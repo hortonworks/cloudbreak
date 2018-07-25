@@ -1208,6 +1208,60 @@ func main() {
 					Usage: "lists available images from imagecatalog",
 					Subcommands: []cli.Command{
 						{
+							Name:  "describe",
+							Usage: "provides detailed information about an image",
+							Subcommands: []cli.Command{
+								{
+									Name:   "aws",
+									Usage:  "provides detailed information about an aws image",
+									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlImageCatalog).AddFlags(cb.FlImageId).AddOutputFlag().AddAuthenticationFlags().Build(),
+									Before: ConfigRead,
+									Action: cb.DescribeAwsImage,
+									BashComplete: func(c *cli.Context) {
+										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlImageCatalog).AddFlags(cb.FlImageId).AddOutputFlag().AddAuthenticationFlags().Build() {
+											printFlagCompletion(f)
+										}
+									},
+								},
+								{
+									Name:   "azure",
+									Usage:  "provides detailed information about an azure image",
+									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlImageCatalog).AddFlags(cb.FlImageId).AddOutputFlag().AddAuthenticationFlags().Build(),
+									Before: ConfigRead,
+									Action: cb.DescribeAzureImage,
+									BashComplete: func(c *cli.Context) {
+										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlImageCatalog).AddFlags(cb.FlImageId).AddOutputFlag().AddAuthenticationFlags().Build() {
+											printFlagCompletion(f)
+										}
+									},
+								},
+								{
+									Name:   "gcp",
+									Usage:  "provides detailed information about an gcp image",
+									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlImageCatalog).AddFlags(cb.FlImageId).AddOutputFlag().AddAuthenticationFlags().Build(),
+									Before: ConfigRead,
+									Action: cb.DescribeGcpImage,
+									BashComplete: func(c *cli.Context) {
+										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlImageCatalog).AddFlags(cb.FlImageId).AddOutputFlag().AddAuthenticationFlags().Build() {
+											printFlagCompletion(f)
+										}
+									},
+								},
+								{
+									Name:   "openstack",
+									Usage:  "provides detailed information about an openstack image",
+									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlImageCatalog).AddFlags(cb.FlImageId).AddOutputFlag().AddAuthenticationFlags().Build(),
+									Before: ConfigRead,
+									Action: cb.DescribeOpenstackImage,
+									BashComplete: func(c *cli.Context) {
+										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlImageCatalog).AddFlags(cb.FlImageId).AddOutputFlag().AddAuthenticationFlags().Build() {
+											printFlagCompletion(f)
+										}
+									},
+								},
+							},
+						},
+						{
 							Name:   "aws",
 							Usage:  "lists available aws images from an imagecatalog",
 							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlImageCatalog).AddOutputFlag().AddAuthenticationFlags().Build(),

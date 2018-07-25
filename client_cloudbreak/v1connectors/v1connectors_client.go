@@ -145,6 +145,36 @@ func (a *Client) GetDisktypes(params *GetDisktypesParams) (*GetDisktypesOK, erro
 }
 
 /*
+GetEncryptionKeys retrives encryption keys with properties
+
+Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
+*/
+func (a *Client) GetEncryptionKeys(params *GetEncryptionKeysParams) (*GetEncryptionKeysOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetEncryptionKeysParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getEncryptionKeys",
+		Method:             "POST",
+		PathPattern:        "/v1/connectors/encryptionkeys",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetEncryptionKeysReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetEncryptionKeysOK), nil
+
+}
+
+/*
 GetGatewaysCredentialID retrives gateways with properties
 
 Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.

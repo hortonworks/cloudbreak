@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"fmt"
 	"strconv"
 	"time"
 
@@ -12,7 +13,7 @@ import (
 	"github.com/urfave/cli"
 )
 
-var imagecatalogHeader []string = []string{"Name", "Default", "URL"}
+var imagecatalogHeader = []string{"Name", "Default", "URL"}
 
 type imagecatalogOut struct {
 	Name    string `json:"Name" yaml:"Name"`
@@ -24,7 +25,7 @@ func (r *imagecatalogOut) DataAsStringArray() []string {
 	return []string{r.Name, strconv.FormatBool(r.Default), r.URL}
 }
 
-var imageHeader []string = []string{"Date", "Description", "Version", "ImageID"}
+var imageHeader = []string{"Date", "Description", "Version", "ImageID"}
 
 type imageOut struct {
 	Date        string `json:"Date" yaml:"Date"`
@@ -35,6 +36,36 @@ type imageOut struct {
 
 func (r *imageOut) DataAsStringArray() []string {
 	return []string{r.Date, r.Description, r.Version, r.ImageID}
+}
+
+var imageDetailsHeader = []string{"Date", "Description", "Version", "ImageID", "OS", "OS Type", "Images", "Package Versions"}
+
+type imageDetailsOut struct {
+	Date            string                       `json:"Date" yaml:"Date"`
+	Description     string                       `json:"Description" yaml:"Description"`
+	Version         string                       `json:"Version" yaml:"Version"`
+	ImageID         string                       `json:"ImageID" yaml:"ImageID"`
+	Os              string                       `json:"OS" yaml:"OS"`
+	OsType          string                       `json:"OSType" yaml:"OSType"`
+	Images          map[string]map[string]string `json:"Images" yaml:"Images"`
+	PackageVersions map[string]string            `json:"PackageVersions" yaml:"PackageVersions"`
+}
+
+func (r *imageDetailsOut) DataAsStringArray() []string {
+	var images string
+	for prov, imgs := range r.Images {
+		images += fmt.Sprintf("%s:\n", prov)
+		for region, image := range imgs {
+			images += fmt.Sprintf("  %s: %s\n", region, image)
+		}
+	}
+
+	var packageVersions string
+	for pkg, ver := range r.PackageVersions {
+		packageVersions += fmt.Sprintf("%s: %s\n", pkg, ver)
+	}
+
+	return []string{r.Date, r.Description, r.Version, r.ImageID, r.Os, r.OsType, images, packageVersions}
 }
 
 func CreateImagecatalogFromUrl(c *cli.Context) {
@@ -160,6 +191,67 @@ func listImages(c *cli.Context) {
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
 	listImagesImpl(cbClient.Cloudbreak.V1imagecatalogs, output.WriteList, c.String(FlImageCatalog.Name))
+}
+
+func DescribeAwsImage(c *cli.Context) {
+	cloud.SetProviderType(cloud.AWS)
+	describeImage(c)
+}
+
+func DescribeAzureImage(c *cli.Context) {
+	cloud.SetProviderType(cloud.AZURE)
+	describeImage(c)
+}
+
+func DescribeGcpImage(c *cli.Context) {
+	cloud.SetProviderType(cloud.GCP)
+	describeImage(c)
+}
+
+func DescribeOpenstackImage(c *cli.Context) {
+	cloud.SetProviderType(cloud.OPENSTACK)
+	describeImage(c)
+}
+
+func describeImage(c *cli.Context) {
+	checkRequiredFlagsAndArguments(c)
+	defer utils.TimeTrack(time.Now(), "describe image")
+
+	cbClient := NewCloudbreakHTTPClientFromContext(c)
+	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
+	describeImageImpl(cbClient.Cloudbreak.V1imagecatalogs, output.WriteList, c.String(FlImageCatalog.Name), c.String(FlImageId.Name))
+}
+
+func describeImageImpl(client getPublicImagesClient, writer func([]string, []utils.Row), imagecatalog string, imageid string) {
+	log.Infof("[listImagesImpl] sending list images request")
+	provider := cloud.GetProvider().GetName()
+	imageResp, err := client.GetPublicImagesByProviderAndCustomImageCatalog(v1imagecatalogs.NewGetPublicImagesByProviderAndCustomImageCatalogParams().WithName(imagecatalog).WithPlatform(*provider))
+	if err != nil {
+		utils.LogErrorAndExit(err)
+	}
+
+	image := findBaseImageByUUID(imageResp.Payload.BaseImages, imageid)
+
+	if image == nil {
+		utils.LogErrorMessageAndExit(fmt.Sprintf("Image not found by id: %s", imageid))
+	}
+
+	listImageInformation(writer, image)
+}
+
+func findBaseImageByUUID(baseImages []*models_cloudbreak.BaseImageResponse, imageid string) *models_cloudbreak.BaseImageResponse {
+	for i := range baseImages {
+		if baseImages[i].UUID == imageid {
+			return baseImages[i]
+		}
+	}
+	return nil
+}
+
+func listImageInformation(writer func([]string, []utils.Row), image *models_cloudbreak.BaseImageResponse) {
+	tableRows := []utils.Row{}
+	tableRows = append(tableRows, &imageDetailsOut{image.Date, image.Description, image.Version, image.UUID, image.Os, image.OsType, image.Images, image.PackageVersions})
+	writer(imageDetailsHeader, tableRows)
 }
 
 type getPublicImagesClient interface {

@@ -1,0 +1,444 @@
+1..86
+ok 1 change ambari pwd
+not ok 2 Check blueprint create from url
+# (in test file integration/blueprint.bats, line 9)
+#   `[[ "${OUTPUT}" == *"blueprint created:"* ]]' failed
+ok 3 Check blueprint create from url - url does not exist
+ok 4 Check blueprint create from url - invalid url no protocol
+not ok 5 Check blueprint create from file
+# (in test file integration/blueprint.bats, line 31)
+#   `[[ "${OUTPUT}" == *"blueprint created:"* ]]' failed
+# time="2018-05-31T10:09:13Z" level="info" msg="create blueprint took 11.666028ms"
+ok 6 Check blueprint create from file - file does not exist
+not ok 7 Check blueprint describe result
+# (in test file integration/blueprint.bats, line 45)
+#   `[[ "${OUTPUT}" == "${BLUEPRINT_NAME}" ]]' failed
+# time="2018-05-31T10:09:14Z" level="info" msg="[ReadConfig] found config file: /root/.cb/config" 
+# time="2018-05-31T10:09:14Z" level="info" msg="[ReadConfig] selected profile: default" 
+# time="2018-05-31T10:09:14Z" level="info" msg="[ConfigRead] Config read from file, setting as global variable:\nusername: admin@example.com\npassword: '*'\nserver: https://127.0.0.1\n" 
+# time="2018-05-31T10:09:14Z" level="debug" msg="Request POST https://127.0.0.1/identity/oauth/authorize?response_type=token&client_id=cloudbreak_shell" 
+# time="2018-05-31T10:09:14Z" level="debug" msg="Response method:POST status:302 duration:226ms req_url:https://127.0.0.1/identity/oauth/authorize?response_type=token&client_id=cloudbreak_shell" 
+# GET /cb/api/v1/blueprints/account/EDW-Analytics:%20Apache%20Hive%202%20LLAP,%20Apache%20Zeppelin%200.7.0 HTTP/1.1
+# Host: 127.0.0.1
+# User-Agent: Go-http-client/1.1
+# Accept: application/json
+# Authorization: Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6ImxlZ2FjeS10b2tlbi1rZXkiLCJ0eXAiOiJKV1QifQ.eyJqdGkiOiJlODAxM2ZkM2E1NzY0YmExYTlhNWM0OGEzOGQyM2E0YSIsInN1YiI6ImRiNTY5NGQ2LTEyNzctNDVlOC1iZWFkLWIzYTE0NTgyN2FmZiIsInNjb3BlIjpbImNsb3VkYnJlYWsubmV0d29ya3MucmVhZCIsInBlcmlzY29wZS5jbHVzdGVyIiwiY2xvdWRicmVhay51c2FnZXMudXNlciIsImNsb3VkYnJlYWsucmVjaXBlcyIsImNsb3VkYnJlYWsudXNhZ2VzLmdsb2JhbCIsIm9wZW5pZCIsImNsb3VkYnJlYWsucGxhdGZvcm1zIiwiY2xvdWRicmVhay50ZW1wbGF0ZXMucmVhZCIsImNsb3VkYnJlYWsudXNhZ2VzLmFjY291bnQiLCJjbG91ZGJyZWFrLmV2ZW50cyIsImNsb3VkYnJlYWsuc3RhY2tzLnJlYWQiLCJjbG91ZGJyZWFrLmJsdWVwcmludHMiLCJjbG91ZGJyZWFrLnRlbXBsYXRlcyIsImNsb3VkYnJlYWsubmV0d29ya3MiLCJjbG91ZGJyZWFrLnNzc2Rjb25maWdzIiwiY2xvdWRicmVhay5wbGF0Zm9ybXMucmVhZCIsImNsb3VkYnJlYWsuY3JlZGVudGlhbHMucmVhZCIsImNsb3VkYnJlYWsuc2VjdXJpdHlncm91cHMucmVhZCIsImNsb3VkYnJlYWsuc2VjdXJpdHlncm91cHMiLCJjbG91ZGJyZWFrLnN0YWNrcyIsImNsb3VkYnJlYWsuY3JlZGVudGlhbHMiLCJjbG91ZGJyZWFrLnNzc2Rjb25maWdzLnJlYWQiLCJjbG91ZGJyZWFrLnJlY2lwZXMucmVhZCIsImNsb3VkYnJlYWsuYmx1ZXByaW50cy5yZWFkIl0sImNsaWVudF9pZCI6ImNsb3VkYnJlYWtfc2hlbGwiLCJjaWQiOiJjbG91ZGJyZWFrX3NoZWxsIiwiYXpwIjoiY2xvdWRicmVha19zaGVsbCIsInVzZXJfaWQiOiJkYjU2OTRkNi0xMjc3LTQ1ZTgtYmVhZC1iM2ExNDU4MjdhZmYiLCJvcmlnaW4iOiJ1YWEiLCJ1c2VyX25hbWUiOiJhZG1pbkBleGFtcGxlLmNvbSIsImVtYWlsIjoiYWRtaW5AZXhhbXBsZS5jb20iLCJhdXRoX3RpbWUiOjE1Mjc3NjEzNTQsInJldl9zaWciOiJmZjEwYjM2MyIsImlhdCI6MTUyNzc2MTM1NCwiZXhwIjoxNTI3ODA0NTU0LCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvdWFhL29hdXRoL3Rva2VuIiwiemlkIjoidWFhIiwiYXVkIjpbImNsb3VkYnJlYWtfc2hlbGwiLCJjbG91ZGJyZWFrLnJlY2lwZXMiLCJvcGVuaWQiLCJjbG91ZGJyZWFrIiwiY2xvdWRicmVhay5wbGF0Zm9ybXMiLCJjbG91ZGJyZWFrLmJsdWVwcmludHMiLCJjbG91ZGJyZWFrLnRlbXBsYXRlcyIsImNsb3VkYnJlYWsubmV0d29ya3MiLCJwZXJpc2NvcGUiLCJjbG91ZGJyZWFrLnNzc2Rjb25maWdzIiwiY2xvdWRicmVhay51c2FnZXMiLCJjbG91ZGJyZWFrLnNlY3VyaXR5Z3JvdXBzIiwiY2xvdWRicmVhay5zdGFja3MiLCJjbG91ZGJyZWFrLmNyZWRlbnRpYWxzIl19.rnT5UevCyfn6xG06RZeIeBlX11Gn5xhHV_Tf133Urg8
+# Accept-Encoding: gzip
+# 
+# 
+# time="2018-05-31T10:09:14Z" level="debug" msg="Request GET https://127.0.0.1/cb/api/v1/blueprints/account/EDW-Analytics:%20Apache%20Hive%202%20LLAP,%20Apache%20Zeppelin%200.7.0" 
+# time="2018-05-31T10:09:14Z" level="debug" msg="Response method:GET status:404 duration:0ms req_url:https://127.0.0.1/cb/api/v1/blueprints/account/EDW-Analytics:%20Apache%20Hive%202%20LLAP,%20Apache%20Zeppelin%200.7.0" 
+# HTTP/1.1 404 Not Found
+# Content-Length: 19
+# Content-Type: text/plain; charset=utf-8
+# Date: Thu, 31 May 2018 10:09:14 GMT
+# X-Content-Type-Options: nosniff
+# 
+# 404 page not found
+# 
+# time="2018-05-31T10:09:14Z" level="error" msg="status code: 404, message: 404 page not found\n " 
+# time="2018-05-31T10:09:14Z" level="debug" msg="status code: 404, message: 404 page not found\n " 
+# time="2018-05-31T10:09:14Z" level="info" msg="describe blueprint took 236.456555ms" 
+# time="2018-05-31T10:09:14Z" level="debug" msg="status code: 404, message: 404 page not found\n " 
+not ok 8 Check blueprint describe structure
+# (in test file integration/blueprint.bats, line 51)
+#   `[[ "${OUTPUT}" == "true" ]]' failed
+# time="2018-05-31T10:09:14Z" level="info" msg="[ReadConfig] found config file: /root/.cb/config" 
+# time="2018-05-31T10:09:14Z" level="info" msg="[ReadConfig] selected profile: default" 
+# time="2018-05-31T10:09:14Z" level="info" msg="[ConfigRead] Config read from file, setting as global variable:\nusername: admin@example.com\npassword: '*'\nserver: https://127.0.0.1\n" 
+# time="2018-05-31T10:09:14Z" level="debug" msg="Request POST https://127.0.0.1/identity/oauth/authorize?response_type=token&client_id=cloudbreak_shell" 
+# time="2018-05-31T10:09:14Z" level="debug" msg="Response method:POST status:302 duration:245ms req_url:https://127.0.0.1/identity/oauth/authorize?response_type=token&client_id=cloudbreak_shell" 
+# GET /cb/api/v1/blueprints/account/EDW-Analytics:%20Apache%20Hive%202%20LLAP,%20Apache%20Zeppelin%200.7.0 HTTP/1.1
+# Host: 127.0.0.1
+# User-Agent: Go-http-client/1.1
+# Accept: application/json
+# Authorization: Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6ImxlZ2FjeS10b2tlbi1rZXkiLCJ0eXAiOiJKV1QifQ.eyJqdGkiOiJkNjA2NjhhYWM1N2Y0OWE1YTljNDdiYzI5NDUxNzVjOCIsInN1YiI6ImRiNTY5NGQ2LTEyNzctNDVlOC1iZWFkLWIzYTE0NTgyN2FmZiIsInNjb3BlIjpbImNsb3VkYnJlYWsubmV0d29ya3MucmVhZCIsInBlcmlzY29wZS5jbHVzdGVyIiwiY2xvdWRicmVhay51c2FnZXMudXNlciIsImNsb3VkYnJlYWsucmVjaXBlcyIsImNsb3VkYnJlYWsudXNhZ2VzLmdsb2JhbCIsIm9wZW5pZCIsImNsb3VkYnJlYWsucGxhdGZvcm1zIiwiY2xvdWRicmVhay50ZW1wbGF0ZXMucmVhZCIsImNsb3VkYnJlYWsudXNhZ2VzLmFjY291bnQiLCJjbG91ZGJyZWFrLmV2ZW50cyIsImNsb3VkYnJlYWsuc3RhY2tzLnJlYWQiLCJjbG91ZGJyZWFrLmJsdWVwcmludHMiLCJjbG91ZGJyZWFrLnRlbXBsYXRlcyIsImNsb3VkYnJlYWsubmV0d29ya3MiLCJjbG91ZGJyZWFrLnNzc2Rjb25maWdzIiwiY2xvdWRicmVhay5wbGF0Zm9ybXMucmVhZCIsImNsb3VkYnJlYWsuY3JlZGVudGlhbHMucmVhZCIsImNsb3VkYnJlYWsuc2VjdXJpdHlncm91cHMucmVhZCIsImNsb3VkYnJlYWsuc2VjdXJpdHlncm91cHMiLCJjbG91ZGJyZWFrLnN0YWNrcyIsImNsb3VkYnJlYWsuY3JlZGVudGlhbHMiLCJjbG91ZGJyZWFrLnNzc2Rjb25maWdzLnJlYWQiLCJjbG91ZGJyZWFrLnJlY2lwZXMucmVhZCIsImNsb3VkYnJlYWsuYmx1ZXByaW50cy5yZWFkIl0sImNsaWVudF9pZCI6ImNsb3VkYnJlYWtfc2hlbGwiLCJjaWQiOiJjbG91ZGJyZWFrX3NoZWxsIiwiYXpwIjoiY2xvdWRicmVha19zaGVsbCIsInVzZXJfaWQiOiJkYjU2OTRkNi0xMjc3LTQ1ZTgtYmVhZC1iM2ExNDU4MjdhZmYiLCJvcmlnaW4iOiJ1YWEiLCJ1c2VyX25hbWUiOiJhZG1pbkBleGFtcGxlLmNvbSIsImVtYWlsIjoiYWRtaW5AZXhhbXBsZS5jb20iLCJhdXRoX3RpbWUiOjE1Mjc3NjEzNTQsInJldl9zaWciOiJmZjEwYjM2MyIsImlhdCI6MTUyNzc2MTM1NCwiZXhwIjoxNTI3ODA0NTU0LCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvdWFhL29hdXRoL3Rva2VuIiwiemlkIjoidWFhIiwiYXVkIjpbImNsb3VkYnJlYWtfc2hlbGwiLCJjbG91ZGJyZWFrLnJlY2lwZXMiLCJvcGVuaWQiLCJjbG91ZGJyZWFrIiwiY2xvdWRicmVhay5wbGF0Zm9ybXMiLCJjbG91ZGJyZWFrLmJsdWVwcmludHMiLCJjbG91ZGJyZWFrLnRlbXBsYXRlcyIsImNsb3VkYnJlYWsubmV0d29ya3MiLCJwZXJpc2NvcGUiLCJjbG91ZGJyZWFrLnNzc2Rjb25maWdzIiwiY2xvdWRicmVhay51c2FnZXMiLCJjbG91ZGJyZWFrLnNlY3VyaXR5Z3JvdXBzIiwiY2xvdWRicmVhay5zdGFja3MiLCJjbG91ZGJyZWFrLmNyZWRlbnRpYWxzIl19.x1GVuWlU_q_OVx9J_PyCmWLT-GMtprDjZuKGMk78sL8
+# Accept-Encoding: gzip
+# 
+# 
+# time="2018-05-31T10:09:14Z" level="debug" msg="Request GET https://127.0.0.1/cb/api/v1/blueprints/account/EDW-Analytics:%20Apache%20Hive%202%20LLAP,%20Apache%20Zeppelin%200.7.0" 
+# time="2018-05-31T10:09:14Z" level="debug" msg="Response method:GET status:404 duration:0ms req_url:https://127.0.0.1/cb/api/v1/blueprints/account/EDW-Analytics:%20Apache%20Hive%202%20LLAP,%20Apache%20Zeppelin%200.7.0" 
+# HTTP/1.1 404 Not Found
+# Content-Length: 19
+# Content-Type: text/plain; charset=utf-8
+# Date: Thu, 31 May 2018 10:09:14 GMT
+# X-Content-Type-Options: nosniff
+# 
+# 404 page not found
+# 
+# time="2018-05-31T10:09:14Z" level="error" msg="status code: 404, message: 404 page not found\n " 
+# time="2018-05-31T10:09:14Z" level="debug" msg="status code: 404, message: 404 page not found\n " 
+# time="2018-05-31T10:09:14Z" level="info" msg="describe blueprint took 255.809455ms" 
+# time="2018-05-31T10:09:14Z" level="debug" msg="status code: 404, message: 404 page not found\n " 
+not ok 9 Check blueprint list
+# (in test file integration/blueprint.bats, line 56)
+#   `API_BLUEPRINTS=$(curl -ks "${BASE_URL}"/cb/api/v1/blueprints/user | jq 'length')' failed with status 4
+# time="2018-05-31T10:09:14Z" level="info" msg="[ReadConfig] found config file: /root/.cb/config" 
+# time="2018-05-31T10:09:14Z" level="info" msg="[ReadConfig] selected profile: default" 
+# time="2018-05-31T10:09:14Z" level="info" msg="[ConfigRead] Config read from file, setting as global variable:\nusername: admin@example.com\npassword: '*'\nserver: https://127.0.0.1\n" 
+# time="2018-05-31T10:09:14Z" level="debug" msg="Request POST https://127.0.0.1/identity/oauth/authorize?response_type=token&client_id=cloudbreak_shell" 
+# time="2018-05-31T10:09:15Z" level="debug" msg="Response method:POST status:302 duration:221ms req_url:https://127.0.0.1/identity/oauth/authorize?response_type=token&client_id=cloudbreak_shell" 
+# time="2018-05-31T10:09:15Z" level="info" msg="[listBlueprintsImpl] sending blueprint list request" 
+# GET /cb/api/v1/blueprints/user HTTP/1.1
+# Host: 127.0.0.1
+# User-Agent: Go-http-client/1.1
+# Accept: application/json
+# Authorization: Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6ImxlZ2FjeS10b2tlbi1rZXkiLCJ0eXAiOiJKV1QifQ.eyJqdGkiOiIyOWRkOWY1MTFhMmQ0MzI3YWYzYTBlZWVlYjE5NzZjMiIsInN1YiI6ImRiNTY5NGQ2LTEyNzctNDVlOC1iZWFkLWIzYTE0NTgyN2FmZiIsInNjb3BlIjpbImNsb3VkYnJlYWsubmV0d29ya3MucmVhZCIsInBlcmlzY29wZS5jbHVzdGVyIiwiY2xvdWRicmVhay51c2FnZXMudXNlciIsImNsb3VkYnJlYWsucmVjaXBlcyIsImNsb3VkYnJlYWsudXNhZ2VzLmdsb2JhbCIsIm9wZW5pZCIsImNsb3VkYnJlYWsucGxhdGZvcm1zIiwiY2xvdWRicmVhay50ZW1wbGF0ZXMucmVhZCIsImNsb3VkYnJlYWsudXNhZ2VzLmFjY291bnQiLCJjbG91ZGJyZWFrLmV2ZW50cyIsImNsb3VkYnJlYWsuc3RhY2tzLnJlYWQiLCJjbG91ZGJyZWFrLmJsdWVwcmludHMiLCJjbG91ZGJyZWFrLnRlbXBsYXRlcyIsImNsb3VkYnJlYWsubmV0d29ya3MiLCJjbG91ZGJyZWFrLnNzc2Rjb25maWdzIiwiY2xvdWRicmVhay5wbGF0Zm9ybXMucmVhZCIsImNsb3VkYnJlYWsuY3JlZGVudGlhbHMucmVhZCIsImNsb3VkYnJlYWsuc2VjdXJpdHlncm91cHMucmVhZCIsImNsb3VkYnJlYWsuc2VjdXJpdHlncm91cHMiLCJjbG91ZGJyZWFrLnN0YWNrcyIsImNsb3VkYnJlYWsuY3JlZGVudGlhbHMiLCJjbG91ZGJyZWFrLnNzc2Rjb25maWdzLnJlYWQiLCJjbG91ZGJyZWFrLnJlY2lwZXMucmVhZCIsImNsb3VkYnJlYWsuYmx1ZXByaW50cy5yZWFkIl0sImNsaWVudF9pZCI6ImNsb3VkYnJlYWtfc2hlbGwiLCJjaWQiOiJjbG91ZGJyZWFrX3NoZWxsIiwiYXpwIjoiY2xvdWRicmVha19zaGVsbCIsInVzZXJfaWQiOiJkYjU2OTRkNi0xMjc3LTQ1ZTgtYmVhZC1iM2ExNDU4MjdhZmYiLCJvcmlnaW4iOiJ1YWEiLCJ1c2VyX25hbWUiOiJhZG1pbkBleGFtcGxlLmNvbSIsImVtYWlsIjoiYWRtaW5AZXhhbXBsZS5jb20iLCJhdXRoX3RpbWUiOjE1Mjc3NjEzNTUsInJldl9zaWciOiJmZjEwYjM2MyIsImlhdCI6MTUyNzc2MTM1NSwiZXhwIjoxNTI3ODA0NTU1LCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvdWFhL29hdXRoL3Rva2VuIiwiemlkIjoidWFhIiwiYXVkIjpbImNsb3VkYnJlYWtfc2hlbGwiLCJjbG91ZGJyZWFrLnJlY2lwZXMiLCJvcGVuaWQiLCJjbG91ZGJyZWFrIiwiY2xvdWRicmVhay5wbGF0Zm9ybXMiLCJjbG91ZGJyZWFrLmJsdWVwcmludHMiLCJjbG91ZGJyZWFrLnRlbXBsYXRlcyIsImNsb3VkYnJlYWsubmV0d29ya3MiLCJwZXJpc2NvcGUiLCJjbG91ZGJyZWFrLnNzc2Rjb25maWdzIiwiY2xvdWRicmVhay51c2FnZXMiLCJjbG91ZGJyZWFrLnNlY3VyaXR5Z3JvdXBzIiwiY2xvdWRicmVhay5zdGFja3MiLCJjbG91ZGJyZWFrLmNyZWRlbnRpYWxzIl19.wLpZvETe3sDoNoajl2UMWCdgBPumN7n7dLdQ67Oa9QU
+# Accept-Encoding: gzip
+# 
+# 
+# time="2018-05-31T10:09:15Z" level="debug" msg="Request GET https://127.0.0.1/cb/api/v1/blueprints/user" 
+# time="2018-05-31T10:09:15Z" level="debug" msg="Response method:GET status:404 duration:0ms req_url:https://127.0.0.1/cb/api/v1/blueprints/user" 
+# HTTP/1.1 404 Not Found
+# Content-Length: 19
+# Content-Type: text/plain; charset=utf-8
+# Date: Thu, 31 May 2018 10:09:15 GMT
+# X-Content-Type-Options: nosniff
+# 
+# 404 page not found
+# 
+# time="2018-05-31T10:09:15Z" level="error" msg="status code: 404, message: 404 page not found\n " 
+# time="2018-05-31T10:09:15Z" level="debug" msg="status code: 404, message: 404 page not found\n " 
+# time="2018-05-31T10:09:15Z" level="info" msg="get public blueprints took 232.908125ms" 
+# time="2018-05-31T10:09:15Z" level="debug" msg="status code: 404, message: 404 page not found\n " 
+# parse error: Invalid numeric literal at line 1, column 9
+not ok 10 Check blueprint delete SUCCESS
+# (in test file integration/blueprint.bats, line 64)
+#   `[[ "${OUTPUT}" == *"blueprint deleted, name: ${BLUEPRINT_NAME}"* ]]' failed
+ok 11 Check availability zone list
+not ok 12 Check regions are listed
+# (in test file integration/cloud.bats, line 15)
+#   `[[ "$OUTPUT" == "true" ]]' failed
+# time="2018-05-31T10:09:16Z" level="info" msg="[ReadConfig] found config file: /root/.cb/config" 
+# time="2018-05-31T10:09:16Z" level="info" msg="[ReadConfig] selected profile: default" 
+# time="2018-05-31T10:09:16Z" level="info" msg="[ConfigRead] Config read from file, setting as global variable:\nusername: admin@example.com\npassword: '*'\nserver: https://127.0.0.1\n" 
+# time="2018-05-31T10:09:16Z" level="debug" msg="Request POST https://127.0.0.1/identity/oauth/authorize?response_type=token&client_id=cloudbreak_shell" 
+# time="2018-05-31T10:09:16Z" level="debug" msg="Response method:POST status:302 duration:245ms req_url:https://127.0.0.1/identity/oauth/authorize?response_type=token&client_id=cloudbreak_shell" 
+# time="2018-05-31T10:09:16Z" level="info" msg="[listRegionsImpl] sending regions list request" 
+# POST /cb/api/v2/connectors/regions HTTP/1.1
+# Host: 127.0.0.1
+# User-Agent: Go-http-client/1.1
+# Content-Length: 31
+# Accept: application/json
+# Authorization: Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6ImxlZ2FjeS10b2tlbi1rZXkiLCJ0eXAiOiJKV1QifQ.eyJqdGkiOiJlMDdiNjQwNDQ1OTA0YWQ4OTYzYTQ5NTcxNjNjM2I1ZiIsInN1YiI6ImRiNTY5NGQ2LTEyNzctNDVlOC1iZWFkLWIzYTE0NTgyN2FmZiIsInNjb3BlIjpbImNsb3VkYnJlYWsubmV0d29ya3MucmVhZCIsInBlcmlzY29wZS5jbHVzdGVyIiwiY2xvdWRicmVhay51c2FnZXMudXNlciIsImNsb3VkYnJlYWsucmVjaXBlcyIsImNsb3VkYnJlYWsudXNhZ2VzLmdsb2JhbCIsIm9wZW5pZCIsImNsb3VkYnJlYWsucGxhdGZvcm1zIiwiY2xvdWRicmVhay50ZW1wbGF0ZXMucmVhZCIsImNsb3VkYnJlYWsudXNhZ2VzLmFjY291bnQiLCJjbG91ZGJyZWFrLmV2ZW50cyIsImNsb3VkYnJlYWsuc3RhY2tzLnJlYWQiLCJjbG91ZGJyZWFrLmJsdWVwcmludHMiLCJjbG91ZGJyZWFrLnRlbXBsYXRlcyIsImNsb3VkYnJlYWsubmV0d29ya3MiLCJjbG91ZGJyZWFrLnNzc2Rjb25maWdzIiwiY2xvdWRicmVhay5wbGF0Zm9ybXMucmVhZCIsImNsb3VkYnJlYWsuY3JlZGVudGlhbHMucmVhZCIsImNsb3VkYnJlYWsuc2VjdXJpdHlncm91cHMucmVhZCIsImNsb3VkYnJlYWsuc2VjdXJpdHlncm91cHMiLCJjbG91ZGJyZWFrLnN0YWNrcyIsImNsb3VkYnJlYWsuY3JlZGVudGlhbHMiLCJjbG91ZGJyZWFrLnNzc2Rjb25maWdzLnJlYWQiLCJjbG91ZGJyZWFrLnJlY2lwZXMucmVhZCIsImNsb3VkYnJlYWsuYmx1ZXByaW50cy5yZWFkIl0sImNsaWVudF9pZCI6ImNsb3VkYnJlYWtfc2hlbGwiLCJjaWQiOiJjbG91ZGJyZWFrX3NoZWxsIiwiYXpwIjoiY2xvdWRicmVha19zaGVsbCIsInVzZXJfaWQiOiJkYjU2OTRkNi0xMjc3LTQ1ZTgtYmVhZC1iM2ExNDU4MjdhZmYiLCJvcmlnaW4iOiJ1YWEiLCJ1c2VyX25hbWUiOiJhZG1pbkBleGFtcGxlLmNvbSIsImVtYWlsIjoiYWRtaW5AZXhhbXBsZS5jb20iLCJhdXRoX3RpbWUiOjE1Mjc3NjEzNTYsInJldl9zaWciOiJmZjEwYjM2MyIsImlhdCI6MTUyNzc2MTM1NiwiZXhwIjoxNTI3ODA0NTU2LCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvdWFhL29hdXRoL3Rva2VuIiwiemlkIjoidWFhIiwiYXVkIjpbImNsb3VkYnJlYWtfc2hlbGwiLCJjbG91ZGJyZWFrLnJlY2lwZXMiLCJvcGVuaWQiLCJjbG91ZGJyZWFrIiwiY2xvdWRicmVhay5wbGF0Zm9ybXMiLCJjbG91ZGJyZWFrLmJsdWVwcmludHMiLCJjbG91ZGJyZWFrLnRlbXBsYXRlcyIsImNsb3VkYnJlYWsubmV0d29ya3MiLCJwZXJpc2NvcGUiLCJjbG91ZGJyZWFrLnNzc2Rjb25maWdzIiwiY2xvdWRicmVhay51c2FnZXMiLCJjbG91ZGJyZWFrLnNlY3VyaXR5Z3JvdXBzIiwiY2xvdWRicmVhay5zdGFja3MiLCJjbG91ZGJyZWFrLmNyZWRlbnRpYWxzIl19.IolY4dEX8hs3dmQmYcyTMaNIzTvTvd0S5bYTfERhKe8
+# Content-Type: application/json
+# Accept-Encoding: gzip
+# 
+# {"credentialName":"openstack"}
+# 
+# time="2018-05-31T10:09:16Z" level="debug" msg="Request POST https://127.0.0.1/cb/api/v2/connectors/regions" 
+# time="2018-05-31T10:09:16Z" level="debug" msg="Response method:POST status:404 duration:0ms req_url:https://127.0.0.1/cb/api/v2/connectors/regions" 
+# HTTP/1.1 404 Not Found
+# Content-Length: 19
+# Content-Type: text/plain; charset=utf-8
+# Date: Thu, 31 May 2018 10:09:16 GMT
+# X-Content-Type-Options: nosniff
+# 
+# 404 page not found
+# 
+# time="2018-05-31T10:09:16Z" level="error" msg="status code: 404, message: 404 page not found\n " 
+# time="2018-05-31T10:09:16Z" level="debug" msg="status code: 404, message: 404 page not found\n " 
+# time="2018-05-31T10:09:16Z" level="info" msg="list regions took 251.565369ms" 
+# time="2018-05-31T10:09:16Z" level="debug" msg="status code: 404, message: 404 page not found\n " 
+ok 13 Check instances are listed
+ok 14 Check volumes are listed - aws
+ok 15 Check volumes are listed - azure
+ok 16 Check volumes are listed - gcp
+not ok 17 Check cluster list
+# (in test file integration/cluster.bats, line 8)
+#   `API_CLUSTERS=$(curl -ks "${BASE_URL}"/cb/api/v1/stacks/account | jq 'length')' failed with status 4
+# time="2018-05-31T10:09:18Z" level="info" msg="[ReadConfig] found config file: /root/.cb/config" 
+# time="2018-05-31T10:09:18Z" level="info" msg="[ReadConfig] selected profile: default" 
+# time="2018-05-31T10:09:18Z" level="info" msg="[ConfigRead] Config read from file, setting as global variable:\nusername: admin@example.com\npassword: '*'\nserver: https://127.0.0.1\n" 
+# time="2018-05-31T10:09:18Z" level="debug" msg="Request POST https://127.0.0.1/identity/oauth/authorize?response_type=token&client_id=cloudbreak_shell" 
+# time="2018-05-31T10:09:18Z" level="debug" msg="Response method:POST status:302 duration:214ms req_url:https://127.0.0.1/identity/oauth/authorize?response_type=token&client_id=cloudbreak_shell" 
+# time="2018-05-31T10:09:18Z" level="info" msg="[listStacksImpl] sending stack list request" 
+# GET /cb/api/v1/stacks/account HTTP/1.1
+# Host: 127.0.0.1
+# User-Agent: Go-http-client/1.1
+# Accept: application/json
+# Authorization: Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6ImxlZ2FjeS10b2tlbi1rZXkiLCJ0eXAiOiJKV1QifQ.eyJqdGkiOiI2NDc0NmZmYzU1OTI0YWU5OTM5YmRkZDNhNGRmZWMxMyIsInN1YiI6ImRiNTY5NGQ2LTEyNzctNDVlOC1iZWFkLWIzYTE0NTgyN2FmZiIsInNjb3BlIjpbImNsb3VkYnJlYWsubmV0d29ya3MucmVhZCIsInBlcmlzY29wZS5jbHVzdGVyIiwiY2xvdWRicmVhay51c2FnZXMudXNlciIsImNsb3VkYnJlYWsucmVjaXBlcyIsImNsb3VkYnJlYWsudXNhZ2VzLmdsb2JhbCIsIm9wZW5pZCIsImNsb3VkYnJlYWsucGxhdGZvcm1zIiwiY2xvdWRicmVhay50ZW1wbGF0ZXMucmVhZCIsImNsb3VkYnJlYWsudXNhZ2VzLmFjY291bnQiLCJjbG91ZGJyZWFrLmV2ZW50cyIsImNsb3VkYnJlYWsuc3RhY2tzLnJlYWQiLCJjbG91ZGJyZWFrLmJsdWVwcmludHMiLCJjbG91ZGJyZWFrLnRlbXBsYXRlcyIsImNsb3VkYnJlYWsubmV0d29ya3MiLCJjbG91ZGJyZWFrLnNzc2Rjb25maWdzIiwiY2xvdWRicmVhay5wbGF0Zm9ybXMucmVhZCIsImNsb3VkYnJlYWsuY3JlZGVudGlhbHMucmVhZCIsImNsb3VkYnJlYWsuc2VjdXJpdHlncm91cHMucmVhZCIsImNsb3VkYnJlYWsuc2VjdXJpdHlncm91cHMiLCJjbG91ZGJyZWFrLnN0YWNrcyIsImNsb3VkYnJlYWsuY3JlZGVudGlhbHMiLCJjbG91ZGJyZWFrLnNzc2Rjb25maWdzLnJlYWQiLCJjbG91ZGJyZWFrLnJlY2lwZXMucmVhZCIsImNsb3VkYnJlYWsuYmx1ZXByaW50cy5yZWFkIl0sImNsaWVudF9pZCI6ImNsb3VkYnJlYWtfc2hlbGwiLCJjaWQiOiJjbG91ZGJyZWFrX3NoZWxsIiwiYXpwIjoiY2xvdWRicmVha19zaGVsbCIsInVzZXJfaWQiOiJkYjU2OTRkNi0xMjc3LTQ1ZTgtYmVhZC1iM2ExNDU4MjdhZmYiLCJvcmlnaW4iOiJ1YWEiLCJ1c2VyX25hbWUiOiJhZG1pbkBleGFtcGxlLmNvbSIsImVtYWlsIjoiYWRtaW5AZXhhbXBsZS5jb20iLCJhdXRoX3RpbWUiOjE1Mjc3NjEzNTgsInJldl9zaWciOiJmZjEwYjM2MyIsImlhdCI6MTUyNzc2MTM1OCwiZXhwIjoxNTI3ODA0NTU4LCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvdWFhL29hdXRoL3Rva2VuIiwiemlkIjoidWFhIiwiYXVkIjpbImNsb3VkYnJlYWtfc2hlbGwiLCJjbG91ZGJyZWFrLnJlY2lwZXMiLCJvcGVuaWQiLCJjbG91ZGJyZWFrIiwiY2xvdWRicmVhay5wbGF0Zm9ybXMiLCJjbG91ZGJyZWFrLmJsdWVwcmludHMiLCJjbG91ZGJyZWFrLnRlbXBsYXRlcyIsImNsb3VkYnJlYWsubmV0d29ya3MiLCJwZXJpc2NvcGUiLCJjbG91ZGJyZWFrLnNzc2Rjb25maWdzIiwiY2xvdWRicmVhay51c2FnZXMiLCJjbG91ZGJyZWFrLnNlY3VyaXR5Z3JvdXBzIiwiY2xvdWRicmVhay5zdGFja3MiLCJjbG91ZGJyZWFrLmNyZWRlbnRpYWxzIl19.u_1ijWeMcugFjqYq7ZJPgTD1958NEUtKQxmlgGKWYIA
+# Accept-Encoding: gzip
+# 
+# 
+# time="2018-05-31T10:09:19Z" level="debug" msg="Request GET https://127.0.0.1/cb/api/v1/stacks/account" 
+# time="2018-05-31T10:09:19Z" level="debug" msg="Response method:GET status:404 duration:0ms req_url:https://127.0.0.1/cb/api/v1/stacks/account" 
+# HTTP/1.1 404 Not Found
+# Content-Length: 19
+# Content-Type: text/plain; charset=utf-8
+# Date: Thu, 31 May 2018 10:09:19 GMT
+# X-Content-Type-Options: nosniff
+# 
+# 404 page not found
+# 
+# time="2018-05-31T10:09:19Z" level="error" msg="status code: 404, message: 404 page not found\n " 
+# time="2018-05-31T10:09:19Z" level="debug" msg="status code: 404, message: 404 page not found\n " 
+# time="2018-05-31T10:09:19Z" level="info" msg="list stacks took 240.23859ms" 
+# time="2018-05-31T10:09:19Z" level="debug" msg="status code: 404, message: 404 page not found\n " 
+# parse error: Invalid numeric literal at line 1, column 9
+ok 18 Check cluster list attributes
+not ok 19 Check cluster describe result
+# (in test file integration/cluster.bats, line 23)
+#   `[[ "${OUTPUT}" == "${OS_CLUSTER_NAME}" ]]' failed
+# time="2018-05-31T10:09:19Z" level="info" msg="[ReadConfig] found config file: /root/.cb/config" 
+# time="2018-05-31T10:09:19Z" level="info" msg="[ReadConfig] selected profile: default" 
+# time="2018-05-31T10:09:19Z" level="info" msg="[ConfigRead] Config read from file, setting as global variable:\nusername: admin@example.com\npassword: '*'\nserver: https://127.0.0.1\n" 
+# time="2018-05-31T10:09:19Z" level="debug" msg="Request POST https://127.0.0.1/identity/oauth/authorize?response_type=token&client_id=cloudbreak_shell" 
+# time="2018-05-31T10:09:19Z" level="debug" msg="Response method:POST status:302 duration:202ms req_url:https://127.0.0.1/identity/oauth/authorize?response_type=token&client_id=cloudbreak_shell" 
+# GET /cb/api/v1/stacks/account/openstack-cluster HTTP/1.1
+# Host: 127.0.0.1
+# User-Agent: Go-http-client/1.1
+# Accept: application/json
+# Authorization: Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6ImxlZ2FjeS10b2tlbi1rZXkiLCJ0eXAiOiJKV1QifQ.eyJqdGkiOiI5OGJmNjdjNjY3OTM0MGI0OGExZTcxNTc0ZTA2NDgwMCIsInN1YiI6ImRiNTY5NGQ2LTEyNzctNDVlOC1iZWFkLWIzYTE0NTgyN2FmZiIsInNjb3BlIjpbImNsb3VkYnJlYWsubmV0d29ya3MucmVhZCIsInBlcmlzY29wZS5jbHVzdGVyIiwiY2xvdWRicmVhay51c2FnZXMudXNlciIsImNsb3VkYnJlYWsucmVjaXBlcyIsImNsb3VkYnJlYWsudXNhZ2VzLmdsb2JhbCIsIm9wZW5pZCIsImNsb3VkYnJlYWsucGxhdGZvcm1zIiwiY2xvdWRicmVhay50ZW1wbGF0ZXMucmVhZCIsImNsb3VkYnJlYWsudXNhZ2VzLmFjY291bnQiLCJjbG91ZGJyZWFrLmV2ZW50cyIsImNsb3VkYnJlYWsuc3RhY2tzLnJlYWQiLCJjbG91ZGJyZWFrLmJsdWVwcmludHMiLCJjbG91ZGJyZWFrLnRlbXBsYXRlcyIsImNsb3VkYnJlYWsubmV0d29ya3MiLCJjbG91ZGJyZWFrLnNzc2Rjb25maWdzIiwiY2xvdWRicmVhay5wbGF0Zm9ybXMucmVhZCIsImNsb3VkYnJlYWsuY3JlZGVudGlhbHMucmVhZCIsImNsb3VkYnJlYWsuc2VjdXJpdHlncm91cHMucmVhZCIsImNsb3VkYnJlYWsuc2VjdXJpdHlncm91cHMiLCJjbG91ZGJyZWFrLnN0YWNrcyIsImNsb3VkYnJlYWsuY3JlZGVudGlhbHMiLCJjbG91ZGJyZWFrLnNzc2Rjb25maWdzLnJlYWQiLCJjbG91ZGJyZWFrLnJlY2lwZXMucmVhZCIsImNsb3VkYnJlYWsuYmx1ZXByaW50cy5yZWFkIl0sImNsaWVudF9pZCI6ImNsb3VkYnJlYWtfc2hlbGwiLCJjaWQiOiJjbG91ZGJyZWFrX3NoZWxsIiwiYXpwIjoiY2xvdWRicmVha19zaGVsbCIsInVzZXJfaWQiOiJkYjU2OTRkNi0xMjc3LTQ1ZTgtYmVhZC1iM2ExNDU4MjdhZmYiLCJvcmlnaW4iOiJ1YWEiLCJ1c2VyX25hbWUiOiJhZG1pbkBleGFtcGxlLmNvbSIsImVtYWlsIjoiYWRtaW5AZXhhbXBsZS5jb20iLCJhdXRoX3RpbWUiOjE1Mjc3NjEzNTksInJldl9zaWciOiJmZjEwYjM2MyIsImlhdCI6MTUyNzc2MTM1OSwiZXhwIjoxNTI3ODA0NTU5LCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvdWFhL29hdXRoL3Rva2VuIiwiemlkIjoidWFhIiwiYXVkIjpbImNsb3VkYnJlYWtfc2hlbGwiLCJjbG91ZGJyZWFrLnJlY2lwZXMiLCJvcGVuaWQiLCJjbG91ZGJyZWFrIiwiY2xvdWRicmVhay5wbGF0Zm9ybXMiLCJjbG91ZGJyZWFrLmJsdWVwcmludHMiLCJjbG91ZGJyZWFrLnRlbXBsYXRlcyIsImNsb3VkYnJlYWsubmV0d29ya3MiLCJwZXJpc2NvcGUiLCJjbG91ZGJyZWFrLnNzc2Rjb25maWdzIiwiY2xvdWRicmVhay51c2FnZXMiLCJjbG91ZGJyZWFrLnNlY3VyaXR5Z3JvdXBzIiwiY2xvdWRicmVhay5zdGFja3MiLCJjbG91ZGJyZWFrLmNyZWRlbnRpYWxzIl19.TF_WBdEYpiCtjv_7IL-tPZcBI7u3Eg9uF5KG3KUqvH4
+# Accept-Encoding: gzip
+# 
+# 
+# time="2018-05-31T10:09:19Z" level="debug" msg="Request GET https://127.0.0.1/cb/api/v1/stacks/account/openstack-cluster" 
+# time="2018-05-31T10:09:19Z" level="debug" msg="Response method:GET status:404 duration:0ms req_url:https://127.0.0.1/cb/api/v1/stacks/account/openstack-cluster" 
+# HTTP/1.1 404 Not Found
+# Content-Length: 19
+# Content-Type: text/plain; charset=utf-8
+# Date: Thu, 31 May 2018 10:09:19 GMT
+# X-Content-Type-Options: nosniff
+# 
+# 404 page not found
+# 
+# time="2018-05-31T10:09:19Z" level="error" msg="status code: 404, message: 404 page not found\n " 
+# time="2018-05-31T10:09:19Z" level="debug" msg="status code: 404, message: 404 page not found\n " 
+# time="2018-05-31T10:09:19Z" level="info" msg="describe stack took 212.722379ms" 
+# time="2018-05-31T10:09:19Z" level="debug" msg="status code: 404, message: 404 page not found\n " 
+not ok 20 Check cluster describe FAILED
+# (in test file integration/cluster.bats, line 29)
+#   `[[ "${OUTPUT}" == *"status code: 404, message: Stack 'az404' not found"* ]]' failed
+not ok 21 Check cluster delete SUCCESS
+# (in test file integration/cluster.bats, line 36)
+#   `[[ "${OUTPUT}" == *"stack deleted, name: openstack-cluster"* ]]' failed
+not ok 22 Check cluster delete FAILED
+# (in test file integration/cluster.bats, line 43)
+#   `[[ "${OUTPUT}" == *"status code: 404, message: Stack 'az404' not found"* ]]' failed
+not ok 23 Check cluster start SUCCESS
+# (in test file integration/cluster.bats, line 50)
+#   `[[ "${OUTPUT}" == *"stack started, name: openstack-cluster"* ]]' failed
+not ok 24 Check cluster start FAILED
+# (in test file integration/cluster.bats, line 58)
+#   `[[ "${OUTPUT}" == *"status code: 404, message: Stack 'azstatus' not found"* ]]' failed
+# time="2018-05-31T10:09:21Z" level="error" msg="status code: 404, message: 404 page not found\n "
+not ok 25 Check clusters top SUCCESS
+# (in test file integration/cluster.bats, line 65)
+#   `[[ "${OUTPUT}" == *"stack stopted, name: openstack-cluster"* ]]' failed
+not ok 26 Check cluster stop FAILED
+# (in test file integration/cluster.bats, line 72)
+#   `[[ "${OUTPUT}" == *"status code: 404, message: Stack 'azstatus' not found"* ]]' failed
+not ok 27 Check cluster sync SUCCESS
+# (in test file integration/cluster.bats, line 79)
+#   `[[ "${OUTPUT}" == *"stack synced, name: openstack-cluster"* ]]' failed
+not ok 28 Check cluster sync FAILED
+# (in test file integration/cluster.bats, line 86)
+#   `[[ "${OUTPUT}" == *"status code: 404, message: Stack 'azstatus' not found"* ]]' failed
+ok 29 # skip (The repairClusterV2 endpoint should be added to cb-mock. Waiting for the new cb-mock implementation.) Check cluster repair SUCCESS
+ok 30 # skip (The repairClusterV2 endpoint should be added to cb-mock. Waiting for the new cb-mock implementation.) Check cluster repair FAILED
+not ok 31 Check cluster scale SUCCESS
+# (in test file integration/cluster.bats, line 109)
+#   `[[ "${OUTPUT}" == *"stack scaled, name: openstack-cluster"* ]]' failed
+not ok 32 Check cluster scale FAILED
+# (in test file integration/cluster.bats, line 116)
+#   `[[ "${OUTPUT}" == *"status code: 404, message: Stack 'azstatus' not found"* ]]' failed
+not ok 33 Check cluster create SUCCESS
+# (in test file integration/cluster.bats, line 123)
+#   `[[ "${OUTPUT}" == *"stack created: openstack-cluster"* ]]' failed
+ok 34 Check cluster create without name
+ok 35 # skip (BUG-94445) Check cluster create without password
+not ok 36 Check cluster create without password by parameter
+# (in test file integration/cluster.bats, line 146)
+#   `[[ "${OUTPUT}" == *"stack created: openstack-cluster"* ]]' failed
+not ok 37 Check cluster re-install
+# (in test file integration/cluster.bats, line 153)
+#   `[[ "${OUTPUT}" == *"status code: 404, message: Stack 'aaaaa' not found"* ]]' failed
+ok 38 Check CB configure
+not ok 39 Check credential create AWS role based
+# (in test file integration/credential.bats, line 16)
+#   `[[ "${OUTPUT}" == *"credential created:"* ]]' failed
+not ok 40 Check credential create AWS key based
+# (in test file integration/credential.bats, line 23)
+#   `[[ "${OUTPUT}" == *"credential created:"* ]]' failed
+not ok 41 Check credential create Azure
+# (in test file integration/credential.bats, line 30)
+#   `[[ "${OUTPUT}" == *"credential created:"* ]]' failed
+not ok 42 Check credential create OpenStack V2
+# (in test file integration/credential.bats, line 37)
+#   `[[ "${OUTPUT}" == *"credential created:"* ]]' failed
+not ok 43 Check credential create OpenStack V3
+# (in test file integration/credential.bats, line 44)
+#   `[[ "${OUTPUT}" == *"credential created:"* ]]' failed
+not ok 44 Check credential create GCP
+# (in test file integration/credential.bats, line 51)
+#   `[[ "${OUTPUT}" == *"credential created:"* ]]' failed
+not ok 45 Check credential delete
+# (in test file integration/credential.bats, line 58)
+#   `[[ "${OUTPUT}" == *"credential deleted, name: ${OS_CREDENTIAL_NAME}"* ]]' failed
+ok 46 Check credential list
+not ok 47 Check credential described result
+# (in test file integration/credential.bats, line 72)
+#   `[[ "${OUTPUT}" == "${OS_CREDENTIAL_NAME}" ]]' failed
+# time="2018-05-31T10:09:28Z" level="info" msg="[ReadConfig] found config file: /root/.cb/config" 
+# time="2018-05-31T10:09:28Z" level="info" msg="[ReadConfig] selected profile: default" 
+# time="2018-05-31T10:09:28Z" level="info" msg="[ConfigRead] Config read from file, setting as global variable:\nusername: admin@example.com\npassword: '*'\nserver: https://127.0.0.1\n" 
+# time="2018-05-31T10:09:28Z" level="debug" msg="Request POST https://127.0.0.1/identity/oauth/authorize?response_type=token&client_id=cloudbreak_shell" 
+# time="2018-05-31T10:09:29Z" level="debug" msg="Response method:POST status:302 duration:196ms req_url:https://127.0.0.1/identity/oauth/authorize?response_type=token&client_id=cloudbreak_shell" 
+# GET /cb/api/v1/credentials/account/openstack HTTP/1.1
+# Host: 127.0.0.1
+# User-Agent: Go-http-client/1.1
+# Accept: application/json
+# Authorization: Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6ImxlZ2FjeS10b2tlbi1rZXkiLCJ0eXAiOiJKV1QifQ.eyJqdGkiOiIxODFhNGQ4ODFlODg0YWZiYjM0MTRmZGE0NmI4OGQ0MyIsInN1YiI6ImRiNTY5NGQ2LTEyNzctNDVlOC1iZWFkLWIzYTE0NTgyN2FmZiIsInNjb3BlIjpbImNsb3VkYnJlYWsubmV0d29ya3MucmVhZCIsInBlcmlzY29wZS5jbHVzdGVyIiwiY2xvdWRicmVhay51c2FnZXMudXNlciIsImNsb3VkYnJlYWsucmVjaXBlcyIsImNsb3VkYnJlYWsudXNhZ2VzLmdsb2JhbCIsIm9wZW5pZCIsImNsb3VkYnJlYWsucGxhdGZvcm1zIiwiY2xvdWRicmVhay50ZW1wbGF0ZXMucmVhZCIsImNsb3VkYnJlYWsudXNhZ2VzLmFjY291bnQiLCJjbG91ZGJyZWFrLmV2ZW50cyIsImNsb3VkYnJlYWsuc3RhY2tzLnJlYWQiLCJjbG91ZGJyZWFrLmJsdWVwcmludHMiLCJjbG91ZGJyZWFrLnRlbXBsYXRlcyIsImNsb3VkYnJlYWsubmV0d29ya3MiLCJjbG91ZGJyZWFrLnNzc2Rjb25maWdzIiwiY2xvdWRicmVhay5wbGF0Zm9ybXMucmVhZCIsImNsb3VkYnJlYWsuY3JlZGVudGlhbHMucmVhZCIsImNsb3VkYnJlYWsuc2VjdXJpdHlncm91cHMucmVhZCIsImNsb3VkYnJlYWsuc2VjdXJpdHlncm91cHMiLCJjbG91ZGJyZWFrLnN0YWNrcyIsImNsb3VkYnJlYWsuY3JlZGVudGlhbHMiLCJjbG91ZGJyZWFrLnNzc2Rjb25maWdzLnJlYWQiLCJjbG91ZGJyZWFrLnJlY2lwZXMucmVhZCIsImNsb3VkYnJlYWsuYmx1ZXByaW50cy5yZWFkIl0sImNsaWVudF9pZCI6ImNsb3VkYnJlYWtfc2hlbGwiLCJjaWQiOiJjbG91ZGJyZWFrX3NoZWxsIiwiYXpwIjoiY2xvdWRicmVha19zaGVsbCIsInVzZXJfaWQiOiJkYjU2OTRkNi0xMjc3LTQ1ZTgtYmVhZC1iM2ExNDU4MjdhZmYiLCJvcmlnaW4iOiJ1YWEiLCJ1c2VyX25hbWUiOiJhZG1pbkBleGFtcGxlLmNvbSIsImVtYWlsIjoiYWRtaW5AZXhhbXBsZS5jb20iLCJhdXRoX3RpbWUiOjE1Mjc3NjEzNjksInJldl9zaWciOiJmZjEwYjM2MyIsImlhdCI6MTUyNzc2MTM2OSwiZXhwIjoxNTI3ODA0NTY5LCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvdWFhL29hdXRoL3Rva2VuIiwiemlkIjoidWFhIiwiYXVkIjpbImNsb3VkYnJlYWtfc2hlbGwiLCJjbG91ZGJyZWFrLnJlY2lwZXMiLCJvcGVuaWQiLCJjbG91ZGJyZWFrIiwiY2xvdWRicmVhay5wbGF0Zm9ybXMiLCJjbG91ZGJyZWFrLmJsdWVwcmludHMiLCJjbG91ZGJyZWFrLnRlbXBsYXRlcyIsImNsb3VkYnJlYWsubmV0d29ya3MiLCJwZXJpc2NvcGUiLCJjbG91ZGJyZWFrLnNzc2Rjb25maWdzIiwiY2xvdWRicmVhay51c2FnZXMiLCJjbG91ZGJyZWFrLnNlY3VyaXR5Z3JvdXBzIiwiY2xvdWRicmVhay5zdGFja3MiLCJjbG91ZGJyZWFrLmNyZWRlbnRpYWxzIl19.yAi3oAEI7DWvzJpEqZAqdNybN5tZ0P4phLziOeIYVR0
+# Accept-Encoding: gzip
+# 
+# 
+# time="2018-05-31T10:09:29Z" level="debug" msg="Request GET https://127.0.0.1/cb/api/v1/credentials/account/openstack" 
+# time="2018-05-31T10:09:29Z" level="debug" msg="Response method:GET status:404 duration:0ms req_url:https://127.0.0.1/cb/api/v1/credentials/account/openstack" 
+# HTTP/1.1 404 Not Found
+# Content-Length: 19
+# Content-Type: text/plain; charset=utf-8
+# Date: Thu, 31 May 2018 10:09:29 GMT
+# X-Content-Type-Options: nosniff
+# 
+# 404 page not found
+# 
+# time="2018-05-31T10:09:29Z" level="error" msg="status code: 404, message: 404 page not found\n " 
+# time="2018-05-31T10:09:29Z" level="debug" msg="status code: 404, message: 404 page not found\n " 
+# time="2018-05-31T10:09:29Z" level="info" msg="describe credential took 202.166019ms" 
+# time="2018-05-31T10:09:29Z" level="debug" msg="status code: 404, message: 404 page not found\n " 
+not ok 48 Check credential described structure
+# (in test file integration/credential.bats, line 78)
+#   `[[ "${OUTPUT}" == "true" ]]' failed
+# time="2018-05-31T10:09:29Z" level="info" msg="[ReadConfig] found config file: /root/.cb/config" 
+# time="2018-05-31T10:09:29Z" level="info" msg="[ReadConfig] selected profile: default" 
+# time="2018-05-31T10:09:29Z" level="info" msg="[ConfigRead] Config read from file, setting as global variable:\nusername: admin@example.com\npassword: '*'\nserver: https://127.0.0.1\n" 
+# time="2018-05-31T10:09:29Z" level="debug" msg="Request POST https://127.0.0.1/identity/oauth/authorize?response_type=token&client_id=cloudbreak_shell" 
+# time="2018-05-31T10:09:29Z" level="debug" msg="Response method:POST status:302 duration:196ms req_url:https://127.0.0.1/identity/oauth/authorize?response_type=token&client_id=cloudbreak_shell" 
+# GET /cb/api/v1/credentials/account/openstack HTTP/1.1
+# Host: 127.0.0.1
+# User-Agent: Go-http-client/1.1
+# Accept: application/json
+# Authorization: Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6ImxlZ2FjeS10b2tlbi1rZXkiLCJ0eXAiOiJKV1QifQ.eyJqdGkiOiIyYzhmY2E0YmQ4NzU0NzgxODdhNzA1OWZhYTI0MjIyNiIsInN1YiI6ImRiNTY5NGQ2LTEyNzctNDVlOC1iZWFkLWIzYTE0NTgyN2FmZiIsInNjb3BlIjpbImNsb3VkYnJlYWsubmV0d29ya3MucmVhZCIsInBlcmlzY29wZS5jbHVzdGVyIiwiY2xvdWRicmVhay51c2FnZXMudXNlciIsImNsb3VkYnJlYWsucmVjaXBlcyIsImNsb3VkYnJlYWsudXNhZ2VzLmdsb2JhbCIsIm9wZW5pZCIsImNsb3VkYnJlYWsucGxhdGZvcm1zIiwiY2xvdWRicmVhay50ZW1wbGF0ZXMucmVhZCIsImNsb3VkYnJlYWsudXNhZ2VzLmFjY291bnQiLCJjbG91ZGJyZWFrLmV2ZW50cyIsImNsb3VkYnJlYWsuc3RhY2tzLnJlYWQiLCJjbG91ZGJyZWFrLmJsdWVwcmludHMiLCJjbG91ZGJyZWFrLnRlbXBsYXRlcyIsImNsb3VkYnJlYWsubmV0d29ya3MiLCJjbG91ZGJyZWFrLnNzc2Rjb25maWdzIiwiY2xvdWRicmVhay5wbGF0Zm9ybXMucmVhZCIsImNsb3VkYnJlYWsuY3JlZGVudGlhbHMucmVhZCIsImNsb3VkYnJlYWsuc2VjdXJpdHlncm91cHMucmVhZCIsImNsb3VkYnJlYWsuc2VjdXJpdHlncm91cHMiLCJjbG91ZGJyZWFrLnN0YWNrcyIsImNsb3VkYnJlYWsuY3JlZGVudGlhbHMiLCJjbG91ZGJyZWFrLnNzc2Rjb25maWdzLnJlYWQiLCJjbG91ZGJyZWFrLnJlY2lwZXMucmVhZCIsImNsb3VkYnJlYWsuYmx1ZXByaW50cy5yZWFkIl0sImNsaWVudF9pZCI6ImNsb3VkYnJlYWtfc2hlbGwiLCJjaWQiOiJjbG91ZGJyZWFrX3NoZWxsIiwiYXpwIjoiY2xvdWRicmVha19zaGVsbCIsInVzZXJfaWQiOiJkYjU2OTRkNi0xMjc3LTQ1ZTgtYmVhZC1iM2ExNDU4MjdhZmYiLCJvcmlnaW4iOiJ1YWEiLCJ1c2VyX25hbWUiOiJhZG1pbkBleGFtcGxlLmNvbSIsImVtYWlsIjoiYWRtaW5AZXhhbXBsZS5jb20iLCJhdXRoX3RpbWUiOjE1Mjc3NjEzNjksInJldl9zaWciOiJmZjEwYjM2MyIsImlhdCI6MTUyNzc2MTM2OSwiZXhwIjoxNTI3ODA0NTY5LCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvdWFhL29hdXRoL3Rva2VuIiwiemlkIjoidWFhIiwiYXVkIjpbImNsb3VkYnJlYWtfc2hlbGwiLCJjbG91ZGJyZWFrLnJlY2lwZXMiLCJvcGVuaWQiLCJjbG91ZGJyZWFrIiwiY2xvdWRicmVhay5wbGF0Zm9ybXMiLCJjbG91ZGJyZWFrLmJsdWVwcmludHMiLCJjbG91ZGJyZWFrLnRlbXBsYXRlcyIsImNsb3VkYnJlYWsubmV0d29ya3MiLCJwZXJpc2NvcGUiLCJjbG91ZGJyZWFrLnNzc2Rjb25maWdzIiwiY2xvdWRicmVhay51c2FnZXMiLCJjbG91ZGJyZWFrLnNlY3VyaXR5Z3JvdXBzIiwiY2xvdWRicmVhay5zdGFja3MiLCJjbG91ZGJyZWFrLmNyZWRlbnRpYWxzIl19.Z7UJr_slwwsjpOHsUZbfkrAwamq5UIl3LSaTnQNxHxw
+# Accept-Encoding: gzip
+# 
+# 
+# time="2018-05-31T10:09:29Z" level="debug" msg="Request GET https://127.0.0.1/cb/api/v1/credentials/account/openstack" 
+# time="2018-05-31T10:09:29Z" level="debug" msg="Response method:GET status:404 duration:0ms req_url:https://127.0.0.1/cb/api/v1/credentials/account/openstack" 
+# HTTP/1.1 404 Not Found
+# Content-Length: 19
+# Content-Type: text/plain; charset=utf-8
+# Date: Thu, 31 May 2018 10:09:29 GMT
+# X-Content-Type-Options: nosniff
+# 
+# 404 page not found
+# 
+# time="2018-05-31T10:09:29Z" level="error" msg="status code: 404, message: 404 page not found\n " 
+# time="2018-05-31T10:09:29Z" level="debug" msg="status code: 404, message: 404 page not found\n " 
+# time="2018-05-31T10:09:29Z" level="info" msg="describe credential took 203.203691ms" 
+# time="2018-05-31T10:09:29Z" level="debug" msg="status code: 404, message: 404 page not found\n " 
+ok 49 List imagecatalog
+ok 50 Create image catalog
+not ok 51 Delete image catalog
+# (in test file integration/imagecatalog.bats, line 22)
+#   `[[ "${OUTPUT}" == *"imagecatalog deleted, name: test"* ]]' failed
+ok 52 Get images - openstack
+ok 53 Set default image catalog
+ok 54 Check ldaps are listed
+ok 55 Create ldap
+ok 56 Create ldap - invalid server without protocol
+not ok 57 Check ldap delete
+# (in test file integration/ldap.bats, line 28)
+#   `[[ "${OUTPUT}" == *"ldap config deleted"* ]]' failed
+ok 58 Check proxy configs are listed
+ok 59 Create proxy
+not ok 60 Check proxy delete
+# (in test file integration/proxy.bats, line 22)
+#   `[[ "${OUTPUT}" == *"proxy config deleted"* ]]' failed
+ok 61 List RDS configs with response [Name,ConnectionURL,DatabaseEngine,Type,Driver]
+ok 62 New RDS with message [create database took]
+not ok 63 Check RDS delete with message [database configuration deleted]
+# (in test file integration/rds.bats, line 24)
+#   `[[ "${OUTPUT}" == *"database configuration deleted"* ]]' failed
+ok 64 Check recipe create from url pre-ambari-start
+ok 65 Check recipe create from url post-ambari-start
+ok 66 Check recipe create from url post-cluster-install
+ok 67 Check recipe create from url pre-termination
+ok 68 Check recipe create from file pre-ambari-start
+ok 69 Check recipe create from file post-ambari-start
+ok 70 Check recipe create from file post-cluster-install
+ok 71 Check recipe create from file pre-termination
+ok 72 Check recipes are listed
+not ok 73 Check recipe is described
+# (in test file integration/recipe.bats, line 72)
+#   `[[ "$OUTPUT" == "true" ]]' failed
+# time="2018-05-31T10:09:40Z" level="info" msg="[ReadConfig] found config file: /root/.cb/config" 
+# time="2018-05-31T10:09:40Z" level="info" msg="[ReadConfig] selected profile: default" 
+# time="2018-05-31T10:09:40Z" level="info" msg="[ConfigRead] Config read from file, setting as global variable:\nusername: admin@example.com\npassword: '*'\nserver: https://127.0.0.1\n" 
+# time="2018-05-31T10:09:40Z" level="debug" msg="Request POST https://127.0.0.1/identity/oauth/authorize?response_type=token&client_id=cloudbreak_shell" 
+# time="2018-05-31T10:09:40Z" level="debug" msg="Response method:POST status:302 duration:143ms req_url:https://127.0.0.1/identity/oauth/authorize?response_type=token&client_id=cloudbreak_shell" 
+# GET /cb/api/v1/recipes/account/testrecipe HTTP/1.1
+# Host: 127.0.0.1
+# User-Agent: Go-http-client/1.1
+# Accept: application/json
+# Authorization: Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6ImxlZ2FjeS10b2tlbi1rZXkiLCJ0eXAiOiJKV1QifQ.eyJqdGkiOiI1NTZjNTJlOGZiNDI0ZDM2OWRkODNiNmExNmFiNzZkNyIsInN1YiI6ImRiNTY5NGQ2LTEyNzctNDVlOC1iZWFkLWIzYTE0NTgyN2FmZiIsInNjb3BlIjpbImNsb3VkYnJlYWsubmV0d29ya3MucmVhZCIsInBlcmlzY29wZS5jbHVzdGVyIiwiY2xvdWRicmVhay51c2FnZXMudXNlciIsImNsb3VkYnJlYWsucmVjaXBlcyIsImNsb3VkYnJlYWsudXNhZ2VzLmdsb2JhbCIsIm9wZW5pZCIsImNsb3VkYnJlYWsucGxhdGZvcm1zIiwiY2xvdWRicmVhay50ZW1wbGF0ZXMucmVhZCIsImNsb3VkYnJlYWsudXNhZ2VzLmFjY291bnQiLCJjbG91ZGJyZWFrLmV2ZW50cyIsImNsb3VkYnJlYWsuc3RhY2tzLnJlYWQiLCJjbG91ZGJyZWFrLmJsdWVwcmludHMiLCJjbG91ZGJyZWFrLnRlbXBsYXRlcyIsImNsb3VkYnJlYWsubmV0d29ya3MiLCJjbG91ZGJyZWFrLnNzc2Rjb25maWdzIiwiY2xvdWRicmVhay5wbGF0Zm9ybXMucmVhZCIsImNsb3VkYnJlYWsuY3JlZGVudGlhbHMucmVhZCIsImNsb3VkYnJlYWsuc2VjdXJpdHlncm91cHMucmVhZCIsImNsb3VkYnJlYWsuc2VjdXJpdHlncm91cHMiLCJjbG91ZGJyZWFrLnN0YWNrcyIsImNsb3VkYnJlYWsuY3JlZGVudGlhbHMiLCJjbG91ZGJyZWFrLnNzc2Rjb25maWdzLnJlYWQiLCJjbG91ZGJyZWFrLnJlY2lwZXMucmVhZCIsImNsb3VkYnJlYWsuYmx1ZXByaW50cy5yZWFkIl0sImNsaWVudF9pZCI6ImNsb3VkYnJlYWtfc2hlbGwiLCJjaWQiOiJjbG91ZGJyZWFrX3NoZWxsIiwiYXpwIjoiY2xvdWRicmVha19zaGVsbCIsInVzZXJfaWQiOiJkYjU2OTRkNi0xMjc3LTQ1ZTgtYmVhZC1iM2ExNDU4MjdhZmYiLCJvcmlnaW4iOiJ1YWEiLCJ1c2VyX25hbWUiOiJhZG1pbkBleGFtcGxlLmNvbSIsImVtYWlsIjoiYWRtaW5AZXhhbXBsZS5jb20iLCJhdXRoX3RpbWUiOjE1Mjc3NjEzODAsInJldl9zaWciOiJmZjEwYjM2MyIsImlhdCI6MTUyNzc2MTM4MCwiZXhwIjoxNTI3ODA0NTgwLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvdWFhL29hdXRoL3Rva2VuIiwiemlkIjoidWFhIiwiYXVkIjpbImNsb3VkYnJlYWtfc2hlbGwiLCJjbG91ZGJyZWFrLnJlY2lwZXMiLCJvcGVuaWQiLCJjbG91ZGJyZWFrIiwiY2xvdWRicmVhay5wbGF0Zm9ybXMiLCJjbG91ZGJyZWFrLmJsdWVwcmludHMiLCJjbG91ZGJyZWFrLnRlbXBsYXRlcyIsImNsb3VkYnJlYWsubmV0d29ya3MiLCJwZXJpc2NvcGUiLCJjbG91ZGJyZWFrLnNzc2Rjb25maWdzIiwiY2xvdWRicmVhay51c2FnZXMiLCJjbG91ZGJyZWFrLnNlY3VyaXR5Z3JvdXBzIiwiY2xvdWRicmVhay5zdGFja3MiLCJjbG91ZGJyZWFrLmNyZWRlbnRpYWxzIl19.9sYRQ177Ab4TOLRsf6Xz6SU6qHimNPP_V7NMyBfZ4SY
+# Accept-Encoding: gzip
+# 
+# 
+# time="2018-05-31T10:09:40Z" level="debug" msg="Request GET https://127.0.0.1/cb/api/v1/recipes/account/testrecipe" 
+# time="2018-05-31T10:09:40Z" level="debug" msg="Response method:GET status:404 duration:0ms req_url:https://127.0.0.1/cb/api/v1/recipes/account/testrecipe" 
+# HTTP/1.1 404 Not Found
+# Content-Length: 19
+# Content-Type: text/plain; charset=utf-8
+# Date: Thu, 31 May 2018 10:09:40 GMT
+# X-Content-Type-Options: nosniff
+# 
+# 404 page not found
+# 
+# time="2018-05-31T10:09:40Z" level="error" msg="status code: 404, message: 404 page not found\n " 
+# time="2018-05-31T10:09:40Z" level="debug" msg="status code: 404, message: 404 page not found\n " 
+# time="2018-05-31T10:09:40Z" level="info" msg="describe recipe took 149.402634ms" 
+# time="2018-05-31T10:09:40Z" level="debug" msg="status code: 404, message: 404 page not found\n " 
+not ok 74 Check recipe delete
+# (in test file integration/recipe.bats, line 78)
+#   `[[ "${OUTPUT}" == *"recipe deleted, name: test"* ]]' failed
+ok 75 Check generate cluster template azure new network
+ok 76 Check generate cluster template azure existing subnet
+ok 77 Check generate cluster template aws new network
+ok 78 Check generate cluster template aws existing network
+ok 79 Check generate cluster template aws existing subnet
+ok 80 Check generate cluster template openstack new network
+ok 81 Check generate cluster template openstack existing network
+ok 82 Check generate cluster template openstack existing subnet
+ok 83 Check generate cluster template gcp new network
+ok 84 Check generate cluster template gcp existing network
+ok 85 Check generate cluster template gcp existing subnet
+not ok 86 Generate reinstall template
+# (in test file integration/template.bats, line 73)
+#   `[[ "${OUTPUT}" == "test.bp" ]]' failed
+# time="2018-05-31T10:09:42Z" level="info" msg="[ReadConfig] found config file: /root/.cb/config" 
+# time="2018-05-31T10:09:42Z" level="info" msg="[ReadConfig] selected profile: default" 
+# time="2018-05-31T10:09:42Z" level="info" msg="[ConfigRead] Config read from file, setting as global variable:\nusername: admin@example.com\npassword: '*'\nserver: https://127.0.0.1\n" 
+# time="2018-05-31T10:09:42Z" level="debug" msg="Request POST https://127.0.0.1/identity/oauth/authorize?response_type=token&client_id=cloudbreak_shell" 
+# time="2018-05-31T10:09:42Z" level="debug" msg="Response method:POST status:302 duration:190ms req_url:https://127.0.0.1/identity/oauth/authorize?response_type=token&client_id=cloudbreak_shell" 
+# GET /cb/api/v1/stacks/account/aaaaa HTTP/1.1
+# Host: 127.0.0.1
+# User-Agent: Go-http-client/1.1
+# Accept: application/json
+# Authorization: Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6ImxlZ2FjeS10b2tlbi1rZXkiLCJ0eXAiOiJKV1QifQ.eyJqdGkiOiIwYTQ0Nzc0MWU4MjM0ZDVlYWE1MzlkOWQzNjBjZmMzNSIsInN1YiI6ImRiNTY5NGQ2LTEyNzctNDVlOC1iZWFkLWIzYTE0NTgyN2FmZiIsInNjb3BlIjpbImNsb3VkYnJlYWsubmV0d29ya3MucmVhZCIsInBlcmlzY29wZS5jbHVzdGVyIiwiY2xvdWRicmVhay51c2FnZXMudXNlciIsImNsb3VkYnJlYWsucmVjaXBlcyIsImNsb3VkYnJlYWsudXNhZ2VzLmdsb2JhbCIsIm9wZW5pZCIsImNsb3VkYnJlYWsucGxhdGZvcm1zIiwiY2xvdWRicmVhay50ZW1wbGF0ZXMucmVhZCIsImNsb3VkYnJlYWsudXNhZ2VzLmFjY291bnQiLCJjbG91ZGJyZWFrLmV2ZW50cyIsImNsb3VkYnJlYWsuc3RhY2tzLnJlYWQiLCJjbG91ZGJyZWFrLmJsdWVwcmludHMiLCJjbG91ZGJyZWFrLnRlbXBsYXRlcyIsImNsb3VkYnJlYWsubmV0d29ya3MiLCJjbG91ZGJyZWFrLnNzc2Rjb25maWdzIiwiY2xvdWRicmVhay5wbGF0Zm9ybXMucmVhZCIsImNsb3VkYnJlYWsuY3JlZGVudGlhbHMucmVhZCIsImNsb3VkYnJlYWsuc2VjdXJpdHlncm91cHMucmVhZCIsImNsb3VkYnJlYWsuc2VjdXJpdHlncm91cHMiLCJjbG91ZGJyZWFrLnN0YWNrcyIsImNsb3VkYnJlYWsuY3JlZGVudGlhbHMiLCJjbG91ZGJyZWFrLnNzc2Rjb25maWdzLnJlYWQiLCJjbG91ZGJyZWFrLnJlY2lwZXMucmVhZCIsImNsb3VkYnJlYWsuYmx1ZXByaW50cy5yZWFkIl0sImNsaWVudF9pZCI6ImNsb3VkYnJlYWtfc2hlbGwiLCJjaWQiOiJjbG91ZGJyZWFrX3NoZWxsIiwiYXpwIjoiY2xvdWRicmVha19zaGVsbCIsInVzZXJfaWQiOiJkYjU2OTRkNi0xMjc3LTQ1ZTgtYmVhZC1iM2ExNDU4MjdhZmYiLCJvcmlnaW4iOiJ1YWEiLCJ1c2VyX25hbWUiOiJhZG1pbkBleGFtcGxlLmNvbSIsImVtYWlsIjoiYWRtaW5AZXhhbXBsZS5jb20iLCJhdXRoX3RpbWUiOjE1Mjc3NjEzODIsInJldl9zaWciOiJmZjEwYjM2MyIsImlhdCI6MTUyNzc2MTM4MiwiZXhwIjoxNTI3ODA0NTgyLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvdWFhL29hdXRoL3Rva2VuIiwiemlkIjoidWFhIiwiYXVkIjpbImNsb3VkYnJlYWtfc2hlbGwiLCJjbG91ZGJyZWFrLnJlY2lwZXMiLCJvcGVuaWQiLCJjbG91ZGJyZWFrIiwiY2xvdWRicmVhay5wbGF0Zm9ybXMiLCJjbG91ZGJyZWFrLmJsdWVwcmludHMiLCJjbG91ZGJyZWFrLnRlbXBsYXRlcyIsImNsb3VkYnJlYWsubmV0d29ya3MiLCJwZXJpc2NvcGUiLCJjbG91ZGJyZWFrLnNzc2Rjb25maWdzIiwiY2xvdWRicmVhay51c2FnZXMiLCJjbG91ZGJyZWFrLnNlY3VyaXR5Z3JvdXBzIiwiY2xvdWRicmVhay5zdGFja3MiLCJjbG91ZGJyZWFrLmNyZWRlbnRpYWxzIl19.OITKGKNfF7s-HdLAZgIoNiMUbwATnD-Ohcjn0LQ2G8U
+# Accept-Encoding: gzip
+# 
+# 
+# time="2018-05-31T10:09:42Z" level="debug" msg="Request GET https://127.0.0.1/cb/api/v1/stacks/account/aaaaa" 
+# time="2018-05-31T10:09:42Z" level="debug" msg="Response method:GET status:404 duration:0ms req_url:https://127.0.0.1/cb/api/v1/stacks/account/aaaaa" 
+# HTTP/1.1 404 Not Found
+# Content-Length: 19
+# Content-Type: text/plain; charset=utf-8
+# Date: Thu, 31 May 2018 10:09:42 GMT
+# X-Content-Type-Options: nosniff
+# 
+# 404 page not found
+# 
+# time="2018-05-31T10:09:42Z" level="error" msg="status code: 404, message: 404 page not found\n " 
+# time="2018-05-31T10:09:42Z" level="debug" msg="status code: 404, message: 404 page not found\n " 
+# time="2018-05-31T10:09:42Z" level="debug" msg="status code: 404, message: 404 page not found\n " 

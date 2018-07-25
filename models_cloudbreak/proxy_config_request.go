@@ -19,7 +19,9 @@ import (
 type ProxyConfigRequest struct {
 
 	// description of the resource
-	Description string `json:"description,omitempty"`
+	// Max Length: 1000
+	// Min Length: 0
+	Description *string `json:"description,omitempty"`
 
 	// Name of the proxy configuration resource
 	// Required: true
@@ -71,6 +73,11 @@ type ProxyConfigRequest struct {
 func (m *ProxyConfigRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateDescription(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
 	if err := m.validateName(formats); err != nil {
 		// prop
 		res = append(res, err)
@@ -94,6 +101,23 @@ func (m *ProxyConfigRequest) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *ProxyConfigRequest) validateDescription(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Description) { // not required
+		return nil
+	}
+
+	if err := validate.MinLength("description", "body", string(*m.Description), 0); err != nil {
+		return err
+	}
+
+	if err := validate.MaxLength("description", "body", string(*m.Description), 1000); err != nil {
+		return err
+	}
+
 	return nil
 }
 

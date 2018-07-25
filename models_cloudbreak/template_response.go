@@ -18,6 +18,12 @@ import (
 
 type TemplateResponse struct {
 
+	// aws specific parameters for template
+	AwsParameters *AwsParameters `json:"awsParameters,omitempty"`
+
+	// azure specific parameters for template
+	AzureParameters *AzureParameters `json:"azureParameters,omitempty"`
+
 	// type of cloud provider
 	// Required: true
 	CloudPlatform *string `json:"cloudPlatform"`
@@ -30,6 +36,9 @@ type TemplateResponse struct {
 	// Min Length: 0
 	Description *string `json:"description,omitempty"`
 
+	// gcp specific parameters for template
+	GcpTemlateParameters GcpParameters `json:"gcpTemlateParameters,omitempty"`
+
 	// id of the resource
 	ID int64 `json:"id,omitempty"`
 
@@ -39,6 +48,9 @@ type TemplateResponse struct {
 	// name of the resource
 	// Required: true
 	Name *string `json:"name"`
+
+	// openstack specific parameters for template
+	OpenStackParameters OpenStackParameters `json:"openStackParameters,omitempty"`
 
 	// cloud specific parameters for template
 	Parameters map[string]interface{} `json:"parameters,omitempty"`
@@ -62,7 +74,14 @@ type TemplateResponse struct {
 
 	// type of the volumes
 	VolumeType string `json:"volumeType,omitempty"`
+
+	// yarn specific parameters for template
+	YarnParameters YarnParameters `json:"yarnParameters,omitempty"`
 }
+
+/* polymorph TemplateResponse awsParameters false */
+
+/* polymorph TemplateResponse azureParameters false */
 
 /* polymorph TemplateResponse cloudPlatform false */
 
@@ -70,11 +89,15 @@ type TemplateResponse struct {
 
 /* polymorph TemplateResponse description false */
 
+/* polymorph TemplateResponse gcpTemlateParameters false */
+
 /* polymorph TemplateResponse id false */
 
 /* polymorph TemplateResponse instanceType false */
 
 /* polymorph TemplateResponse name false */
+
+/* polymorph TemplateResponse openStackParameters false */
 
 /* polymorph TemplateResponse parameters false */
 
@@ -90,9 +113,21 @@ type TemplateResponse struct {
 
 /* polymorph TemplateResponse volumeType false */
 
+/* polymorph TemplateResponse yarnParameters false */
+
 // Validate validates this template response
 func (m *TemplateResponse) Validate(formats strfmt.Registry) error {
 	var res []error
+
+	if err := m.validateAwsParameters(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateAzureParameters(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
 
 	if err := m.validateCloudPlatform(formats); err != nil {
 		// prop
@@ -127,6 +162,44 @@ func (m *TemplateResponse) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *TemplateResponse) validateAwsParameters(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.AwsParameters) { // not required
+		return nil
+	}
+
+	if m.AwsParameters != nil {
+
+		if err := m.AwsParameters.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("awsParameters")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *TemplateResponse) validateAzureParameters(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.AzureParameters) { // not required
+		return nil
+	}
+
+	if m.AzureParameters != nil {
+
+		if err := m.AzureParameters.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("azureParameters")
+			}
+			return err
+		}
+	}
+
 	return nil
 }
 

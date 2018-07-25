@@ -265,6 +265,36 @@ func (a *Client) GetRds(params *GetRdsParams) (*GetRdsOK, error) {
 }
 
 /*
+GetRdsRequestFromName gets request
+
+An RDS Configuration describe a connection to an external Relational Database Service that can be used as the Hive Metastore.
+*/
+func (a *Client) GetRdsRequestFromName(params *GetRdsRequestFromNameParams) (*GetRdsRequestFromNameOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetRdsRequestFromNameParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getRdsRequestFromName",
+		Method:             "GET",
+		PathPattern:        "/v1/rdsconfigs/{name}/request",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetRdsRequestFromNameReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetRdsRequestFromNameOK), nil
+
+}
+
+/*
 PostPrivateRds creates r d s configuration as private resource
 
 An RDS Configuration describe a connection to an external Relational Database Service that can be used as the Hive Metastore.

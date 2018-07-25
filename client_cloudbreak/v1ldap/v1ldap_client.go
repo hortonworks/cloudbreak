@@ -145,6 +145,36 @@ func (a *Client) GetLdap(params *GetLdapParams) (*GetLdapOK, error) {
 }
 
 /*
+GetLdapRequestFromName gets request
+
+LDAP server integration enables the user to provide a central place to store usernames and passwords for the users of his/her clusters.
+*/
+func (a *Client) GetLdapRequestFromName(params *GetLdapRequestFromNameParams) (*GetLdapRequestFromNameOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetLdapRequestFromNameParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getLdapRequestFromName",
+		Method:             "GET",
+		PathPattern:        "/v1/ldap/{name}/request",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetLdapRequestFromNameReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetLdapRequestFromNameOK), nil
+
+}
+
+/*
 GetPrivateLdap retrieves a private l d a p config by name
 
 LDAP server integration enables the user to provide a central place to store usernames and passwords for the users of his/her clusters.

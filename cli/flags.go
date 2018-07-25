@@ -581,6 +581,13 @@ var (
 			Usage: "name of the imagecatalog",
 		},
 	}
+	FlImageId = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "imageid",
+			Usage: "id of the image",
+		},
+	}
 	FlKey = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
