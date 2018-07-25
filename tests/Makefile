@@ -38,6 +38,9 @@ docker-e2e-test:
 docker-e2e-test-local:
 	./scripts/docker-e2e-test-aruba-local.sh
 
+docker-e2e-test-jenkins:
+	./scripts/jenkins-docker-e2e-test-aruba.sh	
+
 run-e2e-suite:
 	$(call run_test,${test})
 

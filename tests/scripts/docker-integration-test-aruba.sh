@@ -10,7 +10,7 @@ echo "======================================="
 #docker-compose run test
 
 echo "Refresh the Test Runner Docker image"
-docker pull halmy/aruba-rspec:1.0
+docker pull hortonworks/cloud-cli-e2e:latest
 
 export TEST_CONTAINER_NAME=cli-integration-runner
 
@@ -24,7 +24,7 @@ docker run -it \
     --net=host \
     -v $(dirname "$(pwd)")"/build/Linux":/usr/local/bin \
     -v $(pwd):/work \
-    halmy/aruba-rspec:1.0 /work/scripts/integration-test-aruba.sh
+    hortonworks/cloud-cli-e2e:latest /work/scripts/integration-test-aruba.sh
 RESULT=$?
 
 cat aruba/test-result.html | grep -e ".*script.*totals.*failure" | cut -d ',' -f 2 | grep -e " 0"
