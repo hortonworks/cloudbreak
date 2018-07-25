@@ -15,16 +15,22 @@ public class EncryptionKeyConfigJson implements JsonEntity {
 
     private String id;
 
+    private String description;
+
+    private String displayName;
+
     private Map<String, Object> properties = new HashMap<>();
 
     public EncryptionKeyConfigJson() {
 
     }
 
-    public EncryptionKeyConfigJson(String name, String id, Map<String, Object> properties) {
+    public EncryptionKeyConfigJson(String name, String id, String description, String displayName, Map<String, Object> properties) {
         this.name = name;
         this.id = id;
         this.properties = properties;
+        this.description = description;
+        this.displayName = displayName;
     }
 
     public String getName() {
@@ -49,5 +55,17 @@ public class EncryptionKeyConfigJson implements JsonEntity {
 
     public void setProperties(Map<String, Object> properties) {
         this.properties = properties;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getDisplayName() {
+        return displayName;
     }
 }
