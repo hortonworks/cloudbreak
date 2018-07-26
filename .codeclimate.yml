@@ -1,3 +1,11 @@
+version: "2"         # required to adjust maintainability checks
+checks:
+  method-count:
+    config:
+      threshold: 100
+  file-lines:
+    config:
+      threshold: 1000
 exclude_patterns:
 - "mock/"
 - "**/test/"
