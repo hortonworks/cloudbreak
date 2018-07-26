@@ -302,7 +302,7 @@ public class AmbariClusterConnector {
             pollingResult = waitForClusterInstall(stack, ambariClient);
             checkPollingResult(pollingResult.getLeft(), cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_INSTALL_FAILED.code()));
 
-            recipeEngine.executePostInstall(stack);
+            recipeEngine.executePostInstallRecipes(stack, hostGroups);
 
             triggerSmartSenseCapture(ambariClient, blueprintText);
             cluster = ambariViewProvider.provideViewInformation(ambariClient, cluster);

@@ -561,7 +561,7 @@ public class SaltOrchestrator implements HostOrchestrator {
                 runSaltCommand(sc, new GrainRemoveRunner(targets, allNodes, "recipes", RecipeExecutionPhase.PRE.value(), CompoundType.IP), exitCriteriaModel);
             }
         } catch (Exception e) {
-            LOGGER.error("Error occurred during recipe execution", e);
+            LOGGER.error("Error occurred during executing highstate (for recipes).", e);
             throw new CloudbreakOrchestratorFailedException(e);
         }
     }
