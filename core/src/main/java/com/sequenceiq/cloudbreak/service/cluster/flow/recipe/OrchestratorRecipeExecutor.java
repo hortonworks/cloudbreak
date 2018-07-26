@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.RecipeModel;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
+import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeExecutionFailureCollector.RecipeExecutionFailure;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
@@ -147,7 +148,7 @@ class OrchestratorRecipeExecutor {
         Set<RecipeExecutionFailure> failures = recipeExecutionFailureCollector.collectErrors((CloudbreakOrchestratorException) e.getCause().getCause(),
                 recipeMap, instanceGroupService.findByStackId(stack.getId()));
         StringBuilder messagePrefix = new StringBuilder("Failed to execute recipe(s): \n");
-        String message = failures.stream().map(failure -> new StringBuilder("Recipe: '")
+        String message = failures.stream().map(failure -> new StringBuilder("[Recipe: '")
                 .append(failure.getRecipe().getName())
                 .append("' - \n")
                 .append("Hostgroup: '")
@@ -155,6 +156,7 @@ class OrchestratorRecipeExecutor {
                 .append("' - \n")
                 .append("Instance: '")
                 .append(failure.getInstanceMetaData().getDiscoveryFQDN())
+                .append(']')
                 .toString()).collect(Collectors.joining("   ---||---   ")
         );
         return messagePrefix.append(message).toString();

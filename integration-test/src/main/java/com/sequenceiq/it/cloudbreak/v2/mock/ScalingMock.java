@@ -48,7 +48,7 @@ import spark.Service;
 public class ScalingMock extends MockServer {
     public static final String NAME = "ScalingMock";
 
-    private int grainsBaseAppendCount = 8;
+    private int grainsBaseAppendCount = 6;
 
     public ScalingMock(int mockPort, int sshPort, Map<String, CloudVmMetaDataStatus> instanceMap) {
         super(mockPort, sshPort, instanceMap);
@@ -200,11 +200,11 @@ public class ScalingMock extends MockServer {
             verify(SALT_BOOT_ROOT + "/salt/action/distribute", "POST").atLeast(1).verify();
             verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=network.ipaddrs").exactTimes(1).verify();
             verify(SALT_API_ROOT + "/run", "POST").bodyContains("arg=roles&arg=ambari_server").exactTimes(2).verify();
-            verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=saltutil.sync_grains").atLeast(2).verify();
+            verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=saltutil.sync_grains").atLeast(1).verify();
             verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=mine.update").atLeast(1).verify();
-            verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=state.highstate").exactTimes(2).verify();
+            verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=state.highstate").exactTimes(1).verify();
 
-            verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=grains.remove").exactTimes(2).verify();
+            verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=grains.remove").exactTimes(0).verify();
             verify(SALT_BOOT_ROOT + "/hostname/distribute", "POST").bodyRegexp("^.*\\[([\"0-9\\.]+([,]{0,1})){" + scalingAdjustment + "}\\].*")
                     .exactTimes(1).verify();
             verify(SALT_BOOT_ROOT + "/salt/server/pillar/distribute", "POST").bodyContains("/nodes/hosts.sls").exactTimes(1).verify();
