@@ -6,15 +6,12 @@ checks:
   method-complexity:
     config:
       threshold: 10
-  method-count:
-    config:
-      threshold: 30
   method-lines:
     config:
-      threshold: 50
+      threshold: 40
   file-lines:
     config:
-      threshold: 600
+      threshold: 400
 exclude_patterns:
 - "**/mock/"
 - "**/test/"
