@@ -19,3 +19,4 @@ exclude_patterns:
 - "**/mock/"
 - "**/test/"
 - "**/*Test.java"
+- "**/*Converter.java"
