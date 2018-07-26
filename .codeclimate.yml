@@ -5,10 +5,10 @@ checks:
       threshold: 7
   method-complexity:
     config:
-      threshold: 20
+      threshold: 10
   method-count:
     config:
-      threshold: 40
+      threshold: 30
   method-lines:
     config:
       threshold: 50
