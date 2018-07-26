@@ -1,5 +1,10 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow.recipe;
 
+import static com.sequenceiq.cloudbreak.api.model.RecipeType.POST_AMBARI_START;
+import static com.sequenceiq.cloudbreak.api.model.RecipeType.POST_CLUSTER_INSTALL;
+import static com.sequenceiq.cloudbreak.api.model.RecipeType.PRE_AMBARI_START;
+import static com.sequenceiq.cloudbreak.api.model.RecipeType.PRE_TERMINATION;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
@@ -95,42 +100,43 @@ public class RecipeEngine {
 
     public void executePreAmbariStartRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
         Orchestrator orchestrator = stack.getOrchestrator();
-        if (shouldExecuteRecipeOnStack(stack, hostGroups, orchestrator)) {
+        if (shouldExecuteRecipeOnStack(hostGroups, orchestrator, PRE_AMBARI_START)) {
             orchestratorRecipeExecutor.preAmbariStartRecipes(stack);
         }
     }
 
+    // note: executed when LDAP config is present, because later the LDAP sync is hooked for this salt state in the top.sls.
     public void executePostAmbariStartRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
         Orchestrator orchestrator = stack.getOrchestrator();
-        if (shouldExecuteRecipeOnStack(stack, hostGroups, orchestrator)) {
+        if ((stack.getCluster() != null && stack.getCluster().getLdapConfig() != null) || recipesFound(hostGroups, POST_AMBARI_START)
+                && recipesSupportedOnOrchestrator(orchestrator)) {
             orchestratorRecipeExecutor.postAmbariStartRecipes(stack);
         }
     }
 
-    private boolean shouldExecuteRecipeOnStack(Stack stack, Set<HostGroup> hostGroups, Orchestrator orchestrator) throws CloudbreakException {
-        return ((stack.getCluster() != null && stack.getCluster().getLdapConfig() != null) || recipesFound(hostGroups))
-                && recipesSupportedOnOrchestrator(orchestrator);
-    }
-
-    public void executePostInstall(Stack stack) throws CloudbreakException {
+    public void executePostInstallRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
         Orchestrator orchestrator = stack.getOrchestrator();
-        if (recipesSupportedOnOrchestrator(orchestrator)) {
-            orchestratorRecipeExecutor.postInstall(stack);
+        if (shouldExecuteRecipeOnStack(hostGroups, orchestrator, POST_CLUSTER_INSTALL)) {
+            orchestratorRecipeExecutor.postClusterInstall(stack);
         }
     }
 
     public void executePreTerminationRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
         Orchestrator orchestrator = stack.getOrchestrator();
-        if (recipesFound(hostGroups, RecipeType.PRE_TERMINATION) && recipesSupportedOnOrchestrator(orchestrator)) {
+        if (shouldExecuteRecipeOnStack(hostGroups, orchestrator, PRE_TERMINATION)) {
             orchestratorRecipeExecutor.preTerminationRecipes(stack);
         }
     }
 
     public void executePreTerminationRecipes(Stack stack, Set<HostGroup> hostGroups, Set<String> hostNames) throws CloudbreakException {
         Orchestrator orchestrator = stack.getOrchestrator();
-        if (recipesFound(hostGroups, RecipeType.PRE_TERMINATION) && recipesSupportedOnOrchestrator(orchestrator)) {
+        if (shouldExecuteRecipeOnStack(hostGroups, orchestrator, PRE_TERMINATION)) {
             orchestratorRecipeExecutor.preTerminationRecipes(stack, hostNames);
         }
+    }
+
+    private boolean shouldExecuteRecipeOnStack(Set<HostGroup> hostGroups, Orchestrator orchestrator, RecipeType recipeType) throws CloudbreakException {
+        return (recipesFound(hostGroups, recipeType)) && recipesSupportedOnOrchestrator(orchestrator);
     }
 
     private void addContainerExecutorScripts(Stack stack, Set<HostGroup> hostGroups) {
@@ -139,7 +145,7 @@ public class RecipeEngine {
             if (cluster != null && ExecutorType.CONTAINER.equals(cluster.getExecutorType())) {
                 for (HostGroup hostGroup : hostGroups) {
                     String script = FileReaderUtils.readFileFromClasspath("scripts/configure-container-executor.sh");
-                    RecipeScript recipeScript = new RecipeScript(script, RecipeType.POST_CLUSTER_INSTALL);
+                    RecipeScript recipeScript = new RecipeScript(script, POST_CLUSTER_INSTALL);
                     Recipe recipe = recipeBuilder.buildRecipes("getConfigurationEntries-container-executor",
                             Collections.singletonList(recipeScript)).get(0);
                     hostGroup.addRecipe(recipe);
@@ -177,7 +183,7 @@ public class RecipeEngine {
             for (HostGroup hostGroup : hostGroups) {
                 if (isComponentPresent(blueprintText, "NAMENODE", hostGroup)) {
                     String script = FileReaderUtils.readFileFromClasspath("scripts/hdfs-home.sh").replaceAll("\\$USER", cluster.getUserName());
-                    RecipeScript recipeScript = new RecipeScript(script, RecipeType.POST_CLUSTER_INSTALL);
+                    RecipeScript recipeScript = new RecipeScript(script, POST_CLUSTER_INSTALL);
                     Recipe recipe = recipeBuilder.buildRecipes("hdfs-home", Collections.singletonList(recipeScript)).get(0);
                     hostGroup.addRecipe(recipe);
                     break;
@@ -196,7 +202,7 @@ public class RecipeEngine {
                 for (HostGroup hostGroup : hostGroups) {
                     if (isComponentPresent(blueprintText, "HST_AGENT", hostGroup)) {
                         String script = FileReaderUtils.readFileFromClasspath("scripts/smartsense-capture-schedule.sh");
-                        RecipeScript recipeScript = new RecipeScript(script, RecipeType.POST_CLUSTER_INSTALL);
+                        RecipeScript recipeScript = new RecipeScript(script, POST_CLUSTER_INSTALL);
                         Recipe recipe = recipeBuilder.buildRecipes("smartsense-capture-schedule",
                                 Collections.singletonList(recipeScript)).get(0);
                         hostGroup.addRecipe(recipe);

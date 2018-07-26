@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBa
 import static com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine.DEFAULT_RECIPES;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -35,7 +34,6 @@ import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.RecipeModel;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
-import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeExecutionFailureCollector.RecipeExecutionFailure;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
@@ -43,7 +41,7 @@ import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Component
-public class OrchestratorRecipeExecutor {
+class OrchestratorRecipeExecutor {
 
     @Inject
     private HostOrchestratorResolver hostOrchestratorResolver;
@@ -107,7 +105,7 @@ public class OrchestratorRecipeExecutor {
         }
     }
 
-    public void postInstall(Stack stack) throws CloudbreakException {
+    public void postClusterInstall(Stack stack) throws CloudbreakException {
         HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
         GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
         try {
@@ -192,7 +190,7 @@ public class OrchestratorRecipeExecutor {
     private void recipesEvent(Long stackId, Status status, Map<String, List<RecipeModel>> recipeMap) {
         List<String> recipes = new ArrayList<>();
         for (Entry<String, List<RecipeModel>> entry : recipeMap.entrySet()) {
-            Collection<String> recipeNamesPerHostgroup = new ArrayList<>(entry.getValue().size());
+            List<String> recipeNamesPerHostgroup = new ArrayList<>(entry.getValue().size());
             for (RecipeModel rm : entry.getValue()) {
                 //filter out default recipes
                 if (!DEFAULT_RECIPES.contains(rm.getName())) {
