@@ -6,6 +6,9 @@ checks:
   method-complexity:
     config:
       threshold: 10
+  method-count:
+    config:
+      threshold: 40
   method-lines:
     config:
       threshold: 40
