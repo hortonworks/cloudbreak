@@ -13,38 +13,37 @@ import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.model.RecipeModel;
+import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 
 @Component
 public class RecipeExecutionFailureCollector {
 
     public boolean canProcessExecutionFailure(Exception e) {
-        if (e.getCause() != null && e.getCause() instanceof CloudbreakOrchestratorException) {
-            return !((CloudbreakOrchestratorException) e.getCause()).getNodesWithErrors().isEmpty();
-        } else if (e.getCause() != null && e.getCause().getCause() != null && e.getCause().getCause() instanceof CloudbreakOrchestratorException) {
-            return !((CloudbreakOrchestratorException) e.getCause().getCause()).getNodesWithErrors().isEmpty();
-        }
-        return false;
+        return getNodesWithErrors(e).isPresent() && e.getMessage().contains("2>&1 | tee -a /var/log/recipes/");
     }
 
     public Set<RecipeExecutionFailure> collectErrors(CloudbreakOrchestratorException exception,
             Map<HostGroup, List<RecipeModel>> hostgroupToRecipeMap, Set<InstanceGroup> instanceGroups) {
 
+        if (!canProcessExecutionFailure(exception)) {
+            throw new CloudbreakServiceException("Failed to collect recipe execution failures. Cause exception contains no information.", exception);
+        }
+
         return exception.getNodesWithErrors().asMap().entrySet().stream().flatMap((Entry<String, Collection<String>> nodeWithErrors) -> {
-            Map<String, Optional<String>> errorsWithPhase = nodeWithErrors.getValue().stream().collect(Collectors.toMap(
-                    e -> e,
-                    this::getInstallPhase,
-                    (phase1, phase2) -> phase1.map(Optional::of).orElse(phase2)));
+
+            Map<String, Optional<String>> errorsWithPhase = nodeWithErrors.getValue().stream()
+                    .collect(Collectors.toMap(e -> e, this::getInstallPhase, (phase1, phase2) -> phase1.map(Optional::of).orElse(phase2)));
+
             return errorsWithPhase.entrySet().stream()
                     .filter(errorWithPhase -> errorWithPhase.getValue().isPresent())
-                    .map((Entry<String, Optional<String>> errorWithPhase) ->
-                            StringUtils.substringBetween(errorWithPhase.getKey(), "sh -x /opt/scripts/" + errorWithPhase.getValue().get() + '/', " 2>&1 |")
-                    )
+                    .map(this::errorWithPhaseToRecipeName)
                     .collect(Collectors.toMap(
                             recipeName -> recipeName,
                             recipeName -> getPossibleFailingHostgroupsByRecipeName(hostgroupToRecipeMap, recipeName),
@@ -63,6 +62,26 @@ public class RecipeExecutionFailureCollector {
                             .filter(Objects::nonNull)
                     );
         }).collect(Collectors.toSet());
+    }
+
+    private String errorWithPhaseToRecipeName(Entry<String, Optional<String>> errorWithPhase) {
+        return StringUtils.substringBetween(errorWithPhase.getKey(), "sh -x /opt/scripts/" + errorWithPhase.getValue().get() + '/', " 2>&1 |");
+    }
+
+    private Optional<Multimap<String, String>> getNodesWithErrors(Throwable throwable) {
+        if (throwable instanceof CloudbreakOrchestratorException) {
+            CloudbreakOrchestratorException exception = (CloudbreakOrchestratorException) throwable;
+            if (exception.getNodesWithErrors().isEmpty()) {
+                if (throwable.getCause() != null) {
+                    return getNodesWithErrors(throwable.getCause());
+                } else {
+                    return Optional.empty();
+                }
+            }
+            return Optional.of(exception.getNodesWithErrors());
+        } else {
+            return getNodesWithErrors(throwable.getCause());
+        }
     }
 
     private Optional<String> getInstallPhase(String message) {

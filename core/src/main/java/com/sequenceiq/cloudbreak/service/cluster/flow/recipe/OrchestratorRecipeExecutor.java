@@ -42,7 +42,7 @@ import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Component
-public class OrchestratorRecipeExecutor {
+class OrchestratorRecipeExecutor {
 
     @Inject
     private HostOrchestratorResolver hostOrchestratorResolver;
@@ -106,7 +106,7 @@ public class OrchestratorRecipeExecutor {
         }
     }
 
-    public void postInstall(Stack stack) throws CloudbreakException {
+    public void postClusterInstall(Stack stack) throws CloudbreakException {
         HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
         GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
         try {
@@ -147,19 +147,20 @@ public class OrchestratorRecipeExecutor {
         Map<HostGroup, List<RecipeModel>> recipeMap = getHostgroupToRecipeMap(hostGroupService.getByCluster(stack.getCluster().getId()));
         Set<RecipeExecutionFailure> failures = recipeExecutionFailureCollector.collectErrors((CloudbreakOrchestratorException) e.getCause().getCause(),
                 recipeMap, instanceGroupService.findByStackId(stack.getId()));
-        StringBuilder message = new StringBuilder("Failed to execute recipe(s): ");
-        failures.forEach(failure ->
-                message.append("Recipe: '")
-                        .append(failure.getRecipe().getName())
-                        .append("' - \n")
-                        .append("Hostgroup: '")
-                        .append(failure.getInstanceMetaData().getInstanceGroup().getGroupName())
-                        .append("' - \n")
-                        .append("Instance: '")
-                        .append(failure.getInstanceMetaData().getDiscoveryFQDN())
-                        .append("\'  |||  \n")
+
+        StringBuilder messagePrefix = new StringBuilder("Failed to execute recipe(s): \n");
+        String message = failures.stream().map(failure -> new StringBuilder("[Recipe: '")
+                .append(failure.getRecipe().getName())
+                .append("' - \n")
+                .append("Hostgroup: '")
+                .append(failure.getInstanceMetaData().getInstanceGroup().getGroupName())
+                .append("' - \n")
+                .append("Instance: '")
+                .append(failure.getInstanceMetaData().getDiscoveryFQDN())
+                .append(']')
+                .toString()).collect(Collectors.joining("\'  |||  \n")
         );
-        return message.toString();
+        return messagePrefix.append(message).toString();
     }
 
     private Map<HostGroup, List<RecipeModel>> getHostgroupToRecipeMap(Set<HostGroup> hostGroups) {
