@@ -8,13 +8,13 @@ checks:
       threshold: 20
   method-count:
     config:
-      threshold: 100
+      threshold: 40
   method-lines:
     config:
       threshold: 50
   file-lines:
     config:
-      threshold: 1000
+      threshold: 600
 exclude_patterns:
 - "**/mock/"
 - "**/test/"
