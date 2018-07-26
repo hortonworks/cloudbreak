@@ -1,5 +1,8 @@
 version: "2"         # required to adjust maintainability checks
 checks:
+  argument-count:
+    config:
+      threshold: 7
   method-complexity:
     config:
       threshold: 30
@@ -13,5 +16,6 @@ checks:
     config:
       threshold: 1000
 exclude_patterns:
-- "mock/"
+- "**/mock/"
 - "**/test/"
+- "**/Test.java"
