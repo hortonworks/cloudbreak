@@ -5,7 +5,7 @@ checks:
       threshold: 7
   method-complexity:
     config:
-      threshold: 30
+      threshold: 20
   method-count:
     config:
       threshold: 100
@@ -18,4 +18,4 @@ checks:
 exclude_patterns:
 - "**/mock/"
 - "**/test/"
-- "**/Test.java"
+- "**/*Test.java"
