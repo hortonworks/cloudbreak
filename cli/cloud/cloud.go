@@ -35,6 +35,14 @@ const (
 	NO_CLOUD_STORAGE
 )
 
+type EncryptionType int
+
+const (
+	DEFAULT_ENCRYPTION EncryptionType = iota
+	NONE_ENCRYPTION
+	CUSTOM_ENCRYPTION
+)
+
 const (
 	REGION_FIELD            = "region"
 	AVAILABILITY_ZONE_FIELD = "availabilityZone"

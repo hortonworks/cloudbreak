@@ -400,10 +400,10 @@ func main() {
 									Name:   "new-network",
 									Usage:  "creates an aws cluster JSON template with new network",
 									Before: ConfigRead,
-									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional, cb.FlCloudStorageTypeOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
+									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional, cb.FlCloudStorageTypeOptional, cb.FlDefaultEncryptionOptional, cb.FlCustomEncryptionOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
 									Action: cb.GenerateAwsStackTemplate,
 									BashComplete: func(c *cli.Context) {
-										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional, cb.FlCloudStorageTypeOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
+										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional, cb.FlCloudStorageTypeOptional, cb.FlDefaultEncryptionOptional, cb.FlCustomEncryptionOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
 											printFlagCompletion(f)
 										}
 									},
@@ -412,10 +412,10 @@ func main() {
 									Name:   "existing-network",
 									Usage:  "creates an aws cluster JSON template with existing network",
 									Before: ConfigRead,
-									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional, cb.FlCloudStorageTypeOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
+									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional, cb.FlCloudStorageTypeOptional, cb.FlDefaultEncryptionOptional, cb.FlCustomEncryptionOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
 									Action: cb.GenerateAwsStackTemplate,
 									BashComplete: func(c *cli.Context) {
-										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional, cb.FlCloudStorageTypeOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
+										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional, cb.FlCloudStorageTypeOptional, cb.FlDefaultEncryptionOptional, cb.FlCustomEncryptionOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
 											printFlagCompletion(f)
 										}
 									},
@@ -424,10 +424,10 @@ func main() {
 									Name:   "existing-subnet",
 									Usage:  "creates an aws cluster JSON template with existing subnet",
 									Before: ConfigRead,
-									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional, cb.FlCloudStorageTypeOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
+									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional, cb.FlCloudStorageTypeOptional, cb.FlDefaultEncryptionOptional, cb.FlCustomEncryptionOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
 									Action: cb.GenerateAwsStackTemplate,
 									BashComplete: func(c *cli.Context) {
-										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional, cb.FlCloudStorageTypeOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
+										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional, cb.FlCloudStorageTypeOptional, cb.FlDefaultEncryptionOptional, cb.FlCustomEncryptionOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
 											printFlagCompletion(f)
 										}
 									},

@@ -17,6 +17,12 @@ import (
 
 type EncryptionKeyConfigJSON struct {
 
+	// description
+	Description string `json:"description,omitempty"`
+
+	// display name
+	DisplayName string `json:"displayName,omitempty"`
+
 	// id
 	ID string `json:"id,omitempty"`
 
@@ -26,6 +32,10 @@ type EncryptionKeyConfigJSON struct {
 	// properties
 	Properties map[string]interface{} `json:"properties,omitempty"`
 }
+
+/* polymorph EncryptionKeyConfigJson description false */
+
+/* polymorph EncryptionKeyConfigJson displayName false */
 
 /* polymorph EncryptionKeyConfigJson id false */
 

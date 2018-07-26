@@ -145,9 +145,7 @@ func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string)
 		Network:             provider.GenerateDefaultNetwork(provider.GetNetworkParamatersTemplate(mode), mode),
 		StackAuthentication: &models_cloudbreak.StackAuthentication{PublicKey: "____"},
 	}
-
-	extendTemplateWithOptionalBlocks(&template, boolFinder, storageType)
-
+	preExtendTemplateWithOptionalBlocks(&template, boolFinder, storageType)
 	nodes := defaultNodes
 	if bpName := stringFinder(FlBlueprintNameOptional.Name); len(bpName) != 0 {
 		bpResp := fetchBlueprint(bpName, getBlueprintClient(stringFinder(FlServerOptional.Name), stringFinder(FlUsername.Name), stringFinder(FlPassword.Name), stringFinder(FlAuthTypeOptional.Name)))
@@ -168,6 +166,7 @@ func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string)
 	if params := provider.GetParamatersTemplate(); params != nil {
 		template.Parameters = params
 	}
+	postExtendTemplateWithOptionalBlocks(&template, boolFinder, storageType)
 	return &template
 }
 
@@ -251,7 +250,7 @@ func getNodesByBlueprint(bp []byte) []cloud.Node {
 	return resp
 }
 
-func extendTemplateWithOptionalBlocks(template *models_cloudbreak.StackV2Request, boolFinder func(string) bool, storageType cloud.CloudStorageType) {
+func preExtendTemplateWithOptionalBlocks(template *models_cloudbreak.StackV2Request, boolFinder func(string) bool, storageType cloud.CloudStorageType) {
 	if withCustomDomain := boolFinder(FlWithCustomDomainOptional.Name); withCustomDomain {
 		template.CustomDomain = &models_cloudbreak.CustomDomainSettings{
 			CustomDomain:            "____",
@@ -313,6 +312,33 @@ func extendTemplateWithOptionalBlocks(template *models_cloudbreak.StackV2Request
 		}
 	}
 	extendTemplateWithStorageType(template, storageType)
+}
+
+func postExtendTemplateWithOptionalBlocks(template *models_cloudbreak.StackV2Request, boolFinder func(string) bool, storageType cloud.CloudStorageType) {
+	extendTemplateWithEncryptionType(template, boolFinder)
+}
+
+func extendTemplateWithEncryptionType(template *models_cloudbreak.StackV2Request, boolFinder func(string) bool) {
+	if withCustomEncryption := boolFinder(FlCustomEncryptionOptional.Name); withCustomEncryption {
+		for _, group := range template.InstanceGroups {
+			group.Template.AwsParameters = &models_cloudbreak.AwsParameters{
+				Encrypted: &(&types.B{B: true}).B,
+				Encryption: &models_cloudbreak.Encryption{
+					Key:  "____",
+					Type: "CUSTOM",
+				},
+			}
+		}
+	} else if withDefaultEncryption := boolFinder(FlDefaultEncryptionOptional.Name); withDefaultEncryption {
+		for _, group := range template.InstanceGroups {
+			group.Template.AwsParameters = &models_cloudbreak.AwsParameters{
+				Encrypted: &(&types.B{B: true}).B,
+				Encryption: &models_cloudbreak.Encryption{
+					Type: "DEFAULT",
+				},
+			}
+		}
+	}
 }
 
 func extendTemplateWithStorageType(template *models_cloudbreak.StackV2Request, storageType cloud.CloudStorageType) {

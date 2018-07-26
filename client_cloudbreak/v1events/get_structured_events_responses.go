@@ -47,7 +47,7 @@ func NewGetStructuredEventsOK() *GetStructuredEventsOK {
 successful operation
 */
 type GetStructuredEventsOK struct {
-	Payload []*models_cloudbreak.StructuredEvent
+	Payload *models_cloudbreak.StructuredEventContainer
 }
 
 func (o *GetStructuredEventsOK) Error() string {
@@ -56,8 +56,10 @@ func (o *GetStructuredEventsOK) Error() string {
 
 func (o *GetStructuredEventsOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
+	o.Payload = new(models_cloudbreak.StructuredEventContainer)
+
 	// response payload
-	if err := consumer.Consume(response.Body(), &o.Payload); err != nil && err != io.EOF {
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
 		return err
 	}
 

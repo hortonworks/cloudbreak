@@ -308,6 +308,20 @@ var (
 			Usage: "type of the cloud storage [wasb/WASB, adls/ADLS, s3/S3, gcs/GCS]",
 		},
 	}
+	FlDefaultEncryptionOptional = BoolFlag{
+		RequiredFlag: OPTIONAL,
+		BoolFlag: cli.BoolFlag{
+			Name:  "with-default-encryption",
+			Usage: "default encryption for AWS instances which can use a default key",
+		},
+	}
+	FlCustomEncryptionOptional = BoolFlag{
+		RequiredFlag: OPTIONAL,
+		BoolFlag: cli.BoolFlag{
+			Name:  "with-custom-encryption",
+			Usage: "custom key encryption for AWS instances which can use your custom key",
+		},
+	}
 	FlExecutionType = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{

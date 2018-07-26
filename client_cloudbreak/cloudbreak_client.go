@@ -12,6 +12,7 @@ import (
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1accountpreferences"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v1audits"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1blueprints"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1clustertemplates"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1connectors"
@@ -84,6 +85,8 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *Cloudbreak
 	cli.Transport = transport
 
 	cli.V1accountpreferences = v1accountpreferences.New(transport, formats)
+
+	cli.V1audits = v1audits.New(transport, formats)
 
 	cli.V1blueprints = v1blueprints.New(transport, formats)
 
@@ -187,6 +190,8 @@ func (cfg *TransportConfig) WithSchemes(schemes []string) *TransportConfig {
 type Cloudbreak struct {
 	V1accountpreferences *v1accountpreferences.Client
 
+	V1audits *v1audits.Client
+
 	V1blueprints *v1blueprints.Client
 
 	V1clustertemplates *v1clustertemplates.Client
@@ -251,6 +256,8 @@ func (c *Cloudbreak) SetTransport(transport runtime.ClientTransport) {
 	c.Transport = transport
 
 	c.V1accountpreferences.SetTransport(transport)
+
+	c.V1audits.SetTransport(transport)
 
 	c.V1blueprints.SetTransport(transport)
 
