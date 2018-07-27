@@ -11,7 +11,7 @@ define run_test
     bats --tap e2e/${1}.bats | tee ${1}-result.tap
 endef
 
-all: start-mock docker-integration-test-aruba stop-mock
+all: start-mock docker-aruba-test stop-mock
 
 clean: stop-mock clean-test-result
 
@@ -35,11 +35,8 @@ docker-integration-test:
 docker-e2e-test:
 	./scripts/run-e2e-test.sh
 
-docker-e2e-test-local:
-	./scripts/docker-e2e-test-aruba-local.sh
-
-docker-e2e-test-jenkins:
-	./scripts/jenkins-docker-e2e-test-aruba.sh	
+docker-aruba-test:
+	./scripts/docker-aruba-test.sh
 
 run-e2e-suite:
 	$(call run_test,${test})
@@ -56,12 +53,9 @@ clean-test-result:
 download-s3:
 	curl -k https://s3-eu-central-1.amazonaws.com/cloudbreak-swagger/swagger-$(GIT_FIRST_PARENT).json -o swagger.json
 
-docker-integration-test-aruba:
-	./scripts/docker-integration-test-aruba.sh
-
 replace-ip:
 ifneq ($(ORIGINAL_IP), $(NEW_IP))
-	find . -type f -exec sed -i 's/$(ORIGINAL_IP)/$(NEW_IP)/g' {} +
+	find . -not -path "./Makefile" -type f -exec sed -i 's/$(ORIGINAL_IP)/$(NEW_IP)/g' {} +
 endif
 
 .PHONY:

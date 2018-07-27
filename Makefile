@@ -136,7 +136,7 @@ integration-test: build-docker
 	make -C tests all
 
 e2e-test:
-	make -C tests docker-e2e-test-local
+	make -C tests docker-aruba-test
 
 .DEFAULT_GOAL := build
 

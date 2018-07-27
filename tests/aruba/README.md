@@ -46,7 +46,7 @@ rspec -f RspecJunitFormatter -o test-result.xml -f h spec/e2e/*.rb | tee test-re
 
 **Run tests:**
 ```
-make -C ../ docker-e2e-test-local
+make -C ../ docker-aruba-test
 ```
 > You can check test results at `tests/aruba/out.html`
 

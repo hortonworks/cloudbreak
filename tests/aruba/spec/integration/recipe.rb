@@ -1,6 +1,6 @@
-require "common/e2e_vars.rb"
-require "common/command_helpers.rb"
-require "e2e/spec_helper"
+require_relative "../common/mock_vars"
+require_relative "../common/command_helpers"
+require_relative "spec_helper"
 
 define_method(:cb) do
   cb = CommandBuilder.new
@@ -10,7 +10,7 @@ end
 
 RSpec.describe 'Recipe test cases', :type => :aruba do
   include_context "shared command helpers"    
-  include_context "e2e shared vars"
+  include_context "mock shared vars"
 
   it "Recipe - Create from url - All recipe types" do 
     with_environment 'DEBUG' => '1' do       
