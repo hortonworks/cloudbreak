@@ -44,12 +44,15 @@ import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
+import com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateService;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
 
 @Component
@@ -87,6 +90,12 @@ public class ImageCatalogService {
 
     @Inject
     private AccountPreferencesService accountPreferencesService;
+
+    @Inject
+    private StackService stackService;
+
+    @Inject
+    private StackImageUpdateService stackImageUpdateService;
 
     public StatedImages getImagesOsFiltered(String provider, String os) throws CloudbreakImageCatalogException {
         StatedImages images = getImages(getDefaultImageCatalog(), provider, cbVersion);
@@ -267,6 +276,29 @@ public class ImageCatalogService {
         imageCatalog.setImageCatalogName(source.getImageCatalogName());
         imageCatalog.setImageCatalogUrl(source.getImageCatalogUrl());
         return create(imageCatalog);
+    }
+
+    public Images getApplicableImages(String stackName) throws CloudbreakImageCatalogException {
+        return getApplicableImages(CLOUDBREAK_DEFAULT_CATALOG_NAME, stackName);
+    }
+
+    public Images getApplicableImages(String imageCatalogName, String stackName) throws CloudbreakImageCatalogException {
+        IdentityUser user = authenticatedUserService.getCbUser();
+        Stack stack = stackService.getByName(stackName, user);
+        StatedImages statedImages = getImages(imageCatalogName, stack.cloudPlatform());
+        List<Image> filteredHdpImages =
+                filterByApplicability(imageCatalogName, statedImages.getImageCatalogUrl(), stack, statedImages.getImages().getHdpImages());
+        List<Image> filteredBaseImages =
+                filterByApplicability(imageCatalogName, statedImages.getImageCatalogUrl(), stack, statedImages.getImages().getBaseImages());
+        List<Image> filteredHdfImages =
+                filterByApplicability(imageCatalogName, statedImages.getImageCatalogUrl(), stack, statedImages.getImages().getHdfImages());
+        return new Images(filteredBaseImages, filteredHdpImages, filteredHdfImages, statedImages.getImages().getSuppertedVersions());
+    }
+
+    private List<Image> filterByApplicability(String imageCatalogName, String imageCatalogUrl, Stack stack, List<Image> imagesList) {
+        return imagesList.stream()
+                .filter(x -> stackImageUpdateService.isValidImage(stack, x.getUuid(), imageCatalogName, imageCatalogUrl))
+                .collect(Collectors.toList());
     }
 
     private ImageCatalog findImageCatalog(Long id) {

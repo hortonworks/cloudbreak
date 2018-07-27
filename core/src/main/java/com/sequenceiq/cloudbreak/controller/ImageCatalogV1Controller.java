@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImagesResponse;
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.UpdateImageCatalogRequest;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
@@ -93,6 +94,18 @@ public class ImageCatalogV1Controller implements ImageCatalogV1Endpoint {
     public ImageCatalogRequest getRequestfromName(String name) {
         ImageCatalog imageCatalog = imageCatalogService.get(name);
         return conversionService.convert(imageCatalog, ImageCatalogRequest.class);
+    }
+
+    @Override
+    public ImagesResponse getImagesFromCustomImageCatalogByCluster(String imageCatalogName, String stackName) throws CloudbreakImageCatalogException {
+        Images images = imageCatalogService.getApplicableImages(imageCatalogName, stackName);
+        return conversionService.convert(images, ImagesResponse.class);
+    }
+
+    @Override
+    public ImagesResponse getImagesFromDefaultImageCatalogByCluster(String stackName) throws Exception {
+        Images images = imageCatalogService.getApplicableImages(stackName);
+        return conversionService.convert(images, ImagesResponse.class);
     }
 
     private ImageCatalogResponse createImageCatalog(ImageCatalogRequest imageCatalogRequest, boolean publicInAccount) {
