@@ -12,14 +12,21 @@ import com.sequenceiq.cloudbreak.structuredevent.event.StructuredRestCallEvent;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AuditEvent {
 
+    private Long auditId;
+
     private StructuredEvent structuredEvent;
 
-    public AuditEvent(StructuredEvent structuredEvent) {
+    public AuditEvent(Long auditId, StructuredEvent structuredEvent) {
+        this.auditId = auditId;
         this.structuredEvent = structuredEvent;
     }
 
     public OperationDetails getOperation() {
         return structuredEvent.getOperation();
+    }
+
+    public Long getAuditId() {
+        return auditId;
     }
 
     public String getStatus() {

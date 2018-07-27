@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.util.comparator;
+package com.sequenceiq.cloudbreak.comparator.audit;
 
 import java.io.Serializable;
 import java.util.Comparator;
