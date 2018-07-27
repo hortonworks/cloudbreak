@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.domain.security.User;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
-import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
+import com.sequenceiq.cloudbreak.service.user.CachedUserDetailsService;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
@@ -29,7 +29,7 @@ import com.sequenceiq.cloudbreak.service.user.UserService;
 public class UserController implements UserEndpoint {
 
     @Inject
-    private UserDetailsService userDetailsService;
+    private CachedUserDetailsService cachedUserDetailsService;
 
     @Inject
     private AuthenticatedUserService authenticatedUserService;
@@ -46,14 +46,14 @@ public class UserController implements UserEndpoint {
 
     @Override
     public String evictUserDetails(String id, UserJson user) {
-        userDetailsService.evictUserDetails(id, user.getUsername());
+        cachedUserDetailsService.evictUserDetails(id, user.getUsername());
         return user.getUsername();
     }
 
     @Override
     public UserJson evictCurrentUserDetails() {
         IdentityUser user = authenticatedUserService.getCbUser();
-        userDetailsService.evictUserDetails(user.getUserId(), user.getUsername());
+        cachedUserDetailsService.evictUserDetails(user.getUserId(), user.getUsername());
         return new UserJson(user.getUsername());
     }
 

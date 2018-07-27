@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.domain.AccountPreferences;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
+import com.sequenceiq.cloudbreak.service.user.CachedUserDetailsService;
 
 @Component
 public class AccountPreferencesValidator {
@@ -28,7 +28,7 @@ public class AccountPreferencesValidator {
     private StackService stackService;
 
     @Inject
-    private UserDetailsService userDetailsService;
+    private CachedUserDetailsService cachedUserDetailsService;
 
     public void validate(Stack stack, String account, String owner) throws AccountPreferencesValidationException {
         validate(stack.getInstanceGroups(), stack.getFullNodeCount(), account, owner);
@@ -97,7 +97,7 @@ public class AccountPreferencesValidator {
     public void validateUserTimeToLive(String owner, AccountPreferences preferences) throws AccountPreferencesValidationException {
         Long userTimeToLive = preferences.getUserTimeToLive();
         if (needToValidateField(userTimeToLive)) {
-            IdentityUser identityUser = userDetailsService.getDetails(owner, UserFilterField.USERID);
+            IdentityUser identityUser = cachedUserDetailsService.getDetails(owner, UserFilterField.USERID);
             long now = getTimeInMillis();
             long userActiveTime = now - identityUser.getCreated().getTime();
             if (userActiveTime > userTimeToLive) {

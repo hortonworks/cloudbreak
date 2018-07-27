@@ -30,7 +30,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ambari.InstanceGroupMetadataCol
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
+import com.sequenceiq.cloudbreak.service.user.CachedUserDetailsService;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
@@ -50,7 +50,7 @@ public class StackToBlueprintPreparationObjectConverter extends AbstractConversi
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
     @Inject
-    private UserDetailsService userDetailsService;
+    private CachedUserDetailsService cachedUserDetailsService;
 
     @Inject
     private InstanceGroupMetadataCollector instanceGroupMetadataCollector;
@@ -97,7 +97,7 @@ public class StackToBlueprintPreparationObjectConverter extends AbstractConversi
             Map<String, List<InstanceMetaData>> groupInstances = instanceGroupMetadataCollector.collectMetadata(source);
             HdfConfigs hdfConfigs = hdfConfigProvider.createHdfConfig(cluster.getHostGroups(), groupInstances, cluster.getBlueprint().getBlueprintText());
             BaseFileSystemConfigurationsView fileSystemConfigurationView = getFileSystemConfigurationView(source, fileSystem);
-            IdentityUser identityUser = userDetailsService.getDetails(cluster.getOwner(), UserFilterField.USERID);
+            IdentityUser identityUser = cachedUserDetailsService.getDetails(cluster.getOwner(), UserFilterField.USERID);
             Stack dataLakeStack = getDataLakeStack(source);
             StackInputs stackInputs = getStackInputs(source);
             Map<String, Object> fixInputs = stackInputs.getFixInputs() == null ? new HashMap<>() : stackInputs.getFixInputs();

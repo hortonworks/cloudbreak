@@ -27,7 +27,7 @@ import com.sequenceiq.cloudbreak.domain.AccountPreferences;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
+import com.sequenceiq.cloudbreak.service.user.CachedUserDetailsService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AccountPreferencesValidatorTest {
@@ -50,7 +50,7 @@ public class AccountPreferencesValidatorTest {
     private StackService stackService;
 
     @Mock
-    private UserDetailsService userDetailsService;
+    private CachedUserDetailsService cachedUserDetailsService;
 
     @InjectMocks
     private AccountPreferencesValidator underTest;
@@ -143,7 +143,7 @@ public class AccountPreferencesValidatorTest {
         calendar.add(Calendar.HOUR_OF_DAY, -1);
         when(preferences.getUserTimeToLive()).thenReturn(40000L);
         IdentityUser identityUser = Mockito.mock(IdentityUser.class);
-        when(userDetailsService.getDetails(anyString(), any(UserFilterField.class))).thenReturn(identityUser);
+        when(cachedUserDetailsService.getDetails(anyString(), any(UserFilterField.class))).thenReturn(identityUser);
         when(identityUser.getCreated()).thenReturn(calendar.getTime());
         thrown.expect(AccountPreferencesValidationException.class);
         thrown.expectMessage("The user demo time is expired!");
@@ -159,7 +159,7 @@ public class AccountPreferencesValidatorTest {
         calendar.add(Calendar.HOUR_OF_DAY, -1);
         when(preferences.getUserTimeToLive()).thenReturn(40000L);
         IdentityUser identityUser = Mockito.mock(IdentityUser.class);
-        when(userDetailsService.getDetails(anyString(), any(UserFilterField.class))).thenReturn(identityUser);
+        when(cachedUserDetailsService.getDetails(anyString(), any(UserFilterField.class))).thenReturn(identityUser);
         when(identityUser.getCreated()).thenReturn(calendar.getTime());
         thrown.expect(AccountPreferencesValidationException.class);
         thrown.expectMessage("The user demo time is expired!");
@@ -175,7 +175,7 @@ public class AccountPreferencesValidatorTest {
         calendar.add(Calendar.HOUR_OF_DAY, -1);
         when(preferences.getUserTimeToLive()).thenReturn(40000L);
         IdentityUser identityUser = Mockito.mock(IdentityUser.class);
-        when(userDetailsService.getDetails(anyString(), any(UserFilterField.class))).thenReturn(identityUser);
+        when(cachedUserDetailsService.getDetails(anyString(), any(UserFilterField.class))).thenReturn(identityUser);
         when(identityUser.getCreated()).thenReturn(calendar.getTime());
         thrown.expect(AccountPreferencesValidationException.class);
         thrown.expectMessage("The user demo time is expired!");
@@ -190,7 +190,7 @@ public class AccountPreferencesValidatorTest {
         calendar.add(Calendar.MINUTE, -1);
         when(preferences.getUserTimeToLive()).thenReturn(65000L);
         IdentityUser identityUser = Mockito.mock(IdentityUser.class);
-        when(userDetailsService.getDetails(anyString(), any(UserFilterField.class))).thenReturn(identityUser);
+        when(cachedUserDetailsService.getDetails(anyString(), any(UserFilterField.class))).thenReturn(identityUser);
         when(identityUser.getCreated()).thenReturn(calendar.getTime());
 
         underTest.validate(stack, EMPTY_STRING, EMPTY_STRING);

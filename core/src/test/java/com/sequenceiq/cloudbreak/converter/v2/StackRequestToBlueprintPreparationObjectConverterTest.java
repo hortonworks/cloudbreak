@@ -66,7 +66,7 @@ import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
+import com.sequenceiq.cloudbreak.service.user.CachedUserDetailsService;
 
 public class StackRequestToBlueprintPreparationObjectConverterTest {
 
@@ -101,7 +101,7 @@ public class StackRequestToBlueprintPreparationObjectConverterTest {
     private GeneralClusterConfigsProvider generalClusterConfigsProvider;
 
     @Mock
-    private UserDetailsService userDetailsService;
+    private CachedUserDetailsService cachedUserDetailsService;
 
     @Mock
     private BlueprintService blueprintService;
@@ -161,7 +161,7 @@ public class StackRequestToBlueprintPreparationObjectConverterTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         when(source.getOwner()).thenReturn(OWNER);
-        when(userDetailsService.getDetails(OWNER, UserFilterField.USERID)).thenReturn(user);
+        when(cachedUserDetailsService.getDetails(OWNER, UserFilterField.USERID)).thenReturn(user);
         when(source.getGeneral()).thenReturn(generalSettings);
         when(generalSettings.getCredentialName()).thenReturn(TEST_CREDENTIAL_NAME);
         when(source.getCluster()).thenReturn(cluster);

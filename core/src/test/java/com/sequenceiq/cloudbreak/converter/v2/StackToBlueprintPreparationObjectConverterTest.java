@@ -35,7 +35,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ambari.InstanceGroupMetadataCol
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
+import com.sequenceiq.cloudbreak.service.user.CachedUserDetailsService;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -85,7 +85,7 @@ public class StackToBlueprintPreparationObjectConverterTest {
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
     @Mock
-    private UserDetailsService userDetailsService;
+    private CachedUserDetailsService cachedUserDetailsService;
 
     @Mock
     private InstanceGroupMetadataCollector instanceGroupMetadataCollector;
@@ -160,7 +160,7 @@ public class StackToBlueprintPreparationObjectConverterTest {
         when(blueprint.getBlueprintText()).thenReturn(TEST_BLUEPRINT_TEXT);
         when(blueprint.getOwner()).thenReturn(CLUSTER_OWNER);
         when(cluster.getOwner()).thenReturn(CLUSTER_OWNER);
-        when(userDetailsService.getDetails(CLUSTER_OWNER, UserFilterField.USERID)).thenReturn(user);
+        when(cachedUserDetailsService.getDetails(CLUSTER_OWNER, UserFilterField.USERID)).thenReturn(user);
         when(source.getInputs()).thenReturn(stackInputs);
         when(stackInputs.get(StackInputs.class)).thenReturn(null);
         when(stackInfoService.blueprintStackInfo(TEST_BLUEPRINT_TEXT)).thenReturn(blueprintStackInfo);

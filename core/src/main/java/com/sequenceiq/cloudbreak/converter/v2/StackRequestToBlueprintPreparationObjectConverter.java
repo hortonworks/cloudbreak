@@ -52,7 +52,7 @@ import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
+import com.sequenceiq.cloudbreak.service.user.CachedUserDetailsService;
 
 @Component
 public class StackRequestToBlueprintPreparationObjectConverter extends AbstractConversionServiceAwareConverter<StackV2Request, BlueprintPreparationObject> {
@@ -73,7 +73,7 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
     private GeneralClusterConfigsProvider generalClusterConfigsProvider;
 
     @Inject
-    private UserDetailsService userDetailsService;
+    private CachedUserDetailsService cachedUserDetailsService;
 
     @Inject
     private BlueprintService blueprintService;
@@ -108,7 +108,7 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
     @Override
     public BlueprintPreparationObject convert(StackV2Request source) {
         try {
-            IdentityUser identityUser = userDetailsService.getDetails(source.getOwner(), UserFilterField.USERID);
+            IdentityUser identityUser = cachedUserDetailsService.getDetails(source.getOwner(), UserFilterField.USERID);
             Credential credential = credentialService.get(source.getGeneral().getCredentialName(), identityUser.getAccount());
             Optional<FlexSubscription> flexSubscription = getFlexSubscription(source);
             SmartSenseSubscription smartsenseSubscription = flexSubscription.isPresent() ? flexSubscription.get().getSmartSenseSubscription() : null;

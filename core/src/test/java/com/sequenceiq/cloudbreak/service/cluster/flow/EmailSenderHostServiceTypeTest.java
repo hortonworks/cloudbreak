@@ -35,7 +35,7 @@ import com.icegreen.greenmail.util.ServerSetup;
 import com.icegreen.greenmail.util.ServerSetupTest;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
-import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
+import com.sequenceiq.cloudbreak.service.user.CachedUserDetailsService;
 
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
@@ -47,7 +47,7 @@ public class EmailSenderHostServiceTypeTest {
     private GreenMail greenMail;
 
     @Mock
-    private UserDetailsService userDetailsService;
+    private CachedUserDetailsService cachedUserDetailsService;
 
     @InjectMocks
     private final EmailSenderService emailSenderService = new EmailSenderService();
@@ -88,7 +88,7 @@ public class EmailSenderHostServiceTypeTest {
 
         ReflectionTestUtils.setField(emailSenderService, "emailMimeMessagePreparator", mmp);
 
-        when(userDetailsService.getDetails(anyString(), any(UserFilterField.class)))
+        when(cachedUserDetailsService.getDetails(anyString(), any(UserFilterField.class)))
                 .thenReturn(identityUser);
 
     }

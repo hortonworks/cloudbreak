@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
 import com.sequenceiq.cloudbreak.repository.security.UserRepository;
-import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
+import com.sequenceiq.cloudbreak.service.user.CachedUserDetailsService;
 
 @Service
 @Lazy
@@ -34,7 +34,7 @@ public class OwnerBasedPermissionEvaluator implements PermissionEvaluator {
 
     @Inject
     @Lazy
-    private UserDetailsService userDetailsService;
+    private CachedUserDetailsService cachedUserDetailsService;
 
     @Inject
     private UserRepository userRepository;
@@ -53,7 +53,7 @@ public class OwnerBasedPermissionEvaluator implements PermissionEvaluator {
             return oauth.getOAuth2Request().getScope().contains(AUTO_SCALE_SCOPE);
         }
 
-        IdentityUser user = userDetailsService.getDetails((String) authentication.getPrincipal(), UserFilterField.USERNAME);
+        IdentityUser user = cachedUserDetailsService.getDetails((String) authentication.getPrincipal(), UserFilterField.USERNAME);
 
         // TODO: implement this properly:
 //        User cbUser = userRepository.findByEmail(user.getUserId());

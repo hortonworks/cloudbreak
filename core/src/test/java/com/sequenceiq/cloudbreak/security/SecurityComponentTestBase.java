@@ -40,7 +40,7 @@ import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.RepositoryLookupService;
 import com.sequenceiq.cloudbreak.service.security.OwnerBasedPermissionEvaluator;
 import com.sequenceiq.cloudbreak.service.security.ScimAccountGroupReaderFilter;
-import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
+import com.sequenceiq.cloudbreak.service.user.CachedUserDetailsService;
 
 @RunWith(SpringRunner.class)
 @TestPropertySource(properties = {
@@ -70,7 +70,7 @@ public abstract class SecurityComponentTestBase {
     private OAuth2Request oAuth2Request;
 
     @Inject
-    private UserDetailsService userDetailsService;
+    private CachedUserDetailsService cachedUserDetailsService;
 
     @Before
     public void before() {
@@ -91,7 +91,7 @@ public abstract class SecurityComponentTestBase {
     }
 
     protected void setupLoggedInUser(IdentityUser loggedInUser) {
-        when(userDetailsService.getDetails(anyString(), any(UserFilterField.class))).thenReturn(loggedInUser);
+        when(cachedUserDetailsService.getDetails(anyString(), any(UserFilterField.class))).thenReturn(loggedInUser);
     }
 
     protected IdentityUser getUserFromDifferentAccount(boolean admin, String... scopes) {
@@ -142,7 +142,7 @@ public abstract class SecurityComponentTestBase {
         private ResourceServerTokenServices resourceServerTokenServices;
 
         @MockBean
-        private UserDetailsService userDetailsService;
+        private CachedUserDetailsService cachedUserDetailsService;
 
         @MockBean
         private RepositoryLookupService repositoryLookupService;
