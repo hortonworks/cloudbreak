@@ -44,6 +44,7 @@ import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
+import com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateService;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.domain.security.Organization;
@@ -51,8 +52,10 @@ import com.sequenceiq.cloudbreak.domain.security.User;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
+import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserProfileHandler;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
@@ -62,9 +65,9 @@ public class ImageCatalogService {
 
     public static final String UNDEFINED = "";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ImageCatalogService.class);
+    public static final String CLOUDBREAK_DEFAULT_CATALOG_NAME = "cloudbreak-default";
 
-    private static final String CLOUDBREAK_DEFAULT_CATALOG_NAME = "cloudbreak-default";
+    private static final Logger LOGGER = LoggerFactory.getLogger(ImageCatalogService.class);
 
     @Value("${info.app.version:}")
     private String cbVersion;
@@ -97,10 +100,19 @@ public class ImageCatalogService {
     private AccountPreferencesService accountPreferencesService;
 
     @Inject
+    private StackService stackService;
+
+    @Inject
+    private StackImageUpdateService stackImageUpdateService;
+
+    @Inject
     private UserService userService;
 
     @Inject
     private OrganizationService organizationService;
+
+    @Inject
+    private ComponentConfigProvider componentConfigProvider;
 
     public StatedImages getImagesOsFiltered(String provider, String os) throws CloudbreakImageCatalogException {
         StatedImages images = getImages(getDefaultImageCatalog(), provider, cbVersion);

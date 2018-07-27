@@ -334,6 +334,10 @@ public class StackService {
         }
     }
 
+    public Stack getByName(String name, IdentityUser identityUser) {
+        return stackRepository.findByNameInAccountWithLists(name, identityUser.getAccount());
+    }
+
     public StackV2Request getStackRequestByName(String name, IdentityUser identityUser) {
         try {
             return transactionService.required(() ->

@@ -171,19 +171,20 @@ public class StackImageUpdateService {
         if (image.getImage().getStackDetails() != null) {
             try {
                 StackType imageStackType = imageService.determineStackType(image.getImage().getStackDetails());
-                StackRepoDetails repoDetails = clusterComponentConfigProvider.getStackRepoDetails(stack.getCluster().getId());
-                String repoId = repoDetails.getStack().get(StackRepoDetails.REPO_ID_TAG);
-                Optional<StackType> clusterStackType = EnumSet.allOf(StackType.class).stream().filter(st -> repoId.contains(st.name())).findFirst();
-                if (clusterStackType.isPresent()) {
-                    return imageStackType == clusterStackType.get();
-                } else {
-                    throw new CloudbreakServiceException("could not determine stack type for cluster");
-                }
+                StackType clusterStackType = getStackType(stack);
+                return imageStackType == clusterStackType;
             } catch (CloudbreakImageCatalogException e) {
                 throw new CloudbreakServiceException(e);
             }
         }
         return true;
+    }
+
+    public StackType getStackType(Stack stack) {
+        StackRepoDetails repoDetails = clusterComponentConfigProvider.getStackRepoDetails(stack.getCluster().getId());
+        String repoId = repoDetails.getStack().get(StackRepoDetails.REPO_ID_TAG);
+        Optional<StackType> clusterStackType = EnumSet.allOf(StackType.class).stream().filter(st -> repoId.contains(st.name())).findFirst();
+        return clusterStackType.orElseThrow(() ->  new CloudbreakServiceException("could not determine stack type for cluster"));
     }
 
     public CheckResult checkPackageVersions(Stack stack, StatedImage newImage) {
