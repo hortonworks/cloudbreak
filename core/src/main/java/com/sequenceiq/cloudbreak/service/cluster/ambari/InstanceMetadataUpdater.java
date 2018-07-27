@@ -14,18 +14,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -33,6 +31,7 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorRes
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
@@ -41,25 +40,13 @@ import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 
 @Component
+@ConfigurationProperties(prefix = "cb.instance")
 public class InstanceMetadataUpdater {
     private static final Logger LOGGER = LoggerFactory.getLogger(InstanceMetadataUpdater.class);
 
     private Pattern saltBootstrapVersionPattern = Pattern.compile("Version: (.*)");
 
-    @Value("#{'${cb.instance.packages.all}'.split(',')}")
-    private String[] packages;
-
-    @Value("#{'${cb.instance.packages.mandatory.base}'.split(',')}")
-    private List<String> mandatoryBasePackages;
-
-    @Value("#{'${cb.instance.packages.mandatory.prewarmed}'.split(',')}")
-    private List<String> mandatoryPrewarmedPackages;
-
-    @Value("${cb.instance.saltboot.versionCommand}")
-    private String saltBootstrapVersionCmd;
-
-    @Value("${cb.instance.saltboot.packageName}")
-    private String saltBootstrapPackageName;
+    private List<Package> packages;
 
     @Inject
     private HostOrchestratorResolver hostOrchestratorResolver;
@@ -76,32 +63,37 @@ public class InstanceMetadataUpdater {
     @Inject
     private CloudbreakMessagesService cloudbreakMessagesService;
 
-    private List<String> mandatoryPackages;
-
-    @PostConstruct
-    private void setup() {
-        List<String> mandatoryPackages = Lists.newArrayList(mandatoryBasePackages);
-        mandatoryPackages.addAll(mandatoryPrewarmedPackages);
-        this.mandatoryPackages = Collections.unmodifiableList(mandatoryPackages);
-    }
-
     public void updatePackageVersionsOnAllInstances(Stack stack) throws Exception {
         Boolean enableKnox = stack.getCluster().getGateway() != null;
+        GatewayConfig gatewayConfig = getGatewayConfig(stack, enableKnox);
+        HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
+
+        Map<String, Map<String, String>> packageVersionsByNameByHost = getPackageVersionByNameByHost(gatewayConfig, hostOrchestrator);
+
+        Set<InstanceMetaData> instanceMetaDataSet = stack.getNotDeletedInstanceMetaDataSet();
+        updateInstanceMetaDataWithPackageVersions(packageVersionsByNameByHost, instanceMetaDataSet);
+
+        List<String> packagesWithMultipleVersions = collectPackagesWithMultipleVersions(instanceMetaDataSet);
+        notifyIfPackagesHaveDifferentVersions(stack, packagesWithMultipleVersions);
+
+        Map<String, List<String>> instancesWithMissingPackageVersions = collectInstancesWithMissingPackageVersions(instanceMetaDataSet);
+        notifyIfInstancesMissingPackageVersion(stack, instancesWithMissingPackageVersions);
+    }
+
+    private GatewayConfig getGatewayConfig(Stack stack, Boolean enableKnox) {
         GatewayConfig gatewayConfig = null;
         for (InstanceMetaData gateway : stack.getGatewayInstanceMetadata()) {
             if (InstanceMetadataType.GATEWAY_PRIMARY.equals(gateway.getInstanceMetadataType())) {
                 gatewayConfig = gatewayConfigService.getGatewayConfig(stack, gateway, enableKnox);
             }
         }
-        HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
-        Map<String, Map<String, String>> packageVersions = hostOrchestrator.getPackageVersionsFromAllHosts(gatewayConfig, packages);
-        Map<String, String> saltbootVersions = hostOrchestrator.runCommandOnAllHosts(gatewayConfig, saltBootstrapVersionCmd);
-        for (Map.Entry<String, String> saltbootVersion : saltbootVersions.entrySet()) {
-            packageVersions.get(saltbootVersion.getKey()).put(saltBootstrapPackageName, parseSaltBootstrapVersion(saltbootVersion.getValue()));
-        }
-        Set<InstanceMetaData> instanceMetaDataSet = stack.getNotDeletedInstanceMetaDataSet();
+        return gatewayConfig;
+    }
+
+    private void updateInstanceMetaDataWithPackageVersions(Map<String, Map<String, String>> packageVersionsByNameByHost,
+            Set<InstanceMetaData> instanceMetaDataSet) throws IOException {
         for (InstanceMetaData im : instanceMetaDataSet) {
-            Map<String, String> packageVersionsOnHost = packageVersions.get(im.getDiscoveryFQDN());
+            Map<String, String> packageVersionsOnHost = packageVersionsByNameByHost.get(im.getDiscoveryFQDN());
             if (!CollectionUtils.isEmpty(packageVersionsOnHost)) {
                 Image image = im.getImage().get(Image.class);
                 image = updatePackageVersions(image, packageVersionsOnHost);
@@ -109,15 +101,9 @@ public class InstanceMetadataUpdater {
                 instanceMetaDataRepository.save(im);
             }
         }
-        List<String> packagesWithMultipleVersions = collectPackagesWithMultipleVersions(instanceMetaDataSet);
-        if (!packagesWithMultipleVersions.isEmpty()) {
-            cloudbreakEventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
-                    cloudbreakMessagesService.getMessage(Msg.PACKAGES_ON_INSTANCES_ARE_DIFFERENT.code(),
-                            Collections.singletonList(packagesWithMultipleVersions.stream().collect(Collectors.joining(",")))));
+    }
 
-        }
-
-        Map<String, List<String>> instancesWithMissingPackageVersions = collectInstancesWithMissingPackageVersions(instanceMetaDataSet);
+    private void notifyIfInstancesMissingPackageVersion(Stack stack, Map<String, List<String>> instancesWithMissingPackageVersions) {
         if (!instancesWithMissingPackageVersions.isEmpty()) {
             cloudbreakEventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
                     cloudbreakMessagesService.getMessage(Msg.PACKAGE_VERSIONS_ON_INSTANCES_ARE_MISSING.code(),
@@ -126,6 +112,48 @@ public class InstanceMetadataUpdater {
                                             entry.getKey(), StringUtils.join(entry.getValue(), ",")))
                                     .collect(Collectors.joining(" * ")))));
         }
+    }
+
+    private void notifyIfPackagesHaveDifferentVersions(Stack stack, List<String> packagesWithMultipleVersions) {
+        if (!packagesWithMultipleVersions.isEmpty()) {
+            cloudbreakEventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
+                    cloudbreakMessagesService.getMessage(Msg.PACKAGES_ON_INSTANCES_ARE_DIFFERENT.code(),
+                            Collections.singletonList(packagesWithMultipleVersions.stream().collect(Collectors.joining(",")))));
+        }
+    }
+
+    private Map<String, Map<String, String>> getPackageVersionByNameByHost(GatewayConfig gatewayConfig, HostOrchestrator hostOrchestrator)
+            throws CloudbreakOrchestratorFailedException {
+        Map<String, Map<String, String>> packageVersionsByNameByHost = getPackageVersionByPackageName(gatewayConfig, hostOrchestrator);
+        addPackageVersionsFromCommand(gatewayConfig, hostOrchestrator, packageVersionsByNameByHost);
+        return packageVersionsByNameByHost;
+    }
+
+    private void addPackageVersionsFromCommand(GatewayConfig gatewayConfig, HostOrchestrator hostOrchestrator,
+            Map<String, Map<String, String>> packageVersionsByNameByHost) throws CloudbreakOrchestratorFailedException {
+        List<Package> packagesWithCommand = packages.stream().filter(pkg -> StringUtils.isNotBlank(pkg.getCommand())).collect(Collectors.toList());
+        for (Package packageWithCommand : packagesWithCommand) {
+            Map<String, String> versionsByHost = hostOrchestrator.runCommandOnAllHosts(gatewayConfig, packageWithCommand.getCommand());
+            for (Map.Entry<String, String> entry : versionsByHost.entrySet()) {
+                packageVersionsByNameByHost.computeIfAbsent(entry.getKey(), s -> new HashMap<>())
+                        .put(packageWithCommand.getName(), parseSaltBootstrapVersion(entry.getValue()));
+            }
+        }
+    }
+
+    private Map<String, Map<String, String>> getPackageVersionByPackageName(GatewayConfig gatewayConfig, HostOrchestrator hostOrchestrator)
+            throws CloudbreakOrchestratorFailedException {
+        Map<String, String> pkgNames = packages.stream().filter(pkg -> StringUtils.isNotBlank(pkg.getPkgName()))
+                .collect(Collectors.toMap(Package::getPkgName, Package::getName));
+        Map<String, Map<String, String>> packageVersionsByPkgNameByHost =
+                hostOrchestrator.getPackageVersionsFromAllHosts(gatewayConfig, pkgNames.keySet().toArray(new String[pkgNames.size()]));
+        Map<String, Map<String, String>> packageVersionsByNameByHost = new HashMap<>();
+        for (Map.Entry<String, Map<String, String>> entry : packageVersionsByPkgNameByHost.entrySet()) {
+            Map<String, String> versionByName =
+                    entry.getValue().entrySet().stream().collect(Collectors.toMap(e -> pkgNames.get(e.getKey()), Map.Entry::getValue));
+            packageVersionsByNameByHost.put(entry.getKey(), versionByName);
+        }
+        return packageVersionsByNameByHost;
     }
 
     public List<String> collectPackagesWithMultipleVersions(Collection<InstanceMetaData> instanceMetadataList) {
@@ -157,7 +185,7 @@ public class InstanceMetadataUpdater {
             try {
                 Image image = instanceMetaData.getImage().get(Image.class);
                 Set<String> packages = image.getPackageVersions().keySet();
-                List<String> missingPackageVersions = Lists.newArrayList(mandatoryPackages);
+                List<String> missingPackageVersions = this.packages.stream().map(Package::getName).collect(Collectors.toList());
                 missingPackageVersions.removeAll(packages);
                 if (!missingPackageVersions.isEmpty()) {
                     instancesWithMissingPackagVersions.put(instanceMetaData.getInstanceId(), missingPackageVersions);
@@ -170,25 +198,20 @@ public class InstanceMetadataUpdater {
         return instancesWithMissingPackagVersions;
     }
 
-    public List<String> getMandatoryPackages() {
-        return mandatoryPackages;
+    public List<Package> getPackages() {
+        return packages;
     }
 
-    public List<String> getMandatoryBasePackages() {
-        return mandatoryBasePackages;
-    }
-
-    public List<String> getMandatoryPrewarmedPackages() {
-        return mandatoryPrewarmedPackages;
+    public void setPackages(List<Package> packages) {
+        this.packages = packages;
     }
 
     private String parseSaltBootstrapVersion(String versionCommandOutput) {
         Matcher matcher = saltBootstrapVersionPattern.matcher(versionCommandOutput);
-        String result = "UNKNOWN";
         if (matcher.matches()) {
-            result = matcher.group(1);
+            return matcher.group(1);
         }
-        return result;
+        return versionCommandOutput;
     }
 
     private Image updatePackageVersions(Image image, Map<String, String> packageVersionsOnHost) {
@@ -208,6 +231,48 @@ public class InstanceMetadataUpdater {
 
         public String code() {
             return code;
+        }
+    }
+
+    public static class Package {
+        private String name;
+
+        private String pkgName;
+
+        private String command;
+
+        private boolean prewarmed;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getPkgName() {
+            return pkgName;
+        }
+
+        public void setPkgName(String pkgName) {
+            this.pkgName = pkgName;
+        }
+
+        public String getCommand() {
+            return command;
+        }
+
+        public void setCommand(String command) {
+            this.command = command;
+        }
+
+        public boolean isPrewarmed() {
+            return prewarmed;
+        }
+
+        public void setPrewarmed(boolean prewarmed) {
+            this.prewarmed = prewarmed;
         }
     }
 }

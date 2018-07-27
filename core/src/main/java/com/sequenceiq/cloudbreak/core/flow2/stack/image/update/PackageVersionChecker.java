@@ -18,6 +18,7 @@ import org.testng.collections.Lists;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.InstanceMetadataUpdater;
+import com.sequenceiq.cloudbreak.service.cluster.ambari.InstanceMetadataUpdater.Package;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 
@@ -35,9 +36,10 @@ public class PackageVersionChecker {
         Map<String, String> packageVersions = newImage.getImage().getPackageVersions();
         List<String> packagesToCompare;
         if (newImage.getImage().isPrewarmed()) {
-            packagesToCompare = instanceMetadataUpdater.getMandatoryPackages();
+            packagesToCompare = instanceMetadataUpdater.getPackages().stream().map(Package::getName).collect(Collectors.toList());
         } else {
-            packagesToCompare = instanceMetadataUpdater.getMandatoryBasePackages();
+            packagesToCompare = instanceMetadataUpdater.getPackages().stream().filter(pkg -> !pkg.isPrewarmed())
+                    .map(Package::getName).collect(Collectors.toList());
         }
 
         List<String> missingPackageVersion = Lists.newArrayList();

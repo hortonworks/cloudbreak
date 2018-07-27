@@ -26,8 +26,6 @@ import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.StackDetails;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
@@ -82,10 +80,8 @@ public class StackImageUpdateServiceTest {
         stack.setRegion("region");
         stack.setCloudPlatform("AWS");
 
-        StackRepoDetails repo = new StackRepoDetails(Collections.emptyMap(), Collections.emptyMap());
-        StackDetails stackDetails = new StackDetails("2", repo, Collections.emptyList());
         image = new Image("asdf", "asdf", "centos7", "uuid", "2.8.0", Collections.emptyMap(),
-                Collections.singletonMap("AWS", Collections.emptyMap()), stackDetails, "centos", packageVersions);
+                Collections.singletonMap("AWS", Collections.emptyMap()), null, "centos", packageVersions);
         statedImage = StatedImage.statedImage(image, "url", "name");
         when(packageVersionChecker.checkInstancesHaveAllMandatoryPackageVersion(anySet())).thenReturn(CheckResult.ok());
         when(packageVersionChecker.checkInstancesHaveMultiplePackageVersions(anySet())).thenReturn(CheckResult.ok());
