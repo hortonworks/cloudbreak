@@ -329,13 +329,18 @@ cb:
 
   instance:
     packages:
-      all: kernel,salt,python,hdp-select,ambari-agent
-      mandatory:
-        base: salt,salt-bootstrap
-        prewarmed: hdp-select,ambari-agent
-    saltboot:
-      versionCommand: "salt-bootstrap version"
-      packageName: salt-bootstrap
+      - name: salt
+        prewarmed: false
+        pkgName: salt
+      - name: salt-bootstrap
+        prewarmed: false
+        command: "salt-bootstrap version"
+      - name: stack
+        pkgName: hdp-select
+        prewarmed: true
+      - name: ambari
+        pkgName: ambari-agent
+        prewarmed: true
 
 # configuration for BlueprintPortConfigCollector.java
 blueprintServicePorts:

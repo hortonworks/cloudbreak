@@ -193,7 +193,7 @@ public class ImageService {
         }
     }
 
-    private StackType determineStackType(StackDetails stackDetails) throws CloudbreakImageCatalogException {
+    public StackType determineStackType(StackDetails stackDetails) throws CloudbreakImageCatalogException {
         String repoId = stackDetails.getRepo().getStack().get(StackRepoDetails.REPO_ID_TAG);
         Optional<StackType> stackType = EnumSet.allOf(StackType.class).stream().filter(st -> repoId.contains(st.name())).findFirst();
         if (stackType.isPresent()) {

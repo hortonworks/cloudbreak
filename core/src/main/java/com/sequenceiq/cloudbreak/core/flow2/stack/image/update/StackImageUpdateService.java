@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.core.flow2.stack.image.update;
 
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 
+import java.util.EnumSet;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -17,6 +19,8 @@ import com.sequenceiq.cloudbreak.cloud.VersionComparator;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
+import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.controller.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
@@ -109,6 +113,13 @@ public class StackImageUpdateService {
                 LOGGER.warn(message);
                 throw new OperationException(message);
             }
+
+            if (!isStackMatchIfPrewarmed(stack, newImage)) {
+                String message = "Stack versions don't match on prewarmed image with cluster's";
+                LOGGER.warn(message);
+                throw new OperationException(message);
+            }
+
             return newImage;
 
         } catch (CloudbreakImageNotFoundException e) {
@@ -152,6 +163,25 @@ public class StackImageUpdateService {
         return compare >= 0;
     }
 
+    public boolean isStackMatchIfPrewarmed(Stack stack, StatedImage image) {
+        if (image.getImage().getStackDetails() != null) {
+            try {
+                StackType imageStackType = imageService.determineStackType(image.getImage().getStackDetails());
+                StackRepoDetails repoDetails = componentConfigProvider.getHDPRepo(stack.getId());
+                String repoId = repoDetails.getStack().get(StackRepoDetails.REPO_ID_TAG);
+                Optional<StackType> clusterStackType = EnumSet.allOf(StackType.class).stream().filter(st -> repoId.contains(st.name())).findFirst();
+                if (clusterStackType.isPresent()) {
+                    return imageStackType == clusterStackType.get();
+                } else {
+                    throw new CloudbreakServiceException("could not determine stack type for cluster");
+                }
+            } catch (CloudbreakImageCatalogException e) {
+                throw new CloudbreakServiceException(e);
+            }
+        }
+        return true;
+    }
+
     public CheckResult checkPackageVersions(Stack stack, StatedImage newImage) {
         Set<InstanceMetaData> instanceMetaDataSet = stack.getNotDeletedInstanceMetaDataSet();
 
@@ -178,7 +208,8 @@ public class StackImageUpdateService {
         if (isCbVersionOk(stack)) {
             try {
                 StatedImage newImage = getNewImage(newImageId, imageCatalogName, imageCatalogUrl, getCurrentImage(stack));
-                return isCloudPlatformMatches(stack, newImage) && checkPackageVersions(stack, newImage).getStatus() == EventStatus.OK;
+                return isCloudPlatformMatches(stack, newImage) && isStackMatchIfPrewarmed(stack, newImage)
+                        && checkPackageVersions(stack, newImage).getStatus() == EventStatus.OK;
             } catch (CloudbreakImageNotFoundException e) {
                 LOGGER.warn("Cloudbreak Image not found", e);
                 return false;
