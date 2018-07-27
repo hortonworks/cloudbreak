@@ -18,9 +18,11 @@ import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImagesResponse;
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.UpdateImageCatalogRequest;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
+import com.sequenceiq.cloudbreak.service.image.StackImageFilterService;
 
 @Component
 @Transactional(TxType.NEVER)
@@ -28,6 +30,9 @@ public class ImageCatalogV1Controller implements ImageCatalogV1Endpoint {
 
     @Inject
     private ImageCatalogService imageCatalogService;
+
+    @Inject
+    private StackImageFilterService stackImageFilterService;
 
     @Inject
     private AuthenticatedUserService authenticatedUserService;
@@ -93,6 +98,18 @@ public class ImageCatalogV1Controller implements ImageCatalogV1Endpoint {
     public ImageCatalogRequest getRequestfromName(String name) {
         ImageCatalog imageCatalog = imageCatalogService.get(name);
         return conversionService.convert(imageCatalog, ImageCatalogRequest.class);
+    }
+
+    @Override
+    public ImagesResponse getImagesFromCustomImageCatalogByStack(String imageCatalogName, String stackName) throws CloudbreakImageCatalogException {
+        Images images = stackImageFilterService.getApplicableImages(imageCatalogName, stackName);
+        return conversionService.convert(images, ImagesResponse.class);
+    }
+
+    @Override
+    public ImagesResponse getImagesFromDefaultImageCatalogByStack(String stackName) throws Exception {
+        Images images = stackImageFilterService.getApplicableImages(stackName);
+        return conversionService.convert(images, ImagesResponse.class);
     }
 
     private ImageCatalogResponse createImageCatalog(ImageCatalogRequest imageCatalogRequest, boolean publicInAccount) {
