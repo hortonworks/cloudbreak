@@ -16,6 +16,8 @@ import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType;
 @Transactional(Transactional.TxType.REQUIRED)
 public interface StructuredEventRepository extends CrudRepository<StructuredEventEntity, Long> {
 
+    StructuredEventEntity findByIdAndOwner(Long id, String owner);
+
     List<StructuredEventEntity> findByOwnerAndEventType(String owner, StructuredEventType eventType);
 
     List<StructuredEventEntity> findByOwnerAndResourceTypeAndResourceId(String owner, String resourceType, Long resourceId);
