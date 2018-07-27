@@ -104,7 +104,7 @@ public class StackResponseHardwareInfoProvider implements ResponseProvider {
                     Image image = instanceMetaData.getImage().get(Image.class);
                     if (image != null) {
                         hardwareInfoResponse.setImageCatalogName(image.getImageCatalogName());
-                        hardwareInfoResponse.setImageName(image.getImageCatalogName());
+                        hardwareInfoResponse.setImageName(image.getImageName());
                         hardwareInfoResponse.setImageId(image.getImageId());
                         hardwareInfoResponse.setImageCatalogUrl(image.getImageCatalogUrl());
                         hardwareInfoResponse.setOs(image.getOs());
