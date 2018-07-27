@@ -42,7 +42,7 @@ public class VmType extends StringType {
         return metaData;
     }
 
-    public String getMetaDataValue(String key) {
+    public Object getMetaDataValue(String key) {
         return metaData.getProperties().get(key);
     }
 
