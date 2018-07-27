@@ -172,7 +172,7 @@ public class AmbariClusterSetupService implements ClusterSetupService {
 
             ambariClusterConnectorPollingResultChecker
                     .checkPollingResult(pollingResultExceptionPair.getLeft(), constructClusterFailedMessage(cluster.getId(), ambariClient));
-            recipeEngine.executePostInstall(stack);
+            recipeEngine.executePostInstallRecipes(stack, hostGroups);
             ambariSmartSenseCapturer.capture(0, ambariClient);
             cluster = ambariViewProvider.provideViewInformation(ambariClient, cluster);
             ambariClusterCreationSuccessHandler.handleClusterCreationSuccess(stack, cluster);

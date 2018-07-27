@@ -26,7 +26,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 public class RecipeExecutionFailureCollector {
 
     public boolean canProcessExecutionFailure(Exception e) {
-        return getNodesWithErrors(e).isPresent();
+        return getNodesWithErrors(e).isPresent() && e.getMessage().contains("/opt/scripts/recipe-runner.sh ");
     }
 
     public Set<RecipeExecutionFailure> collectErrors(CloudbreakOrchestratorException exception,
@@ -37,10 +37,10 @@ public class RecipeExecutionFailureCollector {
         }
 
         return getNodesWithErrors(exception).get().asMap().entrySet().stream().flatMap((Entry<String, Collection<String>> nodeWithErrors) -> {
-            Map<String, Optional<String>> errorsWithPhase = nodeWithErrors.getValue().stream().collect(Collectors.toMap(
-                    error -> error,
-                    this::getInstallPhase,
-                    (phase1, phase2) -> phase1.map(Optional::of).orElse(phase2)));
+
+            Map<String, Optional<String>> errorsWithPhase = nodeWithErrors.getValue().stream()
+                    .collect(Collectors.toMap(error -> error, this::getInstallPhase, (phase1, phase2) -> phase1.map(Optional::of).orElse(phase2)));
+
             return errorsWithPhase.entrySet().stream()
                     .filter(errorWithPhase -> errorWithPhase.getValue().isPresent())
                     .map(this::errorWithPhaseToRecipeName)

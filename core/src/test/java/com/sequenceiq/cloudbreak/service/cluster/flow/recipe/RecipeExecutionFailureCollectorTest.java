@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.service.cluster.flow.recipe;
 import static com.sequenceiq.cloudbreak.api.model.RecipeType.POST_AMBARI_START;
 import static com.sequenceiq.cloudbreak.api.model.RecipeType.PRE_AMBARI_START;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -25,31 +27,32 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeExecutionFail
 
 public class RecipeExecutionFailureCollectorTest {
 
-    private static final String EXCEPTION_MESSAGE = "Failed: Orchestrator component went failed in 7.500000 mins, message: "
-            + "There are missing nodes from job (jid: 20180702142917892446), target: [host-10-0-0-4.openstacklocal, host-10-0-0-3.openstacklocal]\n"
-            + "Node: host-10-0-0-4.openstacklocal Error(s): Command \"sh -x /opt/scripts/post-ambari-start/failingRecipe1 2>&1 | "
-            + "tee -a /var/log/recipes/failingRecipe1.log && exit ${PIPESTATUS[0]}\" run |"
-            + " Command \"sh -x /opt/scripts/pre-ambari-start/failingRecipe2 2>&1 | "
-            + "tee -a /var/log/recipes/failingRecipe2.log && exit ${PIPESTATUS[0]}\" run\n"
-            + "Node: host-10-0-0-3.openstacklocal Error(s): Command \"sh -x /opt/scripts/post-ambari-start/failingRecipe1 2>&1 | "
-            + "tee -a /var/log/recipes/failingRecipe1.log && exit ${PIPESTATUS[0]}\" run";
+    private static final String EXCEPTION_MESSAGE = "\"Comment: Command \"/opt/scripts/recipe-runner.sh post-ambari-start failingRecipe1\" run\n"
+            + "Stdout: /opt/scripts/recipe-runner.sh post-ambari-start failingRecipe1 : Timed out after 10 seconds\""
+            + "\"Comment: Command \"/opt/scripts/recipe-runner.sh pre-ambari-start failingRecipe2\" run\n"
+            + "Stdout: /opt/scripts/recipe-runner.sh pre-ambari-start failingRecipe2 : Timed out after 10 seconds\""
+            + "Comment: One or more requisite failed: postgresql.init-services-db, postgresql.configure-listen-address"
+            + "Comment: One or more requisite failed: postgresql.init-services-db, postgresql.configure-listen-address";
 
     private final RecipeExecutionFailureCollector recipeExecutionFailureHandler = new RecipeExecutionFailureCollector();
 
     @Test
+    public void testCanProcessWithUnprocessableMessage() {
+        ArrayListMultimap<String, String> nodesWithErrors = getNodesWithErrors();
+        CloudbreakOrchestratorFailedException exception = new CloudbreakOrchestratorFailedException("Something went wrong", nodesWithErrors);
+        assertFalse(recipeExecutionFailureHandler.canProcessExecutionFailure(exception));
+    }
+
+    @Test
+    public void testCanProcessProcessableMessage() {
+        ArrayListMultimap<String, String> nodesWithErrors = getNodesWithErrors();
+        CloudbreakOrchestratorFailedException exception = new CloudbreakOrchestratorFailedException(EXCEPTION_MESSAGE, nodesWithErrors);
+        assertTrue(recipeExecutionFailureHandler.canProcessExecutionFailure(exception));
+    }
+
+    @Test
     public void testCollectErrors() {
-        ArrayListMultimap<String, String> nodesWithErrors = ArrayListMultimap.create();
-        nodesWithErrors.putAll("host-10-0-0-4.openstacklocal", Arrays.asList(
-                "\"Comment: Command \"/opt/scripts/recipe-runner.sh post-ambari-start failingRecipe1\" run\n"
-                        + "Stdout: /opt/scripts/recipe-runner.sh post-ambari-start failingRecipe1 : Timed out after 10 seconds\"",
-                "\"Comment: Command \"/opt/scripts/recipe-runner.sh pre-ambari-start failingRecipe2\" run\n"
-                        + "Stdout: /opt/scripts/recipe-runner.sh pre-ambari-start failingRecipe2 : Timed out after 10 seconds\"",
-                "Comment: One or more requisite failed: postgresql.init-services-db, postgresql.configure-listen-address",
-                "Comment: One or more requisite failed: postgresql.init-services-db, postgresql.configure-listen-address"
-        ));
-        nodesWithErrors.put("host-10-0-0-3.openstacklocal",
-                "\"Comment: Command \"/opt/scripts/recipe-runner.sh post-ambari-start failingRecipe1\" run\n"
-                        + "Stdout: /opt/scripts/recipe-runner.sh post-ambari-start failingRecipe1 : Timed out after 10 seconds\"");
+        ArrayListMultimap<String, String> nodesWithErrors = getNodesWithErrors();
         CloudbreakOrchestratorFailedException exception = new CloudbreakOrchestratorFailedException(EXCEPTION_MESSAGE, nodesWithErrors);
 
         Recipe failingRecipe1 = new Recipe();
@@ -117,5 +120,21 @@ public class RecipeExecutionFailureCollectorTest {
                 .peek(failure -> assertEquals("failingRecipe1", failure.getRecipe().getName()))
                 .count();
         assertEquals(1, masterInstanceFailures);
+    }
+
+    private ArrayListMultimap<String, String> getNodesWithErrors() {
+        ArrayListMultimap<String, String> nodesWithErrors = ArrayListMultimap.create();
+        nodesWithErrors.putAll("host-10-0-0-4.openstacklocal", Arrays.asList(
+                "\"Comment: Command \"/opt/scripts/recipe-runner.sh post-ambari-start failingRecipe1\" run\n"
+                        + "Stdout: /opt/scripts/recipe-runner.sh post-ambari-start failingRecipe1 : Timed out after 10 seconds\"",
+                "\"Comment: Command \"/opt/scripts/recipe-runner.sh pre-ambari-start failingRecipe2\" run\n"
+                        + "Stdout: /opt/scripts/recipe-runner.sh pre-ambari-start failingRecipe2 : Timed out after 10 seconds\"",
+                "Comment: One or more requisite failed: postgresql.init-services-db, postgresql.configure-listen-address",
+                "Comment: One or more requisite failed: postgresql.init-services-db, postgresql.configure-listen-address"
+        ));
+        nodesWithErrors.put("host-10-0-0-3.openstacklocal",
+                "\"Comment: Command \"/opt/scripts/recipe-runner.sh post-ambari-start failingRecipe1\" run\n"
+                        + "Stdout: /opt/scripts/recipe-runner.sh post-ambari-start failingRecipe1 : Timed out after 10 seconds\"");
+        return nodesWithErrors;
     }
 }

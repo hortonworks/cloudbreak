@@ -43,7 +43,7 @@ import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Component
-public class OrchestratorRecipeExecutor {
+class OrchestratorRecipeExecutor {
 
     @Inject
     private HostOrchestratorResolver hostOrchestratorResolver;
@@ -107,7 +107,7 @@ public class OrchestratorRecipeExecutor {
         }
     }
 
-    public void postInstall(Stack stack) throws CloudbreakException {
+    public void postClusterInstall(Stack stack) throws CloudbreakException {
         HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
         GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
         try {

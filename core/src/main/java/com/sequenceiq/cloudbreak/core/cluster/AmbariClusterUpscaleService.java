@@ -115,9 +115,9 @@ public class AmbariClusterUpscaleService {
         ambariClusterConnector.upscaleCluster(stack, hostGroup, hostMetadata);
     }
 
-    public void executePostRecipesOnNewHosts(Long stackId, String hostGroupName) throws CloudbreakException {
+    public void executePostRecipesOnNewHosts(Long stackId) throws CloudbreakException {
         Stack stack = stackService.getByIdWithLists(stackId);
         LOGGER.info("Start executing post recipes");
-        recipeEngine.executePostInstall(stack);
+        recipeEngine.executePostInstallRecipes(stack, hostGroupService.getByCluster(stack.getCluster().getId()));
     }
 }
