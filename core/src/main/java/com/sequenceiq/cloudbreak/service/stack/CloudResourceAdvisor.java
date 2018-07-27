@@ -150,7 +150,7 @@ public class CloudResourceAdvisor {
     }
 
     private void decorateWithRecommendation(VmType vmType, VmRecommendation recommendation, String cloudPlatform) {
-        Map<String, String> vmMetaDataProps = vmType.getMetaData().getProperties();
+        Map<String, Object> vmMetaDataProps = vmType.getMetaData().getProperties();
         vmMetaDataProps.put("recommendedVolumeType", recommendation.getVolumeType());
         vmMetaDataProps.put("recommendedvolumeCount", String.valueOf(recommendation.getVolumeCount()));
         vmMetaDataProps.put("recommendedvolumeSizeGB", String.valueOf(recommendation.getVolumeSizeGB()));

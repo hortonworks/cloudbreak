@@ -205,7 +205,7 @@ public class OpenStackPlatformResources implements PlatformResources {
         types.stream()
                 .filter(t -> t.getMetaData().getProperties().containsKey(VmTypeMeta.MEMORY))
                 .forEach(t -> {
-                    String memory = t.getMetaData().getProperties().get(VmTypeMeta.MEMORY);
+                    String memory = t.getMetaData().getProperties().get(VmTypeMeta.MEMORY).toString();
                     String formattedSize = ConversionUtil.convertToGB(memory);
                     t.getMetaData().getProperties().put(VmTypeMeta.MEMORY, formattedSize);
                 });
