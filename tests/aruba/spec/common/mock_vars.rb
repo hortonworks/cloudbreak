@@ -34,6 +34,10 @@ RSpec.shared_context "mock shared vars", :a => :b do
     
     @mock_password = "mockpassword"
 
+    @mock_endpoint_setup = "/cb/api/setup"
+    @mock_endpoint_reset = "/cb/api/reset"
+    @mock_password = "mockpassword"
+
     @default_blueprint_name = "'EDW-ETL: Apache Hive, Apache Spark 2'"
     @blueprint_name_file = "cli-bp-file"
     @blueprint_url = "https://gist.githubusercontent.com/mhalmy/8309c7e4a4649fa85f38b260a38146af/raw/5c3534c7f1849ffea64a81d467d5eee801858ff7/test.bp"
