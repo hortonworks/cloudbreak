@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.api.model.UsageStatus;
 import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 import com.sequenceiq.cloudbreak.service.usages.UsageTimeService;
-import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
+import com.sequenceiq.cloudbreak.service.user.CachedUserDetailsService;
 
 @Component
 public class CloudbreakUsageToCloudbreakUsageJsonConverter extends AbstractConversionServiceAwareConverter<CloudbreakUsage, CloudbreakUsageJson> {
@@ -24,7 +24,7 @@ public class CloudbreakUsageToCloudbreakUsageJsonConverter extends AbstractConve
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakUsageToCloudbreakUsageJsonConverter.class);
 
     @Inject
-    private UserDetailsService userDetailsService;
+    private CachedUserDetailsService cachedUserDetailsService;
 
     @Inject
     private UsageTimeService usageTimeService;
@@ -35,7 +35,7 @@ public class CloudbreakUsageToCloudbreakUsageJsonConverter extends AbstractConve
         String day = new SimpleDateFormat(DATE_FORMAT).format(entity.getDay());
         String cbUser;
         try {
-            cbUser = userDetailsService.getDetails(entity.getOwner(), UserFilterField.USERID).getUsername();
+            cbUser = cachedUserDetailsService.getDetails(entity.getOwner(), UserFilterField.USERID).getUsername();
         } catch (Exception ignored) {
             LOGGER.warn("Expected user was not found with '{}' id. Maybe it was deleted by the admin user.", entity.getOwner());
             cbUser = entity.getOwner();

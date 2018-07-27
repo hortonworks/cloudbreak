@@ -35,7 +35,7 @@ import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
 import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
+import com.sequenceiq.cloudbreak.service.user.CachedUserDetailsService;
 
 @Service
 public class FlexUsageGenerator {
@@ -52,7 +52,7 @@ public class FlexUsageGenerator {
     private static final long UP_TO_MILLIS = 1000;
 
     @Inject
-    private UserDetailsService userDetailsService;
+    private CachedUserDetailsService cachedUserDetailsService;
 
     @Inject
     private SmartSenseSubscriptionService smartSenseSubscriptionService;
@@ -122,7 +122,7 @@ public class FlexUsageGenerator {
     private String getUserEmail(CloudbreakUsage source) {
         String cbUser;
         try {
-            cbUser = userDetailsService.getDetails(source.getOwner(), UserFilterField.USERID).getUsername();
+            cbUser = cachedUserDetailsService.getDetails(source.getOwner(), UserFilterField.USERID).getUsername();
         } catch (Exception ignored) {
             LOGGER.warn("Expected user was not found with '{}' id. Maybe it was deleted by the admin user.", source.getOwner());
             cbUser = source.getOwner();

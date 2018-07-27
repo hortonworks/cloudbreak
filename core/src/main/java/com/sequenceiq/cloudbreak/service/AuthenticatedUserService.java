@@ -9,13 +9,13 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
-import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
+import com.sequenceiq.cloudbreak.service.user.CachedUserDetailsService;
 
 @Service
 public class AuthenticatedUserService {
 
     @Inject
-    private UserDetailsService userDetailsService;
+    private CachedUserDetailsService cachedUserDetailsService;
 
     public IdentityUser getCbUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -23,7 +23,7 @@ public class AuthenticatedUserService {
             OAuth2Authentication oauth = (OAuth2Authentication) authentication;
             if (oauth.getUserAuthentication() != null) {
                 String username = (String) authentication.getPrincipal();
-                return userDetailsService.getDetails(username, UserFilterField.USERNAME);
+                return cachedUserDetailsService.getDetails(username, UserFilterField.USERNAME);
             }
         }
         return null;

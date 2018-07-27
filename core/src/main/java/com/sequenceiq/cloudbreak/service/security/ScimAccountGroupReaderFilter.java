@@ -16,13 +16,13 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
-import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
+import com.sequenceiq.cloudbreak.service.user.CachedUserDetailsService;
 
 @Service
 public class ScimAccountGroupReaderFilter extends OncePerRequestFilter {
 
     @Inject
-    private UserDetailsService userDetailsService;
+    private CachedUserDetailsService cachedUserDetailsService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException,
@@ -32,7 +32,7 @@ public class ScimAccountGroupReaderFilter extends OncePerRequestFilter {
             OAuth2Authentication oauth = (OAuth2Authentication) authentication;
             if (oauth.getUserAuthentication() != null) {
                 String username = (String) authentication.getPrincipal();
-                IdentityUser user = userDetailsService.getDetails(username, UserFilterField.USERNAME);
+                IdentityUser user = cachedUserDetailsService.getDetails(username, UserFilterField.USERNAME);
                 request.setAttribute("user", user);
             }
         }

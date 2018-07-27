@@ -28,7 +28,7 @@ public class OwnerBasedPermissionEvaluator implements PermissionEvaluator {
 
     @Inject
     @Lazy
-    private UserDetailsService userDetailsService;
+    private CachedUserDetailsService cachedUserDetailsService;
 
     @Override
     public boolean hasPermission(Authentication authentication, Object target, Object permission) {
@@ -38,7 +38,7 @@ public class OwnerBasedPermissionEvaluator implements PermissionEvaluator {
         if (target == null) {
             return false;
         }
-        PeriscopeUser user = userDetailsService.getDetails((String) authentication.getPrincipal(), UserFilterField.USERNAME);
+        PeriscopeUser user = cachedUserDetailsService.getDetails((String) authentication.getPrincipal(), UserFilterField.USERNAME);
         Collection<?> targets = target instanceof Collection ? (Collection<?>) target : Collections.singleton(target);
         return targets.stream().allMatch(t -> {
             try {

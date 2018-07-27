@@ -19,8 +19,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -33,9 +31,9 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Service
-public class CachedUserDetailsService {
+public class UserDetailsService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CachedUserDetailsService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserDetailsService.class);
 
     private static final int ACCOUNT_PART = 2;
 
@@ -72,7 +70,6 @@ public class CachedUserDetailsService {
         identityWebTarget = RestClientUtil.get(configKey).target(identityServerUrl).path("Users");
     }
 
-    @Cacheable(cacheNames = "userCache", key = "#username")
     public IdentityUser getDetails(String username, UserFilterField filterField, String clientSecret) {
         try {
             return getIdentityUser(username, filterField, clientSecret);
@@ -90,20 +87,7 @@ public class CachedUserDetailsService {
     }
 
     private IdentityUser getIdentityUser(String username, UserFilterField filterField, String clientSecret) {
-        WebTarget target;
-
-        LOGGER.info("Load user details: {}", username);
-
-        switch (filterField) {
-            case USERNAME:
-                target = identityWebTarget.queryParam("filter", "userName eq \"" + username + '"');
-                break;
-            case USERID:
-                target = identityWebTarget.path(username);
-                break;
-            default:
-                throw new UserDetailsUnavailableException("User details cannot be retrieved.");
-        }
+        WebTarget target = getWebTarget(username, filterField);
         AccessToken accessToken = identityClient.getToken(clientSecret);
         String scimResponse = target.request(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + accessToken.getToken()).get(String.class);
         try {
@@ -136,6 +120,23 @@ public class CachedUserDetailsService {
         }
     }
 
+    private WebTarget getWebTarget(String username, UserFilterField filterField) {
+        WebTarget target;
+        LOGGER.info("Load user details: {}", username);
+        switch (filterField) {
+            case USERNAME:
+                target = identityWebTarget.queryParam("filter", "userName eq \"" + username + '"');
+                break;
+            case USERID:
+                target = identityWebTarget.path(username);
+                break;
+            default:
+                throw new UserDetailsUnavailableException("User details cannot be retrieved.");
+        }
+
+        return target;
+    }
+
     private IdentityUser createIdentityUser(List<IdentityUserRole> roles, String account, JsonNode userNode) {
         String userId = userNode.get("id").asText();
         String email = userNode.get("userName").asText();
@@ -163,11 +164,6 @@ public class CachedUserDetailsService {
             }
         }
         return "";
-    }
-
-    @CacheEvict(value = "userCache", key = "#username")
-    public void evictUserDetails(String updatedUserId, String username) {
-        LOGGER.info("Remove userid: {} / username: {} from user cache", updatedUserId, username);
     }
 
     private Date parseUserCreated(String dateOfCreation) {

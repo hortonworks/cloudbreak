@@ -90,7 +90,7 @@ import com.sequenceiq.periscope.service.AuthenticatedUserService;
 import com.sequenceiq.periscope.service.MetricService;
 import com.sequenceiq.periscope.service.ha.LeaderElectionService;
 import com.sequenceiq.periscope.service.ha.PeriscopeNodeConfig;
-import com.sequenceiq.periscope.service.security.UserDetailsService;
+import com.sequenceiq.periscope.service.security.CachedUserDetailsService;
 import com.zaxxer.hikari.HikariDataSource;
 
 import springfox.documentation.swagger.web.SwaggerResourcesProvider;
@@ -466,7 +466,7 @@ public class MetricTest {
         private SwaggerResourcesProvider swaggerResourcesProvider;
 
         @MockBean
-        private UserDetailsService userDetailsService;
+        private CachedUserDetailsService cachedUserDetailsService;
 
         @MockBean
         private Scheduler scheduler;
