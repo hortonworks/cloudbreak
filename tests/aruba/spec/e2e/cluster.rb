@@ -103,7 +103,7 @@ RSpec.describe 'Custer operation test cases', :type => :aruba do
   it "List clusters - checking created cluster" do
     result = list_with_name_exists(@os_cluster_name)  do
       cb.cluster.list.build
-    end       
+    end
     expect(result[0]).to be_truthy
   end
 

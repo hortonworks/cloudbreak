@@ -32,13 +32,13 @@ RSpec.describe 'Blueprint test cases', :type => :aruba do
     expect(result.stderr).to include("error") 
   end
 
-  it "Blueprint - Create from file" do 
+  it "Blueprint - Create from file" do
     with_environment 'DEBUG' => '1' do
-      result = cb.blueprint.create.from_file.name(@blueprint_name_file).file(@blueprint_file).build(false) 
+      result = cb.blueprint.create.from_file.name(@blueprint_name_file).file(@blueprint_file).build(false)
       expect(result.exit_status).to eql 0
-      expect(result.stderr).to include("blueprint created")    
+      expect(result.stderr).to include("blueprint created")
     end
-  end     
+  end
 
   it "Blueprint - Describe a default blueprint" do
     result = cb.blueprint.describe.name(@default_blueprint_name).build(false)

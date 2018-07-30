@@ -11,7 +11,7 @@ end
 RSpec.describe 'Cloud test cases', :type => :aruba do
   include_context "shared command helpers"    
   include_context "e2e shared vars"
-  
+
   before(:all) do
     result = list_with_name_exists(@os_credential_name + "-cloud") do
       cb.credential.list.build
@@ -22,7 +22,7 @@ RSpec.describe 'Cloud test cases', :type => :aruba do
       expect(result.exit_status).to eql 0 
     end
     result = cb.cloud.regions.credential(@os_credential_name + "-cloud").build
-    @os_region = get_region(result.stdout)    
+    @os_region = get_region(result.stdout)
   end
 
   after(:all) do 

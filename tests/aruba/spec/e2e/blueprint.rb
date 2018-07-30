@@ -18,7 +18,7 @@ RSpec.describe 'Blueprint test cases', :type => :aruba do
     end
     if (result[0])
       result = cb.blueprint.delete.name(@blueprint_name_url).build
-      expect(result.exit_status).to eql 0 
+      expect(result.exit_status).to eql 0
     end
   end
 
@@ -28,11 +28,11 @@ RSpec.describe 'Blueprint test cases', :type => :aruba do
     end
     if (result[0])
       result = cb.blueprint.delete.name(@blueprint_name_file).build
-      expect(result.exit_status).to eql 0 
+      expect(result.exit_status).to eql 0
     end
   end  
 
-  it "Blueprint - Create from url - Describe - List - Delete " do 
+  it "Blueprint - Create from url - Describe - List - Delete " do
     bp_create_describe_delete(cb, @blueprint_name_url) do
       cb.blueprint.create.from_url.name(@blueprint_name_url).url(@blueprint_url).build
     end 
@@ -50,7 +50,7 @@ RSpec.describe 'Blueprint test cases', :type => :aruba do
     expect(result.stderr).to include("error") 
   end
 
-  it "Blueprint - Create from file - Describe List - Delete " do 
+  it "Blueprint - Create from file - Describe List - Delete " do
     bp_create_describe_delete(cb, @blueprint_name_file) do
       cb.blueprint.create.from_file.name(@blueprint_name_file).file(@blueprint_file).build  
     end 

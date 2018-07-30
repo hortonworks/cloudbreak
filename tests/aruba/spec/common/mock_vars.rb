@@ -1,5 +1,5 @@
 RSpec.shared_context "mock shared vars", :a => :b do
-  before (:all) { 
+  before (:all) {
     @os_cluster_name = "os-cluster"
     @os_credential_name = "openstack"
     @cli_input_json = "../../templates/kilo-openstack-template.json"
@@ -27,11 +27,11 @@ RSpec.shared_context "mock shared vars", :a => :b do
     @imagecatalog_invalid_json = "https://gist.githubusercontent.com/mhalmy/a206484148d0cb02085bfbd8a58af97f/raw/f9c0a0fea59a67e1e7a" +
     "80f5e7b6defd97a69f26f/imagecatalog_invalid.json"
 
-  	@db_name = "mockdbname" 
-  	@db_url = "jdbc:postgresql://test:99/mock" 
-  	@db_user = "mockuser" 
-    @ldap_url = "ldap://mock-12345.elb.eu-west-1.amazonaws.com:89" 
-    
+  	@db_name = "mockdbname"
+  	@db_url = "jdbc:postgresql://test:99/mock"
+  	@db_user = "mockuser"
+    @ldap_url = "ldap://mock-12345.elb.eu-west-1.amazonaws.com:89"
+
     @mock_password = "mockpassword"
 
     @mock_endpoint_setup = "/cb/api/setup"

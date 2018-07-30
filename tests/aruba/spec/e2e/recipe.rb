@@ -22,7 +22,7 @@ RSpec.describe 'Recipe test cases', :type => :aruba do
     @recipe_types.each  do |type|
       r_name = "cli-" + type + "-u"
       recipe_exist = json_has_name(recipe_list_json, r_name)
-   
+
       if (recipe_exist[0] == true)
         result = cb.recipe.delete.name(r_name).build
         expect(result.exit_status).to eql 0 
@@ -40,7 +40,7 @@ RSpec.describe 'Recipe test cases', :type => :aruba do
     @recipe_types.each  do |type|
       r_name = "cli-" + type + "-f"
       recipe_exist = json_has_name(recipe_list_json, r_name)
-   
+
       if (recipe_exist[0] == true)
         result = cb.recipe.delete.name(r_name).build
         expect(result.exit_status).to eql 0 

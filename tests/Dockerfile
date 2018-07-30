@@ -1,7 +1,7 @@
-FROM ubuntu 
-MAINTAINER mhalmy@hortonworks.com
+FROM ubuntu
+MAINTAINER Hortonworks
 
-RUN apt-get update 
+RUN apt-get update
 RUN apt-get install -y software-properties-common
 RUN apt-add-repository -y ppa:rael-gc/rvm
 RUN apt-get update
