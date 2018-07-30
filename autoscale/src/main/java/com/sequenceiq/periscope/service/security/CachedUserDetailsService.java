@@ -23,8 +23,8 @@ public class CachedUserDetailsService {
     private UserDetailsService cachedUserDetailsService;
 
     @Cacheable(cacheNames = "userCache", key = "#username")
-    public PeriscopeUser getDetails(String fieldValue, UserFilterField filterField) {
-        IdentityUser identityUser = cachedUserDetailsService.getDetails(fieldValue, filterField, clientSecret);
+    public PeriscopeUser getDetails(String username, UserFilterField filterField) {
+        IdentityUser identityUser = cachedUserDetailsService.getDetails(username, filterField, clientSecret);
         return new PeriscopeUser(identityUser.getUserId(), identityUser.getUsername(), identityUser.getAccount());
     }
 
