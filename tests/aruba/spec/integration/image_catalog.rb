@@ -1,8 +1,7 @@
-require "common/e2e_vars.rb"
-require "common/mock_vars.rb"
-require "common/helpers.rb"
-require "common/command_helpers.rb"
-require "e2e/spec_helper"
+require_relative "../common/mock_vars"
+require_relative "../common/command_helpers"
+require_relative "../common/helpers"
+require_relative "spec_helper"
 
 define_method(:cb) do
   cb = CommandBuilder.new
@@ -13,8 +12,7 @@ end
 RSpec.describe 'Image catalog test cases', :type => :aruba do
   include_context "shared helpers"
   include_context "shared command helpers"    
-  include_context "shared vars"
-  include_context "mock shared vars"  
+  include_context "mock shared vars"
   
   it "Imagecatalog - Create" do 
     with_environment 'DEBUG' => '1' do

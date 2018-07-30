@@ -1,7 +1,7 @@
-require "common/e2e_vars.rb"
-require "common/helpers.rb"
-require "common/command_helpers.rb"
-require "e2e/spec_helper"
+require_relative "../common/mock_vars"
+require_relative "../common/command_helpers"
+require_relative "../common/helpers"
+require_relative "spec_helper"
 
 define_method(:cb) do
   cb = CommandBuilder.new
@@ -12,7 +12,7 @@ end
 RSpec.describe 'Cloud test cases', :type => :aruba do
   include_context "shared helpers"
   include_context "shared command helpers"    
-  include_context "shared vars"
+  include_context "mock shared vars"
 
   it "Cloud - Availability zones list" do 
     result = cb.cloud.availability_zones.credential(@os_credential_name + "-cloud").region("region").build(false)

@@ -2,6 +2,7 @@
 
 : ${GIT_VERSION:=latest}
 : ${GIT_TAG:=latest}
+: ${BASE_URL:=https://127.0.0.1}
 
 set-mock-image-tag() {
     echo "GitHub First Parent Tag is: ${GIT_VERSION}"
@@ -15,6 +16,7 @@ set-mock-image-tag() {
 }
 
 set-mock-image-tag
-docker-compose up -d
+
+docker-compose -f docker-compose.yml -p cbreak up -d
 
 sleep 30s

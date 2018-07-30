@@ -2,7 +2,7 @@ require 'aruba/rspec'
 require "rspec/json_expectations"
 require 'json'
 require 'date'
-require "common/command_builder.rb"
+require_relative "../common/command_builder"
 require "oauth"
 
 def html_print(&blk)
