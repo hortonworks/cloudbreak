@@ -15,19 +15,11 @@ import (
 var auditListHeader = []string{"AuditID", "EventType", "TimeStamp", "ResourceId", "ResourceName", "ResourceType", "UserName", "Status", "Duration"}
 
 type auditListOut struct {
-	AuditID      string `json:"AuditID" yaml:"AuditID"`
-	EventType    string `json:"EventType" yaml:"EventType"`
-	TimeStamp    string `json:"TimeStamp" yaml:"TimeStamp"`
-	ResourceID   string `json:"ResourceID" yaml:"ResourceID"`
-	ResourceName string `json:"ResourceName" yaml:"ResourceName"`
-	ResourceType string `json:"ResourceType" yaml:"ResourceType"`
-	UserName     string `json:"UserName" yaml:"UserName"`
-	Status       string `json:"Status" yaml:"Status"`
-	Duration     string `json:"Duration" yaml:"Duration"`
+	Audit *models_cloudbreak.AuditEvent `json:"Audit" yaml:"Audit"`
 }
 
 func (a *auditListOut) DataAsStringArray() []string {
-	return []string{a.AuditID, a.EventType, a.TimeStamp, a.ResourceID, a.ResourceName, a.ResourceType, a.UserName, a.Status, a.Duration}
+	return []string{strconv.FormatInt(a.Audit.AuditID, 10), a.Audit.Operation.EventType, a.Audit.Operation.ZonedDateTime.String(), strconv.FormatInt(a.Audit.Operation.ResourceID, 10), a.Audit.Operation.ResourceName, a.Audit.Operation.ResourceType, a.Audit.Operation.UserName, a.Audit.Status, strconv.FormatInt(a.Audit.Duration, 10)}
 }
 
 var auditHeader = []string{"Audit"}
@@ -67,18 +59,20 @@ func ListAudits(c *cli.Context) {
 
 	tableRows := []utils.Row{}
 	for _, audit := range resp.Payload {
-		tableRows = append(tableRows, &auditListOut{strconv.FormatInt(audit.AuditID, 10),
-			audit.Operation.EventType, audit.Operation.ZonedDateTime.String(),
-			strconv.FormatInt(audit.Operation.ResourceID, 10), audit.Operation.ResourceName,
-			audit.Operation.ResourceType, audit.Operation.UserName, audit.Status, strconv.FormatInt(audit.Duration, 10)})
+		tableRows = append(tableRows, &auditListOut{audit})
 	}
 	output.WriteList(auditListHeader, tableRows)
+
+	// tableRows = append(tableRows, &auditListOut{strconv.FormatInt(audit.AuditID, 10),
+	// 	audit.Operation.EventType, audit.Operation.ZonedDateTime.String(),
+	// 	strconv.FormatInt(audit.Operation.ResourceID, 10), audit.Operation.ResourceName,
+	// 	audit.Operation.ResourceType, audit.Operation.UserName, audit.Status, strconv.FormatInt(audit.Duration, 10)})
 }
 
-func ShowAudit(c *cli.Context) {
+func DescribeAudit(c *cli.Context) {
 	checkRequiredFlagsAndArguments(c)
-	defer utils.TimeTrack(time.Now(), "show audits")
-	log.Infof("[ShowAudit] Show audit entry identified by Audit ID")
+	defer utils.TimeTrack(time.Now(), "describe audit")
+	log.Infof("[DescribeAudit] Show audit entry identified by Audit ID")
 	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
 	auditID, err := strconv.ParseInt(c.String(FlAuditID.Name), 10, 64)
 	if err != nil {

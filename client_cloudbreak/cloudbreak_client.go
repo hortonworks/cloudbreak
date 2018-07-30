@@ -14,29 +14,23 @@ import (
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1accountpreferences"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1audits"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1blueprints"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/v1clustertemplates"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1connectors"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/v1constraints"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1credentials"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1events"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1flexsubscriptions"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1imagecatalogs"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1ldap"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1mpacks"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/v1networks"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1organizations"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1proxyconfigs"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1rdsconfigs"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1recipes"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1repositoryconfigs"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/v1securitygroups"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1securityrules"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1settings"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1smartsensesubscriptions"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1stacks"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1subscriptions"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/v1templates"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/v1topologies"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1usages"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1users"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1util"
@@ -91,11 +85,7 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *Cloudbreak
 
 	cli.V1blueprints = v1blueprints.New(transport, formats)
 
-	cli.V1clustertemplates = v1clustertemplates.New(transport, formats)
-
 	cli.V1connectors = v1connectors.New(transport, formats)
-
-	cli.V1constraints = v1constraints.New(transport, formats)
 
 	cli.V1credentials = v1credentials.New(transport, formats)
 
@@ -109,8 +99,6 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *Cloudbreak
 
 	cli.V1mpacks = v1mpacks.New(transport, formats)
 
-	cli.V1networks = v1networks.New(transport, formats)
-
 	cli.V1organizations = v1organizations.New(transport, formats)
 
 	cli.V1proxyconfigs = v1proxyconfigs.New(transport, formats)
@@ -121,8 +109,6 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *Cloudbreak
 
 	cli.V1repositoryconfigs = v1repositoryconfigs.New(transport, formats)
 
-	cli.V1securitygroups = v1securitygroups.New(transport, formats)
-
 	cli.V1securityrules = v1securityrules.New(transport, formats)
 
 	cli.V1settings = v1settings.New(transport, formats)
@@ -132,10 +118,6 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *Cloudbreak
 	cli.V1stacks = v1stacks.New(transport, formats)
 
 	cli.V1subscriptions = v1subscriptions.New(transport, formats)
-
-	cli.V1templates = v1templates.New(transport, formats)
-
-	cli.V1topologies = v1topologies.New(transport, formats)
 
 	cli.V1usages = v1usages.New(transport, formats)
 
@@ -197,11 +179,7 @@ type Cloudbreak struct {
 
 	V1blueprints *v1blueprints.Client
 
-	V1clustertemplates *v1clustertemplates.Client
-
 	V1connectors *v1connectors.Client
-
-	V1constraints *v1constraints.Client
 
 	V1credentials *v1credentials.Client
 
@@ -215,8 +193,6 @@ type Cloudbreak struct {
 
 	V1mpacks *v1mpacks.Client
 
-	V1networks *v1networks.Client
-
 	V1organizations *v1organizations.Client
 
 	V1proxyconfigs *v1proxyconfigs.Client
@@ -227,8 +203,6 @@ type Cloudbreak struct {
 
 	V1repositoryconfigs *v1repositoryconfigs.Client
 
-	V1securitygroups *v1securitygroups.Client
-
 	V1securityrules *v1securityrules.Client
 
 	V1settings *v1settings.Client
@@ -238,10 +212,6 @@ type Cloudbreak struct {
 	V1stacks *v1stacks.Client
 
 	V1subscriptions *v1subscriptions.Client
-
-	V1templates *v1templates.Client
-
-	V1topologies *v1topologies.Client
 
 	V1usages *v1usages.Client
 
@@ -266,11 +236,7 @@ func (c *Cloudbreak) SetTransport(transport runtime.ClientTransport) {
 
 	c.V1blueprints.SetTransport(transport)
 
-	c.V1clustertemplates.SetTransport(transport)
-
 	c.V1connectors.SetTransport(transport)
-
-	c.V1constraints.SetTransport(transport)
 
 	c.V1credentials.SetTransport(transport)
 
@@ -284,8 +250,6 @@ func (c *Cloudbreak) SetTransport(transport runtime.ClientTransport) {
 
 	c.V1mpacks.SetTransport(transport)
 
-	c.V1networks.SetTransport(transport)
-
 	c.V1organizations.SetTransport(transport)
 
 	c.V1proxyconfigs.SetTransport(transport)
@@ -296,8 +260,6 @@ func (c *Cloudbreak) SetTransport(transport runtime.ClientTransport) {
 
 	c.V1repositoryconfigs.SetTransport(transport)
 
-	c.V1securitygroups.SetTransport(transport)
-
 	c.V1securityrules.SetTransport(transport)
 
 	c.V1settings.SetTransport(transport)
@@ -307,10 +269,6 @@ func (c *Cloudbreak) SetTransport(transport runtime.ClientTransport) {
 	c.V1stacks.SetTransport(transport)
 
 	c.V1subscriptions.SetTransport(transport)
-
-	c.V1templates.SetTransport(transport)
-
-	c.V1topologies.SetTransport(transport)
 
 	c.V1usages.SetTransport(transport)
 

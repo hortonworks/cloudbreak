@@ -1581,7 +1581,7 @@ func main() {
 		},
 		{
 			Name:  "audit",
-			Usage: "audits related operations",
+			Usage: "audit related operations",
 			Subcommands: []cli.Command{
 				{
 					Name:   "list",
@@ -1596,11 +1596,11 @@ func main() {
 					},
 				},
 				{
-					Name:   "show",
-					Usage:  "show audit entry",
+					Name:   "describe",
+					Usage:  "describe an audit entry",
 					Flags:  cb.NewFlagBuilder().AddFlags(cb.FlAuditID).AddOutputFlag().AddAuthenticationFlags().Build(),
 					Before: ConfigRead,
-					Action: cb.ShowAudit,
+					Action: cb.DescribeAudit,
 					BashComplete: func(c *cli.Context) {
 						for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlAuditID).AddOutputFlag().AddAuthenticationFlags().Build() {
 							printFlagCompletion(f)
@@ -1719,6 +1719,78 @@ func main() {
 					Action: cb.ListMpacks,
 					BashComplete: func(c *cli.Context) {
 						for _, f := range cb.NewFlagBuilder().AddOutputFlag().AddAuthenticationFlags().Build() {
+							printFlagCompletion(f)
+						}
+					},
+				},
+			},
+		},
+		{
+			Name:  "user",
+			Usage: "user related operations",
+			Subcommands: []cli.Command{
+				{
+					Name:   "list",
+					Usage:  "list users",
+					Flags:  cb.NewFlagBuilder().AddOutputFlag().AddAuthenticationFlags().Build(),
+					Before: ConfigRead,
+					Action: cb.ListUsers,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddOutputFlag().AddAuthenticationFlags().Build() {
+							printFlagCompletion(f)
+						}
+					},
+				},
+			},
+		},
+		{
+			Name:  "org",
+			Usage: "organization related operations",
+			Subcommands: []cli.Command{
+				{
+					Name:   "create",
+					Usage:  "create a new organization",
+					Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddAuthenticationFlags().Build(),
+					Before: ConfigRead,
+					Action: cb.CreateOrg,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddAuthenticationFlags().Build() {
+							printFlagCompletion(f)
+						}
+					},
+				},
+				{
+					Name:   "delete",
+					Usage:  "deletes an organization",
+					Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().Build(),
+					Before: ConfigRead,
+					Action: cb.DeleteOrg,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().Build() {
+							printFlagCompletion(f)
+						}
+					},
+				},
+				{
+					Name:   "list",
+					Usage:  "list organizations",
+					Flags:  cb.NewFlagBuilder().AddOutputFlag().AddAuthenticationFlags().Build(),
+					Before: ConfigRead,
+					Action: cb.ListOrgs,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddOutputFlag().AddAuthenticationFlags().Build() {
+							printFlagCompletion(f)
+						}
+					},
+				},
+				{
+					Name:   "describe",
+					Usage:  "describes an organization",
+					Flags:  cb.NewFlagBuilder().AddOutputFlag().AddFlags(cb.FlName).AddAuthenticationFlags().Build(),
+					Before: ConfigRead,
+					Action: cb.DescribeOrg,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddOutputFlag().AddFlags(cb.FlName).AddAuthenticationFlags().Build() {
 							printFlagCompletion(f)
 						}
 					},
