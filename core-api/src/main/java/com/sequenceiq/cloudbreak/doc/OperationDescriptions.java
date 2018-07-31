@@ -358,6 +358,10 @@ public class OperationDescriptions {
         public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private Image Catalog by id";
         public static final String PUT_PUBLIC_BY_NAME = "update public (owned) or private Image Catalog by id";
         public static final String GET_BY_IMAGE_CATALOG_NAME = "retrieve imagecatalog request by imagecatalog name";
+        public static final String GET_IMAGES_BY_CLUSTER_NAME_AND_CUSTOM_IMAGE_CATALOG = "determines available images for the given cluster"
+                + "from the given imagecatalog name";
+        public static final String GET_IMAGES_BY_CLUSTER_NAME = "determines available images for the given cluster"
+                + "from the default image catalog";
     }
 
     public static class SecurityRuleOpDescription {
