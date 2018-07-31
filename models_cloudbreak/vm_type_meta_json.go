@@ -23,7 +23,7 @@ type VMTypeMetaJSON struct {
 	Configs []*VolumeParameterConfigJSON `json:"configs"`
 
 	// properties
-	Properties map[string]string `json:"properties,omitempty"`
+	Properties map[string]interface{} `json:"properties,omitempty"`
 }
 
 /* polymorph VmTypeMetaJson configs false */

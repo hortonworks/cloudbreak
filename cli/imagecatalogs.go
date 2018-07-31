@@ -38,7 +38,7 @@ func (r *imageOut) DataAsStringArray() []string {
 	return []string{r.Date, r.Description, r.Version, r.ImageID}
 }
 
-var imageDetailsHeader = []string{"Date", "Description", "Version", "ImageID", "OS", "OS Type", "Images", "Package Versions"}
+var imageDetailsHeader = []string{"Date", "Description", "Ambari Version", "ImageID", "OS", "OS Type", "Images", "Package Versions"}
 
 type imageDetailsOut struct {
 	Date            string                       `json:"Date" yaml:"Date"`
@@ -193,6 +193,48 @@ func listImages(c *cli.Context) {
 	listImagesImpl(cbClient.Cloudbreak.V1imagecatalogs, output.WriteList, c.String(FlImageCatalog.Name))
 }
 
+func ListImagesValidForUpgrade(c *cli.Context) {
+	checkRequiredFlagsAndArguments(c)
+	defer utils.TimeTrack(time.Now(), "list images valid for stack upgrade")
+
+	cbClient := NewCloudbreakHTTPClientFromContext(c)
+
+	clusterName := c.String(FlClusterToUpgrade.Name)
+	imageCatalogName := c.String(FlImageCatalogOptional.Name)
+	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
+
+	if imageCatalogName != "" {
+		log.Infof("[ListImagesValidForUpgrade] sending list images request, stack: %s, catalog: %s", clusterName, imageCatalogName)
+		imageResp, err := cbClient.Cloudbreak.V1imagecatalogs.GetImagesByStackNameAndCustomImageCatalog(v1imagecatalogs.NewGetImagesByStackNameAndCustomImageCatalogParams().WithName(imageCatalogName).WithStackName(clusterName))
+		if err != nil {
+			utils.LogErrorAndExit(err)
+		}
+		writeImageListInformation(output.WriteList, toImageResponseList(imageResp.Payload))
+	} else {
+		log.Infof("[ListImagesValidForUpgrade] sending list images request using the default catalog, stack: %s", clusterName)
+		imageResp, err := cbClient.Cloudbreak.V1imagecatalogs.GetImagesByStackNameAndDefaultImageCatalog(v1imagecatalogs.NewGetImagesByStackNameAndDefaultImageCatalogParams().WithStackName(clusterName))
+		if err != nil {
+			utils.LogErrorAndExit(err)
+		}
+		writeImageListInformation(output.WriteList, toImageResponseList(imageResp.Payload))
+	}
+}
+
+func toImageResponseList(images *models_cloudbreak.ImagesResponse) []*models_cloudbreak.ImageResponse {
+	var imagesList = make([]*models_cloudbreak.ImageResponse, 0, len(images.BaseImages)+len(images.HdfImages)+len(images.HdpImages))
+	for _, i := range images.BaseImages {
+		imagesList = append(imagesList, toImageResponse(i))
+	}
+	for _, i := range images.HdfImages {
+		imagesList = append(imagesList, i)
+	}
+	for _, i := range images.HdpImages {
+		imagesList = append(imagesList, i)
+	}
+
+	return imagesList
+}
+
 func DescribeAwsImage(c *cli.Context) {
 	cloud.SetProviderType(cloud.AWS)
 	describeImage(c)
@@ -235,7 +277,7 @@ func describeImageImpl(client getPublicImagesClient, writer func([]string, []uti
 		utils.LogErrorMessageAndExit(fmt.Sprintf("Image not found by id: %s for cloud: %s", imageid, *provider))
 	}
 
-	listImageInformation(writer, image)
+	writeImageInformation(writer, image)
 }
 
 func findImageByUUID(imageResponse *models_cloudbreak.ImagesResponse, imageID string) *models_cloudbreak.ImageResponse {
@@ -247,10 +289,14 @@ func findImageByUUID(imageResponse *models_cloudbreak.ImagesResponse, imageID st
 		}
 		return warmupImage
 	}
+	return toImageResponse(image)
+}
+
+func toImageResponse(image *models_cloudbreak.BaseImageResponse) *models_cloudbreak.ImageResponse {
 	return &models_cloudbreak.ImageResponse{
 		Date:            image.Date,
 		Description:     image.Description,
-		Version:         image.Version,
+		Version:         "",
 		UUID:            image.UUID,
 		Os:              image.Os,
 		OsType:          image.OsType,
@@ -277,9 +323,18 @@ func findWarmupImage(images []*models_cloudbreak.ImageResponse, imageID string) 
 	return nil
 }
 
-func listImageInformation(writer func([]string, []utils.Row), image *models_cloudbreak.ImageResponse) {
+func writeImageInformation(writer func([]string, []utils.Row), image *models_cloudbreak.ImageResponse) {
 	tableRows := []utils.Row{}
 	tableRows = append(tableRows, &imageDetailsOut{image.Date, image.Description, image.Version, image.UUID, image.Os, image.OsType, image.Images, image.PackageVersions})
+	writer(imageDetailsHeader, tableRows)
+}
+
+func writeImageListInformation(writer func([]string, []utils.Row), payload []*models_cloudbreak.ImageResponse) {
+	tableRows := []utils.Row{}
+
+	for _, i := range payload {
+		tableRows = append(tableRows, &imageDetailsOut{i.Date, i.Description, i.Version, i.UUID, i.Os, i.OsType, i.Images, i.PackageVersions})
+	}
 	writer(imageDetailsHeader, tableRows)
 }
 

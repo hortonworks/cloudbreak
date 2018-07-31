@@ -109,3 +109,27 @@ func TestSemicolonDelimiterConvertToEmptyString(t *testing.T) {
 		t.Errorf("content not match content == %s", result)
 	}
 }
+
+func TestSafeStringTypeAssertOk(t *testing.T) {
+	t.Parallel()
+	strValue := "string value"
+	var value interface{}
+	value = strValue
+
+	convertedValue := SafeStringTypeAssert(value)
+	if convertedValue != "string value" {
+		t.Errorf("conversion failed, expected %s, received %s", strValue, convertedValue)
+	}
+}
+
+func TestSafeStringTypeAssertWithOtherType(t *testing.T) {
+	t.Parallel()
+	intValue := 13
+	var value interface{}
+	value = intValue
+
+	convertedValue := SafeStringTypeAssert(value)
+	if convertedValue != "" {
+		t.Errorf("conversion failed, expected %s, received %s", "", convertedValue)
+	}
+}

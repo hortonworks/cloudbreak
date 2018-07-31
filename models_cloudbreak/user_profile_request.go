@@ -23,6 +23,9 @@ type UserProfileRequest struct {
 	// credential name
 	CredentialName string `json:"credentialName,omitempty"`
 
+	// image catalog name
+	ImageCatalogName string `json:"imageCatalogName,omitempty"`
+
 	// ui properties
 	UIProperties map[string]interface{} `json:"uiProperties,omitempty"`
 }
@@ -30,6 +33,8 @@ type UserProfileRequest struct {
 /* polymorph UserProfileRequest credentialId false */
 
 /* polymorph UserProfileRequest credentialName false */
+
+/* polymorph UserProfileRequest imageCatalogName false */
 
 /* polymorph UserProfileRequest uiProperties false */
 

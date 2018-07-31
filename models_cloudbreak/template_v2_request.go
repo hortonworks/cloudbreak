@@ -27,7 +27,7 @@ type TemplateV2Request struct {
 	CustomInstanceType *CustomInstanceType `json:"customInstanceType,omitempty"`
 
 	// gcp specific parameters for template
-	GcpTemlateParameters GcpParameters `json:"gcpTemlateParameters,omitempty"`
+	GcpTemlateParameters *GcpParameters `json:"gcpTemlateParameters,omitempty"`
 
 	// type of the instance
 	InstanceType string `json:"instanceType,omitempty"`
@@ -97,6 +97,11 @@ func (m *TemplateV2Request) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
+	if err := m.validateGcpTemlateParameters(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
@@ -152,6 +157,25 @@ func (m *TemplateV2Request) validateCustomInstanceType(formats strfmt.Registry) 
 		if err := m.CustomInstanceType.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("customInstanceType")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *TemplateV2Request) validateGcpTemlateParameters(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.GcpTemlateParameters) { // not required
+		return nil
+	}
+
+	if m.GcpTemlateParameters != nil {
+
+		if err := m.GcpTemlateParameters.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("gcpTemlateParameters")
 			}
 			return err
 		}

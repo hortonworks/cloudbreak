@@ -24,6 +24,7 @@ import (
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1ldap"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1mpacks"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1networks"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v1organizations"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1proxyconfigs"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1rdsconfigs"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1recipes"
@@ -109,6 +110,8 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *Cloudbreak
 	cli.V1mpacks = v1mpacks.New(transport, formats)
 
 	cli.V1networks = v1networks.New(transport, formats)
+
+	cli.V1organizations = v1organizations.New(transport, formats)
 
 	cli.V1proxyconfigs = v1proxyconfigs.New(transport, formats)
 
@@ -214,6 +217,8 @@ type Cloudbreak struct {
 
 	V1networks *v1networks.Client
 
+	V1organizations *v1organizations.Client
+
 	V1proxyconfigs *v1proxyconfigs.Client
 
 	V1rdsconfigs *v1rdsconfigs.Client
@@ -280,6 +285,8 @@ func (c *Cloudbreak) SetTransport(transport runtime.ClientTransport) {
 	c.V1mpacks.SetTransport(transport)
 
 	c.V1networks.SetTransport(transport)
+
+	c.V1organizations.SetTransport(transport)
 
 	c.V1proxyconfigs.SetTransport(transport)
 

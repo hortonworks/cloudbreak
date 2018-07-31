@@ -115,6 +115,66 @@ func (a *Client) GetImagesByProvider(params *GetImagesByProviderParams) (*GetIma
 }
 
 /*
+GetImagesByStackNameAndCustomImageCatalog determines available images for the given stackfrom the given imagecatalog name
+
+Provides an interface to determine available Virtual Machine images for the given stack.Please consider running sync beforehand
+*/
+func (a *Client) GetImagesByStackNameAndCustomImageCatalog(params *GetImagesByStackNameAndCustomImageCatalogParams) (*GetImagesByStackNameAndCustomImageCatalogOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetImagesByStackNameAndCustomImageCatalogParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getImagesByStackNameAndCustomImageCatalog",
+		Method:             "GET",
+		PathPattern:        "/v1/imagecatalogs/account/upgrade/{stackName}/{name}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetImagesByStackNameAndCustomImageCatalogReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetImagesByStackNameAndCustomImageCatalogOK), nil
+
+}
+
+/*
+GetImagesByStackNameAndDefaultImageCatalog determines available images for the given stackfrom the default image catalog
+
+Provides an interface to determine available Virtual Machine images for the given stack.Please consider running sync beforehand
+*/
+func (a *Client) GetImagesByStackNameAndDefaultImageCatalog(params *GetImagesByStackNameAndDefaultImageCatalogParams) (*GetImagesByStackNameAndDefaultImageCatalogOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetImagesByStackNameAndDefaultImageCatalogParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getImagesByStackNameAndDefaultImageCatalog",
+		Method:             "GET",
+		PathPattern:        "/v1/imagecatalogs/account/upgrade/{stackName}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetImagesByStackNameAndDefaultImageCatalogReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetImagesByStackNameAndDefaultImageCatalogOK), nil
+
+}
+
+/*
 GetPublicImageCatalogsByName gets custom image catalog by name
 
 Provides an interface to determine available Virtual Machine images for the given version of Cloudbreak.

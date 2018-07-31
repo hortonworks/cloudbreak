@@ -340,7 +340,7 @@ func main() {
 				},
 				{
 					Name:   "change-image",
-					Usage:  "changes image of cluster - will be used when creating new instances or repairing failed ones",
+					Usage:  "changes image of the cluster - will be used when creating new instances or repairing failed ones",
 					Before: ConfigRead,
 					Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlImageId, cb.FlImageCatalogOptional).AddAuthenticationFlags().Build(),
 					Action: cb.ChangeImage,
@@ -1377,6 +1377,18 @@ func main() {
 							Action: cb.ListOpenstackImages,
 							BashComplete: func(c *cli.Context) {
 								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlImageCatalog).AddOutputFlag().AddAuthenticationFlags().Build() {
+									printFlagCompletion(f)
+								}
+							},
+						},
+						{
+							Name:   "cluster-upgrade",
+							Usage:  "lists images that are valid for upgrading the cluster",
+							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlClusterToUpgrade).AddFlags(cb.FlImageCatalogOptional).AddOutputFlag().AddAuthenticationFlags().Build(),
+							Before: ConfigRead,
+							Action: cb.ListImagesValidForUpgrade,
+							BashComplete: func(c *cli.Context) {
+								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlClusterToUpgrade).AddFlags(cb.FlImageCatalog).AddOutputFlag().AddAuthenticationFlags().Build() {
 									printFlagCompletion(f)
 								}
 							},

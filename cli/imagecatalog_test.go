@@ -131,7 +131,7 @@ var detailedImage = &models_cloudbreak.ImageResponse{
 func TestListImageInformation(t *testing.T) {
 	var rows []utils.Row
 
-	listImageInformation(func(h []string, r []utils.Row) { rows = r }, detailedImage)
+	writeImageInformation(func(h []string, r []utils.Row) { rows = r }, detailedImage)
 	if len(rows) != 1 {
 		t.Fatalf("row number doesn't match %d == 1", len(rows))
 	}

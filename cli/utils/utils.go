@@ -108,3 +108,11 @@ func CopyToByTargets(sourceParameters map[string]interface{}, parameters ...stri
 	}
 	return destinationParameters
 }
+
+func SafeStringTypeAssert(value interface{}) string {
+	strValue, ok := value.(string)
+	if ok {
+		return strValue
+	}
+	return ""
+}

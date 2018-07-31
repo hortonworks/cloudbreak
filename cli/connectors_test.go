@@ -100,7 +100,7 @@ func (*mockInstanceTypesClient) GetVMTypesByCredentialID(*v2connectors.GetVMType
 					{
 						Value: "machine",
 						VMTypeMetaJSON: &models_cloudbreak.VMTypeMetaJSON{
-							Properties: map[string]string{
+							Properties: map[string]interface{}{
 								"Cpu":    "1",
 								"Memory": "1",
 							},

@@ -85,6 +85,36 @@ func (a *Client) EvictUserDetails(params *EvictUserDetailsParams) (*EvictUserDet
 }
 
 /*
+GetAllUsers retrieves all users in the tenant
+
+Users can be invited under an account by the administrator, and all resources (e.g. resources, networks, blueprints, credentials, clusters) can be shared across account users
+*/
+func (a *Client) GetAllUsers(params *GetAllUsersParams) (*GetAllUsersOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetAllUsersParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getAllUsers",
+		Method:             "GET",
+		PathPattern:        "/v1/users",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetAllUsersReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetAllUsersOK), nil
+
+}
+
+/*
 GetUserProfile users related profile
 
 Users can be invited under an account by the administrator, and all resources (e.g. resources, networks, blueprints, credentials, clusters) can be shared across account users

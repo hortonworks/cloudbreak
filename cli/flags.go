@@ -119,6 +119,13 @@ var (
 			Usage: "name of resource",
 		},
 	}
+	FlClusterToUpgrade = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "cluster",
+			Usage: "cluster to upgrade",
+		},
+	}
 	FlDescriptionOptional = StringFlag{
 		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{

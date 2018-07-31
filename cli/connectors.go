@@ -216,7 +216,7 @@ func listInstanceTypesImpl(client getInstanceTypesClient, writer func([]string, 
 
 	tableRows := []utils.Row{}
 	for _, instance := range machines.VirtualMachines {
-		tableRows = append(tableRows, &instanceOut{instance.Value, instance.VMTypeMetaJSON.Properties["Cpu"], instance.VMTypeMetaJSON.Properties["Memory"], avzone})
+		tableRows = append(tableRows, &instanceOut{instance.Value, utils.SafeStringTypeAssert(instance.VMTypeMetaJSON.Properties["Cpu"]), utils.SafeStringTypeAssert(instance.VMTypeMetaJSON.Properties["Memory"]), avzone})
 	}
 	sortByName(tableRows)
 	writer(instanceHeader, tableRows)

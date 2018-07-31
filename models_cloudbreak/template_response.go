@@ -37,7 +37,7 @@ type TemplateResponse struct {
 	Description *string `json:"description,omitempty"`
 
 	// gcp specific parameters for template
-	GcpTemlateParameters GcpParameters `json:"gcpTemlateParameters,omitempty"`
+	GcpTemlateParameters *GcpParameters `json:"gcpTemlateParameters,omitempty"`
 
 	// id of the resource
 	ID int64 `json:"id,omitempty"`
@@ -144,6 +144,11 @@ func (m *TemplateResponse) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
+	if err := m.validateGcpTemlateParameters(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
 	if err := m.validateName(formats); err != nil {
 		// prop
 		res = append(res, err)
@@ -243,6 +248,25 @@ func (m *TemplateResponse) validateDescription(formats strfmt.Registry) error {
 
 	if err := validate.MaxLength("description", "body", string(*m.Description), 1000); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *TemplateResponse) validateGcpTemlateParameters(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.GcpTemlateParameters) { // not required
+		return nil
+	}
+
+	if m.GcpTemlateParameters != nil {
+
+		if err := m.GcpTemlateParameters.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("gcpTemlateParameters")
+			}
+			return err
+		}
 	}
 
 	return nil

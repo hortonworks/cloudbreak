@@ -23,6 +23,9 @@ type UserProfileResponse struct {
 	// credential
 	Credential *CredentialResponse `json:"credential,omitempty"`
 
+	// image catalog
+	ImageCatalog *ImageCatalogShortResponse `json:"imageCatalog,omitempty"`
+
 	// owner
 	Owner string `json:"owner,omitempty"`
 
@@ -34,6 +37,8 @@ type UserProfileResponse struct {
 
 /* polymorph UserProfileResponse credential false */
 
+/* polymorph UserProfileResponse imageCatalog false */
+
 /* polymorph UserProfileResponse owner false */
 
 /* polymorph UserProfileResponse uiProperties false */
@@ -43,6 +48,11 @@ func (m *UserProfileResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateCredential(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateImageCatalog(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -64,6 +74,25 @@ func (m *UserProfileResponse) validateCredential(formats strfmt.Registry) error 
 		if err := m.Credential.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("credential")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *UserProfileResponse) validateImageCatalog(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ImageCatalog) { // not required
+		return nil
+	}
+
+	if m.ImageCatalog != nil {
+
+		if err := m.ImageCatalog.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("imageCatalog")
 			}
 			return err
 		}
