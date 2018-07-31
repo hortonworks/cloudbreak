@@ -1,17 +1,17 @@
 # Blueprints
 : ${BLUEPRINT_FILE:=blueprints/test.bp}
-: ${BLUEPRINT_URL:=https://gist.githubusercontent.com/mhalmy/8309c7e4a4649fa85f38b260a38146af/raw/5c3534c7f1849ffea64a81d467d5eee801858ff7/test.bp}
+: ${BLUEPRINT_URL:=https://rawgit.com/hortonworks/cb-cli/master/tests/blueprints/test.bp}
 : ${BLUEPRINT_NAME:="EDW-ETL: Apache Hive, Apache Spark 2"}
 
 # Recipes
 : ${RECIPE_NAME:=test-recipe}
-: ${RECIPE_URL:="https://gist.githubusercontent.com/aszegedi/4fc4a6a2fd319da436df6441c04c68e1/raw/5698a1106a2365eb543e9d3c830e14f955882437/post-install.sh"}
+: ${RECIPE_URL:=https://rawgit.com/hortonworks/cb-cli/master/tests/recipes/post-install.sh}
 : ${RECIPE_FILE:=scripts/recipe.sh}
 
 # Image catalog DEV
 : ${IMAGE_CATALOG_NAME:=test-catalog}
 : ${IMAGE_CATALOG_NAME_DEFAULT:=cloudbreak-default}
-: ${IMAGE_CATALOG_URL:="https://s3-eu-west-1.amazonaws.com/cloudbreak-info/v2-dev-cb-image-catalog.json"}
+: ${IMAGE_CATALOG_URL:=https://s3-eu-west-1.amazonaws.com/cloudbreak-info/v2-dev-cb-image-catalog.json}
 
 # Input JSON files
 : ${AWS_INPUT_JSON_FILE:=templates/aws-template.json}

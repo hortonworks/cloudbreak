@@ -23,12 +23,12 @@
 
 # Blueprints
 : ${BLUEPRINT_FILE:="blueprints/test.bp"}
-: ${BLUEPRINT_URL:=https://gist.githubusercontent.com/mhalmy/8309c7e4a4649fa85f38b260a38146af/raw/5c3534c7f1849ffea64a81d467d5eee801858ff7/test.bp}
+: ${BLUEPRINT_URL:=https://rawgit.com/hortonworks/cb-cli/master/tests/blueprints/test.bp}
 : ${BLUEPRINT_NAME:="EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin 0.7.0"}
 
 # Recipes
 : ${RECIPE_NAME:="test-recipe"}
-: ${RECIPE_URL:="https://gist.githubusercontent.com/aszegedi/4fc4a6a2fd319da436df6441c04c68e1/raw/5698a1106a2365eb543e9d3c830e14f955882437/post-install.sh"}
+: ${RECIPE_URL:=https://rawgit.com/hortonworks/cb-cli/master/tests/recipes/post-install.sh}
 : ${RECIPE_FILE:="scripts/recipe.sh"}
 
 # Image catalog

@@ -24,8 +24,7 @@ RSpec.shared_context "mock shared vars", :a => :b do
     @valid_cred_json = "{\"Name\":\"test\"}"
     @invalid_cred_json = "{\"Other\":\"test\"}"
 
-    @imagecatalog_invalid_json = "https://gist.githubusercontent.com/mhalmy/a206484148d0cb02085bfbd8a58af97f/raw/f9c0a0fea59a67e1e7a" +
-    "80f5e7b6defd97a69f26f/imagecatalog_invalid.json"
+    @imagecatalog_invalid_json = "https://rawgit.com/hortonworks/cb-cli/master/tests/templates/imagecatalog_invalid.json"
 
   	@db_name = "mockdbname"
   	@db_url = "jdbc:postgresql://test:99/mock"
@@ -40,12 +39,12 @@ RSpec.shared_context "mock shared vars", :a => :b do
 
     @default_blueprint_name = "'EDW-ETL: Apache Hive, Apache Spark 2'"
     @blueprint_name_file = "cli-bp-file"
-    @blueprint_url = "https://gist.githubusercontent.com/mhalmy/8309c7e4a4649fa85f38b260a38146af/raw/5c3534c7f1849ffea64a81d467d5eee801858ff7/test.bp"
+    @blueprint_url = "https://rawgit.com/hortonworks/cb-cli/master/tests/blueprints/test.bp"
     @blueprint_file = "../../blueprints/test.bp"
 
     @recipe_types = Array["pre-ambari-start", "pre-termination","post-ambari-start", "post-cluster-install"]
     @recipe_name = "cli-recipe-url"
-    @recipe_url = "https://gist.githubusercontent.com/aszegedi/4fc4a6a2fd319da436df6441c04c68e1/raw/5698a1106a2365eb543e9d3c830e14f955882437/post-install.sh"
+    @recipe_url = "https://rawgit.com/hortonworks/cb-cli/master/tests/recipes/post-install.sh"
     @recipe_file = "../../scripts/recipe.sh"
 
     @ldap_name = "cli-ldap"

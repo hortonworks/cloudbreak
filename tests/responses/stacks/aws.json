@@ -70,7 +70,7 @@
             "description": "",
             "recipeType": "PRE_AMBARI_START",
             "content": "IyEvYmluL2Jhc2gKdG91Y2ggL3ByZS1pbnN0YWxsCmVjaG8gIkhlbGxvIFByZS1JbnN0YWxsIiA+PiAvcHJlLWluc3RhbGw=",
-            "uri": "https://gist.githubusercontent.com/aszegedi/a31408e3110eee0ffa34d29db25519d4/raw/be9fc7198d64a9a98ce319a867a6c5e6270386b4/pre-install.sh",
+            "uri": "https://rawgit.com/hortonworks/cb-cli/master/tests/recipes/pre-install.sh",
             "id": 1,
             "public": true
           }
@@ -95,7 +95,7 @@
             "description": "",
             "recipeType": "PRE_AMBARI_START",
             "content": "IyEvYmluL2Jhc2gKdG91Y2ggL3ByZS1pbnN0YWxsCmVjaG8gIkhlbGxvIFByZS1JbnN0YWxsIiA+PiAvcHJlLWluc3RhbGw=",
-            "uri": "https://gist.githubusercontent.com/aszegedi/a31408e3110eee0ffa34d29db25519d4/raw/be9fc7198d64a9a98ce319a867a6c5e6270386b4/pre-install.sh",
+            "uri": "https://rawgit.com/hortonworks/cb-cli/master/tests/recipes/pre-install.sh",
             "id": 1,
             "public": true
           }
@@ -120,7 +120,7 @@
             "description": "",
             "recipeType": "PRE_AMBARI_START",
             "content": "IyEvYmluL2Jhc2gKdG91Y2ggL3ByZS1pbnN0YWxsCmVjaG8gIkhlbGxvIFByZS1JbnN0YWxsIiA+PiAvcHJlLWluc3RhbGw=",
-            "uri": "https://gist.githubusercontent.com/aszegedi/a31408e3110eee0ffa34d29db25519d4/raw/be9fc7198d64a9a98ce319a867a6c5e6270386b4/pre-install.sh",
+            "uri": "https://rawgit.com/hortonworks/cb-cli/master/tests/recipes/pre-install.sh",
             "id": 1,
             "public": true
           }
