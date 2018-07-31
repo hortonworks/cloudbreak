@@ -1,22 +1,20 @@
 package com.sequenceiq.it.cloudbreak;
 
-import static com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants.CLOUDPROVIDER;
-
-import java.util.Set;
-
-import javax.inject.Inject;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.ForbiddenException;
-
-import org.testng.Assert;
-import org.testng.annotations.AfterSuite;
-import org.testng.annotations.Test;
-
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImageCatalogResponse;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.ImageCatalog;
 import com.sequenceiq.it.util.LongStringGeneratorUtil;
+import org.testng.Assert;
+import org.testng.annotations.AfterSuite;
+import org.testng.annotations.Test;
+
+import javax.inject.Inject;
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.ForbiddenException;
+import java.util.Set;
+
+import static com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants.CLOUDPROVIDER;
 
 public class ImageCatalogTests extends CloudbreakTest {
     private static final String VALID_IMAGECATALOG_NAME = "valid-imagecat";
@@ -29,8 +27,8 @@ public class ImageCatalogTests extends CloudbreakTest {
 
     private static final String INVALID_IMAGECATALOG_URL = "google.com";
 
-    private static final String INVALID_IMAGECATALOG_JSON = "https://gist.githubusercontent.com/mhalmy/a206484148d0cb02085bfbd8a58af97f/raw/f9c0a0fea59a67e1e7a"
-    + "80f5e7b6defd97a69f26f/imagecatalog_invalid.json";
+    private static final String INVALID_IMAGECATALOG_JSON = "https://rawgit.com/hortonworks/cloudbreak/master/integration-test/src/main/resources/"
+            + "templates/imagecatalog_invalid.json";
 
     private static final String DEFAULT_IMAGECATALOG_NAME = "cloudbreak-default";
 
