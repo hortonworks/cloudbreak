@@ -156,3 +156,21 @@ tests:
           - testStopCluster
           - testStartCluster
           - testTerminateCluster
+  - name: "openstack change image"
+    preserveOrder: true
+    parameters:
+      clusterName: os-prewarm-datasci-changeimage
+      provider: openstack
+      blueprintName: "Data Science: Apache Spark 2, Apache Zeppelin"
+      image: hdp
+      instancegroupName: worker
+    classes:
+      - name: com.sequenceiq.it.cloudbreak.ClusterTests
+        includedMethods:
+          - testCreateNewRegularCluster
+          - testModifyImage
+          - testScaleCluster
+          - testStackImagesDifferent
+          - testStopCluster
+          - testStartCluster
+          - testTerminateCluster
