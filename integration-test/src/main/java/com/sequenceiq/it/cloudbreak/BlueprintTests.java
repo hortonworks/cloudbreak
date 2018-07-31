@@ -251,8 +251,8 @@ public class BlueprintTests extends CloudbreakTest {
     }
 
     private String getBlueprintUrl() {
-        return "https://gist.githubusercontent.com/aszegedi/852bc5cea158e3cd0eec88415580321b/"
-                + "raw/717daa56694ed544b58ff7ba8ca426144db4e518/empty.bp";
+        return "https://rawgit.com/hortonworks/cloudbreak/master/integration-test/src/main/resources/"
+                + "blueprint/multi-node-hdfs-yarn.bp";
     }
 
     private String getBlueprintInvalidUrl() {

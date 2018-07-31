@@ -1,10 +1,11 @@
 package com.sequenceiq.it.cloudbreak;
 
-import java.io.IOException;
-import java.util.Set;
-
-import javax.ws.rs.BadRequestException;
-
+import com.google.api.client.repackaged.org.apache.commons.codec.binary.Base64;
+import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
+import com.sequenceiq.cloudbreak.api.model.RecipeType;
+import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
+import com.sequenceiq.it.cloudbreak.newway.Recipe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StreamUtils;
@@ -12,20 +13,17 @@ import org.testng.Assert;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.Test;
 
-import com.google.api.client.repackaged.org.apache.commons.codec.binary.Base64;
-import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
-import com.sequenceiq.cloudbreak.api.model.RecipeType;
-import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
-import com.sequenceiq.it.cloudbreak.newway.Recipe;
+import javax.ws.rs.BadRequestException;
+import java.io.IOException;
+import java.util.Set;
 
 public class RecipeTests extends CloudbreakTest {
     private static final String VALID_RECIPE_NAME = "valid-recipe";
 
     private static final String VALID_RECIPE_DESCRIPTION = "recipe for API E2E tests";
 
-    private static final String VALID_RECIPE_URI = "https://gist.githubusercontent.com/aszegedi/4fc4a6a2fd319da436df6441c04c68e1/"
-            + "raw/5698a1106a2365eb543e9d3c830e14f955882437/post-install.sh";
+    private static final String VALID_RECIPE_URI = "https://rawgit.com/hortonworks/cloudbreak/master/integration-test/src/main/resources/"
+            + "recipes/post-install.sh";
 
     private static final String VALID_RECIPE_SCRIPT = "echo test";
 
