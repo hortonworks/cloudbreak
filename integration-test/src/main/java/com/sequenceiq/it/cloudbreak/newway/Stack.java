@@ -3,19 +3,28 @@ package com.sequenceiq.it.cloudbreak.newway;
 import static com.sequenceiq.it.cloudbreak.CloudbreakUtil.waitAndCheckClusterStatus;
 import static com.sequenceiq.it.cloudbreak.CloudbreakUtil.waitAndCheckStackStatus;
 import static com.sequenceiq.it.cloudbreak.CloudbreakUtil.waitAndExpectClusterFailure;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 
+import com.sequenceiq.cloudbreak.api.model.ImageJson;
+import com.sequenceiq.cloudbreak.api.model.stack.hardware.HardwareInfoGroupResponse;
+import com.sequenceiq.cloudbreak.api.model.stack.hardware.HardwareInfoResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetaDataJson;
 import com.sequenceiq.it.IntegrationTestContext;
@@ -61,6 +70,10 @@ public class Stack extends StackEntity {
 
     public static Action<Stack> get(String key) {
         return new Action<>(getTestContextStack(key), StackAction::get);
+    }
+
+    public static Action<Stack> get(Strategy strategy) {
+        return new Action<>(getTestContextStack(STACK), strategy);
     }
 
     public static Action<Stack> get() {
@@ -142,7 +155,7 @@ public class Stack extends StackEntity {
         });
     }
 
-    public static Assertion<Stack> checkRecipes(String [] searchOnHost, String[] files, String privateKey, String sshCommand, Integer require) {
+    public static Assertion<Stack> checkRecipes(String[] searchOnHost, String[] files, String privateKey, String sshCommand, Integer require) {
         return assertThis((stack, t) -> {
             List<String> ips = new ArrayList<>();
             List<String> emptyList = new ArrayList<>();
@@ -162,6 +175,28 @@ public class Stack extends StackEntity {
             } catch (Exception e) {
                 LOGGER.error("Error occurred during ssh execution: " + e);
             }
+        });
+    }
+
+    public static Assertion<Stack> checkImage(String imageId, String imageCatalogName) {
+        return assertThis((stack, t) -> {
+            ImageJson image = stack.getResponse().getImage();
+            assertEquals(imageId, image.getImageId());
+            if (StringUtils.isNotBlank(imageCatalogName)) {
+                assertEquals(imageCatalogName, image.getImageCatalogName());
+            }
+        });
+    }
+
+    public static Assertion<Stack> checkImagesDifferent() {
+        return assertThis((stack, t) -> {
+            Set<String> imageIds = stack.getResponse().getHardwareInfoGroups().stream()
+                    .map(HardwareInfoGroupResponse::getHardwareInfos)
+                    .map(hwInfoResponses -> hwInfoResponses.stream()
+                            .map(HardwareInfoResponse::getImageId).collect(Collectors.toSet()))
+                    .flatMap(Collection::stream).collect(Collectors.toSet());
+            assertTrue(imageIds.size() > 1);
+            assertTrue(imageIds.contains(stack.getResponse().getImage().getImageId()));
         });
     }
 }

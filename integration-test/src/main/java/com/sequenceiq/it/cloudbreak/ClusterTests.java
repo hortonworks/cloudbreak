@@ -12,6 +12,7 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImageResponse;
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImagesResponse;
+import com.sequenceiq.cloudbreak.api.model.stack.StackResponseEntries;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.SSOType;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
@@ -22,6 +23,8 @@ import com.sequenceiq.it.cloudbreak.newway.HostGroups;
 import com.sequenceiq.it.cloudbreak.newway.ImageSettings;
 import com.sequenceiq.it.cloudbreak.newway.Kerberos;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
+import com.sequenceiq.it.cloudbreak.newway.StackGetWithEntriesStrategy;
+import com.sequenceiq.it.cloudbreak.newway.StackImageChange;
 import com.sequenceiq.it.cloudbreak.newway.StackOperation;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
@@ -133,6 +136,24 @@ public class ClusterTests extends CloudbreakTest {
                 "check if ambari is available through knox");
     }
 
+    @Test(dataProvider = "providername", priority = 15)
+    public void testModifyImage(CloudProvider cloudProvider, String clusterName) throws Exception {
+        given(CloudbreakClient.isCreated());
+        given(cloudProvider.aValidCredential());
+        given(cloudProvider.aValidStackIsCreated()
+                .withName(clusterName), "a stack is created");
+        String provider = getTestParameter().get("provider").toLowerCase();
+        String imageId = getImageIdWithPkgVersions(provider, "");
+        given(StackImageChange.request().withImageId(imageId));
+
+        when(StackImageChange.changeImage(), "changeImage");
+        when(Stack.get());
+
+        then(Stack.waitAndCheckClusterAndStackAvailabilityStatus(),
+                "wait and check availability");
+        then(Stack.checkImage(imageId, null));
+    }
+
     @Test(dataProvider = "providernamehostgroupdesiredno", priority = 20)
     public void testScaleCluster(CloudProvider cloudProvider, String clusterName, String hostgroupName, int desiredCount) throws Exception {
         given(CloudbreakClient.isCreated());
@@ -150,6 +171,21 @@ public class ClusterTests extends CloudbreakTest {
                 getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_USER),
                 getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_PASSWORD)),
                 "check ambari");
+    }
+
+    @Test(dataProvider = "providername", priority = 25)
+    public void testStackImagesDifferent(CloudProvider cloudProvider, String clusterName) throws Exception {
+        given(CloudbreakClient.isCreated());
+        given(cloudProvider.aValidCredential());
+        given(cloudProvider.aValidStackIsCreated()
+                .withName(clusterName), "a stack is created");
+
+        when(Stack.get(StackGetWithEntriesStrategy.create(Collections.singleton(StackResponseEntries.HARDWARE_INFO))));
+
+        then(Stack.waitAndCheckClusterAndStackAvailabilityStatus(),
+                "wait and check availability");
+        then(Stack.checkImagesDifferent());
+
     }
 
     @Test(dataProvider = "providername", priority = 30)
@@ -257,12 +293,33 @@ public class ClusterTests extends CloudbreakTest {
         }
     }
 
+    private String getImageIdWithPkgVersions(String provider, String imageDescription) throws Exception {
+        given(CloudbreakClient.isCreated());
+        CloudbreakClient clientContext = CloudbreakClient.getTestContextCloudbreakClient().apply(getItContext());
+        com.sequenceiq.cloudbreak.client.CloudbreakClient client = clientContext.getCloudbreakClient();
+        ImagesResponse imagesByProvider = client.imageCatalogEndpoint().getImagesByProvider(provider);
+        List<? extends ImageResponse> images;
+        switch (imageDescription) {
+            case "hdf":
+                images = imagesByProvider.getHdfImages();
+                break;
+            case "hdp":
+                images = imagesByProvider.getHdpImages();
+                break;
+            default:
+                images = imagesByProvider.getBaseImages();
+                break;
+        }
+
+        return images.stream().filter(imageResponse -> imageResponse.getPackageVersions() != null)
+                .max(Comparator.comparing(ImageResponse::getDate)).orElseThrow().getUuid();
+    }
+
     private String getLastUuid(List<? extends ImageResponse> images) {
         List<? extends ImageResponse> result = images.stream().filter(ImageResponse::isDefaultImage).collect(Collectors.toList());
         if (result.isEmpty()) {
             result = images;
         }
-        result = result.stream().sorted(Comparator.comparing(ImageResponse::getDate)).collect(Collectors.toList());
-        return result.get(result.size() - 1).getUuid();
+        return result.stream().max(Comparator.comparing(ImageResponse::getDate)).orElseThrow().getUuid();
     }
 }
