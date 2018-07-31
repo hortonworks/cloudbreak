@@ -21,7 +21,10 @@ import com.sequenceiq.cloudbreak.api.model.v2.template.AzureParameters;
 import com.sequenceiq.cloudbreak.api.model.v2.template.BaseTemplateParameter;
 import com.sequenceiq.cloudbreak.api.model.v2.template.Encryption;
 import com.sequenceiq.cloudbreak.api.model.v2.template.EncryptionType;
+import com.sequenceiq.cloudbreak.api.model.v2.template.GcpEncryption;
+import com.sequenceiq.cloudbreak.api.model.v2.template.GcpEncryptionType;
 import com.sequenceiq.cloudbreak.api.model.v2.template.GcpParameters;
+import com.sequenceiq.cloudbreak.api.model.v2.template.KeyEncryptionMethod;
 import com.sequenceiq.cloudbreak.api.model.v2.template.OpenStackParameters;
 import com.sequenceiq.cloudbreak.api.model.v2.template.YarnParameters;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
@@ -84,6 +87,9 @@ public class TemplateToTemplateResponseConverterTest {
         TemplateResponse convert = underTest.convert(template);
 
         Assert.assertNotNull(convert.getGcpTemlateParameters());
+        Assert.assertEquals(GcpEncryptionType.CUSTOM.name(), convert.getGcpTemlateParameters().getEncryption().getType());
+        Assert.assertEquals(KeyEncryptionMethod.RAW.name(), convert.getGcpTemlateParameters().getEncryption().getKeyEncryptionMethod());
+        Assert.assertEquals("someKey", convert.getGcpTemlateParameters().getEncryption().getKey());
     }
 
     @Test
@@ -133,7 +139,13 @@ public class TemplateToTemplateResponseConverterTest {
     }
 
     private GcpParameters gcpParameters() throws JsonProcessingException {
-        return new GcpParameters();
+        GcpParameters templateParameters = new GcpParameters();
+        GcpEncryption encryption = new GcpEncryption();
+        encryption.setKeyEncryptionMethod("RAW");
+        encryption.setType("CUSTOM");
+        encryption.setKey("someKey");
+        templateParameters.setEncryption(encryption);
+        return templateParameters;
     }
 
     private AzureParameters azureParameters() throws JsonProcessingException {

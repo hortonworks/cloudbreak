@@ -58,8 +58,10 @@ public class ModelDescriptions {
         public static final String AZURE_PRIVATE_ID = "private id for azure";
         public static final String ENCRYPTION = "encryption for vm";
         public static final String ENCRYPTION_TYPE = "encryption type for vm (DEFAULT|CUSTOM|NONE)";
+        public static final String GCP_ENCRYPTION_TYPE = "encryption type for vm (DEFAULT|CUSTOM)";
         public static final String ENCRYPTION_KEY = "encryption key for vm";
         public static final String ENCRYPTED = "should encrypt the vm";
+        public static final String ENCRYPTION_METHOD = "encryption method for the key (RAW|RSA)";
     }
 
     public static class ConstraintTemplateModelDescription {
