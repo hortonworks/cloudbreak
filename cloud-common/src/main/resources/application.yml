@@ -331,7 +331,7 @@ cb:
     packages:
       - name: salt
         prewarmed: false
-        pkgName: salt
+        grain: saltversion
       - name: salt-bootstrap
         prewarmed: false
         command: "salt-bootstrap version"
