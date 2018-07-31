@@ -384,6 +384,16 @@ public class SaltOrchestrator implements HostOrchestrator {
         }
     }
 
+    @Override
+    public Map<String, String> getGrainOnAllHosts(GatewayConfig gateway, String grain) throws CloudbreakOrchestratorFailedException {
+        try (SaltConnector saltConnector = new SaltConnector(gateway, restDebug)) {
+            return SaltStates.getGrains(saltConnector, grain);
+        } catch (RuntimeException e) {
+            LOGGER.error("Error occurred during get grain execution: " + grain, e);
+            throw new CloudbreakOrchestratorFailedException(e);
+        }
+    }
+
     private void removeDeadSaltMinions(GatewayConfig gateway) throws CloudbreakOrchestratorFailedException {
         try (SaltConnector saltConnector = new SaltConnector(gateway, restDebug)) {
             MinionStatusSaltResponse minionStatusSaltResponse = SaltStates.collectNodeStatus(saltConnector);

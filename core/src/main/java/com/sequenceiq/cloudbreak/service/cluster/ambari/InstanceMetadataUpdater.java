@@ -126,6 +126,7 @@ public class InstanceMetadataUpdater {
             throws CloudbreakOrchestratorFailedException {
         Map<String, Map<String, String>> packageVersionsByNameByHost = getPackageVersionByPackageName(gatewayConfig, hostOrchestrator);
         addPackageVersionsFromCommand(gatewayConfig, hostOrchestrator, packageVersionsByNameByHost);
+        addPackageVersionsFromGrain(gatewayConfig, hostOrchestrator, packageVersionsByNameByHost);
         return packageVersionsByNameByHost;
     }
 
@@ -137,6 +138,18 @@ public class InstanceMetadataUpdater {
             for (Map.Entry<String, String> entry : versionsByHost.entrySet()) {
                 packageVersionsByNameByHost.computeIfAbsent(entry.getKey(), s -> new HashMap<>())
                         .put(packageWithCommand.getName(), parseSaltBootstrapVersion(entry.getValue()));
+            }
+        }
+    }
+
+    private void addPackageVersionsFromGrain(GatewayConfig gatewayConfig, HostOrchestrator hostOrchestrator,
+            Map<String, Map<String, String>> packageVersionsByNameByHost) throws CloudbreakOrchestratorFailedException {
+        List<Package> packagesWithGrain = packages.stream().filter(pkg -> StringUtils.isNotBlank(pkg.getGrain())).collect(Collectors.toList());
+        for (Package packageWithGrain : packagesWithGrain) {
+            Map<String, String> versionsByHost = hostOrchestrator.getGrainOnAllHosts(gatewayConfig, packageWithGrain.getGrain());
+            for (Map.Entry<String, String> entry : versionsByHost.entrySet()) {
+                packageVersionsByNameByHost.computeIfAbsent(entry.getKey(), s -> new HashMap<>())
+                        .put(packageWithGrain.getName(), entry.getValue());
             }
         }
     }
@@ -243,6 +256,8 @@ public class InstanceMetadataUpdater {
 
         private boolean prewarmed;
 
+        private String grain;
+
         public String getName() {
             return name;
         }
@@ -273,6 +288,14 @@ public class InstanceMetadataUpdater {
 
         public void setPrewarmed(boolean prewarmed) {
             this.prewarmed = prewarmed;
+        }
+
+        public String getGrain() {
+            return grain;
+        }
+
+        public void setGrain(String grain) {
+            this.grain = grain;
         }
     }
 }
