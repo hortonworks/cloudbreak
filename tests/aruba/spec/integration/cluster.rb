@@ -259,7 +259,7 @@ RSpec.describe 'Cluster test cases', :type => :aruba do
     end
   end
 
-    xit "Cluster - Generate attached cluster template " do 
+    it "Cluster - Generate attached cluster template " do 
     with_environment 'DEBUG' => '1' do
       result = cb.cluster.generate_attached_cluster_template.source_cluster("dl-ok").blueprint_name("test").build(false)
       expect(result.exit_status).to eql 0

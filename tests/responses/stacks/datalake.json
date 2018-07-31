@@ -177,7 +177,11 @@
     "sharedServiceResponse": {
       "attachedClusters": []
     },
-    "fileSystemResponse": null
+    "fileSystemResponse": {
+      "id":1,
+      "name": "testfs",
+      "type": "S3"
+    }
   },
   "statusReason": "Building the Ambari cluster. Ambari ip:172.21.250.80",
   "credential": {
