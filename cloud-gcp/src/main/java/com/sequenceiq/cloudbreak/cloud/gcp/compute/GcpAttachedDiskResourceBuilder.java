@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpPlatformParameters.GcpDiskType;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
+import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpDiskEncryptionService;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpResourceNameService;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -46,6 +47,9 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
 
     @Inject
     private DefaultCostTaggingService defaultCostTaggingService;
+
+    @Inject
+    private GcpDiskEncryptionService gcpDiskEncryptionService;
 
     @Override
     public List<CloudResource> create(GcpContext context, long privateId, AuthenticatedContext auth, Group group, Image image) {
@@ -78,6 +82,8 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
         Collection<Future<Void>> futures = new ArrayList<>();
         for (CloudResource cloudResource : buildableResource) {
             Disk disk = createDisk(volume, projectId, location.getAvailabilityZone(), cloudResource.getName(), cloudStack.getTags());
+
+            gcpDiskEncryptionService.addEncryptionKeyToDisk(template, disk);
             Future<Void> submit = intermediateBuilderExecutor.submit(() -> {
                 Insert insDisk = compute.disks().insert(projectId, location.getAvailabilityZone().value(), disk);
                 try {

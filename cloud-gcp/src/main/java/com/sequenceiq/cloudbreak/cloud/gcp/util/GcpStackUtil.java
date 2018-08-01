@@ -23,6 +23,8 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.SecurityUtils;
+import com.google.api.services.cloudkms.v1.CloudKMS;
+import com.google.api.services.cloudkms.v1.CloudKMSScopes;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.Compute.GlobalOperations;
 import com.google.api.services.compute.Compute.RegionOperations.Get;
@@ -313,4 +315,15 @@ public final class GcpStackUtil {
         return splittable.split("/");
     }
 
+    public static CloudKMS buildCloudKMS(CloudCredential cloudCredential) throws GeneralSecurityException, IOException {
+        HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+        GoogleCredential credential = buildCredential(cloudCredential, httpTransport);
+        if (credential.createScopedRequired()) {
+            credential = credential.createScoped(CloudKMSScopes.all());
+        }
+
+        return new CloudKMS.Builder(httpTransport, JSON_FACTORY, credential)
+                .setApplicationName(cloudCredential.getName())
+                .build();
+    }
 }

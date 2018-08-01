@@ -10,15 +10,25 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import com.google.api.services.cloudkms.v1.CloudKMS;
+import com.google.api.services.cloudkms.v1.model.CryptoKey;
+import com.google.api.services.cloudkms.v1.model.KeyRing;
+import com.google.api.services.cloudkms.v1.model.ListCryptoKeysResponse;
+import com.google.api.services.cloudkms.v1.model.ListKeyRingsResponse;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.model.Firewall;
 import com.google.api.services.compute.model.FirewallList;
@@ -34,6 +44,7 @@ import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKey;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudGateWays;
 import com.sequenceiq.cloudbreak.cloud.model.CloudIpPools;
@@ -51,6 +62,8 @@ import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta.VmTypeMetaBuilder;
 
 @Service
 public class GcpPlatformResources implements PlatformResources {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(GcpPlatformResources.class);
 
     private static final float THOUSAND = 1000.0f;
 
@@ -238,6 +251,72 @@ public class GcpPlatformResources implements PlatformResources {
 
     @Override
     public CloudEncryptionKeys encryptionKeys(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
-        return new CloudEncryptionKeys(new HashSet<>());
+        CloudKMS cloudKMS;
+        try {
+            cloudKMS = GcpStackUtil.buildCloudKMS(cloudCredential);
+        } catch (Exception e) {
+            LOGGER.error("Failed to build CloudKMS client.", e);
+            return new CloudEncryptionKeys(new HashSet<>());
+        }
+
+        String projectId = GcpStackUtil.getProjectId(cloudCredential);
+        String keyRingPath = String.format(
+                "projects/%s/locations/%s",
+                projectId, region.getRegionName());
+
+        ListKeyRingsResponse response;
+        try {
+            response = cloudKMS.projects().locations()
+                    .keyRings()
+                    .list(keyRingPath)
+                    .execute();
+        } catch (IOException e) {
+            LOGGER.error("Failed to get list of keyrings on keyring path: [{}].", keyRingPath, e);
+            return new CloudEncryptionKeys(new HashSet<>());
+        }
+
+        Set<CloudEncryptionKey> cloudEncryptionKeys = response.getKeyRings().stream().parallel()
+                .map(KeyRing::getName)
+                .map(toCryptoKeyPathList(cloudKMS, projectId, region.getRegionName()))
+                .flatMap(Set::stream)
+                .collect(Collectors.toSet());
+
+        return new CloudEncryptionKeys(cloudEncryptionKeys);
+    }
+
+    private Function<String, Set<CloudEncryptionKey>> toCryptoKeyPathList(CloudKMS cloudKMS, String projectId, String location) {
+        return keyRing -> {
+            String cryptoKeysPath = String.format("projects/%s/locations/%s/keyRings/%s", projectId, location, keyRing);
+            return getCryptoKeysList(cloudKMS, cryptoKeysPath).stream()
+                    .map(toCloudEncryptionKey(projectId, keyRing, location))
+                    .collect(Collectors.toSet());
+        };
+    }
+
+    private Function<CryptoKey, CloudEncryptionKey> toCloudEncryptionKey(String projectId, String keyRing, String location) {
+        return cryptoKey -> {
+            String cryptoKeyPath = String.format("projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s", projectId, location, keyRing, cryptoKey.getName());
+            Map<String, Object> metadata =
+                    cryptoKey.getLabels().entrySet().stream().collect(Collectors.toMap(Entry::getKey, entry -> (Object) entry.getValue()));
+            return new CloudEncryptionKey(
+                    cryptoKeyPath,
+                    cryptoKey.getName(),
+                    cryptoKey.getPurpose(),
+                    String.format("%s/%s", keyRing, cryptoKey.getName()),
+                    metadata);
+        };
+    }
+
+    private List<CryptoKey> getCryptoKeysList(CloudKMS cloudKMS, String cryptoKeysPath) {
+        try {
+            ListCryptoKeysResponse listCryptoKeysResponse = cloudKMS.projects().locations().keyRings()
+                    .cryptoKeys()
+                    .list(cryptoKeysPath)
+                    .execute();
+            return listCryptoKeysResponse.getCryptoKeys();
+        } catch (IOException e) {
+            LOGGER.error("Failed to get list of crypto keys on keyring path: [{}].", cryptoKeysPath, e);
+            return List.of();
+        }
     }
 }

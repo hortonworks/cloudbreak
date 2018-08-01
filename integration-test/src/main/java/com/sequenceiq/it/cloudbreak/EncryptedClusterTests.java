@@ -12,7 +12,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImageResponse;
 import com.sequenceiq.cloudbreak.api.model.v2.template.AwsParameters;
-import com.sequenceiq.cloudbreak.api.model.v2.template.Encryption;
+import com.sequenceiq.cloudbreak.api.model.v2.template.AwsEncryption;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Cluster;
@@ -148,32 +148,32 @@ public class EncryptedClusterTests extends CloudbreakTest {
 
     private AwsParameters getAwsParametersWithEncryption(EncryptionType type) {
         var params = new AwsParameters();
-        params.setEncryption(type.getEncryption(getTestParameter()));
+        params.setAwsEncryption(type.getEncryption(getTestParameter()));
         return params;
     }
 
     private enum EncryptionType {
         DEFAULT {
-            public Encryption getEncryption(TestParameter testParameter) {
-                var encryption = new Encryption();
+            public AwsEncryption getEncryption(TestParameter testParameter) {
+                var encryption = new AwsEncryption();
                 encryption.setType("DEFAULT");
                 return encryption;
             }
         },
         CUSTOM {
-            public Encryption getEncryption(TestParameter testParameter) {
-                var encryption = new Encryption();
+            public AwsEncryption getEncryption(TestParameter testParameter) {
+                var encryption = new AwsEncryption();
                 encryption.setType("CUSTOM");
                 encryption.setKey(testParameter.getRequired("INTEGRATIONTEST_AWS_DISKENCRYPTIONKEY"));
                 return encryption;
             }
         },
         NONE {
-            public Encryption getEncryption(TestParameter testParameter) {
+            public AwsEncryption getEncryption(TestParameter testParameter) {
                 return null;
             }
         };
 
-        public abstract Encryption getEncryption(TestParameter testParameter);
+        public abstract AwsEncryption getEncryption(TestParameter testParameter);
     }
 }

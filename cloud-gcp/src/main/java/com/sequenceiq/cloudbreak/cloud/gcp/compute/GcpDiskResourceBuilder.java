@@ -18,11 +18,13 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpPlatformParameters.GcpDiskType;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
+import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpDiskEncryptionService;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
@@ -32,6 +34,9 @@ public class GcpDiskResourceBuilder extends AbstractGcpComputeBuilder {
 
     @Inject
     private DefaultCostTaggingService defaultCostTaggingService;
+
+    @Inject
+    private GcpDiskEncryptionService gcpDiskEncryptionService;
 
     @Override
     public List<CloudResource> create(GcpContext context, long privateId, AuthenticatedContext auth, Group group, Image image) {
@@ -50,6 +55,9 @@ public class GcpDiskResourceBuilder extends AbstractGcpComputeBuilder {
         disk.setSizeGb((long) group.getRootVolumeSize());
         disk.setName(buildableResources.get(0).getName());
         disk.setKind(GcpDiskType.HDD.getUrl(projectId, location.getAvailabilityZone()));
+
+        InstanceTemplate template = group.getReferenceInstanceConfiguration().getTemplate();
+        gcpDiskEncryptionService.addEncryptionKeyToDisk(template, disk);
 
         Map<String, String> customTags = new HashMap<>();
         customTags.putAll(cloudStack.getTags());

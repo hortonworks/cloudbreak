@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -24,7 +26,10 @@ import com.google.api.services.compute.Compute.Instances.Get;
 import com.google.api.services.compute.Compute.Instances.Insert;
 import com.google.api.services.compute.model.AccessConfig;
 import com.google.api.services.compute.model.AttachedDisk;
+import com.google.api.services.compute.model.CustomerEncryptionKey;
+import com.google.api.services.compute.model.CustomerEncryptionKeyProtectedDisk;
 import com.google.api.services.compute.model.Instance;
+import com.google.api.services.compute.model.InstancesStartWithEncryptionKeyRequest;
 import com.google.api.services.compute.model.Metadata;
 import com.google.api.services.compute.model.Metadata.Items;
 import com.google.api.services.compute.model.NetworkInterface;
@@ -37,6 +42,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
+import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpDiskEncryptionService;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -71,6 +77,9 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
     @Inject
     private DefaultCostTaggingService defaultCostTaggingService;
 
+    @Inject
+    private GcpDiskEncryptionService gcpDiskEncryptionService;
+
     @Override
     public List<CloudResource> create(GcpContext context, long privateId, AuthenticatedContext auth, Group group, Image image) {
         CloudContext cloudContext = auth.getCloudContext();
@@ -90,8 +99,11 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
 
         List<CloudResource> computeResources = context.getComputeResources(privateId);
         List<AttachedDisk> listOfDisks = new ArrayList<>();
+
         listOfDisks.addAll(getBootDiskList(computeResources, projectId, location.getAvailabilityZone()));
         listOfDisks.addAll(getAttachedDisks(computeResources, projectId, location.getAvailabilityZone()));
+
+        listOfDisks.forEach(disk -> gcpDiskEncryptionService.addEncryptionKeyToDisk(template, disk));
 
         Instance instance = new Instance();
         instance.setMachineType(String.format("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/machineTypes/%s",
@@ -299,9 +311,10 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         try {
             Get get = compute.instances().get(projectId, availabilityZone, instanceId);
             String state = stopRequest ? "RUNNING" : "TERMINATED";
-            if (state.equals(get.execute().getStatus())) {
+            Instance instanceResponse = get.execute();
+            if (state.equals(instanceResponse.getStatus())) {
                 Operation operation = stopRequest ? compute.instances().stop(projectId, availabilityZone, instanceId).setPrettyPrint(true).execute()
-                        : compute.instances().start(projectId, availabilityZone, instanceId).setPrettyPrint(true).execute();
+                        : executeStartOperation(projectId, availabilityZone, compute, instanceId, instance.getTemplate(), instanceResponse.getDisks());
                 CloudInstance operationAwareCloudInstance = createOperationAwareCloudInstance(instance, operation);
                 return checkInstances(context, auth, singletonList(operationAwareCloudInstance)).get(0);
             } else {
@@ -311,6 +324,33 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         } catch (IOException e) {
             throw new GcpResourceException(String.format("An error occurred while stopping the vm '%s'", instanceId), e);
         }
+    }
+
+    private Operation executeStartOperation(String projectId, String availabilityZone, Compute compute, String instanceId, InstanceTemplate template,
+            List<AttachedDisk> disks) throws IOException {
+
+        if (gcpDiskEncryptionService.hasCustomEncryptionRequested(template)) {
+            CustomerEncryptionKey customerEncryptionKey = gcpDiskEncryptionService.createCustomerEncryptionKey(template);
+            List<CustomerEncryptionKeyProtectedDisk> protectedDisks = disks
+                    .stream()
+                    .map(AttachedDisk::getSource)
+                    .map(toCustomerEncryptionKeyProtectedDisk(customerEncryptionKey))
+                    .collect(Collectors.toList());
+            InstancesStartWithEncryptionKeyRequest request = new InstancesStartWithEncryptionKeyRequest();
+            request.setDisks(protectedDisks);
+            return compute.instances().startWithEncryptionKey(projectId, availabilityZone, instanceId, request).setPrettyPrint(true).execute();
+        } else {
+            return compute.instances().start(projectId, availabilityZone, instanceId).setPrettyPrint(true).execute();
+        }
+    }
+
+    private Function<String, CustomerEncryptionKeyProtectedDisk> toCustomerEncryptionKeyProtectedDisk(CustomerEncryptionKey diskEncryptionKey) {
+        return source -> {
+            CustomerEncryptionKeyProtectedDisk protectedDisk = new CustomerEncryptionKeyProtectedDisk();
+            protectedDisk.setDiskEncryptionKey(diskEncryptionKey);
+            protectedDisk.setSource(source);
+            return protectedDisk;
+        };
     }
 
 }
