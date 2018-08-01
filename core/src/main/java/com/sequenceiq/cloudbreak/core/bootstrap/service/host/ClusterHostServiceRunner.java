@@ -231,7 +231,9 @@ public class ClusterHostServiceRunner {
 
         decoratePillarWithAmbariDatabase(cluster, servicePillar);
 
-        saveLdapPillar(cluster.getLdapConfig(), servicePillar);
+        if (cluster.getLdapConfig() != null) {
+            saveLdapPillar(cluster.getLdapConfig().copyWithoutOrganization(), servicePillar);
+        }
         saveDockerPillar(cluster.getExecutorType(), servicePillar);
         saveHDPPillar(cluster.getId(), servicePillar);
         Map<String, Object> credentials = new HashMap<>();
