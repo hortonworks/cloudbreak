@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"errors"
+
 	"github.com/hortonworks/cb-cli/cli/cloud"
 	_ "github.com/hortonworks/cb-cli/cli/cloud/aws"
 	"github.com/hortonworks/cb-cli/cli/types"
@@ -47,9 +48,9 @@ func TestCreateCredentialPublic(t *testing.T) {
 	}
 
 	mock := mockCredentialCreate{request: make(chan *models_cloudbreak.CredentialRequest)}
-
+	parameters := map[string]interface{}{}
 	go func() {
-		credential := createCredentialImpl(mockStringFinder, boolFinder, &mock)
+		credential := createCredentialImpl(mockStringFinder, boolFinder, &mock, parameters)
 		if !*credential.Public {
 			t.Errorf("not public true == %t", *credential.Public)
 		}
@@ -72,9 +73,9 @@ func TestCreateCredentialPrivate(t *testing.T) {
 	t.Parallel()
 
 	mock := mockCredentialCreate{request: make(chan *models_cloudbreak.CredentialRequest)}
-
+	parameters := map[string]interface{}{}
 	go func() {
-		credential := createCredentialImpl(mockStringFinder, mockBoolFinder, &mock)
+		credential := createCredentialImpl(mockStringFinder, mockBoolFinder, &mock, parameters)
 		if *credential.Public {
 			t.Errorf("not private false == %t", *credential.Public)
 		}
@@ -186,8 +187,8 @@ func TestModifyCredentialImplForValidChange(t *testing.T) {
 			return "empty"
 		}
 	}
-
-	credentialResponse := modifyCredentialImpl(stringFinder, mockBoolFinder, new(mockCredentialModifyClient))
+	parameters := map[string]interface{}{}
+	credentialResponse := modifyCredentialImpl(stringFinder, mockBoolFinder, new(mockCredentialModifyClient), parameters)
 	resultArn := credentialResponse.Parameters["roleArn"].(string)
 	if resultArn != expectedArn {
 		t.Errorf("roleArn does not match %s != %s", resultArn, expectedArn)
@@ -219,8 +220,8 @@ func TestModifyCredentialImplForDescriptionChange(t *testing.T) {
 			return "empty"
 		}
 	}
-
-	credentialResponse := modifyCredentialImpl(stringFinder, mockBoolFinder, new(mockCredentialModifyClient))
+	parameters := map[string]interface{}{}
+	credentialResponse := modifyCredentialImpl(stringFinder, mockBoolFinder, new(mockCredentialModifyClient), parameters)
 	resultArn := credentialResponse.Parameters["roleArn"].(string)
 	if resultArn != expectedArn {
 		t.Errorf("roleArn does not match %s != %s", resultArn, expectedArn)
@@ -252,8 +253,8 @@ func TestModifyCredentialImplForDescriptionPublicChange(t *testing.T) {
 			return "empty"
 		}
 	}
-
-	credentialResponse := modifyCredentialImpl(stringFinder, mockBoolFinder, new(mockCredentialModifyClient))
+	parameters := map[string]interface{}{}
+	credentialResponse := modifyCredentialImpl(stringFinder, mockBoolFinder, new(mockCredentialModifyClient), parameters)
 	resultArn := credentialResponse.Parameters["roleArn"].(string)
 	if resultArn != expectedArn {
 		t.Errorf("roleArn does not match %s != %s", resultArn, expectedArn)
@@ -289,8 +290,8 @@ func TestModifyCredentialImplForInvalidCredential(t *testing.T) {
 			return "empty"
 		}
 	}
-
-	modifyCredentialImpl(stringFinder, mockBoolFinder, new(mockCredentialModifyClient))
+	parameters := map[string]interface{}{}
+	modifyCredentialImpl(stringFinder, mockBoolFinder, new(mockCredentialModifyClient), parameters)
 	t.Error("the credential modification should fail")
 }
 

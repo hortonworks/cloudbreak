@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"errors"
+
 	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/cb-cli/cli/cloud"
 	"github.com/hortonworks/cb-cli/cli/types"
@@ -18,42 +19,62 @@ import (
 
 func CreateAwsCredential(c *cli.Context) {
 	cloud.SetProviderType(cloud.AWS)
-	createCredential(c)
+	parameters := map[string]interface{}{"govCloud": false}
+	createCredential(c, parameters)
 }
 
 func ModifyAwsCredential(c *cli.Context) {
 	cloud.SetProviderType(cloud.AWS)
-	modifyCredential(c)
+	parameters := map[string]interface{}{"govCloud": false}
+	modifyCredential(c, parameters)
+}
+
+func CreateAwsGovCredential(c *cli.Context) {
+	cloud.SetProviderType(cloud.AWS)
+	parameters := map[string]interface{}{"govCloud": true}
+	createCredential(c, parameters)
+}
+
+func ModifyAwsGovCredential(c *cli.Context) {
+	cloud.SetProviderType(cloud.AWS)
+	parameters := map[string]interface{}{"govCloud": true}
+	modifyCredential(c, parameters)
 }
 
 func CreateAzureCredential(c *cli.Context) {
 	cloud.SetProviderType(cloud.AZURE)
-	createCredential(c)
+	parameters := map[string]interface{}{}
+	createCredential(c, parameters)
 }
 
 func ModifyAzureCredential(c *cli.Context) {
 	cloud.SetProviderType(cloud.AZURE)
-	modifyCredential(c)
+	parameters := map[string]interface{}{}
+	modifyCredential(c, parameters)
 }
 
 func CreateGcpCredential(c *cli.Context) {
 	cloud.SetProviderType(cloud.GCP)
-	createCredential(c)
+	parameters := map[string]interface{}{}
+	createCredential(c, parameters)
 }
 
 func ModifyGcpCredential(c *cli.Context) {
 	cloud.SetProviderType(cloud.GCP)
-	modifyCredential(c)
+	parameters := map[string]interface{}{}
+	modifyCredential(c, parameters)
 }
 
 func CreateOpenstackCredential(c *cli.Context) {
 	cloud.SetProviderType(cloud.OPENSTACK)
-	createCredential(c)
+	parameters := map[string]interface{}{}
+	createCredential(c, parameters)
 }
 
 func ModifyOpenstackCredential(c *cli.Context) {
 	cloud.SetProviderType(cloud.OPENSTACK)
-	modifyCredential(c)
+	parameters := map[string]interface{}{}
+	modifyCredential(c, parameters)
 }
 
 func CreateCredentialFromFile(c *cli.Context) {
@@ -101,20 +122,20 @@ func assembleCredentialRequest(path, credName string) *models_cloudbreak.Credent
 	return &req
 }
 
-func createCredential(c *cli.Context) {
+func createCredential(c *cli.Context, credentialParameters map[string]interface{}) {
 	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "create credential")
 
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
-	createCredentialImpl(c.String, c.Bool, cbClient.Cloudbreak.V1credentials)
+	createCredentialImpl(c.String, c.Bool, cbClient.Cloudbreak.V1credentials, credentialParameters)
 }
 
-func modifyCredential(c *cli.Context) {
+func modifyCredential(c *cli.Context, credentialParameters map[string]interface{}) {
 	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "modify credential")
 
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
-	modifyCredentialImpl(c.String, c.Bool, cbClient.Cloudbreak.V1credentials)
+	modifyCredentialImpl(c.String, c.Bool, cbClient.Cloudbreak.V1credentials, credentialParameters)
 }
 
 type modifyCredentialClient interface {
@@ -123,7 +144,7 @@ type modifyCredentialClient interface {
 	GetPublicCredential(params *v1credentials.GetPublicCredentialParams) (*v1credentials.GetPublicCredentialOK, error)
 }
 
-func modifyCredentialImpl(stringFinder func(string) string, boolFinder func(string) bool, client modifyCredentialClient) *models_cloudbreak.CredentialResponse {
+func modifyCredentialImpl(stringFinder func(string) string, boolFinder func(string) bool, client modifyCredentialClient, credentialParameters map[string]interface{}) *models_cloudbreak.CredentialResponse {
 	name := stringFinder(FlName.Name)
 	description := stringFinder(FlDescriptionOptional.Name)
 	provider := cloud.GetProvider()
@@ -135,6 +156,9 @@ func modifyCredentialImpl(stringFinder func(string) string, boolFinder func(stri
 
 	log.Infof("[modifyCredentialImpl] original credential found name: %s id: %d", name, credential.ID)
 	credentialMap, err := provider.GetCredentialParameters(stringFinder, boolFinder)
+	for k, v := range credentialParameters {
+		credentialMap[k] = v
+	}
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -192,9 +216,12 @@ type createCredentialClient interface {
 	PostPrivateCredential(*v1credentials.PostPrivateCredentialParams) (*v1credentials.PostPrivateCredentialOK, error)
 }
 
-func createCredentialImpl(stringFinder func(string) string, boolFinder func(string) bool, client createCredentialClient) *models_cloudbreak.CredentialResponse {
+func createCredentialImpl(stringFinder func(string) string, boolFinder func(string) bool, client createCredentialClient, credentialParameters map[string]interface{}) *models_cloudbreak.CredentialResponse {
 	provider := cloud.GetProvider()
 	credentialMap, err := provider.GetCredentialParameters(stringFinder, boolFinder)
+	for k, v := range credentialParameters {
+		credentialMap[k] = v
+	}
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -281,8 +308,15 @@ func listCredentialsImpl(client getPublicsCredentialClient, writer func([]string
 
 	tableRows := []utils.Row{}
 	for _, cred := range credResp.Payload {
-		tableRows = append(tableRows, &cloudResourceOut{*cred.Name, *cred.Description, *cred.CloudPlatform})
+		tableRows = append(tableRows, &cloudResourceOut{*cred.Name, *cred.Description, GetPlatformName(cred)})
 	}
 
 	writer(cloudResourceHeader, tableRows)
+}
+
+func GetPlatformName(credRes *models_cloudbreak.CredentialResponse) string {
+	if credRes != nil && credRes.Parameters["govCloud"] == "true" {
+		return *credRes.CloudPlatform + "_GOV"
+	}
+	return *credRes.CloudPlatform
 }

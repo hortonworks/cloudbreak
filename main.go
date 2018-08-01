@@ -784,6 +784,36 @@ func main() {
 							},
 						},
 						{
+							Name:  "aws-gov",
+							Usage: "creates a new aws govcloud credential",
+							Subcommands: []cli.Command{
+								{
+									Name:   "key-based",
+									Usage:  "creates a new key based aws govcloud credential",
+									Before: ConfigRead,
+									Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlAccessKey, cb.FlSecretKey).AddAuthenticationFlags().Build(),
+									Action: cb.CreateAwsGovCredential,
+									BashComplete: func(c *cli.Context) {
+										for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlAccessKey, cb.FlSecretKey).AddAuthenticationFlags().Build() {
+											printFlagCompletion(f)
+										}
+									},
+								},
+								{
+									Name:   "role-based",
+									Usage:  "creates a new role based aws govcloud credential",
+									Before: ConfigRead,
+									Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlRoleARN).AddAuthenticationFlags().Build(),
+									Action: cb.CreateAwsGovCredential,
+									BashComplete: func(c *cli.Context) {
+										for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlRoleARN).AddAuthenticationFlags().Build() {
+											printFlagCompletion(f)
+										}
+									},
+								},
+							},
+						},
+						{
 							Name:  "azure",
 							Usage: "creates a new azure credential",
 							Subcommands: []cli.Command{
@@ -903,6 +933,36 @@ func main() {
 									Before: ConfigRead,
 									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlDescriptionOptional, cb.FlAccessKey, cb.FlSecretKey).AddAuthenticationFlags().Build(),
 									Action: cb.ModifyAwsCredential,
+									BashComplete: func(c *cli.Context) {
+										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlDescriptionOptional, cb.FlAccessKey, cb.FlSecretKey).AddAuthenticationFlags().Build() {
+											printFlagCompletion(f)
+										}
+									},
+								},
+							},
+						},
+						{
+							Name:  "aws-gov",
+							Usage: "modify an existing aws govcloud credential",
+							Subcommands: []cli.Command{
+								{
+									Name:   "role-based",
+									Usage:  "modify a role based aws govcloud credential",
+									Before: ConfigRead,
+									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlDescriptionOptional, cb.FlRoleARN).AddAuthenticationFlags().Build(),
+									Action: cb.ModifyAwsGovCredential,
+									BashComplete: func(c *cli.Context) {
+										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlDescriptionOptional, cb.FlRoleARN).AddAuthenticationFlags().Build() {
+											printFlagCompletion(f)
+										}
+									},
+								},
+								{
+									Name:   "key-based",
+									Usage:  "modify a key based aws govcloud credential",
+									Before: ConfigRead,
+									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlDescriptionOptional, cb.FlAccessKey, cb.FlSecretKey).AddAuthenticationFlags().Build(),
+									Action: cb.ModifyAwsGovCredential,
 									BashComplete: func(c *cli.Context) {
 										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlDescriptionOptional, cb.FlAccessKey, cb.FlSecretKey).AddAuthenticationFlags().Build() {
 											printFlagCompletion(f)
