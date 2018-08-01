@@ -30,7 +30,7 @@ public class AuditEventService {
 
     public List<AuditEvent> getAuditEvents(String userId, String resourceType, Long resourceId) {
         List<AuditEvent> auditEvents = getEventsForUserWithTypeAndResourceId(userId, resourceType, resourceId);
-        Collections.sort(auditEvents, new AuditEventComparator());
+        Collections.sort(auditEvents, new AuditEventComparator().reversed());
         return auditEvents;
     }
 

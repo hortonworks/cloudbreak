@@ -21,7 +21,7 @@ public class StructuredNotificationEvent extends StructuredEvent {
 
     @Override
     public Long getDuration() {
-        return null;
+        return 0L;
     }
 
     public void setNotificationDetails(NotificationDetails notificationDetails) {

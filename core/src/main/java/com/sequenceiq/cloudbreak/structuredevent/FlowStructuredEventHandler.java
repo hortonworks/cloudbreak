@@ -37,7 +37,7 @@ public class FlowStructuredEventHandler<S, E> extends StateMachineListenerAdapte
 
     private final Long stackId;
 
-    private Long lastStateChange = -1L;
+    private Long lastStateChange;
 
     private Exception exception;
 
@@ -80,7 +80,7 @@ public class FlowStructuredEventHandler<S, E> extends StateMachineListenerAdapte
             String eventId = trigger != null ? trigger.getEvent().toString() : "unknown";
             Boolean detailed = toId.equals(initState.toString()) || toId.equals(finalState.toString());
             FlowDetails flowDetails = new FlowDetails("", flowType, "", flowId, fromId, toId, eventId,
-                    lastStateChange == -1L ? -1L : currentTime - lastStateChange);
+                    lastStateChange == null ? 0L : currentTime - lastStateChange);
             StructuredEvent structuredEvent;
             if (exception == null) {
                 structuredEvent = structuredFlowEventFactory.createStucturedFlowEvent(stackId, flowDetails, detailed);
@@ -112,7 +112,7 @@ public class FlowStructuredEventHandler<S, E> extends StateMachineListenerAdapte
             Long currentTime = System.currentTimeMillis();
             String fromId = currentState != null ? currentState.getId().toString() : "unknown";
             FlowDetails flowDetails = new FlowDetails("", flowType, "", flowId, fromId, "unknown", "FLOW_CANCEL",
-                    lastStateChange == -1L ? -1L : currentTime - lastStateChange);
+                    lastStateChange == null ? 0L : currentTime - lastStateChange);
             StructuredEvent structuredEvent = structuredFlowEventFactory.createStucturedFlowEvent(stackId, flowDetails, true);
             structuredEventClient.sendStructuredEvent(structuredEvent);
             lastStateChange = currentTime;

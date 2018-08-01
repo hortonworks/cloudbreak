@@ -99,7 +99,7 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
             "\\/cb\\/api\\/v.\\/([a-z]*)\\/(user|account)\\/(.*)");
 
     private final List<String> putUrlPatterns = Lists.newArrayList(
-            "\\/cb\\/api\\/v.\\/([a-z]*)\\/([0-9]+).*");
+            "\\/cb\\/api\\/v.\\/([a-z]*)\\/([0-9]+).*", "\\/cb\\/api\\/v.\\/([a-z]*).*");
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
