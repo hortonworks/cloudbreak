@@ -84,6 +84,33 @@ public class LdapConfig implements ProvisionEntity {
     @ManyToOne
     private Organization organization;
 
+    public LdapConfig copyWithoutOrganization() {
+        LdapConfig copy = new LdapConfig();
+        copy.setId(id);
+        copy.setName(name);
+        copy.setDescription(description);
+        copy.setAccount(account);
+        copy.setOwner(owner);
+        copy.setPublicInAccount(publicInAccount);
+        copy.setServerHost(serverHost);
+        copy.setServerPort(serverPort);
+        copy.setProtocol(protocol);
+        copy.setBindDn(bindDn);
+        copy.setBindPassword(bindPassword);
+        copy.setDirectoryType(directoryType);
+        copy.setUserSearchBase(userSearchBase);
+        copy.setUserDnPattern(userDnPattern);
+        copy.setUserNameAttribute(userNameAttribute);
+        copy.setUserObjectClass(userObjectClass);
+        copy.setGroupSearchBase(groupSearchBase);
+        copy.setGroupNameAttribute(groupNameAttribute);
+        copy.setGroupObjectClass(groupObjectClass);
+        copy.setGroupMemberAttribute(groupMemberAttribute);
+        copy.setDomain(domain);
+        copy.setAdminGroup(adminGroup);
+        return copy;
+    }
+
     public Long getId() {
         return id;
     }
