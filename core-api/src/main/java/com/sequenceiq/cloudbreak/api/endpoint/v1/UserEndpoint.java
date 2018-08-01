@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v1;
 
-import java.util.Set;
+import java.util.SortedSet;
 
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
@@ -58,9 +58,8 @@ public interface UserEndpoint {
     void modifyProfile(UserProfileRequest userProfileRequest);
 
     @GET
-    @Path("auth")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = UserOpDescription.GET_TENANT_USERS, produces = ContentType.JSON, notes = Notes.USER_NOTES,
             nickname = "getAllUsers")
-    Set<UserResponseJson> getAll();
+    SortedSet<UserResponseJson> getAll();
 }
