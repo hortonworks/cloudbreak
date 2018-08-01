@@ -64,14 +64,14 @@ public interface OrganizationEndpoint {
             nickname = "changeOrganizationUsers")
     SortedSet<UserResponseJson> changeUsers(@PathParam("name") String orgName, @Valid Set<ChangeOrganizationUsersJson> changeOrganizationUsersJson);
 
-    @DELETE
+    @PUT
     @Path("name/{name}/removeUsers")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OrganizationOpDescription.REMOVE_USERS, produces = ContentType.JSON, notes = Notes.ORGANIZATION_NOTES,
             nickname = "removeOrganizationUsers")
     SortedSet<UserResponseJson> removeUsers(@PathParam("name") String orgName, @Valid Set<String> userIds);
 
-    @POST
+    @PUT
     @Path("name/{name}/addUsers")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OrganizationOpDescription.ADD_USERS, produces = ContentType.JSON, notes = Notes.ORGANIZATION_NOTES,
