@@ -336,7 +336,7 @@ cb:
         prewarmed: false
         command: "salt-bootstrap version"
       - name: stack
-        pkgName: hdp-select
+        pkgName: hdp-select,hdf-select
         prewarmed: true
       - name: ambari
         pkgName: ambari-agent

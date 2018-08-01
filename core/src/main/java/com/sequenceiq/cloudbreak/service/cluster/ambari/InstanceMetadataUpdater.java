@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.cluster.ambari;
 import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
 
 import java.io.IOException;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -156,17 +157,38 @@ public class InstanceMetadataUpdater {
 
     private Map<String, Map<String, String>> getPackageVersionByPackageName(GatewayConfig gatewayConfig, HostOrchestrator hostOrchestrator)
             throws CloudbreakOrchestratorFailedException {
-        Map<String, String> pkgNames = packages.stream().filter(pkg -> StringUtils.isNotBlank(pkg.getPkgName()))
-                .collect(Collectors.toMap(Package::getPkgName, Package::getName));
+        Map<String, String> pkgNames = mapPackageToPkgNameAndNameMap();
+
+        // Map<host, Map<pkgName, version>
         Map<String, Map<String, String>> packageVersionsByPkgNameByHost =
                 hostOrchestrator.getPackageVersionsFromAllHosts(gatewayConfig, pkgNames.keySet().toArray(new String[pkgNames.size()]));
+
+        return mapHostPkgNameVersionToHostNameVersionMap(pkgNames, packageVersionsByPkgNameByHost);
+    }
+
+    private Map<String, Map<String, String>> mapHostPkgNameVersionToHostNameVersionMap(Map<String, String> pkgNames,
+            Map<String, Map<String, String>> packageVersionsByPkgNameByHost) {
+        // Map<host, Map<name, version>
         Map<String, Map<String, String>> packageVersionsByNameByHost = new HashMap<>();
         for (Map.Entry<String, Map<String, String>> entry : packageVersionsByPkgNameByHost.entrySet()) {
             Map<String, String> versionByName =
-                    entry.getValue().entrySet().stream().collect(Collectors.toMap(e -> pkgNames.get(e.getKey()), Map.Entry::getValue));
+                    entry.getValue().entrySet().stream()
+                            .filter(e -> StringUtils.isNotBlank(e.getValue()))
+                            .collect(Collectors.toMap(e -> pkgNames.get(e.getKey()), Map.Entry::getValue));
             packageVersionsByNameByHost.put(entry.getKey(), versionByName);
         }
         return packageVersionsByNameByHost;
+    }
+
+    private Map<String, String> mapPackageToPkgNameAndNameMap() {
+        /*
+         * From Package { List<String> pkgName; String name; }
+         * To Map<pkgName, name>
+         */
+        return packages.stream().filter(pkg -> pkg.getPkgName() != null && !pkg.getPkgName().isEmpty())
+                .flatMap(pkg -> pkg.getPkgName().stream()
+                        .map(pkgName -> new AbstractMap.SimpleEntry<>(pkgName, pkg.getName())))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     public List<String> collectPackagesWithMultipleVersions(Collection<InstanceMetaData> instanceMetadataList) {
@@ -250,7 +272,7 @@ public class InstanceMetadataUpdater {
     public static class Package {
         private String name;
 
-        private String pkgName;
+        private List<String> pkgName;
 
         private String command;
 
@@ -266,11 +288,11 @@ public class InstanceMetadataUpdater {
             this.name = name;
         }
 
-        public String getPkgName() {
+        public List<String> getPkgName() {
             return pkgName;
         }
 
-        public void setPkgName(String pkgName) {
+        public void setPkgName(List<String> pkgName) {
             this.pkgName = pkgName;
         }
 

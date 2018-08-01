@@ -85,7 +85,7 @@ public class InstanceMetadataUpdaterTest {
         InstanceMetadataUpdater.Package packageByName = new InstanceMetadataUpdater.Package();
         this.packageByName = "packageByName";
         packageByName.setName(this.packageByName);
-        packageByName.setPkgName("packageByName");
+        packageByName.setPkgName(Collections.singletonList("packageByName"));
         InstanceMetadataUpdater.Package packageByCmd = new InstanceMetadataUpdater.Package();
         this.packageByCmd = "packageByCmd";
         packageByCmd.setName(this.packageByCmd);
