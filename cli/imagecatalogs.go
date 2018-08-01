@@ -230,25 +230,54 @@ func describeImageImpl(client getPublicImagesClient, writer func([]string, []uti
 		utils.LogErrorAndExit(err)
 	}
 
-	image := findBaseImageByUUID(imageResp.Payload.BaseImages, imageid)
-
+	image := findImageByUUID(imageResp.Payload, imageid)
 	if image == nil {
-		utils.LogErrorMessageAndExit(fmt.Sprintf("Image not found by id: %s", imageid))
+		utils.LogErrorMessageAndExit(fmt.Sprintf("Image not found by id: %s for cloud: %s", imageid, *provider))
 	}
 
 	listImageInformation(writer, image)
 }
 
-func findBaseImageByUUID(baseImages []*models_cloudbreak.BaseImageResponse, imageid string) *models_cloudbreak.BaseImageResponse {
-	for i := range baseImages {
-		if baseImages[i].UUID == imageid {
-			return baseImages[i]
+func findImageByUUID(imageResponse *models_cloudbreak.ImagesResponse, imageID string) *models_cloudbreak.ImageResponse {
+	image := findBaseImage(imageResponse.BaseImages, imageID)
+	if image == nil {
+		warmupImage := findWarmupImage(imageResponse.HdpImages, imageID)
+		if warmupImage == nil {
+			warmupImage = findWarmupImage(imageResponse.HdfImages, imageID)
+		}
+		return warmupImage
+	}
+	return &models_cloudbreak.ImageResponse{
+		Date:            image.Date,
+		Description:     image.Description,
+		Version:         image.Version,
+		UUID:            image.UUID,
+		Os:              image.Os,
+		OsType:          image.OsType,
+		Images:          image.Images,
+		PackageVersions: image.PackageVersions,
+	}
+}
+
+func findBaseImage(images []*models_cloudbreak.BaseImageResponse, imageID string) *models_cloudbreak.BaseImageResponse {
+	for _, i := range images {
+		if i.UUID == imageID {
+			return i
 		}
 	}
 	return nil
 }
 
-func listImageInformation(writer func([]string, []utils.Row), image *models_cloudbreak.BaseImageResponse) {
+func findWarmupImage(images []*models_cloudbreak.ImageResponse, imageID string) *models_cloudbreak.ImageResponse {
+	for _, i := range images {
+		if i.UUID == imageID {
+			return i
+		}
+	}
+	return nil
+}
+
+func listImageInformation(writer func([]string, []utils.Row), image *models_cloudbreak.ImageResponse) {
 	tableRows := []utils.Row{}
 	tableRows = append(tableRows, &imageDetailsOut{image.Date, image.Description, image.Version, image.UUID, image.Os, image.OsType, image.Images, image.PackageVersions})
 	writer(imageDetailsHeader, tableRows)

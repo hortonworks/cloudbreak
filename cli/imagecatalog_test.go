@@ -96,16 +96,19 @@ func TestFindBaseImageByUUID(t *testing.T) {
 		},
 	}
 
+	imageResponse := &models_cloudbreak.ImagesResponse{
+		BaseImages: baseImages,
+	}
 	expectedUUID := "uuid3"
 
-	foundImage := findBaseImageByUUID(baseImages, expectedUUID)
+	foundImage := findImageByUUID(imageResponse, expectedUUID)
 
 	if foundImage.UUID != expectedUUID {
 		t.Errorf("UUID not match %s == %s", expectedUUID, foundImage.UUID)
 	}
 }
 
-var detailedImage = &models_cloudbreak.BaseImageResponse{
+var detailedImage = &models_cloudbreak.ImageResponse{
 	Date:        "1111-11-11",
 	Version:     "1.1.1",
 	Description: "images",
