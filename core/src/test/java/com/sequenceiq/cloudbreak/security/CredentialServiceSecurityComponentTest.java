@@ -34,15 +34,18 @@ import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.UserProfileRepository;
 import com.sequenceiq.cloudbreak.repository.security.UserRepository;
+import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.security.OwnerBasedPermissionEvaluator;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderCredentialAdapter;
 import com.sequenceiq.cloudbreak.service.user.UserProfileCredentialHandler;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @SpringBootTest(classes = CredentialServiceSecurityComponentTest.TestConfig.class)
 public class CredentialServiceSecurityComponentTest extends SecurityComponentTestBase {
@@ -436,6 +439,15 @@ public class CredentialServiceSecurityComponentTest extends SecurityComponentTes
 
         @MockBean
         private CloudbreakMessagesService messagesService;
+
+        @MockBean
+        private OrganizationService organizationService;
+
+        @MockBean
+        private UserService userService;
+
+        @MockBean
+        private AuthenticatedUserService authenticatedUserService;
 
         @Bean
         public CredentialRepository credentialRepository() {

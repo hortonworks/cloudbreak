@@ -18,10 +18,14 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
+import com.sequenceiq.cloudbreak.domain.security.Organization;
+import com.sequenceiq.cloudbreak.domain.security.User;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.ProxyConfigRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Service
 public class ProxyConfigService {
@@ -36,6 +40,12 @@ public class ProxyConfigService {
 
     @Inject
     private AuthorizationService authorizationService;
+
+    @Inject
+    private UserService userService;
+
+    @Inject
+    private OrganizationService organizationService;
 
     public Set<ProxyConfig> retrievePrivateProxyConfigs(IdentityUser user) {
         return proxyConfigRepository.findAllByOwner(user.getUserId());
@@ -73,10 +83,13 @@ public class ProxyConfigService {
         delete(proxyConfig);
     }
 
-    public ProxyConfig create(IdentityUser user, ProxyConfig proxyConfig) {
-        LOGGER.debug("Creating Proxy configuration: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
-        proxyConfig.setOwner(user.getUserId());
-        proxyConfig.setAccount(user.getAccount());
+    public ProxyConfig create(IdentityUser identityUser, ProxyConfig proxyConfig) {
+        LOGGER.debug("Creating Proxy configuration: [User: '{}', Account: '{}']", identityUser.getUsername(), identityUser.getAccount());
+        proxyConfig.setOwner(identityUser.getUserId());
+        proxyConfig.setAccount(identityUser.getAccount());
+        User user = userService.getOrCreate(identityUser);
+        Organization organization = organizationService.getDefaultOrganizationForUser(user);
+        proxyConfig.setOrganization(organization);
         return proxyConfigRepository.save(proxyConfig);
     }
 

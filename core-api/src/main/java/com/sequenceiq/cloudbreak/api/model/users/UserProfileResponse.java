@@ -1,7 +1,9 @@
-package com.sequenceiq.cloudbreak.api.model;
+package com.sequenceiq.cloudbreak.api.model.users;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
 
 import io.swagger.annotations.ApiModel;
 

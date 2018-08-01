@@ -1,19 +1,19 @@
-package com.sequenceiq.cloudbreak.api.model;
+package com.sequenceiq.cloudbreak.api.model.users;
 
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.api.model.JsonEntity;
+
 import io.swagger.annotations.ApiModel;
 
-@ApiModel()
+@ApiModel
 public class UserOrgPermissionsJson implements JsonEntity {
 
     private Set<String> permissions;
 
     private String userName;
 
-    private String email;
-
-    private String company;
+    private String userId;
 
     public Set<String> getPermissions() {
         return permissions;
@@ -31,19 +31,11 @@ public class UserOrgPermissionsJson implements JsonEntity {
         this.userName = userName;
     }
 
-    public String getEmail() {
-        return email;
+    public String getUserId() {
+        return userId;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getCompany() {
-        return company;
-    }
-
-    public void setCompany(String company) {
-        this.company = company;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 }

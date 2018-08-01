@@ -1,10 +1,11 @@
-package com.sequenceiq.cloudbreak.converter;
+package com.sequenceiq.cloudbreak.converter.users;
 
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.OrganizationRequest;
+import com.sequenceiq.cloudbreak.api.model.users.OrganizationRequest;
+import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.security.Organization;
 import com.sequenceiq.cloudbreak.domain.security.User;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;

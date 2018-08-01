@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.model;
+package com.sequenceiq.cloudbreak.api.model.users;
 
 import io.swagger.annotations.ApiModel;
 

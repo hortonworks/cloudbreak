@@ -39,12 +39,10 @@ public class UserService {
     public User getOrCreate(IdentityUser identityUser) {
         try {
             return transactionService.required(() -> {
-                User user = userRepository.findByEmail(identityUser.getUsername());
+                User user = userRepository.findByUserId(identityUser.getUsername());
                 if (user == null) {
                     user = new User();
-                    user.setEmail(identityUser.getUsername());
-                    user.setCompany(identityUser.getAccount());
-                    user.setName(identityUser.getUsername());
+                    user.setUserId(identityUser.getUsername());
 
                     Tenant tenant = tenantRepository.findByName("DEFAULT");
                     user.setTenant(tenant);
@@ -65,12 +63,16 @@ public class UserService {
         }
     }
 
-    public User getByEmail(String email) {
-        return userRepository.findByEmail(email);
+    public User getByUserId(String userId) {
+        return userRepository.findByUserId(userId);
+    }
+
+    public Set<User> getByUsersIds(Set<String> userIds) {
+        return userRepository.findByUserIdIn(userIds);
     }
 
     public Set<User> getAll(IdentityUser identityUser) {
-        User user = userRepository.findByEmail(identityUser.getUsername());
+        User user = userRepository.findByUserId(identityUser.getUsername());
         return userRepository.findAllByTenant(user.getTenant());
     }
 }

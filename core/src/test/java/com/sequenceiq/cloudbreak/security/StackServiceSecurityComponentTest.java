@@ -59,10 +59,12 @@ import com.sequenceiq.cloudbreak.service.decorator.StackResponseDecorator;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.security.OwnerBasedPermissionEvaluator;
 import com.sequenceiq.cloudbreak.service.stack.StackDownscaleValidatorService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @SpringBootTest(classes = StackServiceSecurityComponentTest.TestConfig.class)
 public class StackServiceSecurityComponentTest extends SecurityComponentTestBase {
@@ -606,6 +608,12 @@ public class StackServiceSecurityComponentTest extends SecurityComponentTestBase
 
         @MockBean(name = "conversionService")
         private ConversionService conversionService;
+
+        @MockBean
+        private UserService userService;
+
+        @MockBean
+        private OrganizationService organizationService;
 
         @Bean
         public StackRepository stackRepository() {

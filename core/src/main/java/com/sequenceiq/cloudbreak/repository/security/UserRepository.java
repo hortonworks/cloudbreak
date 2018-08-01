@@ -18,8 +18,10 @@ import com.sequenceiq.cloudbreak.service.EntityType;
 @DisablePermission
 public interface UserRepository extends DisabledBaseRepository<User, Long> {
 
-    User findByEmail(String email);
+    User findByUserId(String userId);
 
     @Query("SELECT u FROM User u WHERE u.tenant= :tenant")
     Set<User> findAllByTenant(@Param("tenant") Tenant tenant);
+
+    Set<User> findByUserIdIn(Set<String> userIds);
 }

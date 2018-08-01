@@ -13,9 +13,10 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v1.UserEndpoint;
-import com.sequenceiq.cloudbreak.api.model.UserJson;
-import com.sequenceiq.cloudbreak.api.model.UserProfileRequest;
-import com.sequenceiq.cloudbreak.api.model.UserProfileResponse;
+import com.sequenceiq.cloudbreak.api.model.users.UserJson;
+import com.sequenceiq.cloudbreak.api.model.users.UserProfileRequest;
+import com.sequenceiq.cloudbreak.api.model.users.UserProfileResponse;
+import com.sequenceiq.cloudbreak.api.model.users.UserResponseJson;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.domain.security.User;
@@ -71,13 +72,13 @@ public class UserController implements UserEndpoint {
     }
 
     @Override
-    public Set<UserJson> getAll() {
+    public Set<UserResponseJson> getAll() {
         IdentityUser user = authenticatedUserService.getCbUser();
         return toJsonSet(userService.getAll(user));
     }
 
-    private Set<UserJson> toJsonSet(Set<User> users) {
-        return (Set<UserJson>) conversionService.convert(users, TypeDescriptor.forObject(users),
+    private Set<UserResponseJson> toJsonSet(Set<User> users) {
+        return (Set<UserResponseJson>) conversionService.convert(users, TypeDescriptor.forObject(users),
                 TypeDescriptor.collection(Set.class, TypeDescriptor.valueOf(UserJson.class)));
     }
 

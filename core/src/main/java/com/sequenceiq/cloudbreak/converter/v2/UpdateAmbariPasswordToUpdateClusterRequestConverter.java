@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.converter.v2;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
-import com.sequenceiq.cloudbreak.api.model.UserNamePasswordJson;
+import com.sequenceiq.cloudbreak.api.model.users.UserNamePasswordJson;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 
 @Component

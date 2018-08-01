@@ -27,17 +27,21 @@ import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.security.Organization;
+import com.sequenceiq.cloudbreak.domain.security.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.notification.Notification;
 import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderCredentialAdapter;
 import com.sequenceiq.cloudbreak.service.user.UserProfileCredentialHandler;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Service
 public class CredentialService {
@@ -46,9 +50,6 @@ public class CredentialService {
 
     @Inject
     private CredentialRepository credentialRepository;
-
-    @Inject
-    private StackService stackService;
 
     @Inject
     private StackRepository stackRepository;
@@ -70,6 +71,15 @@ public class CredentialService {
 
     @Inject
     private CloudbreakMessagesService messagesService;
+
+    @Inject
+    private UserService userService;
+
+    @Inject
+    private OrganizationService organizationService;
+
+    @Inject
+    private AuthenticatedUserService authenticatedUserService;
 
     public Set<Credential> retrievePrivateCredentials(IdentityUser user) {
         return credentialRepository.findForUser(user.getUserId());
@@ -138,6 +148,10 @@ public class CredentialService {
         LOGGER.debug("Creating credential: [UserId: '{}', Account: '{}']", userId, account);
         credential.setOwner(userId);
         credential.setAccount(account);
+        IdentityUser identityUser = authenticatedUserService.getCbUser();
+        User user = userService.getOrCreate(identityUser);
+        Organization organization = organizationService.getDefaultOrganizationForUser(user);
+        credential.setOrganization(organization);
         return saveCredentialAndNotify(credential, ResourceEvent.CREDENTIAL_CREATED);
     }
 

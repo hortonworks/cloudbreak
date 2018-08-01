@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v1;
 
 import java.util.Set;
+import java.util.SortedSet;
 
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
@@ -13,9 +14,10 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.sequenceiq.cloudbreak.api.model.ChangeOrganizationUsersJson;
-import com.sequenceiq.cloudbreak.api.model.OrganizationRequest;
-import com.sequenceiq.cloudbreak.api.model.OrganizationResponse;
+import com.sequenceiq.cloudbreak.api.model.users.ChangeOrganizationUsersJson;
+import com.sequenceiq.cloudbreak.api.model.users.OrganizationRequest;
+import com.sequenceiq.cloudbreak.api.model.users.OrganizationResponse;
+import com.sequenceiq.cloudbreak.api.model.users.UserResponseJson;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
@@ -32,48 +34,55 @@ public interface OrganizationEndpoint {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OrganizationOpDescription.POST, produces = ContentType.JSON, notes = Notes.ORGANIZATION_NOTES,
-            nickname = "postOrganization")
-    OrganizationResponse post(@Valid OrganizationRequest organizationRequest);
+            nickname = "createOrganization")
+    OrganizationResponse create(@Valid OrganizationRequest organizationRequest);
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OrganizationOpDescription.GET, produces = ContentType.JSON, notes = Notes.ORGANIZATION_NOTES,
             nickname = "getOrganizations")
-    Set<OrganizationResponse> getAll();
+    SortedSet<OrganizationResponse> getAll();
 
     @GET
-    @Path("t/{name}")
+    @Path("name/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OrganizationOpDescription.GET_BY_NAME, produces = ContentType.JSON, notes = Notes.ORGANIZATION_NOTES,
             nickname = "getOrganizationByName")
     OrganizationResponse getByName(@PathParam("name") String name);
 
-    @GET
-    @Path("{id}")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OrganizationOpDescription.GET_BY_ID, produces = ContentType.JSON, notes = Notes.ORGANIZATION_NOTES,
-            nickname = "getOrganization")
-    OrganizationResponse get(@PathParam("id") Long id);
-
     @DELETE
-    @Path("{id}")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OrganizationOpDescription.DELETE_BY_ID, produces = ContentType.JSON, notes = Notes.ORGANIZATION_NOTES,
-            nickname = "deleteOrganization")
-    void delete(@PathParam("id") Long id);
-
-    @DELETE
-    @Path("t/{name}")
+    @Path("name/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OrganizationOpDescription.DELETE_BY_NAME, produces = ContentType.JSON, notes = Notes.ORGANIZATION_NOTES,
-            nickname = "deletePrivateOrganization")
-    void deleteByName(@PathParam("name") String name);
+            nickname = "deleteOrganizationByName")
+    OrganizationResponse deleteByName(@PathParam("name") String name);
 
     @PUT
-    @Path("{id}")
+    @Path("name/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OrganizationOpDescription.CHANGE_USERS, produces = ContentType.JSON, notes = Notes.ORGANIZATION_NOTES,
             nickname = "changeOrganizationUsers")
-    void changeUsers(@PathParam("id") Long id, @Valid Set<ChangeOrganizationUsersJson> changeOrganizationUsersJson);
+    SortedSet<UserResponseJson> changeUsers(@PathParam("name") String orgName, @Valid Set<ChangeOrganizationUsersJson> changeOrganizationUsersJson);
+
+    @DELETE
+    @Path("name/{name}/removeUsers")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OrganizationOpDescription.REMOVE_USERS, produces = ContentType.JSON, notes = Notes.ORGANIZATION_NOTES,
+            nickname = "removeOrganizationUsers")
+    SortedSet<UserResponseJson> removeUsers(@PathParam("name") String orgName, @Valid Set<String> userIds);
+
+    @POST
+    @Path("name/{name}/addUsers")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OrganizationOpDescription.ADD_USERS, produces = ContentType.JSON, notes = Notes.ORGANIZATION_NOTES,
+            nickname = "addOrganizationUsers")
+    SortedSet<UserResponseJson> addUsers(@PathParam("name") String orgName, @Valid Set<ChangeOrganizationUsersJson> addOrganizationUsersJson);
+
+    @PUT
+    @Path("name/{name}/updateUsers")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OrganizationOpDescription.UPDATE_USERS, produces = ContentType.JSON, notes = Notes.ORGANIZATION_NOTES,
+            nickname = "updateOrganizationUsers")
+    SortedSet<UserResponseJson> updateUsers(@PathParam("name") String orgName, @Valid Set<ChangeOrganizationUsersJson> updateOrganizationUsersJson);
 
 }
