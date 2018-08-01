@@ -34,6 +34,8 @@ import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemConfigurationsVi
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
@@ -719,4 +721,18 @@ public class StackToCloudStackConverterTest {
         return map;
     }
 
+    @Test
+    public void testBuildInstanceTemplateWithAttributes() throws Exception {
+        Template template = new Template();
+        template.setVolumeCount(0);
+        template.setAttributes(new Json(Map.of("someAttr", "value")));
+        template.setSecretAttributes(new Json(Map.of("otherAttr", "value")));
+
+        InstanceTemplate instanceTemplate = underTest.buildInstanceTemplate(
+                template, "name", 0L, InstanceStatus.CREATE_REQUESTED, "instanceImageId");
+
+        assertNotNull(instanceTemplate.getParameters());
+        assertEquals("value", instanceTemplate.getParameters().get("someAttr"));
+        assertEquals("value", instanceTemplate.getParameters().get("otherAttr"));
+    }
 }

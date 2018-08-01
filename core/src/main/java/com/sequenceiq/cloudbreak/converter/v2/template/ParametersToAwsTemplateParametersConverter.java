@@ -5,7 +5,7 @@ import java.util.Map;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.v2.template.AwsParameters;
-import com.sequenceiq.cloudbreak.api.model.v2.template.Encryption;
+import com.sequenceiq.cloudbreak.api.model.v2.template.AwsEncryption;
 import com.sequenceiq.cloudbreak.api.model.v2.template.EncryptionType;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 
@@ -19,21 +19,21 @@ public class ParametersToAwsTemplateParametersConverter extends AbstractConversi
             if (Boolean.valueOf(source.get("encrypted").toString())) {
                 Object key = source.get("key");
                 if (key == null) {
-                    Encryption encryption = new Encryption();
-                    encryption.setType(EncryptionType.DEFAULT.name());
-                    awsParameters.setEncryption(encryption);
+                    AwsEncryption awsEncryption = new AwsEncryption();
+                    awsEncryption.setType(EncryptionType.DEFAULT.name());
+                    awsParameters.setAwsEncryption(awsEncryption);
                     awsParameters.setEncrypted(true);
                 } else {
-                    Encryption encryption = new Encryption();
-                    encryption.setType(EncryptionType.CUSTOM.name());
-                    encryption.setKey(key.toString());
-                    awsParameters.setEncryption(encryption);
+                    AwsEncryption awsEncryption = new AwsEncryption();
+                    awsEncryption.setType(EncryptionType.CUSTOM.name());
+                    awsEncryption.setKey(key.toString());
+                    awsParameters.setAwsEncryption(awsEncryption);
                     awsParameters.setEncrypted(true);
                 }
             } else {
-                Encryption encryption = new Encryption();
-                encryption.setType(EncryptionType.NONE.name());
-                awsParameters.setEncryption(encryption);
+                AwsEncryption awsEncryption = new AwsEncryption();
+                awsEncryption.setType(EncryptionType.NONE.name());
+                awsParameters.setAwsEncryption(awsEncryption);
                 awsParameters.setEncrypted(false);
             }
         } else {

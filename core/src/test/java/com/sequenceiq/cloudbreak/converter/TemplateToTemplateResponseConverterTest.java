@@ -19,10 +19,9 @@ import com.sequenceiq.cloudbreak.api.model.TemplateResponse;
 import com.sequenceiq.cloudbreak.api.model.v2.template.AwsParameters;
 import com.sequenceiq.cloudbreak.api.model.v2.template.AzureParameters;
 import com.sequenceiq.cloudbreak.api.model.v2.template.BaseTemplateParameter;
-import com.sequenceiq.cloudbreak.api.model.v2.template.Encryption;
+import com.sequenceiq.cloudbreak.api.model.v2.template.AwsEncryption;
 import com.sequenceiq.cloudbreak.api.model.v2.template.EncryptionType;
 import com.sequenceiq.cloudbreak.api.model.v2.template.GcpEncryption;
-import com.sequenceiq.cloudbreak.api.model.v2.template.GcpEncryptionType;
 import com.sequenceiq.cloudbreak.api.model.v2.template.GcpParameters;
 import com.sequenceiq.cloudbreak.api.model.v2.template.KeyEncryptionMethod;
 import com.sequenceiq.cloudbreak.api.model.v2.template.OpenStackParameters;
@@ -59,10 +58,10 @@ public class TemplateToTemplateResponseConverterTest {
 
         Assert.assertNotNull(convert.getAwsParameters());
         Assert.assertEquals(10.0D, convert.getAwsParameters().getSpotPrice().doubleValue(), 0);
-        Assert.assertEquals("someKey", convert.getAwsParameters().getEncryption().getKey());
-        Assert.assertEquals(EncryptionType.CUSTOM.name(), convert.getAwsParameters().getEncryption().getType());
+        Assert.assertEquals("someKey", convert.getAwsParameters().getAwsEncryption().getKey());
+        Assert.assertEquals(EncryptionType.CUSTOM.name(), convert.getAwsParameters().getAwsEncryption().getType());
         Assert.assertNull(convert.getAzureParameters());
-        Assert.assertNull(convert.getGcpTemlateParameters());
+        Assert.assertNull(convert.getGcpParameters());
         Assert.assertNull(convert.getOpenStackParameters());
     }
 
@@ -86,10 +85,10 @@ public class TemplateToTemplateResponseConverterTest {
 
         TemplateResponse convert = underTest.convert(template);
 
-        Assert.assertNotNull(convert.getGcpTemlateParameters());
-        Assert.assertEquals(GcpEncryptionType.CUSTOM.name(), convert.getGcpTemlateParameters().getEncryption().getType());
-        Assert.assertEquals(KeyEncryptionMethod.RAW.name(), convert.getGcpTemlateParameters().getEncryption().getKeyEncryptionMethod());
-        Assert.assertEquals("someKey", convert.getGcpTemlateParameters().getEncryption().getKey());
+        Assert.assertNotNull(convert.getGcpParameters());
+        Assert.assertEquals(EncryptionType.CUSTOM.name(), convert.getGcpParameters().getEncryption().getType());
+        Assert.assertEquals(KeyEncryptionMethod.RAW.name(), convert.getGcpParameters().getEncryption().getKeyEncryptionMethod());
+        Assert.assertEquals("someKey", convert.getGcpParameters().getEncryption().getKey());
     }
 
     @Test
@@ -113,7 +112,7 @@ public class TemplateToTemplateResponseConverterTest {
 
         Assert.assertNull(convert.getAwsParameters());
         Assert.assertNull(convert.getAzureParameters());
-        Assert.assertNull(convert.getGcpTemlateParameters());
+        Assert.assertNull(convert.getGcpParameters());
         Assert.assertNull(convert.getOpenStackParameters());
     }
 
@@ -127,10 +126,10 @@ public class TemplateToTemplateResponseConverterTest {
         AwsParameters templateParameters = new AwsParameters();
         templateParameters.setSpotPrice(10.0D);
         templateParameters.setEncrypted(true);
-        Encryption encryption = new Encryption();
-        encryption.setKey("someKey");
-        encryption.setType("CUSTOM");
-        templateParameters.setEncryption(encryption);
+        AwsEncryption awsEncryption = new AwsEncryption();
+        awsEncryption.setKey("someKey");
+        awsEncryption.setType("CUSTOM");
+        templateParameters.setAwsEncryption(awsEncryption);
         return templateParameters;
     }
 

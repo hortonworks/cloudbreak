@@ -11,8 +11,8 @@ import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.api.model.v2.template.BaseTemplateParameter;
+import com.sequenceiq.cloudbreak.api.model.v2.template.EncryptionType;
 import com.sequenceiq.cloudbreak.api.model.v2.template.GcpEncryption;
-import com.sequenceiq.cloudbreak.api.model.v2.template.GcpEncryptionType;
 import com.sequenceiq.cloudbreak.api.model.v2.template.GcpParameters;
 import com.sequenceiq.cloudbreak.api.model.v2.template.KeyEncryptionMethod;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
@@ -39,12 +39,12 @@ public class GcpTemplateParametersToParametersConverterTest {
         Map<String, Object> actual = underTest.convert(awsParameters);
 
         assertEquals("someKey", actual.get("key"));
-        assertEquals(GcpEncryptionType.CUSTOM, actual.get("type"));
+        assertEquals(EncryptionType.CUSTOM, actual.get("type"));
         assertEquals(KeyEncryptionMethod.RSA, actual.get("keyEncryptionMethod"));
         assertEquals(CloudConstants.GCP, actual.get(BaseTemplateParameter.PLATFORM_TYPE));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testInvalidEncryptionType() {
         GcpParameters awsParameters = new GcpParameters();
         GcpEncryption encryption = new GcpEncryption();
@@ -53,7 +53,8 @@ public class GcpTemplateParametersToParametersConverterTest {
         encryption.setKeyEncryptionMethod("RSA");
         awsParameters.setEncryption(encryption);
 
-        underTest.convert(awsParameters);
+        Map<String, Object> converted = underTest.convert(awsParameters);
+        assertEquals(EncryptionType.DEFAULT, converted.get("type"));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -75,6 +76,6 @@ public class GcpTemplateParametersToParametersConverterTest {
         Map<String, Object> actual = underTest.convert(awsParameters);
 
         assertNull(actual.get("key"));
-        assertEquals(GcpEncryptionType.DEFAULT, actual.get("type"));
+        assertEquals(EncryptionType.DEFAULT, actual.get("type"));
     }
 }

@@ -19,14 +19,18 @@ dependencies {
     compile group: 'org.apache.commons',            name: 'commons-lang3',                version: apacheCommonsLangVersion
     compile group: 'commons-io',                    name: 'commons-io',                   version: '2.4'
     compile group: 'commons-codec',                 name: 'commons-codec',                version: '1.10'
-    compile group: 'com.google.apis',               name: 'google-api-services-compute',  version: 'beta-rev76-1.23.0'
+    compile group: 'com.google.apis',               name: 'google-api-services-compute',  version: 'beta-rev102-1.24.1'
     compile group: 'com.google.apis',               name: 'google-api-services-storage',  version: 'v1-rev94-1.22.0'
     compile group: 'com.google.apis',               name: 'google-api-services-dns',      version: 'v2beta1-rev14-1.22.0'
+    compile group: 'com.google.apis',               name: 'google-api-services-cloudkms', version: 'v1-rev26-1.23.0'
     compile group: 'junit',                         name: 'junit',                        version: junitVersion
 
     testCompile project(path: ':core-model', configuration: 'tests')
     testCompile project(':cloud-reactor')
-    testCompile group: 'org.mockito',               name: 'mockito-core',                 version: mockitoVersion
+    testCompile group: 'org.mockito',               name: 'mockito-junit-jupiter',        version: mockitoVersion
     testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-test',     version: springBootVersion
+    testCompile group: 'org.apache.httpcomponents', name: 'httpclient',                   version: '4.5.6',           classifier: 'tests'
+    testCompile group: 'org.junit.jupiter',         name: 'junit-jupiter-api',            version: '5.2.0'
+    testRuntime group: 'org.junit.jupiter',         name: 'junit-jupiter-engine',         version: '5.2.0'
 
 }

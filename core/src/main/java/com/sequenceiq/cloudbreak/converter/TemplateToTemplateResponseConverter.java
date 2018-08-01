@@ -53,7 +53,7 @@ public class TemplateToTemplateResponseConverter extends AbstractConversionServi
                         templateJson.setAzureParameters(getConversionService().convert(atributesMap, AzureParameters.class));
                         break;
                     case GCP:
-                        templateJson.setGcpTemlateParameters(getConversionService().convert(atributesMap, GcpParameters.class));
+                        templateJson.setGcpParameters(getConversionService().convert(atributesMap, GcpParameters.class));
                         break;
                     case YARN:
                         templateJson.setYarnParameters(getConversionService().convert(atributesMap, YarnParameters.class));

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.v2;
 
 import java.util.Map;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.TemplateRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.TemplateV2Request;
+import com.sequenceiq.cloudbreak.api.model.v2.template.GcpParameters;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.service.MissingResourceNameGenerator;
@@ -37,11 +39,12 @@ public class TemplateV2RequestToTemplateRequestConverter extends AbstractConvers
             template.getParameters().putAll(getConversionService().convert(source.getAwsParameters(), Map.class));
         } else if (source.getAzureParameters() != null) {
             template.getParameters().putAll(getConversionService().convert(source.getAzureParameters(), Map.class));
-        } else if (source.getGcpTemlateParameters() != null) {
-            template.getParameters().putAll(getConversionService().convert(source.getGcpTemlateParameters(), Map.class));
+        } else if (source.getGcpParameters() != null) {
+            GcpParameters gcpParameters = Optional.ofNullable(source.getGcpParameters()).orElse(new GcpParameters());
+            template.getSecretParameters().putAll(getConversionService().convert(gcpParameters, Map.class));
         } else if (source.getOpenStackParameters() != null) {
             template.getParameters().putAll(getConversionService().convert(source.getOpenStackParameters(), Map.class));
-        } else if (source.getOpenStackParameters() != null) {
+        } else if (source.getYarnParameters() != null) {
             template.getParameters().putAll(getConversionService().convert(source.getYarnParameters(), Map.class));
         }
         return template;

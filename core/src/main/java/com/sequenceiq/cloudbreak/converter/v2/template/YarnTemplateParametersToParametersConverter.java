@@ -7,15 +7,15 @@ import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.v2.template.GcpParameters;
+import com.sequenceiq.cloudbreak.api.model.v2.template.YarnParameters;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 
 @Component
-public class YarnTemplateParametersToParametersConverter extends AbstractConversionServiceAwareConverter<GcpParameters, Map<String, Object>> {
+public class YarnTemplateParametersToParametersConverter extends AbstractConversionServiceAwareConverter<YarnParameters, Map<String, Object>> {
 
     @Override
-    public Map<String, Object> convert(GcpParameters source) {
+    public Map<String, Object> convert(YarnParameters source) {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put(PLATFORM_TYPE, CloudConstants.YARN);
         return parameters;

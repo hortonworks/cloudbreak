@@ -9,7 +9,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Encryption implements JsonEntity {
+public class AwsEncryption implements JsonEntity {
 
     @ApiModelProperty(TemplateModelDescription.ENCRYPTION_TYPE)
     private String type;

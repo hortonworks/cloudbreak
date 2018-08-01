@@ -1,9 +1,13 @@
 package com.sequenceiq.cloudbreak.converter;
 
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -22,6 +26,8 @@ import com.sequenceiq.cloudbreak.service.topology.TopologyService;
 
 @Component
 public class TemplateRequestToTemplateConverter extends AbstractConversionServiceAwareConverter<TemplateRequest, Template> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TemplateRequestToTemplateConverter.class);
 
     @Inject
     private TopologyService topologyService;
@@ -53,13 +59,27 @@ public class TemplateRequestToTemplateConverter extends AbstractConversionServic
             try {
                 template.setAttributes(new Json(parameters));
             } catch (JsonProcessingException ignored) {
+                LOGGER.error("Failed to parse parameters JSON.", ignored);
                 throw new BadRequestException("Invalid parameters");
             }
         }
+
+        Optional.ofNullable(source.getSecretParameters()).map(toJson()).ifPresent(template::setSecretAttributes);
+
         if (source.getTopologyId() != null) {
             template.setTopology(topologyService.get(source.getTopologyId()));
         }
         return template;
+    }
+
+    private Function<Map<String, Object>, Json> toJson() {
+        return value -> {
+            try {
+                return new Json(value);
+            } catch (JsonProcessingException e) {
+                throw new BadRequestException("Invalid parameters");
+            }
+        };
     }
 
     private Template convertVolume(TemplateRequest source, Template template) {

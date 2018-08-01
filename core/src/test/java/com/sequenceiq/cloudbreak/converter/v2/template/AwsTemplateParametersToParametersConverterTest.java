@@ -11,7 +11,7 @@ import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.api.model.v2.template.AwsParameters;
 import com.sequenceiq.cloudbreak.api.model.v2.template.BaseTemplateParameter;
-import com.sequenceiq.cloudbreak.api.model.v2.template.Encryption;
+import com.sequenceiq.cloudbreak.api.model.v2.template.AwsEncryption;
 import com.sequenceiq.cloudbreak.api.model.v2.template.EncryptionType;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 
@@ -47,10 +47,10 @@ public class AwsTemplateParametersToParametersConverterTest {
     @Test
     public void testEncryption() {
         AwsParameters awsParameters = new AwsParameters();
-        Encryption encryption = new Encryption();
-        encryption.setKey("someKey");
-        encryption.setType("CUSTOM");
-        awsParameters.setEncryption(encryption);
+        AwsEncryption awsEncryption = new AwsEncryption();
+        awsEncryption.setKey("someKey");
+        awsEncryption.setType("CUSTOM");
+        awsParameters.setAwsEncryption(awsEncryption);
         awsParameters.setEncrypted(true);
 
         Map<String, Object> actual = underTest.convert(awsParameters);

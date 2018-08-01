@@ -14,6 +14,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.domain.json.EncryptedJsonToString;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 
@@ -69,6 +70,10 @@ public class Template implements ProvisionEntity {
     @Convert(converter = JsonToString.class)
     @Column(columnDefinition = "TEXT")
     private Json attributes;
+
+    @Convert(converter = EncryptedJsonToString.class)
+    @Column(columnDefinition = "TEXT")
+    private Json secretAttributes;
 
     public Template() {
         deleted = false;
@@ -192,6 +197,14 @@ public class Template implements ProvisionEntity {
 
     public void setAttributes(Json attributes) {
         this.attributes = attributes;
+    }
+
+    public Json getSecretAttributes() {
+        return secretAttributes;
+    }
+
+    public void setSecretAttributes(Json secretAttributes) {
+        this.secretAttributes = secretAttributes;
     }
 
     public Topology getTopology() {

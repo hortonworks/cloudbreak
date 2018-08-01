@@ -34,7 +34,7 @@ public class TemplateResponse extends TemplateBase {
     private AwsParameters awsParameters;
 
     @ApiModelProperty(TemplateModelDescription.GCP_PARAMETERS)
-    private GcpParameters gcpTemlateParameters;
+    private GcpParameters gcpParameters;
 
     @ApiModelProperty(TemplateModelDescription.AZURE_PARAMETERS)
     private AzureParameters azureParameters;
@@ -94,12 +94,12 @@ public class TemplateResponse extends TemplateBase {
         this.awsParameters = awsParameters;
     }
 
-    public GcpParameters getGcpTemlateParameters() {
-        return gcpTemlateParameters;
+    public GcpParameters getGcpParameters() {
+        return gcpParameters;
     }
 
-    public void setGcpTemlateParameters(GcpParameters gcpTemlateParameters) {
-        this.gcpTemlateParameters = gcpTemlateParameters;
+    public void setGcpParameters(GcpParameters gcpParameters) {
+        this.gcpParameters = gcpParameters;
     }
 
     public AzureParameters getAzureParameters() {

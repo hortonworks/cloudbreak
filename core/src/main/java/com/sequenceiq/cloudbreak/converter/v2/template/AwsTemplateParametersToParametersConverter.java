@@ -18,18 +18,18 @@ public class AwsTemplateParametersToParametersConverter extends AbstractConversi
     @Override
     public Map<String, Object> convert(AwsParameters source) {
         Map<String, Object> parameters = new HashMap<>();
-        if (source.isEncrypted() != null || source.getEncryption() != null) {
-            if (source.getEncryption() != null) {
-                if (source.getEncryption() == null) {
+        if (source.isEncrypted() != null || source.getAwsEncryption() != null) {
+            if (source.getAwsEncryption() != null) {
+                if (source.getAwsEncryption() == null) {
                     parameters.put("type", EncryptionType.DEFAULT);
                     parameters.put("encrypted", true);
                 } else {
-                    if (source.getEncryption().getKey() != null) {
+                    if (source.getAwsEncryption().getKey() != null) {
                         parameters.put("type", EncryptionType.CUSTOM);
-                        parameters.put("key", source.getEncryption().getKey());
+                        parameters.put("key", source.getAwsEncryption().getKey());
                         parameters.put("encrypted", true);
                     } else {
-                        EncryptionType encryptionType = EncryptionType.valueOf(source.getEncryption().getType());
+                        EncryptionType encryptionType = EncryptionType.valueOf(source.getAwsEncryption().getType());
                         parameters.put("type", encryptionType);
                         if (EncryptionType.NONE.equals(encryptionType)) {
                             parameters.put("encrypted", false);

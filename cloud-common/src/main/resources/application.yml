@@ -147,6 +147,7 @@ cb:
 
   gcp:
     hostkey.verify: false
+    disk.encryption.url: https://cloud-certs.storage.googleapis.com/google-cloud-csek-ingress.pem
 
   nginx:
     port: 9443

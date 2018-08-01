@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -149,8 +150,14 @@ public class StackToCloudStackConverter {
     }
 
     InstanceTemplate buildInstanceTemplate(Template template, String name, Long privateId, InstanceStatus status, String instanceImageId) {
-        Json attributes = template.getAttributes();
-        Map<String, Object> fields = attributes == null ? Collections.emptyMap() : attributes.getMap();
+        Json attributesJson = template.getAttributes();
+        Map<String, Object> attributes = Optional.ofNullable(attributesJson).map(Json::getMap).orElseGet(HashMap::new);
+        Map<String, Object> secretAttributes = Optional.ofNullable(template.getSecretAttributes()).map(Json::getMap).orElseGet(HashMap::new);
+
+        Map<String, Object> fields = new HashMap<>();
+        fields.putAll(attributes);
+        fields.putAll(secretAttributes);
+
         List<Volume> volumes = new ArrayList<>();
         for (int i = 0; i < template.getVolumeCount(); i++) {
             Volume volume = new Volume(VolumeUtils.VOLUME_PREFIX + (i + 1), template.getVolumeType(), template.getVolumeSize());
