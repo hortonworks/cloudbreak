@@ -49,6 +49,19 @@ public class ClusterComponentConfigProvider {
         }
     }
 
+    public StackRepoDetails getStackRepoDetails(Long clusterId) {
+        ClusterComponent component = getComponent(clusterId, ComponentType.HDP_REPO_DETAILS);
+        if (component == null) {
+            component = getComponent(clusterId, ComponentType.HDF_REPO_DETAILS);
+        }
+        try {
+            return component.getAttributes().get(StackRepoDetails.class);
+        } catch (IOException e) {
+            LOGGER.warn("Failed to read repo component for cluster: [{}]", clusterId, e);
+            throw new CloudbreakServiceException("Failed to read HDP repo details.", e);
+        }
+    }
+
     public StackRepoDetails getStackRepo(Iterable<ClusterComponent> clusterComponents) {
         try {
             StackRepoDetails component = getComponent(Lists.newArrayList(clusterComponents), StackRepoDetails.class, ComponentType.HDP_REPO_DETAILS);

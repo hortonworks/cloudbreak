@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.InstanceMetadataUpdater;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
@@ -48,6 +49,9 @@ public class StackImageUpdateService {
 
     @Inject
     private ComponentConfigProvider componentConfigProvider;
+
+    @Inject
+    private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
     @Inject
     private ImageCatalogService imageCatalogService;
@@ -107,7 +111,7 @@ public class StackImageUpdateService {
                 throw new OperationException(message);
             }
 
-            if (isOsVersionsMismatch(currentImage, newImage)) {
+            if (!isOsVersionsMatch(currentImage, newImage)) {
                 String message = messagesService.getMessage(Msg.OSVERSION_DIFFERENT.code(),
                         Lists.newArrayList(newImage.getImage().getOs(), newImage.getImage().getOsType(), currentImage.getOs(), currentImage.getOsType()));
                 LOGGER.warn(message);
@@ -139,9 +143,9 @@ public class StackImageUpdateService {
         return componentConfigProvider.getImage(stack.getId());
     }
 
-    private boolean isOsVersionsMismatch(Image currentImage, StatedImage newImage) {
-        return !newImage.getImage().getOs().equalsIgnoreCase(currentImage.getOs())
-                || !newImage.getImage().getOsType().equalsIgnoreCase(currentImage.getOsType());
+    private boolean isOsVersionsMatch(Image currentImage, StatedImage newImage) {
+        return newImage.getImage().getOs().equalsIgnoreCase(currentImage.getOs())
+                && newImage.getImage().getOsType().equalsIgnoreCase(currentImage.getOsType());
     }
 
     private StatedImage getNewImage(String newImageId, String imageCatalogName, String imageCatalogUrl, Image currentImage)
@@ -167,7 +171,7 @@ public class StackImageUpdateService {
         if (image.getImage().getStackDetails() != null) {
             try {
                 StackType imageStackType = imageService.determineStackType(image.getImage().getStackDetails());
-                StackRepoDetails repoDetails = componentConfigProvider.getHDPRepo(stack.getId());
+                StackRepoDetails repoDetails = clusterComponentConfigProvider.getStackRepoDetails(stack.getCluster().getId());
                 String repoId = repoDetails.getStack().get(StackRepoDetails.REPO_ID_TAG);
                 Optional<StackType> clusterStackType = EnumSet.allOf(StackType.class).stream().filter(st -> repoId.contains(st.name())).findFirst();
                 if (clusterStackType.isPresent()) {
@@ -207,8 +211,9 @@ public class StackImageUpdateService {
     public boolean isValidImage(Stack stack, String newImageId, String imageCatalogName, String imageCatalogUrl) {
         if (isCbVersionOk(stack)) {
             try {
-                StatedImage newImage = getNewImage(newImageId, imageCatalogName, imageCatalogUrl, getCurrentImage(stack));
-                return isCloudPlatformMatches(stack, newImage) && isStackMatchIfPrewarmed(stack, newImage)
+                Image currentImage = getCurrentImage(stack);
+                StatedImage newImage = getNewImage(newImageId, imageCatalogName, imageCatalogUrl, currentImage);
+                return isCloudPlatformMatches(stack, newImage) && isOsVersionsMatch(currentImage, newImage) && isStackMatchIfPrewarmed(stack, newImage)
                         && checkPackageVersions(stack, newImage).getStatus() == EventStatus.OK;
             } catch (CloudbreakImageNotFoundException e) {
                 LOGGER.warn("Cloudbreak Image not found", e);

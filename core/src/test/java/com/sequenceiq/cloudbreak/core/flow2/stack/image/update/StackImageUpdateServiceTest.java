@@ -155,7 +155,7 @@ public class StackImageUpdateServiceTest {
     @Test
     public void testIsValidImage() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         com.sequenceiq.cloudbreak.cloud.model.Image imageInComponent =
-                new com.sequenceiq.cloudbreak.cloud.model.Image("imageOldName", Collections.emptyMap(), "centos6", "centos",
+                new com.sequenceiq.cloudbreak.cloud.model.Image("imageOldName", Collections.emptyMap(), "centos7", "centos",
                         statedImage.getImageCatalogUrl(), statedImage.getImageCatalogName(), "uuid2", packageVersions);
         when(componentConfigProvider.getImage(anyLong())).thenReturn(imageInComponent);
         when(imageCatalogService.getImage(anyString(), anyString(), anyString())).thenReturn(statedImage);
