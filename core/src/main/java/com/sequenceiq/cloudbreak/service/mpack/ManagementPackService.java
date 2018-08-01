@@ -12,8 +12,12 @@ import com.google.common.base.Preconditions;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.domain.ManagementPack;
+import com.sequenceiq.cloudbreak.domain.security.Organization;
+import com.sequenceiq.cloudbreak.domain.security.User;
 import com.sequenceiq.cloudbreak.repository.ManagementPackRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Service
 public class ManagementPackService {
@@ -24,6 +28,12 @@ public class ManagementPackService {
 
     @Inject
     private AuthorizationService authorizationService;
+
+    @Inject
+    private UserService userService;
+
+    @Inject
+    private OrganizationService organizationService;
 
     public Set<ManagementPack> retrievePrivateManagementPacks(IdentityUser user) {
         return mpackRepository.findByOwner(user.getUserId());
@@ -60,17 +70,22 @@ public class ManagementPackService {
         delete(mpack);
     }
 
-    public ManagementPack create(IdentityUser user, ManagementPack mpack) {
-        LOGGER.debug("Creating Management Pack: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
-        mpack.setOwner(user.getUserId());
-        mpack.setAccount(user.getAccount());
+    public ManagementPack create(IdentityUser identityUser, ManagementPack mpack) {
+        LOGGER.debug("Creating Management Pack: [User: '{}', Account: '{}']", identityUser.getUsername(), identityUser.getAccount());
+        mpack.setOwner(identityUser.getUserId());
+        mpack.setAccount(identityUser.getAccount());
+        User user = userService.getOrCreate(identityUser);
+        Organization organization = organizationService.getDefaultOrganizationForUser(user);
+        mpack.setOrganization(organization);
         return mpackRepository.save(mpack);
     }
 
     public ManagementPack create(ManagementPack mpack) {
         Preconditions.checkNotNull(mpack.getOwner(), "Owner cannot be null");
         Preconditions.checkNotNull(mpack.getAccount(), "Account cannot be null");
-        LOGGER.debug("Creating RDS configuration: [User: '{}', Account: '{}']", mpack.getOwner(), mpack.getAccount());
+        Preconditions.checkNotNull(mpack.getOrganization(), "Organization cannot be null");
+        LOGGER.debug("Creating RDS configuration: [User: '{}', Account: '{}', Organization: '{}']",
+                mpack.getOwner(), mpack.getAccount(), mpack.getOrganization().getId());
         return mpackRepository.save(mpack);
     }
 

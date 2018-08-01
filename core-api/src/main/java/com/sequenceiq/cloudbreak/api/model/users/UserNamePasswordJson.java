@@ -1,8 +1,9 @@
-package com.sequenceiq.cloudbreak.api.model;
+package com.sequenceiq.cloudbreak.api.model.users;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.UserNamePasswordModelDescription;
 
 import io.swagger.annotations.ApiModel;

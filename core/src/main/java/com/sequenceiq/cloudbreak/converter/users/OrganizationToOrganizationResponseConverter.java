@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.converter;
+package com.sequenceiq.cloudbreak.converter.users;
 
 import java.util.Set;
 
@@ -7,8 +7,9 @@ import javax.inject.Inject;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.OrganizationResponse;
-import com.sequenceiq.cloudbreak.api.model.UserOrgPermissionsJson;
+import com.sequenceiq.cloudbreak.api.model.users.OrganizationResponse;
+import com.sequenceiq.cloudbreak.api.model.users.UserOrgPermissionsJson;
+import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.security.Organization;
 import com.sequenceiq.cloudbreak.domain.security.UserOrgPermissions;
 import com.sequenceiq.cloudbreak.repository.security.UserOrgPermissionsRepository;

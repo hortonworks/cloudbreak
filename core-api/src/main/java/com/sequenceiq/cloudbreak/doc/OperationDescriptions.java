@@ -149,6 +149,9 @@ public class OperationDescriptions {
         public static final String DELETE_BY_NAME = "delete an organization by name";
         public static final String GET_REQUEST_BY_NAME = "retrieve organization request by organization name";
         public static final String CHANGE_USERS = "change users and their permissions in the organization";
+        public static final String REMOVE_USERS = "removes users from the given organization by their userIds";
+        public static final String ADD_USERS = "adds users to the given organization";
+        public static final String UPDATE_USERS = "updates the users' permissions in the given organization";
     }
 
     public static class UsagesOpDescription {

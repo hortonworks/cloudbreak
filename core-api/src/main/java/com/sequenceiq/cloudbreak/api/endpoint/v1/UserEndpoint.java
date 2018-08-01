@@ -12,9 +12,10 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.sequenceiq.cloudbreak.api.model.UserJson;
-import com.sequenceiq.cloudbreak.api.model.UserProfileRequest;
-import com.sequenceiq.cloudbreak.api.model.UserProfileResponse;
+import com.sequenceiq.cloudbreak.api.model.users.UserJson;
+import com.sequenceiq.cloudbreak.api.model.users.UserProfileRequest;
+import com.sequenceiq.cloudbreak.api.model.users.UserProfileResponse;
+import com.sequenceiq.cloudbreak.api.model.users.UserResponseJson;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
@@ -61,5 +62,5 @@ public interface UserEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = UserOpDescription.GET_TENANT_USERS, produces = ContentType.JSON, notes = Notes.USER_NOTES,
             nickname = "getAllUsers")
-    Set<UserJson> getAll();
+    Set<UserResponseJson> getAll();
 }

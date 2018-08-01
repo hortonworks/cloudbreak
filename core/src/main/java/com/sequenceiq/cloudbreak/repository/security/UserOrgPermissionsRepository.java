@@ -26,5 +26,5 @@ public interface UserOrgPermissionsRepository extends DisabledBaseRepository<Use
     Set<UserOrgPermissions> findForOrganization(@Param("organization") Organization organization);
 
     @Query("SELECT o FROM UserOrgPermissions o WHERE o.user = :user AND o.organization = :organization")
-    Set<UserOrgPermissions> findForUserAndOrganization(@Param("user") User user, @Param("organization") Organization organization);
+    UserOrgPermissions findForUserAndOrganization(@Param("user") User user, @Param("organization") Organization organization);
 }

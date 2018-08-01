@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.model;
+package com.sequenceiq.cloudbreak.api.model.users;
 
 import java.util.Set;
 
@@ -12,16 +12,16 @@ import io.swagger.annotations.ApiModel;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ChangeOrganizationUsersJson {
 
-    private String userName;
+    private String userId;
 
     private Set<String> permissions;
 
-    public String getUserName() {
-        return userName;
+    public String getUserId() {
+        return userId;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public Set<String> getPermissions() {

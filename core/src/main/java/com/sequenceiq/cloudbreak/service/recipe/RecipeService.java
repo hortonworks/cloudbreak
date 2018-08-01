@@ -23,10 +23,14 @@ import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.Recipe;
+import com.sequenceiq.cloudbreak.domain.security.Organization;
+import com.sequenceiq.cloudbreak.domain.security.User;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.RecipeRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Service
 public class RecipeService {
@@ -42,9 +46,18 @@ public class RecipeService {
     @Inject
     private AuthorizationService authorizationService;
 
-    public Recipe create(IdentityUser user, Recipe recipe) {
-        recipe.setOwner(user.getUserId());
-        recipe.setAccount(user.getAccount());
+    @Inject
+    private OrganizationService organizationService;
+
+    @Inject
+    private UserService userService;
+
+    public Recipe create(IdentityUser identityUser, Recipe recipe) {
+        recipe.setOwner(identityUser.getUserId());
+        recipe.setAccount(identityUser.getAccount());
+        User user = userService.getOrCreate(identityUser);
+        Organization organization = organizationService.getDefaultOrganizationForUser(user);
+        recipe.setOrganization(organization);
         try {
             return recipeRepository.save(recipe);
         } catch (DataIntegrityViolationException ex) {

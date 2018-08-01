@@ -20,9 +20,9 @@ import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.RdsConfigRepository;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
@@ -80,6 +80,7 @@ public abstract class AbstractRdsConfigProvider {
         rdsConfig.setOwner(stack.getOwner());
         rdsConfig.setAccount(stack.getAccount());
         rdsConfig.setClusters(Collections.singleton(cluster));
+        rdsConfig.setOrganization(stack.getOrganization());
         rdsConfig = rdsConfigService.create(rdsConfig);
 
         if (rdsConfigs == null) {

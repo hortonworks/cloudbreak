@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.converter;
+package com.sequenceiq.cloudbreak.converter.users;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -8,7 +8,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
-import com.sequenceiq.cloudbreak.api.model.UserProfileResponse;
+import com.sequenceiq.cloudbreak.api.model.users.UserProfileResponse;
+import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
 
 @Component

@@ -30,12 +30,12 @@ public class User implements ProvisionEntity {
     @SequenceGenerator(name = "users_generator", sequenceName = "users_id_seq", allocationSize = 1)
     private Long id;
 
-    private String name;
+    @Column(name = "username")
+    private String userName;
 
     @Basic(optional = false)
-    private String email;
-
-    private String company;
+    @Column(name = "userid")
+    private String userId;
 
     @Convert(converter = JsonToString.class)
     @Column(columnDefinition = "TEXT", name = "cloudbreak_permissions")
@@ -59,28 +59,20 @@ public class User implements ProvisionEntity {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getUserName() {
+        return userName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
-    public String getEmail() {
-        return email;
+    public String getUserId() {
+        return userId;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getCompany() {
-        return company;
-    }
-
-    public void setCompany(String company) {
-        this.company = company;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public Json getCloudbreakPermissions() {

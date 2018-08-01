@@ -23,10 +23,14 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.domain.security.Organization;
+import com.sequenceiq.cloudbreak.domain.security.User;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.RdsConfigRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.util.NameUtil;
 
 @Service
@@ -42,6 +46,12 @@ public class RdsConfigService {
 
     @Inject
     private AuthorizationService authorizationService;
+
+    @Inject
+    private UserService userService;
+
+    @Inject
+    private OrganizationService organizationService;
 
     public Set<RDSConfig> retrievePrivateRdsConfigs(IdentityUser user) {
         return rdsConfigRepository.findForUser(user.getUserId());
@@ -83,17 +93,22 @@ public class RdsConfigService {
         delete(rdsConfig);
     }
 
-    public RDSConfig create(IdentityUser user, RDSConfig rdsConfig) {
-        LOGGER.debug("Creating RDS configuration: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
-        rdsConfig.setOwner(user.getUserId());
-        rdsConfig.setAccount(user.getAccount());
+    public RDSConfig create(IdentityUser identityUser, RDSConfig rdsConfig) {
+        LOGGER.debug("Creating RDS configuration: [User: '{}', Account: '{}']", identityUser.getUsername(), identityUser.getAccount());
+        rdsConfig.setOwner(identityUser.getUserId());
+        rdsConfig.setAccount(identityUser.getAccount());
+        User user = userService.getOrCreate(identityUser);
+        Organization organization = organizationService.getDefaultOrganizationForUser(user);
+        rdsConfig.setOrganization(organization);
         return rdsConfigRepository.save(rdsConfig);
     }
 
     public RDSConfig create(RDSConfig rdsConfig) {
         Preconditions.checkNotNull(rdsConfig.getOwner(), "Owner cannot be null");
         Preconditions.checkNotNull(rdsConfig.getAccount(), "Account cannot be null");
-        LOGGER.debug("Creating RDS configuration: [User: '{}', Account: '{}']", rdsConfig.getOwner(), rdsConfig.getAccount());
+        Preconditions.checkNotNull(rdsConfig.getOrganization(), "Organization cannot be null");
+        LOGGER.debug("Creating RDS configuration: [User: '{}', Account: '{}', Organization: '{}']",
+                rdsConfig.getOwner(), rdsConfig.getAccount(), rdsConfig.getOrganization().getId());
         return rdsConfigRepository.save(rdsConfig);
     }
 

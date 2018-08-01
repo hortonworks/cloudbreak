@@ -27,7 +27,7 @@ import com.sequenceiq.cloudbreak.api.model.ReinstallRequestV2;
 import com.sequenceiq.cloudbreak.api.model.StatusRequest;
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
-import com.sequenceiq.cloudbreak.api.model.UserNamePasswordJson;
+import com.sequenceiq.cloudbreak.api.model.users.UserNamePasswordJson;
 import com.sequenceiq.cloudbreak.api.model.stack.StackImageChangeRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;

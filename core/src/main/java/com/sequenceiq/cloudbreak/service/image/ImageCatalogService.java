@@ -46,11 +46,15 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
+import com.sequenceiq.cloudbreak.domain.security.Organization;
+import com.sequenceiq.cloudbreak.domain.security.User;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Component
 public class ImageCatalogService {
@@ -87,6 +91,12 @@ public class ImageCatalogService {
 
     @Inject
     private AccountPreferencesService accountPreferencesService;
+
+    @Inject
+    private UserService userService;
+
+    @Inject
+    private OrganizationService organizationService;
 
     public StatedImages getImagesOsFiltered(String provider, String os) throws CloudbreakImageCatalogException {
         StatedImages images = getImages(getDefaultImageCatalog(), provider, cbVersion);
@@ -198,6 +208,10 @@ public class ImageCatalogService {
                 throw new BadRequestException(String
                         .format("%s cannot be created because it is an environment default image catalog.", imageCatalog.getImageCatalogName()));
             }
+            IdentityUser identityUser = authenticatedUserService.getCbUser();
+            User user = userService.getOrCreate(identityUser);
+            Organization organization = organizationService.getDefaultOrganizationForUser(user);
+            imageCatalog.setOrganization(organization);
             return imageCatalogRepository.save(imageCatalog);
         } catch (DataIntegrityViolationException ex) {
             String msg = String.format("Error with resource [%s], %s", APIResourceType.IMAGE_CATALOG, getProperSqlErrorMessage(ex));

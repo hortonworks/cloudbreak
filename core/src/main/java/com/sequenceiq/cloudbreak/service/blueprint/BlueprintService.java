@@ -29,10 +29,14 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.security.Organization;
+import com.sequenceiq.cloudbreak.domain.security.User;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.util.NameUtil;
 
 @Service
@@ -55,6 +59,12 @@ public class BlueprintService {
     @Inject
     private CentralBlueprintParameterQueryService centralBlueprintParameterQueryService;
 
+    @Inject
+    private UserService userService;
+
+    @Inject
+    private OrganizationService organizationService;
+
     public Set<Blueprint> retrievePrivateBlueprints(IdentityUser user) {
         return blueprintRepository.findForUser(user.getUserId());
     }
@@ -76,11 +86,14 @@ public class BlueprintService {
         return blueprintRepository.findOneByName(name, account);
     }
 
-    public Blueprint create(IdentityUser user, Blueprint blueprint, Collection<Map<String, Map<String, String>>> properties) {
-        LOGGER.debug("Creating blueprint: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
+    public Blueprint create(IdentityUser identityUser, Blueprint blueprint, Collection<Map<String, Map<String, String>>> properties) {
+        LOGGER.debug("Creating blueprint: [User: '{}', Account: '{}']", identityUser.getUsername(), identityUser.getAccount());
         Blueprint savedBlueprint;
-        blueprint.setOwner(user.getUserId());
-        blueprint.setAccount(user.getAccount());
+        blueprint.setOwner(identityUser.getUserId());
+        blueprint.setAccount(identityUser.getAccount());
+        User user = userService.getOrCreate(identityUser);
+        Organization organization = organizationService.getDefaultOrganizationForUser(user);
+        blueprint.setOrganization(organization);
         if (properties != null && !properties.isEmpty()) {
             LOGGER.info("Extend blueprint with the following properties: {}", properties);
             Map<String, Map<String, String>> configs = new HashMap<>(properties.size());

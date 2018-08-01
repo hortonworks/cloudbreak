@@ -73,7 +73,9 @@ import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StackServiceTest {
@@ -176,6 +178,12 @@ public class StackServiceTest {
 
     @Mock
     private CloudbreakMessagesService cloudbreakMessagesService;
+
+    @Mock
+    private OrganizationService organizationService;
+
+    @Mock
+    private UserService userService;
 
     @Before
     public void setup() throws TransactionExecutionException {

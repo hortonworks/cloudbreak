@@ -31,7 +31,7 @@ cert:
   ignorePreValidation: false
 
 cb:
-  enabledplatforms: AZURE,AWS,GCP,OPENSTACK
+  enabledplatforms:
   platform.default.rootVolumeSize:
     AWS: 50
     AZURE: 30
