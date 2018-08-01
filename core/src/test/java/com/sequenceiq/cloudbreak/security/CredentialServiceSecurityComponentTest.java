@@ -37,13 +37,14 @@ import com.sequenceiq.cloudbreak.repository.security.UserRepository;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
+import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.security.OwnerBasedPermissionEvaluator;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderCredentialAdapter;
-import com.sequenceiq.cloudbreak.service.user.UserProfileCredentialHandler;
+import com.sequenceiq.cloudbreak.service.user.UserProfileHandler;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
@@ -410,7 +411,7 @@ public class CredentialServiceSecurityComponentTest extends SecurityComponentTes
             includeFilters = {
                     @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = {
                             CredentialService.class,
-                            UserProfileCredentialHandler.class,
+                            UserProfileHandler.class,
                             UserProfileService.class,
                     })
             })
@@ -448,6 +449,9 @@ public class CredentialServiceSecurityComponentTest extends SecurityComponentTes
 
         @MockBean
         private AuthenticatedUserService authenticatedUserService;
+
+        @MockBean
+        private ImageCatalogService imageCatalogService;
 
         @Bean
         public CredentialRepository credentialRepository() {

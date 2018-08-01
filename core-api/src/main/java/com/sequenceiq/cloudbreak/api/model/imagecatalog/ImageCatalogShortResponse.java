@@ -10,7 +10,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 @JsonInclude(Include.NON_NULL)
-public class ImageCatalogResponse extends ImageCatalogBase {
+public class ImageCatalogShortResponse extends ImageCatalogBase {
 
     @ApiModelProperty(value = ModelDescriptions.ID, required = true)
     private Long id;
@@ -20,9 +20,6 @@ public class ImageCatalogResponse extends ImageCatalogBase {
 
     @ApiModelProperty(value = ImageCatalogDescription.DEFAULT, required = true)
     private boolean usedAsDefault;
-
-    @ApiModelProperty(ImageCatalogDescription.IMAGE_RESPONSES)
-    private ImagesResponse imagesResponse;
 
     public Long getId() {
         return id;
@@ -48,11 +45,4 @@ public class ImageCatalogResponse extends ImageCatalogBase {
         this.usedAsDefault = usedAsDefault;
     }
 
-    public ImagesResponse getImagesResponse() {
-        return imagesResponse;
-    }
-
-    public void setImagesResponse(ImagesResponse imagesResponse) {
-        this.imagesResponse = imagesResponse;
-    }
 }

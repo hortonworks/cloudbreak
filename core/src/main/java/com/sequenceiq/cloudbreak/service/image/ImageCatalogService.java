@@ -53,6 +53,7 @@ import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.user.UserProfileHandler;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
@@ -88,6 +89,9 @@ public class ImageCatalogService {
 
     @Inject
     private UserProfileService userProfileService;
+
+    @Inject
+    private UserProfileHandler userProfileHandler;
 
     @Inject
     private AccountPreferencesService accountPreferencesService;
@@ -228,6 +232,7 @@ public class ImageCatalogService {
         setImageCatalogAsDefault(null);
         imageCatalog.setImageCatalogName(generateArchiveName(name));
         imageCatalogRepository.save(imageCatalog);
+        userProfileHandler.destroyProfileImageCatalogPreparation(imageCatalog);
         LOGGER.info("Image catalog has been archived: {}", imageCatalog);
     }
 
@@ -300,7 +305,7 @@ public class ImageCatalogService {
         return allPublicInAccount;
     }
 
-    private ImageCatalog getCloudbreakDefaultImageCatalog() {
+    public ImageCatalog getCloudbreakDefaultImageCatalog() {
         ImageCatalog imageCatalog = new ImageCatalog();
         imageCatalog.setImageCatalogName(CLOUDBREAK_DEFAULT_CATALOG_NAME);
         imageCatalog.setImageCatalogUrl(defaultCatalogUrl);

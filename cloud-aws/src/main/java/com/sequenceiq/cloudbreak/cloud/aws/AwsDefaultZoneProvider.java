@@ -15,8 +15,12 @@ public class AwsDefaultZoneProvider {
     @Value("${cb.aws.gov.zone.parameter.default:us-gov-west-1}")
     private String awsGovZoneParameterDefault;
 
-    public String getDefultZone(CloudCredential credential) {
-        return new AwsCredentialView(credential).isGovernmentCloudEnabled() ? awsGovZoneParameterDefault : awsZoneParameterDefault;
+    public String getDefaultZone(CloudCredential credential) {
+        return getDefaultZone(new AwsCredentialView(credential));
+    }
+
+    public String getDefaultZone(AwsCredentialView awsCredentialView) {
+        return awsCredentialView.isGovernmentCloudEnabled() ? awsGovZoneParameterDefault : awsZoneParameterDefault;
     }
 
 }

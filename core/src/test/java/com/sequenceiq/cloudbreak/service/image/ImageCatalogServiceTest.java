@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.image;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -39,6 +41,7 @@ import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
+import com.sequenceiq.cloudbreak.service.user.UserProfileHandler;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
@@ -75,6 +78,9 @@ public class ImageCatalogServiceTest {
 
     @Mock
     private AccountPreferencesService accountPreferencesService;
+
+    @Mock
+    private UserProfileHandler userProfileHandler;
 
     @InjectMocks
     private ImageCatalogService underTest;
@@ -383,6 +389,7 @@ public class ImageCatalogServiceTest {
         ImageCatalog imageCatalog = new ImageCatalog();
         imageCatalog.setImageCatalogName(name);
         imageCatalog.setArchived(false);
+        doNothing().when(userProfileHandler).destroyProfileImageCatalogPreparation(any(ImageCatalog.class));
         when(authenticatedUserService.getCbUser()).thenReturn(user);
         when(imageCatalogRepository.findByName(name, user.getUserId(), user.getAccount())).thenReturn(imageCatalog);
         when(userProfileService.getOrCreate(user.getAccount(), user.getUserId(), user.getUsername())).thenReturn(userProfile);

@@ -36,7 +36,7 @@ import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderCredentialAdapter;
-import com.sequenceiq.cloudbreak.service.user.UserProfileCredentialHandler;
+import com.sequenceiq.cloudbreak.service.user.UserProfileHandler;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CredentialServiceTest {
@@ -56,7 +56,7 @@ public class CredentialServiceTest {
     private ServiceProviderCredentialAdapter credentialAdapter;
 
     @Mock
-    private UserProfileCredentialHandler userProfileCredentialHandler;
+    private UserProfileHandler userProfileHandler;
 
     @Mock
     private NotificationSender notificationSender;

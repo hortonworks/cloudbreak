@@ -326,7 +326,7 @@ public class AwsPlatformResources implements PlatformResources {
 
         DescribeRegionsRequest describeRegionsRequest = new DescribeRegionsRequest();
         DescribeRegionsResult describeRegionsResult = ec2Client.describeRegions(describeRegionsRequest);
-        String defaultRegion = awsDefaultZoneProvider.getDefultZone(cloudCredential);
+        String defaultRegion = awsDefaultZoneProvider.getDefaultZone(cloudCredential);
 
         for (com.amazonaws.services.ec2.model.Region awsRegion : describeRegionsResult.getRegions()) {
             if (region == null || Strings.isNullOrEmpty(region.value()) || awsRegion.getRegionName().equals(region.value())) {

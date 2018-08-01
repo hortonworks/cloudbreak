@@ -40,8 +40,8 @@ import com.sequenceiq.cloudbreak.service.notification.Notification;
 import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderCredentialAdapter;
-import com.sequenceiq.cloudbreak.service.user.UserProfileCredentialHandler;
 import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.service.user.UserProfileHandler;
 
 @Service
 public class CredentialService {
@@ -61,7 +61,7 @@ public class CredentialService {
     private AuthorizationService authorizationService;
 
     @Inject
-    private UserProfileCredentialHandler userProfileCredentialHandler;
+    private UserProfileHandler userProfileHandler;
 
     @Inject
     private AccountPreferencesService accountPreferencesService;
@@ -165,7 +165,7 @@ public class CredentialService {
         Credential savedCredential;
         try {
             savedCredential = credentialRepository.save(credential);
-            userProfileCredentialHandler.createProfilePreparation(credential);
+            userProfileHandler.createProfilePreparation(credential);
             sendCredentialNotification(credential, resourceEvent);
         } catch (DataIntegrityViolationException ex) {
             String msg = String.format("Error with resource [%s], %s", APIResourceType.CREDENTIAL, getProperSqlErrorMessage(ex));
@@ -229,7 +229,7 @@ public class CredentialService {
             }
             throw new BadRequestException(String.format(message, credential.getName(), clusters));
         }
-        userProfileCredentialHandler.destroyProfilePreparation(credential);
+        userProfileHandler.destroyProfileCredentialPreparation(credential);
         archiveCredential(credential);
     }
 
