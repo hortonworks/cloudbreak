@@ -15,7 +15,13 @@ public class StructuredRestCallEvent extends StructuredEvent {
 
     @Override
     public String getStatus() {
-        return String.format("%s - %s", restCall.getRestResponse().getStatusText(), restCall.getRestResponse().getStatusCode());
+        String status;
+        if (restCall.getRestResponse().getStatusText() != null) {
+            status = String.format("%s - %s", restCall.getRestResponse().getStatusText(), restCall.getRestResponse().getStatusCode());
+        } else {
+            status = Integer.toString(restCall.getRestResponse().getStatusCode());
+        }
+        return status;
     }
 
     @Override

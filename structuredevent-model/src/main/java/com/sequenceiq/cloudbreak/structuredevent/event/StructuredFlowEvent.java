@@ -53,12 +53,21 @@ public class StructuredFlowEvent extends StructuredEvent {
 
     @Override
     public String getStatus() {
-        return flow.getFlowState();
+        String state = flow.getFlowState();
+        if ("unknown".equals(state)) {
+            if (stack != null) {
+                state = "STACK_" + stack.getDetailedStatus();
+            }
+            if (cluster != null) {
+                state += " | CLUSTER_" + cluster.getStatus();
+            }
+        }
+        return state;
     }
 
     @Override
     public Long getDuration() {
-        return flow.getDuration();
+        return Math.max(0L, flow.getDuration());
     }
 
     public FlowDetails getFlow() {
