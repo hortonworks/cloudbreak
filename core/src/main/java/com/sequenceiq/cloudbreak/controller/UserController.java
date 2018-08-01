@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.controller;
 
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -9,7 +12,6 @@ import javax.transaction.Transactional.TxType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v1.UserEndpoint;
@@ -17,9 +19,9 @@ import com.sequenceiq.cloudbreak.api.model.users.UserJson;
 import com.sequenceiq.cloudbreak.api.model.users.UserProfileRequest;
 import com.sequenceiq.cloudbreak.api.model.users.UserProfileResponse;
 import com.sequenceiq.cloudbreak.api.model.users.UserResponseJson;
+import com.sequenceiq.cloudbreak.api.model.users.UserResponseJson.UserIdComparator;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
-import com.sequenceiq.cloudbreak.domain.security.User;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.user.CachedUserDetailsService;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
@@ -72,14 +74,13 @@ public class UserController implements UserEndpoint {
     }
 
     @Override
-    public Set<UserResponseJson> getAll() {
+    public SortedSet<UserResponseJson> getAll() {
         IdentityUser user = authenticatedUserService.getCbUser();
-        return toJsonSet(userService.getAll(user));
+        Set<UserResponseJson> userResponseJsons = userService.getAll(user).stream()
+                .map(u -> conversionService.convert(u, UserResponseJson.class))
+                .collect(Collectors.toSet());
+        SortedSet<UserResponseJson> results = new TreeSet<>(new UserIdComparator());
+        results.addAll(userResponseJsons);
+        return results;
     }
-
-    private Set<UserResponseJson> toJsonSet(Set<User> users) {
-        return (Set<UserResponseJson>) conversionService.convert(users, TypeDescriptor.forObject(users),
-                TypeDescriptor.collection(Set.class, TypeDescriptor.valueOf(UserJson.class)));
-    }
-
 }
