@@ -23,4 +23,6 @@ public interface UserProfileRepository extends BaseRepository<UserProfile, Long>
     @Query("SELECT b FROM UserProfile b WHERE b.credential.id = :credentialId")
     Set<UserProfile> findOneByCredentialId(@Param("credentialId") Long credentialId);
 
+    @Query("SELECT b FROM UserProfile b WHERE b.imageCatalog.id = :catalogId")
+    Set<UserProfile> findOneByImageCatalogName(@Param("catalogId") Long catalogId);
 }

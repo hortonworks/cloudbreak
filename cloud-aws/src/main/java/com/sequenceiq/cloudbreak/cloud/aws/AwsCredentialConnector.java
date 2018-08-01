@@ -51,10 +51,6 @@ public class AwsCredentialConnector implements CredentialConnector {
         if (isNoneEmpty(smartSenseId)) {
             credential.putParameter(SMART_SENSE_ID, smartSenseId);
         }
-        if (awsCredential.isGovernmentCloudEnabled() && isNoneEmpty(roleArn)) {
-            String message = "Please only provide the 'access' and 'secret key' because role based credential is not supported by gov cloud";
-            return new CloudCredentialStatus(credential, CredentialStatus.FAILED, new Exception(message), message);
-        }
         if (isNoneEmpty(roleArn) && isNoneEmpty(accessKey) && isNoneEmpty(secretKey)) {
             String message = "Please only provide the 'role arn' or the 'access' and 'secret key'";
             return new CloudCredentialStatus(credential, CredentialStatus.FAILED, new Exception(message), message);
@@ -92,8 +88,9 @@ public class AwsCredentialConnector implements CredentialConnector {
             credentialClient.retrieveSessionCredentials(awsCredential);
         } catch (AmazonClientException ae) {
             if (ae.getMessage().contains("Unable to load AWS credentials")) {
-                String errorMessage =
-                        "Unable to load AWS credentials: please make sure the deployer defined AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY";
+                String errorMessage = String.format("Unable to load AWS credentials: please make sure that you configured your assumer %s and %s to deployer.",
+                        awsCredential.isGovernmentCloudEnabled() ? "AWS_GOV_ACCESS_KEY_ID" : "AWS_ACCESS_KEY_ID",
+                        awsCredential.isGovernmentCloudEnabled() ? "AWS_GOV_SECRET_ACCESS_KEY" : "AWS_SECRET_ACCESS_KEY");
                 LOGGER.error(errorMessage, ae);
                 return new CloudCredentialStatus(cloudCredential, CredentialStatus.FAILED, ae, errorMessage);
             }

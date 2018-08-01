@@ -17,10 +17,12 @@ import com.sequenceiq.cloudbreak.api.model.users.UserProfileRequest;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.repository.UserProfileRepository;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
+import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 
 @Service
 public class UserProfileService {
@@ -32,6 +34,9 @@ public class UserProfileService {
 
     @Inject
     private CredentialService credentialService;
+
+    @Inject
+    private ImageCatalogService imageCatalogService;
 
     public UserProfile getOrCreate(String account, String owner) {
         return getOrCreate(account, owner, null);
@@ -69,6 +74,10 @@ public class UserProfileService {
         return userProfileRepository.findOneByCredentialId(credentialId);
     }
 
+    public Set<UserProfile> findByImageCatalogId(Long catalogId) {
+        return userProfileRepository.findOneByImageCatalogName(catalogId);
+    }
+
     private void addUiProperties(UserProfile userProfile) {
         try {
             userProfile.setUiProperties(new Json(new HashMap<>()));
@@ -85,6 +94,10 @@ public class UserProfileService {
         } else if (request.getCredentialName() != null) {
             Credential credential = credentialService.get(request.getCredentialName(), userProfile.getAccount());
             userProfile.setCredential(credential);
+        }
+        if (request.getImageCatalogName() != null) {
+            ImageCatalog imageCatalog = imageCatalogService.get(request.getImageCatalogName());
+            userProfile.setImageCatalog(imageCatalog);
         }
         for (Entry<String, Object> uiStringObjectEntry : request.getUiProperties().entrySet()) {
             Map<String, Object> map = userProfile.getUiProperties().getMap();

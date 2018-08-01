@@ -17,6 +17,8 @@ public class UserProfileRequest implements JsonEntity {
 
     private Long credentialId;
 
+    private String imageCatalogName;
+
     private Map<String, Object> uiProperties = new HashMap<>();
 
     public String getCredentialName() {
@@ -33,6 +35,14 @@ public class UserProfileRequest implements JsonEntity {
 
     public void setCredentialId(Long credentialId) {
         this.credentialId = credentialId;
+    }
+
+    public String getImageCatalogName() {
+        return imageCatalogName;
+    }
+
+    public void setImageCatalogName(String imageCatalogName) {
+        this.imageCatalogName = imageCatalogName;
     }
 
     public Map<String, Object> getUiProperties() {

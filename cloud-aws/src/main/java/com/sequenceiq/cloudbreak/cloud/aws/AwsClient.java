@@ -56,7 +56,7 @@ public class AwsClient {
     }
 
     public AmazonEC2Client createAccess(CloudCredential credential) {
-        return createAccess(new AwsCredentialView(credential), awsDefaultZoneProvider.getDefultZone(credential));
+        return createAccess(new AwsCredentialView(credential), awsDefaultZoneProvider.getDefaultZone(credential));
     }
 
     public AmazonEC2Client createAccess(AwsCredentialView awsCredential, String regionName) {
@@ -126,24 +126,34 @@ public class AwsClient {
     public void checkAwsEnvironmentVariables(CloudCredential credential) {
         AwsCredentialView awsCredential = new AwsCredentialView(credential);
         if (isRoleAssumeRequired(awsCredential)) {
-            if (awsEnvironmentVariableChecker.isAwsAccessKeyAvailable() && !awsEnvironmentVariableChecker.isAwsSecretAccessKeyAvailable()) {
-                throw new CredentialVerificationException("If 'AWS_ACCESS_KEY_ID' available then 'AWS_SECRET_ACCESS_KEY' must be set!");
-            } else if (awsEnvironmentVariableChecker.isAwsSecretAccessKeyAvailable() && !awsEnvironmentVariableChecker.isAwsAccessKeyAvailable()) {
-                throw new CredentialVerificationException("If 'AWS_SECRET_ACCESS_KEY' available then 'AWS_ACCESS_KEY_ID' must be set!");
-            } else if (!awsEnvironmentVariableChecker.isAwsAccessKeyAvailable() && !awsEnvironmentVariableChecker.isAwsSecretAccessKeyAvailable()) {
-                try {
-                    try (InstanceProfileCredentialsProvider provider = new InstanceProfileCredentialsProvider()) {
-                        provider.getCredentials();
-                    } catch (IOException e) {
-                        LOGGER.error("Unable to create AWS provider", e);
-                    }
-                } catch (AmazonClientException ignored) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("The 'AWS_ACCESS_KEY_ID' and 'AWS_SECRET_ACCESS_KEY' environment variables must be set ");
-                    sb.append("or an instance profile role should be available.");
-                    LOGGER.info(sb.toString());
-                    throw new CredentialVerificationException(sb.toString());
+            validateEnvironmentForRoleAssuming(
+                    awsCredential,
+                    awsEnvironmentVariableChecker.isAwsAccessKeyAvailable(awsCredential),
+                    awsEnvironmentVariableChecker.isAwsSecretAccessKeyAvailable(awsCredential));
+        }
+    }
+
+    public void validateEnvironmentForRoleAssuming(AwsCredentialView awsCredential, boolean awsAccessKeyAvailable, boolean awsSecretAccessKeyAvailable) {
+        String accesKeyString = awsEnvironmentVariableChecker.getAwsAccessKeyString(awsCredential);
+        String secretAccesKeyString = awsEnvironmentVariableChecker.getAwsSecretAccessKey(awsCredential);
+
+        if (awsAccessKeyAvailable && !awsSecretAccessKeyAvailable) {
+            throw new CredentialVerificationException(String.format("If '%s' available then '%s' must be set!", accesKeyString, secretAccesKeyString));
+        } else if (awsSecretAccessKeyAvailable && !awsAccessKeyAvailable) {
+            throw new CredentialVerificationException(String.format("If '%s' available then '%s' must be set!", accesKeyString, secretAccesKeyString));
+        } else if (!awsAccessKeyAvailable && !awsSecretAccessKeyAvailable) {
+            try {
+                try (InstanceProfileCredentialsProvider provider = new InstanceProfileCredentialsProvider()) {
+                    provider.getCredentials();
+                } catch (IOException e) {
+                    LOGGER.error("Unable to create AWS provider", e);
                 }
+            } catch (AmazonClientException ignored) {
+                StringBuilder sb = new StringBuilder();
+                sb.append(String.format("The '%s' and '%s' environment variables must be set ", accesKeyString, secretAccesKeyString));
+                sb.append("or an instance profile role should be available.");
+                LOGGER.info(sb.toString());
+                throw new CredentialVerificationException(sb.toString());
             }
         }
     }
