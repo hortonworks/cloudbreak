@@ -281,10 +281,13 @@ public class OrganizationService {
     }
 
     public Organization deleteByName(String orgName) {
+        // TODO: check permissions (does the user have the right to delete this org?)
         try {
             return transactionService.required(() -> {
                 Organization organization = getOrganizationOrThrowNotFound(orgName);
+                Long deleted = userOrgPermissionsRepository.deleteByOrganization(organization);
                 organizationRepository.delete(organization);
+                LOGGER.info("Deleted organisation: {}, related permissions: {}", orgName, deleted);
                 return organization;
             });
         } catch (TransactionExecutionException e) {

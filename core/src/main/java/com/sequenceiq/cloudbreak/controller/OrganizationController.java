@@ -7,11 +7,11 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 import javax.validation.Valid;
 
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
@@ -34,7 +34,7 @@ import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 public class OrganizationController extends NotificationController implements OrganizationEndpoint {
 
     @Inject
-    @Qualifier("conversionService")
+    @Named("conversionService")
     private ConversionService conversionService;
 
     @Inject
