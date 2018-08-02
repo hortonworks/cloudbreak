@@ -2,6 +2,11 @@
 
 set -e
 
+salt_copy_kerberos_files() {
+  salt-cp -G 'roles:kerberos_server_slave' /etc/krb5.keytab /etc/krb5.keytab
+  salt-cp -G 'roles:kerberos_server_slave' /var/kerberos/krb5kdc/.k5.{{ realm }} /var/kerberos/krb5kdc/.k5.{{ realm }}
+}
+
 # admin principal
 if {{ kadmin_local }} -q "list_principals *" | grep -w "{{ usr }}/admin@{{ realm }}"; then echo ok; else {{ kadmin_local }} -q "addprinc -pw {{ pw }} {{ usr }}/admin"; fi
 
@@ -22,5 +27,11 @@ else
   done
 fi
 
-salt-cp -G 'roles:kerberos_server_slave' /etc/krb5.keytab /etc/krb5.keytab
-salt-cp -G 'roles:kerberos_server_slave' /var/kerberos/krb5kdc/.k5.{{ realm }} /var/kerberos/krb5kdc/.k5.{{ realm }}
+if [ -x "$(command -v activate_salt_env)" ];
+then
+  . activate_salt_env
+  salt_copy_kerberos_files
+  deactivate
+else
+  salt_copy_kerberos_files
+fi
