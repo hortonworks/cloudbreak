@@ -767,6 +767,14 @@ public class StackService {
         });
     }
 
+    public Set<Stack> findAllForOrganization(Long organizationId) {
+        try {
+            return transactionService.required(() -> stackRepository.findAllForOrganization(organizationId));
+        } catch (TransactionExecutionException e) {
+            throw new TransactionService.TransactionRuntimeExecutionException(e);
+        }
+    }
+
     private void delete(Stack stack, Boolean forced, Boolean deleteDependencies) {
         authorizationService.hasPermission(stack, PermissionType.WRITE.name());
         LOGGER.info("Stack delete requested.");

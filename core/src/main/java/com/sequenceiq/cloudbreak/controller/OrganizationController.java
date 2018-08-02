@@ -67,7 +67,8 @@ public class OrganizationController extends NotificationController implements Or
 
     @Override
     public OrganizationResponse deleteByName(String name) {
-        Organization organization = organizationService.deleteByName(name);
+        IdentityUser user = authenticatedUserService.getCbUser();
+        Organization organization = organizationService.deleteByName(name, user);
         return conversionService.convert(organization, OrganizationResponse.class);
     }
 

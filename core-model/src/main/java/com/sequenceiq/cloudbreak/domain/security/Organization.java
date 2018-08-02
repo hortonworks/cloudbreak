@@ -4,6 +4,8 @@ import java.util.Objects;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -11,6 +13,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import com.sequenceiq.cloudbreak.api.model.v2.OrganizationStatus;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 
 @Entity
@@ -29,6 +32,20 @@ public class Organization implements ProvisionEntity {
 
     @ManyToOne
     private Tenant tenant;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private OrganizationStatus status;
+
+    private Long deletionTimestamp;
+
+    public Long getDeletionTimestamp() {
+        return deletionTimestamp;
+    }
+
+    public void setDeletionTimestamp(Long deletionTimestamp) {
+        this.deletionTimestamp = deletionTimestamp;
+    }
 
     public Long getId() {
         return id;
@@ -60,6 +77,14 @@ public class Organization implements ProvisionEntity {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public OrganizationStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(OrganizationStatus status) {
+        this.status = status;
     }
 
     @Override

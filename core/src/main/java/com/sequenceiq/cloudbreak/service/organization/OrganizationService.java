@@ -1,11 +1,13 @@
 package com.sequenceiq.cloudbreak.service.organization;
 
+import static com.sequenceiq.cloudbreak.api.model.v2.OrganizationStatus.DELETED;
 import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 import static com.sequenceiq.cloudbreak.validation.Permissions.ALL_READ;
 import static com.sequenceiq.cloudbreak.validation.Permissions.ALL_WRITE;
 import static com.sequenceiq.cloudbreak.validation.Permissions.ORG_MANAGE;
 
+import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
@@ -58,6 +60,9 @@ public class OrganizationService {
 
     @Inject
     private AuthenticatedUserService authenticatedUserService;
+
+    @Inject
+    private OrganizationDeleteVerifierService organizationDeleteVerifierService;
 
     public Organization create(IdentityUser identityUser, Organization organization) {
         User user = userService.getOrCreate(identityUser);
@@ -268,30 +273,28 @@ public class OrganizationService {
         }
     }
 
-    public Organization delete(Long id) {
+    public Organization deleteByName(String orgName, IdentityUser identityUser) {
+        // TODO: check permissions (does the user have the right to delete this org?)
         try {
             return transactionService.required(() -> {
-                Organization organization = get(id);
-                organizationRepository.delete(organization);
-                return organization;
+                Organization organizationForDelete = getOrganizationOrThrowNotFound(orgName);
+                User userWhoRequestTheDeletion = userService.getOrCreate(identityUser);
+                Organization defaultOrganizationOfUserWhoRequestTheDeletion = getDefaultOrganizationForUser(userWhoRequestTheDeletion);
+                organizationDeleteVerifierService.checkThatOrganizationIsDeletable(userWhoRequestTheDeletion, organizationForDelete,
+                        defaultOrganizationOfUserWhoRequestTheDeletion);
+                Long deleted = userOrgPermissionsRepository.deleteByOrganization(organizationForDelete);
+                setupDeletionDateAndFlag(organizationForDelete);
+                organizationRepository.save(organizationForDelete);
+                LOGGER.info("Deleted organisation: {}, related permissions: {}", orgName, deleted);
+                return organizationForDelete;
             });
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }
     }
 
-    public Organization deleteByName(String orgName) {
-        // TODO: check permissions (does the user have the right to delete this org?)
-        try {
-            return transactionService.required(() -> {
-                Organization organization = getOrganizationOrThrowNotFound(orgName);
-                Long deleted = userOrgPermissionsRepository.deleteByOrganization(organization);
-                organizationRepository.delete(organization);
-                LOGGER.info("Deleted organisation: {}, related permissions: {}", orgName, deleted);
-                return organization;
-            });
-        } catch (TransactionExecutionException e) {
-            throw new TransactionRuntimeExecutionException(e);
-        }
+    public void setupDeletionDateAndFlag(Organization organizationForDelete) {
+        organizationForDelete.setStatus(DELETED);
+        organizationForDelete.setDeletionTimestamp(Calendar.getInstance().getTimeInMillis());
     }
 }

@@ -89,6 +89,9 @@ public interface StackRepository extends BaseRepository<Stack, Long> {
             + "AND s.stackStatus.status <> 'CREATE_IN_PROGRESS'")
     List<Stack> findAllAliveAndProvisioned();
 
+    @Query("SELECT s FROM Stack s WHERE s.stackStatus.status <> 'DELETE_COMPLETED' AND s.organization.id= :organizationId")
+    Set<Stack> findAllForOrganization(@Param("organizationId") Long organizationId);
+
     @Query("SELECT s FROM Stack s WHERE s.stackStatus.status IN :statuses")
     List<Stack> findByStatuses(@Param("statuses") List<Status> statuses);
 

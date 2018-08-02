@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sequenceiq.cloudbreak.api.model.v2.OrganizationStatus;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
 import io.swagger.annotations.ApiModel;
@@ -17,6 +18,8 @@ public class OrganizationResponse extends OrganizationBase {
     private Long id;
 
     private Set<UserOrgPermissionsJson> users;
+
+    private OrganizationStatus status;
 
     @JsonProperty("id")
     public Long getId() {
@@ -33,6 +36,14 @@ public class OrganizationResponse extends OrganizationBase {
 
     public void setUsers(Set<UserOrgPermissionsJson> users) {
         this.users = users;
+    }
+
+    public OrganizationStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(OrganizationStatus status) {
+        this.status = status;
     }
 
     public static class NameComparator implements Comparator<OrganizationResponse>, Serializable {

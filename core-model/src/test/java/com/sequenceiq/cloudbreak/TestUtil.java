@@ -37,6 +37,7 @@ import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.SSOType;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.model.v2.OrganizationStatus;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
@@ -61,6 +62,8 @@ import com.sequenceiq.cloudbreak.domain.StorageLocations;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
+import com.sequenceiq.cloudbreak.domain.security.Organization;
+import com.sequenceiq.cloudbreak.domain.security.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -184,6 +187,21 @@ public class TestUtil {
         }
         orchestrator.setId(1L);
         return orchestrator;
+    }
+
+    public static Organization organization(Long id, String name) {
+        Organization organization = new Organization();
+        organization.setStatus(OrganizationStatus.ACTIVE);
+        organization.setName(name);
+        organization.setId(id);
+        return organization;
+    }
+
+    public static User user(Long id, String name) {
+        User user = new User();
+        user.setUserId(name);
+        user.setId(id);
+        return user;
     }
 
     public static SecurityGroup securityGroup(long id) {

@@ -26,6 +26,7 @@ public class OrganizationToOrganizationResponseConverter extends AbstractConvers
         json.setDescription(organization.getDescription());
         json.setName(organization.getName());
         json.setId(organization.getId());
+        json.setStatus(organization.getStatus());
         Set<UserOrgPermissions> userPermissions = userOrgPermissionsRepository.findForOrganization(organization);
         json.setUsers((Set<UserOrgPermissionsJson>) getConversionService().convert(userPermissions, TypeDescriptor.forObject(userPermissions),
                 TypeDescriptor.collection(Set.class, TypeDescriptor.valueOf(UserOrgPermissionsJson.class))));

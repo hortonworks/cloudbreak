@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.user;
 
+import static com.sequenceiq.cloudbreak.api.model.v2.OrganizationStatus.ACTIVE;
+
 import java.util.Collections;
 import java.util.Set;
 
@@ -53,6 +55,7 @@ public class UserService {
                     Organization organization = new Organization();
                     organization.setTenant(tenant);
                     organization.setName(identityUser.getUsername());
+                    organization.setStatus(ACTIVE);
                     organization.setDescription("Default organization for the user.");
                     organizationService.create(identityUser, organization);
                 }
