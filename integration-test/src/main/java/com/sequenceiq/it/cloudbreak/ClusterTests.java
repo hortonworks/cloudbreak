@@ -151,6 +151,7 @@ public class ClusterTests extends CloudbreakTest {
 
         then(Stack.waitAndCheckClusterAndStackAvailabilityStatus(),
                 "wait and check availability");
+        when(Stack.get());
         then(Stack.checkImage(imageId, null));
     }
 
