@@ -101,6 +101,16 @@ RSpec.shared_context "shared command helpers", :a => :b do
     f = File.open(File.dirname(__FILE__) + "/../../tmp/aruba/" + file_name,"w")
     f.write(content)
     f.close
+  end
+
+  def load_json(file_path)
+    f = File.open(File.dirname(__FILE__) + file_path)
+    data = ""
+    f.each do |line|
+      data << line
+    end
+    f.close
+    return data  
   end    
 
   def get_cluster_info(cb, cluster_name)

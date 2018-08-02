@@ -71,6 +71,9 @@ RSpec.shared_context "mock shared vars", :a => :b do
     @image_catalog_name = "cli-cat"
     @image_catalog_name_default = "cloudbreak-default"
     @image_catalog_url = "https://s3-eu-west-1.amazonaws.com/cloudbreak-info/v2-dev-cb-image-catalog.json"
+
+    @audit_json = "/../../../responses/audit/audit.json"
+    @audit_json_single = "/../../../responses/audit/audit_single.json"
   }
 end
 
