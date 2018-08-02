@@ -362,6 +362,11 @@ public class OfflineStateGenerator {
         }
 
         @Override
+        public Set<Stack> findAllForOrganization(Long organizationId) {
+            return null;
+        }
+
+        @Override
         public List<Stack> findByStatuses(List<Status> statuses) {
             return null;
         }

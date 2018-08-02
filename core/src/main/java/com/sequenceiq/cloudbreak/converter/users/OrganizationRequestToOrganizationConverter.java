@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.users;
 
+import static com.sequenceiq.cloudbreak.api.model.v2.OrganizationStatus.ACTIVE;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
@@ -28,6 +30,7 @@ public class OrganizationRequestToOrganizationConverter extends AbstractConversi
         organization.setName(json.getName());
         organization.setDescription(json.getDescription());
         organization.setTenant(user.getTenant());
+        organization.setStatus(ACTIVE);
 
         return organization;
     }
