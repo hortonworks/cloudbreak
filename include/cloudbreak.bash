@@ -267,6 +267,8 @@ cloudbreak-conf-cloud-provider() {
 
     env-import AWS_ACCESS_KEY_ID ""
     env-import AWS_SECRET_ACCESS_KEY ""
+    env-import AWS_GOV_ACCESS_KEY_ID ""
+    env-import AWS_GOV_SECRET_ACCESS_KEY ""
     env-import CB_AWS_DEFAULT_CF_TAG ""
     env-import CB_AWS_CUSTOM_CF_TAGS ""
 
