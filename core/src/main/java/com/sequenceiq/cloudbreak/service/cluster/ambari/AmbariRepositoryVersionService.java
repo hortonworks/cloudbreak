@@ -40,6 +40,8 @@ public class AmbariRepositoryVersionService {
 
     public static final Versioned AMBARI_VERSION_2_6_0_0 = () -> "2.6.0.0";
 
+    public static final Versioned AMBARI_VERSION_2_7_0_0 = () -> "2.7.0.0-0";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariRepositoryVersionService.class);
 
     @Inject
@@ -84,6 +86,10 @@ public class AmbariRepositoryVersionService {
         } else {
             LOGGER.info("Using latest HDP repository");
         }
+    }
+
+    public boolean setupLdapAndSsoOnApi(AmbariRepo ambariRepo) {
+        return isVersionNewerOrEqualThanLimited(ambariRepo::getVersion, AMBARI_VERSION_2_7_0_0);
     }
 
     public boolean isVersionNewerOrEqualThanLimited(Versioned currentVersion, Versioned limitedAPIVersion) {

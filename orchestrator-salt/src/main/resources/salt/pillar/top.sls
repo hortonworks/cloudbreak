@@ -1,5 +1,6 @@
 base:
   '*':
+    - ambari.config
     - ambari.repo
     - ambari.gpl
     - hdp.repo

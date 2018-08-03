@@ -22,6 +22,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.InstallClusterRequest
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.InstallClusterSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartAmbariRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartAmbariSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.ldap.LdapSSOConfigurationRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.ldap.LdapSSOConfigurationSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.BootstrapMachinesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.BootstrapMachinesSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.HostMetadataSetupRequest;
@@ -132,11 +134,26 @@ public class ClusterCreationActions {
         };
     }
 
-    @Bean(name = "INSTALLING_CLUSTER_STATE")
-    public Action<?, ?> installingClusterAction() {
+    @Bean(name = "CONFIGURE_LDAP_SSO_STATE")
+    public Action<?, ?> configureLdapSSOAction() {
         return new AbstractClusterAction<StartAmbariSuccess>(StartAmbariSuccess.class) {
             @Override
             protected void doExecute(ClusterViewContext context, StartAmbariSuccess payload, Map<Object, Object> variables) {
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(ClusterViewContext context) {
+                return new LdapSSOConfigurationRequest(context.getStackId());
+            }
+        };
+    }
+
+    @Bean(name = "INSTALLING_CLUSTER_STATE")
+    public Action<?, ?> installingClusterAction() {
+        return new AbstractClusterAction<LdapSSOConfigurationSuccess>(LdapSSOConfigurationSuccess.class) {
+            @Override
+            protected void doExecute(ClusterViewContext context, LdapSSOConfigurationSuccess payload, Map<Object, Object> variables) {
                 clusterCreationService.installingCluster(context.getStack());
                 sendEvent(context);
             }

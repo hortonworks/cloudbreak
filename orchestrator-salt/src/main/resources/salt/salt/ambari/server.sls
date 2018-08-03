@@ -2,7 +2,9 @@
 
 include:
   - ambari.server-install
+{% if not ambari.setup_ldap_and_sso_on_api %}
   - ambari.setup-sso
+{% endif %}
 {% if pillar['proxy'] is defined and pillar['proxy']['host'] is defined and pillar['proxy']['port'] is defined and pillar['proxy']['protocol'] is defined %}
   - ambari.proxy
 {% endif %}
@@ -139,13 +141,32 @@ install_mpack_{{ loop.index }}:
 
 {% if not ambari.is_local_ldap %}
 
-{% if ambari.ldap.adminGroup is defined and ambari.ldap.adminGroup is not none %}
+{% if ambari.ldap.adminGroup is defined and ambari.ldap.adminGroup is not none and not ambari.setup_ldap_and_sso_on_api %}
 set_ambari_administrators:
   file.append:
     - name: /etc/ambari-server/conf/ambari.properties
     - text: authorization.ldap.adminGroupMappingRules={{ ambari.ldap.adminGroup }}
     - unless: grep "authorization.ldap.adminGroupMappingRules" /etc/ambari-server/conf/ambari.properties
 {% endif %}
+
+{% if ambari.setup_ldap_and_sso_on_api %}
+
+setup_ldap_in_ambari_properties:
+  file.append:
+    - name: /etc/ambari-server/conf/ambari.properties
+    - text: client.security=ldap
+    - unless: grep "client.security=ldap" /etc/ambari-server/conf/ambari.properties
+
+/etc/ambari-server/conf/ldap-password.dat:
+  file.managed:
+    - makedirs: True
+    - source: salt://ambari/conf/ldap-password.dat
+    - template: jinja
+    - mode: 660
+    - context:
+      ldap: {{ ambari.ldap }}
+
+{% else %}
 
 /opt/ambari-server/setup-ldap.sh:
   file.managed:
@@ -162,5 +183,7 @@ setup_ldap:
     - name: /opt/ambari-server/setup-ldap.sh
     - shell: /bin/bash
     - unless: test -f /var/ldap_setup_success
+
+{% endif %}
 
 {% endif %}
