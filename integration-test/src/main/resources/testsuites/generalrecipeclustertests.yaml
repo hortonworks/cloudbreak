@@ -1,0 +1,11 @@
+name: Cluster_tests_with_recipes
+parameters:
+  cleanUp: true
+tests:
+  - name: openstack_cluster_test_recipes_with_python_script
+    parameters:
+      provider: openstack
+      openstackClusterName: e2e-cluster-py-recipe
+      openstackCredentialName: e2e-recipe-os
+    classes:
+      - name: com.sequenceiq.it.cloudbreak.GeneralRecipeClusterTests
