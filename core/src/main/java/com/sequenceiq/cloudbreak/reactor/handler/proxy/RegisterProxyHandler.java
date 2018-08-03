@@ -13,7 +13,6 @@ import com.sequenceiq.cloudbreak.reactor.api.event.proxy.RegisterProxySuccess;
 import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyRegistrator;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.util.StackUtil;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -29,9 +28,6 @@ public class RegisterProxyHandler implements ReactorEventHandler<RegisterProxyRe
 
     @Inject
     private EventBus eventBus;
-
-    @Inject
-    private StackUtil stackUtil;
 
     @Override
     public String selector() {

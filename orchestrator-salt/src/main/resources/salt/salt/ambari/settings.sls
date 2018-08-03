@@ -15,6 +15,7 @@
 {% set server_address = server_address[0] %}
 
 {% set is_gpl_repo_enabled = salt['pillar.get']('ambari:gpl:enabled') %}
+{% set setup_ldap_and_sso_on_api = salt['pillar.get']('ambari:setup_ldap_and_sso_on_api') %}
 {% set is_container_executor = salt['pillar.get']('docker:enableContainerExecutor') %}
 {% set version = salt['pillar.get']('ambari:repo:version') %}
 {% set ambari_database = salt['pillar.get']('ambari:database') %}
@@ -46,5 +47,6 @@
     'gateway': gateway,
     'username': username,
     'password': password,
-    'security_master_key': security_master_key
+    'security_master_key': security_master_key,
+    'setup_ldap_and_sso_on_api': setup_ldap_and_sso_on_api
 }) %}
