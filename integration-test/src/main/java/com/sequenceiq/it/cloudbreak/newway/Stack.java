@@ -9,9 +9,8 @@ import static org.testng.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -183,12 +182,17 @@ public class Stack extends StackEntity {
         });
     }
 
-    public static Assertion<Stack> checkRecipes(String[] searchOnHost, String[] files, String privateKey, String sshCommand, Integer require) {
+    public static Assertion<Stack> checkRecipes(String[] searchOnHost, String[] files, String privateKey, String sshCommand,  int require) {
+        return checkRecipes(searchOnHost, files, privateKey, Optional.ofNullable(sshCommand), require);
+    }
+
+    public static Assertion<Stack> checkRecipes(String[] searchOnHost, String[] files, String privateKey, int require) {
+        return checkRecipes(searchOnHost, files, privateKey, Optional.empty(), require);
+    }
+
+    public static Assertion<Stack> checkRecipes(String[] searchOnHost, String[] files, String privateKey, Optional<String> sshCommand, int require) {
         return assertThis((stack, t) -> {
             List<String> ips = new ArrayList<>();
-            List<String> emptyList = new ArrayList<>();
-            Map<String, List<String>> sshCheckMap = new HashMap<>();
-            sshCheckMap.put("beginsWith", emptyList);
             List<InstanceGroupResponse> instanceGroups = stack.getResponse().getInstanceGroups();
             for (InstanceGroupResponse instanceGroup : instanceGroups) {
                 if (Arrays.asList(searchOnHost).contains(instanceGroup.getGroup())) {
@@ -197,12 +201,13 @@ public class Stack extends StackEntity {
                     }
                 }
             }
+            int quantity = 0;
             try {
-                SshService sshService = new SshService();
-                sshService.executeCommand(ips, files, privateKey, sshCommand, "cloudbreak", 120000, require, sshCheckMap);
+                quantity = new SshService().countFilesOnHostByExtensionAndPath(ips, files, sshCommand, privateKey, "success", "cloudbreak", 120000, require);
             } catch (Exception e) {
                 LOGGER.error("Error occurred during ssh execution: " + e);
             }
+            assertEquals(quantity, require, "The number of existing files is different than required.");
         });
     }
 
