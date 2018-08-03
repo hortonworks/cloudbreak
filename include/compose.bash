@@ -429,6 +429,8 @@ cloudbreak:
     environment:
         - AWS_ACCESS_KEY_ID
         - AWS_SECRET_ACCESS_KEY
+        - AWS_GOV_ACCESS_KEY_ID
+        - AWS_GOV_SECRET_ACCESS_KEY
         - "SERVICE_NAME=cloudbreak"
           #- SERVICE_CHECK_HTTP=/info
         - "http_proxy=$HTTP_PROXY"
