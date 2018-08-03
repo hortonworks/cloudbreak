@@ -28,6 +28,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.core.flow2.FlowTriggerCondition;
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition.Builder;
 
@@ -52,6 +53,11 @@ public class StackImageUpdateFlowConfig extends AbstractFlowConfiguration<StackI
 
     public StackImageUpdateFlowConfig() {
         super(StackImageUpdateState.class, StackImageUpdateEvent.class);
+    }
+
+    @Override
+    public FlowTriggerCondition getFlowTriggerCondition() {
+        return getApplicationContext().getBean(StackImageUpdateFlowTriggerCondition.class);
     }
 
     @Override
