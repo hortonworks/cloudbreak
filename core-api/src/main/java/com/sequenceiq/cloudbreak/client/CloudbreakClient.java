@@ -29,25 +29,20 @@ import com.sequenceiq.cloudbreak.api.endpoint.v1.AccountPreferencesEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.BlueprintEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ClusterV1Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ConnectorV1Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.ConstraintTemplateEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.CredentialEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.EventEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.FlexSubscriptionEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ImageCatalogV1Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.LdapConfigEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.NetworkEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.OrganizationEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ProxyConfigEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.RdsConfigEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.RecipeEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.RepositoryConfigValidationEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.SecurityGroupEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.SecurityRuleEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.SmartSenseSubscriptionEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.StackV1Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.SubscriptionEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.TemplateEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.TopologyEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.UsageEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.UserEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.UtilEndpoint;
@@ -110,14 +105,6 @@ public class CloudbreakClient {
         return refreshIfNeededAndGet(CredentialEndpoint.class);
     }
 
-    public TemplateEndpoint templateEndpoint() {
-        return refreshIfNeededAndGet(TemplateEndpoint.class);
-    }
-
-    public TopologyEndpoint topologyEndpoint() {
-        return refreshIfNeededAndGet(TopologyEndpoint.class);
-    }
-
     public UsageEndpoint usageEndpoint() {
         return refreshIfNeededAndGet(UsageEndpoint.class);
     }
@@ -128,10 +115,6 @@ public class CloudbreakClient {
 
     public EventEndpoint eventEndpoint() {
         return refreshIfNeededAndGet(EventEndpoint.class);
-    }
-
-    public SecurityGroupEndpoint securityGroupEndpoint() {
-        return refreshIfNeededAndGet(SecurityGroupEndpoint.class);
     }
 
     public SecurityRuleEndpoint securityRuleEndpoint() {
@@ -148,10 +131,6 @@ public class CloudbreakClient {
 
     public SubscriptionEndpoint subscriptionEndpoint() {
         return refreshIfNeededAndGet(SubscriptionEndpoint.class);
-    }
-
-    public NetworkEndpoint networkEndpoint() {
-        return refreshIfNeededAndGet(NetworkEndpoint.class);
     }
 
     public RecipeEndpoint recipeEndpoint() {
@@ -206,10 +185,6 @@ public class CloudbreakClient {
         return refreshIfNeededAndGet(ImageCatalogV1Endpoint.class);
     }
 
-    public ConstraintTemplateEndpoint constraintTemplateEndpoint() {
-        return refreshIfNeededAndGet(ConstraintTemplateEndpoint.class);
-    }
-
     public UtilEndpoint utilEndpoint() {
         return refreshIfNeededAndGet(UtilEndpoint.class);
     }
@@ -249,16 +224,12 @@ public class CloudbreakClient {
         webTarget = client.target(cloudbreakAddress).path(CoreApi.API_ROOT_CONTEXT);
         endpointWrapperHolder = Optional.ofNullable(endpointWrapperHolder).orElse(new EndpointWrapperHolder());
         endpointWrapperHolder.setEndpoint(newEndpoint(CredentialEndpoint.class, headers));
-        endpointWrapperHolder.setEndpoint(newEndpoint(TemplateEndpoint.class, headers));
-        endpointWrapperHolder.setEndpoint(newEndpoint(TopologyEndpoint.class, headers));
         endpointWrapperHolder.setEndpoint(newEndpoint(UsageEndpoint.class, headers));
         endpointWrapperHolder.setEndpoint(newEndpoint(EventEndpoint.class, headers));
-        endpointWrapperHolder.setEndpoint(newEndpoint(SecurityGroupEndpoint.class, headers));
         endpointWrapperHolder.setEndpoint(newEndpoint(SecurityRuleEndpoint.class, headers));
         endpointWrapperHolder.setEndpoint(newEndpoint(StackV1Endpoint.class, headers));
         endpointWrapperHolder.setEndpoint(newEndpoint(StackV2Endpoint.class, headers));
         endpointWrapperHolder.setEndpoint(newEndpoint(SubscriptionEndpoint.class, headers));
-        endpointWrapperHolder.setEndpoint(newEndpoint(NetworkEndpoint.class, headers));
         endpointWrapperHolder.setEndpoint(newEndpoint(RecipeEndpoint.class, headers));
         endpointWrapperHolder.setEndpoint(newEndpoint(RdsConfigEndpoint.class, headers));
         endpointWrapperHolder.setEndpoint(newEndpoint(ProxyConfigEndpoint.class, headers));
@@ -268,7 +239,6 @@ public class CloudbreakClient {
         endpointWrapperHolder.setEndpoint(newEndpoint(ConnectorV1Endpoint.class, headers));
         endpointWrapperHolder.setEndpoint(newEndpoint(ConnectorV2Endpoint.class, headers));
         endpointWrapperHolder.setEndpoint(newEndpoint(UserEndpoint.class, headers));
-        endpointWrapperHolder.setEndpoint(newEndpoint(ConstraintTemplateEndpoint.class, headers));
         endpointWrapperHolder.setEndpoint(newEndpoint(UtilEndpoint.class, headers));
         endpointWrapperHolder.setEndpoint(newEndpoint(LdapConfigEndpoint.class, headers));
         endpointWrapperHolder.setEndpoint(newEndpoint(SmartSenseSubscriptionEndpoint.class, headers));

@@ -7,8 +7,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v1.SecurityGroupEndpoint;
-import com.sequenceiq.cloudbreak.api.model.SecurityGroupResponse;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.CloudbreakUtil;
 import com.sequenceiq.it.cloudbreak.WaitResult;
@@ -39,24 +37,6 @@ public class CleanupService {
                 .filter(stack -> stack.getName().startsWith("it-"))
                 .forEach(stack -> deleteStackAndWait(cloudbreakClient, String.valueOf(stack.getId())));
 
-        cloudbreakClient.templateEndpoint()
-                .getPrivates()
-                .stream()
-                .filter(template -> template.getName().startsWith("it-"))
-                .forEach(template -> deleteTemplate(cloudbreakClient, String.valueOf(template.getId())));
-
-        cloudbreakClient.networkEndpoint()
-                .getPrivates()
-                .stream()
-                .filter(network -> network.getName().startsWith("it-"))
-                .forEach(network -> deleteNetwork(cloudbreakClient, String.valueOf(network.getId())));
-
-        cloudbreakClient.securityGroupEndpoint()
-                .getPrivates()
-                .stream()
-                .filter(secgroup -> secgroup.getName().startsWith("it-"))
-                .forEach(secgroup -> deleteSecurityGroup(cloudbreakClient, String.valueOf(secgroup.getId())));
-
         cloudbreakClient.blueprintEndpoint()
                 .getPrivates()
                 .stream()
@@ -85,28 +65,6 @@ public class CleanupService {
     public void deleteCredential(CloudbreakClient cloudbreakClient, String credentialId) {
         if (credentialId != null) {
             cloudbreakClient.credentialEndpoint().delete(Long.valueOf(credentialId));
-        }
-    }
-
-    public void deleteTemplate(CloudbreakClient cloudbreakClient, String templateId) {
-        if (templateId != null) {
-            cloudbreakClient.templateEndpoint().delete(Long.valueOf(templateId));
-        }
-    }
-
-    public void deleteNetwork(CloudbreakClient cloudbreakClient, String networkId) {
-        if (networkId != null) {
-            cloudbreakClient.networkEndpoint().delete(Long.valueOf(networkId));
-        }
-    }
-
-    public void deleteSecurityGroup(CloudbreakClient cloudbreakClient, String securityGroupId) {
-        if (securityGroupId != null) {
-            SecurityGroupEndpoint securityGroupEndpoint = cloudbreakClient.securityGroupEndpoint();
-            SecurityGroupResponse securityGroupResponse = securityGroupEndpoint.get(Long.valueOf(securityGroupId));
-            if (!itProps.isDefaultSecurityGroup(securityGroupResponse.getName())) {
-                securityGroupEndpoint.delete(Long.valueOf(securityGroupId));
-            }
         }
     }
 

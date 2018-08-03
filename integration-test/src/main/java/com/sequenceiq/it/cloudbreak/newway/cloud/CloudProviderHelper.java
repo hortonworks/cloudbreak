@@ -25,8 +25,6 @@ import com.sequenceiq.cloudbreak.api.model.v2.filesystem.CloudStorageParameters;
 import com.sequenceiq.it.cloudbreak.filesystem.CloudStorageTypePathPrefix;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
 import com.sequenceiq.it.cloudbreak.newway.LdapConfigRequestDataCollector;
-import com.sequenceiq.it.cloudbreak.newway.Network;
-import com.sequenceiq.it.cloudbreak.newway.NetworkEntity;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackAction;
 import com.sequenceiq.it.cloudbreak.newway.StackCreation;
@@ -46,12 +44,6 @@ public abstract class CloudProviderHelper extends CloudProvider {
     public static final String INTEGRATIONTEST_PUBLIC_KEY_FILE = "integrationtest.publicKeyFile";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudProviderHelper.class);
-
-    private static final String MASTER_INSTANCE_COUNT = "masterInstanceCount";
-
-    private static final String WORKER_INSTANCE_COUNT = "workerInstanceCount";
-
-    private static final String COMPUTE_INSTANCE_COUNT = "computeInstanceCount";
 
     private static final String DEFAULT_DATALAKE_BLUEPRINT = "Data Lake: Apache Ranger, Apache Hive Metastore";
 
@@ -149,14 +141,6 @@ public abstract class CloudProviderHelper extends CloudProvider {
     public abstract NetworkV2Request existingNetwork();
 
     public abstract NetworkV2Request existingSubnet();
-
-    public NetworkEntity aValidNetworkIsCreated() {
-        return Network.isCreated()
-                .withName(getNetworkName())
-                .withCloudPlatform(getPlatform())
-                .withSubnetCIDR(getSubnetCIDR())
-                .withParameters(subnetProperties());
-    }
 
     public List<InstanceGroupV2Request> instanceGroups() {
         return instanceGroups(MASTER, COMPUTE, WORKER);

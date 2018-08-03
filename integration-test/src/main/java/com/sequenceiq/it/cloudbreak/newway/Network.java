@@ -23,45 +23,6 @@ public class Network extends NetworkEntity {
         return new Network();
     }
 
-    public static Network isCreated() {
-        Network network = new Network();
-        network.setCreationStrategy(NetworkAction::createInGiven);
-        return network;
-    }
-
-    public static Network isDeleted(Network network) {
-        network.setCreationStrategy(NetworkAction::createDeleteInGiven);
-        return network;
-    }
-
-    public static Action<Network> post(String key) {
-        return new Action<>(getTestContextNetwork(key), NetworkAction::post);
-    }
-
-    public static Action<Network> post() {
-        return post(NETWORK);
-    }
-
-    public static Action<Network> get(String key) {
-        return new Action<>(getTestContextNetwork(key), NetworkAction::get);
-    }
-
-    public static Action<Network> get() {
-        return get(NETWORK);
-    }
-
-    public static Action<Network> getAll() {
-        return new Action<>(getNew(), NetworkAction::getAll);
-    }
-
-    public static Action<Network> delete(String key) {
-        return new Action<>(getTestContextNetwork(key), NetworkAction::delete);
-    }
-
-    public static Action<Network> delete() {
-        return delete(NETWORK);
-    }
-
     public static Assertion<Network> assertThis(BiConsumer<Network, IntegrationTestContext> check) {
         return new Assertion<>(getTestContextNetwork(GherkinTest.RESULT), check);
     }

@@ -81,16 +81,10 @@ public class EndpointConfig extends ResourceConfig {
         register(PlatformParameterV2Controller.class);
         register(ClusterV1Controller.class);
         register(CredentialController.class);
-        register(NetworkController.class);
         register(RecipeController.class);
-        register(SecurityGroupController.class);
         register(StackV1Controller.class);
         register(StackV2Controller.class);
-        register(TemplateController.class);
-        register(ConstraintTemplateController.class);
         register(UserController.class);
-        register(TopologyController.class);
-        register(ClusterTemplateController.class);
         register(CloudbreakEventController.class);
         register(SubscriptionController.class);
         register(CloudbreakUsageController.class);

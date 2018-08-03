@@ -4,24 +4,19 @@ import com.sequenceiq.cloudbreak.api.endpoint.v1.AccountPreferencesEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.BlueprintEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ClusterV1Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ConnectorV1Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.ConstraintTemplateEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.CredentialEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.EventEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.FlexSubscriptionEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ImageCatalogV1Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.LdapConfigEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.NetworkEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ProxyConfigEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.RdsConfigEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.RecipeEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.RepositoryConfigValidationEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.SecurityGroupEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.SecurityRuleEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.SmartSenseSubscriptionEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.StackV1Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.SubscriptionEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.TemplateEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.TopologyEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.UsageEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.UserEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.UtilEndpoint;
@@ -51,14 +46,6 @@ public class ProxyCloudbreakClient extends com.sequenceiq.cloudbreak.client.Clou
         return createProxy(super.credentialEndpoint(), CredentialEndpoint.class);
     }
 
-    public TemplateEndpoint templateEndpoint() {
-        return createProxy(super.templateEndpoint(), TemplateEndpoint.class);
-    }
-
-    public TopologyEndpoint topologyEndpoint() {
-        return createProxy(super.topologyEndpoint(), TopologyEndpoint.class);
-    }
-
     public UsageEndpoint usageEndpoint() {
         return createProxy(super.usageEndpoint(), UsageEndpoint.class);
     }
@@ -69,10 +56,6 @@ public class ProxyCloudbreakClient extends com.sequenceiq.cloudbreak.client.Clou
 
     public EventEndpoint eventEndpoint() {
         return createProxy(super.eventEndpoint(), EventEndpoint.class);
-    }
-
-    public SecurityGroupEndpoint securityGroupEndpoint() {
-        return createProxy(super.securityGroupEndpoint(), SecurityGroupEndpoint.class);
     }
 
     public SecurityRuleEndpoint securityRuleEndpoint() {
@@ -89,10 +72,6 @@ public class ProxyCloudbreakClient extends com.sequenceiq.cloudbreak.client.Clou
 
     public SubscriptionEndpoint subscriptionEndpoint() {
         return createProxy(super.subscriptionEndpoint(), SubscriptionEndpoint.class);
-    }
-
-    public NetworkEndpoint networkEndpoint() {
-        return createProxy(super.networkEndpoint(), NetworkEndpoint.class);
     }
 
     public RecipeEndpoint recipeEndpoint() {
@@ -141,10 +120,6 @@ public class ProxyCloudbreakClient extends com.sequenceiq.cloudbreak.client.Clou
 
     public ImageCatalogV1Endpoint imageCatalogEndpoint() {
         return createProxy(super.imageCatalogEndpoint(), ImageCatalogV1Endpoint.class);
-    }
-
-    public ConstraintTemplateEndpoint constraintTemplateEndpoint() {
-        return createProxy(super.constraintTemplateEndpoint(), ConstraintTemplateEndpoint.class);
     }
 
     public UtilEndpoint utilEndpoint() {
