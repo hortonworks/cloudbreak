@@ -40,7 +40,7 @@ public class HttpNotificationSender {
         return n;
     }
 
-    public void send(Notification notification) {
+    private void send(Notification notification) {
         Iterable<Subscription> subscriptions = subscriptionRepository.findAll();
         for (Subscription subscription : subscriptions) {
             String endpoint = subscription.getEndpoint();

@@ -4,6 +4,8 @@ import static java.lang.Math.ceil;
 
 import java.util.concurrent.ExecutorService;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,7 @@ import com.sequenceiq.periscope.monitor.event.ScalingEvent;
 import com.sequenceiq.periscope.service.AmbariClientProvider;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.utils.ClusterUtils;
+import com.sequenceiq.periscope.utils.LoggerUtils;
 import com.sequenceiq.periscope.utils.TimeUtil;
 
 @Component
@@ -38,6 +41,9 @@ public class ScalingHandler implements ApplicationListener<ScalingEvent> {
     @Autowired
     private AmbariClientProvider ambariClientProvider;
 
+    @Inject
+    private LoggerUtils loggerUtils;
+
     @Override
     public void onApplicationEvent(ScalingEvent event) {
         BaseAlert alert = event.getAlert();
@@ -53,6 +59,7 @@ public class ScalingHandler implements ApplicationListener<ScalingEvent> {
             int desiredNodeCount = getDesiredNodeCount(cluster, policy, totalNodes);
             if (totalNodes != desiredNodeCount) {
                 Runnable scalingRequest = (Runnable) applicationContext.getBean("ScalingRequest", cluster, policy, totalNodes, desiredNodeCount);
+                loggerUtils.logThreadPoolExecutorParameters(LOGGER, "ScalingHandler", executorService);
                 executorService.execute(scalingRequest);
                 cluster.setLastScalingActivityCurrent();
                 clusterService.save(cluster);

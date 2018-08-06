@@ -51,6 +51,7 @@ public class MetricEvaluator extends AbstractEventPublisher implements Evaluator
 
     @Override
     public void run() {
+        long start = System.currentTimeMillis();
         Cluster cluster = clusterService.findById(clusterId);
         MDCBuilder.buildMdcContext(cluster);
         AmbariClient ambariClient = ambariClientProvider.createAmbariClient(cluster);
@@ -81,6 +82,8 @@ public class MetricEvaluator extends AbstractEventPublisher implements Evaluator
         } catch (Exception e) {
             LOGGER.error("Failed to retrieve alert history", e);
             publishEvent(new UpdateFailedEvent(clusterId));
+        } finally {
+            LOGGER.info("Finished metricEvaluator for cluster {} in {} ms", clusterId, System.currentTimeMillis() - start);
         }
     }
 
