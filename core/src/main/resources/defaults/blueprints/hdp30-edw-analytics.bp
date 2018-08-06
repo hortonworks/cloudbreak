@@ -1,9 +1,9 @@
 {
   "inputs": [],
-  "description": "Useful for data science with Spark and Zeppelin",
+  "description": "Useful for EDW analytics using Hive LLAP",
   "blueprint": {
     "Blueprints": {
-      "blueprint_name": "hdp30-data-science-spark2-v5",
+      "blueprint_name": "hdp30-edw-analytics-v3",
       "stack_name": "HDP",
       "stack_version": "3.0"
     },
@@ -25,6 +25,11 @@
     ],
     "configurations": [
       {
+        "hive-interactive-env": {
+          "enable_hive_interactive": "true"
+        }
+      },
+      {
         "core-site": {
           "fs.trash.interval": "4320"
         }
@@ -35,6 +40,13 @@
         }
       },
       {
+        "hive-interactive-site": {
+          "hive.exec.orc.split.strategy":"BI",
+          "hive.stats.fetch.bitvector":"true",
+          "hive.metastore.rawstore.impl":"org.apache.hadoop.hive.metastore.cache.CachedStore"
+       }
+     },
+     {
         "hive-site": {
           "hive.exec.compress.output": "true",
           "hive.merge.mapfiles": "true",
@@ -50,8 +62,27 @@
         }
       },
       {
+        "tez-site": {
+          "tez.runtime.shuffle.parallel.copies":"4",
+          "tez.runtime.enable.final-merge.in.output":"false",
+          "tez.am.am-rm.heartbeat.interval-ms.max":"2000"
+        }
+      },
+      {
         "yarn-site": {
           "yarn.acl.enable": "true"
+        }
+      },
+      {
+        "capacity-scheduler" : {
+          "properties" : {
+            "yarn.scheduler.capacity.root.queues" : "default,llap",
+            "yarn.scheduler.capacity.root.capacity" : "100",
+            "yarn.scheduler.capacity.root.default.capacity" : "25",
+            "yarn.scheduler.capacity.root.default.maximum-capacity" : "100",
+            "yarn.scheduler.capacity.root.llap.maximum-capacity" : "100",
+            "yarn.scheduler.capacity.root.llap.capacity" : "75"
+          }
         }
       }
     ],
@@ -64,10 +95,10 @@
             "name": "APP_TIMELINE_SERVER"
           },
           {
-            "name": "HDFS_CLIENT"
+            "name": "TIMELINE_READER"
           },
           {
-            "name": "TIMELINE_READER"
+            "name": "HDFS_CLIENT"
           },
           {
             "name": "HISTORYSERVER"
@@ -80,6 +111,9 @@
           },
           {
             "name": "HIVE_SERVER"
+          },
+          {
+            "name": "HIVE_SERVER_INTERACTIVE"
           },
           {
             "name": "JOURNALNODE"
@@ -97,19 +131,13 @@
             "name": "NAMENODE"
           },
           {
+            "name": "PIG"
+          },
+          {
             "name": "RESOURCEMANAGER"
           },
           {
             "name": "SECONDARY_NAMENODE"
-          },
-          {
-            "name": "LIVY2_SERVER"
-          },
-          {
-            "name": "SPARK2_CLIENT"
-          },
-          {
-            "name": "SPARK2_JOBHISTORYSERVER"
           },
           {
             "name": "TEZ_CLIENT"
@@ -140,9 +168,6 @@
             "name": "TEZ_CLIENT"
           },
           {
-            "name": "SPARK2_CLIENT"
-          },
-          {
             "name": "DATANODE"
           },
           {
@@ -163,9 +188,6 @@
           },
           {
             "name": "TEZ_CLIENT"
-          },
-          {
-            "name": "SPARK2_CLIENT"
           },
           {
             "name": "METRICS_MONITOR"
