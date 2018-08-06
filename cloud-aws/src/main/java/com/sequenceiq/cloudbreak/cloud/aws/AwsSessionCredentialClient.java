@@ -9,9 +9,9 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import com.amazonaws.auth.BasicSessionCredentials;
+import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.auth.InstanceProfileCredentialsProvider;
 import com.amazonaws.services.securitytoken.AWSSecurityTokenService;
-import com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClient;
 import com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClientBuilder;
 import com.amazonaws.services.securitytoken.model.AssumeRoleRequest;
 import com.amazonaws.services.securitytoken.model.AssumeRoleResult;
@@ -63,7 +63,10 @@ public class AwsSessionCredentialClient {
                     .build();
         } else {
             LOGGER.info("AWSSecurityTokenServiceClient will use environment variables");
-            return new AWSSecurityTokenServiceClient();
+            return AWSSecurityTokenServiceClientBuilder.standard()
+                    .withRegion(awsDefaultZoneProvider.getDefaultZone(awsCredential))
+                    .withCredentials(DefaultAWSCredentialsProviderChain.getInstance())
+                    .build();
         }
     }
 
