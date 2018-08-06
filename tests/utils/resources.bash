@@ -144,7 +144,7 @@ function remove-stuck-cluster() {
   remove_cluster_name=$1
 
   if [[ $(cb cluster list | jq -r .[].Name) == "$remove_cluster_name" ]]; then
-    cb cluster delete --name "$remove_cluster_name" --wait
+    cb cluster delete --name "$remove_cluster_name" --force --wait
   fi
 }
 

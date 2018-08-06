@@ -21,34 +21,35 @@ AMBARI_PASSWORD="Admin123!@#\""
 }
 
 @test "Create new ["${OS_CLUSTER_NAME}"] OpenStack cluster" {
-  OUTPUT=$(create-cluster --name "${OS_CLUSTER_NAME}" --cli-input-json $OS_INPUT_JSON_FILE 2>&1 | tail -n 2 | head -n 1)
+  OUTPUT=$(create-cluster --name "${OS_CLUSTER_NAME}" --cli-input-json "${OS_INPUT_JSON_FILE}" 2>&1 | tail -n 2 | head -n 1)
 
-  echo "${OUTPUT}" >&2
-
-  [[ "${OUTPUT}" == *"stack created: ${OS_CLUSTER_NAME}"* ]]
+  if [[ "${OUTPUT}" != *"stack created: ${OS_CLUSTER_NAME}"* ]]; then
+    create-cluster --name "${OS_CLUSTER_NAME}" --cli-input-json "${OS_INPUT_JSON_FILE}"
+  fi
   [[ "${OUTPUT}" != *"error"* ]]
 }
 
 @test "Wait for ["${OS_CLUSTER_NAME}"] cluster is created" {
   run wait-cluster-status "${OS_CLUSTER_NAME}" "AVAILABLE"
 
-  echo "$output" >&2
-
-  [ $status -eq 0 ]
-  [ "$output" = true ]
+  if [[ "${status}" -ne 0 ]]; then
+    cb cluster describe --name "${OS_CLUSTER_NAME}" | jq -r .statusReason
+  fi
+  [[ "${output}" == true ]]
 }
 
 @test "Wait for ["${OS_CLUSTER_NAME}"] stack is created" {
   run is-cluster-status "${OS_CLUSTER_NAME}" "AVAILABLE"
-  if [[ "$output" != true ]]; then
+  if [[ "${output}" != true ]]; then
     skip "Cluster has not been created yet!"
   fi
 
   run wait-stack-status "${OS_CLUSTER_NAME}" "AVAILABLE"
-  echo "$output" >&2
 
-  [ $status -eq 0 ]
-  [ "$output" = true ]
+  if [[ "${status}" -ne 0 ]]; then
+    cb cluster describe --name "${OS_CLUSTER_NAME}" | jq -r .statusReason
+  fi
+  [[ "${output}" == true ]]
 }
 
 @test "Change Ambari password for ["${OS_CLUSTER_NAME}"] cluster" {
