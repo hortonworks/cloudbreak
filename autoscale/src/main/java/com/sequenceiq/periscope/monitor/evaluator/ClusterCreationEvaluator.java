@@ -53,6 +53,8 @@ public class ClusterCreationEvaluator implements Runnable {
 
     @Override
     public void run() {
+
+        long start = System.currentTimeMillis();
         AutoscaleStackResponse stack = context.getStack();
         try {
             Cluster cluster = clusterService.findOneByStackId(stack.getStackId());
@@ -72,6 +74,8 @@ public class ClusterCreationEvaluator implements Runnable {
                     stack.getStackId(), stack.getName(), ex.getMessage()));
         } catch (Exception ex) {
             LOGGER.error(String.format("Could not create cluster for Cloudbreak stack: %s (ID:%s)", stack.getStackId(), stack.getName()), ex);
+        } finally {
+            LOGGER.info("Finished clusterCreationEvaluator in {} ms", System.currentTimeMillis() - start);
         }
     }
 

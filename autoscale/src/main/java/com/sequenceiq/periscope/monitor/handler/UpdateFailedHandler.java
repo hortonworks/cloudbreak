@@ -48,6 +48,7 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
     @Override
     public void onApplicationEvent(UpdateFailedEvent event) {
         long id = event.getClusterId();
+        LOGGER.info("Cluster {} failed", id);
         Cluster cluster = clusterService.find(id);
         MDCBuilder.buildMdcContext(cluster);
         Integer failed = updateFailures.get(id);
@@ -61,16 +62,19 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
                 String clusterStatus = stackResponse.getCluster().getStatus().name();
                 if (stackStatus.startsWith(DELETE_STATUSES_PREFIX)) {
                     clusterService.removeById(id);
-                    LOGGER.info("Delete cluster due to failing update attempts and Cloudbreak stack status");
+                    LOGGER.info("Delete cluster {} due to failing update attempts and Cloudbreak stack status", id);
                 } else if (stackStatus.equals(AVAILABLE) && clusterStatus.equals(AVAILABLE)) {
                     // Ambari server is unreacheable but the stack and cluster statuses are "AVAILABLE"
                     reportAmbariServerFailure(cluster, stackResponse, cloudbreakClient);
                     suspendCluster(cluster);
+                    LOGGER.info("Suspend cluster monitoring for cluster {} due to failing update attempts and Cloudbreak stack status {}", id, stackStatus);
                 } else {
                     suspendCluster(cluster);
+                    LOGGER.info("Suspend cluster monitoring for cluster {}", id);
                 }
             } catch (Exception ex) {
-                LOGGER.warn("Cluster status could not be verified by Cloudbreak for remove. Original message: {}", ex.getMessage());
+                LOGGER.warn("Cluster status could not be verified by Cloudbreak for remove. Suspending cluster. Original message: {}",
+                        ex.getMessage());
                 suspendCluster(cluster);
             }
             updateFailures.remove(id);
@@ -82,7 +86,6 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
     private void suspendCluster(Cluster cluster) {
         cluster.setState(ClusterState.SUSPENDED);
         clusterService.save(cluster);
-        LOGGER.info("Suspend cluster monitoring due to failing update attempts");
     }
 
     private void reportAmbariServerFailure(Cluster cluster, StackResponse stackResponse, CloudbreakClient cbClient) {

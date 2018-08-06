@@ -55,6 +55,7 @@ public class PrometheusEvaluator extends AbstractEventPublisher implements Evalu
 
     @Override
     public void run() {
+        long start = System.currentTimeMillis();
         try {
             Cluster cluster = clusterService.find(clusterId);
             MDCBuilder.buildMdcContext(cluster);
@@ -111,6 +112,8 @@ public class PrometheusEvaluator extends AbstractEventPublisher implements Evalu
         } catch (Exception e) {
             LOGGER.error("Failed to retrieve alerts from Prometheus", e);
             publishEvent(new UpdateFailedEvent(clusterId));
+        } finally {
+            LOGGER.info("Finished prometheusEvaluator for cluster {} in {} ms", clusterId, System.currentTimeMillis() - start);
         }
     }
 
