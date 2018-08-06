@@ -57,9 +57,10 @@ public class AmbariAgentHealthEvaluator extends AbstractEventPublisher implement
 
     @Override
     public void run() {
+        long start = System.currentTimeMillis();
         Cluster cluster = clusterService.find(clusterId);
         MDCBuilder.buildMdcContext(cluster);
-        LOGGER.info("Checking '{}' alerts.", AMBARI_AGENT_HEARTBEAT);
+        LOGGER.info("Checking '{}' alerts for cluster {}.", AMBARI_AGENT_HEARTBEAT, cluster.getId());
         try {
             AmbariClient ambariClient = ambariClientProvider.createAmbariClient(cluster);
             List<Map<String, Object>> alertHistory = ambariClient.getAlert(AMBARI_AGENT_HEARTBEAT_DEF_NAME);
@@ -84,7 +85,10 @@ public class AmbariAgentHealthEvaluator extends AbstractEventPublisher implement
         } catch (Exception e) {
             LOGGER.warn(String.format("Failed to retrieve '%s' alerts. Original message: %s", AMBARI_AGENT_HEARTBEAT, e.getMessage()));
             publishEvent(new UpdateFailedEvent(clusterId));
+        } finally {
+            LOGGER.info("Finished {} for cluster {} in {} ms", AMBARI_AGENT_HEARTBEAT, clusterId, System.currentTimeMillis() - start);
         }
+
     }
 
     private boolean isAlertStateMet(String currentState) {
