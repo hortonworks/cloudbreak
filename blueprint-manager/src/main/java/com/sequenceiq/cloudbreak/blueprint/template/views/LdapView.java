@@ -37,10 +37,16 @@ public class LdapView {
 
     private String connectionURL;
 
+    private String host;
+
+    private int port;
+
     public LdapView(@Nonnull LdapConfig ldapConfig) {
         protocol = ldapConfig.getProtocol().toLowerCase();
+        host = ldapConfig.getServerHost();
         connectionURL = protocol + "://" + ldapConfig.getServerHost();
         if (ldapConfig.getServerPort() != null) {
+            port = ldapConfig.getServerPort();
             connectionURL = connectionURL.toLowerCase() + ':' + ldapConfig.getServerPort();
         }
         bindDn = ldapConfig.getBindDn();
@@ -56,6 +62,18 @@ public class LdapView {
         domain = ldapConfig.getDomain();
         userDnPattern = ldapConfig.getUserDnPattern();
         adminGroup = ldapConfig.getAdminGroup();
+    }
+
+    public String getHost() {
+        return host;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public boolean isSecure() {
+        return protocol.toLowerCase().equalsIgnoreCase("ldaps");
     }
 
     public String getProtocol() {

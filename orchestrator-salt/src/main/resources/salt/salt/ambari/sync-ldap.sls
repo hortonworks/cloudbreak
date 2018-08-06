@@ -1,6 +1,6 @@
 {%- from 'ambari/settings.sls' import ambari with context %}
 
-{% if not ambari.is_local_ldap %}
+{% if not ambari.is_local_ldap and not ambari.setup_ldap_and_sso_on_api %}
 
 /opt/ambari-server/sync-ldap.sh:
   file.managed:
