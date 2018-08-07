@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -260,22 +260,7 @@ public class GcpPlatformResources implements PlatformResources {
         }
 
         String projectId = GcpStackUtil.getProjectId(cloudCredential);
-        String keyRingPath = String.format(
-                "projects/%s/locations/%s",
-                projectId, region.getRegionName());
-
-        ListKeyRingsResponse response;
-        try {
-            response = cloudKMS.projects().locations()
-                    .keyRings()
-                    .list(keyRingPath)
-                    .execute();
-        } catch (IOException e) {
-            LOGGER.error("Failed to get list of keyrings on keyring path: [{}].", keyRingPath, e);
-            return new CloudEncryptionKeys(new HashSet<>());
-        }
-
-        Set<CloudEncryptionKey> cloudEncryptionKeys = response.getKeyRings().stream().parallel()
+        Set<CloudEncryptionKey> cloudEncryptionKeys = getKeyRingList(cloudKMS, projectId, region.getRegionName()).stream().parallel()
                 .map(KeyRing::getName)
                 .map(toCryptoKeyPathList(cloudKMS, projectId, region.getRegionName()))
                 .flatMap(Set::stream)
@@ -284,26 +269,30 @@ public class GcpPlatformResources implements PlatformResources {
         return new CloudEncryptionKeys(cloudEncryptionKeys);
     }
 
+    private List<KeyRing> getKeyRingList(CloudKMS cloudKMS, String projectId, String regionName) {
+        String keyRingPath = String.format("projects/%s/locations/%s", projectId, regionName);
+        try {
+            ListKeyRingsResponse response = cloudKMS.projects().locations()
+                .keyRings()
+                .list(keyRingPath)
+                .execute();
+            return Optional.ofNullable(response.getKeyRings()).orElse(List.of());
+        } catch (IOException e) {
+            LOGGER.error("Failed to get list of keyrings on keyring path: [{}].", keyRingPath, e);
+            return List.of();
+        }
+    }
+
     private Function<String, Set<CloudEncryptionKey>> toCryptoKeyPathList(CloudKMS cloudKMS, String projectId, String location) {
-        return keyRing -> {
-            String cryptoKeysPath = String.format("projects/%s/locations/%s/keyRings/%s", projectId, location, keyRing);
-            return getCryptoKeysList(cloudKMS, cryptoKeysPath).stream()
-                    .map(toCloudEncryptionKey(projectId, keyRing, location))
-                    .collect(Collectors.toSet());
-        };
+        return keyRing -> getCryptoKeysList(cloudKMS, keyRing).stream()
+                .map(toCloudEncryptionKey(projectId, keyRing, location))
+                .collect(Collectors.toSet());
     }
 
     private Function<CryptoKey, CloudEncryptionKey> toCloudEncryptionKey(String projectId, String keyRing, String location) {
         return cryptoKey -> {
-            String cryptoKeyPath = String.format("projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s", projectId, location, keyRing, cryptoKey.getName());
-            Map<String, Object> metadata =
-                    cryptoKey.getLabels().entrySet().stream().collect(Collectors.toMap(Entry::getKey, entry -> (Object) entry.getValue()));
-            return new CloudEncryptionKey(
-                    cryptoKeyPath,
-                    cryptoKey.getName(),
-                    cryptoKey.getPurpose(),
-                    String.format("%s/%s", keyRing, cryptoKey.getName()),
-                    metadata);
+            Map<String, Object> metadata = new HashMap<>(cryptoKey.getLabels());
+            return new CloudEncryptionKey(cryptoKey.getName(), cryptoKey.getName(), cryptoKey.getPurpose(), cryptoKey.getName(), metadata);
         };
     }
 
@@ -313,7 +302,7 @@ public class GcpPlatformResources implements PlatformResources {
                     .cryptoKeys()
                     .list(cryptoKeysPath)
                     .execute();
-            return listCryptoKeysResponse.getCryptoKeys();
+            return Optional.ofNullable(listCryptoKeysResponse.getCryptoKeys()).orElse(List.of());
         } catch (IOException e) {
             LOGGER.error("Failed to get list of crypto keys on keyring path: [{}].", cryptoKeysPath, e);
             return List.of();

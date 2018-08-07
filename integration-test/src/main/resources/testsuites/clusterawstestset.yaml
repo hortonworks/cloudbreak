@@ -145,6 +145,7 @@ tests:
     preserveOrder: true
     parameters:
       clusterName: encrypted-aws-prewarm-datasci
+      provider: aws
       blueprintName: "Data Science: Apache Spark 2, Apache Zeppelin"
       image: hdp
       instancegroupName: worker
