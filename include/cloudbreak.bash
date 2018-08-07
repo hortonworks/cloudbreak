@@ -232,6 +232,8 @@ cloudbreak-conf-defaults() {
     if [[ ! -z "$CB_DEFAULT_GATEWAY_CIDR" ]]; then
         env-import CB_DEFAULT_GATEWAY_CIDR
     fi;
+    env-import CB_AUDIT_FILE_ENABLED false
+    env-import CB_KAFKA_BOOTSTRAP_SERVERS
     env-import CB_LOCAL_DEV_BIND_ADDR "192.168.64.1"
     env-import ADDRESS_RESOLVING_TIMEOUT 120000
     env-import CB_UI_MAX_WAIT 400

@@ -92,6 +92,8 @@ CB_INSTANCE_PROVIDER - Cloud provider of the Cloudbreak instance
 CB_INSTANCE_REGION - Cloud region of the Cloudbreak instance
 CB_INSTANCE_UUID - Unique identifier of Cloudbreak deployment
 CB_JAVA_OPTS - Extra Java options for Autoscale and Cloudbreak
+CB_AUDIT_FILE_ENABLED - Enable audit log file
+CB_KAFKA_BOOTSTRAP_SERVERS - Kafka server endpoints for structured audit logs (eg. server1:123,server2:456)
 CB_LOG_LEVEL - Log level of the Cloudbreak service
 CB_DEFAULT_GATEWAY_CIDR - Cidr for default security rules
 CB_MAX_SALT_NEW_SERVICE_RETRY - Salt orchestrator max retry count
