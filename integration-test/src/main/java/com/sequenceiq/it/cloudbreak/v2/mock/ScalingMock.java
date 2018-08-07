@@ -203,9 +203,9 @@ public class ScalingMock extends MockServer {
             verify(SALT_API_ROOT + "/run", "POST").bodyContains("arg=roles&arg=ambari_server").exactTimes(2).verify();
             verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=saltutil.sync_grains").atLeast(1).verify();
             verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=mine.update").atLeast(1).verify();
-            verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=state.highstate").exactTimes(1).verify();
-            verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=grains.append").exactTimes(securityEnabled ? 7 : 6).verify();
-            verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=grains.remove").exactTimes(0).verify();
+            verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=state.highstate").exactTimes(2).verify();
+            verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=grains.append").exactTimes(securityEnabled ? 9 : 8).verify();
+            verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=grains.remove").exactTimes(2).verify();
             verify(SALT_BOOT_ROOT + "/hostname/distribute", "POST").bodyRegexp("^.*\\[([\"0-9\\.]+([,]{0,1})){" + scalingAdjustment + "}\\].*")
                     .exactTimes(1).verify();
             verify(SALT_BOOT_ROOT + "/salt/server/pillar/distribute", "POST").bodyContains("/nodes/hosts.sls").exactTimes(1).verify();
