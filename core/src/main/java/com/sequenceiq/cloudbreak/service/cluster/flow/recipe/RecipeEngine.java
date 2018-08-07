@@ -116,7 +116,7 @@ public class RecipeEngine {
 
     public void executePostInstallRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
         Orchestrator orchestrator = stack.getOrchestrator();
-        if (shouldExecuteRecipeOnStack(hostGroups, orchestrator, POST_CLUSTER_INSTALL)) {
+        if (recipesSupportedOnOrchestrator(orchestrator)) {
             orchestratorRecipeExecutor.postClusterInstall(stack);
         }
     }
