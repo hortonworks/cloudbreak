@@ -188,15 +188,15 @@ public class StackCreationMock extends MockServer {
 
         verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=saltutil.sync_grains").atLeast(1).verify();
         verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=mine.update").atLeast(1).verify();
-        verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=state.highstate").atLeast(1).verify();
-        verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=jobs.lookup_jid").bodyContains("jid=1").atLeast(1).verify();
+        verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=state.highstate").atLeast(2).verify();
+        verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=jobs.lookup_jid").bodyContains("jid=1").atLeast(2).verify();
         verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=grains.append").bodyContains("ambari_agent_install").exactTimes(1).verify();
         verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=grains.append").bodyContains("ambari_agent").exactTimes(2).verify();
         verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=grains.append").bodyContains("ambari_server_install").exactTimes(1).verify();
         verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=grains.append").bodyContains("ambari_server").exactTimes(2).verify();
-        verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=grains.append").bodyContains("recipes").exactTimes(0).verify();
-        verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=grains.remove").bodyContains("recipes").exactTimes(0).verify();
-        verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=jobs.active").atLeast(1).verify();
+        verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=grains.append").bodyContains("recipes").exactTimes(2).verify();
+        verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=grains.remove").bodyContains("recipes").exactTimes(2).verify();
+        verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=jobs.active").atLeast(2).verify();
 
         verify(SALT_BOOT_ROOT + "/file", "POST").exactTimes(0).verify();
         verify(SALT_BOOT_ROOT + "/file/distribute", "POST").exactTimes(4).verify();
