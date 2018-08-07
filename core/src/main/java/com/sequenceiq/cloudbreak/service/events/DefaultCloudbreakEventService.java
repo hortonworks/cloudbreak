@@ -8,11 +8,9 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
-import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredEventService;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredFlowEventFactory;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEvent;
@@ -25,9 +23,6 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCloudbreakEventService.class);
 
     private static final String CLOUDBREAK_EVENT = "CLOUDBREAK_EVENT";
-
-    @Inject
-    private StackRepository stackRepository;
 
     @Inject
     private ErrorHandlerAwareReactorEventFactory eventFactory;
@@ -43,9 +38,6 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
 
     @Inject
     private StructuredEventService structuredEventService;
-
-    @Inject
-    private ConversionService conversionService;
 
     @PostConstruct
     public void setup() {
@@ -70,11 +62,8 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     @Override
     public List<StructuredNotificationEvent> cloudbreakEvents(String owner, Long since) {
         List<StructuredNotificationEvent> events;
-        if (null == since) {
-            events = structuredEventService.getEventsForUserWithType(owner, "NOTIFICATION");
-        } else {
-            events = structuredEventService.getEventsForUserWithTypeSince(owner, "NOTIFICATION", since);
-        }
+        events = null == since ? structuredEventService.getEventsForUserWithType(owner, StructuredNotificationEvent.class)
+                : structuredEventService.getEventsForUserWithTypeSince(owner, StructuredNotificationEvent.class, since);
         return events;
     }
 
@@ -82,7 +71,7 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     public List<StructuredNotificationEvent> cloudbreakEventsForStack(String owner, Long stackId) {
         List<StructuredNotificationEvent> events = new ArrayList<>();
         if (stackId != null) {
-            events = structuredEventService.getEventsForUserWithTypeAndResourceId(owner, "NOTIFICATION", "STACK", stackId);
+            events = structuredEventService.getEventsForUserWithTypeAndResourceId(owner, StructuredNotificationEvent.class, "stacks", stackId);
         }
         return events;
     }

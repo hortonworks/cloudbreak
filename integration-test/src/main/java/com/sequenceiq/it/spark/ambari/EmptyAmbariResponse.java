@@ -7,7 +7,7 @@ import spark.Response;
 
 public class EmptyAmbariResponse extends ITResponse {
     @Override
-    public Object handle(Request request, Response response) throws Exception {
+    public Object handle(Request request, Response response) {
         response.type("text/plain");
         return "";
     }

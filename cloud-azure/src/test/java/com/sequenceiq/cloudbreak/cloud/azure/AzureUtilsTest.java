@@ -13,7 +13,7 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -25,7 +25,7 @@ public class AzureUtilsTest {
     private static final String MAX_RESOURCE_NAME_LENGTH = "50";
 
     @Rule
-    public ExpectedException thrown = ExpectedException.none();
+    public final ExpectedException thrown = ExpectedException.none();
 
     @Mock
     private AzurePremiumValidatorService azurePremiumValidatorService;
@@ -49,7 +49,7 @@ public class AzureUtilsTest {
         //THEN
         Assert.assertNotNull("The generated name must not be null!", testResult);
         assertEquals("The resource name is not the excepted one!", "thisisaverylongazureresourcenamewhichneedstobe7899", testResult);
-        Assert.assertTrue("The resource name length is wrong", testResult.length() == Integer.parseInt(MAX_RESOURCE_NAME_LENGTH));
+        assertEquals("The resource name length is wrong", testResult.length(), Integer.parseInt(MAX_RESOURCE_NAME_LENGTH));
 
     }
 

@@ -11,8 +11,6 @@ import com.sequenceiq.it.cloudbreak.AbstractCloudbreakIntegrationTest;
 import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
 import com.sequenceiq.it.cloudbreak.CloudbreakUtil;
 
-
-
 public class ClusterStartTest extends AbstractCloudbreakIntegrationTest {
     private static final String STARTED = "STARTED";
 
@@ -26,7 +24,7 @@ public class ClusterStartTest extends AbstractCloudbreakIntegrationTest {
     }
 
     @Test
-    public void testClusterStart() throws Exception {
+    public void testClusterStart() {
         // GIVEN
         IntegrationTestContext itContext = getItContext();
         String stackId = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);

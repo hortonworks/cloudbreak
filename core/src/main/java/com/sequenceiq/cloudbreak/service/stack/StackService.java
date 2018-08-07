@@ -3,17 +3,19 @@ package com.sequenceiq.cloudbreak.service.stack;
 import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOP_REQUESTED;
-import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
+import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
-import javax.transaction.Transactional;
-import javax.transaction.Transactional.TxType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +24,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -30,41 +31,45 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.AutoscaleStackResponse;
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupAdjustmentJson;
-import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
-import com.sequenceiq.cloudbreak.api.model.StackResponse;
+import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.StatusRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
+import com.sequenceiq.cloudbreak.aspect.PermissionType;
+import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
-import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.CloudbreakApiException;
-import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.exception.CloudbreakApiException;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.validation.network.NetworkConfigurationValidator;
-import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
-import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.domain.Component;
-import com.sequenceiq.cloudbreak.domain.HostGroup;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.FlexSubscription;
+import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
-import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.StackStatus;
-import com.sequenceiq.cloudbreak.domain.StackValidation;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.domain.security.Organization;
+import com.sequenceiq.cloudbreak.domain.security.User;
+import com.sequenceiq.cloudbreak.domain.stack.Component;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
+import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
@@ -77,28 +82,37 @@ import com.sequenceiq.cloudbreak.repository.OrchestratorRepository;
 import com.sequenceiq.cloudbreak.repository.SecurityConfigRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.StackStatusRepository;
-import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackViewRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
+import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
-import com.sequenceiq.cloudbreak.service.cluster.AmbariClusterService;
+import com.sequenceiq.cloudbreak.service.TransactionService;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.credential.OpenSshPublicKeyValidator;
 import com.sequenceiq.cloudbreak.service.decorator.StackResponseDecorator;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 
 @Service
-@Transactional
 public class StackService {
 
     private static final String SSH_USER_CB = "cloudbreak";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackService.class);
+
+    private static final String STACK_NOT_FOUND_EXCEPTION_FORMAT_TEXT = "Stack '%s' has not found";
+
+    private static final String STACK_NOT_FOUND_BY_ID_EXCEPTION_FORMAT_TEXT = "Stack not found by id '%d'";
 
     @Inject
     private StackRepository stackRepository;
@@ -116,7 +130,7 @@ public class StackService {
     private ImageService imageService;
 
     @Inject
-    private AmbariClusterService ambariClusterService;
+    private ClusterService ambariClusterService;
 
     @Inject
     private ClusterRepository clusterRepository;
@@ -179,16 +193,33 @@ public class StackService {
     @Inject
     private AuthorizationService authorizationService;
 
+    @Inject
+    private StackDownscaleValidatorService downscaleValidatorService;
+
+    @Inject
+    private TransactionService transactionService;
+
+    @Inject
+    private UserService userService;
+
+    @Inject
+    private OrganizationService organizationService;
+
     public Set<StackResponse> retrievePrivateStacks(IdentityUser user) {
-        return convertStacks(stackRepository.findForUserWithLists(user.getUserId()));
+        try {
+            return transactionService.required(() -> convertStacks(stackRepository.findForUserWithLists(user.getUserId())));
+        } catch (TransactionExecutionException e) {
+            throw new TransactionService.TransactionRuntimeExecutionException(e);
+        }
     }
 
-    @Transactional(TxType.NEVER)
     public Set<StackResponse> retrieveAccountStacks(IdentityUser user) {
-        if (user.getRoles().contains(IdentityUserRole.ADMIN)) {
-            return convertStacks(stackRepository.findAllInAccountWithLists(user.getAccount()));
-        } else {
-            return convertStacks(stackRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount()));
+        try {
+            return transactionService.required(() -> user.getRoles().contains(IdentityUserRole.ADMIN)
+                    ? convertStacks(stackRepository.findAllInAccountWithLists(user.getAccount()))
+                    : convertStacks(stackRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount())));
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
         }
     }
 
@@ -200,37 +231,45 @@ public class StackService {
         return stackRepository.findForUser(owner);
     }
 
-    @Transactional(TxType.NEVER)
-    public StackResponse getJsonById(Long id, Set<String> entry) {
-        Stack stack = getByIdWithLists(id);
-        authorizationService.hasReadPermission(stack);
-        StackResponse stackResponse = conversionService.convert(stack, StackResponse.class);
-        stackResponse = stackResponseDecorator.decorate(stackResponse, stack, entry);
-        return stackResponse;
+    public StackResponse getJsonById(Long id, Collection<String> entry) {
+        try {
+            return transactionService.required(() -> {
+                Stack stack = getByIdWithLists(id);
+                StackResponse stackResponse = conversionService.convert(stack, StackResponse.class);
+                stackResponse = stackResponseDecorator.decorate(stackResponse, stack, entry);
+                return stackResponse;
+            });
+        } catch (TransactionExecutionException e) {
+            throw new TransactionService.TransactionRuntimeExecutionException(e);
+        }
     }
 
     public Stack get(Long id) {
-        Stack stack = stackRepository.findOne(id);
-        if (stack == null) {
-            throw new NotFoundException(String.format("Stack '%s' not found", id));
+        try {
+            return transactionService.required(() -> {
+                Stack stack = stackRepository.findById(id).orElseThrow(notFound("Stack", id));
+                return stack;
+            });
+        } catch (TransactionExecutionException e) {
+            throw new TransactionService.TransactionRuntimeExecutionException(e);
         }
-        authorizationService.hasReadPermission(stack);
-        return stack;
     }
 
     @PreAuthorize("#oauth2.hasScope('cloudbreak.autoscale')")
     public Stack getForAutoscale(Long id) {
-        Stack stack = stackRepository.findOne(id);
-        if (stack == null) {
-            throw new NotFoundException(String.format("Stack '%s' not found", id));
-        }
-        return stack;
+        return getById(id);
     }
 
     @PreAuthorize("#oauth2.hasScope('cloudbreak.autoscale')")
     public Set<AutoscaleStackResponse> getAllForAutoscale() {
-        Set<Stack> aliveOnes = stackRepository.findAliveOnes();
-        return convertStacksForAutoscale(aliveOnes);
+        try {
+            return transactionService.required(() -> {
+                Set<Stack> aliveOnes = stackRepository.findAliveOnes();
+                return convertStacksForAutoscale(aliveOnes);
+            });
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
+        }
     }
 
     public Set<Stack> findClustersConnectedToDatalake(Long stackId) {
@@ -240,105 +279,96 @@ public class StackService {
     public Stack getByIdWithLists(Long id) {
         Stack retStack = stackRepository.findOneWithLists(id);
         if (retStack == null) {
-            throw new NotFoundException(String.format("Stack '%s' not found", id));
+            throw new NotFoundException(String.format(STACK_NOT_FOUND_BY_ID_EXCEPTION_FORMAT_TEXT, id));
         }
         return retStack;
     }
 
     public Stack getById(Long id) {
-        Stack retStack = stackRepository.findOne(id);
-        if (retStack == null) {
-            throw new NotFoundException(String.format("Stack '%s' not found", id));
-        }
-        return retStack;
+        return stackRepository.findById(id).orElseThrow(notFound("Stack", id));
     }
 
     public StackView getByIdView(Long id) {
-        StackView retStack = stackViewRepository.findOne(id);
-        if (retStack == null) {
-            throw new NotFoundException(String.format("Stack '%s' not found", id));
-        }
-        return retStack;
+        return stackViewRepository.findById(id).orElseThrow(notFound("Stack", id));
     }
 
     public StackStatus getCurrentStatusByStackId(long stackId) {
         return stackStatusRepository.findFirstByStackIdOrderByCreatedDesc(stackId);
     }
 
-    public StackResponse get(String ambariAddress) {
-        Stack stack = stackRepository.findByAmbari(ambariAddress);
-        if (stack == null) {
-            throw new NotFoundException(String.format("Stack not found by Ambari address: '%s' not found", ambariAddress));
+    public StackResponse getByAmbariAddress(String ambariAddress) {
+        try {
+            return transactionService.required(() -> conversionService.convert(stackRepository.findByAmbari(ambariAddress), StackResponse.class));
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
         }
-        return conversionService.convert(stack, StackResponse.class);
     }
 
     public Stack getPrivateStack(String name, IdentityUser identityUser) {
-        Stack stack = stackRepository.findByNameInUser(name, identityUser.getUserId());
-        if (stack == null) {
-            throw new NotFoundException(String.format("Stack '%s' not found", name));
-        }
-        return stack;
+        return stackRepository.findByNameInUser(name, identityUser.getUserId());
     }
 
-    public StackResponse getPrivateStackJsonByName(String name, IdentityUser identityUser, Set<String> entries) {
-        Stack stack = stackRepository.findByNameInUserWithLists(name, identityUser.getUserId());
-        if (stack == null) {
-            throw new NotFoundException(String.format("Stack '%s' not found", name));
+    public StackResponse getPrivateStackJsonByName(String name, IdentityUser identityUser, Collection<String> entries) {
+        try {
+            return transactionService.required(() -> {
+                Stack stack = stackRepository.findByNameInUserWithLists(name, identityUser.getUserId());
+                StackResponse stackResponse = conversionService.convert(stack, StackResponse.class);
+                stackResponse = stackResponseDecorator.decorate(stackResponse, stack, entries);
+                return stackResponse;
+            });
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
         }
-        StackResponse stackResponse = conversionService.convert(stack, StackResponse.class);
-        stackResponse = stackResponseDecorator.decorate(stackResponse, stack, entries);
-        return stackResponse;
     }
 
-    public StackResponse getPublicStackJsonByName(String name, IdentityUser identityUser, Set<String> entries) {
-        Stack stack = stackRepository.findByNameInAccountWithLists(name, identityUser.getAccount());
-        if (stack == null) {
-            throw new NotFoundException(String.format("Stack '%s' not found", name));
+    public StackResponse getPublicStackJsonByName(String name, IdentityUser identityUser, Collection<String> entries) {
+        try {
+            return transactionService.required(() -> {
+                Stack stack = stackRepository.findByNameInAccountWithLists(name, identityUser.getAccount());
+                StackResponse stackResponse = conversionService.convert(stack, StackResponse.class);
+                stackResponse = stackResponseDecorator.decorate(stackResponse, stack, entries);
+                return stackResponse;
+            });
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
         }
-        authorizationService.hasReadPermission(stack);
-        StackResponse stackResponse = conversionService.convert(stack, StackResponse.class);
-        stackResponse = stackResponseDecorator.decorate(stackResponse, stack, entries);
-        return stackResponse;
+    }
+
+    public Stack getByName(String name, IdentityUser identityUser) {
+        return stackRepository.findByNameInAccountWithLists(name, identityUser.getAccount());
     }
 
     public StackV2Request getStackRequestByName(String name, IdentityUser identityUser) {
-        Stack stack = stackRepository.findByNameInAccountWithLists(name, identityUser.getAccount());
-        if (stack == null) {
-            throw new NotFoundException(String.format("Stack '%s' not found", name));
+        try {
+            return transactionService.required(() ->
+                    conversionService.convert(stackRepository.findByNameInAccountWithLists(name, identityUser.getAccount()), StackV2Request.class));
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
         }
-        authorizationService.hasReadPermission(stack);
-        return conversionService.convert(stack, StackV2Request.class);
     }
 
     public Stack getPublicStack(String name, IdentityUser identityUser) {
-        Stack stack = stackRepository.findByNameInAccount(name, identityUser.getAccount());
-        if (stack == null) {
-            throw new NotFoundException(String.format("Stack '%s' not found", name));
-        }
-        authorizationService.hasReadPermission(stack);
-        return stack;
+        return stackRepository.findByNameInAccount(name, identityUser.getAccount());
     }
 
     public void delete(String name, IdentityUser user, Boolean forced, Boolean deleteDependencies) {
         Stack stack = stackRepository.findByNameInAccountOrOwner(name, user.getAccount(), user.getUserId());
-        if (stack == null) {
-            throw new NotFoundException(String.format("Stack '%s' not found", name));
-        }
         delete(stack, forced, deleteDependencies);
     }
 
-    @Transactional(TxType.NEVER)
-    public Stack create(IdentityUser user, Stack stack, String platformString, StatedImage imgFromCatalog) {
-        Stack savedStack;
-        stack.setOwner(user.getUserId());
-        stack.setAccount(user.getAccount());
+    public Stack create(IdentityUser identityUser, Stack stack, String platformString, StatedImage imgFromCatalog) {
+        stack.setOwner(identityUser.getUserId());
+        stack.setAccount(identityUser.getAccount());
         stack.setGatewayPort(nginxPort);
+        User user = userService.getOrCreate(identityUser);
+        Organization organization = organizationService.getDefaultOrganizationForUser(user);
+        stack.setOrganization(organization);
         setPlatformVariant(stack);
         String stackName = stack.getName();
         MDCBuilder.buildMdcContext(stack);
         try {
-            if (!stack.getStackAuthentication().passwordAuthenticationRequired() && !Strings.isNullOrEmpty(stack.getStackAuthentication().getPublicKey())) {
+            if (!stack.getStackAuthentication().passwordAuthenticationRequired()
+                    && !Strings.isNullOrEmpty(stack.getStackAuthentication().getPublicKey())) {
                 long start = System.currentTimeMillis();
                 rsaPublicKeyValidator.validate(stack.getStackAuthentication().getPublicKey());
                 LOGGER.info("RSA key has been validated in {} ms fot stack {}", System.currentTimeMillis() - start, stackName);
@@ -353,25 +383,25 @@ public class StackService {
             LOGGER.info("Get cluster template took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
             start = System.currentTimeMillis();
-            savedStack = stackRepository.save(stack);
+            Stack savedStack = stackRepository.save(stack);
             LOGGER.info("Stackrepository save took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
             start = System.currentTimeMillis();
-            addTemplateForStack(stack, template);
+            addTemplateForStack(savedStack, template);
             LOGGER.info("Save cluster template took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
             start = System.currentTimeMillis();
-            addCloudbreakDetailsForStack(stack);
+            addCloudbreakDetailsForStack(savedStack);
             LOGGER.info("Add Cloudbreak template took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
             MDCBuilder.buildMdcContext(savedStack);
 
             start = System.currentTimeMillis();
-            instanceGroupRepository.save(savedStack.getInstanceGroups());
+            instanceGroupRepository.saveAll(savedStack.getInstanceGroups());
             LOGGER.info("Instance groups saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
             start = System.currentTimeMillis();
-            instanceMetaDataRepository.save(savedStack.getInstanceMetaDataAsList());
+            instanceMetaDataRepository.saveAll(savedStack.getInstanceMetaDataAsList());
             LOGGER.info("Instance metadatas saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
             start = System.currentTimeMillis();
@@ -384,22 +414,16 @@ public class StackService {
             securityConfig.setKnoxMasterSecret(PasswordUtil.generatePassword());
             LOGGER.info("Generating salt passwords took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
-            securityConfig.setStack(stack);
+            securityConfig.setStack(savedStack);
             start = System.currentTimeMillis();
             securityConfigRepository.save(securityConfig);
             LOGGER.info("Security config save took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
             savedStack.setSecurityConfig(securityConfig);
 
             start = System.currentTimeMillis();
-            imageService.create(savedStack, platformString, connector.getPlatformParameters(stack), imgFromCatalog);
+            imageService.create(savedStack, platformString, connector.getPlatformParameters(savedStack), imgFromCatalog);
             LOGGER.info("Image creation took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
-
-        } catch (DataIntegrityViolationException ex) {
-            String msg = String.format("Error with resource [%s], error: [%s]", APIResourceType.STACK, getProperSqlErrorMessage(ex));
-            throw new BadRequestException(msg);
-        } catch (CloudbreakSecuritySetupException e) {
-            LOGGER.error("Storing of security credentials failed", e);
-            throw new CloudbreakApiException("Storing security credentials failed", e);
+            return savedStack;
         } catch (CloudbreakImageNotFoundException e) {
             LOGGER.error("Cloudbreak Image not found", e);
             throw new CloudbreakApiException(e.getMessage(), e);
@@ -407,7 +431,6 @@ public class StackService {
             LOGGER.error("Cloudbreak Image Catalog error", e);
             throw new CloudbreakApiException(e.getMessage(), e);
         }
-        return savedStack;
     }
 
     private void setPlatformVariant(Stack stack) {
@@ -416,25 +439,29 @@ public class StackService {
 
     public void delete(Long id, IdentityUser user, Boolean forced, Boolean deleteDependencies) {
         Stack stack = stackRepository.findByIdInAccount(id, user.getAccount());
-        if (stack == null) {
-            throw new NotFoundException(String.format("Stack '%s' not found", id));
-        }
         delete(stack, forced, deleteDependencies);
     }
 
-    public void removeInstance(IdentityUser user, Long stackId, String instanceId, boolean forced) {
-        Stack stack = get(stackId);
-        InstanceMetaData instanceMetaData = instanceMetaDataRepository.findByInstanceId(stackId, instanceId);
-        if (instanceMetaData == null) {
-            throw new NotFoundException(String.format("Metadata for instance %s not found.", instanceId));
-        }
-        if (!stack.isPublicInAccount() && !stack.getOwner().equals(user.getUserId())) {
-            throw new BadRequestException(String.format("Private stack (%s) only modifiable by the owner.", stackId));
-        }
-        flowManager.triggerStackRemoveInstance(stackId, instanceMetaData.getInstanceGroupName(), instanceMetaData.getPrivateId(), forced);
+    public void removeInstance(@Nonnull IdentityUser user, Long stackId, String instanceId) {
+        removeInstance(user, stackId, instanceId, false);
     }
 
-    @Transactional(TxType.NEVER)
+    public void removeInstance(@Nonnull IdentityUser user, Long stackId, String instanceId, boolean forced) {
+        Stack stack = getById(stackId);
+        InstanceMetaData metaData = validateInstanceForDownscale(user, instanceId, stack);
+        flowManager.triggerStackRemoveInstance(stackId, metaData.getInstanceGroupName(), metaData.getPrivateId(), forced);
+    }
+
+    public void removeInstances(IdentityUser user, Long stackId, Set<String> instanceIds) {
+        Stack stack = getById(stackId);
+        Map<String, Set<Long>> instanceIdsByHostgroupMap = new HashMap<>();
+        for (String instanceId : instanceIds) {
+            InstanceMetaData metaData = validateInstanceForDownscale(user, instanceId, stack);
+            instanceIdsByHostgroupMap.computeIfAbsent(metaData.getInstanceGroupName(), s -> new LinkedHashSet<>()).add(metaData.getPrivateId());
+        }
+        flowManager.triggerStackRemoveInstances(stackId, instanceIdsByHostgroupMap);
+    }
+
     public void updateStatus(Long stackId, StatusRequest status, boolean updateCluster) {
         Stack stack = getByIdWithLists(stackId);
         Cluster cluster = null;
@@ -460,6 +487,17 @@ public class StackService {
             default:
                 throw new BadRequestException("Cannot update the status of stack because status request not valid.");
         }
+    }
+
+    private InstanceMetaData validateInstanceForDownscale(@Nonnull IdentityUser user, String instanceId, Stack stack) {
+        InstanceMetaData metaData = instanceMetaDataRepository.findByInstanceId(stack.getId(), instanceId);
+        if (metaData == null) {
+            throw new NotFoundException(String.format("Metadata for instance %s has not found.", instanceId));
+        }
+        downscaleValidatorService.checkInstanceIsTheAmbariServerOrNot(metaData.getPublicIp(), metaData.getInstanceMetadataType());
+        downscaleValidatorService.checkUserHasRightToTerminateInstance(stack.isPublicInAccount(), stack.getOwner(), user.getUserId(), stack.getId());
+        downscaleValidatorService.checkClusterInValidStatus(stack.getCluster());
+        return metaData;
     }
 
     private Set<StackResponse> convertStacks(Set<Stack> stacks) {
@@ -551,36 +589,44 @@ public class StackService {
             throw new BadRequestException(
                     String.format("Cannot update the status of stack '%s' to STARTED, because it isn't in STOPPED state.", stack.getName()));
         } else if (stack.isStopped() || stack.isStartFailed()) {
-            stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.START_REQUESTED);
+            Stack startStack = stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.START_REQUESTED);
             flowManager.triggerStackStart(stack.getId());
             if (updateCluster && cluster != null) {
-                ambariClusterService.updateStatus(stack.getId(), StatusRequest.STARTED);
+                ambariClusterService.updateStatus(startStack, StatusRequest.STARTED);
             }
         }
     }
 
     public void updateNodeCount(Long stackId, InstanceGroupAdjustmentJson instanceGroupAdjustmentJson, boolean withClusterEvent) {
-        Stack stack = get(stackId);
-        validateStackStatus(stack);
-        validateInstanceGroup(stack, instanceGroupAdjustmentJson.getInstanceGroup());
-        validateScalingAdjustment(instanceGroupAdjustmentJson, stack);
-        if (withClusterEvent) {
-            validateClusterStatus(stack);
-            validateHostGroupAdjustment(instanceGroupAdjustmentJson, stack, instanceGroupAdjustmentJson.getScalingAdjustment());
+        try {
+            transactionService.required(() -> {
+                Stack stack = getByIdWithLists(stackId);
+                validateStackStatus(stack);
+                validateInstanceGroup(stack, instanceGroupAdjustmentJson.getInstanceGroup());
+                validateScalingAdjustment(instanceGroupAdjustmentJson, stack);
+                if (withClusterEvent) {
+                    validateClusterStatus(stack);
+                    validateHostGroupAdjustment(instanceGroupAdjustmentJson, stack, instanceGroupAdjustmentJson.getScalingAdjustment());
+                }
+                if (instanceGroupAdjustmentJson.getScalingAdjustment() > 0) {
+                    stackUpdater.updateStackStatus(stackId, DetailedStackStatus.UPSCALE_REQUESTED);
+                    flowManager.triggerStackUpscale(stack.getId(), instanceGroupAdjustmentJson, withClusterEvent);
+                } else {
+                    stackUpdater.updateStackStatus(stackId, DetailedStackStatus.DOWNSCALE_REQUESTED);
+                    flowManager.triggerStackDownscale(stack.getId(), instanceGroupAdjustmentJson);
+                }
+                return null;
+            });
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
         }
-        if (instanceGroupAdjustmentJson.getScalingAdjustment() > 0) {
-            stackUpdater.updateStackStatus(stackId, DetailedStackStatus.UPSCALE_REQUESTED);
-            flowManager.triggerStackUpscale(stack.getId(), instanceGroupAdjustmentJson, withClusterEvent);
-        } else {
-            stackUpdater.updateStackStatus(stackId, DetailedStackStatus.DOWNSCALE_REQUESTED);
-            flowManager.triggerStackDownscale(stack.getId(), instanceGroupAdjustmentJson);
-        }
+
     }
 
     public void updateMetaDataStatusIfFound(Long id, String hostName, InstanceStatus status) {
         InstanceMetaData metaData = instanceMetaDataRepository.findHostInStack(id, hostName);
         if (metaData == null) {
-            LOGGER.warn("Metadata not found on stack:'%s' with hostname: '%s'.", id, hostName);
+            LOGGER.warn("Metadata not found on stack:'{}' with hostname: '{}'.", id, hostName);
         } else {
             metaData.setInstanceStatus(status);
             instanceMetaDataRepository.save(metaData);
@@ -643,13 +689,26 @@ public class StackService {
         }
     }
 
-    @Transactional(TxType.NEVER)
     public Stack save(Stack stack) {
         return stackRepository.save(stack);
     }
 
     public List<Stack> getAllAlive() {
         return stackRepository.findAllAlive();
+    }
+
+    public List<Stack> getByStatuses(List<Status> statuses) {
+        return stackRepository.findByStatuses(statuses);
+    }
+
+    public long countByCredential(Credential credential) {
+        Long count = stackRepository.countByCredential(credential);
+        return count == null ? 0L : count;
+    }
+
+    public long countByFlexSubscription(FlexSubscription subscription) {
+        Long count = stackRepository.countByFlexSubscription(subscription);
+        return count == null ? 0L : count;
     }
 
     private void validateScalingAdjustment(InstanceGroupAdjustmentJson instanceGroupAdjustmentJson, Stack stack) {
@@ -705,33 +764,28 @@ public class StackService {
         }
     }
 
-    public void delete(Stack stack) {
-        stackRepository.delete(stack.getId());
+    public void delete(Stack stack) throws TransactionExecutionException {
+        transactionService.required(() -> {
+            stackRepository.delete(stack);
+            return null;
+        });
+    }
+
+    public Set<Stack> findAllForOrganization(Long organizationId) {
+        try {
+            return transactionService.required(() -> stackRepository.findAllForOrganization(organizationId));
+        } catch (TransactionExecutionException e) {
+            throw new TransactionService.TransactionRuntimeExecutionException(e);
+        }
     }
 
     private void delete(Stack stack, Boolean forced, Boolean deleteDependencies) {
-        authorizationService.hasWritePermission(stack);
+        authorizationService.hasPermission(stack, PermissionType.WRITE.name());
         LOGGER.info("Stack delete requested.");
         if (!stack.isDeleteCompleted()) {
             flowManager.triggerTermination(stack.getId(), forced, deleteDependencies);
         } else {
             LOGGER.info("Stack is already deleted.");
-        }
-    }
-
-    private enum Msg {
-        STACK_STOP_IGNORED("stack.stop.ignored"),
-        STACK_START_IGNORED("stack.start.ignored"),
-        STACK_STOP_REQUESTED("stack.stop.requested");
-
-        private final String code;
-
-        Msg(String msgCode) {
-            code = msgCode;
-        }
-
-        public String code() {
-            return code;
         }
     }
 
@@ -752,6 +806,46 @@ public class StackService {
             componentConfigProvider.store(cbDetailsComponent);
         } catch (JsonProcessingException e) {
             LOGGER.error("Could not create Cloudbreak details component.", e);
+        }
+    }
+
+    public List<Object[]> getStatuses(Set<Long> stackIds) {
+        return stackRepository.findStackStatuses(stackIds);
+    }
+
+    public Set<Stack> getByNetwork(Network network) {
+        return stackRepository.findByNetwork(network);
+    }
+
+    public List<Stack> getAllForTemplate(Long id) {
+        return stackRepository.findAllStackForTemplate(id);
+    }
+
+    public List<Stack> getAllAliveAndProvisioned() {
+        return stackRepository.findAllAliveAndProvisioned();
+    }
+
+    public Stack getForCluster(Long id) {
+        return stackRepository.findStackForCluster(id);
+    }
+
+    public void updateImage(Long stackId, String imageId, String imageCatalogName, String imageCatalogUrl) {
+        flowManager.triggerStackImageUpdate(stackId, imageId, imageCatalogName, imageCatalogUrl);
+    }
+
+    private enum Msg {
+        STACK_STOP_IGNORED("stack.stop.ignored"),
+        STACK_START_IGNORED("stack.start.ignored"),
+        STACK_STOP_REQUESTED("stack.stop.requested");
+
+        private final String code;
+
+        Msg(String msgCode) {
+            code = msgCode;
+        }
+
+        public String code() {
+            return code;
         }
     }
 }

@@ -37,6 +37,6 @@ public class ChangePrimaryGatewayHandler implements ReactorEventHandler<ChangePr
         } catch (Exception e) {
             response = new ChangePrimaryGatewayFailed(request.getStackId(), e);
         }
-        eventBus.notify(response.selector(), new Event(event.getHeaders(), response));
+        eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));
     }
 }

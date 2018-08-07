@@ -27,11 +27,10 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
-import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.OnFailureAction;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
-import com.sequenceiq.cloudbreak.cloud.event.instance.GetSSHFingerprintsResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.CheckImageRequest;
 import com.sequenceiq.cloudbreak.cloud.event.setup.CheckImageResult;
@@ -44,23 +43,23 @@ import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFact
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.common.type.BillingStatus;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
-import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
-import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
-import com.sequenceiq.cloudbreak.repository.StackUpdater;
+import com.sequenceiq.cloudbreak.service.StackUpdater;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.notification.Notification;
 import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
-import com.sequenceiq.cloudbreak.service.stack.InstanceMetadataService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
@@ -100,7 +99,7 @@ public class StackCreationService {
     private InstanceGroupRepository instanceGroupRepository;
 
     @Inject
-    private InstanceMetadataService instanceMetadataService;
+    private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
     private MetadataSetupService metadatSetupService;
@@ -133,7 +132,7 @@ public class StackCreationService {
         Stack stack = context.getStack();
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.CREATING_INFRASTRUCTURE, "Creating infrastructure");
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_PROVISIONING, CREATE_IN_PROGRESS.name());
-        instanceMetadataService.saveInstanceRequests(stack, context.getCloudStack().getGroups());
+        instanceMetaDataService.saveInstanceRequests(stack, context.getCloudStack().getGroups());
     }
 
     public Stack provisioningFinished(StackContext context, LaunchStackResult result, Map<Object, Object> variables) {
@@ -159,7 +158,7 @@ public class StackCreationService {
             Stack stack = context.getStack();
             Image image = imageService.getImage(stack.getId());
             CheckImageRequest<CheckImageResult> checkImageRequest = new CheckImageRequest<>(context.getCloudContext(), context.getCloudCredential(),
-                    cloudStackConverter.convert(stack), image);
+                cloudStackConverter.convert(stack), image);
             LOGGER.info("Triggering event: {}", checkImageRequest);
             eventBus.notify(checkImageRequest.selector(), eventFactory.createEvent(checkImageRequest));
             CheckImageResult result = checkImageRequest.await();
@@ -196,19 +195,10 @@ public class StackCreationService {
         return stack;
     }
 
-    public void setupTls(StackContext context, GetSSHFingerprintsResult sshFingerprints) throws CloudbreakException {
-        LOGGER.info("Fingerprint has been determined: {}", sshFingerprints.getSshFingerprints());
+    public void setupTls(StackContext context) throws CloudbreakException {
         Stack stack = context.getStack();
         for (InstanceMetaData gwInstance : stack.getGatewayInstanceMetadata()) {
-            tlsSetupService.setupTls(stack, gwInstance, stack.getStackAuthentication().getLoginUserName(), sshFingerprints.getSshFingerprints());
-        }
-    }
-
-    public void removeTemporarySShKey(StackContext context, Set<String> sshFingerprints) throws CloudbreakException {
-        Stack stack = context.getStack();
-        for (InstanceMetaData gateway : stack.getGatewayInstanceMetadata()) {
-            String ipToTls = gatewayConfigService.getGatewayIp(stack, gateway);
-            tlsSetupService.removeTemporarySShKey(stack, ipToTls, gateway.getSshPort(), stack.getStackAuthentication().getLoginUserName(), sshFingerprints);
+            tlsSetupService.setupTls(stack, gwInstance);
         }
     }
 
@@ -281,11 +271,11 @@ public class StackCreationService {
     }
 
     private void validateResourceResults(CloudContext cloudContext, LaunchStackResult res) {
-        validateResourceResults(cloudContext, res.getErrorDetails(), res.getResults(), true);
+        validateResourceResults(cloudContext, res.getErrorDetails(), res.getResults());
     }
 
-    private void validateResourceResults(CloudContext cloudContext, Exception exception, List<CloudResourceStatus> results, boolean create) {
-        String action = create ? "create" : "upscale";
+    private void validateResourceResults(CloudContext cloudContext, Exception exception, List<CloudResourceStatus> results) {
+        String action = "create";
         if (exception != null) {
             LOGGER.error(format("Failed to %s stack: %s", action, cloudContext), exception);
             throw new OperationException(exception);
@@ -306,7 +296,7 @@ public class StackCreationService {
             Long privateId = status.getPrivateId();
             if (privateId != null && status.isFailed() && !failedResources.containsKey(privateId) && groupPrivateIds.contains(privateId)) {
                 failedResources.put(privateId, status);
-                instanceMetadataService.deleteInstanceRequest(stackId, privateId);
+                instanceMetaDataService.deleteInstanceRequest(stackId, privateId);
             }
         }
         return new ArrayList<>(failedResources.values());

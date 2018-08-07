@@ -16,7 +16,6 @@ import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 public class YarnCredentialConnector implements CredentialConnector {
     @Override
     public CloudCredentialStatus verify(AuthenticatedContext authenticatedContext) {
-        // TODO endoint verifiaction
         return new CloudCredentialStatus(authenticatedContext.getCloudCredential(), CredentialStatus.VERIFIED);
     }
 

@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service.host;
 
+import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
+import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariRepositoryVersionService.AMBARI_VERSION_2_7_0_0;
 import static java.util.Collections.singletonMap;
 
 import java.io.IOException;
@@ -16,54 +18,74 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
-import javax.transaction.Transactional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.ExposedService;
-import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
+import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.SSOType;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintTextProcessor;
+import com.sequenceiq.cloudbreak.blueprint.kerberos.KerberosDetailService;
+import com.sequenceiq.cloudbreak.blueprint.template.views.RdsView;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
-import com.sequenceiq.cloudbreak.core.CloudbreakException;
-import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.domain.ExposedServices;
-import com.sequenceiq.cloudbreak.domain.HostGroup;
-import com.sequenceiq.cloudbreak.domain.HostMetadata;
-import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
+import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
-import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.repository.StackViewRepository;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.SmartSenseCredentialConfigService;
 import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
-import com.sequenceiq.cloudbreak.service.cluster.AmbariSecurityConfigProvider;
-import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintProcessor;
-import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.HiveConfigProvider;
-import com.sequenceiq.cloudbreak.service.cluster.flow.kerberos.KerberosDetailService;
+import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariRepositoryVersionService;
+import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariSecurityConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigProvider;
+import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Component
 public class ClusterHostServiceRunner {
 
     @Inject
-    private StackRepository stackRepository;
+    private StackService stackService;
+
+    @Inject
+    private StackViewRepository stackViewRepository;
+
+    @Inject
+    private ClusterRepository clusterRepository;
 
     @Inject
     private HostOrchestratorResolver hostOrchestratorResolver;
@@ -81,7 +103,7 @@ public class ClusterHostServiceRunner {
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
     @Inject
-    private BlueprintProcessor blueprintProcessor;
+    private BlueprintProcessorFactory blueprintProcessorFactory;
 
     @Inject
     private ComponentLocatorService componentLocator;
@@ -96,7 +118,13 @@ public class ClusterHostServiceRunner {
     private KerberosDetailService kerberosDetailService;
 
     @Inject
-    private HiveConfigProvider hiveConfigProvider;
+    private PostgresConfigService postgresConfigService;
+
+    @Inject
+    private ProxyConfigProvider proxyConfigProvider;
+
+    @Inject
+    private RdsConfigService rdsConfigService;
 
     @Inject
     private StackUtil stackUtil;
@@ -104,8 +132,13 @@ public class ClusterHostServiceRunner {
     @Inject
     private RecipeEngine recipeEngine;
 
-    @Transactional
-    public void runAmbariServices(Stack stack, Cluster cluster) throws CloudbreakException {
+    @Inject
+    private BlueprintPortConfigCollector blueprintPortConfigCollector;
+
+    @Inject
+    private AmbariRepositoryVersionService ambariRepositoryVersionService;
+
+    public void runAmbariServices(Stack stack, Cluster cluster) {
         try {
             Set<Node> nodes = stackUtil.collectNodes(stack);
             HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
@@ -118,13 +151,53 @@ public class ClusterHostServiceRunner {
             hostOrchestrator.runService(gatewayConfigs, nodes, saltConfig, exitCriteriaModel);
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());
-        } catch (CloudbreakOrchestratorException | IOException e) {
-            throw new CloudbreakException(e.getMessage(), e);
+        } catch (CloudbreakOrchestratorException | IOException | CloudbreakException e) {
+            throw new CloudbreakServiceException(e.getMessage(), e);
         }
     }
 
-    private SaltConfig createSaltConfig(Stack stack, Cluster cluster, GatewayConfig primaryGatewayConfig, List<GatewayConfig> gatewayConfigs)
-            throws IOException {
+    public Map<String, String> addAmbariServices(Long stackId, String hostGroupName, Integer scalingAdjustment) throws CloudbreakException {
+        Map<String, String> candidates;
+        try {
+            Stack stack = stackService.getByIdWithLists(stackId);
+            Cluster cluster = stack.getCluster();
+            candidates = collectUpscaleCandidates(cluster.getId(), hostGroupName, scalingAdjustment);
+            Set<Node> allNodes = stackUtil.collectNodes(stack);
+            HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
+            List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
+            SaltConfig saltConfig = createSaltConfig(stack, cluster, gatewayConfigService.getPrimaryGatewayConfig(stack), gatewayConfigs);
+            ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());
+            hostOrchestrator.initServiceRun(gatewayConfigs, allNodes, saltConfig, exitCriteriaModel);
+            hostOrchestrator.runService(gatewayConfigs, allNodes, saltConfig, exitCriteriaModel);
+        } catch (CloudbreakOrchestratorCancelledException e) {
+            throw new CancellationException(e.getMessage());
+        } catch (CloudbreakOrchestratorException | IOException e) {
+            throw new CloudbreakException(e);
+        }
+        return candidates;
+    }
+
+    public String changePrimaryGateway(Stack stack) throws CloudbreakException {
+        GatewayConfig formerPrimaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
+        List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
+        Optional<GatewayConfig> newPrimaryCandidate = gatewayConfigs.stream().filter(gc -> !gc.isPrimary()).findFirst();
+        if (newPrimaryCandidate.isPresent()) {
+            GatewayConfig newPrimary = newPrimaryCandidate.get();
+            Set<Node> allNodes = stackUtil.collectNodes(stack);
+            try {
+                hostOrchestratorResolver.get(stack.getOrchestrator().getType()).changePrimaryGateway(formerPrimaryGatewayConfig, newPrimary, gatewayConfigs,
+                        allNodes, clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
+                return newPrimary.getHostname();
+            } catch (CloudbreakOrchestratorException ex) {
+                throw new CloudbreakException(ex);
+            }
+        } else {
+            throw new CloudbreakException("Primary gateway change is not possible because there is no available node for the action");
+        }
+    }
+
+    private SaltConfig createSaltConfig(Stack stack, Cluster cluster, GatewayConfig primaryGatewayConfig, Iterable<GatewayConfig> gatewayConfigs)
+            throws IOException, CloudbreakOrchestratorException {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
         saveDatalakeNameservers(stack, servicePillar);
         saveSharedRangerService(stack, servicePillar);
@@ -136,7 +209,7 @@ public class ClusterHostServiceRunner {
             putIfNotNull(kerberosPillarConf, kerberosConfig.getPassword(), "password");
             if (StringUtils.isEmpty(kerberosConfig.getDescriptor())) {
                 putIfNotNull(kerberosPillarConf, kerberosConfig.getUrl(), "url");
-                putIfNotNull(kerberosPillarConf, kerberosConfig.getAdminUrl(), "adminUrl");
+                putIfNotNull(kerberosPillarConf, kerberosDetailService.resolveHostForKdcAdmin(kerberosConfig, kerberosConfig.getUrl()), "adminUrl");
                 putIfNotNull(kerberosPillarConf, kerberosConfig.getRealm(), "realm");
             } else {
                 Map<String, Object> properties = kerberosDetailService.getKerberosEnvProperties(kerberosConfig);
@@ -155,12 +228,20 @@ public class ClusterHostServiceRunner {
         AmbariRepo ambariRepo = clusterComponentConfigProvider.getAmbariRepo(cluster.getId());
         if (ambariRepo != null) {
             servicePillar.put("ambari-repo", new SaltPillarProperties("/ambari/repo.sls", singletonMap("ambari", singletonMap("repo", ambariRepo))));
+            boolean setupLdapAndSsoOnApi = ambariRepositoryVersionService.isVersionNewerOrEqualThanLimited(ambariRepo::getVersion, AMBARI_VERSION_2_7_0_0);
+            servicePillar.put("setup-ldap-and-sso-on-api", new SaltPillarProperties("/ambari/config.sls",
+                    singletonMap("ambari", singletonMap("setup_ldap_and_sso_on_api", setupLdapAndSsoOnApi))));
         }
         servicePillar.put("ambari-gpl-repo", new SaltPillarProperties("/ambari/gpl.sls", singletonMap("ambari", singletonMap("gpl", singletonMap("enabled",
                 clusterComponentConfigProvider.getHDPRepo(cluster.getId()).isEnableGplRepo())))));
-        AmbariDatabase ambariDb = clusterComponentConfigProvider.getAmbariDatabase(cluster.getId());
-        servicePillar.put("ambari-database", new SaltPillarProperties("/ambari/database.sls", singletonMap("ambari", singletonMap("database", ambariDb))));
-        saveLdapPillar(cluster.getLdapConfig(), servicePillar);
+
+        postgresConfigService.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack, cluster);
+
+        decoratePillarWithAmbariDatabase(cluster, servicePillar);
+
+        if (cluster.getLdapConfig() != null) {
+            saveLdapPillar(cluster.getLdapConfig().copyWithoutOrganization(), servicePillar);
+        }
         saveDockerPillar(cluster.getExecutorType(), servicePillar);
         saveHDPPillar(cluster.getId(), servicePillar);
         Map<String, Object> credentials = new HashMap<>();
@@ -173,12 +254,24 @@ public class ClusterHostServiceRunner {
             servicePillar.put("smartsense-credentials", new SaltPillarProperties("/smartsense/credentials.sls", smartSenseCredentials));
         }
 
-        hiveConfigProvider.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack, cluster);
+        proxyConfigProvider.decoratePillarWithProxyDataIfNeeded(servicePillar, cluster);
+
+        decoratePillarWithJdbcConnectors(cluster, servicePillar);
 
         return new SaltConfig(servicePillar, createGrainProperties(gatewayConfigs));
     }
 
-    private Map<String, Map<String, String>> createGrainProperties(List<GatewayConfig> gatewayConfigs) {
+    private void decoratePillarWithAmbariDatabase(Cluster cluster, Map<String, SaltPillarProperties> servicePillar)
+            throws CloudbreakOrchestratorFailedException {
+        RDSConfig ambariRdsConfig = rdsConfigService.findByClusterIdAndType(cluster.getOwner(), cluster.getAccount(), cluster.getId(), RdsType.AMBARI);
+        if (ambariRdsConfig == null) {
+            throw new CloudbreakOrchestratorFailedException("Ambari RDSConfig is missing for stack");
+        }
+        RdsView ambariRdsView = new RdsView(ambariRdsConfig);
+        servicePillar.put("ambari-database", new SaltPillarProperties("/ambari/database.sls", singletonMap("ambari", singletonMap("database", ambariRdsView))));
+    }
+
+    private Map<String, Map<String, String>> createGrainProperties(Iterable<GatewayConfig> gatewayConfigs) {
         Map<String, Map<String, String>> grainProperties = new HashMap<>();
         for (GatewayConfig gatewayConfig : gatewayConfigs) {
             Map<String, String> hostGrain = new HashMap<>();
@@ -195,7 +288,7 @@ public class ClusterHostServiceRunner {
     private void saveDatalakeNameservers(Stack stack, Map<String, SaltPillarProperties> servicePillar) {
         Long datalakeId = stack.getDatalakeId();
         if (datalakeId != null) {
-            Stack dataLakeStack = stackRepository.findOneWithLists(datalakeId);
+            Stack dataLakeStack = stackService.getByIdWithLists(datalakeId);
             String datalakeDomain = dataLakeStack.getGatewayInstanceMetadata().get(0).getDomain();
             List<String> ipList = dataLakeStack.getGatewayInstanceMetadata().stream().map(InstanceMetaData::getPrivateIp).collect(Collectors.toList());
             servicePillar.put("forwarder-zones", new SaltPillarProperties("/unbound/forwarders.sls",
@@ -206,18 +299,29 @@ public class ClusterHostServiceRunner {
     private void saveSharedRangerService(Stack stack, Map<String, SaltPillarProperties> servicePillar) {
         Long datalakeId = stack.getDatalakeId();
         if (datalakeId != null) {
-            Stack dataLakeStack = stackRepository.findOne(datalakeId);
-            Cluster dataLakeCluster = dataLakeStack.getCluster();
-            Set<String> groupNames = blueprintProcessor.getHostGroupsWithComponent(dataLakeCluster.getBlueprint().getBlueprintText(), "RANGER_ADMIN");
+            StackView dataLakeStack = getStackView(datalakeId);
+            Cluster dataLakeCluster = clusterRepository.findOneWithLists(dataLakeStack.getClusterView().getId());
+            BlueprintTextProcessor blueprintTextProcessor = blueprintProcessorFactory.get(dataLakeCluster.getBlueprint().getBlueprintText());
+
+            Set<String> groupNames = blueprintTextProcessor.getHostGroupsWithComponent("RANGER_ADMIN");
             List<HostGroup> groups = dataLakeCluster.getHostGroups().stream().filter(hg -> groupNames.contains(hg.getName())).collect(Collectors.toList());
             Set<String> hostNames = new HashSet<>();
-            groups.forEach(hg -> hostNames.addAll(hg.getHostMetadata().stream().map(HostMetadata::getHostName).collect(Collectors.toList())));
+            groups.forEach(hg -> hostNames.addAll(hostGroupService.getByClusterIdAndName(dataLakeCluster.getId(), hg.getName())
+                    .getHostMetadata().stream().map(HostMetadata::getHostName).collect(Collectors.toList())));
+
+            Map<String, String> rangerAdminConfigs = blueprintTextProcessor.getConfigurationEntries().getOrDefault("ranger-admin-site", new HashMap<>());
+            String rangerPort = rangerAdminConfigs.getOrDefault("ranger.service.http.port", "6080");
+
             Map<String, Object> rangerMap = new HashMap<>();
             rangerMap.put("servers", hostNames);
-            rangerMap.put("port", "6080");
+            rangerMap.put("port", rangerPort);
             servicePillar.put("datalake-services", new SaltPillarProperties("/datalake/init.sls",
                     singletonMap("datalake-services", singletonMap("ranger", rangerMap))));
         }
+    }
+
+    private StackView getStackView(Long datalakeId) {
+        return stackViewRepository.findById(datalakeId).orElseThrow(notFound("Stack view", datalakeId));
     }
 
     private void saveGatewayPillar(GatewayConfig gatewayConfig, Cluster cluster, Map<String, SaltPillarProperties> servicePillar) throws IOException {
@@ -225,30 +329,67 @@ public class ClusterHostServiceRunner {
         gateway.put("address", gatewayConfig.getPublicAddress());
         gateway.put("username", cluster.getUserName());
         gateway.put("password", cluster.getPassword());
-        gateway.put("path", cluster.getGateway().getPath());
-        gateway.put("topology", cluster.getGateway().getTopologyName());
-        gateway.put("ssotype", cluster.getGateway().getSsoType());
-        gateway.put("ssoprovider", cluster.getGateway().getSsoProvider());
-        gateway.put("signpub", cluster.getGateway().getSignPub());
-        gateway.put("signcert", cluster.getGateway().getSignCert());
-        gateway.put("signkey", cluster.getGateway().getSignKey());
-        gateway.put("tokencert", cluster.getGateway().getTokenCert());
-        gateway.put("mastersecret", cluster.getStack().getSecurityConfig().getKnoxMasterSecret());
-        gateway.put("kerberos", cluster.isSecure());
 
-        Json exposedJson = cluster.getGateway().getExposedServices();
-        if (exposedJson != null && StringUtils.isNoneEmpty(exposedJson.getValue())) {
-            List<String> exposedServices = exposedJson.get(ExposedServices.class).getServices();
-            if (blueprintProcessor.componentExistsInBlueprint("HIVE_SERVER_INTERACTIVE", cluster.getBlueprint().getBlueprintText())) {
-                exposedServices = exposedServices.stream().map(x -> "HIVE".equals(x) ? "HIVE_INTERACTIVE" : x).collect(Collectors.toList());
+        // for cloudbreak upgradeability
+        gateway.put("ssotype", SSOType.NONE);
+
+        Gateway clusterGateway = cluster.getGateway();
+        if (clusterGateway != null) {
+            gateway.put("path", clusterGateway.getPath());
+            gateway.put("ssotype", clusterGateway.getSsoType());
+            gateway.put("ssoprovider", clusterGateway.getSsoProvider());
+            gateway.put("signpub", clusterGateway.getSignPub());
+            gateway.put("signcert", clusterGateway.getSignCert());
+            gateway.put("signkey", clusterGateway.getSignKey());
+            gateway.put("tokencert", clusterGateway.getTokenCert());
+            List<Map<String, Object>> topologies = getTopologies(clusterGateway);
+            gateway.put("topologies", topologies);
+            if (cluster.getBlueprint() != null) {
+                Map<String, Integer> servicePorts = blueprintPortConfigCollector.getServicePorts(cluster.getBlueprint());
+                gateway.put("ports", servicePorts);
             }
-            gateway.put("exposed", exposedServices);
-        } else {
-            gateway.put("exposed", new ArrayList<>());
         }
+
+        gateway.put("kerberos", cluster.isSecure());
+        gateway.put("mastersecret", cluster.getStack().getSecurityConfig().getKnoxMasterSecret());
         Map<String, List<String>> serviceLocation = componentLocator.getComponentLocation(cluster, new HashSet<>(ExposedService.getAllServiceName()));
+
+        List<String> rangerLocations = serviceLocation.get(ExposedService.RANGER.getServiceName());
+        if (rangerLocations != null && !rangerLocations.isEmpty()) {
+            serviceLocation.put(ExposedService.RANGER.getServiceName(), getSingleRangerFqdn(gatewayConfig.getHostname(), rangerLocations));
+        }
+
         gateway.put("location", serviceLocation);
         servicePillar.put("gateway", new SaltPillarProperties("/gateway/init.sls", singletonMap("gateway", gateway)));
+    }
+
+    private List<String> getSingleRangerFqdn(String primaryGatewayFqdn, List<String> rangerLocations) {
+        return rangerLocations.contains(primaryGatewayFqdn) ? List.of(primaryGatewayFqdn) : List.of(rangerLocations.iterator().next());
+    }
+
+    private List<Map<String, Object>> getTopologies(Gateway clusterGateway) throws IOException {
+        if (!CollectionUtils.isEmpty(clusterGateway.getTopologies())) {
+            List<Map<String, Object>> topologyMaps = new ArrayList<>();
+            for (GatewayTopology topology : clusterGateway.getTopologies()) {
+                Map<String, Object> topologyAndExposed = mapTopologyToMap(topology);
+                topologyMaps.add(topologyAndExposed);
+            }
+            return topologyMaps;
+        }
+        return Collections.emptyList();
+    }
+
+    private Map<String, Object> mapTopologyToMap(GatewayTopology gt) throws IOException {
+        Map<String, Object> topology = new HashMap<>();
+        topology.put("name", gt.getTopologyName());
+        Json exposedJson = gt.getExposedServices();
+        if (exposedJson != null && StringUtils.isNoneEmpty(exposedJson.getValue())) {
+            List<String> exposedServices = exposedJson.get(ExposedServices.class).getServices();
+            topology.put("exposed", exposedServices);
+        } else {
+            topology.put("exposed", new ArrayList<>());
+        }
+        return topology;
     }
 
     private void saveLdapPillar(LdapConfig ldapConfig, Map<String, SaltPillarProperties> servicePillar) {
@@ -268,28 +409,6 @@ public class ClusterHostServiceRunner {
     private void saveHDPPillar(Long clusterId, Map<String, SaltPillarProperties> servicePillar) {
         StackRepoDetails hdprepo = clusterComponentConfigProvider.getHDPRepo(clusterId);
         servicePillar.put("hdp", new SaltPillarProperties("/hdp/repo.sls", singletonMap("hdp", hdprepo)));
-    }
-
-    @Transactional
-    public Map<String, String> addAmbariServices(Long stackId, String hostGroupName, Integer scalingAdjustment) throws CloudbreakException {
-        Map<String, String> candidates;
-        try {
-            Stack stack = stackRepository.findOneWithLists(stackId);
-            Cluster cluster = stack.getCluster();
-            candidates = collectUpscaleCandidates(cluster.getId(), hostGroupName, scalingAdjustment);
-            Set<Node> allNodes = stackUtil.collectNodes(stack);
-            HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
-            List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
-            SaltConfig saltConfig = createSaltConfig(stack, cluster, gatewayConfigService.getPrimaryGatewayConfig(stack), gatewayConfigs);
-            ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());
-            hostOrchestrator.initServiceRun(gatewayConfigs, allNodes, saltConfig, exitCriteriaModel);
-            hostOrchestrator.runService(gatewayConfigs, allNodes, saltConfig, exitCriteriaModel);
-        } catch (CloudbreakOrchestratorCancelledException e) {
-            throw new CancellationException(e.getMessage());
-        } catch (CloudbreakOrchestratorException | IOException e) {
-            throw new CloudbreakException(e);
-        }
-        return candidates;
     }
 
     private Map<String, String> collectUpscaleCandidates(Long clusterId, String hostGroupName, Integer adjustment) {
@@ -313,22 +432,19 @@ public class ClusterHostServiceRunner {
         }
     }
 
-    public String changePrimaryGateway(Stack stack) throws CloudbreakException {
-        GatewayConfig formerPrimaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
-        List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
-        Optional<GatewayConfig> newPrimaryCandidate = gatewayConfigs.stream().filter(gc -> !gc.isPrimary()).findFirst();
-        if (newPrimaryCandidate.isPresent()) {
-            GatewayConfig newPrimary = newPrimaryCandidate.get();
-            Set<Node> allNodes = stackUtil.collectNodes(stack);
-            try {
-                hostOrchestratorResolver.get(stack.getOrchestrator().getType()).changePrimaryGateway(formerPrimaryGatewayConfig, newPrimary, gatewayConfigs,
-                        allNodes, clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
-                return newPrimary.getHostname();
-            } catch (CloudbreakOrchestratorException ex) {
-                throw new CloudbreakException(ex);
-            }
-        } else {
-            throw new CloudbreakException("Primary gateway change is not possible because there is no available node for the action");
+    private void decoratePillarWithJdbcConnectors(Cluster cluster, Map<String, SaltPillarProperties> servicePillar) {
+        Set<RDSConfig> rdsConfigs = rdsConfigService.findByClusterId(cluster.getOwner(), cluster.getAccount(), cluster.getId());
+        Map<String, Object> connectorJarUrlsByVendor = new HashMap<>();
+        rdsConfigs.stream()
+                .filter(rds -> StringUtils.isNoneEmpty(rds.getConnectorJarUrl()))
+                .forEach(rdsConfig -> {
+                    connectorJarUrlsByVendor.put("databaseType", rdsConfig.getDatabaseEngine().databaseType());
+                    connectorJarUrlsByVendor.put("connectorJarUrl", rdsConfig.getConnectorJarUrl());
+                    connectorJarUrlsByVendor.put("connectorJarName", rdsConfig.getDatabaseEngine().connectorJarName());
+                });
+        if (!connectorJarUrlsByVendor.isEmpty()) {
+            Map<String, Object> jdbcConnectors = singletonMap("jdbc_connectors", connectorJarUrlsByVendor);
+            servicePillar.put("jdbc-connectors", new SaltPillarProperties("/jdbc/connectors.sls", jdbcConnectors));
         }
     }
 }

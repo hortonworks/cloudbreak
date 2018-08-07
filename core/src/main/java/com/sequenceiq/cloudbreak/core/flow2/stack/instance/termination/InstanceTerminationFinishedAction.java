@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.cloud.event.resource.RemoveInstanceResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 
 @Component("InstanceTerminationFinishedAction")
 public class InstanceTerminationFinishedAction extends AbstractInstanceTerminationAction<RemoveInstanceResult> {
@@ -20,7 +21,8 @@ public class InstanceTerminationFinishedAction extends AbstractInstanceTerminati
     }
 
     @Override
-    protected void doExecute(InstanceTerminationContext context, RemoveInstanceResult payload, Map<Object, Object> variables) throws Exception {
+    protected void doExecute(InstanceTerminationContext context, RemoveInstanceResult payload, Map<Object, Object> variables)
+            throws TransactionExecutionException {
         instanceTerminationService.finishInstanceTermination(context, payload);
         sendEvent(context);
     }

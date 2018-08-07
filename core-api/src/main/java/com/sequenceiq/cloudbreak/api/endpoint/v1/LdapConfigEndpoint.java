@@ -12,11 +12,14 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.sequenceiq.cloudbreak.api.model.LdapConfigRequest;
-import com.sequenceiq.cloudbreak.api.model.LdapConfigResponse;
+import com.sequenceiq.cloudbreak.api.model.ldap.LDAPTestRequest;
+import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigRequest;
+import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
+import com.sequenceiq.cloudbreak.api.model.ldap.LdapTestResult;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
+import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.LdapConfigOpDescription;
 
 import io.swagger.annotations.Api;
@@ -96,4 +99,17 @@ public interface LdapConfigEndpoint {
     @ApiOperation(value = LdapConfigOpDescription.DELETE_PRIVATE_BY_NAME, produces = ContentType.JSON, notes = Notes.LDAP_CONFIG_NOTES,
             nickname = "deletePrivateLdap")
     void deletePrivate(@PathParam("name") String name);
+
+    @POST
+    @Path("testconnect")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = LdapConfigOpDescription.POST_CONNECTION_TEST, produces = ContentType.JSON, nickname = "postLdapConnectionTest")
+    LdapTestResult testLdapConnection(@Valid LDAPTestRequest ldapValidationRequest);
+
+    @GET
+    @Path("{name}/request")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OperationDescriptions.LdapConfigOpDescription.GET_REQUEST, produces = ContentType.JSON, notes = Notes.LDAP_CONFIG_NOTES,
+            nickname = "getLdapRequestFromName")
+    LdapConfigRequest getRequestFromName(@PathParam("name") String name);
 }

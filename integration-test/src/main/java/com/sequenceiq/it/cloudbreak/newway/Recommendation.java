@@ -8,11 +8,11 @@ import java.util.function.Function;
 public class Recommendation extends RecommendationEntity {
 
     static Function<IntegrationTestContext, Recommendation> getTestContext(String key) {
-        return (testContext) -> testContext.getContextParam(key, Recommendation.class);
+        return testContext -> testContext.getContextParam(key, Recommendation.class);
     }
 
     static Function<IntegrationTestContext, Recommendation> getNew() {
-        return (testContext) -> new Recommendation();
+        return testContext -> new Recommendation();
     }
 
     public static Recommendation request() {
@@ -20,9 +20,9 @@ public class Recommendation extends RecommendationEntity {
     }
 
     public static Recommendation isCreated() {
-        Recommendation credential = new Recommendation();
-        credential.setCreationStrategy(RecommendationAction::createInGiven);
-        return credential;
+        Recommendation recommendation = new Recommendation();
+        recommendation.setCreationStrategy(RecommendationAction::createInGiven);
+        return recommendation;
     }
 
     public static Action<Recommendation> post(String key) {

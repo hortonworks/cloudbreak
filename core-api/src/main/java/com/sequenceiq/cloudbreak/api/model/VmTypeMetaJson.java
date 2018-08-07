@@ -14,7 +14,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 public class VmTypeMetaJson implements JsonEntity {
     private List<VolumeParameterConfigJson> configs = new ArrayList<>();
 
-    private Map<String, String> properties = new HashMap<>();
+    private Map<String, Object> properties = new HashMap<>();
 
     public List<VolumeParameterConfigJson> getConfigs() {
         return configs;
@@ -24,11 +24,11 @@ public class VmTypeMetaJson implements JsonEntity {
         this.configs = configs;
     }
 
-    public Map<String, String> getProperties() {
+    public Map<String, Object> getProperties() {
         return properties;
     }
 
-    public void setProperties(Map<String, String> properties) {
+    public void setProperties(Map<String, Object> properties) {
         this.properties = properties;
     }
 }

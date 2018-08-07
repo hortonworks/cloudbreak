@@ -7,8 +7,8 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.model.RDSConfigRequest;
-import com.sequenceiq.cloudbreak.api.model.RDSDatabase;
+import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
+import com.sequenceiq.cloudbreak.api.model.rds.RDSTestRequest;
 import com.sequenceiq.it.IntegrationTestContext;
 
 public class RDSConfigTest extends AbstractCloudbreakIntegrationTest {
@@ -25,7 +25,7 @@ public class RDSConfigTest extends AbstractCloudbreakIntegrationTest {
     @Test
     @Parameters({ "rdsName", "rdsUser", "rdsPassword", "rdsConnectionUrl", "rdsDbType", "hdpVersion" })
     public void testRDSConfig(String rdsName, @Optional("") String rdsUser, @Optional("") String rdsPassword,
-            @Optional("") String rdsConnectionUrl, @Optional("POSTGRES") String rdsDbType, @Optional("2.5") String hdpVersion) throws Exception {
+            @Optional("") String rdsConnectionUrl, @Optional("POSTGRES") String rdsDbType, @Optional("2.5") String hdpVersion) {
         // GIVEN
         IntegrationTestContext itContext = getItContext();
         rdsUser = StringUtils.hasLength(rdsUser) ? rdsUser : defaultRdsUser;
@@ -37,10 +37,10 @@ public class RDSConfigTest extends AbstractCloudbreakIntegrationTest {
         rdsCreateRequest.setConnectionUserName(rdsUser);
         rdsCreateRequest.setConnectionPassword(rdsPassword);
         rdsCreateRequest.setConnectionURL(rdsConnectionUrl);
-        rdsCreateRequest.setDatabaseType(RDSDatabase.valueOf(rdsDbType));
-        rdsCreateRequest.setHdpVersion(hdpVersion);
+        RDSTestRequest testRequest = new RDSTestRequest();
+        testRequest.setRdsConfig(rdsCreateRequest);
         // WHEN
-        String rdsConnectionResult = getCloudbreakClient().utilEndpoint().testRdsConnection(rdsCreateRequest).getConnectionResult();
+        String rdsConnectionResult = getCloudbreakClient().rdsConfigEndpoint().testRdsConnection(testRequest).getConnectionResult();
         Assert.assertEquals(rdsConnectionResult, "connected", "RDS connection test failed. Set the RDS configuration parameters properly.");
         String rdsConfigId = getCloudbreakClient().rdsConfigEndpoint().postPrivate(rdsCreateRequest).getId().toString();
         itContext.putContextParam(CloudbreakITContextConstants.RDS_CONFIG_ID, rdsConfigId);

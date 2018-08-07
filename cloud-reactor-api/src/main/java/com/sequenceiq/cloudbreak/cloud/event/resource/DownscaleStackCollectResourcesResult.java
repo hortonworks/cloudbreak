@@ -5,7 +5,7 @@ import java.util.Collections;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 
-public class DownscaleStackCollectResourcesResult extends CloudPlatformResult<CloudPlatformRequest> {
+public class DownscaleStackCollectResourcesResult extends CloudPlatformResult<CloudPlatformRequest<?>> {
 
     private final Object resourcesToScale;
 

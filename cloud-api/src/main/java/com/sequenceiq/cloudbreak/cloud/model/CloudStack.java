@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -19,9 +21,9 @@ public class CloudStack {
 
     private final String template;
 
-    private String loginUserName;
+    private final String loginUserName;
 
-    private String publicKey;
+    private final String publicKey;
 
     private final Map<String, String> parameters;
 
@@ -29,8 +31,10 @@ public class CloudStack {
 
     private final InstanceAuthentication instanceAuthentication;
 
-    public CloudStack(List<Group> groups, Network network, Image image, Map<String, String> parameters, Map<String, String> tags, String template,
-            InstanceAuthentication instanceAuthentication, String loginUserName, String publicKey) {
+    private final Optional<SpiFileSystem> fileSystem;
+
+    public CloudStack(Collection<Group> groups, Network network, Image image, Map<String, String> parameters, Map<String, String> tags, String template,
+            InstanceAuthentication instanceAuthentication, String loginUserName, String publicKey, SpiFileSystem fileSystem) {
         this.groups = ImmutableList.copyOf(groups);
         this.network = network;
         this.image = image;
@@ -40,6 +44,7 @@ public class CloudStack {
         this.instanceAuthentication = instanceAuthentication;
         this.loginUserName = loginUserName;
         this.publicKey = publicKey;
+        this.fileSystem = Optional.ofNullable(fileSystem);
     }
 
     public List<Group> getGroups() {
@@ -70,14 +75,8 @@ public class CloudStack {
         return instanceAuthentication;
     }
 
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder("CloudStack{");
-        sb.append("groups=").append(groups);
-        sb.append(", network=").append(network);
-        sb.append(", image=").append(image);
-        sb.append('}');
-        return sb.toString();
+    public Optional<SpiFileSystem> getFileSystem() {
+        return fileSystem;
     }
 
     public String getTemplate() {
@@ -90,5 +89,16 @@ public class CloudStack {
 
     public String getLoginUserName() {
         return loginUserName;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("CloudStack{");
+        sb.append("groups=").append(groups);
+        sb.append(", network=").append(network);
+        sb.append(", image=").append(image);
+        sb.append(", cloudFileSystem=").append(fileSystem.orElse(null));
+        sb.append('}');
+        return sb.toString();
     }
 }

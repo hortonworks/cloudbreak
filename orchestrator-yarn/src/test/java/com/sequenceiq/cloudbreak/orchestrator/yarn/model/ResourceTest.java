@@ -13,14 +13,14 @@ public class ResourceTest {
     private static final int MEMORY = 1024;
 
     @Test
-    public void testCpus() throws Exception {
+    public void testCpus() {
         Resource resource = new Resource();
         resource.setCpus(CPUS);
         assertEquals(CPUS, resource.getCpus());
     }
 
     @Test
-    public void testMemory() throws Exception {
+    public void testMemory() {
         Resource resource = new Resource();
         resource.setMemory(MEMORY);
         assertEquals(MEMORY, resource.getMemory());

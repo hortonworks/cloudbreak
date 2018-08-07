@@ -6,7 +6,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.Temporal;
+import java.time.temporal.TemporalAccessor;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -19,8 +20,8 @@ import com.sequenceiq.cloudbreak.api.model.UsageStatus;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
-import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.service.ha.CloudbreakNodeConfig;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 
 @Service
 public class UsageGeneratorService {
@@ -92,7 +93,7 @@ public class UsageGeneratorService {
         return newUsage;
     }
 
-    public CloudbreakUsage openNewUsage(Stack stack, String instanceType, Integer instanceNum, String groupName, Temporal started) {
+    public CloudbreakUsage openNewUsage(Stack stack, String instanceType, Integer instanceNum, String groupName, TemporalAccessor started) {
         CloudbreakUsage usage = new CloudbreakUsage();
         usage.setStackUuid(stack.getUuid());
         usage.setParentUuid(cloudbreakNodeConfig.getInstanceUUID());
@@ -126,7 +127,7 @@ public class UsageGeneratorService {
         return usage;
     }
 
-    public List<CloudbreakUsage> createClosedUsagesUntilNow(CloudbreakUsage usage) {
+    public Collection<CloudbreakUsage> createClosedUsagesUntilNow(CloudbreakUsage usage) {
         List<CloudbreakUsage> result = Lists.newArrayList();
         long days = usageTimeService.daysBetweenDateAndNow(usage.getDay());
         ZonedDateTime zdt = usage.getDay().toInstant().atZone(ZoneId.systemDefault());

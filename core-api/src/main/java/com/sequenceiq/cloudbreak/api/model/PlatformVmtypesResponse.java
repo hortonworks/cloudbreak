@@ -1,14 +1,16 @@
 package com.sequenceiq.cloudbreak.api.model;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PlatformVmtypesResponse implements JsonEntity {
 
-    private Map<String, VirtualMachinesResponse> vmTypes = new HashMap<>();
+    private Map<String, VirtualMachinesResponse> vmTypes;
+
+    public PlatformVmtypesResponse() {
+    }
 
     public PlatformVmtypesResponse(Map<String, VirtualMachinesResponse> vmTypes) {
         this.vmTypes = vmTypes;

@@ -3,15 +3,21 @@ package com.sequenceiq.cloudbreak.repository;
 import java.util.Collection;
 import java.util.Set;
 
+import javax.transaction.Transactional;
+
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.api.model.RecipeType;
+import com.sequenceiq.cloudbreak.aspect.BaseRepository;
 import com.sequenceiq.cloudbreak.domain.Recipe;
+import com.sequenceiq.cloudbreak.aspect.HasPermission;
+import com.sequenceiq.cloudbreak.service.EntityType;
 
 @EntityType(entityClass = Recipe.class)
-public interface RecipeRepository extends CrudRepository<Recipe, Long> {
+@Transactional(Transactional.TxType.REQUIRED)
+@HasPermission
+public interface RecipeRepository extends BaseRepository<Recipe, Long> {
 
     @Query("SELECT r FROM Recipe r WHERE r.name= :name AND r.account= :account")
     Recipe findByNameInAccount(@Param("name") String name, @Param("account") String account);

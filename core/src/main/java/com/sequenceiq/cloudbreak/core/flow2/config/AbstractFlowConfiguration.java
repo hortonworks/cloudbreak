@@ -1,10 +1,11 @@
 package com.sequenceiq.cloudbreak.core.flow2.config;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -79,11 +80,11 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
 
     @Override
     public Flow createFlow(String flowId, Long stackId) {
-        StateMachine sm = stateMachineFactory.getStateMachine();
-        FlowStructuredEventHandler fl = applicationContext.getBean(FlowStructuredEventHandler.class, getEdgeConfig().initState, getEdgeConfig().finalState,
-                getClass().getSimpleName(), flowId, stackId);
-        Flow flow = new FlowAdapter<>(flowId, sm, new MessageFactory<E>(), new StateConverterAdapter<>(stateType),
-                new EventConverterAdapter<>(eventType), getClass(), fl);
+        StateMachine<S, E> sm = stateMachineFactory.getStateMachine();
+        FlowStructuredEventHandler<S, E> fl = applicationContext.getBean(FlowStructuredEventHandler.class, getEdgeConfig().initState,
+                getEdgeConfig().finalState, getClass().getSimpleName(), flowId, stackId);
+        Flow flow = new FlowAdapter<>(flowId, sm, new MessageFactory<>(), new StateConverterAdapter<>(stateType),
+                new EventConverterAdapter<>(eventType), (Class<? extends FlowConfiguration<E>>) getClass(), fl);
         sm.addStateListener(fl);
         return flow;
     }
@@ -102,10 +103,10 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
     }
 
     private void configure(StateMachineStateConfigurer<S, E> stateConfig, StateMachineTransitionConfigurer<S, E> transitionConfig,
-            FlowEdgeConfig<S, E> flowEdgeConfig, List<Transition<S, E>> transitions) throws Exception {
+            FlowEdgeConfig<S, E> flowEdgeConfig, Iterable<Transition<S, E>> transitions) throws Exception {
         StateConfigurer<S, E> stateConfigurer = stateConfig.withStates().initial(flowEdgeConfig.initState).end(flowEdgeConfig.finalState);
         ExternalTransitionConfigurer<S, E> transitionConfigurer = null;
-        Set<S> failHandled = new HashSet<>();
+        Collection<S> failHandled = new HashSet<>();
         for (Transition<S, E> transition : transitions) {
             transitionConfigurer = transitionConfigurer == null ? transitionConfig.withExternal() : transitionConfigurer.and().withExternal();
             AbstractAction<S, E, ?, ?> action = getAction(transition.source);
@@ -113,7 +114,7 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
                 stateConfigurer.state(transition.source, action, null);
             }
             transitionConfigurer.source(transition.source).target(transition.target).event(transition.event);
-            if (action != null && transition.getFailureEvent() != null && transition.target != flowEdgeConfig.defaultFailureState) {
+            if (action != null && transition.getFailureEvent() != null && !Objects.equals(transition.target, flowEdgeConfig.defaultFailureState)) {
                 action.setFailureEvent(transition.getFailureEvent());
                 S failureState = Optional.ofNullable(transition.getFailureState()).orElse(flowEdgeConfig.defaultFailureState);
                 stateConfigurer.state(failureState, getAction(failureState), null);
@@ -153,15 +154,15 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
 
     protected abstract FlowEdgeConfig<S, E> getEdgeConfig();
 
-    private AbstractAction getAction(FlowState state) {
+    private AbstractAction<S, E, ?, ?> getAction(FlowState state) {
         return state.action() == null ? getAction(state.name()) : getAction(state.action());
     }
 
-    private AbstractAction getAction(Class<? extends AbstractAction> clazz) {
+    private AbstractAction<S, E, ?, ?> getAction(Class<? extends AbstractAction> clazz) {
         return applicationContext.getBean(clazz.getSimpleName(), clazz);
     }
 
-    private AbstractAction getAction(String name) {
+    private AbstractAction<S, E, ?, ?> getAction(String name) {
         try {
             return applicationContext.getBean(name, AbstractAction.class);
         } catch (NoSuchBeanDefinitionException ignored) {

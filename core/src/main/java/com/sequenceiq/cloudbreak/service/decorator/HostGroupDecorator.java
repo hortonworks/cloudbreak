@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.decorator;
 
 import static org.springframework.util.StringUtils.isEmpty;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 
@@ -13,17 +14,17 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.ConstraintJson;
-import com.sequenceiq.cloudbreak.api.model.HostGroupRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.ConstraintTemplate;
-import com.sequenceiq.cloudbreak.domain.HostGroup;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Recipe;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.repository.ConstraintRepository;
 import com.sequenceiq.cloudbreak.repository.ConstraintTemplateRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
@@ -86,12 +87,12 @@ public class HostGroupDecorator {
         return subject;
     }
 
-    private void prepareRecipesByName(HostGroup subject, IdentityUser user, Set<String> recipeNames) {
+    private void prepareRecipesByName(HostGroup subject, IdentityUser user, Collection<String> recipeNames) {
         Set<Recipe> recipes = recipeService.getPublicRecipes(user, recipeNames);
         subject.getRecipes().addAll(recipes);
     }
 
-    private void prepareRecipesByRequests(HostGroup subject, IdentityUser user, Set<RecipeRequest> recipes, Boolean publicInAccount) {
+    private void prepareRecipesByRequests(HostGroup subject, IdentityUser user, Iterable<RecipeRequest> recipes, Boolean publicInAccount) {
         for (RecipeRequest recipe : recipes) {
             Recipe convert = conversionService.convert(recipe, Recipe.class);
             convert.setPublicInAccount(publicInAccount);
@@ -100,7 +101,7 @@ public class HostGroupDecorator {
         }
     }
 
-    private void prepareRecipesByIds(HostGroup subject, Set<Long> recipeIds) {
+    private void prepareRecipesByIds(HostGroup subject, Iterable<Long> recipeIds) {
         for (Long recipeId : recipeIds) {
             Recipe recipe = recipeService.get(recipeId);
             subject.getRecipes().add(recipe);
@@ -163,7 +164,7 @@ public class HostGroupDecorator {
         return result;
     }
 
-    private HostGroup getDetailsFromExistingHostGroup(Constraint constraint, HostGroup subject, String instanceGroupName, Set<HostGroup> hostGroups) {
+    private HostGroup getDetailsFromExistingHostGroup(Constraint constraint, HostGroup subject, String instanceGroupName, Collection<HostGroup> hostGroups) {
         Optional<HostGroup> hostGroupOptional = hostGroups.stream().filter(input ->
                 input.getConstraint().getInstanceGroup().getGroupName().equals(instanceGroupName)
         ).findFirst();

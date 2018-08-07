@@ -3,14 +3,11 @@ package com.sequenceiq.it.cloudbreak.newway;
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
-import com.sequenceiq.cloudbreak.api.model.BlueprintInputJson;
 import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.model.ConnectedClusterRequest;
-import com.sequenceiq.cloudbreak.api.model.GatewayJson;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
-
-import java.util.Set;
 
 public class Ambari extends Entity  {
     public static final String AMBARI_REQUEST = "AMBARI_REQUEST";
@@ -19,7 +16,7 @@ public class Ambari extends Entity  {
 
     Ambari(String newId) {
         super(newId);
-        setRequest(new AmbariV2Request());
+        this.request = new AmbariV2Request();
     }
 
     Ambari() {
@@ -35,77 +32,67 @@ public class Ambari extends Entity  {
     }
 
     public Ambari withBlueprintId(Long blueprintId) {
-        getRequest().setBlueprintId(blueprintId);
+        request.setBlueprintId(blueprintId);
         return this;
     }
 
     public Ambari withBlueprintName(String name) {
-        getRequest().setBlueprintName(name);
-        return this;
-    }
-
-    public Ambari withBlueprintInputs(Set<BlueprintInputJson> inputs) {
-        getRequest().setBlueprintInputs(inputs);
-        return this;
-    }
-
-    public Ambari withBlueprintCustomProperties(String properties) {
-        getRequest().setBlueprintCustomProperties(properties);
+        request.setBlueprintName(name);
         return this;
     }
 
     public Ambari withAmbariDatabaseDetails(AmbariDatabaseDetailsJson ambariDatabaseDetailsJson) {
-        getRequest().setAmbariDatabaseDetails(ambariDatabaseDetailsJson);
+        request.setAmbariDatabaseDetails(ambariDatabaseDetailsJson);
         return this;
     }
 
     public Ambari withAmbariRepoDetailsJson(AmbariRepoDetailsJson ambariRepoDetailsJson) {
-        getRequest().setAmbariRepoDetailsJson(ambariRepoDetailsJson);
+        request.setAmbariRepoDetailsJson(ambariRepoDetailsJson);
         return this;
     }
 
     public Ambari withAmbariStackDetails(AmbariStackDetailsJson ambariStackDetailsJson) {
-        getRequest().setAmbariStackDetails(ambariStackDetailsJson);
+        request.setAmbariStackDetails(ambariStackDetailsJson);
         return this;
     }
 
     public Ambari withConfigStrategy(ConfigStrategy configStrategy) {
-        getRequest().setConfigStrategy(configStrategy);
+        request.setConfigStrategy(configStrategy);
         return this;
     }
 
     public Ambari withConnectedCluster(ConnectedClusterRequest connectedClusterRequest) {
-        getRequest().setConnectedCluster(connectedClusterRequest);
+        request.setConnectedCluster(connectedClusterRequest);
         return this;
     }
 
     public Ambari withEnableSecurity(boolean enableSecurity) {
-        getRequest().setEnableSecurity(enableSecurity);
+        request.setEnableSecurity(enableSecurity);
         return this;
     }
 
     public Ambari withGateway(GatewayJson gatewayJson) {
-        getRequest().setGateway(gatewayJson);
+        request.setGateway(gatewayJson);
         return this;
     }
 
     public Ambari withKerberos(KerberosRequest kerberosRequest) {
-        getRequest().setKerberos(kerberosRequest);
+        request.setKerberos(kerberosRequest);
         return this;
     }
 
     public Ambari withPassword(String password) {
-        getRequest().setPassword(password);
+        request.setPassword(password);
         return this;
     }
 
     public Ambari withUsername(String username) {
-        getRequest().setUserName(username);
+        request.setUserName(username);
         return this;
     }
 
     public Ambari withValidateBlueprint(boolean validate) {
-        getRequest().setValidateBlueprint(validate);
+        request.setValidateBlueprint(validate);
         return this;
     }
 

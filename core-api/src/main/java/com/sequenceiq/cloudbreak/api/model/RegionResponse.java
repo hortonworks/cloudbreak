@@ -61,6 +61,6 @@ public class RegionResponse implements JsonEntity {
     }
 
     public void setDefaultRegion(String defaultRegions) {
-        this.defaultRegion = defaultRegions;
+        defaultRegion = defaultRegions;
     }
 }

@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.blueprint;
 
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -17,29 +16,37 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.model.ExposedService;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.Constraint;
-import com.sequenceiq.cloudbreak.domain.HostGroup;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
-import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintProcessor;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ComponentLocatorServiceTest {
 
     @Mock
-    private BlueprintProcessor blueprintProcessor;
+    private BlueprintTextProcessor blueprintProcessor;
 
     @Mock
     private HostGroupService hostGroupService;
+
+    @Mock
+    private BlueprintProcessorFactory blueprintProcessorFactory;
+
+    @Mock
+    private InstanceMetaDataRepository instanceMetaDataRepository;
 
     @InjectMocks
     private ComponentLocatorService underTest;
@@ -51,24 +58,26 @@ public class ComponentLocatorServiceTest {
         cluster = new Cluster();
         cluster.setBlueprint(new Blueprint());
 
-        HostGroup hg1 = createHostGroup("hg1", "myhost1");
-        HostGroup hg2 = createHostGroup("hg2", "myhost2");
+        HostGroup hg1 = createHostGroup("hg1", 0L, "myhost1");
+        HostGroup hg2 = createHostGroup("hg2", 1L, "myhost2");
 
         Set<String> hg1Components = set("RESOURCEMANAGER", "Service1", "HIVE_SERVER");
         Set<String> hg2Components = set("NAMENODE", "Service2", "Service3");
 
-        when(hostGroupService.getByCluster(anyLong())).thenReturn(ImmutableSet.of(hg1, hg2));
-        when(blueprintProcessor.getComponentsInHostGroup(anyString(), eq("hg1"))).thenReturn(hg1Components);
-        when(blueprintProcessor.getComponentsInHostGroup(anyString(), eq("hg2"))).thenReturn(hg2Components);
+        when(hostGroupService.getByCluster(nullable(Long.class))).thenReturn(ImmutableSet.of(hg1, hg2));
+        when(blueprintProcessor.getComponentsInHostGroup(eq("hg1"))).thenReturn(hg1Components);
+        when(blueprintProcessor.getComponentsInHostGroup(eq("hg2"))).thenReturn(hg2Components);
+        when(blueprintProcessorFactory.get(nullable(String.class))).thenReturn(blueprintProcessor);
     }
 
-    private HostGroup createHostGroup(String name, String hostname) {
+    private HostGroup createHostGroup(String name, Long id, String hostname) {
         HostGroup hg = new HostGroup();
         hg.setName(name);
         Constraint constraint = new Constraint();
         hg.setConstraint(constraint);
 
         InstanceGroup ig = new InstanceGroup();
+        ig.setId(id);
         constraint.setInstanceGroup(ig);
 
         InstanceMetaData im = new InstanceMetaData();
@@ -78,12 +87,13 @@ public class ComponentLocatorServiceTest {
         return hg;
     }
 
-    private <T> Set<T> set(T... array) {
+    @SafeVarargs
+    private final <T> Set<T> set(T... array) {
         return new HashSet<>(Arrays.asList(array));
     }
 
     @Test
-    public void getComponentLocation() throws Exception {
+    public void getComponentLocation() {
 
         Map<String, List<String>> expected = Maps.newHashMap();
         expected.put("RESOURCEMANAGER", ImmutableList.of("myhost1"));
@@ -91,7 +101,7 @@ public class ComponentLocatorServiceTest {
         expected.put("NAMENODE", ImmutableList.of("myhost2"));
 
         Map<String, List<String>> result = underTest.getComponentLocation(cluster, new HashSet<>(ExposedService.getAllServiceName()));
-        Assert.assertEquals(3, result.size());
+        Assert.assertEquals(3L, result.size());
         Assert.assertEquals(expected, result);
     }
 

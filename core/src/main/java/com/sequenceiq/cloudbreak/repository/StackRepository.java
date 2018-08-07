@@ -3,18 +3,24 @@ package com.sequenceiq.cloudbreak.repository;
 import java.util.List;
 import java.util.Set;
 
+import javax.transaction.Transactional;
+
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.aspect.BaseRepository;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.domain.Network;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.aspect.HasPermission;
+import com.sequenceiq.cloudbreak.service.EntityType;
 
 @EntityType(entityClass = Stack.class)
-public interface StackRepository extends CrudRepository<Stack, Long> {
+@Transactional(Transactional.TxType.REQUIRED)
+@HasPermission
+public interface StackRepository extends BaseRepository<Stack, Long> {
 
     @Query("SELECT s from Stack s LEFT JOIN FETCH s.resources LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
             + "WHERE s.cluster.ambariIp= :ambariIp AND s.stackStatus.status <> 'DELETE_COMPLETED'")
@@ -63,7 +69,7 @@ public interface StackRepository extends CrudRepository<Stack, Long> {
     Stack findByNameInAccountOrOwner(@Param("name") String name, @Param("account") String account, @Param("owner") String owner);
 
     @Query("SELECT c FROM Stack c LEFT JOIN FETCH c.resources LEFT JOIN FETCH c.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
-        + "WHERE c.name= :name and c.account= :account")
+            + "WHERE c.name= :name and c.account= :account")
     Stack findByNameInAccountWithLists(@Param("name") String name, @Param("account") String account);
 
     @Query("SELECT c FROM Stack c WHERE c.name= :name and c.account= :account")
@@ -83,11 +89,15 @@ public interface StackRepository extends CrudRepository<Stack, Long> {
             + "AND s.stackStatus.status <> 'CREATE_IN_PROGRESS'")
     List<Stack> findAllAliveAndProvisioned();
 
+    @Query("SELECT s FROM Stack s WHERE s.stackStatus.status <> 'DELETE_COMPLETED' AND s.organization.id= :organizationId")
+    Set<Stack> findAllForOrganization(@Param("organizationId") Long organizationId);
+
     @Query("SELECT s FROM Stack s WHERE s.stackStatus.status IN :statuses")
     List<Stack> findByStatuses(@Param("statuses") List<Status> statuses);
 
     @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.cluster LEFT JOIN FETCH s.credential LEFT JOIN FETCH s.network LEFT JOIN FETCH s.orchestrator "
-            + "LEFT JOIN FETCH s.stackStatus LEFT JOIN FETCH s.securityConfig LEFT JOIN FETCH s.failurePolicy WHERE s.stackStatus.status <> 'DELETE_COMPLETED' "
+            + "LEFT JOIN FETCH s.stackStatus LEFT JOIN FETCH s.securityConfig LEFT JOIN FETCH s.failurePolicy LEFT JOIN FETCH"
+            + " s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData WHERE s.stackStatus.status <> 'DELETE_COMPLETED' "
             + "AND s.stackStatus.status <> 'DELETE_IN_PROGRESS'")
     Set<Stack> findAliveOnes();
 
@@ -95,5 +105,9 @@ public interface StackRepository extends CrudRepository<Stack, Long> {
 
     Long countByCredential(Credential credential);
 
+    Set<Stack> findByCredential(Credential credential);
+
     Long countByNetwork(Network network);
+
+    Set<Stack> findByNetwork(Network network);
 }

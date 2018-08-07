@@ -23,30 +23,29 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
+import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.DirectoryType;
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
-import com.sequenceiq.cloudbreak.api.model.InstanceMetadataType;
-import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.model.GatewayType;
 import com.sequenceiq.cloudbreak.api.model.RecipeType;
 import com.sequenceiq.cloudbreak.api.model.RecoveryMode;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.SSOType;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetadataType;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.model.v2.OrganizationStatus;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
-import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
-import com.sequenceiq.cloudbreak.domain.Gateway;
-import com.sequenceiq.cloudbreak.domain.HostGroup;
-import com.sequenceiq.cloudbreak.domain.HostMetadata;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.Network;
@@ -57,22 +56,34 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
-import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.StackStatus;
+import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
+import com.sequenceiq.cloudbreak.domain.StorageLocation;
+import com.sequenceiq.cloudbreak.domain.StorageLocations;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
+import com.sequenceiq.cloudbreak.domain.security.Organization;
+import com.sequenceiq.cloudbreak.domain.security.User;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackStatusView;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.type.KerberosType;
 
 public class TestUtil {
 
-    public static final String DUMMY_DESCRIPTION = "dummyDescription";
+    private static final String DUMMY_DESCRIPTION = "dummyDescription";
 
-    public static final String DUMMY_SECURITY_GROUP_ID = "dummySecurityGroupId";
+    private static final String DUMMY_SECURITY_GROUP_ID = "dummySecurityGroupId";
 
-    public static final String N1_HIGHCPU_16_INSTANCE = "n1-highcpu-16";
+    private static final String N1_HIGHCPU_16_INSTANCE = "n1-highcpu-16";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TestUtil.class);
 
@@ -81,7 +92,7 @@ public class TestUtil {
     private TestUtil() {
     }
 
-    public static Path getFilePath(Class clazz, String fileName) {
+    public static Path getFilePath(Class<?> clazz, String fileName) {
         try {
             URL resource = clazz.getResource(fileName);
             return Paths.get(resource.toURI());
@@ -93,12 +104,12 @@ public class TestUtil {
 
     public static IdentityUser cbAdminUser() {
         return new IdentityUser("userid", "testuser", "testaccount",
-            Arrays.asList(IdentityUserRole.ADMIN, IdentityUserRole.USER), "givenname", "familyname", new Date());
+                Arrays.asList(IdentityUserRole.ADMIN, IdentityUserRole.USER), "givenname", "familyname", new Date());
     }
 
     public static IdentityUser cbUser() {
         return new IdentityUser("userid", "testuser", "testaccount",
-            Collections.singletonList(IdentityUserRole.USER), "givenname", "familyname", new Date());
+                Collections.singletonList(IdentityUserRole.USER), "givenname", "familyname", new Date());
     }
 
     public static Credential awsCredential() {
@@ -178,6 +189,21 @@ public class TestUtil {
         return orchestrator;
     }
 
+    public static Organization organization(Long id, String name) {
+        Organization organization = new Organization();
+        organization.setStatus(OrganizationStatus.ACTIVE);
+        organization.setName(name);
+        organization.setId(id);
+        return organization;
+    }
+
+    public static User user(Long id, String name) {
+        User user = new User();
+        user.setUserId(name);
+        user.setId(id);
+        return user;
+    }
+
     public static SecurityGroup securityGroup(long id) {
         SecurityGroup sg = new SecurityGroup();
         sg.setId(id);
@@ -215,18 +241,26 @@ public class TestUtil {
         return instanceGroups;
     }
 
+    public static InstanceGroup instanceGroup(Long id, String name, InstanceGroupType instanceGroupType, Template template) {
+        return instanceGroup(id, name, instanceGroupType, template, 1);
+    }
+
     public static InstanceGroup instanceGroup(Long id, InstanceGroupType instanceGroupType, Template template) {
         return instanceGroup(id, instanceGroupType, template, 1);
     }
 
     public static InstanceGroup instanceGroup(Long id, InstanceGroupType instanceGroupType, Template template, int nodeCount) {
+        return instanceGroup(id, "is" + id, instanceGroupType, template, nodeCount);
+    }
+
+    public static InstanceGroup instanceGroup(Long id, String name, InstanceGroupType instanceGroupType, Template template, int nodeCount) {
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setId(id);
-        instanceGroup.setGroupName("is" + id);
+        instanceGroup.setGroupName(name);
         instanceGroup.setInstanceGroupType(instanceGroupType);
         instanceGroup.setTemplate(template);
         instanceGroup.setSecurityGroup(securityGroup(1L));
-        instanceGroup.setInstanceMetaData(generateInstanceMetaDatas(1, id, instanceGroup));
+        instanceGroup.setInstanceMetaData(generateInstanceMetaDatas(nodeCount, id, instanceGroup));
         return instanceGroup;
     }
 
@@ -244,7 +278,7 @@ public class TestUtil {
     }
 
     public static InstanceMetaData instanceMetaData(Long serverNumber, Long instanceGroupId, InstanceStatus instanceStatus, boolean ambariServer,
-        InstanceGroup instanceGroup) {
+            InstanceGroup instanceGroup, InstanceMetadataType instanceMetadataType) {
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setInstanceStatus(instanceStatus);
         instanceMetaData.setAmbariServer(ambariServer);
@@ -257,15 +291,25 @@ public class TestUtil {
         instanceMetaData.setId(instanceGroupId + serverNumber);
         instanceMetaData.setInstanceGroup(instanceGroup);
         instanceMetaData.setStartDate(new Date().getTime());
-        instanceMetaData.setInstanceMetadataType(InstanceMetadataType.CORE);
+        instanceMetaData.setInstanceMetadataType(instanceMetadataType);
         return instanceMetaData;
+    }
+
+    public static InstanceMetaData instanceMetaData(Long serverNumber, Long instanceGroupId, InstanceStatus instanceStatus, boolean ambariServer,
+            InstanceGroup instanceGroup) {
+        return instanceMetaData(serverNumber, instanceGroupId, instanceStatus, ambariServer, instanceGroup, InstanceMetadataType.CORE);
+    }
+
+    public static InstanceMetaData primaryGateWayInstanceMetaData(Long serverNumber, Long instanceGroupId, InstanceStatus instanceStatus, boolean ambariServer,
+            InstanceGroup instanceGroup) {
+        return instanceMetaData(serverNumber, instanceGroupId, instanceStatus, ambariServer, instanceGroup, InstanceMetadataType.GATEWAY_PRIMARY);
     }
 
     public static Set<InstanceMetaData> generateInstanceMetaDatas(int count, Long instanceGroupId, InstanceGroup instanceGroup) {
         Set<InstanceMetaData> instanceMetaDatas = new HashSet<>();
         for (int i = 1; i <= count; i++) {
             instanceMetaDatas.add(instanceMetaData(Integer.toUnsignedLong(i), instanceGroupId, InstanceStatus.REGISTERED,
-                instanceGroup.getInstanceGroupType().equals(InstanceGroupType.GATEWAY), instanceGroup));
+                    instanceGroup.getInstanceGroupType().equals(InstanceGroupType.GATEWAY), instanceGroup));
         }
         return instanceMetaDatas;
     }
@@ -317,6 +361,12 @@ public class TestUtil {
         return stack(AVAILABLE, gcpCredential());
     }
 
+    public static Stack stack(Cluster cluster) {
+        Stack stack = stack(AVAILABLE, gcpCredential());
+        stack.setCluster(cluster);
+        return stack;
+    }
+
     public static StackView stackView() {
         return stackView(AVAILABLE, gcpCredential());
     }
@@ -351,8 +401,7 @@ public class TestUtil {
         cluster.setUserName("admin");
         cluster.setPassword("admin");
         Gateway gateway = new Gateway();
-        gateway.setEnableGateway(true);
-        gateway.setTopologyName("cb");
+        setGatewayTopology(gateway, "cb");
         cluster.setGateway(gateway);
         cluster.setExecutorType(ExecutorType.DEFAULT);
         RDSConfig rdsConfig = new RDSConfig();
@@ -361,13 +410,6 @@ public class TestUtil {
         cluster.setRdsConfigs(rdsConfigs);
         cluster.setLdapConfig(ldapConfig());
         cluster.setHostGroups(hostGroups(cluster));
-        Map<String, String> inputs = new HashMap<>();
-        inputs.put("S3_BUCKET", "testbucket");
-        try {
-            cluster.setBlueprintInputs(new Json(inputs));
-        } catch (JsonProcessingException ignored) {
-            cluster.setBlueprintInputs(null);
-        }
 
         Map<String, String> map = new HashMap<>();
         try {
@@ -393,19 +435,35 @@ public class TestUtil {
         return kerberosConfig;
     }
 
-    public static HostGroup hostGroup() {
+    public static HostGroup hostGroup(String name) {
+        return hostGroup(name, 1);
+    }
+
+    public static HostGroup hostGroup(String name, int count) {
         HostGroup hostGroup = new HostGroup();
         hostGroup.setId(1L);
-        hostGroup.setName(DUMMY_NAME);
+        hostGroup.setName(name);
         hostGroup.setRecipes(recipes(1));
-        hostGroup.setHostMetadata(hostMetadata(hostGroup, 1));
-        InstanceGroup instanceGroup = instanceGroup(1L, InstanceGroupType.CORE, gcpTemplate(1L));
+        hostGroup.setHostMetadata(hostMetadata(hostGroup, count));
+        InstanceGroup instanceGroup = instanceGroup(1L, name, InstanceGroupType.CORE, gcpTemplate(1L), count);
         Constraint constraint = new Constraint();
         constraint.setInstanceGroup(instanceGroup);
         hostGroup.setConstraint(constraint);
         hostGroup.setCluster(cluster(blueprint(), stack(), 1L));
         hostGroup.setRecoveryMode(RecoveryMode.MANUAL);
         return hostGroup;
+    }
+
+    public static Set<HostGroup> hostGroups(Set<String> names) {
+        Set<HostGroup> hostgroups = new HashSet<>();
+        for (String name : names) {
+            hostgroups.add(hostGroup(name));
+        }
+        return hostgroups;
+    }
+
+    public static HostGroup hostGroup() {
+        return hostGroup(DUMMY_NAME);
     }
 
     public static Set<HostGroup> hostGroups(Cluster cluster) {
@@ -452,6 +510,32 @@ public class TestUtil {
         config.setDescription(DUMMY_DESCRIPTION);
         config.setPublicInAccount(true);
         config.setUserSearchBase("cn=users,dc=example,dc=org");
+        config.setUserDnPattern("cn={0},cn=users,dc=example,dc=org");
+        config.setGroupSearchBase("cn=groups,dc=example,dc=org");
+        config.setBindDn("cn=admin,dc=example,dc=org");
+        config.setBindPassword("admin");
+        config.setServerHost("localhost");
+        config.setUserNameAttribute("cn=admin,dc=example,dc=org");
+        config.setDomain("ad.hdc.com");
+        config.setServerPort(389);
+        config.setProtocol("ldap");
+        config.setDirectoryType(DirectoryType.LDAP);
+        config.setUserObjectClass("person");
+        config.setGroupObjectClass("groupOfNames");
+        config.setGroupNameAttribute("cn");
+        config.setGroupMemberAttribute("member");
+        config.setAdminGroup("ambariadmins");
+        return config;
+    }
+
+    public static LdapConfig adConfig() {
+        LdapConfig config = new LdapConfig();
+        config.setId(1L);
+        config.setName(DUMMY_NAME);
+        config.setDescription(DUMMY_DESCRIPTION);
+        config.setPublicInAccount(true);
+        config.setUserSearchBase("cn=users,dc=example,dc=org");
+        config.setUserDnPattern("cn={0},cn=users,dc=example,dc=org");
         config.setGroupSearchBase("cn=groups,dc=example,dc=org");
         config.setBindDn("cn=admin,dc=example,dc=org");
         config.setBindPassword("admin");
@@ -480,6 +564,7 @@ public class TestUtil {
         blueprint.setName(name);
         blueprint.setAmbariName("multi-node-yarn");
         blueprint.setStatus(ResourceStatus.DEFAULT);
+        blueprint.setTags(getEmptyJson());
         return blueprint;
     }
 
@@ -500,7 +585,7 @@ public class TestUtil {
         cloudbreakUsage.setId(id);
         cloudbreakUsage.setInstanceGroup("master");
         cloudbreakUsage.setAccount("account");
-        cloudbreakUsage.setCosts(2d);
+        cloudbreakUsage.setCosts(2.0D);
         cloudbreakUsage.setDay(new Date());
         cloudbreakUsage.setInstanceHours(1L);
         cloudbreakUsage.setInstanceType("xlarge");
@@ -566,14 +651,133 @@ public class TestUtil {
         return resource;
     }
 
+    public static SmartSenseSubscription smartSenseSubscription() {
+        SmartSenseSubscription smartSenseSubscription = new SmartSenseSubscription();
+        smartSenseSubscription.setSubscriptionId("1234-1234-1234-1244");
+        smartSenseSubscription.setAccount("hortonworks");
+        smartSenseSubscription.setOwner("hwx-user");
+        smartSenseSubscription.setPublicInAccount(false);
+        smartSenseSubscription.setId(1L);
+        return smartSenseSubscription;
+    }
+
+    public static RDSConfig rdsConfig(RdsType rdsType, DatabaseVendor databaseVendor) {
+        RDSConfig rdsConfig = new RDSConfig();
+        rdsConfig.setName(rdsType.name());
+        rdsConfig.setConnectionPassword("iamsoosecure");
+        rdsConfig.setConnectionUserName("heyitsme");
+        if (databaseVendor == DatabaseVendor.ORACLE12 || databaseVendor == DatabaseVendor.ORACLE11) {
+            rdsConfig.setConnectionURL("jdbc:" + databaseVendor.jdbcUrlDriverId() + ":@10.1.1.1:1521:" + rdsType.name().toLowerCase());
+        } else if (databaseVendor == DatabaseVendor.MYSQL) {
+            rdsConfig.setConnectionURL("jdbc:" + databaseVendor.jdbcUrlDriverId() + "://10.1.1.1:3306/" + rdsType.name().toLowerCase());
+        } else {
+            rdsConfig.setConnectionURL("jdbc:" + databaseVendor.jdbcUrlDriverId() + "://10.1.1.1:5432/" + rdsType.name().toLowerCase());
+        }
+        rdsConfig.setType(rdsType.name());
+        rdsConfig.setConnectionDriver(databaseVendor.connectionDriver());
+        rdsConfig.setDatabaseEngine(databaseVendor);
+        return rdsConfig;
+    }
+
+    public static RDSConfig rdsConfig(RdsType rdsType) {
+        RDSConfig rdsConfig = new RDSConfig();
+        rdsConfig.setName(rdsType.name());
+        rdsConfig.setConnectionPassword("iamsoosecure");
+        rdsConfig.setConnectionUserName("heyitsme");
+        rdsConfig.setConnectionURL("jdbc:postgresql://10.1.1.1:5432/" + rdsType.name().toLowerCase());
+        rdsConfig.setType(rdsType.name());
+        rdsConfig.setConnectionDriver("org.postgresql.Driver");
+        rdsConfig.setDatabaseEngine(DatabaseVendor.POSTGRES);
+        return rdsConfig;
+    }
+
+    private static void setGatewayTopology(Gateway gateway) {
+        setGatewayTopology(gateway, "topology");
+    }
+
+    private static void setGatewayTopology(Gateway gateway, String topologyName) {
+        try {
+            GatewayTopology gatewayTopology = new GatewayTopology();
+            gatewayTopology.setTopologyName(topologyName);
+            gatewayTopology.setExposedServices(new Json("{}"));
+            gateway.getTopologies().add(gatewayTopology);
+        } catch (JsonProcessingException e) {
+            LOGGER.error("unexpected error during creating GatewayTopology", e);
+        }
+    }
+
+    public static Gateway gatewayEnabled() {
+        Gateway gateway = new Gateway();
+        setGatewayTopology(gateway);
+        gateway.setPath("/path");
+        gateway.setSsoProvider("simple");
+        gateway.setSsoType(SSOType.SSO_PROVIDER);
+        gateway.setGatewayType(GatewayType.CENTRAL);
+        gateway.setSignCert("signcert");
+        gateway.setSignKey("signkey");
+        gateway.setTokenCert("tokencert");
+        gateway.setSignPub("signpub");
+        return gateway;
+    }
+
+    public static Gateway gatewayEnabledWithoutSSOAndWithRanger() {
+        Gateway gateway = new Gateway();
+        setGatewayTopology(gateway);
+        gateway.setPath("/path");
+        gateway.setSsoType(SSOType.NONE);
+        gateway.setGatewayType(GatewayType.CENTRAL);
+        gateway.setSignCert("signcert");
+        gateway.setSignKey("signkey");
+        gateway.setTokenCert("tokencert");
+        gateway.setSignPub("signpub");
+        return gateway;
+    }
+
     public static Stack setSpotInstances(Stack stack) {
         if (stack.cloudPlatform().equals(AWS)) {
             for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
                 (instanceGroup.getTemplate()).setAttributes(new JsonToString().convertToEntityAttribute(
-                    "{\"sshLocation\":\"0.0.0.0/0\",\"encrypted\":false,\"spotPrice\":0.04}"));
+                        "{\"sshLocation\":\"0.0.0.0/0\",\"encrypted\":false,\"spotPrice\":0.04}"));
             }
         }
         return stack;
 
     }
+
+    public static StorageLocations emptyStorageLocations() {
+        return new StorageLocations();
+    }
+
+    public static StorageLocations storageLocations() {
+        StorageLocations storageLocations = new StorageLocations();
+        for (int i = 0; i < 10; i++) {
+            storageLocations.getLocations().add(storageLocation(i));
+        }
+        return storageLocations;
+    }
+
+    public static StorageLocation storageLocation(int i) {
+        StorageLocation storageLocation = new StorageLocation();
+        storageLocation.setValue(i + "_test/test/end");
+        storageLocation.setProperty(i + "_property");
+        storageLocation.setConfigFile(i + "_file");
+        return storageLocation;
+    }
+
+    public static StorageLocation storageLocation(String configFile, int i) {
+        StorageLocation storageLocation = new StorageLocation();
+        storageLocation.setValue("random.value." + i);
+        storageLocation.setProperty("random.property." + i);
+        storageLocation.setConfigFile(configFile);
+        return storageLocation;
+    }
+
+    private static Json getEmptyJson() {
+        try {
+            return new Json("");
+        } catch (JsonProcessingException ignore) {
+            return null;
+        }
+    }
+
 }

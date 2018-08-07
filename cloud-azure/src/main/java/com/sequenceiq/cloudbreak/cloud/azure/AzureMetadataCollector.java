@@ -101,7 +101,6 @@ public class AzureMetadataCollector implements MetadataCollector {
                     Map<String, Object> params = new HashMap<>(1);
                     params.put(CloudInstance.SUBNET_ID, subnetId);
                     params.put(CloudInstance.INSTANCE_NAME, instanceName);
-                    //TODO use shhkey here
                     CloudInstance cloudInstance = new CloudInstance(instanceId, template, null, params);
                     CloudVmInstanceStatus status = new CloudVmInstanceStatus(cloudInstance, InstanceStatus.CREATED);
                     results.add(new CloudVmMetaDataStatus(status, md));

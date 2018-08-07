@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -13,15 +12,15 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
-import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.converter.scheduler.StatusToPollGroupConverter;
-import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.StackStatus;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StackUpdaterTest {
@@ -30,7 +29,7 @@ public class StackUpdaterTest {
     private StackStatusRepository stackStatusRepository;
 
     @Mock
-    private StackRepository stackRepository;
+    private StackService stackService;
 
     @Mock
     private CloudbreakEventService cloudbreakEventService;
@@ -49,12 +48,8 @@ public class StackUpdaterTest {
         Stack stack = TestUtil.stack();
 
         DetailedStackStatus newStatus = DetailedStackStatus.DELETE_COMPLETED;
-        StackStatus testStackStatus = new StackStatus(stack, newStatus.getStatus(), "", newStatus);
-        when(stackStatusRepository.save(any(StackStatus.class))).thenReturn(testStackStatus);
-        when(stackRepository.findOne(anyLong())).thenReturn(stack);
-        when(stackRepository.save(any(Stack.class))).thenReturn(stack);
-        doNothing().when(cloudbreakEventService).fireCloudbreakEvent(anyLong(), anyString(), anyString());
-        when(statusToPollGroupConverter.convert(newStatus.getStatus())).thenReturn(PollGroup.POLLABLE);
+        when(stackService.getById(anyLong())).thenReturn(stack);
+        when(stackService.save(any(Stack.class))).thenReturn(stack);
 
         Stack newStack = underTest.updateStackStatus(1L, DetailedStackStatus.DELETE_COMPLETED);
         assertEquals(newStatus.getStatus(), newStack.getStatus());
@@ -68,12 +63,8 @@ public class StackUpdaterTest {
 
         DetailedStackStatus newStatus = DetailedStackStatus.DELETE_COMPLETED;
         String newStatusReason = "test";
-        StackStatus testStackStatus = new StackStatus(stack, newStatus.getStatus(), newStatusReason, newStatus);
-        when(stackStatusRepository.save(any(StackStatus.class))).thenReturn(testStackStatus);
-        when(stackRepository.findOne(anyLong())).thenReturn(stack);
-        when(stackRepository.save(any(Stack.class))).thenReturn(stack);
-        doNothing().when(cloudbreakEventService).fireCloudbreakEvent(anyLong(), anyString(), anyString());
-        when(statusToPollGroupConverter.convert(newStatus.getStatus())).thenReturn(PollGroup.POLLABLE);
+        when(stackService.getById(anyLong())).thenReturn(stack);
+        when(stackService.save(any(Stack.class))).thenReturn(stack);
 
         Stack newStack = underTest.updateStackStatus(1L, newStatus, newStatusReason);
         assertEquals(newStatus.getStatus(), newStack.getStatus());

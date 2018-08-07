@@ -23,9 +23,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
@@ -36,7 +35,7 @@ import com.icegreen.greenmail.util.ServerSetup;
 import com.icegreen.greenmail.util.ServerSetupTest;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
-import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
+import com.sequenceiq.cloudbreak.service.user.CachedUserDetailsService;
 
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
@@ -48,7 +47,7 @@ public class EmailSenderHostServiceTypeTest {
     private GreenMail greenMail;
 
     @Mock
-    private UserDetailsService userDetailsService;
+    private CachedUserDetailsService cachedUserDetailsService;
 
     @InjectMocks
     private final EmailSenderService emailSenderService = new EmailSenderService();
@@ -68,19 +67,19 @@ public class EmailSenderHostServiceTypeTest {
         ReflectionTestUtils.setField(emailSenderService, "successClusterMailTemplatePath", "templates/cluster-installer-mail-success.ftl");
         ReflectionTestUtils.setField(emailSenderService, "failedClusterMailTemplatePath", "templates/cluster-installer-mail-fail.ftl");
 
-        JavaMailSender mailSender = new JavaMailSenderImpl();
-        ((JavaMailSenderImpl) mailSender).setHost("localhost");
-        ((JavaMailSenderImpl) mailSender).setPort(3465);
-        ((JavaMailSenderImpl) mailSender).setUsername("demouser2");
-        ((JavaMailSenderImpl) mailSender).setPassword("demopwd2");
+        JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+        mailSender.setHost("localhost");
+        mailSender.setPort(3465);
+        mailSender.setUsername("demouser2");
+        mailSender.setPassword("demopwd2");
 
         Properties props = new Properties();
-        props.put("mail.transport.protocol", "smtp");
+        props.setProperty("mail.transport.protocol", "smtp");
         props.put("mail.smtp.auth", false);
         props.put("mail.smtp.starttls.enable", false);
         props.put("mail.debug", false);
 
-        ((JavaMailSenderImpl) mailSender).setJavaMailProperties(props);
+        mailSender.setJavaMailProperties(props);
 
         ReflectionTestUtils.setField(emailSenderService, "mailSender", mailSender);
 
@@ -89,7 +88,7 @@ public class EmailSenderHostServiceTypeTest {
 
         ReflectionTestUtils.setField(emailSenderService, "emailMimeMessagePreparator", mmp);
 
-        when(userDetailsService.getDetails(anyString(), any(UserFilterField.class)))
+        when(cachedUserDetailsService.getDetails(anyString(), any(UserFilterField.class)))
                 .thenReturn(identityUser);
 
     }
@@ -106,10 +105,10 @@ public class EmailSenderHostServiceTypeTest {
         // WHEN
         emailSenderService.sendTerminationSuccessEmail("xxx", "xxx", "123.123.123.123", NAME_OF_THE_CLUSTER);
         // THEN
-        greenMail.waitForIncomingEmail(5000, 1);
+        greenMail.waitForIncomingEmail(5000L, 1);
         Message[] messages = greenMail.getReceivedMessages();
 
-        Assert.assertEquals(1, messages.length);
+        Assert.assertEquals(1L, messages.length);
         Assert.assertEquals(subject, messages[0].getSubject());
         Assert.assertThat(String.valueOf(messages[0].getContent()), Matchers.containsString("successfully terminated"));
     }
@@ -121,10 +120,10 @@ public class EmailSenderHostServiceTypeTest {
         //WHEN
         emailSenderService.sendTerminationFailureEmail("xxx", "xxx", "123.123.123.123", NAME_OF_THE_CLUSTER);
         //THEN
-        greenMail.waitForIncomingEmail(5000, 1);
+        greenMail.waitForIncomingEmail(5000L, 1);
         Message[] messages = greenMail.getReceivedMessages();
 
-        Assert.assertEquals(1, messages.length);
+        Assert.assertEquals(1L, messages.length);
         Assert.assertEquals(subject, messages[0].getSubject());
         Assert.assertThat(String.valueOf(messages[0].getContent()), Matchers.containsString("Failed to terminate your cluster"));
     }
@@ -136,10 +135,10 @@ public class EmailSenderHostServiceTypeTest {
         //WHEN
         emailSenderService.sendProvisioningFailureEmail("xxx", "xxx", NAME_OF_THE_CLUSTER);
         //THEN
-        greenMail.waitForIncomingEmail(5000, 1);
+        greenMail.waitForIncomingEmail(5000L, 1);
         Message[] messages = greenMail.getReceivedMessages();
 
-        Assert.assertEquals(1, messages.length);
+        Assert.assertEquals(1L, messages.length);
         Assert.assertEquals(subject, messages[0].getSubject());
         Assert.assertThat(String.valueOf(messages[0].getContent()), Matchers.containsString("Something went terribly wrong"));
     }
@@ -153,16 +152,16 @@ public class EmailSenderHostServiceTypeTest {
         greenMail = new GreenMail(ServerSetupTest.SMTPS);
         greenMail.start();
         //GIVEN
-        String content = getFileContent("mail/cluster-installer-mail-success").replaceAll("\\n", "");
+        String content = getFileContent().replaceAll("\\n", "");
         String subject = String.format("%s cluster installation", NAME_OF_THE_CLUSTER);
         //WHEN
         emailSenderService.sendProvisioningSuccessEmail("test@example.com", "xxx", "123.123.123.123", NAME_OF_THE_CLUSTER, false);
 
         //THEN
-        greenMail.waitForIncomingEmail(5000, 1);
+        greenMail.waitForIncomingEmail(5000L, 1);
         Message[] messages = greenMail.getReceivedMessages();
 
-        Assert.assertEquals(1, messages.length);
+        Assert.assertEquals(1L, messages.length);
         Assert.assertEquals(subject, messages[0].getSubject());
         Assert.assertTrue(String.valueOf(messages[0].getContent()).replaceAll("\\n", "").replaceAll("\\r", "").contains(content));
     }
@@ -174,10 +173,10 @@ public class EmailSenderHostServiceTypeTest {
         emailSenderService.sendProvisioningSuccessEmail("xxx@alma.com", "xxx", "123.123.123.123", NAME_OF_THE_CLUSTER, false);
 
         //THEN
-        greenMail.waitForIncomingEmail(5000, 1);
+        greenMail.waitForIncomingEmail(5000L, 1);
         Message[] messages = greenMail.getReceivedMessages();
 
-        Assert.assertEquals(1, messages.length);
+        Assert.assertEquals(1L, messages.length);
         Assert.assertEquals("Your cluster '" + NAME_OF_THE_CLUSTER + "' is ready", messages[0].getSubject());
         Assert.assertThat(String.valueOf(messages[0].getContent()), Matchers.containsString("Your cluster '" + NAME_OF_THE_CLUSTER + "' is ready"));
     }
@@ -190,8 +189,8 @@ public class EmailSenderHostServiceTypeTest {
         return factoryBean.getObject();
     }
 
-    private String getFileContent(String path) throws IOException {
-        return CharStreams.toString(new InputStreamReader(new ClassPathResource(path).getInputStream()));
+    private String getFileContent() throws IOException {
+        return CharStreams.toString(new InputStreamReader(new ClassPathResource("mail/cluster-installer-mail-success").getInputStream()));
     }
 
 }

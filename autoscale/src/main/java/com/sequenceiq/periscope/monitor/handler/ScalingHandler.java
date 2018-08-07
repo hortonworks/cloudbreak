@@ -16,9 +16,10 @@ import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
 import com.sequenceiq.periscope.log.MDCBuilder;
 import com.sequenceiq.periscope.monitor.event.ScalingEvent;
+import com.sequenceiq.periscope.service.AmbariClientProvider;
 import com.sequenceiq.periscope.service.ClusterService;
-import com.sequenceiq.periscope.utils.AmbariClientProvider;
 import com.sequenceiq.periscope.utils.ClusterUtils;
+import com.sequenceiq.periscope.utils.TimeUtil;
 
 @Component
 public class ScalingHandler implements ApplicationListener<ScalingEvent> {
@@ -40,7 +41,7 @@ public class ScalingHandler implements ApplicationListener<ScalingEvent> {
     @Override
     public void onApplicationEvent(ScalingEvent event) {
         BaseAlert alert = event.getAlert();
-        Cluster cluster = clusterService.find(alert.getCluster().getId());
+        Cluster cluster = clusterService.findById(alert.getCluster().getId());
         MDCBuilder.buildMdcContext(cluster);
         scale(cluster, alert.getScalingPolicy());
     }
@@ -51,8 +52,7 @@ public class ScalingHandler implements ApplicationListener<ScalingEvent> {
             int totalNodes = ClusterUtils.getTotalNodes(ambariClientProvider.createAmbariClient(cluster));
             int desiredNodeCount = getDesiredNodeCount(cluster, policy, totalNodes);
             if (totalNodes != desiredNodeCount) {
-                ScalingRequest scalingRequest = (ScalingRequest)
-                        applicationContext.getBean("ScalingRequest", cluster, policy, totalNodes, desiredNodeCount);
+                Runnable scalingRequest = (Runnable) applicationContext.getBean("ScalingRequest", cluster, policy, totalNodes, desiredNodeCount);
                 executorService.execute(scalingRequest);
                 cluster.setLastScalingActivityCurrent();
                 clusterService.save(cluster);
@@ -61,14 +61,14 @@ public class ScalingHandler implements ApplicationListener<ScalingEvent> {
             }
         } else {
             LOGGER.info("Cluster cannot be scaled for {} min(s)",
-                    ClusterUtils.TIME_FORMAT.format((double) remainingTime / ClusterUtils.MIN_IN_MS));
+                    ClusterUtils.TIME_FORMAT.format((double) remainingTime / TimeUtil.MIN_IN_MS));
         }
     }
 
     private long getRemainingCooldownTime(Cluster cluster) {
         long coolDown = cluster.getCoolDown();
         long lastScalingActivity = cluster.getLastScalingActivity();
-        return lastScalingActivity == 0L ? 0L : (coolDown * ClusterUtils.MIN_IN_MS) - (System.currentTimeMillis() - lastScalingActivity);
+        return lastScalingActivity == 0L ? 0L : (coolDown * TimeUtil.MIN_IN_MS) - (System.currentTimeMillis() - lastScalingActivity);
     }
 
     private int getDesiredNodeCount(Cluster cluster, ScalingPolicy policy, int totalNodes) {

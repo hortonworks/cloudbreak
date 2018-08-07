@@ -12,6 +12,8 @@ public class ModelDescriptions {
     public static final String TOPOLOGY_ID = "id of the topology the resource belongs to";
     public static final String REQUESTS = "request object";
     public static final String RESPONSE = "response object";
+    public static final String FIXINPUTS = "fixinputs object";
+    public static final String DATALAKEINPUTS = "datalakeinputs object";
     public static final String CREATED = "creation time of the resource in long";
     public static final String AMBARI_SERVER = "ambari server address";
 
@@ -26,6 +28,7 @@ public class ModelDescriptions {
         public static final String STATUS = "status of the blueprint";
         public static final String INPUTS = "input parameters of the blueprint";
         public static final String BLUEPRINT_PROPERTIES = "properties to extend the blueprint with";
+        public static final String TAGS = "user defined tags for blueprint";
     }
 
     public static class CredentialModelDescription {
@@ -41,10 +44,24 @@ public class ModelDescriptions {
     public static class TemplateModelDescription {
         public static final String VOLUME_COUNT = "number of volumes";
         public static final String VOLUME_SIZE = "size of volumes";
+        public static final String ROOT_VOLUME_SIZE = "size of the root volume";
         public static final String VOLUME_TYPE = "type of the volumes";
         public static final String INSTANCE_TYPE = "type of the instance";
         public static final String CUSTOM_INSTANCE_TYPE = "custom instancetype definition";
         public static final String PARAMETERS = "cloud specific parameters for template";
+        public static final String AWS_PARAMETERS = "aws specific parameters for template";
+        public static final String GCP_PARAMETERS = "gcp specific parameters for template";
+        public static final String OPENSTACK_PARAMETERS = "openstack specific parameters for template";
+        public static final String YARN_PARAMETERS = "yarn specific parameters for template";
+        public static final String AZURE_PARAMETERS = "azure specific parameters for template";
+        public static final String AWS_SPOT_PRICE = "spot price for aws";
+        public static final String AZURE_PRIVATE_ID = "private id for azure";
+        public static final String ENCRYPTION = "encryption for vm";
+        public static final String ENCRYPTION_TYPE = "encryption type for vm (DEFAULT|CUSTOM|NONE)";
+        public static final String GCP_ENCRYPTION_TYPE = "encryption type for vm (DEFAULT|CUSTOM)";
+        public static final String ENCRYPTION_KEY = "encryption key for vm";
+        public static final String ENCRYPTED = "should encrypt the vm";
+        public static final String ENCRYPTION_METHOD = "encryption method for the key (RAW|RSA)";
     }
 
     public static class ConstraintTemplateModelDescription {
@@ -81,6 +98,8 @@ public class ModelDescriptions {
 
     public static class StackModelDescription {
         public static final String STACK_ID = "id of the stack";
+        public static final String CUSTOM = "Custom parameters as a json";
+        public static final String ENTRIES = "Entries parameters as a json";
         public static final String IMAGE = "image of the stack";
         public static final String STACK_NAME = "name of the stack";
         public static final String REGION = "region of the stack";
@@ -89,6 +108,7 @@ public class ModelDescriptions {
         public static final String CREDENTIAL_NAME = "credential resource name for the stack";
         public static final String USERNAME = "ambari username";
         public static final String PASSWORD = "ambari password";
+        public static final String EXTENDED_BLUEPRINT_TEXT = "extended bluerint text";
         public static final String ENABLE_SECURITY = "enable Kerberos security";
         public static final String KERBEROS_MASTER_KEY = "kerberos master key";
         public static final String KERBEROS_ADMIN = "kerberos admin user";
@@ -97,6 +117,7 @@ public class ModelDescriptions {
         public static final String KERBEROS_ADMIN_URL = "kerberos admin server URL";
         public static final String KERBEROS_PRINCIPAL = "kerberos principal";
         public static final String PARAMETERS = "additional cloud specific parameters for stack";
+        public static final String INPUTS = "dynamic properties";
         public static final String FAILURE_ACTION = "action on failure";
         public static final String FAILURE_POLICY = "failure policy in case of failures";
         public static final String STACK_STATUS = "status of the stack";
@@ -121,10 +142,12 @@ public class ModelDescriptions {
         public static final String VPC_ID = "cluster vpc id";
         public static final String SUBNET_ID = "cluster subnet id";
         public static final String FILE_SYSTEM = "external file system configuration";
+        public static final String CLOUD_STORAGE = "external cloud storage configuration";
         public static final String INSTANCE_GROUPS = "collection of instance groupst";
         public static final String IMAGE_SETTINGS = "settings for custom images";
         public static final String IMAGE_CATALOG = "custom image catalog URL";
         public static final String IMAGE_ID = "virtual machine image id from ImageCatalog, machines of the cluster will be started from this image";
+        public static final String OS_TYPE = "os type of the image, this property is only considered when no specific image id is provided";
         public static final String INSTANCE_GROUP_ADJUSTMENT = "instance group adjustment";
         public static final String TAGS = "stack related tags";
         public static final String APPLICATION_TAGS = "stack related application tags";
@@ -149,6 +172,7 @@ public class ModelDescriptions {
         public static final String CUSTOM_DOMAIN_SETTINGS = "settings related to custom domain names";
         public static final String GENERAL_SETTINGS = "general configuration parameters for a cluster (e.g. 'name', 'credentialname')";
         public static final String PLACEMENT_SETTINGS = "placement configuration parameters for a cluster (e.g. 'region', 'availabilityZone')";
+        public static final String SHARED_SERVICE_REQUEST = "Shared service request";
     }
 
     public static class ClusterModelDescription {
@@ -160,12 +184,15 @@ public class ModelDescriptions {
         public static final String BLUEPRINT_ID = "blueprint id for the cluster";
         public static final String BLUEPRINT_NAME = "blueprint name for the cluster";
         public static final String BLUEPRINT = "blueprint for the cluster";
-        public static final String VALIDATE_BLUEPRINT = "validate blueprint";
+        public static final String SHARED_SERVICE_REQUEST = "Shared service request";
+        public static final String VALIDATE_BLUEPRINT = "blueprint validation";
+        public static final String SHARED_SERVICE = "shared service for a specific stack";
+        public static final String FILESYSTEM = "filesystem for a specific stack";
         public static final String HOURS = "duration - how long the cluster is running in hours";
         public static final String MINUTES = "duration - how long the cluster is running in minutes (minus hours)";
         public static final String EMAIL_TO = "send email to the requested address";
         public static final String EMAIL_NEEDED = "send email about the result of the cluster installation";
-        public static final String SERVICE_ENDPOINT_MAP = "most important services in the cluster";
+        public static final String CLUSTER_EXPOSED_SERVICES = "cluster exposed services for topologies";
         public static final String CONFIG_STRATEGY = "config recommendation strategy";
         public static final String BLUEPRINT_INPUTS = "blueprint inputs in the cluster";
         public static final String BLUEPRINT_CUSTOM_PROPERTIES = "blueprint custom properties";
@@ -175,6 +202,7 @@ public class ModelDescriptions {
         public static final String CONNECTED_CLUSTER = "cluster can connect to a datalake you can define the parameters here";
         public static final String CLUSTER_ATTRIBUTES = "Additional information for ambari cluster";
         public static final String RDSCONFIG_IDS = "RDS configuration ids for the cluster";
+        public static final String RDSCONFIG_NAMES = "RDS configuration names for the cluster";
         public static final String RDSCONFIGS = "RDS configurations for the cluster";
         public static final String LDAP_CONFIG_ID = "LDAP config id for the cluster";
         public static final String LDAP_CONFIG_NAME = "LDAP config name for the cluster";
@@ -187,25 +215,38 @@ public class ModelDescriptions {
         public static final String HOSTGROUPS = "collection of hostgroups";
         public static final String AMBARI_STACK_DETAILS = "details of the Ambari stack";
         public static final String AMBARI_REPO_DETAILS = "details of the Ambari package repository";
-        public static final String AMBARI_DATABASE_DETAILS = "details of the external Ambari database";
+        public static final String AMBARI_DATABASE_DETAILS = "[DEPRECATED] use RdsConfig instead! details of the external Ambari database";
         public static final String AMBARI_DATABASE_ERROR = "result of Ambari database test";
         public static final String RDS_CONFIGS = "details of the external database for Hadoop components";
-        public static final String RDS_CONNECTION_RESULT = "result of RDS connection test";
         public static final String LDAP_CONNECTION_RESULT = "result of Ldap connection test";
         public static final String CREATION_FINISHED = "Epoch time of cluster creation finish";
         public static final String AMBARI_SECURITY_MASTER_KEY = "a master key for encrypting the passwords in Ambari";
         public static final String UPTIME = "duration - how long the cluster is running in milliseconds";
+        public static final String PROXY_NAME = "proxy configuration name for the cluster";
+        public static final String PROXY_CONFIG_ID = "proxy configuration id for the cluster";
+        public static final String LOCATIONS = "cloud storage locations";
     }
 
     public static class GatewayModelDescription {
-        public static final String ENABLE_KNOX_GATEWAY = "enable Knox gateway security";
+        public static final String ENABLE_KNOX_GATEWAY = "[DEPRECATED] 'enableGateway' is no longer needed to determine if "
+                + "gateway needs to be launched or not.\n"
+                + "Presence of gateway definition in request is suffucicient. This value is only used in legacy requests, \n"
+                + "when 'topologyName' or 'exposedServices' is defined in the root of Gateway, instead of using topologies.\n"
+                + "When it is a legacy request and 'enableGateway' is set to 'false', gateway will not be saved and created.";
         public static final String KNOX_PATH = "Knox gateway path";
         public static final String KNOX_GATEWAY_TYPE = "Knox gateway type";
         public static final String KNOX_SSO_TYPE = "Knox SSO type";
+        public static final String DEPRECATED_KNOX_TOPOLOGY_NAME = "[DEPRECATED] Use the 'topologyName' inside the 'topologies' part of the request.\n"
+                + "If 'topologyName' is specified, other deprecated properties ('exposedServices' and 'enableGateway') will be used as well, "
+                + "and 'topologies' will be ignored.";
         public static final String KNOX_TOPOLOGY_NAME = "Knox topology name";
-        public static final String EXPOSED_KNOX_SERVICES = "exposed Knox services";
+        public static final String DEPRECATED_EXPOSED_KNOX_SERVICES = "[DEPRECATED] Use the 'exposedServices' inside the 'topologies' part of the request.\n"
+                + "If 'exposedServices' is specified, other deprecated properties ('topologyName' and 'enableGateway') will be used as well, "
+                + "and 'topologies' will be ignored.";
+        public static final String EXPOSED_KNOX_SERVICES = "exposed Knox services - those services that should be accessible through Knox gateway.";
         public static final String KNOX_SSO_PROVIDER = "SSO provider cluster name";
         public static final String KNOX_SSO_CERT = "SSO Provider certificate";
+        public static final String GATEWAY_TOPOLOGIES = "Topology definitions of the gateway.";
     }
 
     public static class ClusterTemplateModelDescription {
@@ -266,20 +307,27 @@ public class ModelDescriptions {
         public static final String REPOSITORY_VERSION = "version of the repository for VDF file creation in Ambari";
         public static final String VDF_URL = "local path on the Ambari server or URL that point to the desired VDF file";
         public static final String MPACK_URL = "url the MPACK that needs to be installed before HDF installation";
+        public static final String MPACKS = "Management packs which are needed for the HDP / HDF clusters";
     }
 
     public static class RDSConfig {
         public static final String CONNECTION_URL = "JDBC connection URL in the form of jdbc:<db-type>://<address>:<port>/<db>";
-        public static final String DB_TYPE = "Type of the external database (allowed values: MYSQL, POSTGRES)";
+        public static final String CONNECTION_DRIVER_NAME = "Name of the JDBC connection driver (for example: 'org.postgresql.Driver')";
+        public static final String DB_ENGINE = "Name of the external database engine (MYSQL, POSTGRES...)";
+        public static final String DB_ENGINE_DISPLAYNAME = "Display name of the external database engine (Mysql, PostgreSQL...)";
+        public static final String VERSION = "Version of the Database";
         public static final String USERNAME = "Username to use for the jdbc connection";
         public static final String PASSWORD = "Password to use for the jdbc connection";
+        public static final String ORACLE = "Oracle specific properties";
         public static final String NAME = "Name of the RDS configuration resource";
-        public static final String HDPVERSION = "HDP version for the RDS configuration";
-        public static final String VALIDATED = "If true, then the RDS configuration will be validated";
-        public static final String RDSTYPE = "Type of rds (HIVE or RANGER)";
-        public static final String RDS_PROPERTIES = "custom properties for rds connection";
+        public static final String STACK_VERSION = "(HDP, HDF)Stack version for the RDS configuration";
+        public static final String RDSTYPE = "Type of RDS, aka the service name that will use the RDS like HIVE, DRUID, SUPERSET, RANGER, etc.";
+        public static final String CONNECTOR_JAR_URL = "URL that points to the jar of the connection driver(connector)";
         public static final String RDS_REQUEST = "rds config request";
         public static final String RDS_REQUEST_CLUSTER_NAME = "requested cluster name";
+        public static final String RDS_CONNECTION_TEST_RESULT = "result of RDS connection test";
+        public static final String RDS_CONFIG_ID = "id of the RDS config to be tested by connectivity";
+        public static final String RDS_CONFIG_REQUEST = "unsaved RDS config to be tested by connectivity";
     }
 
     public static class FileSystem {
@@ -287,6 +335,7 @@ public class ModelDescriptions {
         public static final String TYPE = "type of the filesystem";
         public static final String DEFAULT = "true if fs.defaultFS should point to this filesystem";
         public static final String PROPERTIES = "configuration of the filesystem access as key-value pairs";
+        public static final String LOCATIONS = "configuration of the filesystem location";
     }
 
     public static class RecipeModelDescription {
@@ -312,6 +361,16 @@ public class ModelDescriptions {
     public static class InstanceGroupAdjustmentModelDescription {
         public static final String SCALING_ADJUSTMENT = "scaling adjustment of the instance groups";
         public static final String WITH_CLUSTER_EVENT = "on stack update, update cluster too";
+    }
+
+    public static class MpackDetailsDescription {
+        public static final String MPACK_NAME = "name of the ambari management pack";
+        public static final String MPACK_URL = "url of the ambari management pack";
+        public static final String PURGE = "if true, management pack will be installed with '--purge' flag";
+        public static final String PURGE_LIST = "if provided, management pack will be installed with '--purgeList' option with this values";
+        public static final String FORCE = "if true, management pack will be installed with '--force' flag";
+        public static final String STACK_DEFAULT = "if true, the management pack is mandatory for the stack";
+        public static final String PREINSTALLED = "if true, the management pack is already installed on the instances";
     }
 
     public static class HostGroupModelDescription {
@@ -412,6 +471,7 @@ public class ModelDescriptions {
         public static final String BIND_DN = "bind distinguished name for connection test and group search (e.g. cn=admin,dc=example,dc=org)";
         public static final String BIND_PASSWORD = "password for the provided bind DN";
         public static final String USER_SEARCH_BASE = "template for user search for authentication (e.g. dc=hadoop,dc=apache,dc=org)";
+        public static final String USER_DN_PATTERN = "template for pattern based user search for authentication (e.g. cn={0},dc=hadoop,dc=apache,dc=org)";
         public static final String GROUP_SEARCH_BASE = "template for group search for authorization (e.g. dc=hadoop,dc=apache,dc=org)";
         public static final String USER_NAME_ATTRIBUTE = "attribute name for simplified search filter (e.g. sAMAccountName in case of AD, UID or cn for LDAP).";
         public static final String DOMAIN = "domain in LDAP server (e.g. ad.seq.com).";
@@ -421,6 +481,7 @@ public class ModelDescriptions {
         public static final String GROUP_ID_ATTRIBUTE = "Group Id Attribute (defaults to cn)";
         public static final String GROUP_MEMBER_ATTRIBUTE = "Group Member Attribute (defaults to member)";
         public static final String ADMIN_GROUP = "LDAP group for administrators";
+        public static final String VALIDATION_REQUEST = "Request that contains the minimal set of fields to test LDAP connectivity";
     }
 
     public static class RDSConfigModelDescription {
@@ -433,6 +494,16 @@ public class ModelDescriptions {
 
     public static class SubscriptionModelDescription {
         public static final String ENDPOINT = "url of the endpoint";
+    }
+
+    public static class SupportedDatabaseModelDescription {
+        public static final String DATABASENAME = "Name of the database";
+        public static final String DISPLAYNAME = "Display name of the database";
+        public static final String JDBCPREFIX = "Jdbc prefix of the database";
+        public static final String NAME = "Name of the service";
+        public static final String SERVICE_DISPLAYNAME = "Display name of the service";
+        public static final String DATABASES = "Supported database list";
+        public static final String VERSIONS = "Supported version types currently only for Oracle";
     }
 
     public static class FailureReport {
@@ -448,6 +519,10 @@ public class ModelDescriptions {
     public static class SmartSenseSubscriptionModelDescription {
         public static final String SUBSCRIPTION_ID = "Identifier of SmartSense subscription.";
         public static final String AUTOGENERATED = "Flag of aut generated SmartSense subscription.";
+    }
+
+    public static class HardwareModelDescription {
+        public static final String METADATA = "Metadata of instances.";
     }
 
     public static class FlexSubscriptionModelDescription {
@@ -477,5 +552,20 @@ public class ModelDescriptions {
 
     public static class RepositoryConfigValidationDescription {
         public static final String FIELDS = "Indicates the request's value with the same key is valid and reachable by Cloudbreak or not";
+    }
+
+    public static class UtilDescription {
+        public static final String STORAGE_NAME = "Storage name of the path";
+        public static final String ACCOUNT_NAME = "Account name of the path";
+        public static final String FILESYTEM_TYPE = "Type of filesystem";
+    }
+
+    public static class ProxyConfigModelDescription {
+        public static final String SERVER_HOST = "host or IP address of proxy server";
+        public static final String SERVER_PORT = "port of proxy server (typically: 3128 or 8080)";
+        public static final String PROTOCOL = "determines the protocol (http or https)";
+        public static final String NAME = "Name of the proxy configuration resource";
+        public static final String USERNAME = "Username to use for basic authentication";
+        public static final String PASSWORD = "Password to use for basic authentication";
     }
 }

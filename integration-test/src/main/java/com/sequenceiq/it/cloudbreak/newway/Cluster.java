@@ -3,16 +3,25 @@ package com.sequenceiq.it.cloudbreak.newway;
 import java.util.Set;
 import java.util.function.Function;
 
+import javax.inject.Inject;
+
+import com.sequenceiq.cloudbreak.api.model.SharedServiceRequest;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.convert.ConversionService;
+
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
-import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
-import com.sequenceiq.cloudbreak.api.model.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
+import com.sequenceiq.cloudbreak.api.model.v2.CloudStorageRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.RdsConfigs;
 import com.sequenceiq.it.IntegrationTestContext;
 
-public class Cluster extends Entity  {
-    public static final String CLUSTER_REQUEST = "CLUSTER_REQUEST";
+public class Cluster extends Entity {
+
+    private static final String CLUSTER_REQUEST = "CLUSTER_REQUEST";
+
+    @Inject
+    @Qualifier("conversionService")
+    private ConversionService conversionService;
 
     private ClusterV2Request request;
 
@@ -20,7 +29,7 @@ public class Cluster extends Entity  {
 
     Cluster(String newId) {
         super(newId);
-        setRequest(new ClusterV2Request());
+        request = new ClusterV2Request();
     }
 
     Cluster() {
@@ -44,59 +53,60 @@ public class Cluster extends Entity  {
     }
 
     public Cluster withName(String name) {
-        getRequest().setName(name);
-        setName(name);
+        request.setName(name);
+        this.name = name;
         return this;
     }
 
     public Cluster withAmbariRequest(AmbariV2Request ambariRequest) {
-        getRequest().setAmbari(ambariRequest);
+        request.setAmbari(ambariRequest);
         return this;
     }
 
     public Cluster withEmailNeeded(Boolean aBoolean) {
-        getRequest().setEmailNeeded(aBoolean);
+        request.setEmailNeeded(aBoolean);
         return this;
     }
 
     public Cluster withEmailTo(String parameters) {
-        getRequest().setEmailTo(parameters);
+        request.setEmailTo(parameters);
         return this;
     }
 
     public Cluster withExecutorType(ExecutorType executorType) {
-        getRequest().setExecutorType(executorType);
-        return this;
-    }
-
-    public Cluster withFileSystem(FileSystemRequest fileSystemRequest) {
-        getRequest().setFileSystem(fileSystemRequest);
+        request.setExecutorType(executorType);
         return this;
     }
 
     public Cluster withLdapConfigName(String ldap) {
-        getRequest().setLdapConfigName(ldap);
+        request.setLdapConfigName(ldap);
         return this;
     }
 
-    public Cluster withRdsConfigIds(Set<Long> ids) {
-        if (getRequest().getRdsConfigs() == null) {
-            getRequest().setRdsConfigs(new RdsConfigs());
-        }
-        getRequest().getRdsConfigs().setIds(ids);
+    public Cluster withProxyConfigName(String proxy) {
+        request.setProxyName(proxy);
         return this;
     }
 
-    public Cluster withRdsConfigJsons(Set<RDSConfigRequest> rdsConfigRequests) {
-        if (getRequest().getRdsConfigs() == null) {
-            getRequest().setRdsConfigs(new RdsConfigs());
-        }
-        getRequest().getRdsConfigs().setConfigs(rdsConfigRequests);
+    public Cluster withRdsConfigNames(Set<String> names) {
+        request.setRdsConfigNames(names);
+        return this;
+    }
+
+    public Cluster withCloudStorage(CloudStorageRequest cloudStorage) {
+        request.setCloudStorage(cloudStorage);
+        return this;
+    }
+
+    public Cluster withSharedService(String datalakeClusterName) {
+        SharedServiceRequest sharedServiceRequest = new SharedServiceRequest();
+        sharedServiceRequest.setSharedCluster(datalakeClusterName);
+        request.setSharedService(sharedServiceRequest);
         return this;
     }
 
     public static Function<IntegrationTestContext, Cluster> getTestContextCluster(String key) {
-        return (testContext)->testContext.getContextParam(key, Cluster.class);
+        return testContext -> testContext.getContextParam(key, Cluster.class);
     }
 
     public static Function<IntegrationTestContext, Cluster> getTestContextCluster() {
@@ -104,7 +114,7 @@ public class Cluster extends Entity  {
     }
 
     public static Function<IntegrationTestContext, Cluster> getNewCluster() {
-        return (testContext)->new Cluster();
+        return testContext -> new Cluster();
     }
 
     public static Cluster request(String key) {

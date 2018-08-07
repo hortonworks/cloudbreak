@@ -1,0 +1,35 @@
+{
+  "providers" : [
+    {
+      "provider" : "AWS",
+      "configEntries" : [
+        {
+          "supportedFileSytem" : "S3",
+          "minVersion" : "2.6.0"
+        }
+      ]
+    },
+    {
+      "provider" : "GCP",
+      "configEntries" : [
+        {
+          "supportedFileSytem" : "GCS",
+          "minVersion" : "2.6.5"
+        }
+      ]
+    },
+    {
+      "provider" : "AZURE",
+      "configEntries" : [
+        {
+          "supportedFileSytem" : "WASB",
+          "minVersion" : "2.6.0"
+        },
+        {
+          "supportedFileSytem" : "ADLS",
+          "minVersion" : "2.6.0"
+        }
+      ]
+    }
+  ]
+}

@@ -17,26 +17,26 @@ public class CreateApplicationRequestTest {
     private static final int LIFETIME = 12;
 
     @Test
-    public void testName() throws Exception {
+    public void testName() {
         CreateApplicationRequest createApplicationRequest = new CreateApplicationRequest();
         createApplicationRequest.setName(NAME);
         assertEquals(NAME, createApplicationRequest.getName());
     }
 
     @Test
-    public void testLifetime() throws Exception {
+    public void testLifetime() {
         CreateApplicationRequest createApplicationRequest = new CreateApplicationRequest();
         createApplicationRequest.setLifetime(LIFETIME);
         assertEquals(LIFETIME, createApplicationRequest.getLifetime());
     }
 
     @Test
-    public void testComponents() throws Exception {
+    public void testComponents() {
         YarnComponent component = new YarnComponent();
         CreateApplicationRequest createApplicationRequest = new CreateApplicationRequest();
         List<YarnComponent> components = new ArrayList<>();
         components.add(component);
         createApplicationRequest.setComponents(components);
-        assertEquals(1, createApplicationRequest.getComponents().size());
+        assertEquals(1L, createApplicationRequest.getComponents().size());
     }
 }

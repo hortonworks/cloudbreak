@@ -1,0 +1,9 @@
+name: Ldap_config_tests
+parallel: "instances"
+parameters:
+  cleanUp: false
+
+tests:
+  - name: ldap_config_test
+    classes:
+      - com.sequenceiq.it.cloudbreak.LdapConfigTests

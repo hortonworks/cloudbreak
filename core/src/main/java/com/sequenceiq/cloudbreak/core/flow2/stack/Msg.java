@@ -20,6 +20,7 @@ public enum Msg {
     STACK_REMOVING_INSTANCE_FINISHED("stack.removing.instance.finished"),
     STACK_REMOVING_INSTANCE_FAILED("stack.removing.instance.failed"),
     STACK_METADATA_EXTEND("stack.metadata.extend"),
+    STACK_METADATA_SETUP_BILLING_CHANGED("stack.metadata.setup.billing.changed"),
     STACK_BOOTSTRAP_NEW_NODES("stack.bootstrap.new.nodes"),
     STACK_UPSCALE_FINISHED("stack.upscale.finished"),
     STACK_DOWNSCALE_INSTANCES("stack.downscale.instances"),
@@ -83,7 +84,11 @@ public enum Msg {
     AMBARI_CLUSTER_GATEWAY_CHANGE("ambari.cluster.gateway.change"),
     AMBARI_CLUSTER_GATEWAY_CHANGED_SUCCESSFULLY("ambari.cluster.gateway.changed.successfully"),
     AMBARI_CLUSTER_GATEWAY_CHANGE_FAILED("ambari.cluster.gateway.change.failed"),
-    STACK_IMAGE_SETUP("stack.image.setup");
+    AMBARI_CLUSTER_DECOMMISSIONING_TIME("ambari.cluster.decommissioning.time"),
+    STACK_IMAGE_SETUP("stack.image.setup"),
+    STACK_IMAGE_UPDATE_STARTED("stack.image.update.started"),
+    STACK_IMAGE_UPDATE_FINISHED("stack.image.update.finished"),
+    STACK_IMAGE_UPDATE_FAILED("stack.image.update.failed");
 
     private final String code;
 

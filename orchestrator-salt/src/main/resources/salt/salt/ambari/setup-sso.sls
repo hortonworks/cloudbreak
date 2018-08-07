@@ -1,6 +1,7 @@
 {%- from 'ambari/settings.sls' import ambari with context %}
 
-{% if ambari.gateway.ssotype == 'SSO_PROVIDER' %}
+{% if not ambari.setup_ldap_and_sso_on_api %}
+{% if ambari.gateway.ssotype is defined and ambari.gateway.ssotype is not none and ambari.gateway.ssotype == 'SSO_PROVIDER' %}
 
 ambari_sso_enabled:
   file.append:
@@ -32,4 +33,5 @@ ambari_sso_publickey:
     - require:
       - pkg: ambari-server
 
+{% endif %}
 {% endif %}

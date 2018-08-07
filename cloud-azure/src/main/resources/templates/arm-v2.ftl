@@ -358,6 +358,7 @@
                                     "uri" : "[concat(variables('osDiskVhdName'), '${instance.instanceId}','.vhd')]"
                                },
                                <#else>
+                               "diskSizeGB": "${instance.rootVolumeSize}",
                                "managedDisk": {
                                     "storageAccountType": "${instance.attachedDiskStorageType}"
                                },
@@ -368,7 +369,11 @@
                            },
                            <#if instance.managedDisk == true>
                            "imageReference": {
+                               <#if instance.customImageId?? && instance.customImageId?has_content>
+                               "id": "${instance.customImageId}"
+                               <#else>
                                "id": "${customImageId}"
+                               </#if>
                            },
                            </#if>
                            "dataDisks": [

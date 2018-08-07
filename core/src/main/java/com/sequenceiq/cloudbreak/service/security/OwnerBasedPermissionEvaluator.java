@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -16,10 +17,12 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
 
+import com.sequenceiq.cloudbreak.aspect.PermissionType;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
-import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
+import com.sequenceiq.cloudbreak.repository.security.UserRepository;
+import com.sequenceiq.cloudbreak.service.user.CachedUserDetailsService;
 
 @Service
 @Lazy
@@ -31,11 +34,17 @@ public class OwnerBasedPermissionEvaluator implements PermissionEvaluator {
 
     @Inject
     @Lazy
-    private UserDetailsService userDetailsService;
+    private CachedUserDetailsService cachedUserDetailsService;
+
+    @Inject
+    private UserRepository userRepository;
 
     @Override
     public boolean hasPermission(Authentication authentication, Object target, Object permission) {
-        Permission p = Permission.valueOf(permission.toString().toUpperCase());
+        PermissionType p = PermissionType.valueOf(permission.toString().toUpperCase());
+        if (target instanceof Optional) {
+            target = ((Optional) target).orElse(null);
+        }
         if (target == null) {
             return false;
         }
@@ -44,10 +53,17 @@ public class OwnerBasedPermissionEvaluator implements PermissionEvaluator {
             return oauth.getOAuth2Request().getScope().contains(AUTO_SCALE_SCOPE);
         }
 
-        IdentityUser user = userDetailsService.getDetails((String) authentication.getPrincipal(), UserFilterField.USERNAME);
+        IdentityUser user = cachedUserDetailsService.getDetails((String) authentication.getPrincipal(), UserFilterField.USERNAME);
+
+        // TODO: implement this properly:
+//        User cbUser = userRepository.findByEmail(user.getUserId());
+//        Set<UserOrgPermissions> organizations = cbUser.getOrganizations();
+
         Collection<?> targets = target instanceof Collection ? (Collection<?>) target : Collections.singleton(target);
         return targets.stream().allMatch(t -> {
             try {
+                // TODO: check if organization of the resource is in the list of the user's organizations
+                // TODO: also check by role: organizations.iterator().next().getRole()
                 return hasPermission(user, p, t);
             } catch (IllegalAccessException e) {
                 LOGGER.error("Object doesn't have properties to check permission with class: " + t.getClass().getCanonicalName(), e);
@@ -61,12 +77,9 @@ public class OwnerBasedPermissionEvaluator implements PermissionEvaluator {
         return false;
     }
 
-    private boolean hasPermission(IdentityUser user, Permission p, Object targetDomainObject) throws IllegalAccessException {
-        if (getOwner(targetDomainObject).equals(user.getUserId()) || getAccount(targetDomainObject).equals(user.getAccount())
-                && (user.getRoles().contains(IdentityUserRole.ADMIN) || (p == Permission.READ && isPublicInAccount(targetDomainObject)))) {
-            return true;
-        }
-        return false;
+    private boolean hasPermission(IdentityUser user, PermissionType p, Object targetDomainObject) throws IllegalAccessException {
+        return getOwner(targetDomainObject).equals(user.getUserId()) || getAccount(targetDomainObject).equals(user.getAccount())
+                && (user.getRoles().contains(IdentityUserRole.ADMIN) || (p == PermissionType.READ && isPublicInAccount(targetDomainObject)));
     }
 
     private String getAccount(Object targetDomainObject) throws IllegalAccessException {
@@ -96,9 +109,5 @@ public class OwnerBasedPermissionEvaluator implements PermissionEvaluator {
             result = (String) ownerField.get(targetDomainObject);
         }
         return result;
-    }
-
-    private enum Permission {
-        READ, WRITE
     }
 }

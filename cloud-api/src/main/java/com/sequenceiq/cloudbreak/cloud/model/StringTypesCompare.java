@@ -93,11 +93,7 @@ public class StringTypesCompare implements Comparator<StringType>, Serializable 
         }
     }
 
-    char charAt(String s, int i) {
-        if (i >= s.length()) {
-            return 0;
-        } else {
-            return s.charAt(i);
-        }
+    char charAt(CharSequence s, int i) {
+        return i >= s.length() ? 0 : s.charAt(i);
     }
 }

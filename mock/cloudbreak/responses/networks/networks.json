@@ -1,0 +1,72 @@
+[
+  {
+    "description": null,
+    "subnetCIDR": null,
+    "cloudPlatform": "OPENSTACK",
+    "parameters": {
+      "publicNetId": null,
+      "routerId": null,
+      "internetGatewayId": null,
+      "subnetId": "0404bf21-db5f-4987-8576-e65a4a99b14e",
+      "networkingOption": "self-service",
+      "networkId": "a5ad7a1d-d3a6-4180-8d61-07a23f6fb449"
+    },
+    "topologyId": null,
+    "name": "ncc1f02de-0ff6-404b-ad4e-526cfb620d87",
+    "id": 1,
+    "publicInAccount": false
+  },
+  {
+    "description": null,
+    "subnetCIDR": "10.0.0.0/16",
+    "cloudPlatform": "AWS",
+    "parameters": {
+      "publicNetId": null,
+      "routerId": null,
+      "internetGatewayId": null,
+      "networkId": null,
+      "vpcId": null
+    },
+    "topologyId": null,
+    "name": "n7c98594f-1afa-4e79-8c77-7697a7d4346f",
+    "id": 2,
+    "publicInAccount": false
+  },
+  {
+    "description": null,
+    "subnetCIDR": "10.0.0.0/16",
+    "cloudPlatform": "AZURE",
+    "parameters": {
+      "publicNetId": null,
+      "routerId": null,
+      "internetGatewayId": null,
+      "noPublicIp": false,
+      "noFirewallRules": false,
+      "networkId": null,
+      "vpcId": null
+    },
+    "topologyId": null,
+    "name": "nceddf172-7b62-41cc-b9ef-e6bdf15b08ea",
+    "id": 3,
+    "publicInAccount": false
+  },
+  {
+    "description": null,
+    "subnetCIDR": "10.0.0.0/16",
+    "cloudPlatform": "GCP",
+    "parameters": {
+      "subnetId": "gcpcluster-20180119120325",
+      "publicNetId": null,
+      "routerId": null,
+      "internetGatewayId": null,
+      "vpcId": null,
+      "noFirewallRules": false,
+      "networkId": "gcpcluster-20180119120314",
+      "noPublicIp": false
+    },
+    "topologyId": null,
+    "name": "n5001012c-3a70-4c3e-b944-2f8703354dcc",
+    "id": 4,
+    "publicInAccount": false
+  }
+]

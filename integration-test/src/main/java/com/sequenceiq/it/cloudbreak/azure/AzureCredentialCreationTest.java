@@ -34,7 +34,7 @@ public class AzureCredentialCreationTest extends AbstractCloudbreakIntegrationTe
     @Test
     @Parameters({ "credentialName", "subscriptionId", "secretKey", "accessKey", "tenantId" })
     public void testAzureRMCredentialCreation(@Optional("itazurermcreden") String credentialName, @Optional("") String subscriptionId,
-            @Optional("") String secretKey, @Optional("") String accessKey, @Optional("") String tenantId) throws Exception {
+            @Optional("") String secretKey, @Optional("") String accessKey, @Optional("") String tenantId) {
         // GIVEN
         credentialName = StringUtils.hasLength(credentialName) ? credentialName : defaultName;
         subscriptionId = StringUtils.hasLength(subscriptionId) ? subscriptionId : defaultSubscriptionId;
@@ -43,7 +43,6 @@ public class AzureCredentialCreationTest extends AbstractCloudbreakIntegrationTe
         accessKey = StringUtils.hasLength(accessKey) ? accessKey : defaultAccesKey;
 
         // WHEN
-        // TODO publicInAccount
         CredentialRequest credentialRequest = new CredentialRequest();
         credentialRequest.setName(credentialName);
         credentialRequest.setDescription("Azure credential for integartion test");

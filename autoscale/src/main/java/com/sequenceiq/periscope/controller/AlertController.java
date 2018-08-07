@@ -8,7 +8,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
-import javax.transaction.Transactional;
 
 import org.springframework.stereotype.Component;
 
@@ -31,7 +30,7 @@ import com.sequenceiq.periscope.domain.MetricAlert;
 import com.sequenceiq.periscope.domain.PrometheusAlert;
 import com.sequenceiq.periscope.domain.TimeAlert;
 import com.sequenceiq.periscope.service.AlertService;
-import com.sequenceiq.periscope.utils.DateUtils;
+import com.sequenceiq.periscope.service.DateService;
 
 @Component
 public class AlertController implements AlertEndpoint {
@@ -58,7 +57,7 @@ public class AlertController implements AlertEndpoint {
     private PrometheusAlertResponseConverter prometheusAlertResponseConverter;
 
     @Inject
-    private DateUtils dateUtils;
+    private DateService dateService;
 
     @Override
     public MetricAlertResponse createMetricAlerts(Long clusterId, MetricAlertRequest json) {
@@ -73,7 +72,6 @@ public class AlertController implements AlertEndpoint {
     }
 
     @Override
-    @Transactional
     public List<MetricAlertResponse> getMetricAlerts(Long clusterId) {
         return createAlarmsResponse(alertService.getMetricAlerts(clusterId));
     }
@@ -114,7 +112,7 @@ public class AlertController implements AlertEndpoint {
 
     @Override
     public Boolean validateCronExpression(Long clusterId, TimeAlertValidationRequest json) throws ParseException {
-        dateUtils.getCronExpression(json.getCronExpression());
+        dateService.getCronExpression(json.getCronExpression());
         return true;
     }
 
@@ -148,7 +146,7 @@ public class AlertController implements AlertEndpoint {
 
     private TimeAlert validateTimeAlert(TimeAlertRequest json) throws ParseException {
         TimeAlert alert = timeAlertRequestConverter.convert(json);
-        dateUtils.getCronExpression(alert.getCron());
+        dateService.getCronExpression(alert.getCron());
         return alert;
     }
 

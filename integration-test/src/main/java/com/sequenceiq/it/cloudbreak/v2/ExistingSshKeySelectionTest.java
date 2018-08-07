@@ -34,7 +34,7 @@ public class ExistingSshKeySelectionTest extends AbstractCloudbreakIntegrationTe
         Set<PlatformSshKeyResponse> regionKeys = response.getSshKeys().get(region);
         Assert.assertNotNull(regionKeys, "keys cannot be null for " + region);
         java.util.Optional<PlatformSshKeyResponse> selected = regionKeys.stream().filter(rk -> rk.getName().equals(selectedKeyName)).findFirst();
-        Assert.assertTrue(selected.isPresent(), "the sshkey list doesn't contain [" + selectedKeyName + "]");
+        Assert.assertTrue(selected.isPresent(), "the sshkey list doesn't contain [" + selectedKeyName + ']');
         getItContext().putContextParam(CloudbreakV2Constants.SSH_PUBLICKEY_ID, selected.get().getName());
     }
 }

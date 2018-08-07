@@ -4,9 +4,10 @@ import com.sequenceiq.cloudbreak.api.model.RecommendationRequestJson;
 import com.sequenceiq.cloudbreak.api.model.RecommendationResponse;
 
 public class RecommendationEntity extends AbstractCloudbreakEntity<RecommendationRequestJson, RecommendationResponse> {
-    public static final String RECOMMENDATION = "RECOMMENDATION";
 
-    RecommendationEntity(String newId) {
+    static final String RECOMMENDATION = "RECOMMENDATION";
+
+    private RecommendationEntity(String newId) {
         super(newId);
         setRequest(new RecommendationRequestJson());
     }
@@ -22,6 +23,26 @@ public class RecommendationEntity extends AbstractCloudbreakEntity<Recommendatio
 
     public RecommendationEntity withBlueprintName(String name) {
         getRequest().setBlueprintName(name);
+        return this;
+    }
+
+    public RecommendationEntity withCredentialId(Long id) {
+        getRequest().setCredentialId(id);
+        return this;
+    }
+
+    public RecommendationEntity withCredentialName(String name) {
+        getRequest().setCredentialName(name);
+        return this;
+    }
+
+    public RecommendationEntity withRegion(String regionName) {
+        getRequest().setRegion(regionName);
+        return this;
+    }
+
+    public RecommendationEntity withAvailabilityZone(String availabilityZone) {
+        getRequest().setAvailabilityZone(availabilityZone);
         return this;
     }
 }

@@ -43,6 +43,135 @@
           }
         },
         "description": "Cloudbreak official base image"
+      },
+      {
+        "uuid": "second-latest-base",
+        "date": "2016-09-19",
+        "os": "centos7",
+        "images": {
+          "aws": {
+            "ap-northeast-1": "ami-0fc3016e",
+            "ap-northeast-2": "ami-4d6aa023",
+            "ap-southeast-1": "ami-ced60fad",
+            "ap-southeast-2": "ami-9f9eaafc",
+            "eu-central-1": "ami-cd4cbaa2",
+            "eu-west-1": "ami-0b067378",
+            "sa-east-1": "ami-70a5331c",
+            "us-east-1": "ami-70a73c67",
+            "us-west-1": "ami-3fe8ab5f",
+            "us-west-2": "ami-6bf9330b"
+          },
+          "azure_rm": {
+            "Brazil South": "https://sequenceiqbrazilsouth2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "Canada Central": "https://sequenceiqcanadacentral.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "Canada East": "https://sequenceiqcanadaeast.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "Central US": "https://sequenceiqcentralus2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "East Asia": "https://sequenceiqeastasia2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "East US": "https://sequenceiqeastus12.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "East US 2": "https://sequenceiqeastus22.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "Japan East": "https://sequenceiqjapaneast2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "Japan West": "https://sequenceiqjapanwest2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "North Central US": "https://sequenceiqorthcentralus2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "North Europe": "https://sequenceiqnortheurope2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "South Central US": "https://sequenceiqouthcentralus2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "Southeast Asia": "https://sequenceiqsoutheastasia2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "West Europe": "https://sequenceiqwesteurope2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "West US": "https://sequenceiqwestus2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd"
+          },
+          "gcp": {
+            "default": "sequenceiqimage/hdc-hdp--1710161226.tar.gz"
+          },
+          "openstack": {
+            "default": "hdc-hdp--1710161226"
+          }
+        },
+        "description": "Cloudbreak official base image"
+      },
+      {
+        "uuid": "third-latest-base-amazonlinux",
+        "date": "2016-09-18",
+        "os": "amazonlinux2",
+        "images": {
+          "aws": {
+            "ap-northeast-1": "ami-0fc3016e",
+            "ap-northeast-2": "ami-4d6aa023",
+            "ap-southeast-1": "ami-ced60fad",
+            "ap-southeast-2": "ami-9f9eaafc",
+            "eu-central-1": "ami-cd4cbaa2",
+            "eu-west-1": "ami-0b067378",
+            "sa-east-1": "ami-70a5331c",
+            "us-east-1": "ami-70a73c67",
+            "us-west-1": "ami-3fe8ab5f",
+            "us-west-2": "ami-6bf9330b"
+          },
+          "azure_rm": {
+            "Brazil South": "https://sequenceiqbrazilsouth2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "Canada Central": "https://sequenceiqcanadacentral.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "Canada East": "https://sequenceiqcanadaeast.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "Central US": "https://sequenceiqcentralus2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "East Asia": "https://sequenceiqeastasia2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "East US": "https://sequenceiqeastus12.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "East US 2": "https://sequenceiqeastus22.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "Japan East": "https://sequenceiqjapaneast2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "Japan West": "https://sequenceiqjapanwest2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "North Central US": "https://sequenceiqorthcentralus2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "North Europe": "https://sequenceiqnortheurope2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "South Central US": "https://sequenceiqouthcentralus2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "Southeast Asia": "https://sequenceiqsoutheastasia2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "West Europe": "https://sequenceiqwesteurope2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "West US": "https://sequenceiqwestus2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd"
+          },
+          "gcp": {
+            "default": "sequenceiqimage/hdc-hdp--1710161226.tar.gz"
+          },
+          "openstack": {
+            "default": "hdc-hdp--1710161226"
+          }
+        },
+        "description": "Cloudbreak official base image"
+      },
+      {
+        "uuid": "forth-latest-base-amazonlinux",
+        "date": "2016-09-17",
+        "os": "amazonlinux2",
+        "images": {
+          "aws": {
+            "ap-northeast-1": "ami-0fc3016e",
+            "ap-northeast-2": "ami-4d6aa023",
+            "ap-southeast-1": "ami-ced60fad",
+            "ap-southeast-2": "ami-9f9eaafc",
+            "eu-central-1": "ami-cd4cbaa2",
+            "eu-west-1": "ami-0b067378",
+            "sa-east-1": "ami-70a5331c",
+            "us-east-1": "ami-70a73c67",
+            "us-west-1": "ami-3fe8ab5f",
+            "us-west-2": "ami-6bf9330b"
+          },
+          "azure_rm": {
+            "Brazil South": "https://sequenceiqbrazilsouth2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "Canada Central": "https://sequenceiqcanadacentral.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "Canada East": "https://sequenceiqcanadaeast.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "Central US": "https://sequenceiqcentralus2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "East Asia": "https://sequenceiqeastasia2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "East US": "https://sequenceiqeastus12.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "East US 2": "https://sequenceiqeastus22.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "Japan East": "https://sequenceiqjapaneast2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "Japan West": "https://sequenceiqjapanwest2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "North Central US": "https://sequenceiqorthcentralus2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "North Europe": "https://sequenceiqnortheurope2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "South Central US": "https://sequenceiqouthcentralus2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "Southeast Asia": "https://sequenceiqsoutheastasia2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "West Europe": "https://sequenceiqwesteurope2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "West US": "https://sequenceiqwestus2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd"
+          },
+          "gcp": {
+            "default": "sequenceiqimage/hdc-hdp--1710161226.tar.gz"
+          },
+          "openstack": {
+            "default": "hdc-hdp--1710161226"
+          }
+        },
+        "description": "Cloudbreak official base image"
       }
     ],
     "hdp-images": [
@@ -1095,6 +1224,80 @@
         "version": "2.5.2.0"
       },
       {
+        "date": "2017-10-23",
+        "description": "Cloudbreak official image",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat6": "http://s3.amazonaws.com/dev.hortonworks.com/HDP/centos6/2.x/BUILDS/2.6.2.4-5",
+              "repoid": "HDP-2.6"
+            },
+            "util": {
+              "redhat6": "http://s3.amazonaws.com/dev.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos6",
+              "repoid": "HDP-UTILS-1.1.0.21"
+            }
+          },
+          "version": "2.6.2.4-5"
+        },
+        "images": {
+          "aws": {
+            "ap-northeast-1": "ami-efd67089",
+            "ap-northeast-2": "ami-24288d4a",
+            "ap-southeast-1": "ami-47135224",
+            "ap-southeast-2": "ami-4d79952f",
+            "eu-central-1": "ami-b5ec57da",
+            "eu-west-1": "ami-d28359ab",
+            "sa-east-1": "ami-9ed7aef2",
+            "us-east-1": "ami-de5389a4",
+            "us-west-1": "ami-aa91acca",
+            "us-west-2": "ami-815995f9"
+          }
+        },
+        "os": "centos7",
+        "repo": {
+          "redhat6": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.5.2.5-3"
+        },
+        "uuid": "second-latest-hdp",
+        "version": "2.5.2.5-3"
+      },
+      {
+        "date": "2017-10-23",
+        "description": "Cloudbreak official image",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat6": "http://s3.amazonaws.com/dev.hortonworks.com/HDP/centos6/2.x/BUILDS/2.6.2.4-5",
+              "repoid": "HDP-2.6"
+            },
+            "util": {
+              "redhat6": "http://s3.amazonaws.com/dev.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos6",
+              "repoid": "HDP-UTILS-1.1.0.21"
+            }
+          },
+          "version": "2.6.2.4-5"
+        },
+        "images": {
+          "aws": {
+            "ap-northeast-1": "ami-efd67089",
+            "ap-northeast-2": "ami-24288d4a",
+            "ap-southeast-1": "ami-47135224",
+            "ap-southeast-2": "ami-4d79952f",
+            "eu-central-1": "ami-b5ec57da",
+            "eu-west-1": "ami-d28359ab",
+            "sa-east-1": "ami-9ed7aef2",
+            "us-east-1": "ami-de5389a4",
+            "us-west-1": "ami-aa91acca",
+            "us-west-2": "ami-815995f9"
+          }
+        },
+        "os": "amazonlinux2",
+        "repo": {
+          "redhat6": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.5.2.5-3"
+        },
+        "uuid": "latest-amazonlinux-hdp",
+        "version": "2.5.2.5-3"
+      },
+      {
         "date": "2017-10-24",
         "description": "Cloudbreak official image",
         "stack-details": {
@@ -1414,8 +1617,29 @@
         "versions": [
           "5.0.0"
         ],
+        "defaults": [
+          "latest-base",
+          "second-latest-base",
+          "2.4.0.0-1157-6eff4b14-482f-4e31-8e15-cb3a153d1030-2.5.0.0-1200",
+          "2.4.0.0-1157-290254ec-4574-4f42-bbfa-d036913b80ff-2.4.10.0-80",
+          "2.4.0.1-1-d6b1be0f-d1ec-4236-8a01-3ae5ce2d71a3-2.5.0.0",
+          "2.4.0.1-1-e8eccde2-45cb-45b3-9819-4691c789e460-2.4.10.0-80",
+          "2.4.1.0-19-664e8908-c502-4b43-b0b7-fe23e6100122-2.5.0.1-8",
+          "2.4.1.0-19-e24d0638-1690-41fc-a907-1a61cfa9bd0a-2.4.10.0-80",
+          "2.5.0.2-65-5288855d-d7b9-4b90-b326-ab4b168cf581-2.6.0.1-145",
+          "2.5.0.3-7-27d7cb22-3d7e-485a-9266-10fb09d632f4-2.6.1.0-55",
+          "2.5.0.3-7-0af7ea50-d096-4c2a-8d5b-32f323cef86b-2.6.1.0-22",
+          "2.5.1.2-1-ee64754a-091e-4251-8c27-2326d583928b-2.6.1.4-1",
+          "2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2",
+          "2.5.2.0-a7b0e31f-0469-405c-834d-24a3f045dacb-2.6.2.0",
+          "latest-hdp",
+          "latest-amazonlinux-hdp",
+          "second-latest-hdp",
+          "9958938a-1261-48e2-aff9-dbcb2cebf6cd"
+        ],
         "images": [
           "latest-base",
+          "second-latest-base",
           "2.4.0.0-1157-6eff4b14-482f-4e31-8e15-cb3a153d1030-2.5.0.0-1200",
           "2.4.0.0-1157-290254ec-4574-4f42-bbfa-d036913b80ff-2.4.10.0-80",
           "2.4.0.1-1-d6b1be0f-d1ec-4236-8a01-3ae5ce2d71a3-2.5.0.0",
@@ -1443,6 +1667,233 @@
           "2.5.1.2-1-ee64754a-091e-4251-8c27-2326d583928b-2.6.1.4-1",
           "2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2",
           "2.5.2.0-a7b0e31f-0469-405c-834d-24a3f045dacb-2.6.2.0",
+          "second-latest-hdp",
+          "latest-hdp",
+          "latest-amazonlinux-hdp",
+          "third-latest-base-amazonlinux",
+          "9958938a-1261-48e2-aff9-dbcb2cebf6cd"
+        ]
+      },
+      {
+        "versions": [
+          "6.0.0"
+        ],
+        "defaults": [
+          "second-latest-base",
+          "2.4.0.0-1157-6eff4b14-482f-4e31-8e15-cb3a153d1030-2.5.0.0-1200",
+          "2.4.0.0-1157-290254ec-4574-4f42-bbfa-d036913b80ff-2.4.10.0-80",
+          "2.4.0.1-1-d6b1be0f-d1ec-4236-8a01-3ae5ce2d71a3-2.5.0.0",
+          "2.4.0.1-1-e8eccde2-45cb-45b3-9819-4691c789e460-2.4.10.0-80",
+          "2.4.1.0-19-664e8908-c502-4b43-b0b7-fe23e6100122-2.5.0.1-8",
+          "2.4.1.0-19-e24d0638-1690-41fc-a907-1a61cfa9bd0a-2.4.10.0-80",
+          "2.5.0.2-65-5288855d-d7b9-4b90-b326-ab4b168cf581-2.6.0.1-145",
+          "2.5.0.3-7-27d7cb22-3d7e-485a-9266-10fb09d632f4-2.6.1.0-55",
+          "2.5.0.3-7-0af7ea50-d096-4c2a-8d5b-32f323cef86b-2.6.1.0-22",
+          "2.5.1.2-1-ee64754a-091e-4251-8c27-2326d583928b-2.6.1.4-1",
+          "2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2",
+          "2.5.2.0-a7b0e31f-0469-405c-834d-24a3f045dacb-2.6.2.0",
+          "second-latest-hdp",
+          "forth-latest-base-amazonlinux",
+          "9958938a-1261-48e2-aff9-dbcb2cebf6cd"
+        ],
+        "images": [
+          "latest-base",
+          "second-latest-base",
+          "2.4.0.0-1157-6eff4b14-482f-4e31-8e15-cb3a153d1030-2.5.0.0-1200",
+          "2.4.0.0-1157-290254ec-4574-4f42-bbfa-d036913b80ff-2.4.10.0-80",
+          "2.4.0.1-1-d6b1be0f-d1ec-4236-8a01-3ae5ce2d71a3-2.5.0.0",
+          "2.4.0.1-1-e8eccde2-45cb-45b3-9819-4691c789e460-2.4.10.0-80",
+          "2.4.1.0-19-664e8908-c502-4b43-b0b7-fe23e6100122-2.5.0.1-8",
+          "2.4.1.0-19-e24d0638-1690-41fc-a907-1a61cfa9bd0a-2.4.10.0-80",
+          "2.4.1.0-19-4c88ad27-9fbe-4288-8299-fa61e9d8b8af-2.5.0.1-31",
+          "2.4.1.0-22-787b6974-3bf8-41c1-9492-d61bd139af86-2.5.0.1-60",
+          "2.4.2.2-1-734767a1-dd05-4a73-a8cf-75964997963b-2.5.0.1-139",
+          "2.4.2.2-1-cde06be0-b50a-4e6d-98ce-45366988e63d-2.5.0.1-139",
+          "2.4.2.2-1-8c667c54-5365-43de-a026-16c2e7235c55-2.5.0.1-139",
+          "2.4.2.2-1-faf7cd22-9f61-4186-bf88-89b541400ddc-2.5.0.1-210",
+          "2.4.2.2-1-88a52f8b-7cf8-4e1c-a81a-8917eae25db8-2.5.0.1-265",
+          "2.4.2.2-1-9a308050-4d5b-45a9-bfee-ce1cc444953d-2.5.0.1-265",
+          "2.4.2.2-1-9e3ccdca-fa64-42eb-ab29-b1450767bbd8-2.5.0.1-265",
+          "2.5.0.0-608-31139004-fc4c-4172-ab39-9ca5c473fe28-2.6.0.0-331",
+          "2.5.0.0-608-3f571a38-2fa3-4c6c-9452-057b27adacdd-2.6.0.0-331",
+          "2.5.0.0-771-43f25ef0-0ecd-4802-9563-183be5814978-2.6.0.0-422",
+          "2.5.0.0-1094-4b02d4f4-bc8b-41fb-8653-04c0828f75f6-2.6.0.0-598",
+          "2.5.0.0-1096-328d571d-d95d-4a69-a7f3-6bfbba0e3950-2.6.0.0-598",
+          "2.5.0.2-65-fe0ba14f-cb44-4573-ac8c-23cbc72bbd57-2.6.0.1-152",
+          "2.5.0.2-65-5288855d-d7b9-4b90-b326-ab4b168cf581-2.6.0.1-145",
+          "2.5.0.3-7-27d7cb22-3d7e-485a-9266-10fb09d632f4-2.6.1.0-55",
+          "2.5.0.3-7-0af7ea50-d096-4c2a-8d5b-32f323cef86b-2.6.1.0-22",
+          "2.5.1.2-1-ee64754a-091e-4251-8c27-2326d583928b-2.6.1.4-1",
+          "2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2",
+          "2.5.2.0-a7b0e31f-0469-405c-834d-24a3f045dacb-2.6.2.0",
+          "second-latest-hdp",
+          "latest-hdp",
+          "third-latest-base-amazonlinux",
+          "forth-latest-base-amazonlinux",
+          "9958938a-1261-48e2-aff9-dbcb2cebf6cd"
+        ]
+      },
+      {
+        "versions": [
+          "6.1.0"
+        ],
+        "defaults": [
+          "second-latest-hdp"
+        ],
+        "images": [
+          "latest-base",
+          "second-latest-base",
+          "2.4.0.0-1157-6eff4b14-482f-4e31-8e15-cb3a153d1030-2.5.0.0-1200",
+          "2.4.0.0-1157-290254ec-4574-4f42-bbfa-d036913b80ff-2.4.10.0-80",
+          "2.4.0.1-1-d6b1be0f-d1ec-4236-8a01-3ae5ce2d71a3-2.5.0.0",
+          "2.4.0.1-1-e8eccde2-45cb-45b3-9819-4691c789e460-2.4.10.0-80",
+          "2.4.1.0-19-664e8908-c502-4b43-b0b7-fe23e6100122-2.5.0.1-8",
+          "2.4.1.0-19-e24d0638-1690-41fc-a907-1a61cfa9bd0a-2.4.10.0-80",
+          "2.4.1.0-19-4c88ad27-9fbe-4288-8299-fa61e9d8b8af-2.5.0.1-31",
+          "2.4.1.0-22-787b6974-3bf8-41c1-9492-d61bd139af86-2.5.0.1-60",
+          "2.4.2.2-1-734767a1-dd05-4a73-a8cf-75964997963b-2.5.0.1-139",
+          "2.4.2.2-1-cde06be0-b50a-4e6d-98ce-45366988e63d-2.5.0.1-139",
+          "2.4.2.2-1-8c667c54-5365-43de-a026-16c2e7235c55-2.5.0.1-139",
+          "2.4.2.2-1-faf7cd22-9f61-4186-bf88-89b541400ddc-2.5.0.1-210",
+          "2.4.2.2-1-88a52f8b-7cf8-4e1c-a81a-8917eae25db8-2.5.0.1-265",
+          "2.4.2.2-1-9a308050-4d5b-45a9-bfee-ce1cc444953d-2.5.0.1-265",
+          "2.4.2.2-1-9e3ccdca-fa64-42eb-ab29-b1450767bbd8-2.5.0.1-265",
+          "2.5.0.0-608-31139004-fc4c-4172-ab39-9ca5c473fe28-2.6.0.0-331",
+          "2.5.0.0-608-3f571a38-2fa3-4c6c-9452-057b27adacdd-2.6.0.0-331",
+          "2.5.0.0-771-43f25ef0-0ecd-4802-9563-183be5814978-2.6.0.0-422",
+          "2.5.0.0-1094-4b02d4f4-bc8b-41fb-8653-04c0828f75f6-2.6.0.0-598",
+          "2.5.0.0-1096-328d571d-d95d-4a69-a7f3-6bfbba0e3950-2.6.0.0-598",
+          "2.5.0.2-65-fe0ba14f-cb44-4573-ac8c-23cbc72bbd57-2.6.0.1-152",
+          "2.5.0.2-65-5288855d-d7b9-4b90-b326-ab4b168cf581-2.6.0.1-145",
+          "2.5.0.3-7-27d7cb22-3d7e-485a-9266-10fb09d632f4-2.6.1.0-55",
+          "2.5.0.3-7-0af7ea50-d096-4c2a-8d5b-32f323cef86b-2.6.1.0-22",
+          "2.5.1.2-1-ee64754a-091e-4251-8c27-2326d583928b-2.6.1.4-1",
+          "2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2",
+          "2.5.2.0-a7b0e31f-0469-405c-834d-24a3f045dacb-2.6.2.0",
+          "second-latest-hdp",
+          "latest-hdp",
+          "9958938a-1261-48e2-aff9-dbcb2cebf6cd"
+        ]
+      },
+      {
+        "versions": [
+          "7.0.0-dev.1"
+        ],
+        "defaults": [
+        ],
+        "images": [
+          "latest-base",
+          "second-latest-base",
+          "2.4.0.0-1157-6eff4b14-482f-4e31-8e15-cb3a153d1030-2.5.0.0-1200",
+          "2.4.0.0-1157-290254ec-4574-4f42-bbfa-d036913b80ff-2.4.10.0-80",
+          "2.4.0.1-1-d6b1be0f-d1ec-4236-8a01-3ae5ce2d71a3-2.5.0.0",
+          "2.4.0.1-1-e8eccde2-45cb-45b3-9819-4691c789e460-2.4.10.0-80",
+          "2.4.1.0-19-664e8908-c502-4b43-b0b7-fe23e6100122-2.5.0.1-8",
+          "2.4.1.0-19-e24d0638-1690-41fc-a907-1a61cfa9bd0a-2.4.10.0-80",
+          "2.4.1.0-19-4c88ad27-9fbe-4288-8299-fa61e9d8b8af-2.5.0.1-31",
+          "2.4.1.0-22-787b6974-3bf8-41c1-9492-d61bd139af86-2.5.0.1-60",
+          "2.4.2.2-1-734767a1-dd05-4a73-a8cf-75964997963b-2.5.0.1-139",
+          "2.4.2.2-1-cde06be0-b50a-4e6d-98ce-45366988e63d-2.5.0.1-139",
+          "2.4.2.2-1-8c667c54-5365-43de-a026-16c2e7235c55-2.5.0.1-139",
+          "2.4.2.2-1-faf7cd22-9f61-4186-bf88-89b541400ddc-2.5.0.1-210",
+          "2.4.2.2-1-88a52f8b-7cf8-4e1c-a81a-8917eae25db8-2.5.0.1-265",
+          "2.4.2.2-1-9a308050-4d5b-45a9-bfee-ce1cc444953d-2.5.0.1-265",
+          "2.4.2.2-1-9e3ccdca-fa64-42eb-ab29-b1450767bbd8-2.5.0.1-265",
+          "2.5.0.0-608-31139004-fc4c-4172-ab39-9ca5c473fe28-2.6.0.0-331",
+          "2.5.0.0-608-3f571a38-2fa3-4c6c-9452-057b27adacdd-2.6.0.0-331",
+          "2.5.0.0-771-43f25ef0-0ecd-4802-9563-183be5814978-2.6.0.0-422",
+          "2.5.0.0-1094-4b02d4f4-bc8b-41fb-8653-04c0828f75f6-2.6.0.0-598",
+          "2.5.0.0-1096-328d571d-d95d-4a69-a7f3-6bfbba0e3950-2.6.0.0-598",
+          "2.5.0.2-65-fe0ba14f-cb44-4573-ac8c-23cbc72bbd57-2.6.0.1-152",
+          "2.5.0.2-65-5288855d-d7b9-4b90-b326-ab4b168cf581-2.6.0.1-145",
+          "2.5.0.3-7-27d7cb22-3d7e-485a-9266-10fb09d632f4-2.6.1.0-55",
+          "2.5.0.3-7-0af7ea50-d096-4c2a-8d5b-32f323cef86b-2.6.1.0-22",
+          "2.5.1.2-1-ee64754a-091e-4251-8c27-2326d583928b-2.6.1.4-1",
+          "2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2",
+          "2.5.2.0-a7b0e31f-0469-405c-834d-24a3f045dacb-2.6.2.0",
+          "second-latest-hdp",
+          "latest-hdp",
+          "9958938a-1261-48e2-aff9-dbcb2cebf6cd"
+        ]
+      },
+      {
+        "versions": [
+          "8.0.0-dev.1"
+        ],
+        "defaults": [
+          "second-latest-base"
+        ],
+        "images": [
+          "latest-base",
+          "second-latest-base",
+          "2.4.0.0-1157-6eff4b14-482f-4e31-8e15-cb3a153d1030-2.5.0.0-1200",
+          "2.4.0.0-1157-290254ec-4574-4f42-bbfa-d036913b80ff-2.4.10.0-80",
+          "2.4.0.1-1-d6b1be0f-d1ec-4236-8a01-3ae5ce2d71a3-2.5.0.0",
+          "2.4.0.1-1-e8eccde2-45cb-45b3-9819-4691c789e460-2.4.10.0-80",
+          "2.4.1.0-19-664e8908-c502-4b43-b0b7-fe23e6100122-2.5.0.1-8",
+          "2.4.1.0-19-e24d0638-1690-41fc-a907-1a61cfa9bd0a-2.4.10.0-80",
+          "2.4.1.0-19-4c88ad27-9fbe-4288-8299-fa61e9d8b8af-2.5.0.1-31",
+          "2.4.1.0-22-787b6974-3bf8-41c1-9492-d61bd139af86-2.5.0.1-60",
+          "2.4.2.2-1-734767a1-dd05-4a73-a8cf-75964997963b-2.5.0.1-139",
+          "2.4.2.2-1-cde06be0-b50a-4e6d-98ce-45366988e63d-2.5.0.1-139",
+          "2.4.2.2-1-8c667c54-5365-43de-a026-16c2e7235c55-2.5.0.1-139",
+          "2.4.2.2-1-faf7cd22-9f61-4186-bf88-89b541400ddc-2.5.0.1-210",
+          "2.4.2.2-1-88a52f8b-7cf8-4e1c-a81a-8917eae25db8-2.5.0.1-265",
+          "2.4.2.2-1-9a308050-4d5b-45a9-bfee-ce1cc444953d-2.5.0.1-265",
+          "2.4.2.2-1-9e3ccdca-fa64-42eb-ab29-b1450767bbd8-2.5.0.1-265",
+          "2.5.0.0-608-31139004-fc4c-4172-ab39-9ca5c473fe28-2.6.0.0-331",
+          "2.5.0.0-608-3f571a38-2fa3-4c6c-9452-057b27adacdd-2.6.0.0-331",
+          "2.5.0.0-771-43f25ef0-0ecd-4802-9563-183be5814978-2.6.0.0-422",
+          "2.5.0.0-1094-4b02d4f4-bc8b-41fb-8653-04c0828f75f6-2.6.0.0-598",
+          "2.5.0.0-1096-328d571d-d95d-4a69-a7f3-6bfbba0e3950-2.6.0.0-598",
+          "2.5.0.2-65-fe0ba14f-cb44-4573-ac8c-23cbc72bbd57-2.6.0.1-152",
+          "2.5.0.2-65-5288855d-d7b9-4b90-b326-ab4b168cf581-2.6.0.1-145",
+          "2.5.0.3-7-27d7cb22-3d7e-485a-9266-10fb09d632f4-2.6.1.0-55",
+          "2.5.0.3-7-0af7ea50-d096-4c2a-8d5b-32f323cef86b-2.6.1.0-22",
+          "2.5.1.2-1-ee64754a-091e-4251-8c27-2326d583928b-2.6.1.4-1",
+          "2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2",
+          "2.5.2.0-a7b0e31f-0469-405c-834d-24a3f045dacb-2.6.2.0",
+          "second-latest-hdp",
+          "latest-hdp",
+          "9958938a-1261-48e2-aff9-dbcb2cebf6cd"
+        ]
+      },
+      {
+        "versions": [
+          "9.0.0"
+        ],
+        "defaults": null,
+        "images": [
+          "latest-base",
+          "second-latest-base",
+          "2.4.0.0-1157-6eff4b14-482f-4e31-8e15-cb3a153d1030-2.5.0.0-1200",
+          "2.4.0.0-1157-290254ec-4574-4f42-bbfa-d036913b80ff-2.4.10.0-80",
+          "2.4.0.1-1-d6b1be0f-d1ec-4236-8a01-3ae5ce2d71a3-2.5.0.0",
+          "2.4.0.1-1-e8eccde2-45cb-45b3-9819-4691c789e460-2.4.10.0-80",
+          "2.4.1.0-19-664e8908-c502-4b43-b0b7-fe23e6100122-2.5.0.1-8",
+          "2.4.1.0-19-e24d0638-1690-41fc-a907-1a61cfa9bd0a-2.4.10.0-80",
+          "2.4.1.0-19-4c88ad27-9fbe-4288-8299-fa61e9d8b8af-2.5.0.1-31",
+          "2.4.1.0-22-787b6974-3bf8-41c1-9492-d61bd139af86-2.5.0.1-60",
+          "2.4.2.2-1-734767a1-dd05-4a73-a8cf-75964997963b-2.5.0.1-139",
+          "2.4.2.2-1-cde06be0-b50a-4e6d-98ce-45366988e63d-2.5.0.1-139",
+          "2.4.2.2-1-8c667c54-5365-43de-a026-16c2e7235c55-2.5.0.1-139",
+          "2.4.2.2-1-faf7cd22-9f61-4186-bf88-89b541400ddc-2.5.0.1-210",
+          "2.4.2.2-1-88a52f8b-7cf8-4e1c-a81a-8917eae25db8-2.5.0.1-265",
+          "2.4.2.2-1-9a308050-4d5b-45a9-bfee-ce1cc444953d-2.5.0.1-265",
+          "2.4.2.2-1-9e3ccdca-fa64-42eb-ab29-b1450767bbd8-2.5.0.1-265",
+          "2.5.0.0-608-31139004-fc4c-4172-ab39-9ca5c473fe28-2.6.0.0-331",
+          "2.5.0.0-608-3f571a38-2fa3-4c6c-9452-057b27adacdd-2.6.0.0-331",
+          "2.5.0.0-771-43f25ef0-0ecd-4802-9563-183be5814978-2.6.0.0-422",
+          "2.5.0.0-1094-4b02d4f4-bc8b-41fb-8653-04c0828f75f6-2.6.0.0-598",
+          "2.5.0.0-1096-328d571d-d95d-4a69-a7f3-6bfbba0e3950-2.6.0.0-598",
+          "2.5.0.2-65-fe0ba14f-cb44-4573-ac8c-23cbc72bbd57-2.6.0.1-152",
+          "2.5.0.2-65-5288855d-d7b9-4b90-b326-ab4b168cf581-2.6.0.1-145",
+          "2.5.0.3-7-27d7cb22-3d7e-485a-9266-10fb09d632f4-2.6.1.0-55",
+          "2.5.0.3-7-0af7ea50-d096-4c2a-8d5b-32f323cef86b-2.6.1.0-22",
+          "2.5.1.2-1-ee64754a-091e-4251-8c27-2326d583928b-2.6.1.4-1",
+          "2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2",
+          "2.5.2.0-a7b0e31f-0469-405c-834d-24a3f045dacb-2.6.2.0",
+          "second-latest-hdp",
           "latest-hdp",
           "9958938a-1261-48e2-aff9-dbcb2cebf6cd"
         ]

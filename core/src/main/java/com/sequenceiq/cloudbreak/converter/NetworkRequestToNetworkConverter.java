@@ -11,7 +11,7 @@ import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.NetworkRequest;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.service.MissingResourceNameGenerator;
@@ -46,7 +46,7 @@ public class NetworkRequestToNetworkConverter extends AbstractConversionServiceA
             }
         }
         if (source.getTopologyId() != null) {
-            network.setTopology(topologyService.getById(source.getTopologyId()));
+            network.setTopology(topologyService.get(source.getTopologyId()));
         }
         return network;
     }

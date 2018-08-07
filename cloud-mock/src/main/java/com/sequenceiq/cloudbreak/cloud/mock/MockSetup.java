@@ -7,6 +7,7 @@ import java.security.NoSuchAlgorithmException;
 import javax.annotation.PostConstruct;
 import javax.net.ssl.SSLContext;
 
+import org.apache.http.conn.socket.LayeredConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -23,7 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
-import com.sequenceiq.cloudbreak.cloud.model.FileSystem;
+import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.type.ImageStatus;
@@ -62,7 +63,7 @@ public class MockSetup implements Setup {
             SSLContext sslcontext = SSLContexts.custom()
                     .loadTrustMaterial(null, new TrustSelfSignedStrategy())
                     .build();
-            SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslcontext);
+            LayeredConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslcontext);
             CloseableHttpClient httpclient = HttpClients.custom()
                     .setSSLSocketFactory(sslsf)
                     .build();
@@ -88,6 +89,6 @@ public class MockSetup implements Setup {
     }
 
     @Override
-    public void validateFileSystem(CloudCredential credential, FileSystem fileSystem) throws Exception {
+    public void validateFileSystem(CloudCredential credential, SpiFileSystem spiFileSystem) {
     }
 }

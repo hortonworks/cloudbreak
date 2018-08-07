@@ -1,0 +1,27 @@
+{
+    "Blueprints": {
+        "blueprint_name": "multi-node-hdfs-yarn",
+        "stack_name": "HDP",
+        "stack_version": "2.5"
+    },
+    "configurations": [],
+    "host_groups": [
+        {
+            "cardinality": "1",
+            "components": [
+                {
+                    "name": "HST_SERVER"
+                }
+            ],
+            "name": "master"
+        },
+        {
+            "cardinality": "1",
+            "components": [
+                {
+                }
+            ],
+            "name": "slave_1"
+        }
+    ]
+}

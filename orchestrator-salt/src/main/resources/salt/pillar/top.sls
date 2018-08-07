@@ -1,5 +1,6 @@
 base:
   '*':
+    - ambari.config
     - ambari.repo
     - ambari.gpl
     - hdp.repo
@@ -11,6 +12,7 @@ base:
     - datalake.init
     - docker
     - metadata.init
+    - proxy.proxy
 
   'roles:gateway':
     - match: grain
@@ -37,6 +39,7 @@ base:
     - grafana.repo
     - gateway.init
     - gateway.ldap
+    - jdbc.connectors
 
   'roles:knox_gateway':
     - match: grain

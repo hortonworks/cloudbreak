@@ -3,12 +3,12 @@ package com.sequenceiq.it.cloudbreak.newway;
 import com.sequenceiq.it.IntegrationTestContext;
 
 public abstract class Entity {
-    private String entityId;
+    private final String entityId;
 
     private Strategy creationStrategy;
 
-    public Entity(String id) {
-        this.entityId = id;
+    protected Entity(String id) {
+        entityId = id;
     }
 
     String getEntityId() {
@@ -16,7 +16,7 @@ public abstract class Entity {
     }
 
     protected void setCreationStrategy(Strategy strategy) {
-        this.creationStrategy = strategy;
+        creationStrategy = strategy;
     }
 
     void create(IntegrationTestContext integrationTestContext) throws Exception {

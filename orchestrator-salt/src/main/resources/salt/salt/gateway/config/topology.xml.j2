@@ -2,6 +2,8 @@
 <topology>
     <gateway>
 
+        <!-- {{ exposed }} -->
+
         {% if 'NONE' == salt['pillar.get']('gateway:ssotype') -%}
 
         <provider>
@@ -89,42 +91,42 @@
 
     </gateway>
 
-    {% if ('WEBHDFS' in salt['pillar.get']('gateway:exposed')) and ('NAMENODE' in salt['pillar.get']('gateway:location')) -%}
+    {% if 'NAMENODE' in salt['pillar.get']('gateway:location') -%}
+    {% if 'WEBHDFS' in exposed -%}
     <!-- curl -iku {{ salt['pillar.get']('ambari:username') }}:{{ salt['pillar.get']('ambari:password') }} -X GET 'https://{{ salt['grains.get']('gateway-address')[0] }}:8443/gateway/hdc/webhdfs/v1/?op=LISTSTATUS' -->
     <service>
         <role>WEBHDFS</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['NAMENODE'] -%}
-        <url>http://{{ hostloc }}:50070/webhdfs</url>
+        <url>http://{{ hostloc }}:{{ ports['WEBHDFS'] }}/webhdfs</url>
         {%- endfor %}
     </service>
     {%- endif %}
+    {%- endif %}
 
-    {% if 'AMBARI' in salt['pillar.get']('gateway:exposed') -%}
+    {% if 'AMBARI' in exposed -%}
     <service>
         <role>AMBARI</role>
-        <url>http://{{ salt['grains.get']('fqdn') }}:8080</url>
+        <url>http://{{ salt['grains.get']('fqdn') }}:{{ ports['AMBARI'] }}</url>
     </service>
-    {%- endif %}
-
-    {% if ('ZEPPELINWS' in salt['pillar.get']('gateway:exposed')) and ('ZEPPELIN_MASTER' in salt['pillar.get']('gateway:location')) -%}
     <service>
-        <role>ZEPPELINWS</role>
-        {% for hostloc in salt['pillar.get']('gateway:location')['ZEPPELIN_MASTER'] -%}
-        <url>ws://{{ hostloc }}:9995/ws</url>
-        {%- endfor %}
+        <role>AMBARIUI</role>
+        <url>http://{{ salt['grains.get']('fqdn') }}:{{ ports['AMBARI'] }}</url>
     </service>
     {%- endif %}
 
-    {% if ('RANGER' in salt['pillar.get']('gateway:exposed')) and ('RANGER_ADMIN' in salt['pillar.get']('gateway:location')) -%}
+    {% if 'RANGER_ADMIN' in salt['pillar.get']('gateway:location') -%}
+    {% if 'RANGER' in exposed -%}
     <service>
         <role>RANGER</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['RANGER_ADMIN'] -%}
-        <url>http://{{ hostloc }}:6080</url>
+        <url>http://{{ hostloc }}:{{ ports['RANGERUI'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
+    {%- endif %}
 
-    {% if ('HIVE' in salt['pillar.get']('gateway:exposed')) and ('HIVE_SERVER' in salt['pillar.get']('gateway:location')) -%}
+    {% if ('HIVE_SERVER' in salt['pillar.get']('gateway:location')) and not ('HIVE_SERVER_INTERACTIVE' in salt['pillar.get']('gateway:location')) -%}
+    {% if 'HIVE' in exposed -%}
     <!-- beeline -u "jdbc:hive2://{{ salt['grains.get']('gateway-address')[0] }}:8443/;ssl=true;sslTrustStore=/usr/hdp/current/knox-server/data/security/keystores/gateway.jks;trustStorePassword={{ salt['pillar.get']('gateway:password') }};transportMode=http;httpPath=gateway/hdc/hive" -d org.apache.hive.jdbc.HiveDriver -n {{ salt['pillar.get']('gateway:username') }} -p {{ salt['pillar.get']('gateway:password') }} -e "show databases;" -->
     <!-- beeline -u "jdbc:hive2://localhost:10001/;transportMode=http;httpPath=cliservice" -d org.apache.hive.jdbc.HiveDriver -n hive -p {{ salt['pillar.get']('gateway:password') }} -e "show databases;" -->
     <!-- docker run -ti -v $(pwd):/cert akanto/beeline -u "jdbc:hive2://{{ salt['grains.get']('gateway-address')[0] }}:8443/;ssl=true;sslTrustStore=/cert/gateway.jks;trustStorePassword={{ salt['pillar.get']('gateway:password') }};transportMode=http;httpPath=gateway/hdc/hive" -d org.apache.hive.jdbc.HiveDriver -n {{ salt['pillar.get']('gateway:username') }} -p {{ salt['pillar.get']('gateway:password') }} -e "show databases;" -->
@@ -132,12 +134,14 @@
     <service>
         <role>HIVE</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['HIVE_SERVER'] -%}
-        <url>http://{{ hostloc }}:10001/cliservice</url>
+        <url>http://{{ hostloc }}:{{ ports['HIVE'] }}/cliservice</url>
         {%- endfor %}
     </service>
     {%- endif %}
+    {%- endif %}
 
-    {% if ('HIVE_INTERACTIVE' in salt['pillar.get']('gateway:exposed')) and ('HIVE_SERVER_INTERACTIVE' in salt['pillar.get']('gateway:location')) -%}
+    {% if 'HIVE_SERVER_INTERACTIVE' in salt['pillar.get']('gateway:location') -%}
+    {% if 'HIVE_INTERACTIVE' in exposed -%}
     <!-- beeline -u "jdbc:hive2://{{ salt['grains.get']('gateway-address')[0] }}:8443/;ssl=true;sslTrustStore=/usr/hdp/current/knox-server/data/security/keystores/gateway.jks;trustStorePassword={{ salt['pillar.get']('gateway:password') }};transportMode=http;httpPath=gateway/hdc/hive" -d org.apache.hive.jdbc.HiveDriver -n {{ salt['pillar.get']('gateway:username') }} -p {{ salt['pillar.get']('gateway:password') }} -e "show databases;" -->
     <!-- beeline -u "jdbc:hive2://localhost:10001/;transportMode=http;httpPath=cliservice" -d org.apache.hive.jdbc.HiveDriver -n hive -p {{ salt['pillar.get']('gateway:password') }} -e "show databases;" -->
     <!-- docker run -ti -v $(pwd):/cert akanto/beeline -u "jdbc:hive2://{{ salt['grains.get']('gateway-address')[0] }}:8443/;ssl=true;sslTrustStore=/cert/gateway.jks;trustStorePassword={{ salt['pillar.get']('gateway:password') }};transportMode=http;httpPath=gateway/hdc/hive" -d org.apache.hive.jdbc.HiveDriver -n {{ salt['pillar.get']('gateway:username') }} -p {{ salt['pillar.get']('gateway:password') }} -e "show databases;" -->
@@ -145,102 +149,130 @@
     <service>
         <role>HIVE</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['HIVE_SERVER_INTERACTIVE'] -%}
-        <url>http://{{ hostloc }}:10501/cliservice</url>
+        <url>http://{{ hostloc }}:{{ ports['HIVE_INTERACTIVE'] }}/cliservice</url>
         {%- endfor %}
     </service>
     {%- endif %}
+    {%- endif %}
 
     <!-- UI -->
-    {% if ('HDFSUI' in salt['pillar.get']('gateway:exposed')) and ('NAMENODE' in salt['pillar.get']('gateway:location')) -%}
+    {% if 'NAMENODE' in salt['pillar.get']('gateway:location') -%}
+    {% if 'HDFSUI' in exposed -%}
     <!-- https://{{ salt['grains.get']('gateway-address')[0] }}:8443/gateway/hdc/hdfs/ -->
     <service>
         <role>HDFSUI</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['NAMENODE'] -%}
-        <url>http://{{ hostloc }}:50070</url>
+        <url>http://{{ hostloc }}:{{ ports['HDFSUI'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
-
-    {% if 'AMBARIUI' in salt['pillar.get']('gateway:exposed') -%}
-    <!-- https://{{ salt['grains.get']('gateway-address')[0] }}:8443/gateway/hdc/ambari/ -->
-
-    <service>
-        <role>AMBARIUI</role>
-        <url>http://{{ salt['grains.get']('fqdn') }}:8080</url>
-    </service>
     {%- endif %}
 
-    {% if ('YARNUI' in salt['pillar.get']('gateway:exposed')) and ('RESOURCEMANAGER' in salt['pillar.get']('gateway:location')) -%}
+    {% if 'RESOURCEMANAGER' in salt['pillar.get']('gateway:location') -%}
+    {% if 'YARNUI' in exposed -%}
     <!-- https://{{ salt['grains.get']('gateway-address')[0] }}:8443/gateway/hdc/yarn/ -->
-
     <service>
         <role>YARNUI</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['RESOURCEMANAGER'] -%}
-        <url>http://{{ hostloc }}:8088</url>
+        <url>http://{{ hostloc }}:{{ ports['YARNUI'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
+    {%- endif %}
 
-    {% if ('JOBHISTORYUI' in salt['pillar.get']('gateway:exposed')) and ('HISTORYSERVER' in salt['pillar.get']('gateway:location')) -%}
+    {% if 'HISTORYSERVER' in salt['pillar.get']('gateway:location') -%}
+    {% if 'JOBHISTORYUI' in exposed -%}
     <!-- https://{{ salt['grains.get']('gateway-address')[0] }}:8443/gateway/hdc/jobhistory/ -->
-
     <service>
         <role>JOBHISTORYUI</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['HISTORYSERVER'] -%}
-        <url>http://{{ hostloc }}:19888</url>
+        <url>http://{{ hostloc }}:{{ ports['JOBHISTORYUI'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
+    {%- endif %}
 
-    {% if ('SPARKHISTORYUI' in salt['pillar.get']('gateway:exposed')) and ('SPARK_JOBHISTORYSERVER' in salt['pillar.get']('gateway:location')) -%}
+    {% if 'SPARK_JOBHISTORYSERVER' in salt['pillar.get']('gateway:location') -%}
+    {% if 'SPARKHISTORYUI' in exposed -%}
     <!-- https://{{ salt['grains.get']('gateway-address')[0] }}:8443/gateway/hdc/sparkhistory/ -->
-
     <service>
         <role>SPARKHISTORYUI</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['SPARK_JOBHISTORYSERVER'] -%}
-        <url>http://{{ hostloc }}:18080/</url>
+        <url>http://{{ hostloc }}:{{ ports['SPARKHISTORYUI'] }}/</url>
         {%- endfor %}
     </service>
     {%- endif %}
+    {%- endif %}
 
-    {% if ('ZEPPELINUI' in salt['pillar.get']('gateway:exposed')) and ('ZEPPELIN_MASTER' in salt['pillar.get']('gateway:location')) -%}
+    {% if 'ZEPPELIN_MASTER' in salt['pillar.get']('gateway:location') -%}
+    {% if 'ZEPPELIN' in exposed -%}
     <!-- https://{{ salt['grains.get']('gateway-address')[0] }}:8443/gateway/hdc/zeppelin/ -->
-
     <service>
         <role>ZEPPELINUI</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['ZEPPELIN_MASTER'] -%}
-        <url>http://{{ hostloc }}:9995</url>
+        <url>http://{{ hostloc }}:{{ ports['ZEPPELIN'] }}</url>
+        {%- endfor %}
+    </service>
+    <service>
+        <role>ZEPPELINWS</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['ZEPPELIN_MASTER'] -%}
+        <url>ws://{{ hostloc }}:9995/ws</url>
         {%- endfor %}
     </service>
     {%- endif %}
+    {%- endif %}
 
-    {% if ('RANGERUI' in salt['pillar.get']('gateway:exposed')) and ('RANGER_ADMIN' in salt['pillar.get']('gateway:location')) -%}
+    {% if 'RANGER_ADMIN' in salt['pillar.get']('gateway:location') -%}
+    {% if 'RANGERUI' in exposed -%}
     <!-- https://{{ salt['grains.get']('gateway-address')[0] }}:8443/gateway/hdc/ranger/ -->
-
     <service>
         <role>RANGERUI</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['RANGER_ADMIN'] -%}
-        <url>http://{{ hostloc }}:6080</url>
+        <url>http://{{ hostloc }}:{{ ports['RANGERUI'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
+    {%- endif %}
 
-    {% if ('ATLAS' in salt['pillar.get']('gateway:exposed')) and ('ATLAS_SERVER' in salt['pillar.get']('gateway:location')) -%}
+    {% if 'ATLAS_SERVER' in salt['pillar.get']('gateway:location') -%}
+    {% if 'ATLAS' in exposed -%}
     <!-- https://{{ salt['grains.get']('gateway-address')[0] }}:8443/gateway/hdc/atlas/ -->
-
     <service>
         <role>ATLAS</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['ATLAS_SERVER'] -%}
-        <url>http://{{ hostloc }}:21000</url>
+        <url>http://{{ hostloc }}:{{ ports['ATLAS'] }}</url>
         {%- endfor %}
     </service>
 
     <service>
         <role>ATLAS-API</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['ATLAS_SERVER'] -%}
-        <url>http://{{ hostloc }}:21000</url>
+        <url>http://{{ hostloc }}:{{ ports['ATLAS'] }}</url>
         {%- endfor %}
     </service>
+    {%- endif %}
+    {%- endif %}
+
+    {% if 'DP_PROFILER_AGENT' in salt['pillar.get']('gateway:location') -%}
+    {% if 'PROFILER-AGENT' in exposed -%}
+    <service>
+        <role>PROFILER-AGENT</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['DP_PROFILER_AGENT'] -%}
+        <url>http://{{ hostloc }}:{{ ports['PROFILER-AGENT'] }}</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
+    {%- endif %}
+
+    {% if 'BEACON_SERVER' in salt['pillar.get']('gateway:location') -%}
+    {% if 'BEACON' in exposed -%}
+    <service>
+        <role>BEACON</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['BEACON_SERVER'] -%}
+        <url>http://{{ hostloc }}:{{ ports['BEACON'] }}</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
     {%- endif %}
 
 </topology>

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.structuredevent.rest;
 
+import static com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType.REST;
+
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FilterOutputStream;
@@ -9,6 +11,7 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -27,14 +30,16 @@ import javax.ws.rs.ext.WriterInterceptorContext;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.message.MessageUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.controller.AuthenticatedUserService;
-import com.sequenceiq.cloudbreak.service.ha.CloudbreakNodeConfig;
+import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredEventClient;
 import com.sequenceiq.cloudbreak.structuredevent.event.OperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredRestCallEvent;
@@ -44,6 +49,9 @@ import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestResponseDetails;
 
 @Component
 public class StructuredEventFilter implements WriterInterceptor, ContainerRequestFilter, ContainerResponseFilter {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(StructuredEventFilter.class);
+
     private static final String LOGGING_ENABLED_PROPERTY = "structuredevent.loggingEnabled";
 
     private static final String LOGGINGSTREAM_PROPERTY = "structuredevent.entityLogger";
@@ -80,18 +88,18 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
     @Value("${cb.structuredevent.rest.contentlogging:false}")
     private Boolean contentLogging;
 
-    private List<String> urlBlackList = Lists.newArrayList("connectors", "flexsubscriptions", "accountpreferences", "users");
+    private final List<String> urlBlackList = Lists.newArrayList("connectors", "flexsubscriptions", "accountpreferences", "users");
 
-    private List<String> skippedHeadersList = Lists.newArrayList("authorization");
+    private final List<String> skippedHeadersList = Lists.newArrayList("authorization");
 
-    private List<String> postUrlPatterns = Lists.newArrayList("\\/cb\\/api\\/v.\\/([a-z]*).*");
+    private final List<String> postUrlPatterns = Lists.newArrayList("\\/cb\\/api\\/v.\\/([a-z]*).*");
 
-    private List<String> deleteUrlPatterns = Lists.newArrayList(
+    private final List<String> deleteUrlPatterns = Lists.newArrayList(
             "\\/cb\\/api\\/v.\\/([a-z]*)\\/([0-9]+)",
             "\\/cb\\/api\\/v.\\/([a-z]*)\\/(user|account)\\/(.*)");
 
-    private List<String> putUrlPatterns = Lists.newArrayList(
-            "\\/cb\\/api\\/v.\\/([a-z]*)\\/([0-9]+).*");
+    private final List<String> putUrlPatterns = Lists.newArrayList(
+            "\\/cb\\/api\\/v.\\/([a-z]*)\\/([0-9]+).*", "\\/cb\\/api\\/v.\\/([a-z]*).*");
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
@@ -108,11 +116,11 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
     }
 
     @Override
-    public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) throws IOException {
+    public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) {
         if (BooleanUtils.isTrue((Boolean) requestContext.getProperty(LOGGING_ENABLED_PROPERTY))) {
             RestResponseDetails restResponse = createResponseDetails(responseContext);
             if (responseContext.hasEntity()) {
-                final OutputStream stream = new LoggingStream(responseContext.getEntityStream());
+                OutputStream stream = new LoggingStream(responseContext.getEntityStream());
                 responseContext.setEntityStream(stream);
                 requestContext.setProperty(LOGGINGSTREAM_PROPERTY, stream);
                 requestContext.setProperty(RESPONSE_DETAILS, restResponse);
@@ -150,7 +158,7 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
         structuredEventClient.sendStructuredEvent(new StructuredRestCallEvent(createOperationDetails(restParams, requestTime), restCall));
     }
 
-    private Map<String, String> getRequestUrlParameters(String method, String url) {
+    private Map<String, String> getRequestUrlParameters(String method, CharSequence url) {
         Map<String, String> params = Maps.newHashMap();
         List<String> urlPatterns;
         switch (method) {
@@ -187,7 +195,7 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
         return params;
     }
 
-    private Map<String, String> extendRestParamsFromResponse(Map<String, String> params, String responseBody) {
+    private void extendRestParamsFromResponse(Map<String, String> params, CharSequence responseBody) {
         if (!params.containsKey(RESOURCE_ID)) {
             Pattern pattern = Pattern.compile("\"id\":([0-9]*)");
             Matcher matcher = pattern.matcher(responseBody);
@@ -195,28 +203,30 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
                 params.put(RESOURCE_ID, matcher.group(1));
             }
         }
-        return params;
     }
 
     private boolean isLoggingEnabled(ContainerRequestContext requestContext) {
         String path = requestContext.getUriInfo().getRequestUri().getPath();
-        return !requestContext.getMethod().equals("GET") && !urlBlackList.stream().anyMatch(url -> path.contains(url));
+        return !"GET".equals(requestContext.getMethod()) && urlBlackList.stream().noneMatch(path::contains);
     }
 
     private OperationDetails createOperationDetails(Map<String, String> restParams, Long requestTime) {
         IdentityUser user = authenticatedUserService.getCbUser();
+        String resoureceType = restParams.get(RESOURCE_TYPE);
         String resoureceId = restParams.get(RESOURCE_ID);
-        return new OperationDetails(requestTime, "REST", restParams.get(RESOURCE_TYPE), resoureceId != null ? Long.valueOf(resoureceId) : null,
-                user != null ? user.getAccount() : "", user != null ? user.getUserId() : "", cloudbreakNodeConfig.getId(), cbVersion);
+        String resoureceName = restParams.get(RESOURCE_NAME);
+        return new OperationDetails(requestTime, REST, resoureceType, resoureceId != null ? Long.valueOf(resoureceId) : null, resoureceName,
+                user != null ? user.getAccount() : "", user != null ? user.getUserId() : "", user != null ? user.getUsername() : "",
+                cloudbreakNodeConfig.getId(), cbVersion);
     }
 
     private RestRequestDetails createRequestDetails(ContainerRequestContext requestContext, String body) {
         RestRequestDetails restRequest = new RestRequestDetails();
         restRequest.setRequestUri(requestContext.getUriInfo().getRequestUri().toString());
         restRequest.setBody(body);
-        restRequest.setCookies(requestContext.getCookies().entrySet().stream().collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue().toString())));
+        restRequest.setCookies(requestContext.getCookies().entrySet().stream().collect(Collectors.toMap(Entry::getKey, e -> e.getValue().toString())));
         restRequest.setHeaders(requestContext.getHeaders().entrySet().stream().filter(e -> !skippedHeadersList.contains(e.getKey())).collect(
-                Collectors.toMap(e -> e.getKey(), e -> StringUtils.join(e.getValue(), ","))));
+                Collectors.toMap(Entry::getKey, e -> StringUtils.join(e.getValue(), ","))));
         MediaType mediaType = requestContext.getMediaType();
         restRequest.setMediaType(mediaType != null ? mediaType.toString() : "");
         restRequest.setMethod(requestContext.getMethod());
@@ -226,22 +236,23 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
     private RestResponseDetails createResponseDetails(ContainerResponseContext responseContext) {
         RestResponseDetails restResponse = new RestResponseDetails();
         restResponse.setStatusCode(responseContext.getStatus());
-        restResponse.setCookies(responseContext.getCookies().entrySet().stream().collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue().toString())));
+        restResponse.setStatusText(responseContext.getStatusInfo().toEnum().name());
+        restResponse.setCookies(responseContext.getCookies().entrySet().stream().collect(Collectors.toMap(Entry::getKey, e -> e.getValue().toString())));
         restResponse.setHeaders(responseContext.getHeaders().entrySet().stream().filter(e -> !skippedHeadersList.contains(e.getKey())).collect(
-                Collectors.toMap(e -> e.getKey(), e -> StringUtils.join(e.getValue(), ","))));
+                Collectors.toMap(Entry::getKey, e -> StringUtils.join(e.getValue(), ","))));
         MediaType mediaType = responseContext.getMediaType();
         restResponse.setMediaType(mediaType != null ? mediaType.toString() : "");
         return restResponse;
     }
 
-    private InputStream logInboundEntity(final StringBuilder content, InputStream stream, final Charset charset) throws IOException {
+    private InputStream logInboundEntity(StringBuilder content, InputStream stream, Charset charset) throws IOException {
         if (contentLogging) {
             if (!stream.markSupported()) {
                 stream = new BufferedInputStream(stream);
             }
             stream.mark(MAX_CONTENT_LENGTH + 1);
-            final byte[] entity = new byte[MAX_CONTENT_LENGTH + 1];
-            final int entitySize = stream.read(entity);
+            byte[] entity = new byte[MAX_CONTENT_LENGTH + 1];
+            int entitySize = stream.read(entity);
             if (entitySize != -1) {
                 content.append(new String(entity, 0, Math.min(entitySize, MAX_CONTENT_LENGTH), charset));
                 if (entitySize > MAX_CONTENT_LENGTH) {
@@ -255,22 +266,18 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
     }
 
     private class LoggingStream extends FilterOutputStream {
-        private int maxEntitySize = MAX_CONTENT_LENGTH;
-
-        private final StringBuilder b;
-
         private final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-        LoggingStream(final OutputStream inner) {
+        LoggingStream(OutputStream inner) {
             super(inner);
-            this.b = new StringBuilder();
         }
 
-        StringBuilder getStringBuilder(final Charset charset) {
+        StringBuffer getStringBuilder(Charset charset) {
+            StringBuffer b = new StringBuffer();
             if (contentLogging) {
-                final byte[] entity = baos.toByteArray();
-                b.append(new String(entity, 0, Math.min(entity.length, maxEntitySize), charset));
-                if (entity.length > maxEntitySize) {
+                byte[] entity = baos.toByteArray();
+                b.append(new String(entity, 0, Math.min(entity.length, MAX_CONTENT_LENGTH), charset));
+                if (entity.length > MAX_CONTENT_LENGTH) {
                     b.append("...more...");
                 }
                 b.append('\n');
@@ -279,8 +286,8 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
         }
 
         @Override
-        public void write(final int i) throws IOException {
-            if (contentLogging && baos.size() <= maxEntitySize) {
+        public void write(int i) throws IOException {
+            if (contentLogging && baos.size() <= MAX_CONTENT_LENGTH) {
                 baos.write(i);
             }
             out.write(i);

@@ -4,6 +4,8 @@ import static com.google.common.collect.Maps.newHashMap;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singletonMap;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Matchers.anyMap;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -18,7 +20,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
@@ -31,12 +33,25 @@ import com.sequenceiq.cloudbreak.controller.validation.LocationService;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
+import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TemplateDecoratorTest {
 
+    private static final String REGION = "region";
+
+    private static final String AVAILABILITY_ZONE = "availabilityZone";
+
+    private static final String VARIANT = "variant";
+
+    private static final String VM_TYPE = "vmType";
+
+    private static final String PLATFORM_1 = "platform";
+
+    private static final String VOLUME_TYPE = "volumeType";
+
     @InjectMocks
-    private TemplateDecorator underTest = new TemplateDecorator();
+    private final TemplateDecorator underTest = new TemplateDecorator();
 
     @Mock
     private CloudParameterService cloudParameterService;
@@ -44,24 +59,21 @@ public class TemplateDecoratorTest {
     @Mock
     private LocationService locationService;
 
+    @Mock
+    private DefaultRootVolumeSizeProvider defaultRootVolumeSizeProvider;
+
+    private Credential cloudCredential;
+
     @Test
     public void testDecorator() {
-
-        String vmType = "vmType";
-        String platform1 = "platform";
-        String volumeType = "volumeType";
-        String region = "region";
-        String availibilityZone = "availabilityZone";
-        String variant = "variant";
-
-        Credential cloudCredential = mock(Credential.class);
+        cloudCredential = mock(Credential.class);
 
         Template template = new Template();
-        template.setInstanceType(vmType);
-        template.setCloudPlatform(platform1);
-        template.setVolumeType(volumeType);
+        template.setInstanceType(VM_TYPE);
+        template.setCloudPlatform(PLATFORM_1);
+        template.setVolumeType(VOLUME_TYPE);
 
-        Platform platform = Platform.platform(platform1);
+        Platform platform = Platform.platform(PLATFORM_1);
         int minimumSize = 10;
         int maximumSize = 100;
         int minimumNumber = 1;
@@ -72,40 +84,29 @@ public class TemplateDecoratorTest {
         vmTypeMeta.setMagneticConfig(config);
 
         Map<Platform, Map<String, VolumeParameterType>> diskMappings = newHashMap();
-        diskMappings.put(platform, singletonMap(volumeType, VolumeParameterType.MAGNETIC));
+        diskMappings.put(platform, singletonMap(VOLUME_TYPE, VolumeParameterType.MAGNETIC));
 
         PlatformDisks platformDisk = new PlatformDisks(emptyMap(), emptyMap(), diskMappings, emptyMap());
 
         CloudVmTypes cloudVmTypes = new CloudVmTypes();
-        Map<String, Set<VmType>> region1 = singletonMap(region, Collections.singleton(VmType.vmTypeWithMeta(vmType, vmTypeMeta, true)));
+        Map<String, Set<VmType>> region1 = singletonMap(REGION, Collections.singleton(VmType.vmTypeWithMeta(VM_TYPE, vmTypeMeta, true)));
         cloudVmTypes.setCloudVmResponses(region1);
 
         when(cloudParameterService.getDiskTypes()).thenReturn(platformDisk);
-        when(cloudParameterService.getVmTypesV2(eq(cloudCredential), eq(region), eq(variant), anyMap())).thenReturn(cloudVmTypes);
-        when(locationService.location(region, availibilityZone)).thenReturn(region);
+        when(cloudParameterService.getVmTypesV2(eq(cloudCredential), eq(REGION), eq(VARIANT), anyMap())).thenReturn(cloudVmTypes);
+        when(locationService.location(REGION, AVAILABILITY_ZONE)).thenReturn(REGION);
 
-        Template actual = underTest.decorate(cloudCredential, template, region, availibilityZone, variant);
+        Template actual = underTest.decorate(cloudCredential, template, REGION, AVAILABILITY_ZONE, VARIANT);
 
-        Assert.assertEquals(maximumNumber, actual.getVolumeCount().longValue());
-        Assert.assertEquals(maximumSize, actual.getVolumeSize().longValue());
+        assertEquals(maximumNumber, actual.getVolumeCount().longValue());
+        assertEquals(maximumSize, actual.getVolumeSize().longValue());
     }
 
     @Test
     public void testDecoratorWhenNoLocation() {
-        String region = "region";
-        String availibilityZone = "availabilityZone";
-        String variant = "variant";
-        String vmType = "vmType";
+        Template template = initTemplate();
 
-        Template template = new Template();
-        Credential cloudCredential = mock(Credential.class);
-
-        CloudVmTypes cloudVmTypes = new CloudVmTypes(singletonMap(region, emptySet()), emptyMap());
-
-        when(cloudParameterService.getVmTypesV2(eq(cloudCredential), eq(region), eq(variant), anyMap())).thenReturn(cloudVmTypes);
-        when(locationService.location(region, availibilityZone)).thenReturn(null);
-
-        Template actual = underTest.decorate(cloudCredential, template, region, availibilityZone, variant);
+        Template actual = underTest.decorate(cloudCredential, template, REGION, AVAILABILITY_ZONE, VARIANT);
 
         Assert.assertNull(actual.getVolumeCount());
         Assert.assertNull(actual.getVolumeSize());
@@ -113,21 +114,15 @@ public class TemplateDecoratorTest {
 
     @Test
     public void testDecoratorWhenNoInstanceType() {
-        String vmType = "vmType";
-        String platform1 = "platform";
-        String volumeType = "volumeType";
-        String region = "region";
-        String availibilityZone = "availabilityZone";
-        String variant = "variant";
 
-        Credential cloudCredential = mock(Credential.class);
+        cloudCredential = mock(Credential.class);
 
         Template template = new Template();
         template.setInstanceType("missingVmType");
-        template.setCloudPlatform(platform1);
-        template.setVolumeType(volumeType);
+        template.setCloudPlatform(PLATFORM_1);
+        template.setVolumeType(VOLUME_TYPE);
 
-        Platform platform = Platform.platform(platform1);
+        Platform platform = Platform.platform(PLATFORM_1);
         int minimumSize = 10;
         int maximumSize = 100;
         int minimumNumber = 1;
@@ -138,21 +133,51 @@ public class TemplateDecoratorTest {
         vmTypeMeta.setMagneticConfig(config);
 
         Map<Platform, Map<String, VolumeParameterType>> diskMappings = newHashMap();
-        diskMappings.put(platform, singletonMap(volumeType, VolumeParameterType.MAGNETIC));
+        diskMappings.put(platform, singletonMap(VOLUME_TYPE, VolumeParameterType.MAGNETIC));
 
         PlatformDisks platformDisk = new PlatformDisks(emptyMap(), emptyMap(), diskMappings, emptyMap());
 
         CloudVmTypes cloudVmTypes = new CloudVmTypes();
-        Map<String, Set<VmType>> region1 = singletonMap(region, Collections.singleton(VmType.vmTypeWithMeta(vmType, vmTypeMeta, true)));
+        Map<String, Set<VmType>> region1 = singletonMap(REGION, Collections.singleton(VmType.vmTypeWithMeta(VM_TYPE, vmTypeMeta, true)));
         cloudVmTypes.setCloudVmResponses(region1);
 
         when(cloudParameterService.getDiskTypes()).thenReturn(platformDisk);
-        when(cloudParameterService.getVmTypesV2(eq(cloudCredential), eq(region), eq(variant), anyMap())).thenReturn(cloudVmTypes);
-        when(locationService.location(region, availibilityZone)).thenReturn(region);
+        when(cloudParameterService.getVmTypesV2(eq(cloudCredential), eq(REGION), eq(VARIANT), anyMap())).thenReturn(cloudVmTypes);
+        when(locationService.location(REGION, AVAILABILITY_ZONE)).thenReturn(REGION);
 
-        Template actual = underTest.decorate(cloudCredential, template, region, availibilityZone, variant);
+        Template actual = underTest.decorate(cloudCredential, template, REGION, AVAILABILITY_ZONE, VARIANT);
 
         Assert.assertNull(actual.getVolumeCount());
         Assert.assertNull(actual.getVolumeSize());
+    }
+
+    @Test
+    public void testConvertWithRootVolumeSizeInRequestAndDefaultIsSet() {
+        Template template = initTemplate();
+
+        template.setRootVolumeSize(70);
+
+        Template actual = underTest.decorate(cloudCredential, template, REGION, AVAILABILITY_ZONE, VARIANT);
+        assertEquals(70L, (long) actual.getRootVolumeSize());
+    }
+
+    @Test
+    public void testConvertWithoutRootVolumeSizeInRequestAndDefaultIsSet() {
+        Template template = initTemplate();
+
+        when(defaultRootVolumeSizeProvider.getForPlatform(any())).thenReturn(100);
+
+        Template actual = underTest.decorate(cloudCredential, template, REGION, AVAILABILITY_ZONE, VARIANT);
+        assertEquals(100L, (long) actual.getRootVolumeSize());
+    }
+
+    private Template initTemplate() {
+        Template template = new Template();
+        cloudCredential = mock(Credential.class);
+
+        CloudVmTypes cloudVmTypes = new CloudVmTypes(singletonMap(REGION, emptySet()), emptyMap());
+        when(cloudParameterService.getVmTypesV2(eq(cloudCredential), eq(REGION), eq(VARIANT), anyMap())).thenReturn(cloudVmTypes);
+        when(locationService.location(REGION, AVAILABILITY_ZONE)).thenReturn(null);
+        return template;
     }
 }

@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudGateWays;
 import com.sequenceiq.cloudbreak.cloud.model.CloudIpPools;
 import com.sequenceiq.cloudbreak.cloud.model.CloudNetwork;
@@ -46,6 +47,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
+import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta.VmTypeMetaBuilder;
 
 @Service
 public class GcpPlatformResources implements PlatformResources {
@@ -164,7 +166,7 @@ public class GcpPlatformResources implements PlatformResources {
         StringBuilder sb = new StringBuilder();
         for (String s : list) {
             sb.append(StringUtils.capitalize(s.replaceAll("[0-9]", "")));
-            sb.append(" ");
+            sb.append(' ');
         }
         split = word.split("(?<=\\D)(?=\\d)");
         if (split.length == 2) {
@@ -191,7 +193,7 @@ public class GcpPlatformResources implements PlatformResources {
             for (AvailabilityZone availabilityZone : regions.getCloudRegions().get(region)) {
                 MachineTypeList machineTypeList = compute.machineTypes().list(projectId, availabilityZone.value()).execute();
                 for (MachineType machineType : machineTypeList.getItems()) {
-                    VmTypeMeta vmTypeMeta = VmTypeMeta.VmTypeMetaBuilder.builder()
+                    VmTypeMeta vmTypeMeta = VmTypeMetaBuilder.builder()
                             .withCpuAndMemory(machineType.getGuestCpus(),
                                     machineType.getMemoryMb().floatValue() / THOUSAND)
 
@@ -220,17 +222,22 @@ public class GcpPlatformResources implements PlatformResources {
     }
 
     @Override
-    public CloudGateWays gateways(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception {
+    public CloudGateWays gateways(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         return new CloudGateWays();
     }
 
     @Override
-    public CloudIpPools publicIpPool(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception {
+    public CloudIpPools publicIpPool(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         return new CloudIpPools();
     }
 
     @Override
-    public CloudAccessConfigs accessConfigs(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception {
+    public CloudAccessConfigs accessConfigs(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         return new CloudAccessConfigs(new HashSet<>());
+    }
+
+    @Override
+    public CloudEncryptionKeys encryptionKeys(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+        return new CloudEncryptionKeys(new HashSet<>());
     }
 }

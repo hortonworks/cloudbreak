@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.cloud.openstack.nativ.compute;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import org.openstack4j.api.OSClient;
 import org.openstack4j.api.exceptions.OS4JException;
@@ -13,8 +12,8 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
-import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.OpenStackResourceException;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.context.OpenStackContext;
@@ -23,13 +22,13 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
 @Service
 public class OpenStackFloatingIPBuilder extends AbstractOpenStackComputeResourceBuilder {
     @Override
-    public List<CloudResource> build(OpenStackContext context, long privateId, AuthenticatedContext auth, Group group, Image image,
-            List<CloudResource> buildableResource, Map<String, String> tags) throws Exception {
+    public List<CloudResource> build(OpenStackContext context, long privateId, AuthenticatedContext auth, Group group,
+            List<CloudResource> buildableResource, CloudStack cloudStack) {
         CloudResource resource = buildableResource.get(0);
         try {
             String publicNetId = context.getStringParameter(OpenStackConstants.PUBLIC_NET_ID);
             if (publicNetId != null) {
-                OSClient osClient = createOSClient(auth);
+                OSClient<?> osClient = createOSClient(auth);
                 List<CloudResource> computeResources = context.getComputeResources(privateId);
                 CloudResource instance = getInstance(computeResources);
                 FloatingIP unusedIp = osClient.compute().floatingIps().allocateIP(publicNetId);
@@ -49,7 +48,7 @@ public class OpenStackFloatingIPBuilder extends AbstractOpenStackComputeResource
 
     @Override
     @SuppressWarnings("unchecked")
-    public CloudResource delete(OpenStackContext context, AuthenticatedContext auth, CloudResource resource) throws Exception {
+    public CloudResource delete(OpenStackContext context, AuthenticatedContext auth, CloudResource resource) {
         context.getParameter(OpenStackConstants.FLOATING_IP_IDS, List.class).add(resource.getReference());
         return null;
     }
@@ -64,7 +63,7 @@ public class OpenStackFloatingIPBuilder extends AbstractOpenStackComputeResource
         return true;
     }
 
-    private CloudResource getInstance(List<CloudResource> computeResources) {
+    private CloudResource getInstance(Iterable<CloudResource> computeResources) {
         CloudResource instance = null;
         for (CloudResource computeResource : computeResources) {
             if (computeResource.getType() == ResourceType.OPENSTACK_INSTANCE) {

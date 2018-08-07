@@ -1,6 +1,7 @@
 package com.sequenceiq.it.spark.spi;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -23,7 +24,7 @@ public class CloudMetaDataStatuses extends ITResponse {
         this.instanceMap = instanceMap;
     }
 
-    private List<CloudVmMetaDataStatus> createCloudVmMetaDataStatuses(List<CloudInstance> cloudInstances) {
+    private List<CloudVmMetaDataStatus> createCloudVmMetaDataStatuses(Collection<CloudInstance> cloudInstances) {
         List<CloudVmMetaDataStatus> cloudVmMetaDataStatuses = new ArrayList<>();
         for (Entry<String, CloudVmMetaDataStatus> stringCloudVmMetaDataStatusEntry : instanceMap.entrySet()) {
             CloudVmMetaDataStatus oldCloudVmMetaDataStatus = stringCloudVmMetaDataStatusEntry.getValue();
@@ -45,7 +46,7 @@ public class CloudMetaDataStatuses extends ITResponse {
     }
 
     @Override
-    public Object handle(spark.Request request, spark.Response response) throws Exception {
+    public Object handle(spark.Request request, spark.Response response) {
         List<CloudInstance> cloudInstances = new Gson().fromJson(request.body(), new TypeToken<List<CloudInstance>>() {
         }.getType());
         return createCloudVmMetaDataStatuses(cloudInstances);

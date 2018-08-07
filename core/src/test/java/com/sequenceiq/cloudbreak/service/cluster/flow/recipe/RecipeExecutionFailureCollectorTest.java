@@ -17,24 +17,22 @@ import org.junit.Test;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.domain.HostGroup;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Recipe;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.model.RecipeModel;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeExecutionFailureCollector.RecipeExecutionFailure;
 
 public class RecipeExecutionFailureCollectorTest {
 
-    private static final String EXCEPTION_MESSAGE = "Failed: Orchestrator component went failed in 7.500000 mins, message: "
-            + "There are missing nodes from job (jid: 20180702142917892446), target: [host-10-0-0-4.openstacklocal, host-10-0-0-3.openstacklocal]\n"
-            + "Node: host-10-0-0-4.openstacklocal Error(s): Command \"sh -x /opt/scripts/post-ambari-start/failingRecipe1 2>&1 | "
-            + "tee -a /var/log/recipes/failingRecipe1.log && exit ${PIPESTATUS[0]}\" run |"
-            + " Command \"sh -x /opt/scripts/pre-ambari-start/failingRecipe2 2>&1 | "
-            + "tee -a /var/log/recipeMockStackCreationV2Tests/failingRecipe2.log && exit ${PIPESTATUS[0]}\" run\n"
-            + "Node: host-10-0-0-3.openstacklocal Error(s): Command \"sh -x /opt/scripts/post-ambari-start/failingRecipe1 2>&1 | "
-            + "tee -a /var/log/recipes/failingRecipe1.log && exit ${PIPESTATUS[0]}\" run";
+    private static final String EXCEPTION_MESSAGE = "\"Comment: Command \"/opt/scripts/recipe-runner.sh post-ambari-start failingRecipe1\" run\n"
+            + "Stdout: /opt/scripts/recipe-runner.sh post-ambari-start failingRecipe1 : Timed out after 10 seconds\""
+            + "\"Comment: Command \"/opt/scripts/recipe-runner.sh pre-ambari-start failingRecipe2\" run\n"
+            + "Stdout: /opt/scripts/recipe-runner.sh pre-ambari-start failingRecipe2 : Timed out after 10 seconds\""
+            + "Comment: One or more requisite failed: postgresql.init-services-db, postgresql.configure-listen-address"
+            + "Comment: One or more requisite failed: postgresql.init-services-db, postgresql.configure-listen-address";
 
     private final RecipeExecutionFailureCollector recipeExecutionFailureHandler = new RecipeExecutionFailureCollector();
 
@@ -127,16 +125,16 @@ public class RecipeExecutionFailureCollectorTest {
     private ArrayListMultimap<String, String> getNodesWithErrors() {
         ArrayListMultimap<String, String> nodesWithErrors = ArrayListMultimap.create();
         nodesWithErrors.putAll("host-10-0-0-4.openstacklocal", Arrays.asList(
-                "Command \"sh -x /opt/scripts/post-ambari-start/failingRecipe1 2>&1 | tee -a /var/log/recipes/post-ambari-start-failingRecipe1 && "
-                        + "exit ${PIPESTATUS[0]}\" run",
-                "Command \"sh -x /opt/scripts/pre-ambari-start/failingRecipe2 2>&1 | tee -a /var/log/recipes/pre-ambari-start-failingRecipe2.log && "
-                        + "exit ${PIPESTATUS[0]}\" run",
+                "\"Comment: Command \"/opt/scripts/recipe-runner.sh post-ambari-start failingRecipe1\" run\n"
+                        + "Stdout: /opt/scripts/recipe-runner.sh post-ambari-start failingRecipe1 : Timed out after 10 seconds\"",
+                "\"Comment: Command \"/opt/scripts/recipe-runner.sh pre-ambari-start failingRecipe2\" run\n"
+                        + "Stdout: /opt/scripts/recipe-runner.sh pre-ambari-start failingRecipe2 : Timed out after 10 seconds\"",
                 "Comment: One or more requisite failed: postgresql.init-services-db, postgresql.configure-listen-address",
                 "Comment: One or more requisite failed: postgresql.init-services-db, postgresql.configure-listen-address"
         ));
         nodesWithErrors.put("host-10-0-0-3.openstacklocal",
-                "Command \"sh -x /opt/scripts/post-ambari-start/failingRecipe1 2>&1 |"
-                        + " tee -a /var/log/recipes/post-ambari-start-failingRecipe1.log && exit ${PIPESTATUS[0]}\" run");
+                "\"Comment: Command \"/opt/scripts/recipe-runner.sh post-ambari-start failingRecipe1\" run\n"
+                        + "Stdout: /opt/scripts/recipe-runner.sh post-ambari-start failingRecipe1 : Timed out after 10 seconds\"");
         return nodesWithErrors;
     }
 }

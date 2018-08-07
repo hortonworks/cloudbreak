@@ -2,17 +2,20 @@ package com.sequenceiq.cloudbreak.repository;
 
 import java.util.Set;
 
+import javax.transaction.Transactional;
+
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
+import com.sequenceiq.cloudbreak.aspect.BaseRepository;
 import com.sequenceiq.cloudbreak.domain.ClusterTemplate;
+import com.sequenceiq.cloudbreak.aspect.HasPermission;
+import com.sequenceiq.cloudbreak.service.EntityType;
 
 @EntityType(entityClass = ClusterTemplate.class)
-public interface ClusterTemplateRepository extends CrudRepository<ClusterTemplate, Long> {
-
-    @Override
-    ClusterTemplate findOne(@Param("id") Long id);
+@Transactional(Transactional.TxType.REQUIRED)
+@HasPermission
+public interface ClusterTemplateRepository extends BaseRepository<ClusterTemplate, Long> {
 
     @Query("SELECT b FROM ClusterTemplate b WHERE b.name= :name and b.account= :account")
     ClusterTemplate findOneByName(@Param("name") String name, @Param("account") String account);

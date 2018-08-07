@@ -1,0 +1,5 @@
+{% if 'user' in pillar['proxy'] %}
+HTTP_PROXY="{{ pillar['proxy']['protocol'] }}://{{ pillar['proxy']['user'] }}:{{ pillar['proxy']['password'] }}@{{ pillar['proxy']['host'] }}:{{ pillar['proxy']['port'] }}"
+{% else %}
+HTTP_PROXY="{{ pillar['proxy']['protocol'] }}://{{ pillar['proxy']['host'] }}:{{ pillar['proxy']['port'] }}"
+{% endif%}

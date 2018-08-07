@@ -17,6 +17,4 @@ public enum SaltActionType {
     public String getAction() {
         return action;
     }
-
-
 }

@@ -4,17 +4,17 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ClusterSyncRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ClusterSyncResult;
 import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.cluster.ambari.InstanceMetadataUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.flow.status.AmbariClusterStatusUpdater;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyRegistrator;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.util.StackUtil;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -37,7 +37,7 @@ public class ClusterSyncHandler implements ReactorEventHandler<ClusterSyncReques
     private ProxyRegistrator proxyRegistrator;
 
     @Inject
-    private StackUtil stackUtil;
+    private InstanceMetadataUpdater instanceMetadataUpdater;
 
     @Override
     public String selector() {
@@ -50,15 +50,16 @@ public class ClusterSyncHandler implements ReactorEventHandler<ClusterSyncReques
         ClusterSyncResult result;
         try {
             Stack stack = stackService.getByIdWithLists(request.getStackId());
-            String proxyIp = stackUtil.extractAmbariIp(stack);
-            String contextPath = stack.getCluster().getGateway().getPath();
-            proxyRegistrator.register(stack.getName(), contextPath, proxyIp);
+            proxyRegistrator.registerIfNeed(stack);
             Cluster cluster = clusterService.retrieveClusterByStackId(request.getStackId());
             ambariClusterStatusUpdater.updateClusterStatus(stack, cluster);
+            if (cluster.isAvailable()) {
+                instanceMetadataUpdater.updatePackageVersionsOnAllInstances(stack);
+            }
             result = new ClusterSyncResult(request);
         } catch (Exception e) {
             result = new ClusterSyncResult(e.getMessage(), e, request);
         }
-        eventBus.notify(result.selector(), new Event(event.getHeaders(), result));
+        eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
     }
 }

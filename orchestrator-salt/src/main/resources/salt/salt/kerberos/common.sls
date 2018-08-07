@@ -5,12 +5,39 @@ haveged:
   service.running:
     - enable: True
 
+{% if grains['os_family'] == 'Suse' %}
+install_kerberos:
+  pkg.installed:
+    - pkgs:
+      - krb5-server
+{% elif grains['os_family'] == 'Debian' %}
+install_kerberos:
+  pkg.installed:
+    - pkgs:
+      - krb5-kdc
+      - krb5-admin-server
+{% else %}
 install_kerberos:
   pkg.installed:
     - pkgs:
       - krb5-server
       - krb5-libs
       - krb5-workstation
+{% endif %}
+
+{% if grains['os_family'] == 'Suse' %}
+/var/kerberos:
+  file.symlink:
+      - target: /var/lib/kerberos
+      - force: True
+{% endif %}
+
+{% if grains['os_family'] == 'Debian' %}
+/var/kerberos:
+  file.symlink:
+      - target: /etc
+      - force: True
+{% endif %}
 
 {% if kerberos.url is none or kerberos.url == '' %}
 
@@ -25,15 +52,19 @@ install_kerberos:
 
 create_db:
   cmd.run:
-    - name: /usr/sbin/kdb5_util -P {{ kerberos.master_key }} -r {{ kerberos.realm }} create -s
-    - unless: ls -la /var/kerberos/krb5kdc/principal
+{% if grains['os_family'] == 'Suse' %}
+    - name: /usr/lib/mit/sbin/kdb5_util -P {{ kerberos.master_key }} -r {{ kerberos.realm }} create -s && touch /var/kerberos_database_created
+{% else %}
+    - name: /usr/sbin/kdb5_util -P {{ kerberos.master_key }} -r {{ kerberos.realm }} create -s && touch /var/kerberos_database_created
+{% endif %}
+    - unless: ls -la /var/kerberos_database_created
     - watch:
       - pkg: install_kerberos
     - output_loglevel: quiet
 
 add_kadm5_sh_script:
   file.managed:
-    - name: /tmp/kadm5.sh
+    - name: /opt/salt/kadm5.sh
     - source: salt://kerberos/scripts/kadm5.sh
     - template: jinja
     - skip_verify: True
@@ -45,7 +76,7 @@ add_kadm5_sh_script:
 
 run_kadm5_sh_script:
   cmd.run:
-    - name: sh -x /tmp/kadm5.sh 2>&1 | tee -a /var/log/kadm5_sh.log && exit ${PIPESTATUS[0]}
+    - name: sh -x /opt/salt/kadm5.sh 2>&1 | tee -a /var/log/kadm5_sh.log && exit ${PIPESTATUS[0]}
     - require:
       - file: add_kadm5_sh_script
 
@@ -55,12 +86,21 @@ run_kadm5_sh_script:
     - source: salt://kerberos/init.d/kpropd
     - mode: 755
 
+{% if grains['os_family'] == 'Suse' %}
+create_cluster_user:
+  cmd.run:
+    - name: '/usr/lib/mit/sbin/kadmin.local -q "addprinc -pw {{ kerberos.clusterPassword }} {{ kerberos.clusterUser }}"'
+    - shell: /bin/bash
+    - unless: /usr/lib/mit/sbin/kadmin.local -q "list_principals *" | grep "^{{ kerberos.clusterUser }}@{{ kerberos.clusterPassword }} *"
+    - output_loglevel: quiet
+{% else %}
 create_cluster_user:
   cmd.run:
     - name: 'kadmin.local -q "addprinc -pw {{ kerberos.clusterPassword }} {{ kerberos.clusterUser }}"'
     - shell: /bin/bash
     - unless: kadmin.local -q "list_principals *" | grep "^{{ kerberos.clusterUser }}@{{ kerberos.clusterPassword }} *"
     - output_loglevel: quiet
+{% endif %}
 
 {% if grains['init'] == 'systemd' %}
 

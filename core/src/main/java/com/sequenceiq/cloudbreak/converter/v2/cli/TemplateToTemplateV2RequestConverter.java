@@ -21,6 +21,7 @@ public class TemplateToTemplateV2RequestConverter extends AbstractConversionServ
         templateV2Request.setVolumeCount(source.getVolumeCount());
         templateV2Request.setVolumeSize(source.getVolumeSize());
         templateV2Request.setVolumeType(source.getVolumeType());
+        templateV2Request.setRootVolumeSize(source.getRootVolumeSize());
         return templateV2Request;
     }
 

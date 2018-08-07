@@ -7,7 +7,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.slf4j.MDC;
 
-import com.sequenceiq.cloudbreak.core.CloudbreakException;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
@@ -32,7 +32,7 @@ public class SimpleOrchestratorBootstrapRunnerTest {
         OrchestratorBootstrapRunner runner = new OrchestratorBootstrapRunner(new MockBootstrapRunner(-1),
                 new MockExitCriteria(),
                 new MockExitCriteriaModel(),
-                MDC.getCopyOfContextMap(), 2, 1);
+                MDC.getCopyOfContextMap(), 2, 1, 2);
         Boolean result = null;
         try {
             result = runner.call();
@@ -47,7 +47,7 @@ public class SimpleOrchestratorBootstrapRunnerTest {
 
         private int count;
 
-        private int retryOk = 2;
+        private final int retryOk;
 
         private MockBootstrapRunner(int retryOk) {
             this.retryOk = retryOk;

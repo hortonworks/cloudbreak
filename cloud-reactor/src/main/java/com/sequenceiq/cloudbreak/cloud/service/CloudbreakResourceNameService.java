@@ -13,7 +13,6 @@ import org.springframework.util.StringUtils;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 
-
 public abstract class CloudbreakResourceNameService implements ResourceNameService {
     public static final String DELIMITER = "-";
 
@@ -112,11 +111,7 @@ public abstract class CloudbreakResourceNameService implements ResourceNameServi
             throw new IllegalArgumentException("base and part are both null! Can't append them!");
         }
         StringBuilder sb;
-        if (null != base) {
-            sb = new StringBuilder(base).append(DELIMITER).append(part);
-        } else {
-            sb = new StringBuilder(part);
-        }
+        sb = null != base ? new StringBuilder(base).append(DELIMITER).append(part) : new StringBuilder(part);
         return sb.toString();
     }
 

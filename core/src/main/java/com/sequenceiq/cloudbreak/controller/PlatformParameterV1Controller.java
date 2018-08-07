@@ -7,6 +7,8 @@ import java.util.Map;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
 
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
@@ -16,6 +18,7 @@ import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ConnectorV1Endpoint;
 import com.sequenceiq.cloudbreak.api.model.PlatformAccessConfigsResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformDisksJson;
+import com.sequenceiq.cloudbreak.api.model.PlatformEncryptionKeysResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformGatewaysResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformIpPoolsResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformNetworksResponse;
@@ -33,6 +36,7 @@ import com.sequenceiq.cloudbreak.api.model.SpecialParametersJson;
 import com.sequenceiq.cloudbreak.api.model.TagSpecificationsJson;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
+import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudGateWays;
 import com.sequenceiq.cloudbreak.cloud.model.CloudIpPools;
 import com.sequenceiq.cloudbreak.cloud.model.CloudNetworks;
@@ -46,11 +50,14 @@ import com.sequenceiq.cloudbreak.cloud.model.PlatformRegions;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformVirtualMachines;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.PlatformResourceRequest;
+import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 import com.sequenceiq.cloudbreak.service.stack.CloudResourceAdvisor;
 
 @Component
+@Transactional(TxType.NEVER)
 public class PlatformParameterV1Controller implements ConnectorV1Endpoint {
 
     @Inject
@@ -244,6 +251,16 @@ public class PlatformParameterV1Controller implements ConnectorV1Endpoint {
         CloudAccessConfigs cloudAccessConfigs = cloudParameterService.getCloudAccessConfigs(convert.getCredential(), convert.getRegion(),
                 convert.getPlatformVariant(), convert.getFilters());
         return conversionService.convert(cloudAccessConfigs, PlatformAccessConfigsResponse.class);
+    }
+
+    @Override
+    public PlatformEncryptionKeysResponse getEncryptionKeys(PlatformResourceRequestJson resourceRequestJson) {
+        resourceRequestJson = prepareAccountAndOwner(resourceRequestJson, authenticatedUserService.getCbUser());
+        PlatformResourceRequest convert = conversionService.convert(resourceRequestJson, PlatformResourceRequest.class);
+
+        CloudEncryptionKeys cloudEncryptionKeys = cloudParameterService.getCloudEncryptionKeys(convert.getCredential(), convert.getRegion(),
+                convert.getPlatformVariant(), convert.getFilters());
+        return conversionService.convert(cloudEncryptionKeys, PlatformEncryptionKeysResponse.class);
     }
 
     private PlatformResourceRequestJson prepareAccountAndOwner(PlatformResourceRequestJson resourceRequestJson, IdentityUser user) {

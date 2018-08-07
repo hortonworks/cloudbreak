@@ -25,7 +25,7 @@
       "cardinality": "1"
     },
     {
-      "name": "slave_1",
+      "name": "slave1",
       "components": [
         {
           "name": "DATANODE"
@@ -52,6 +52,6 @@
   "Blueprints": {
     "blueprint_name": "multi-node-hdfs-yarn",
     "stack_name": "HDP",
-    "stack_version": "2.3"
+    "stack_version": "2.6"
   }
 }

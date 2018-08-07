@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartAmbariRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartAmbariSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ClusterResetRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ClusterResetResult;
-import com.sequenceiq.cloudbreak.repository.StackUpdater;
+import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
 
@@ -45,10 +45,10 @@ public class ClusterResetActions {
     private ClusterResetService clusterResetService;
 
     @Bean(name = "CLUSTER_RESET_STATE")
-    public Action syncCluster() {
+    public Action<?, ?> syncCluster() {
         return new AbstractClusterResetAction<StackEvent>(StackEvent.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterViewContext context, StackEvent payload, Map<Object, Object> variables) {
                 clusterResetService.resetCluster(context.getStackId());
                 sendEvent(context);
             }
@@ -61,10 +61,10 @@ public class ClusterResetActions {
     }
 
     @Bean(name = "CLUSTER_RESET_FINISHED_STATE")
-    public Action finishResetCluster() {
+    public Action<?, ?> finishResetCluster() {
         return new AbstractClusterResetAction<ClusterResetResult>(ClusterResetResult.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, ClusterResetResult payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterViewContext context, ClusterResetResult payload, Map<Object, Object> variables) {
                 sendEvent(context);
             }
 
@@ -76,10 +76,10 @@ public class ClusterResetActions {
     }
 
     @Bean(name = "CLUSTER_RESET_START_AMBARI_FINISHED_STATE")
-    public Action finishStartAmbari() {
+    public Action<?, ?> finishStartAmbari() {
         return new AbstractClusterResetAction<StartAmbariSuccess>(StartAmbariSuccess.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, StartAmbariSuccess payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterViewContext context, StartAmbariSuccess payload, Map<Object, Object> variables) {
                 clusterResetService.handleResetClusterFinished(context.getClusterView());
                 sendEvent(context);
             }
@@ -92,10 +92,10 @@ public class ClusterResetActions {
     }
 
     @Bean(name = "CLUSTER_RESET_FAILED_STATE")
-    public Action clusterResetFailedAction() {
+    public Action<?, ?> clusterResetFailedAction() {
         return new AbstractStackFailureAction<ClusterResetState, ClusterResetEvent>() {
             @Override
-            protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 clusterResetService.handleResetClusterFailure(context.getStackView(), payload.getException());
                 sendEvent(context);
             }

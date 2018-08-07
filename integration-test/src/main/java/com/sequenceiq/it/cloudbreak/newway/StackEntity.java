@@ -1,10 +1,11 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import com.sequenceiq.cloudbreak.api.model.StackAuthenticationRequest;
-import com.sequenceiq.cloudbreak.api.model.StackResponse;
+import com.sequenceiq.cloudbreak.api.model.stack.StackAuthenticationRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.CustomDomainSettings;
 import com.sequenceiq.cloudbreak.api.model.v2.GeneralSettings;
@@ -80,6 +81,15 @@ public class StackEntity extends AbstractCloudbreakEntity<StackV2Request, StackR
         return this;
     }
 
+    public StackEntity withInputs(Map<String, Object> inputs) {
+        if (inputs == null) {
+            getRequest().setInputs(Collections.emptyMap());
+        } else {
+            getRequest().setInputs(inputs);
+        }
+        return this;
+    }
+
     public StackEntity withInstanceGroups(List<InstanceGroupV2Request> instanceGroups) {
         getRequest().setInstanceGroups(instanceGroups);
         return this;
@@ -116,5 +126,9 @@ public class StackEntity extends AbstractCloudbreakEntity<StackV2Request, StackR
     public StackEntity withAmbariVersion(String version) {
         getRequest().setAmbariVersion(version);
         return this;
+    }
+
+    public boolean hasCluster() {
+        return getRequest().getCluster() != null;
     }
 }

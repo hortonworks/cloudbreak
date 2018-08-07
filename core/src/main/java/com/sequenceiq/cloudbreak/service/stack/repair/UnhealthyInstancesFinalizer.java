@@ -23,8 +23,8 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
-import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 
 @Component
 public class UnhealthyInstancesFinalizer {
@@ -38,7 +38,7 @@ public class UnhealthyInstancesFinalizer {
     @Inject
     private InstanceStateQuery instanceStateQuery;
 
-    public Set<String> finalizeUnhealthyInstances(Stack stack, Set<InstanceMetaData> candidateUnhealthyInstances) {
+    public Set<String> finalizeUnhealthyInstances(Stack stack, Iterable<InstanceMetaData> candidateUnhealthyInstances) {
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(),
                 stack.getOwner(), stack.getPlatformVariant(), location);

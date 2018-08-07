@@ -11,35 +11,39 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.scheduling.support.CronSequenceGenerator;
+
+import com.sequenceiq.periscope.service.DateTimeService;
+import com.sequenceiq.periscope.service.DateService;
 
 @RunWith(Parameterized.class)
 public class CronTest {
 
     @Rule
-    public ExpectedException thrown = ExpectedException.none();
+    public final ExpectedException thrown = ExpectedException.none();
 
     @Mock
-    private DateTimeUtils dateTimeUtils;
+    private DateTimeService dateTimeService;
 
     @InjectMocks
-    private final DateUtils underTest = new DateUtils();
+    private final DateService underTest = new DateService();
 
-    private String input;
+    private final String input;
 
-    private Optional<String> expected;
+    private final Optional<String> expected;
 
-    private Optional<Class> exception;
+    private final Optional<Class<? extends Exception>> exception;
 
-    public CronTest(String input, String expected, Class exception) {
+    public CronTest(String input, String expected, Class<? extends Exception> exception) {
         this.input = input;
         this.expected = Optional.ofNullable(expected);
         this.exception = Optional.ofNullable(exception);
     }
 
-    @Parameterized.Parameters(name = "{index}: cronExpressionTest({0})={1}")
+    @Parameters(name = "{index}: cronExpressionTest({0})={1}")
     public static Iterable<Object[]> data() {
         return Arrays.asList(new Object[][] {
                 { "* * * * *",              "* * * * * ?",              null },
@@ -78,12 +82,12 @@ public class CronTest {
 
     @Test
     public void test() throws ParseException {
-        if (this.exception.isPresent()) {
-            thrown.expect(this.exception.get());
+        if (exception.isPresent()) {
+            thrown.expect(exception.get());
         }
-        CronSequenceGenerator cronExpression = underTest.getCronExpression(this.input);
-        if (!this.exception.isPresent()) {
-            Assert.assertEquals(String.format("CronSequenceGenerator: %s", this.expected.orElse("This should be null")), cronExpression.toString());
+        CronSequenceGenerator cronExpression = underTest.getCronExpression(input);
+        if (!exception.isPresent()) {
+            Assert.assertEquals(String.format("CronSequenceGenerator: %s", expected.orElse("This should be null")), cronExpression.toString());
         }
     }
 }

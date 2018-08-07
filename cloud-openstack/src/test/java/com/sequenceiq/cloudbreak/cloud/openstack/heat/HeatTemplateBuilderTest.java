@@ -24,15 +24,16 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -76,14 +77,14 @@ public class HeatTemplateBuilderTest {
 
     private Image image;
 
-    private String templatePath;
+    private final String templatePath;
 
     public HeatTemplateBuilderTest(String templatePath) {
         this.templatePath = templatePath;
     }
 
-    @Parameterized.Parameters(name = "{0}")
-    public static Iterable<? extends Object> getTemplatesPath() {
+    @Parameters(name = "{0}")
+    public static Iterable<?> getTemplatesPath() {
         List<String> templates = Lists.newArrayList("templates/openstack-heat.ftl");
         File[] templateFiles = new File(HeatTemplateBuilderTest.class.getClassLoader().getResource("templates").getPath()).listFiles();
         List<String> olderTemplates = Arrays.stream(templateFiles).map(file -> {
@@ -110,14 +111,14 @@ public class HeatTemplateBuilderTest {
         String name = "master";
         List<Volume> volumes = Arrays.asList(new Volume("/hadoop/fs1", "HDD", 1), new Volume("/hadoop/fs2", "HDD", 1));
         InstanceTemplate instanceTemplate = new InstanceTemplate("m1.medium", name, 0L, volumes, InstanceStatus.CREATE_REQUESTED,
-                new HashMap<>(), 0L);
+                new HashMap<>(), 0L, "cb-centos66-amb200-2015-05-25");
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         CloudInstance instance = new CloudInstance("SOME_ID", instanceTemplate, instanceAuthentication);
         List<SecurityRule> rules = Collections.singletonList(new SecurityRule("0.0.0.0/0",
                 new PortDefinition[]{new PortDefinition("22", "22"), new PortDefinition("443", "443")}, "tcp"));
         Security security = new Security(rules, null);
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey()));
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), 50));
         Map<InstanceGroupType, String> userData = ImmutableMap.of(
                 InstanceGroupType.CORE, "CORE",
                 InstanceGroupType.GATEWAY, "GATEWAY"
@@ -131,21 +132,19 @@ public class HeatTemplateBuilderTest {
         tags.put(CloudbreakResourceType.STORAGE.templateVariable(), CloudbreakResourceType.STORAGE.key());
         tags.put(CloudbreakResourceType.TEMPLATE.templateVariable(), CloudbreakResourceType.TEMPLATE.key());
         when(defaultCostTaggingService.prepareInstanceTagging()).thenReturn(tags);
-        image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "url", "default", null);
+        image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "url", "default", null, new HashMap<>());
     }
 
     @Test
-    public void buildTestWithExistingNetworkAndExistingSubnetAndAssignFloatingIp() throws Exception {
+    public void buildTestWithExistingNetworkAndExistingSubnetAndAssignFloatingIp() {
         //GIVEN
-        boolean existingNetwork = true;
-        boolean existingSubnet = true;
         NeutronNetworkView neutronNetworkView = createNeutronNetworkView("floating_pool_id");
         //WHEN
-        when(openStackUtil.adjustStackNameLength(Mockito.anyString())).thenReturn("t");
+        when(openStackUtil.adjustStackNameLength(ArgumentMatchers.anyString())).thenReturn("t");
 
         ModelContext modelContext = new ModelContext();
-        modelContext.withExistingNetwork(existingNetwork);
-        modelContext.withExistingSubnet(existingSubnet);
+        modelContext.withExistingNetwork(true);
+        modelContext.withExistingSubnet(true);
         modelContext.withGroups(groups);
         modelContext.withInstanceUserData(image);
         modelContext.withLocation(location());
@@ -165,26 +164,24 @@ public class HeatTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestWithExistingNetworkAndExistingSubnetAndAssignFloatingIpWithExistingSecurityGroups() throws Exception {
-        assumeTrue("Template doesn't support this feature, required version is '2.x' at least", isTemplateMajorVersionGreaterOrEqualThan(2));
+    public void buildTestWithExistingNetworkAndExistingSubnetAndAssignFloatingIpWithExistingSecurityGroups() {
+        assumeTrue("Template doesn't support this feature, required version is '2.x' at least", isTemplateMajorVersionGreaterOrEqualThan());
         //GIVEN
-        boolean existingNetwork = true;
-        boolean existingSubnet = true;
         NeutronNetworkView neutronNetworkView = createNeutronNetworkView("floating_pool_id");
         Group group = groups.get(0);
         groups.clear();
         String cloudSecurityId = "sec-group-id";
         Security security = new Security(Collections.emptyList(), cloudSecurityId);
         Group groupWithSecGroup = new Group(group.getName(), InstanceGroupType.CORE, group.getInstances(), security, null,
-                group.getInstanceAuthentication(), group.getInstanceAuthentication().getLoginUserName(), group.getInstanceAuthentication().getPublicKey());
+                group.getInstanceAuthentication(), group.getInstanceAuthentication().getLoginUserName(), group.getInstanceAuthentication().getPublicKey(), 50);
         groups.add(groupWithSecGroup);
 
         //WHEN
-        when(openStackUtil.adjustStackNameLength(Mockito.anyString())).thenReturn("t");
+        when(openStackUtil.adjustStackNameLength(ArgumentMatchers.anyString())).thenReturn("t");
 
         ModelContext modelContext = new ModelContext();
-        modelContext.withExistingNetwork(existingNetwork);
-        modelContext.withExistingSubnet(existingSubnet);
+        modelContext.withExistingNetwork(true);
+        modelContext.withExistingSubnet(true);
         modelContext.withGroups(groups);
         modelContext.withInstanceUserData(image);
         modelContext.withLocation(location());
@@ -206,17 +203,15 @@ public class HeatTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestWithExistingSubnetAndAssignFloatingIpWithoutExistingNetwork() throws Exception {
+    public void buildTestWithExistingSubnetAndAssignFloatingIpWithoutExistingNetwork() {
         //GIVEN
-        boolean existingNetwork = false;
-        boolean existingSubnet = true;
         NeutronNetworkView neutronNetworkView = createNeutronNetworkView("floating_pool_id");
         //WHEN
-        when(openStackUtil.adjustStackNameLength(Mockito.anyString())).thenReturn("t");
+        when(openStackUtil.adjustStackNameLength(ArgumentMatchers.anyString())).thenReturn("t");
 
         ModelContext modelContext = new ModelContext();
-        modelContext.withExistingNetwork(existingNetwork);
-        modelContext.withExistingSubnet(existingSubnet);
+        modelContext.withExistingNetwork(false);
+        modelContext.withExistingSubnet(true);
         modelContext.withGroups(groups);
         modelContext.withInstanceUserData(image);
         modelContext.withLocation(location());
@@ -236,17 +231,15 @@ public class HeatTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestWithExistingNetworkAndAssignFloatingIpWithoutExistingSubnet() throws Exception {
+    public void buildTestWithExistingNetworkAndAssignFloatingIpWithoutExistingSubnet() {
         //GIVEN
-        boolean existingNetwork = true;
-        boolean existingSubnet = false;
         NeutronNetworkView neutronNetworkView = createNeutronNetworkView("floating_pool_id");
         //WHEN
-        when(openStackUtil.adjustStackNameLength(Mockito.anyString())).thenReturn("t");
+        when(openStackUtil.adjustStackNameLength(ArgumentMatchers.anyString())).thenReturn("t");
 
         ModelContext modelContext = new ModelContext();
-        modelContext.withExistingNetwork(existingNetwork);
-        modelContext.withExistingSubnet(existingSubnet);
+        modelContext.withExistingNetwork(true);
+        modelContext.withExistingSubnet(false);
         modelContext.withGroups(groups);
         modelContext.withInstanceUserData(image);
         modelContext.withLocation(location());
@@ -266,17 +259,15 @@ public class HeatTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestWithExistingNetworkAndExistingSubnetWithoutAssignFloatingIp() throws Exception {
+    public void buildTestWithExistingNetworkAndExistingSubnetWithoutAssignFloatingIp() {
         //GIVEN
-        boolean existingNetwork = true;
-        boolean existingSubnet = true;
         NeutronNetworkView neutronNetworkView = createNeutronNetworkView(null);
         //WHEN
-        when(openStackUtil.adjustStackNameLength(Mockito.anyString())).thenReturn("t");
+        when(openStackUtil.adjustStackNameLength(ArgumentMatchers.anyString())).thenReturn("t");
 
         ModelContext modelContext = new ModelContext();
-        modelContext.withExistingNetwork(existingNetwork);
-        modelContext.withExistingSubnet(existingSubnet);
+        modelContext.withExistingNetwork(true);
+        modelContext.withExistingSubnet(true);
         modelContext.withGroups(groups);
         modelContext.withInstanceUserData(image);
         modelContext.withLocation(location());
@@ -296,17 +287,15 @@ public class HeatTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestWithoutExistingNetworkAndExistingSubnetAndAssignFloatingIp() throws Exception {
+    public void buildTestWithoutExistingNetworkAndExistingSubnetAndAssignFloatingIp() {
         //GIVEN
-        boolean existingNetwork = false;
-        boolean existingSubnet = false;
         NeutronNetworkView neutronNetworkView = createNeutronNetworkView(null);
         //WHEN
-        when(openStackUtil.adjustStackNameLength(Mockito.anyString())).thenReturn("t");
+        when(openStackUtil.adjustStackNameLength(ArgumentMatchers.anyString())).thenReturn("t");
 
         ModelContext modelContext = new ModelContext();
-        modelContext.withExistingNetwork(existingNetwork);
-        modelContext.withExistingSubnet(existingSubnet);
+        modelContext.withExistingNetwork(false);
+        modelContext.withExistingSubnet(false);
         modelContext.withGroups(groups);
         modelContext.withInstanceUserData(image);
         modelContext.withLocation(location());
@@ -326,17 +315,15 @@ public class HeatTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestWithExistingNetworkWithoutExistingSubnetAndAssignFloatingIp() throws Exception {
+    public void buildTestWithExistingNetworkWithoutExistingSubnetAndAssignFloatingIp() {
         //GIVEN
-        boolean existingNetwork = true;
-        boolean existingSubnet = false;
         NeutronNetworkView neutronNetworkView = createNeutronNetworkView(null);
         //WHEN
-        when(openStackUtil.adjustStackNameLength(Mockito.anyString())).thenReturn("t");
+        when(openStackUtil.adjustStackNameLength(ArgumentMatchers.anyString())).thenReturn("t");
 
         ModelContext modelContext = new ModelContext();
-        modelContext.withExistingNetwork(existingNetwork);
-        modelContext.withExistingSubnet(existingSubnet);
+        modelContext.withExistingNetwork(true);
+        modelContext.withExistingSubnet(false);
         modelContext.withGroups(groups);
         modelContext.withInstanceUserData(image);
         modelContext.withLocation(location());
@@ -356,17 +343,15 @@ public class HeatTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestWithExistingSubnetWithoutExistingNetworkAndAssignFloatingIp() throws Exception {
+    public void buildTestWithExistingSubnetWithoutExistingNetworkAndAssignFloatingIp() {
         //GIVEN
-        boolean existingNetwork = false;
-        boolean existingSubnet = true;
         NeutronNetworkView neutronNetworkView = createNeutronNetworkView(null);
         //WHEN
-        when(openStackUtil.adjustStackNameLength(Mockito.anyString())).thenReturn("t");
+        when(openStackUtil.adjustStackNameLength(ArgumentMatchers.anyString())).thenReturn("t");
 
         ModelContext modelContext = new ModelContext();
-        modelContext.withExistingNetwork(existingNetwork);
-        modelContext.withExistingSubnet(existingSubnet);
+        modelContext.withExistingNetwork(false);
+        modelContext.withExistingSubnet(true);
         modelContext.withGroups(groups);
         modelContext.withInstanceUserData(image);
         modelContext.withLocation(location());
@@ -386,17 +371,15 @@ public class HeatTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestWithAssignFloatingIpWithoutExistingNetworkAndExistingSubnet() throws Exception {
+    public void buildTestWithAssignFloatingIpWithoutExistingNetworkAndExistingSubnet() {
         //GIVEN
-        boolean existingNetwork = false;
-        boolean existingSubnet = false;
         NeutronNetworkView neutronNetworkView = createNeutronNetworkView("floating_pool_id");
         //WHEN
-        when(openStackUtil.adjustStackNameLength(Mockito.anyString())).thenReturn("t");
+        when(openStackUtil.adjustStackNameLength(ArgumentMatchers.anyString())).thenReturn("t");
 
         ModelContext modelContext = new ModelContext();
-        modelContext.withExistingNetwork(existingNetwork);
-        modelContext.withExistingSubnet(existingSubnet);
+        modelContext.withExistingNetwork(false);
+        modelContext.withExistingSubnet(false);
         modelContext.withGroups(groups);
         modelContext.withInstanceUserData(image);
         modelContext.withLocation(location());
@@ -417,17 +400,15 @@ public class HeatTemplateBuilderTest {
 
     @Test
     @Ignore
-    public void buildTestWithExistingNetworkAndExistingSubnetAndAssignFloatingIpShouldThrowAssertionException() throws Exception {
+    public void buildTestWithExistingNetworkAndExistingSubnetAndAssignFloatingIpShouldThrowAssertionException() {
         //GIVEN
-        boolean existingNetwork = true;
-        boolean existingSubnet = true;
         NeutronNetworkView neutronNetworkView = createNeutronNetworkView("floating_pool_id");
         //WHEN
-        when(openStackUtil.adjustStackNameLength(Mockito.anyString())).thenReturn("t");
+        when(openStackUtil.adjustStackNameLength(ArgumentMatchers.anyString())).thenReturn("t");
 
         ModelContext modelContext = new ModelContext();
-        modelContext.withExistingNetwork(existingNetwork);
-        modelContext.withExistingSubnet(existingSubnet);
+        modelContext.withExistingNetwork(true);
+        modelContext.withExistingSubnet(true);
         modelContext.withGroups(groups);
         modelContext.withInstanceUserData(image);
         modelContext.withLocation(location());
@@ -448,17 +429,15 @@ public class HeatTemplateBuilderTest {
 
     @Test
     @Ignore
-    public void buildTestWithExistingSubnetAndAssignFloatingIpWithoutExistingNetworkShouldThrowAssertionException() throws Exception {
+    public void buildTestWithExistingSubnetAndAssignFloatingIpWithoutExistingNetworkShouldThrowAssertionException() {
         //GIVEN
-        boolean existingNetwork = false;
-        boolean existingSubnet = true;
         NeutronNetworkView neutronNetworkView = createNeutronNetworkView("floating_pool_id");
         //WHEN
-        when(openStackUtil.adjustStackNameLength(Mockito.anyString())).thenReturn("t");
+        when(openStackUtil.adjustStackNameLength(ArgumentMatchers.anyString())).thenReturn("t");
 
         ModelContext modelContext = new ModelContext();
-        modelContext.withExistingNetwork(existingNetwork);
-        modelContext.withExistingSubnet(existingSubnet);
+        modelContext.withExistingNetwork(false);
+        modelContext.withExistingSubnet(true);
         modelContext.withGroups(groups);
         modelContext.withInstanceUserData(image);
         modelContext.withLocation(location());
@@ -479,17 +458,15 @@ public class HeatTemplateBuilderTest {
 
     @Test
     @Ignore
-    public void buildTestWithExistingNetworkAndAssignFloatingIpWithoutExistingSubnetShouldThrowAssertionException() throws Exception {
+    public void buildTestWithExistingNetworkAndAssignFloatingIpWithoutExistingSubnetShouldThrowAssertionException() {
         //GIVEN
-        boolean existingNetwork = true;
-        boolean existingSubnet = false;
         NeutronNetworkView neutronNetworkView = createNeutronNetworkView("floating_pool_id");
         //WHEN
-        when(openStackUtil.adjustStackNameLength(Mockito.anyString())).thenReturn("t");
+        when(openStackUtil.adjustStackNameLength(ArgumentMatchers.anyString())).thenReturn("t");
 
         ModelContext modelContext = new ModelContext();
-        modelContext.withExistingNetwork(existingNetwork);
-        modelContext.withExistingSubnet(existingSubnet);
+        modelContext.withExistingNetwork(true);
+        modelContext.withExistingSubnet(false);
         modelContext.withGroups(groups);
         modelContext.withInstanceUserData(image);
         modelContext.withLocation(location());
@@ -523,11 +500,11 @@ public class HeatTemplateBuilderTest {
         return Location.location(r);
     }
 
-    private boolean isTemplateMajorVersionGreaterOrEqualThan(int majorVersion) {
+    private boolean isTemplateMajorVersionGreaterOrEqualThan() {
         String[] splittedName = templatePath.split("-");
         String templateMajorVersion = splittedName[splittedName.length - 1].split("\\.")[0];
         if (StringUtils.isNumeric(templateMajorVersion)) {
-            return Integer.parseInt(templateMajorVersion) >= majorVersion;
+            return Integer.parseInt(templateMajorVersion) >= 2;
         }
         // template has no version, we assume it is the latest one
         return true;

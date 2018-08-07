@@ -1,16 +1,22 @@
 package com.sequenceiq.cloudbreak.controller.mapper;
 
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.ext.Provider;
 
-import com.sequenceiq.cloudbreak.controller.SmartSenseNotFoundException;
+import org.springframework.stereotype.Component;
 
-@Provider
-public class SmartSenseNotFoundExceptionMapper extends BaseExceptionMapper<SmartSenseNotFoundException> {
+import com.sequenceiq.cloudbreak.controller.exception.SmartSenseConfigurationNotFoundException;
+
+@Component
+public class SmartSenseNotFoundExceptionMapper extends BaseExceptionMapper<SmartSenseConfigurationNotFoundException> {
 
     @Override
     Status getResponseStatus() {
         return Status.NOT_FOUND;
+    }
+
+    @Override
+    Class<SmartSenseConfigurationNotFoundException> getExceptionType() {
+        return SmartSenseConfigurationNotFoundException.class;
     }
 
     @Override

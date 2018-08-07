@@ -1,121 +1,316 @@
 'use strict';
 
-var url = require('url');
-
-var V1stacks = require('./V1stacksService');
+var utils = require('../utils/writer.js');
+var V1stacks = require('../service/V1stacksService');
 
 module.exports.deleteCluster = function deleteCluster (req, res, next) {
-    V1stacks.deleteCluster(req.swagger.params, res, next);
+  var id = req.swagger.params['id'].value;
+  var withStackDelete = req.swagger.params['withStackDelete'].value;
+  var deleteDependencies = req.swagger.params['deleteDependencies'].value;
+  V1stacks.deleteCluster(id,withStackDelete,deleteDependencies)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.deleteInstanceStack = function deleteInstanceStack (req, res, next) {
-    V1stacks.deleteInstanceStack(req.swagger.params, res, next);
+  var stackId = req.swagger.params['stackId'].value;
+  var instanceId = req.swagger.params['instanceId'].value;
+  V1stacks.deleteInstanceStack(stackId,instanceId)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.deletePrivateStack = function deletePrivateStack (req, res, next) {
-    V1stacks.deletePrivateStack(req.swagger.params, res, next);
+  var name = req.swagger.params['name'].value;
+  var forced = req.swagger.params['forced'].value;
+  var deleteDependencies = req.swagger.params['deleteDependencies'].value;
+  V1stacks.deletePrivateStack(name,forced,deleteDependencies)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.deletePublicStack = function deletePublicStack (req, res, next) {
-    V1stacks.deletePublicStack(req.swagger.params, res, next);
+  var name = req.swagger.params['name'].value;
+  var forced = req.swagger.params['forced'].value;
+  var deleteDependencies = req.swagger.params['deleteDependencies'].value;
+  V1stacks.deletePublicStack(name,forced,deleteDependencies)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.deleteStack = function deleteStack (req, res, next) {
-    V1stacks.deleteStack(req.swagger.params, res, next);
+  var id = req.swagger.params['id'].value;
+  var forced = req.swagger.params['forced'].value;
+  var deleteDependencies = req.swagger.params['deleteDependencies'].value;
+  V1stacks.deleteStack(id,forced,deleteDependencies)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.failureReportCluster = function failureReportCluster (req, res, next) {
-    V1stacks.failureReportCluster(req.swagger.params, res, next);
+  var id = req.swagger.params['id'].value;
+  var body = req.swagger.params['body'].value;
+  V1stacks.failureReportCluster(id,body)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.getAllStack = function getAllStack (req, res, next) {
-    V1stacks.getAllStack(req.swagger.params, res, next);
+  V1stacks.getAllStack()
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.getCertificateStack = function getCertificateStack (req, res, next) {
-    V1stacks.getCertificateStack(req.swagger.params, res, next);
+  var id = req.swagger.params['id'].value;
+  V1stacks.getCertificateStack(id)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.getCluster = function getCluster (req, res, next) {
-    V1stacks.getCluster(req.swagger.params, res, next);
+  var id = req.swagger.params['id'].value;
+  V1stacks.getCluster(id)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.getConfigsCluster = function getConfigsCluster (req, res, next) {
-    V1stacks.getConfigsCluster(req.swagger.params, res, next);
+  var id = req.swagger.params['id'].value;
+  var body = req.swagger.params['body'].value;
+  V1stacks.getConfigsCluster(id,body)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.getFullCluster = function getFullCluster (req, res, next) {
-    V1stacks.getFullCluster(req.swagger.params, res, next);
+  var id = req.swagger.params['id'].value;
+  V1stacks.getFullCluster(id)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.getPrivateCluster = function getPrivateCluster (req, res, next) {
-    V1stacks.getPrivateCluster(req.swagger.params, res, next);
+  var name = req.swagger.params['name'].value;
+  V1stacks.getPrivateCluster(name)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.getPrivateStack = function getPrivateStack (req, res, next) {
-    V1stacks.getPrivateStack(req.swagger.params, res, next);
+  var name = req.swagger.params['name'].value;
+  var entry = req.swagger.params['entry'].value;
+  V1stacks.getPrivateStack(name,entry)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.getPrivatesStack = function getPrivatesStack (req, res, next) {
-    V1stacks.getPrivatesStack(req.swagger.params, res, next);
+  V1stacks.getPrivatesStack()
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.getPublicCluster = function getPublicCluster (req, res, next) {
-    V1stacks.getPublicCluster(req.swagger.params, res, next);
+  var name = req.swagger.params['name'].value;
+  V1stacks.getPublicCluster(name)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.getPublicStack = function getPublicStack (req, res, next) {
-    V1stacks.getPublicStack(req.swagger.params, res, next);
+  var name = req.swagger.params['name'].value;
+  var entry = req.swagger.params['entry'].value;
+  V1stacks.getPublicStack(name,entry)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.getPublicsStack = function getPublicsStack (req, res, next) {
-    V1stacks.getPublicsStack(req.swagger.params, res, next);
+  V1stacks.getPublicsStack()
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.getStack = function getStack (req, res, next) {
-    V1stacks.getStack(req.swagger.params, res, next);
+  var id = req.swagger.params['id'].value;
+  var entry = req.swagger.params['entry'].value;
+  V1stacks.getStack(id,entry)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.getStackForAmbari = function getStackForAmbari (req, res, next) {
-    V1stacks.getStackForAmbari(req.swagger.params, res, next);
+  var body = req.swagger.params['body'].value;
+  V1stacks.getStackForAmbari(body)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.postCluster = function postCluster (req, res, next) {
-    V1stacks.postCluster(req.swagger.params, res, next);
-};
-
-module.exports.postPrivateStack = function postPrivateStack (req, res, next) {
-    V1stacks.postPrivateStack(req.swagger.params, res, next);
-};
-
-module.exports.postPublicStack = function postPublicStack (req, res, next) {
-    V1stacks.postPublicStack(req.swagger.params, res, next);
+  var id = req.swagger.params['id'].value;
+  var body = req.swagger.params['body'].value;
+  V1stacks.postCluster(id,body)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.putCluster = function putCluster (req, res, next) {
-    V1stacks.putCluster(req.swagger.params, res, next);
+  var id = req.swagger.params['id'].value;
+  var body = req.swagger.params['body'].value;
+  V1stacks.putCluster(id,body)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.putStack = function putStack (req, res, next) {
-    V1stacks.putStack(req.swagger.params, res, next);
+  var id = req.swagger.params['id'].value;
+  var body = req.swagger.params['body'].value;
+  V1stacks.putStack(id,body)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.repairCluster = function repairCluster (req, res, next) {
-    V1stacks.repairCluster(req.swagger.params, res, next);
+  var id = req.swagger.params['id'].value;
+  var body = req.swagger.params['body'].value;
+  V1stacks.repairCluster(id,body)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.statusStack = function statusStack (req, res, next) {
-    V1stacks.statusStack(req.swagger.params, res, next);
+  var id = req.swagger.params['id'].value;
+  V1stacks.statusStack(id)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.upgradeCluster = function upgradeCluster (req, res, next) {
-    V1stacks.upgradeCluster(req.swagger.params, res, next);
+  var id = req.swagger.params['id'].value;
+  var body = req.swagger.params['body'].value;
+  V1stacks.upgradeCluster(id,body)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.validateStack = function validateStack (req, res, next) {
-    V1stacks.validateStack(req.swagger.params, res, next);
+  var body = req.swagger.params['body'].value;
+  V1stacks.validateStack(body)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.variantsStack = function variantsStack (req, res, next) {
-    V1stacks.variantsStack(req.swagger.params, res, next);
+  V1stacks.variantsStack()
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };

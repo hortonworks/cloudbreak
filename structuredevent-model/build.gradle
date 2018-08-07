@@ -11,4 +11,6 @@ jar {
 
 dependencies {
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonVersion
+    testCompile group: 'junit',                     name: 'junit',                          version: junitVersion
+
 }

@@ -4,15 +4,25 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
+
 @Component
 public class AwsEnvironmentVariableChecker {
 
-    public boolean isAwsSecretAccessKeyAvailable() {
-        return !isEmpty(System.getenv("AWS_SECRET_ACCESS_KEY"));
+    public boolean isAwsSecretAccessKeyAvailable(AwsCredentialView awsCredentialView) {
+        return !isEmpty(System.getenv(getAwsSecretAccessKey(awsCredentialView)));
     }
 
-    public boolean isAwsAccessKeyAvailable() {
-        return !isEmpty(System.getenv("AWS_ACCESS_KEY_ID"));
+    public String getAwsSecretAccessKey(AwsCredentialView awsCredentialView) {
+        return awsCredentialView.isGovernmentCloudEnabled() ? "AWS_GOV_SECRET_ACCESS_KEY" : "AWS_SECRET_ACCESS_KEY";
+    }
+
+    public boolean isAwsAccessKeyAvailable(AwsCredentialView awsCredentialView) {
+        return !isEmpty(System.getenv(getAwsAccessKeyString(awsCredentialView)));
+    }
+
+    public String getAwsAccessKeyString(AwsCredentialView awsCredentialView) {
+        return awsCredentialView.isGovernmentCloudEnabled() ? "AWS_GOV_ACCESS_KEY_ID" : "AWS_ACCESS_KEY_ID";
     }
 
 }

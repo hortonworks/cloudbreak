@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.api.model.v2;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
@@ -10,80 +7,78 @@ import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonRawValue;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
-import com.sequenceiq.cloudbreak.api.model.BlueprintInputJson;
 import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.model.ConnectedClusterRequest;
-import com.sequenceiq.cloudbreak.api.model.GatewayJson;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(Include.NON_NULL)
 public class AmbariV2Request implements JsonEntity {
 
-    @ApiModelProperty(ModelDescriptions.ClusterModelDescription.BLUEPRINT_ID)
+    @ApiModelProperty(ClusterModelDescription.BLUEPRINT_ID)
     private Long blueprintId;
 
-    @ApiModelProperty(ModelDescriptions.ClusterModelDescription.BLUEPRINT_NAME)
+    @ApiModelProperty(ClusterModelDescription.BLUEPRINT_NAME)
     private String blueprintName;
 
     private GatewayJson gateway;
 
-    @ApiModelProperty(ModelDescriptions.StackModelDescription.ENABLE_SECURITY)
+    @ApiModelProperty(StackModelDescription.ENABLE_SECURITY)
     private Boolean enableSecurity = Boolean.FALSE;
 
     @Size(max = 15, min = 5, message = "The length of the username has to be in range of 5 to 15")
     @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
             message = "The username can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.StackModelDescription.USERNAME, required = true)
+    @ApiModelProperty(value = StackModelDescription.USERNAME, required = true)
     private String userName;
 
     @NotNull
     @Size(max = 100, min = 5, message = "The length of the password has to be in range of 5 to 100")
-    @ApiModelProperty(value = ModelDescriptions.StackModelDescription.PASSWORD, required = true)
+    @ApiModelProperty(value = StackModelDescription.PASSWORD, required = true)
     private String password;
 
     @Valid
     private KerberosRequest kerberos;
 
-    @ApiModelProperty(ModelDescriptions.ClusterModelDescription.VALIDATE_BLUEPRINT)
+    @ApiModelProperty(ClusterModelDescription.VALIDATE_BLUEPRINT)
     private Boolean validateBlueprint = Boolean.TRUE;
 
     @Valid
-    @ApiModelProperty(ModelDescriptions.ClusterModelDescription.AMBARI_STACK_DETAILS)
+    @ApiModelProperty(ClusterModelDescription.AMBARI_STACK_DETAILS)
     private AmbariStackDetailsJson ambariStackDetails;
 
     @Valid
-    @ApiModelProperty(ModelDescriptions.ClusterModelDescription.AMBARI_REPO_DETAILS)
+    @ApiModelProperty(ClusterModelDescription.AMBARI_REPO_DETAILS)
     private AmbariRepoDetailsJson ambariRepoDetailsJson;
 
+    /**
+     * @deprecated RdsConfig is replacing AmbariDatabaseDetailsJson
+     */
     @Valid
-    @ApiModelProperty(ModelDescriptions.ClusterModelDescription.AMBARI_DATABASE_DETAILS)
+    @ApiModelProperty(ClusterModelDescription.AMBARI_DATABASE_DETAILS)
+    @Deprecated
     private AmbariDatabaseDetailsJson ambariDatabaseDetails;
 
-    @ApiModelProperty(ModelDescriptions.ClusterModelDescription.CONFIG_STRATEGY)
+    @ApiModelProperty(ClusterModelDescription.CONFIG_STRATEGY)
     private ConfigStrategy configStrategy = ConfigStrategy.ALWAYS_APPLY_DONT_OVERRIDE_CUSTOM_VALUES;
 
-    @ApiModelProperty(ModelDescriptions.ClusterModelDescription.BLUEPRINT_INPUTS)
-    private Set<BlueprintInputJson> blueprintInputs = new HashSet<>();
-
-    @ApiModelProperty(ModelDescriptions.ClusterModelDescription.BLUEPRINT_CUSTOM_PROPERTIES)
-    private String blueprintCustomProperties;
-
-    @ApiModelProperty(ModelDescriptions.ClusterModelDescription.CONNECTED_CLUSTER)
+    @ApiModelProperty(ClusterModelDescription.CONNECTED_CLUSTER)
     private ConnectedClusterRequest connectedCluster;
 
-    @ApiModelProperty(ModelDescriptions.ClusterModelDescription.AMBARI_SECURITY_MASTER_KEY)
+    @ApiModelProperty(ClusterModelDescription.AMBARI_SECURITY_MASTER_KEY)
     @Size(max = 100, min = 5, message = "The length of the password has to be in range of 5 to 100")
     private String ambariSecurityMasterKey;
 
@@ -181,23 +176,6 @@ public class AmbariV2Request implements JsonEntity {
 
     public void setConfigStrategy(ConfigStrategy configStrategy) {
         this.configStrategy = configStrategy;
-    }
-
-    public Set<BlueprintInputJson> getBlueprintInputs() {
-        return blueprintInputs;
-    }
-
-    public void setBlueprintInputs(Set<BlueprintInputJson> blueprintInputs) {
-        this.blueprintInputs = blueprintInputs;
-    }
-
-    @JsonRawValue
-    public String getBlueprintCustomProperties() {
-        return blueprintCustomProperties;
-    }
-
-    public void setBlueprintCustomProperties(String blueprintCustomProperties) {
-        this.blueprintCustomProperties = blueprintCustomProperties;
     }
 
     public ConnectedClusterRequest getConnectedCluster() {

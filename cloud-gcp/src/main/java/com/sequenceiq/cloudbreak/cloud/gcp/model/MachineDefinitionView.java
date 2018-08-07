@@ -1,15 +1,14 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.model;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class MachineDefinitionView {
 
     private static final Integer LIMIT = 24;
 
-    private Map<String, Object> map = new HashMap();
+    private final Map<String, Object> map;
 
-    public MachineDefinitionView(Map map) {
+    public MachineDefinitionView(Map<String, Object> map) {
         this.map = map;
     }
 

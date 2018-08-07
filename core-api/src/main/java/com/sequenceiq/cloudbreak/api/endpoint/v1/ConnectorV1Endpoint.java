@@ -14,6 +14,7 @@ import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.model.PlatformAccessConfigsResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformDisksJson;
+import com.sequenceiq.cloudbreak.api.model.PlatformEncryptionKeysResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformGatewaysResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformIpPoolsResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformNetworksResponse;
@@ -171,5 +172,12 @@ public interface ConnectorV1Endpoint {
     @ApiOperation(value = ConnectorOpDescription.GET_ACCESSCONFIGS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
             nickname = "getAccessConfigs")
     PlatformAccessConfigsResponse getAccessConfigs(PlatformResourceRequestJson resourceRequestJson);
+
+    @POST
+    @Path("encryptionkeys")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ConnectorOpDescription.GET_ENCRYPTIONKEYS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
+            nickname = "getEncryptionKeys")
+    PlatformEncryptionKeysResponse getEncryptionKeys(PlatformResourceRequestJson resourceRequestJson);
 
 }

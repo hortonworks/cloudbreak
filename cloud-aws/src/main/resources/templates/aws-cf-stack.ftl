@@ -291,7 +291,7 @@
     </#if>
 
     <#list instanceGroups as group>
-	"AmbariNodes${group.groupName?replace('_', '')}" : {
+	"${group.autoScalingGroupName}" : {
       "Type" : "AWS::AutoScaling::AutoScalingGroup",
       <#if !existingSubnet>
       "DependsOn" : [ "PublicSubnetRouteTableAssociation", "PublicRoute" ],
@@ -334,7 +334,7 @@
       	  {
             "DeviceName" : { "Ref" : "RootDeviceName" },
             "Ebs" : {
-              "VolumeSize" : "50",
+              "VolumeSize" : "${group.rootVolumeSize}",
               "VolumeType" : "gp2"
             }
           }
@@ -348,9 +348,7 @@
             <#else>
             "Ebs" : {
             <#if group.ebsEncrypted == true>
-              <#if group.kmsKeyDefined == true>
               "SnapshotId" : "${group.snapshotId}",
-              </#if>
             <#else>
               "Encrypted" : false,
             </#if>
@@ -361,7 +359,11 @@
       	  }
 			</#list>
       	],
+      	<#if group.ebsEncrypted == true>
+      	"ImageId"        : "${group.encryptedAMI}",
+        <#else>
         "ImageId"        : { "Ref" : "AMI" },
+        </#if>
         <#if group.cloudSecurityId??>
         "SecurityGroups" : [ "${group.cloudSecurityId}" ],
         <#else>

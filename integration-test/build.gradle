@@ -1,3 +1,5 @@
+import org.ajoberstar.grgit.Grgit
+
 buildscript {
   repositories {
     mavenCentral()
@@ -8,26 +10,39 @@ buildscript {
   }
 }
 
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+
+springBoot {
+  mainClassName = 'com.sequenceiq.it.IntegrationTestApp'
+}
+
+bootRun {
+  systemProperty 'spring.profiles.active', System.properties['spring.profiles.active']
+  systemProperty 'spring.config.location', System.properties['spring.config.location']
+  if (project.hasProperty('jvmArgs')) {
+    jvmArgs += project.jvmArgs.split("\\s+").toList()
+  }
+}
+
 jar {
   baseName = 'cloudbreak-integration-test'
   archiveName = 'cloudbreak-integration-test.jar'
 }
 
-apply plugin: 'org.springframework.boot'
-
-springBoot {
-  mainClass = 'com.sequenceiq.it.IntegrationTestApp'
+bootJar {
+  baseName = 'cloudbreak-integration-test'
+  archiveName = 'cloudbreak-integration-test.jar'
+  manifest {
+    def grgit = Grgit.open(currentDir: project.projectDir)
+    attributes "Implementation-Version": grgit.describe()
+  }
 }
 
 task runMockServer(type:JavaExec) {
   main = 'com.sequenceiq.it.spark.MockSparkServer'
   classpath = sourceSets.main.runtimeClasspath
   systemProperty "MOCK_SERVER_ADDRESS", System.getProperty("MOCK_SERVER_ADDRESS")
-}
-
-task runMockSshServer(type:JavaExec) {
-  main = 'com.sequenceiq.it.spark.MockSshServerRunner'
-  classpath = sourceSets.main.runtimeClasspath
 }
 
 dependencies {
@@ -51,6 +66,8 @@ dependencies {
   compile (group: 'com.amazonaws',                name: 'aws-java-sdk',                   version: awsSdkVersion) {
     exclude group: 'commons-logging'
   }
+  compile group: 'com.google.code.gson',          name: 'gson',                           version: '2.6.2'
+  compile group: 'org.codehaus.groovy',           name: 'groovy-all',                     version: '2.5.0'
   compile (group: 'com.microsoft.azure',          name: 'azure',                          version: azureSdkVersion) { exclude group: 'org.slf4j' }
   compile group:  'com.google.apis',              name: 'google-api-services-compute',    version: 'v1-rev133-1.22.0'
   compile group: 'com.google.apis',               name: 'google-api-services-storage',    version: 'v1-rev94-1.22.0'
@@ -58,15 +75,15 @@ dependencies {
   compile group: 'com.microsoft.azure',           name: 'azure-data-lake-store-sdk',      version: '2.1.5'
   compile group:  'org.springframework.boot',     name: 'spring-boot-starter',            version: springBootVersion
   compile group:  'org.springframework.boot',     name: 'spring-boot-starter-test',       version: springBootVersion
-  compile group:  'org.springframework',          name: 'spring-web',                     version: springFrameworkVersion
+  compile group:  'org.springframework.boot',     name: 'spring-boot-starter-web',        version: springBootVersion
   compile group:  'org.springframework',          name: 'spring-context-support',         version: springFrameworkVersion
   compile group:  'org.apache.velocity',          name: 'velocity',                       version: '1.7'
   compile group:  'com.hierynomus',               name: 'sshj',                           version: '0.15.0'
   compile group:  'org.testng',                   name: 'testng',                         version: '6.9.10'
   compile group:  'javax.el',                     name: 'javax.el-api',                   version: '3.0.0'
   compile group:  'org.apache.commons',           name: 'commons-lang3',                  version: '3.4'
-  compile group:  'org.pacesys',                  name: 'openstack4j-core',               version: '3.0.4-guava-update'
-  compile (group: 'org.pacesys.openstack4j.connectors', name: 'openstack4j-jersey2',            version: '3.0.4') {
+  compile group:  'org.pacesys',                  name: 'openstack4j-core',               version: '3.1.0'
+  compile (group: 'org.pacesys.openstack4j.connectors', name: 'openstack4j-jersey2',            version: '3.1.0-jersey26') {
     exclude group: 'org.pacesys', module: 'openstack4j-core'
   }
   compile(group:  'org.apache.sshd',              name: 'sshd-core',                      version: '1.2.0') {
@@ -79,14 +96,14 @@ dependencies {
   }
   compile group: 'com.google.code.findbugs',      name: 'annotations',                    version: '3.0.1'
   runtime group: 'com.google.inject',             name: 'guice',                          version: '3.0'
-  runtime group: 'org.hibernate',                 name: 'hibernate-validator',            version: hibernateValidatorVersion
+  runtime group: 'javax.xml.bind',                name: 'jaxb-api', version: '2.3.0'
 }
 
-task buildInfo(type: BuildInfoTask) {
-  destination = file("$buildDir")
-  applicationPropertiesPath = "$buildDir"
-  basename = jar.baseName
-  buildVersion = version
+task buildInfo(type: BuildInfoTask, dependsOn: processResources) {
+    destination = file("$buildDir")
+    applicationPropertiesPath = "$buildDir"
+    basename = jar.baseName
+    buildVersion = version
 }
 
 compileJava.dependsOn buildInfo
@@ -99,20 +116,47 @@ class BuildInfoTask extends DefaultTask {
 
   @TaskAction
   def writeBuildInfo() {
+    List<File> applicationDestinations = []
+
+    applicationDestinations += project.file("out/production/resources")
+    applicationDestinations += new File(applicationPropertiesPath + "/resources/main")
+
     destination.mkdirs()
-    File applicationDestination = new File(applicationPropertiesPath + "/resources/main")
-    applicationDestination.mkdirs()
+    String activeProfile = determineActiveProfile()
+
+    // if using dev environment this condition is true
+    if (buildVersion.contains("+") || buildVersion == "unspecified") {
+      def grgit = Grgit.open(currentDir: project.projectDir)
+      buildVersion = grgit.describe()
+      println "buildVersion from git: " + buildVersion
+    }
     new File(destination, "build.info").withWriter { out ->
       [
               "ARTIFACT_BASENAME=" + basename,
               "ARTIFACT_VERSION=" + buildVersion,
       ].each { out.println it }
     }
-    new File(applicationDestination, "application.properties").withWriter { out ->
-      [
-              "info.app.name=" + basename,
-              "info.app.version=" + buildVersion
-      ].each { out.println it }
+    applicationDestinations.each {
+      it.mkdirs()
+      new File(it, "application.properties").withWriter { out ->
+        [
+                "info.app.name=" + basename,
+                "info.app.version=" + buildVersion,
+                "spring.profiles.active=" + activeProfile
+        ].each { out.println it }
+      }
     }
+  }
+
+  private String determineActiveProfile() {
+    String activeProfile = "dev"
+    if (buildVersion.contains("dev") || buildVersion.equals("unspecified")) {
+      activeProfile = "dev"
+    } else if (buildVersion.contains("rc")) {
+      activeProfile = "rc"
+    } else {
+      activeProfile = "prod"
+    }
+    return activeProfile
   }
 }

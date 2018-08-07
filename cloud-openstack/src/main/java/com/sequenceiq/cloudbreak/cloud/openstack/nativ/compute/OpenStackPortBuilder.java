@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.cloud.openstack.nativ.compute;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import org.openstack4j.api.Builders;
 import org.openstack4j.api.OSClient;
@@ -13,8 +12,8 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
-import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.OpenStackResourceException;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.context.OpenStackContext;
@@ -23,11 +22,11 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
 @Service
 public class OpenStackPortBuilder extends AbstractOpenStackComputeResourceBuilder {
     @Override
-    public List<CloudResource> build(OpenStackContext context, long privateId, AuthenticatedContext auth, Group group, Image image,
-            List<CloudResource> buildableResource, Map<String, String> tags) throws Exception {
+    public List<CloudResource> build(OpenStackContext context, long privateId, AuthenticatedContext auth, Group group,
+            List<CloudResource> buildableResource, CloudStack cloudStack) {
         CloudResource resource = buildableResource.get(0);
         try {
-            OSClient osClient = createOSClient(auth);
+            OSClient<?> osClient = createOSClient(auth);
             Port port = Builders.port()
                     .tenantId(context.getStringParameter(OpenStackConstants.TENANT_ID))
                     .networkId(context.getStringParameter(OpenStackConstants.NETWORK_ID))
@@ -43,9 +42,9 @@ public class OpenStackPortBuilder extends AbstractOpenStackComputeResourceBuilde
     }
 
     @Override
-    public CloudResource delete(OpenStackContext context, AuthenticatedContext auth, CloudResource resource) throws Exception {
+    public CloudResource delete(OpenStackContext context, AuthenticatedContext auth, CloudResource resource) {
         try {
-            OSClient osClient = createOSClient(auth);
+            OSClient<?> osClient = createOSClient(auth);
             ActionResponse response = osClient.networking().port().delete(resource.getReference());
             return checkDeleteResponse(response, resourceType(), auth, resource, "Port deletion failed");
         } catch (OS4JException ex) {

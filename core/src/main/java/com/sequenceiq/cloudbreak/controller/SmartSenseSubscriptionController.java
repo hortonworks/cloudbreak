@@ -1,22 +1,30 @@
 package com.sequenceiq.cloudbreak.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.SmartSenseSubscriptionEndpoint;
 import com.sequenceiq.cloudbreak.api.model.SmartSenseSubscriptionJson;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.converter.SmartSenseSubscriptionRequestToSmartSenseSubscriptionConverter;
 import com.sequenceiq.cloudbreak.converter.SmartSenseSubscriptionToSmartSenseSubscriptionJsonConverter;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
+import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
 
 @Component
+@Transactional(TxType.NEVER)
 public class SmartSenseSubscriptionController implements SmartSenseSubscriptionEndpoint {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SmartSenseSubscriptionController.class);
 
     @Inject
     private SmartSenseSubscriptionService smartSenseSubService;
@@ -34,15 +42,12 @@ public class SmartSenseSubscriptionController implements SmartSenseSubscriptionE
     public SmartSenseSubscriptionJson get() {
         IdentityUser cbUser = authenticatedUserService.getCbUser();
         SmartSenseSubscription subscription = smartSenseSubService.getDefaultForUser(cbUser);
-        if (subscription == null) {
-            throw new SmartSenseNotFoundException("SmartSense subscription not found");
-        }
         return toJsonConverter.convert(subscription);
     }
 
     @Override
     public SmartSenseSubscriptionJson get(Long id) {
-        SmartSenseSubscription subscription = smartSenseSubService.findOneById(id);
+        SmartSenseSubscription subscription = smartSenseSubService.findById(id);
         return toJsonConverter.convert(subscription);
     }
 
@@ -70,7 +75,7 @@ public class SmartSenseSubscriptionController implements SmartSenseSubscriptionE
 
     @Override
     public List<SmartSenseSubscriptionJson> getPublics() {
-        List<SmartSenseSubscription> result = Lists.newArrayList();
+        List<SmartSenseSubscription> result = new ArrayList<>();
         smartSenseSubService.getDefault().ifPresent(result::add);
         return toJsonConverter.convert(result);
     }
@@ -94,4 +99,5 @@ public class SmartSenseSubscriptionController implements SmartSenseSubscriptionE
         subscription = smartSenseSubService.create(subscription);
         return toJsonConverter.convert(subscription);
     }
+
 }

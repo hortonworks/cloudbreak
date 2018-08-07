@@ -4,7 +4,7 @@ import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 
 public class GetVirtualMachineRecommendtaionRequest extends CloudPlatformRequest<GetVirtualMachineRecommendationResponse> {
 
-    private String cloudPlatform;
+    private final String cloudPlatform;
 
     public GetVirtualMachineRecommendtaionRequest(String cloudPlatform) {
         super(null, null);

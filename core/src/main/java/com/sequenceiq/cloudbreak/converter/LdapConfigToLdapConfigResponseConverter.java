@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.converter;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.LdapConfigResponse;
+import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 
 @Component
@@ -20,6 +20,7 @@ public class LdapConfigToLdapConfigResponseConverter extends AbstractConversionS
         json.setProtocol(config.getProtocol());
         json.setGroupSearchBase(config.getGroupSearchBase());
         json.setUserSearchBase(config.getUserSearchBase());
+        json.setUserDnPattern(config.getUserDnPattern());
         json.setUserNameAttribute(config.getUserNameAttribute());
         json.setDomain(config.getDomain());
         json.setDirectoryType(config.getDirectoryType());

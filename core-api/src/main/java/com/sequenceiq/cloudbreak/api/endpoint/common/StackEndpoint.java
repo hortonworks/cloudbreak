@@ -14,8 +14,8 @@ import com.sequenceiq.cloudbreak.api.model.AmbariAddressJson;
 import com.sequenceiq.cloudbreak.api.model.AutoscaleStackResponse;
 import com.sequenceiq.cloudbreak.api.model.CertificateResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformVariantsJson;
-import com.sequenceiq.cloudbreak.api.model.StackResponse;
-import com.sequenceiq.cloudbreak.api.model.StackValidationRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
+import com.sequenceiq.cloudbreak.api.model.stack.StackValidationRequest;
 
 public interface StackEndpoint {
 
@@ -47,6 +47,8 @@ public interface StackEndpoint {
     }
 
     Response deleteInstance(@PathParam("stackId") Long stackId, @PathParam("instanceId") String instanceId, @QueryParam("forced") boolean forced);
+
+    Response deleteInstances(@PathParam("stackId") Long stackId, @QueryParam("instanceIds") Set<String> instanceIds);
 
     CertificateResponse getCertificate(@PathParam("id") Long stackId);
 

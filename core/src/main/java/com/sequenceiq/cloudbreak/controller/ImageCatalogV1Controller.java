@@ -4,6 +4,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
 
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
@@ -18,13 +20,19 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
+import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
+import com.sequenceiq.cloudbreak.service.image.StackImageFilterService;
 
 @Component
+@Transactional(TxType.NEVER)
 public class ImageCatalogV1Controller implements ImageCatalogV1Endpoint {
 
     @Inject
     private ImageCatalogService imageCatalogService;
+
+    @Inject
+    private StackImageFilterService stackImageFilterService;
 
     @Inject
     private AuthenticatedUserService authenticatedUserService;
@@ -40,7 +48,6 @@ public class ImageCatalogV1Controller implements ImageCatalogV1Endpoint {
 
     @Override
     public ImageCatalogResponse getPublicByName(String name, boolean withImages) {
-
         ImageCatalogResponse imageCatalogResponse = convert(imageCatalogService.get(name));
         Images images = imageCatalogService.propagateImagesIfRequested(name, withImages);
         if (images != null) {
@@ -51,17 +58,17 @@ public class ImageCatalogV1Controller implements ImageCatalogV1Endpoint {
 
     @Override
     public ImagesResponse getImagesByProvider(String platform) throws Exception {
-        Images images = imageCatalogService.getImages(platform).getImages();
+        Images images = imageCatalogService.getImagesOsFiltered(platform, null).getImages();
         return conversionService.convert(images, ImagesResponse.class);
     }
 
     @Override
-    public ImageCatalogResponse postPublic(ImageCatalogRequest imageCatalogRequest) throws Exception {
+    public ImageCatalogResponse postPublic(ImageCatalogRequest imageCatalogRequest) {
         return createImageCatalog(imageCatalogRequest, true);
     }
 
     @Override
-    public ImageCatalogResponse postPrivate(ImageCatalogRequest imageCatalogRequest) throws Exception {
+    public ImageCatalogResponse postPrivate(ImageCatalogRequest imageCatalogRequest) {
         return createImageCatalog(imageCatalogRequest, false);
     }
 
@@ -77,7 +84,7 @@ public class ImageCatalogV1Controller implements ImageCatalogV1Endpoint {
     }
 
     @Override
-    public ImageCatalogResponse putPublic(UpdateImageCatalogRequest request) throws CloudbreakImageCatalogException {
+    public ImageCatalogResponse putPublic(UpdateImageCatalogRequest request) {
         ImageCatalog imageCatalog = imageCatalogService.update(conversionService.convert(request, ImageCatalog.class));
         return convert(imageCatalog);
     }
@@ -93,7 +100,19 @@ public class ImageCatalogV1Controller implements ImageCatalogV1Endpoint {
         return conversionService.convert(imageCatalog, ImageCatalogRequest.class);
     }
 
-    private ImageCatalogResponse createImageCatalog(ImageCatalogRequest imageCatalogRequest, boolean publicInAccount) throws Exception {
+    @Override
+    public ImagesResponse getImagesFromCustomImageCatalogByStack(String imageCatalogName, String stackName) throws CloudbreakImageCatalogException {
+        Images images = stackImageFilterService.getApplicableImages(imageCatalogName, stackName);
+        return conversionService.convert(images, ImagesResponse.class);
+    }
+
+    @Override
+    public ImagesResponse getImagesFromDefaultImageCatalogByStack(String stackName) throws Exception {
+        Images images = stackImageFilterService.getApplicableImages(stackName);
+        return conversionService.convert(images, ImagesResponse.class);
+    }
+
+    private ImageCatalogResponse createImageCatalog(ImageCatalogRequest imageCatalogRequest, boolean publicInAccount) {
         IdentityUser identityUser = authenticatedUserService.getCbUser();
         ImageCatalog imageCatalog = conversionService.convert(imageCatalogRequest, ImageCatalog.class);
         imageCatalog.setAccount(identityUser.getAccount());

@@ -11,7 +11,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Variant;
 
 @Service
 public class GcpAuthenticator implements Authenticator {
-
     @Override
     public Platform platform() {
         return GcpConstants.GCP_PLATFORM;

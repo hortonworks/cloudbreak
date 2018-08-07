@@ -1,30 +1,38 @@
 package com.sequenceiq.periscope.service;
 
 import static com.sequenceiq.periscope.api.model.ClusterState.RUNNING;
+import static com.sequenceiq.periscope.service.NotFoundException.notFound;
 import static org.springframework.util.StringUtils.isEmpty;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.StreamSupport;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.google.common.collect.Lists;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.api.model.ScalingConfigurationRequest;
 import com.sequenceiq.periscope.domain.Ambari;
 import com.sequenceiq.periscope.domain.Cluster;
+import com.sequenceiq.periscope.domain.MetricType;
 import com.sequenceiq.periscope.domain.PeriscopeUser;
 import com.sequenceiq.periscope.domain.SecurityConfig;
 import com.sequenceiq.periscope.model.AmbariStack;
 import com.sequenceiq.periscope.repository.ClusterRepository;
 import com.sequenceiq.periscope.repository.SecurityConfigRepository;
 import com.sequenceiq.periscope.repository.UserRepository;
+import com.sequenceiq.periscope.service.ha.PeriscopeNodeConfig;
 
 @Service
 public class ClusterService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterService.class);
 
     @Inject
     private ClusterRepository clusterRepository;
@@ -38,13 +46,23 @@ public class ClusterService {
     @Inject
     private AlertService alertService;
 
+    @Inject
+    private PeriscopeNodeConfig periscopeNodeConfig;
+
+    @Inject
+    private MetricService metricService;
+
     public Cluster create(PeriscopeUser user, AmbariStack stack, ClusterState clusterState) {
         return create(new Cluster(), user, stack, clusterState);
     }
 
+    @PostConstruct
+    protected void init() {
+        calculateClusterStateMetrics();
+    }
+
     public Cluster create(Cluster cluster, PeriscopeUser user, AmbariStack stack, ClusterState clusterState) {
         PeriscopeUser periscopeUser = createUserIfAbsent(user);
-        validateClusterUniqueness(stack);
         cluster.setUser(periscopeUser);
         cluster.setAmbari(stack.getAmbari());
         cluster.setStackId(stack.getStackId());
@@ -58,15 +76,16 @@ public class ClusterService {
             securityConfig.setCluster(cluster);
             securityConfigRepository.save(securityConfig);
         }
+        calculateClusterStateMetrics();
         return cluster;
     }
 
     public Cluster update(Long clusterId, AmbariStack stack, boolean enableAutoscaling) {
-        return update(clusterId, stack, true, null, enableAutoscaling);
+        return update(clusterId, stack, null, enableAutoscaling);
     }
 
-    public Cluster update(Long clusterId, AmbariStack stack, boolean withPermissionCheck, ClusterState clusterState, boolean enableAutoscaling) {
-        Cluster cluster = withPermissionCheck ? findOneById(clusterId) : find(clusterId);
+    public Cluster update(Long clusterId, AmbariStack stack, ClusterState clusterState, boolean enableAutoscaling) {
+        Cluster cluster = findById(clusterId);
         ClusterState newState = clusterState != null ? clusterState : cluster.getState();
         cluster.setState(newState);
         cluster.setAutoscalingEnabled(enableAutoscaling);
@@ -87,15 +106,12 @@ public class ClusterService {
         }
         cluster = save(cluster);
         addPrometheusAlertsToConsul(cluster);
+        calculateClusterStateMetrics();
         return cluster;
     }
 
     public List<Cluster> findAllByUser(PeriscopeUser user) {
         return clusterRepository.findByUserId(user.getId());
-    }
-
-    public Cluster findOneById(Long clusterId) {
-        return clusterRepository.findOne(clusterId);
     }
 
     public Cluster findOneByStackId(Long stackId) {
@@ -106,30 +122,26 @@ public class ClusterService {
         return clusterRepository.save(cluster);
     }
 
-    public Cluster find(Long clusterId) {
-        return clusterRepository.findById(clusterId);
-    }
-
-    public void removeOne(Long clusterId) {
-        Cluster cluster = findOneById(clusterId);
-        clusterRepository.delete(cluster);
+    public Cluster findById(Long clusterId) {
+        return clusterRepository.findById(clusterId).orElseThrow(notFound("Cluster", clusterId));
     }
 
     public void removeById(Long clusterId) {
-        Cluster cluster = find(clusterId);
+        Cluster cluster = findById(clusterId);
         clusterRepository.delete(cluster);
+        calculateClusterStateMetrics();
     }
 
-    public void updateScalingConfiguration(Long clusterId, ScalingConfigurationRequest scalingConfiguration) {
-        Cluster cluster = findOneById(clusterId);
+    public Cluster updateScalingConfiguration(Long clusterId, ScalingConfigurationRequest scalingConfiguration) {
+        Cluster cluster = findById(clusterId);
         cluster.setMinSize(scalingConfiguration.getMinSize());
         cluster.setMaxSize(scalingConfiguration.getMaxSize());
         cluster.setCoolDown(scalingConfiguration.getCoolDown());
-        save(cluster);
+        return save(cluster);
     }
 
     public ScalingConfigurationRequest getScalingConfiguration(Long clusterId) {
-        Cluster cluster = findOneById(clusterId);
+        Cluster cluster = findById(clusterId);
         ScalingConfigurationRequest configuration = new ScalingConfigurationRequest();
         configuration.setCoolDown(cluster.getCoolDown());
         configuration.setMaxSize(cluster.getMaxSize());
@@ -138,46 +150,36 @@ public class ClusterService {
     }
 
     public Cluster setState(Long clusterId, ClusterState state) {
-        Cluster cluster = findOneById(clusterId);
-        cluster.setState(state);
+        Cluster cluster = findById(clusterId);
         addPrometheusAlertsToConsul(cluster);
-        return clusterRepository.save(cluster);
+        return setState(cluster, state);
+    }
+
+    public Cluster setState(Cluster cluster, ClusterState state) {
+        cluster.setState(state);
+        cluster = clusterRepository.save(cluster);
+        calculateClusterStateMetrics();
+        return cluster;
     }
 
     public Cluster setAutoscaleState(Long clusterId, boolean enableAutoscaling) {
-        Cluster cluster = findOneById(clusterId);
+        Cluster cluster = findById(clusterId);
         cluster.setAutoscalingEnabled(enableAutoscaling);
         addPrometheusAlertsToConsul(cluster);
-        return clusterRepository.save(cluster);
+        cluster = clusterRepository.save(cluster);
+        calculateClusterStateMetrics();
+        return cluster;
     }
 
-    public List<Cluster> findAll(ClusterState state) {
-        return clusterRepository.findByState(state);
+    public List<Cluster> findAllByStateAndNode(ClusterState state, String nodeId) {
+        return clusterRepository.findByStateAndPeriscopeNodeId(state, nodeId);
     }
 
-    public List<Cluster> findAll() {
-        return Lists.newArrayList(clusterRepository.findAll());
+    public List<Cluster> findAllForNode(ClusterState state, boolean autoscalingEnabled, String nodeId) {
+        return clusterRepository.findByStateAndAutoscalingEnabledAndPeriscopeNodeId(state, autoscalingEnabled, nodeId);
     }
 
-    public List<Cluster> findAll(ClusterState state, boolean autoscalingEnabled) {
-        return clusterRepository.findByStateAndAutoscalingEnabled(state, autoscalingEnabled);
-    }
-
-    private PeriscopeUser createUserIfAbsent(PeriscopeUser user) {
-        PeriscopeUser periscopeUser = userRepository.findOne(user.getId());
-        if (periscopeUser == null) {
-            periscopeUser = userRepository.save(user);
-        }
-        return periscopeUser;
-    }
-
-    private void addPrometheusAlertsToConsul(Cluster cluster) {
-        if (RUNNING.equals(cluster.getState())) {
-            alertService.addPrometheusAlertsToConsul(cluster);
-        }
-    }
-
-    private void validateClusterUniqueness(AmbariStack stack) {
+    public void validateClusterUniqueness(AmbariStack stack) {
         Iterable<Cluster> clusters = clusterRepository.findAll();
         boolean clusterForTheSameStackAndAmbari = StreamSupport.stream(clusters.spliterator(), false)
                 .anyMatch(cluster -> {
@@ -193,4 +195,23 @@ public class ClusterService {
             throw new BadRequestException("Cluster exists for the same Cloudbreak stack id and Ambari host.");
         }
     }
+
+    private PeriscopeUser createUserIfAbsent(PeriscopeUser user) {
+        Optional<PeriscopeUser> periscopeUserOpt = userRepository.findById(user.getId());
+        return periscopeUserOpt.orElse(userRepository.save(user));
+    }
+
+    private void addPrometheusAlertsToConsul(Cluster cluster) {
+        if (RUNNING.equals(cluster.getState())) {
+            alertService.addPrometheusAlertsToConsul(cluster);
+        }
+    }
+
+    private void calculateClusterStateMetrics() {
+        metricService.submitGauge(MetricType.CLUSTER_STATE_ACTIVE,
+                clusterRepository.countByStateAndAutoscalingEnabledAndPeriscopeNodeId(ClusterState.RUNNING, true, periscopeNodeConfig.getId()));
+        metricService.submitGauge(MetricType.CLUSTER_STATE_SUSPENDED,
+                clusterRepository.countByStateAndAutoscalingEnabledAndPeriscopeNodeId(ClusterState.SUSPENDED, true, periscopeNodeConfig.getId()));
+    }
 }
+

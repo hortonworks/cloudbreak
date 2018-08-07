@@ -5,6 +5,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.ws.rs.BadRequestException;
 
@@ -18,7 +19,7 @@ import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.google.api.client.testing.http.MockHttpTransport;
 import com.google.api.client.testing.json.MockJsonFactory;
@@ -34,8 +35,17 @@ import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
 @RunWith(MockitoJUnitRunner.class)
 public class GcpCredentialConnectorTest {
 
+    private static final Map<String, Object> CREDENTIAL_PARAMETERS = new HashMap<>();
+
+    static {
+        CREDENTIAL_PARAMETERS.put("compute", new Compute(new MockHttpTransport(), new MockJsonFactory(), request -> {
+        }));
+        CREDENTIAL_PARAMETERS.put("serviceAccountId", "some service account");
+        CREDENTIAL_PARAMETERS.put("projectId", "some id");
+    }
+
     @Rule
-    public ExpectedException expectedException = ExpectedException.none();
+    public final ExpectedException expectedException = ExpectedException.none();
 
     @InjectMocks
     private GcpCredentialConnector underTest;
@@ -61,14 +71,14 @@ public class GcpCredentialConnectorTest {
      */
     @Test
     public void testForNullExceptionOnVerifyPermissionCheck() throws IOException {
-        final AuthenticatedContext authContext = createAuthContext();
-        final String expectionReasonMessage = "exception message";
+        AuthenticatedContext authContext = createAuthContext();
+        String expectionReasonMessage = "exception message";
         when(contextBuilder.contextInit(authContext.getCloudContext(), authContext, null, null, false)).thenReturn(context);
         when(context.getProjectId()).thenReturn("some id");
         when(context.getServiceAccountId()).thenReturn("some service id");
         when(context.getCompute().regions().list(anyString()).executeUsingHead()).thenThrow(new BadRequestException(expectionReasonMessage));
 
-        final CloudCredentialStatus status = underTest.verify(authContext);
+        CloudCredentialStatus status = underTest.verify(authContext);
 
         Assert.assertNotNull("The returned CloudCredentialStatus instance is null!", status);
         Assert.assertEquals("Invalid credential status has specified!", CredentialStatus.FAILED, status.getStatus());
@@ -79,18 +89,15 @@ public class GcpCredentialConnectorTest {
     /**
      * Test that if the credential authentication has passed, the returned
      * CredentialStatus is VERIFIED.
-     *
-     * @throws IOException this exception could thrown by the credential
-     *                     checker method.
      */
     @Test
-    public void testPassingVerifyPermissionCheck() throws IOException {
-        final AuthenticatedContext authContext = createAuthContext();
+    public void testPassingVerifyPermissionCheck() {
+        AuthenticatedContext authContext = createAuthContext();
         when(contextBuilder.contextInit(authContext.getCloudContext(), authContext, null, null, false)).thenReturn(context);
         when(context.getProjectId()).thenReturn("some id");
         when(context.getServiceAccountId()).thenReturn("some service id");
 
-        final CloudCredentialStatus status = underTest.verify(authContext);
+        CloudCredentialStatus status = underTest.verify(authContext);
 
         Assert.assertNotNull("The returned CloudCredentialStatus instance is null!", status);
         Assert.assertEquals("Invalid credential status has specified!", CredentialStatus.VERIFIED, status.getStatus());
@@ -103,12 +110,11 @@ public class GcpCredentialConnectorTest {
      */
     @Test
     public void testForFailedStatusBecauseMissingPrjId() {
-        final AuthenticatedContext authContext = createAuthContext();
+        AuthenticatedContext authContext = createAuthContext();
         when(contextBuilder.contextInit(authContext.getCloudContext(), authContext, null, null, false)).thenReturn(context);
         when(context.getProjectId()).thenReturn(null);
-        when(context.getServiceAccountId()).thenReturn("some service id");
 
-        final CloudCredentialStatus status = underTest.verify(authContext);
+        CloudCredentialStatus status = underTest.verify(authContext);
 
         Assert.assertNotNull("The returned CloudCredentialStatus instance is null!", status);
         Assert.assertEquals("Invalid credential status has specified!", CredentialStatus.FAILED, status.getStatus());
@@ -121,13 +127,12 @@ public class GcpCredentialConnectorTest {
      */
     @Test
     public void testForFailedStatusBecauseMissingServiceAccId() {
-        final AuthenticatedContext authContext = createAuthContext();
+        AuthenticatedContext authContext = createAuthContext();
         when(contextBuilder.contextInit(authContext.getCloudContext(), authContext, null, null, false)).thenReturn(context);
         when(context.getProjectId()).thenReturn("some id");
         when(context.getServiceAccountId()).thenReturn(null);
-        when(context.getCompute()).thenReturn(createDummyCompute());
 
-        final CloudCredentialStatus status = underTest.verify(authContext);
+        CloudCredentialStatus status = underTest.verify(authContext);
 
         Assert.assertNotNull("The returned CloudCredentialStatus instance is null!", status);
         Assert.assertEquals("Invalid credential status has specified!", CredentialStatus.FAILED, status.getStatus());
@@ -140,13 +145,13 @@ public class GcpCredentialConnectorTest {
      */
     @Test
     public void testForFailedStatusBecauseMissingCompute() {
-        final AuthenticatedContext authContext = createAuthContext();
+        AuthenticatedContext authContext = createAuthContext();
         when(contextBuilder.contextInit(authContext.getCloudContext(), authContext, null, null, false)).thenReturn(context);
         when(context.getProjectId()).thenReturn("some id");
         when(context.getServiceAccountId()).thenReturn("some service id");
         when(context.getCompute()).thenReturn(null);
 
-        final CloudCredentialStatus status = underTest.verify(authContext);
+        CloudCredentialStatus status = underTest.verify(authContext);
 
         Assert.assertNotNull("The returned CloudCredentialStatus instance is null!", status);
         Assert.assertEquals("Invalid credential status has specified!", CredentialStatus.FAILED, status.getStatus());
@@ -171,7 +176,7 @@ public class GcpCredentialConnectorTest {
      */
     @Test
     public void testDeletePositive() {
-        final CloudCredentialStatus status = underTest.delete(createAuthContext());
+        CloudCredentialStatus status = underTest.delete(createAuthContext());
 
         Assert.assertNotNull("The returned CloudCredentialStatus instance is null!", status);
         Assert.assertEquals("Invalid credential status has specified!", CredentialStatus.DELETED, status.getStatus());
@@ -184,7 +189,7 @@ public class GcpCredentialConnectorTest {
      */
     @Test
     public void testCreatePositive() {
-        final CloudCredentialStatus status = underTest.create(createAuthContext());
+        CloudCredentialStatus status = underTest.create(createAuthContext());
 
         Assert.assertNotNull("The returned CloudCredentialStatus instance is null!", status);
         Assert.assertEquals("Invalid credential status has specified!", CredentialStatus.CREATED, status.getStatus());
@@ -199,18 +204,6 @@ public class GcpCredentialConnectorTest {
     }
 
     private CloudCredential createCloudCredential() {
-        return new CloudCredential(1L, "name", new HashMap<String, Object>() {
-            {
-                put("projectId", "some id");
-                put("serviceAccountId", "some service account");
-                put("compute", createDummyCompute());
-            }
-        });
+        return new CloudCredential(1L, "name", CREDENTIAL_PARAMETERS);
     }
-
-    private Compute createDummyCompute() {
-        return new Compute(new MockHttpTransport(), new MockJsonFactory(), request -> {
-        });
-    }
-
 }

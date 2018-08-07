@@ -1,17 +1,19 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow.recipe;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.common.model.recipe.RecipeScript;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 
 @Component
 public class RecipeBuilder {
 
-    public List<Recipe> buildRecipes(String recipeName, List<RecipeScript> recipeScripts) {
+    public List<Recipe> buildRecipes(String recipeName, Collection<RecipeScript> recipeScripts) {
         List<Recipe> recipes = new ArrayList<>();
         int index = 0;
         for (RecipeScript script : recipeScripts) {

@@ -1,25 +1,20 @@
 package com.sequenceiq.cloudbreak.converter.v2.cli;
 
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
-
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
-import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 
 @Component
@@ -34,10 +29,8 @@ public class ClusterToAmbariV2RequestRequestConverter extends AbstractConversion
     public AmbariV2Request convert(Cluster source) {
         AmbariV2Request ambariV2Request = new AmbariV2Request();
         ambariV2Request.setBlueprintName(source.getBlueprint().getName());
-        prepareAmbariDatabase(source, ambariV2Request);
         prepareAmbariRepo(source, ambariV2Request);
         prepareStackRepoDetails(source, ambariV2Request);
-        prepareBlueprintInputs(source, ambariV2Request);
         ambariV2Request.setConfigStrategy(null);
         ambariV2Request.setConnectedCluster(null);
         ambariV2Request.setEnableSecurity(source.isSecure());
@@ -48,15 +41,10 @@ public class ClusterToAmbariV2RequestRequestConverter extends AbstractConversion
         if (source.isSecure() && source.getKerberosConfig() != null) {
             ambariV2Request.setKerberos(getConversionService().convert(source.getKerberosConfig(), KerberosRequest.class));
         }
-        return ambariV2Request;
-    }
-
-    private void prepareBlueprintInputs(Cluster source, AmbariV2Request ambariV2Request) {
-        try {
-            ambariV2Request.setBlueprintInputs(source.getBlueprintInputs().get(Set.class));
-        } catch (IOException e) {
-            ambariV2Request.setBlueprintInputs(new HashSet<>());
+        if (source.getGateway() != null) {
+            ambariV2Request.setGateway(getConversionService().convert(source.getGateway(), GatewayJson.class));
         }
+        return ambariV2Request;
     }
 
     private void prepareStackRepoDetails(Cluster source, AmbariV2Request ambariV2Request) {
@@ -72,12 +60,4 @@ public class ClusterToAmbariV2RequestRequestConverter extends AbstractConversion
             ambariV2Request.setAmbariRepoDetailsJson(getConversionService().convert(ambariRepo, AmbariRepoDetailsJson.class));
         }
     }
-
-    private void prepareAmbariDatabase(Cluster source, AmbariV2Request ambariV2Request) {
-        AmbariDatabase ambariDatabase = componentConfigProvider.getAmbariDatabase(source.getId());
-        if (ambariDatabase != null) {
-            ambariV2Request.setAmbariDatabaseDetails(getConversionService().convert(ambariDatabase, AmbariDatabaseDetailsJson.class));
-        }
-    }
-
 }

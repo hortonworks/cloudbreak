@@ -11,16 +11,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
-import com.sequenceiq.cloudbreak.core.CloudbreakException;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorType;
+import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
-import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.OrchestratorView;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
-import com.sequenceiq.cloudbreak.repository.StackUpdater;
+import com.sequenceiq.cloudbreak.service.StackUpdater;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
@@ -71,8 +72,9 @@ public class ClusterCreationService {
         } else if (orchestratorType.hostOrchestrator()) {
             flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_RUN_SERVICES, UPDATE_IN_PROGRESS.name());
         } else {
-            LOGGER.info(String.format("Please implement %s orchestrator because it is not on classpath.", orchestrator.getType()));
-            throw new CloudbreakException(String.format("Please implement %s orchestrator because it is not on classpath.", orchestrator.getType()));
+            String message = String.format("Please implement %s orchestrator because it is not on classpath.", orchestrator.getType());
+            LOGGER.info(message);
+            throw new CloudbreakException(message);
         }
     }
 
@@ -100,7 +102,7 @@ public class ClusterCreationService {
 
         if (cluster.getEmailNeeded()) {
             emailSenderService.sendProvisioningSuccessEmail(cluster.getOwner(), stackView.getClusterView().getEmailTo(), ambariIp,
-                    cluster.getName(), cluster.getGateway().getEnableGateway());
+                    cluster.getName(), cluster.getGateway() != null);
             flowMessageService.fireEventAndLog(stackView.getId(), Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, AVAILABLE.name());
         }
     }
@@ -108,11 +110,8 @@ public class ClusterCreationService {
     public void handleClusterCreationFailure(StackView stackView, Exception exception) {
         if (stackView.getClusterView() != null) {
             Cluster cluster = clusterService.getById(stackView.getClusterView().getId());
-
             clusterService.cleanupKerberosCredential(cluster);
-
-            String errorMessage = exception instanceof CloudbreakException && exception.getCause() != null
-                    ? exception.getCause().getMessage() : exception.getMessage();
+            String errorMessage = getErrorMessageFromException(exception);
             clusterService.updateClusterStatusByStackId(stackView.getId(), CREATE_FAILED, errorMessage);
             stackUpdater.updateStackStatus(stackView.getId(), DetailedStackStatus.AVAILABLE);
             flowMessageService.fireEventAndLog(stackView.getId(), Msg.AMBARI_CLUSTER_CREATE_FAILED, CREATE_FAILED.name(), errorMessage);
@@ -131,6 +130,15 @@ public class ClusterCreationService {
             }
         } else {
             LOGGER.error("Cluster was null. Flow action was not required.");
+        }
+    }
+
+    private String getErrorMessageFromException(Exception exception) {
+        if (exception instanceof TransactionRuntimeExecutionException && exception.getCause() != null && exception.getCause().getCause() != null) {
+            return exception.getCause().getCause().getMessage();
+        } else {
+            return exception instanceof CloudbreakException && exception.getCause() != null
+                    ? exception.getCause().getMessage() : exception.getMessage();
         }
     }
 }

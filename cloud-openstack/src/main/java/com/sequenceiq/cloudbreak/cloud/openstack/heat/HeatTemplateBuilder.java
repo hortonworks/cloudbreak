@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
@@ -58,8 +58,8 @@ public class HeatTemplateBuilder {
             Map<String, Object> model = new HashMap<>();
             model.put("cb_stack_name", openStackUtil.adjustStackNameLength(modelContext.stackName));
             model.put("agents", novaInstances);
-            model.put("core_user_data", formatUserData(modelContext.instanceUserData.getUserData(InstanceGroupType.CORE)));
-            model.put("gateway_user_data", formatUserData(modelContext.instanceUserData.getUserData(InstanceGroupType.GATEWAY)));
+            model.put("core_user_data", formatUserData(modelContext.instanceUserData.getUserDataByType(InstanceGroupType.CORE)));
+            model.put("gateway_user_data", formatUserData(modelContext.instanceUserData.getUserDataByType(InstanceGroupType.GATEWAY)));
             model.put("groups", modelContext.groups);
             model.put("existingNetwork", modelContext.existingNetwork);
             model.put("existingSubnet", modelContext.existingSubnet);

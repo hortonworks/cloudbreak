@@ -6,6 +6,8 @@ public class AzureInstanceGroupView {
 
     private final String compressedName;
 
+    private final Integer rootVolumeSize;
+
     private Integer platformFaultDomainCount;
 
     private Integer platformUpdateDomainCount;
@@ -14,17 +16,20 @@ public class AzureInstanceGroupView {
 
     private boolean managedDisk;
 
-    public AzureInstanceGroupView(String name) {
+    public AzureInstanceGroupView(String name, Integer rootVolumeSize) {
         this.name = name;
         compressedName = name.replaceAll("_", "");
+        this.rootVolumeSize = rootVolumeSize;
     }
 
-    public AzureInstanceGroupView(String name, Integer platformFaultDomainCount, Integer platformUpdateDomainCount, String availabilitySetName) {
+    public AzureInstanceGroupView(String name, Integer platformFaultDomainCount, Integer platformUpdateDomainCount,
+            String availabilitySetName, Integer rootVolumeSize) {
         this.name = name;
         this.platformFaultDomainCount = platformFaultDomainCount;
         this.platformUpdateDomainCount = platformUpdateDomainCount;
         this.availabilitySetName = availabilitySetName;
         compressedName = name.replaceAll("_", "");
+        this.rootVolumeSize = rootVolumeSize;
     }
 
     public String getName() {
@@ -65,6 +70,10 @@ public class AzureInstanceGroupView {
 
     public String getCompressedName() {
         return compressedName;
+    }
+
+    public Integer getRootVolumeSize() {
+        return rootVolumeSize;
     }
 
     /**

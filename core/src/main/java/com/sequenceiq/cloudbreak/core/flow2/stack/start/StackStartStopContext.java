@@ -5,8 +5,8 @@ import java.util.List;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.core.flow2.CommonContext;
-import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 
 public class StackStartStopContext extends CommonContext {
     private final Stack stack;
@@ -30,7 +30,7 @@ public class StackStartStopContext extends CommonContext {
         return stack;
     }
 
-    public List<InstanceMetaData> getInstanceMetaData() {
+    public Iterable<InstanceMetaData> getInstanceMetaData() {
         return instanceMetaData;
     }
 

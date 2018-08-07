@@ -32,7 +32,7 @@ public class OpenStackCredentialCreationTest extends AbstractCloudbreakIntegrati
     @Test
     @Parameters({ "credentialName", "tenantName", "userName", "password", "endpoint" })
     public void testOpenStackCredentialCreation(@Optional("")String credentialName, @Optional("")String tenantName, @Optional("")String userName,
-            @Optional("")String password, @Optional("")String endpoint) throws Exception {
+            @Optional("")String password, @Optional("")String endpoint) {
         // GIVEN
         credentialName = StringUtils.hasLength(credentialName) ? credentialName : defaultName;
         tenantName = StringUtils.hasLength(tenantName) ? tenantName : defaultTenantName;

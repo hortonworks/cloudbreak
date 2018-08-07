@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service;
 
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AWS;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.GCP;
+import static com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType.NOTIFICATION;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -13,12 +14,12 @@ import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
-import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.StackStatus;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.structuredevent.event.NotificationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.OperationDetails;
@@ -192,8 +193,9 @@ public final class ServiceTestUtils {
         }
     }
 
-    public static StructuredNotificationEvent createEvent(Long stackId, int nodeCount, String eventStatus, Date eventTimestamp) {
-        OperationDetails operation = new OperationDetails(eventTimestamp.getTime(), "NOTIFICATION", "STACK", stackId, "account", "userid", "cbId", "cbVersion");
+    public static StructuredNotificationEvent createEvent(Long stackId, String stackName, int nodeCount, String eventStatus, Date eventTimestamp) {
+        OperationDetails operation = new OperationDetails(eventTimestamp.getTime(), NOTIFICATION, "stacks", stackId, stackName, "account",
+                "userid", "username", "cbId", "cbVersion");
         NotificationDetails notification = new NotificationDetails();
         notification.setNotificationType(eventStatus);
         notification.setNodeCount(nodeCount);

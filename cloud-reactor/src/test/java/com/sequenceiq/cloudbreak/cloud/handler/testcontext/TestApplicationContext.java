@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.cloud.handler.testcontext;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyMap;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -63,11 +62,11 @@ public class TestApplicationContext {
 
     private final CloudInstance cloudInstance = new CloudInstance("instanceId",
             new InstanceTemplate("flavor", "groupName", 1L, Collections.emptyList(),
-                    InstanceStatus.CREATE_REQUESTED, new HashMap<>(), 0L), instanceAuthentication);
+                    InstanceStatus.CREATE_REQUESTED, new HashMap<>(), 0L, "imageId"), instanceAuthentication);
 
     private final CloudInstance cloudInstanceBad = new CloudInstance("instanceIdBad",
             new InstanceTemplate("flavor", "groupName", 1L, Collections.emptyList(),
-                    InstanceStatus.CREATE_REQUESTED, new HashMap<>(), 1L), instanceAuthentication);
+                    InstanceStatus.CREATE_REQUESTED, new HashMap<>(), 1L, "imageId"), instanceAuthentication);
 
     @Mock
     private CloudPlatformConnectors cloudPlatformConnectors;
@@ -85,7 +84,7 @@ public class TestApplicationContext {
     private MetadataCollector collector;
 
     @Mock
-    private ResourceConnector resourceConnector;
+    private ResourceConnector<Object> resourceConnector;
 
     @Mock
     private InstanceConnector instanceConnector;
@@ -94,7 +93,7 @@ public class TestApplicationContext {
     private PersistenceNotifier persistenceNotifier;
 
     @Mock
-    private Persister persister;
+    private Persister<?> persister;
 
     @Inject
     private ParameterGenerator g;
@@ -151,7 +150,7 @@ public class TestApplicationContext {
                 .thenReturn(Collections.singletonList(new CloudResourceStatus(resource, ResourceStatus.UPDATED)));
         when(resourceConnector.upscale(any(), any(), any()))
                 .thenReturn(Collections.singletonList(new CloudResourceStatus(resource, ResourceStatus.UPDATED)));
-        when(resourceConnector.downscale(any(), any(), any(), anyList(), anyMap()))
+        when(resourceConnector.downscale(any(), any(), any(), anyList(), any()))
                 .thenReturn(Collections.singletonList(new CloudResourceStatus(resource, ResourceStatus.UPDATED)));
         when(instanceConnector.check(any(), any()))
                 .thenReturn(Collections.singletonList(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.STARTED)));
@@ -176,7 +175,7 @@ public class TestApplicationContext {
     }
 
     @Bean
-    public Persister getPersister() {
+    public Persister<?> getPersister() {
         return persister;
     }
 

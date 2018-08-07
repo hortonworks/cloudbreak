@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.model.catalog;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -10,23 +11,27 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Image {
 
-    private String date;
+    private final String date;
 
-    private String description;
+    private final String description;
 
-    private String os;
+    private final String os;
 
-    private String osType;
+    private final String osType;
 
-    private String uuid;
+    private final String uuid;
 
-    private String version;
+    private final String version;
 
-    private Map<String, String> repo;
+    private final Map<String, String> repo;
 
-    private Map<String, Map<String, String>> imageSetsByProvider;
+    private final Map<String, Map<String, String>> imageSetsByProvider;
 
-    private StackDetails stackDetails;
+    private final StackDetails stackDetails;
+
+    private boolean defaultImage;
+
+    private Map<String, String> packageVersions;
 
     @JsonCreator
     public Image(
@@ -38,7 +43,8 @@ public class Image {
             @JsonProperty("repo") Map<String, String> repo,
             @JsonProperty(value = "images", required = true) Map<String, Map<String, String>> imageSetsByProvider,
             @JsonProperty("stack-details") StackDetails stackDetails,
-            @JsonProperty("os_type") String osType) {
+            @JsonProperty("os_type") String osType,
+            @JsonProperty("package-versions") Map<String, String> packageVersions) {
         this.date = date;
         this.description = description;
         this.os = os;
@@ -48,6 +54,7 @@ public class Image {
         this.imageSetsByProvider = imageSetsByProvider;
         this.stackDetails = stackDetails;
         this.osType = osType;
+        this.packageVersions = packageVersions;
     }
 
     public String getDate() {
@@ -86,6 +93,22 @@ public class Image {
         return osType;
     }
 
+    public void setDefaultImage(boolean defaultImage) {
+        this.defaultImage = defaultImage;
+    }
+
+    public boolean isDefaultImage() {
+        return defaultImage;
+    }
+
+    public Map<String, String> getPackageVersions() {
+        return packageVersions == null ? new HashMap<>() : packageVersions;
+    }
+
+    public boolean isPrewarmed() {
+        return stackDetails != null && stackDetails.getRepo() != null && stackDetails.getRepo().getStack() != null;
+    }
+
     @Override
     public String toString() {
         return "Image{"
@@ -95,6 +118,15 @@ public class Image {
                 + ", os='" + os + '\''
                 + ", osType='" + osType + '\''
                 + ", version='" + version + '\''
+                + ", default='" + defaultImage + '\''
+                + ", packageVersions='" + packageVersions + '\''
+                + '}';
+    }
+
+    public String shortOsDescriptionFormat() {
+        return "Image{"
+                + "uuid='" + uuid + '\''
+                + ", os='" + os + '\''
                 + '}';
     }
 }

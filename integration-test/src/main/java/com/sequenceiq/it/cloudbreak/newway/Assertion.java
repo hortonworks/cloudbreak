@@ -1,15 +1,15 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
-import com.sequenceiq.it.IntegrationTestContext;
-
 import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-public class Assertion<T> {
-    private Function<IntegrationTestContext, T> entitySupplier;
+import com.sequenceiq.it.IntegrationTestContext;
 
-    private BiConsumer<T, IntegrationTestContext> check;
+public class Assertion<T> {
+    private final Function<IntegrationTestContext, T> entitySupplier;
+
+    private final BiConsumer<T, IntegrationTestContext> check;
 
     Assertion(Function<IntegrationTestContext, T> entitySupplier, BiConsumer<T, IntegrationTestContext> check) {
         this.entitySupplier = Objects.requireNonNull(entitySupplier);
@@ -25,7 +25,7 @@ public class Assertion<T> {
     }
 
     void doAssertion(IntegrationTestContext integrationTestContext) {
-        T subject = (T) getEntitySupplier().apply(integrationTestContext);
-        getCheck().accept(subject, integrationTestContext);
+        T subject = entitySupplier.apply(integrationTestContext);
+        check.accept(subject, integrationTestContext);
     }
 }

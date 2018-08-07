@@ -12,7 +12,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.google.common.collect.Sets;
@@ -25,13 +25,13 @@ public class SimpleAccountPreferencesServiceTest {
 
     public static final String AWS = "AWS";
 
-    public static final String OPENSTACK = "OPENSTACK";
+    private static final String OPENSTACK = "OPENSTACK";
 
     @InjectMocks
-    private final SimpleAccountPreferencesService underTest = new SimpleAccountPreferencesService();
+    private final AccountPreferencesService underTest = new AccountPreferencesService();
 
     @Spy
-    private List<CloudConstant> cloudConstants = new ArrayList<>();
+    private final List<CloudConstant> cloudConstants = new ArrayList<>();
 
     @Before
     public void setup() {
@@ -39,22 +39,12 @@ public class SimpleAccountPreferencesServiceTest {
     }
 
     private CloudConstant createCloudConstant(String name) {
-        return new CloudConstant() {
-            @Override
-            public Platform platform() {
-                return Platform.platform(name);
-            }
-
-            @Override
-            public Variant variant() {
-                return Variant.variant(name);
-            }
-        };
+        return new TestCloudConstant(name);
     }
 
     @Test
     public void testEnabledPlatformsWhenEnabledPlatformsIsEmpty() {
-        ReflectionTestUtils.setField(underTest, SimpleAccountPreferencesService.class, "enabledPlatforms", "", null);
+        ReflectionTestUtils.setField(underTest, AccountPreferencesService.class, "enabledPlatforms", "", null);
         Set<String> actual = underTest.enabledPlatforms();
 
         assertThat(actual, containsInAnyOrder(AWS, OPENSTACK));
@@ -62,9 +52,27 @@ public class SimpleAccountPreferencesServiceTest {
 
     @Test
     public void testEnabledPlatformsWhenEnabledPlatformsIsNotEmpty() {
-        ReflectionTestUtils.setField(underTest, SimpleAccountPreferencesService.class, "enabledPlatforms", "AWS,PL1,PL2", null);
+        ReflectionTestUtils.setField(underTest, AccountPreferencesService.class, "enabledPlatforms", "AWS,PL1,PL2", null);
         Set<String> actual = underTest.enabledPlatforms();
 
         assertThat(actual, containsInAnyOrder(AWS, "PL1", "PL2"));
+    }
+
+    private static class TestCloudConstant implements CloudConstant {
+        private final String name;
+
+        TestCloudConstant(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public Platform platform() {
+            return Platform.platform(name);
+        }
+
+        @Override
+        public Variant variant() {
+            return Variant.variant(name);
+        }
     }
 }

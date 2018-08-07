@@ -38,7 +38,7 @@ public class PollInstancesStateTask extends AbstractPollTask<InstancesStatusResu
     }
 
     @Override
-    protected InstancesStatusResult doCall() throws Exception {
+    protected InstancesStatusResult doCall() {
         List<CloudVmInstanceStatus> instanceStatuses = instanceConnector.check(getAuthenticatedContext(), instances);
         return new InstancesStatusResult(getAuthenticatedContext().getCloudContext(), instanceStatuses);
     }

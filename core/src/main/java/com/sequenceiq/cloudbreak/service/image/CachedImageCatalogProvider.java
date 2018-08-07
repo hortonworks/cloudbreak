@@ -2,8 +2,13 @@ package com.sequenceiq.cloudbreak.service.image;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -12,6 +17,7 @@ import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status.Family;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -20,12 +26,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV2;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
@@ -37,15 +45,18 @@ public class CachedImageCatalogProvider {
     @Value("${cb.etc.config.dir}")
     private String etcConfigDir;
 
+    @Value("#{'${cb.enabled.linux.types}'.split(',')}")
+    private List<String> enabledLinuxTypes;
+
     @Inject
     private ObjectMapper objectMapper;
 
     @Cacheable(cacheNames = "imageCatalogCache", key = "#catalogUrl")
     public CloudbreakImageCatalogV2 getImageCatalogV2(String catalogUrl) throws CloudbreakImageCatalogException {
-        CloudbreakImageCatalogV2 catalog = null;
+        CloudbreakImageCatalogV2 catalog;
         if (catalogUrl == null) {
             LOGGER.warn("No image catalog was defined!");
-            return catalog;
+            return null;
         }
 
         try {
@@ -62,8 +73,9 @@ public class CachedImageCatalogProvider {
             validateImageCatalogUuids(catalog);
             validateCloudBreakVersions(catalog);
             cleanAndValidateMaps(catalog);
+            catalog = filterImagesByOsType(catalog);
             long timeOfParse = System.currentTimeMillis() - started;
-            LOGGER.info("ImageCatalog has been get and parsed from '{}' and took '{}' ms.", catalogUrl, timeOfParse);
+            LOGGER.debug("ImageCatalog has been get and parsed from '{}' and took '{}' ms.", catalogUrl, timeOfParse);
         } catch (RuntimeException e) {
             throw new CloudbreakImageCatalogException("Failed to get image catalog", e);
         } catch (JsonMappingException e) {
@@ -74,9 +86,48 @@ public class CachedImageCatalogProvider {
         return catalog;
     }
 
+    private CloudbreakImageCatalogV2 filterImagesByOsType(CloudbreakImageCatalogV2 catalog) {
+        LOGGER.debug("Filtering images by OS type {}", getEnabledLinuxTypes());
+        if (CollectionUtils.isEmpty(getEnabledLinuxTypes()) || Objects.isNull(catalog) || Objects.isNull(catalog.getImages())) {
+            return catalog;
+        }
+
+        Images catalogImages = catalog.getImages();
+
+        List<Image> filteredBaseImages = filterImages(catalogImages.getBaseImages(), enabledOsPredicate());
+        List<Image> filteredHdpImages = filterImages(catalogImages.getHdpImages(), enabledOsPredicate());
+        List<Image> filteredHdfImages = filterImages(catalogImages.getHdfImages(), enabledOsPredicate());
+
+        Images images = new Images(filteredBaseImages, filteredHdpImages, filteredHdfImages, catalogImages.getSuppertedVersions());
+        return new CloudbreakImageCatalogV2(images, catalog.getVersions());
+    }
+
+    private List<Image> filterImages(List<Image> imageList, Predicate<Image> predicate) {
+        Map<Boolean, List<Image>> partitionedImages = Optional.ofNullable(imageList).orElse(Collections.emptyList()).stream()
+                .collect(Collectors.partitioningBy(predicate));
+        if (hasFiltered(partitionedImages)) {
+            LOGGER.debug("Used filter linuxTypes: | {} | Images filtered: {}",
+                    getEnabledLinuxTypes(),
+                    partitionedImages.get(false).stream().map(img -> img.shortOsDescriptionFormat()).collect(Collectors.joining(", ")));
+        }
+        return partitionedImages.get(true);
+    }
+
+    private boolean hasFiltered(Map<Boolean, List<Image>> partitioned) {
+        return !partitioned.get(false).isEmpty();
+    }
+
+    private Predicate<Image> enabledOsPredicate() {
+        return img -> getEnabledLinuxTypes().stream().anyMatch(img.getOs()::equalsIgnoreCase);
+    }
+
+    private List<String> getEnabledLinuxTypes() {
+        return enabledLinuxTypes.stream().filter(StringUtils::isNoneBlank).collect(Collectors.toList());
+    }
+
     private CloudbreakImageCatalogV2 checkResponse(WebTarget target, Response response) throws CloudbreakImageCatalogException {
         CloudbreakImageCatalogV2 catalog;
-        if (!response.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL)) {
+        if (!response.getStatusInfo().getFamily().equals(Family.SUCCESSFUL)) {
             throw new CloudbreakImageCatalogException(String.format("Failed to get image catalog from '%s' due to: '%s'",
                     target.getUri().toString(), response.getStatusInfo().getReasonPhrase()));
         } else {
@@ -108,10 +159,6 @@ public class CachedImageCatalogProvider {
         }
     }
 
-    void setEtcConfigDir(String etcConfigDir) {
-        this.etcConfigDir = etcConfigDir;
-    }
-
     private String readCatalogFromFile(String catalogUrl) throws IOException {
         File customCatalogFile = new File(etcConfigDir, catalogUrl);
         return FileReaderUtils.readFileFromPath(customCatalogFile.toPath());
@@ -119,9 +166,9 @@ public class CachedImageCatalogProvider {
 
     private void cleanAndValidateMaps(CloudbreakImageCatalogV2 catalog) throws CloudbreakImageCatalogException {
 
-        boolean baseImagesValidate = cleanAndCheckMap(catalog.getImages().getBaseImages());
-        boolean hdfImagesValidate = cleanAndCheckMap(catalog.getImages().getHdfImages());
-        boolean hdpImagesValidate = cleanAndCheckMap(catalog.getImages().getHdpImages());
+        boolean baseImagesValidate = isCleanAndCheckMap(catalog.getImages().getBaseImages());
+        boolean hdfImagesValidate = isCleanAndCheckMap(catalog.getImages().getHdfImages());
+        boolean hdpImagesValidate = isCleanAndCheckMap(catalog.getImages().getHdpImages());
 
         if (baseImagesValidate && hdfImagesValidate && hdpImagesValidate) {
             throw new CloudbreakImageCatalogException("All images are empty or every items equals NULL");
@@ -130,18 +177,18 @@ public class CachedImageCatalogProvider {
 
     }
 
-    private boolean cleanAndCheckMap(List<Image> images) throws CloudbreakImageCatalogException {
-        boolean invalid = images.isEmpty();
-        if (!invalid) {
+    private boolean isCleanAndCheckMap(Collection<Image> images) {
+        boolean valid = !images.isEmpty();
+        if (valid) {
             for (Image image : images) {
                 image.getImageSetsByProvider().values().removeIf(Objects::isNull);
                 if (image.getImageSetsByProvider().isEmpty()) {
-                    invalid = true;
+                    valid = false;
                 }
             }
         }
 
-        return invalid;
+        return !valid;
     }
 
     private void validateCloudBreakVersions(CloudbreakImageCatalogV2 catalog) throws CloudbreakImageCatalogException {

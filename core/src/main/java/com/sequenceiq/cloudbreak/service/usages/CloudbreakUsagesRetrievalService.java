@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.domain.CbUsageFilterParameters;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 import com.sequenceiq.cloudbreak.repository.CloudbreakUsageRepository;
-import com.sequenceiq.cloudbreak.repository.CloudbreakUsageSpecifications;
+import com.sequenceiq.cloudbreak.service.CloudbreakUsageSpecifications;
 
 @Service
 public class CloudbreakUsagesRetrievalService {

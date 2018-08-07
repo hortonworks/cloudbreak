@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.AccountPreferences;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Service
@@ -45,7 +45,7 @@ public class ScheduledAccountPreferencesValidator {
             try {
                 preferencesValidator.validateClusterTimeToLive(stack.getCreated(), preferences.getClusterTimeToLive());
                 preferencesValidator.validateUserTimeToLive(stack.getOwner(), preferences);
-            } catch (AccountPreferencesValidationFailed ignored) {
+            } catch (AccountPreferencesValidationException ignored) {
                 terminateStack(stack);
             }
         }

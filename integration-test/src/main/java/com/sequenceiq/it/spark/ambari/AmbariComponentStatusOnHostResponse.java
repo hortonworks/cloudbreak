@@ -10,7 +10,7 @@ import spark.Response;
 public class AmbariComponentStatusOnHostResponse extends ITResponse {
 
     @Override
-    public Object handle(Request request, Response response) throws Exception {
+    public Object handle(Request request, Response response) {
         response.type("text/plain");
         ObjectNode rootNode = JsonNodeFactory.instance.objectNode();
         ObjectNode roles = rootNode.putObject("HostRoles");

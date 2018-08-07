@@ -12,6 +12,7 @@ import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
@@ -39,84 +40,48 @@ public class KeyStoreUtil {
     }
 
     public static KeyStore createTrustStore(String serverCert) throws Exception {
-        Reader reader = null;
-        PEMParser pemParser = null;
+        try (Reader reader = new StringReader(serverCert)) {
+            try (PEMParser pemParser = new PEMParser(reader)) {
+                X509CertificateHolder certificateHolder = (X509CertificateHolder) pemParser.readObject();
+                Certificate caCertificate = new JcaX509CertificateConverter().getCertificate(certificateHolder);
 
-        try {
-            reader = new StringReader(serverCert);
-            pemParser = new PEMParser(reader);
-            X509CertificateHolder certificateHolder = (X509CertificateHolder) pemParser.readObject();
-            Certificate caCertificate = new JcaX509CertificateConverter().getCertificate(certificateHolder);
-
-            KeyStore trustStore = KeyStore.getInstance("JKS");
-            trustStore.load(null);
-            trustStore.setCertificateEntry("ca", caCertificate);
-            return trustStore;
-
-        } finally {
-            if (pemParser != null) {
-                pemParser.close();
-            }
-
-            if (reader != null) {
-                reader.close();
+                KeyStore trustStore = KeyStore.getInstance("JKS");
+                trustStore.load(null);
+                trustStore.setCertificateEntry("ca", caCertificate);
+                return trustStore;
             }
         }
     }
 
     private static Certificate convertCertificate(String cert) throws IOException, CertificateException {
-        Reader reader = null;
-        PEMParser pemParser = null;
-
-        try {
-            reader = new StringReader(cert);
-            pemParser = new PEMParser(reader);
-            X509CertificateHolder certificateHolder = (X509CertificateHolder) pemParser.readObject();
-            return new JcaX509CertificateConverter().getCertificate(certificateHolder);
-        } finally {
-            if (pemParser != null) {
-                pemParser.close();
-            }
-
-            if (reader != null) {
-                reader.close();
+        try (Reader reader = new StringReader(cert)) {
+            try (PEMParser pemParser = new PEMParser(reader)) {
+                X509CertificateHolder certificateHolder = (X509CertificateHolder) pemParser.readObject();
+                return new JcaX509CertificateConverter().getCertificate(certificateHolder);
             }
         }
 
     }
 
     public static KeyPair createKeyPair(String clientKey) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
-        Reader reader = null;
-        PEMParser pemParser = null;
+        try (Reader reader = new StringReader(clientKey)) {
+            try (PEMParser pemParser = new PEMParser(reader)) {
 
-        try {
-            reader = new StringReader(clientKey);
-            pemParser = new PEMParser(reader);
+                PEMKeyPair pemKeyPair = (PEMKeyPair) pemParser.readObject();
 
-            PEMKeyPair pemKeyPair = (PEMKeyPair) pemParser.readObject();
+                byte[] pemPrivateKeyEncoded = pemKeyPair.getPrivateKeyInfo().getEncoded();
+                byte[] pemPublicKeyEncoded = pemKeyPair.getPublicKeyInfo().getEncoded();
 
-            byte[] pemPrivateKeyEncoded = pemKeyPair.getPrivateKeyInfo().getEncoded();
-            byte[] pemPublicKeyEncoded = pemKeyPair.getPublicKeyInfo().getEncoded();
+                KeyFactory factory = KeyFactory.getInstance("RSA");
 
-            KeyFactory factory = KeyFactory.getInstance("RSA");
+                KeySpec publicKeySpec = new X509EncodedKeySpec(pemPublicKeyEncoded);
+                PublicKey publicKey = factory.generatePublic(publicKeySpec);
 
-            X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(pemPublicKeyEncoded);
-            PublicKey publicKey = factory.generatePublic(publicKeySpec);
+                KeySpec privateKeySpec = new PKCS8EncodedKeySpec(pemPrivateKeyEncoded);
+                PrivateKey privateKey = factory.generatePrivate(privateKeySpec);
 
-            PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(pemPrivateKeyEncoded);
-            PrivateKey privateKey = factory.generatePrivate(privateKeySpec);
-
-            return new KeyPair(publicKey, privateKey);
-
-        } finally {
-            if (pemParser != null) {
-                pemParser.close();
-            }
-
-            if (reader != null) {
-                reader.close();
+                return new KeyPair(publicKey, privateKey);
             }
         }
-
     }
 }

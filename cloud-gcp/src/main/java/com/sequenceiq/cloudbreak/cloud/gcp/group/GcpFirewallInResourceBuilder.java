@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.common.type.ResourceType.GCP_FIREWALL_IN
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute;
+import com.google.api.services.compute.Compute.Firewalls.Update;
 import com.google.api.services.compute.ComputeRequest;
 import com.google.api.services.compute.model.Firewall;
 import com.google.api.services.compute.model.Firewall.Allowed;
@@ -56,11 +58,9 @@ public class GcpFirewallInResourceBuilder extends AbstractGcpGroupBuilder {
 
         ComputeRequest<Operation> firewallRequest;
 
-        if (StringUtils.isNotBlank(security.getCloudSecurityId()) && isExistingNetwork(network)) {
-            firewallRequest = updateExistingFirewallForNewTargets(context, auth, group, security);
-        } else {
-            firewallRequest = createNewFirewallRule(context, auth, group, security, buildableResource, projectId);
-        }
+        firewallRequest = StringUtils.isNotBlank(security.getCloudSecurityId()) && isExistingNetwork(network)
+                ? updateExistingFirewallForNewTargets(context, auth, group, security)
+                : createNewFirewallRule(context, auth, group, security, buildableResource, projectId);
         try {
             Operation operation = firewallRequest.execute();
             if (operation.getHttpErrorStatusCode() != null) {
@@ -72,7 +72,7 @@ public class GcpFirewallInResourceBuilder extends AbstractGcpGroupBuilder {
         }
     }
 
-    private Compute.Firewalls.Update updateExistingFirewallForNewTargets(GcpContext context, AuthenticatedContext auth, Group group, Security security)
+    private Update updateExistingFirewallForNewTargets(GcpContext context, AuthenticatedContext auth, Group group, Security security)
             throws java.io.IOException {
         Firewall firewall = context.getCompute().firewalls().get(context.getProjectId(), security.getCloudSecurityId()).execute();
         if (firewall.getTargetTags() == null) {
@@ -151,8 +151,8 @@ public class GcpFirewallInResourceBuilder extends AbstractGcpGroupBuilder {
         return sourceRanges;
     }
 
-    private List<Allowed> createRule(Security security) {
-        List<Allowed> rules = new LinkedList<>();
+    private Collection<Allowed> createRule(Security security) {
+        Collection<Allowed> rules = new LinkedList<>();
         List<SecurityRule> securityRules = security.getRules();
         for (SecurityRule securityRule : securityRules) {
             Allowed rule = new Allowed();

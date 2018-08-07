@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.controller;
 
 import javax.inject.Inject;
+import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
 
 import org.springframework.stereotype.Component;
 
@@ -9,6 +11,7 @@ import com.sequenceiq.cloudbreak.api.model.SecurityRulesResponse;
 import com.sequenceiq.cloudbreak.service.securityrule.SecurityRuleService;
 
 @Component
+@Transactional(TxType.NEVER)
 public class SecurityRuleController implements SecurityRuleEndpoint {
 
     @Inject

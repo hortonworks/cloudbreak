@@ -2,14 +2,12 @@ package com.sequenceiq.it.cloudbreak.newway.listener;
 
 import static com.sequenceiq.it.cloudbreak.newway.log.Log.log;
 
-import java.util.List;
-
 import org.testng.ITestResult;
 import org.testng.TestListenerAdapter;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
+import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventContainer;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.GherkinTest;
@@ -25,7 +23,7 @@ public class StructuredEventsReporterOnFailingCluster extends TestListenerAdapte
         Stack stack = Stack.getTestContextStack(Stack.STACK).apply(integrationTestContext);
         CloudbreakClient client = CloudbreakClient.getTestContextCloudbreakClient(CloudbreakClient.CLOUDBREAK_CLIENT).apply(integrationTestContext);
         if (stack != null && client != null && stack.getResponse() != null) {
-            List<StructuredEvent> events = client.getCloudbreakClient().eventEndpoint().getStructuredEvents(stack.getResponse().getId());
+            StructuredEventContainer events = client.getCloudbreakClient().eventEndpoint().getStructuredEvents(stack.getResponse().getId());
             String json = null;
             try {
                 json = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(events);

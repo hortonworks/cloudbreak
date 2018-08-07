@@ -1,61 +1,87 @@
 package com.sequenceiq.cloudbreak.controller;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v1.UtilEndpoint;
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseTestResult;
-import com.sequenceiq.cloudbreak.api.model.LdapTestResult;
-import com.sequenceiq.cloudbreak.api.model.LdapValidationRequest;
-import com.sequenceiq.cloudbreak.api.model.RDSBuildRequest;
-import com.sequenceiq.cloudbreak.api.model.RDSConfigRequest;
-import com.sequenceiq.cloudbreak.api.model.RdsBuildResult;
-import com.sequenceiq.cloudbreak.api.model.RdsTestResult;
-import com.sequenceiq.cloudbreak.controller.validation.ldapconfig.LdapConfigValidator;
+import com.sequenceiq.cloudbreak.api.model.ExposedServiceResponse;
+import com.sequenceiq.cloudbreak.api.model.ParametersQueryRequest;
+import com.sequenceiq.cloudbreak.api.model.ParametersQueryResponse;
+import com.sequenceiq.cloudbreak.api.model.StructuredParameterQueriesResponse;
+import com.sequenceiq.cloudbreak.api.model.StructuredParameterQueryResponse;
+import com.sequenceiq.cloudbreak.api.model.StructuredParametersQueryRequest;
+import com.sequenceiq.cloudbreak.api.model.VersionCheckResult;
+import com.sequenceiq.cloudbreak.api.model.filesystem.CloudStorageSupportedResponse;
+import com.sequenceiq.cloudbreak.api.model.rds.RDSBuildRequest;
+import com.sequenceiq.cloudbreak.api.model.rds.RdsBuildResult;
+import com.sequenceiq.cloudbreak.api.model.stack.StackMatrix;
+import com.sequenceiq.cloudbreak.blueprint.filesystem.query.ConfigQueryEntry;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionBuilder;
-import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionValidator;
-import com.sequenceiq.cloudbreak.domain.LdapConfig;
-import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.repository.LdapConfigRepository;
-import com.sequenceiq.cloudbreak.repository.RdsConfigRepository;
+import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
+import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.service.StackMatrixService;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.filesystem.FileSystemSupportMatrixService;
+import com.sequenceiq.cloudbreak.util.ClientVersionUtil;
 
 @Component
 public class UtilController implements UtilEndpoint {
-
-    private static final String CONNECTED = "connected";
-
-    @Inject
-    private RdsConnectionValidator rdsConnectionValidator;
 
     @Inject
     private RdsConnectionBuilder rdsConnectionBuilder;
 
     @Inject
-    private LdapConfigValidator ldapConfigValidator;
+    private StackMatrixService stackMatrixService;
 
     @Inject
-    private RdsConfigRepository rdsConfigRepository;
+    private BlueprintService blueprintService;
 
     @Inject
-    private LdapConfigRepository ldapConfigRepository;
+    private ServiceEndpointCollector serviceEndpointCollector;
+
+    @Autowired
+    private AuthenticatedUserService authenticatedUserService;
+
+    @Autowired
+    private FileSystemSupportMatrixService fileSystemSupportMatrixService;
+
+    @Autowired
+    @Qualifier("conversionService")
+    private ConversionService conversionService;
+
+    @Value("${info.app.version:}")
+    private String cbVersion;
 
     @Override
-    public RdsTestResult testRdsConnection(@Valid RDSConfigRequest rdsConfigRequest) {
-        RdsTestResult rdsTestResult = new RdsTestResult();
-        try {
-            rdsConnectionValidator.validateRdsConnection(rdsConfigRequest.getConnectionURL(), rdsConfigRequest.getConnectionUserName(),
-                    rdsConfigRequest.getConnectionPassword());
-            rdsTestResult.setConnectionResult(CONNECTED);
-        } catch (BadRequestException e) {
-            rdsTestResult.setConnectionResult(e.getMessage());
+    public VersionCheckResult checkClientVersion(String version) {
+        boolean compatible = ClientVersionUtil.checkVersion(cbVersion, version);
+        if (compatible) {
+            return new VersionCheckResult(true);
+
         }
-        return rdsTestResult;
+        return new VersionCheckResult(false, String.format("Versions not compatible: [server: '%s', client: '%s']", cbVersion, version));
+    }
+
+    @Override
+    public AmbariDatabaseTestResult testAmbariDatabase(@Valid AmbariDatabaseDetailsJson ambariDatabaseDetailsJson) {
+        return new AmbariDatabaseTestResult();
     }
 
     @Override
@@ -78,53 +104,50 @@ public class UtilController implements UtilEndpoint {
     }
 
     @Override
-    public RdsTestResult testRdsConnectionById(Long id) {
-        RdsTestResult rdsTestResult = new RdsTestResult();
-        try {
-            RDSConfig config = rdsConfigRepository.findById(id);
-            if (config != null) {
-                rdsConnectionValidator.validateRdsConnection(config.getConnectionURL(), config.getConnectionUserName(), config.getConnectionPassword());
-                rdsTestResult.setConnectionResult(CONNECTED);
-            } else {
-                rdsTestResult.setConnectionResult("not found");
-            }
-        } catch (RuntimeException e) {
-            rdsTestResult.setConnectionResult(e.getMessage());
-        }
-        return rdsTestResult;
+    public StackMatrix getStackMatrix() {
+        return stackMatrixService.getStackMatrix();
     }
 
     @Override
-    public LdapTestResult testLdapConnection(@Valid LdapValidationRequest ldapValidationRequest) {
-        LdapTestResult ldapTestResult = new LdapTestResult();
-        try {
-            ldapConfigValidator.validateLdapConnection(ldapValidationRequest);
-            ldapTestResult.setConnectionResult(CONNECTED);
-        } catch (BadRequestException e) {
-            ldapTestResult.setConnectionResult(e.getMessage());
-        }
-        return ldapTestResult;
+    public Collection<ExposedServiceResponse> getKnoxServices(String blueprintName) {
+        IdentityUser cbUser = authenticatedUserService.getCbUser();
+        return serviceEndpointCollector.getKnoxServices(cbUser, blueprintName);
     }
 
     @Override
-    public LdapTestResult testLdapConnectionById(Long id) {
-        LdapTestResult ldapTestResult = new LdapTestResult();
-        try {
-            LdapConfig config = ldapConfigRepository.findOne(id);
-            if (config != null) {
-                ldapConfigValidator.validateLdapConnection(config);
-                ldapTestResult.setConnectionResult(CONNECTED);
-            } else {
-                ldapTestResult.setConnectionResult("not found");
-            }
-        } catch (BadRequestException e) {
-            ldapTestResult.setConnectionResult(e.getMessage());
-        }
-        return ldapTestResult;
+    public Collection<CloudStorageSupportedResponse> getCloudStorageMatrix(String stackVersion) {
+        return fileSystemSupportMatrixService.getCloudStorageMatrix(stackVersion);
     }
 
     @Override
-    public AmbariDatabaseTestResult testAmbariDatabase(@Valid AmbariDatabaseDetailsJson ambariDatabaseDetailsJson) {
-        return new AmbariDatabaseTestResult();
+    public ParametersQueryResponse getCustomParameters(ParametersQueryRequest parametersQueryRequest) {
+        IdentityUser user = authenticatedUserService.getCbUser();
+        Set<String> strings = blueprintService.queryCustomParameters(parametersQueryRequest.getBlueprintName(), user);
+        Map<String, String> result = new HashMap<>();
+        for (String customParameter : strings) {
+            result.put(customParameter, "");
+        }
+        ParametersQueryResponse parametersQueryResponse = new ParametersQueryResponse();
+        parametersQueryResponse.setCustom(result);
+        return parametersQueryResponse;
+    }
+
+    @Override
+    public StructuredParameterQueriesResponse getFileSystemParameters(StructuredParametersQueryRequest structuredParametersQueryRequest) {
+        IdentityUser user = authenticatedUserService.getCbUser();
+        Set<ConfigQueryEntry> entries = blueprintService.queryFileSystemParameters(
+                structuredParametersQueryRequest.getBlueprintName(),
+                structuredParametersQueryRequest.getClusterName(),
+                structuredParametersQueryRequest.getStorageName(),
+                structuredParametersQueryRequest.getFileSystemType(),
+                structuredParametersQueryRequest.getAccountName(),
+                user);
+        List<StructuredParameterQueryResponse> result = new ArrayList<>();
+        for (ConfigQueryEntry configQueryEntry : entries) {
+            result.add(conversionService.convert(configQueryEntry, StructuredParameterQueryResponse.class));
+        }
+        StructuredParameterQueriesResponse parametersQueryResponse = new StructuredParameterQueriesResponse();
+        parametersQueryResponse.setEntries(result);
+        return parametersQueryResponse;
     }
 }

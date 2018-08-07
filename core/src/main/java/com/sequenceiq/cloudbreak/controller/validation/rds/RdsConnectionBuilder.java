@@ -7,14 +7,13 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 
 import org.postgresql.util.PSQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 
 @Component
 public class RdsConnectionBuilder {
@@ -22,12 +21,12 @@ public class RdsConnectionBuilder {
     private static final Logger LOGGER = LoggerFactory.getLogger(RdsConnectionBuilder.class);
 
     public Map<String, String> buildRdsConnection(String connectionURL, String connectionUserName, String connectionPassword, String clusterName,
-            Set<String> targets) {
+            Iterable<String> targets) {
         Map<String, String> map = new HashMap<>();
 
         Properties connectionProps = new Properties();
-        connectionProps.put("user", connectionUserName);
-        connectionProps.put("password", connectionPassword);
+        connectionProps.setProperty("user", connectionUserName);
+        connectionProps.setProperty("password", connectionPassword);
         try (Connection conn = DriverManager.getConnection(connectionURL, connectionProps)) {
             for (String target : targets) {
                 createDb(conn, clusterName, target);

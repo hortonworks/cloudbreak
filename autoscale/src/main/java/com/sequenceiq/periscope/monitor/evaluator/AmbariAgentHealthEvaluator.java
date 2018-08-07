@@ -19,7 +19,7 @@ import com.sequenceiq.periscope.log.MDCBuilder;
 import com.sequenceiq.periscope.monitor.event.UpdateFailedEvent;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.configuration.CloudbreakClientConfiguration;
-import com.sequenceiq.periscope.utils.AmbariClientProvider;
+import com.sequenceiq.periscope.service.AmbariClientProvider;
 
 @Component("AmbariAgentHealthEvaluator")
 @Scope("prototype")
@@ -57,7 +57,7 @@ public class AmbariAgentHealthEvaluator extends AbstractEventPublisher implement
 
     @Override
     public void run() {
-        Cluster cluster = clusterService.find(clusterId);
+        Cluster cluster = clusterService.findById(clusterId);
         MDCBuilder.buildMdcContext(cluster);
         LOGGER.info("Checking '{}' alerts.", AMBARI_AGENT_HEARTBEAT);
         try {
@@ -82,7 +82,7 @@ public class AmbariAgentHealthEvaluator extends AbstractEventPublisher implement
                 }
             }
         } catch (Exception e) {
-            LOGGER.warn(String.format("Failed to retrieve '%s' alerts.", AMBARI_AGENT_HEARTBEAT), e);
+            LOGGER.warn("Failed to retrieve '{}' alerts. Original message: {}", AMBARI_AGENT_HEARTBEAT, e.getMessage());
             publishEvent(new UpdateFailedEvent(clusterId));
         }
     }

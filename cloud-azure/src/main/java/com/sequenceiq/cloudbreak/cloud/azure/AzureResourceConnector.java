@@ -10,12 +10,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.net.util.SubnetUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,19 +45,19 @@ import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStorageView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
-import com.sequenceiq.cloudbreak.cloud.exception.TemplatingDoesNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.service.Retry;
-import com.sequenceiq.cloudbreak.service.Retry.ActionWentFail;
+import com.sequenceiq.cloudbreak.service.Retry.ActionWentFailException;
 
 @Service
 public class AzureResourceConnector implements ResourceConnector<Map<String, Map<String, Object>>> {
@@ -102,8 +102,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
         String resourceGroupName = azureUtils.getResourceGroupName(ac.getCloudContext());
         AzureClient client = ac.getParameter(AzureClient.class);
 
-        AzureStackView azureStackView = getAzureStack(azureCredentialView, ac.getCloudContext(), stack,
-                getNumberOfAvailableIPsInSubnets(client, stack.getNetwork()));
+        AzureStackView azureStackView = getAzureStack(azureCredentialView, stack, getNumberOfAvailableIPsInSubnets(client, stack.getNetwork()), ac);
 
         String customImageId = azureStorage.getCustomImageId(client, ac, stack);
         String template = azureTemplateBuilder.build(stackName, customImageId, azureCredentialView, azureStackView, ac.getCloudContext(), stack);
@@ -192,13 +191,13 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
                 try {
                     retryService.testWith2SecDelayMax5Times(() -> {
                         if (!client.resourceGroupExists(resource.getName())) {
-                            throw new ActionWentFail("Resource group not exists");
+                            throw new ActionWentFailException("Resource group not exists");
                         }
                         return true;
                     });
                     client.deleteResourceGroup(resource.getName());
-                } catch (ActionWentFail ignored) {
-                    LOGGER.info(String.format("Resource group not found with name: %s", resource.getName()));
+                } catch (ActionWentFailException ignored) {
+                    LOGGER.info("Resource group not found with name: {}", resource.getName());
                 }
                 if (azureStorage.isPersistentStorage(azureStorage.getPersistentStorageName(stack))) {
                     CloudContext cloudCtx = authenticatedContext.getCloudContext();
@@ -231,8 +230,8 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
 
         String stackName = azureUtils.getStackName(authenticatedContext.getCloudContext());
 
-        AzureStackView azureStackView = getAzureStack(azureCredentialView, authenticatedContext.getCloudContext(), stack,
-                getNumberOfAvailableIPsInSubnets(client, stack.getNetwork()));
+        AzureStackView azureStackView = getAzureStack(azureCredentialView, stack,
+                getNumberOfAvailableIPsInSubnets(client, stack.getNetwork()), authenticatedContext);
 
         String customImageId = azureStorage.getCustomImageId(client, authenticatedContext, stack);
         String template = azureTemplateBuilder.build(stackName, customImageId, azureCredentialView, azureStackView,
@@ -321,7 +320,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
                     NetworkInterface networkInterface = client.getNetworkInterfaceById(interfaceId);
                     String interfaceName = networkInterface.name();
                     networkInterfacesNames.add(interfaceName);
-                    Set<String> ipNames = new HashSet<>();
+                    Collection<String> ipNames = new HashSet<>();
                     for (NicIPConfiguration ipConfiguration : networkInterface.ipConfigurations().values()) {
                         if (ipConfiguration.publicIPAddressId() != null && ipConfiguration.getPublicIPAddress().name() != null) {
                             ipNames.add(ipConfiguration.getPublicIPAddress().name());
@@ -348,8 +347,8 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
         StorageProfile storageProfile = virtualMachine.storageProfile();
         List<DataDisk> dataDisks = storageProfile.dataDisks();
 
-        List<String> storageProfileDiskNames = new ArrayList<>();
-        List<String> managedDiskIds = new ArrayList<>();
+        Collection<String> storageProfileDiskNames = new ArrayList<>();
+        Collection<String> managedDiskIds = new ArrayList<>();
         for (DataDisk datadisk : dataDisks) {
             VirtualHardDisk vhd = datadisk.vhd();
             if (datadisk.vhd() != null) {
@@ -383,11 +382,12 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
                 deallocateVirtualMachine(client, stackName, instanceId);
                 deleteVirtualMachine(client, stackName, instanceId);
                 if (instanceResources != null) {
-                    deleteNetworkInterfaces(client, stackName, CollectionUtils.emptyIfNull((List<String>) instanceResources.get(NETWORK_INTERFACES_NAMES)));
-                    deletePublicIps(client, stackName, CollectionUtils.emptyIfNull((List<String>) instanceResources.get(PUBLIC_ADDRESS_NAME)));
-                    deleteDisk(CollectionUtils.emptyIfNull((List<String>) instanceResources.get(STORAGE_PROFILE_DISK_NAMES)), client, resourceGroupName,
+                    deleteNetworkInterfaces(client, stackName,
+                            CollectionUtils.emptyIfNull((Collection<String>) instanceResources.get(NETWORK_INTERFACES_NAMES)));
+                    deletePublicIps(client, stackName, CollectionUtils.emptyIfNull((Collection<String>) instanceResources.get(PUBLIC_ADDRESS_NAME)));
+                    deleteDisk(CollectionUtils.emptyIfNull((Collection<String>) instanceResources.get(STORAGE_PROFILE_DISK_NAMES)), client, resourceGroupName,
                             (String) instanceResources.get(ATTACHED_DISK_STORAGE_NAME), diskContainer);
-                    deleteManagedDisks(CollectionUtils.emptyIfNull((List<String>) instanceResources.get(MANAGED_DISK_IDS)), client);
+                    deleteManagedDisks(CollectionUtils.emptyIfNull((Collection<String>) instanceResources.get(MANAGED_DISK_IDS)), client);
                     if (azureStorage.getArmAttachedStorageOption(stack.getParameters()) == ArmAttachedStorageOption.PER_VM) {
                         azureStorage.deleteStorage(client, (String) instanceResources.get(ATTACHED_DISK_STORAGE_NAME), resourceGroupName);
                     }
@@ -407,15 +407,34 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
     }
 
     @Override
-    public String getStackTemplate() throws TemplatingDoesNotSupportedException {
+    public String getStackTemplate() {
         return azureTemplateBuilder.getTemplateString();
     }
 
-    private AzureStackView getAzureStack(AzureCredentialView azureCredentialView, CloudContext cloudContext, CloudStack cloudStack,
-            Map<String, Integer> availableIPs) {
-        return new AzureStackView(cloudContext.getName(), stackNamePrefixLength, cloudStack.getGroups(), new AzureStorageView(azureCredentialView, cloudContext,
+    private AzureStackView getAzureStack(AzureCredentialView azureCredentialView, CloudStack cloudStack,
+            Map<String, Integer> availableIPs, AuthenticatedContext ac) {
+        Map<String, String> customImageNamePerInstance = getcustomImageNamePerInstance(ac, cloudStack);
+        return new AzureStackView(ac.getCloudContext().getName(), stackNamePrefixLength, cloudStack.getGroups(), new AzureStorageView(azureCredentialView,
+                ac.getCloudContext(),
                 azureStorage, azureStorage.getArmAttachedStorageOption(cloudStack.getParameters())),
-                AzureSubnetStrategy.getAzureSubnetStrategy(FILL, azureUtils.getCustomSubnetIds(cloudStack.getNetwork()), availableIPs));
+                AzureSubnetStrategy.getAzureSubnetStrategy(FILL, azureUtils.getCustomSubnetIds(cloudStack.getNetwork()), availableIPs),
+                customImageNamePerInstance);
+    }
+
+    private Map<String, String> getcustomImageNamePerInstance(AuthenticatedContext ac, CloudStack cloudStack) {
+        AzureClient client = ac.getParameter(AzureClient.class);
+        Map<String, String> imageNameMap = new HashMap<>();
+        Map<String, String> customImageNamePerInstance = new HashMap<>();
+        for (Group group : cloudStack.getGroups()) {
+            for (CloudInstance instance : group.getInstances()) {
+                String imageId = instance.getTemplate().getImageId();
+                if (StringUtils.isNotBlank(imageId)) {
+                    String imageCustomName = imageNameMap.computeIfAbsent(imageId, s -> azureStorage.getCustomImageId(client, ac, cloudStack, imageId));
+                    customImageNamePerInstance.put(instance.getInstanceId(), imageCustomName);
+                }
+            }
+        }
+        return customImageNamePerInstance;
     }
 
     private void deleteContainer(AzureClient azureClient, String resourceGroup, String storageName, String container) {

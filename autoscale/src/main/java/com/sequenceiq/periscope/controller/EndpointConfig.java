@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.periscope.api.AutoscaleApi;
 import com.sequenceiq.periscope.controller.mapper.AccessDeniedExceptionMapper;
 import com.sequenceiq.periscope.controller.mapper.BadRequestExceptionMapper;
+import com.sequenceiq.periscope.controller.mapper.ConstraintViolationExceptionMapper;
 import com.sequenceiq.periscope.controller.mapper.ConversionFailedExceptionMapper;
 import com.sequenceiq.periscope.controller.mapper.DataIntegrityViolationExceptionMapper;
 import com.sequenceiq.periscope.controller.mapper.DefaultExceptionMapper;
@@ -70,6 +71,7 @@ public class EndpointConfig extends ResourceConfig {
         register(DataIntegrityViolationExceptionMapper.class);
         register(WebApplicaitonExceptionMapper.class);
         register(ParseExceptionMapper.class);
+        register(ConstraintViolationExceptionMapper.class);
 
         register(RuntimeExceptionMapper.class);
         register(DefaultExceptionMapper.class);

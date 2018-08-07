@@ -11,6 +11,8 @@ public class FlowChainTriggers {
 
     public static final String FULL_DOWNSCALE_TRIGGER_EVENT = "FULL_DOWNSCALE_TRIGGER_EVENT";
 
+    public static final String FULL_DOWNSCALE_MULTIHOSTGROUP_TRIGGER_EVENT = "FULL_DOWNSCALE_MULTIHOSTGROUP_TRIGGER_EVENT";
+
     public static final String FULL_START_TRIGGER_EVENT = "FULL_START_TRIGGER_EVENT";
 
     public static final String FULL_STOP_TRIGGER_EVENT = "FULL_STOP_TRIGGER_EVENT";
@@ -26,6 +28,8 @@ public class FlowChainTriggers {
     public static final String PROPER_TERMINATION_TRIGGER_EVENT = "PROPER_TERMINATION_TRIGGER_EVENT";
 
     public static final String EPHEMERAL_CLUSTERS_UPDATE_TRIGGER_EVENT = "EPHEMERAL_CLUSTERS_UPDATE_TRIGGER_EVENT";
+
+    public static final String STACK_IMAGE_UPDATE_TRIGGER_EVENT = "STACK_IMAGE_UPDATE_TRIGGER_EVENT";
 
     private FlowChainTriggers() {
     }

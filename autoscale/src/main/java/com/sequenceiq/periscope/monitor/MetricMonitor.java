@@ -23,7 +23,7 @@ public class MetricMonitor extends AbstractMonitor {
     }
 
     @Override
-    public Class getEvaluatorType() {
+    public Class<?> getEvaluatorType() {
         return MetricEvaluator.class;
     }
 

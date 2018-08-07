@@ -44,7 +44,7 @@ public class BaseSaltJobRunnerTest {
         returnedNodes.add("host-10-0-0-2.example.com");
         Set<String> collectedMissingNodes = baseSaltJobRunner.collectMissingNodes(returnedNodes);
 
-        Assert.assertEquals(1, collectedMissingNodes.size());
+        Assert.assertEquals(1L, collectedMissingNodes.size());
         Assert.assertEquals("10.0.0.3", collectedMissingNodes.iterator().next());
     }
 
@@ -63,7 +63,7 @@ public class BaseSaltJobRunnerTest {
         returnedNodes.add("host-10-0-0-2.example.com");
         Set<String> collectedMissingNodes = baseSaltJobRunner.collectMissingNodes(returnedNodes);
 
-        Assert.assertEquals(1, collectedMissingNodes.size());
+        Assert.assertEquals(1L, collectedMissingNodes.size());
         Assert.assertEquals("10.0.0.3", collectedMissingNodes.iterator().next());
     }
 
@@ -82,7 +82,7 @@ public class BaseSaltJobRunnerTest {
         returnedNodes.add("host-10-0-0-2");
         Set<String> collectedMissingNodes = baseSaltJobRunner.collectMissingNodes(returnedNodes);
 
-        Assert.assertEquals(1, collectedMissingNodes.size());
+        Assert.assertEquals(1L, collectedMissingNodes.size());
         Assert.assertEquals("10.0.0.3", collectedMissingNodes.iterator().next());
     }
 
@@ -101,7 +101,7 @@ public class BaseSaltJobRunnerTest {
         returnedNodes.add("host-10-0-0-2.example.com");
         Set<String> collectedMissingNodes = baseSaltJobRunner.collectMissingNodes(returnedNodes);
 
-        Assert.assertEquals(1, collectedMissingNodes.size());
+        Assert.assertEquals(1L, collectedMissingNodes.size());
         Assert.assertEquals("10.0.0.3", collectedMissingNodes.iterator().next());
     }
 
@@ -123,7 +123,7 @@ public class BaseSaltJobRunnerTest {
         resultList.add(resultMap);
         applyResponse.setResult(resultList);
         Set<String> collectedNodes = baseSaltJobRunner.collectNodes(applyResponse);
-        Assert.assertEquals(3, collectedNodes.size());
+        Assert.assertEquals(3L, collectedNodes.size());
         Assert.assertTrue(collectedNodes.contains("host-10-0-0-1.example.com"));
         Assert.assertTrue(collectedNodes.contains("host-10-0-0-2.example.com"));
         Assert.assertTrue(collectedNodes.contains("host-10-0-0-3.example.com"));

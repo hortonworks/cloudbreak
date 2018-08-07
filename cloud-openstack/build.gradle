@@ -20,10 +20,10 @@ dependencies {
     compile group: 'org.apache.commons',                 name: 'commons-lang3',                  version: apacheCommonsLangVersion
     compile group: 'org.springframework.boot',           name: 'spring-boot-starter',            version: springBootVersion
     compile group: 'org.glassfish.jersey.core',          name: 'jersey-client',                  version: jerseyCoreVersion
-    compile (group: 'org.pacesys',                       name: 'openstack4j-core',               version: '3.0.4-guava-update') {
+    compile (group: 'org.pacesys',                       name: 'openstack4j-core',               version: '3.1.0') {
         force = true
     }
-    compile (group: 'org.pacesys.openstack4j.connectors', name: 'openstack4j-jersey2',            version: '3.0.4') {
+    compile (group: 'org.pacesys.openstack4j.connectors', name: 'openstack4j-jersey2',            version: '3.1.0-jersey26') {
       exclude group: 'org.pacesys', module: 'openstack4j-core'
     }
     compile group: 'org.freemarker',                     name: 'freemarker',                     version: freemarkerVersion
@@ -33,10 +33,10 @@ dependencies {
 
     testCompile group: 'org.springframework.boot',       name: 'spring-boot-starter-test',       version: springBootVersion
     testCompile group: 'org.springframework.boot',       name:'spring-boot-starter-freemarker',  version:springBootVersion
-    testCompile (group: 'junit', name: 'junit', version: '4+') {
+    testCompile (group: 'junit', name: 'junit', version: junitVersion) {
       exclude group: 'org.hamcrest'
     }
-    testCompile ('org.mockito:mockito-core:1+') {
+    testCompile (group: 'org.mockito',             name: 'mockito-core',          version: mockitoVersion) {
       exclude group: 'org.hamcrest'
     }
     testCompile 'org.hamcrest:java-hamcrest:2.0.0.0'

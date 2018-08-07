@@ -5,9 +5,12 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+
+import com.sequenceiq.cloudbreak.domain.security.Organization;
 
 @Entity
 @Table(name = "ImageCatalog", uniqueConstraints = @UniqueConstraint(columnNames = {"account", "name"}))
@@ -35,6 +38,9 @@ public class ImageCatalog implements ProvisionEntity {
 
     @Column(columnDefinition = "boolean default false")
     private boolean archived;
+
+    @ManyToOne
+    private Organization organization;
 
     public Long getId() {
         return id;
@@ -92,4 +98,11 @@ public class ImageCatalog implements ProvisionEntity {
         this.archived = archived;
     }
 
+    public Organization getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(Organization organization) {
+        this.organization = organization;
+    }
 }

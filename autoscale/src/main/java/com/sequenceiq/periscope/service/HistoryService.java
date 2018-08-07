@@ -35,7 +35,7 @@ public class HistoryService {
     }
 
     public List<History> getHistory(long clusterId) {
-        clusterService.findOneById(clusterId);
+        clusterService.findById(clusterId);
         return historyRepository.findAllByCluster(clusterId);
     }
 

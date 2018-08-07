@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.v2;
 
+import java.util.Map;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
@@ -26,10 +28,22 @@ public class TemplateV2RequestToTemplateRequestConverter extends AbstractConvers
         template.setVolumeCount(source.getVolumeCount());
         template.setVolumeSize(source.getVolumeSize());
         template.setInstanceType(source.getInstanceType());
+        template.setRootVolumeSize(source.getRootVolumeSize());
         String volumeType = source.getVolumeType();
         template.setVolumeType(volumeType == null ? "HDD" : volumeType);
         template.setCustomInstanceType(source.getCustomInstanceType());
         template.setParameters(source.getParameters());
+        if (source.getAwsParameters() != null) {
+            template.getParameters().putAll(getConversionService().convert(source.getAwsParameters(), Map.class));
+        } else if (source.getAzureParameters() != null) {
+            template.getParameters().putAll(getConversionService().convert(source.getAzureParameters(), Map.class));
+        } else if (source.getGcpTemlateParameters() != null) {
+            template.getParameters().putAll(getConversionService().convert(source.getGcpTemlateParameters(), Map.class));
+        } else if (source.getOpenStackParameters() != null) {
+            template.getParameters().putAll(getConversionService().convert(source.getOpenStackParameters(), Map.class));
+        } else if (source.getOpenStackParameters() != null) {
+            template.getParameters().putAll(getConversionService().convert(source.getYarnParameters(), Map.class));
+        }
         return template;
     }
 }

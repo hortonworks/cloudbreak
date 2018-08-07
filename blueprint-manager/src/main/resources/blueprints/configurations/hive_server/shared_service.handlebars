@@ -1,0 +1,32 @@
+{
+{{{#if-true sharedService.attachedCluster}}}
+  "ranger-hive-plugin-properties": {
+    "properties": {
+      "external_admin_username": "admin",
+      "external_admin_password": "{{{ sharedService.rangerAdminPassword }}}",
+      "external_ranger_admin_username": "admin",
+      "external_ranger_admin_password": "{{{ sharedService.rangerAdminPassword }}}"
+    }
+  },
+  "hive-site": {
+    "properties": {
+      "hive.exec.compress.output": "true",
+      "hive.merge.mapfiles": "true",
+      "hive.server2.tez.initialize.default.sessions": "true",
+      "hive.server2.transport.mode": "http",
+      "hive.metastore.transactional.event.listeners": "org.apache.hive.hcatalog.listener.DbNotificationListener"
+    }
+  },
+  "ranger-hive-security":{
+    "properties": {
+      "ranger.plugin.hive.policy.rest.url": "http://localhost:{{{ sharedService.rangerAdminPort }}}",
+      "ranger.plugin.hive.service.name":"{{{ remoteClusterName }}}_hive"
+    }
+  },
+  "hive-env": {
+    "properties": {
+      "hive_security_authorization": "Ranger"
+    }
+  }
+{{{/if-true}}}
+}

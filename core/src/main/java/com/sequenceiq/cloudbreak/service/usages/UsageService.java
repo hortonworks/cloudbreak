@@ -20,11 +20,11 @@ import com.google.api.client.util.Lists;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.UsageStatus;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Template;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.repository.CloudbreakUsageRepository;
-import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Service
 public class UsageService {
@@ -44,7 +44,7 @@ public class UsageService {
     private CloudbreakUsageRepository usageRepository;
 
     @Inject
-    private StackRepository stackRepository;
+    private StackService stackService;
 
     public void openUsagesForStack(Stack stack) {
         LocalDateTime ldt = LocalDateTime.now();
@@ -56,7 +56,7 @@ public class UsageService {
             Integer instanceNum = ig.getNodeCount();
             usages.add(usageGeneratorService.openNewUsage(stack, instanceType, instanceNum, groupName, ldt));
         }
-        usageRepository.save(usages);
+        usageRepository.saveAll(usages);
     }
 
     public void closeUsagesForStack(Long stackId) {
@@ -122,11 +122,11 @@ public class UsageService {
             closeUsage(usage);
             usageRepository.save(usage);
         }
-        usageRepository.save(newUsages);
+        usageRepository.saveAll(newUsages);
     }
 
     private CloudbreakUsage closeUsageIfStackKilled(CloudbreakUsage usage) {
-        Stack s = stackRepository.findOne(usage.getStackId());
+        Stack s = stackService.getById(usage.getStackId());
         if (s == null || s.getStatus() == Status.DELETE_COMPLETED) {
             return closeUsage(usage);
         }
@@ -136,10 +136,10 @@ public class UsageService {
     private void openNewIfNotFound() {
         List<CloudbreakUsage> usages = usageRepository.findAllOpenAndStopped(Date.from(ZonedDateTime.now().toInstant()));
         Set<Long> stackIdsForOpenUsages = usages.stream().map(CloudbreakUsage::getStackId).collect(Collectors.toSet());
-        List<Stack> stacks = stackRepository.findAllAliveAndProvisioned();
+        List<Stack> stacks = stackService.getAllAliveAndProvisioned();
         for (Stack stack : stacks) {
             if (!stackIdsForOpenUsages.contains(stack.getId())) {
-                Stack fullStack = stackRepository.findOneWithLists(stack.getId());
+                Stack fullStack = stackService.getByIdWithLists(stack.getId());
                 openUsagesForStack(fullStack);
                 if (fullStack.getStatus() == Status.STOPPED) {
                     stopUsagesForStack(fullStack);

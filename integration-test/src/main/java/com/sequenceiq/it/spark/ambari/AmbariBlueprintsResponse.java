@@ -9,7 +9,7 @@ import spark.Response;
 
 public class AmbariBlueprintsResponse extends ITResponse {
     @Override
-    public Object handle(Request request, Response response) throws Exception {
+    public Object handle(Request request, Response response) {
         response.type("text/plain");
         ObjectNode rootNode = JsonNodeFactory.instance.objectNode();
         rootNode.putArray("host_groups").addObject()

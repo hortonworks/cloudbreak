@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.upscale;
 
-import static com.sequenceiq.cloudbreak.api.model.InstanceStatus.CREATED;
 import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus.CREATED;
 import static java.lang.String.format;
 
 import java.util.ArrayList;
@@ -11,18 +11,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
-import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
-import com.sequenceiq.cloudbreak.cloud.event.instance.GetSSHFingerprintsResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -30,23 +28,25 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.type.BillingStatus;
+import com.sequenceiq.cloudbreak.common.type.CommonResourceType;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
-import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackScalingFlowContext;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
-import com.sequenceiq.cloudbreak.repository.StackUpdater;
+import com.sequenceiq.cloudbreak.service.StackUpdater;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
+import com.sequenceiq.cloudbreak.service.TransactionService;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
-import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TlsSetupService;
@@ -73,9 +73,6 @@ public class StackUpscaleService {
     private ClusterService clusterService;
 
     @Inject
-    private CloudbreakMessagesService messagesService;
-
-    @Inject
     private CloudbreakEventService eventService;
 
     @Inject
@@ -90,22 +87,29 @@ public class StackUpscaleService {
     @Inject
     private GatewayConfigService gatewayConfigService;
 
+    @Inject
+    private TransactionService transactionService;
+
     public void startAddInstances(Stack stack, Integer scalingAdjustment) {
         String statusReason = format("Adding %s new instance(s) to the infrastructure.", scalingAdjustment);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.ADDING_NEW_INSTANCES, statusReason);
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_ADDING_INSTANCES, UPDATE_IN_PROGRESS.name(), scalingAdjustment);
     }
 
-    public Set<Resource> finishAddInstances(StackScalingFlowContext context, UpscaleStackResult payload) {
+    public void addInstanceFireEventAndLog(Stack stack, Integer scalingAdjustment) {
+        flowMessageService.fireEventAndLog(stack.getId(),
+                flowMessageService.message(Msg.STACK_ADDING_INSTANCES, scalingAdjustment),
+                UPDATE_IN_PROGRESS.name());
+    }
+
+    public void finishAddInstances(StackScalingFlowContext context, UpscaleStackResult payload) {
         LOGGER.info("Upscale stack result: {}", payload);
         List<CloudResourceStatus> results = payload.getResults();
-        validateResourceResults(context.getCloudContext(), payload.getErrorDetails(), results);
+        validateResourceResults(context, payload.getErrorDetails(), results);
         Set<Resource> resourceSet = transformResults(results, context.getStack());
         if (resourceSet.isEmpty()) {
             throw new OperationException("Failed to upscale the cluster since all create request failed. Resource set is empty");
         }
         LOGGER.debug("Adding new instances to the stack is DONE");
-        return resourceSet;
     }
 
     public void extendingMetadata(Stack stack) {
@@ -113,41 +117,35 @@ public class StackUpscaleService {
         clusterService.updateClusterStatusByStackId(stack.getId(), UPDATE_IN_PROGRESS);
     }
 
-    @Transactional
-    public Set<String> finishExtendMetadata(Stack stack, String instanceGroupName, CollectMetadataResult payload) {
-        List<CloudVmMetaDataStatus> coreInstanceMetaData = payload.getResults();
-        int newinstances = metadataSetupService.saveInstanceMetaData(stack, coreInstanceMetaData, CREATED);
-        Set<String> upscaleCandidateAddresses = new HashSet<>();
-        for (CloudVmMetaDataStatus cloudVmMetaDataStatus : coreInstanceMetaData) {
-            upscaleCandidateAddresses.add(cloudVmMetaDataStatus.getMetaData().getPrivateIp());
-        }
-        InstanceGroup instanceGroup = instanceGroupRepository.findOneByGroupNameInStack(stack.getId(), instanceGroupName);
-        int nodeCount = instanceGroup.getNodeCount() + newinstances;
-        clusterService.updateClusterStatusByStackIdOutOfTransaction(stack.getId(), AVAILABLE);
-        eventService.fireCloudbreakEvent(stack.getId(), BillingStatus.BILLING_CHANGED.name(),
-                messagesService.getMessage("stack.metadata.setup.billing.changed"));
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_METADATA_EXTEND, AVAILABLE.name());
-        usageService.scaleUsagesForStack(stack.getId(), instanceGroupName, nodeCount);
+    public Set<String> finishExtendMetadata(Stack stack, String instanceGroupName, CollectMetadataResult payload) throws TransactionExecutionException {
+        return transactionService.required(() -> {
+            List<CloudVmMetaDataStatus> coreInstanceMetaData = payload.getResults();
+            int newInstances = metadataSetupService.saveInstanceMetaData(stack, coreInstanceMetaData, CREATED);
+            Set<String> upscaleCandidateAddresses = new HashSet<>();
+            for (CloudVmMetaDataStatus cloudVmMetaDataStatus : coreInstanceMetaData) {
+                upscaleCandidateAddresses.add(cloudVmMetaDataStatus.getMetaData().getPrivateIp());
+            }
+            InstanceGroup instanceGroup = instanceGroupRepository.findOneByGroupNameInStack(stack.getId(), instanceGroupName);
+            int nodeCount = instanceGroup.getNodeCount() + newInstances;
+            try {
+                clusterService.updateClusterStatusByStackIdOutOfTransaction(stack.getId(), AVAILABLE);
+            } catch (TransactionExecutionException e) {
+                throw e.getCause();
+            }
+            eventService.fireCloudbreakEvent(stack.getId(), BillingStatus.BILLING_CHANGED.name(),
+                    flowMessageService.message(Msg.STACK_METADATA_SETUP_BILLING_CHANGED));
+            flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_METADATA_EXTEND, AVAILABLE.name());
+            usageService.scaleUsagesForStack(stack.getId(), instanceGroupName, nodeCount);
 
-        return upscaleCandidateAddresses;
+            return upscaleCandidateAddresses;
+        });
     }
 
-    public void setupTls(StackContext context, GetSSHFingerprintsResult sshFingerprints) throws CloudbreakException {
-        LOGGER.info("Fingerprint has been determined: {}", sshFingerprints.getSshFingerprints());
+    public void setupTls(StackContext context) throws CloudbreakException {
         Stack stack = context.getStack();
         for (InstanceMetaData gwInstance : stack.getGatewayInstanceMetadata()) {
             if (CREATED.equals(gwInstance.getInstanceStatus())) {
-                tlsSetupService.setupTls(stack, gwInstance, stack.getStackAuthentication().getLoginUserName(), sshFingerprints.getSshFingerprints());
-            }
-        }
-    }
-
-    public void removeTemporarySShKey(StackContext context, Set<String> sshFingerprints) throws CloudbreakException {
-        Stack stack = context.getStack();
-        for (InstanceMetaData gateway : stack.getGatewayInstanceMetadata()) {
-            if (CREATED.equals(gateway.getInstanceStatus())) {
-                String ipToTls = gatewayConfigService.getGatewayIp(stack, gateway);
-                tlsSetupService.removeTemporarySShKey(stack, ipToTls, gateway.getSshPort(), stack.getStackAuthentication().getLoginUserName(), sshFingerprints);
+                tlsSetupService.setupTls(stack, gwInstance);
             }
         }
     }
@@ -177,7 +175,7 @@ public class StackUpscaleService {
         }
     }
 
-    private Set<Resource> transformResults(List<CloudResourceStatus> cloudResourceStatuses, Stack stack) {
+    private Set<Resource> transformResults(Iterable<CloudResourceStatus> cloudResourceStatuses, Stack stack) {
         Set<Resource> retSet = new HashSet<>();
         for (CloudResourceStatus cloudResourceStatus : cloudResourceStatuses) {
             if (!cloudResourceStatus.isFailed()) {
@@ -190,13 +188,15 @@ public class StackUpscaleService {
         return retSet;
     }
 
-    private void validateResourceResults(CloudContext cloudContext, Exception exception, List<CloudResourceStatus> results) {
+    private void validateResourceResults(StackScalingFlowContext context, Exception exception, List<CloudResourceStatus> results) {
         if (exception != null) {
-            LOGGER.error(format("Failed to upscale stack: %s", cloudContext), exception);
+            LOGGER.error(format("Failed to upscale stack: %s", context.getCloudContext()), exception);
             throw new OperationException(exception);
         }
-        if (results.size() == 1 && (results.get(0).isFailed() || results.get(0).isDeleted())) {
-            throw new OperationException(format("Failed to upscale the stack for %s due to: %s", cloudContext, results.get(0).getStatusReason()));
+        List<CloudResourceStatus> templates = results.stream().filter(result -> CommonResourceType.TEMPLATE == result.getCloudResource().getType()
+                .getCommonResourceType()).collect(Collectors.toList());
+        if (!templates.isEmpty() && (templates.get(0).isFailed() || templates.get(0).isDeleted())) {
+            throw new OperationException(format("Failed to upscale the stack for %s due to: %s", context.getCloudContext(), templates.get(0).getStatusReason()));
         }
     }
 

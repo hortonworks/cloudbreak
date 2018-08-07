@@ -35,6 +35,9 @@ public class UserProfile {
     @Column(nullable = false)
     private String account;
 
+    @Column
+    private String userName;
+
     @Convert(converter = EncryptedJsonToString.class)
     @Column(columnDefinition = "TEXT")
     private Json uiProperties;
@@ -69,6 +72,14 @@ public class UserProfile {
 
     public void setAccount(String account) {
         this.account = account;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
     public Json getUiProperties() {

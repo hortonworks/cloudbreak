@@ -16,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.HttpTransport;
@@ -33,14 +34,28 @@ import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.Storage.Builder;
 import com.google.api.services.storage.StorageScopes;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationException;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 public final class GcpStackUtil {
+
+    public static final String NETWORK_ID = "networkId";
+
+    public static final String SUBNET_ID = "subnetId";
+
+    public static final String SERVICE_ACCOUNT = "serviceAccountId";
+
+    public static final String PROJECT_ID = "projectId";
+
+    public static final String PRIVATE_KEY = "serviceAccountPrivateKey";
+
+    public static final String CREDENTIAL_JSON = "credentialJson";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpStackUtil.class);
 
@@ -55,16 +70,6 @@ public final class GcpStackUtil {
     private static final int FINISHED = 100;
 
     private static final int PRIVATE_ID_PART = 2;
-
-    private static final String SERVICE_ACCOUNT = "serviceAccountId";
-
-    private static final String PRIVATE_KEY = "serviceAccountPrivateKey";
-
-    private static final String PROJECT_ID = "projectId";
-
-    private static final String NETWORK_ID = "networkId";
-
-    private static final String SUBNET_ID = "subnetId";
 
     private static final String NO_PUBLIC_IP = "noPublicIp";
 
@@ -82,24 +87,38 @@ public final class GcpStackUtil {
                     .setHttpRequestInitializer(credential)
                     .build();
         } catch (Exception e) {
-            LOGGER.error("Error occurred while building Google Compute access.", e);
+            LOGGER.info("Error occurred while building Google Compute access.", e);
+            throw new CredentialVerificationException("Error occurred while building Google Compute access.", e);
         }
-        return null;
     }
 
     public static GoogleCredential buildCredential(CloudCredential gcpCredential, HttpTransport httpTransport) throws IOException, GeneralSecurityException {
-        PrivateKey pk = SecurityUtils.loadPrivateKeyFromKeyStore(SecurityUtils.getPkcs12KeyStore(),
-                new ByteArrayInputStream(Base64.decodeBase64(getServiceAccountPrivateKey(gcpCredential))), "notasecret", "privatekey", "notasecret");
-        return new GoogleCredential.Builder().setTransport(httpTransport)
-                .setJsonFactory(JSON_FACTORY)
-                .setServiceAccountId(getServiceAccountId(gcpCredential))
-                .setServiceAccountScopes(SCOPES)
-                .setServiceAccountPrivateKey(pk)
-                .build();
+        String credentialJson = getServiceAccountCredentialJson(gcpCredential);
+        if (StringUtils.isNoneEmpty(credentialJson)) {
+            return GoogleCredential.fromStream(new ByteArrayInputStream(Base64.decodeBase64(credentialJson)), httpTransport, JSON_FACTORY)
+                    .createScoped(SCOPES);
+        } else {
+            try {
+                PrivateKey pk = SecurityUtils.loadPrivateKeyFromKeyStore(SecurityUtils.getPkcs12KeyStore(),
+                        new ByteArrayInputStream(Base64.decodeBase64(getServiceAccountPrivateKey(gcpCredential))), "notasecret", "privatekey", "notasecret");
+                return new GoogleCredential.Builder().setTransport(httpTransport)
+                        .setJsonFactory(JSON_FACTORY)
+                        .setServiceAccountId(getServiceAccountId(gcpCredential))
+                        .setServiceAccountScopes(SCOPES)
+                        .setServiceAccountPrivateKey(pk)
+                        .build();
+            } catch (IOException e) {
+                throw new CredentialVerificationException("Can not read private key", e);
+            }
+        }
     }
 
     public static String getServiceAccountPrivateKey(CloudCredential credential) {
         return credential.getParameter(PRIVATE_KEY, String.class);
+    }
+
+    public static String getServiceAccountCredentialJson(CloudCredential credential) {
+        return credential.getParameter(CREDENTIAL_JSON, String.class);
     }
 
     public static String getServiceAccountId(CloudCredential credential) {
@@ -107,7 +126,36 @@ public final class GcpStackUtil {
     }
 
     public static String getProjectId(CloudCredential credential) {
-        return credential.getParameter(PROJECT_ID, String.class).toLowerCase().replaceAll("[^A-Za-z0-9 ]", "-");
+        String projectId = credential.getParameter(PROJECT_ID, String.class);
+        if (projectId == null) {
+            throw new CredentialVerificationException("Missing Project Id from GCP Credential");
+        }
+        return projectId.toLowerCase().replaceAll("[^A-Za-z0-9 ]", "-");
+    }
+
+    public static CloudCredential prepareCredential(CloudCredential credential) {
+        try {
+            String credentialJson = GcpStackUtil.getServiceAccountCredentialJson(credential);
+            if (StringUtils.isNoneEmpty(credentialJson)) {
+                JsonNode credNode = JsonUtil.readTree(new String(Base64.decodeBase64(credentialJson)));
+                JsonNode projectId = credNode.get("project_id");
+                if (projectId != null) {
+                    credential.putParameter(GcpStackUtil.PROJECT_ID, projectId.asText());
+                } else {
+                    throw new CredentialVerificationException("project_id is missing from json");
+                }
+                JsonNode clientEmail = credNode.get("client_email");
+                if (clientEmail != null) {
+                    credential.putParameter(GcpStackUtil.SERVICE_ACCOUNT, clientEmail.asText());
+                } else {
+                    throw new CredentialVerificationException("client_email is missing from json");
+                }
+                credential.putParameter(GcpStackUtil.PRIVATE_KEY, "");
+            }
+            return credential;
+        } catch (IOException iox) {
+            throw new CredentialVerificationException("Invalid credential json!", iox);
+        }
     }
 
     public static boolean isOperationFinished(Operation operation) throws Exception {
@@ -214,7 +262,7 @@ public final class GcpStackUtil {
     }
 
     public static boolean isNewSubnetInExistingNetwork(Network network) {
-        return isExistingNetwork(network) && isNoneEmpty(network.getSubnet().getCidr());
+        return isExistingNetwork(network) && !isExistingSubnet(network);
     }
 
     public static boolean isNewNetworkAndSubnet(Network network) {

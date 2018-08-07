@@ -9,8 +9,10 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import com.amazonaws.auth.BasicSessionCredentials;
+import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.auth.InstanceProfileCredentialsProvider;
-import com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClient;
+import com.amazonaws.services.securitytoken.AWSSecurityTokenService;
+import com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClientBuilder;
 import com.amazonaws.services.securitytoken.model.AssumeRoleRequest;
 import com.amazonaws.services.securitytoken.model.AssumeRoleResult;
 import com.sequenceiq.cloudbreak.cloud.aws.cache.AwsCachingConfig;
@@ -29,6 +31,9 @@ public class AwsSessionCredentialClient {
     @Inject
     private AwsEnvironmentVariableChecker awsEnvironmentVariableChecker;
 
+    @Inject
+    private AwsDefaultZoneProvider awsDefaultZoneProvider;
+
     @Cacheable(value = AwsCachingConfig.TEMPORARY_AWS_CREDENTIAL_CACHE, unless = "#awsCredential.getId() == null")
     public BasicSessionCredentials retrieveCachedSessionCredentials(AwsCredentialView awsCredential) {
         return retrieveSessionCredentials(awsCredential);
@@ -36,27 +41,32 @@ public class AwsSessionCredentialClient {
 
     public BasicSessionCredentials retrieveSessionCredentials(AwsCredentialView awsCredential) {
         LOGGER.debug("retrieving session credential");
-        AWSSecurityTokenServiceClient client = awsSecurityTokenServiceClient();
         AssumeRoleRequest assumeRoleRequest = new AssumeRoleRequest()
                 .withDurationSeconds(DEFAULT_SESSION_CREDENTIALS_DURATION)
                 .withExternalId(externalId)
                 .withRoleArn(awsCredential.getRoleArn())
                 .withRoleSessionName("hadoop-provisioning");
-        AssumeRoleResult result = client.assumeRole(assumeRoleRequest);
+        AssumeRoleResult result = awsSecurityTokenServiceClient(awsCredential).assumeRole(assumeRoleRequest);
         return new BasicSessionCredentials(
                 result.getCredentials().getAccessKeyId(),
                 result.getCredentials().getSecretAccessKey(),
                 result.getCredentials().getSessionToken());
     }
 
-    private AWSSecurityTokenServiceClient awsSecurityTokenServiceClient() {
-        if (!awsEnvironmentVariableChecker.isAwsAccessKeyAvailable() || !awsEnvironmentVariableChecker.isAwsSecretAccessKeyAvailable()) {
-            InstanceProfileCredentialsProvider instanceProfileCredentialsProvider = new InstanceProfileCredentialsProvider();
+    private AWSSecurityTokenService awsSecurityTokenServiceClient(AwsCredentialView awsCredential) {
+        if (!awsEnvironmentVariableChecker.isAwsAccessKeyAvailable(awsCredential)
+                || !awsEnvironmentVariableChecker.isAwsSecretAccessKeyAvailable(awsCredential)) {
             LOGGER.info("AWSSecurityTokenServiceClient will use aws metadata because environment variables are undefined");
-            return new AWSSecurityTokenServiceClient(instanceProfileCredentialsProvider);
+            return AWSSecurityTokenServiceClientBuilder.standard()
+                    .withRegion(awsDefaultZoneProvider.getDefaultZone(awsCredential))
+                    .withCredentials(new InstanceProfileCredentialsProvider())
+                    .build();
         } else {
             LOGGER.info("AWSSecurityTokenServiceClient will use environment variables");
-            return new AWSSecurityTokenServiceClient();
+            return AWSSecurityTokenServiceClientBuilder.standard()
+                    .withRegion(awsDefaultZoneProvider.getDefaultZone(awsCredential))
+                    .withCredentials(DefaultAWSCredentialsProviderChain.getInstance())
+                    .build();
         }
     }
 

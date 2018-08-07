@@ -36,10 +36,10 @@ public class ClusterCredentialChangeActions {
     private FlowMessageService flowMessageService;
 
     @Bean(name = "CLUSTER_CREDENTIALCHANGE_STATE")
-    public Action changingClusterCredential() {
+    public Action<?, ?> changingClusterCredential() {
         return new AbstractClusterAction<ClusterCredentialChangeTriggerEvent>(ClusterCredentialChangeTriggerEvent.class) {
             @Override
-            protected void doExecute(ClusterViewContext ctx, ClusterCredentialChangeTriggerEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterViewContext ctx, ClusterCredentialChangeTriggerEvent payload, Map<Object, Object> variables) {
                 clusterCredentialChangeService.credentialChange(ctx.getStackId());
                 ClusterCredentialChangeRequest request;
                 switch (payload.getType()) {
@@ -58,10 +58,10 @@ public class ClusterCredentialChangeActions {
     }
 
     @Bean(name = "CLUSTER_CREDENTIALCHANGE_FINISHED_STATE")
-    public Action clusterCredentialChangeFinished() {
+    public Action<?, ?> clusterCredentialChangeFinished() {
         return new AbstractClusterAction<ClusterCredentialChangeResult>(ClusterCredentialChangeResult.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, ClusterCredentialChangeResult payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterViewContext context, ClusterCredentialChangeResult payload, Map<Object, Object> variables) {
                 switch (payload.getRequest().getType()) {
                     case REPLACE:
                         clusterCredentialChangeService.finishCredentialReplace(context.getStackId(), context.getClusterId(),
@@ -85,10 +85,10 @@ public class ClusterCredentialChangeActions {
     }
 
     @Bean(name = "CLUSTER_CREDENTIALCHANGE_FAILED_STATE")
-    public Action clusterCredentialChangeFailedAction() {
+    public Action<?, ?> clusterCredentialChangeFailedAction() {
         return new AbstractStackFailureAction<ClusterCredentialChangeState, ClusterCredentialChangeEvent>() {
             @Override
-            protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 LOGGER.error("Exception during cluster authentication change!: {}", payload.getException().getMessage());
                 flowMessageService.fireEventAndLog(payload.getStackId(), Msg.AMBARI_CLUSTER_CHANGE_CREDENTIAL_FAILED, UPDATE_FAILED.name());
                 sendEvent(context);

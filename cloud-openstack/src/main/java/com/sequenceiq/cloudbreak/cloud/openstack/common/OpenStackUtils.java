@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.openstack.common;
 
-import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -38,7 +37,7 @@ public class OpenStackUtils {
     @Inject
     private OpenStackClient openStackClient;
 
-    public CloudResource getHeatResource(List<CloudResource> resourceList) {
+    public CloudResource getHeatResource(Iterable<CloudResource> resourceList) {
         for (CloudResource resource : resourceList) {
             if (resource.getType() == ResourceType.HEAT_STACK) {
                 return resource;
@@ -71,14 +70,14 @@ public class OpenStackUtils {
         return heatResourceStatus;
     }
 
-    public String adjustStackNameLength(String stackName) {
+    public String adjustStackNameLength(CharSequence stackName) {
         return Splitter.fixedLength(maxResourceNameLength).splitToList(stackName).get(0);
     }
 
     public String getExistingSubnetCidr(AuthenticatedContext authenticatedContext, NeutronNetworkView neutronNetwork) {
         if (neutronNetwork.isExistingSubnet()) {
             String subnetId = neutronNetwork.getCustomSubnetId();
-            OSClient osClient = openStackClient.createOSClient(authenticatedContext);
+            OSClient<?> osClient = openStackClient.createOSClient(authenticatedContext);
             Subnet subnet = osClient.networking().subnet().get(subnetId);
             if (subnet == null) {
                 throw new CloudConnectorException("The specified subnet does not exist: " + subnetId);

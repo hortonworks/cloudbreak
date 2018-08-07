@@ -19,7 +19,7 @@ import com.sequenceiq.periscope.domain.PeriscopeUser;
 public class ScimAccountGroupReaderFilter extends OncePerRequestFilter {
 
     @Inject
-    private UserDetailsService userDetailsService;
+    private CachedUserDetailsService cachedUserDetailsService;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -27,7 +27,7 @@ public class ScimAccountGroupReaderFilter extends OncePerRequestFilter {
             IOException {
         if (SecurityContextHolder.getContext().getAuthentication() != null) {
             String username = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            PeriscopeUser user = userDetailsService.getDetails(username, UserFilterField.USERNAME);
+            PeriscopeUser user = cachedUserDetailsService.getDetails(username, UserFilterField.USERNAME);
             request.setAttribute("user", user);
         }
         filterChain.doFilter(request, response);

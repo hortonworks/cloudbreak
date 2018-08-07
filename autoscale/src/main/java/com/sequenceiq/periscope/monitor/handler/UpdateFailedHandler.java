@@ -14,10 +14,10 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.FailureReport;
-import com.sequenceiq.cloudbreak.api.model.InstanceMetaDataJson;
-import com.sequenceiq.cloudbreak.api.model.InstanceMetadataType;
-import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
-import com.sequenceiq.cloudbreak.api.model.StackResponse;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetaDataJson;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetadataType;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.domain.Cluster;
@@ -48,7 +48,7 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
     @Override
     public void onApplicationEvent(UpdateFailedEvent event) {
         long id = event.getClusterId();
-        Cluster cluster = clusterService.find(id);
+        Cluster cluster = clusterService.findById(id);
         MDCBuilder.buildMdcContext(cluster);
         Integer failed = updateFailures.get(id);
         if (failed == null) {
@@ -70,7 +70,7 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
                     suspendCluster(cluster);
                 }
             } catch (Exception ex) {
-                LOGGER.warn("Cluster status could not be verified by Cloudbreak for remove.", ex);
+                LOGGER.warn("Cluster status could not be verified by Cloudbreak for remove. Original message: {}", ex.getMessage());
                 suspendCluster(cluster);
             }
             updateFailures.remove(id);
@@ -80,8 +80,7 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
     }
 
     private void suspendCluster(Cluster cluster) {
-        cluster.setState(ClusterState.SUSPENDED);
-        clusterService.save(cluster);
+        clusterService.setState(cluster, ClusterState.SUSPENDED);
         LOGGER.info("Suspend cluster monitoring due to failing update attempts");
     }
 
@@ -94,7 +93,7 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
             try {
                 cbClient.clusterEndpoint().failureReport(cluster.getStackId(), failureReport);
             } catch (Exception e) {
-                LOGGER.warn("Exception during failure report", e);
+                LOGGER.warn("Exception during failure report. Original message: {}", e.getMessage());
             }
         }
     }

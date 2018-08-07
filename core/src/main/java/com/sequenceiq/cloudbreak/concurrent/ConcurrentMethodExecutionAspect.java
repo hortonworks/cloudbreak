@@ -56,13 +56,13 @@ public class ConcurrentMethodExecutionAspect {
         if (!lock.tryLock()) {
             logWaitingOperation(lockPrefix, stackId);
             lock.lock();
-            logContinueOperation(lockPrefix, stackId);
+            try {
+                logContinueOperation(lockPrefix, stackId);
+            } finally {
+                lock.unlock();
+            }
         }
-        try {
-            return joinPoint.proceed();
-        } finally {
-            lock.unlock();
-        }
+        return joinPoint.proceed();
     }
 
     @Around("com.sequenceiq.cloudbreak.concurrent.ConcurrentMethodExecutionAspect.guardedMethodWithPayloadArg()")
@@ -126,11 +126,8 @@ public class ConcurrentMethodExecutionAspect {
 
     private Object skipMethodExecution(String lockPrefix, Long stackId) {
         String message;
-        if (stackId != null) {
-            message = String.format("%s operation will be skipped on stack %d, because it is running on a different thread.", lockPrefix, stackId);
-        } else {
-            message = String.format("%s operation will be skipped, because it is running on a different thread.", lockPrefix);
-        }
+        message = stackId != null ? String.format("%s operation will be skipped on stack %d, because it is running on a different thread.", lockPrefix, stackId)
+                : String.format("%s operation will be skipped, because it is running on a different thread.", lockPrefix);
         LOGGER.info(message);
         throw new CancellationException(message);
     }

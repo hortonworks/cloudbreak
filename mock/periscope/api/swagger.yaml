@@ -10,19 +10,41 @@ info:
     \ level QoS to the cluster."
   version: "1.9.0"
   title: "Auto-scaling API"
-basePath: "/as/api"
+basePath: "/as"
 tags:
-- name: "v1clusters"
-- name: "v1configurations"
-- name: "v1policies"
+- name: "health"
 - name: "v1alerts"
 - name: "v2clusters"
 - name: "v1history"
+- name: "v1configurations"
+- name: "v1policies"
+- name: "v1clusters"
 schemes:
 - "http"
 - "https"
 paths:
-  /v1/clusters:
+  /health:
+    get:
+      tags:
+      - "health"
+      summary: "retrieve Periscope server status for user"
+      description: "Periscope server status."
+      operationId: "getPeriscopeHealth"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters: []
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Health"
+      x-swagger-router-controller: "Health"
+  /api/v1/clusters:
     get:
       tags:
       - "v1clusters"
@@ -70,7 +92,7 @@ paths:
           schema:
             $ref: "#/definitions/AutoscaleClusterResponse"
       x-swagger-router-controller: "V1clusters"
-  /v1/clusters/{clusterId}:
+  /api/v1/clusters/{clusterId}:
     get:
       tags:
       - "v1clusters"
@@ -149,7 +171,7 @@ paths:
         default:
           description: "successful operation"
       x-swagger-router-controller: "V1clusters"
-  /v1/clusters/{clusterId}/alerts/metric:
+  /api/v1/clusters/{clusterId}/alerts/metric:
     get:
       tags:
       - "v1alerts"
@@ -219,7 +241,7 @@ paths:
           schema:
             $ref: "#/definitions/MetricAlertResponse"
       x-swagger-router-controller: "V1alerts"
-  /v1/clusters/{clusterId}/alerts/metric/definitions:
+  /api/v1/clusters/{clusterId}/alerts/metric/definitions:
     get:
       tags:
       - "v1alerts"
@@ -256,7 +278,7 @@ paths:
                 type: "object"
                 properties: {}
       x-swagger-router-controller: "V1alerts"
-  /v1/clusters/{clusterId}/alerts/metric/{alertId}:
+  /api/v1/clusters/{clusterId}/alerts/metric/{alertId}:
     put:
       tags:
       - "v1alerts"
@@ -332,7 +354,7 @@ paths:
         default:
           description: "successful operation"
       x-swagger-router-controller: "V1alerts"
-  /v1/clusters/{clusterId}/alerts/prometheus:
+  /api/v1/clusters/{clusterId}/alerts/prometheus:
     get:
       tags:
       - "v1alerts"
@@ -390,7 +412,7 @@ paths:
           schema:
             $ref: "#/definitions/PrometheusAlertResponse"
       x-swagger-router-controller: "V1alerts"
-  /v1/clusters/{clusterId}/alerts/prometheus/definitions:
+  /api/v1/clusters/{clusterId}/alerts/prometheus/definitions:
     get:
       tags:
       - "v1alerts"
@@ -418,7 +440,7 @@ paths:
             items:
               $ref: "#/definitions/AlertRuleDefinitionEntry"
       x-swagger-router-controller: "V1alerts"
-  /v1/clusters/{clusterId}/alerts/prometheus/{alertId}:
+  /api/v1/clusters/{clusterId}/alerts/prometheus/{alertId}:
     put:
       tags:
       - "v1alerts"
@@ -482,7 +504,7 @@ paths:
         default:
           description: "successful operation"
       x-swagger-router-controller: "V1alerts"
-  /v1/clusters/{clusterId}/alerts/time:
+  /api/v1/clusters/{clusterId}/alerts/time:
     get:
       tags:
       - "v1alerts"
@@ -544,7 +566,40 @@ paths:
           schema:
             $ref: "#/definitions/TimeAlertResponse"
       x-swagger-router-controller: "V1alerts"
-  /v1/clusters/{clusterId}/alerts/time/{alertId}:
+  /api/v1/clusters/{clusterId}/alerts/time/validate:
+    post:
+      tags:
+      - "v1alerts"
+      summary: "cron expression validation"
+      description: "Auto-scaling supports two Alert types: metric and time based.\
+        \ Time based alerts are based on cron expressions and allow alerts to be triggered\
+        \ based on time."
+      operationId: "validateCronExpression"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "clusterId"
+        in: "path"
+        required: true
+        type: "integer"
+        format: "int64"
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/TimeAlertValidationRequest"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "boolean"
+      x-swagger-router-controller: "V1alerts"
+  /api/v1/clusters/{clusterId}/alerts/time/{alertId}:
     put:
       tags:
       - "v1alerts"
@@ -612,7 +667,7 @@ paths:
         default:
           description: "successful operation"
       x-swagger-router-controller: "V1alerts"
-  /v1/clusters/{clusterId}/autoscale:
+  /api/v1/clusters/{clusterId}/autoscale:
     post:
       tags:
       - "v1clusters"
@@ -643,7 +698,7 @@ paths:
           schema:
             $ref: "#/definitions/AutoscaleClusterResponse"
       x-swagger-router-controller: "V1clusters"
-  /v1/clusters/{clusterId}/configurations/scaling:
+  /api/v1/clusters/{clusterId}/configurations/scaling:
     get:
       tags:
       - "v1configurations"
@@ -713,7 +768,7 @@ paths:
           schema:
             $ref: "#/definitions/ScalingConfiguration"
       x-swagger-router-controller: "V1configurations"
-  /v1/clusters/{clusterId}/history:
+  /api/v1/clusters/{clusterId}/history:
     get:
       tags:
       - "v1history"
@@ -741,7 +796,7 @@ paths:
             items:
               $ref: "#/definitions/HistoryResponse"
       x-swagger-router-controller: "V1history"
-  /v1/clusters/{clusterId}/history/{historyId}:
+  /api/v1/clusters/{clusterId}/history/{historyId}:
     get:
       tags:
       - "v1history"
@@ -772,7 +827,7 @@ paths:
           schema:
             $ref: "#/definitions/HistoryResponse"
       x-swagger-router-controller: "V1history"
-  /v1/clusters/{clusterId}/policies:
+  /api/v1/clusters/{clusterId}/policies:
     get:
       tags:
       - "v1policies"
@@ -842,7 +897,7 @@ paths:
           schema:
             $ref: "#/definitions/ScalingPolicyResponse"
       x-swagger-router-controller: "V1policies"
-  /v1/clusters/{clusterId}/policies/{policyId}:
+  /api/v1/clusters/{clusterId}/policies/{policyId}:
     put:
       tags:
       - "v1policies"
@@ -918,7 +973,7 @@ paths:
         default:
           description: "successful operation"
       x-swagger-router-controller: "V1policies"
-  /v1/clusters/{clusterId}/state:
+  /api/v1/clusters/{clusterId}/state:
     post:
       tags:
       - "v1clusters"
@@ -949,7 +1004,7 @@ paths:
           schema:
             $ref: "#/definitions/AutoscaleClusterResponse"
       x-swagger-router-controller: "V1clusters"
-  /v2/clusters/{cbClusterId}:
+  /api/v2/clusters/{cbClusterId}:
     get:
       tags:
       - "v2clusters"
@@ -1028,7 +1083,7 @@ paths:
         default:
           description: "successful operation"
       x-swagger-router-controller: "V2clusters"
-  /v2/clusters/{cbClusterId}/disable:
+  /api/v2/clusters/{cbClusterId}/disable:
     post:
       tags:
       - "v2clusters"
@@ -1054,7 +1109,7 @@ paths:
           schema:
             $ref: "#/definitions/AutoscaleClusterResponse"
       x-swagger-router-controller: "V2clusters"
-  /v2/clusters/{cbClusterId}/enable:
+  /api/v2/clusters/{cbClusterId}/enable:
     post:
       tags:
       - "v2clusters"
@@ -1080,7 +1135,7 @@ paths:
           schema:
             $ref: "#/definitions/AutoscaleClusterResponse"
       x-swagger-router-controller: "V2clusters"
-  /v2/clusters/{cbClusterId}/running:
+  /api/v2/clusters/{cbClusterId}/running:
     post:
       tags:
       - "v2clusters"
@@ -1106,7 +1161,7 @@ paths:
           schema:
             $ref: "#/definitions/AutoscaleClusterResponse"
       x-swagger-router-controller: "V2clusters"
-  /v2/clusters/{cbClusterId}/suspended:
+  /api/v2/clusters/{cbClusterId}/suspended:
     post:
       tags:
       - "v2clusters"
@@ -1180,16 +1235,6 @@ definitions:
       scalingConfiguration:
         description: "Scaling configuration for the cluster"
         $ref: "#/definitions/ScalingConfiguration"
-  ClusterState:
-    type: "object"
-    properties:
-      state:
-        type: "string"
-        description: "State of the cluster"
-        enum:
-        - "RUNNING"
-        - "SUSPENDED"
-        - "PENDING"
   AutoscaleClusterRequest:
     type: "object"
     required:
@@ -1229,6 +1274,16 @@ definitions:
       scalingConfiguration:
         description: "Scaling configuration for the cluster"
         $ref: "#/definitions/ScalingConfiguration"
+  ClusterState:
+    type: "object"
+    properties:
+      state:
+        type: "string"
+        description: "State of the cluster"
+        enum:
+        - "RUNNING"
+        - "SUSPENDED"
+        - "PENDING"
   AutoscaleClusterState:
     type: "object"
     properties:
@@ -1302,7 +1357,7 @@ definitions:
       alertName:
         type: "string"
         description: "Name of the alert"
-        pattern: "([a-zA-Z][-a-zA-Z0-9]*)"
+        pattern: "(^[a-zA-Z][-a-zA-Z0-9]*$)"
       description:
         type: "string"
         description: "Description of the alert"
@@ -1336,7 +1391,7 @@ definitions:
       alertName:
         type: "string"
         description: "Name of the alert"
-        pattern: "([a-zA-Z][-a-zA-Z0-9]*)"
+        pattern: "(^[a-zA-Z][-a-zA-Z0-9]*$)"
       description:
         type: "string"
         description: "Description of the alert"
@@ -1363,7 +1418,7 @@ definitions:
       name:
         type: "string"
         description: "Name of the policy"
-        pattern: "([a-zA-Z][-a-zA-Z0-9]*)"
+        pattern: "(^[a-zA-Z][-a-zA-Z0-9]*$)"
       adjustmentType:
         type: "string"
         description: "Type of the scaling count"
@@ -1392,7 +1447,7 @@ definitions:
       name:
         type: "string"
         description: "Name of the policy"
-        pattern: "([a-zA-Z][-a-zA-Z0-9]*)"
+        pattern: "(^[a-zA-Z][-a-zA-Z0-9]*$)"
       adjustmentType:
         type: "string"
         description: "Type of the scaling count"
@@ -1417,7 +1472,7 @@ definitions:
       alertName:
         type: "string"
         description: "Name of the alert"
-        pattern: "([a-zA-Z][-a-zA-Z0-9]*)"
+        pattern: "(^[a-zA-Z][-a-zA-Z0-9]*$)"
       description:
         type: "string"
         description: "Description of the alert"
@@ -1436,7 +1491,7 @@ definitions:
       alertName:
         type: "string"
         description: "Name of the alert"
-        pattern: "([a-zA-Z][-a-zA-Z0-9]*)"
+        pattern: "(^[a-zA-Z][-a-zA-Z0-9]*$)"
       description:
         type: "string"
         description: "Description of the alert"
@@ -1471,7 +1526,7 @@ definitions:
       alertName:
         type: "string"
         description: "Name of the alert"
-        pattern: "([a-zA-Z][-a-zA-Z0-9]*)"
+        pattern: "(^[a-zA-Z][-a-zA-Z0-9]*$)"
       description:
         type: "string"
         description: "Description of the alert"
@@ -1530,13 +1585,14 @@ definitions:
         type: "integer"
         format: "int32"
         description: "The time between two scaling activities"
+        minimum: 1
   MetricAlertResponse:
     type: "object"
     properties:
       alertName:
         type: "string"
         description: "Name of the alert"
-        pattern: "([a-zA-Z][-a-zA-Z0-9]*)"
+        pattern: "(^[a-zA-Z][-a-zA-Z0-9]*$)"
       description:
         type: "string"
         description: "Description of the alert"
@@ -1565,3 +1621,13 @@ definitions:
       scalingPolicy:
         description: "Id of the scaling ploicy"
         $ref: "#/definitions/ScalingPolicyRequest"
+  TimeAlertValidationRequest:
+    type: "object"
+    required:
+    - "cronExpression"
+    properties:
+      cronExpression:
+        type: "string"
+        description: "Cron expression of the time alert"
+  Health:
+    type: "object"

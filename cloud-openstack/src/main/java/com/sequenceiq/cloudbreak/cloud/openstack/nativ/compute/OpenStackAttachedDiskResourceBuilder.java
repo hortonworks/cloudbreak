@@ -1,10 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.openstack.nativ.compute;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
 import javax.inject.Inject;
@@ -22,6 +21,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
@@ -61,29 +61,26 @@ public class OpenStackAttachedDiskResourceBuilder extends AbstractOpenStackCompu
     }
 
     @Override
-    public List<CloudResource> build(OpenStackContext context, long privateId, AuthenticatedContext auth, Group group, Image image,
-            List<CloudResource> buildableResource, Map<String, String> tags) throws Exception {
+    public List<CloudResource> build(OpenStackContext context, long privateId, AuthenticatedContext auth, Group group,
+            List<CloudResource> buildableResource, CloudStack cloudStack) throws Exception {
         List<CloudResource> resources = new ArrayList<>();
         List<CloudResource> syncedResources = Collections.synchronizedList(resources);
-        List<Future<Void>> futures = new ArrayList<>();
+        Collection<Future<Void>> futures = new ArrayList<>();
         for (CloudResource cloudResource : buildableResource) {
-            Future<Void> submit = intermediateBuilderExecutor.submit(new Callable<Void>() {
-                @Override
-                public Void call() throws Exception {
-                    CinderVolumeView volumeView = cloudResource.getParameter(VOLUME_VIEW, CinderVolumeView.class);
-                    Volume osVolume = Builders.volume().name(cloudResource.getName())
-                            .size(volumeView.getSize()).build();
-                    try {
-                        OSClient osClient = createOSClient(auth);
-                        osVolume = osClient.blockStorage().volumes().create(osVolume);
-                        CloudResource newRes = createPersistedResource(cloudResource, group.getName(), osVolume.getId());
-                        newRes.putParameter(OpenStackConstants.VOLUME_MOUNT_POINT, volumeView.getDevice());
-                        syncedResources.add(newRes);
-                    } catch (OS4JException ex) {
-                        throw new OpenStackResourceException("Volume creation failed", resourceType(), cloudResource.getName(), ex);
-                    }
-                    return null;
+            Future<Void> submit = intermediateBuilderExecutor.submit(() -> {
+                CinderVolumeView volumeView = cloudResource.getParameter(VOLUME_VIEW, CinderVolumeView.class);
+                Volume osVolume = Builders.volume().name(cloudResource.getName())
+                        .size(volumeView.getSize()).build();
+                try {
+                    OSClient<?> osClient = createOSClient(auth);
+                    osVolume = osClient.blockStorage().volumes().create(osVolume);
+                    CloudResource newRes = createPersistedResource(cloudResource, group.getName(), osVolume.getId());
+                    newRes.putParameter(OpenStackConstants.VOLUME_MOUNT_POINT, volumeView.getDevice());
+                    syncedResources.add(newRes);
+                } catch (OS4JException ex) {
+                    throw new OpenStackResourceException("Volume creation failed", resourceType(), cloudResource.getName(), ex);
                 }
+                return null;
             });
             futures.add(submit);
         }
@@ -94,9 +91,9 @@ public class OpenStackAttachedDiskResourceBuilder extends AbstractOpenStackCompu
     }
 
     @Override
-    public CloudResource delete(OpenStackContext context, AuthenticatedContext auth, CloudResource resource) throws Exception {
+    public CloudResource delete(OpenStackContext context, AuthenticatedContext auth, CloudResource resource) {
         try {
-            OSClient osClient = createOSClient(auth);
+            OSClient<?> osClient = createOSClient(auth);
             ActionResponse response = osClient.blockStorage().volumes().delete(resource.getReference());
             return checkDeleteResponse(response, resourceType(), auth, resource, "Volume deletion failed");
         } catch (OS4JException ex) {
@@ -112,7 +109,7 @@ public class OpenStackAttachedDiskResourceBuilder extends AbstractOpenStackCompu
     @Override
     protected boolean checkStatus(OpenStackContext context, AuthenticatedContext auth, CloudResource resource) {
         CloudContext cloudContext = auth.getCloudContext();
-        OSClient osClient = createOSClient(auth);
+        OSClient<?> osClient = createOSClient(auth);
         Volume osVolume = osClient.blockStorage().volumes().get(resource.getReference());
         if (osVolume != null && context.isBuild()) {
             Status volumeStatus = osVolume.getStatus();
@@ -122,9 +119,8 @@ public class OpenStackAttachedDiskResourceBuilder extends AbstractOpenStackCompu
                         volumeStatus.name());
             }
             return volumeStatus == Status.AVAILABLE;
-        } else if (osVolume == null && !context.isBuild()) {
-            return true;
+        } else {
+            return osVolume == null && !context.isBuild();
         }
-        return false;
     }
 }

@@ -12,13 +12,18 @@ import javax.validation.constraints.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+/**
+ * @deprecated RdsConfig is replacing AmbariDatabaseDetailsJson
+ */
 @ApiModel("AmbariDatabaseDetails")
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(Include.NON_NULL)
+@Deprecated
 public class AmbariDatabaseDetailsJson implements JsonEntity {
 
     @NotNull
@@ -53,8 +58,8 @@ public class AmbariDatabaseDetailsJson implements JsonEntity {
         return vendor;
     }
 
-    public void setVendor(DatabaseVendor vendor) {
-        this.vendor = vendor;
+    public void setVendor(DatabaseVendor databaseVendor) {
+        vendor = databaseVendor;
     }
 
     public String getName() {

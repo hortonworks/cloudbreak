@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v1;
 
+import java.util.SortedSet;
+
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -10,9 +12,10 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.sequenceiq.cloudbreak.api.model.User;
-import com.sequenceiq.cloudbreak.api.model.UserProfileRequest;
-import com.sequenceiq.cloudbreak.api.model.UserProfileResponse;
+import com.sequenceiq.cloudbreak.api.model.users.UserJson;
+import com.sequenceiq.cloudbreak.api.model.users.UserProfileRequest;
+import com.sequenceiq.cloudbreak.api.model.users.UserProfileResponse;
+import com.sequenceiq.cloudbreak.api.model.users.UserResponseJson;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
@@ -31,21 +34,14 @@ public interface UserEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = UserOpDescription.USER_DETAILS_EVICT, produces = ContentType.JSON, notes = Notes.USER_NOTES,
             nickname = "evictUserDetails")
-    String evictUserDetails(@PathParam("id") String id, @Valid User user);
+    String evictUserDetails(@PathParam("id") String id, @Valid UserJson user);
 
     @DELETE
     @Path("evict")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = UserOpDescription.CURRENT_USER_DETAILS_EVICT, produces = ContentType.JSON, notes = Notes.USER_NOTES,
             nickname = "evictCurrentUserDetails")
-    User evictCurrentUserDetails();
-
-    @GET
-    @Path("{id}/resources")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = UserOpDescription.USER_GET_RESOURCE, produces = ContentType.JSON, notes = Notes.USER_NOTES,
-            nickname = "hasResourcesUser")
-    Boolean hasResources(@PathParam("id") String id);
+    UserJson evictCurrentUserDetails();
 
     @GET
     @Path("profile")
@@ -60,4 +56,10 @@ public interface UserEndpoint {
     @ApiOperation(value = UserOpDescription.USER_PUT_PROFILE, produces = ContentType.JSON, notes = Notes.USER_NOTES,
             nickname = "modifyProfile")
     void modifyProfile(UserProfileRequest userProfileRequest);
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = UserOpDescription.GET_TENANT_USERS, produces = ContentType.JSON, notes = Notes.USER_NOTES,
+            nickname = "getAllUsers")
+    SortedSet<UserResponseJson> getAll();
 }

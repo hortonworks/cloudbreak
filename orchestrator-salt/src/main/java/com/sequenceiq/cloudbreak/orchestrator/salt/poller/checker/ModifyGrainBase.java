@@ -31,11 +31,8 @@ public abstract class ModifyGrainBase extends BaseSaltJobRunner {
     @Override
     public String submit(SaltConnector saltConnector) {
         ApplyResponse response;
-        if (addGrain) {
-            response = SaltStates.addGrain(saltConnector, new Compound(getTarget(), compoundType), key, value);
-        } else {
-            response = SaltStates.removeGrain(saltConnector, new Compound(getTarget(), compoundType), key, value);
-        }
+        response = addGrain ? SaltStates.addGrain(saltConnector, new Compound(getTarget(), compoundType), key, value)
+                : SaltStates.removeGrain(saltConnector, new Compound(getTarget(), compoundType), key, value);
         Set<String> missingIps = collectMissingNodes(collectNodes(response));
         setTarget(missingIps);
         return missingIps.toString();

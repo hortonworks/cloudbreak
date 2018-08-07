@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.cloud.model.DiskType.diskType;
 import static com.sequenceiq.cloudbreak.cloud.model.DisplayName.displayName;
 import static com.sequenceiq.cloudbreak.cloud.model.Orchestrator.orchestrator;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -38,8 +37,8 @@ public class PlatformParametersTest {
     @Test
     public void getRegionByNameIfValueNotConfigured() {
         DiskTypes diskTypes = underTest.diskTypes();
-        Assert.assertEquals(1, diskTypes.displayNames().entrySet().size());
-        Assert.assertEquals(1, diskTypes.diskMapping().entrySet().size());
+        Assert.assertEquals(1L, diskTypes.displayNames().entrySet().size());
+        Assert.assertEquals(1L, diskTypes.diskMapping().entrySet().size());
         Assert.assertEquals("testDiskType", diskTypes.defaultType().value());
     }
 
@@ -60,7 +59,7 @@ public class PlatformParametersTest {
             Map<DiskType, DisplayName> displayNames = new HashMap<>();
             displayNames.put(diskType, displayName("diskType"));
 
-            return new DiskTypes(Arrays.asList(diskType), diskType, stringVolumeParameterTypeMap, displayNames);
+            return new DiskTypes(Collections.singletonList(diskType), diskType, stringVolumeParameterTypeMap, displayNames);
         }
 
         @Override
@@ -80,7 +79,7 @@ public class PlatformParametersTest {
 
         @Override
         public TagSpecification tagSpecification() {
-            return new TagSpecification(1, 256, "keyValidator", 256, "valueValidator");
+            return new TagSpecification(1, 5, 256, "keyValidator", 5, 256, "valueValidator");
         }
 
         @Override

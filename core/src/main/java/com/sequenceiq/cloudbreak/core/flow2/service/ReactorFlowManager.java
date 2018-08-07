@@ -13,19 +13,21 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncEvent.STA
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.cloud.Acceptable;
 import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
-import com.sequenceiq.cloudbreak.controller.CloudbreakApiException;
-import com.sequenceiq.cloudbreak.controller.FlowsAlreadyRunningException;
+import com.sequenceiq.cloudbreak.controller.exception.CloudbreakApiException;
+import com.sequenceiq.cloudbreak.controller.exception.FlowsAlreadyRunningException;
 import com.sequenceiq.cloudbreak.core.flow2.Flow2Handler;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.EphemeralClusterEvent;
@@ -34,12 +36,13 @@ import com.sequenceiq.cloudbreak.core.flow2.event.ClusterAndStackDownscaleTrigge
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterCredentialChangeTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleDetails;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterScaleTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.MultiHostgroupClusterAndStackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
-import com.sequenceiq.cloudbreak.core.flow2.event.StackScaleTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.StackImageUpdateTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackSyncTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.EphemeralClusterUpdateTriggerEvent;
@@ -77,7 +80,7 @@ public class ReactorFlowManager {
 
     public void triggerStackStart(Long stackId) {
         String selector = FlowChainTriggers.FULL_START_TRIGGER_EVENT;
-        StackEvent startTriggerEvent = new StackEvent(selector, stackId);
+        Acceptable startTriggerEvent = new StackEvent(selector, stackId);
         notify(selector, startTriggerEvent);
     }
 
@@ -88,7 +91,7 @@ public class ReactorFlowManager {
 
     public void triggerStackUpscale(Long stackId, InstanceGroupAdjustmentJson instanceGroupAdjustment, boolean withClusterEvent) {
         String selector = FlowChainTriggers.FULL_UPSCALE_TRIGGER_EVENT;
-        StackAndClusterUpscaleTriggerEvent stackAndClusterUpscaleTriggerEvent = new StackAndClusterUpscaleTriggerEvent(selector,
+        Acceptable stackAndClusterUpscaleTriggerEvent = new StackAndClusterUpscaleTriggerEvent(selector,
                 stackId, instanceGroupAdjustment.getInstanceGroup(), instanceGroupAdjustment.getScalingAdjustment(),
                 withClusterEvent ? ScalingType.UPSCALE_TOGETHER : ScalingType.UPSCALE_ONLY_STACK);
         notify(selector, stackAndClusterUpscaleTriggerEvent);
@@ -96,7 +99,7 @@ public class ReactorFlowManager {
 
     public void triggerStackDownscale(Long stackId, InstanceGroupAdjustmentJson instanceGroupAdjustment) {
         String selector = STACK_DOWNSCALE_EVENT.event();
-        StackScaleTriggerEvent stackScaleTriggerEvent = new StackDownscaleTriggerEvent(selector, stackId, instanceGroupAdjustment.getInstanceGroup(),
+        Acceptable stackScaleTriggerEvent = new StackDownscaleTriggerEvent(selector, stackId, instanceGroupAdjustment.getInstanceGroup(),
                 instanceGroupAdjustment.getScalingAdjustment());
         notify(selector, stackScaleTriggerEvent);
     }
@@ -106,11 +109,22 @@ public class ReactorFlowManager {
         notify(selector, new StackSyncTriggerEvent(selector, stackId, true));
     }
 
+    public void triggerStackRemoveInstance(Long stackId, String hostGroup, Long privateId) {
+        triggerStackRemoveInstance(stackId, hostGroup, privateId, false);
+    }
+
     public void triggerStackRemoveInstance(Long stackId, String hostGroup, Long privateId, boolean forced) {
         String selector = FlowChainTriggers.FULL_DOWNSCALE_TRIGGER_EVENT;
         ClusterDownscaleDetails details = new ClusterDownscaleDetails(forced);
         ClusterAndStackDownscaleTriggerEvent event = new ClusterAndStackDownscaleTriggerEvent(selector, stackId, hostGroup, Collections.singleton(privateId),
                 ScalingType.DOWNSCALE_TOGETHER, new Promise<>(), details);
+        notify(selector, event);
+    }
+
+    public void triggerStackRemoveInstances(Long stackId, Map<String, Set<Long>> instanceIdsByHostgroupMap) {
+        String selector = FlowChainTriggers.FULL_DOWNSCALE_MULTIHOSTGROUP_TRIGGER_EVENT;
+        MultiHostgroupClusterAndStackDownscaleTriggerEvent event = new MultiHostgroupClusterAndStackDownscaleTriggerEvent(selector, stackId,
+                instanceIdsByHostgroupMap, ScalingType.DOWNSCALE_TOGETHER, new Promise<>());
         notify(selector, event);
     }
 
@@ -154,7 +168,7 @@ public class ReactorFlowManager {
 
     public void triggerClusterUpscale(Long stackId, HostGroupAdjustmentJson hostGroupAdjustment) {
         String selector = CLUSTER_UPSCALE_TRIGGER_EVENT.event();
-        ClusterScaleTriggerEvent event = new ClusterScaleTriggerEvent(selector, stackId,
+        Acceptable event = new ClusterScaleTriggerEvent(selector, stackId,
                 hostGroupAdjustment.getHostGroup(), hostGroupAdjustment.getScalingAdjustment());
         notify(selector, event);
     }
@@ -162,7 +176,7 @@ public class ReactorFlowManager {
     public void triggerClusterDownscale(Long stackId, HostGroupAdjustmentJson hostGroupAdjustment) {
         String selector = FlowChainTriggers.FULL_DOWNSCALE_TRIGGER_EVENT;
         ScalingType scalingType = hostGroupAdjustment.getWithStackUpdate() ? ScalingType.DOWNSCALE_TOGETHER : ScalingType.DOWNSCALE_ONLY_CLUSTER;
-        ClusterAndStackDownscaleTriggerEvent event = new ClusterAndStackDownscaleTriggerEvent(selector, stackId,
+        Acceptable event = new ClusterAndStackDownscaleTriggerEvent(selector, stackId,
                 hostGroupAdjustment.getHostGroup(), hostGroupAdjustment.getScalingAdjustment(), scalingType);
         notify(selector, event);
     }
@@ -182,13 +196,23 @@ public class ReactorFlowManager {
         notify(selector, new StackEvent(selector, stackId));
     }
 
+    public void triggerClusterSyncWithoutCheck(Long stackId) {
+        String selector = CLUSTER_SYNC_EVENT.event();
+        notifyWithoutCheck(selector, new StackEvent(selector, stackId));
+    }
+
     public void triggerFullSync(Long stackId) {
         String selector = FlowChainTriggers.FULL_SYNC_TRIGGER_EVENT;
         notify(selector, new StackEvent(selector, stackId));
     }
 
+    public void triggerFullSyncWithoutCheck(Long stackId) {
+        String selector = FlowChainTriggers.FULL_SYNC_TRIGGER_EVENT;
+        notifyWithoutCheck(selector, new StackEvent(selector, stackId));
+    }
+
     public void triggerClusterTermination(Long stackId, Boolean withStackDelete, Boolean deleteDependencies) {
-        Boolean secure = stackService.get(stackId).getCluster().isSecure();
+        Boolean secure = stackService.getById(stackId).getCluster().isSecure();
         if (withStackDelete) {
             String selector = secure ? FlowChainTriggers.PROPER_TERMINATION_TRIGGER_EVENT : FlowChainTriggers.TERMINATION_TRIGGER_EVENT;
             notify(selector, new TerminationEvent(selector, stackId, false, deleteDependencies));
@@ -213,12 +237,25 @@ public class ReactorFlowManager {
         notify(FlowChainTriggers.CLUSTER_REPAIR_TRIGGER_EVENT, new ClusterRepairTriggerEvent(stackId, failedNodesMap, removeOnly));
     }
 
+    public void triggerStackImageUpdate(Long stackId, String newImageId, String imageCatalogName, String imageCatalogUrl) {
+        String selector = FlowChainTriggers.STACK_IMAGE_UPDATE_TRIGGER_EVENT;
+        notify(selector, new StackImageUpdateTriggerEvent(selector, stackId, newImageId, imageCatalogName, imageCatalogUrl));
+    }
+
     public void cancelRunningFlows(Long stackId) {
         StackEvent cancelEvent = new StackEvent(Flow2Handler.FLOW_CANCEL, stackId);
         reactor.notify(Flow2Handler.FLOW_CANCEL, eventFactory.createEventWithErrHandler(cancelEvent));
     }
 
     private void notify(String selector, Acceptable acceptable) {
+        notify(selector, acceptable, stackService::getById);
+    }
+
+    private void notifyWithoutCheck(String selector, Acceptable acceptable) {
+        notify(selector, acceptable, stackService::getById);
+    }
+
+    private void notify(String selector, Acceptable acceptable, Function<Long, Stack> getStackFn) {
         Event<Acceptable> event = eventFactory.createEventWithErrHandler(acceptable);
         reactor.notify(selector, event);
         try {
@@ -227,11 +264,12 @@ public class ReactorFlowManager {
                 accepted = event.getData().accepted().await(WAIT_FOR_ACCEPT, TimeUnit.SECONDS);
             }
             if (accepted == null || !accepted) {
-                Stack stack = stackService.get(event.getData().getStackId());
+                Stack stack = getStackFn.apply(event.getData().getStackId());
                 throw new FlowsAlreadyRunningException(String.format("Stack %s has flows under operation, request not allowed.", stack.getName()));
             }
         } catch (InterruptedException e) {
             throw new CloudbreakApiException(e.getMessage());
         }
+
     }
 }

@@ -40,10 +40,9 @@ public class OpenStackRouterResourceBuilder extends AbstractOpenStackNetworkReso
     }
 
     @Override
-    public CloudResource build(OpenStackContext context, AuthenticatedContext auth, Network network, Security security, CloudResource resource)
-            throws Exception {
+    public CloudResource build(OpenStackContext context, AuthenticatedContext auth, Network network, Security security, CloudResource resource) {
         try {
-            OSClient osClient = createOSClient(auth);
+            OSClient<?> osClient = createOSClient(auth);
             NeutronNetworkView networkView = new NeutronNetworkView(network);
             String routerId = networkView.getCustomRouterId();
             if (!networkView.isExistingNetwork()) {
@@ -68,9 +67,9 @@ public class OpenStackRouterResourceBuilder extends AbstractOpenStackNetworkReso
     }
 
     @Override
-    public CloudResource delete(OpenStackContext context, AuthenticatedContext auth, CloudResource resource, Network network) throws Exception {
+    public CloudResource delete(OpenStackContext context, AuthenticatedContext auth, CloudResource resource, Network network) {
         try {
-            OSClient osClient = createOSClient(auth);
+            OSClient<?> osClient = createOSClient(auth);
             NeutronNetworkView networkView = new NeutronNetworkView(network);
             if (!networkView.isExistingSubnet()) {
                 String subnetId = context.getStringParameter(OpenStackConstants.SUBNET_ID);
@@ -94,7 +93,7 @@ public class OpenStackRouterResourceBuilder extends AbstractOpenStackNetworkReso
     @Override
     protected boolean checkStatus(OpenStackContext context, AuthenticatedContext auth, CloudResource resource) {
         CloudContext cloudContext = auth.getCloudContext();
-        OSClient osClient = createOSClient(auth);
+        OSClient<?> osClient = createOSClient(auth);
         Router osRouter = osClient.networking().router().get(resource.getReference());
         if (osRouter != null && context.isBuild()) {
             State routerStatus = osRouter.getStatus();
@@ -103,9 +102,8 @@ public class OpenStackRouterResourceBuilder extends AbstractOpenStackNetworkReso
                         resource.getName());
             }
             return routerStatus == State.ACTIVE;
-        } else if (osRouter == null && !context.isBuild()) {
-            return true;
+        } else {
+            return osRouter == null && !context.isBuild();
         }
-        return false;
     }
 }

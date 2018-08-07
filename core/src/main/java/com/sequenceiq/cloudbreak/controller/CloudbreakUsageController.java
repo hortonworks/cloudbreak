@@ -5,6 +5,9 @@ import static java.time.ZoneId.systemDefault;
 import java.time.LocalDate;
 import java.util.List;
 
+import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -15,8 +18,10 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.CbUsageFilterParameters;
 import com.sequenceiq.cloudbreak.domain.CbUsageFilterParameters.Builder;
 import com.sequenceiq.cloudbreak.facade.CloudbreakUsagesFacade;
+import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 
 @Component
+@Transactional(TxType.NEVER)
 public class CloudbreakUsageController implements UsageEndpoint {
 
     @Autowired

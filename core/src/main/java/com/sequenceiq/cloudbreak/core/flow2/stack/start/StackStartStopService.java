@@ -25,10 +25,10 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.type.BillingStatus;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
-import com.sequenceiq.cloudbreak.repository.StackUpdater;
+import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
 import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
@@ -74,9 +74,8 @@ public class StackStartStopService {
     public void finishStackStart(StackStartStopContext context, List<CloudVmMetaDataStatus> coreInstanceMetaData) {
         Stack stack = context.getStack();
         if (coreInstanceMetaData.size() != stack.getFullNodeCount()) {
-            LOGGER.warn(String.format(
-                    "Size of the collected metadata set does not equal the node count of the stack. [metadata size=%s] [nodecount=%s]",
-                    coreInstanceMetaData.size(), stack.getFullNodeCount()));
+            LOGGER.warn("Size of the collected metadata set does not equal the node count of the stack. [metadata size={}] [nodecount={}]",
+                    coreInstanceMetaData.size(), stack.getFullNodeCount());
         }
         metadatSetupService.saveInstanceMetaData(stack, coreInstanceMetaData, null);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STARTED, "Cluster infrastructure started successfully.");
@@ -153,7 +152,7 @@ public class StackStartStopService {
     }
 
     private void handleError(StackView stackView, Exception exception, DetailedStackStatus detailedStackStatus, Msg msg, String logMessage) {
-        LOGGER.error(logMessage, exception);
+        LOGGER.warn(logMessage, exception);
         Status stackStatus = detailedStackStatus.getStatus();
         stackUpdater.updateStackStatus(stackView.getId(), detailedStackStatus, logMessage + exception.getMessage());
         flowMessageService.fireEventAndLog(stackView.getId(), msg, stackStatus.name(), exception.getMessage());

@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.downscale;
 import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_FAILED;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -15,17 +16,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
-import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleDetails;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
-import com.sequenceiq.cloudbreak.domain.HostGroup;
-import com.sequenceiq.cloudbreak.domain.HostMetadata;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.ClusterView;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
-import com.sequenceiq.cloudbreak.repository.StackUpdater;
+import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.NotEnoughNodeException;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
@@ -68,7 +69,7 @@ public class ClusterDownscaleService {
         }
     }
 
-    public void updateMetadata(Long stackId, Set<String> hostNames, String hostGroupName) {
+    public void updateMetadata(Long stackId, Collection<String> hostNames, String hostGroupName) {
         StackView stackView = stackService.getByIdView(stackId);
         ClusterView clusterView = stackView.getClusterView();
         hostNames.forEach(hn -> {
@@ -88,7 +89,7 @@ public class ClusterDownscaleService {
 
     public void handleClusterDownscaleFailure(long stackId, Exception error) {
         String errorDetailes = error.getMessage();
-        LOGGER.error("Error during Cluster downscale flow: ", error);
+        LOGGER.warn("Error during Cluster downscale flow: ", error);
         Status status = UPDATE_FAILED;
         if (error instanceof NotEnoughNodeException) {
             status = AVAILABLE;

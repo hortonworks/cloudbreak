@@ -34,7 +34,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
@@ -55,7 +55,7 @@ public class StackSyncActions {
     private FlowMessageService flowMessageService;
 
     @Bean(name = "SYNC_STATE")
-    public Action stackSyncAction() {
+    public Action<?, ?> stackSyncAction() {
         return new AbstractStackSyncAction<StackSyncTriggerEvent>(StackSyncTriggerEvent.class) {
             @Override
             protected void prepareExecution(StackSyncTriggerEvent payload, Map<Object, Object> variables) {
@@ -63,7 +63,7 @@ public class StackSyncActions {
             }
 
             @Override
-            protected void doExecute(StackSyncContext context, StackSyncTriggerEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StackSyncContext context, StackSyncTriggerEvent payload, Map<Object, Object> variables) {
                 sendEvent(context);
             }
 
@@ -76,10 +76,10 @@ public class StackSyncActions {
     }
 
     @Bean(name = "SYNC_FINISHED_STATE")
-    public Action stackSyncFinishedAction() {
+    public Action<?, ?> stackSyncFinishedAction() {
         return new AbstractStackSyncAction<GetInstancesStateResult>(GetInstancesStateResult.class) {
             @Override
-            protected void doExecute(StackSyncContext context, GetInstancesStateResult payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StackSyncContext context, GetInstancesStateResult payload, Map<Object, Object> variables) {
                 stackSyncService.updateInstances(context.getStack(), context.getInstanceMetaData(), payload.getStatuses(), context.isStatusUpdateEnabled());
                 sendEvent(context);
             }
@@ -92,10 +92,10 @@ public class StackSyncActions {
     }
 
     @Bean(name = "SYNC_FAILED_STATE")
-    public Action stackSyncFailedAction() {
+    public Action<?, ?> stackSyncFailedAction() {
         return new AbstractStackFailureAction<StackSyncState, StackSyncEvent>() {
             @Override
-            protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 LOGGER.error("Error during Stack synchronization flow:", payload.getException());
                 flowMessageService.fireEventAndLog(context.getStackView().getId(), Msg.STACK_SYNC_INSTANCE_STATUS_COULDNT_DETERMINE, UPDATE_FAILED.name());
                 sendEvent(context);
@@ -130,8 +130,6 @@ public class StackSyncActions {
             Long stackId = payload.getStackId();
             Stack stack = stackService.getByIdWithLists(stackId);
             MDCBuilder.buildMdcContext(stack);
-            // we need a find all in stack where we have host metadata associated
-            // if there are multiple instances with the same hostname let's use the latest one only
             Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
             CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getOwner(), stack.getPlatformVariant(),
                     location);

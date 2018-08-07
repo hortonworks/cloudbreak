@@ -14,10 +14,10 @@ import com.sequenceiq.cloudbreak.common.type.BillingStatus;
 import com.sequenceiq.cloudbreak.common.type.MetricType;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
-import com.sequenceiq.cloudbreak.repository.StackUpdater;
+import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricService;
@@ -89,7 +89,7 @@ public class StackTerminationService {
             status = DetailedStackStatus.DELETE_FAILED;
             eventMessage = Msg.STACK_INFRASTRUCTURE_DELETE_FAILED;
             stackUpdater.updateStackStatus(stackView.getId(), status, stackUpdateMessage);
-            LOGGER.error("Error during stack termination flow: ", errorDetails);
+            LOGGER.warn("Error during stack termination flow: ", errorDetails);
         } else {
             terminationService.finalizeTermination(stackView.getId(), true);
             clusterService.updateClusterStatusByStackId(stackView.getId(), DELETE_COMPLETED);

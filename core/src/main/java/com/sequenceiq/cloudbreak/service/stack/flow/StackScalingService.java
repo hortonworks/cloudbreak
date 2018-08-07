@@ -2,33 +2,34 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.common.type.BillingStatus;
-import com.sequenceiq.cloudbreak.domain.HostMetadata;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
-import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
-import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariDecommissioner;
+import com.sequenceiq.cloudbreak.service.TransactionService;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariClusterConnector;
+import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariDecommissioner;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
@@ -64,6 +65,9 @@ public class StackScalingService {
     @Inject
     private CloudbreakMessagesService cloudbreakMessagesService;
 
+    @Inject
+    private TransactionService transactionService;
+
     private enum Msg {
         STACK_SCALING_HOST_DELETED("stack.scaling.host.deleted"),
         STACK_SCALING_HOST_DELETE_FAILED("stack.scaling.host.delete.failed"),
@@ -88,7 +92,7 @@ public class StackScalingService {
                 // Deleting by entity will not work because HostMetadata has a reference pointed
                 // from HostGroup and per JPA, we would need to clear that up.
                 // Reference: http://stackoverflow.com/a/22315188
-                hostMetadataRepository.delete(hostMetadata.getId());
+                hostMetadataRepository.delete(hostMetadata);
                 eventService.fireCloudbreakEvent(stack.getId(), Status.AVAILABLE.name(),
                         cloudbreakMessagesService.getMessage(Msg.STACK_SCALING_HOST_DELETED.code(),
                                 Collections.singletonList(instanceMetaData.getInstanceId())));
@@ -108,23 +112,24 @@ public class StackScalingService {
         }
     }
 
-    @Transactional
-    public int updateRemovedResourcesState(Stack stack, Set<String> instanceIds, InstanceGroup instanceGroup) {
-        int nodesRemoved = 0;
-        for (InstanceMetaData instanceMetaData : instanceGroup.getNotTerminatedInstanceMetaDataSet()) {
-            if (instanceIds.contains(instanceMetaData.getInstanceId())) {
-                long timeInMillis = Calendar.getInstance().getTimeInMillis();
-                instanceMetaData.setTerminationDate(timeInMillis);
-                instanceMetaData.setInstanceStatus(InstanceStatus.TERMINATED);
-                instanceMetaDataRepository.save(instanceMetaData);
-                nodesRemoved++;
+    public int updateRemovedResourcesState(Stack stack, Collection<String> instanceIds, InstanceGroup instanceGroup) throws TransactionExecutionException {
+        return transactionService.required(() -> {
+            int nodesRemoved = 0;
+            for (InstanceMetaData instanceMetaData : instanceGroup.getNotTerminatedInstanceMetaDataSet()) {
+                if (instanceIds.contains(instanceMetaData.getInstanceId())) {
+                    long timeInMillis = Calendar.getInstance().getTimeInMillis();
+                    instanceMetaData.setTerminationDate(timeInMillis);
+                    instanceMetaData.setInstanceStatus(InstanceStatus.TERMINATED);
+                    instanceMetaDataRepository.save(instanceMetaData);
+                    nodesRemoved++;
+                }
             }
-        }
-        int nodeCount = instanceGroup.getNodeCount() - nodesRemoved;
-        LOGGER.info("Successfully terminated metadata of instances '{}' in stack.", instanceIds);
-        eventService.fireCloudbreakEvent(stack.getId(), BillingStatus.BILLING_CHANGED.name(),
-                cloudbreakMessagesService.getMessage(Msg.STACK_SCALING_BILLING_CHANGED.code()));
-        return nodeCount;
+            int nodeCount = instanceGroup.getNodeCount() - nodesRemoved;
+            LOGGER.info("Successfully terminated metadata of instances '{}' in stack.", instanceIds);
+            eventService.fireCloudbreakEvent(stack.getId(), BillingStatus.BILLING_CHANGED.name(),
+                    cloudbreakMessagesService.getMessage(Msg.STACK_SCALING_BILLING_CHANGED.code()));
+            return nodeCount;
+        });
     }
 
     public Map<String, String> getUnusedInstanceIds(String instanceGroupName, Integer scalingAdjustment, Stack stack) {

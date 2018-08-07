@@ -2,6 +2,8 @@ package com.sequenceiq.periscope.api.model;
 
 import java.util.List;
 
+import javax.validation.Valid;
+
 import com.sequenceiq.periscope.doc.ApiDescription.ClusterJsonsProperties;
 
 import io.swagger.annotations.ApiModel;
@@ -16,9 +18,11 @@ public class AutoscaleClusterRequest extends ClusterBaseJson {
     @ApiModelProperty(ClusterJsonsProperties.ENABLE_AUTOSCALING)
     private boolean enableAutoscaling;
 
+    @Valid
     @ApiModelProperty(ClusterJsonsProperties.METRIC_ALERTS)
     private List<MetricAlertRequest> metricAlerts;
 
+    @Valid
     @ApiModelProperty(ClusterJsonsProperties.TIME_ALERTS)
     private List<TimeAlertRequest> timeAlerts;
 
@@ -26,6 +30,7 @@ public class AutoscaleClusterRequest extends ClusterBaseJson {
     private List<PrometheusAlertRequest> prometheusAlerts;
 
     @ApiModelProperty(ClusterJsonsProperties.SCALING_CONFIGURATION)
+    @Valid
     private ScalingConfigurationRequest scalingConfiguration;
 
     public AutoscaleClusterRequest() {

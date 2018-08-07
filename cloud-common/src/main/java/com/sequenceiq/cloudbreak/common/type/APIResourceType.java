@@ -10,13 +10,16 @@ public enum APIResourceType {
     RECIPE("hrec"),
     NETWORK("n"),
     TOPOLOGY("tp"),
+    FILESYSTEM("fs"),
     SECURITY_GROUP("sg"),
     CLUSTER_TEMPLATE("ct"),
     RDS_CONFIG("rds"),
     LDAP_CONFIG("ldap"),
     SMARTSENSE_SUBSCRIPTION("sss"),
     IMAGE_CATALOG("ic"),
-    FLEX_SUBSCRIPTION("fs");
+    FLEX_SUBSCRIPTION("fs"),
+    MANAGEMENT_PACK("mpack"),
+    ORGANIZATION("org");
 
     private final String namePrefix;
 

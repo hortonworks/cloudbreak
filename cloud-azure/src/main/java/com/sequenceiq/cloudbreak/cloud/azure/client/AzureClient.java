@@ -7,10 +7,12 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -50,9 +52,11 @@ import com.microsoft.azure.management.resources.Deployments;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azure.management.resources.ResourceGroups;
 import com.microsoft.azure.management.resources.fluentcore.arm.Region;
+import com.microsoft.azure.management.resources.fluentcore.arm.models.HasId;
 import com.microsoft.azure.management.storage.ProvisioningState;
 import com.microsoft.azure.management.storage.SkuName;
 import com.microsoft.azure.management.storage.StorageAccount;
+import com.microsoft.azure.management.storage.StorageAccount.DefinitionStages.WithCreate;
 import com.microsoft.azure.management.storage.StorageAccountKey;
 import com.microsoft.azure.management.storage.StorageAccounts;
 import com.microsoft.azure.storage.CloudStorageAccount;
@@ -72,6 +76,8 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
+
+import okhttp3.JavaNetAuthenticator;
 
 public class AzureClient {
 
@@ -100,6 +106,7 @@ public class AzureClient {
                 .withDefaultSubscriptionId(subscriptionId);
         azure = Azure
                 .configure()
+                .withProxyAuthenticator(new JavaNetAuthenticator())
                 .withLogLevel(logLevel)
                 .authenticate(creds)
                 .withSubscription(subscriptionId);
@@ -151,20 +158,19 @@ public class AzureClient {
 
     public ResourceGroup createResourceGroup(String name, String region, Map<String, String> tags, Map<String, String> costFollowerTags) {
         Map<String, String> resultTags = new HashMap<>();
-        for (Map.Entry<String, String> entry : costFollowerTags.entrySet()) {
+        for (Entry<String, String> entry : costFollowerTags.entrySet()) {
             resultTags.put(entry.getKey(), entry.getValue());
         }
         resultTags.putAll(tags);
         return handleAuthException(() ->
                 azure.resourceGroups().define(name)
-                .withRegion(region)
-                .withTags(resultTags)
-                .create()
+                        .withRegion(region)
+                        .withTags(resultTags)
+                        .create()
         );
     }
 
-    public Deployment createTemplateDeployment(String resourceGroupName, String deploymentName, String templateContent, String parameterContent)
-            throws IOException {
+    public Deployment createTemplateDeployment(String resourceGroupName, String deploymentName, String templateContent, String parameterContent) {
         return handleAuthException(() -> {
             try {
                 return azure.deployments().define(deploymentName)
@@ -218,12 +224,12 @@ public class AzureClient {
     public StorageAccount createStorageAccount(String resourceGroup, String storageName, String storageLocation, SkuName accType, Boolean encryted,
             Map<String, String> tags, Map<String, String> costFollowerTags) {
         Map<String, String> resultTags = new HashMap<>();
-        for (Map.Entry<String, String> entry : costFollowerTags.entrySet()) {
+        for (Entry<String, String> entry : costFollowerTags.entrySet()) {
             resultTags.put(entry.getKey(), entry.getValue());
         }
         resultTags.putAll(tags);
         return handleAuthException(() -> {
-            StorageAccount.DefinitionStages.WithCreate withCreate = azure.storageAccounts()
+            WithCreate withCreate = azure.storageAccounts()
                     .define(storageName)
                     .withRegion(storageLocation)
                     .withExistingResourceGroup(resourceGroup)
@@ -310,7 +316,7 @@ public class AzureClient {
         try {
             CloudPageBlob cloudPageBlob = container.getPageBlobReference(sourceBlob.substring(sourceBlob.lastIndexOf('/') + 1));
             String copyId = cloudPageBlob.startCopy(new URI(sourceBlob));
-            LOGGER.info("image copy started, copy id: %s", copyId);
+            LOGGER.info("image copy started, copy id: {}", copyId);
         } catch (URISyntaxException e) {
             throw new CloudConnectorException("can't copy image blob, URI is not valid", e);
         } catch (StorageException e) {
@@ -438,7 +444,7 @@ public class AzureClient {
         handleAuthException(() -> azure.publicIPAddresses().deleteById(ipId));
     }
 
-    public PublicIPAddress getPublicIpAddress(String resourceGroup, String ipName) {
+    public HasId getPublicIpAddress(String resourceGroup, String ipName) {
         return handleAuthException(() -> azure.publicIPAddresses().getByResourceGroup(resourceGroup, ipName));
     }
 
@@ -540,8 +546,8 @@ public class AzureClient {
         });
     }
 
-    public Set<Region> getRegion(com.sequenceiq.cloudbreak.cloud.model.Region region) {
-        Set<Region> resultList = new HashSet<>();
+    public Iterable<Region> getRegion(com.sequenceiq.cloudbreak.cloud.model.Region region) {
+        Collection<Region> resultList = new HashSet<>();
         for (Region tmpRegion : Region.values()) {
             if (region == null || Strings.isNullOrEmpty(region.value())
                     || tmpRegion.name().equals(region.value()) || tmpRegion.label().equals(region.value())) {
@@ -563,7 +569,7 @@ public class AzureClient {
         }
     }
 
-    private Set<VirtualMachineSize> getAllElement(PagedList<VirtualMachineSize> virtualMachineSizes, Set<VirtualMachineSize> resultList) {
+    private Set<VirtualMachineSize> getAllElement(Collection<VirtualMachineSize> virtualMachineSizes, Set<VirtualMachineSize> resultList) {
         resultList.addAll(virtualMachineSizes);
         return resultList;
     }

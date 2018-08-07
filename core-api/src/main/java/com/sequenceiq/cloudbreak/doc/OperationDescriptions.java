@@ -12,7 +12,7 @@ public class OperationDescriptions {
         public static final String DELETE_PRIVATE_BY_NAME = "delete private blueprint by name";
         public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private blueprint by name";
         public static final String DELETE_BY_ID = "delete blueprint by id";
-        public static final String GET_BY_BLUEPRINT_ID = "retrieve blueprint request by blueprint name";
+        public static final String GET_BY_BLUEPRINT_ID = "retrieve validation request by blueprint name";
     }
 
     public static class TemplateOpDescription {
@@ -50,7 +50,9 @@ public class OperationDescriptions {
 
     public static class CredentialOpDescription {
         public static final String POST_PRIVATE = "create credential as private resource";
+        public static final String PUT_PRIVATE = "modify private credential resource";
         public static final String POST_PUBLIC = "create credential as public resource";
+        public static final String PUT_PUBLIC = "modify public credential resource";
         public static final String GET_PRIVATE = "retrieve private credentials";
         public static final String GET_PUBLIC = "retrieve public and private (owned) credentials";
         public static final String GET_PRIVATE_BY_NAME = "retrieve a private credential by name";
@@ -69,6 +71,7 @@ public class OperationDescriptions {
     public static class StackOpDescription {
         public static final String POST_PRIVATE = "create stack as private resource";
         public static final String POST_PUBLIC = "create stack as public resource";
+        public static final String POST_PUBLIC_BLUEPRINT = "create stack as public resource for blueprint";
         public static final String GET_PRIVATE = "retrieve private stack";
         public static final String GET_PUBLIC = "retrieve public and private (owned) stacks";
         public static final String GET_PRIVATE_BY_NAME = "retrieve a private stack by name";
@@ -88,6 +91,7 @@ public class OperationDescriptions {
         public static final String GET_PLATFORM_VARIANTS = "retrieve available platform variants";
         public static final String GET_ALL = "retrieve all stacks";
         public static final String GET_BY_STACK_NAME = "retrieve stack request by stack name";
+        public static final String RETRY_BY_ID = "retry stack and cluster provisioning of failed stack";
     }
 
     public static class ClusterOpDescription {
@@ -102,6 +106,11 @@ public class OperationDescriptions {
         public static final String GET_CLUSTER_PROPERTIES = "get cluster properties with blueprint outputs";
         public static final String FAILURE_REPORT = "failure report";
         public static final String REPAIR_CLUSTER = "repair the cluster";
+    }
+
+    public static class GatewayOpDescription {
+
+        public static final String UPDATE_GATEWAY_TOPOLOGIES = "update topologies of a gateway";
     }
 
     public static class ClusterTemplateOpDescription {
@@ -129,6 +138,20 @@ public class OperationDescriptions {
         public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private recipe by name";
         public static final String DELETE_BY_ID = "delete recipe by id";
         public static final String GET_BY_RECIPE_NAME = "retrieve recipe request by recipe name";
+    }
+
+    public static class OrganizationOpDescription {
+        public static final String POST = "create an organization";
+        public static final String GET = "retrieve organizations";
+        public static final String GET_BY_NAME = "retrieve an organization by name";
+        public static final String GET_BY_ID = "retrieve an organization by id";
+        public static final String DELETE_BY_ID = "delete an organization by id";
+        public static final String DELETE_BY_NAME = "delete an organization by name";
+        public static final String GET_REQUEST_BY_NAME = "retrieve organization request by organization name";
+        public static final String CHANGE_USERS = "change users and their permissions in the organization";
+        public static final String REMOVE_USERS = "removes users from the given organization by their userIds";
+        public static final String ADD_USERS = "adds users to the given organization";
+        public static final String UPDATE_USERS = "updates the users' permissions in the given organization";
     }
 
     public static class UsagesOpDescription {
@@ -160,9 +183,9 @@ public class OperationDescriptions {
     public static class UserOpDescription {
         public static final String USER_DETAILS_EVICT = "remove user from cache (by username)";
         public static final String CURRENT_USER_DETAILS_EVICT = "remove current user from cache";
-        public static final String USER_GET_RESOURCE = "check that account user has any resources";
         public static final String USER_GET_PROFILE = "user related profile";
         public static final String USER_PUT_PROFILE = "modify user related profile";
+        public static final String GET_TENANT_USERS = "retrieve all users in the tenant";
     }
 
     public static class SecurityGroupOpDescription {
@@ -198,6 +221,8 @@ public class OperationDescriptions {
         public static final String DELETE_PRIVATE_BY_NAME = "delete private LDAP config by name";
         public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private LDAP config by name";
         public static final String DELETE_BY_ID = "delete LDAP config by id";
+        public static final String POST_CONNECTION_TEST = "test that the connection could be established of an existing or new LDAP config";
+        public static final String GET_REQUEST = "get request";
     }
 
     public static class UtilityOpDescription {
@@ -206,7 +231,13 @@ public class OperationDescriptions {
         public static final String TEST_LDAP_CONNECTION = "tests an LDAP connection";
         public static final String TEST_LDAP_CONNECTION_BY_ID = "tests an already exists LDAP connection";
         public static final String TEST_DATABASE = "tests a database connection parameters";
-        public static final String CREATE_DATABASE = "create a database connection parameters";
+        public static final String CREATE_DATABASE = "create a database for the service in the RDS if the connection could be created";
+        public static final String STACK_MATRIX = "returns default ambari details for distinct HDP and HDF";
+        public static final String KNOX_SERVICES = "returns supported knox services";
+        public static final String CLOUD_STORAGE_MATRIX = "returns supported cloud storage for stack version";
+        public static final String CUSTOM_PARAMETERS = "returns custom parameters";
+        public static final String FILE_SYSTEM_PARAMETERS = "returns filesystem parameters";
+        public static final String CHECK_CLIENT_VERSION = "checks the client version";
     }
 
     public static class RdsConfigOpDescription {
@@ -220,6 +251,34 @@ public class OperationDescriptions {
         public static final String DELETE_PRIVATE_BY_NAME = "delete private RDS configuration by name";
         public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private RDS configuration by name";
         public static final String DELETE_BY_ID = "delete RDS configuration by id";
+        public static final String POST_CONNECTION_TEST = "test RDS connectivity";
+        public static final String GET_REQUEST = "get request";
+    }
+
+    public static class ProxyConfigOpDescription {
+        public static final String POST_PRIVATE = "create proxy configuration as private resource";
+        public static final String POST_PUBLIC = "create proxy configuration as public resource";
+        public static final String GET_PRIVATE = "retrieve private proxy configurations";
+        public static final String GET_PUBLIC = "retrieve public and private (owned) proxy configurations";
+        public static final String GET_PRIVATE_BY_NAME = "retrieve a private proxy configuration by name";
+        public static final String GET_PUBLIC_BY_NAME = "retrieve a public or private (owned) proxy configuration by name";
+        public static final String GET_BY_ID = "retrieve proxy configuration by id";
+        public static final String DELETE_PRIVATE_BY_NAME = "delete private proxy configuration by name";
+        public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private proxy configuration by name";
+        public static final String DELETE_BY_ID = "delete proxy configuration by id";
+    }
+
+    public static class ManagementPackOpDescription {
+        public static final String POST_PRIVATE = "create management pack as private resource";
+        public static final String POST_PUBLIC = "create management pack as public resource";
+        public static final String GET_PRIVATE = "retrieve private management packs";
+        public static final String GET_PUBLIC = "retrieve public and private (owned) management packs";
+        public static final String GET_PRIVATE_BY_NAME = "retrieve a private management pack by name";
+        public static final String GET_PUBLIC_BY_NAME = "retrieve a public or private (owned) management pack by name";
+        public static final String GET_BY_ID = "retrieve management pack by id";
+        public static final String DELETE_PRIVATE_BY_NAME = "delete private management pack by name";
+        public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private management pack by name";
+        public static final String DELETE_BY_ID = "delete management pack by id";
     }
 
     public static class ConnectorOpDescription {
@@ -247,6 +306,7 @@ public class OperationDescriptions {
         public static final String GET_GATEWAYS = "retrive gateways with properties";
         public static final String GET_IPPOOLS = "retrive ip pools with properties";
         public static final String GET_ACCESSCONFIGS = "retrive access configs with properties";
+        public static final String GET_ENCRYPTIONKEYS = "retrive encryption keys with properties";
     }
 
     public static class SettingsOpDescription {
@@ -301,6 +361,10 @@ public class OperationDescriptions {
         public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private Image Catalog by id";
         public static final String PUT_PUBLIC_BY_NAME = "update public (owned) or private Image Catalog by id";
         public static final String GET_BY_IMAGE_CATALOG_NAME = "retrieve imagecatalog request by imagecatalog name";
+        public static final String GET_IMAGES_BY_STACK_NAME_AND_CUSTOM_IMAGE_CATALOG = "determines available images for the given stack"
+                + "from the given imagecatalog name";
+        public static final String GET_IMAGES_BY_STACK_NAME = "determines available images for the given stack"
+                + "from the default image catalog";
     }
 
     public static class SecurityRuleOpDescription {

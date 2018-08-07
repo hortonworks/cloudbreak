@@ -8,7 +8,6 @@ import java.security.InvalidKeyException;
 import java.security.PrivateKey;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -24,6 +23,7 @@ import com.google.api.client.util.Base64;
 import com.google.api.client.util.SecurityUtils;
 import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.Storage.Builder;
+import com.google.api.services.storage.Storage.Objects.List;
 import com.google.api.services.storage.model.Objects;
 import com.google.api.services.storage.model.StorageObject;
 import com.microsoft.azure.datalake.store.ADLStoreClient;
@@ -34,8 +34,6 @@ import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.CloudBlobClient;
 import com.microsoft.azure.storage.blob.CloudBlobContainer;
 import com.sequenceiq.it.util.ResourceUtil;
-
-
 
 public class FilesystemUtil {
 
@@ -118,13 +116,12 @@ public class FilesystemUtil {
         Storage storage = new Builder(httpTransport, jsonFactory, googleCredential)
                 .setApplicationName("Google-BucketsInsertExample/1.0").build();
 
-        List<StorageObject> storageObjects = new ArrayList<>();
-        Storage.Objects.List listObjects = storage.objects().list(bucketName).setPrefix(folderPrefix);
+        List listObjects = storage.objects().list(bucketName).setPrefix(folderPrefix);
         Objects objects = listObjects.execute();
 
         Assert.assertNotNull(objects.getItems(), "Not found any objects with " + folderPrefix + " prefix.");
 
-        storageObjects.addAll(objects.getItems());
+        Iterable<StorageObject> storageObjects = new ArrayList<>(objects.getItems());
         for (StorageObject storageObject : storageObjects) {
             storage.objects().delete("hm-bucket", storageObject.getName()).execute();
         }

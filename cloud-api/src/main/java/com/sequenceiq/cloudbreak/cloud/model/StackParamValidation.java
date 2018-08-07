@@ -6,13 +6,13 @@ public class StackParamValidation {
 
     private final String paramName;
 
-    private final Class clazz;
+    private final Class<?> clazz;
 
     private final boolean required;
 
     private final Optional<String> regex;
 
-    public StackParamValidation(String paramName, Boolean required, Class clazz, Optional<String> regex) {
+    public StackParamValidation(String paramName, Boolean required, Class<?> clazz, Optional<String> regex) {
         this.paramName = paramName;
         this.required = required;
         this.clazz = clazz;
@@ -23,7 +23,7 @@ public class StackParamValidation {
         return paramName;
     }
 
-    public Class getClazz() {
+    public Class<?> getClazz() {
         return clazz;
     }
 

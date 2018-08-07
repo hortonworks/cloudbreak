@@ -1,0 +1,17 @@
+{
+  "core": [],
+  "gateway": [
+    {
+      "subnet": "0.0.0.0/0",
+      "ports": "22",
+      "protocol": "tcp",
+      "modifiable": false
+    },
+    {
+      "subnet": "0.0.0.0/0",
+      "ports": "9443",
+      "protocol": "tcp",
+      "modifiable": false
+    }
+  ]
+}

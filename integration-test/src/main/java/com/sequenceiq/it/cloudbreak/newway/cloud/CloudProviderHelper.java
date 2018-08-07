@@ -1,22 +1,35 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud;
 
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
-import com.sequenceiq.cloudbreak.api.model.SecurityRuleRequest;
-import com.sequenceiq.cloudbreak.api.model.StackAuthenticationRequest;
-import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.SecurityGroupV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.TemplateV2Request;
-import com.sequenceiq.it.cloudbreak.newway.Entity;
-import com.sequenceiq.it.cloudbreak.newway.Stack;
-import com.sequenceiq.it.cloudbreak.newway.StackEntity;
-import com.sequenceiq.it.cloudbreak.newway.TestParameter;
+import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.COMPUTE;
+import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.MASTER;
+import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.WORKER;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
+import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.StackAuthenticationRequest;
+import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
+import com.sequenceiq.cloudbreak.api.model.v2.CloudStorageRequest;
+import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
+import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
+import com.sequenceiq.cloudbreak.api.model.v2.StorageLocationRequest;
+import com.sequenceiq.cloudbreak.api.model.v2.filesystem.CloudStorageParameters;
+import com.sequenceiq.it.cloudbreak.filesystem.CloudStorageTypePathPrefix;
+import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
+import com.sequenceiq.it.cloudbreak.newway.LdapConfigRequestDataCollector;
+import com.sequenceiq.it.cloudbreak.newway.Stack;
+import com.sequenceiq.it.cloudbreak.newway.StackAction;
+import com.sequenceiq.it.cloudbreak.newway.StackCreation;
+import com.sequenceiq.it.cloudbreak.newway.StackEntity;
+import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 
 public abstract class CloudProviderHelper extends CloudProvider {
 
@@ -32,148 +45,222 @@ public abstract class CloudProviderHelper extends CloudProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudProviderHelper.class);
 
-    private TestParameter testParameter;
+    private static final String DEFAULT_DATALAKE_BLUEPRINT = "Data Lake: Apache Ranger, Apache Hive Metastore";
 
-    public CloudProviderHelper(TestParameter testParameter) {
+    private final TestParameter testParameter;
+
+    private String clusterNamePostfix;
+
+    protected CloudProviderHelper(TestParameter testParameter) {
         LOGGER.info("TestParemeters length: {}", testParameter.size());
         this.testParameter = testParameter;
     }
 
-    public static CloudProvider[] providerFactory(String provider, TestParameter testParameter) {
+    public static CloudProvider[] providersFactory(String provider, TestParameter testParameter) {
         CloudProvider[] results;
         String[] providerArray = provider.split(",");
         results = new CloudProvider[providerArray.length];
         for (int i = 0; i < providerArray.length; i++) {
             LOGGER.info("Provider: \'{}\'", providerArray[i].toLowerCase().trim());
-            CloudProvider cloudProvider;
-            switch (providerArray[i].toLowerCase().trim()) {
-                case AwsCloudProvider.AWS:
-                    cloudProvider = new AwsCloudProvider(testParameter);
-                    break;
-                case AzureCloudProvider.AZURE:
-                    cloudProvider = new AzureCloudProvider(testParameter);
-                    break;
-                case GcpCloudProvider.GCP:
-                    cloudProvider = new GcpCloudProvider(testParameter);
-                    break;
-                case OpenstackCloudProvider.OPENSTACK:
-                    cloudProvider = new OpenstackCloudProvider(testParameter);
-                    break;
-                default:
-                    LOGGER.warn("could not determine cloud provider!");
-                    cloudProvider = null;
-
-            }
-            results[i] = cloudProvider;
+            results[i] = providerFactory(providerArray[i].toLowerCase().trim(), testParameter);
         }
         return results;
     }
 
+    public static CloudProvider providerFactory(String provider, TestParameter testParameter) {
+        LOGGER.info("Provider: \'{}\'", provider.toLowerCase().trim());
+        CloudProvider cloudProvider;
+        switch (provider.toLowerCase().trim()) {
+            case AwsCloudProvider.AWS:
+                cloudProvider = new AwsCloudProvider(testParameter);
+                break;
+            case AzureCloudProvider.AZURE:
+                cloudProvider = new AzureCloudProvider(testParameter);
+                break;
+            case GcpCloudProvider.GCP:
+                cloudProvider = new GcpCloudProvider(testParameter);
+                break;
+            case OpenstackCloudProvider.OPENSTACK:
+                cloudProvider = new OpenstackCloudProvider(testParameter);
+                break;
+            default:
+                LOGGER.warn("could not determine cloud provider!");
+                cloudProvider = null;
+
+        }
+        return cloudProvider;
+    }
+
+    @Override
+    public CredentialEntity aValidCredential() {
+        return aValidCredential(true);
+    }
+
     public StackEntity aValidStackRequest() {
         return Stack.request()
-                .withName(getClusterDefaultName())
+                .withInputs(Collections.emptyMap())
+                .withName(getClusterName())
                 .withRegion(region())
                 .withAvailabilityZone(availabilityZone())
                 .withInstanceGroups(instanceGroups())
-                .withNetwork(network())
+                .withNetwork(newNetwork())
                 .withStackAuthentication(stackauth());
     }
 
-    abstract String availabilityZone();
-
-    abstract String region();
+    public StackEntity aValidAttachedStackRequest() {
+        var request = new StackCreation(aValidStackRequest());
+        request.setCreationStrategy(StackAction::determineNetworkFromDatalakeStack);
+        return request.getStack();
+    }
 
     @Override
-    public Entity aValidStackIsCreated() {
-        return Stack.isCreated()
-                .withName(getClusterDefaultName())
+    public Stack aValidStackIsCreated() {
+        return (Stack) Stack.isCreated()
+                .withName(getClusterName())
                 .withRegion(region())
                 .withAvailabilityZone(availabilityZone())
                 .withInstanceGroups(instanceGroups())
-                .withNetwork(network())
+                .withNetwork(newNetwork())
+                .withStackAuthentication(stackauth());
+    }
+
+    public Stack aValidAttachedClusterStackIsCreated(HostGroupType... groupTypes) {
+        return (Stack) Stack.request()
+                .withName(getClusterName())
+                .withRegion(region())
+                .withAvailabilityZone(availabilityZone())
+                .withInstanceGroups(instanceGroups(groupTypes))
+                .withNetwork(newNetwork())
                 .withStackAuthentication(stackauth());
     }
 
     abstract StackAuthenticationRequest stackauth();
 
-    abstract NetworkV2Request network();
+    public abstract NetworkV2Request newNetwork();
 
-    List<InstanceGroupV2Request> instanceGroups() {
-        List<InstanceGroupV2Request> requests = new ArrayList<InstanceGroupV2Request>();
-        requests.add(master());
-        requests.add(compute());
-        requests.add(worker());
+    public abstract NetworkV2Request existingNetwork();
+
+    public abstract NetworkV2Request existingSubnet();
+
+    public List<InstanceGroupV2Request> instanceGroups() {
+        return instanceGroups(MASTER, COMPUTE, WORKER);
+    }
+
+    public List<InstanceGroupV2Request> instanceGroups(HostGroupType... groupTypes) {
+        List<InstanceGroupV2Request> requests = new ArrayList<>(groupTypes != null ? groupTypes.length : 0);
+        if (groupTypes != null) {
+            for (HostGroupType groupType : groupTypes) {
+                requests.add(groupType.hostgroupRequest(this, testParameter));
+            }
+        }
         return requests;
+    }
+
+    public List<InstanceGroupV2Request> instanceGroups(String securityGroupId, HostGroupType... groupTypes) {
+        List<InstanceGroupV2Request> requests = new ArrayList<>(groupTypes != null ? groupTypes.length : 0);
+        if (groupTypes != null) {
+            for (HostGroupType groupType : groupTypes) {
+                requests.add(groupType.hostgroupRequest(this, testParameter, securityGroupId));
+            }
+        }
+        return requests;
+    }
+
+    public List<InstanceGroupV2Request> instanceGroups(Set<String> recipes, HostGroupType... groupTypes) {
+        List<InstanceGroupV2Request> requests = new ArrayList<>(groupTypes != null ? groupTypes.length : 0);
+        if (groupTypes != null) {
+            for (HostGroupType groupType : groupTypes) {
+                requests.add(groupType.hostgroupRequest(this, testParameter, recipes));
+            }
+        }
+        return requests;
+    }
+
+    public List<InstanceGroupV2Request> instanceGroups(String securityGroupId) {
+        return instanceGroups(securityGroupId, MASTER, COMPUTE, WORKER);
+
+    }
+
+    public List<InstanceGroupV2Request> instanceGroups(Set<String> recipes) {
+        return instanceGroups(recipes, MASTER, COMPUTE, WORKER);
     }
 
     @Override
     public AmbariV2Request ambariRequestWithBlueprintId(Long id) {
         AmbariV2Request req = new AmbariV2Request();
-        req.setUserName(getTestParameter().get(DEFAULT_AMBARI_USER));
-        req.setPassword(getTestParameter().get(DEFAULT_AMBARI_PASSWORD));
+        req.setUserName(testParameter.get(DEFAULT_AMBARI_USER));
+        req.setPassword(testParameter.get(DEFAULT_AMBARI_PASSWORD));
         req.setBlueprintId(id);
         return req;
     }
 
     @Override
     public AmbariV2Request ambariRequestWithBlueprintName(String name) {
-        AmbariV2Request req = new AmbariV2Request();
-        req.setUserName(getTestParameter().get(DEFAULT_AMBARI_USER));
-        req.setPassword(getTestParameter().get(DEFAULT_AMBARI_PASSWORD));
+        var req = new AmbariV2Request();
+        req.setUserName(testParameter.get(DEFAULT_AMBARI_USER));
+        req.setPassword(testParameter.get(DEFAULT_AMBARI_PASSWORD));
         req.setBlueprintName(name);
+        req.setValidateBlueprint(false);
+        req.setAmbariStackDetails(new AmbariStackDetailsJson());
         return req;
     }
 
-    InstanceGroupV2Request master() {
-        InstanceGroupV2Request r = new InstanceGroupV2Request();
-        r.setNodeCount(1);
-        r.setGroup("master");
-        r.setType(InstanceGroupType.GATEWAY);
-        SecurityGroupV2Request s = new SecurityGroupV2Request();
-        s.setSecurityRules(rules());
-        r.setSecurityGroup(s);
-        r.setTemplate(template());
-        return r;
-    }
-
-    InstanceGroupV2Request compute() {
-        InstanceGroupV2Request r = new InstanceGroupV2Request();
-        r.setNodeCount(1);
-        r.setGroup("compute");
-        r.setType(InstanceGroupType.CORE);
-        SecurityGroupV2Request s = new SecurityGroupV2Request();
-        s.setSecurityRules(rules());
-        r.setSecurityGroup(s);
-        r.setTemplate(template());
-        return r;
-    }
-
-    InstanceGroupV2Request worker() {
-        InstanceGroupV2Request r = new InstanceGroupV2Request();
-        r.setNodeCount(1);
-        r.setGroup("worker");
-        r.setType(InstanceGroupType.CORE);
-        SecurityGroupV2Request s = new SecurityGroupV2Request();
-        s.setSecurityRules(rules());
-        r.setSecurityGroup(s);
-        r.setTemplate(template());
-        return r;
-    }
-
-    abstract TemplateV2Request template();
-
-    List<SecurityRuleRequest> rules() {
-        List<SecurityRuleRequest> rules = new ArrayList<SecurityRuleRequest>();
-        SecurityRuleRequest a = new SecurityRuleRequest();
-        a.setSubnet("0.0.0.0/0");
-        a.setProtocol("tcp");
-        a.setPorts("22,443,8443,9443,8080");
-        rules.add(a);
-
-        return rules;
+    public LdapConfigRequest getLdap() {
+        return LdapConfigRequestDataCollector.createLdapRequestWithProperties(testParameter);
     }
 
     public TestParameter getTestParameter() {
         return testParameter;
+    }
+
+    protected Set<StorageLocationRequest> defaultDatalakeStorageLocations(CloudStorageTypePathPrefix type, String parameterToInsert) {
+        Set<StorageLocationRequest> request = new LinkedHashSet<>(2);
+        request.add(createLocation(
+                String.format("%s://%s/apps/hive/warehouse", type.getPrefix(), parameterToInsert),
+                "hive-site",
+                "hive.metastore.warehouse.dir"));
+        request.add(createLocation(
+                String.format("%s://%s/apps/ranger/audit", type.getPrefix(), parameterToInsert),
+                "ranger-env",
+                "xasecure.audit.destination.hdfs.dir"));
+        return request;
+    }
+
+    protected CloudStorageRequest getCloudStorageForAttachedCluster(CloudStorageTypePathPrefix type, String parameterToInsert,
+                                                                    CloudStorageParameters emptyType) {
+        var request = new CloudStorageRequest();
+        var locations = new LinkedHashSet<StorageLocationRequest>(1);
+        locations.add(
+                createLocation(
+                        String.format("%s://%s/attached/apps/hive/warehouse", type.getPrefix(), parameterToInsert),
+                        "hive-site",
+                        "hive.metastore.warehouse.dir"));
+        request.setLocations(locations);
+        type.setParameterForRequest(request, emptyType);
+        return request;
+    }
+
+    protected StorageLocationRequest createLocation(String value, String propertyFile, String propertyName) {
+        var location = new StorageLocationRequest();
+        location.setValue(value);
+        location.setPropertyFile(propertyFile);
+        location.setPropertyName(propertyName);
+        return location;
+    }
+
+    protected String getDatalakeBlueprintName() {
+        String blueprintName = testParameter.get("datalakeBlueprintName");
+        return blueprintName != null ? blueprintName : DEFAULT_DATALAKE_BLUEPRINT;
+    }
+
+    private int determineInstanceCount(String key) {
+        String instanceCount = testParameter.get(key);
+        int instanceCountInt;
+        try {
+            instanceCountInt = Integer.parseInt(instanceCount);
+        } catch (NumberFormatException e) {
+            instanceCountInt = 1;
+        }
+        return instanceCountInt;
     }
 }

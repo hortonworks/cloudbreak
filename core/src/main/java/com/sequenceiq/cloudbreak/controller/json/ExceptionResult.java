@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
-
 public class ExceptionResult {
 
     private String message;
@@ -16,5 +15,4 @@ public class ExceptionResult {
     public void setMessage(String message) {
         this.message = message;
     }
-
 }

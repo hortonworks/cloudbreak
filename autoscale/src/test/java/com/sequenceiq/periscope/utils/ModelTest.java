@@ -19,7 +19,7 @@ import com.openpojo.validation.test.impl.SetterTester;
 
 public class ModelTest {
 
-    private static final int EXPECTED_CLASS_COUNT = 13;
+    private static final int EXPECTED_CLASS_COUNT = 15;
 
     private static final String DOMAIN_PACKAGE = "com.sequenceiq.periscope.domain";
 
@@ -32,12 +32,12 @@ public class ModelTest {
     @Test
     public void testPojoStructureAndBehavior() {
         Validator validator = ValidatorBuilder.create()
-                .with(new GetterMustExistRule())
-                .with(new SetterMustExistRule())
+                .with(new SetterMustExistRule(),
+                        new GetterMustExistRule())
+                .with(new SetterTester(),
+                        new GetterTester())
                 .with(new NoStaticExceptFinalRule())
                 .with(new NoNestedClassRule())
-                .with(new SetterTester())
-                .with(new GetterTester())
                 .build();
         validator.validate(DOMAIN_PACKAGE, new FilterPackageInfo());
     }

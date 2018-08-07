@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.structuredevent.converter;
 
 import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.GCP;
+import static com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType.NOTIFICATION;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Calendar;
@@ -36,8 +37,8 @@ public class StructuredNotificationEventToCloudbreakEventJsonConverterTest exten
 
     @Override
     public StructuredNotificationEvent createSource() {
-        OperationDetails operation = new OperationDetails(Calendar.getInstance().getTimeInMillis(), "NOTIFICATION", "STACK", 1L, "account", "owner", "cbId",
-                "cbVersion");
+        OperationDetails operation = new OperationDetails(Calendar.getInstance().getTimeInMillis(), NOTIFICATION, "stacks", 1L,
+                "usagestack", "account", "owner", "userName", "cbId", "cbVersion");
         NotificationDetails notification = new NotificationDetails();
         notification.setInstanceGroup("master");
         notification.setRegion("us");

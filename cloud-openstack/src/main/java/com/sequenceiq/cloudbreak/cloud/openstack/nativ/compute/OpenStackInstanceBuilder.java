@@ -29,9 +29,9 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
-import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants;
@@ -48,18 +48,18 @@ public class OpenStackInstanceBuilder extends AbstractOpenStackComputeResourceBu
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackInstanceBuilder.class);
 
     @Override
-    public List<CloudResource> build(OpenStackContext context, long privateId, AuthenticatedContext auth, Group group, Image image,
-            List<CloudResource> buildableResource, Map<String, String> tags) throws Exception {
+    public List<CloudResource> build(OpenStackContext context, long privateId, AuthenticatedContext auth, Group group,
+            List<CloudResource> buildableResource, CloudStack cloudStack) {
         CloudResource resource = buildableResource.get(0);
         try {
-            OSClient osClient = createOSClient(auth);
+            OSClient<?> osClient = createOSClient(auth);
             InstanceTemplate template = getInstanceTemplate(group, privateId);
             CloudResource port = getPort(context.getComputeResources(privateId));
             KeystoneCredentialView osCredential = new KeystoneCredentialView(auth);
             NovaInstanceView novaInstanceView = new NovaInstanceView(context.getName(), template, group.getType(), group.getLoginUserName());
-            String imageId = osClient.imagesV2().list(Collections.singletonMap("name", image.getImageName())).get(0).getId();
+            String imageId = osClient.imagesV2().list(Collections.singletonMap("name", cloudStack.getImage().getImageName())).get(0).getId();
             LOGGER.info("Selected image id: {}", imageId);
-            Map<String, String> metadata = mergeMetadata(novaInstanceView.getMetadataMap(), tags);
+            Map<String, String> metadata = mergeMetadata(novaInstanceView.getMetadataMap(), cloudStack.getTags());
             ServerCreateBuilder serverCreateBuilder = Builders.server()
                     .name(resource.getName())
                     .image(imageId)
@@ -67,7 +67,7 @@ public class OpenStackInstanceBuilder extends AbstractOpenStackComputeResourceBu
                     .keypairName(osCredential.getKeyPairName())
                     .addMetadata(metadata)
                     .addNetworkPort(port.getStringParameter(OpenStackConstants.PORT_ID))
-                    .userData(new String(Base64.encodeBase64(image.getUserData(group.getType()).getBytes())));
+                    .userData(new String(Base64.encodeBase64(cloudStack.getImage().getUserDataByType(group.getType()).getBytes())));
             BlockDeviceMappingBuilder blockDeviceMappingBuilder = Builders.blockDeviceMapping()
                     .uuid(imageId)
                     .sourceType(BDMSourceType.IMAGE)
@@ -107,7 +107,7 @@ public class OpenStackInstanceBuilder extends AbstractOpenStackComputeResourceBu
     @Override
     public List<CloudVmInstanceStatus> checkInstances(OpenStackContext context, AuthenticatedContext auth, List<CloudInstance> instances) {
         List<CloudVmInstanceStatus> statuses = Lists.newArrayList();
-        OSClient osClient = createOSClient(auth);
+        OSClient<?> osClient = createOSClient(auth);
         for (CloudInstance instance : instances) {
             Server server = osClient.compute().servers().get(instance.getInstanceId());
             if (server == null) {
@@ -120,9 +120,9 @@ public class OpenStackInstanceBuilder extends AbstractOpenStackComputeResourceBu
     }
 
     @Override
-    public CloudResource delete(OpenStackContext context, AuthenticatedContext auth, CloudResource resource) throws Exception {
+    public CloudResource delete(OpenStackContext context, AuthenticatedContext auth, CloudResource resource) {
         try {
-            OSClient osClient = createOSClient(auth);
+            OSClient<?> osClient = createOSClient(auth);
             ActionResponse response = osClient.compute().servers().delete(resource.getReference());
             return checkDeleteResponse(response, resourceType(), auth, resource, "Instance deletion failed");
         } catch (OS4JException ex) {
@@ -141,7 +141,7 @@ public class OpenStackInstanceBuilder extends AbstractOpenStackComputeResourceBu
     }
 
     private CloudVmInstanceStatus executeAction(AuthenticatedContext auth, CloudInstance instance, Action action) {
-        OSClient osClient = createOSClient(auth);
+        OSClient<?> osClient = createOSClient(auth);
         ActionResponse actionResponse = osClient.compute().servers().action(instance.getInstanceId(), action);
         if (actionResponse.isSuccess()) {
             return new CloudVmInstanceStatus(instance, InstanceStatus.IN_PROGRESS);
@@ -164,14 +164,13 @@ public class OpenStackInstanceBuilder extends AbstractOpenStackComputeResourceBu
                         status.name());
             }
             return status == Status.ACTIVE;
-        } else if (status == null && !context.isBuild()) {
-            return true;
+        } else {
+            return status == null && !context.isBuild();
         }
-        return false;
     }
 
     private Status getStatus(AuthenticatedContext auth, String serverId) {
-        OSClient osClient = createOSClient(auth);
+        OSClient<?> osClient = createOSClient(auth);
         Server server = osClient.compute().servers().get(serverId);
         Status status = null;
         if (server != null) {
@@ -180,7 +179,7 @@ public class OpenStackInstanceBuilder extends AbstractOpenStackComputeResourceBu
         return status;
     }
 
-    private CloudResource getPort(List<CloudResource> computeResources) {
+    private CloudResource getPort(Iterable<CloudResource> computeResources) {
         CloudResource instance = null;
         for (CloudResource computeResource : computeResources) {
             if (computeResource.getType() == ResourceType.OPENSTACK_PORT) {
@@ -190,7 +189,7 @@ public class OpenStackInstanceBuilder extends AbstractOpenStackComputeResourceBu
         return instance;
     }
 
-    private String getFlavorId(OSClient osClient, String flavorName) {
+    private String getFlavorId(OSClient<?> osClient, String flavorName) {
         List<? extends Flavor> flavors = osClient.compute().flavors().list();
         for (Flavor flavor : flavors) {
             if (flavor.getName().equals(flavorName)) {

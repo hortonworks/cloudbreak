@@ -19,14 +19,13 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.init.blueprint.BlueprintLoaderService;
 import com.sequenceiq.cloudbreak.init.blueprint.DefaultBlueprintCache;
-import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BlueprintLoaderServiceTest {
@@ -35,7 +34,7 @@ public class BlueprintLoaderServiceTest {
 
     private static final String LOTTERY_WINNERS = "lottery_winners";
 
-    private static final String JSON = "{\"blueprint\":{\"Blueprints\":{\"blueprint_name\":\"hdp-etl-edw-tp\","
+    private static final String JSON = "{\"validation\":{\"Blueprints\":{\"blueprint_name\":\"hdp-etl-edw-tp\","
             + "\"stack_name\":\"HDP\",\"stack_version\":\"2.5\"},\"configurations\":[{\"core-site\":{\"fs.trash.interval\":\"4320\"}},{\"hdfs-site\":"
             + "{\"dfs.namenode.safemode.threshold-pct\":\"0.99\"}},{\"hive-site\":{\"hive.exec.compress.output\":\"true\",\"hive.merge.mapfiles\""
             + ":\"true\",\"hive.server2.tez.initialize.default.sessions\":\"true\"}},{\"mapred-site\":{\"mapreduce.job.reduce.slowstart.completedmaps\""
@@ -57,7 +56,7 @@ public class BlueprintLoaderServiceTest {
     private DefaultBlueprintCache blueprintCache;
 
     @Mock
-    private BlueprintRepository blueprintRepository;
+    private BlueprintService blueprintService;
 
     @Test
     public void testBlueprintLoaderWhenTheUserWhenUserHaveAllTheDefaultBlueprintThenItShouldReturnWithFalse() {
@@ -95,33 +94,33 @@ public class BlueprintLoaderServiceTest {
     public void testLoadBlueprintsForTheSpecifiedUserWhenOneNewDefaultExistThenRepositoryShouldUpdateOnlyOneBlueprint() {
         Map<String, Blueprint> stringBlueprintMap = generateCacheData(3, 1);
         Set<Blueprint> blueprints = generateDatabaseData(3);
-        ArgumentCaptor<Set> argumentCaptor = ArgumentCaptor.forClass(Set.class);
+        ArgumentCaptor<Set<Blueprint>> argumentCaptor = ArgumentCaptor.forClass(Set.class);
 
         Blueprint blueprint = stringBlueprintMap.get("multi-node-hdfs-yarn3");
         Set<Blueprint> resultList = new HashSet<>();
         resultList.add(blueprint);
 
-        when(blueprintRepository.save(resultList)).thenReturn(resultList);
+        when(blueprintService.save(resultList)).thenReturn(resultList);
 
         Collection<Blueprint> resultSet = underTest.loadBlueprintsForTheSpecifiedUser(identityUser(), blueprints);
-        verify(blueprintRepository).save(argumentCaptor.capture());
+        verify(blueprintService).save(argumentCaptor.capture());
 
-        Assert.assertEquals(1, argumentCaptor.getAllValues().size());
-        Assert.assertEquals(4, resultSet.size());
+        Assert.assertEquals(1L, argumentCaptor.getAllValues().size());
+        Assert.assertEquals(4L, resultSet.size());
     }
 
     @Test
     public void testLoadBlueprintsForTheSpecifiedUserIsNewOneAndNoDefaultBlueprintAddedThenAllDefaultShouldBeAdd() {
         Map<String, Blueprint> stringBlueprintMap = generateCacheData(3);
         Set<Blueprint> blueprints = generateDatabaseData(0);
-        ArgumentCaptor<Set> argumentCaptor = ArgumentCaptor.forClass(Set.class);
-        when(blueprintRepository.save(anySet())).thenReturn(stringBlueprintMap.values());
+        ArgumentCaptor<Set<Blueprint>> argumentCaptor = ArgumentCaptor.forClass(Set.class);
+        when(blueprintService.save(anySet())).thenReturn(stringBlueprintMap.values());
 
         Collection<Blueprint> resultSet = underTest.loadBlueprintsForTheSpecifiedUser(identityUser(), blueprints);
-        verify(blueprintRepository).save(argumentCaptor.capture());
+        verify(blueprintService).save(argumentCaptor.capture());
 
-        Assert.assertEquals(3, argumentCaptor.getValue().size());
-        Assert.assertEquals(3, resultSet.size());
+        Assert.assertEquals(3L, argumentCaptor.getValue().size());
+        Assert.assertEquals(3L, resultSet.size());
     }
 
     @Test
@@ -130,7 +129,7 @@ public class BlueprintLoaderServiceTest {
         Set<Blueprint> blueprints = generateDatabaseData(3);
 
         Collection<Blueprint> resultSet = underTest.loadBlueprintsForTheSpecifiedUser(identityUser(), blueprints);
-        Assert.assertEquals(3, resultSet.size());
+        Assert.assertEquals(3L, resultSet.size());
     }
 
     private Map<String, Blueprint> generateCacheData(int cacheSize) {
@@ -158,12 +157,12 @@ public class BlueprintLoaderServiceTest {
 
     public static Blueprint createBlueprint(ResourceStatus resourceStatus, int index) {
         Blueprint blueprint = new Blueprint();
-        blueprint.setId(Long.valueOf(index));
-        blueprint.setAmbariName("test-blueprint" + index);
+        blueprint.setId((long) index);
+        blueprint.setAmbariName("test-validation" + index);
         blueprint.setBlueprintText(JSON + index);
         blueprint.setHostGroupCount(3);
         blueprint.setStatus(resourceStatus);
-        blueprint.setDescription("test blueprint" + index);
+        blueprint.setDescription("test validation" + index);
         blueprint.setName("multi-node-hdfs-yarn" + index);
         blueprint.setOwner(LUCKY_MAN);
         blueprint.setAccount(LOTTERY_WINNERS);

@@ -2,7 +2,6 @@ package com.sequenceiq.it.cloudbreak.filesystem;
 
 import java.io.File;
 import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,7 +22,6 @@ import com.sequenceiq.it.cloudbreak.CloudbreakUtil;
 import com.sequenceiq.it.cloudbreak.SshUtil;
 import com.sequenceiq.it.util.ResourceUtil;
 
-
 public class FilesystemTest extends AbstractCloudbreakIntegrationTest {
 
     @Value("${integrationtest.defaultPrivateKeyFile}")
@@ -41,7 +39,7 @@ public class FilesystemTest extends AbstractCloudbreakIntegrationTest {
     @Test
     @Parameters({"filesystemType", "filesystemName", "folderPrefix", "wasbContainerName", "sshCommand", "sshUser", "sshChecker"})
     public void testFileSystem(String filesystemType, String filesystemName, String folderPrefix, @Optional("it-container") String wasbContainerName,
-            String sshCommand, @Optional("cloudbreak") String sshUser, String sshChecker) throws IOException, GeneralSecurityException {
+            String sshCommand, @Optional("cloudbreak") String sshUser, String sshChecker) throws IOException {
         //GIVEN
         Assert.assertEquals(new File(defaultPrivateKeyFile).exists(), true, "Private cert file not found: " + defaultPrivateKeyFile);
         fsParams.put("filesystemType", filesystemType);

@@ -1,14 +1,6 @@
 package com.sequenceiq.cloudbreak.controller.validation.filesystem;
 
-import java.io.IOException;
-import java.util.Set;
-
 import javax.inject.Inject;
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,12 +11,11 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.validation.FileSystemValidationRequest;
 import com.sequenceiq.cloudbreak.cloud.event.validation.FileSystemValidationResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
-import com.sequenceiq.cloudbreak.cloud.model.FileSystem;
+import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.spi.FileSystemRequestToSpiFileSystemConverter;
 import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
-import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 import reactor.bus.EventBus;
 
@@ -46,11 +37,10 @@ public class FileSystemValidator {
         if (fileSystemRequest == null) {
             return;
         }
-        validateFilesystemRequest(fileSystemRequest);
         LOGGER.debug("Sending fileSystemRequest to {} to validate the file system", platform);
         CloudContext cloudContext = new CloudContext(null, null, platform, null, null, null);
-        FileSystem fileSystem = converter.convert(fileSystemRequest);
-        FileSystemValidationRequest request = new FileSystemValidationRequest(fileSystem, cloudCredential, cloudContext);
+        SpiFileSystem spiFileSystem = converter.convert(fileSystemRequest);
+        FileSystemValidationRequest request = new FileSystemValidationRequest(spiFileSystem, cloudCredential, cloudContext);
         eventBus.notify(request.selector(), eventFactory.createEvent(request));
         try {
             FileSystemValidationResult result = request.await();
@@ -62,21 +52,6 @@ public class FileSystemValidator {
         } catch (InterruptedException e) {
             LOGGER.error("Error while sending the file system validation request", e);
             throw new OperationException(e);
-        }
-    }
-
-    private void validateFilesystemRequest(FileSystemRequest fileSystemRequest) {
-        ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
-        Validator validator = validatorFactory.getValidator();
-        try {
-            String json = JsonUtil.writeValueAsString(fileSystemRequest.getProperties());
-            Object fsConfig = JsonUtil.readValue(json, fileSystemRequest.getType().getClazz());
-            Set<ConstraintViolation<Object>> violations = validator.validate(fsConfig);
-            if (!violations.isEmpty()) {
-                throw new ConstraintViolationException(violations);
-            }
-        } catch (IOException e) {
-            throw new BadRequestException(e.getMessage(), e);
         }
     }
 

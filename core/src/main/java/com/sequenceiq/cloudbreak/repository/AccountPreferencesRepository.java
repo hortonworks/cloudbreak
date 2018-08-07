@@ -1,15 +1,15 @@
 package com.sequenceiq.cloudbreak.repository;
 
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
-import org.springframework.data.repository.query.Param;
+import javax.transaction.Transactional;
 
+import com.sequenceiq.cloudbreak.aspect.BaseRepository;
 import com.sequenceiq.cloudbreak.domain.AccountPreferences;
+import com.sequenceiq.cloudbreak.aspect.HasPermission;
+import com.sequenceiq.cloudbreak.service.EntityType;
 
 @EntityType(entityClass = AccountPreferences.class)
-public interface AccountPreferencesRepository extends CrudRepository<AccountPreferences, Long> {
-
-    @Query("SELECT ap FROM AccountPreferences ap WHERE ap.account= :account")
-    AccountPreferences findByAccount(@Param("account") String account);
+@Transactional(Transactional.TxType.REQUIRED)
+@HasPermission
+public interface AccountPreferencesRepository extends BaseRepository<AccountPreferences, String> {
 
 }

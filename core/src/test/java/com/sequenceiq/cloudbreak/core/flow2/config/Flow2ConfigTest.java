@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.core.flow2.config;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -15,6 +17,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import com.google.common.collect.Lists;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationFlowConfig;
+import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationFlowConfig;
 
@@ -61,5 +66,23 @@ public class Flow2ConfigTest {
         return flowConfigs.stream()
                 .mapToInt(c -> c.getInitEvents().length)
                 .sum();
+    }
+
+    @Test
+    public void testFailHandledEventsEmptyCollection() {
+        assertTrue(underTest.failHandledEvents(Collections.emptyList()).isEmpty());
+    }
+
+    @Test
+    public void testFailHandledEvents() {
+        StackCreationFlowConfig stackCreationFlowConfig = new StackCreationFlowConfig();
+        ClusterCreationFlowConfig clusterCreationFlowConfig = new ClusterCreationFlowConfig();
+
+        List<RetryableFlowConfiguration<?>> retryableFlowConfigurations = Lists.newArrayList(stackCreationFlowConfig, clusterCreationFlowConfig);
+        List<String> failHandledEvents = underTest.failHandledEvents(retryableFlowConfigurations);
+
+        List<String> expected = Lists.newArrayList(stackCreationFlowConfig.getFailHandledEvent().event(),
+                clusterCreationFlowConfig.getFailHandledEvent().event());
+        assertEquals(expected, failHandledEvents);
     }
 }

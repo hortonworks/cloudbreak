@@ -77,7 +77,7 @@ public class CloudProviderParamsInitializer extends AbstractTestNGSpringContextT
     @BeforeSuite(dependsOnMethods = "initContext")
     @Parameters({"cloudProvider", "azureSubscriptionId", "azureSecretKey", "azureAccesKey", "azureTenantId", "azureAccountKeyWasb"})
     public void initAzureCloudProviderParameters(String cloudProvider, @Optional("") String azureSubscriptionId, @Optional ("") String azureSecretKey,
-            @Optional ("") String azureAccesKey, @Optional ("") String azureTenantId, @Optional ("") String azureAccountKeyWasb) throws Exception {
+            @Optional ("") String azureAccesKey, @Optional ("") String azureTenantId, @Optional ("") String azureAccountKeyWasb) {
         if ("AZURE".equals(cloudProvider)) {
             azureSubscriptionId = StringUtils.hasLength(azureSubscriptionId) ? azureSubscriptionId : defaultAzureSubscriptionId;
             azureSecretKey = StringUtils.hasLength(azureSecretKey) ? azureSecretKey : defaultAzureSecretKey;
@@ -124,7 +124,7 @@ public class CloudProviderParamsInitializer extends AbstractTestNGSpringContextT
     @BeforeSuite(dependsOnMethods = "initContext")
     @Parameters({ "cloudProvider", "gcpAvailabiltyZone", "gcpAppName", "gcpProjectId", "gcpServiceAccountId", "gcpP12File" })
     public void checkGcpTags(String cloudProvider, @Optional ("europe-west1-b") String gcpAvailabilityZone, @Optional ("") String gcpAppName,
-            @Optional ("") String gcpProjectId, @Optional ("") String gcpServiceAccountId, @Optional ("") String gcpP12File) throws Exception {
+            @Optional ("") String gcpProjectId, @Optional ("") String gcpServiceAccountId, @Optional ("") String gcpP12File) {
         if ("GCP".equals(cloudProvider)) {
             gcpAppName = StringUtils.hasLength(gcpAppName) ? gcpAppName : defaultGcpName;
             gcpProjectId = StringUtils.hasLength(gcpProjectId) ? gcpProjectId : defaultGcpProjectId;

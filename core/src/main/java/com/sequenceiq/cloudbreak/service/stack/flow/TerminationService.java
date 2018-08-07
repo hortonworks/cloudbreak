@@ -4,44 +4,37 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
-import javax.annotation.Resource;
 import javax.inject.Inject;
-import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
-import com.sequenceiq.cloudbreak.api.model.FileSystemType;
-import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
-import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
-import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.repository.StackUpdater;
+import com.sequenceiq.cloudbreak.service.StackUpdater;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.service.TransactionService;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
-import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfigurator;
-import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Service
-@Transactional
 public class TerminationService {
     private static final Logger LOGGER = LoggerFactory.getLogger(TerminationService.class);
 
     private static final String DELIMITER = "_";
 
     @Inject
-    private ServiceProviderConnectorAdapter connector;
-
-    @Inject
-    private StackRepository stackRepository;
+    private StackService stackService;
 
     @Inject
     private InstanceGroupRepository instanceGroupRepository;
@@ -58,34 +51,42 @@ public class TerminationService {
     @Inject
     private OrchestratorTypeResolver orchestratorTypeResolver;
 
-    @Resource
-    private Map<FileSystemType, FileSystemConfigurator> fileSystemConfigurators;
+    @Inject
+    private TransactionService transactionService;
 
     public void finalizeTermination(Long stackId, boolean force) {
-        Stack stack = stackRepository.findOneWithLists(stackId);
+        Stack stack = stackService.getByIdWithLists(stackId);
+        Date now = new Date();
+        String terminatedName = stack.getName() + DELIMITER + now.getTime();
+        Cluster cluster = stack.getCluster();
         try {
-            Date now = new Date();
-            String terminatedName = stack.getName() + DELIMITER + now.getTime();
-            Cluster cluster = stack.getCluster();
-            if (cluster != null && orchestratorTypeResolver.resolveType(stack.getOrchestrator()).containerOrchestrator()) {
-                clusterTerminationService.deleteClusterComponents(cluster.getId());
-                clusterTerminationService.finalizeClusterTermination(cluster.getId());
-            } else {
-                if (!force && cluster != null) {
-                    throw new TerminationFailedException(String.format("There is a cluster installed on stack '%s', terminate it first!.", stackId));
-                } else if (cluster != null) {
-                    clusterTerminationService.finalizeClusterTermination(cluster.getId());
+            transactionService.required(() -> {
+                if (cluster != null) {
+                    try {
+                        boolean containerOrchestrator = orchestratorTypeResolver.resolveType(stack.getOrchestrator()).containerOrchestrator();
+                        if (containerOrchestrator) {
+                            clusterTerminationService.deleteClusterComponents(cluster.getId());
+                        } else if (!force) {
+                            throw new TerminationFailedException(String.format("There is a cluster installed on stack '%s', terminate it first!.", stackId));
+                        }
+                        clusterTerminationService.finalizeClusterTermination(cluster.getId());
+                    } catch (CloudbreakException e) {
+                        throw new RuntimeException(e.getMessage(), e);
+                    } catch (TransactionExecutionException e) {
+                        throw e.getCause();
+                    }
                 }
-            }
-            stack.setCredential(null);
-            stack.setNetwork(null);
-            stack.setFlexSubscription(null);
-            stack.setName(terminatedName);
-            terminateInstanceGroups(stack);
-            terminateMetaDataInstances(stack);
-            stackRepository.save(stack);
-            stackUpdater.updateStackStatus(stackId, DetailedStackStatus.DELETE_COMPLETED, "Stack was terminated successfully.");
-        } catch (Exception ex) {
+                stack.setCredential(null);
+                stack.setNetwork(null);
+                stack.setFlexSubscription(null);
+                stack.setName(terminatedName);
+                terminateInstanceGroups(stack);
+                terminateMetaDataInstances(stack);
+                stackService.save(stack);
+                stackUpdater.updateStackStatus(stackId, DetailedStackStatus.DELETE_COMPLETED, "Stack was terminated successfully.");
+                return null;
+            });
+        } catch (TransactionExecutionException ex) {
             LOGGER.error("Failed to terminate cluster infrastructure. Stack id {}", stack.getId());
             throw new TerminationFailedException(ex);
         }
@@ -97,7 +98,6 @@ public class TerminationService {
             instanceGroup.setTemplate(null);
             instanceGroupRepository.save(instanceGroup);
         }
-
     }
 
     private void terminateMetaDataInstances(Stack stack) {
@@ -108,6 +108,6 @@ public class TerminationService {
             metaData.setInstanceStatus(InstanceStatus.TERMINATED);
             instanceMetaDatas.add(metaData);
         }
-        instanceMetaDataRepository.save(instanceMetaDatas);
+        instanceMetaDataRepository.saveAll(instanceMetaDatas);
     }
 }

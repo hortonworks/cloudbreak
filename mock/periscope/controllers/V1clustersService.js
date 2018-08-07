@@ -58,7 +58,7 @@ exports.getCluster = function(args, res, next) {
     "id" : 1,
     "alertState" : "OK"
   } ],
-  "id" : 6,
+  "id" : args.clusterId.value,
   "state" : "aeiou",
   "prometheusAlerts" : [ {
     "scalingPolicy" : "",
@@ -125,7 +125,7 @@ exports.getClusters = function(args, res, next) {
     "id" : 1,
     "alertState" : "OK"
   } ],
-  "id" : 6,
+  "id" : args.clusterId.value,
   "state" : "aeiou",
   "prometheusAlerts" : [ {
     "scalingPolicy" : "",
@@ -194,7 +194,7 @@ exports.modifyCluster = function(args, res, next) {
     "id" : 1,
     "alertState" : "OK"
   } ],
-  "id" : 6,
+  "id" : args.clusterId.value,
   "state" : "aeiou",
   "prometheusAlerts" : [ {
     "scalingPolicy" : "",
@@ -263,7 +263,7 @@ exports.setAutoscaleState = function(args, res, next) {
     "id" : 1,
     "alertState" : "OK"
   } ],
-  "id" : 6,
+  "id" : args.clusterId.value,
   "state" : "aeiou",
   "prometheusAlerts" : [ {
     "scalingPolicy" : "",
@@ -332,7 +332,7 @@ exports.setState = function(args, res, next) {
     "id" : 1,
     "alertState" : "OK"
   } ],
-  "id" : 6,
+  "id" : args.clusterId.value,
   "state" : "aeiou",
   "prometheusAlerts" : [ {
     "scalingPolicy" : "",

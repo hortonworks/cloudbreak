@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.converter;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sequenceiq.cloudbreak.api.model.LdapConfigRequest;
+import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigRequest;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 
 public class LdapConfigRequestToLdapConfigConverterTest extends AbstractJsonConverterTest<LdapConfigRequest> {

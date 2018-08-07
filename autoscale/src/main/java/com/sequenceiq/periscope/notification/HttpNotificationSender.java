@@ -1,7 +1,6 @@
 package com.sequenceiq.periscope.notification;
 
 import java.util.Date;
-import java.util.List;
 
 import javax.inject.Inject;
 import javax.ws.rs.client.Client;
@@ -37,12 +36,12 @@ public class HttpNotificationSender {
         n.setEventType("PERISCOPE_HISTORY");
         n.setHistoryRecord(history);
         n.setEventTimestamp(new Date());
-        n.setOwner(history.getUserId());
+        n.setOwner(history.getUser());
         return n;
     }
 
     public void send(Notification notification) {
-        List<Subscription> subscriptions = (List<Subscription>) subscriptionRepository.findAll();
+        Iterable<Subscription> subscriptions = subscriptionRepository.findAll();
         for (Subscription subscription : subscriptions) {
             String endpoint = subscription.getEndpoint();
             try {

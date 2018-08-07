@@ -15,13 +15,14 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.Payload;
 import javax.validation.metadata.ConstraintDescriptor;
+import javax.validation.metadata.ValidateUnwrappedValue;
 
 import org.hibernate.validator.internal.engine.constraintvalidation.ConstraintValidatorContextImpl;
 import org.hibernate.validator.internal.engine.path.PathImpl;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.StatusRequest;
 import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
 import com.sequenceiq.cloudbreak.validation.UpdateStackRequestValidator;
@@ -37,8 +38,9 @@ public class UpdateStackRequestValidatorTest {
         underTest = new UpdateStackRequestValidator();
         constraintValidatorContext = new ConstraintValidatorContextImpl(
                 new ArrayList<>(), null,
-                PathImpl.createRootPath(),
-                new DummyConstraintDescriptor()
+                PathImpl.createPathFromString("status"),
+                new DummyConstraintDescriptor(),
+                null
         );
     }
 
@@ -166,6 +168,16 @@ public class UpdateStackRequestValidatorTest {
         @Override
         public boolean isReportAsSingleViolation() {
             return false;
+        }
+
+        @Override
+        public ValidateUnwrappedValue getValueUnwrapping() {
+            return null;
+        }
+
+        @Override
+        public <U> U unwrap(Class<U> type) {
+            return null;
         }
     }
 }

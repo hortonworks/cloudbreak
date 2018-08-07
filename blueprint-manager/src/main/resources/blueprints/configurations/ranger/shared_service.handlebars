@@ -1,0 +1,16 @@
+{
+{{{#if-true sharedService.datalakeCluster}}}
+  "ranger-env": {
+    "properties": {
+      "is_solrCloud_enabled": "true",
+      "ranger-hdfs-plugin-enabled": "No",
+      "ranger-hive-plugin-enabled": "No",
+      "ranger-yarn-plugin-enabled": "No",
+      "ranger-atlas-plugin-enabled": "No",
+      "create_db_dbuser": "false",
+      "xasecure.audit.destination.hdfs": "true",
+      "xasecure.audit.destination.solr": "true"
+    }
+  }
+{{{/if-true}}}
+}

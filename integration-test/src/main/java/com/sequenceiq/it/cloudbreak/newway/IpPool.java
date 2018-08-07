@@ -1,24 +1,33 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
+import java.util.Map;
+import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testng.Assert;
+
+import com.sequenceiq.cloudbreak.api.model.IpPoolJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformIpPoolsResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformResourceRequestJson;
 import com.sequenceiq.it.IntegrationTestContext;
 
-import java.util.function.BiConsumer;
-import java.util.function.Function;
-
 public class IpPool extends Entity {
-    public static final String IPPOOL = "IPPOOL";
+    private static final Logger LOGGER = LoggerFactory.getLogger(IpPool.class);
 
-    private PlatformResourceRequestJson request;
+    private static final String IPPOOL = "IPPOOL";
+
+    private PlatformResourceRequestJson request = new PlatformResourceRequestJson();
 
     private PlatformIpPoolsResponse response;
 
-    public IpPool(String id) {
+    private IpPool(String id) {
         super(id);
     }
 
-    public IpPool() {
+    private IpPool() {
         this(IPPOOL);
     }
 
@@ -26,8 +35,8 @@ public class IpPool extends Entity {
         this.request = request;
     }
 
-    public PlatformIpPoolsResponse getResponse() {
-        return response;
+    private Map<String, Set<IpPoolJson>> getResponseWithIpPools() {
+        return response.getIppools();
     }
 
     public PlatformResourceRequestJson getRequest() {
@@ -36,6 +45,16 @@ public class IpPool extends Entity {
 
     public void setResponse(PlatformIpPoolsResponse response) {
         this.response = response;
+    }
+
+    public IpPool withAccount(String account) {
+        request.setAccount(account);
+        return this;
+    }
+
+    public IpPool withAvailabilityZone(String availabilityZone) {
+        request.setAvailabilityZone(availabilityZone);
+        return this;
     }
 
     public IpPool withCredentialId(Long id) {
@@ -48,32 +67,62 @@ public class IpPool extends Entity {
         return this;
     }
 
+    public IpPool withFilters(Map<String, String> filter) {
+        request.setFilters(filter);
+        return this;
+    }
+
+    public IpPool withOwner(String owner) {
+        request.setOwner(owner);
+        return this;
+    }
+
+    public IpPool withPlatformVariant(String platformVariant) {
+        request.setPlatformVariant(platformVariant);
+        return this;
+    }
+
     public IpPool withRegion(String region) {
         request.setRegion(region);
         return this;
     }
 
-    static Function<IntegrationTestContext, IpPool> getTestContext(String key) {
-        return (testContext) -> testContext.getContextParam(key, IpPool.class);
+    private static Function<IntegrationTestContext, IpPool> getTestContext(String key) {
+        return testContext -> testContext.getContextParam(key, IpPool.class);
     }
 
     static Function<IntegrationTestContext, IpPool> getNew() {
-        return (testContext) -> new IpPool();
+        return testContext -> new IpPool();
     }
 
     public static IpPool request() {
         return new IpPool();
     }
 
-    public static Action<IpPool> get(String key) {
-        return new Action<>(getTestContext(key), RegionAction::getPlatformRegions);
+    private static Action<IpPool> get(String key) {
+        return new Action<>(getTestContext(key), IpPoolAction::get);
     }
 
     public static Action<IpPool> get() {
         return get(IPPOOL);
     }
 
-    public static Assertion<IpPool> assertThis(BiConsumer<IpPool, IntegrationTestContext> check) {
+    private static Assertion<IpPool> assertThis(BiConsumer<IpPool, IntegrationTestContext> check) {
         return new Assertion<>(getTestContext(GherkinTest.RESULT), check);
+    }
+
+    public static Assertion<IpPool> assertValidIpPool() {
+        return assertThis((ipPool, t) -> {
+            if (ipPool.getResponseWithIpPools().isEmpty()) {
+                LOGGER.info("No ipPool for given provider");
+            } else {
+                for (Map.Entry<String, Set<IpPoolJson>> elem : ipPool.getResponseWithIpPools().entrySet()) {
+                    for (Object response : elem.getValue()) {
+                        IpPoolJson ipPoolJson = (IpPoolJson) response;
+                        Assert.assertFalse(ipPoolJson.getName().isEmpty());
+                    }
+                }
+            }
+        });
     }
 }

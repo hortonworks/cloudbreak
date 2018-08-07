@@ -7,15 +7,18 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
@@ -57,9 +60,9 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleConfig;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.domain.Network;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.ha.CloudbreakNodeConfig;
+import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.FlowStructuredEventHandler;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredEventClient;
@@ -94,20 +97,20 @@ public class OfflineStateGenerator {
                     new StackUpscaleConfig()
             );
 
-    private static final CustomApplicationContext APP_CONTEXT = new CustomApplicationContext();
+    private static final ConfigurableApplicationContext APP_CONTEXT = new CustomApplicationContext();
 
     static {
         APP_CONTEXT.refresh();
     }
 
-    private final FlowConfiguration flowConfiguration;
+    private final FlowConfiguration<?> flowConfiguration;
 
-    private OfflineStateGenerator(FlowConfiguration flowConfiguration) {
+    private OfflineStateGenerator(FlowConfiguration<?> flowConfiguration) {
         this.flowConfiguration = flowConfiguration;
     }
 
     public static void main(String[] args) throws Exception {
-        for (FlowConfiguration flowConfiguration : CONFIGS) {
+        for (FlowConfiguration<?> flowConfiguration : CONFIGS) {
             new OfflineStateGenerator(flowConfiguration).generate();
         }
     }
@@ -157,7 +160,7 @@ public class OfflineStateGenerator {
     private String generateTransition(FlowState source, FlowState target, FlowEvent event) {
         String color = "black";
         String style = "solid";
-        if (source == target) {
+        if (Objects.equals(source, target)) {
             color = "blue";
         } else if (event.name().contains("FAIL") || event.name().contains("ERROR")) {
             color = "red";
@@ -169,11 +172,11 @@ public class OfflineStateGenerator {
     private StateMachine<FlowState, FlowEvent> getStateMachine(Flow flow) throws NoSuchFieldException, IllegalAccessException {
         Field flowMachine = flow.getClass().getDeclaredField("flowMachine");
         flowMachine.setAccessible(true);
-        return (StateMachine) flowMachine.get(flow);
+        return (StateMachine<FlowState, FlowEvent>) flowMachine.get(flow);
     }
 
     private Flow initializeFlow() throws Exception {
-        ((AbstractFlowConfiguration) flowConfiguration).init();
+        ((AbstractFlowConfiguration<?, ?>) flowConfiguration).init();
         Flow flow = flowConfiguration.createFlow("", 0L);
         flow.initialize();
         return flow;
@@ -243,7 +246,7 @@ public class OfflineStateGenerator {
     static class CustomBeanFactory extends DefaultListableBeanFactory {
         @Override
         public <T> T getBean(Class<T> requiredType, Object... args) throws BeansException {
-            FlowStructuredEventHandler bean = new FlowStructuredEventHandler(args[FlowStructuredEventHandlerParams.INIT_STATE.ordinal()],
+            FlowStructuredEventHandler<?, ?> bean = new FlowStructuredEventHandler(args[FlowStructuredEventHandlerParams.INIT_STATE.ordinal()],
                     args[FlowStructuredEventHandlerParams.FINAL_STATE.ordinal()], (String) args[FlowStructuredEventHandlerParams.FLOW_TYPE.ordinal()],
                     (String) args[FlowStructuredEventHandlerParams.FLOW_ID.ordinal()], (Long) args[FlowStructuredEventHandlerParams.STACK_ID.ordinal()]);
 
@@ -262,9 +265,6 @@ public class OfflineStateGenerator {
     }
 
     static class CustomStackRepository implements StackRepository {
-
-        CustomStackRepository() {
-        }
 
         @Override
         public Stack findByAmbari(String ambariIp) {
@@ -362,6 +362,11 @@ public class OfflineStateGenerator {
         }
 
         @Override
+        public Set<Stack> findAllForOrganization(Long organizationId) {
+            return null;
+        }
+
+        @Override
         public List<Stack> findByStatuses(List<Status> statuses) {
             return null;
         }
@@ -382,38 +387,48 @@ public class OfflineStateGenerator {
         }
 
         @Override
+        public Set<Stack> findByCredential(Credential credential) {
+            return null;
+        }
+
+        @Override
         public Long countByNetwork(Network network) {
             return null;
         }
 
         @Override
+        public Set<Stack> findByNetwork(Network network) {
+            return null;
+        }
+
+        @Override
         public <S extends Stack> S save(S entity) {
-            return null;
+            return entity;
         }
 
         @Override
-        public <S extends Stack> Iterable<S> save(Iterable<S> entities) {
-            return null;
+        public <S extends Stack> Iterable<S> saveAll(Iterable<S> entities) {
+            return entities;
         }
 
         @Override
-        public Stack findOne(Long aLong) {
-            return new Stack();
+        public Optional<Stack> findById(Long aLong) {
+            return Optional.empty();
         }
 
         @Override
-        public boolean exists(Long aLong) {
+        public boolean existsById(Long aLong) {
             return false;
         }
 
         @Override
         public Iterable<Stack> findAll() {
-            return null;
+            return Collections.emptyList();
         }
 
         @Override
-        public Iterable<Stack> findAll(Iterable<Long> longs) {
-            return null;
+        public Iterable<Stack> findAllById(Iterable<Long> longs) {
+            return Collections.emptyList();
         }
 
         @Override
@@ -422,7 +437,7 @@ public class OfflineStateGenerator {
         }
 
         @Override
-        public void delete(Long aLong) {
+        public void deleteById(Long aLong) {
 
         }
 
@@ -432,7 +447,7 @@ public class OfflineStateGenerator {
         }
 
         @Override
-        public void delete(Iterable<? extends Stack> entities) {
+        public void deleteAll(Iterable<? extends Stack> entities) {
 
         }
 
@@ -480,7 +495,7 @@ public class OfflineStateGenerator {
         }
 
         @Override
-        protected void doExecute(CommonContext context, Payload payload, Map<Object, Object> variables) throws Exception {
+        protected void doExecute(CommonContext context, Payload payload, Map<Object, Object> variables) {
 
         }
 

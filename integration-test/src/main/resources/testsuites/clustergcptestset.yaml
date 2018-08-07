@@ -1,0 +1,25 @@
+name: "GCP cluster tests"
+parallel: tests
+threadCount: 4
+parameters:
+  gcpCredentialName: autotesting-clusters-gcp
+listeners:
+  - com.sequenceiq.it.cloudbreak.newway.listener.FirstLastTestExecutionBehaviour
+  - com.sequenceiq.it.cloudbreak.newway.listener.StructuredEventsReporterOnFailingCluster
+tests:
+  - name: "gcp prewarm image edw edwetl"
+    preserveOrder: true
+    parameters:
+      clusterName: gcp-prewarm-edwetl
+      provider: gcp
+      blueprintName: "EDW-ETL: Apache Hive, Apache Spark 2"
+      image: hdp
+      instancegroupName: worker
+    classes:
+      - name: com.sequenceiq.it.cloudbreak.ClusterTests
+        includedMethods:
+          - testCreateNewRegularCluster
+          - testScaleCluster
+          - testStopCluster
+          - testStartCluster
+          - testTerminateCluster

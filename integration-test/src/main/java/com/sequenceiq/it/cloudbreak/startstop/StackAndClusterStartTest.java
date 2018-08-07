@@ -14,8 +14,6 @@ import com.sequenceiq.it.cloudbreak.AbstractCloudbreakIntegrationTest;
 import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
 import com.sequenceiq.it.cloudbreak.CloudbreakUtil;
 
-
-
 public class StackAndClusterStartTest extends AbstractCloudbreakIntegrationTest {
     private static final String STARTED = "STARTED";
 
@@ -32,7 +30,7 @@ public class StackAndClusterStartTest extends AbstractCloudbreakIntegrationTest 
 
     @Test
     @Parameters("waitOn")
-    public void testStackAndClusterStart(@Optional(NOWAIT) Boolean waitOn) throws Exception {
+    public void testStackAndClusterStart(@Optional(NOWAIT) Boolean waitOn) {
         // GIVEN
         IntegrationTestContext itContext = getItContext();
         String stackId = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);

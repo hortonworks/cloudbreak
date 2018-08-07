@@ -4,9 +4,9 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.core.CloudbreakException;
-import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariClusterConnector;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Service
@@ -19,12 +19,12 @@ public class AmbariClusterCreationService {
 
     public void startAmbari(Long stackId) throws CloudbreakException {
         Stack stack = stackService.getById(stackId);
-        ambariClusterConnector.waitForAmbariServer(stack);
+        ambariClusterConnector.waitForServer(stack);
         ambariClusterConnector.changeOriginalAmbariCredentialsAndCreateCloudbreakUser(stack);
     }
 
     public void buildAmbariCluster(Long stackId) {
         Stack stack = stackService.getByIdWithLists(stackId);
-        ambariClusterConnector.buildAmbariCluster(stack);
+        ambariClusterConnector.buildCluster(stack);
     }
 }

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.task;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component;
 import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
 import com.amazonaws.services.autoscaling.model.Activity;
 import com.amazonaws.services.autoscaling.model.DescribeScalingActivitiesRequest;
+import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusRequest;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusResult;
@@ -96,7 +98,7 @@ public class ASGroupStatusCheckerTask extends PollBooleanStateTask {
             checkFailedActivities(activities);
             return false;
         }
-        List<DescribeInstanceStatusResult> describeInstanceStatusResultList = new ArrayList<>();
+        Collection<DescribeInstanceStatusResult> describeInstanceStatusResultList = new ArrayList<>();
 
         List<List<String>> partitionedInstanceIdsList = Lists.partition(instanceIds, MAX_INSTANCE_ID_SIZE);
 
@@ -130,7 +132,7 @@ public class ASGroupStatusCheckerTask extends PollBooleanStateTask {
         }
     }
 
-    private void checkFailedActivities(List<Activity> activities) {
+    private void checkFailedActivities(Iterable<Activity> activities) {
         for (Activity activity : activities) {
             if (activity.getProgress().equals(COMPLETED) && (CANCELLED.equals(activity.getStatusCode()) || FAILED.equals(activity.getStatusCode()))) {
                 throw new CloudConnectorException(activity.getStatusMessage());
@@ -138,7 +140,7 @@ public class ASGroupStatusCheckerTask extends PollBooleanStateTask {
         }
     }
 
-    private void checkForSpotRequest(Activity activity, AmazonEC2Client amazonEC2Client) {
+    private void checkForSpotRequest(Activity activity, AmazonEC2 amazonEC2Client) {
         if (WAIT_FOR_SPOT_INSTANCES_STATUS_CODE.equals(activity.getStatusCode())) {
             Pattern pattern = Pattern.compile(SPOT_ID_PATTERN);
             Matcher matcher = pattern.matcher(activity.getStatusMessage());

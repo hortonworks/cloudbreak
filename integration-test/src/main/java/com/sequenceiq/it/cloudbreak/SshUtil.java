@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -18,7 +19,6 @@ import net.schmizz.sshj.common.IOUtils;
 import net.schmizz.sshj.connection.channel.direct.Session;
 import net.schmizz.sshj.connection.channel.direct.Session.Command;
 import net.schmizz.sshj.transport.verification.PromiscuousVerifier;
-
 
 public class SshUtil {
 
@@ -38,7 +38,7 @@ public class SshUtil {
             sshClient.authPublickey(sshUser, defaultPrivateKeyFile);
             Pair<Integer, String> cmdOut = execute(sshClient, sshCommand);
             LOGGER.info("Ssh command status code and output: " + cmdOut);
-            for (Map.Entry<String, List<String>> entry : sshCheckMap.entrySet()) {
+            for (Entry<String, List<String>> entry : sshCheckMap.entrySet()) {
                 for (String listValue: entry.getValue()) {
                     if (cmdOut.getLeft() != 0 || !checkCommandOutput(cmdOut, entry.getKey(), listValue)) {
                         LOGGER.error("Ssh command output is not proper: " + entry.getKey() + ' ' + listValue);

@@ -48,11 +48,11 @@ public class CloudInstanceMetaData {
     //BEGIN GENERATED CODE
     @Override
     public String toString() {
-        return "InstanceMetaData{" +
-                ", privateIp='" + privateIp + '\'' +
-                ", publicIp='" + publicIp + '\'' +
-                ", localityIndicator='" + localityIndicator + '\'' +
-                '}';
+        return "InstanceMetaData{"
+                + ", privateIp='" + privateIp + '\''
+                + ", publicIp='" + publicIp + '\''
+                + ", localityIndicator='" + localityIndicator + '\''
+                + '}';
     }
     //END GENERATED CODE
 }

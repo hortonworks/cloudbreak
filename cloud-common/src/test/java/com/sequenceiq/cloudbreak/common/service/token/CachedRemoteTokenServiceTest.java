@@ -8,7 +8,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.security.jwt.crypto.sign.InvalidSignatureException;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
@@ -51,7 +51,7 @@ public class CachedRemoteTokenServiceTest {
     }
 
     @Test
-    public void testLoadAuthenticationForInvalidMacKeyUsed() throws IOException {
+    public void testLoadAuthenticationForInvalidMacKeyUsed() {
         CachedRemoteTokenService tokenService = new CachedRemoteTokenService("clientId", "clientSecret", "http://localhost:8089", "alma", identityClient);
         try {
             tokenService.loadAuthentication(token);

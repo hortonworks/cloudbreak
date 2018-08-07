@@ -17,16 +17,19 @@ import javax.ws.rs.core.Response;
 
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AutoscaleClusterResponse;
-import com.sequenceiq.cloudbreak.api.model.ClusterRepairRequest;
-import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
-import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRepairRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.ConfigsRequest;
 import com.sequenceiq.cloudbreak.api.model.ConfigsResponse;
 import com.sequenceiq.cloudbreak.api.model.FailureReport;
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.UpdateGatewayTopologiesJson;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
+import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescription;
 
 import io.swagger.annotations.Api;
@@ -86,7 +89,7 @@ public interface ClusterV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ClusterOpDescription.PUT_BY_STACK_ID, produces = ContentType.JSON, notes = Notes.CLUSTER_NOTES,
             nickname = "putCluster")
-    Response put(@PathParam("id") Long stackId, @Valid UpdateClusterJson updateJson) throws Exception;
+    Response put(@PathParam("id") Long stackId, @Valid UpdateClusterJson updateJson);
 
     @POST
     @Path("{id}/cluster/config")
@@ -107,12 +110,19 @@ public interface ClusterV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ClusterOpDescription.FAILURE_REPORT, produces = ContentType.JSON, notes = Notes.FAILURE_REPORT_NOTES,
             nickname = "failureReportCluster")
-    Response failureReport(@PathParam("id") Long stackId, FailureReport failureReport) throws Exception;
+    Response failureReport(@PathParam("id") Long stackId, FailureReport failureReport);
 
     @POST
     @Path("{id}/cluster/manualrepair")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ClusterOpDescription.REPAIR_CLUSTER, produces = ContentType.JSON, notes = Notes.CLUSTER_REPAIR_NOTES,
             nickname = "repairCluster")
-    Response repairCluster(@PathParam("id") Long stackId, ClusterRepairRequest clusterRepairRequest) throws Exception;
+    Response repairCluster(@PathParam("id") Long stackId, ClusterRepairRequest clusterRepairRequest);
+
+    @PUT
+    @Path("{id}/cluster/gateway")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OperationDescriptions.GatewayOpDescription.UPDATE_GATEWAY_TOPOLOGIES, produces = ContentType.JSON, notes = Notes.GATEWAY_NOTES,
+            nickname = "updateGatewayTopologies")
+    GatewayJson updateGatewayTopologies(@PathParam("id") Long stackId, @NotNull UpdateGatewayTopologiesJson request);
 }

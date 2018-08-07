@@ -54,7 +54,7 @@ public class OpenStackMetadataCollector implements MetadataCollector {
         Map<String, InstanceTemplate> templateMap = Maps.uniqueIndex(templates,
                 from -> utils.getPrivateInstanceId(Objects.requireNonNull(from).getGroupName(), Long.toString(from.getPrivateId())));
 
-        OSClient client = openStackClient.createOSClient(authenticatedContext);
+        OSClient<?> client = openStackClient.createOSClient(authenticatedContext);
 
         Stack heatStack = client.heat().stacks().getDetails(stackName, heatStackId);
 
@@ -71,7 +71,6 @@ public class OpenStackMetadataCollector implements MetadataCollector {
                 InstanceTemplate template = templateMap.get(privateInstanceId);
                 if (template != null) {
                     CloudInstanceMetaData md = cloudInstanceMetaDataExtractor.extractMetadata(client, server, instanceUUID);
-                    //TODO use here sshkey
                     CloudInstance cloudInstance = new CloudInstance(instanceUUID, template, null);
                     CloudVmInstanceStatus status = new CloudVmInstanceStatus(cloudInstance, InstanceStatus.CREATED);
                     results.add(new CloudVmMetaDataStatus(status, md));

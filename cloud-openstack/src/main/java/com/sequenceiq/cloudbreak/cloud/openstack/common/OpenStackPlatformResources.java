@@ -4,10 +4,12 @@ import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.MAGNETIC;
 import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.values;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -30,6 +32,7 @@ import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudGateWay;
 import com.sequenceiq.cloudbreak.cloud.model.CloudGateWays;
 import com.sequenceiq.cloudbreak.cloud.model.CloudIpPool;
@@ -45,8 +48,10 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
+import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta.VmTypeMetaBuilder;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
+import com.sequenceiq.cloudbreak.cloud.model.generic.StringType;
 import com.sequenceiq.cloudbreak.cloud.openstack.auth.OpenStackClient;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.KeystoneCredentialView;
 
@@ -72,7 +77,7 @@ public class OpenStackPlatformResources implements PlatformResources {
 
     @Override
     public CloudNetworks networks(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
-        OSClient osClient = openStackClient.createOSClient(cloudCredential);
+        OSClient<?> osClient = openStackClient.createOSClient(cloudCredential);
         KeystoneCredentialView osCredential = openStackClient.createKeystoneCredential(cloudCredential);
 
         Set<CloudNetwork> cloudNetworks = new HashSet<>();
@@ -108,7 +113,7 @@ public class OpenStackPlatformResources implements PlatformResources {
 
     @Override
     public CloudSshKeys sshKeys(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
-        OSClient osClient = openStackClient.createOSClient(cloudCredential);
+        OSClient<?> osClient = openStackClient.createOSClient(cloudCredential);
         KeystoneCredentialView osCredential = openStackClient.createKeystoneCredential(cloudCredential);
 
         Set<CloudSshKey> cloudSshKeys = new HashSet<>();
@@ -133,7 +138,7 @@ public class OpenStackPlatformResources implements PlatformResources {
 
     @Override
     public CloudSecurityGroups securityGroups(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
-        OSClient osClient = openStackClient.createOSClient(cloudCredential);
+        OSClient<?> osClient = openStackClient.createOSClient(cloudCredential);
         KeystoneCredentialView osCredential = openStackClient.createKeystoneCredential(cloudCredential);
 
         Set<CloudSecurityGroup> cloudSecurityGroups = new HashSet<>();
@@ -158,7 +163,7 @@ public class OpenStackPlatformResources implements PlatformResources {
     @Cacheable(cacheNames = "cloudResourceRegionCache", key = "#cloudCredential?.id")
     public CloudRegions regions(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         Set<String> regionsFromOpenStack = openStackClient.getRegion(cloudCredential);
-        OSClient osClient = openStackClient.createOSClient(cloudCredential);
+        OSClient<?> osClient = openStackClient.createOSClient(cloudCredential);
 
         Map<Region, List<AvailabilityZone>> cloudRegions = new HashMap<>();
         Map<Region, String> displayNames = new HashMap<>();
@@ -169,7 +174,7 @@ public class OpenStackPlatformResources implements PlatformResources {
         }
         String defaultRegion = null;
         if (!cloudRegions.keySet().isEmpty()) {
-            defaultRegion = ((Region) cloudRegions.keySet().toArray()[0]).value();
+            defaultRegion = ((StringType) cloudRegions.keySet().toArray()[0]).value();
         }
         CloudRegions regions = new CloudRegions(cloudRegions, displayNames, defaultRegion);
         LOGGER.info("openstack regions result: {}", regions);
@@ -179,7 +184,7 @@ public class OpenStackPlatformResources implements PlatformResources {
     @Override
     @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName()")
     public CloudVmTypes virtualMachines(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
-        OSClient osClient = openStackClient.createOSClient(cloudCredential);
+        OSClient<?> osClient = openStackClient.createOSClient(cloudCredential);
         Map<String, Set<VmType>> cloudVmResponses = new HashMap<>();
         Map<String, VmType> defaultCloudVmResponses = new HashMap<>();
         CloudRegions regions = regions(cloudCredential, region, filters);
@@ -196,20 +201,20 @@ public class OpenStackPlatformResources implements PlatformResources {
         return cloudVmTypes;
     }
 
-    private void convertVmSizeToGB(Set<VmType> types) {
+    private void convertVmSizeToGB(Collection<VmType> types) {
         types.stream()
                 .filter(t -> t.getMetaData().getProperties().containsKey(VmTypeMeta.MEMORY))
                 .forEach(t -> {
-                    String memory = t.getMetaData().getProperties().get(VmTypeMeta.MEMORY);
+                    String memory = t.getMetaData().getProperties().get(VmTypeMeta.MEMORY).toString();
                     String formattedSize = ConversionUtil.convertToGB(memory);
                     t.getMetaData().getProperties().put(VmTypeMeta.MEMORY, formattedSize);
                 });
     }
 
-    private Set<VmType> collectVmTypes(OSClient osClient) {
+    private Set<VmType> collectVmTypes(OSClient<?> osClient) {
         Set<VmType> types = new HashSet<>();
         for (Flavor flavor : openStackClient.getFlavors(osClient)) {
-            VmTypeMeta.VmTypeMetaBuilder builder = VmTypeMeta.VmTypeMetaBuilder.builder()
+            VmTypeMetaBuilder builder = VmTypeMetaBuilder.builder()
                     .withCpuAndMemory(flavor.getVcpus(), flavor.getRam());
             for (VolumeParameterType volumeParameterType : values()) {
                 switch (volumeParameterType) {
@@ -241,10 +246,10 @@ public class OpenStackPlatformResources implements PlatformResources {
 
     @Override
     public CloudGateWays gateways(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
-        OSClient osClient = openStackClient.createOSClient(cloudCredential);
+        OSClient<?> osClient = openStackClient.createOSClient(cloudCredential);
         Map<String, Set<CloudGateWay>> resultCloudGateWayMap = new HashMap<>();
         CloudRegions regions = regions(cloudCredential, region, filters);
-        for (Map.Entry<Region, List<AvailabilityZone>> regionListEntry : regions.getCloudRegions().entrySet()) {
+        for (Entry<Region, List<AvailabilityZone>> regionListEntry : regions.getCloudRegions().entrySet()) {
             Set<CloudGateWay> cloudGateWays = new HashSet<>();
             List<? extends Router> routerList = osClient.networking().router().list();
             LOGGER.info("routers from openstack: {}", routerList);
@@ -268,10 +273,10 @@ public class OpenStackPlatformResources implements PlatformResources {
 
     @Override
     public CloudIpPools publicIpPool(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
-        OSClient osClient = openStackClient.createOSClient(cloudCredential);
+        OSClient<?> osClient = openStackClient.createOSClient(cloudCredential);
         Map<String, Set<CloudIpPool>> cloudIpPools = new HashMap<>();
         CloudRegions regions = regions(cloudCredential, region, filters);
-        for (Map.Entry<Region, List<AvailabilityZone>> regionListEntry : regions.getCloudRegions().entrySet()) {
+        for (Entry<Region, List<AvailabilityZone>> regionListEntry : regions.getCloudRegions().entrySet()) {
             Set<CloudIpPool> cloudGateWays = new HashSet<>();
             List<? extends Network> networks = getNetworks(osClient);
             List<? extends Network> networksWithExternalRouter = networks.stream().filter(Network::isRouterExternal).collect(Collectors.toList());
@@ -290,8 +295,13 @@ public class OpenStackPlatformResources implements PlatformResources {
     }
 
     @Override
-    public CloudAccessConfigs accessConfigs(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception {
+    public CloudAccessConfigs accessConfigs(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         return new CloudAccessConfigs(new HashSet<>());
+    }
+
+    @Override
+    public CloudEncryptionKeys encryptionKeys(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+        return new CloudEncryptionKeys(new HashSet<>());
     }
 
     private VolumeParameterConfig volumeParameterConfig(VolumeParameterType volumeParameterType) {
@@ -303,7 +313,7 @@ public class OpenStackPlatformResources implements PlatformResources {
                 defaultMaximumVolumeCount);
     }
 
-    private List<? extends Network> getNetworks(OSClient osClient) {
+    private List<? extends Network> getNetworks(OSClient<?> osClient) {
         List<? extends Network> networks = osClient.networking().network().list();
         LOGGER.info("networks from openstack: {}", networks);
         return networks;

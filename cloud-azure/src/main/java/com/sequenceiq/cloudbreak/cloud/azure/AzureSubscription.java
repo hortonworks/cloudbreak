@@ -113,15 +113,15 @@ public class AzureSubscription {
     //BEGIN GENERATED CODE
     @Override
     public String toString() {
-        return "AzureSubscription{" +
-                "id='" + id + '\'' +
-                ", subscriptionId='" + subscriptionId + '\'' +
-                ", tenantId='" + tenantId + '\'' +
-                ", displayName='" + displayName + '\'' +
-                ", state=" + state +
-                ", subscriptionPolicies=" + subscriptionPolicies +
-                ", authorizationSource='" + authorizationSource + '\'' +
-                '}';
+        return "AzureSubscription{"
+                + "id='" + id + '\''
+                + ", subscriptionId='" + subscriptionId + '\''
+                + ", tenantId='" + tenantId + '\''
+                + ", displayName='" + displayName + '\''
+                + ", state=" + state
+                + ", subscriptionPolicies=" + subscriptionPolicies
+                + ", authorizationSource='" + authorizationSource + '\''
+                + '}';
     }
     //END GENERATED CODE
 }

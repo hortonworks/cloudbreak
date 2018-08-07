@@ -1,7 +1,9 @@
 #!/bin/bash -e
 : ${WORKSPACE=.}
 
-LATEST_RC_BRANCH=$(git branch --sort=-committerdate -r | grep 'origin/rc' | head -n 1)
+set -x
+
+LATEST_RC_BRANCH=$(git branch --sort=-refname -r | grep 'origin/rc' | head -n 1)
 LATEST_RC_MAJOR_MINOR_VERSION=$(echo "$LATEST_RC_BRANCH" | cut -d'-' -f 2)
 LATEST_RC_MAJOR=$(echo $LATEST_RC_MAJOR_MINOR_VERSION | cut -d'.' -f 1)
 LATEST_RC_MINOR=$(echo $LATEST_RC_MAJOR_MINOR_VERSION | cut -d'.' -f 2)

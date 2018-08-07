@@ -2,6 +2,9 @@ package com.sequenceiq.cloudbreak.controller;
 
 import java.util.Set;
 
+import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,9 +20,11 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.init.blueprint.BlueprintLoaderService;
+import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 
 @Component
+@Transactional(TxType.NEVER)
 public class BlueprintController extends NotificationController implements BlueprintEndpoint {
     private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintController.class);
 

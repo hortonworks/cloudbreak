@@ -4,7 +4,7 @@ import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
-public class ResourceDefinitionResult extends CloudPlatformResult {
+public class ResourceDefinitionResult extends CloudPlatformResult<CloudPlatformRequest<?>> {
 
     private final String definition;
 

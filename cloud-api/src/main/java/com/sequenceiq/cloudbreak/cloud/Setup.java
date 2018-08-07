@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.cloud;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
-import com.sequenceiq.cloudbreak.cloud.model.FileSystem;
+import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.type.ImageStatusResult;
@@ -16,7 +16,7 @@ public interface Setup {
     /**
      * Creates the VM if it is not available. Some platform does not allow to start a VM from a central image but it forces the user to copy the image to
      * its own storage.
-     * <p/>
+     * <br>
      * To check whether the image copy is finished use {@link #checkImageStatus(AuthenticatedContext, CloudStack, Image)}
      *
      * @param authenticatedContext the context which already contains the authenticated client
@@ -50,9 +50,9 @@ public interface Setup {
      *
      *
      * @param credential credenital to enable validation
-     * @param fileSystem filesystem to validate
+     * @param spiFileSystem filesystem to validate
      * @throws Exception exception is thrown when the filesystem does not meet the desired requirements
      */
-    void validateFileSystem(CloudCredential credential, FileSystem fileSystem) throws Exception;
+    void validateFileSystem(CloudCredential credential, SpiFileSystem spiFileSystem) throws Exception;
 
 }

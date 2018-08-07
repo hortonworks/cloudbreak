@@ -4,11 +4,13 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sequenceiq.periscope.api.endpoint.validator.ValidScalingConfiguration;
 import com.sequenceiq.periscope.doc.ApiDescription.ScalingConfigurationJsonProperties;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+@ValidScalingConfiguration
 @ApiModel("ScalingConfiguration")
 public class ScalingConfigurationRequest implements Json {
 

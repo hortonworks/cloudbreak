@@ -38,6 +38,6 @@ public class EphemeralClusterUpdateHandler implements ReactorEventHandler<Epheme
         } catch (Exception e) {
             response = new EphemeralClusterUpdateFailed(request.getStackId(), e);
         }
-        eventBus.notify(response.selector(), new Event(event.getHeaders(), response));
+        eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));
     }
 }

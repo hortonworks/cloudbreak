@@ -1,9 +1,21 @@
 {%- from 'ambari/settings.sls' import ambari with context %}
 
-/var/lib/ambari-server/jdbc-drivers:
+copy-optional-jdbc-drivers:
   cmd.run:
-    - name: cp -R /opt/jdbc-drivers /var/lib/ambari-server/jdbc-drivers
-    - unless: ls -1 /var/lib/ambari-server/jdbc-drivers
+    - name: cp -R /opt/jdbc-drivers /usr/share/java
+    - onlyif: test -d /opt/jdbc-drivers
+
+{% if ambari.ambari_database.ambariVendor == 'embedded' %}
+ambari-start-postgresql:
+  service.running:
+    - enable: True
+    - name: postgresql
+{% endif %}
+
+execute-ambari-server-init:
+  cmd.run:
+    - name: /opt/ambari-server/ambari-server-init.sh 2>&1 | tee -a /var/log/ambari-server-init.log && exit ${PIPESTATUS[0]}
+    - unless: test -f /var/ambari-init-executed
 
 {% if ambari.is_systemd %}
 

@@ -24,11 +24,12 @@ import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 
 @Configuration
 public class StackDownscaleActions {
@@ -48,10 +49,10 @@ public class StackDownscaleActions {
     private StackDownscaleService stackDownscaleService;
 
     @Bean(name = "DOWNSCALE_COLLECT_RESOURCES_STATE")
-    public Action stackDownscaleCollectResourcesAction() {
+    public Action<?, ?> stackDownscaleCollectResourcesAction() {
         return new AbstractStackDownscaleAction<StackDownscaleTriggerEvent>(StackDownscaleTriggerEvent.class) {
             @Override
-            protected void doExecute(StackScalingFlowContext context, StackDownscaleTriggerEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StackScalingFlowContext context, StackDownscaleTriggerEvent payload, Map<Object, Object> variables) {
                 stackDownscaleService.startStackDownscale(context, payload);
                 Stack stack = context.getStack();
                 LOGGER.debug("Assembling downscale stack event for stack: {}", stack);
@@ -66,7 +67,7 @@ public class StackDownscaleActions {
                     }
                 }
                 variables.put(INSTANCES, instances);
-                DownscaleStackCollectResourcesRequest request = new DownscaleStackCollectResourcesRequest(context.getCloudContext(),
+                Selectable request = new DownscaleStackCollectResourcesRequest(context.getCloudContext(),
                         context.getCloudCredential(), context.getCloudStack(), resources, instances);
                 sendEvent(context.getFlowId(), request);
             }
@@ -74,12 +75,11 @@ public class StackDownscaleActions {
     }
 
     @Bean(name = "DOWNSCALE_STATE")
-    public Action stackDownscaleAction() {
+    public Action<?, ?> stackDownscaleAction() {
         return new AbstractStackDownscaleAction<DownscaleStackCollectResourcesResult>(DownscaleStackCollectResourcesResult.class) {
             @Override
-            protected void doExecute(StackScalingFlowContext context, DownscaleStackCollectResourcesResult payload, Map<Object, Object> variables)
-                    throws Exception {
-                DownscaleStackRequest request =  new DownscaleStackRequest(context.getCloudContext(), context.getCloudCredential(), context.getCloudStack(),
+            protected void doExecute(StackScalingFlowContext context, DownscaleStackCollectResourcesResult payload, Map<Object, Object> variables) {
+                Selectable request =  new DownscaleStackRequest(context.getCloudContext(), context.getCloudCredential(), context.getCloudStack(),
                         (List<CloudResource>) variables.get(RESOURCES), (List<CloudInstance>) variables.get(INSTANCES), payload.getResourcesToScale());
                 sendEvent(context.getFlowId(), request);
             }
@@ -87,10 +87,11 @@ public class StackDownscaleActions {
     }
 
     @Bean(name = "DOWNSCALE_FINISHED_STATE")
-    public Action stackDownscaleFinishedAction() {
+    public Action<?, ?> stackDownscaleFinishedAction() {
         return new AbstractStackDownscaleAction<DownscaleStackResult>(DownscaleStackResult.class) {
             @Override
-            protected void doExecute(StackScalingFlowContext context, DownscaleStackResult payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StackScalingFlowContext context, DownscaleStackResult payload, Map<Object, Object> variables)
+                    throws TransactionExecutionException {
                 stackDownscaleService.finishStackDownscale(context, getInstanceGroupName(variables), getInstanceIds(variables));
                 sendEvent(context);
             }
@@ -103,10 +104,10 @@ public class StackDownscaleActions {
     }
 
     @Bean(name = "DOWNSCALE_FAILED_STATE")
-    public Action stackDownscaleFailedAction() {
+    public Action<?, ?> stackDownscaleFailedAction() {
         return new AbstractStackFailureAction<StackDownscaleState, StackDownscaleEvent>() {
             @Override
-            protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 stackDownscaleService.handleStackDownscaleError(context, payload.getException());
                 sendEvent(context);
             }

@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.handler;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
@@ -18,9 +18,9 @@ public class StopStackComponentTest extends AbstractComponentTest<StopInstancesR
     public void testStopStack() {
         StopInstancesResult result = sendCloudRequest();
 
-        assertEquals(1, result.getResults().getResults().size());
+        assertEquals(1L, result.getResults().getResults().size());
         assertEquals(InstanceStatus.STOPPED, result.getResults().getResults().get(0).getStatus());
-        assertFalse(result.getStatus().equals(EventStatus.FAILED));
+        assertNotEquals(result.getStatus(), EventStatus.FAILED);
         assertNull(result.getErrorDetails());
     }
 
@@ -30,8 +30,8 @@ public class StopStackComponentTest extends AbstractComponentTest<StopInstancesR
     }
 
     @Override
-    protected CloudPlatformRequest getRequest() {
-        return new StopInstancesRequest(g().createCloudContext(), g().createCloudCredential(),
+    protected CloudPlatformRequest<StopInstancesResult> getRequest() {
+        return new StopInstancesRequest<>(g().createCloudContext(), g().createCloudCredential(),
                 g().createCloudResourceList(), g().createCloudInstances());
     }
 }

@@ -10,24 +10,27 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.cloud.Acceptable;
 import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstances;
 
@@ -38,6 +41,8 @@ import reactor.rx.Promise;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ReactorFlowManagerTest {
+
+    private static final Long STACK_ID = 1L;
 
     @Mock
     private EventBus reactor;
@@ -51,31 +56,15 @@ public class ReactorFlowManagerTest {
     @InjectMocks
     private ReactorFlowManager underTest;
 
-    private final Long stackId = 1L;
-
     @Before
     public void setUp() {
         reset(reactor);
         reset(eventFactory);
         when(reactor.notify((Object) anyObject(), any(Event.class))).thenReturn(new EventBus(new ThreadPoolExecutorDispatcher(1, 1)));
-        Acceptable acceptable = new Acceptable() {
-            @Override
-            public Promise<Boolean> accepted() {
-                Promise<Boolean> a = new Promise<>();
-                a.accept(true);
-                return a;
-            }
-
-            @Override
-            public Long getStackId() {
-                return stackId;
-            }
-        };
+        Acceptable acceptable = new TestAcceptable();
         Stack stack = TestUtil.stack();
         stack.setCluster(TestUtil.cluster());
-        when(stackService.get(anyLong())).thenReturn(stack);
-        when(stackService.getById(anyLong())).thenReturn(TestUtil.stack());
-        when(stackService.getByIdView(anyLong())).thenReturn(TestUtil.stackView());
+        when(stackService.getById(anyLong())).thenReturn(stack);
         when(eventFactory.createEventWithErrHandler(anyObject())).thenReturn(new Event<>(acceptable));
     }
 
@@ -83,33 +72,40 @@ public class ReactorFlowManagerTest {
     public void shouldReturnTheNextFailureTransition() {
         InstanceGroupAdjustmentJson instanceGroupAdjustment = new InstanceGroupAdjustmentJson();
         HostGroupAdjustmentJson hostGroupAdjustment = new HostGroupAdjustmentJson();
+        Map<String, Set<Long>> instanceIdsByHostgroup = new HashMap<>();
+        instanceIdsByHostgroup.put("hostrgroup", Collections.singleton(1L));
 
-        underTest.triggerProvisioning(stackId);
-        underTest.triggerClusterInstall(stackId);
-        underTest.triggerClusterReInstall(stackId);
-        underTest.triggerStackStop(stackId);
-        underTest.triggerStackStart(stackId);
-        underTest.triggerClusterStop(stackId);
-        underTest.triggerClusterStart(stackId);
-        underTest.triggerTermination(stackId, false, false);
-        underTest.triggerTermination(stackId, false, true);
-        underTest.triggerStackUpscale(stackId, instanceGroupAdjustment, true);
-        underTest.triggerStackDownscale(stackId, instanceGroupAdjustment);
-        underTest.triggerStackRemoveInstance(stackId, "hostgroup", 5L, false);
-        underTest.triggerClusterUpscale(stackId, hostGroupAdjustment);
-        underTest.triggerClusterDownscale(stackId, hostGroupAdjustment);
-        underTest.triggerClusterSync(stackId);
-        underTest.triggerStackSync(stackId);
-        underTest.triggerFullSync(stackId);
-        underTest.triggerClusterCredentialReplace(stackId, "admin", "admin1");
-        underTest.triggerClusterCredentialUpdate(stackId, "admin1");
-        underTest.triggerClusterTermination(stackId, false, false);
-        underTest.triggerClusterTermination(stackId, true, false);
-        underTest.triggerClusterUpgrade(stackId);
-        underTest.triggerManualRepairFlow(stackId);
-        underTest.triggerStackRepairFlow(stackId, new UnhealthyInstances());
-        underTest.triggerClusterRepairFlow(stackId, new HashMap<>(), true);
-        underTest.triggerEphemeralUpdate(stackId);
+        underTest.triggerProvisioning(STACK_ID);
+        underTest.triggerClusterInstall(STACK_ID);
+        underTest.triggerClusterReInstall(STACK_ID);
+        underTest.triggerStackStop(STACK_ID);
+        underTest.triggerStackStart(STACK_ID);
+        underTest.triggerClusterStop(STACK_ID);
+        underTest.triggerClusterStart(STACK_ID);
+        underTest.triggerTermination(STACK_ID, false, false);
+        underTest.triggerTermination(STACK_ID, false, true);
+        underTest.triggerStackUpscale(STACK_ID, instanceGroupAdjustment, true);
+        underTest.triggerStackDownscale(STACK_ID, instanceGroupAdjustment);
+        underTest.triggerStackRemoveInstance(STACK_ID, "hostgroup", 5L);
+        underTest.triggerStackRemoveInstance(STACK_ID, "hostgroup", 5L, false);
+        underTest.triggerStackRemoveInstances(STACK_ID, instanceIdsByHostgroup);
+        underTest.triggerClusterUpscale(STACK_ID, hostGroupAdjustment);
+        underTest.triggerClusterDownscale(STACK_ID, hostGroupAdjustment);
+        underTest.triggerClusterSync(STACK_ID);
+        underTest.triggerClusterSyncWithoutCheck(STACK_ID);
+        underTest.triggerStackSync(STACK_ID);
+        underTest.triggerFullSync(STACK_ID);
+        underTest.triggerFullSyncWithoutCheck(STACK_ID);
+        underTest.triggerClusterCredentialReplace(STACK_ID, "admin", "admin1");
+        underTest.triggerClusterCredentialUpdate(STACK_ID, "admin1");
+        underTest.triggerClusterTermination(STACK_ID, false, false);
+        underTest.triggerClusterTermination(STACK_ID, true, false);
+        underTest.triggerClusterUpgrade(STACK_ID);
+        underTest.triggerManualRepairFlow(STACK_ID);
+        underTest.triggerStackRepairFlow(STACK_ID, new UnhealthyInstances());
+        underTest.triggerClusterRepairFlow(STACK_ID, new HashMap<>(), true);
+        underTest.triggerEphemeralUpdate(STACK_ID);
+        underTest.triggerStackImageUpdate(STACK_ID, "asdf", null, null);
 
         // Not start from 0 because flow cancellations
         int count = 5;
@@ -133,7 +129,7 @@ public class ReactorFlowManagerTest {
         Stack stack = TestUtil.stack();
         stack.setCluster(TestUtil.cluster());
         stack.getCluster().setSecure(true);
-        when(stackService.get(anyLong())).thenReturn(stack);
+        when(stackService.getById(anyLong())).thenReturn(stack);
 
         underTest.triggerClusterTermination(1L, false, false);
 
@@ -152,10 +148,34 @@ public class ReactorFlowManagerTest {
         Stack stack = TestUtil.stack();
         stack.setCluster(TestUtil.cluster());
         stack.getCluster().setSecure(true);
-        when(stackService.get(anyLong())).thenReturn(stack);
+        when(stackService.getById(anyLong())).thenReturn(stack);
 
         underTest.triggerClusterTermination(1L, true, false);
 
         verify(reactor).notify(eq(FlowChainTriggers.PROPER_TERMINATION_TRIGGER_EVENT), any(Event.class));
+    }
+
+    @Test
+    public void testtriggerStackImageUpdate() {
+        long stackId = 1L;
+        String imageID = "imageID";
+        String imageCatalogName = "imageCatalogName";
+        String imageCatalogUrl = "imageCatalogUrl";
+        underTest.triggerStackImageUpdate(stackId, imageID, imageCatalogName, imageCatalogUrl);
+        verify(reactor).notify(eq(FlowChainTriggers.STACK_IMAGE_UPDATE_TRIGGER_EVENT), any(Event.class));
+    }
+
+    private static class TestAcceptable implements Acceptable {
+        @Override
+        public Promise<Boolean> accepted() {
+            Promise<Boolean> a = new Promise<>();
+            a.accept(true);
+            return a;
+        }
+
+        @Override
+        public Long getStackId() {
+            return STACK_ID;
+        }
     }
 }

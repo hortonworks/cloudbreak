@@ -17,10 +17,10 @@ import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableList;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ClusterV1Endpoint;
-import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.ConstraintJson;
-import com.sequenceiq.cloudbreak.api.model.GatewayJson;
-import com.sequenceiq.cloudbreak.api.model.HostGroupRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.it.IntegrationTestContext;
@@ -91,7 +91,6 @@ public class MockClusterCreationWithSaltSuccessTest extends AbstractCloudbreakIn
         }
 
         GatewayJson gatewayJson = new GatewayJson();
-        gatewayJson.setEnableGateway(Boolean.TRUE);
         gatewayJson.setExposedServices(ImmutableList.of("ALL"));
         clusterRequest.setGateway(gatewayJson);
 
@@ -113,7 +112,7 @@ public class MockClusterCreationWithSaltSuccessTest extends AbstractCloudbreakIn
         stackCreationMock.stop();
     }
 
-    private Set<HostGroupRequest> convertHostGroups(List<HostGroup> hostGroups, String runRecipesOnHosts) {
+    private Set<HostGroupRequest> convertHostGroups(Iterable<HostGroup> hostGroups, String runRecipesOnHosts) {
         Set<Long> recipeIds = Collections.emptySet();
         List<String> hostGroupsWithRecipe = Collections.emptyList();
         if (!runRecipesOnHosts.isEmpty()) {

@@ -45,13 +45,13 @@ public class MockServer {
     @Value("${mock.server.address:localhost}")
     private String mockServerAddress;
 
-    private int mockPort;
+    private final int mockPort;
 
-    private int sshPort;
+    private final int sshPort;
 
-    private Service sparkService;
+    private final Service sparkService;
 
-    private Map<Call, Response> requestResponseMap = new HashMap<>();
+    private final Map<Call, Response> requestResponseMap = new HashMap<>();
 
     private Map<String, CloudVmMetaDataStatus> instanceMap;
 
@@ -98,7 +98,7 @@ public class MockServer {
         serverAddressGenerator.iterateOver((address, number) -> {
             String instanceId = "instance-" + address;
             InstanceTemplate instanceTemplate = new InstanceTemplate("medium", "group", Integer.toUnsignedLong(number),
-                    new ArrayList<>(), InstanceStatus.CREATED, null, 0L);
+                    new ArrayList<>(), InstanceStatus.CREATED, null, 0L, "imageId");
             InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
             CloudInstance cloudInstanceWithId = new CloudInstance(instanceId, instanceTemplate, instanceAuthentication);
             CloudVmInstanceStatus cloudVmInstanceStatus = new CloudVmInstanceStatus(cloudInstanceWithId, InstanceStatus.STARTED);
@@ -112,7 +112,7 @@ public class MockServer {
         CloudVmMetaDataStatus vmMetaDataStatus = instanceMap.get(instanceId);
         InstanceTemplate oldTemplate = vmMetaDataStatus.getCloudVmInstanceStatus().getCloudInstance().getTemplate();
         InstanceTemplate newTemplate = new InstanceTemplate("medium", "group", oldTemplate.getPrivateId(),
-                new ArrayList<>(), InstanceStatus.TERMINATED, null, 0L);
+                new ArrayList<>(), InstanceStatus.TERMINATED, null, 0L, "imageId");
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         CloudInstance cloudInstanceWithId = new CloudInstance(instanceId, newTemplate, instanceAuthentication);
         CloudVmInstanceStatus cloudVmInstanceStatus = new CloudVmInstanceStatus(cloudInstanceWithId, InstanceStatus.TERMINATED);

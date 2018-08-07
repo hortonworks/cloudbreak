@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.service.notification;
 
-import java.util.List;
-
 import javax.inject.Inject;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
@@ -28,7 +26,7 @@ public class HttpNotificationSender implements NotificationSender {
 
     @Override
     public <T> void send(Notification<T> notification) {
-        List<Subscription> subscriptions = (List<Subscription>) subscriptionRepository.findAll();
+        Iterable<Subscription> subscriptions = subscriptionRepository.findAll();
         for (Subscription subscription : subscriptions) {
             String endpoint = subscription.getEndpoint();
             try {

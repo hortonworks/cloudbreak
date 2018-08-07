@@ -11,6 +11,7 @@ jar {
   archiveName = 'cloud-aws.jar'
 }
 
+
 dependencies {
 
   compile project(':cloud-api')
@@ -24,14 +25,43 @@ dependencies {
   compile (group: 'com.amazonaws',                name: 'aws-java-sdk',                   version: awsSdkVersion)      { exclude group: 'commons-logging' }
   compile group: 'org.freemarker',                name: 'freemarker',                     version: freemarkerVersion
 
+  compile group: 'org.mapstruct',                 name: 'mapstruct-jdk8',                 version: mapstructVersion
+  compileOnly group: 'org.mapstruct',             name: 'mapstruct-processor',            version: mapstructVersion
+  annotationProcessor group: 'org.mapstruct',     name: 'mapstruct-processor',            version: mapstructVersion
+
   testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
   testCompile group: 'org.springframework.boot',  name:'spring-boot-starter-freemarker',  version:springBootVersion
-  testCompile (group: 'junit', name: 'junit', version: '4+') {
+  testCompile (group: 'junit', name: 'junit', version: junitVersion) {
     exclude group: 'org.hamcrest'
   }
-  testCompile ('org.mockito:mockito-core:1+') {
+  testCompile (group: 'org.mockito',             name: 'mockito-core',          version: mockitoVersion) {
     exclude group: 'org.hamcrest'
   }
   testCompile 'org.hamcrest:java-hamcrest:2.0.0.0'
 
+}
+
+sourceSets {
+  main {
+    java.srcDirs += "${projectDir}/src/main/generated"
+  }
+}
+
+compileJava {
+  options.compilerArgs = [
+          '-Amapstruct.unmappedTargetPolicy=ERROR',
+          '-Amapstruct.suppressGeneratorTimestamp=true',
+          '-Amapstruct.suppressGeneratorVersionInfoComment=true'
+  ]
+
+  options.annotationProcessorGeneratedSourcesDirectory = file("$projectDir/src/main/generated")
+}
+
+compileJava.doFirst {
+  def path = "${projectDir}/src/main/generated"
+  if (new File(path).exists()) {
+    delete fileTree(path) {
+      include '**/*.java'
+    }
+  }
 }

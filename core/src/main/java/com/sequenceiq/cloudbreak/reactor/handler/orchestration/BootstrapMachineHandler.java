@@ -38,6 +38,6 @@ public class BootstrapMachineHandler implements ReactorEventHandler<BootstrapMac
         } catch (Exception e) {
             response = new BootstrapMachinesFailed(request.getStackId(), e);
         }
-        eventBus.notify(response.selector(), new Event(event.getHeaders(), response));
+        eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));
     }
 }

@@ -1,6 +1,8 @@
 package com.sequenceiq.periscope.api.model;
 
-import com.sequenceiq.periscope.doc.ApiDescription;
+import javax.validation.Valid;
+
+import com.sequenceiq.periscope.doc.ApiDescription.BaseAlertJsonProperties;
 import com.sequenceiq.periscope.doc.ApiDescription.TimeAlertJsonProperties;
 
 import io.swagger.annotations.ApiModel;
@@ -15,7 +17,8 @@ public class TimeAlertRequest extends AbstractAlertJson {
     @ApiModelProperty(TimeAlertJsonProperties.CRON)
     private String cron;
 
-    @ApiModelProperty(ApiDescription.BaseAlertJsonProperties.SCALINGPOLICYID)
+    @Valid
+    @ApiModelProperty(BaseAlertJsonProperties.SCALINGPOLICYID)
     private ScalingPolicyRequest scalingPolicy;
 
     public String getTimeZone() {

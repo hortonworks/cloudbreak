@@ -85,7 +85,7 @@ public class YarnMetadataCollector implements MetadataCollector {
         }
     }
 
-    private CloudResource getYarnApplcationResource(List<CloudResource> resourceList) {
+    private CloudResource getYarnApplcationResource(Iterable<CloudResource> resourceList) {
         for (CloudResource resource : resourceList) {
             if (resource.getType() == ResourceType.YARN_APPLICATION) {
                 return resource;
@@ -94,7 +94,7 @@ public class YarnMetadataCollector implements MetadataCollector {
         throw new CloudConnectorException(String.format("No resource found: %s", ResourceType.YARN_APPLICATION));
     }
 
-    private ListMultimap<String, CloudInstance> groupInstancesByInstanceGroup(List<CloudInstance> vms) {
+    private ListMultimap<String, CloudInstance> groupInstancesByInstanceGroup(Iterable<CloudInstance> vms) {
         ListMultimap<String, CloudInstance> groupByInstanceGroup = ArrayListMultimap.create();
         for (CloudInstance vm : vms) {
             String groupName = vm.getTemplate().getGroupName();
@@ -103,7 +103,7 @@ public class YarnMetadataCollector implements MetadataCollector {
         return groupByInstanceGroup;
     }
 
-    private ListMultimap<String, Container> groupContainersByInstanceGroup(List<Container> containers) {
+    private ListMultimap<String, Container> groupContainersByInstanceGroup(Iterable<Container> containers) {
         ListMultimap<String, Container> groupByInstanceGroup = ArrayListMultimap.create();
         for (Container container : containers) {
             String groupName = container.getComponentName();
@@ -112,7 +112,7 @@ public class YarnMetadataCollector implements MetadataCollector {
         return groupByInstanceGroup;
     }
 
-    private Map<String, CloudInstance> mapByInstanceId(List<CloudInstance> vms) {
+    private Map<String, CloudInstance> mapByInstanceId(Iterable<CloudInstance> vms) {
         Map<String, CloudInstance> groupByInstanceId = Maps.newHashMap();
         for (CloudInstance vm : vms) {
             String instanceId = vm.getInstanceId();
@@ -123,7 +123,7 @@ public class YarnMetadataCollector implements MetadataCollector {
         return groupByInstanceId;
     }
 
-    private Queue<CloudInstance> untrackedInstances(List<CloudInstance> vms) {
+    private Queue<CloudInstance> untrackedInstances(Iterable<CloudInstance> vms) {
         Queue<CloudInstance> cloudInstances = Lists.newLinkedList();
         for (CloudInstance vm : vms) {
             if (vm.getInstanceId() == null) {

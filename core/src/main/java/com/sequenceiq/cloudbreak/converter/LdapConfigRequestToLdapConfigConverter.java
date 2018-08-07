@@ -5,7 +5,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.api.model.LdapConfigRequest;
+import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigRequest;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.api.model.DirectoryType;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
@@ -33,6 +33,7 @@ public class LdapConfigRequestToLdapConfigConverter extends AbstractConversionSe
         config.setProtocol(json.getProtocol());
         config.setGroupSearchBase(json.getGroupSearchBase());
         config.setUserSearchBase(json.getUserSearchBase());
+        config.setUserDnPattern(json.getUserDnPattern());
         config.setUserNameAttribute(json.getUserNameAttribute());
         config.setDomain(json.getDomain());
         config.setDirectoryType(json.getDirectoryType() != null ? json.getDirectoryType() : DirectoryType.LDAP);

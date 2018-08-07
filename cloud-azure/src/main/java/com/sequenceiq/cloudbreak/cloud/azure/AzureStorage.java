@@ -62,10 +62,14 @@ public class AzureStorage {
     }
 
     public String getCustomImageId(AzureClient client, AuthenticatedContext ac, CloudStack stack) {
+        return getCustomImageId(client, ac, stack, stack.getImage().getImageName());
+    }
+
+    public String getCustomImageId(AzureClient client, AuthenticatedContext ac, CloudStack stack, String imageName) {
         String imageResourceGroupName = getImageResourceGroupName(ac.getCloudContext(), stack);
         AzureCredentialView acv = new AzureCredentialView(ac.getCloudCredential());
         String imageStorageName = getImageStorageName(acv, ac.getCloudContext(), stack);
-        String imageBlobUri = client.getImageBlobUri(imageResourceGroupName, imageStorageName, IMAGES_CONTAINER, stack.getImage().getImageName());
+        String imageBlobUri = client.getImageBlobUri(imageResourceGroupName, imageStorageName, IMAGES_CONTAINER, imageName);
         String region = ac.getCloudContext().getLocation().getRegion().value();
         return getCustomImageId(imageBlobUri, imageResourceGroupName, region, client);
     }
@@ -80,11 +84,9 @@ public class AzureStorage {
         String storageName;
         if (isLegacyImageStore(stack)) {
             String persistentStorageName = getPersistentStorageName(stack);
-            if (isPersistentStorage(persistentStorageName)) {
-                storageName = getPersistentStorageName(persistentStorageName, acv, cloudContext.getLocation().getRegion().value());
-            } else {
-                storageName = buildStorageName(getArmAttachedStorageOption(stack.getParameters()), acv, null, cloudContext, AzureDiskType.LOCALLY_REDUNDANT);
-            }
+            storageName = isPersistentStorage(persistentStorageName)
+                    ? getPersistentStorageName(persistentStorageName, acv, cloudContext.getLocation().getRegion().value())
+                    : buildStorageName(getArmAttachedStorageOption(stack.getParameters()), acv, null, cloudContext, AzureDiskType.LOCALLY_REDUNDANT);
         } else {
             storageName = getPersistentStorageName(imageStorePrefix, acv, cloudContext.getLocation().getRegion().value());
         }

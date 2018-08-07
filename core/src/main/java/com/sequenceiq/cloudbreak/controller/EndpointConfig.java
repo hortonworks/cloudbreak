@@ -1,9 +1,12 @@
 package com.sequenceiq.cloudbreak.controller;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.ext.ExceptionMapper;
 
 import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,34 +14,9 @@ import org.springframework.stereotype.Component;
 
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.CoreApi;
-import com.sequenceiq.cloudbreak.controller.mapper.AccessDeniedExceptionMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.AuthenticationCredentialsNotFoundExceptionMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.BadRequestExceptionMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.CloudbreakApiExceptionMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.ConstraintViolationExceptionMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.ConversionFailedExceptionMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.DataIntegrityViolationExceptionMapper;
+import com.sequenceiq.cloudbreak.controller.audit.AuditController;
 import com.sequenceiq.cloudbreak.controller.mapper.DefaultExceptionMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.DuplicatedKeyValueExceptionMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.EntityNotFoundExceptionMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.GetCloudParameterExceptionMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.HibernateConstraintViolationExceptionMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.HttpMediaTypeNotSupportedExceptionMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.HttpMessageNotReadableExceptionMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.HttpRequestMethodNotSupportedExceptionMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.MethodArgumentNotValidExceptionMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.NotFoundExceptionMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.OperationExceptionMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.RuntimeExceptionMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.SmartSenseNotFoundExceptionMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.SpringAccessDeniedExceptionMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.SpringBadRequestExceptionMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.SubscriptionAlreadyExistExceptionMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.TerminationFailedExceptionMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.TypeMismatchExceptionMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.UnsupportedOperationFailedExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.WebApplicaitonExceptionMapper;
-import com.sequenceiq.cloudbreak.filter.MDCContextFilter;
 import com.sequenceiq.cloudbreak.structuredevent.rest.StructuredEventFilter;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
@@ -57,8 +35,8 @@ public class EndpointConfig extends ResourceConfig {
     @Value("${cb.structuredevent.rest.enabled:false}")
     private Boolean auditEnabled;
 
-    public EndpointConfig() {
-    }
+    @Inject
+    private List<ExceptionMapper<?>> exceptionMappers;
 
     @PostConstruct
     private void init() {
@@ -67,7 +45,6 @@ public class EndpointConfig extends ResourceConfig {
         }
         registerEndpoints();
         registerExceptionMappers();
-        register(MDCContextFilter.class);
     }
 
     @PostConstruct
@@ -91,33 +68,10 @@ public class EndpointConfig extends ResourceConfig {
     }
 
     private void registerExceptionMappers() {
-        register(OperationExceptionMapper.class);
-        register(AccessDeniedExceptionMapper.class);
-        register(AuthenticationCredentialsNotFoundExceptionMapper.class);
-        register(BadRequestExceptionMapper.class);
-        register(CloudbreakApiExceptionMapper.class);
-        register(ConstraintViolationExceptionMapper.class);
-        register(ConversionFailedExceptionMapper.class);
-        register(DuplicatedKeyValueExceptionMapper.class);
-        register(EntityNotFoundExceptionMapper.class);
-        register(HttpMediaTypeNotSupportedExceptionMapper.class);
-        register(HttpMessageNotReadableExceptionMapper.class);
-        register(HttpRequestMethodNotSupportedExceptionMapper.class);
-        register(MethodArgumentNotValidExceptionMapper.class);
-        register(NotFoundExceptionMapper.class);
-        register(SmartSenseNotFoundExceptionMapper.class);
-        register(SpringAccessDeniedExceptionMapper.class);
-        register(SpringBadRequestExceptionMapper.class);
-        register(SubscriptionAlreadyExistExceptionMapper.class);
-        register(TypeMismatchExceptionMapper.class);
-        register(UnsupportedOperationFailedExceptionMapper.class);
-        register(HibernateConstraintViolationExceptionMapper.class);
-        register(DataIntegrityViolationExceptionMapper.class);
-        register(TerminationFailedExceptionMapper.class);
+        for (ExceptionMapper<?> mapper : exceptionMappers) {
+            register(mapper);
+        }
         register(WebApplicaitonExceptionMapper.class);
-        register(GetCloudParameterExceptionMapper.class);
-
-        register(RuntimeExceptionMapper.class);
         register(DefaultExceptionMapper.class);
     }
 
@@ -127,17 +81,10 @@ public class EndpointConfig extends ResourceConfig {
         register(PlatformParameterV2Controller.class);
         register(ClusterV1Controller.class);
         register(CredentialController.class);
-        register(NetworkController.class);
         register(RecipeController.class);
-        register(SecurityGroupController.class);
         register(StackV1Controller.class);
         register(StackV2Controller.class);
-        register(TemplateController.class);
-        register(ConstraintTemplateController.class);
         register(UserController.class);
-        register(TopologyController.class);
-        register(ClusterTemplateController.class);
-
         register(CloudbreakEventController.class);
         register(SubscriptionController.class);
         register(CloudbreakUsageController.class);
@@ -145,12 +92,16 @@ public class EndpointConfig extends ResourceConfig {
         register(SettingsController.class);
         register(UtilController.class);
         register(RdsConfigController.class);
+        register(ProxyConfigController.class);
         register(LdapController.class);
         register(SmartSenseSubscriptionController.class);
         register(FlexSubscriptionController.class);
         register(ImageCatalogV1Controller.class);
         register(SecurityRuleController.class);
         register(RepositoryConfigValidationController.class);
+        register(ManagementPackController.class);
+        register(AuditController.class);
+        register(OrganizationController.class);
 
         register(io.swagger.jaxrs.listing.ApiListingResource.class);
         register(io.swagger.jaxrs.listing.SwaggerSerializers.class);

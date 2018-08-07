@@ -3,7 +3,9 @@ package com.sequenceiq.cloudbreak.service.stack.connector.adapter;
 import static com.sequenceiq.cloudbreak.cloud.model.CloudCredential.SMART_SENSE_ID;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -22,7 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.Credential;
@@ -69,6 +71,7 @@ public class ServiceProviderCredentialAdapter {
             }
             CloudCredential cloudCredentialResponse = res.getCloudCredentialStatus().getCloudCredential();
             mergeSmartSenseAttributeIfExists(credential, cloudCredentialResponse);
+            mergeCloudProviderParameters(credential, cloudCredentialResponse, Collections.singleton(SMART_SENSE_ID));
         } catch (InterruptedException e) {
             LOGGER.error("Error while executing credential verification", e);
             throw new OperationException(e);
@@ -111,6 +114,26 @@ public class ServiceProviderCredentialAdapter {
                 credential.setAttributes(new Json(newAttributes));
             } catch (IOException e) {
                 LOGGER.error("SmartSense id could not be added to the credential as attribute.", e);
+            }
+        }
+    }
+
+    private void mergeCloudProviderParameters(Credential credential, CloudCredential cloudCredentialResponse, Set<String> skippedKeys) {
+        Json attributes = credential.getAttributes();
+        Map<String, Object> newAttributes = attributes.getMap();
+        boolean newAttributesAdded = false;
+        for (Map.Entry<String, Object> cloudParam : cloudCredentialResponse.getParameters().entrySet()) {
+            if (!skippedKeys.contains(cloudParam.getKey()) && newAttributes.get(cloudParam.getKey()) == null && cloudParam.getValue() != null) {
+                newAttributes.put(cloudParam.getKey(), cloudParam.getValue());
+                newAttributesAdded = true;
+            }
+        }
+        if (newAttributesAdded) {
+            try {
+                credential.setAttributes(new Json(newAttributes));
+            } catch (IOException ex) {
+                LOGGER.error("New cloudprovider attributes could not be added to the credential.", ex);
+                throw new OperationException(ex);
             }
         }
     }

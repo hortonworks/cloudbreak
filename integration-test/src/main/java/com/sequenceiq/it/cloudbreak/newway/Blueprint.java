@@ -1,18 +1,18 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
-import com.sequenceiq.it.IntegrationTestContext;
-
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+
+import com.sequenceiq.it.IntegrationTestContext;
 
 public class Blueprint extends BlueprintEntity {
 
     static Function<IntegrationTestContext, Blueprint> getTestContext(String key) {
-        return (testContext)->testContext.getContextParam(key, Blueprint.class);
+        return testContext -> testContext.getContextParam(key, Blueprint.class);
     }
 
     static Function<IntegrationTestContext, Blueprint> getNew() {
-        return (testContext)->new Blueprint();
+        return testContext -> new Blueprint();
     }
 
     public static Blueprint request() {
@@ -26,7 +26,7 @@ public class Blueprint extends BlueprintEntity {
     }
 
     public static Action<Blueprint> post(String key) {
-        return new Action<Blueprint>(getTestContext(key), BlueprintAction::post);
+        return new Action<>(getTestContext(key), BlueprintAction::post);
     }
 
     public static Action<Blueprint> post() {

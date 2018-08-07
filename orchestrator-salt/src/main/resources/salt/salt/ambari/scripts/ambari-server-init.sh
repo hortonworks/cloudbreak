@@ -20,52 +20,52 @@ if [[ '{{ is_gpl_repo_enabled }}' = 'True' ]]; then
 fi
 
 config_remote_jdbc() {
-    if [[ '{{ ambari_database.vendor }}' = 'embedded' ]]; then
+    if [[ '{{ ambari_database.ambariVendor }}' = 'embedded' ]]; then
         echo Configure local jdbc connection
         ambari-server setup --silent $GPL_SWITCH --java-home $JAVA_HOME
     else
         echo Configure remote jdbc connection
         local specoptions=''
-        if [[ -f /var/lib/ambari-server/resources/Ambari-DDL-{{ ambari_database.fancyName }}-CREATE.sql ]]; then
-          echo 'Initialize {{ ambari_database.vendor }} database for Ambari.'
-          if [[ '{{ ambari_database.vendor }}' = 'postgres' ]]; then
-            PGPASSWORD='{{ ambari_database.password }}' psql 'dbname={{ ambari_database.name }} options=--search_path=public' -h {{ ambari_database.host }} -p {{ ambari_database.port }} -U '{{ ambari_database.userName }}' -a -f /var/lib/ambari-server/resources/Ambari-DDL-{{ ambari_database.fancyName }}-CREATE.sql
-            specoptions='--postgresschema public'
-          fi
-          if [[ '{{ ambari_database.vendor }}' = 'mysql' ]]; then
-            mysql -h{{ ambari_database.host }} -P{{ ambari_database.port }} -u'{{ ambari_database.userName }}' -p'{{ ambari_database.password }}' '{{ ambari_database.name }}' < /var/lib/ambari-server/resources/Ambari-DDL-{{ ambari_database.fancyName }}-CREATE.sql
-          fi
+        echo 'Initialize {{ ambari_database.ambariVendor }} database for Ambari.'
+        if [[ '{{ ambari_database.ambariVendor }}' = 'postgres' && -f /var/lib/ambari-server/resources/Ambari-DDL-Postgres-CREATE.sql ]]; then
+          PGPASSWORD='{{ ambari_database.connectionPassword }}' psql 'dbname={{ ambari_database.databaseName }} options=--search_path=public' -h {{ ambari_database.host }} -p {{ ambari_database.port }} -U '{{ ambari_database.connectionUserName }}' -a -f /var/lib/ambari-server/resources/Ambari-DDL-Postgres-CREATE.sql
+          specoptions='--postgresschema public'
+        elif [[ '{{ ambari_database.ambariVendor }}' = 'mysql' && -f /var/lib/ambari-server/resources/Ambari-DDL-MySQL-CREATE.sql ]]; then
+          mysql -h{{ ambari_database.host }} -P{{ ambari_database.port }} -u'{{ ambari_database.connectionUserName }}' -p'{{ ambari_database.connectionPassword }}' '{{ ambari_database.databaseName }}' < /var/lib/ambari-server/resources/Ambari-DDL-MySQL-CREATE.sql
+          cp -f $(find /usr/share/java -name "mysql-connector*.jar" | tail -n1) /usr/share/java/mysql-connector.jar ##copy the jdbc driver jar to /usr/share/java folder because Ambari server requires it in that directory
+          ambari-server setup --jdbc-db mysql --jdbc-driver /usr/share/java/mysql-connector.jar
+        elif [[ '{{ ambari_database.ambariVendor }}' = 'oracle' && -f /var/lib/ambari-server/resources/Ambari-DDL-Oracle-CREATE.sql ]]; then
+          sqlplus '{{ ambari_database.connectionUserName }}/{{ ambari_database.connectionPassword }}@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(Host={{ ambari_database.host }})(Port={{ ambari_database.port }}))(CONNECT_DATA=(SID=remote_SID)))' < /var/lib/ambari-server/resources/Ambari-DDL-Oracle-CREATE.sql
         else
-            echo File not found /var/lib/ambari-server/resources/Ambari-DDL-{{ ambari_database.fancyName }}-CREATE.sql
+            echo "SQL migration file could not be found for vendor='{{ ambari_database.ambariVendor }}'"
             exit 1
         fi
         ambari-server setup --silent $GPL_SWITCH --verbose --java-home $JAVA_HOME \
-            --database {{ ambari_database.vendor }} --databasehost {{ ambari_database.host }} --databaseport {{ ambari_database.port }} --databasename '{{ ambari_database.name }}' \
-            --databaseusername '{{ ambari_database.userName }}' --databasepassword '{{ ambari_database.password }}' $specoptions
+            --database {{ ambari_database.ambariVendor }} --databasehost {{ ambari_database.host }} --databaseport {{ ambari_database.port }} --databasename '{{ ambari_database.databaseName }}' \
+            --databaseusername '{{ ambari_database.connectionUserName }}' --databasepassword '{{ ambari_database.connectionPassword }}' $specoptions
     fi
 }
 
 config_jdbc_drivers() {
-  if [ -d "/var/lib/ambari-server/jdbc-drivers" ]; then
-    if [ -z "$(find_and_distribute_latest_jdbc_driver postgres)" ]; then
+    if [ -z "$(find_and_distribute_latest_jdbc_driver postgresql-jdbc postgres)" ]; then
       echo "PostgreSQL JDBC driver not found."
     fi
-    if [ -z "$(find_and_distribute_latest_jdbc_driver mysql)" ]; then
+    if [ -z "$(find_and_distribute_latest_jdbc_driver mysql-connector mysql)" ]; then
       echo "MySQL JDBC driver not found."
     fi
-  else
-    echo "JDBC driver directory not found."
-  fi
+    if [ -z "$(find_and_distribute_latest_jdbc_driver ojdbc oracle)" ]; then
+      echo "ORACLE_JDBC driver not found."
+    fi
 }
 
 find_and_distribute_latest_jdbc_driver() {
-    latest=$(find /var/lib/ambari-server/jdbc-drivers -name "$1*.jar" | tail -n1)
+    latest=$(find /usr/share/java -name "$1*.jar" | tail -n1)
     if [ -z "$latest" ]; then
         exit 1
     fi
-    ln -s $latest /usr/share/java # this is for ambari-server setup
+
     ln -s $latest $JAVA_HOME/jre/lib/ext # this is for ambari-server start -> database check
-    ambari-server setup --jdbc-db=$1 --jdbc-driver=${latest} $GPL_SWITCH
+    ambari-server setup --jdbc-db=$2 --jdbc-driver=${latest} $GPL_SWITCH
     echo ${latest}
 }
 
@@ -75,21 +75,21 @@ silent_security_setup() {
 }
 
 read_tarballs() {
-  mkdir -p /tmp/preload
-  cp -fn $(find /usr/hdp/ -name "mapreduce.tar.gz") /tmp/preload &
-  cp -fn $(find /usr/hdp/ -name "tez.tar.gz") /tmp/preload &
-  cp -fn $(find /usr/hdp/ -name "slider.tar.gz") /tmp/preload &
-  cp -fn $(find /usr/hdp/ -name "pig.tar.gz") /tmp/preload &
+  mkdir -p /opt/salt/preload
+  cp -fn $(find /usr/hdp/ -name "mapreduce.tar.gz") /opt/salt/preload &
+  cp -fn $(find /usr/hdp/ -name "tez.tar.gz") /opt/salt/preload &
+  cp -fn $(find /usr/hdp/ -name "slider.tar.gz") /opt/salt/preload &
+  cp -fn $(find /usr/hdp/ -name "pig.tar.gz") /opt/salt/preload &
 }
 
 main() {
   # consul-register-service ambari-server $(ip addr show eth0 | grep "inet\b" | awk '{print $2}' | cut -d/ -f1)
-  if [ ! -f "/var/ambari-init-executed" ]; then
-    config_jdbc_drivers
-    config_remote_jdbc
-    silent_security_setup
-    read_tarballs
-  fi
+  echo "--------- Executing script: /opt/ambari-server/ambari-server-init.sh at $(date) ---------"
+  config_jdbc_drivers
+  config_remote_jdbc
+  silent_security_setup
+  # read_tarballs
+  echo "--------- Executed script: /opt/ambari-server/ambari-server-init.sh at $(date) ---------"
   echo $(date +%Y-%m-%d:%H:%M:%S) >> /var/ambari-init-executed
 }
 

@@ -39,7 +39,7 @@ public class ResourceBuilders {
 
     @PostConstruct
     public void init() {
-        BuilderComparator comparator = new BuilderComparator();
+        Comparator<OrderedBuilder> comparator = new BuilderComparator();
         initNetwork(comparator);
         initGroup(comparator);
         initCompute(comparator);
@@ -57,37 +57,25 @@ public class ResourceBuilders {
         return new ArrayList<>(groupChain.get(platform));
     }
 
-    private void initNetwork(BuilderComparator comparator) {
-        for (NetworkResourceBuilder builder : network) {
-            List<NetworkResourceBuilder> chain = networkChain.get(builder.platform());
-            if (chain == null) {
-                chain = new LinkedList<>();
-                networkChain.put(builder.platform(), chain);
-            }
+    private void initNetwork(Comparator<OrderedBuilder> comparator) {
+        for (NetworkResourceBuilder<?> builder : network) {
+            List<NetworkResourceBuilder> chain = networkChain.computeIfAbsent(builder.platform(), k -> new LinkedList<>());
             chain.add(builder);
             chain.sort(comparator);
         }
     }
 
-    private void initCompute(BuilderComparator comparator) {
-        for (ComputeResourceBuilder builder : compute) {
-            List<ComputeResourceBuilder> chain = computeChain.get(builder.platform());
-            if (chain == null) {
-                chain = new LinkedList<>();
-                computeChain.put(builder.platform(), chain);
-            }
+    private void initCompute(Comparator<OrderedBuilder> comparator) {
+        for (ComputeResourceBuilder<?> builder : compute) {
+            List<ComputeResourceBuilder> chain = computeChain.computeIfAbsent(builder.platform(), k -> new LinkedList<>());
             chain.add(builder);
             chain.sort(comparator);
         }
     }
 
-    private void initGroup(BuilderComparator comparator) {
-        for (GroupResourceBuilder builder : group) {
-            List<GroupResourceBuilder> chain = groupChain.get(builder.platform());
-            if (chain == null) {
-                chain = new LinkedList<>();
-                groupChain.put(builder.platform(), chain);
-            }
+    private void initGroup(Comparator<OrderedBuilder> comparator) {
+        for (GroupResourceBuilder<?> builder : group) {
+            List<GroupResourceBuilder> chain = groupChain.computeIfAbsent(builder.platform(), k -> new LinkedList<>());
             chain.add(builder);
             chain.sort(comparator);
         }

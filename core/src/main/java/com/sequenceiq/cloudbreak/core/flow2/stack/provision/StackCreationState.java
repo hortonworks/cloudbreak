@@ -23,24 +23,24 @@ public enum StackCreationState implements FlowState {
     STACK_CREATION_FINISHED_STATE,
     FINAL_STATE;
 
-    private Class<? extends AbstractAction> action;
+    private Class<? extends AbstractAction<?, ?, ?, ?>> action;
 
     private Class<? extends RestartAction> restartAction = FillInMemoryStateStoreRestartAction.class;
 
     StackCreationState() {
     }
 
-    StackCreationState(Class<? extends AbstractAction> action) {
+    StackCreationState(Class<? extends AbstractAction<?, ?, ?, ?>> action) {
         this.action = action;
     }
 
-    StackCreationState(Class<? extends AbstractAction> action, Class<? extends RestartAction> restartAction) {
+    StackCreationState(Class<? extends AbstractAction<?, ?, ?, ?>> action, Class<? extends RestartAction> restartAction) {
         this.action = action;
         this.restartAction = restartAction;
     }
 
     @Override
-    public Class<? extends AbstractAction> action() {
+    public Class<? extends AbstractAction<?, ?, ?, ?>> action() {
         return action;
     }
 

@@ -35,7 +35,7 @@ public class AutoScalingPrometheusTest extends AbstractCloudbreakIntegrationTest
     @Parameters({ "cooldown", "clusterMinSize", "clusterMaxSize", "policyName", "operator", "alertRuleName", "period", "threshold", "hostGroup",
             "scalingAdjustment"})
     public void testAutoscaling(int cooldown, int clusterMinSize, int clusterMaxSize, String policyName, String operator, String alertRuleName, int period,
-            Double threshold, String hostGroup, int scalingAdjustment) throws Exception {
+            Double threshold, String hostGroup, int scalingAdjustment) {
         // GIVEN
         itContext = getItContext();
         String stackId = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);
@@ -67,9 +67,9 @@ public class AutoScalingPrometheusTest extends AbstractCloudbreakIntegrationTest
     public void cleanUpscaling() {
         Map<Long, List<Long>> autoscalingAlerts = itContext.getContextParam(CloudbreakITContextConstants.AUTOSCALE_ALERTS, Map.class);
         if (autoscalingAlerts != null) {
-            for (Entry elem : autoscalingAlerts.entrySet()) {
-                for (Object alertId : (Iterable<?>) (elem.getValue())) {
-                    AutoscalingUtil.deletePrometheusAlert(autoscaleClient, (Long) elem.getKey(), (Long) alertId);
+            for (Entry<Long, List<Long>> elem : autoscalingAlerts.entrySet()) {
+                for (Object alertId : elem.getValue()) {
+                    AutoscalingUtil.deletePrometheusAlert(autoscaleClient, elem.getKey(), (Long) alertId);
                 }
             }
         }

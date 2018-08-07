@@ -74,6 +74,8 @@ public class SecurityConfig {
 
         private static final String[] RECIPE_URL_PATTERNS = {API_ROOT_CONTEXT + "/v1/recipes/**"};
 
+        private static final String[] MPACK_URL_PATTERNS = {API_ROOT_CONTEXT + "/v1/mpacks/**"};
+
         private static final String[] NETWORK_URL_PATTERNS = {API_ROOT_CONTEXT + "/v1/networks/**"};
 
         private static final String[] SECURITYGROUP_URL_PATTERNS = {API_ROOT_CONTEXT + "/v1/securitygroups/**"};
@@ -115,6 +117,8 @@ public class SecurityConfig {
                     .access("#oauth2.hasScope('cloudbreak.credentials.read') or #oauth2.hasScope('cloudbreak.credentials')")
                     .antMatchers(HttpMethod.GET, RECIPE_URL_PATTERNS)
                     .access("#oauth2.hasScope('cloudbreak.recipes.read') or #oauth2.hasScope('cloudbreak.recipes')")
+                    .antMatchers(HttpMethod.GET, MPACK_URL_PATTERNS)
+                    .access("#oauth2.hasScope('cloudbreak.recipes.read') or #oauth2.hasScope('cloudbreak.recipes')")
                     .antMatchers(HttpMethod.GET, NETWORK_URL_PATTERNS)
                     .access("#oauth2.hasScope('cloudbreak.networks.read') or #oauth2.hasScope('cloudbreak.networks')")
                     .antMatchers(HttpMethod.GET, SECURITYGROUP_URL_PATTERNS)
@@ -134,6 +138,7 @@ public class SecurityConfig {
                     .antMatchers(TEMPLATE_URL_PATTERNS).access("#oauth2.hasScope('cloudbreak.templates')")
                     .antMatchers(CREDENTIAL_URL_PATTERNS).access("#oauth2.hasScope('cloudbreak.credentials')")
                     .antMatchers(RECIPE_URL_PATTERNS).access("#oauth2.hasScope('cloudbreak.recipes')")
+                    .antMatchers(MPACK_URL_PATTERNS).access("#oauth2.hasScope('cloudbreak.recipes')")
                     .antMatchers(NETWORK_URL_PATTERNS).access("#oauth2.hasScope('cloudbreak.networks')")
                     .antMatchers(SECURITYGROUP_URL_PATTERNS).access("#oauth2.hasScope('cloudbreak.securitygroups')")
                     .antMatchers(STACK_URL_PATTERNS).access("#oauth2.hasScope('cloudbreak.stacks') or #oauth2.hasScope('cloudbreak.autoscale')")
@@ -147,6 +152,7 @@ public class SecurityConfig {
                     .antMatchers(API_ROOT_CONTEXT + "/v2/stacks/ambari", API_ROOT_CONTEXT + "/v2/stacks/*/certificate", API_ROOT_CONTEXT + "/v2/stacks/all")
                     .access("#oauth2.hasScope('cloudbreak.autoscale')")
                     .antMatchers(API_ROOT_CONTEXT + "/v1/events/**").access("#oauth2.hasScope('cloudbreak.events')")
+                    .antMatchers(API_ROOT_CONTEXT + "/v1/audits/**").access("#oauth2.hasScope('cloudbreak.events')")
                     .antMatchers(API_ROOT_CONTEXT + "/v1/usages/account/**").access("#oauth2.hasScope('cloudbreak.usages.account')")
                     .antMatchers(API_ROOT_CONTEXT + "/v1/usages/user/**").access("#oauth2.hasScope('cloudbreak.usages.user')")
                     .antMatchers(API_ROOT_CONTEXT + "/v1/usages/flex/**").access("#oauth2.hasScope('cloudbreak.flex')")
@@ -161,10 +167,12 @@ public class SecurityConfig {
                     .antMatchers(API_ROOT_CONTEXT + "/v1/ldap/**").access("#oauth2.hasScope('cloudbreak.stacks')")
                     .antMatchers(API_ROOT_CONTEXT + "/v1/util/**").access("#oauth2.hasScope('cloudbreak.stacks')")
                     .antMatchers(API_ROOT_CONTEXT + "/v1/rdsconfigs/**").access("#oauth2.hasScope('cloudbreak.stacks')")
+                    .antMatchers(API_ROOT_CONTEXT + "/v1/proxyconfigs/**").access("#oauth2.hasScope('cloudbreak.stacks')")
                     .antMatchers(API_ROOT_CONTEXT + "/v1/smartsensesubscriptions/**").access("#oauth2.hasScope('cloudbreak.stacks')")
                     .antMatchers(API_ROOT_CONTEXT + "/v1/flexsubscriptions/**").access("#oauth2.hasScope('cloudbreak.stacks')")
                     .antMatchers(API_ROOT_CONTEXT + "/v1/connectors/**").access("#oauth2.hasScope('cloudbreak.credentials')")
                     .antMatchers(API_ROOT_CONTEXT + "/v2/connectors/**").access("#oauth2.hasScope('cloudbreak.credentials')")
+                    .antMatchers(API_ROOT_CONTEXT + "/v1/organizations/**").access("#oauth2.hasScope('cloudbreak.credentials')")
                     .antMatchers(API_ROOT_CONTEXT + "/v1/repositoryconfigs/**").access("#oauth2.hasScope('cloudbreak.stacks')")
                     .antMatchers(API_ROOT_CONTEXT + "/swagger.json").permitAll()
                     .antMatchers(API_ROOT_CONTEXT + "/api-docs/**").permitAll()

@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.api.model;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -17,7 +16,10 @@ public class PlatformNetworkResponse implements JsonEntity {
 
     private Map<String, String> subnets;
 
-    private Map<String, Object> properties = new HashMap<>();
+    private Map<String, Object> properties;
+
+    public PlatformNetworkResponse() {
+    }
 
     public PlatformNetworkResponse(String name, String id, Map<String, String> subnets, Map<String, Object> properties) {
         this.name = name;

@@ -40,7 +40,7 @@ exports.disableAutoscaleStateByCloudbreakCluster = function(args, res, next) {
     "id" : 1,
     "alertState" : "OK"
   } ],
-  "id" : 6,
+  "id" : args.cbClusterId.value,
   "state" : "aeiou",
   "prometheusAlerts" : [ {
     "scalingPolicy" : "",
@@ -108,7 +108,7 @@ exports.enableAutoscaleStateByCloudbreakCluster = function(args, res, next) {
     "id" : 1,
     "alertState" : "OK"
   } ],
-  "id" : 6,
+  "id" : args.cbClusterId.value,
   "state" : "aeiou",
   "prometheusAlerts" : [ {
     "scalingPolicy" : "",
@@ -142,10 +142,10 @@ exports.enableAutoscaleStateByCloudbreakCluster = function(args, res, next) {
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
     if (args.cbClusterId.value == 4) {
-      var responseJson = require('../responses/clusters/4.json');
-      res.end(JSON.stringify(responseJson));
+        var responseJson = require('../responses/clusters/4.json');
+        res.end(JSON.stringify(responseJson));
     } else {
-      res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
+        res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
     }
   } else {
     res.end();
@@ -181,7 +181,7 @@ exports.getByCloudbreakCluster = function(args, res, next) {
     "id" : 1,
     "alertState" : "OK"
   } ],
-  "id" : 6,
+  "id" : args.cbClusterId.value,
   "state" : "aeiou",
   "prometheusAlerts" : [ {
     "scalingPolicy" : "",
@@ -214,26 +214,26 @@ exports.getByCloudbreakCluster = function(args, res, next) {
 };
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
-    switch(args.cbClusterId.value){
-      case 1:
-        var responseJson = require('../responses/clusters/1.json');
-        res.end(JSON.stringify(responseJson));
-        break;
-      case 2:
-        var responseJson = require('../responses/clusters/2.json');
-        res.end(JSON.stringify(responseJson));
-        break;
-      case 3:
-        var responseJson = require('../responses/clusters/3.json');
-        res.end(JSON.stringify(responseJson));
-        break;
-      case 4:
-        var responseJson = require('../responses/clusters/4.json');
-        res.end(JSON.stringify(responseJson));
-        break;
-      default:
-        res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
-    }
+      switch(args.cbClusterId.value){
+          case 1:
+            var responseJson = require('../responses/clusters/1.json');
+            res.end(JSON.stringify(responseJson));
+            break;
+          case 2:
+            var responseJson = require('../responses/clusters/2.json');
+            res.end(JSON.stringify(responseJson));
+            break;
+          case 3:
+            var responseJson = require('../responses/clusters/3.json');
+            res.end(JSON.stringify(responseJson));
+            break;
+          case 4:
+            var responseJson = require('../responses/clusters/4.json');
+            res.end(JSON.stringify(responseJson));
+            break;
+          default:
+            res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
+      }
   } else {
     res.end();
   }
@@ -269,7 +269,7 @@ exports.modifyByCloudbreakCluster = function(args, res, next) {
     "id" : 1,
     "alertState" : "OK"
   } ],
-  "id" : 6,
+  "id" : args.cbClusterId.value,
   "state" : "aeiou",
   "prometheusAlerts" : [ {
     "scalingPolicy" : "",
@@ -337,7 +337,7 @@ exports.runByCloudbreakCluster = function(args, res, next) {
     "id" : 1,
     "alertState" : "OK"
   } ],
-  "id" : 6,
+  "id" : args.cbClusterId.value,
   "state" : "aeiou",
   "prometheusAlerts" : [ {
     "scalingPolicy" : "",
@@ -387,7 +387,7 @@ exports.suspendByCloudbreakCluster = function(args, res, next) {
   var examples = {};
   examples['application/json'] = {
   "port" : "aeiou",
-  "stackId" : args.cbClusterId.value,
+  "stackId" : 0,
   "host" : "aeiou",
   "metricAlerts" : [ {
     "scalingPolicy" : {

@@ -2,9 +2,14 @@ package com.sequenceiq.periscope.service.security;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
@@ -19,24 +24,30 @@ import com.sequenceiq.periscope.domain.PeriscopeUser;
 @Lazy
 public class OwnerBasedPermissionEvaluator implements PermissionEvaluator {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(OwnerBasedPermissionEvaluator.class);
+
     @Inject
     @Lazy
-    private UserDetailsService userDetailsService;
+    private CachedUserDetailsService cachedUserDetailsService;
 
     @Override
-    public boolean hasPermission(Authentication authentication, Object targetDomainObject, Object permission) {
-        if (targetDomainObject == null) {
+    public boolean hasPermission(Authentication authentication, Object target, Object permission) {
+        if (target instanceof Optional) {
+            target = ((Optional) target).orElse(null);
+        }
+        if (target == null) {
             return false;
         }
-        try {
-            PeriscopeUser user = userDetailsService.getDetails((String) authentication.getPrincipal(), UserFilterField.USERNAME);
-            if (getUserId(targetDomainObject).equals(user.getId())) {
-                return true;
+        PeriscopeUser user = cachedUserDetailsService.getDetails((String) authentication.getPrincipal(), UserFilterField.USERNAME);
+        Collection<?> targets = target instanceof Collection ? (Collection<?>) target : Collections.singleton(target);
+        return targets.stream().allMatch(t -> {
+            try {
+                return getUserId(t).equals(user.getId());
+            } catch (IllegalAccessException e) {
+                LOGGER.error("Object doesn't have properties to check permission with class: " + t.getClass().getCanonicalName(), e);
+                return false;
             }
-        } catch (IllegalAccessException ignored) {
-            return false;
-        }
-        return false;
+        });
     }
 
     @Override

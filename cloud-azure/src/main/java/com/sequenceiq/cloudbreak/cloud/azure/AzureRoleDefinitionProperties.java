@@ -52,7 +52,7 @@ public class AzureRoleDefinitionProperties {
         this.type = type;
     }
 
-    public List<AzurePermission> getPermissions() {
+    public Iterable<AzurePermission> getPermissions() {
         return permissions;
     }
 
@@ -71,13 +71,13 @@ public class AzureRoleDefinitionProperties {
     //BEGIN GENERATED CODE
     @Override
     public String toString() {
-        return "AzureRoleDefinitionProperties{" +
-                "roleName='" + roleName + '\'' +
-                ", description='" + description + '\'' +
-                ", type='" + type + '\'' +
-                ", permissions=" + permissions +
-                ", assignableScopes=" + assignableScopes +
-                '}';
+        return "AzureRoleDefinitionProperties{"
+                + "roleName='" + roleName + '\''
+                + ", description='" + description + '\''
+                + ", type='" + type + '\''
+                + ", permissions=" + permissions
+                + ", assignableScopes=" + assignableScopes
+                + '}';
     }
     //END GENERATED CODE
 }

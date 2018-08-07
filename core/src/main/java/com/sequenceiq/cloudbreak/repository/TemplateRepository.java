@@ -2,18 +2,21 @@ package com.sequenceiq.cloudbreak.repository;
 
 import java.util.Set;
 
+import javax.transaction.Transactional;
+
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
+import com.sequenceiq.cloudbreak.aspect.BaseRepository;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.Topology;
+import com.sequenceiq.cloudbreak.aspect.HasPermission;
+import com.sequenceiq.cloudbreak.service.EntityType;
 
 @EntityType(entityClass = Template.class)
-public interface TemplateRepository extends CrudRepository<Template, Long> {
-
-    @Override
-    Template findOne(@Param("id") Long id);
+@Transactional(Transactional.TxType.REQUIRED)
+@HasPermission
+public interface TemplateRepository extends BaseRepository<Template, Long> {
 
     @Query("SELECT t FROM Template t WHERE t.owner= :user AND deleted IS NOT TRUE AND t.status <> 'DEFAULT_DELETED'")
     Set<Template> findForUser(@Param("user") String user);
@@ -38,8 +41,7 @@ public interface TemplateRepository extends CrudRepository<Template, Long> {
     @Query("SELECT t FROM Template t WHERE t.owner= :owner and t.name= :name AND deleted IS NOT TRUE AND t.status <> 'DEFAULT_DELETED'")
     Template findByNameInUser(@Param("name") String name, @Param("owner") String owner);
 
-    @Query("SELECT t FROM Template t WHERE t.account= :account AND (t.status = 'DEFAULT_DELETED' OR t.status = 'DEFAULT')")
-    Set<Template> findAllDefaultInAccount(@Param("account") String account);
-
     Long countByTopology(Topology topology);
+
+    Set<Template> findByTopology(Topology topology);
 }

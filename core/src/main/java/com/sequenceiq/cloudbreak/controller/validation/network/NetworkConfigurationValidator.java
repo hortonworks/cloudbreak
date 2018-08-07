@@ -1,21 +1,19 @@
 package com.sequenceiq.cloudbreak.controller.validation.network;
 
-import java.util.Set;
-
 import org.apache.commons.net.util.SubnetUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Network;
 
 @Component
 public class NetworkConfigurationValidator {
     private static final Logger LOGGER = LoggerFactory.getLogger(NetworkConfigurationValidator.class);
 
-    public boolean validateNetworkForStack(Network network, Set<InstanceGroup> instanceGroups) {
+    public boolean validateNetworkForStack(Network network, Iterable<InstanceGroup> instanceGroups) {
         if (network.getSubnetCIDR() != null) {
             SubnetUtils utils = new SubnetUtils(network.getSubnetCIDR());
             int addressCount = utils.getInfo().getAddressCount();

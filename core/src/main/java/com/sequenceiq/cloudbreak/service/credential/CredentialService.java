@@ -5,11 +5,12 @@ import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
 import java.util.Date;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
-import javax.transaction.Transactional;
-import javax.transaction.Transactional.TxType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,19 +24,26 @@ import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.security.Organization;
+import com.sequenceiq.cloudbreak.domain.security.User;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
+import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.notification.Notification;
 import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderCredentialAdapter;
-import com.sequenceiq.cloudbreak.service.user.UserProfileCredentialHandler;
+import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.service.user.UserProfileHandler;
 
 @Service
-@Transactional
 public class CredentialService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialService.class);
@@ -53,13 +61,25 @@ public class CredentialService {
     private AuthorizationService authorizationService;
 
     @Inject
-    private UserProfileCredentialHandler userProfileCredentialHandler;
+    private UserProfileHandler userProfileHandler;
 
     @Inject
     private AccountPreferencesService accountPreferencesService;
 
     @Inject
     private NotificationSender notificationSender;
+
+    @Inject
+    private CloudbreakMessagesService messagesService;
+
+    @Inject
+    private UserService userService;
+
+    @Inject
+    private OrganizationService organizationService;
+
+    @Inject
+    private AuthenticatedUserService authenticatedUserService;
 
     public Set<Credential> retrievePrivateCredentials(IdentityUser user) {
         return credentialRepository.findForUser(user.getUserId());
@@ -73,33 +93,24 @@ public class CredentialService {
     }
 
     public Credential get(Long id) {
-        Credential credential = credentialRepository.findOne(id);
-        if (credential == null) {
-            throw new AccessDeniedException(String.format("Access is denied: Credential '%d'.", id));
-        }
-        authorizationService.hasReadPermission(credential);
-        return credential;
+        return credentialRepository.findById(id)
+                .orElseThrow(accessDenied(String.format("Access is denied: Credential not found by id '%d'.", id)));
+    }
+
+    public Supplier<AccessDeniedException> accessDenied(String accessDeniedMessage) {
+        return () -> new AccessDeniedException(accessDeniedMessage);
     }
 
     public Credential get(Long id, String account) {
-        Credential credential = credentialRepository.findByIdInAccount(id, account);
-        if (credential == null) {
-            throw new AccessDeniedException(String.format("Access is denied: Credential '%d' in %s account.", id, account));
-        }
-        authorizationService.hasReadPermission(credential);
-        return credential;
+        return Optional.ofNullable(credentialRepository.findByIdInAccount(id, account))
+                .orElseThrow(accessDenied(String.format("Access is denied: Credential not found by id '%d' in %s account.", id, account)));
     }
 
     public Credential get(String name, String account) {
-        Credential credential = credentialRepository.findOneByName(name, account);
-        if (credential == null) {
-            throw new AccessDeniedException(String.format("Access is denied: Credential '%s' in %s account.", name, account));
-        }
-        authorizationService.hasReadPermission(credential);
-        return credential;
+        return Optional.ofNullable(credentialRepository.findOneByName(name, account))
+                .orElseThrow(accessDenied(String.format("Access is denied: Credential not found by name '%s' in %s account.", name, account)));
     }
 
-    @Transactional(TxType.NEVER)
     public Map<String, String> interactiveLogin(IdentityUser user, Credential credential) {
         LOGGER.debug("Interactive login: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         credential.setOwner(user.getUserId());
@@ -107,47 +118,67 @@ public class CredentialService {
         return credentialAdapter.interactiveLogin(credential);
     }
 
-    @Transactional(TxType.NEVER)
     public Credential create(IdentityUser user, Credential credential) {
         LOGGER.debug("Creating credential: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         credential.setOwner(user.getUserId());
         credential.setAccount(user.getAccount());
-        return saveCredential(credential);
+        return saveCredentialAndNotify(credential, ResourceEvent.CREDENTIAL_CREATED);
     }
 
-    @Transactional(TxType.NEVER)
+    public Credential modify(IdentityUser user, Credential credential) {
+        LOGGER.debug("Modifying credential: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
+        Credential credentialToModify = credential.isPublicInAccount() ? getPublicCredential(credential.getName(), user)
+                : getPrivateCredential(credential.getName(), user);
+        if (!credentialToModify.cloudPlatform().equals(credential.cloudPlatform())) {
+            throw new BadRequestException("Modifying credential platform is forbidden");
+        }
+        if (credential.getAttributes() != null) {
+            credentialToModify.setAttributes(credential.getAttributes());
+        }
+        if (credential.getDescription() != null) {
+            credentialToModify.setDescription(credential.getDescription());
+        }
+        if (credential.getTopology() != null) {
+            credentialToModify.setTopology(credential.getTopology());
+        }
+        return saveCredentialAndNotify(credentialToModify, ResourceEvent.CREDENTIAL_MODIFIED);
+    }
+
     public Credential create(String userId, String account, Credential credential) {
         LOGGER.debug("Creating credential: [UserId: '{}', Account: '{}']", userId, account);
         credential.setOwner(userId);
         credential.setAccount(account);
-        return saveCredential(credential);
+        IdentityUser identityUser = authenticatedUserService.getCbUser();
+        User user = userService.getOrCreate(identityUser);
+        Organization organization = organizationService.getDefaultOrganizationForUser(user);
+        credential.setOrganization(organization);
+        return saveCredentialAndNotify(credential, ResourceEvent.CREDENTIAL_CREATED);
     }
 
-    @Transactional(TxType.NEVER)
     @Retryable(value = BadRequestException.class, maxAttempts = 30, backoff = @Backoff(delay = 2000))
     public Credential createWithRetry(String userId, String account, Credential credential) {
         return create(userId, account, credential);
     }
 
-    private Credential saveCredential(Credential credential) {
+    private Credential saveCredentialAndNotify(Credential credential, ResourceEvent resourceEvent) {
         credential = credentialAdapter.init(credential);
         Credential savedCredential;
         try {
             savedCredential = credentialRepository.save(credential);
-            userProfileCredentialHandler.createProfilePreparation(credential);
-            sendCredentialCreatedNotification(credential);
+            userProfileHandler.createProfilePreparation(credential);
+            sendCredentialNotification(credential, resourceEvent);
         } catch (DataIntegrityViolationException ex) {
-            String msg = String.format("Error with resource [%s], error: [%s]", APIResourceType.CREDENTIAL, getProperSqlErrorMessage(ex));
+            String msg = String.format("Error with resource [%s], %s", APIResourceType.CREDENTIAL, getProperSqlErrorMessage(ex));
             throw new BadRequestException(msg);
         }
         return savedCredential;
     }
 
-    private void sendCredentialCreatedNotification(Credential credential) {
+    private void sendCredentialNotification(Credential credential, ResourceEvent resourceEvent) {
         CloudbreakEventsJson notification = new CloudbreakEventsJson();
-        notification.setEventType("CREDENTIAL_CREATED");
+        notification.setEventType(resourceEvent.name());
         notification.setEventTimestamp(new Date().getTime());
-        notification.setEventMessage("Credential created");
+        notification.setEventMessage(messagesService.getMessage(resourceEvent.getMessage()));
         notification.setOwner(credential.getOwner());
         notification.setAccount(credential.getAccount());
         notification.setCloud(credential.cloudPlatform());
@@ -155,52 +186,50 @@ public class CredentialService {
     }
 
     public Credential getPublicCredential(String name, IdentityUser user) {
-        Credential credential = credentialRepository.findOneByName(name, user.getAccount());
-        if (credential == null) {
-            throw new AccessDeniedException(String.format("Access is denied: Credential '%s'", name));
-        }
-        authorizationService.hasReadPermission(credential);
-        return credential;
+        return Optional.ofNullable(credentialRepository.findOneByName(name, user.getAccount()))
+                .orElseThrow(accessDenied(String.format("Access is denied: Credential not found by name '%s'", name)));
     }
 
     public Credential getPrivateCredential(String name, IdentityUser user) {
-        Credential credential = credentialRepository.findByNameInUser(name, user.getUserId());
-        if (credential == null) {
-            throw new AccessDeniedException(String.format("Access is denied: Credential '%s'.", name));
-        }
-        authorizationService.hasReadPermission(credential);
-        return credential;
+        return Optional.ofNullable(credentialRepository.findByNameInUser(name, user.getUserId()))
+                .orElseThrow(accessDenied(String.format("Access is denied: Credential not found by name '%s'.", name)));
     }
 
-    @Transactional(TxType.NEVER)
     public void delete(Long id, IdentityUser user) {
-        Credential credential = credentialRepository.findByIdInAccount(id, user.getAccount());
-        if (credential == null) {
-            throw new AccessDeniedException(String.format("Access is denied: Credential '%d'.", id));
-        }
+        Credential credential = Optional.ofNullable(credentialRepository.findByIdInAccount(id, user.getAccount()))
+                .orElseThrow(accessDenied(String.format("Access is denied: Credential not found by id: '%d'.", id)));
         delete(credential);
     }
 
-    @Transactional(TxType.NEVER)
     public void delete(String name, IdentityUser user) {
-        Credential credential = credentialRepository.findByNameInAccount(name, user.getAccount(), user.getUserId());
-        if (credential == null) {
-            throw new AccessDeniedException(String.format("Access is denied: Credential '%s'.", name));
-        }
+        Credential credential = Optional.ofNullable(credentialRepository.findByNameInAccount(name, user.getAccount(), user.getUserId()))
+                .orElseThrow(accessDenied(String.format("Access is denied: Credential not found by name '%s'.", name)));
         delete(credential);
     }
 
-    @Transactional(TxType.NEVER)
     public Credential update(Long id) {
         return credentialAdapter.update(get(id));
     }
 
     private void delete(Credential credential) {
-        authorizationService.hasWritePermission(credential);
-        if (!stackRepository.countByCredential(credential).equals(0L)) {
-            throw new BadRequestException(String.format("Credential '%d' is in use, cannot be deleted.", credential.getId()));
+        Set<Stack> stacksForCredential = stackRepository.findByCredential(credential);
+        if (!stacksForCredential.isEmpty()) {
+            String clusters;
+            String message;
+            if (stacksForCredential.size() > 1) {
+                clusters = stacksForCredential.stream()
+                        .map(Stack::getName)
+                        .collect(Collectors.joining(", "));
+                message = "There are clusters associated with credential config '%s'. Please remove these before deleting the credential. "
+                        + "The following clusters are using this credential: [%s]";
+            } else {
+                clusters = stacksForCredential.iterator().next().getName();
+                message = "There is a cluster associated with credential config '%s'. Please remove before deleting the credential. "
+                        + "The following cluster is using this credential: [%s]";
+            }
+            throw new BadRequestException(String.format(message, credential.getName(), clusters));
         }
-        userProfileCredentialHandler.destroyProfilePreparation(credential);
+        userProfileHandler.destroyProfileCredentialPreparation(credential);
         archiveCredential(credential);
     }
 

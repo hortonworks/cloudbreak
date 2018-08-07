@@ -18,7 +18,7 @@ public class ResponseProviders {
 
     @PostConstruct
     public void init() {
-        responseProviders.stream().forEach(rp -> map.put(rp.type(), rp));
+        responseProviders.forEach(rp -> map.put(rp.type(), rp));
     }
 
     public ResponseProvider get(String type) {

@@ -23,7 +23,7 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
-import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
+import com.sequenceiq.cloudbreak.service.user.CachedUserDetailsService;
 
 public class CloudbreakUsageToCloudbreakUsageJsonConverterTest extends AbstractEntityConverterTest<CloudbreakUsage> {
 
@@ -31,7 +31,7 @@ public class CloudbreakUsageToCloudbreakUsageJsonConverterTest extends AbstractE
     private CloudbreakUsageToCloudbreakUsageJsonConverter underTest;
 
     @Mock
-    private UserDetailsService userDetailsService;
+    private CachedUserDetailsService cachedUserDetailsService;
 
     private IdentityUser user;
 
@@ -45,7 +45,7 @@ public class CloudbreakUsageToCloudbreakUsageJsonConverterTest extends AbstractE
     @Test
     public void testConvert() {
         // GIVEN
-        given(userDetailsService.getDetails(anyString(), any(UserFilterField.class))).willReturn(user);
+        given(cachedUserDetailsService.getDetails(anyString(), any(UserFilterField.class))).willReturn(user);
         // WHEN
         CloudbreakUsageJson result = underTest.convert(getSource());
         // THEN
@@ -59,7 +59,7 @@ public class CloudbreakUsageToCloudbreakUsageJsonConverterTest extends AbstractE
         // GIVEN
         getSource().setProvider(AWS);
         getSource().setRegion("us_east_1");
-        given(userDetailsService.getDetails(anyString(), any(UserFilterField.class))).willReturn(user);
+        given(cachedUserDetailsService.getDetails(anyString(), any(UserFilterField.class))).willReturn(user);
         // WHEN
         CloudbreakUsageJson result = underTest.convert(getSource());
         // THEN
@@ -74,7 +74,7 @@ public class CloudbreakUsageToCloudbreakUsageJsonConverterTest extends AbstractE
         getSource().setProvider(GCP);
         getSource().setRegion("us_central1");
         getSource().setAvailabilityZone("us_central1_a");
-        given(userDetailsService.getDetails(anyString(), any(UserFilterField.class))).willReturn(user);
+        given(cachedUserDetailsService.getDetails(anyString(), any(UserFilterField.class))).willReturn(user);
         // WHEN
         CloudbreakUsageJson result = underTest.convert(getSource());
         // THEN

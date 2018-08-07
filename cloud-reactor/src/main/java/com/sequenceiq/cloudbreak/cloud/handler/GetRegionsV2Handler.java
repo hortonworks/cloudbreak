@@ -33,12 +33,10 @@ public class GetRegionsV2Handler implements CloudPlatformEventHandler<GetPlatfor
     public void accept(Event<GetPlatformRegionsRequestV2> getRegionsRequestEvent) {
         LOGGER.info("Received event: {}", getRegionsRequestEvent);
         GetPlatformRegionsRequestV2 request = getRegionsRequestEvent.getData();
-
         try {
             CloudPlatformVariant cloudPlatformVariant = new CloudPlatformVariant(
                     Platform.platform(request.getExtendedCloudCredential().getCloudPlatform()),
                     Variant.variant(request.getVariant()));
-
             CloudRegions cloudRegions = cloudPlatformConnectors.get(cloudPlatformVariant)
                     .platformResources().regions(request.getCloudCredential(), Region.region(request.getRegion()), request.getFilters());
             GetPlatformRegionsResultV2 getPlatformRegionsResultV2 = new GetPlatformRegionsResultV2(request, cloudRegions);

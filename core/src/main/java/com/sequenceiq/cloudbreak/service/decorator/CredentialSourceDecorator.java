@@ -12,7 +12,7 @@ import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.CredentialSourceRequest;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.service.MissingResourceNameGenerator;
@@ -29,11 +29,8 @@ public class CredentialSourceDecorator {
 
     public Credential decorate(Credential credential, CredentialSourceRequest credentialSourceRequest, IdentityUser user) {
         if (credential == null) {
-            if (!Strings.isNullOrEmpty(credentialSourceRequest.getSourceName())) {
-                credential = credentialService.get(credentialSourceRequest.getSourceName(), user.getAccount());
-            } else {
-                credential = credentialService.get(credentialSourceRequest.getSourceId());
-            }
+            credential = Strings.isNullOrEmpty(credentialSourceRequest.getSourceName()) ? credentialService.get(credentialSourceRequest.getSourceId())
+                    : credentialService.get(credentialSourceRequest.getSourceName(), user.getAccount());
 
             if (credential == null) {
                 throw new BadRequestException("Source credential does not exist!");

@@ -13,10 +13,11 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 import com.sequenceiq.cloudbreak.api.model.RecoveryMode;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.HostGroupModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceGroupModelDescription;
 
 import io.swagger.annotations.ApiModel;
@@ -24,7 +25,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel("instanceGroupsV2")
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(Include.NON_NULL)
 public class InstanceGroupV2Request implements JsonEntity {
 
     @Min(value = 0, message = "The node count has to be greater or equals than 0")
@@ -51,10 +52,10 @@ public class InstanceGroupV2Request implements JsonEntity {
     @ApiModelProperty(InstanceGroupModelDescription.SECURITYGROUP)
     private SecurityGroupV2Request securityGroup;
 
-    @ApiModelProperty(ModelDescriptions.HostGroupModelDescription.RECIPE_NAMES)
+    @ApiModelProperty(HostGroupModelDescription.RECIPE_NAMES)
     private Set<String> recipeNames = new HashSet<>();
 
-    @ApiModelProperty(ModelDescriptions.HostGroupModelDescription.RECOVERY_MODE)
+    @ApiModelProperty(HostGroupModelDescription.RECOVERY_MODE)
     private RecoveryMode recoveryMode = RecoveryMode.MANUAL;
 
     public TemplateV2Request getTemplate() {

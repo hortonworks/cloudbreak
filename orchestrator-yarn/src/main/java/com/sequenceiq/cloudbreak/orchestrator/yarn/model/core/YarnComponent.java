@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.orchestrator.yarn.model.core;
 
+import java.util.Collection;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -72,7 +73,7 @@ public class YarnComponent implements JsonEntity {
         this.name = name;
     }
 
-    public List<Dependency> getDependencies() {
+    public Collection<Dependency> getDependencies() {
         return dependencies;
     }
 

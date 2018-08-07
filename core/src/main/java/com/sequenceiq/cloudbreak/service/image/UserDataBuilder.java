@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.image;
 import static com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils.processTemplateIntoString;
 
 import java.io.IOException;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,7 +15,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.BaseEncoding;
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
@@ -33,30 +34,30 @@ public class UserDataBuilder {
     @Inject
     private Configuration freemarkerConfiguration;
 
-    Map<InstanceGroupType, String> buildUserData(Platform cloudPlatform, byte[] cbSshKeyDer, String cbSshKey, String sshUser,
-            PlatformParameters parameters, String saltBootPassword) {
-        Map<InstanceGroupType, String> result = new HashMap<>();
+    Map<InstanceGroupType, String> buildUserData(Platform cloudPlatform, byte[] cbSshKeyDer, String sshUser,
+        PlatformParameters parameters, String saltBootPassword, String cbCert) {
+        Map<InstanceGroupType, String> result = new EnumMap<>(InstanceGroupType.class);
         for (InstanceGroupType type : InstanceGroupType.values()) {
-            String userData = build(type, cloudPlatform, cbSshKey, cbSshKeyDer, sshUser, parameters, saltBootPassword);
+            String userData = build(type, cloudPlatform, cbSshKeyDer, sshUser, parameters, saltBootPassword, cbCert);
             result.put(type, userData);
             LOGGER.debug("User data for {}, content; {}", type, userData);
         }
-
         return result;
     }
 
-    private String build(InstanceGroupType type, Platform cloudPlatform, String cbSshKey, byte[] cbSshKeyDer, String sshUser,
-            PlatformParameters params, String saltBootPassword) {
+    private String build(InstanceGroupType type, Platform cloudPlatform, byte[] cbSshKeyDer, String sshUser,
+        PlatformParameters params, String saltBootPassword, String cbCert) {
         Map<String, Object> model = new HashMap<>();
         model.put("cloudPlatform", cloudPlatform.value());
         model.put("platformDiskPrefix", params.scriptParams().getDiskPrefix());
         model.put("platformDiskStartLabel", params.scriptParams().getStartLabel());
         model.put("gateway", type == InstanceGroupType.GATEWAY);
-        model.put("tmpSshKey", cbSshKey);
+        model.put("tmpSshKey", "#NOT_USER_ANYMORE_BUT_KEEP_FOR_BACKWARD_COMPATIBILITY");
         model.put("signaturePublicKey", BaseEncoding.base64().encode(cbSshKeyDer));
         model.put("sshUser", sshUser);
         model.put("customUserData", userDataBuilderParams.getCustomData());
         model.put("saltBootPassword", saltBootPassword);
+        model.put("cbCert", cbCert);
         return build(model);
     }
 

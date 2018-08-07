@@ -11,17 +11,16 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import org.hibernate.annotations.Type;
-
-import com.sequenceiq.cloudbreak.api.model.RDSDatabase;
-import com.sequenceiq.cloudbreak.api.model.RdsType;
+import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.domain.json.JsonToString;
+import com.sequenceiq.cloudbreak.domain.converter.EncryptionConverter;
+import com.sequenceiq.cloudbreak.domain.security.Organization;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 
 @Entity
 @Table(name = "RDSConfig", uniqueConstraints = @UniqueConstraint(columnNames = {"account", "name"}))
@@ -40,20 +39,23 @@ public class RDSConfig implements ProvisionEntity {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private RDSDatabase databaseType;
+    private DatabaseVendor databaseEngine;
 
-    @Type(type = "encrypted_string")
+    @Column(nullable = false)
+    private String connectionDriver;
+
+    @Convert(converter = EncryptionConverter.class)
     @Column(nullable = false)
     private String connectionUserName;
 
-    @Type(type = "encrypted_string")
+    @Convert(converter = EncryptionConverter.class)
     @Column(nullable = false)
     private String connectionPassword;
 
     private Long creationDate;
 
     @Column(nullable = false)
-    private String hdpVersion;
+    private String stackVersion;
 
     @Column(nullable = false)
     private String owner;
@@ -71,12 +73,14 @@ public class RDSConfig implements ProvisionEntity {
     @ManyToMany(mappedBy = "rdsConfigs")
     private Set<Cluster> clusters;
 
-    @Enumerated(EnumType.STRING)
-    private RdsType type = RdsType.HIVE;
+    @Column(nullable = false)
+    private String type;
 
-    @Convert(converter = JsonToString.class)
-    @Column(columnDefinition = "TEXT")
-    private Json attributes;
+    @Column
+    private String connectorJarUrl;
+
+    @ManyToOne
+    private Organization organization;
 
     public Long getId() {
         return id;
@@ -102,12 +106,12 @@ public class RDSConfig implements ProvisionEntity {
         this.connectionURL = connectionURL;
     }
 
-    public RDSDatabase getDatabaseType() {
-        return databaseType;
+    public DatabaseVendor getDatabaseEngine() {
+        return databaseEngine;
     }
 
-    public void setDatabaseType(RDSDatabase databaseType) {
-        this.databaseType = databaseType;
+    public void setDatabaseEngine(DatabaseVendor databaseEngine) {
+        this.databaseEngine = databaseEngine;
     }
 
     public String getConnectionUserName() {
@@ -134,12 +138,12 @@ public class RDSConfig implements ProvisionEntity {
         this.creationDate = creationDate;
     }
 
-    public String getHdpVersion() {
-        return hdpVersion;
+    public String getStackVersion() {
+        return stackVersion;
     }
 
-    public void setHdpVersion(String hdpVersion) {
-        this.hdpVersion = hdpVersion;
+    public void setStackVersion(String stackVersion) {
+        this.stackVersion = stackVersion;
     }
 
     public String getAccount() {
@@ -182,19 +186,35 @@ public class RDSConfig implements ProvisionEntity {
         this.clusters = clusters;
     }
 
-    public RdsType getType() {
+    public String getType() {
         return type;
     }
 
-    public void setType(RdsType type) {
+    public void setType(String type) {
         this.type = type;
     }
 
-    public Json getAttributes() {
-        return attributes;
+    public String getConnectionDriver() {
+        return connectionDriver;
     }
 
-    public void setAttributes(Json attributes) {
-        this.attributes = attributes;
+    public void setConnectionDriver(String connectionDriver) {
+        this.connectionDriver = connectionDriver;
+    }
+
+    public String getConnectorJarUrl() {
+        return connectorJarUrl;
+    }
+
+    public void setConnectorJarUrl(String connectorJarUrl) {
+        this.connectorJarUrl = connectorJarUrl;
+    }
+
+    public Organization getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(Organization organization) {
+        this.organization = organization;
     }
 }

@@ -24,6 +24,4 @@ class FillSubnetStrategy extends AzureSubnetStrategy {
         }
         return null;
     }
-
-
 }

@@ -1,8 +1,10 @@
 package com.sequenceiq.periscope.service.security;
 
+
 import javax.inject.Inject;
 
 import org.bouncycastle.util.encoders.Base64;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.CertificateResponse;
@@ -34,11 +36,19 @@ public class TlsSecurityService {
         if (securityConfig != null) {
             return new TlsConfiguration(securityConfig.getClientKeyDecoded(), securityConfig.getClientCertDecoded(), securityConfig.getServerCertDecoded());
         }
-        securityConfig = securityConfigRepository.findByClusterId(cluster.getId());
+        securityConfig = getSecurityConfigSilently(cluster);
         if (securityConfig == null) {
             securityConfig = prepareSecurityConfig(cluster.getStackId());
         }
         return new TlsConfiguration(securityConfig.getClientKeyDecoded(), securityConfig.getClientCertDecoded(), securityConfig.getServerCertDecoded());
+    }
+
+    private SecurityConfig getSecurityConfigSilently(Cluster cluster) {
+        try {
+            return securityConfigRepository.findByClusterId(cluster.getId());
+        } catch (AccessDeniedException ignore) {
+            return null;
+        }
     }
 
 }

@@ -59,6 +59,10 @@
     {
       "name": "us-east-2",
       "displayName": "US East (Ohio)"
+    },
+    {
+      "name": "us-gov-west-1",
+      "displayName": "GovCloud (US)"
     }
   ]
 }

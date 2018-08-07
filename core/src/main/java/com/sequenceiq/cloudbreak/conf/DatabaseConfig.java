@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.conf;
 
+import static java.util.concurrent.TimeUnit.MINUTES;
+import static java.util.concurrent.TimeUnit.SECONDS;
+
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.SQLException;
@@ -11,12 +14,10 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
-import org.postgresql.Driver;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
-import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -25,11 +26,15 @@ import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.util.DatabaseUtil;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 
 @Configuration
 @EnableTransactionManagement
 public class DatabaseConfig {
+
     @Value("${cb.db.env.user:}")
     private String dbUser;
 
@@ -38,6 +43,18 @@ public class DatabaseConfig {
 
     @Value("${cb.db.env.db:}")
     private String dbName;
+
+    @Value("${cb.db.env.poolsize:30}")
+    private int poolSize;
+
+    @Value("${cb.db.env.connectiontimeout:30}")
+    private long connectionTimeout;
+
+    @Value("${cb.db.env.minidle:2}")
+    private int minimumIdle;
+
+    @Value("${cb.db.env.idletimeout:10}")
+    private long idleTimeout;
 
     @Value("${cb.db.env.schema:" + DatabaseUtil.DEFAULT_SCHEMA_NAME + '}')
     private String dbSchemaName;
@@ -58,22 +75,29 @@ public class DatabaseConfig {
     @Named("databaseAddress")
     private String databaseAddress;
 
+    @Inject
+    private CloudbreakNodeConfig cloudbreakNodeConfig;
+
     @Bean
     public DataSource dataSource() throws SQLException {
         DatabaseUtil.createSchemaIfNeeded("postgresql", databaseAddress, dbName, dbUser, dbPassword, dbSchemaName);
-        SimpleDriverDataSource dataSource = new SimpleDriverDataSource();
-        dataSource.setDriverClass(Driver.class);
+        HikariConfig config = new HikariConfig();
         if (ssl && Files.exists(Paths.get(certFile))) {
-            Properties properties = new Properties();
-            properties.setProperty("ssl", "true");
-            properties.setProperty("sslfactory", "org.postgresql.ssl.SingleCertValidatingFactory");
-            properties.setProperty("sslfactoryarg", "file://" + certFile);
-            dataSource.setConnectionProperties(properties);
+            config.addDataSourceProperty("ssl", "true");
+            config.addDataSourceProperty("sslfactory", "org.postgresql.ssl.SingleCertValidatingFactory");
+            config.addDataSourceProperty("sslfactoryarg", "file://" + certFile);
         }
-        dataSource.setUrl(String.format("jdbc:postgresql://%s/%s?currentSchema=%s", databaseAddress, dbName, dbSchemaName));
-        dataSource.setUsername(dbUser);
-        dataSource.setPassword(dbPassword);
-        return dataSource;
+        if (cloudbreakNodeConfig.isNodeIdSpecified()) {
+            config.addDataSourceProperty("ApplicationName", cloudbreakNodeConfig.getId());
+        }
+        config.setJdbcUrl(String.format("jdbc:postgresql://%s/%s?currentSchema=%s", databaseAddress, dbName, dbSchemaName));
+        config.setUsername(dbUser);
+        config.setPassword(dbPassword);
+        config.setMaximumPoolSize(poolSize);
+        config.setMinimumIdle(minimumIdle);
+        config.setConnectionTimeout(SECONDS.toMillis(connectionTimeout));
+        config.setIdleTimeout(MINUTES.toMillis(idleTimeout));
+        return new HikariDataSource(config);
     }
 
     @Bean
@@ -119,6 +143,7 @@ public class DatabaseConfig {
         properties.setProperty("hibernate.use_sql_comments", Boolean.toString(debug));
         properties.setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
         properties.setProperty("hibernate.default_schema", dbSchemaName);
+        properties.setProperty("hibernate.jdbc.lob.non_contextual_creation", Boolean.toString(true));
         return properties;
     }
 }

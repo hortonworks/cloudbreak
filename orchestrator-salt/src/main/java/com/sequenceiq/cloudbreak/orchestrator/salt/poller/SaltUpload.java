@@ -52,7 +52,7 @@ public class SaltUpload implements OrchestratorBootstrap {
             LOGGER.info("Salt file upload responses: {}", responses);
             for (GenericResponse genericResponse : responses.getResponses()) {
                 if (genericResponse.getStatusCode() != HttpStatus.CREATED.value()) {
-                    LOGGER.info("Failed upload attempt to: " + genericResponse.getAddress());
+                    LOGGER.info("Failed upload attempt to: {}, error: {}", genericResponse.getAddress(), genericResponse.getErrorText());
                     String address = genericResponse.getAddress().split(":")[0];
                     failedTargets.addAll(originalTargets.stream().filter(a -> a.equals(address)).collect(Collectors.toList()));
                 }

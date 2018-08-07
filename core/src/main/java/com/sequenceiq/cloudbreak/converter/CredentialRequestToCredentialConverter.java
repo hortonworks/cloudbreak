@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.service.stack.resource.definition.credential.CredentialDefinitionService;
@@ -41,7 +41,7 @@ public class CredentialRequestToCredentialConverter extends AbstractConversionSe
             }
         }
         if (source.getTopologyId() != null) {
-            credential.setTopology(topologyService.getById(source.getTopologyId()));
+            credential.setTopology(topologyService.get(source.getTopologyId()));
         }
         return credential;
     }

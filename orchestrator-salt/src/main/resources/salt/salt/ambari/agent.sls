@@ -1,8 +1,6 @@
 {%- from 'ambari/settings.sls' import ambari with context %}
 {%- from 'nodes/settings.sls' import host with context %}
 
-{% if not ambari.is_predefined_repo %}
-
 include:
   - ambari.repo
 
@@ -10,29 +8,15 @@ ambari-agent:
   pkg.installed:
     - require:
       - sls: ambari.repo
-    - version: {{ ambari.version }}
-
-{% else %}
+{% if grains['os_family'] == 'Suse' or grains['os_family'] == 'Debian' %}
+    - skip_verify: True
+{% endif %}
 
 parallel_task_execution:
   file.replace:
     - name: /etc/ambari-agent/conf/ambari-agent.ini
     - pattern: parallel_execution=0
     - repl: parallel_execution=1
-
-reduce_reconnect_retry_delay:
-  file.replace:
-    - name: /etc/ambari-agent/conf/ambari-agent.ini
-    - pattern: "max_reconnect_retry_delay.*=.*30"
-    - repl: max_reconnect_retry_delay=10
-
-reduce_connect_retry_delay:
-  file.replace:
-    - name: /etc/ambari-agent/conf/ambari-agent.ini
-    - pattern: "connect_retry_delay.*=.*10"
-    - repl: connect_retry_delay=5
-
-{% endif %}
 
 {% if salt['pillar.get']('platform') == 'GCP' %}
 /etc/environment:
@@ -88,7 +72,7 @@ set_tlsv1_2:
 
 add_amazon-osfamily_patch_script_agent:
   file.managed:
-    - name: /tmp/amazon-osfamily.sh
+    - name: /opt/salt/amazon-osfamily.sh
     - source: salt://ambari/scripts/amazon-osfamily.sh
     - skip_verify: True
     - makedirs: True
@@ -96,7 +80,7 @@ add_amazon-osfamily_patch_script_agent:
 
 run_amazon-osfamily_sh_agent:
   cmd.run:
-    - name: sh -x /tmp/amazon-osfamily.sh 2>&1 | tee -a /var/log/amazon-osfamily_agent_sh.log && exit ${PIPESTATUS[0]}
+    - name: sh -x /opt/salt/amazon-osfamily.sh 2>&1 | tee -a /var/log/amazon-osfamily_agent_sh.log && exit ${PIPESTATUS[0]}
     - unless: ls /var/log/amazon-osfamily_agent_sh.log
     - require:
       - file: add_amazon-osfamily_patch_script_agent

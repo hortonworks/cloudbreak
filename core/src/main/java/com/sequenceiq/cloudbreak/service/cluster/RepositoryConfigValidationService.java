@@ -2,96 +2,75 @@ package com.sequenceiq.cloudbreak.service.cluster;
 
 import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Response;
+import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.repositoryconfig.RepoConfigValidationRequest;
 import com.sequenceiq.cloudbreak.api.model.repositoryconfig.RepoConfigValidationResponse;
-import com.sequenceiq.cloudbreak.client.RestClientUtil;
+import com.sequenceiq.cloudbreak.common.service.url.UrlAccessValidationService;
 
 @Service
 public class RepositoryConfigValidationService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RepositoryConfigValidationService.class);
+    @Inject
+    private UrlAccessValidationService urlAccessValidationService;
 
     public RepoConfigValidationResponse validate(RepoConfigValidationRequest request) {
         RepoConfigValidationResponse result = new RepoConfigValidationResponse();
         if (request != null) {
-            Client client = createRestClient();
-
             String ambariBaseUrl = request.getAmbariBaseUrl();
             if (isNoneEmpty(ambariBaseUrl)) {
-                result.setAmbariBaseUrl(repoUrlAvailable(client, ambariBaseUrl, "Ambari"));
+                result.setAmbariBaseUrl(repoUrlAvailable(ambariBaseUrl, "Ambari"));
             }
 
             String ambariGpgKeyUrl = request.getAmbariGpgKeyUrl();
             if (isNoneEmpty(ambariGpgKeyUrl)) {
-                result.setAmbariGpgKeyUrl(validateUrl(ambariGpgKeyUrl, null, client));
+                result.setAmbariGpgKeyUrl(isAccessible(ambariGpgKeyUrl, null));
             }
 
             String stackBaseURL = request.getStackBaseURL();
             if (isNoneEmpty(stackBaseURL)) {
-                result.setStackBaseURL(repoUrlAvailable(client, stackBaseURL, "HDP"));
+                result.setStackBaseURL(repoUrlAvailable(stackBaseURL, "HDP"));
             }
 
             String utilsBaseURL = request.getUtilsBaseURL();
             if (isNoneEmpty(utilsBaseURL)) {
-                result.setUtilsBaseURL(repoUrlAvailable(client, utilsBaseURL, "HDP-UTILS"));
+                result.setUtilsBaseURL(repoUrlAvailable(utilsBaseURL, "HDP-UTILS"));
             }
 
             String versionDefinitionFileUrl = request.getVersionDefinitionFileUrl();
             if (isNoneEmpty(versionDefinitionFileUrl)) {
-                result.setVersionDefinitionFileUrl(validateUrl(versionDefinitionFileUrl, null, client));
+                result.setVersionDefinitionFileUrl(isAccessible(versionDefinitionFileUrl, null));
             }
 
             String mpackUrl = request.getMpackUrl();
             if (isNoneEmpty(mpackUrl)) {
-                result.setMpackUrl(validateUrl(mpackUrl, null, client));
+                result.setMpackUrl(isAccessible(mpackUrl, null));
             }
         }
         return result;
     }
 
-    private boolean repoUrlAvailable(Client client, String ambariBaseUrl, String service) {
-        return rpmRepoAvailable(client, ambariBaseUrl) || debRepoAvailable(client, ambariBaseUrl, service);
+    private boolean repoUrlAvailable(String ambariBaseUrl, String service) {
+        return rpmRepoAvailable(ambariBaseUrl) || debRepoAvailable(ambariBaseUrl, service);
     }
 
-    private Boolean debRepoAvailable(Client client, String stackBaseURL, String serviceName) {
+    private Boolean debRepoAvailable(String stackBaseURL, String serviceName) {
         String urlExtension = String.format("dists/%s/InRelease", serviceName);
-        return validateUrl(stackBaseURL, urlExtension, client);
+        return isAccessible(stackBaseURL, urlExtension);
     }
 
-    private Boolean rpmRepoAvailable(Client client, String stackBaseURL) {
-        return validateUrl(stackBaseURL, "repodata/repomd.xml", client);
+    private Boolean rpmRepoAvailable(String stackBaseURL) {
+        return isAccessible(stackBaseURL, "repodata/repomd.xml");
     }
 
-    Client createRestClient() {
-        return RestClientUtil.get();
-    }
-
-    private Boolean validateUrl(String url, String urlExtension, Client client) {
-        boolean result = false;
-
+    private Boolean isAccessible(String baseUrl, String urlExtension) {
+        String url = baseUrl;
         if (isNoneEmpty(urlExtension)) {
-            String ext = url.endsWith("/") ? urlExtension : "/" + urlExtension;
-            url = url + ext;
+            String ext = baseUrl.endsWith("/") ? urlExtension : '/' + urlExtension;
+            url += ext;
         }
-
-        try {
-            WebTarget target = client.target(url);
-            Response response = target.request().get();
-            if (HttpStatus.OK.value() == response.getStatus()) {
-                result = true;
-            }
-        } catch (Exception ex) {
-            LOGGER.info("The following URL is not reachable by Cloudbreak: '{}'", url);
-        }
-        return result;
+        return urlAccessValidationService.isAccessible(url);
     }
 }

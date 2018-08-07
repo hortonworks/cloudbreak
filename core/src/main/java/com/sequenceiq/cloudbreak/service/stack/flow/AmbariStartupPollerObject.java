@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 import java.util.List;
 
 import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.StackContext;
 
 public class AmbariStartupPollerObject extends StackContext {
@@ -26,7 +26,7 @@ public class AmbariStartupPollerObject extends StackContext {
         this.ambariIp = ambariIp;
     }
 
-    public List<AmbariClient> getAmbariClients() {
+    public Iterable<AmbariClient> getAmbariClients() {
         return ambariClients;
     }
 

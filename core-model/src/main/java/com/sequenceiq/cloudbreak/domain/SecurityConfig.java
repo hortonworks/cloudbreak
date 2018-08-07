@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.domain;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -11,7 +12,9 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import org.apache.commons.codec.binary.Base64;
-import org.hibernate.annotations.Type;
+
+import com.sequenceiq.cloudbreak.domain.converter.EncryptionConverter;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 
 @Entity
 @Table(name = "SecurityConfig")
@@ -22,35 +25,35 @@ public class SecurityConfig implements ProvisionEntity {
     @SequenceGenerator(name = "securityconfig_generator", sequenceName = "securityconfig_id_seq", allocationSize = 1)
     private Long id;
 
-    @Type(type = "encrypted_string")
+    @Convert(converter = EncryptionConverter.class)
     @Column(columnDefinition = "TEXT")
     private String clientKey;
 
-    @Type(type = "encrypted_string")
+    @Convert(converter = EncryptionConverter.class)
     @Column(columnDefinition = "TEXT")
     private String clientCert;
 
     @Column(columnDefinition = "TEXT")
     private String cloudbreakSshPublicKey;
 
-    @Type(type = "encrypted_string")
+    @Convert(converter = EncryptionConverter.class)
     @Column(columnDefinition = "TEXT")
     private String cloudbreakSshPrivateKey;
 
     @Column(columnDefinition = "TEXT")
     private String saltSignPublicKey;
 
-    @Type(type = "encrypted_string")
+    @Convert(converter = EncryptionConverter.class)
     @Column(columnDefinition = "TEXT")
     private String saltSignPrivateKey;
 
-    @Type(type = "encrypted_string")
+    @Convert(converter = EncryptionConverter.class)
     private String saltPassword;
 
-    @Type(type = "encrypted_string")
+    @Convert(converter = EncryptionConverter.class)
     private String saltBootPassword;
 
-    @Type(type = "encrypted_string")
+    @Convert(converter = EncryptionConverter.class)
     private String knoxMasterSecret;
 
     @OneToOne(fetch = FetchType.LAZY)
@@ -77,6 +80,10 @@ public class SecurityConfig implements ProvisionEntity {
 
     public String getClientCertDecoded() {
         return clientCert == null ? null : new String(Base64.decodeBase64(clientCert));
+    }
+
+    public String getClientCertRaw() {
+        return clientCert;
     }
 
     public void setClientCert(String clientCert) {

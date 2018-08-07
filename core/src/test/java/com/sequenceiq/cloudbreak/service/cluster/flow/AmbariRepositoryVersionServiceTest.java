@@ -1,18 +1,20 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
-import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariRepositoryVersionService.AMBARI_VERSION_2_6_0_0;
+import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariRepositoryVersionService.AMBARI_VERSION_2_6_0_0;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
+
+import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariRepositoryVersionService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AmbariRepositoryVersionServiceTest {
 
     @InjectMocks
-    private AmbariRepositoryVersionService underTest = new AmbariRepositoryVersionService();
+    private final AmbariRepositoryVersionService underTest = new AmbariRepositoryVersionService();
 
     @Test
     public void testIsNewerOrEqualAmbariApi() {

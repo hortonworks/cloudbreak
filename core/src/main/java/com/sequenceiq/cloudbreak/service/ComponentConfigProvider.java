@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
-import com.sequenceiq.cloudbreak.domain.Component;
+import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.repository.ComponentRepository;
 
 @Service
@@ -116,8 +116,16 @@ public class ComponentConfigProvider {
         Set<Component> componentsByStackId = componentRepository.findComponentByStackId(stackId);
         if (!componentsByStackId.isEmpty()) {
             LOGGER.debug("Components({}) are going to be deleted for stack: {}", componentsByStackId.size(), stackId);
-            componentRepository.delete(componentsByStackId);
+            componentRepository.deleteAll(componentsByStackId);
             LOGGER.debug("Components({}) have been deleted for stack : {}", componentsByStackId.size(), stackId);
         }
+    }
+
+    public void replaceImageComponentWithNew(Component component) {
+        Component componentEntity = componentRepository.findComponentByStackIdComponentTypeName(component.getStack().getId(), component.getComponentType(),
+                component.getName());
+        componentEntity.setAttributes(component.getAttributes());
+        componentEntity.setName(component.getName());
+        componentRepository.save(componentEntity);
     }
 }

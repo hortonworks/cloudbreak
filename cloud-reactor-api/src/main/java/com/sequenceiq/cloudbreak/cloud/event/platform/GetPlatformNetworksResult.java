@@ -4,7 +4,7 @@ import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudNetworks;
 
-public class GetPlatformNetworksResult extends CloudPlatformResult<CloudPlatformRequest> {
+public class GetPlatformNetworksResult extends CloudPlatformResult<CloudPlatformRequest<?>> {
     private CloudNetworks cloudNetworks;
 
     public GetPlatformNetworksResult(CloudPlatformRequest<?> request, CloudNetworks cloudNetworks) {

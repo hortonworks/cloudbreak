@@ -12,12 +12,6 @@ tests:
       - com.sequenceiq.it.cloudbreak.CloudbreakTestSuiteInitializer
       - com.sequenceiq.it.MockSuiteInitializer
 
-  - name: start ssh server on port 2020
-    parameters:
-      sshPort: 2020
-    classes:
-      - com.sequenceiq.it.cloudbreak.StartSshServerTest
-
   - name: create mock credential
     parameters:
       credentialName: its-mock-credential-instance-termiantion
@@ -87,9 +81,3 @@ tests:
   - name: instance terminate unknown
     classes:
       - com.sequenceiq.it.cloudbreak.v2.mock.instanceterm.MockInstanceTerminationUnknownTest
-
-  - name: stop ssh server
-    parameters:
-      sshPort: 2020
-    classes:
-      - com.sequenceiq.it.cloudbreak.StopSshServerTest

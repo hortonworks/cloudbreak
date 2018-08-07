@@ -11,17 +11,15 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.hamcrest.Description;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatcher;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
-import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.UnhealthyInstancesDetectionRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.UnhealthyInstancesDetectionResult;
@@ -31,7 +29,6 @@ import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstancesFinalize
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
-
 
 @RunWith(MockitoJUnitRunner.class)
 public class UnhealthyInstancesDetectionHandlerTest {
@@ -52,11 +49,11 @@ public class UnhealthyInstancesDetectionHandlerTest {
     private UnhealthyInstancesDetectionHandler unhealthyInstancesDetectionHandler;
 
     @Test
-    public void shouldNotInvokeFinalizerIfNoCandidateUnhealthyInstancesWereSelected() throws CloudbreakSecuritySetupException {
+    public void shouldNotInvokeFinalizerIfNoCandidateUnhealthyInstancesWereSelected() {
 
         long stackId = 1L;
         UnhealthyInstancesDetectionRequest unhealthyInstancesDetectionRequest = new UnhealthyInstancesDetectionRequest(stackId);
-        Event event = mock(Event.class);
+        Event<UnhealthyInstancesDetectionRequest> event = mock(Event.class);
         when(event.getData()).thenReturn(unhealthyInstancesDetectionRequest);
 
         Stack stack = mock(Stack.class);
@@ -73,10 +70,10 @@ public class UnhealthyInstancesDetectionHandlerTest {
     }
 
     @Test
-    public void shouldCreateResponseWithExactInstances() throws CloudbreakSecuritySetupException {
+    public void shouldCreateResponseWithExactInstances() {
         long stackId = 1L;
         UnhealthyInstancesDetectionRequest unhealthyInstancesDetectionRequest = new UnhealthyInstancesDetectionRequest(stackId);
-        Event event = mock(Event.class);
+        Event<UnhealthyInstancesDetectionRequest> event = mock(Event.class);
         when(event.getData()).thenReturn(unhealthyInstancesDetectionRequest);
 
         Stack stack = mock(Stack.class);
@@ -101,7 +98,7 @@ public class UnhealthyInstancesDetectionHandlerTest {
 
     }
 
-    private static class UnhealthyInstancesResultMatcher extends ArgumentMatcher<Event<UnhealthyInstancesDetectionResult>> {
+    private static class UnhealthyInstancesResultMatcher implements ArgumentMatcher<Event<UnhealthyInstancesDetectionResult>> {
 
         private final Set<String> expectedUnhealthyIds;
 
@@ -112,9 +109,13 @@ public class UnhealthyInstancesDetectionHandlerTest {
         }
 
         @Override
-        public boolean matches(Object argument) {
-            Event event = (Event) argument;
-            UnhealthyInstancesDetectionResult payload = (UnhealthyInstancesDetectionResult) event.getData();
+        public String toString() {
+            return errorMessage == null ? "" : errorMessage;
+        }
+
+        @Override
+        public boolean matches(Event<UnhealthyInstancesDetectionResult> event) {
+            UnhealthyInstancesDetectionResult payload = event.getData();
             Set<String> unhealthyInstanceIds = payload.getUnhealthyInstanceIds();
             if (unhealthyInstanceIds.size() != expectedUnhealthyIds.size()) {
                 errorMessage = String.format("Sizes don't match, expected=%d, actual=%d",
@@ -129,15 +130,6 @@ public class UnhealthyInstancesDetectionHandlerTest {
                 }
             }
             return true;
-        }
-
-        @Override
-        public void describeTo(Description description) {
-            if (errorMessage == null) {
-                super.describeTo(description);
-            } else {
-                description.appendText(errorMessage);
-            }
         }
     }
 }

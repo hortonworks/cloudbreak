@@ -8,3 +8,6 @@ deps:
 
 dockerhub-tag:
 	dockerhub-tag set $(IMAGE) $(VERSION) $(VERSION) /mock/cloudbreak
+
+generate-api:
+	./swagger-codegen.sh

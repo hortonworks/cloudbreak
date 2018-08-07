@@ -101,7 +101,7 @@ public class MockSparkServer {
         port(9443);
         before((req, res) -> {
             res.type("application/json");
-            LOGGER.info(req.requestMethod() + " " + req.url());
+            LOGGER.info(req.requestMethod() + ' ' + req.url());
         });
     }
 

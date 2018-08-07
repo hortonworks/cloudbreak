@@ -4,7 +4,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 
 public class AzureInstanceCredentialView {
 
-    private CloudStack cloudStack;
+    private final CloudStack cloudStack;
 
     public AzureInstanceCredentialView(CloudStack cloudStack) {
         this.cloudStack = cloudStack;

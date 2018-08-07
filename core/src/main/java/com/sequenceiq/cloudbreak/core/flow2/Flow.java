@@ -23,5 +23,5 @@ public interface Flow {
 
     boolean isFlowFailed();
 
-    Class<? extends FlowConfiguration> getFlowConfigClass();
+    Class<? extends FlowConfiguration<?>> getFlowConfigClass();
 }

@@ -1,12 +1,12 @@
 package com.sequenceiq.cloudbreak.cloud.template;
 
 import java.util.List;
-import java.util.Map;
 
 import com.sequenceiq.cloudbreak.cloud.CloudPlatformAware;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -26,17 +26,17 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
  * order of the resource creation. In the example above on GCP first the root disk will be created after that the attached disks and then at the end the
  * actual instance will be created. For instance creation it is most likely to need the resources created by an early builder so these resources should
  * be provided by the generic {@link ResourceBuilderContext} objects which will be passed along with the creation process.
- * <p/>
+ * <br>
  * To remove the corresponding compute resources the builders will be called in <b>reverse</b> order. It the example above it will be called as:
  * - GCP_INSTANCE
  * - GCP_ATTACHED_DISK
  * - GCP_DISK
  * It is possible that the instance deletion will delete all the resources as well which is a normal scenario, see the documentation on the delete method.
- * <p/>
+ * <br>
  * These type of resources <b>can be rolled back</b>. It means if the creation of an instance fails does not automatically mean that the whole deployment
  * fails. The failure policy can determine when to rollback the whole deployment {@link com.sequenceiq.cloudbreak.cloud.template.compute.CloudFailureHandler}.
  * The rollback is handled automatically by Cloudbreak by calling the appropriate delete methods of the different resource builders.
- * <p/>
+ * <br>
  * In order to make use of this interface and call the resource builders in ordered fashion the cloud provider implementation should extend
  * {@link AbstractResourceConnector} which is a base implementation of {@link com.sequenceiq.cloudbreak.cloud.ResourceConnector}.
  * Eventually all the cloud provider implementations use {@link com.sequenceiq.cloudbreak.cloud.ResourceConnector}. Providers which support some form of
@@ -46,7 +46,7 @@ public interface ComputeResourceBuilder<C extends ResourceBuilderContext> extend
 
     /**
      * Create the reference {@link CloudResource} objects with proper resource naming to persist them into the DB. In the next phase these objects
-     * will be provided to the {@link #build(ResourceBuilderContext, long, AuthenticatedContext, Group, Image, List, Map)} method to actually create these
+     * will be provided to the {@link #build(ResourceBuilderContext, long, AuthenticatedContext, Group, List, CloudStack)} method to actually create these
      * resources on the cloud provider. In case the resource creation fails it will be rolled back using the resource name as a reference. To provide
      * resource names implement the {@link com.sequenceiq.cloudbreak.cloud.service.ResourceNameService} interface and inject it to the implementation
      * using {@link javax.inject.Inject}.
@@ -75,18 +75,16 @@ public interface ComputeResourceBuilder<C extends ResourceBuilderContext> extend
      * @param group             Compute resources which are required for a deployment. Each group represents an instance group in Cloudbreak. One group contains
      *                          multiple instance templates for the same instance type so this method supposed to create for 1 template at a time, because it
      *                          will be called as many times as there are templates in the group.
-     * @param image             Base cloud image for the deployment.
      * @param buildableResource Resources created earlier by the {@link #create(ResourceBuilderContext, long, AuthenticatedContext, Group, Image)}. If this
      *                          builder is responsible to create the instance the list will contain 1 resource. It does not contain all the required resources
      *                          for the instance, like the attached disks or network interface. Those resources should be retrievable from the context object
      *                          by private id.
-     * @param tags              Tags will be set on the created compute resources
+     * @param cloudStack        The entire cloud stack object for deployment
      * @return Returns the created cloud resources which can be extended with extra information since the object itself is a dynamic model. These objects
      * will be passed along with the extra information if it's provided so later it can be used to track the status of the deployment.
      * @throws Exception Exception can be thrown if the resource creation request fails for some reason and then the resources will be rolled back.
      */
-    List<CloudResource> build(C context, long privateId, AuthenticatedContext auth, Group group, Image image, List<CloudResource> buildableResource,
-            Map<String, String> tags)
+    List<CloudResource> build(C context, long privateId, AuthenticatedContext auth, Group group, List<CloudResource> buildableResource, CloudStack cloudStack)
             throws Exception;
 
     /**

@@ -332,3 +332,22 @@ exports.updateTimeAlert = function(args, res, next) {
   }
 }
 
+exports.validateCronExpression = function(args, res, next) {
+  /**
+   * cron expression validation
+   * Auto-scaling supports two Alert types: metric and time based. Time based alerts are based on cron expressions and allow alerts to be triggered based on time.
+   *
+   * clusterId Long 
+   * body TimeAlertValidationRequest  (optional)
+   * returns Boolean
+   **/
+  var examples = {};
+  examples['application/json'] = true;
+  if (Object.keys(examples).length > 0) {
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
+  } else {
+    res.end();
+  }
+}
+

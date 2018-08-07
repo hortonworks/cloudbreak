@@ -20,9 +20,9 @@ import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.security.OwnerBasedPermissionEvaluator;
-import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
+import com.sequenceiq.cloudbreak.service.user.CachedUserDetailsService;
 
 public class OwnerBasedPermissionEvaluatorTest {
 
@@ -30,7 +30,7 @@ public class OwnerBasedPermissionEvaluatorTest {
     private OwnerBasedPermissionEvaluator underTest;
 
     @Mock
-    private UserDetailsService userDetailsService;
+    private CachedUserDetailsService cachedUserDetailsService;
 
     @Mock
     private OAuth2Authentication oauth;
@@ -55,7 +55,7 @@ public class OwnerBasedPermissionEvaluatorTest {
     public void testWriteOwner() {
         when(oauth.getUserAuthentication()).thenReturn(new TestingAuthenticationToken("principal", "credential"));
         IdentityUser user = new IdentityUser("userid", "", "", Collections.emptyList(), "", "", null);
-        when(userDetailsService.getDetails(anyString(), any(UserFilterField.class))).thenReturn(user);
+        when(cachedUserDetailsService.getDetails(anyString(), any(UserFilterField.class))).thenReturn(user);
 
         boolean result = underTest.hasPermission(oauth, stack, "write");
 
@@ -66,7 +66,7 @@ public class OwnerBasedPermissionEvaluatorTest {
     public void testWriteNotOwnerButAdmin() {
         when(oauth.getUserAuthentication()).thenReturn(new TestingAuthenticationToken("principal", "credential"));
         IdentityUser user = new IdentityUser("admin", "", "account", Collections.singletonList(IdentityUserRole.ADMIN), "", "", null);
-        when(userDetailsService.getDetails(anyString(), any(UserFilterField.class))).thenReturn(user);
+        when(cachedUserDetailsService.getDetails(anyString(), any(UserFilterField.class))).thenReturn(user);
 
         boolean result = underTest.hasPermission(oauth, stack, "write");
 
@@ -77,7 +77,7 @@ public class OwnerBasedPermissionEvaluatorTest {
     public void testReadNotOwnerNotAdminButPublicInAccount() {
         when(oauth.getUserAuthentication()).thenReturn(new TestingAuthenticationToken("principal", "credential"));
         IdentityUser user = new IdentityUser("admin", "", "account", Collections.emptyList(), "", "", null);
-        when(userDetailsService.getDetails(anyString(), any(UserFilterField.class))).thenReturn(user);
+        when(cachedUserDetailsService.getDetails(anyString(), any(UserFilterField.class))).thenReturn(user);
         stack.setPublicInAccount(true);
         boolean result = underTest.hasPermission(oauth, stack, "read");
 
@@ -88,7 +88,7 @@ public class OwnerBasedPermissionEvaluatorTest {
     public void testReadNotOwnerNotAdminNotAccountButPublicInAccount() {
         when(oauth.getUserAuthentication()).thenReturn(new TestingAuthenticationToken("principal", "credential"));
         IdentityUser user = new IdentityUser("admin", "", "test-account", Collections.emptyList(), "", "", null);
-        when(userDetailsService.getDetails(anyString(), any(UserFilterField.class))).thenReturn(user);
+        when(cachedUserDetailsService.getDetails(anyString(), any(UserFilterField.class))).thenReturn(user);
         stack.setPublicInAccount(true);
         boolean result = underTest.hasPermission(oauth, stack, "read");
 
@@ -99,7 +99,7 @@ public class OwnerBasedPermissionEvaluatorTest {
     public void testWriteNotOwnerNotAdminButPublicInAccount() {
         when(oauth.getUserAuthentication()).thenReturn(new TestingAuthenticationToken("principal", "credential"));
         IdentityUser user = new IdentityUser("admin", "", "account", Collections.emptyList(), "", "", null);
-        when(userDetailsService.getDetails(anyString(), any(UserFilterField.class))).thenReturn(user);
+        when(cachedUserDetailsService.getDetails(anyString(), any(UserFilterField.class))).thenReturn(user);
         stack.setPublicInAccount(true);
         boolean result = underTest.hasPermission(oauth, stack, "write");
 
@@ -110,7 +110,7 @@ public class OwnerBasedPermissionEvaluatorTest {
     public void testReadNotOwnerNotAdminNotPublicInAccount() {
         when(oauth.getUserAuthentication()).thenReturn(new TestingAuthenticationToken("principal", "credential"));
         IdentityUser user = new IdentityUser("admin", "", "account", Collections.emptyList(), "", "", null);
-        when(userDetailsService.getDetails(anyString(), any(UserFilterField.class))).thenReturn(user);
+        when(cachedUserDetailsService.getDetails(anyString(), any(UserFilterField.class))).thenReturn(user);
 
         boolean result = underTest.hasPermission(oauth, stack, "read");
 

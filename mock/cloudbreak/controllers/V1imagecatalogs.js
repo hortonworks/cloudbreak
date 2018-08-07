@@ -1,45 +1,115 @@
 'use strict';
 
-var url = require('url');
-
-var V1imagecatalogs = require('./V1imagecatalogsService');
+var utils = require('../utils/writer.js');
+var V1imagecatalogs = require('../service/V1imagecatalogsService');
 
 module.exports.deletePublicImageCatalogByName = function deletePublicImageCatalogByName (req, res, next) {
-    V1imagecatalogs.deletePublicImageCatalogByName(req.swagger.params, res, next);
+  var name = req.swagger.params['name'].value;
+  V1imagecatalogs.deletePublicImageCatalogByName(name)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.getImageCatalogRequestFromName = function getImageCatalogRequestFromName (req, res, next) {
-    V1imagecatalogs.getImageCatalogRequestFromName(req.swagger.params, res, next);
+  var name = req.swagger.params['name'].value;
+  V1imagecatalogs.getImageCatalogRequestFromName(name)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.getImagesByProvider = function getImagesByProvider (req, res, next) {
-    V1imagecatalogs.getImagesByProvider(req.swagger.params, res, next);
+  var platform = req.swagger.params['platform'].value;
+  V1imagecatalogs.getImagesByProvider(platform)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
-module.exports.getPublicImageCatalogsById = function getPublicImageCatalogsById (req, res, next) {
-    V1imagecatalogs.getPublicImageCatalogsById(req.swagger.params, res, next);
+module.exports.getPublicImageCatalogsByName = function getPublicImageCatalogsByName (req, res, next) {
+  var name = req.swagger.params['name'].value;
+  var withImages = req.swagger.params['withImages'].value;
+  V1imagecatalogs.getPublicImageCatalogsByName(name,withImages)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.getPublicImagesByProviderAndCustomImageCatalog = function getPublicImagesByProviderAndCustomImageCatalog (req, res, next) {
-    V1imagecatalogs.getPublicImagesByProviderAndCustomImageCatalog(req.swagger.params, res, next);
+  var name = req.swagger.params['name'].value;
+  var platform = req.swagger.params['platform'].value;
+  V1imagecatalogs.getPublicImagesByProviderAndCustomImageCatalog(name,platform)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.getPublicsImageCatalogs = function getPublicsImageCatalogs (req, res, next) {
-    V1imagecatalogs.getPublicsImageCatalogs(req.swagger.params, res, next);
+  V1imagecatalogs.getPublicsImageCatalogs()
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.postPrivateImageCatalog = function postPrivateImageCatalog (req, res, next) {
-    V1imagecatalogs.postPrivateImageCatalog(req.swagger.params, res, next);
+  var body = req.swagger.params['body'].value;
+  V1imagecatalogs.postPrivateImageCatalog(body)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.postPublicImageCatalog = function postPublicImageCatalog (req, res, next) {
-    V1imagecatalogs.postPublicImageCatalog(req.swagger.params, res, next);
+  var body = req.swagger.params['body'].value;
+  V1imagecatalogs.postPublicImageCatalog(body)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.putPublicImageCatalog = function putPublicImageCatalog (req, res, next) {
-    V1imagecatalogs.putPublicImageCatalog(req.swagger.params, res, next);
+  var body = req.swagger.params['body'].value;
+  V1imagecatalogs.putPublicImageCatalog(body)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.putSetDefaultImageCatalogByName = function putSetDefaultImageCatalogByName (req, res, next) {
-    V1imagecatalogs.putSetDefaultImageCatalogByName(req.swagger.params, res, next);
+  var name = req.swagger.params['name'].value;
+  V1imagecatalogs.putSetDefaultImageCatalogByName(name)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };

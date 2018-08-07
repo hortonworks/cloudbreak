@@ -8,14 +8,14 @@ import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
-import org.aspectj.lang.reflect.MethodSignature;
+import org.aspectj.lang.reflect.CodeSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.controller.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 
 @Component
 @Aspect
@@ -33,7 +33,7 @@ public class ControllerLogContextAspects {
     public void buildLogContextForControllerCalls(JoinPoint joinPoint) {
         try {
             Object[] args = joinPoint.getArgs();
-            MethodSignature sig = (MethodSignature) joinPoint.getSignature();
+            CodeSignature sig = (CodeSignature) joinPoint.getSignature();
             String[] paramNames = sig.getParameterNames();
             String trackingIdLCKey = LoggerContextKey.TRACKING_ID.toString();
             Map<String, String> mdcParams = getMDCParams(joinPoint.getTarget(), paramNames, args);

@@ -9,9 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
-import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.UnhealthyInstancesDetectionRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.UnhealthyInstancesDetectionResult;
@@ -60,16 +59,12 @@ public class UnhealthyInstancesDetectionHandler implements ReactorEventHandler<U
                 Set<String> unhealthyInstances = unhealthyInstancesFinalizer.finalizeUnhealthyInstances(stack, candidateUnhealthyInstances);
                 result = new UnhealthyInstancesDetectionResult(request, unhealthyInstances);
             }
-        } catch (CloudbreakSecuritySetupException e) {
-            String msg = String.format("Could not get host statuses from Ambari: %s", e.getMessage());
-            LOG.error(msg, e);
-            result = new UnhealthyInstancesDetectionResult(msg, e, request);
         } catch (RuntimeException e) {
             String msg = String.format("Could not get statuses for unhealty instances: %s", e.getMessage());
             LOG.error(msg, e);
             result = new UnhealthyInstancesDetectionResult(msg, e, request);
         }
-        eventBus.notify(result.selector(), new Event(event.getHeaders(), result));
+        eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
     }
 
 }

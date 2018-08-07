@@ -1,12 +1,13 @@
 package com.sequenceiq.cloudbreak.orchestrator.model;
 
+import java.util.Collection;
 import java.util.List;
 
 public class GenericResponses {
 
     private List<GenericResponse> responses;
 
-    public List<GenericResponse> getResponses() {
+    public Collection<GenericResponse> getResponses() {
         return responses;
     }
 

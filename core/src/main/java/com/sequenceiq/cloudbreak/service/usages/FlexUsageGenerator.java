@@ -31,12 +31,11 @@ import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
-import com.sequenceiq.cloudbreak.repository.FlexSubscriptionRepository;
+import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
-import com.sequenceiq.cloudbreak.service.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
+import com.sequenceiq.cloudbreak.service.user.CachedUserDetailsService;
 
 @Service
 public class FlexUsageGenerator {
@@ -53,7 +52,7 @@ public class FlexUsageGenerator {
     private static final long UP_TO_MILLIS = 1000;
 
     @Inject
-    private UserDetailsService userDetailsService;
+    private CachedUserDetailsService cachedUserDetailsService;
 
     @Inject
     private SmartSenseSubscriptionService smartSenseSubscriptionService;
@@ -63,9 +62,6 @@ public class FlexUsageGenerator {
 
     @Inject
     private StackService stackService;
-
-    @Inject
-    private FlexSubscriptionRepository flexSubscriptionRepository;
 
     @Inject
     private CloudbreakNodeConfig cloudbreakNodeConfig;
@@ -126,15 +122,15 @@ public class FlexUsageGenerator {
     private String getUserEmail(CloudbreakUsage source) {
         String cbUser;
         try {
-            cbUser = userDetailsService.getDetails(source.getOwner(), UserFilterField.USERID).getUsername();
+            cbUser = cachedUserDetailsService.getDetails(source.getOwner(), UserFilterField.USERID).getUsername();
         } catch (Exception ignored) {
-            LOGGER.warn(String.format("Expected user was not found with '%s' id. Maybe it was deleted by the admin user.", source.getOwner()));
+            LOGGER.warn("Expected user was not found with '{}' id. Maybe it was deleted by the admin user.", source.getOwner());
             cbUser = source.getOwner();
         }
         return cbUser;
     }
 
-    private List<FlexUsageProductJson> getFlexUsageProductJsons(List<CloudbreakUsage> usages, Long fromDate) {
+    private List<FlexUsageProductJson> getFlexUsageProductJsons(Iterable<CloudbreakUsage> usages, Long fromDate) {
         List<FlexUsageProductJson> flexUsageProducts = new ArrayList<>();
         FlexUsageProductJson flexUsageProductJson = new FlexUsageProductJson();
         flexUsageProductJson.setProductId(productId);
@@ -167,14 +163,14 @@ public class FlexUsageGenerator {
             creationTime = formatInstant(Instant.ofEpochMilli(bumpToMillis(controllerCreated)), FLEX_TIME_ZONE_FORMAT_PATTERN);
         }
         cbdComponentInstance.setCreationTime(creationTime);
-        FlexSubscription usedForController = Optional.ofNullable(flexSubscriptionRepository.findFirstByUsedForController(true))
-                .orElse(flexSubscriptionRepository.findFirstByIsDefault(true));
+        FlexSubscription usedForController = Optional.ofNullable(flexSubscriptionService.findFirstByUsedForController(true))
+                .orElse(flexSubscriptionService.findFirstByIsDefault(true));
         cbdComponentInstance.setFlexSubscriptionId(usedForController == null ? "" : usedForController.getSubscriptionId());
         cbdComponentInstance.setUsageDate(formatInstant(Instant.ofEpochMilli(fromDate), FLEX_USAGE_DAY_FORMAT_PATTERN));
         return cbdComponentInstance;
     }
 
-    private List<FlexUsageHdpInstanceJson> getFlexUsageHdpInstances(List<CloudbreakUsage> usages) {
+    private List<FlexUsageHdpInstanceJson> getFlexUsageHdpInstances(Iterable<CloudbreakUsage> usages) {
         Map<Long, FlexUsageHdpInstanceJson> flexUsageJsonsByStackId = new HashMap<>();
         for (CloudbreakUsage usage : usages) {
             Long stackId = usage.getStackId();

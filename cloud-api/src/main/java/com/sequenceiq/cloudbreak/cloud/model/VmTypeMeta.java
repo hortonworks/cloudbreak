@@ -13,6 +13,8 @@ public class VmTypeMeta {
 
     public static final String PRICE = "Price";
 
+    public static final String VOLUME_ENCRYPTION_SUPPORTED = "EncryptionSupported";
+
     private VolumeParameterConfig magneticConfig;
 
     private VolumeParameterConfig autoAttachedConfig;
@@ -23,7 +25,7 @@ public class VmTypeMeta {
 
     private VolumeParameterConfig st1Config;
 
-    private Map<String, String> properties = new HashMap<>();
+    private Map<String, Object> properties = new HashMap<>();
 
     public VolumeParameterConfig getMagneticConfig() {
         return magneticConfig;
@@ -65,11 +67,11 @@ public class VmTypeMeta {
         this.st1Config = st1Config;
     }
 
-    public Map<String, String> getProperties() {
+    public Map<String, Object> getProperties() {
         return properties;
     }
 
-    public void setProperties(Map<String, String> properties) {
+    public void setProperties(Map<String, Object> properties) {
         this.properties = properties;
     }
 
@@ -97,7 +99,7 @@ public class VmTypeMeta {
 
         private VolumeParameterConfig st1Config;
 
-        private final Map<String, String> properties = new HashMap<>();
+        private final Map<String, Object> properties = new HashMap<>();
 
         private VmTypeMetaBuilder() {
         }
@@ -191,6 +193,11 @@ public class VmTypeMeta {
 
         public VmTypeMetaBuilder withPrice(Double price) {
             properties.put(PRICE, price.toString());
+            return this;
+        }
+
+        public VmTypeMetaBuilder withVolumeEncryptionSupport(boolean supportEncryption) {
+            properties.put(VOLUME_ENCRYPTION_SUPPORTED, supportEncryption);
             return this;
         }
 

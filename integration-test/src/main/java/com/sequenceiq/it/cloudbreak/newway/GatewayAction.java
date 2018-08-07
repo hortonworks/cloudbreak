@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
+import static com.sequenceiq.it.cloudbreak.newway.log.Log.logJSON;
+
 import com.sequenceiq.it.IntegrationTestContext;
 
 public class GatewayAction {
@@ -13,5 +15,6 @@ public class GatewayAction {
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
         gateway.setResponse(client.getCloudbreakClient().connectorV1Endpoint().getGatewaysCredentialId(gateway.getRequest()));
+        logJSON("V1 Connectors Gateways post request: ", gateway.getRequest());
     }
 }

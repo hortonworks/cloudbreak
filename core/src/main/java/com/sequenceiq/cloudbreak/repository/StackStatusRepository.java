@@ -1,11 +1,16 @@
 package com.sequenceiq.cloudbreak.repository;
 
-import org.springframework.data.repository.CrudRepository;
+import javax.transaction.Transactional;
 
-import com.sequenceiq.cloudbreak.domain.StackStatus;
+import com.sequenceiq.cloudbreak.aspect.DisablePermission;
+import com.sequenceiq.cloudbreak.aspect.DisabledBaseRepository;
+import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
+import com.sequenceiq.cloudbreak.service.EntityType;
 
 @EntityType(entityClass = StackStatus.class)
-public interface StackStatusRepository extends CrudRepository<StackStatus, Long> {
+@Transactional(Transactional.TxType.REQUIRED)
+@DisablePermission
+public interface StackStatusRepository extends DisabledBaseRepository<StackStatus, Long> {
 
     StackStatus findFirstByStackIdOrderByCreatedDesc(long stackId);
 }

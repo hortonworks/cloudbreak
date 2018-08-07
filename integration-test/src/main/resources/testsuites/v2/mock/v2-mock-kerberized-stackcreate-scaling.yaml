@@ -12,12 +12,6 @@ tests:
       - com.sequenceiq.it.cloudbreak.CloudbreakTestSuiteInitializer
       - com.sequenceiq.it.MockSuiteInitializer
 
-  - name: start ssh server on port 2020
-    parameters:
-      sshPort: 2020
-    classes:
-      - com.sequenceiq.it.cloudbreak.StartSshServerTest
-
   - name: create mock credential
     parameters:
       credentialName: its-mock-krb-credential-v2
@@ -70,6 +64,7 @@ tests:
       mockPort: 9443
       publicKeyId: seq-master
       enableSecurity: true
+      enableGateway: false
       kerberosMasterKey: masterkey
       kerberosAdmin: admin
       kerberosPassword: admin
@@ -96,9 +91,3 @@ tests:
       desiredCount: 14
     classes:
         - com.sequenceiq.it.cloudbreak.v2.mock.MockScalingTest
-
-  - name: stop ssh server
-    parameters:
-      sshPort: 2020
-    classes:
-      - com.sequenceiq.it.cloudbreak.StopSshServerTest

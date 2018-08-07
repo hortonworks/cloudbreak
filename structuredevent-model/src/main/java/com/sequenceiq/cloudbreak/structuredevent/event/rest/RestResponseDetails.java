@@ -5,11 +5,13 @@ import java.util.Map;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.sequenceiq.cloudbreak.structuredevent.json.AnonymizingBase64Serializer;
 import com.sequenceiq.cloudbreak.structuredevent.json.Base64Deserializer;
-import com.sequenceiq.cloudbreak.structuredevent.json.Base64Serializer;
 
 public class RestResponseDetails implements Serializable {
     private Integer statusCode;
+
+    private String statusText;
 
     private String mediaType;
 
@@ -17,12 +19,9 @@ public class RestResponseDetails implements Serializable {
 
     private Map<String, String> cookies;
 
-    @JsonSerialize(using = Base64Serializer.class)
+    @JsonSerialize(using = AnonymizingBase64Serializer.class)
     @JsonDeserialize(using = Base64Deserializer.class)
     private String body;
-
-    public RestResponseDetails() {
-    }
 
     public Integer getStatusCode() {
         return statusCode;
@@ -30,6 +29,14 @@ public class RestResponseDetails implements Serializable {
 
     public void setStatusCode(Integer statusCode) {
         this.statusCode = statusCode;
+    }
+
+    public String getStatusText() {
+        return statusText;
+    }
+
+    public void setStatusText(String statusText) {
+        this.statusText = statusText;
     }
 
     public String getMediaType() {

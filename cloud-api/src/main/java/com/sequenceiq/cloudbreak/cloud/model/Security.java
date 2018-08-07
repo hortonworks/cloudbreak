@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
+import java.util.Collection;
 import java.util.List;
 
 import com.google.common.collect.ImmutableList;
@@ -10,7 +11,7 @@ public class Security {
 
     private final String cloudSecurityId;
 
-    public Security(List<SecurityRule> rules, String cloudSecurityId) {
+    public Security(Collection<SecurityRule> rules, String cloudSecurityId) {
         this.rules = ImmutableList.copyOf(rules);
         this.cloudSecurityId = cloudSecurityId;
     }

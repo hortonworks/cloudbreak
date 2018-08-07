@@ -23,7 +23,7 @@ public class TimeMonitor extends AbstractMonitor {
     }
 
     @Override
-    public Class getEvaluatorType() {
+    public Class<?> getEvaluatorType() {
         return CronTimeEvaluator.class;
     }
 

@@ -1,29 +1,37 @@
 package com.sequenceiq.cloudbreak.service.ldapconfig;
 
+import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
-import javax.transaction.Transactional;
-import javax.transaction.Transactional.TxType;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.NotFoundException;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
+import com.sequenceiq.cloudbreak.domain.security.Organization;
+import com.sequenceiq.cloudbreak.domain.security.User;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.LdapConfigRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Service
-@Transactional
 public class LdapConfigService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(LdapConfigService.class);
 
     @Inject
     private LdapConfigRepository ldapConfigRepository;
@@ -34,25 +42,32 @@ public class LdapConfigService {
     @Inject
     private AuthorizationService authorizationService;
 
-    @Transactional(TxType.NEVER)
-    public LdapConfig create(IdentityUser user, LdapConfig ldapConfig) {
-        ldapConfig.setOwner(user.getUserId());
-        ldapConfig.setAccount(user.getAccount());
+    @Inject
+    private UserService userService;
+
+    @Inject
+    private OrganizationService organizationService;
+
+    public LdapConfig create(IdentityUser identityUser, LdapConfig ldapConfig) {
+        ldapConfig.setOwner(identityUser.getUserId());
+        ldapConfig.setAccount(identityUser.getAccount());
+        User user = userService.getOrCreate(identityUser);
+        Organization organization = organizationService.getDefaultOrganizationForUser(user);
+        ldapConfig.setOrganization(organization);
         try {
             return ldapConfigRepository.save(ldapConfig);
         } catch (DataIntegrityViolationException ex) {
-            String msg = String.format("Error with resource [%s], error: [%s]", APIResourceType.LDAP_CONFIG, getProperSqlErrorMessage(ex));
+            String msg = String.format("Error with resource [%s], %s", APIResourceType.LDAP_CONFIG, getProperSqlErrorMessage(ex));
             throw new BadRequestException(msg);
         }
     }
 
     public LdapConfig get(Long id) {
-        LdapConfig ldapConfig = ldapConfigRepository.findOne(id);
-        if (ldapConfig == null) {
-            throw new NotFoundException(String.format("LdapConfig '%s' not found", id));
-        }
-        authorizationService.hasReadPermission(ldapConfig);
-        return ldapConfig;
+        return ldapConfigRepository.findById(id).orElseThrow(notFound("LdapConfig", id));
+    }
+
+    public LdapConfig getByName(String name, IdentityUser user) {
+        return ldapConfigRepository.findByNameInAccount(name, user.getAccount());
     }
 
     public Set<LdapConfig> retrievePrivateConfigs(IdentityUser user) {
@@ -60,27 +75,16 @@ public class LdapConfigService {
     }
 
     public Set<LdapConfig> retrieveAccountConfigs(IdentityUser user) {
-        if (user.getRoles().contains(IdentityUserRole.ADMIN)) {
-            return ldapConfigRepository.findAllInAccount(user.getAccount());
-        } else {
-            return ldapConfigRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
-        }
+        return user.getRoles().contains(IdentityUserRole.ADMIN) ? ldapConfigRepository.findAllInAccount(user.getAccount())
+                : ldapConfigRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
     }
 
     public LdapConfig getPrivateConfig(String name, IdentityUser user) {
-        LdapConfig ldapConfig = ldapConfigRepository.findByNameForUser(name, user.getUserId());
-        if (ldapConfig == null) {
-            throw new NotFoundException(String.format("LdapConfig '%s' not found.", name));
-        }
-        return ldapConfig;
+        return ldapConfigRepository.findByNameForUser(name, user.getUserId());
     }
 
     public LdapConfig getPublicConfig(String name, IdentityUser user) {
-        LdapConfig ldapConfig = ldapConfigRepository.findByNameInAccount(name, user.getAccount());
-        if (ldapConfig == null) {
-            throw new NotFoundException(String.format("LdapConfig '%s' not found.", name));
-        }
-        return ldapConfig;
+        return ldapConfigRepository.findByNameInAccount(name, user.getAccount());
     }
 
     public void delete(Long id) {
@@ -93,17 +97,25 @@ public class LdapConfigService {
 
     public void delete(String name, IdentityUser user) {
         LdapConfig ldapConfig = ldapConfigRepository.findByNameInAccount(name, user.getAccount());
-        if (ldapConfig == null) {
-            throw new NotFoundException(String.format("LdapConfig '%s' not found.", name));
-        }
         delete(ldapConfig);
     }
 
     private void delete(LdapConfig ldapConfig) {
-        authorizationService.hasWritePermission(ldapConfig);
-        if (!clusterRepository.countByLdapConfig(ldapConfig).equals(0L)) {
-            throw new BadRequestException(String.format(
-                    "There are clusters associated with LDAP config '%s'. Please remove these before deleting the LDAP config.", ldapConfig.getId()));
+        LOGGER.info("Deleting ldap configuration with name: {}", ldapConfig.getName());
+        List<Cluster> clustersWithLdap = clusterRepository.findByLdapConfig(ldapConfig);
+        if (!clustersWithLdap.isEmpty()) {
+            if (clustersWithLdap.size() > 1) {
+                String clusters = clustersWithLdap
+                        .stream()
+                        .map(Cluster::getName)
+                        .collect(Collectors.joining(", "));
+                throw new BadRequestException(String.format(
+                        "There are clusters associated with LDAP config '%s'. Please remove these before deleting the LDAP config. "
+                                + "The following clusters are using this LDAP: [%s]", ldapConfig.getName(), clusters));
+            } else {
+                throw new BadRequestException(String.format("There is a cluster ['%s'] which uses LDAP config '%s'. Please remove this "
+                        + "cluster before deleting the LDAP config", clustersWithLdap.get(0).getName(), ldapConfig.getName()));
+            }
         }
         ldapConfigRepository.delete(ldapConfig);
     }

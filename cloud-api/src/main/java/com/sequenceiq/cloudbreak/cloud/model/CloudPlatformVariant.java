@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
+import java.util.Objects;
+
 public class CloudPlatformVariant {
 
     private final Platform platform;
@@ -8,11 +10,7 @@ public class CloudPlatformVariant {
 
     public CloudPlatformVariant(Platform platform, Variant variant) {
         this.platform = platform;
-        if (variant == null) {
-            this.variant = Variant.EMPTY;
-        } else {
-            this.variant = variant;
-        }
+        this.variant = variant == null ? Variant.EMPTY : variant;
     }
 
     public Platform getPlatform() {
@@ -25,7 +23,7 @@ public class CloudPlatformVariant {
 
     @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || !Objects.equals(getClass(), o.getClass())) {
             return false;
         } else if (this == o) {
             return true;

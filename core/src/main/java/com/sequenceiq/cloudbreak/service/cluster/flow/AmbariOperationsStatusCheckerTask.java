@@ -14,16 +14,17 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.ClusterBasedStatusCheckerTask;
-import com.sequenceiq.cloudbreak.service.cluster.AmbariOperationFailedException;
+import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariOperationFailedException;
+import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariOperationType;
 import com.sequenceiq.cloudbreak.service.notification.Notification;
 import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
 
 @Component
 public class AmbariOperationsStatusCheckerTask extends ClusterBasedStatusCheckerTask<AmbariOperations> {
 
-    public static final BigDecimal COMPLETED = new BigDecimal(100.0);
+    public static final Comparable<BigDecimal> COMPLETED = new BigDecimal(100.0);
 
     public static final BigDecimal FAILED = new BigDecimal(-1.0);
 
@@ -95,7 +96,7 @@ public class AmbariOperationsStatusCheckerTask extends ClusterBasedStatusChecker
 
     @Override
     public void handleException(Exception e) {
-        LOGGER.error("Ambari operation failed.", e);
+        LOGGER.info("Ambari operation failed.", e);
     }
 
 }

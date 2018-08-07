@@ -1,13 +1,15 @@
 base:
   '*':
+    - pkg-mgr-proxy
     - consul
     - unbound
     - java
     - metadata
 {% if not salt['file.directory_exists']('/yarn-private') %}  # FIXME (BUG-92637): must be disabled for YCloud
-    - nginx
+    - nginx.datalake
 {% endif %}
     - docker
+    - recipes.runner
 
   'roles:kerberos_server_master':
     - match: grain
@@ -34,26 +36,27 @@ base:
     - smartsense.server-upgrade
     - ambari.server-upgrade
 
-  'roles:gateway':
-    - match: grain
-    - gateway
-
   'roles:smartsense_agent_update':
     - match: grain
     - smartsense.agent-update
 
   'roles:postgresql_server':
     - match: grain
-    - postgresql.postgres-install
+    - postgresql
 
   'roles:ambari_server_install':
     - match: grain
     - prometheus.server
     - ambari.server
+    - jdbc.connectors
 
   'roles:ambari_agent_install':
     - match: grain
     - ambari.agent
+
+  'roles:gateway':
+    - match: grain
+    - gateway
 
   'roles:smartsense':
     - match: grain
@@ -61,11 +64,14 @@ base:
 
   'recipes:pre-ambari-start':
     - match: grain
-    - pre-recipes.pre-ambari-start
+    - recipes.pre-ambari-start
 
   'roles:ambari_server':
     - match: grain
     - ambari.server-start
+{% if not salt['file.directory_exists']('/yarn-private') %}  # FIXME (BUG-92637): must be disabled for YCloud
+    - nginx.init
+{% endif %}
 
   'roles:ambari_server_standby':
     - match: grain
@@ -77,7 +83,7 @@ base:
 
   'recipes:post-ambari-start':
     - match: grain
-    - pre-recipes.post-ambari-start
+    - recipes.post-ambari-start
 
   'G@roles:ambari_server and G@recipes:post-ambari-start':
     - match: compound
@@ -85,11 +91,11 @@ base:
 
   'recipes:pre-termination':
     - match: grain
-    - pre-recipes.pre-termination
+    - recipes.pre-termination
 
   'recipes:post-cluster-install':
     - match: grain
-    - post-recipes
+    - recipes.post-cluster-install
 
   'G@recipes:post and G@roles:kerberos_server_slave':
     - match: compound

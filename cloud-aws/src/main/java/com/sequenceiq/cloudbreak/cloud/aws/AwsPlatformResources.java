@@ -7,10 +7,13 @@ import static java.util.Collections.singletonList;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -46,6 +49,15 @@ import com.amazonaws.services.ec2.model.Vpc;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
 import com.amazonaws.services.identitymanagement.model.InstanceProfile;
 import com.amazonaws.services.identitymanagement.model.ListInstanceProfilesResult;
+import com.amazonaws.services.kms.AWSKMS;
+import com.amazonaws.services.kms.model.AliasListEntry;
+import com.amazonaws.services.kms.model.DescribeKeyRequest;
+import com.amazonaws.services.kms.model.DescribeKeyResult;
+import com.amazonaws.services.kms.model.KeyListEntry;
+import com.amazonaws.services.kms.model.ListAliasesRequest;
+import com.amazonaws.services.kms.model.ListAliasesResult;
+import com.amazonaws.services.kms.model.ListKeysRequest;
+import com.amazonaws.services.kms.model.ListKeysResult;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
@@ -54,6 +66,8 @@ import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfig;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKey;
+import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudGateWay;
 import com.sequenceiq.cloudbreak.cloud.model.CloudGateWays;
 import com.sequenceiq.cloudbreak.cloud.model.CloudIpPools;
@@ -67,12 +81,14 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.ConfigSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.DisplayName;
+import com.sequenceiq.cloudbreak.cloud.model.PropertySpecification;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.RegionDisplayNameSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.RegionDisplayNameSpecifications;
 import com.sequenceiq.cloudbreak.cloud.model.VmSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
+import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta.VmTypeMetaBuilder;
 import com.sequenceiq.cloudbreak.cloud.model.VmsSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
@@ -81,7 +97,8 @@ import com.sequenceiq.cloudbreak.cloud.model.ZoneVmSpecifications;
 import com.sequenceiq.cloudbreak.cloud.model.view.PlatformResourceSecurityGroupFilterView;
 import com.sequenceiq.cloudbreak.cloud.model.view.PlatformResourceSshKeyFilterView;
 import com.sequenceiq.cloudbreak.cloud.model.view.PlatformResourceVpcFilterView;
-import com.sequenceiq.cloudbreak.cloud.service.CloudbreakResourceReaderService;
+import com.sequenceiq.cloudbreak.common.type.CloudConstants;
+import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
@@ -100,17 +117,17 @@ public class AwsPlatformResources implements PlatformResources {
     @Inject
     private AwsPlatformParameters awsPlatformParameters;
 
-    @Value("${cb.aws.zone.parameter.default:eu-west-1}")
-    private String awsZoneParameterDefault;
+    @Inject
+    private AwsDefaultZoneProvider awsDefaultZoneProvider;
 
     @Value("${cb.aws.vm.parameter.definition.path:}")
     private String awsVmParameterDefinitionPath;
 
     private Map<Region, DisplayName> regionDisplayNames = new HashMap<>();
 
-    private Map<Region, Set<VmType>> vmTypes = new HashMap<>();
+    private final Map<Region, Set<VmType>> vmTypes = new HashMap<>();
 
-    private Map<Region, VmType> defaultVmTypes = new HashMap<>();
+    private final Map<Region, VmType> defaultVmTypes = new HashMap<>();
 
     @PostConstruct
     public void init() {
@@ -119,11 +136,7 @@ public class AwsPlatformResources implements PlatformResources {
     }
 
     private String getDefinition(String parameter, String type) {
-        if (Strings.isNullOrEmpty(parameter)) {
-            return resourceDefinition(type);
-        } else {
-            return FileReaderUtils.readFileFromClasspathQuietly(parameter);
-        }
+        return Strings.isNullOrEmpty(parameter) ? resourceDefinition(type) : FileReaderUtils.readFileFromClasspathQuietly(parameter);
     }
 
     public String resourceDefinition(String resource) {
@@ -137,10 +150,11 @@ public class AwsPlatformResources implements PlatformResources {
         try {
             VmsSpecification oVms = JsonUtil.readValue(vm, VmsSpecification.class);
             for (VmSpecification vmSpecification : oVms.getItems()) {
-                VmTypeMeta.VmTypeMetaBuilder builder = VmTypeMeta.VmTypeMetaBuilder.builder()
-                        .withCpuAndMemory(vmSpecification.getMetaSpecification().getProperties().getCpu(),
-                                vmSpecification.getMetaSpecification().getProperties().getMemory())
-                        .withPrice(vmSpecification.getMetaSpecification().getProperties().getPrice());
+                PropertySpecification properties = vmSpecification.getMetaSpecification().getProperties();
+                VmTypeMetaBuilder builder = VmTypeMetaBuilder.builder()
+                        .withCpuAndMemory(properties.getCpu(), properties.getMemory())
+                        .withPrice(properties.getPrice())
+                        .withVolumeEncryptionSupport(properties.getEncryptionSupported());
                 for (ConfigSpecification configSpecification : vmSpecification.getMetaSpecification().getConfigSpecification()) {
                     addConfig(builder, configSpecification);
                 }
@@ -167,7 +181,7 @@ public class AwsPlatformResources implements PlatformResources {
         }
     }
 
-    private void addConfig(VmTypeMeta.VmTypeMetaBuilder builder, ConfigSpecification configSpecification) {
+    private void addConfig(VmTypeMetaBuilder builder, ConfigSpecification configSpecification) {
         if (configSpecification.getVolumeParameterType().equals(VolumeParameterType.AUTO_ATTACHED.name())) {
             builder.withAutoAttachedConfig(volumeParameterConfig(configSpecification));
         } else if (configSpecification.getVolumeParameterType().equals(VolumeParameterType.EPHEMERAL.name())) {
@@ -312,7 +326,7 @@ public class AwsPlatformResources implements PlatformResources {
 
         DescribeRegionsRequest describeRegionsRequest = new DescribeRegionsRequest();
         DescribeRegionsResult describeRegionsResult = ec2Client.describeRegions(describeRegionsRequest);
-        String defaultRegion = awsZoneParameterDefault;
+        String defaultRegion = awsDefaultZoneProvider.getDefaultZone(cloudCredential);
 
         for (com.amazonaws.services.ec2.model.Region awsRegion : describeRegionsResult.getRegions()) {
             if (region == null || Strings.isNullOrEmpty(region.value()) || awsRegion.getRegionName().equals(region.value())) {
@@ -321,7 +335,7 @@ public class AwsPlatformResources implements PlatformResources {
                 ec2Client.setRegion(RegionUtils.getRegion(awsRegion.getRegionName()));
                 Filter filter = new Filter();
                 filter.setName("region-name");
-                List<String> list = new ArrayList<>();
+                Collection<String> list = new ArrayList<>();
                 list.add(awsRegion.getRegionName());
                 filter.setValues(list);
 
@@ -350,7 +364,7 @@ public class AwsPlatformResources implements PlatformResources {
 
     @Override
     @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName()")
-    public CloudVmTypes virtualMachines(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception {
+    public CloudVmTypes virtualMachines(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         CloudRegions regions = regions(cloudCredential, region, filters);
 
         Map<String, Set<VmType>> cloudVmResponses = new HashMap<>();
@@ -365,13 +379,13 @@ public class AwsPlatformResources implements PlatformResources {
     }
 
     @Override
-    public CloudGateWays gateways(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception {
+    public CloudGateWays gateways(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         AmazonEC2Client ec2Client = awsClient.createAccess(cloudCredential);
 
         Map<String, Set<CloudGateWay>> resultCloudGateWayMap = new HashMap<>();
         CloudRegions regions = regions(cloudCredential, region, filters);
 
-        for (Map.Entry<Region, List<AvailabilityZone>> regionListEntry : regions.getCloudRegions().entrySet()) {
+        for (Entry<Region, List<AvailabilityZone>> regionListEntry : regions.getCloudRegions().entrySet()) {
             if (region == null || Strings.isNullOrEmpty(region.value()) || regionListEntry.getKey().value().equals(region.value())) {
                 ec2Client.setRegion(RegionUtils.getRegion(regionListEntry.getKey().value()));
 
@@ -383,7 +397,7 @@ public class AwsPlatformResources implements PlatformResources {
                     CloudGateWay cloudGateWay = new CloudGateWay();
                     cloudGateWay.setId(internetGateway.getInternetGatewayId());
                     cloudGateWay.setName(internetGateway.getInternetGatewayId());
-                    List<String> vpcs = new ArrayList<>();
+                    Collection<String> vpcs = new ArrayList<>();
                     for (InternetGatewayAttachment internetGatewayAttachment : internetGateway.getAttachments()) {
                         vpcs.add(internetGatewayAttachment.getVpcId());
                     }
@@ -401,12 +415,12 @@ public class AwsPlatformResources implements PlatformResources {
     }
 
     @Override
-    public CloudIpPools publicIpPool(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception {
+    public CloudIpPools publicIpPool(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         return new CloudIpPools();
     }
 
     @Override
-    public CloudAccessConfigs accessConfigs(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception {
+    public CloudAccessConfigs accessConfigs(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         String queryFailedMessage = "Could not get instance profile roles from Amazon: ";
 
         CloudAccessConfigs cloudAccessConfigs = new CloudAccessConfigs(new HashSet<>());
@@ -431,16 +445,84 @@ public class AwsPlatformResources implements PlatformResources {
         } catch (AmazonServiceException ase) {
             if (ase.getStatusCode() == UNAUTHORIZED) {
                 String policyMessage = "Could not get instance profile roles because the user does not have enough permission.";
-                LOGGER.info(policyMessage + ase);
+                LOGGER.warn(policyMessage + ase);
                 throw new CloudConnectorException(policyMessage, ase);
             } else {
-                LOGGER.error(queryFailedMessage, ase);
+                LOGGER.warn(queryFailedMessage, ase);
                 throw new CloudConnectorException(queryFailedMessage + ase.getMessage(), ase);
             }
         } catch (Exception e) {
-            LOGGER.error(queryFailedMessage, e);
+            LOGGER.warn(queryFailedMessage, e);
             throw new CloudConnectorException(queryFailedMessage + e.getMessage(), e);
         }
         return cloudAccessConfigs;
+    }
+
+    @Override
+    public CloudEncryptionKeys encryptionKeys(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+        String queryFailedMessage = "Could not get encryption keys from Amazon: ";
+
+        CloudEncryptionKeys cloudEncryptionKeys = new CloudEncryptionKeys(new HashSet<>());
+        AwsCredentialView awsCredentialView = new AwsCredentialView(cloudCredential);
+        AWSKMS client = awsClient.createAWSKMS(awsCredentialView, region.value());
+        try {
+            ListKeysRequest listKeysRequest = new ListKeysRequest();
+            ListKeysResult listKeysResult = client.listKeys(listKeysRequest);
+            ListAliasesRequest listAliasesRequest = new ListAliasesRequest();
+            ListAliasesResult listAliasesResult = client.listAliases(listAliasesRequest);
+
+            for (AliasListEntry keyListEntry : listAliasesResult.getAliases()) {
+                try {
+                    Optional<KeyListEntry> filteredEntry =
+                            listKeysResult.getKeys().stream().filter(item -> item.getKeyId().equals(keyListEntry.getTargetKeyId())).findFirst();
+                    if (filteredEntry.isPresent()) {
+                        DescribeKeyRequest describeKeyRequest = new DescribeKeyRequest().withKeyId(filteredEntry.get().getKeyId());
+                        DescribeKeyResult describeKeyResult = client.describeKey(describeKeyRequest);
+                        Map<String, Object> meta = new HashMap<>();
+                        meta.put("aWSAccountId", describeKeyResult.getKeyMetadata().getAWSAccountId());
+                        meta.put("creationDate", describeKeyResult.getKeyMetadata().getCreationDate());
+                        meta.put("enabled", describeKeyResult.getKeyMetadata().getEnabled());
+                        meta.put("expirationModel", describeKeyResult.getKeyMetadata().getExpirationModel());
+                        meta.put("keyManager", describeKeyResult.getKeyMetadata().getKeyManager());
+                        meta.put("keyState", describeKeyResult.getKeyMetadata().getKeyState());
+                        meta.put("keyUsage", describeKeyResult.getKeyMetadata().getKeyUsage());
+                        meta.put("origin", describeKeyResult.getKeyMetadata().getOrigin());
+                        meta.put("validTo", describeKeyResult.getKeyMetadata().getValidTo());
+
+                        if (!CloudConstants.AWS.equalsIgnoreCase(describeKeyResult.getKeyMetadata().getKeyManager())) {
+                            CloudEncryptionKey key = new CloudEncryptionKey(
+                                    filteredEntry.get().getKeyArn(),
+                                    describeKeyResult.getKeyMetadata().getKeyId(),
+                                    describeKeyResult.getKeyMetadata().getDescription(),
+                                    keyListEntry.getAliasName().replace("alias/", ""),
+                                    meta);
+                            cloudEncryptionKeys.getCloudEncryptionKeys().add(key);
+                        }
+                    }
+                } catch (AmazonServiceException e) {
+                    if (e.getStatusCode() == UNAUTHORIZED) {
+                        String policyMessage = "Could not get encryption keys because the user does not have enough permission.";
+                        LOGGER.warn(policyMessage + e);
+                    } else {
+                        LOGGER.warn(queryFailedMessage, e);
+                    }
+                } catch (Exception e) {
+                    LOGGER.warn(queryFailedMessage, e);
+                }
+            }
+        } catch (AmazonServiceException ase) {
+            if (ase.getStatusCode() == UNAUTHORIZED) {
+                String policyMessage = "Could not get encryption keys because the user does not have enough permission.";
+                LOGGER.warn(policyMessage + ase);
+                throw new CloudConnectorException(policyMessage, ase);
+            } else {
+                LOGGER.warn(queryFailedMessage, ase);
+                throw new CloudConnectorException(queryFailedMessage + ase.getMessage(), ase);
+            }
+        } catch (Exception e) {
+            LOGGER.warn(queryFailedMessage, e);
+            throw new CloudConnectorException(queryFailedMessage + e.getMessage(), e);
+        }
+        return cloudEncryptionKeys;
     }
 }

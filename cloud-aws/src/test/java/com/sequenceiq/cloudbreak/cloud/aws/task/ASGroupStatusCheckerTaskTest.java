@@ -40,7 +40,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Region;
 public class ASGroupStatusCheckerTaskTest {
 
     @Test
-    public void successTest() throws Exception {
+    public void successTest() {
         int requiredInstances = 160;
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
 
@@ -91,13 +91,13 @@ public class ASGroupStatusCheckerTaskTest {
         verify(amazonEC2Client, times(2)).describeInstanceStatus(instanceStatusRequestArgumentCaptor.capture());
 
         List<DescribeInstanceStatusRequest> allValues = instanceStatusRequestArgumentCaptor.getAllValues();
-        assertEquals(100, allValues.get(0).getInstanceIds().size());
-        assertEquals(60, allValues.get(1).getInstanceIds().size());
+        assertEquals(100L, allValues.get(0).getInstanceIds().size());
+        assertEquals(60L, allValues.get(1).getInstanceIds().size());
         assertTrue(taskResult);
     }
 
     @Test
-    public void failTest() throws Exception {
+    public void failTest() {
         int requiredInstances = 160;
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
 
@@ -148,8 +148,8 @@ public class ASGroupStatusCheckerTaskTest {
         verify(amazonEC2Client, times(2)).describeInstanceStatus(instanceStatusRequestArgumentCaptor.capture());
 
         List<DescribeInstanceStatusRequest> allValues = instanceStatusRequestArgumentCaptor.getAllValues();
-        assertEquals(100, allValues.get(0).getInstanceIds().size());
-        assertEquals(60, allValues.get(1).getInstanceIds().size());
+        assertEquals(100L, allValues.get(0).getInstanceIds().size());
+        assertEquals(60L, allValues.get(1).getInstanceIds().size());
         assertFalse(taskResult);
     }
 

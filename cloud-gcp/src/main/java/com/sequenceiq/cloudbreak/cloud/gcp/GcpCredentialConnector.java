@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.cloud.gcp;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 
 import javax.annotation.Nonnull;
@@ -22,6 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.credential.CredentialNotifier;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContextBuilder;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.InvalidGcpContextException;
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
@@ -39,8 +39,8 @@ public class GcpCredentialConnector implements CredentialConnector {
 
     @Override
     public CloudCredentialStatus verify(@Nonnull AuthenticatedContext authenticatedContext) {
-        Objects.requireNonNull(authenticatedContext);
         LOGGER.info("Verify credential: {}", authenticatedContext.getCloudCredential());
+        GcpStackUtil.prepareCredential(authenticatedContext.getCloudCredential());
         GcpContext gcpContext = gcpContextBuilder.contextInit(authenticatedContext.getCloudContext(), authenticatedContext, null, null, false);
         try {
             checkGcpContextValidity(gcpContext);
@@ -55,7 +55,6 @@ public class GcpCredentialConnector implements CredentialConnector {
 
     @Override
     public CloudCredentialStatus create(@Nonnull AuthenticatedContext authenticatedContext) {
-        Objects.requireNonNull(authenticatedContext);
         return new CloudCredentialStatus(authenticatedContext.getCloudCredential(), CredentialStatus.CREATED);
     }
 
@@ -67,7 +66,6 @@ public class GcpCredentialConnector implements CredentialConnector {
 
     @Override
     public CloudCredentialStatus delete(@Nonnull AuthenticatedContext authenticatedContext) {
-        Objects.requireNonNull(authenticatedContext);
         return new CloudCredentialStatus(authenticatedContext.getCloudCredential(), CredentialStatus.DELETED);
     }
 
@@ -86,12 +84,14 @@ public class GcpCredentialConnector implements CredentialConnector {
      *                    If the passed Optional is empty, then a default
      *                    message is going to be passed to the status
      *                    instance.
+     *
      * @return The combined CloudCredentialStatus instance which stores all
      * the necessary/required data for a proper object with a FAILED status.
      */
     private CloudCredentialStatus createFailedCloudCredentialStatusWithExc(Exception e, AuthenticatedContext authContext, Optional<String> message) {
         LOGGER.warn(String.format("Could not verify credential, detailed message: %s", e.getMessage()), e);
-        return new CloudCredentialStatus(authContext.getCloudCredential(), CredentialStatus.FAILED, e, message.orElse("Could not verify credential!"));
+        return new CloudCredentialStatus(authContext.getCloudCredential(), CredentialStatus.FAILED, e, message.orElse(
+                "Could not verify credential! " + e.getMessage()));
     }
 
     /**
@@ -101,6 +101,7 @@ public class GcpCredentialConnector implements CredentialConnector {
      *
      * @param gcpContext the GcpContext instance which credential would be
      *                   checked.
+     *
      * @throws IOException if something happens while listing the regions,
      *                     this exception would thrown by the api.
      */
@@ -116,6 +117,7 @@ public class GcpCredentialConnector implements CredentialConnector {
      *
      * @param e The TokenResponseException which content should have a
      *          "error_description" parameter with a string value.
+     *
      * @return A String Optional with the content of the "error_description"
      * from the exception, or an empty one.
      */

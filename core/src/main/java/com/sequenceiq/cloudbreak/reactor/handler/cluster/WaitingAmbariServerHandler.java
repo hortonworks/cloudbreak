@@ -5,13 +5,13 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.WaitForAmbariServerFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.WaitForAmbariServerRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.WaitForAmbariServerSuccess;
 import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
-import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
+import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariClusterConnector;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 import reactor.bus.Event;
@@ -39,11 +39,11 @@ public class WaitingAmbariServerHandler implements ReactorEventHandler<WaitForAm
         Selectable response;
         try {
             Stack stack = stackService.getById(stackId);
-            ambariClusterConnector.waitForAmbariServer(stack);
+            ambariClusterConnector.waitForServer(stack);
             response = new WaitForAmbariServerSuccess(stackId);
         } catch (Exception e) {
             response = new WaitForAmbariServerFailed(stackId, e);
         }
-        eventBus.notify(response.selector(), new Event(event.getHeaders(), response));
+        eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));
     }
 }

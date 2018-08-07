@@ -1,13 +1,17 @@
 package com.sequenceiq.cloudbreak.api.model.v2;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.validation.Valid;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
-import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
+import com.sequenceiq.cloudbreak.api.model.SharedServiceRequest;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 
@@ -16,7 +20,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(Include.NON_NULL)
 public class ClusterV2Request implements JsonEntity {
 
     @ApiModelProperty(hidden = true)
@@ -31,12 +35,15 @@ public class ClusterV2Request implements JsonEntity {
     @ApiModelProperty(ClusterModelDescription.LDAP_CONFIG_NAME)
     private String ldapConfigName;
 
-    @ApiModelProperty(ClusterModelDescription.RDS_CONFIGS)
-    private RdsConfigs rdsConfigs;
+    @ApiModelProperty(ClusterModelDescription.RDSCONFIG_NAMES)
+    private Set<String> rdsConfigNames = new HashSet<>();
+
+    @ApiModelProperty(ClusterModelDescription.PROXY_NAME)
+    private String proxyName;
 
     @Valid
-    @ApiModelProperty(StackModelDescription.FILE_SYSTEM)
-    private FileSystemRequest fileSystem;
+    @ApiModelProperty(StackModelDescription.CLOUD_STORAGE)
+    private CloudStorageRequest cloudStorage;
 
     @ApiModelProperty(ClusterModelDescription.EXECUTOR_TYPE)
     private ExecutorType executorType = ExecutorType.DEFAULT;
@@ -45,20 +52,15 @@ public class ClusterV2Request implements JsonEntity {
     @ApiModelProperty(ClusterModelDescription.AMBARI_REQUEST)
     private AmbariV2Request ambari;
 
+    @ApiModelProperty(ClusterModelDescription.SHARED_SERVICE_REQUEST)
+    private SharedServiceRequest sharedService;
+
     public Boolean getEmailNeeded() {
         return emailNeeded;
     }
 
     public void setEmailNeeded(Boolean emailNeeded) {
         this.emailNeeded = emailNeeded;
-    }
-
-    public FileSystemRequest getFileSystem() {
-        return fileSystem;
-    }
-
-    public void setFileSystem(FileSystemRequest fileSystem) {
-        this.fileSystem = fileSystem;
     }
 
     public String getEmailTo() {
@@ -91,6 +93,14 @@ public class ClusterV2Request implements JsonEntity {
         this.name = name;
     }
 
+    public CloudStorageRequest getCloudStorage() {
+        return cloudStorage;
+    }
+
+    public void setCloudStorage(CloudStorageRequest cloudStorage) {
+        this.cloudStorage = cloudStorage;
+    }
+
     public ExecutorType getExecutorType() {
         return executorType;
     }
@@ -103,11 +113,27 @@ public class ClusterV2Request implements JsonEntity {
         this.ambari = ambari;
     }
 
-    public RdsConfigs getRdsConfigs() {
-        return rdsConfigs;
+    public Set<String> getRdsConfigNames() {
+        return rdsConfigNames;
     }
 
-    public void setRdsConfigs(RdsConfigs rdsConfigs) {
-        this.rdsConfigs = rdsConfigs;
+    public void setRdsConfigNames(Set<String> rdsConfigNames) {
+        this.rdsConfigNames = rdsConfigNames;
+    }
+
+    public String getProxyName() {
+        return proxyName;
+    }
+
+    public void setProxyName(String proxyName) {
+        this.proxyName = proxyName;
+    }
+
+    public SharedServiceRequest getSharedService() {
+        return sharedService;
+    }
+
+    public void setSharedService(SharedServiceRequest sharedService) {
+        this.sharedService = sharedService;
     }
 }

@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.converter;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +13,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.BaseImageResponse;
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImageResponse;
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImagesResponse;
+import com.sequenceiq.cloudbreak.api.model.imagecatalog.ManagementPackEntry;
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.StackDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.StackRepoDetailsJson;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.StackDetails;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDFEntries;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDPEntries;
+import com.sequenceiq.cloudbreak.cloud.model.component.ManagementPackComponent;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackInfo;
 import com.sequenceiq.cloudbreak.service.DefaultAmbariRepoService;
 
@@ -48,7 +49,7 @@ public class ImagesToImagesResponseJsonConverter extends AbstractConversionServi
         for (Image hdpImg : source.getHdpImages()) {
             ImageResponse hdpImgJson = new ImageResponse();
             copyImageFieldsToJson(hdpImg, hdpImgJson);
-            hdpImgJson.setStackDetails(convertStackDetailsToJson(hdpImg.getStackDetails()));
+            hdpImgJson.setStackDetails(convertStackDetailsToJson(hdpImg.getStackDetails(), hdpImg.getOsType()));
             hdpImages.add(hdpImgJson);
         }
         res.setHdpImages(hdpImages);
@@ -57,11 +58,11 @@ public class ImagesToImagesResponseJsonConverter extends AbstractConversionServi
         for (Image hdfImg : source.getHdfImages()) {
             ImageResponse hdfImgJson = new ImageResponse();
             copyImageFieldsToJson(hdfImg, hdfImgJson);
-            hdfImgJson.setStackDetails(convertStackDetailsToJson(hdfImg.getStackDetails()));
+            hdfImgJson.setStackDetails(convertStackDetailsToJson(hdfImg.getStackDetails(), hdfImg.getOsType()));
             hdfImages.add(hdfImgJson);
         }
         res.setHdfImages(hdfImages);
-
+        res.setSupportedVersions(source.getSuppertedVersions());
         return res;
     }
 
@@ -69,14 +70,14 @@ public class ImagesToImagesResponseJsonConverter extends AbstractConversionServi
         List<StackDetailsJson> defaultHdpStacks = getDefaultStackInfos(defaultHDPEntries.getEntries().values());
         List<StackDetailsJson> defaultHdfStacks = getDefaultStackInfos(defaultHDFEntries.getEntries().values());
         List<BaseImageResponse> baseImages = source.getBaseImages().stream()
-            .filter(i -> defaultAmbariRepoService.getDefault(i.getOsType()) != null)
-            .map(i -> {
+            .filter(image -> defaultAmbariRepoService.getDefault(image.getOsType()) != null)
+            .map(image -> {
                 BaseImageResponse imgJson = new BaseImageResponse();
-                copyImageFieldsToJson(i, imgJson);
+                copyImageFieldsToJson(image, imgJson);
                 imgJson.setHdpStacks(defaultHdpStacks);
                 imgJson.setHdfStacks(defaultHdfStacks);
-                imgJson.setVersion(defaultAmbariRepoService.getVersion());
-                AmbariRepo ambariRepo = defaultAmbariRepoService.getDefault(i.getOsType());
+                AmbariRepo ambariRepo = defaultAmbariRepoService.getDefault(image.getOsType());
+                imgJson.setVersion(ambariRepo.getVersion());
                 Map<String, String> repoJson = new HashMap<>();
                 repoJson.put("baseurl", ambariRepo.getBaseUrl());
                 repoJson.put("gpgkey", ambariRepo.getGpgKeyUrl());
@@ -87,7 +88,7 @@ public class ImagesToImagesResponseJsonConverter extends AbstractConversionServi
         return baseImages;
     }
 
-    private List<StackDetailsJson> getDefaultStackInfos(Collection<? extends StackInfo> defaultStackInfos) {
+    private List<StackDetailsJson> getDefaultStackInfos(Iterable<? extends StackInfo> defaultStackInfos) {
         List<StackDetailsJson> result = new ArrayList<>();
         for (StackInfo info : defaultStackInfos) {
             StackDetailsJson json = new StackDetailsJson();
@@ -100,12 +101,17 @@ public class ImagesToImagesResponseJsonConverter extends AbstractConversionServi
             if (utilRepo != null) {
                 repoJson.setUtil(utilRepo);
             }
-            Map<String, String> knoxRepo = info.getRepo().getKnox();
-            if (knoxRepo != null) {
-                repoJson.setKnox(knoxRepo);
-            }
             json.setRepo(repoJson);
             json.setVersion(info.getVersion());
+            Map<String, List<ManagementPackEntry>> mpacks = new HashMap<>();
+            for (Map.Entry<String, List<ManagementPackComponent>> mp : info.getRepo().getMpacks().entrySet()) {
+                mpacks.put(mp.getKey(), mp.getValue().stream().map(mpack -> {
+                    ManagementPackEntry mpackEntry = new ManagementPackEntry();
+                    mpackEntry.setMpackUrl(mpack.getMpackUrl());
+                    return mpackEntry;
+                }).collect(Collectors.toList()));
+            }
+            json.setMpacks(mpacks);
             result.add(json);
         }
         return result;
@@ -118,6 +124,8 @@ public class ImagesToImagesResponseJsonConverter extends AbstractConversionServi
         json.setOsType(source.getOsType());
         json.setUuid(source.getUuid());
         json.setVersion(source.getVersion());
+        json.setDefaultImage(source.isDefaultImage());
+        json.setPackageVersions(source.getPackageVersions());
         if (source.getRepo() != null) {
             json.setRepo(new HashMap<>(source.getRepo()));
         } else {
@@ -126,10 +134,22 @@ public class ImagesToImagesResponseJsonConverter extends AbstractConversionServi
         json.setImageSetsByProvider(new HashMap<>(source.getImageSetsByProvider()));
     }
 
-    private StackDetailsJson convertStackDetailsToJson(StackDetails stackDetails) {
+    private StackDetailsJson convertStackDetailsToJson(StackDetails stackDetails, String osType) {
         StackDetailsJson json = new StackDetailsJson();
         json.setVersion(stackDetails.getVersion());
         json.setRepo(convertStackRepoDetailsToJson(stackDetails.getRepo()));
+        Map<String, List<ManagementPackEntry>> mpacks = new HashMap<>();
+        mpacks.put(osType, stackDetails.getMpackList().stream().map(mp -> {
+            ManagementPackEntry mpackEntry = new ManagementPackEntry();
+            mpackEntry.setMpackUrl(mp.getMpackUrl());
+            return mpackEntry;
+        }).collect(Collectors.toList()));
+        json.setMpacks(mpacks);
+        if (!stackDetails.getMpackList().isEmpty()) {
+            // Backward compatibility for the previous version of UI
+            json.getRepo().getStack().put(com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.MPACK_TAG,
+                    stackDetails.getMpackList().get(0).getMpackUrl());
+        }
         return json;
     }
 
@@ -137,9 +157,6 @@ public class ImagesToImagesResponseJsonConverter extends AbstractConversionServi
         StackRepoDetailsJson json = new StackRepoDetailsJson();
         json.setStack(new HashMap<>(repo.getStack()));
         json.setUtil(new HashMap<>(repo.getUtil()));
-        if (repo.getKnox() != null && !repo.getKnox().isEmpty()) {
-            json.setKnox(repo.getKnox());
-        }
         return json;
     }
 }

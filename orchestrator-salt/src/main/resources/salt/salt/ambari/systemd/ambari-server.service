@@ -14,6 +14,5 @@ IgnoreSIGPIPE=no
 KillMode=process
 GuessMainPID=no
 Environment='AMBARI_JVM_ARGS=-XX:MaxPermSize=512m'
-ExecStartPre=/opt/ambari-server/ambari-server-init.sh
 ExecStart=/usr/sbin/ambari-server start
 ExecStop=/usr/sbin/ambari-server stop

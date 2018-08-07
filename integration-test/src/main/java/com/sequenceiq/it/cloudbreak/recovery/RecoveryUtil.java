@@ -16,10 +16,9 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2ClientBuilder;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupResponse;
-import com.sequenceiq.cloudbreak.api.model.InstanceMetaDataJson;
-import com.sequenceiq.cloudbreak.api.model.StackResponse;
-
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupResponse;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetaDataJson;
+import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 
 public class RecoveryUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(RecoveryUtil.class);
@@ -66,7 +65,7 @@ public class RecoveryUtil {
     }
 
     public static void deleteOpenstackInstance(String endpoint, String userName, String password, String tenantName, String instanceId) {
-        OSClient os = OSFactory.builderV2()
+        OSClient<?> os = OSFactory.builderV2()
                 .endpoint(endpoint)
                 .credentials(userName, password)
                 .tenantName(tenantName)

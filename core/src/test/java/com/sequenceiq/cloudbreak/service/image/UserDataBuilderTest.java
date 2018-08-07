@@ -15,7 +15,7 @@ import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
@@ -54,55 +54,57 @@ public class UserDataBuilderTest {
     public void testBuildUserDataAzure() throws IOException {
         String expectedGwScript = FileReaderUtils.readFileFromClasspath("azure-gateway-init.sh");
         String expectedCoreScript = FileReaderUtils.readFileFromClasspath("azure-core-init.sh");
-        Map<InstanceGroupType, String> userdata = USER_DATA_BUILDER.buildUserData(Platform.platform("AZURE"), "priv-key".getBytes(), "ssh-rsa test",
-                "cloudbreak", getPlatformParameters(), "pass");
+        Map<InstanceGroupType, String> userdata = USER_DATA_BUILDER.buildUserData(Platform.platform("AZURE"), "priv-key".getBytes(),
+            "cloudbreak", getPlatformParameters(), "pass", "cert");
         Assert.assertEquals(expectedGwScript, userdata.get(InstanceGroupType.GATEWAY));
         Assert.assertEquals(expectedCoreScript, userdata.get(InstanceGroupType.CORE));
     }
 
-    public PlatformParameters getPlatformParameters() {
-        return new PlatformParameters() {
-            @Override
-            public ScriptParams scriptParams() {
-                return new ScriptParams("sd", 98);
-            }
+    private PlatformParameters getPlatformParameters() {
+        return new TestPlatformParameters();
+    }
 
-            @Override
-            public DiskTypes diskTypes() {
-                return new DiskTypes(new ArrayList<>(), DiskType.diskType(""), new HashMap<>(), new HashMap<>());
-            }
+    private static class TestPlatformParameters implements PlatformParameters {
+        @Override
+        public ScriptParams scriptParams() {
+            return new ScriptParams("sd", 98);
+        }
 
-            @Override
-            public String resourceDefinition(String resource) {
-                return "";
-            }
+        @Override
+        public DiskTypes diskTypes() {
+            return new DiskTypes(new ArrayList<>(), DiskType.diskType(""), new HashMap<>(), new HashMap<>());
+        }
 
-            @Override
-            public List<StackParamValidation> additionalStackParameters() {
-                return new ArrayList<>();
-            }
+        @Override
+        public String resourceDefinition(String resource) {
+            return "";
+        }
 
-            @Override
-            public PlatformOrchestrator orchestratorParams() {
-                return new PlatformOrchestrator(Collections.singleton(orchestrator(OrchestratorConstants.SALT)),
-                        orchestrator(OrchestratorConstants.SALT));
-            }
+        @Override
+        public List<StackParamValidation> additionalStackParameters() {
+            return new ArrayList<>();
+        }
 
-            @Override
-            public TagSpecification tagSpecification() {
-                return null;
-            }
+        @Override
+        public PlatformOrchestrator orchestratorParams() {
+            return new PlatformOrchestrator(Collections.singleton(orchestrator(OrchestratorConstants.SALT)),
+                orchestrator(OrchestratorConstants.SALT));
+        }
 
-            @Override
-            public VmRecommendations recommendedVms() {
-                    return null;
-            }
+        @Override
+        public TagSpecification tagSpecification() {
+            return null;
+        }
 
-            @Override
-            public String platforName() {
-                return "TEST";
-            }
+        @Override
+        public VmRecommendations recommendedVms() {
+            return null;
+        }
 
-        };
+        @Override
+        public String platforName() {
+            return "TEST";
+        }
+
     }
 }

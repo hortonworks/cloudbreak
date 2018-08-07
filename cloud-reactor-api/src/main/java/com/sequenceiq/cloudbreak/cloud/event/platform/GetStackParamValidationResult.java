@@ -6,7 +6,7 @@ import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 
-public class GetStackParamValidationResult extends CloudPlatformResult<CloudPlatformRequest> {
+public class GetStackParamValidationResult extends CloudPlatformResult<CloudPlatformRequest<?>> {
     private List<StackParamValidation> stackParamValidations;
 
     public GetStackParamValidationResult(CloudPlatformRequest<?> request, List<StackParamValidation> stackParamValidations) {

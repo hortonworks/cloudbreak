@@ -19,12 +19,10 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.api.model.InstanceProfileStrategy;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
@@ -32,40 +30,25 @@ import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
 import com.sequenceiq.cloudbreak.cloud.model.DisplayName;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrator;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
-import com.sequenceiq.cloudbreak.cloud.model.RegionDisplayNameSpecification;
-import com.sequenceiq.cloudbreak.cloud.model.RegionDisplayNameSpecifications;
 import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
 import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
-import com.sequenceiq.cloudbreak.cloud.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
+import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Service
 public class AwsPlatformParameters implements PlatformParameters {
     public static final String DEDICATED_INSTANCES = "dedicatedInstances";
 
-    public static final String INSTANCE_PROFILE_STRATEGY = "instanceProfileStrategy";
-
-    public static final String INSTANCE_PROFILE = "instanceProfile";
-
     private static final Integer START_LABEL = 97;
 
     private static final ScriptParams SCRIPT_PARAMS = new ScriptParams("xvd", START_LABEL);
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsPlatformParameters.class);
-
-    @Value("${cb.platform.default.regions:}")
-    private String defaultRegions;
-
-    @Value("${cb.aws.vm.parameter.definition.path:}")
-    private String awsVmParameterDefinitionPath;
-
-    @Value("${cb.aws.zone.parameter.default:eu-west-1}")
-    private String awsZoneParameterDefault;
 
     @Inject
     private CloudbreakResourceReaderService cloudbreakResourceReaderService;
@@ -77,10 +60,6 @@ public class AwsPlatformParameters implements PlatformParameters {
     @Qualifier("AwsTagSpecification")
     private TagSpecification tagSpecification;
 
-    private Map<Region, List<AvailabilityZone>> regions = new HashMap<>();
-
-    private Map<Region, DisplayName> regionDisplayNames = new HashMap<>();
-
     private final Map<AvailabilityZone, VmType> defaultVmTypes = new HashMap<>();
 
     private Region defaultRegion;
@@ -91,23 +70,7 @@ public class AwsPlatformParameters implements PlatformParameters {
 
     @PostConstruct
     public void init() {
-        regions = readRegions(resourceDefinition("zone"));
-        regionDisplayNames = readRegionDisplayNames(resourceDefinition("zone-displaynames"));
         vmRecommendations = initVmRecommendations();
-    }
-
-    private Map<Region, DisplayName> readRegionDisplayNames(String displayNames) {
-        Map<Region, DisplayName> regionDisplayNames = new HashMap<>();
-        try {
-            RegionDisplayNameSpecifications regionDisplayNameSpecifications = JsonUtil.readValue(displayNames, RegionDisplayNameSpecifications.class);
-            for (RegionDisplayNameSpecification regionDisplayNameSpecification : regionDisplayNameSpecifications.getItems()) {
-                regionDisplayNames.put(Region.region(regionDisplayNameSpecification.getName()),
-                        displayName(regionDisplayNameSpecification.getDisplayName()));
-            }
-        } catch (IOException ignored) {
-            return regionDisplayNames;
-        }
-        return sortMap(regionDisplayNames);
     }
 
     @Override
@@ -160,9 +123,6 @@ public class AwsPlatformParameters implements PlatformParameters {
         List<StackParamValidation> additionalStackParameterValidations = Lists.newArrayList();
         additionalStackParameterValidations.add(new StackParamValidation(TTL, false, String.class, Optional.of("^[0-9]*$")));
         additionalStackParameterValidations.add(new StackParamValidation(DEDICATED_INSTANCES, false, Boolean.class, Optional.empty()));
-        additionalStackParameterValidations.add(new StackParamValidation(INSTANCE_PROFILE_STRATEGY, false, InstanceProfileStrategy.class,
-                Optional.empty()));
-        additionalStackParameterValidations.add(new StackParamValidation(INSTANCE_PROFILE, false, String.class, Optional.empty()));
         return additionalStackParameterValidations;
     }
 

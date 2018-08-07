@@ -5,16 +5,27 @@ import java.io.Reader;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import net.sf.json.JSONObject;
 
 public class JsonUtil {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
+
+    static {
+        MAPPER.enable(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS);
+        MAPPER.configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, false);
+    }
 
     private JsonUtil() {
     }
@@ -27,6 +38,10 @@ public class JsonUtil {
         return MAPPER.readValue(content, valueType);
     }
 
+    public static <T> T readValue(Map<String, Object> map, Class<T> valueType) {
+        return MAPPER.convertValue(map, valueType);
+    }
+
     public static String writeValueAsString(Object object) throws JsonProcessingException {
         return MAPPER.writeValueAsString(object);
     }
@@ -35,9 +50,19 @@ public class JsonUtil {
         return MAPPER.readTree(content);
     }
 
+    public static JsonNode readTreeByArray(String content) throws IOException {
+        JSONObject jsonObject;
+        try {
+            jsonObject = JSONObject.fromObject(content);
+        } catch (Exception e) {
+            jsonObject = new JSONObject();
+        }
+        return MAPPER.readTree(jsonObject.toString());
+    }
+
     public static JsonNode createJsonTree(Map<String, Object> map) {
         ObjectNode rootNode = MAPPER.createObjectNode();
-        map.entrySet().stream().forEach(e -> rootNode.set(e.getKey(), MAPPER.valueToTree(e.getValue())));
+        map.forEach((key, value) -> rootNode.set(key, MAPPER.valueToTree(value)));
         return rootNode;
     }
 
@@ -47,7 +72,7 @@ public class JsonUtil {
 
     public static String minify(String content, Collection<String> toCleanup) {
         try {
-            JsonNode node = readTree(content);
+            JsonNode node = Optional.ofNullable(readTree(content)).orElse(new ObjectNode(JsonNodeFactory.instance));
             if (!toCleanup.isEmpty() && node instanceof ObjectNode) {
                 ((ObjectNode) node).remove(toCleanup);
             }

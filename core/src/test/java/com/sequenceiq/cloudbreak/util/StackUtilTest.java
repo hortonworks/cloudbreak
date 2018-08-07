@@ -9,10 +9,10 @@ import java.util.Date;
 import org.junit.Test;
 
 import com.sequenceiq.cloudbreak.api.model.Status;
-import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 
 public class StackUtilTest {
-    private StackUtil stackUtil = new StackUtil();
+    private final StackUtil stackUtil = new StackUtil();
 
     @Test
     public void testGetUptimeForClusterZero() {

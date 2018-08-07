@@ -1,0 +1,11 @@
+[
+  {
+    "name": "proxy",
+    "description": "test proxy",
+    "serverHost": "qa-cloud.eng.hortonworks.com",
+    "serverPort": 31000,
+    "protocol": "https",
+    "userName": "inttest",
+    "id": 1
+  }
+]

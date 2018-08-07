@@ -4,11 +4,12 @@ import static com.sequenceiq.cloudbreak.common.type.ResourceType.YARN_APPLICATIO
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -28,6 +29,7 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudOperationNotSupportedExcep
 import com.sequenceiq.cloudbreak.cloud.exception.TemplatingDoesNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -57,6 +59,8 @@ import com.sequenceiq.cloudbreak.cloud.yarn.status.YarnApplicationStatus;
 public class YarnResourceConnector implements ResourceConnector<Object> {
     private static final Logger LOGGER = LoggerFactory.getLogger(YarnResourceConnector.class);
 
+    private static final String ARTIFACT_TYPE_DOCKER = "DOCKER";
+
     @Inject
     private YarnClientUtil yarnClientUtil;
 
@@ -72,63 +76,85 @@ public class YarnResourceConnector implements ResourceConnector<Object> {
     @Override
     public List<CloudResourceStatus> launch(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier,
             AdjustmentType adjustmentType, Long threshold) throws Exception {
+        YarnClient yarnClient = yarnClientUtil.createYarnClient(authenticatedContext);
+        String applicationName = createApplicationName(authenticatedContext);
+
+        if (!checkApplicationAlreadyCreated(yarnClient, applicationName)) {
+            CreateApplicationRequest createApplicationRequest = createRequest(stack, applicationName);
+            createApplication(yarnClient, createApplicationRequest);
+        }
+
+        CloudResource yarnApplication = new Builder().type(YARN_APPLICATION).name(applicationName).build();
+        persistenceNotifier.notifyAllocation(yarnApplication, authenticatedContext.getCloudContext());
+        return check(authenticatedContext, Collections.singletonList(yarnApplication));
+    }
+
+    private void createApplication(YarnClient yarnClient, CreateApplicationRequest createApplicationRequest) throws MalformedURLException {
+        ResponseContext responseContext = yarnClient.createApplication(createApplicationRequest);
+        if (Objects.nonNull(responseContext.getResponseError())) {
+            ApplicationErrorResponse applicationErrorResponse = responseContext.getResponseError();
+            throw new CloudConnectorException(String.format("Yarn Application creation error: HTTP Return: %d Error: %s", responseContext.getStatusCode(),
+                    applicationErrorResponse.getDiagnostics()));
+        }
+    }
+
+    private CreateApplicationRequest createRequest(CloudStack stack, String applicationName) {
         CreateApplicationRequest createApplicationRequest = new CreateApplicationRequest();
-        createApplicationRequest.setName(createApplicationName(authenticatedContext));
+        createApplicationRequest.setName(applicationName);
         createApplicationRequest.setQueue(stack.getParameters().getOrDefault(YarnConstants.YARN_QUEUE_PARAMETER, defaultQueue));
         String lifeTimeStr = stack.getParameters().get(YarnConstants.YARN_LIFETIME_PARAMETER);
         createApplicationRequest.setLifetime(lifeTimeStr != null ? Integer.parseInt(lifeTimeStr) : defaultLifeTime);
 
         Artifact artifact = new Artifact();
         artifact.setId(stack.getImage().getImageName());
-        artifact.setType("DOCKER");
+        artifact.setType(ARTIFACT_TYPE_DOCKER);
 
-        List<YarnComponent> components = new ArrayList<>();
-        for (Group group : stack.getGroups()) {
-            YarnComponent component = new YarnComponent();
-            component.setName(group.getName());
-            component.setNumberOfContainers(group.getInstancesSize());
-            String userData = stack.getImage().getUserData(group.getType());
-            component.setLaunchCommand(String.format("/bootstrap/start-systemd '%s' '%s' '%s'", Base64.getEncoder().encodeToString(userData.getBytes()),
-                    stack.getLoginUserName(), stack.getPublicKey()));
-            component.setArtifact(artifact);
-            component.setDependencies(new ArrayList<>());
-            InstanceTemplate instanceTemplate = group.getReferenceInstanceConfiguration().getTemplate();
-            Resource resource = new Resource();
-            resource.setCpus(instanceTemplate.getParameter(PlatformParametersConsts.CUSTOM_INSTANCETYPE_CPUS, Integer.class));
-            resource.setMemory(instanceTemplate.getParameter(PlatformParametersConsts.CUSTOM_INSTANCETYPE_MEMORY, Integer.class));
-            component.setResource(resource);
-            component.setRunPrivilegedContainer(true);
+        List<YarnComponent> components = stack.getGroups().stream()
+            .map(group -> mapGroupToYarnComponent(group, stack, artifact))
+            .collect(Collectors.toList());
 
-            Configuration configuration = new Configuration();
-            Map<String, String> propsMap = Maps.newHashMap();
-            propsMap.put("conf.cb-conf.per.component", "true");
-            propsMap.put("site.cb-conf.userData", "'" + Base64.getEncoder().encodeToString(userData.getBytes()) + "'");
-            propsMap.put("site.cb-conf.sshUser", "'" + stack.getLoginUserName() + "'");
-            propsMap.put("site.cb-conf.groupname", "'" + group.getName() + "'");
-            propsMap.put("site.cb-conf.sshPubKey", "'" + stack.getPublicKey() + "'");
-            configuration.setProperties(propsMap);
-            ConfigFile configFileProps = new ConfigFile();
-            configFileProps.setType(ConfigFileType.PROPERTIES.name());
-            configFileProps.setSrcFile("cb-conf");
-            configFileProps.setDestFile("/etc/cloudbreak-config.props");
-            configuration.setFiles(Arrays.asList(configFileProps));
-
-            component.setConfiguration(configuration);
-            components.add(component);
-        }
         createApplicationRequest.setComponents(components);
-        CloudResource yarnApplication = new CloudResource.Builder().type(YARN_APPLICATION).name(createApplicationRequest.getName()).build();
-        persistenceNotifier.notifyAllocation(yarnApplication, authenticatedContext.getCloudContext());
+        return createApplicationRequest;
+    }
 
-        YarnClient yarnClient = yarnClientUtil.createYarnClient(authenticatedContext);
-        ResponseContext responseContext = yarnClient.createApplication(createApplicationRequest);
-        if (responseContext.getResponseError() != null) {
-            ApplicationErrorResponse applicationErrorResponse = responseContext.getResponseError();
-            throw new CloudConnectorException(String.format("Yarn Application creation error: HTTP Return: %d Error: %s", responseContext.getStatusCode(),
-                    applicationErrorResponse.getDiagnostics()));
-        }
+    private YarnComponent mapGroupToYarnComponent(Group group, CloudStack stack, Artifact artifact) {
+        YarnComponent component = new YarnComponent();
+        component.setName(group.getName());
+        component.setNumberOfContainers(group.getInstancesSize());
+        String userData = stack.getImage().getUserDataByType(group.getType());
+        component.setLaunchCommand(String.format("/bootstrap/start-systemd '%s' '%s' '%s'", Base64.getEncoder().encodeToString(userData.getBytes()),
+                stack.getLoginUserName(), stack.getPublicKey()));
+        component.setArtifact(artifact);
+        component.setDependencies(new ArrayList<>());
+        InstanceTemplate instanceTemplate = group.getReferenceInstanceConfiguration().getTemplate();
+        Resource resource = new Resource();
+        resource.setCpus(instanceTemplate.getParameter(PlatformParametersConsts.CUSTOM_INSTANCETYPE_CPUS, Integer.class));
+        resource.setMemory(instanceTemplate.getParameter(PlatformParametersConsts.CUSTOM_INSTANCETYPE_MEMORY, Integer.class));
+        component.setResource(resource);
+        component.setRunPrivilegedContainer(true);
 
-        return check(authenticatedContext, Collections.singletonList(yarnApplication));
+        Configuration configuration = new Configuration();
+        Map<String, String> propsMap = Maps.newHashMap();
+        propsMap.put("conf.cb-conf.per.component", "true");
+        propsMap.put("site.cb-conf.userData", '\'' + Base64.getEncoder().encodeToString(userData.getBytes()) + '\'');
+        propsMap.put("site.cb-conf.sshUser", '\'' + stack.getLoginUserName() + '\'');
+        propsMap.put("site.cb-conf.groupname", '\'' + group.getName() + '\'');
+        propsMap.put("site.cb-conf.sshPubKey", '\'' + stack.getPublicKey() + '\'');
+        configuration.setProperties(propsMap);
+        ConfigFile configFileProps = new ConfigFile();
+        configFileProps.setType(ConfigFileType.PROPERTIES.name());
+        configFileProps.setSrcFile("cb-conf");
+        configFileProps.setDestFile("/etc/cloudbreak-config.props");
+        configuration.setFiles(Collections.singletonList(configFileProps));
+
+        component.setConfiguration(configuration);
+        return component;
+    }
+
+    private boolean checkApplicationAlreadyCreated(YarnClient yarnClient, String applicationName) throws MalformedURLException {
+        ApplicationDetailRequest applicationDetailRequest = new ApplicationDetailRequest();
+        applicationDetailRequest.setName(applicationName);
+        return yarnClient.getApplicationDetail(applicationDetailRequest).getStatusCode() == YarnResourceConstants.HTTP_SUCCESS;
     }
 
     @Override
@@ -167,8 +193,7 @@ public class YarnResourceConnector implements ResourceConnector<Object> {
     }
 
     @Override
-    public List<CloudResourceStatus> terminate(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> cloudResources)
-            throws Exception {
+    public List<CloudResourceStatus> terminate(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> cloudResources) {
         for (CloudResource resource : cloudResources) {
             switch (resource.getType()) {
                 case YARN_APPLICATION:
@@ -193,7 +218,7 @@ public class YarnResourceConnector implements ResourceConnector<Object> {
     }
 
     @Override
-    public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) throws Exception {
+    public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) {
         return null;
     }
 

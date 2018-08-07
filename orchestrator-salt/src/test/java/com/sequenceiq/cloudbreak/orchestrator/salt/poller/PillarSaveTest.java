@@ -41,7 +41,7 @@ public class PillarSaveTest {
         PillarSave pillarSave = new PillarSave(saltConnector, Sets.newHashSet("10.0.0.1"), nodes);
         pillarSave.call();
         ArgumentCaptor<Pillar> pillarCaptor = ArgumentCaptor.forClass(Pillar.class);
-        ArgumentCaptor<Set> targetCaptor = ArgumentCaptor.forClass(Set.class);
+        ArgumentCaptor<Set<String>> targetCaptor = ArgumentCaptor.forClass(Set.class);
         verify(saltConnector).pillar(targetCaptor.capture(), pillarCaptor.capture());
         Pillar pillar = pillarCaptor.getValue();
         Map<String, Map<String, Map<String, Object>>> pillarJson = (Map<String, Map<String, Map<String, Object>>>) pillar.getJson();

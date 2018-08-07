@@ -10,9 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
-import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
-import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 
@@ -27,7 +26,7 @@ public class CandidateUnhealthyInstanceSelector {
     @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
 
-    public Set<InstanceMetaData> selectCandidateUnhealthyInstances(long stackId) throws CloudbreakSecuritySetupException {
+    public Set<InstanceMetaData> selectCandidateUnhealthyInstances(long stackId) {
         Map<String, String> hostStatuses = clusterService.getHostStatuses(stackId);
         LOGGER.info("HostStatuses: {}", hostStatuses);
         Set<InstanceMetaData> candidateUnhealthyInstances = new HashSet<>();

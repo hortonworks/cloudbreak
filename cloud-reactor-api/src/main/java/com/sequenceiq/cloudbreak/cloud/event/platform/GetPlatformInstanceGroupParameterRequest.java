@@ -9,9 +9,9 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceGroupParameterRequest;
 
 public class GetPlatformInstanceGroupParameterRequest extends CloudPlatformRequest<GetPlatformInstanceGroupParameterResult> {
 
-    private Set<InstanceGroupParameterRequest> instanceGroupParameterRequest;
+    private final Set<InstanceGroupParameterRequest> instanceGroupParameterRequest;
 
-    private ExtendedCloudCredential extendedCloudCredential;
+    private final ExtendedCloudCredential extendedCloudCredential;
 
     private final String variant;
 

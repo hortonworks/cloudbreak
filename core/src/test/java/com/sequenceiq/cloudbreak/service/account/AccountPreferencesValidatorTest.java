@@ -18,16 +18,16 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
 import com.sequenceiq.cloudbreak.domain.AccountPreferences;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
+import com.sequenceiq.cloudbreak.service.user.CachedUserDetailsService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AccountPreferencesValidatorTest {
@@ -50,7 +50,7 @@ public class AccountPreferencesValidatorTest {
     private StackService stackService;
 
     @Mock
-    private UserDetailsService userDetailsService;
+    private CachedUserDetailsService cachedUserDetailsService;
 
     @InjectMocks
     private AccountPreferencesValidator underTest;
@@ -58,34 +58,31 @@ public class AccountPreferencesValidatorTest {
     @Before
     public void setUp() {
         underTest = Mockito.spy(underTest);
-
-        when(stack.getAccount()).thenReturn("");
         when(accountPreferencesService.getByAccount("")).thenReturn(preferences);
         when(preferences.getMaxNumberOfNodesPerCluster()).thenReturn(0L);
         when(preferences.getMaxNumberOfClusters()).thenReturn(0L);
         when(preferences.getMaxNumberOfClustersPerUser()).thenReturn(0L);
-        when(preferences.getClusterTimeToLive()).thenReturn(0L);
         when(preferences.getUserTimeToLive()).thenReturn(0L);
         when(preferences.getAllowedInstanceTypes()).thenReturn(new ArrayList<>());
     }
 
     @Test
-    public void testValidateShouldNotThrowExceptionWhenPreferencesShouldNotBeValidated() throws AccountPreferencesValidationFailed {
+    public void testValidateShouldNotThrowExceptionWhenPreferencesShouldNotBeValidated() throws AccountPreferencesValidationException {
         underTest.validate(stack, EMPTY_STRING, EMPTY_STRING);
     }
 
     @Test
-    public void testValidateShouldThrowExceptionWhenTheStackNodeCountIsGreaterThanTheAccountMaximum() throws AccountPreferencesValidationFailed {
+    public void testValidateShouldThrowExceptionWhenTheStackNodeCountIsGreaterThanTheAccountMaximum() throws AccountPreferencesValidationException {
         when(preferences.getMaxNumberOfNodesPerCluster()).thenReturn(4L);
         when(stack.getFullNodeCount()).thenReturn(5);
-        thrown.expect(AccountPreferencesValidationFailed.class);
+        thrown.expect(AccountPreferencesValidationException.class);
         thrown.expectMessage("Cluster with maximum '4' instances could be created within this account!");
 
         underTest.validate(stack, EMPTY_STRING, EMPTY_STRING);
     }
 
     @Test
-    public void testValidateShouldNotThrowExceptionWhenTheStackNodeCountIsLessThanTheAccountMaximum() throws AccountPreferencesValidationFailed {
+    public void testValidateShouldNotThrowExceptionWhenTheStackNodeCountIsLessThanTheAccountMaximum() throws AccountPreferencesValidationException {
         when(preferences.getMaxNumberOfNodesPerCluster()).thenReturn(4L);
         when(stack.getFullNodeCount()).thenReturn(3);
 
@@ -94,21 +91,21 @@ public class AccountPreferencesValidatorTest {
 
     @Test
     public void testValidateShouldThrowExceptionWhenTheNumberOfClusterInAccountIsGreaterOrEqualThanTheAccountMaximum()
-            throws AccountPreferencesValidationFailed {
+            throws AccountPreferencesValidationException {
         when(preferences.getMaxNumberOfClusters()).thenReturn(400L);
-        Set stacks = Mockito.mock(Set.class);
+        Set<Stack> stacks = Mockito.mock(Set.class);
         when(stackService.retrieveAccountStacks(anyString())).thenReturn(stacks);
         when(stacks.size()).thenReturn(400);
-        thrown.expect(AccountPreferencesValidationFailed.class);
+        thrown.expect(AccountPreferencesValidationException.class);
         thrown.expectMessage("No more cluster could be created! The number of clusters exceeded the account's limit(400)!");
 
         underTest.validate(stack, EMPTY_STRING, EMPTY_STRING);
     }
 
     @Test
-    public void testValidateShouldNotThrowExceptionWhenTheNumberOfClusterInAccountIsLessThanTheAccountMaximum() throws AccountPreferencesValidationFailed {
+    public void testValidateShouldNotThrowExceptionWhenTheNumberOfClusterInAccountIsLessThanTheAccountMaximum() throws AccountPreferencesValidationException {
         when(preferences.getMaxNumberOfClusters()).thenReturn(400L);
-        Set stacks = Mockito.mock(Set.class);
+        Set<Stack> stacks = Mockito.mock(Set.class);
         when(stackService.retrieveAccountStacks(anyString())).thenReturn(stacks);
         when(stacks.size()).thenReturn(200);
 
@@ -117,12 +114,12 @@ public class AccountPreferencesValidatorTest {
 
     @Test
     public void testValidateShouldThrowExceptionWhenTheNumberOfClusterInAccountForAUserIsGreaterOrEqualThanTheAccountMaximum()
-            throws AccountPreferencesValidationFailed {
+            throws AccountPreferencesValidationException {
         when(preferences.getMaxNumberOfClustersPerUser()).thenReturn(4L);
-        Set stacks = Mockito.mock(Set.class);
+        Set<Stack> stacks = Mockito.mock(Set.class);
         when(stackService.retrieveOwnerStacks(anyString())).thenReturn(stacks);
         when(stacks.size()).thenReturn(4);
-        thrown.expect(AccountPreferencesValidationFailed.class);
+        thrown.expect(AccountPreferencesValidationException.class);
         thrown.expectMessage("No more cluster could be created! The number of clusters exceeded the user's limit(4)!");
 
         underTest.validate(stack, EMPTY_STRING, EMPTY_STRING);
@@ -130,9 +127,9 @@ public class AccountPreferencesValidatorTest {
 
     @Test
     public void testValidateShouldNotThrowExceptionWhenTheNumberOfClusterInAccountForAUserIsLessThanTheAccountMaximum()
-            throws AccountPreferencesValidationFailed {
+            throws AccountPreferencesValidationException {
         when(preferences.getMaxNumberOfClustersPerUser()).thenReturn(4L);
-        Set stacks = Mockito.mock(Set.class);
+        Set<Stack> stacks = Mockito.mock(Set.class);
         when(stackService.retrieveOwnerStacks(anyString())).thenReturn(stacks);
         when(stacks.size()).thenReturn(2);
 
@@ -140,67 +137,67 @@ public class AccountPreferencesValidatorTest {
     }
 
     @Test
-    public void testValidateShouldThrowExceptionWhenTheUserDemoTimeExpired() throws AccountPreferencesValidationFailed {
+    public void testValidateShouldThrowExceptionWhenTheUserDemoTimeExpired() throws AccountPreferencesValidationException {
         Calendar calendar = Calendar.getInstance();
         when(underTest.getTimeInMillis()).thenReturn(calendar.getTimeInMillis());
         calendar.add(Calendar.HOUR_OF_DAY, -1);
         when(preferences.getUserTimeToLive()).thenReturn(40000L);
         IdentityUser identityUser = Mockito.mock(IdentityUser.class);
-        when(userDetailsService.getDetails(anyString(), any(UserFilterField.class))).thenReturn(identityUser);
+        when(cachedUserDetailsService.getDetails(anyString(), any(UserFilterField.class))).thenReturn(identityUser);
         when(identityUser.getCreated()).thenReturn(calendar.getTime());
-        thrown.expect(AccountPreferencesValidationFailed.class);
+        thrown.expect(AccountPreferencesValidationException.class);
         thrown.expectMessage("The user demo time is expired!");
 
         underTest.validate(stack, EMPTY_STRING, EMPTY_STRING);
     }
 
     @Test
-    public void testValidateShouldThrowExceptionWhenTheUserDemoTimeExpiredAtMidnight() throws AccountPreferencesValidationFailed {
+    public void testValidateShouldThrowExceptionWhenTheUserDemoTimeExpiredAtMidnight() throws AccountPreferencesValidationException {
         Calendar calendar = Calendar.getInstance();
-        calendar.set(2018, 4, 23, 0, 35);
+        calendar.set(2018, Calendar.MAY, 23, 0, 35);
         when(underTest.getTimeInMillis()).thenReturn(calendar.getTimeInMillis());
         calendar.add(Calendar.HOUR_OF_DAY, -1);
         when(preferences.getUserTimeToLive()).thenReturn(40000L);
         IdentityUser identityUser = Mockito.mock(IdentityUser.class);
-        when(userDetailsService.getDetails(anyString(), any(UserFilterField.class))).thenReturn(identityUser);
+        when(cachedUserDetailsService.getDetails(anyString(), any(UserFilterField.class))).thenReturn(identityUser);
         when(identityUser.getCreated()).thenReturn(calendar.getTime());
-        thrown.expect(AccountPreferencesValidationFailed.class);
+        thrown.expect(AccountPreferencesValidationException.class);
         thrown.expectMessage("The user demo time is expired!");
 
         underTest.validate(stack, EMPTY_STRING, EMPTY_STRING);
     }
 
     @Test
-    public void testValidateShouldThrowExceptionWhenTheUserDemoTimeExpiredOneHourBeforeMidnight() throws AccountPreferencesValidationFailed {
+    public void testValidateShouldThrowExceptionWhenTheUserDemoTimeExpiredOneHourBeforeMidnight() throws AccountPreferencesValidationException {
         Calendar calendar = Calendar.getInstance();
-        calendar.set(2018, 4, 22, 23, 35);
+        calendar.set(2018, Calendar.MAY, 22, 23, 35);
         when(underTest.getTimeInMillis()).thenReturn(calendar.getTimeInMillis());
         calendar.add(Calendar.HOUR_OF_DAY, -1);
         when(preferences.getUserTimeToLive()).thenReturn(40000L);
         IdentityUser identityUser = Mockito.mock(IdentityUser.class);
-        when(userDetailsService.getDetails(anyString(), any(UserFilterField.class))).thenReturn(identityUser);
+        when(cachedUserDetailsService.getDetails(anyString(), any(UserFilterField.class))).thenReturn(identityUser);
         when(identityUser.getCreated()).thenReturn(calendar.getTime());
-        thrown.expect(AccountPreferencesValidationFailed.class);
+        thrown.expect(AccountPreferencesValidationException.class);
         thrown.expectMessage("The user demo time is expired!");
 
         underTest.validate(stack, EMPTY_STRING, EMPTY_STRING);
     }
 
     @Test
-    public void testValidateShouldNotThrowExceptionWhenTheUserDemoTimeHasNotExpiredYet() throws AccountPreferencesValidationFailed {
+    public void testValidateShouldNotThrowExceptionWhenTheUserDemoTimeHasNotExpiredYet() throws AccountPreferencesValidationException {
         Calendar calendar = Calendar.getInstance();
         when(underTest.getTimeInMillis()).thenReturn(calendar.getTimeInMillis());
         calendar.add(Calendar.MINUTE, -1);
         when(preferences.getUserTimeToLive()).thenReturn(65000L);
         IdentityUser identityUser = Mockito.mock(IdentityUser.class);
-        when(userDetailsService.getDetails(anyString(), any(UserFilterField.class))).thenReturn(identityUser);
+        when(cachedUserDetailsService.getDetails(anyString(), any(UserFilterField.class))).thenReturn(identityUser);
         when(identityUser.getCreated()).thenReturn(calendar.getTime());
 
         underTest.validate(stack, EMPTY_STRING, EMPTY_STRING);
     }
 
     @Test
-    public void testValidateShouldThrowExceptionWhenTheStackContainsNotAllowedInstanceTypes() throws AccountPreferencesValidationFailed {
+    public void testValidateShouldThrowExceptionWhenTheStackContainsNotAllowedInstanceTypes() throws AccountPreferencesValidationException {
         String n1St4Type = "n1-standard-4";
         List<String> allowedInstanceTypes = Arrays.asList(n1St4Type, "n1-standard-8", "n1-standard-16");
         when(preferences.getAllowedInstanceTypes()).thenReturn(allowedInstanceTypes);
@@ -211,14 +208,14 @@ public class AccountPreferencesValidatorTest {
         when(master.getTemplate().getInstanceType()).thenReturn(n1St4Type);
         when(slave.getTemplate().getInstanceType()).thenReturn("n1-standard-32");
         when(stack.getInstanceGroups()).thenReturn(Sets.newHashSet(cbgateway, master, slave));
-        thrown.expect(AccountPreferencesValidationFailed.class);
+        thrown.expect(AccountPreferencesValidationException.class);
         thrown.expectMessage("The 'n1-standard-32' instance type isn't allowed within the account!");
 
         underTest.validate(stack, EMPTY_STRING, EMPTY_STRING);
     }
 
     @Test
-    public void testValidateShouldNotThrowExceptionWhenTheStackContainsOnlyAllowedInstanceTypes() throws AccountPreferencesValidationFailed {
+    public void testValidateShouldNotThrowExceptionWhenTheStackContainsOnlyAllowedInstanceTypes() throws AccountPreferencesValidationException {
         String n1St4Type = "n1-standard-4";
         String n1St6Type = "n1-standard-8";
         List<String> allowedInstanceTypes = Arrays.asList(n1St4Type, n1St6Type, "n1-standard-16");

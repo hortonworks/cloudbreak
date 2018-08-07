@@ -1,13 +1,17 @@
 package com.sequenceiq.cloudbreak.controller.mapper;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.ext.Provider;
 
-import com.sequenceiq.cloudbreak.controller.json.ValidationResult;
+import org.springframework.stereotype.Component;
 
-@Provider
+import ch.qos.logback.classic.Level;
+
+@Component
 public class ConstraintViolationExceptionMapper extends SendNotificationExceptionMapper<ConstraintViolationException> {
 
     @Override
@@ -25,19 +29,25 @@ public class ConstraintViolationExceptionMapper extends SendNotificationExceptio
 
     @Override
     protected Object getEntity(ConstraintViolationException exception) {
-        ValidationResult result = new ValidationResult();
-        for (ConstraintViolation violation : exception.getConstraintViolations()) {
-            String key = "";
-            if (violation.getPropertyPath() != null) {
-                key = violation.getPropertyPath().toString();
-            }
-            result.addValidationError(key, violation.getMessage());
+        List<String> result = new ArrayList<>();
+        for (ConstraintViolation<?> violation : exception.getConstraintViolations()) {
+            result.add(violation.getMessage());
         }
-        return result;
+        return String.join("\n", result);
     }
 
     @Override
     Status getResponseStatus() {
         return Status.BAD_REQUEST;
+    }
+
+    @Override
+    Class<ConstraintViolationException> getExceptionType() {
+        return ConstraintViolationException.class;
+    }
+
+    @Override
+    protected Level getLogLevel() {
+        return Level.INFO;
     }
 }

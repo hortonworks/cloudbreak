@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.task;
 
+import java.util.Collection;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -14,7 +15,6 @@ import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 
 @Component
@@ -40,13 +40,16 @@ public class AwsPollTaskFactory {
         return createPollTask(ASGroupStatusCheckerTask.NAME, authenticatedContext, asGroupName, requiredInstances, awsClient, cloudFormationStackUtil);
     }
 
-    public PollTask<Boolean> newEbsVolumeStatusCheckerTask(AuthenticatedContext authenticatedContext, Group group,
-            AmazonEC2Client amazonEC2Client, String volumeId) {
-        return createPollTask(EbsVolumeStatusCheckerTask.NAME, authenticatedContext, group, amazonEC2Client, volumeId);
+    public PollTask<Boolean> newEbsVolumeStatusCheckerTask(AuthenticatedContext authenticatedContext, AmazonEC2Client amazonEC2Client, String volumeId) {
+        return createPollTask(EbsVolumeStatusCheckerTask.NAME, authenticatedContext, amazonEC2Client, volumeId);
     }
 
     public PollTask<Boolean> newCreateSnapshotReadyStatusCheckerTask(AuthenticatedContext authenticatedContext, String snapshotId, AmazonEC2Client ec2Client) {
         return createPollTask(CreateSnapshotReadyStatusCheckerTask.NAME, authenticatedContext, snapshotId, ec2Client);
+    }
+
+    public PollTask<Boolean> newAMICopyStatusCheckerTask(AuthenticatedContext authenticatedContext, Collection<String> imageIds, AmazonEC2Client client) {
+        return createPollTask(AMICopyStatusCheckerTask.NAME, authenticatedContext, imageIds, client);
     }
 
     @SuppressWarnings("unchecked")

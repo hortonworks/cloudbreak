@@ -12,8 +12,8 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.context.ApplicationContext;
@@ -31,14 +31,18 @@ import com.sequenceiq.cloudbreak.core.flow2.Flow;
 import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
 import com.sequenceiq.cloudbreak.core.flow2.FlowFinalizeAction;
 import com.sequenceiq.cloudbreak.core.flow2.FlowState;
+import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.FlowEdgeConfig;
+import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition;
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition.Builder;
-import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfigurationTest.FlowConfiguration.NotAcceptedException;
+import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfigurationTest.TestFlowConfiguration.NotAcceptedException;
 import com.sequenceiq.cloudbreak.structuredevent.FlowStructuredEventHandler;
 
 public class AbstractFlowConfigurationTest {
 
+    private static final Event[] EVENTS = new Event[0];
+
     @InjectMocks
-    private FlowConfiguration underTest;
+    private FlowConfiguration<?> underTest;
 
     @Mock
     private ApplicationContext applicationContext;
@@ -51,17 +55,17 @@ public class AbstractFlowConfigurationTest {
 
     private Flow flow;
 
-    private List<FlowConfiguration.Transition<State, Event>> transitions;
+    private List<Transition<State, Event>> transitions;
 
-    private FlowConfiguration.FlowEdgeConfig<State, Event> edgeConfig;
+    private FlowEdgeConfig<State, Event> edgeConfig;
 
     @Before
     public void setup() throws Exception {
-        underTest = new FlowConfiguration();
+        underTest = new TestFlowConfiguration();
         MockitoAnnotations.initMocks(this);
         given(applicationContext.getBean(anyString(), any(Class.class))).willReturn(action);
-        given(applicationContext.getBean(eq(FlowStructuredEventHandler.class), eq(State.INIT), eq(State.FINAL), anyString(), Matchers.eq("flowId"),
-                Matchers.anyLong())).willReturn(flowStructuredEventHandler);
+        given(applicationContext.getBean(eq(FlowStructuredEventHandler.class), eq(State.INIT), eq(State.FINAL), anyString(), eq("flowId"),
+                ArgumentMatchers.anyLong())).willReturn(flowStructuredEventHandler);
         transitions = new Builder<State, Event>()
                 .defaultFailureEvent(Event.FAILURE)
                 .from(State.INIT).to(State.DO).event(Event.START).noFailureEvent()
@@ -69,8 +73,8 @@ public class AbstractFlowConfigurationTest {
                 .from(State.DO2).to(State.FINISH).event(Event.FINISHED).failureState(State.FAILED2).failureEvent(Event.FAILURE2)
                 .from(State.FINISH).to(State.FINAL).event(Event.FINALIZED).defaultFailureEvent()
                 .build();
-        edgeConfig = new FlowConfiguration.FlowEdgeConfig(State.INIT, State.FINAL, State.FAILED, Event.FAIL_HANDLED);
-        underTest.init();
+        edgeConfig = new FlowEdgeConfig<>(State.INIT, State.FINAL, State.FAILED, Event.FAIL_HANDLED);
+        ((AbstractFlowConfiguration<State, Event>) underTest).init();
         verify(applicationContext, times(8)).getBean(anyString(), any(Class.class));
         flow = underTest.createFlow("flowId", 0L);
         flow.initialize();
@@ -130,7 +134,7 @@ public class AbstractFlowConfigurationTest {
         INIT, DO, DO2, FINISH, FAILED, FAILED2, FINAL;
 
         @Override
-        public Class<? extends AbstractAction> action() {
+        public Class<? extends AbstractAction<?, ?, ?, ?>> action() {
             return FlowFinalizeAction.class;
         }
     }
@@ -144,14 +148,14 @@ public class AbstractFlowConfigurationTest {
         }
     }
 
-    class FlowConfiguration extends AbstractFlowConfiguration<State, Event> {
+    class TestFlowConfiguration extends AbstractFlowConfiguration<State, Event> {
 
-        private FlowConfiguration() {
+        private TestFlowConfiguration() {
             super(State.class, Event.class);
         }
 
         @Override
-        protected FlowConfiguration.MachineConfiguration<State, Event> getStateMachineConfiguration() {
+        protected MachineConfiguration<State, Event> getStateMachineConfiguration() {
             StateMachineConfigurationBuilder<State, Event> configurationBuilder =
                     new StateMachineConfigurationBuilder<>(ObjectPostProcessor.QUIESCENT_POSTPROCESSOR, true);
             StateMachineStateBuilder<State, Event> stateBuilder =
@@ -165,7 +169,7 @@ public class AbstractFlowConfigurationTest {
                             throw new NotAcceptedException();
                         }
                     };
-            return new FlowConfiguration.MachineConfiguration<State, Event>(configurationBuilder, stateBuilder, transitionBuilder, listener,
+            return new MachineConfiguration<>(configurationBuilder, stateBuilder, transitionBuilder, listener,
                     new SyncTaskExecutor());
         }
 
@@ -181,7 +185,7 @@ public class AbstractFlowConfigurationTest {
 
         @Override
         public Event[] getEvents() {
-            return new Event[0];
+            return EVENTS;
         }
 
         @Override

@@ -7,11 +7,9 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.inject.Inject;
 
-import com.sequenceiq.it.cloudbreak.newway.log.ReportListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,6 +22,7 @@ import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfigurat
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.core.io.InputStreamSource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.CollectionUtils;
 import org.testng.TestNG;
@@ -35,6 +34,7 @@ import org.uncommons.reportng.HTMLReporter;
 import org.uncommons.reportng.JUnitXMLReporter;
 
 import com.sequenceiq.it.cloudbreak.config.ITProps;
+import com.sequenceiq.it.cloudbreak.newway.listener.ReportListener;
 
 @EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class, DataSourceTransactionManagerAutoConfiguration.class,
         HibernateJpaAutoConfiguration.class})
@@ -114,9 +114,9 @@ public class IntegrationTestApp implements CommandLineRunner {
         }
     }
 
-    private void setupSmokeTest(TestNG testng, List<String> testTypes) throws IOException {
+    private void setupSmokeTest(TestNG testng, Collection<String> testTypes) throws IOException {
         if (!CollectionUtils.isEmpty(testTypes)) {
-            Set<String> suitePathes = new LinkedHashSet<>();
+            Collection<String> suitePathes = new LinkedHashSet<>();
             for (String testType : testTypes) {
                 List<String> suites = itProps.getTestSuites(testType);
                 if (suites != null) {
@@ -128,7 +128,7 @@ public class IntegrationTestApp implements CommandLineRunner {
     }
 
     private void setupFullTest(TestNG testng, int salt, int regionNum) throws IOException {
-        List<Resource> suites = new ArrayList<>();
+        Collection<Resource> suites = new ArrayList<>();
         suites.addAll(getProviderSuites("classpath:/testsuites/aws/full/*.yaml", salt, regionNum));
         suites.addAll(getProviderSuites("classpath:/testsuites/azure/full/*.yaml", salt, regionNum));
         suites.addAll(getProviderSuites("classpath:/testsuites/gcp/full/*.yaml", salt, regionNum));
@@ -136,9 +136,9 @@ public class IntegrationTestApp implements CommandLineRunner {
         testng.setXmlSuites(loadSuiteResources(suites));
     }
 
-    private Set<Resource> getProviderSuites(String providerDirPattern, int salt, int regionNum) throws IOException {
+    private Collection<Resource> getProviderSuites(String providerDirPattern, int salt, int regionNum) throws IOException {
         Resource[] suites = applicationContext.getResources(providerDirPattern);
-        Set<Resource> providerTests = new HashSet<>();
+        Collection<Resource> providerTests = new HashSet<>();
         regionNum = Math.min(regionNum, suites.length);
         int regionIndex = salt * regionNum % suites.length;
         for (int i = regionIndex; i < regionIndex + regionNum; i++) {
@@ -147,7 +147,7 @@ public class IntegrationTestApp implements CommandLineRunner {
         return providerTests;
     }
 
-    private List<XmlSuite> loadSuiteResources(Collection<Resource> suitePathes) throws IOException {
+    private List<XmlSuite> loadSuiteResources(Iterable<Resource> suitePathes) throws IOException {
         List<XmlSuite> suites = new ArrayList<>();
         for (Resource suite: suitePathes) {
             suites.add(loadSuite(suite.getURL().toString(), suite));
@@ -155,7 +155,7 @@ public class IntegrationTestApp implements CommandLineRunner {
         return suites;
     }
 
-    private List<XmlSuite> loadSuites(Collection<String> suitePathes) throws IOException {
+    private List<XmlSuite> loadSuites(Iterable<String> suitePathes) throws IOException {
         List<XmlSuite> suites = new ArrayList<>();
         for (String suitePath: suitePathes) {
             suites.add(loadSuite(suitePath));
@@ -167,15 +167,15 @@ public class IntegrationTestApp implements CommandLineRunner {
         return loadSuite(suitePath, applicationContext.getResource(suitePath));
     }
 
-    private XmlSuite loadSuite(String suitePath, Resource resource) throws IOException {
+    private XmlSuite loadSuite(String suitePath, InputStreamSource resource) throws IOException {
         IFileParser<XmlSuite> parser = getParser(suitePath);
         try (InputStream inputStream = resource.getInputStream()) {
             return parser.parse(suitePath, inputStream, true);
         }
     }
 
-    private IFileParser getParser(String fileName) {
-        IFileParser result = DEFAULT_FILE_PARSER;
+    private IFileParser<XmlSuite> getParser(String fileName) {
+        IFileParser<XmlSuite> result = DEFAULT_FILE_PARSER;
         if (fileName.endsWith("xml")) {
             result = XML_PARSER;
         } else if (fileName.endsWith("yaml") || fileName.endsWith("yml")) {

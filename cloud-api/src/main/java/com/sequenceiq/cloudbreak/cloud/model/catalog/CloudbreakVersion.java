@@ -11,15 +11,19 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CloudbreakVersion {
 
-    private List<String> versions;
+    private final List<String> versions;
 
-    private List<String> imageIds;
+    private final List<String> defaults;
+
+    private final List<String> imageIds;
 
     @JsonCreator
     public CloudbreakVersion(
             @JsonProperty("versions") List<String> versions,
+            @JsonProperty("defaults") List<String> defaults,
             @JsonProperty("images") List<String> imageIds) {
         this.versions = (versions == null) ? emptyList() : versions;
+        this.defaults = (defaults == null) ? emptyList() : defaults;
         this.imageIds = (imageIds == null) ? emptyList() : imageIds;
     }
 
@@ -27,7 +31,20 @@ public class CloudbreakVersion {
         return versions;
     }
 
+    public List<String> getDefaults() {
+        return defaults;
+    }
+
     public List<String> getImageIds() {
         return imageIds;
+    }
+
+    @Override
+    public String toString() {
+        return "CloudbreakVersion{"
+                + "versions=" + versions
+                + ", defaults=" + defaults
+                + ", imageIds=" + imageIds
+                + '}';
     }
 }

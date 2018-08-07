@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils.processTemp
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,7 +14,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsGroupView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -36,13 +37,14 @@ public class CloudFormationTemplateBuilder {
 
     public String build(ModelContext context) {
         Map<String, Object> model = new HashMap<>();
-        List<AwsGroupView> awsGroupViews = new ArrayList<>();
-        List<AwsGroupView> awsGatewayGroupViews = new ArrayList<>();
+        Collection<AwsGroupView> awsGroupViews = new ArrayList<>();
+        Collection<AwsGroupView> awsGatewayGroupViews = new ArrayList<>();
         int i = 0;
         boolean multigw = context.stack.getGroups().stream().filter(g -> g.getType() == InstanceGroupType.GATEWAY).count() > 1;
         for (Group group : context.stack.getGroups()) {
             AwsInstanceView awsInstanceView = new AwsInstanceView(group.getReferenceInstanceConfiguration().getTemplate());
             String snapshotId = context.snapshotId.get(group.getName());
+            String encryptedAMI = context.encryptedAMIByGroupName.get(group.getName());
             AwsGroupView groupView = new AwsGroupView(
                     group.getInstancesSize(),
                     group.getType().name(),
@@ -51,6 +53,7 @@ public class CloudFormationTemplateBuilder {
                     awsInstanceView.getVolumes().size(),
                     awsInstanceView.isEncryptedVolumes(),
                     awsInstanceView.getVolumeSize(),
+                    group.getRootVolumeSize(),
                     awsInstanceView.getVolumeType(),
                     awsInstanceView.getSpotPrice(),
                     group.getSecurity().getRules(),
@@ -58,7 +61,8 @@ public class CloudFormationTemplateBuilder {
                     getSubnetIds(context.existingSubnetIds, i, group, multigw),
                     awsInstanceView.isKmsEnabled(),
                     awsInstanceView.getKmsKey(),
-                    snapshotId);
+                    snapshotId,
+                    encryptedAMI);
             awsGroupViews.add(groupView);
             if (group.getType() == InstanceGroupType.GATEWAY) {
                 awsGatewayGroupViews.add(groupView);
@@ -91,7 +95,7 @@ public class CloudFormationTemplateBuilder {
                 ? existingSubnetIds.get(i % existingSubnetIds.size()) : null;
     }
 
-    private boolean isNullOrEmptyList(List<?> list) {
+    private boolean isNullOrEmptyList(Collection<?> list) {
         return list == null || list.isEmpty();
     }
 
@@ -132,6 +136,8 @@ public class CloudFormationTemplateBuilder {
         private String defaultSubnet;
 
         private Map<String, String> snapshotId = new HashMap<>();
+
+        private Map<String, String> encryptedAMIByGroupName = new HashMap<>();
 
         public ModelContext withAuthenticatedContext(AuthenticatedContext ac) {
             this.ac = ac;
@@ -190,6 +196,11 @@ public class CloudFormationTemplateBuilder {
 
         public ModelContext withSnapshotId(Map<String, String> snapshotId) {
             this.snapshotId = snapshotId;
+            return this;
+        }
+
+        public ModelContext withEncryptedAMIByGroupName(Map<String, String> encryptedAMIByGroupName) {
+            this.encryptedAMIByGroupName.putAll(encryptedAMIByGroupName);
             return this;
         }
 

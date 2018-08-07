@@ -1,0 +1,27 @@
+package com.sequenceiq.periscope.domain;
+
+public enum MetricType {
+
+    LEADER("node.leader"),
+    CLUSTER_STATE_ACTIVE("cluster.state.active"),
+    CLUSTER_STATE_SUSPENDED("cluster.state.suspended"),
+
+    CLUSTER_UPSCALE_TRIGGERED("cluster.upscale.triggered"),
+    CLUSTER_DOWNSCALE_TRIGGERED("cluster.downscale.triggered"),
+
+    CLUSTER_UPSCALE_SUCCESSFUL("cluster.upscale.successful"),
+    CLUSTER_UPSCALE_FAILED("cluster.upscale.failed"),
+    CLUSTER_DOWNSCALE_SUCCESSFUL("cluster.downscale.successful"),
+    CLUSTER_DOWNSCALE_FAILED("cluster.downscale.failed");
+
+    private final String metricName;
+
+    MetricType(String metricName) {
+        this.metricName = metricName;
+    }
+
+    public String getMetricName() {
+        return metricName;
+    }
+
+}

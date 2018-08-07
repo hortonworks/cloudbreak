@@ -16,7 +16,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
@@ -40,7 +40,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
-
 
 @RunWith(MockitoJUnitRunner.class)
 public class AwsMetaDataCollectorTest {
@@ -98,7 +97,7 @@ public class AwsMetaDataCollectorTest {
         List<Volume> volumes = new ArrayList<>();
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         vms.add(new CloudInstance("i-1",
-                new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null, 0L),
+                new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null, 0L, "imageId"),
                 instanceAuthentication));
 
 
@@ -129,7 +128,7 @@ public class AwsMetaDataCollectorTest {
         AuthenticatedContext ac = authenticatedContext();
         List<CloudVmMetaDataStatus> statuses = awsMetadataCollector.collect(ac, null, vms, vms);
 
-        Assert.assertEquals(1, statuses.size());
+        Assert.assertEquals(1L, statuses.size());
         Assert.assertEquals("i-1", statuses.get(0).getCloudVmInstanceStatus().getCloudInstance().getInstanceId());
         Assert.assertEquals("privateIp", statuses.get(0).getMetaData().getPrivateIp());
         Assert.assertEquals("publicIp", statuses.get(0).getMetaData().getPublicIp());
@@ -141,13 +140,13 @@ public class AwsMetaDataCollectorTest {
         List<Volume> volumes = new ArrayList<>();
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         vms.add(new CloudInstance(null,
-                new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null, 0L),
+                new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null, 0L, "imageId"),
                 instanceAuthentication));
         vms.add(new CloudInstance(null,
-                new InstanceTemplate("fla", "cbgateway", 6L, volumes, InstanceStatus.CREATED, null, 0L),
+                new InstanceTemplate("fla", "cbgateway", 6L, volumes, InstanceStatus.CREATED, null, 0L, "imageId"),
                 instanceAuthentication));
         vms.add(new CloudInstance(null,
-                new InstanceTemplate("fla", "cbgateway", 7L, volumes, InstanceStatus.CREATED, null, 0L),
+                new InstanceTemplate("fla", "cbgateway", 7L, volumes, InstanceStatus.CREATED, null, 0L, "imageId"),
                 instanceAuthentication));
 
         when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonCFClient);
@@ -181,7 +180,7 @@ public class AwsMetaDataCollectorTest {
         AuthenticatedContext ac = authenticatedContext();
         List<CloudVmMetaDataStatus> statuses = awsMetadataCollector.collect(ac, null, vms, Collections.emptyList());
 
-        Assert.assertEquals(3, statuses.size());
+        Assert.assertEquals(3L, statuses.size());
         Assert.assertEquals("i-0", statuses.get(0).getCloudVmInstanceStatus().getCloudInstance().getInstanceId());
         Assert.assertEquals("privateIp0", statuses.get(0).getMetaData().getPrivateIp());
         Assert.assertEquals("publicIp0", statuses.get(0).getMetaData().getPublicIp());
@@ -199,10 +198,10 @@ public class AwsMetaDataCollectorTest {
         List<Volume> volumes = new ArrayList<>();
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         vms.add(new CloudInstance(null,
-                new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null, 0L),
+                new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null, 0L, "imageId"),
                 instanceAuthentication));
         vms.add(new CloudInstance("i-1",
-                new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null, 0L),
+                new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null, 0L, "imageId"),
                 instanceAuthentication));
 
 
@@ -238,7 +237,7 @@ public class AwsMetaDataCollectorTest {
         AuthenticatedContext ac = authenticatedContext();
         List<CloudVmMetaDataStatus> statuses = awsMetadataCollector.collect(ac, null, vms, vms);
 
-        Assert.assertEquals(2, statuses.size());
+        Assert.assertEquals(2L, statuses.size());
         Assert.assertTrue(statuses.stream().anyMatch(predicate -> "i-1".equals(predicate.getCloudVmInstanceStatus().getCloudInstance().getInstanceId())));
         Assert.assertTrue(statuses.stream().anyMatch(predicate -> "privateIp1".equals(predicate.getMetaData().getPrivateIp())));
         Assert.assertTrue(statuses.stream().anyMatch(predicate -> "publicIp1".equals(predicate.getMetaData().getPublicIp())));
@@ -255,13 +254,13 @@ public class AwsMetaDataCollectorTest {
         List<Volume> volumes = new ArrayList<>();
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         CloudInstance cloudInstance1 = new CloudInstance(null,
-                new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null, 0L),
+                new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null, 0L, "imageId"),
                 instanceAuthentication);
         everyVms.add(cloudInstance1);
         newVms.add(cloudInstance1);
 
         everyVms.add(new CloudInstance("i-1",
-                new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null, 0L),
+                new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null, 0L, "imageId"),
                 instanceAuthentication));
 
 
@@ -282,8 +281,6 @@ public class AwsMetaDataCollectorTest {
 
         Instance instance1 = Mockito.mock(Instance.class);
         when(instance1.getInstanceId()).thenReturn("i-1");
-        when(instance1.getPrivateIpAddress()).thenReturn("privateIp1");
-        when(instance1.getPublicIpAddress()).thenReturn("publicIp1");
 
         Instance instance2 = Mockito.mock(Instance.class);
         when(instance2.getInstanceId()).thenReturn("i-2");
@@ -297,7 +294,7 @@ public class AwsMetaDataCollectorTest {
         AuthenticatedContext ac = authenticatedContext();
         List<CloudVmMetaDataStatus> statuses = awsMetadataCollector.collect(ac, null, newVms, everyVms);
 
-        Assert.assertEquals(1, statuses.size());
+        Assert.assertEquals(1L, statuses.size());
         Assert.assertTrue(statuses.stream().anyMatch(predicate -> "i-2".equals(predicate.getCloudVmInstanceStatus().getCloudInstance().getInstanceId())));
         Assert.assertTrue(statuses.stream().anyMatch(predicate -> "privateIp2".equals(predicate.getMetaData().getPrivateIp())));
         Assert.assertTrue(statuses.stream().anyMatch(predicate -> "publicIp2".equals(predicate.getMetaData().getPublicIp())));
@@ -313,7 +310,7 @@ public class AwsMetaDataCollectorTest {
     private AuthenticatedContext authenticatedContext() {
         Location location = Location.location(Region.region("region"), AvailabilityZone.availabilityZone("az"));
         CloudContext cloudContext = new CloudContext(5L, "name", "platform", "owner", "variant", location);
-        CloudCredential cc = new CloudCredential(1L, null, null);
-        return new AuthenticatedContext(cloudContext, cc);
+        CloudCredential credential = new CloudCredential(1L, null, null);
+        return new AuthenticatedContext(cloudContext, credential);
     }
 }

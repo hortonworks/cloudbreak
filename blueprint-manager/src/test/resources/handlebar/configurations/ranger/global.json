@@ -1,0 +1,10 @@
+{
+
+  "ranger-env": {
+    "properties": {
+      "admin_password": "cloudbreak123!",
+      "ranger_admin_password": "cloudbreak123!"
+    }
+  }
+
+}

@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.reactor.handler.orchestration;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
@@ -17,6 +19,8 @@ import reactor.bus.EventBus;
 
 @Component
 public class StartAmbariServicesHandler implements ReactorEventHandler<StartAmbariServicesRequest> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(StartAmbariServicesHandler.class);
+
     @Inject
     private EventBus eventBus;
 
@@ -36,8 +40,9 @@ public class StartAmbariServicesHandler implements ReactorEventHandler<StartAmba
             clusterServiceRunner.runAmbariServices(stackId);
             response = new StartAmbariServicesSuccess(stackId);
         } catch (Exception e) {
+            LOGGER.error("Start ambari services failed!", e);
             response = new StartAmbariServicesFailed(stackId, e);
         }
-        eventBus.notify(response.selector(), new Event(event.getHeaders(), response));
+        eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));
     }
 }

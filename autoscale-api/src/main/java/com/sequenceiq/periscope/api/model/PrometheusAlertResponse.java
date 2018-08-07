@@ -1,6 +1,6 @@
 package com.sequenceiq.periscope.api.model;
 
-import com.sequenceiq.periscope.doc.ApiDescription;
+import com.sequenceiq.periscope.doc.ApiDescription.BaseAlertJsonProperties;
 import com.sequenceiq.periscope.doc.ApiDescription.PrometheusAlertJsonProperties;
 
 import io.swagger.annotations.ApiModel;
@@ -10,7 +10,7 @@ import io.swagger.annotations.ApiModelProperty;
 public class PrometheusAlertResponse extends AbstractAlertJson {
     private static final int DEFAULT_PERIOD = 1;
 
-    @ApiModelProperty(ApiDescription.BaseAlertJsonProperties.ID)
+    @ApiModelProperty(BaseAlertJsonProperties.ID)
     private Long id;
 
     @ApiModelProperty(PrometheusAlertJsonProperties.ALERTRULE)
@@ -28,10 +28,10 @@ public class PrometheusAlertResponse extends AbstractAlertJson {
     @ApiModelProperty(PrometheusAlertJsonProperties.ALERTOPERATOR)
     private AlertOperator alertOperator;
 
-    @ApiModelProperty(ApiDescription.BaseAlertJsonProperties.SCALINGPOLICYID)
+    @ApiModelProperty(BaseAlertJsonProperties.SCALINGPOLICYID)
     private Long scalingPolicyId;
 
-    @ApiModelProperty(ApiDescription.BaseAlertJsonProperties.SCALINGPOLICYID)
+    @ApiModelProperty(BaseAlertJsonProperties.SCALINGPOLICYID)
     private ScalingPolicyRequest scalingPolicy;
 
     public String getAlertRuleName() {

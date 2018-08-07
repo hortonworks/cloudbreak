@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.api.model;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -9,61 +10,53 @@ import com.google.common.collect.ImmutableList;
 
 public enum ExposedService {
 
-    ALL("ALL", "ALL", "", "", ""),
-    SSH("SSH", "SSH", "", "", ""),
-    HTTPS("HTTPS", "HTTPS", "", "", ""),
-    GATEWAY("Gateway", "Gateway", "", "", ""),
-    AMBARI("Ambari", "AMBARI_SERVER", "", "AMBARI", "/ambari/"),
-    AMBARIUI("Ambari", "AMBARI_SERVER", "", "AMBARIUI", "/ambari/"),
-    CONSUL("Consul", "Consul", "", "", ""),
-    WEBHDFS("WebHDFS", "NAMENODE", "", "WEBHDFS", "/webhdfs/"),
-    NAMENODE("Name Node", "NAMENODE", "", "HDFSUI", "/hdfs/"),
-    RESOURCEMANAGER_WEB("Resource Manager", "RESOURCEMANAGER", "", "YARNUI", "/yarn/"),
-    RESOURCEMANAGER_SCHEDULER("RM Scheduler", "RM Scheduler", "", "", ""),
-    RESOURCEMANAGER_IPC("RM IPC", "RM IPC", "", "", ""),
-    JOB_HISTORY_SERVER("Job History Server", "HISTORYSERVER", "", "JOBHISTORYUI", "/jobhistory/"),
-    HBASE_MASTER("HBase Master", "HBase Master", "", "", ""),
-    HBASE_MASTER_WEB("HBase Master Web", "HBASE_MASTER", "", "", ""),
-    HBASE_REGION("HBase Region Server", "HBase Region Server", "", "", ""),
-    HBASE_REGION_INFO("HBase Region Server Info", "HBase Region Server Info", "", "", ""),
-    HIVE_METASTORE("Hive Metastore", "Hive Metastore", "", "", ""),
-    HIVE_SERVER("Hive Server", "HIVE_SERVER", "", "", ""),
-    HIVE_SERVER_INTERACTIVE("Hive Server Interactive", "HIVE_SERVER_INTERACTIVE", "", "", ""),
-    HIVE_SERVER_HTTP("Hive Server Http", "Hive Server Http", "", "", ""),
-    FALCON("Falcon", "FALCON_SERVER", "", "", ""),
-    STORM("Storm", "STORM", "", "", ""),
-    OOZIE("Oozie", "OOZIE_SERVER", "/oozie", "", ""),
-    ACCUMULO_MASTER("Accumulo Master", "Accumulo Master", "", "", ""),
-    ACCUMULO_TSERVER("Accumulo Tserver", "Accumulo Tserver", "", "", ""),
-    ATLAS("Atlas", "ATLAS_SERVER", "", "ATLAS", "/atlas/"),
-    KNOX_GW("Knox GW", "Knox GW", "", "", ""),
-    SPARK_HISTORY_SERVER("Spark History Server", "SPARK_JOBHISTORYSERVER", "", "SPARKHISTORYUI", "/sparkhistory/"),
-    CONTAINER_LOGS("Container logs", "Container logs", "", "", ""),
-    ZEPPELIN_WEB_SOCKET("Zeppelin Web Socket", "ZEPPELIN_MASTER", "", "ZEPPELINWS", ""),
-    ZEPPELIN_UI("Zeppelin UI", "ZEPPELIN_MASTER", "", "ZEPPELINUI", "/zeppelin/"),
-    RANGER("Ranger Admin UI", "RANGER_ADMIN", "", "RANGERUI", "/ranger/"),
-    KIBANA("Kibana", "KIBANA", "", "", ""),
-    ELASTIC_SEARCH("Elastic Search", "ELASTIC_SEARCH", "", "", ""),
-    DRUID_SUPERSET("Druid Superset", "DRUID_SUPERSET", "", "", "");
+    ALL("Every Service", "ALL", "", "", true, null),
+
+    AMBARI("Ambari", "AMBARI_SERVER", "AMBARI", "/ambari/", true, 8080),
+    WEBHDFS("WebHDFS", "NAMENODE", "WEBHDFS", "/webhdfs/", false, 50070),
+    NAMENODE("Name Node", "NAMENODE", "HDFSUI", "/hdfs/", true, 50070),
+    RESOURCEMANAGER_WEB("Resource Manager", "RESOURCEMANAGER", "YARNUI", "/yarn/", true, 8088),
+    JOB_HISTORY_SERVER("Job History Server", "HISTORYSERVER", "JOBHISTORYUI", "/jobhistory/", true, 19888),
+    HIVE_SERVER("Hive Server", "HIVE_SERVER", "HIVE", "/hive/", false, 10001),
+    HIVE_SERVER_INTERACTIVE("Hive Server Interactive", "HIVE_SERVER_INTERACTIVE", "HIVE_INTERACTIVE", "/hive/", false, 10501),
+    ATLAS("Atlas", "ATLAS_SERVER", "ATLAS", "/atlas/", true, 21000),
+    SPARK_HISTORY_SERVER("Spark History Server", "SPARK_JOBHISTORYSERVER", "SPARKHISTORYUI", "/sparkhistory/", true, 18080),
+    ZEPPELIN("Zeppelin", "ZEPPELIN_MASTER", "ZEPPELIN", "/zeppelin/", false, 9995),
+    RANGER("Ranger", "RANGER_ADMIN", "RANGERUI", "/ranger/", true, 6080),
+    DP_PROFILER_AGENT("DP Profiler Agent", "DP_PROFILER_AGENT", "PROFILER-AGENT", "", true, 21900),
+    BEACON_SERVER("Beacon", "BEACON_SERVER", "BEACON", "", true, 25968);
 
     private final String serviceName;
     private final String portName;
-    private final String postfix;
     private final String knoxService;
     private final String knoxUrl;
+    private final boolean ssoSupported;
+    private final Integer defaultPort;
 
-    ExposedService(String portName, String serviceName, String postFix, String knoxService, String knoxUrl) {
+    ExposedService(String portName, String serviceName, String knoxService, String knoxUrl, boolean ssoSupported, Integer defaultPort) {
         this.portName = portName;
         this.serviceName = serviceName;
-        postfix = postFix;
         this.knoxService = knoxService;
         this.knoxUrl = knoxUrl;
+        this.ssoSupported = ssoSupported;
+        this.defaultPort = defaultPort;
     }
 
-    public static List<ExposedService> filterSupportedKnoxServices() {
-        return Arrays.stream(values()).filter(x -> {
-            return !Strings.isNullOrEmpty(x.knoxService);
-        }).collect(Collectors.toList());
+    public static boolean isKnoxExposed(String knoxService) {
+        return getAllKnoxExposed().contains(knoxService);
+    }
+
+    public static Collection<ExposedService> filterSupportedKnoxServices() {
+        return Arrays.stream(values()).filter(x -> !Strings.isNullOrEmpty(x.knoxService)).collect(Collectors.toList());
+    }
+
+    public static Collection<ExposedService> knoxServicesForComponents(Collection<String> components) {
+        Collection<ExposedService> supportedKnoxServices = filterSupportedKnoxServices();
+        return supportedKnoxServices.stream()
+                .filter(exposedService ->
+                        components.contains(exposedService.getServiceName())
+                                || "AMBARI_SERVER".equals(exposedService.getServiceName()))
+                .collect(Collectors.toList());
     }
 
     public static List<String> getAllKnoxExposed() {
@@ -72,9 +65,7 @@ public enum ExposedService {
     }
 
     public static List<String> getAllServiceName() {
-        List<String> allServiceName = Arrays.stream(values()).filter(x -> {
-            return !Strings.isNullOrEmpty(x.serviceName);
-        })
+        List<String> allServiceName = Arrays.stream(values()).filter(x -> !Strings.isNullOrEmpty(x.serviceName))
                 .map(ExposedService::getServiceName).collect(Collectors.toList());
         return ImmutableList.copyOf(allServiceName);
     }
@@ -87,15 +78,19 @@ public enum ExposedService {
         return portName;
     }
 
-    public String getPostFix() {
-        return postfix;
-    }
-
     public String getKnoxService() {
         return knoxService;
     }
 
     public String getKnoxUrl() {
         return knoxUrl;
+    }
+
+    public boolean isSSOSupported() {
+        return ssoSupported;
+    }
+
+    public Integer getDefaultPort() {
+        return defaultPort;
     }
 }

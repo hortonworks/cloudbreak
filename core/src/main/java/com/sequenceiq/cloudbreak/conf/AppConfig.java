@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.security.Security;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,21 +22,19 @@ import javax.ws.rs.client.Client;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.actuate.autoconfigure.ExportMetricWriter;
-import org.springframework.boot.actuate.metrics.jmx.JmxMetricWriter;
-import org.springframework.boot.actuate.metrics.writer.MetricWriter;
+import org.springframework.boot.env.PropertySourceLoader;
 import org.springframework.boot.env.YamlPropertySourceLoader;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.task.AsyncTaskExecutor;
-import org.springframework.jmx.export.MBeanExporter;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -43,13 +43,14 @@ import org.springframework.web.filter.GenericFilterBean;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Maps;
-import com.sequenceiq.cloudbreak.api.model.FileSystemType;
+import com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType;
+import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemConfigurator;
+import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptor;
+import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptors;
 import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.cloudbreak.client.IdentityClient;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.concurrent.MDCCleanerTaskDecorator;
-import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptor;
-import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptors;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteria;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ExecutorBasedParallelOrchestratorComponentRunner;
 import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
@@ -57,7 +58,6 @@ import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelOrchestratorCompo
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.service.StackUnderOperationService;
-import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
@@ -129,12 +129,16 @@ public class AppConfig implements ResourceLoaderAware {
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 
         ResourcePatternResolver patternResolver = new PathMatchingResourcePatternResolver();
-        YamlPropertySourceLoader load = new YamlPropertySourceLoader();
+        PropertySourceLoader load = new YamlPropertySourceLoader();
         for (Resource resource : patternResolver.getResources("classpath*:*-images.yml")) {
-            environment.getPropertySources().addLast(load.load(resource.getFilename(), resource, null));
+            for (PropertySource<?> propertySource : load.load(resource.getFilename(), resource)) {
+                environment.getPropertySources().addLast(propertySource);
+            }
         }
         for (Resource resource : loadEtcResources()) {
-            environment.getPropertySources().addFirst(load.load(resource.getFilename(), resource, null));
+            for (PropertySource<?> propertySource : load.load(resource.getFilename(), resource)) {
+                environment.getPropertySources().addFirst(propertySource);
+            }
         }
     }
 
@@ -149,16 +153,6 @@ public class AppConfig implements ResourceLoaderAware {
     }
 
     @Bean
-    @ExportMetricWriter
-    /*
-     * Prometheus is not capable to scrape json metrics so we need to expose the actuator metrics to jmx. Every
-     * counter and gauge metrics are exposed too.
-     */
-    public MetricWriter metricWriter(MBeanExporter exporter) {
-        return new JmxMetricWriter(exporter);
-    }
-
-    @Bean
     public FilterRegistrationBean turnOnStackUnderOperationService() {
         FilterRegistrationBean registration = new FilterRegistrationBean();
         registration.setFilter(new GenericFilterBean() {
@@ -170,6 +164,7 @@ public class AppConfig implements ResourceLoaderAware {
             }
         });
         registration.addUrlPatterns("/*");
+        registration.setName("turnOnStackUnderOperationService");
         return registration;
     }
 
@@ -200,7 +195,7 @@ public class AppConfig implements ResourceLoaderAware {
 
     @Bean
     public Map<FileSystemType, FileSystemConfigurator> fileSystemConfigurators() {
-        Map<FileSystemType, FileSystemConfigurator> map = new HashMap<>();
+        Map<FileSystemType, FileSystemConfigurator> map = new EnumMap<>(FileSystemType.class);
         for (FileSystemConfigurator fileSystemConfigurator : fileSystemConfigurators) {
             map.put(fileSystemConfigurator.getFileSystemType(), fileSystemConfigurator);
         }
@@ -295,10 +290,10 @@ public class AppConfig implements ResourceLoaderAware {
         return cardinality == null ? defaultValue : cardinality;
     }
 
-    private List<Resource> loadEtcResources() {
+    private Iterable<Resource> loadEtcResources() {
         File folder = new File(etcConfigDir);
         File[] listOfFiles = folder.listFiles();
-        List<Resource> resources = new ArrayList<>();
+        Collection<Resource> resources = new ArrayList<>();
         if (listOfFiles != null) {
             for (File file : listOfFiles) {
                 try {

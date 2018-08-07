@@ -88,8 +88,9 @@ public class AwsCredentialConnector implements CredentialConnector {
             credentialClient.retrieveSessionCredentials(awsCredential);
         } catch (AmazonClientException ae) {
             if (ae.getMessage().contains("Unable to load AWS credentials")) {
-                String errorMessage =
-                        "Unable to load AWS credentials: please make sure the deployer defined AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY";
+                String errorMessage = String.format("Unable to load AWS credentials: please make sure that you configured your assumer %s and %s to deployer.",
+                        awsCredential.isGovernmentCloudEnabled() ? "AWS_GOV_ACCESS_KEY_ID" : "AWS_ACCESS_KEY_ID",
+                        awsCredential.isGovernmentCloudEnabled() ? "AWS_GOV_SECRET_ACCESS_KEY" : "AWS_SECRET_ACCESS_KEY");
                 LOGGER.error(errorMessage, ae);
                 return new CloudCredentialStatus(cloudCredential, CredentialStatus.FAILED, ae, errorMessage);
             }
@@ -109,13 +110,15 @@ public class AwsCredentialConnector implements CredentialConnector {
             DescribeRegionsRequest describeRegionsRequest = new DescribeRegionsRequest();
             access.describeRegions(describeRegionsRequest);
         } catch (AmazonClientException ae) {
-            String errorMessage = "Unable to verify AWS credentials: please make sure the access key and secret key is correct";
-            LOGGER.error(errorMessage, ae);
+            String errorMessage = "Unable to verify AWS credentials: "
+                    + "please make sure the access key and secret key is correct. "
+                    + ae.getMessage();
+            LOGGER.info(errorMessage, ae);
             return new CloudCredentialStatus(cloudCredential, CredentialStatus.FAILED, ae, errorMessage);
         } catch (RuntimeException e) {
-            String errorMessage = String.format("Could not verify keys '%s': check if the keys exists and if it's created with the correct external ID",
-                    awsCredential.getAccessKey());
-            LOGGER.error(errorMessage, e);
+            String errorMessage = String.format("Could not verify keys '%s': check if the keys exists and if it's created with the correct external ID. %s",
+                    awsCredential.getAccessKey(), e.getMessage());
+            LOGGER.warn(errorMessage, e);
             return new CloudCredentialStatus(cloudCredential, CredentialStatus.FAILED, e, errorMessage);
         }
         return new CloudCredentialStatus(cloudCredential, CredentialStatus.CREATED);

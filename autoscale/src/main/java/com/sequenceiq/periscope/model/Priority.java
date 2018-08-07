@@ -1,5 +1,7 @@
 package com.sequenceiq.periscope.model;
 
+import java.util.Objects;
+
 public class Priority implements Comparable<Priority> {
 
     private final int value;
@@ -14,7 +16,7 @@ public class Priority implements Comparable<Priority> {
 
     @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || !Objects.equals(getClass(), o.getClass())) {
             return false;
         } else if (this == o) {
             return true;

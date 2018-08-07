@@ -18,7 +18,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
@@ -31,13 +31,13 @@ import com.sequenceiq.it.spark.ITResponse;
 import com.sequenceiq.it.spark.ambari.AmbariCheckResponse;
 import com.sequenceiq.it.spark.ambari.AmbariClusterRequestsResponse;
 import com.sequenceiq.it.spark.ambari.AmbariClusterResponse;
-import com.sequenceiq.it.spark.ambari.AmbariClustersHostsResponse;
 import com.sequenceiq.it.spark.ambari.AmbariHostsResponse;
 import com.sequenceiq.it.spark.ambari.AmbariServicesComponentsResponse;
 import com.sequenceiq.it.spark.ambari.AmbariStatusResponse;
 import com.sequenceiq.it.spark.ambari.AmbariVersionDefinitionResponse;
 import com.sequenceiq.it.spark.ambari.EmptyAmbariClusterResponse;
 import com.sequenceiq.it.spark.ambari.EmptyAmbariResponse;
+import com.sequenceiq.it.spark.ambari.v2.AmbariCategorizedHostComponentStateResponse;
 import com.sequenceiq.it.spark.salt.SaltApiRunPostResponse;
 import com.sequenceiq.it.spark.spi.CloudMetaDataStatuses;
 import com.sequenceiq.it.util.HostNameUtil;
@@ -104,7 +104,7 @@ public class StackCreationMock extends MockServer {
         sparkService.put(AMBARI_API_ROOT + "/users/admin", new EmptyAmbariResponse());
         sparkService.get(AMBARI_API_ROOT + "/check", new AmbariCheckResponse());
         sparkService.post(AMBARI_API_ROOT + "/users", new EmptyAmbariResponse());
-        sparkService.get(AMBARI_API_ROOT + "/clusters/:cluster/hosts", new AmbariClustersHostsResponse(instanceMap, "SUCCESSFUL"));
+        sparkService.get(AMBARI_API_ROOT + "/clusters/:cluster/hosts", new AmbariCategorizedHostComponentStateResponse(instanceMap));
         sparkService.put(AMBARI_API_ROOT + "/stacks/HDP/versions/:version/operating_systems/:os/repositories/:hdpversion",
                 new AmbariVersionDefinitionResponse());
         sparkService.get(AMBARI_API_ROOT + "/version_definitions", new AmbariVersionDefinitionResponse());
@@ -120,7 +120,7 @@ public class StackCreationMock extends MockServer {
             genericResponse.setStatusCode(HttpStatus.OK.value());
             return genericResponse;
         }, gson()::toJson);
-        objectMapper.setVisibility(objectMapper.getVisibilityChecker().withGetterVisibility(JsonAutoDetect.Visibility.NONE));
+        objectMapper.setVisibility(objectMapper.getVisibilityChecker().withGetterVisibility(Visibility.NONE));
         sparkService.post(SALT_API_ROOT + "/run", new SaltApiRunPostResponse(instanceMap));
         sparkService.post(SALT_BOOT_ROOT + "/file", (request, response) -> {
             response.status(HttpStatus.CREATED.value());
@@ -200,6 +200,19 @@ public class StackCreationMock extends MockServer {
 
         verify(SALT_BOOT_ROOT + "/file", "POST").exactTimes(0).verify();
         verify(SALT_BOOT_ROOT + "/file/distribute", "POST").exactTimes(4).verify();
+    }
+
+    public void verifyGatewayCalls() {
+        verify(SALT_BOOT_ROOT + "/salt/server/pillar/distribute", "POST")
+                .bodyContains("\"path\":\"/gateway/init.sls\"")
+                .bodyContains("\"ssoprovider\":\"/gateway-path/sso/api/v1/websso\"")
+                .bodyContains("\"ports\":{\"SPARKHISTORYUI\":18080,\"HDFSUI\":50070,\"YARNUI\":8088,\"AMBARI\":8080,\"JOBHISTORYUI\":19888,"
+                        + "\"HIVE_INTERACTIVE\":10501,\"BEACON\":25968,\"ATLAS\":21000,\"HIVE_CONFIG_NAME\":10001,\"RANGERUI\":6080,"
+                        + "\"PROFILER-AGENT\":21900,\"ZEPPELIN\":9995,\"WEBHDFS\":50070}")
+                .bodyContains("{\"name\":\"topology1\",\"exposed\":[\"AMBARI\"]}")
+                .bodyContains("{\"name\":\"topology2\",\"exposed\":[\"AMBARI\",\"WEBHDFS\",\"HDFSUI\",\"YARNUI\",\"JOBHISTORYUI\""
+                        + ",\"HIVE_CONFIG_NAME\",\"HIVE_INTERACTIVE\",\"ATLAS\",\"SPARKHISTORYUI\",\"ZEPPELIN\",\"RANGERUI\",\"PROFILER-AGENT\",\"BEACON\"]}")
+                .verify();
     }
 
     public void verifyKerberosCalls(String clusterName, String kerberosAdmin, String kerberosPassword) {

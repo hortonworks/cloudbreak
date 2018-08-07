@@ -2,9 +2,10 @@ package com.sequenceiq.cloudbreak.conf;
 
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 import java.util.Properties;
 
+import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
 
 import org.slf4j.Logger;
@@ -73,7 +74,7 @@ public class MailSenderConfig {
     }
 
     private String missingVars() {
-        List<String> missingVars = new ArrayList();
+        Collection<String> missingVars = new ArrayList<>();
         if (StringUtils.isEmpty(host)) {
             missingVars.add("cb.smtp.sender.host");
         }
@@ -91,10 +92,10 @@ public class MailSenderConfig {
 
     private Properties getJavaMailProperties() {
         Properties props = new Properties();
-        props.put("mail.transport.protocol", smtpType);
-        props.put("mail.smtp.auth", smtpAuth);
-        props.put("mail.smtp.starttls.enable", smtpStarttlsEnable);
-        props.put("mail.debug", true);
+        props.setProperty("mail.transport.protocol", smtpType);
+        props.setProperty("mail.smtp.auth", smtpAuth);
+        props.setProperty("mail.smtp.starttls.enable", smtpStarttlsEnable);
+        props.put("mail.debug", Boolean.TRUE);
         return props;
     }
 
@@ -109,12 +110,12 @@ public class MailSenderConfig {
 
         @Override
         public MimeMessage createMimeMessage() {
-            return null;
+            return new DummyMimeMessage();
         }
 
         @Override
         public MimeMessage createMimeMessage(InputStream contentStream) throws MailException {
-            return null;
+            return new DummyMimeMessage();
         }
 
         @Override
@@ -145,6 +146,13 @@ public class MailSenderConfig {
         @Override
         public void send(SimpleMailMessage[] simpleMessages) throws MailException {
             logger.info(msg);
+        }
+    }
+
+    private static final class DummyMimeMessage extends MimeMessage {
+
+        private DummyMimeMessage() {
+            super((Session) null);
         }
     }
 

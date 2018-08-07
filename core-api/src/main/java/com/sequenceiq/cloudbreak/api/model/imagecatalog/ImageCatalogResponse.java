@@ -1,13 +1,15 @@
 package com.sequenceiq.cloudbreak.api.model.imagecatalog;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ImageCatalogDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(Include.NON_NULL)
 public class ImageCatalogResponse extends ImageCatalogBase {
 
     @ApiModelProperty(value = ModelDescriptions.ID, required = true)
@@ -16,10 +18,10 @@ public class ImageCatalogResponse extends ImageCatalogBase {
     @ApiModelProperty(value = ModelDescriptions.PUBLIC_IN_ACCOUNT, required = true)
     private boolean publicInAccount;
 
-    @ApiModelProperty(value = ModelDescriptions.ImageCatalogDescription.DEFAULT, required = true)
+    @ApiModelProperty(value = ImageCatalogDescription.DEFAULT, required = true)
     private boolean usedAsDefault;
 
-    @ApiModelProperty(value = ModelDescriptions.ImageCatalogDescription.IMAGE_RESPONSES)
+    @ApiModelProperty(ImageCatalogDescription.IMAGE_RESPONSES)
     private ImagesResponse imagesResponse;
 
     public Long getId() {

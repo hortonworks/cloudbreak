@@ -25,7 +25,7 @@ public class AmbariAgentHealthMonitor extends AbstractMonitor {
     }
 
     @Override
-    public Class getEvaluatorType() {
+    public Class<?> getEvaluatorType() {
         return AmbariAgentHealthEvaluator.class;
     }
 
@@ -36,6 +36,6 @@ public class AmbariAgentHealthMonitor extends AbstractMonitor {
 
     @Override
     List<Cluster> getClusters() {
-        return getClusterService().findAll(ClusterState.RUNNING);
+        return getClusterService().findAllByStateAndNode(ClusterState.RUNNING, getPeriscopeNodeConfig().getId());
     }
 }

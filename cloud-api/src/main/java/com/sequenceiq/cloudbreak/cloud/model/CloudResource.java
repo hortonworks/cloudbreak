@@ -13,6 +13,8 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
  */
 public class CloudResource extends DynamicModel {
 
+    public static final String IMAGE = "IMAGE";
+
     private final ResourceType type;
 
     private final CommonStatus status;

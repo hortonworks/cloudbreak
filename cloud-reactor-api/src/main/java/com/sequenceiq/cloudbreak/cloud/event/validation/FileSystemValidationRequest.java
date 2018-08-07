@@ -3,22 +3,22 @@ package com.sequenceiq.cloudbreak.cloud.event.validation;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
-import com.sequenceiq.cloudbreak.cloud.model.FileSystem;
+import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 
 public class FileSystemValidationRequest extends CloudPlatformRequest<FileSystemValidationResult> {
 
-    private final FileSystem fileSystem;
+    private final SpiFileSystem spiFileSystem;
 
     private final CloudCredential credential;
 
-    public FileSystemValidationRequest(FileSystem fileSystem, CloudCredential credential, CloudContext cloudContext) {
+    public FileSystemValidationRequest(SpiFileSystem spiFileSystem, CloudCredential credential, CloudContext cloudContext) {
         super(cloudContext, null);
-        this.fileSystem = fileSystem;
+        this.spiFileSystem = spiFileSystem;
         this.credential = credential;
     }
 
-    public FileSystem getFileSystem() {
-        return fileSystem;
+    public SpiFileSystem getSpiFileSystem() {
+        return spiFileSystem;
     }
 
     public CloudCredential getCredential() {
@@ -28,7 +28,7 @@ public class FileSystemValidationRequest extends CloudPlatformRequest<FileSystem
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("FileSystemValidationRequest{");
-        sb.append("fileSystem=").append(fileSystem);
+        sb.append("spiFileSystem=").append(spiFileSystem);
         sb.append('}');
         return sb.toString();
     }

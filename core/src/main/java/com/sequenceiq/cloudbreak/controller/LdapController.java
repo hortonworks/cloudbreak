@@ -2,30 +2,45 @@ package com.sequenceiq.cloudbreak.controller;
 
 import java.util.Set;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
+
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v1.LdapConfigEndpoint;
-import com.sequenceiq.cloudbreak.api.model.LdapConfigRequest;
-import com.sequenceiq.cloudbreak.api.model.LdapConfigResponse;
+import com.sequenceiq.cloudbreak.api.model.ldap.LDAPTestRequest;
+import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigRequest;
+import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
+import com.sequenceiq.cloudbreak.api.model.ldap.LdapTestResult;
+import com.sequenceiq.cloudbreak.api.model.ldap.LdapValidationRequest;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.validation.ldapconfig.LdapConfigValidator;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
+import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 
+@Component
+@Transactional(TxType.NEVER)
 public class LdapController extends NotificationController implements LdapConfigEndpoint {
 
-    @Autowired
-    @Qualifier("conversionService")
+    @Inject
+    @Named("conversionService")
     private ConversionService conversionService;
 
-    @Autowired
+    @Inject
     private AuthenticatedUserService authenticatedUserService;
 
-    @Autowired
+    @Inject
     private LdapConfigService ldapConfigService;
+
+    @Inject
+    private LdapConfigValidator ldapConfigValidator;
 
     @Override
     public LdapConfigResponse postPrivate(LdapConfigRequest ldapConfigRequest) {
@@ -86,6 +101,36 @@ public class LdapController extends NotificationController implements LdapConfig
     @Override
     public void deletePrivate(String name) {
         executeAndNotify(user -> ldapConfigService.delete(name, user), ResourceEvent.LDAP_DELETED);
+    }
+
+    @Override
+    public LdapTestResult testLdapConnection(LDAPTestRequest ldapTestRequest) {
+        String existingLDAPConfigName = ldapTestRequest.getName();
+        LdapValidationRequest validationRequest = ldapTestRequest.getValidationRequest();
+        if (existingLDAPConfigName == null && validationRequest == null) {
+            throw new BadRequestException("Either an existing resource 'id' or an LDAP 'validationRequest' needs to be specified in the request. ");
+        }
+
+        LdapTestResult ldapTestResult = new LdapTestResult();
+        try {
+            if (existingLDAPConfigName != null) {
+                LdapConfig ldapConfig = ldapConfigService.getByName(existingLDAPConfigName, authenticatedUserService.getCbUser());
+                ldapConfigValidator.validateLdapConnection(ldapConfig);
+            } else {
+                ldapConfigValidator.validateLdapConnection(validationRequest);
+            }
+            ldapTestResult.setConnectionResult("connected");
+        } catch (BadRequestException e) {
+            ldapTestResult.setConnectionResult(e.getMessage());
+        }
+        return ldapTestResult;
+    }
+
+    @Override
+    public LdapConfigRequest getRequestFromName(String name) {
+        IdentityUser user = authenticatedUserService.getCbUser();
+        LdapConfig ldapConfig = ldapConfigService.getPublicConfig(name, user);
+        return conversionService.convert(ldapConfig, LdapConfigRequest.class);
     }
 
     private LdapConfigResponse createConfig(IdentityUser user, LdapConfigRequest request, boolean publicInAccount) {

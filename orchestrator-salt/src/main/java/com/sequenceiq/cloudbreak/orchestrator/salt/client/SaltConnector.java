@@ -12,7 +12,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.client.Client;
@@ -91,7 +90,7 @@ public class SaltConnector implements Closeable {
         return responseEntity;
     }
 
-    public GenericResponses pillar(Set<String> targets, Pillar pillar) {
+    public GenericResponses pillar(Iterable<String> targets, Pillar pillar) {
         Response distributeResponse = saltTarget.path(SaltEndpoint.BOOT_PILLAR_DISTRIBUTE.getContextPath()).request()
                 .header(SIGN_HEADER, PkiUtil.generateSignature(signatureKey, toJson(pillar).getBytes()))
                 .post(Entity.json(pillar));
@@ -169,7 +168,7 @@ public class SaltConnector implements Closeable {
         return responseEntity;
     }
 
-    public GenericResponses upload(Set<String> targets, String path, String fileName, byte[] content) throws IOException {
+    public GenericResponses upload(Iterable<String> targets, String path, String fileName, byte[] content) throws IOException {
         Response distributeResponse = upload(SaltEndpoint.BOOT_FILE_DISTRIBUTE.getContextPath(), targets, path, fileName, content);
         if (distributeResponse.getStatus() == HttpStatus.SC_NOT_FOUND) {
             // simple file upload for CB <= 1.14
@@ -186,7 +185,7 @@ public class SaltConnector implements Closeable {
         return JaxRSUtil.response(distributeResponse, GenericResponses.class);
     }
 
-    private Response upload(String endpoint, Set<String> targets, String path, String fileName, byte[] content) throws IOException {
+    private Response upload(String endpoint, Iterable<String> targets, String path, String fileName, byte[] content) throws IOException {
         try (ByteArrayInputStream inputStream = new ByteArrayInputStream(content)) {
             StreamDataBodyPart streamDataBodyPart = new StreamDataBodyPart("file", inputStream, fileName);
             MultiPart multiPart = new FormDataMultiPart().field("path", path).field("targets", String.join(",", targets)).bodyPart(streamDataBodyPart);
@@ -207,18 +206,19 @@ public class SaltConnector implements Closeable {
                 .filter(genericResponse -> !ACCEPTED_STATUSES.contains(genericResponse.getStatusCode())).collect(Collectors.toList());
         if (!failedResponses.isEmpty()) {
             failedResponseErrorLog(failedResponses);
-            String failedNodeAddresses = failedResponses.stream().map(GenericResponse::getAddress).collect(Collectors.joining(","));
-            throw new CloudbreakOrchestratorFailedException("Hostname resolution failed for nodes: " + failedNodeAddresses);
+            String nodeErrors = failedResponses.stream().map(gr -> gr.getAddress() + ": " + gr.getErrorText()).collect(Collectors.joining(","));
+            throw new CloudbreakOrchestratorFailedException("Hostname resolution failed for nodes: " + nodeErrors);
         }
         return responses.getResponses().stream().collect(Collectors.toMap(GenericResponse::getAddress, GenericResponse::getStatus));
     }
 
-    private void failedResponseErrorLog(List<GenericResponse> failedResponses) {
+    private void failedResponseErrorLog(Iterable<GenericResponse> failedResponses) {
         StringBuilder failedResponsesErrorMessage = new StringBuilder();
         failedResponsesErrorMessage.append("Failed response from salt bootstrap, endpoint: ").append(BOOT_HOSTNAME_ENDPOINT);
         for (GenericResponse failedResponse : failedResponses) {
             failedResponsesErrorMessage.append('\n').append("Status code: ").append(failedResponse.getStatusCode());
-            failedResponsesErrorMessage.append(" Error message: ").append(failedResponse.getStatus());
+            failedResponsesErrorMessage.append(" Status: ").append(failedResponse.getStatus());
+            failedResponsesErrorMessage.append(" Error message: ").append(failedResponse.getErrorText());
         }
         LOGGER.error(failedResponsesErrorMessage.toString());
     }
@@ -231,7 +231,7 @@ public class SaltConnector implements Closeable {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         if (restClient != null) {
             restClient.close();
         }

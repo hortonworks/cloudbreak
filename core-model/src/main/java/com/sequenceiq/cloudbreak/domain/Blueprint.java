@@ -8,15 +8,17 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import org.hibernate.annotations.Type;
-
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.domain.converter.EncryptionConverter;
 import com.sequenceiq.cloudbreak.domain.json.EncryptedJsonToString;
 import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.domain.json.JsonToString;
+import com.sequenceiq.cloudbreak.domain.security.Organization;
 
 @Entity
 @Table(name = "Blueprint", uniqueConstraints = @UniqueConstraint(columnNames = {"account", "name"}))
@@ -30,7 +32,7 @@ public class Blueprint implements ProvisionEntity {
     @Column(nullable = false)
     private String name;
 
-    @Type(type = "encrypted_string")
+    @Convert(converter = EncryptionConverter.class)
     @Column(length = 1000000, columnDefinition = "TEXT", nullable = false)
     private String blueprintText;
 
@@ -57,6 +59,21 @@ public class Blueprint implements ProvisionEntity {
     @Convert(converter = EncryptedJsonToString.class)
     @Column(columnDefinition = "TEXT")
     private Json inputParameters;
+
+    @Convert(converter = JsonToString.class)
+    @Column(columnDefinition = "TEXT")
+    private Json tags;
+
+    @ManyToOne
+    private Organization organization;
+
+    public Json getTags() {
+        return tags;
+    }
+
+    public void setTags(Json tags) {
+        this.tags = tags;
+    }
 
     public String getDescription() {
         return description;
@@ -144,5 +161,13 @@ public class Blueprint implements ProvisionEntity {
 
     public void setInputParameters(Json inputParameters) {
         this.inputParameters = inputParameters;
+    }
+
+    public Organization getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(Organization organization) {
+        this.organization = organization;
     }
 }

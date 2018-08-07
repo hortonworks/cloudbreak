@@ -10,12 +10,12 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
 import com.sequenceiq.cloudbreak.api.model.Status;
-import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
-import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.notification.Notification;
 import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Component
@@ -26,7 +26,7 @@ public class UptimeNotifier {
     private ClusterRepository clusterRepository;
 
     @Inject
-    private StackRepository stackRepository;
+    private StackService stackService;
 
     @Inject
     private NotificationSender notificationSender;
@@ -39,10 +39,10 @@ public class UptimeNotifier {
         EnumSet<Status> statuses = EnumSet.complementOf(EnumSet.of(Status.DELETE_COMPLETED));
         List<Cluster> clusters = clusterRepository.findByStatuses(statuses);
         for (Cluster cluster : clusters) {
-            Stack stack = stackRepository.findStackForCluster(cluster.getId());
+            Stack stack = stackService.getForCluster(cluster.getId());
             if (stack != null && !stack.isDeleteCompleted()) {
                 Long uptime = stackUtil.getUptimeForCluster(cluster, cluster.isAvailable());
-                Notification notification = createUptimeNotification(stack, uptime);
+                Notification<CloudbreakEventsJson> notification = createUptimeNotification(stack, uptime);
                 notificationSender.send(notification);
             }
         }

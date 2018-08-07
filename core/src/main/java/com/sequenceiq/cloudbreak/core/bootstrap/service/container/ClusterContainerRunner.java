@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.A
 import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.AMBARI_SERVER;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,14 +22,13 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
-import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ContainerConfigService;
-import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Container;
-import com.sequenceiq.cloudbreak.domain.HostGroup;
-import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
@@ -36,9 +36,10 @@ import com.sequenceiq.cloudbreak.orchestrator.model.ContainerConstraint;
 import com.sequenceiq.cloudbreak.orchestrator.model.ContainerInfo;
 import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
-import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.ContainerService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Component
 public class ClusterContainerRunner {
@@ -49,7 +50,7 @@ public class ClusterContainerRunner {
     private ClusterService clusterService;
 
     @Inject
-    private StackRepository stackRepository;
+    private StackService stackService;
 
     @Inject
     private HostGroupRepository hostGroupRepository;
@@ -83,7 +84,7 @@ public class ClusterContainerRunner {
     public Map<String, List<Container>> addClusterContainers(Long stackId, String hostGroupName, Integer scalingAdjustment)
             throws CloudbreakException {
         try {
-            Stack stack = stackRepository.findOneWithLists(stackId);
+            Stack stack = stackService.getByIdWithLists(stackId);
             String cloudPlatform = StringUtils.isNotEmpty(stack.cloudPlatform()) ? stack.cloudPlatform() : NONE;
             return addClusterContainers(stack, cloudPlatform, hostGroupName, scalingAdjustment);
         } catch (CloudbreakOrchestratorCancelledException e) {
@@ -195,14 +196,14 @@ public class ClusterContainerRunner {
         }
     }
 
-    private List<String> getOtherHostgroupsAgentHostsFromContainer(Set<Container> existingContainers, String hostGroupName) {
+    private List<String> getOtherHostgroupsAgentHostsFromContainer(Collection<Container> existingContainers, String hostGroupName) {
         String hostGroupNamePart = hostGroupName.replace("_", "-");
         return existingContainers.stream()
                 .filter(input -> input.getImage().contains(AMBARI_AGENT.getName()) && !input.getName().contains(hostGroupNamePart))
                 .map(Container::getHost).collect(Collectors.toList());
     }
 
-    private List<String> getHostsFromContainerInfo(List<ContainerInfo> containerInfos) {
+    private Collection<String> getHostsFromContainerInfo(Collection<ContainerInfo> containerInfos) {
         return containerInfos.stream().map(ContainerInfo::getHost).collect(Collectors.toList());
     }
 
@@ -214,7 +215,7 @@ public class ClusterContainerRunner {
         return hosts;
     }
 
-    private List<Container> convert(List<ContainerInfo> containerInfo, Cluster cluster) {
+    private List<Container> convert(Iterable<ContainerInfo> containerInfo, Cluster cluster) {
         List<Container> containers = new ArrayList<>();
         for (ContainerInfo source : containerInfo) {
             Container container = conversionService.convert(source, Container.class);

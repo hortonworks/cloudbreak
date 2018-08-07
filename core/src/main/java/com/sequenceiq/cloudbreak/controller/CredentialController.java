@@ -5,6 +5,8 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Resource;
+import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -17,10 +19,13 @@ import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 
 @Component
+@Transactional(TxType.NEVER)
 public class CredentialController extends NotificationController implements CredentialEndpoint {
+
     @Resource
     @Qualifier("conversionService")
     private ConversionService conversionService;
@@ -41,6 +46,18 @@ public class CredentialController extends NotificationController implements Cred
     public CredentialResponse postPublic(CredentialRequest credentialRequest) {
         IdentityUser user = authenticatedUserService.getCbUser();
         return createCredential(user, credentialRequest, true);
+    }
+
+    @Override
+    public CredentialResponse putPrivate(CredentialRequest credentialRequest) {
+        IdentityUser user = authenticatedUserService.getCbUser();
+        return modifyCredential(user, credentialRequest, false);
+    }
+
+    @Override
+    public CredentialResponse putPublic(CredentialRequest credentialRequest) {
+        IdentityUser user = authenticatedUserService.getCbUser();
+        return modifyCredential(user, credentialRequest, true);
     }
 
     @Override
@@ -112,7 +129,12 @@ public class CredentialController extends NotificationController implements Cred
     private CredentialResponse createCredential(IdentityUser user, CredentialRequest credentialRequest, boolean publicInAccount) {
         Credential credential = convert(credentialRequest, publicInAccount);
         credential = credentialService.create(user, credential);
-        notify(user, ResourceEvent.CREDENTIAL_CREATED);
+        return convert(credential);
+    }
+
+    private CredentialResponse modifyCredential(IdentityUser user, CredentialRequest credentialRequest, boolean publicInAccount) {
+        Credential credential = convert(credentialRequest, publicInAccount);
+        credential = credentialService.modify(user, credential);
         return convert(credential);
     }
 

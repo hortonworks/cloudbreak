@@ -1,19 +1,21 @@
 package com.sequenceiq.cloudbreak.domain;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import org.hibernate.annotations.Type;
-
 import com.sequenceiq.cloudbreak.api.model.DirectoryType;
+import com.sequenceiq.cloudbreak.domain.converter.EncryptionConverter;
+import com.sequenceiq.cloudbreak.domain.security.Organization;
 
 @Entity
 @Table(name = "ldapconfig", uniqueConstraints = @UniqueConstraint(columnNames = {"account", "name"}))
@@ -51,7 +53,7 @@ public class LdapConfig implements ProvisionEntity {
     @Column(nullable = false)
     private String bindDn;
 
-    @Type(type = "encrypted_string")
+    @Convert(converter = EncryptionConverter.class)
     @Column(nullable = false)
     private String bindPassword;
 
@@ -60,6 +62,8 @@ public class LdapConfig implements ProvisionEntity {
 
     @Column(nullable = false)
     private String userSearchBase;
+
+    private String userDnPattern;
 
     private String userNameAttribute;
 
@@ -76,6 +80,36 @@ public class LdapConfig implements ProvisionEntity {
     private String domain;
 
     private String adminGroup;
+
+    @ManyToOne
+    private Organization organization;
+
+    public LdapConfig copyWithoutOrganization() {
+        LdapConfig copy = new LdapConfig();
+        copy.setId(id);
+        copy.setName(name);
+        copy.setDescription(description);
+        copy.setAccount(account);
+        copy.setOwner(owner);
+        copy.setPublicInAccount(publicInAccount);
+        copy.setServerHost(serverHost);
+        copy.setServerPort(serverPort);
+        copy.setProtocol(protocol);
+        copy.setBindDn(bindDn);
+        copy.setBindPassword(bindPassword);
+        copy.setDirectoryType(directoryType);
+        copy.setUserSearchBase(userSearchBase);
+        copy.setUserDnPattern(userDnPattern);
+        copy.setUserNameAttribute(userNameAttribute);
+        copy.setUserObjectClass(userObjectClass);
+        copy.setGroupSearchBase(groupSearchBase);
+        copy.setGroupNameAttribute(groupNameAttribute);
+        copy.setGroupObjectClass(groupObjectClass);
+        copy.setGroupMemberAttribute(groupMemberAttribute);
+        copy.setDomain(domain);
+        copy.setAdminGroup(adminGroup);
+        return copy;
+    }
 
     public Long getId() {
         return id;
@@ -243,5 +277,21 @@ public class LdapConfig implements ProvisionEntity {
 
     public void setAdminGroup(String adminGroup) {
         this.adminGroup = adminGroup;
+    }
+
+    public String getUserDnPattern() {
+        return userDnPattern;
+    }
+
+    public void setUserDnPattern(String userDnPattern) {
+        this.userDnPattern = userDnPattern;
+    }
+
+    public Organization getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(Organization organization) {
+        this.organization = organization;
     }
 }

@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureStorage;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
@@ -17,30 +17,35 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 public class AzureInstanceView {
 
-    private CloudInstance instance;
+    private final CloudInstance instance;
 
-    private InstanceTemplate instanceTemplate;
+    private final InstanceTemplate instanceTemplate;
 
-    private int stackNamePrefixLength;
+    private final int stackNamePrefixLength;
 
-    private InstanceGroupType type;
+    private final InstanceGroupType type;
 
-    private String attachedDiskStorage;
+    private final String attachedDiskStorage;
 
-    private String attachedDiskStorageType;
+    private final String attachedDiskStorageType;
 
-    private String groupName;
+    private final String groupName;
 
-    private String stackName;
+    private final String stackName;
 
-    private String availabilitySetName;
+    private final String availabilitySetName;
 
-    private boolean managedDisk;
+    private final boolean managedDisk;
 
-    private String subnetId;
+    private final String subnetId;
+
+    private final int rootVolumeSize;
+
+    private final String customImageId;
 
     public AzureInstanceView(String stackName, int stackNamePrefixLength, CloudInstance instance, InstanceGroupType type, String attachedDiskStorage,
-            String attachedDiskStorageType, String groupName, String availabilitySetName, boolean managedDisk, String subnetId) {
+            String attachedDiskStorageType, String groupName, String availabilitySetName, boolean managedDisk, String subnetId, int rootVolumeSize,
+            String customImageId) {
         this.instance = instance;
         instanceTemplate = instance.getTemplate();
         this.stackNamePrefixLength = stackNamePrefixLength;
@@ -52,6 +57,8 @@ public class AzureInstanceView {
         this.availabilitySetName = availabilitySetName;
         this.managedDisk = managedDisk;
         this.subnetId = subnetId;
+        this.rootVolumeSize = rootVolumeSize;
+        this.customImageId = customImageId;
     }
 
     /**
@@ -153,5 +160,13 @@ public class AzureInstanceView {
 
     public String getSubnetId() {
         return subnetId;
+    }
+
+    public int getRootVolumeSize() {
+        return rootVolumeSize;
+    }
+
+    public String getCustomImageId() {
+        return customImageId;
     }
 }

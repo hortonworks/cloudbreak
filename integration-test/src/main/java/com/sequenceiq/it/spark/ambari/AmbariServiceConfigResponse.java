@@ -1,6 +1,7 @@
 package com.sequenceiq.it.spark.ambari;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -23,13 +24,13 @@ public class AmbariServiceConfigResponse extends ITResponse {
     }
 
     @Override
-    public Object handle(Request request, Response response) throws Exception {
+    public Object handle(Request request, Response response) {
         response.type("text/plain");
         List<Map<String, ?>> itemList = new ArrayList<>();
 
         Map<String, Object> map = new HashMap<>();
         map.put("group_name", "default");
-        List<Map> configList = new ArrayList<>();
+        Collection<Map<String, Object>> configList = new ArrayList<>();
 
         Map<String, Object> dfsReplication = new HashMap<>();
         dfsReplication.put("type", "something");

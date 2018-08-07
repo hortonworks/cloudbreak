@@ -7,6 +7,8 @@ import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
 
 public class AwsGroupView {
 
+    public static final String AUTSCALING_GROUP_NAME_PREFIX = "AmbariNodes";
+
     private final Integer instanceCount;
 
     private final String type;
@@ -18,6 +20,8 @@ public class AwsGroupView {
     private final Integer volumeCount;
 
     private final Integer volumeSize;
+
+    private final Integer rootVolumeSize;
 
     private final Boolean ebsEncrypted;
 
@@ -37,9 +41,13 @@ public class AwsGroupView {
 
     private final String snapshotId;
 
-    public AwsGroupView(Integer instanceCount, String type, String flavor, String groupName, Integer volumeCount,
-            Boolean ebsEncrypted, Integer volumeSize, String volumeType, Double spotPrice, List<SecurityRule> rules, String cloudSecurityId, String subnetId,
-            Boolean kmsKeyDefined, String kmsKey, String snapshotId) {
+    private final String encryptedAMI;
+
+    private final String autoScalingGroupName;
+
+    public AwsGroupView(Integer instanceCount, String type, String flavor, String groupName, Integer volumeCount, Boolean ebsEncrypted, Integer volumeSize,
+            Integer rootVolumeSize, String volumeType, Double spotPrice, List<SecurityRule> rules, String cloudSecurityId, String subnetId,
+            Boolean kmsKeyDefined, String kmsKey, String snapshotId, String encryptedAMI) {
         this.instanceCount = instanceCount;
         this.type = type;
         this.flavor = flavor;
@@ -47,6 +55,7 @@ public class AwsGroupView {
         this.volumeCount = volumeCount;
         this.ebsEncrypted = ebsEncrypted;
         this.volumeSize = volumeSize;
+        this.rootVolumeSize = rootVolumeSize;
         this.spotPrice = spotPrice;
         this.volumeType = volumeType;
         this.rules = rules;
@@ -55,6 +64,12 @@ public class AwsGroupView {
         this.kmsKeyDefined = kmsKeyDefined;
         this.kmsKey = kmsKey;
         this.snapshotId = snapshotId;
+        this.encryptedAMI = encryptedAMI;
+        autoScalingGroupName = getAutoScalingGroupName(groupName);
+    }
+
+    public static String getAutoScalingGroupName(String groupName) {
+        return AUTSCALING_GROUP_NAME_PREFIX + groupName.replaceAll("_", "");
     }
 
     public Integer getInstanceCount() {
@@ -119,5 +134,17 @@ public class AwsGroupView {
 
     public String getSnapshotId() {
         return snapshotId;
+    }
+
+    public Integer getRootVolumeSize() {
+        return rootVolumeSize;
+    }
+
+    public String getEncryptedAMI() {
+        return encryptedAMI;
+    }
+
+    public String getAutoScalingGroupName() {
+        return autoScalingGroupName;
     }
 }

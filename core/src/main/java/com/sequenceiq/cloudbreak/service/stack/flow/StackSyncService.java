@@ -8,9 +8,9 @@ import static com.sequenceiq.cloudbreak.api.model.Status.WAIT_FOR_SYNC;
 import static com.sequenceiq.cloudbreak.cloud.model.CloudInstance.INSTANCE_NAME;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -21,26 +21,31 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
-import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
-import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.domain.HostMetadata;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Resource;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.ResourceRepository;
-import com.sequenceiq.cloudbreak.repository.StackUpdater;
-import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
-import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariDecommissioner;
+import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.service.StackUpdater;
+import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariClusterConnector;
+import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariDecommissioner;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderMetadataAdapter;
@@ -79,30 +84,38 @@ public class StackSyncService {
     private ServiceProviderMetadataAdapter metadata;
 
     @Inject
+    private ImageService imageService;
+
+    @Inject
     private CloudbreakMessagesService cloudbreakMessagesService;
 
-    public void updateInstances(Stack stack, List<InstanceMetaData> instanceMetaDataList, List<CloudVmInstanceStatus> instanceStatuses,
+    public void updateInstances(Stack stack, Iterable<InstanceMetaData> instanceMetaDataList, Collection<CloudVmInstanceStatus> instanceStatuses,
             boolean stackStatusUpdateEnabled) {
-        Map<InstanceSyncState, Integer> counts = initInstanceStateCounts();
-        for (InstanceMetaData metaData : instanceMetaDataList) {
-            Optional<CloudVmInstanceStatus> status = instanceStatuses.stream()
-                    .filter(is -> is != null && is.getCloudInstance().getInstanceId() != null
-                            && is.getCloudInstance().getInstanceId().equals(metaData.getInstanceId()))
-                    .findFirst();
+        try {
+            Map<InstanceSyncState, Integer> counts = initInstanceStateCounts();
+            Json imageJson = new Json(imageService.getImage(stack.getId()));
+            for (InstanceMetaData metaData : instanceMetaDataList) {
+                Optional<CloudVmInstanceStatus> status = instanceStatuses.stream()
+                        .filter(is -> is != null && is.getCloudInstance().getInstanceId() != null
+                                && is.getCloudInstance().getInstanceId().equals(metaData.getInstanceId()))
+                        .findFirst();
 
-            InstanceSyncState state;
-            if (status.isPresent()) {
-                CloudVmInstanceStatus cloudVmInstanceStatus = status.get();
-                CloudInstance cloudInstance = cloudVmInstanceStatus.getCloudInstance();
-                state = InstanceSyncState.getInstanceSyncState(cloudVmInstanceStatus.getStatus());
-                syncInstanceName(metaData, cloudInstance);
-            } else {
-                state = InstanceSyncState.DELETED;
+                InstanceSyncState state;
+                if (status.isPresent()) {
+                    CloudVmInstanceStatus cloudVmInstanceStatus = status.get();
+                    CloudInstance cloudInstance = cloudVmInstanceStatus.getCloudInstance();
+                    state = InstanceSyncState.getInstanceSyncState(cloudVmInstanceStatus.getStatus());
+                    syncInstance(metaData, cloudInstance, imageJson);
+                } else {
+                    state = InstanceSyncState.DELETED;
+                }
+                syncInstanceStatusByState(stack, counts, metaData, state);
             }
-            syncInstanceStatusByState(stack, counts, metaData, state);
+            handleSyncResult(stack, counts, stackStatusUpdateEnabled);
+        } catch (CloudbreakImageNotFoundException | JsonProcessingException ex) {
+            LOGGER.error("Error during stack sync:", ex);
+            throw new CloudbreakServiceException("Stack sync failed", ex);
         }
-
-        handleSyncResult(stack, counts, stackStatusUpdateEnabled);
     }
 
     public void sync(Long stackId, boolean stackStatusUpdateEnabled) {
@@ -134,9 +147,12 @@ public class StackSyncService {
         handleSyncResult(stack, instanceStateCounts, stackStatusUpdateEnabled);
     }
 
-    private void syncInstanceName(InstanceMetaData instanceMetaData, CloudInstance cloudInstance) {
+    private void syncInstance(InstanceMetaData instanceMetaData, CloudInstance cloudInstance, Json imageJson) throws JsonProcessingException {
         String instanceName = cloudInstance.getStringParameter(INSTANCE_NAME);
         instanceMetaData.setInstanceName(instanceName);
+        if (instanceMetaData.getImage() == null) {
+            instanceMetaData.setImage(imageJson);
+        }
         instanceMetaDataRepository.save(instanceMetaData);
     }
 
@@ -235,7 +251,7 @@ public class StackSyncService {
     }
 
     private Map<InstanceSyncState, Integer> initInstanceStateCounts() {
-        Map<InstanceSyncState, Integer> instanceStates = new HashMap<>();
+        Map<InstanceSyncState, Integer> instanceStates = new EnumMap<>(InstanceSyncState.class);
         instanceStates.put(InstanceSyncState.DELETED, 0);
         instanceStates.put(InstanceSyncState.DELETED_ON_PROVIDER_SIDE, 0);
         instanceStates.put(InstanceSyncState.STOPPED, 0);
@@ -254,9 +270,9 @@ public class StackSyncService {
                         throw new NotFoundException(String.format("Host not found with id '%s'", instanceMetaData.getDiscoveryFQDN()));
                     }
                 } else {
-                    if (ambariClusterConnector.isAmbariAvailable(stack)) {
+                    if (ambariClusterConnector.available(stack)) {
                         if (ambariDecommissioner.deleteHostFromAmbari(stack, hostMetadata)) {
-                            hostMetadataRepository.delete(hostMetadata.getId());
+                            hostMetadataRepository.delete(hostMetadata);
                             eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
                                     cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_HOST_DELETED.code(),
                                             Collections.singletonList(instanceMetaData.getDiscoveryFQDN())));
@@ -286,11 +302,8 @@ public class StackSyncService {
         instanceMetaData.setInstanceStatus(InstanceStatus.DELETED_ON_PROVIDER_SIDE);
         instanceMetaDataRepository.save(instanceMetaData);
         String name;
-        if (instanceMetaData.getDiscoveryFQDN() == null) {
-            name = instanceMetaData.getInstanceId();
-        } else {
-            name = String.format("%s (%s)", instanceMetaData.getInstanceId(), instanceMetaData.getDiscoveryFQDN());
-        }
+        name = instanceMetaData.getDiscoveryFQDN() == null ? instanceMetaData.getInstanceId() : String.format("%s (%s)", instanceMetaData.getInstanceId(),
+                instanceMetaData.getDiscoveryFQDN());
 
         eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
                 cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_DELETED_CBMETADATA.code(),
@@ -312,6 +325,7 @@ public class StackSyncService {
     }
 
     private enum Msg {
+
         STACK_SYNC_INSTANCE_STATUS_RETRIEVAL_FAILED("stack.sync.instance.status.retrieval.failed"),
         STACK_SYNC_INSTANCE_STATUS_COULDNT_DETERMINE("stack.sync.instance.status.couldnt.determine"),
         STACK_SYNC_INSTANCE_OPERATION_IN_PROGRESS("stack.sync.instance.operation.in.progress"),
@@ -335,6 +349,4 @@ public class StackSyncService {
             return code;
         }
     }
-
-
 }

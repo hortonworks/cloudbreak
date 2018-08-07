@@ -52,6 +52,4 @@ public class AutoScaleClusterV1Controller implements AutoScaleClusterV1Endpoint 
     public AutoscaleClusterResponse setAutoscaleState(Long clusterId, AutoscaleClusterState autoscaleState) {
         return autoScaleClusterCommonService.setAutoscaleState(clusterId, autoscaleState);
     }
-
-
 }

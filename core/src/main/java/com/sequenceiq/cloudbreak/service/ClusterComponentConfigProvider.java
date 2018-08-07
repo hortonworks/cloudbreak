@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -16,8 +17,8 @@ import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
-import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.domain.ClusterComponent;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.repository.ClusterComponentRepository;
 
 @Service
@@ -48,7 +49,20 @@ public class ClusterComponentConfigProvider {
         }
     }
 
-    public StackRepoDetails getStackRepo(Set<ClusterComponent> clusterComponents) {
+    public StackRepoDetails getStackRepoDetails(Long clusterId) {
+        ClusterComponent component = getComponent(clusterId, ComponentType.HDP_REPO_DETAILS);
+        if (component == null) {
+            component = getComponent(clusterId, ComponentType.HDF_REPO_DETAILS);
+        }
+        try {
+            return component.getAttributes().get(StackRepoDetails.class);
+        } catch (IOException e) {
+            LOGGER.warn("Failed to read repo component for cluster: [{}]", clusterId, e);
+            throw new CloudbreakServiceException("Failed to read HDP repo details.", e);
+        }
+    }
+
+    public StackRepoDetails getStackRepo(Iterable<ClusterComponent> clusterComponents) {
         try {
             StackRepoDetails component = getComponent(Lists.newArrayList(clusterComponents), StackRepoDetails.class, ComponentType.HDP_REPO_DETAILS);
             if (component == null) {
@@ -72,7 +86,7 @@ public class ClusterComponentConfigProvider {
         }
     }
 
-    public AmbariRepo getAmbariRepo(Set<ClusterComponent> clusterComponents) {
+    public AmbariRepo getAmbariRepo(Iterable<ClusterComponent> clusterComponents) {
         try {
             return getComponent(Lists.newArrayList(clusterComponents), AmbariRepo.class, ComponentType.AMBARI_REPO_DETAILS);
         } catch (Exception e) {
@@ -80,7 +94,7 @@ public class ClusterComponentConfigProvider {
         }
     }
 
-    public <T> T getComponent(List<ClusterComponent> components, Class<T> clazz, ComponentType componentType) {
+    public <T> T getComponent(Collection<ClusterComponent> components, Class<T> clazz, ComponentType componentType) {
         try {
             Optional<ClusterComponent> comp = components.stream().filter(
                     c -> c.getComponentType() == componentType).findFirst();
@@ -98,14 +112,6 @@ public class ClusterComponentConfigProvider {
             }
             return component.getAttributes().get(AmbariDatabase.class);
         } catch (IOException e) {
-            throw new CloudbreakServiceException("Failed to read Ambari database", e);
-        }
-    }
-
-    public AmbariDatabase getAmbariDatabase(Set<ClusterComponent> clusterComponents) {
-        try {
-            return getComponent(Lists.newArrayList(clusterComponents), AmbariDatabase.class, ComponentType.AMBARI_DATABASE_DETAILS);
-        } catch (Exception e) {
             throw new CloudbreakServiceException("Failed to read Ambari database", e);
         }
     }
@@ -129,8 +135,12 @@ public class ClusterComponentConfigProvider {
         Set<ClusterComponent> componentsByClusterId = componentRepository.findComponentByClusterId(clusterId);
         if (!componentsByClusterId.isEmpty()) {
             LOGGER.debug("Components({}) are going to be deleted for cluster: {}", componentsByClusterId.size(), clusterId);
-            componentRepository.delete(componentsByClusterId);
+            componentRepository.deleteAll(componentsByClusterId);
             LOGGER.debug("Components({}) have been deleted for cluster : {}", componentsByClusterId.size(), clusterId);
         }
+    }
+
+    public Set<ClusterComponent> findByComponentType(ComponentType componentType) {
+        return componentRepository.findByComponentType(componentType);
     }
 }

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.common.model.user;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -41,7 +42,7 @@ public class IdentityUser {
         return account;
     }
 
-    public List<IdentityUserRole> getRoles() {
+    public Collection<IdentityUserRole> getRoles() {
         return roles;
     }
 

@@ -101,7 +101,7 @@ public class CloudFailureHandler {
     }
 
     private void handleExceptions(AuthenticatedContext auth, List<CloudResourceStatus> cloudResourceStatuses, Group group,
-            ResourceBuilderContext ctx, ResourceBuilders resourceBuilders, Set<Long> ids, Boolean upscale) {
+            ResourceBuilderContext ctx, ResourceBuilders resourceBuilders, Collection<Long> ids, Boolean upscale) {
         List<CloudResource> resources = new ArrayList<>(cloudResourceStatuses.size());
         for (CloudResourceStatus exception : cloudResourceStatuses) {
             if (ResourceStatus.FAILED.equals(exception.getStatus()) || ids.contains(exception.getPrivateId())) {
@@ -115,11 +115,11 @@ public class CloudFailureHandler {
         }
     }
 
-    private void doRollbackAndDecreaseNodeCount(AuthenticatedContext auth, List<CloudResourceStatus> statuses, Set<Long> ids, Group group,
+    private void doRollbackAndDecreaseNodeCount(AuthenticatedContext auth, List<CloudResourceStatus> statuses, Collection<Long> ids, Group group,
             ResourceBuilderContext ctx, ResourceBuilders resourceBuilders, Boolean upscale) {
         List<ComputeResourceBuilder> compute = resourceBuilders.compute(auth.getCloudContext().getPlatform());
-        List<Future<ResourceRequestResult<List<CloudResourceStatus>>>> futures = new ArrayList<>();
-        LOGGER.info(String.format("InstanceGroup %s node count decreased with one so the new node size is: %s", group.getName(), group.getInstancesSize()));
+        Collection<Future<ResourceRequestResult<List<CloudResourceStatus>>>> futures = new ArrayList<>();
+        LOGGER.info("InstanceGroup {} node count decreased with one so the new node size is: {}", group.getName(), group.getInstancesSize());
         if (getRemovableInstanceTemplates(group, ids).size() <= 0 && !upscale) {
             LOGGER.info("InstanceGroup node count lower than 1 which is incorrect so error will throw");
             throwError(statuses);
@@ -145,8 +145,8 @@ public class CloudFailureHandler {
         }
     }
 
-    private List<InstanceTemplate> getRemovableInstanceTemplates(Group group, Set<Long> ids) {
-        List<InstanceTemplate> instanceTemplates = new ArrayList<>();
+    private Collection<InstanceTemplate> getRemovableInstanceTemplates(Group group, Collection<Long> ids) {
+        Collection<InstanceTemplate> instanceTemplates = new ArrayList<>();
         for (CloudInstance cloudInstance : group.getInstances()) {
             InstanceTemplate instanceTemplate = cloudInstance.getTemplate();
             if (!ids.contains(instanceTemplate.getPrivateId())) {

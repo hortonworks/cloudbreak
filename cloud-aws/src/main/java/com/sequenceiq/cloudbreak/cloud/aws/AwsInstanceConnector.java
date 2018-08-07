@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -21,6 +20,7 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.SdkClientException;
+import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.AmazonEC2Exception;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
@@ -63,11 +63,7 @@ public class AwsInstanceConnector implements InstanceConnector {
         GetConsoleOutputRequest getConsoleOutputRequest = new GetConsoleOutputRequest().withInstanceId(vm.getInstanceId());
         GetConsoleOutputResult getConsoleOutputResult = amazonEC2Client.getConsoleOutput(getConsoleOutputRequest);
         try {
-            if (getConsoleOutputResult.getOutput() == null) {
-                return "";
-            } else {
-                return getConsoleOutputResult.getDecodedOutput();
-            }
+            return getConsoleOutputResult.getOutput() == null ? "" : getConsoleOutputResult.getDecodedOutput();
         } catch (Exception ex) {
             LOGGER.debug(ex.getMessage(), ex);
             return "";
@@ -231,7 +227,7 @@ public class AwsInstanceConnector implements InstanceConnector {
         return cloudVmInstanceStatuses;
     }
 
-    private Collection<String> removeInstanceIdsWhichAreNotInCorrectState(Collection<String> instances, AmazonEC2Client amazonEC2Client, String state) {
+    private Collection<String> removeInstanceIdsWhichAreNotInCorrectState(Collection<String> instances, AmazonEC2 amazonEC2Client, String state) {
         DescribeInstancesResult describeInstances = amazonEC2Client.describeInstances(
                 new DescribeInstancesRequest().withInstanceIds(instances));
         for (Reservation reservation : describeInstances.getReservations()) {
@@ -244,8 +240,8 @@ public class AwsInstanceConnector implements InstanceConnector {
         return instances;
     }
 
-    private Set<String> getGroups(List<CloudInstance> vms) {
-        Set<String> groups = new HashSet<>();
+    private Collection<String> getGroups(Iterable<CloudInstance> vms) {
+        Collection<String> groups = new HashSet<>();
         for (CloudInstance vm : vms) {
             if (!groups.contains(vm.getTemplate().getGroupName())) {
                 groups.add(vm.getTemplate().getGroupName());

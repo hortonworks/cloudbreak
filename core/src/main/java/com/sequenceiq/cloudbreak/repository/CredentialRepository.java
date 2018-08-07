@@ -3,18 +3,23 @@ package com.sequenceiq.cloudbreak.repository;
 import java.util.Collection;
 import java.util.Set;
 
+import javax.transaction.Transactional;
+
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
+import com.sequenceiq.cloudbreak.aspect.BaseRepository;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Topology;
+import com.sequenceiq.cloudbreak.aspect.HasPermission;
+import com.sequenceiq.cloudbreak.service.EntityType;
 
 @EntityType(entityClass = Credential.class)
-public interface CredentialRepository extends CrudRepository<Credential, Long> {
+@Transactional(Transactional.TxType.REQUIRED)
+@HasPermission
+public interface CredentialRepository extends BaseRepository<Credential, Long> {
 
-    @Override
-    Credential findOne(@Param("id") Long id);
+    Set<Credential> findAllByCloudPlatform(@Param("cloudPlatform") String cloudPlatform);
 
     @Query("SELECT b FROM Credential b WHERE b.name= :name AND b.account= :account AND b.archived IS FALSE")
     Credential findOneByName(@Param("name") String name, @Param("account") String account);
@@ -46,4 +51,6 @@ public interface CredentialRepository extends CrudRepository<Credential, Long> {
     Credential findByNameInUser(@Param("name") String name, @Param("owner") String owner);
 
     Long countByTopology(Topology topology);
+
+    Set<Credential> findByTopology(Topology topology);
 }

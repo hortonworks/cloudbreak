@@ -1,6 +1,6 @@
 package com.sequenceiq.periscope.api.model;
 
-import com.sequenceiq.periscope.doc.ApiDescription;
+import com.sequenceiq.periscope.doc.ApiDescription.BaseAlertJsonProperties;
 import com.sequenceiq.periscope.doc.ApiDescription.MetricAlertJsonProperties;
 
 import io.swagger.annotations.ApiModel;
@@ -9,7 +9,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel("MetricAlertResponse")
 public class MetricAlertResponse extends AbstractAlertJson {
 
-    @ApiModelProperty(ApiDescription.BaseAlertJsonProperties.ID)
+    @ApiModelProperty(BaseAlertJsonProperties.ID)
     private Long id;
 
     @ApiModelProperty(MetricAlertJsonProperties.ALERTDEFINITION)
@@ -21,10 +21,10 @@ public class MetricAlertResponse extends AbstractAlertJson {
     @ApiModelProperty(MetricAlertJsonProperties.ALERTSTATE)
     private AlertState alertState;
 
-    @ApiModelProperty(ApiDescription.BaseAlertJsonProperties.SCALINGPOLICYID)
+    @ApiModelProperty(BaseAlertJsonProperties.SCALINGPOLICYID)
     private Long scalingPolicyId;
 
-    @ApiModelProperty(ApiDescription.BaseAlertJsonProperties.SCALINGPOLICYID)
+    @ApiModelProperty(BaseAlertJsonProperties.SCALINGPOLICYID)
     private ScalingPolicyRequest scalingPolicy;
 
     public String getAlertDefinition() {

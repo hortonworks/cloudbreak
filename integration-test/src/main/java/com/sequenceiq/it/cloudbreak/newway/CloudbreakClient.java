@@ -1,10 +1,13 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
-import com.sequenceiq.it.IntegrationTestContext;
+import java.util.function.Function;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.function.Function;
+import com.sequenceiq.cloudbreak.client.CloudbreakClient.CloudbreakClientBuilder;
+import com.sequenceiq.cloudbreak.client.ConfigKey;
+import com.sequenceiq.it.IntegrationTestContext;
 
 public class CloudbreakClient extends Entity {
     public static final String CLOUDBREAK_CLIENT = "CLOUDBREAK_CLIENT";
@@ -32,7 +35,7 @@ public class CloudbreakClient extends Entity {
     }
 
     public static Function<IntegrationTestContext, CloudbreakClient> getTestContextCloudbreakClient(String key) {
-        return (testContext) -> testContext.getContextParam(key, CloudbreakClient.class);
+        return testContext -> testContext.getContextParam(key, CloudbreakClient.class);
     }
 
     public static Function<IntegrationTestContext, CloudbreakClient> getTestContextCloudbreakClient() {
@@ -41,14 +44,14 @@ public class CloudbreakClient extends Entity {
 
     public static CloudbreakClient isCreated() {
         CloudbreakClient client = new CloudbreakClient();
-        client.setCreationStrategy(CloudbreakClient::singletonCloudbreakClient);
+        client.setCreationStrategy(CloudbreakClient::createProxyCloudbreakClient);
         return client;
     }
 
     public static void newCloudbreakClientCreationStrategy(IntegrationTestContext integrationTestContext, Entity entity) {
         CloudbreakClient clientEntity = (CloudbreakClient) entity;
         com.sequenceiq.cloudbreak.client.CloudbreakClient client;
-        client = new com.sequenceiq.cloudbreak.client.CloudbreakClient.CloudbreakClientBuilder(
+        client = new CloudbreakClientBuilder(
                 integrationTestContext.getContextParam(CloudbreakTest.CLOUDBREAK_SERVER_ROOT),
                 integrationTestContext.getContextParam(CloudbreakTest.IDENTITY_URL),
                 "cloudbreak_shell")
@@ -58,24 +61,21 @@ public class CloudbreakClient extends Entity {
                         integrationTestContext.getContextParam(CloudbreakTest.PASSWORD))
                 .withIgnorePreValidation(true)
                 .build();
-        clientEntity.setCloudbreakClient(client);
+        clientEntity.cloudbreakClient = client;
     }
 
-    public static synchronized void singletonCloudbreakClient(IntegrationTestContext integrationTestContext, Entity entity) {
+    private static synchronized void createProxyCloudbreakClient(IntegrationTestContext integrationTestContext, Entity entity) {
         CloudbreakClient clientEntity = (CloudbreakClient) entity;
         if (singletonCloudbreakClient == null) {
-            singletonCloudbreakClient = new com.sequenceiq.cloudbreak.client.CloudbreakClient.CloudbreakClientBuilder(
+            singletonCloudbreakClient = new ProxyCloudbreakClient(
                     integrationTestContext.getContextParam(CloudbreakTest.CLOUDBREAK_SERVER_ROOT),
                     integrationTestContext.getContextParam(CloudbreakTest.IDENTITY_URL),
-                    "cloudbreak_shell")
-                    .withCertificateValidation(false)
-                    .withDebug(true)
-                    .withCredential(integrationTestContext.getContextParam(CloudbreakTest.USER),
-                            integrationTestContext.getContextParam(CloudbreakTest.PASSWORD))
-                    .withIgnorePreValidation(true)
-                    .build();
+                    integrationTestContext.getContextParam(CloudbreakTest.USER),
+                    integrationTestContext.getContextParam(CloudbreakTest.PASSWORD),
+                    "cloudbreak_shell",
+                    new ConfigKey(false, true, true));
         }
-        clientEntity.setCloudbreakClient(singletonCloudbreakClient);
+        clientEntity.cloudbreakClient = singletonCloudbreakClient;
     }
 }
 

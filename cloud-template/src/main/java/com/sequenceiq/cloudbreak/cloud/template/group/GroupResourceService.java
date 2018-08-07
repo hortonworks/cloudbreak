@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.template.group;
 import static com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup.CANCELLED;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -54,7 +55,7 @@ public class GroupResourceService {
     private PersistenceNotifier resourceNotifier;
 
     public List<CloudResourceStatus> buildResources(ResourceBuilderContext context,
-            AuthenticatedContext auth, List<Group> groups, Network network, Security security) throws Exception {
+            AuthenticatedContext auth, Iterable<Group> groups, Network network, Security security) throws Exception {
         CloudContext cloudContext = auth.getCloudContext();
         List<CloudResourceStatus> results = new ArrayList<>();
         for (GroupResourceBuilder builder : resourceBuilders.group(cloudContext.getPlatform())) {
@@ -82,7 +83,7 @@ public class GroupResourceService {
     }
 
     public List<CloudResourceStatus> deleteResources(ResourceBuilderContext context,
-            AuthenticatedContext auth, List<CloudResource> resources, Network network, boolean cancellable) throws Exception {
+            AuthenticatedContext auth, Collection<CloudResource> resources, Network network, boolean cancellable) throws Exception {
         CloudContext cloudContext = auth.getCloudContext();
         List<CloudResourceStatus> results = new ArrayList<>();
         List<GroupResourceBuilder> builderChain = resourceBuilders.group(cloudContext.getPlatform());
@@ -106,7 +107,7 @@ public class GroupResourceService {
     }
 
     public List<CloudResourceStatus> update(ResourceBuilderContext context, AuthenticatedContext auth,
-            Network network, Security security, List<CloudResource> groupResources) throws Exception {
+            Network network, Security security, Collection<CloudResource> groupResources) throws Exception {
         List<CloudResourceStatus> results = new ArrayList<>();
         CloudContext cloudContext = auth.getCloudContext();
         for (NetworkResourceBuilder builder : resourceBuilders.network(cloudContext.getPlatform())) {
@@ -124,33 +125,31 @@ public class GroupResourceService {
         return results;
     }
 
-    public List<CloudResource> getGroupResources(Platform platform, List<CloudResource> resources) {
-        List<ResourceType> types = new ArrayList<>();
+    public List<CloudResource> getGroupResources(Platform platform, Collection<CloudResource> resources) {
+        Collection<ResourceType> types = new ArrayList<>();
         for (GroupResourceBuilder builder : resourceBuilders.group(platform)) {
             types.add(builder.resourceType());
         }
         return getResources(resources, types);
     }
 
-    protected CloudResource createResource(AuthenticatedContext auth, CloudResource buildableResource) {
+    protected void createResource(AuthenticatedContext auth, CloudResource buildableResource) {
         if (buildableResource.isPersistent()) {
             resourceNotifier.notifyAllocation(buildableResource, auth.getCloudContext());
         }
-        return buildableResource;
     }
 
-    protected CloudResource updateResource(AuthenticatedContext auth, CloudResource buildableResource) {
+    protected void updateResource(AuthenticatedContext auth, CloudResource buildableResource) {
         if (buildableResource.isPersistent()) {
             resourceNotifier.notifyUpdate(buildableResource, auth.getCloudContext());
         }
-        return buildableResource;
     }
 
-    private List<CloudResource> getResources(List<CloudResource> resources, ResourceType type) {
+    private List<CloudResource> getResources(Collection<CloudResource> resources, ResourceType type) {
         return getResources(resources, Collections.singletonList(type));
     }
 
-    private List<CloudResource> getResources(List<CloudResource> resources, List<ResourceType> types) {
+    private List<CloudResource> getResources(Collection<CloudResource> resources, Collection<ResourceType> types) {
         List<CloudResource> filtered = new ArrayList<>(resources.size());
         for (CloudResource resource : resources) {
             if (types.contains(resource.getType())) {
@@ -160,7 +159,7 @@ public class GroupResourceService {
         return filtered;
     }
 
-    private List<Group> getOrderedCopy(List<Group> groups) {
+    private Iterable<Group> getOrderedCopy(Iterable<Group> groups) {
         Ordering<Group> byLengthOrdering = new Ordering<Group>() {
             @Override
             public int compare(Group left, Group right) {

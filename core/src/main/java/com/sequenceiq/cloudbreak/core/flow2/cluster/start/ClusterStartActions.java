@@ -35,10 +35,10 @@ public class ClusterStartActions {
     private ClusterStartService clusterStartService;
 
     @Bean(name = "CLUSTER_STARTING_STATE")
-    public Action startingCluster() {
+    public Action<?, ?> startingCluster() {
         return new AbstractClusterAction<StackEvent>(StackEvent.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterViewContext context, StackEvent payload, Map<Object, Object> variables) {
                 clusterStartService.startingCluster(context.getStack());
                 sendEvent(context);
             }
@@ -51,20 +51,20 @@ public class ClusterStartActions {
     }
 
     @Bean(name = "CLUSTER_START_POLLING_STATE")
-    public Action clusterStartPolling() {
+    public Action<?, ?> clusterStartPolling() {
         return new AbstractClusterAction<ClusterStartResult>(ClusterStartResult.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, ClusterStartResult payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterViewContext context, ClusterStartResult payload, Map<Object, Object> variables) {
                 sendEvent(context.getFlowId(), new ClusterStartPollingRequest(context.getStackId(), payload.getRequestId()));
             }
         };
     }
 
     @Bean(name = "CLUSTER_START_FINISHED_STATE")
-    public Action clusterStartFinished() {
+    public Action<?, ?> clusterStartFinished() {
         return new AbstractClusterAction<ClusterStartPollingResult>(ClusterStartPollingResult.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, ClusterStartPollingResult payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterViewContext context, ClusterStartPollingResult payload, Map<Object, Object> variables) {
                 clusterStartService.clusterStartFinished(context.getStack());
                 metricService.incrementMetricCounter(MetricType.CLUSTER_START_SUCCESSFUL, context.getStack());
                 sendEvent(context);
@@ -78,10 +78,10 @@ public class ClusterStartActions {
     }
 
     @Bean(name = "CLUSTER_START_FAILED_STATE")
-    public Action clusterStartFailedAction() {
+    public Action<?, ?> clusterStartFailedAction() {
         return new AbstractStackFailureAction<ClusterStartState, ClusterStartEvent>() {
             @Override
-            protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 clusterStartService.handleClusterStartFailure(context.getStackView(), payload.getException().getMessage());
                 metricService.incrementMetricCounter(MetricType.CLUSTER_START_FAILED, context.getStackView());
                 sendEvent(context);

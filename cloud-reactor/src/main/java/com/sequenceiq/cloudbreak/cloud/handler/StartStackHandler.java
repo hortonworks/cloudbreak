@@ -66,12 +66,11 @@ public class StartStackHandler implements CloudPlatformEventHandler<StartInstanc
             }
             StartInstancesResult result = new StartInstancesResult(request, cloudContext, statusResult);
             request.getResult().onNext(result);
-            eventBus.notify(result.selector(), new Event(event.getHeaders(), result));
+            eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
         } catch (Exception e) {
             StartInstancesResult failure = new StartInstancesResult("Failed to start stack", e, request);
             request.getResult().onNext(failure);
-            eventBus.notify(failure.selector(), new Event(event.getHeaders(), failure));
+            eventBus.notify(failure.selector(), new Event<>(event.getHeaders(), failure));
         }
     }
-
 }

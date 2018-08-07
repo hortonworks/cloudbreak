@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.aws.view;
 
 import java.util.List;
 
-import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.api.model.v2.template.EncryptionType;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 
@@ -53,12 +53,33 @@ public class AwsInstanceView {
     }
 
     public boolean isKmsEnabled() {
-        String ev = instanceTemplate.getParameter("kmsKey", String.class);
-        return !Strings.isNullOrEmpty(ev);
+        String type = instanceTemplate.getStringParameter("type");
+        if (type != null) {
+            EncryptionType ev = EncryptionType.valueOf(type);
+            return ev != EncryptionType.NONE;
+        }
+        return false;
+    }
+
+    public boolean isKmsDefault() {
+        return isTypeEqualsWith(EncryptionType.DEFAULT);
+    }
+
+    public boolean isKmsCustom() {
+        return isTypeEqualsWith(EncryptionType.CUSTOM);
+    }
+
+    private boolean isTypeEqualsWith(EncryptionType encryptionType) {
+        String type = instanceTemplate.getStringParameter("type");
+        if (type != null) {
+            EncryptionType ev = EncryptionType.valueOf(type);
+            return ev == encryptionType;
+        }
+        return false;
     }
 
     public String getKmsKey() {
-        return instanceTemplate.getParameter("kmsKey", String.class);
+        return instanceTemplate.getStringParameter("key");
     }
 
     public Double getSpotPrice() {

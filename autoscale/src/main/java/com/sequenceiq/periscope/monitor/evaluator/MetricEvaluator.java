@@ -18,9 +18,10 @@ import com.sequenceiq.periscope.log.MDCBuilder;
 import com.sequenceiq.periscope.monitor.event.ScalingEvent;
 import com.sequenceiq.periscope.monitor.event.UpdateFailedEvent;
 import com.sequenceiq.periscope.repository.MetricAlertRepository;
+import com.sequenceiq.periscope.service.AmbariClientProvider;
 import com.sequenceiq.periscope.service.ClusterService;
-import com.sequenceiq.periscope.utils.AmbariClientProvider;
 import com.sequenceiq.periscope.utils.ClusterUtils;
+import com.sequenceiq.periscope.utils.TimeUtil;
 
 @Component("MetricEvaluator")
 @Scope("prototype")
@@ -50,7 +51,7 @@ public class MetricEvaluator extends AbstractEventPublisher implements Evaluator
 
     @Override
     public void run() {
-        Cluster cluster = clusterService.find(clusterId);
+        Cluster cluster = clusterService.findById(clusterId);
         MDCBuilder.buildMdcContext(cluster);
         AmbariClient ambariClient = ambariClientProvider.createAmbariClient(cluster);
         try {
@@ -69,7 +70,7 @@ public class MetricEvaluator extends AbstractEventPublisher implements Evaluator
                     if (isAlertStateMet(currentState, alert)) {
                         long elapsedTime = getPeriod(history);
                         LOGGER.info("Alert: {} is in '{}' state since {} min(s)", alertName, currentState,
-                                ClusterUtils.TIME_FORMAT.format((double) elapsedTime / ClusterUtils.MIN_IN_MS));
+                                ClusterUtils.TIME_FORMAT.format((double) elapsedTime / TimeUtil.MIN_IN_MS));
                         if (isPeriodReached(alert, elapsedTime) && isPolicyAttached(alert)) {
                             publishEvent(new ScalingEvent(alert));
                             break;
@@ -92,7 +93,7 @@ public class MetricEvaluator extends AbstractEventPublisher implements Evaluator
     }
 
     private boolean isPeriodReached(MetricAlert alert, float period) {
-        return period > alert.getPeriod() * ClusterUtils.MIN_IN_MS;
+        return period > alert.getPeriod() * TimeUtil.MIN_IN_MS;
     }
 
     private boolean isPolicyAttached(BaseAlert alert) {

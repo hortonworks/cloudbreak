@@ -49,9 +49,9 @@ public class CloudbreakTest extends GherkinTest {
 
     public CloudbreakTest() {
         try {
-            super.springTestContextBeforeTestClass();
-            super.springTestContextPrepareTestInstance();
-        } catch (Exception e) {
+            springTestContextBeforeTestClass();
+            springTestContextPrepareTestInstance();
+        } catch (Exception ignored) {
         }
 
         testParameter = new TestParameter();
@@ -68,7 +68,7 @@ public class CloudbreakTest extends GherkinTest {
         return testParameter;
     }
 
-    public void setTestParameter(TestParameter tp) {
+    public final void setTestParameter(TestParameter tp) {
         testParameter = tp;
     }
 

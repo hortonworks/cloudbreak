@@ -4,14 +4,15 @@ import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.transaction.Transactional;
-import javax.transaction.Transactional.TxType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,28 +21,30 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
+import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.client.PkiUtil;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.StackDetails;
+import com.sequenceiq.cloudbreak.cloud.model.component.ManagementPackComponent;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
+import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.Component;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.domain.stack.Component;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Service
-@Transactional
 public class ImageService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageService.class);
@@ -68,18 +71,18 @@ public class ImageService {
         return componentConfigProvider.getImage(stackId);
     }
 
-    @Transactional(TxType.NEVER)
     public void create(Stack stack, String platformString, PlatformParameters params, StatedImage imgFromCatalog)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         try {
             Platform platform = platform(stack.cloudPlatform());
             String region = stack.getRegion();
-            String cbPrivKey = stack.getSecurityConfig().getCloudbreakSshPrivateKeyDecoded();
-            String cbSshKey = stack.getSecurityConfig().getCloudbreakSshPublicKeyDecoded();
+            SecurityConfig securityConfig = stack.getSecurityConfig();
+            String cbPrivKey = securityConfig.getCloudbreakSshPrivateKeyDecoded();
             byte[] cbSshKeyDer = PkiUtil.getPublicKeyDer(cbPrivKey);
             String sshUser = stack.getStackAuthentication().getLoginUserName();
-            Map<InstanceGroupType, String> userData = userDataBuilder.buildUserData(platform, cbSshKeyDer, cbSshKey, sshUser, params,
-                    stack.getSecurityConfig().getSaltBootPassword());
+            String cbCert = securityConfig.getClientCertRaw();
+            Map<InstanceGroupType, String> userData = userDataBuilder.buildUserData(platform, cbSshKeyDer, sshUser, params,
+                    securityConfig.getSaltBootPassword(), cbCert);
 
             LOGGER.info("Determined image from catalog: {}", imgFromCatalog);
 
@@ -97,8 +100,8 @@ public class ImageService {
         }
     }
 
-    public StatedImage determineImageFromCatalog(String imageId, String platformString, String catalogName, Blueprint blueprint, boolean forceBaseImage)
-            throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+    public StatedImage determineImageFromCatalog(String imageId, String platformString, String catalogName,
+        Blueprint blueprint, boolean useBaseImage, String os) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         StatedImage statedImage;
         if (imageId != null) {
             statedImage = imageCatalogService.getImageByCatalogName(imageId, catalogName);
@@ -109,24 +112,24 @@ public class ImageService {
                 try {
                     JsonNode root = JsonUtil.readTree(blueprint.getBlueprintText());
                     clusterType = blueprintUtils.getBlueprintStackName(root);
-                    clusterVersion = blueprintUtils.getBlueprintHdpVersion(root);
+                    clusterVersion = blueprintUtils.getBlueprintStackVersion(root);
                 } catch (IOException ex) {
                     LOGGER.warn("Can not initiate default hdp info: ", ex);
                 }
             }
-            LOGGER.warn(
-                    "Image id hasn't been specified for the stack, falling back to a prewarmed image of {}-{} or to a base image if prewarmed doesn't exist.",
-                    clusterType, clusterVersion);
-            if (forceBaseImage) {
-                statedImage = imageCatalogService.getDefaultBaseImage(platformString);
+            if (useBaseImage) {
+                LOGGER.info("Image id isn't specified for the stack, falling back to a base image, because repo information is provided");
+                statedImage = imageCatalogService.getLatestBaseImageDefaultPreferred(platformString, os);
             } else {
-                statedImage = imageCatalogService.getDefaultImage(platformString, clusterType, clusterVersion);
+                LOGGER.info("Image id isn't specified for the stack, falling back to a prewarmed "
+                    + "image of {}-{} or to a base image if prewarmed doesn't exist", clusterType, clusterVersion);
+                statedImage = imageCatalogService.getPrewarmImageDefaultPreferred(platformString, clusterType, clusterVersion, os);
             }
         }
         return statedImage;
     }
 
-    private String determineImageName(String platformString, String region, com.sequenceiq.cloudbreak.cloud.model.catalog.Image imgFromCatalog)
+    public String determineImageName(String platformString, String region, com.sequenceiq.cloudbreak.cloud.model.catalog.Image imgFromCatalog)
             throws CloudbreakImageNotFoundException {
         String imageName;
         Optional<Map<String, String>> imagesForPlatform = findStringKeyWithEqualsIgnoreCase(platformString, imgFromCatalog.getImageSetsByProvider());
@@ -154,7 +157,7 @@ public class ImageService {
     private <T> Optional<T> findStringKeyWithEqualsIgnoreCase(String key, Map<String, T> map) {
         return map.entrySet().stream()
                 .filter(entry -> entry.getKey().equalsIgnoreCase(key))
-                .map(Map.Entry::getValue)
+                .map(Entry::getValue)
                 .findFirst();
     }
 
@@ -162,22 +165,16 @@ public class ImageService {
             com.sequenceiq.cloudbreak.cloud.model.catalog.Image imgFromCatalog,
             String imageName, String imageCatalogUrl, String imageCatalogName, String imageId) throws JsonProcessingException, CloudbreakImageCatalogException {
         List<Component> components = new ArrayList<>();
-        Image image = new Image(imageName, userData, imgFromCatalog.getOs(), imgFromCatalog.getOsType(), imageCatalogUrl, imageCatalogName, imageId);
+        Image image = new Image(imageName, userData, imgFromCatalog.getOs(), imgFromCatalog.getOsType(), imageCatalogUrl, imageCatalogName, imageId,
+                imgFromCatalog.getPackageVersions());
         Component imageComponent = new Component(ComponentType.IMAGE, ComponentType.IMAGE.name(), new Json(image), stack);
         components.add(imageComponent);
-
         if (imgFromCatalog.getStackDetails() != null) {
             components.add(getAmbariComponent(stack, imgFromCatalog));
             StackDetails stackDetails = imgFromCatalog.getStackDetails();
-
-            Component stackRepoComponent;
-            if (!imgFromCatalog.getStackDetails().getRepo().getKnox().isEmpty()) {
-                StackRepoDetails hdfRepo = createHDFRepo(stackDetails);
-                stackRepoComponent = new Component(ComponentType.HDF_REPO_DETAILS, ComponentType.HDF_REPO_DETAILS.name(), new Json(hdfRepo), stack);
-            } else {
-                StackRepoDetails repo = createHDPRepo(stackDetails);
-                stackRepoComponent = new Component(ComponentType.HDP_REPO_DETAILS, ComponentType.HDP_REPO_DETAILS.name(), new Json(repo), stack);
-            }
+            ComponentType componentType = determineStackType(stackDetails).getComponentType();
+            StackRepoDetails repo = createRepo(stackDetails);
+            Component stackRepoComponent = new Component(componentType, componentType.name(), new Json(repo), stack);
             components.add(stackRepoComponent);
         }
         return components;
@@ -196,21 +193,33 @@ public class ImageService {
         }
     }
 
-    private StackRepoDetails createHDPRepo(StackDetails hdpStack) {
-        StackRepoDetails repo = new StackRepoDetails();
-        repo.setHdpVersion(hdpStack.getVersion());
-        repo.setStack(hdpStack.getRepo().getStack());
-        repo.setUtil(hdpStack.getRepo().getUtil());
-        return repo;
+    public StackType determineStackType(StackDetails stackDetails) throws CloudbreakImageCatalogException {
+        String repoId = stackDetails.getRepo().getStack().get(StackRepoDetails.REPO_ID_TAG);
+        Optional<StackType> stackType = EnumSet.allOf(StackType.class).stream().filter(st -> repoId.contains(st.name())).findFirst();
+        if (stackType.isPresent()) {
+            return stackType.get();
+        } else {
+            throw new CloudbreakImageCatalogException(String.format("Unsupported stack type: '%s'.", repoId));
+        }
+
     }
 
-    private StackRepoDetails createHDFRepo(StackDetails hdfStack) {
-        com.sequenceiq.cloudbreak.cloud.model.catalog.StackRepoDetails hdfRepo = hdfStack.getRepo();
+    private StackRepoDetails createRepo(StackDetails stack) {
         StackRepoDetails repo = new StackRepoDetails();
-        repo.setHdpVersion(hdfStack.getVersion());
-        repo.setStack(hdfRepo.getStack());
-        repo.setUtil(hdfRepo.getUtil());
-        repo.setKnox(hdfRepo.getKnox());
+        repo.setHdpVersion(stack.getVersion());
+        repo.setStack(stack.getRepo().getStack());
+        repo.setUtil(stack.getRepo().getUtil());
+        repo.setMpacks(stack.getMpackList().stream().map(icmpack -> {
+            ManagementPackComponent mpack = new ManagementPackComponent();
+            mpack.setMpackUrl(icmpack.getMpackUrl());
+            mpack.setStackDefault(true);
+            mpack.setPreInstalled(true);
+            return mpack;
+        }).collect(Collectors.toList()));
+        if (!stack.getMpackList().isEmpty()) {
+            // Backward compatibility for the previous UI versions
+            repo.getStack().put(StackRepoDetails.MPACK_TAG, stack.getMpackList().get(0).getMpackUrl());
+        }
         return repo;
     }
 }

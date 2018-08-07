@@ -4,10 +4,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.commons.codec.binary.Base64;
-import org.springframework.util.Assert;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
+import org.testng.Assert;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v1.RecipeEndpoint;
 import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
@@ -21,7 +21,7 @@ public class RecipeCreationTest extends AbstractCloudbreakIntegrationTest {
     @Test
     @Parameters({ "name", "description", "preScript", "postScript" })
     public void testRecipeCreation(String name, @Optional ("") String description, @Optional("") String preScript,
-            @Optional("") String postScript) throws Exception {
+            @Optional("") String postScript) {
         // GIVEN
         // WHEN
         if (!preScript.isEmpty()) {
@@ -50,7 +50,7 @@ public class RecipeCreationTest extends AbstractCloudbreakIntegrationTest {
         RecipeEndpoint recipeEndpoint = getCloudbreakClient().recipeEndpoint();
         Long id = recipeEndpoint.postPrivate(recipeRequest).getId();
         //then
-        Assert.notNull(id, "Recipe is not created.");
+        Assert.assertNotNull(id, "Recipe is not created.");
         addRecipeToContext(id);
     }
 }

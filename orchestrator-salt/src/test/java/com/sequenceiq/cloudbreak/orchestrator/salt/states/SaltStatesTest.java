@@ -6,7 +6,9 @@ import static com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltClientType.
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -25,12 +27,13 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Multimap;
@@ -40,7 +43,10 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Compound;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Glob;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Target;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyResponse;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.CommandExecutionResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Minion;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.PackageVersionResponse;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.PackageVersionsResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.PingResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.RunningJobsResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
@@ -101,21 +107,22 @@ public class SaltStatesTest {
 
         InputStream responseStream = SaltStatesTest.class.getResourceAsStream("/jid_response.json");
         String response = IOUtils.toString(responseStream);
-        Map responseMap = new ObjectMapper().readValue(response, Map.class);
-
+        responseStream.close();
+        Map<?, ?> responseMap = new ObjectMapper().readValue(response, Map.class);
         when(saltConnector.run(eq("jobs.lookup_jid"), any(), any(), eq("jid"), any())).thenReturn(responseMap);
 
         Multimap<String, String> jidInfo = SaltStates.jidInfo(saltConnector, jobId, target, StateType.HIGH);
         verify(saltConnector, times(1)).run("jobs.lookup_jid", RUNNER, Map.class, "jid", jobId);
 
         assertThat(jidInfo.keySet(), hasSize(1));
-        assertThat(jidInfo.entries(), hasSize(3));
+        assertThat(jidInfo.entries(), hasSize(4));
         String hostName = jidInfo.keySet().iterator().next();
         Collection<String> hostErrors = jidInfo.get(hostName);
 
-        assertThat(hostErrors, containsInAnyOrder("Source file salt://ambari/scripts/ambari-server-initttt.sh not found",
-                "Service ambari-server is already enabled, and is dead",
-                "Package haveged is already installed."));
+        assertThat(hostErrors, containsInAnyOrder("\nComment: Source file salt://ambari/scripts/ambari-server-initttt.sh not found",
+                "\nComment: Service ambari-server is already enabled, and is dead",
+                "\nComment: Command \"/opt/ambari-server/install-mpack-1.sh\" run\nStderr: + ARGS= + echo yes + ambari-server install-mpack --",
+                "\nComment: Package haveged is already installed."));
     }
 
     @Test
@@ -124,7 +131,7 @@ public class SaltStatesTest {
 
         InputStream responseStream = SaltStatesTest.class.getResourceAsStream("/jid_simple_response.json");
         String response = IOUtils.toString(responseStream);
-        Map responseMap = new ObjectMapper().readValue(response, Map.class);
+        Map<?, ?> responseMap = new ObjectMapper().readValue(response, Map.class);
 
         when(saltConnector.run(eq("jobs.lookup_jid"), any(), any(), eq("jid"), any())).thenReturn(responseMap);
 
@@ -136,9 +143,9 @@ public class SaltStatesTest {
         String hostName = jidInfo.keySet().iterator().next();
         Collection<String> hostErrors = jidInfo.get(hostName);
 
-        assertThat(hostErrors, containsInAnyOrder("Source file salt://ambari/scripts/ambari-server-initttt.sh not found",
-                "Service ambari-server is already enabled, and is dead",
-                "Package haveged is already installed."));
+        assertThat(hostErrors, containsInAnyOrder("\nComment: Source file salt://ambari/scripts/ambari-server-initttt.sh not found",
+                "\nComment: Service ambari-server is already enabled, and is dead",
+                "\nComment: Package haveged is already installed."));
     }
 
     @Test
@@ -152,11 +159,11 @@ public class SaltStatesTest {
         runningJobsResponse.setResult(result);
         when(saltConnector.run(eq("jobs.active"), any(), eq(RunningJobsResponse.class))).thenReturn(runningJobsResponse);
         boolean running = SaltStates.jobIsRunning(saltConnector, jid);
-        assertEquals(true, running);
+        assertTrue(running);
 
         resultMap.clear();
         running = SaltStates.jobIsRunning(saltConnector, jid);
-        assertEquals(false, running);
+        assertFalse(running);
     }
 
     @Test
@@ -183,5 +190,134 @@ public class SaltStatesTest {
 
         Set<String> minionAddresses = saltAction.getMinions().stream().map(Minion::getAddress).collect(Collectors.toSet());
         assertThat(minionAddresses, containsInAnyOrder("10.0.0.1", "10.0.0.2", "10.0.0.3"));
+    }
+
+    @Test
+    public void testGetPackageVersionsWithOnePackage() {
+        // GIVEN
+        List<Map<String, String>> pkgVersionList = new ArrayList<>();
+        Map<String, String> pkgVersionsOnHosts = new HashMap<>();
+        pkgVersionsOnHosts.put("host1", "1.0");
+        pkgVersionsOnHosts.put("host2", "2.0");
+        pkgVersionList.add(pkgVersionsOnHosts);
+        PackageVersionResponse resp = new PackageVersionResponse();
+        resp.setResult(pkgVersionList);
+        when(saltConnector.run(Glob.ALL, "pkg.version", LOCAL, PackageVersionResponse.class, "package")).thenReturn(resp);
+        // WHEN
+        Map<String, Map<String, String>> actualResponse = SaltStates.getPackageVersions(saltConnector, "package");
+        // THEN
+        for (Map.Entry<String, Map<String, String>> e : actualResponse.entrySet()) {
+            String expectedVersion = pkgVersionsOnHosts.get(e.getKey());
+            Map<String, String> actualPkgVersions = e.getValue();
+            assertEquals(1, actualPkgVersions.size());
+            assertEquals(expectedVersion, actualPkgVersions.get("package"));
+        }
+    }
+
+    @Test
+    public void testGetPackageVersionWithOnePackageShouldReturnEmptyMapWhenTheListIsEmptyInResponse() {
+        // GIVEN
+        List<Map<String, String>> pkgVersionsList = new ArrayList<>();
+        PackageVersionResponse resp = new PackageVersionResponse();
+        resp.setResult(pkgVersionsList);
+        when(saltConnector.run(Glob.ALL, "pkg.version", LOCAL, PackageVersionResponse.class, "package")).thenReturn(resp);
+        // WHEN
+        Map<String, Map<String, String>> actualResponse = SaltStates.getPackageVersions(saltConnector, "package");
+        // THEN
+        assertTrue(actualResponse.size() == 0);
+    }
+
+    @Test
+    public void testGetPackageVersionsWithMorePackages() {
+        // GIVEN
+        List<Map<String, Map<String, String>>> pkgVersionsList = new ArrayList<>();
+        Map<String, Map<String, String>> pkgVersionsOnHosts = new HashMap<>();
+        Map<String, String> pkgVersionsOnHost1 = new HashMap<>();
+        pkgVersionsOnHost1.put("package1", "1.0");
+        pkgVersionsOnHost1.put("package2", "2.0");
+        pkgVersionsOnHosts.put("host1", pkgVersionsOnHost1);
+        Map<String, String> pkgVersionsOnHost2 = new HashMap<>();
+        pkgVersionsOnHost2.put("package1", "2.0");
+        pkgVersionsOnHost2.put("package2", "3.0");
+        pkgVersionsOnHosts.put("host2", pkgVersionsOnHost2);
+        pkgVersionsList.add(pkgVersionsOnHosts);
+        PackageVersionsResponse resp = new PackageVersionsResponse();
+        resp.setResult(pkgVersionsList);
+        when(saltConnector.run(Glob.ALL, "pkg.version", LOCAL, PackageVersionsResponse.class, "package1", "package2")).thenReturn(resp);
+        // WHEN
+        Map<String, Map<String, String>> actualResponse = SaltStates.getPackageVersions(saltConnector, "package1", "package2");
+        // THEN
+        Assert.assertEquals(pkgVersionsOnHosts, actualResponse);
+    }
+
+    @Test
+    public void testGetPackageVersionWithMorePackagesShouldReturnEmptyMapWhenTheListIsEmptyInResponse() {
+        // GIVEN
+        List<Map<String, Map<String, String>>> pkgVersionsList = new ArrayList<>();
+        PackageVersionsResponse resp = new PackageVersionsResponse();
+        resp.setResult(pkgVersionsList);
+        when(saltConnector.run(Glob.ALL, "pkg.version", LOCAL, PackageVersionsResponse.class, "package1", "package2")).thenReturn(resp);
+        // WHEN
+        Map<String, Map<String, String>> actualResponse = SaltStates.getPackageVersions(saltConnector, "package1", "package2");
+        // THEN
+        assertTrue(actualResponse.size() == 0);
+    }
+
+    @Test
+    public void testGetPackageVersionsThrowsRuntimeException() {
+        // GIVEN
+        RuntimeException exception = new RuntimeException();
+        when(saltConnector.run(Glob.ALL, "pkg.version", LOCAL, PackageVersionsResponse.class, "package1", "package2")).thenThrow(exception);
+        // WHEN
+        try {
+            SaltStates.getPackageVersions(saltConnector, "package1", "package2");
+        } catch (RuntimeException ex) {
+            // THEN
+            assertEquals(exception, ex);
+        }
+    }
+
+    @Test
+    public void testRunCommandExecuteCommandSuccesfully() {
+        // GIVEN
+        Map<String, String> commandOutputs = new HashMap<>();
+        commandOutputs.put("host1", "output1");
+        commandOutputs.put("host2", "output2");
+        CommandExecutionResponse resp = new CommandExecutionResponse();
+        List<Map<String, String>> commandOutputsList = new ArrayList<>();
+        commandOutputsList.add(commandOutputs);
+        resp.setResult(commandOutputsList);
+        when(saltConnector.run(Glob.ALL, "cmd.run", LOCAL, CommandExecutionResponse.class, "command")).thenReturn(resp);
+        // WHEN
+        Map<String, String> actualResult = SaltStates.runCommand(saltConnector, "command");
+        // THEN
+        assertEquals(commandOutputs, actualResult);
+    }
+
+    @Test
+    public void testRunCommandShouldReturnEmptyMapWhenTheListIsEmptyInResponse() {
+        // GIVEN
+        CommandExecutionResponse resp = new CommandExecutionResponse();
+        List<Map<String, String>> commandOutputsList = new ArrayList<>();
+        resp.setResult(commandOutputsList);
+        when(saltConnector.run(Glob.ALL, "cmd.run", LOCAL, CommandExecutionResponse.class, "command")).thenReturn(resp);
+        // WHEN
+        Map<String, String> actualResult = SaltStates.runCommand(saltConnector, "command");
+        // THEN
+        assertTrue(actualResult.size() == 0);
+    }
+
+    @Test
+    public void testRunCommandThrowsRuntimeException() {
+        // GIVEN
+        RuntimeException exception = new RuntimeException();
+        when(saltConnector.run(Glob.ALL, "cmd.run", LOCAL, CommandExecutionResponse.class, "command")).thenThrow(exception);
+        // WHEN
+        try {
+            SaltStates.runCommand(saltConnector, "command");
+        } catch (RuntimeException ex) {
+            // THEN
+            assertEquals(exception, ex);
+        }
     }
 }

@@ -31,6 +31,8 @@ public class Notes {
             + "They are built based on a Blueprint (running the components and services specified) and on "
             + "a configured infrastructure Stack. Once a cluster is created and launched, it can be used the usual"
             + " way as any Hadoop cluster. We suggest to start with the Cluster's Ambari UI for an overview of your cluster.";
+    public static final String GATEWAY_NOTES = "Gateway is an Apache Knox Gateway, which is an Application Gateway for interacting with REST APIs and"
+            + "UIs of Apache Hadoop deployments. Provides Authentication and other services.";
     public static final String CLUSTER_TEMPLATE_NOTES = "Cluster templates are stored cluster configurations, which configurations are reusable any time";
     public static final String RECIPE_NOTES = "Recipes are basically script extensions to a cluster that run on a set of nodes"
             + " before or after the Ambari cluster installation.";
@@ -50,6 +52,10 @@ public class Notes {
     public static final String TOPOLOGY_NOTES = "A topology gives system administrators an easy way to associate compute nodes with data centers and racks.";
     public static final String RDSCONFIG_NOTES = "An RDS Configuration describe a connection to an external Relational Database Service "
             + "that can be used as the Hive Metastore.";
+    public static final String PROXY_CONFIG_NOTES = "An proxy Configuration describe a connection to an external proxy server which provides internet access "
+            + "cluster members. It's applied for package manager and Ambari too";
+    public static final String MANAGEMENT_PACK_NOTES = "An Apache Ambari Management Pack (Mpack) can bundle multiple service definitions, stack definitions, "
+            + "stack add-on service definitions, view definitions services so that releasing these artifacts don’t enforce an Apache Ambari release.";
 
     public static final String LDAP_CONFIG_NOTES = "LDAP server integration enables the user to provide"
             + " a central place to store usernames and passwords for the users of his/her clusters.";
@@ -63,8 +69,14 @@ public class Notes {
     public static final String SMARTSENSE_SUBSCRIPTION_NOTES = "SmartSense subscriptions could be configured.";
     public static final String FLEX_SUBSCRIPTION_NOTES = "Flex subscriptions could be configured.";
     public static final String IMAGE_CATALOG_NOTES = "Provides an interface to determine available Virtual Machine images for the given version of Cloudbreak.";
+    public static final String IMAGE_CATALOG_STACK_UPGRADE_NOTES = "Provides an interface to determine available Virtual Machine images for the given stack."
+            + "Please consider running sync beforehand";
     public static final String SECURITY_RULE_NOTES = "Security Rules operations";
     public static final String REPOSITORY_CONFIGS_VALIDATION_NOTES = "Repository configs validation related operations";
+    public static final String RETRY_STACK_NOTES = "Failed or interrupted stack and cluster operations can be retried, after the cause of the failure "
+            + "was eliminated. The operations will continue at the state, where the previous process failed.";
+    public static final String ORGANIZATION_NOTES = "Organizations are a way of grouping resources, organization owners can add users to their organizations"
+            + " with different permission sets";
 
     private Notes() {
     }

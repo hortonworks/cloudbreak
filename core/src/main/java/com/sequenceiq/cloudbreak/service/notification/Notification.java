@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.service.notification;
 
 public class Notification<T> {
-    private T notification;
+    private final T notification;
 
     public Notification(T notification) {
         this.notification = notification;

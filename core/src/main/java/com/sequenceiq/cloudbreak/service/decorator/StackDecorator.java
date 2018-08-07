@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.BooleanUtils;
@@ -18,8 +19,9 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
-import com.sequenceiq.cloudbreak.api.model.StackRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
+import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceGroupParameterRequest;
@@ -29,22 +31,24 @@ import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrators;
 import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.controller.AuthenticatedUserService;
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.validation.stack.StackValidator;
+import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.validation.stack.ParameterValidator;
+import com.sequenceiq.cloudbreak.controller.validation.stack.StackRequestValidator;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
+import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
@@ -62,7 +66,7 @@ public class StackDecorator {
     private AuthenticatedUserService authenticatedUserService;
 
     @Inject
-    private StackValidator stackValidator;
+    private StackRequestValidator stackValidator;
 
     @Inject
     private StackParameterService stackParameterService;
@@ -98,7 +102,13 @@ public class StackDecorator {
     @Inject
     private CloudParameterCache cloudParameterCache;
 
-    public Stack decorate(Stack subject, StackRequest request, IdentityUser user) {
+    @Inject
+    private RdsConfigService rdsConfigService;
+
+    @Inject
+    private List<ParameterValidator> parameterValidators;
+
+    public Stack decorate(@Nonnull Stack subject, @Nonnull StackRequest request, IdentityUser user) {
         prepareCredential(subject, request, user);
         prepareDomainIfDefined(subject, request, user);
         Long credentialId = request.getCredentialId();
@@ -121,8 +131,58 @@ public class StackDecorator {
             prepareInstanceGroups(subject, request, subject.getCredential(), user);
             prepareFlexSubscription(subject, request.getFlexId());
             validate(subject);
+            checkSharedServiceStackRequirements(request, user);
         }
         return subject;
+    }
+
+    private void checkSharedServiceStackRequirements(StackRequest request, IdentityUser user) {
+        if (request.getClusterToAttach() != null && !isSharedServiceRequirementsMeets(request, user)) {
+            throw new BadRequestException("Shared service stack should contains both Hive RDS and Ranger RDS and a properly configured LDAP also. "
+                    + "One of them may be missing");
+        }
+    }
+
+    private boolean isSharedServiceRequirementsMeets(StackRequest request, IdentityUser user) {
+        boolean hasConfiguredLdap = hasConfiguredLdap(request);
+        boolean hasConfiguredHiveRds = hasConfiguredRdsByType(request, user, RdsType.HIVE);
+        boolean hasConfiguredRangerRds = hasConfiguredRdsByType(request, user, RdsType.RANGER);
+        return hasConfiguredHiveRds && hasConfiguredRangerRds && hasConfiguredLdap;
+    }
+
+    private boolean hasConfiguredRdsByType(StackRequest request, IdentityUser user, RdsType rdsType) {
+        boolean hasConfiguredRds = false;
+        if (!request.getClusterRequest().getRdsConfigJsons().isEmpty()) {
+            hasConfiguredRds = request.getClusterRequest().getRdsConfigJsons().stream()
+                    .anyMatch(rdsConfigRequest -> rdsType.name().equalsIgnoreCase(rdsConfigRequest.getType()));
+        }
+        if (!hasConfiguredRds && !request.getClusterRequest().getRdsConfigNames().isEmpty()) {
+            for (String rds : request.getClusterRequest().getRdsConfigNames()) {
+                if (rdsType.name().equalsIgnoreCase(rdsConfigService.getPublicRdsConfig(rds, user).getType())) {
+                    hasConfiguredRds = true;
+                    break;
+                }
+            }
+        }
+        if (!hasConfiguredRds && !request.getClusterRequest().getRdsConfigNames().isEmpty()) {
+            for (Long rds : request.getClusterRequest().getRdsConfigIds()) {
+                if (rdsType.name().equalsIgnoreCase(rdsConfigService.get(rds).getType())) {
+                    hasConfiguredRds = true;
+                    break;
+                }
+            }
+        }
+        return hasConfiguredRds;
+    }
+
+    private boolean hasConfiguredLdap(StackRequest request) {
+        boolean hasConfiguredLdap = false;
+        if (request.getClusterRequest().getLdapConfig() != null
+                || request.getClusterRequest().getLdapConfigName() != null
+                || request.getClusterRequest().getLdapConfigId() != null) {
+            hasConfiguredLdap = true;
+        }
+        return hasConfiguredLdap;
     }
 
     private void prepareCredential(Stack subject, StackRequest request, IdentityUser user) {
@@ -151,14 +211,22 @@ public class StackDecorator {
                     params.put(paramName, value);
                 }
             }
-            stackValidator.validate(params, stackParams);
+            validateStackParameters(params, stackParams);
         }
         return params;
     }
 
+    private void validateStackParameters(Map<String, String> params, List<StackParamValidation> stackParamValidations) {
+        if (params != null && !params.isEmpty()) {
+            for (ParameterValidator parameterValidator : parameterValidators) {
+                parameterValidator.validate(params, stackParamValidations);
+            }
+        }
+    }
+
     private void prepareNetwork(Stack subject, Object networkId) {
         if (networkId != null) {
-            subject.setNetwork(networkService.getById((Long) networkId));
+            subject.setNetwork(networkService.get((Long) networkId));
             if (subject.getOrchestrator() != null && (subject.getOrchestrator().getApiEndpoint() != null || subject.getOrchestrator().getType() == null)) {
                 throw new BadRequestException("Orchestrator cannot be configured for the stack!");
             }
@@ -250,7 +318,7 @@ public class StackDecorator {
 
     private void validate(Stack stack) {
         long instanceGroups = stack.getInstanceGroups().stream().filter(ig -> InstanceGroupType.GATEWAY.equals(ig.getInstanceGroupType())).count();
-        if (instanceGroups == 0) {
+        if (instanceGroups == 0L) {
             throw new BadRequestException("Gateway instance group not configured");
         }
     }
@@ -280,7 +348,7 @@ public class StackDecorator {
 
     private void prepareFlexSubscription(Stack subject, Long flexId) {
         if (flexId != null) {
-            FlexSubscription flexSubscription = flexSubscriptionService.findOneById(flexId);
+            FlexSubscription flexSubscription = flexSubscriptionService.get(flexId);
             subject.setFlexSubscription(flexSubscription);
         }
     }
@@ -290,13 +358,10 @@ public class StackDecorator {
             return cloudPlatform;
         } else if (stack.getCredential() != null && stack.getCredential().getId() != null) {
             return stack.getCredential().cloudPlatform();
-        } else if (Strings.isNullOrEmpty(stack.cloudPlatform()))  {
+        } else if (Strings.isNullOrEmpty(stack.cloudPlatform())) {
             return stack.cloudPlatform();
         } else {
             return request.getCloudPlatform();
         }
     }
-
-
-
 }

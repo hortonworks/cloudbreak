@@ -16,11 +16,12 @@ import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.Compute.Addresses.Insert;
 import com.google.api.services.compute.model.Address;
 import com.google.api.services.compute.model.Operation;
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
@@ -46,8 +47,8 @@ public class GcpReservedIpResourceBuilder extends AbstractGcpComputeBuilder {
     }
 
     @Override
-    public List<CloudResource> build(GcpContext context, long privateId, AuthenticatedContext auth, Group group, Image image,
-            List<CloudResource> buildableResource, Map<String, String> tags) throws Exception {
+    public List<CloudResource> build(GcpContext context, long privateId, AuthenticatedContext auth, Group group,
+            List<CloudResource> buildableResource, CloudStack cloudStack) throws Exception {
         List<CloudResource> result = buildableResource;
         if (!buildableResource.isEmpty()) {
             CloudResource resource = buildableResource.get(0);
@@ -58,7 +59,7 @@ public class GcpReservedIpResourceBuilder extends AbstractGcpComputeBuilder {
             address.setName(resource.getName());
 
             Map<String, String> customTags = new HashMap<>();
-            customTags.putAll(tags);
+            customTags.putAll(cloudStack.getTags());
             customTags.putAll(defaultCostTaggingService.prepareIpTagging());
             address.setLabels(customTags);
             Insert networkInsert = context.getCompute().addresses().insert(projectId, region, address);

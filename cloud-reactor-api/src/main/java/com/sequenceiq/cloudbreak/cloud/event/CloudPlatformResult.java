@@ -30,11 +30,11 @@ public class CloudPlatformResult<R extends CloudPlatformRequest> implements Payl
         this.request = request;
     }
 
-    public static String selector(Class clazz) {
+    public static String selector(Class<?> clazz) {
         return clazz.getSimpleName().toUpperCase();
     }
 
-    public static String failureSelector(Class clazz) {
+    public static String failureSelector(Class<?> clazz) {
         return clazz.getSimpleName().toUpperCase() + "_ERROR";
     }
 

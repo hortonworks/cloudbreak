@@ -2,22 +2,26 @@ package com.sequenceiq.cloudbreak.repository;
 
 import java.util.Set;
 
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
-import org.springframework.data.repository.query.Param;
-import org.springframework.security.access.prepost.PostAuthorize;
+import javax.transaction.Transactional;
 
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import com.sequenceiq.cloudbreak.aspect.BaseRepository;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Topology;
+import com.sequenceiq.cloudbreak.aspect.DisablePermission;
+import com.sequenceiq.cloudbreak.aspect.HasPermission;
+import com.sequenceiq.cloudbreak.service.EntityType;
 
 @EntityType(entityClass = Network.class)
-public interface NetworkRepository extends CrudRepository<Network, Long> {
+@Transactional(Transactional.TxType.REQUIRED)
+@HasPermission
+public interface NetworkRepository extends BaseRepository<Network, Long> {
 
-    @PostAuthorize("hasPermission(returnObject,'read')")
     @Query("SELECT r FROM Network r WHERE r.id= :id")
     Network findOneById(@Param("id") Long id);
 
-    @PostAuthorize("hasPermission(returnObject,'read')")
     @Query("SELECT r FROM Network r WHERE r.name= :name AND r.status <> 'DEFAULT_DELETED'")
     Network findOneByName(@Param("name") String name);
 
@@ -39,5 +43,8 @@ public interface NetworkRepository extends CrudRepository<Network, Long> {
     @Query("SELECT r FROM Network r WHERE r.account= :account AND (r.status = 'DEFAULT_DELETED' OR r.status = 'DEFAULT') ")
     Set<Network> findAllDefaultInAccount(@Param("account") String account);
 
+    @DisablePermission
     Long countByTopology(Topology topology);
+
+    Set<Network> findByTopology(Topology topology);
 }

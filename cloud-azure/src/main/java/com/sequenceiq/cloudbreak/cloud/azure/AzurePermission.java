@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import java.util.Collection;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -19,7 +20,7 @@ public class AzurePermission {
         this.notActions = notActions;
     }
 
-    public List<String> getActions() {
+    public Collection<String> getActions() {
         return actions;
     }
 
@@ -27,7 +28,7 @@ public class AzurePermission {
         this.actions = actions;
     }
 
-    public List<String> getNotActions() {
+    public Collection<String> getNotActions() {
         return notActions;
     }
 
@@ -38,10 +39,10 @@ public class AzurePermission {
     //BEGIN GENERATED CODE
     @Override
     public String toString() {
-        return "AzurePermission{" +
-                "actions=" + actions +
-                ", notActions=" + notActions +
-                '}';
+        return "AzurePermission{"
+                + "actions=" + actions
+                + ", notActions=" + notActions
+                + '}';
     }
     //END GENERATED CODE
 }

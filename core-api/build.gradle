@@ -36,10 +36,11 @@ dependencies {
   compile group: 'org.springframework.security.oauth', name: 'spring-security-oauth2',    version: springOauthVersion
   compile group: 'org.apache.commons',            name: 'commons-lang3',                  version: apacheCommonsLangVersion
 
-  testCompile group: 'org.mockito',               name: 'mockito-all',                    version: mockitoAllVersion
+  testCompile group: 'org.mockito',               name: 'mockito-core',                   version: mockitoVersion
   testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter',            version: springBootVersion
   testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
   testCompile group: 'junit',                     name: 'junit',                          version: junitVersion
+  testCompile group: 'org.apache.tomcat.embed',   name: 'tomcat-embed-el',                version: '9.0.8'
 
   compile project(':structuredevent-model')
 }

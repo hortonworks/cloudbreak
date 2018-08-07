@@ -1,13 +1,11 @@
 {
-  "inputs": [
-    {
-      "name": "S3_BUCKET",
-      "referenceConfiguration": "s3.bucket"
-    }
-  ],
+  "inputs": [],
+  "tags": {
+    "shared_services_ready": true
+  },
   "blueprint": {
     "Blueprints": {
-      "blueprint_name": "hdp26-shared-services-ha",
+      "blueprint_name": "hdp26-shared-services",
       "stack_name": "HDP",
       "stack_version": "2.6"
     },
@@ -27,94 +25,10 @@
         "component_settings": []
       }
     ],
-    "configurations": [
-      {
-        "hive-site": {
-          "hive.metastore.warehouse.dir":"s3a://{{{ S3_BUCKET }}}/{{cluster_name}}/apps/hive/warehouse"
-        }
-      },
-      {
-        "admin-properties": {
-          "properties": {
-            "db_user": "{{{ rangerRds.connectionUserName }}}",
-            "db_password": "{{{ rangerRds.connectionPassword }}}",
-            "db_name": "{{{ rangerRds.databaseName }}}",
-            "db_host": "{{{ rangerRds.connectionHost }}}",
-            "DB_FLAVOR": "POSTGRES"
-          }
-        }
-      },
-      {
-        "ranger-env": {
-          "properties": {
-            "admin_password": "{{{ rangerRds.properties.rangerAdminPassword }}}",
-            "ranger_admin_password": "{{{ rangerRds.properties.rangerAdminPassword }}}",
-            "is_solrCloud_enabled": "true",
-            "ranger-hdfs-plugin-enabled": "No",
-            "ranger-hive-plugin-enabled": "No",
-            "ranger-yarn-plugin-enabled": "No",
-            "ranger_privelege_user_jdbc_url": "jdbc:postgresql://{{{ rangerRds.connectionHost }}}",
-            "ranger-atlas-plugin-enabled": "No",
-            "create_db_dbuser": "false",
-            "xasecure.audit.destination.hdfs": "true",
-            "xasecure.audit.destination.hdfs.dir": "s3a://{{{ S3_BUCKET }}}/{{cluster_name}}/apps/ranger/audit/{{cluster_name}}",
-            "xasecure.audit.destination.solr": "true"
-          }
-        }
-      },
-      {
-        "ranger-ugsync-site": {
-          "ranger.usersync.enabled": "true",
-          "ranger.usersync.source.impl.class": "org.apache.ranger.ldapusersync.process.LdapUserGroupBuilder",
-          "ranger.usersync.ldap.url": "{{{ ldapConfig.connectionURL }}}",
-          "ranger.usersync.ldap.binddn": "{{{ ldapConfig.bindDn }}}",
-          "ranger.usersync.ldap.ldapbindpassword": "{{{ ldapConfig.bindPassword }}}",
-          "ranger.usersync.ldap.user.nameattribute": "{{{ ldapConfig.userNameAttribute }}}",
-          "ranger.usersync.ldap.user.searchbase": "{{{ ldapConfig.userSearchBase }}}",
-          "ranger.usersync.ldap.user.objectclass": "{{{ ldapConfig.userObjectClass }}}",
-          "ranger.usersync.ldap.deltasync": "false",
-          "ranger.usersync.group.searchenabled": "true",
-          "ranger.usersync.group.memberattributename": "{{{ ldapConfig.groupMemberAttribute }}}",
-          "ranger.usersync.group.nameattribute": "{{{ ldapConfig.groupNameAttribute }}}",
-          "ranger.usersync.group.objectclass": "{{{ ldapConfig.groupObjectClass }}}",
-          "ranger.usersync.group.searchbase": "{{{ ldapConfig.groupSearchBase }}}",
-          "ranger.usersync.group.searchfilter": " "
-        }
-      },
-      {
-        "ranger-admin-site": {
-          "properties": {
-            "ranger.jpa.jdbc.driver": "org.postgresql.Driver",
-            "ranger.jpa.jdbc.url": "jdbc:postgresql://{{{ rangerRds.connectionHost }}}/{{{ rangerRds.databaseName }}}",
-            "ranger.audit.source.type": "solr",
-            "ranger.authentication.method": "{{{ ldapConfig.directoryType }}}",
-            "ranger.ldap.ad.domain": " ",
-            "ranger.ldap.ad.url": "{{{ ldapConfig.connectionURL }}}",
-            "ranger.ldap.ad.bind.dn": "{{{ ldapConfig.bindDn }}}",
-            "ranger.ldap.ad.bind.password": "{{{ ldapConfig.bindPassword }}}",
-            "ranger.ldap.ad.base.dn": "{{{ ldapConfig.userSearchBase }}}",
-            "ranger.ldap.ad.user.searchfilter": "({{{ ldapConfig.userNameAttribute }}}={0})",
-            "ranger.ldap.url": "{{{ ldapConfig.connectionURL }}}",
-            "ranger.ldap.bind.dn": "{{{ ldapConfig.bindDn }}}",
-            "ranger.ldap.bind.password": "{{{ ldapConfig.bindPassword }}}",
-            "ranger.ldap.base.dn": "{{{ ldapConfig.userSearchBase }}}",
-            "ranger.ldap.user.searchfilter": "({{{ ldapConfig.userNameAttribute }}}={0})",
-            "ranger.ldap.user.dnpattern": "{{{ ldapConfig.userNameAttribute }}}={0},{{{ ldapConfig.userSearchBase }}}",
-            "ranger.ldap.group.searchbase": "{{{ ldapConfig.groupSearchBase }}}",
-            "ranger.ldap.group.roleattribute": "{{{ ldapConfig.groupNameAttribute }}}"
-          }
-        }
-      },
-      {
-        "ranger-hive-plugin-properties": {
-          "ranger.service.config.param.enable.hive.metastore.lookup": "true",
-          "ranger.service.config.param.hive.site.file.path": "/etc/hive/conf/hive-site.xml"
-        }
-      }
-    ],
+    "configurations": [],
     "host_groups": [
       {
-        "name": "master",
+        "name": "master1",
         "configurations": [
         ],
         "components": [
@@ -155,9 +69,8 @@
         "cardinality": "1"
       },
       {
-        "name": "worker",
-        "configurations": [
-        ],
+        "name": "master2",
+        "configurations": [],
         "components": [
           {
             "name": "METRICS_MONITOR"
@@ -182,16 +95,6 @@
           },
           {
             "name": "HIVE_CLIENT"
-          }
-        ],
-        "cardinality": "1+"
-      },
-      {
-        "name": "compute",
-        "configurations": [],
-        "components": [
-          {
-            "name": "METRICS_MONITOR"
           }
         ],
         "cardinality": "1+"

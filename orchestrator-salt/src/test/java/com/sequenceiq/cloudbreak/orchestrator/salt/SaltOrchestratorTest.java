@@ -5,6 +5,7 @@ import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
@@ -42,6 +43,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.common.service.HostDiscoveryService;
+import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrapRunner;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelOrchestratorComponentRunner;
@@ -57,6 +59,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.poller.PillarSave;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltCommandTracker;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltJobIdTracker;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltUpload;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.GrainAddRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.HighStateRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.SyncGrainsRunner;
@@ -92,7 +95,7 @@ public class SaltOrchestratorTest {
     @Before
     public void setUp() throws Exception {
         gatewayConfig = new GatewayConfig("1.1.1.1", "10.0.0.1", "172.16.252.43", "10-0-0-1", 9443, "servercert", "clientcert", "clientkey",
-                "saltpasswd", "saltbootpassword", "signkey", false, true, null, null);
+                "saltpasswd", "saltbootpassword", "signkey", false, true, "privatekey", "publickey");
         targets = new HashSet<>();
         targets.add(new Node("10.0.0.1", "1.1.1.1", "10-0-0-1.example.com", "hg"));
         targets.add(new Node("10.0.0.2", "1.1.1.2", "10-0-0-2.example.com", "hg"));
@@ -109,35 +112,40 @@ public class SaltOrchestratorTest {
 
     @Test
     public void bootstrapTest() throws Exception {
-        saltOrchestrator.init(parallelOrchestratorComponentRunner, exitCriteria);
-
-        whenNew(OrchestratorBootstrapRunner.class).withAnyArguments().thenReturn(mock(OrchestratorBootstrapRunner.class));
         whenNew(SaltBootstrap.class).withAnyArguments().thenReturn(mock(SaltBootstrap.class));
+        whenNew(OrchestratorBootstrapRunner.class)
+                .withArguments(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class), isNull(), anyInt(), anyInt(), anyInt())
+                .thenReturn(mock(OrchestratorBootstrapRunner.class));
+
+        saltOrchestrator.init(parallelOrchestratorComponentRunner, exitCriteria);
         BootstrapParams bootstrapParams = mock(BootstrapParams.class);
 
         saltOrchestrator.bootstrap(Collections.singletonList(gatewayConfig), targets, bootstrapParams, exitCriteriaModel);
 
-        verify(parallelOrchestratorComponentRunner, times(2)).submit(any(OrchestratorBootstrapRunner.class));
+        verify(parallelOrchestratorComponentRunner, times(4)).submit(any(OrchestratorBootstrapRunner.class));
 
-        verifyNew(OrchestratorBootstrapRunner.class, times(2))
-                .withArguments(any(PillarSave.class), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt());
-        verifyNew(OrchestratorBootstrapRunner.class, times(2))
-                .withArguments(any(SaltBootstrap.class), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt());
-        verifyNew(SaltBootstrap.class, times(1)).withArguments(eq(saltConnector),
-            eq(Collections.singletonList(gatewayConfig)), eq(targets), eq(bootstrapParams));
+        verifyNew(OrchestratorBootstrapRunner.class, times(1))
+                .withArguments(any(SaltBootstrap.class), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt(), anyInt());
+        // salt.zip, master_sign.pem, master_sign.pub
+        verifyNew(OrchestratorBootstrapRunner.class, times(3))
+                .withArguments(any(SaltUpload.class), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt(), anyInt());
+        verifyNew(SaltBootstrap.class, times(1)).withArguments(eq(saltConnector), eq(Collections.singletonList(gatewayConfig)), eq(targets),
+            eq(bootstrapParams));
     }
 
     @Test
     public void bootstrapNewNodesTest() throws Exception {
         whenNew(SaltBootstrap.class).withAnyArguments().thenReturn(mock(SaltBootstrap.class));
-        whenNew(OrchestratorBootstrapRunner.class).withAnyArguments().thenReturn(mock(OrchestratorBootstrapRunner.class));
+        whenNew(OrchestratorBootstrapRunner.class)
+                .withArguments(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class), isNull(), anyInt(), anyInt(), anyInt())
+                .thenReturn(mock(OrchestratorBootstrapRunner.class));
         BootstrapParams bootstrapParams = mock(BootstrapParams.class);
 
         saltOrchestrator.init(parallelOrchestratorComponentRunner, exitCriteria);
         saltOrchestrator.bootstrapNewNodes(Collections.singletonList(gatewayConfig), targets, targets, null, bootstrapParams, exitCriteriaModel);
 
         verifyNew(OrchestratorBootstrapRunner.class, times(1))
-                .withArguments(any(SaltBootstrap.class), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt());
+                .withArguments(any(SaltBootstrap.class), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt(), anyInt());
         verifyNew(SaltBootstrap.class, times(1)).withArguments(eq(saltConnector),
             eq(Collections.singletonList(gatewayConfig)), eq(targets), eq(bootstrapParams));
     }
@@ -145,7 +153,9 @@ public class SaltOrchestratorTest {
     @Test
     public void runServiceTest() throws Exception {
         whenNew(SaltBootstrap.class).withAnyArguments().thenReturn(mock(SaltBootstrap.class));
-        whenNew(OrchestratorBootstrapRunner.class).withAnyArguments().thenReturn(mock(OrchestratorBootstrapRunner.class));
+        whenNew(OrchestratorBootstrapRunner.class)
+                .withArguments(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class), isNull(), anyInt(), anyInt(), anyInt())
+                .thenReturn(mock(OrchestratorBootstrapRunner.class));
         PillarSave pillarSave = mock(PillarSave.class);
         whenNew(PillarSave.class).withAnyArguments().thenReturn(pillarSave);
 
@@ -175,7 +185,7 @@ public class SaltOrchestratorTest {
 
         // verify pillar save
         verifyNew(OrchestratorBootstrapRunner.class, times(1))
-                .withArguments(eq(pillarSave), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt());
+                .withArguments(eq(pillarSave), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt(), anyInt());
 
         // verify ambari server role
         verifyNew(GrainAddRunner.class, times(1)).withArguments(eq(Sets.newHashSet(gatewayConfig.getPrivateAddress())),
@@ -196,13 +206,13 @@ public class SaltOrchestratorTest {
         verifyNew(SaltCommandTracker.class, times(4)).withArguments(eq(saltConnector), eq(addRemoveGrainRunner));
         // verify two OrchestratorBootstrapRunner call with rolechecker command tracker
         verifyNew(OrchestratorBootstrapRunner.class, times(4))
-                .withArguments(eq(roleCheckerSaltCommandTracker), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt());
+                .withArguments(eq(roleCheckerSaltCommandTracker), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt(), anyInt());
 
         // verify syncgrains command
         verifyNew(SyncGrainsRunner.class, times(1)).withArguments(eq(allNodes), eq(targets));
         verifyNew(SaltCommandTracker.class, times(1)).withArguments(eq(saltConnector), eq(syncGrainsRunner));
         verifyNew(OrchestratorBootstrapRunner.class, times(1))
-                .withArguments(eq(syncGrainsCheckerSaltCommandTracker), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt());
+                .withArguments(eq(syncGrainsCheckerSaltCommandTracker), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt(), anyInt());
 
         // verify run new service
         verifyNew(HighStateRunner.class, atLeastOnce()).withArguments(eq(allNodes),
@@ -225,9 +235,9 @@ public class SaltOrchestratorTest {
         MinionStatusSaltResponse minionStatusSaltResponse = new MinionStatusSaltResponse();
         List<MinionStatus> minionStatusList = new ArrayList<>();
         MinionStatus minionStatus = new MinionStatus();
-        ArrayList<String> upNodes = Lists.newArrayList("10-0-0-1.example.com", "10-0-0-2.example.com", "10-0-0-3.example.com");
+        List<String> upNodes = Lists.newArrayList("10-0-0-1.example.com", "10-0-0-2.example.com", "10-0-0-3.example.com");
         minionStatus.setUp(upNodes);
-        ArrayList<String> downNodes = Lists.newArrayList("10-0-0-4.example.com", "10-0-0-5.example.com");
+        List<String> downNodes = Lists.newArrayList("10-0-0-4.example.com", "10-0-0-5.example.com");
         minionStatus.setDown(downNodes);
         minionStatusList.add(minionStatus);
         minionStatusSaltResponse.setResult(minionStatusList);
@@ -237,7 +247,8 @@ public class SaltOrchestratorTest {
         saltOrchestrator.tearDown(Collections.singletonList(gatewayConfig), privateIpsByFQDN);
 
         verify(saltConnector, times(1)).wheel(eq("key.delete"), eq(downNodes), eq(Object.class));
-        verifyStatic();
+        verifyStatic(SaltStates.class);
+
         SaltStates.stopMinions(eq(saltConnector), eq(privateIpsByFQDN));
     }
 
@@ -259,7 +270,7 @@ public class SaltOrchestratorTest {
             saltOrchestrator.tearDown(Collections.singletonList(gatewayConfig), privateIpsByFQDN);
             fail();
         } catch (CloudbreakOrchestratorFailedException e) {
-            assertTrue(NullPointerException.class.isInstance(e.getCause()));
+            assertTrue(e.getCause() instanceof NullPointerException);
         }
     }
 

@@ -65,7 +65,7 @@ public class History {
     private AdjustmentType adjustmentType;
 
     @Column(name = "user_id")
-    private String userId;
+    private String user;
 
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
@@ -131,7 +131,7 @@ public class History {
     public History withCluster(Cluster cluster) {
         clusterId = cluster.getId();
         cbStackId = cluster.getStackId();
-        userId = cluster.getUser().getId();
+        user = cluster.getUser().getId();
         return this;
     }
 
@@ -207,12 +207,12 @@ public class History {
         this.properties = properties;
     }
 
-    public String getUserId() {
-        return userId;
+    public String getUser() {
+        return user;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public void setUser(String user) {
+        this.user = user;
     }
 
     public long getId() {

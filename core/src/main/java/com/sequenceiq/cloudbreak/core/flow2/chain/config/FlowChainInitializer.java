@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
+
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
@@ -24,7 +25,7 @@ public class FlowChainInitializer {
     private FlowChainHandler flowChainHandler;
 
     @Resource
-    private List<FlowEventChainFactory> flowChainFactories;
+    private List<FlowEventChainFactory<?>> flowChainFactories;
 
     @PostConstruct
     public void init() {

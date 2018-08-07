@@ -91,7 +91,7 @@ public class Call {
     /**
      * In case of POST request - returns post body
      */
-    public String getPostBody() {
+    public CharSequence getPostBody() {
         return postBody;
     }
 

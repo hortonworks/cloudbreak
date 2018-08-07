@@ -1,12 +1,14 @@
 package com.sequenceiq.cloudbreak.converter;
 
+
 import javax.inject.Inject;
 
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.FlexSubscriptionRequest;
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.NotFoundException;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
@@ -26,10 +28,10 @@ public class FlexSubscriptionRequestToFlexSubscriptionConverter extends Abstract
         subscription.setUsedForController(source.isUsedForController());
         Long smartSenseSubscriptionId = source.getSmartSenseSubscriptionId();
         try {
-            SmartSenseSubscription smartSenseSubscription = smartSenseSubscriptionService.findOneById(smartSenseSubscriptionId);
+            SmartSenseSubscription smartSenseSubscription = smartSenseSubscriptionService.findById(smartSenseSubscriptionId);
             subscription.setSmartSenseSubscription(smartSenseSubscription);
-        } catch (NotFoundException ignored) {
-            throw new BadRequestException("SmartSense subscription could not be found with id: " + smartSenseSubscriptionId);
+        } catch (AccessDeniedException | NotFoundException ignored) {
+            throw new BadRequestException("SmartSense subscription could not be found with id or access is denied: " + smartSenseSubscriptionId);
         }
         return subscription;
     }

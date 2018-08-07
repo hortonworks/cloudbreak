@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.converter.v2;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.inject.Inject;
 
@@ -13,18 +14,22 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
-import com.sequenceiq.cloudbreak.api.model.HostGroupRequest;
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.NetworkRequest;
 import com.sequenceiq.cloudbreak.api.model.OrchestratorRequest;
-import com.sequenceiq.cloudbreak.api.model.StackRequest;
+import com.sequenceiq.cloudbreak.api.model.SharedServiceRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
+import com.sequenceiq.cloudbreak.api.model.v2.ImageSettings;
 import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
-import com.sequenceiq.cloudbreak.controller.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
+import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Component
 public class StackV2RequestToStackRequestConverter extends AbstractConversionServiceAwareConverter<StackV2Request, StackRequest> {
@@ -37,6 +42,12 @@ public class StackV2RequestToStackRequestConverter extends AbstractConversionSer
 
     @Inject
     private CredentialService credentialService;
+
+    @Inject
+    private StackService stackService;
+
+    @Inject
+    private SharedServiceConfigProvider sharedServiceConfigProvider;
 
     @Inject
     private AuthenticatedUserService authenticatedUserService;
@@ -81,9 +92,11 @@ public class StackV2RequestToStackRequestConverter extends AbstractConversionSer
         OrchestratorRequest orchestrator = new OrchestratorRequest();
         orchestrator.setType("SALT");
         stackRequest.setOrchestrator(orchestrator);
-        if (source.getImageSettings() != null) {
-            stackRequest.setImageCatalog(source.getImageSettings().getImageCatalog());
-            stackRequest.setImageId(source.getImageSettings().getImageId());
+        ImageSettings imageSettings = source.getImageSettings();
+        if (imageSettings != null) {
+            stackRequest.setImageCatalog(imageSettings.getImageCatalog());
+            stackRequest.setImageId(imageSettings.getImageId());
+            stackRequest.setOs(imageSettings.getOs());
         }
         stackRequest.setFlexId(source.getFlexId());
         stackRequest.setCredentialName(source.getGeneral().getCredentialName());
@@ -92,15 +105,24 @@ public class StackV2RequestToStackRequestConverter extends AbstractConversionSer
         stackRequest.setOwnerEmail(Strings.isNullOrEmpty(source.getOwnerEmail()) ? authenticatedUserService.getCbUser().getUsername() : source.getOwnerEmail());
         convertClusterRequest(source, stackRequest);
         stackRequest.setCloudPlatform(credentialService.get(stackRequest.getCredentialName(), stackRequest.getAccount()).cloudPlatform());
+        convertCustomInputs(source, stackRequest);
         return stackRequest;
     }
 
-    private Map<String, String> convertParameters(Map<String, ? extends Object> map) {
+    private void convertCustomInputs(StackV2Request source, StackRequest stackRequest) {
+        if (source.getInputs() != null) {
+            stackRequest.setCustomInputs(source.getInputs());
+        } else {
+            stackRequest.setCustomInputs(new HashMap<>());
+        }
+    }
+
+    private Map<String, String> convertParameters(Map<String, ?> map) {
         if (map == null) {
             return null;
         }
         Map<String, String> result = new HashMap<>();
-        for (Map.Entry<String, ? extends Object> e : map.entrySet()) {
+        for (Entry<String, ?> e : map.entrySet()) {
             result.put(e.getKey(), e.getValue().toString());
         }
         return result;
@@ -114,6 +136,10 @@ public class StackV2RequestToStackRequestConverter extends AbstractConversionSer
                 stackRequest.getClusterRequest().getHostGroups().add(convert);
             }
             stackRequest.getClusterRequest().setName(source.getGeneral().getName());
+            if (sharedServiceConfigProvider.isConfigured(source.getCluster())) {
+                SharedServiceRequest sharedService = source.getCluster().getSharedService();
+                stackRequest.setClusterToAttach(stackService.getPublicStack(sharedService.getSharedCluster(), authenticatedUserService.getCbUser()).getId());
+            }
         }
     }
 }

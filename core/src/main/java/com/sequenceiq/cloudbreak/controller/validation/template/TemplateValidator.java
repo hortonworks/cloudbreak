@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.LocationService;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Template;
@@ -109,10 +109,10 @@ public class TemplateValidator {
 
     private void validateMaximumVolumeSize(Template value, VmType vmType) {
         if (vmType != null) {
-            String maxSize = vmType.getMetaDataValue(VmTypeMeta.MAXIMUM_PERSISTENT_DISKS_SIZE_GB);
+            Object maxSize = vmType.getMetaDataValue(VmTypeMeta.MAXIMUM_PERSISTENT_DISKS_SIZE_GB);
             if (maxSize != null) {
                 int fullSize = value.getVolumeSize() * value.getVolumeCount();
-                if (Integer.parseInt(maxSize) < fullSize) {
+                if (Integer.parseInt(maxSize.toString()) < fullSize) {
                     throw new BadRequestException(
                             String.format("The %s platform does not support %s Gb full volume size. The maximum size of disks could be %s Gb.",
                                     value.cloudPlatform(), fullSize, maxSize));

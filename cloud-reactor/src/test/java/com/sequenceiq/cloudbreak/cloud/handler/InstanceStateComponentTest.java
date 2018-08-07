@@ -28,7 +28,7 @@ public class InstanceStateComponentTest extends AbstractComponentTest<GetInstanc
     }
 
     @Override
-    protected CloudPlatformRequest getRequest() {
-        return new GetInstancesStateRequest(g().createCloudContext(), g().createCloudCredential(), g().createCloudInstances());
+    protected CloudPlatformRequest<GetInstancesStateResult> getRequest() {
+        return new GetInstancesStateRequest<>(g().createCloudContext(), g().createCloudCredential(), g().createCloudInstances());
     }
 }
