@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.conf;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
@@ -10,17 +13,36 @@ import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @Configuration
-public class KafkaSenderConfig {
+public class StructuredEventSenderConfig {
 
     @Value("${cb.kafka.bootstrap.servers:}")
     private String bootstrapServers;
 
+    @Value("${cb.audit.filepath:}")
+    private String auditFilePath;
+
+    @Value("${cb.kafka.structured.events.topic:StructuredEvents}")
+    private String structuredEventsTopic;
+
+    public boolean isKafkaConfigured() {
+        return StringUtils.isNotEmpty(bootstrapServers);
+    }
+
+    public boolean isFilePathConfigured() {
+        return StringUtils.isNotEmpty(auditFilePath);
+    }
+
+    public String getAuditFilePath() {
+        return auditFilePath;
+    }
+
+    public String getStructuredEventsTopic() {
+        return structuredEventsTopic;
+    }
+
     @Bean
-    public Map<String, Object> producerConfigs() {
+    public Map<String, Object> kafkaProducerConfigs() {
         Map<String, Object> props = new HashMap<>();
         // list of host:port pairs used for establishing the initial connections to the Kakfa cluster
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,
@@ -33,13 +55,9 @@ public class KafkaSenderConfig {
         return props;
     }
 
-    public boolean isKafkaConfigured() {
-        return StringUtils.isNotEmpty(bootstrapServers);
-    }
-
     @Bean
     public ProducerFactory<String, String> producerFactory() {
-        return new DefaultKafkaProducerFactory<>(producerConfigs());
+        return new DefaultKafkaProducerFactory<>(kafkaProducerConfigs());
     }
 
     @Bean

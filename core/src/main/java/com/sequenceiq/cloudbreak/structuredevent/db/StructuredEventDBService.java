@@ -33,6 +33,10 @@ public class StructuredEventDBService implements StructuredEventService {
         structuredEventRepository.save(structuredEventEntityEntity);
     }
 
+    public boolean isEnabled() {
+        return true;
+    }
+
     @Override
     public <T extends StructuredEvent> List<T> getEventsForUserWithType(String userId, Class<T> eventClass) {
         List<StructuredEventEntity> events = structuredEventRepository.findByOwnerAndEventType(userId, StructuredEventType.getByClass(eventClass));
