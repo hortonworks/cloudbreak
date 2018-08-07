@@ -37,7 +37,7 @@ type TemplateResponse struct {
 	Description *string `json:"description,omitempty"`
 
 	// gcp specific parameters for template
-	GcpTemlateParameters *GcpParameters `json:"gcpTemlateParameters,omitempty"`
+	GcpParameters *GcpParameters `json:"gcpParameters,omitempty"`
 
 	// id of the resource
 	ID int64 `json:"id,omitempty"`
@@ -60,6 +60,9 @@ type TemplateResponse struct {
 
 	// size of the root volume
 	RootVolumeSize int32 `json:"rootVolumeSize,omitempty"`
+
+	// cloud specific secret parameters for template
+	SecretParameters map[string]interface{} `json:"secretParameters,omitempty"`
 
 	// id of the topology the resource belongs to
 	TopologyID int64 `json:"topologyId,omitempty"`
@@ -89,7 +92,7 @@ type TemplateResponse struct {
 
 /* polymorph TemplateResponse description false */
 
-/* polymorph TemplateResponse gcpTemlateParameters false */
+/* polymorph TemplateResponse gcpParameters false */
 
 /* polymorph TemplateResponse id false */
 
@@ -104,6 +107,8 @@ type TemplateResponse struct {
 /* polymorph TemplateResponse public false */
 
 /* polymorph TemplateResponse rootVolumeSize false */
+
+/* polymorph TemplateResponse secretParameters false */
 
 /* polymorph TemplateResponse topologyId false */
 
@@ -144,7 +149,7 @@ func (m *TemplateResponse) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateGcpTemlateParameters(formats); err != nil {
+	if err := m.validateGcpParameters(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -253,17 +258,17 @@ func (m *TemplateResponse) validateDescription(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *TemplateResponse) validateGcpTemlateParameters(formats strfmt.Registry) error {
+func (m *TemplateResponse) validateGcpParameters(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.GcpTemlateParameters) { // not required
+	if swag.IsZero(m.GcpParameters) { // not required
 		return nil
 	}
 
-	if m.GcpTemlateParameters != nil {
+	if m.GcpParameters != nil {
 
-		if err := m.GcpTemlateParameters.Validate(formats); err != nil {
+		if err := m.GcpParameters.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("gcpTemlateParameters")
+				return ve.ValidateName("gcpParameters")
 			}
 			return err
 		}

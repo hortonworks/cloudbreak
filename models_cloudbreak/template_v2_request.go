@@ -27,7 +27,7 @@ type TemplateV2Request struct {
 	CustomInstanceType *CustomInstanceType `json:"customInstanceType,omitempty"`
 
 	// gcp specific parameters for template
-	GcpTemlateParameters *GcpParameters `json:"gcpTemlateParameters,omitempty"`
+	GcpParameters *GcpParameters `json:"gcpParameters,omitempty"`
 
 	// type of the instance
 	InstanceType string `json:"instanceType,omitempty"`
@@ -60,7 +60,7 @@ type TemplateV2Request struct {
 
 /* polymorph TemplateV2Request customInstanceType false */
 
-/* polymorph TemplateV2Request gcpTemlateParameters false */
+/* polymorph TemplateV2Request gcpParameters false */
 
 /* polymorph TemplateV2Request instanceType false */
 
@@ -97,7 +97,7 @@ func (m *TemplateV2Request) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateGcpTemlateParameters(formats); err != nil {
+	if err := m.validateGcpParameters(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -165,17 +165,17 @@ func (m *TemplateV2Request) validateCustomInstanceType(formats strfmt.Registry) 
 	return nil
 }
 
-func (m *TemplateV2Request) validateGcpTemlateParameters(formats strfmt.Registry) error {
+func (m *TemplateV2Request) validateGcpParameters(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.GcpTemlateParameters) { // not required
+	if swag.IsZero(m.GcpParameters) { // not required
 		return nil
 	}
 
-	if m.GcpTemlateParameters != nil {
+	if m.GcpParameters != nil {
 
-		if err := m.GcpTemlateParameters.Validate(formats); err != nil {
+		if err := m.GcpParameters.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("gcpTemlateParameters")
+				return ve.ValidateName("gcpParameters")
 			}
 			return err
 		}

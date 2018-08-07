@@ -329,6 +329,27 @@ var (
 			Usage: "custom key encryption for AWS instances which can use your custom key",
 		},
 	}
+	FlRawEncryptionOptional = BoolFlag{
+		RequiredFlag: OPTIONAL,
+		BoolFlag: cli.BoolFlag{
+			Name:  "with-raw-encryption",
+			Usage: "custom encryption for GCP instances which can use your raw key",
+		},
+	}
+	FlRsaEncryptionOptional = BoolFlag{
+		RequiredFlag: OPTIONAL,
+		BoolFlag: cli.BoolFlag{
+			Name:  "with-rsa-encryption",
+			Usage: "custom key encryption for GCP instances which can use your rsa key",
+		},
+	}
+	FlKmsEncryptionOptional = BoolFlag{
+		RequiredFlag: OPTIONAL,
+		BoolFlag: cli.BoolFlag{
+			Name:  "with-kms-encryption",
+			Usage: "custom key encryption for GCP instances which can use your kms key",
+		},
+	}
 	FlExecutionType = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{

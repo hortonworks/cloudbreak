@@ -484,10 +484,10 @@ func main() {
 									Name:   "new-network",
 									Usage:  "creates a gcp cluster JSON template with new network",
 									Before: ConfigRead,
-									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional, cb.FlCloudStorageTypeOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
+									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional, cb.FlCloudStorageTypeOptional, cb.FlRawEncryptionOptional, cb.FlRsaEncryptionOptional, cb.FlKmsEncryptionOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
 									Action: cb.GenerateGcpStackTemplate,
 									BashComplete: func(c *cli.Context) {
-										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional, cb.FlCloudStorageTypeOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
+										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional, cb.FlCloudStorageTypeOptional, cb.FlRawEncryptionOptional, cb.FlRsaEncryptionOptional, cb.FlKmsEncryptionOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
 											printFlagCompletion(f)
 										}
 									},
@@ -496,10 +496,10 @@ func main() {
 									Name:   "existing-network",
 									Usage:  "creates a gcp cluster JSON template with existing network",
 									Before: ConfigRead,
-									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional, cb.FlCloudStorageTypeOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
+									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional, cb.FlCloudStorageTypeOptional, cb.FlRawEncryptionOptional, cb.FlRsaEncryptionOptional, cb.FlKmsEncryptionOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
 									Action: cb.GenerateGcpStackTemplate,
 									BashComplete: func(c *cli.Context) {
-										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional, cb.FlCloudStorageTypeOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
+										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional, cb.FlCloudStorageTypeOptional, cb.FlRawEncryptionOptional, cb.FlRsaEncryptionOptional, cb.FlKmsEncryptionOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
 											printFlagCompletion(f)
 										}
 									},
@@ -508,10 +508,10 @@ func main() {
 									Name:   "existing-subnet",
 									Usage:  "creates a gcp cluster JSON template with existing subnet",
 									Before: ConfigRead,
-									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional, cb.FlCloudStorageTypeOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
+									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional, cb.FlCloudStorageTypeOptional, cb.FlRawEncryptionOptional, cb.FlRsaEncryptionOptional, cb.FlKmsEncryptionOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
 									Action: cb.GenerateGcpStackTemplate,
 									BashComplete: func(c *cli.Context) {
-										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional, cb.FlCloudStorageTypeOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
+										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional, cb.FlCloudStorageTypeOptional, cb.FlRawEncryptionOptional, cb.FlRsaEncryptionOptional, cb.FlKmsEncryptionOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
 											printFlagCompletion(f)
 										}
 									},

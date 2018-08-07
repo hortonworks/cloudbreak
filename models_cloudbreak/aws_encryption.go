@@ -12,10 +12,10 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// Encryption encryption
-// swagger:model Encryption
+// AwsEncryption aws encryption
+// swagger:model AwsEncryption
 
-type Encryption struct {
+type AwsEncryption struct {
 
 	// encryption key for vm
 	Key string `json:"key,omitempty"`
@@ -24,12 +24,12 @@ type Encryption struct {
 	Type string `json:"type,omitempty"`
 }
 
-/* polymorph Encryption key false */
+/* polymorph AwsEncryption key false */
 
-/* polymorph Encryption type false */
+/* polymorph AwsEncryption type false */
 
-// Validate validates this encryption
-func (m *Encryption) Validate(formats strfmt.Registry) error {
+// Validate validates this aws encryption
+func (m *AwsEncryption) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if len(res) > 0 {
@@ -39,7 +39,7 @@ func (m *Encryption) Validate(formats strfmt.Registry) error {
 }
 
 // MarshalBinary interface implementation
-func (m *Encryption) MarshalBinary() ([]byte, error) {
+func (m *AwsEncryption) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -47,8 +47,8 @@ func (m *Encryption) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *Encryption) UnmarshalBinary(b []byte) error {
-	var res Encryption
+func (m *AwsEncryption) UnmarshalBinary(b []byte) error {
+	var res AwsEncryption
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

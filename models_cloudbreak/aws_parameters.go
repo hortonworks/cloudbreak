@@ -21,7 +21,7 @@ type AwsParameters struct {
 	Encrypted *bool `json:"encrypted,omitempty"`
 
 	// encryption for vm
-	Encryption *Encryption `json:"encryption,omitempty"`
+	Encryption *AwsEncryption `json:"encryption,omitempty"`
 
 	// spot price for aws
 	SpotPrice float64 `json:"spotPrice,omitempty"`

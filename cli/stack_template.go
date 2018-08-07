@@ -346,9 +346,9 @@ func extendTemplateWithEncryptionType(template *models_cloudbreak.StackV2Request
 		for _, group := range template.InstanceGroups {
 			group.Template.AwsParameters = &models_cloudbreak.AwsParameters{
 				Encrypted: &(&types.B{B: true}).B,
-				Encryption: &models_cloudbreak.Encryption{
-					Key:  "____",
+				Encryption: &models_cloudbreak.AwsEncryption{
 					Type: "CUSTOM",
+					Key:  "____",
 				},
 			}
 		}
@@ -356,8 +356,38 @@ func extendTemplateWithEncryptionType(template *models_cloudbreak.StackV2Request
 		for _, group := range template.InstanceGroups {
 			group.Template.AwsParameters = &models_cloudbreak.AwsParameters{
 				Encrypted: &(&types.B{B: true}).B,
-				Encryption: &models_cloudbreak.Encryption{
+				Encryption: &models_cloudbreak.AwsEncryption{
 					Type: "DEFAULT",
+				},
+			}
+		}
+	} else if withRawEncryption := boolFinder(FlRawEncryptionOptional.Name); withRawEncryption {
+		for _, group := range template.InstanceGroups {
+			group.Template.GcpParameters = &models_cloudbreak.GcpParameters{
+				Encryption: &models_cloudbreak.GcpEncryption{
+					Type:                "CUSTOM",
+					KeyEncryptionMethod: "RAW",
+					Key:                 "____",
+				},
+			}
+		}
+	} else if withRsaEncryption := boolFinder(FlRsaEncryptionOptional.Name); withRsaEncryption {
+		for _, group := range template.InstanceGroups {
+			group.Template.GcpParameters = &models_cloudbreak.GcpParameters{
+				Encryption: &models_cloudbreak.GcpEncryption{
+					Type:                "CUSTOM",
+					KeyEncryptionMethod: "RSA",
+					Key:                 "____",
+				},
+			}
+		}
+	} else if withKmsEncryption := boolFinder(FlKmsEncryptionOptional.Name); withKmsEncryption {
+		for _, group := range template.InstanceGroups {
+			group.Template.GcpParameters = &models_cloudbreak.GcpParameters{
+				Encryption: &models_cloudbreak.GcpEncryption{
+					Type:                "CUSTOM",
+					KeyEncryptionMethod: "KMS",
+					Key:                 "____",
 				},
 			}
 		}
