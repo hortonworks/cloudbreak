@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak;
 
+import static com.sequenceiq.it.cloudbreak.newway.cloud.AwsCloudProvider.AWS;
+
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -10,9 +12,10 @@ import org.testng.SkipException;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImageResponse;
-import com.sequenceiq.cloudbreak.api.model.v2.template.AwsParameters;
 import com.sequenceiq.cloudbreak.api.model.v2.template.AwsEncryption;
+import com.sequenceiq.cloudbreak.api.model.v2.template.AwsParameters;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Cluster;
@@ -23,8 +26,6 @@ import com.sequenceiq.it.cloudbreak.newway.StackOperation;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 import com.sequenceiq.it.cloudbreak.newway.cloud.AwsCloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
-
-import static com.sequenceiq.it.cloudbreak.newway.cloud.AwsCloudProvider.AWS;
 
 public class EncryptedClusterTests extends CloudbreakTest {
 
@@ -148,7 +149,7 @@ public class EncryptedClusterTests extends CloudbreakTest {
 
     private AwsParameters getAwsParametersWithEncryption(EncryptionType type) {
         var params = new AwsParameters();
-        params.setAwsEncryption(type.getEncryption(getTestParameter()));
+        params.setEncryption(type.getEncryption(getTestParameter()));
         return params;
     }
 

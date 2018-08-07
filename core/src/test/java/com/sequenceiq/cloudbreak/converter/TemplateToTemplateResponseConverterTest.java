@@ -58,8 +58,8 @@ public class TemplateToTemplateResponseConverterTest {
 
         Assert.assertNotNull(convert.getAwsParameters());
         Assert.assertEquals(10.0D, convert.getAwsParameters().getSpotPrice().doubleValue(), 0);
-        Assert.assertEquals("someKey", convert.getAwsParameters().getAwsEncryption().getKey());
-        Assert.assertEquals(EncryptionType.CUSTOM.name(), convert.getAwsParameters().getAwsEncryption().getType());
+        Assert.assertEquals("someKey", convert.getAwsParameters().getEncryption().getKey());
+        Assert.assertEquals(EncryptionType.CUSTOM.name(), convert.getAwsParameters().getEncryption().getType());
         Assert.assertNull(convert.getAzureParameters());
         Assert.assertNull(convert.getGcpParameters());
         Assert.assertNull(convert.getOpenStackParameters());
@@ -129,7 +129,7 @@ public class TemplateToTemplateResponseConverterTest {
         AwsEncryption awsEncryption = new AwsEncryption();
         awsEncryption.setKey("someKey");
         awsEncryption.setType("CUSTOM");
-        templateParameters.setAwsEncryption(awsEncryption);
+        templateParameters.setEncryption(awsEncryption);
         return templateParameters;
     }
 
