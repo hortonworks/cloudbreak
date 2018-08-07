@@ -55,15 +55,8 @@ public class TemplateRequestToTemplateConverter extends AbstractConversionServic
             parameters.put(PlatformParametersConsts.CUSTOM_INSTANCETYPE_MEMORY, customInstanceType.getMemory());
             parameters.put(PlatformParametersConsts.CUSTOM_INSTANCETYPE_CPUS, customInstanceType.getCpus());
         }
-        if (!parameters.isEmpty()) {
-            try {
-                template.setAttributes(new Json(parameters));
-            } catch (JsonProcessingException ignored) {
-                LOGGER.error("Failed to parse parameters JSON.", ignored);
-                throw new BadRequestException("Invalid parameters");
-            }
-        }
 
+        Optional.ofNullable(parameters).map(toJson()).ifPresent(template::setAttributes);
         Optional.ofNullable(source.getSecretParameters()).map(toJson()).ifPresent(template::setSecretAttributes);
 
         if (source.getTopologyId() != null) {
@@ -77,7 +70,8 @@ public class TemplateRequestToTemplateConverter extends AbstractConversionServic
             try {
                 return new Json(value);
             } catch (JsonProcessingException e) {
-                throw new BadRequestException("Invalid parameters");
+                LOGGER.error("Failed to parse template parameters as JSON.", e);
+                throw new BadRequestException("Invalid template parameter format, valid JSON expected.");
             }
         };
     }

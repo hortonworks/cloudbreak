@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak;
 
 import static com.sequenceiq.it.cloudbreak.newway.cloud.AwsCloudProvider.AWS;
+import static com.sequenceiq.it.cloudbreak.newway.cloud.GcpCloudProvider.GCP;
 
 import java.util.Comparator;
 import java.util.List;
@@ -16,6 +17,8 @@ import org.testng.annotations.Test;
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImageResponse;
 import com.sequenceiq.cloudbreak.api.model.v2.template.AwsEncryption;
 import com.sequenceiq.cloudbreak.api.model.v2.template.AwsParameters;
+import com.sequenceiq.cloudbreak.api.model.v2.template.GcpEncryption;
+import com.sequenceiq.cloudbreak.api.model.v2.template.GcpParameters;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Cluster;
@@ -24,25 +27,22 @@ import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.StackOperation;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
-import com.sequenceiq.it.cloudbreak.newway.cloud.AwsCloudProvider;
+import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
 
 public class EncryptedClusterTests extends CloudbreakTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EncryptedClusterTests.class);
 
-    private AwsCloudProvider cloudProvider;
-
     private String clusterName;
 
     @BeforeTest
     public void initializeCloudProviderAndClusterNameValues() {
-        cloudProvider = (AwsCloudProvider) CloudProviderHelper.providerFactory(AWS, getTestParameter());
         clusterName = getTestParameter().get("clusterName");
     }
 
     @Test(dataProvider = "providernameblueprintimage", priority = 10)
-    public void testCreateNewEncryptedCluster(String blueprintName, String imageId) throws Exception {
+    public void testCreateNewEncryptedCluster(CloudProvider cloudProvider, String blueprintName, String imageId) throws Exception {
         given(CloudbreakClient.isCreated());
         given(cloudProvider.aValidCredential());
         given(Cluster.request()
@@ -51,7 +51,7 @@ public class EncryptedClusterTests extends CloudbreakTest {
         given(ImageSettings.request()
                 .withImageCatalog("")
                 .withImageId(imageId));
-        given(aValidStackRequestWithDifferentEncryptedTypes().withName(clusterName), "a stack request");
+        given(aValidStackRequestWithDifferentEncryptedTypes(cloudProvider).withName(clusterName), "a stack request");
         when(Stack.post(), "post the stack request");
         then(Stack.waitAndCheckClusterAndStackAvailabilityStatus(),
                 "wait and check availability");
@@ -62,8 +62,8 @@ public class EncryptedClusterTests extends CloudbreakTest {
                 "check ambari is running and components available");
     }
 
-    @Test(priority = 30)
-    public void testStopCluster() throws Exception {
+    @Test(dataProvider = "provider", priority = 30)
+    public void testStopCluster(CloudProvider cloudProvider) throws Exception {
         given(CloudbreakClient.isCreated());
         given(cloudProvider.aValidCredential());
         given(cloudProvider.aValidStackIsCreated()
@@ -74,8 +74,8 @@ public class EncryptedClusterTests extends CloudbreakTest {
         then(Stack.waitAndCheckClusterAndStackStoppedStatus(), "stack has been stopped");
     }
 
-    @Test(priority = 40)
-    public void testStartCluster() throws Exception {
+    @Test(dataProvider = "provider", priority = 40)
+    public void testStartCluster(CloudProvider cloudProvider) throws Exception {
         given(CloudbreakClient.isCreated());
         given(cloudProvider.aValidCredential());
         given(cloudProvider.aValidStackIsCreated()
@@ -91,8 +91,8 @@ public class EncryptedClusterTests extends CloudbreakTest {
                 "ambari check");
     }
 
-    @Test(alwaysRun = true, priority = 50)
-    public void testTerminateCluster() throws Exception {
+    @Test(dataProvider = "provider", alwaysRun = true, priority = 50)
+    public void testTerminateCluster(CloudProvider cloudProvider) throws Exception {
         given(CloudbreakClient.isCreated());
         given(cloudProvider.aValidCredential());
         given(cloudProvider.aValidStackIsCreated()
@@ -103,19 +103,30 @@ public class EncryptedClusterTests extends CloudbreakTest {
 
     @DataProvider(name = "providernameblueprintimage")
     public Object[][] providerAndImage() throws Exception {
+        String provider = getTestParameter().get("provider").toLowerCase();
+        CloudProvider cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter());
         var blueprint = getTestParameter().get("blueprintName");
         var imageDescription = getTestParameter().get("image");
-        var image = getImageId(imageDescription);
+        var image = getImageId(imageDescription, provider);
         return new Object[][]{
-                {blueprint, image}
+                {cloudProvider, blueprint, image}
         };
     }
 
-    private String getImageId(String imageDescription) throws Exception {
+    @DataProvider(name = "provider")
+    public Object[][] provider() throws Exception {
+        String provider = getTestParameter().get("provider").toLowerCase();
+        CloudProvider cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter());
+        return new Object[][]{
+                {cloudProvider}
+        };
+    }
+
+    private String getImageId(String imageDescription, String provider) throws Exception {
         given(CloudbreakClient.isCreated());
         var clientContext = CloudbreakClient.getTestContextCloudbreakClient().apply(getItContext());
         var client = clientContext.getCloudbreakClient();
-        var imagesByProvider = client.imageCatalogEndpoint().getImagesByProvider(AWS);
+        var imagesByProvider = client.imageCatalogEndpoint().getImagesByProvider(provider);
         switch (imageDescription) {
             case "hdf":
                 return getLastUuid(imagesByProvider.getHdfImages());
@@ -126,16 +137,28 @@ public class EncryptedClusterTests extends CloudbreakTest {
         }
     }
 
-    private StackEntity aValidStackRequestWithDifferentEncryptedTypes() {
+    private StackEntity aValidStackRequestWithDifferentEncryptedTypes(CloudProvider cloudProvider) {
         var stack = cloudProvider.aValidStackRequest();
         if (stack.getRequest() != null && stack.getRequest().getInstanceGroups() != null && stack.getRequest().getInstanceGroups().size() == 3) {
-            stack.getRequest().getInstanceGroups().get(0).getTemplate().setAwsParameters(getAwsParametersWithEncryption(EncryptionType.DEFAULT));
-            stack.getRequest().getInstanceGroups().get(1).getTemplate().setAwsParameters(getAwsParametersWithEncryption(EncryptionType.CUSTOM));
-            stack.getRequest().getInstanceGroups().get(2).getTemplate().setAwsParameters(getAwsParametersWithEncryption(EncryptionType.NONE));
+            if (AWS.equalsIgnoreCase(cloudProvider.getPlatform())) {
+                stack.getRequest().getInstanceGroups().get(0).getTemplate().setAwsParameters(getAwsParametersWithEncryption(EncryptionType.DEFAULT));
+                stack.getRequest().getInstanceGroups().get(1).getTemplate().setAwsParameters(getAwsParametersWithEncryption(EncryptionType.CUSTOM));
+                stack.getRequest().getInstanceGroups().get(2).getTemplate().setAwsParameters(getAwsParametersWithEncryption(EncryptionType.NONE));
+            } else if (GCP.equalsIgnoreCase(cloudProvider.getPlatform())) {
+                stack.getRequest().getInstanceGroups().get(0).getTemplate().setGcpParameters(getGcpParametersWithEncryption(EncryptionMethod.RAW));
+                stack.getRequest().getInstanceGroups().get(1).getTemplate().setGcpParameters(getGcpParametersWithEncryption(EncryptionMethod.RSA));
+                stack.getRequest().getInstanceGroups().get(2).getTemplate().setGcpParameters(getGcpParametersWithEncryption(EncryptionMethod.KMS));
+            }
         } else {
             throw new SkipException("Unable to set encrypted aws templates for instance groups!");
         }
         return stack;
+    }
+
+    private GcpParameters getGcpParametersWithEncryption(EncryptionMethod encryptionMethod) {
+        var params = new GcpParameters();
+        params.setEncryption(encryptionMethod.getEncryption(getTestParameter()));
+        return params;
     }
 
     private String getLastUuid(List<? extends ImageResponse> images) {
@@ -176,5 +199,37 @@ public class EncryptedClusterTests extends CloudbreakTest {
         };
 
         public abstract AwsEncryption getEncryption(TestParameter testParameter);
+    }
+
+    private enum EncryptionMethod {
+        RAW {
+            public GcpEncryption getEncryption(TestParameter testParameter) {
+                var encryption = new GcpEncryption();
+                encryption.setType(EncryptionType.CUSTOM.name());
+                encryption.setKeyEncryptionMethod(RAW.name());
+                encryption.setKey("Hello World");
+                return encryption;
+            }
+        },
+        RSA {
+            public GcpEncryption getEncryption(TestParameter testParameter) {
+                var encryption = new GcpEncryption();
+                encryption.setType(EncryptionType.CUSTOM.name());
+                encryption.setKeyEncryptionMethod(RSA.name());
+                encryption.setKey("Hello World");
+                return encryption;
+            }
+        },
+        KMS {
+            public GcpEncryption getEncryption(TestParameter testParameter) {
+                var encryption = new GcpEncryption();
+                encryption.setType(EncryptionType.CUSTOM.name());
+                encryption.setKeyEncryptionMethod(KMS.name());
+                encryption.setKey(testParameter.getRequired("INTEGRATIONTEST_GCP_DISKENCRYPTIONKEY"));
+                return encryption;
+            }
+        };
+
+        public abstract GcpEncryption getEncryption(TestParameter testParameter);
     }
 }

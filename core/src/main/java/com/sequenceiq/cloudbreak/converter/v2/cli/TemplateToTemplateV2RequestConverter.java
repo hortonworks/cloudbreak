@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.converter.v2.cli;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -16,7 +19,14 @@ public class TemplateToTemplateV2RequestConverter extends AbstractConversionServ
     @Override
     public TemplateV2Request convert(Template source) {
         TemplateV2Request templateV2Request = new TemplateV2Request();
-        templateV2Request.setParameters(source.getAttributes().getMap());
+
+        Map<String, Object> templateParameters = new HashMap<>();
+        Map<String, Object> parameters = source.getAttributes().getMap();
+        Map<String, Object> secretParameters = source.getSecretAttributes().getMap();
+        templateParameters.putAll(parameters);
+        templateParameters.putAll(secretParameters);
+
+        templateV2Request.setParameters(templateParameters);
         templateV2Request.setInstanceType(source.getInstanceType());
         templateV2Request.setVolumeCount(source.getVolumeCount());
         templateV2Request.setVolumeSize(source.getVolumeSize());

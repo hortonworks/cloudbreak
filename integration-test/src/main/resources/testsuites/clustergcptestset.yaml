@@ -23,3 +23,19 @@ tests:
           - testStopCluster
           - testStartCluster
           - testTerminateCluster
+  - name: "gcp prewarm image datascience with disc encryption"
+    preserveOrder: true
+    parameters:
+      clusterName: encrypted-gcp-prewarm-datasci
+      provider: gcp
+      blueprintName: "Data Science: Apache Spark 2, Apache Zeppelin"
+      image: hdp
+      instancegroupName: worker
+    classes:
+    - name: com.sequenceiq.it.cloudbreak.EncryptedClusterTests
+      includedMethods:
+      - testCreateNewEncryptedCluster
+      - testScaleCluster
+      - testStopCluster
+      - testStartCluster
+      - testTerminateCluster
