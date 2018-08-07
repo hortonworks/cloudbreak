@@ -50,7 +50,7 @@ public class AwsTemplateParametersToParametersConverterTest {
         AwsEncryption awsEncryption = new AwsEncryption();
         awsEncryption.setKey("someKey");
         awsEncryption.setType("CUSTOM");
-        awsParameters.setAwsEncryption(awsEncryption);
+        awsParameters.setEncryption(awsEncryption);
         awsParameters.setEncrypted(true);
 
         Map<String, Object> actual = underTest.convert(awsParameters);

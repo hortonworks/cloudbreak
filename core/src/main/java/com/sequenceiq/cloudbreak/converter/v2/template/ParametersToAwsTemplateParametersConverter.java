@@ -21,19 +21,19 @@ public class ParametersToAwsTemplateParametersConverter extends AbstractConversi
                 if (key == null) {
                     AwsEncryption awsEncryption = new AwsEncryption();
                     awsEncryption.setType(EncryptionType.DEFAULT.name());
-                    awsParameters.setAwsEncryption(awsEncryption);
+                    awsParameters.setEncryption(awsEncryption);
                     awsParameters.setEncrypted(true);
                 } else {
                     AwsEncryption awsEncryption = new AwsEncryption();
                     awsEncryption.setType(EncryptionType.CUSTOM.name());
                     awsEncryption.setKey(key.toString());
-                    awsParameters.setAwsEncryption(awsEncryption);
+                    awsParameters.setEncryption(awsEncryption);
                     awsParameters.setEncrypted(true);
                 }
             } else {
                 AwsEncryption awsEncryption = new AwsEncryption();
                 awsEncryption.setType(EncryptionType.NONE.name());
-                awsParameters.setAwsEncryption(awsEncryption);
+                awsParameters.setEncryption(awsEncryption);
                 awsParameters.setEncrypted(false);
             }
         } else {

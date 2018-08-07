@@ -17,17 +17,17 @@ public class AwsParameters extends BaseTemplateParameter {
     private Double spotPrice;
 
     @ApiModelProperty(TemplateModelDescription.ENCRYPTION)
-    private AwsEncryption awsEncryption;
+    private AwsEncryption encryption;
 
     @ApiModelProperty(TemplateModelDescription.ENCRYPTED)
     private Boolean encrypted;
 
-    public AwsEncryption getAwsEncryption() {
-        return awsEncryption;
+    public AwsEncryption getEncryption() {
+        return encryption;
     }
 
-    public void setAwsEncryption(AwsEncryption awsEncryption) {
-        this.awsEncryption = awsEncryption;
+    public void setEncryption(AwsEncryption encryption) {
+        this.encryption = encryption;
     }
 
     public Boolean isEncrypted() {

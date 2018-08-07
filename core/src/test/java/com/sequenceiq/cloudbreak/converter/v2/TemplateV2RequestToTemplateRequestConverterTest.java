@@ -83,7 +83,7 @@ public class TemplateV2RequestToTemplateRequestConverterTest {
         assertNotNull(result.getParameters());
         assertEquals(request.getParameters(), result.getParameters());
         assertEquals(awsParameters.isEncrypted(), result.getParameters().get("encrypted"));
-        assertEquals(awsParameters.getAwsEncryption().getKey(), result.getParameters().get("key"));
+        assertEquals(awsParameters.getEncryption().getKey(), result.getParameters().get("key"));
         assertEquals(EncryptionType.CUSTOM, result.getParameters().get("type"));
         assertEquals(awsParameters.getSpotPrice(), result.getParameters().get("spotPrice"));
     }
@@ -225,7 +225,7 @@ public class TemplateV2RequestToTemplateRequestConverterTest {
         AwsEncryption awsEncryption = new AwsEncryption();
         awsEncryption.setKey("awsKey");
         awsEncryption.setType("CUSTOM");
-        awsParameters.setAwsEncryption(awsEncryption);
+        awsParameters.setEncryption(awsEncryption);
         awsParameters.setSpotPrice(0.33);
         return awsParameters;
     }
