@@ -418,15 +418,17 @@ public class MetricTest {
             })
     @ComponentScan(
             basePackages = {"com.sequenceiq.periscope", "com.sequenceiq.cloudbreak"},
-            excludeFilters = @ComponentScan.Filter(
+            excludeFilters = {@ComponentScan.Filter(
                     type = FilterType.ASSIGNABLE_TYPE,
                     value = {
                             DatabaseConfig.class,
                             DatabaseMigrationConfig.class,
                             PeriscopeApplication.class,
                             MetricService.class
-                    }))
-
+                    }
+            ),
+                    @ComponentScan.Filter(type = FilterType.REGEX, pattern = "com.sequenceiq.periscope.modul.rejected.*")}
+    )
     public static class TestConfig {
 
         @MockBean
