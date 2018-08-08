@@ -23,6 +23,7 @@ import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.cloudbreak.client.IdentityClient;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
+import com.sequenceiq.periscope.monitor.handler.PersistRejectedThreadExecutionHandler;
 
 @Configuration
 @EnableAsync
@@ -56,12 +57,16 @@ public class AppConfig implements AsyncConfigurer {
     @Value("${cert.ignorePreValidation}")
     private boolean ignorePreValidation;
 
+    @Inject
+    private PersistRejectedThreadExecutionHandler persistRejectedThreadExecutionHandler;
+
     @Bean
     public ThreadPoolExecutorFactoryBean getThreadPoolExecutorFactoryBean() {
         ThreadPoolExecutorFactoryBean executorFactoryBean = new ThreadPoolExecutorFactoryBean();
         executorFactoryBean.setCorePoolSize(corePoolSize);
         executorFactoryBean.setMaxPoolSize(maxPoolSize);
         executorFactoryBean.setQueueCapacity(queueCapacity);
+        executorFactoryBean.setRejectedExecutionHandler(persistRejectedThreadExecutionHandler);
         return executorFactoryBean;
     }
 

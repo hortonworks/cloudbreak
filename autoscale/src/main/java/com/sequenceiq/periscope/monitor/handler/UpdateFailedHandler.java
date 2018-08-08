@@ -53,6 +53,7 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
         MDCBuilder.buildMdcContext(cluster);
         Integer failed = updateFailures.get(id);
         if (failed == null) {
+            LOGGER.info("New failed cluster id: [{}]", id);
             updateFailures.put(id, 1);
         } else if (RETRY_THRESHOLD - 1 == failed) {
             try {
@@ -79,7 +80,9 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
             }
             updateFailures.remove(id);
         } else {
-            updateFailures.put(id, failed + 1);
+            int value = failed + 1;
+            LOGGER.info("Increase failed count[{}] for cluster id: [{}]", value, id);
+            updateFailures.put(id, value);
         }
     }
 

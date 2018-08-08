@@ -1,19 +1,16 @@
 package com.sequenceiq.periscope.monitor;
 
-import java.util.Map;
-
 import org.quartz.Job;
 
-import com.sequenceiq.periscope.domain.Cluster;
+import com.sequenceiq.periscope.monitor.context.EvaluatorContext;
 
-public interface Monitor extends Job {
+public interface Monitor<M extends Monitored> extends Job {
 
     String getIdentifier();
 
     String getTriggerExpression();
 
-    Class<?> getEvaluatorType();
+    Class<?> getEvaluatorType(M monitored);
 
-    Map<String, Object> getContext(Cluster cluster);
-
+    EvaluatorContext getContext(M monitored);
 }

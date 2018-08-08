@@ -8,11 +8,12 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.ambari.client.AmbariClient;
+import com.sequenceiq.periscope.aspects.AmbariRequestLogging;
 import com.sequenceiq.periscope.domain.BaseAlert;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
@@ -20,6 +21,7 @@ import com.sequenceiq.periscope.log.MDCBuilder;
 import com.sequenceiq.periscope.monitor.event.ScalingEvent;
 import com.sequenceiq.periscope.service.AmbariClientProvider;
 import com.sequenceiq.periscope.service.ClusterService;
+import com.sequenceiq.periscope.service.RejectedThreadService;
 import com.sequenceiq.periscope.utils.ClusterUtils;
 import com.sequenceiq.periscope.utils.LoggerUtils;
 import com.sequenceiq.periscope.utils.TimeUtil;
@@ -29,20 +31,26 @@ public class ScalingHandler implements ApplicationListener<ScalingEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ScalingHandler.class);
 
-    @Autowired
+    @Inject
     private ExecutorService executorService;
 
-    @Autowired
+    @Inject
     private ClusterService clusterService;
 
-    @Autowired
+    @Inject
     private ApplicationContext applicationContext;
 
-    @Autowired
+    @Inject
     private AmbariClientProvider ambariClientProvider;
 
     @Inject
     private LoggerUtils loggerUtils;
+
+    @Inject
+    private RejectedThreadService rejectedThreadService;
+
+    @Inject
+    private AmbariRequestLogging ambariRequestLogging;
 
     @Override
     public void onApplicationEvent(ScalingEvent event) {
@@ -55,12 +63,14 @@ public class ScalingHandler implements ApplicationListener<ScalingEvent> {
     private void scale(Cluster cluster, ScalingPolicy policy) {
         long remainingTime = getRemainingCooldownTime(cluster);
         if (remainingTime <= 0) {
-            int totalNodes = ClusterUtils.getTotalNodes(ambariClientProvider.createAmbariClient(cluster));
+            AmbariClient ambariClient = ambariClientProvider.createAmbariClient(cluster);
+            int totalNodes = ambariRequestLogging.logging(ambariClient::getClusterHosts, "clusterHosts").size();
             int desiredNodeCount = getDesiredNodeCount(cluster, policy, totalNodes);
             if (totalNodes != desiredNodeCount) {
                 Runnable scalingRequest = (Runnable) applicationContext.getBean("ScalingRequest", cluster, policy, totalNodes, desiredNodeCount);
                 loggerUtils.logThreadPoolExecutorParameters(LOGGER, "ScalingHandler", executorService);
                 executorService.execute(scalingRequest);
+                rejectedThreadService.remove(cluster.getId());
                 cluster.setLastScalingActivityCurrent();
                 clusterService.save(cluster);
             } else {

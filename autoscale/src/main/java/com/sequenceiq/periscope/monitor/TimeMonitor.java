@@ -1,16 +1,12 @@
 package com.sequenceiq.periscope.monitor;
 
-import java.util.Collections;
-import java.util.Map;
-
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.monitor.evaluator.CronTimeEvaluator;
-import com.sequenceiq.periscope.monitor.evaluator.EvaluatorContext;
 
 @Component
-public class TimeMonitor extends AbstractMonitor {
+public class TimeMonitor extends ClusterMonitor {
 
     @Override
     public String getIdentifier() {
@@ -23,12 +19,8 @@ public class TimeMonitor extends AbstractMonitor {
     }
 
     @Override
-    public Class<?> getEvaluatorType() {
+    public Class<?> getEvaluatorType(Cluster cluster) {
         return CronTimeEvaluator.class;
     }
 
-    @Override
-    public Map<String, Object> getContext(Cluster cluster) {
-        return Collections.singletonMap(EvaluatorContext.CLUSTER_ID.name(), cluster.getId());
-    }
 }
