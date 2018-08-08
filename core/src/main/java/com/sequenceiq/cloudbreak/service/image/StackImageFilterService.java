@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.service.image;
 
 import static com.sequenceiq.cloudbreak.service.image.ImageCatalogService.CLOUDBREAK_DEFAULT_CATALOG_NAME;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,7 +29,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 @Service
 public class StackImageFilterService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ImageCatalogService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(StackImageFilterService.class);
 
     @Inject
     private AuthenticatedUserService authenticatedUserService;
@@ -67,11 +67,11 @@ public class StackImageFilterService {
 
         List<Image> filteredHdpImages = stackType.equals(StackType.HDP)
                 ? filterByApplicability(imageCatalogName, statedImages.getImageCatalogUrl(), stack, statedImages.getImages().getHdpImages(), currentImageUuid)
-                : new ArrayList<>();
+                : Collections.emptyList();
 
         List<Image> filteredHdfImages = stackType.equals(StackType.HDF)
                 ? filterByApplicability(imageCatalogName, statedImages.getImageCatalogUrl(), stack, statedImages.getImages().getHdfImages(), currentImageUuid)
-                : new ArrayList<>();
+                : Collections.emptyList();
 
         return new Images(filteredBaseImages, filteredHdpImages, filteredHdfImages, statedImages.getImages().getSuppertedVersions());
     }
@@ -80,7 +80,7 @@ public class StackImageFilterService {
         try {
             return componentConfigProvider.getImage(stack.getId()).getImageId();
         } catch (CloudbreakImageNotFoundException e) {
-            LOGGER.warn("Could not find last used image when preparing upgrade image list for current cluster, exception: {}", e);
+            LOGGER.warn("Could not find last used image when preparing upgrade image list for current cluster", e);
             return "";
         }
     }

@@ -184,7 +184,7 @@ public class StackImageUpdateService {
         StackRepoDetails repoDetails = clusterComponentConfigProvider.getStackRepoDetails(stack.getCluster().getId());
         String repoId = repoDetails.getStack().get(StackRepoDetails.REPO_ID_TAG);
         Optional<StackType> clusterStackType = EnumSet.allOf(StackType.class).stream().filter(st -> repoId.contains(st.name())).findFirst();
-        return clusterStackType.orElseThrow(() ->  new CloudbreakServiceException("could not determine stack type for cluster"));
+        return clusterStackType.orElseThrow(() ->  new CloudbreakServiceException("Could not determine stack type for cluster"));
     }
 
     public CheckResult checkPackageVersions(Stack stack, StatedImage newImage) {

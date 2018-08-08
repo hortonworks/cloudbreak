@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.aws;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -78,7 +79,8 @@ public class AwsImageUpdateService {
         return scalingGroups.entrySet().stream()
                     .filter(entry -> entry.getKey().getLaunchConfigurationName()
                             .equalsIgnoreCase(oldLaunchConfiguration.getLaunchConfigurationName()))
-                    .findFirst().orElseThrow();
+                    .findFirst().orElseThrow(() -> new NoSuchElementException("Launch configuration not found for: "
+                        + oldLaunchConfiguration.getLaunchConfigurationName()));
     }
 
     private Map<String, String> getEncryptedImagesMappedByAutoscalingGroupName(AuthenticatedContext authenticatedContext, CloudStack stack) {

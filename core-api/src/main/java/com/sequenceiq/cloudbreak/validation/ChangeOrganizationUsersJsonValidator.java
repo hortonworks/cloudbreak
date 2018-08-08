@@ -10,15 +10,12 @@ import com.sequenceiq.cloudbreak.api.model.users.ChangeOrganizationUsersJson;
 public class ChangeOrganizationUsersJsonValidator implements ConstraintValidator<ValidChangeOrganizationUsersJson, ChangeOrganizationUsersJson> {
     @Override
     public boolean isValid(ChangeOrganizationUsersJson value, ConstraintValidatorContext context) {
-        boolean result;
         if (!isPermissionsValid(value.getPermissions())) {
             ValidatorUtil.addConstraintViolation(context, "permissions must be valid", "status")
                     .disableDefaultConstraintViolation();
-            result = false;
-        } else {
-            result = true;
+            return false;
         }
-        return result;
+        return true;
     }
 
     private boolean isPermissionsValid(Set<String> permissions) {
