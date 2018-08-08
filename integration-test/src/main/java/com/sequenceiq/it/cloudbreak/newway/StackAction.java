@@ -53,13 +53,21 @@ public class StackAction {
     }
 
     public static void delete(IntegrationTestContext integrationTestContext, Entity entity) {
-        StackEntity stackEntity = (StackEntity) entity;
+        delete(integrationTestContext, (StackEntity) entity, Boolean.FALSE);
+    }
+
+    public static void deleteWithForce(IntegrationTestContext integrationTestContext, Entity entity) {
+        delete(integrationTestContext, (StackEntity) entity, Boolean.TRUE);
+    }
+
+    private static void delete(IntegrationTestContext integrationTestContext, StackEntity entity, Boolean forced) {
+        StackEntity stackEntity = entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
         Log.log(" delete: " + stackEntity.getName());
         client.getCloudbreakClient().stackV2Endpoint()
-                .deletePrivate(stackEntity.getName(), false, false);
+                .deletePrivate(stackEntity.getName(), forced, false);
     }
 
     public static void createInGiven(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {

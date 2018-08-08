@@ -84,12 +84,20 @@ public class Stack extends StackEntity {
         return new Action<>(getNewStack(), StackAction::getAll);
     }
 
+    public static Action<Stack> delete(String key, Strategy strategy) {
+        return new Action<>(getTestContextStack(key), strategy);
+    }
+
     public static Action<Stack> delete(String key) {
-        return new Action<>(getTestContextStack(key), StackAction::delete);
+        return delete(key, StackAction::delete);
     }
 
     public static Action<Stack> delete() {
         return delete(STACK);
+    }
+
+    public static Action<Stack> delete(Strategy strategy) {
+        return delete(STACK, strategy);
     }
 
     public static Assertion<Stack> assertThis(BiConsumer<Stack, IntegrationTestContext> check) {

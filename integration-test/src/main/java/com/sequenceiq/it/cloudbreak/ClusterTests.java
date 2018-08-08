@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImagesResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponseEntries;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.SSOType;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
+import com.sequenceiq.it.cloudbreak.newway.CloudbreakClusterTestConfiguration;
 import com.sequenceiq.it.cloudbreak.newway.Cluster;
 import com.sequenceiq.it.cloudbreak.newway.ClusterGateway;
 import com.sequenceiq.it.cloudbreak.newway.GatewayTopology;
@@ -30,7 +30,7 @@ import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
 import com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType;
 
-public class ClusterTests extends CloudbreakTest {
+public class ClusterTests extends CloudbreakClusterTestConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterTests.class);
 
