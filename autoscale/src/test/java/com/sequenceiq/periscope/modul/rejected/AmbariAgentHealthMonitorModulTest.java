@@ -114,7 +114,7 @@ public class AmbariAgentHealthMonitorModulTest extends RejectedThreadContext {
         cluster.setUser(new PeriscopeUser());
 
         when(jobDetail.getKey()).thenReturn(JobKey.jobKey("test-heart-beat-critical"));
-        when(clusterService.find(clusterId)).thenReturn(cluster);
+        when(clusterService.findById(clusterId)).thenReturn(cluster);
         when(cloudbreakClient.clusterEndpoint()).thenReturn(clusterV1Endpoint);
 
         Map<String, Object> map = new HashMap<>();
@@ -140,11 +140,11 @@ public class AmbariAgentHealthMonitorModulTest extends RejectedThreadContext {
         Cluster cluster5 = cluster(5L);
 
         when(jobDetail.getKey()).thenReturn(JobKey.jobKey("test-rejected"));
-        when(clusterService.find(1L)).thenReturn(cluster1);
-        when(clusterService.find(2L)).thenReturn(cluster2);
-        when(clusterService.find(3L)).thenReturn(cluster3);
-        when(clusterService.find(4L)).thenReturn(cluster4);
-        when(clusterService.find(5L)).thenReturn(cluster5);
+        when(clusterService.findById(1L)).thenReturn(cluster1);
+        when(clusterService.findById(2L)).thenReturn(cluster2);
+        when(clusterService.findById(3L)).thenReturn(cluster3);
+        when(clusterService.findById(4L)).thenReturn(cluster4);
+        when(clusterService.findById(5L)).thenReturn(cluster5);
 
         when(ambariClient.getAlert(anyString())).thenAnswer(delayed(Collections.emptyList()));
 
@@ -167,7 +167,7 @@ public class AmbariAgentHealthMonitorModulTest extends RejectedThreadContext {
         Cluster cluster = cluster(stackId);
 
         when(jobDetail.getKey()).thenReturn(JobKey.jobKey("test-rejected"));
-        when(clusterService.find(stackId)).thenReturn(cluster);
+        when(clusterService.findById(stackId)).thenReturn(cluster);
 
         when(ambariClient.getAlert("ambari_server_agent_heartbeat")).thenAnswer(delayed(Collections.emptyList()));
 
@@ -201,11 +201,11 @@ public class AmbariAgentHealthMonitorModulTest extends RejectedThreadContext {
         Cluster cluster5 = cluster(5L);
 
         when(jobDetail.getKey()).thenReturn(JobKey.jobKey("test-rejected"));
-        when(clusterService.find(1L)).thenReturn(cluster1);
-        when(clusterService.find(2L)).thenReturn(cluster2);
-        when(clusterService.find(3L)).thenReturn(cluster3);
-        when(clusterService.find(4L)).thenReturn(cluster4);
-        when(clusterService.find(5L)).thenReturn(cluster5);
+        when(clusterService.findById(1L)).thenReturn(cluster1);
+        when(clusterService.findById(2L)).thenReturn(cluster2);
+        when(clusterService.findById(3L)).thenReturn(cluster3);
+        when(clusterService.findById(4L)).thenReturn(cluster4);
+        when(clusterService.findById(5L)).thenReturn(cluster5);
 
         when(ambariClient.getAlert("ambari_server_agent_heartbeat")).thenAnswer(delayed(Collections.emptyList()));
 

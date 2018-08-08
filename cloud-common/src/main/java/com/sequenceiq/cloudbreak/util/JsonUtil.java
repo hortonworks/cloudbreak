@@ -6,12 +6,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
-<<<<<<< HEAD
-=======
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
->>>>>>> BUG-107589 Handle rejected threads in Periscope
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -46,17 +43,16 @@ public class JsonUtil {
         return MAPPER.readValue(content, valueType);
     }
 
-<<<<<<< HEAD
     public static <T> T readValue(Map<String, Object> map, Class<T> valueType) {
         return MAPPER.convertValue(map, valueType);
-=======
+    }
+
     public static <T> Optional<T> readValueOpt(String content, Class<T> valueType) {
         try {
             return Optional.of(MAPPER.readValue(content, valueType));
         } catch (IOException e) {
             return Optional.empty();
         }
->>>>>>> BUG-107589 Handle rejected threads in Periscope
     }
 
     public static String writeValueAsString(Object object) throws JsonProcessingException {

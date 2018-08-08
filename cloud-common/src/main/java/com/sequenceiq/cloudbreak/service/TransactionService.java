@@ -128,15 +128,9 @@ public class TransactionService {
 
     @Service
     @Transactional
-<<<<<<< HEAD
     private static class TransactionExecutorServiceProd implements TransactionExecutorService {
 
         TransactionExecutorServiceProd() {
-=======
-    public static class TransactionExecutorService {
-
-        public TransactionExecutorService() {
->>>>>>> BUG-107589 Handle rejected threads in Periscope
         }
 
         @Override
