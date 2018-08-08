@@ -3,13 +3,14 @@ package com.sequenceiq.cloudbreak.service.cluster.ambari;
 import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
 
 import java.io.IOException;
-import java.util.AbstractMap;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -45,7 +46,7 @@ import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 public class InstanceMetadataUpdater {
     private static final Logger LOGGER = LoggerFactory.getLogger(InstanceMetadataUpdater.class);
 
-    private Pattern saltBootstrapVersionPattern = Pattern.compile("Version: (.*)");
+    private final Pattern saltBootstrapVersionPattern = Pattern.compile("Version: (.*)");
 
     private List<Package> packages;
 
@@ -119,7 +120,7 @@ public class InstanceMetadataUpdater {
         if (!packagesWithMultipleVersions.isEmpty()) {
             cloudbreakEventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
                     cloudbreakMessagesService.getMessage(Msg.PACKAGES_ON_INSTANCES_ARE_DIFFERENT.code(),
-                            Collections.singletonList(packagesWithMultipleVersions.stream().collect(Collectors.joining(",")))));
+                            Collections.singletonList(String.join(",", packagesWithMultipleVersions))));
         }
     }
 
@@ -136,7 +137,7 @@ public class InstanceMetadataUpdater {
         List<Package> packagesWithCommand = packages.stream().filter(pkg -> StringUtils.isNotBlank(pkg.getCommand())).collect(Collectors.toList());
         for (Package packageWithCommand : packagesWithCommand) {
             Map<String, String> versionsByHost = hostOrchestrator.runCommandOnAllHosts(gatewayConfig, packageWithCommand.getCommand());
-            for (Map.Entry<String, String> entry : versionsByHost.entrySet()) {
+            for (Entry<String, String> entry : versionsByHost.entrySet()) {
                 packageVersionsByNameByHost.computeIfAbsent(entry.getKey(), s -> new HashMap<>())
                         .put(packageWithCommand.getName(), parseSaltBootstrapVersion(entry.getValue()));
             }
@@ -148,9 +149,8 @@ public class InstanceMetadataUpdater {
         List<Package> packagesWithGrain = packages.stream().filter(pkg -> StringUtils.isNotBlank(pkg.getGrain())).collect(Collectors.toList());
         for (Package packageWithGrain : packagesWithGrain) {
             Map<String, String> versionsByHost = hostOrchestrator.getGrainOnAllHosts(gatewayConfig, packageWithGrain.getGrain());
-            for (Map.Entry<String, String> entry : versionsByHost.entrySet()) {
-                packageVersionsByNameByHost.computeIfAbsent(entry.getKey(), s -> new HashMap<>())
-                        .put(packageWithGrain.getName(), entry.getValue());
+            for (Entry<String, String> entry : versionsByHost.entrySet()) {
+                packageVersionsByNameByHost.computeIfAbsent(entry.getKey(), s -> new HashMap<>()).put(packageWithGrain.getName(), entry.getValue());
             }
         }
     }
@@ -170,7 +170,7 @@ public class InstanceMetadataUpdater {
             Map<String, Map<String, String>> packageVersionsByPkgNameByHost) {
         // Map<host, Map<name, version>
         Map<String, Map<String, String>> packageVersionsByNameByHost = new HashMap<>();
-        for (Map.Entry<String, Map<String, String>> entry : packageVersionsByPkgNameByHost.entrySet()) {
+        for (Entry<String, Map<String, String>> entry : packageVersionsByPkgNameByHost.entrySet()) {
             Map<String, String> versionByName =
                     entry.getValue().entrySet().stream()
                             .filter(e -> StringUtils.isNotBlank(e.getValue()))
@@ -187,8 +187,8 @@ public class InstanceMetadataUpdater {
          */
         return packages.stream().filter(pkg -> pkg.getPkgName() != null && !pkg.getPkgName().isEmpty())
                 .flatMap(pkg -> pkg.getPkgName().stream()
-                        .map(pkgName -> new AbstractMap.SimpleEntry<>(pkgName, pkg.getName())))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                        .map(pkgName -> new SimpleEntry<>(pkgName, pkg.getName())))
+                .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
     }
 
     public List<String> collectPackagesWithMultipleVersions(Collection<InstanceMetaData> instanceMetadataList) {

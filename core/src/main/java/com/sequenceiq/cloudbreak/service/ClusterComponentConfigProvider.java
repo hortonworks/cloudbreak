@@ -40,20 +40,15 @@ public class ClusterComponentConfigProvider {
     public StackRepoDetails getHDPRepo(Long clusterId) {
         try {
             ClusterComponent component = getComponent(clusterId, ComponentType.HDP_REPO_DETAILS);
-            if (component == null) {
-                return null;
-            }
-            return component.getAttributes().get(StackRepoDetails.class);
+            return component == null ? null : component.getAttributes().get(StackRepoDetails.class);
         } catch (IOException e) {
             throw new CloudbreakServiceException("Failed to read HDP repo details.", e);
         }
     }
 
     public StackRepoDetails getStackRepoDetails(Long clusterId) {
-        ClusterComponent component = getComponent(clusterId, ComponentType.HDP_REPO_DETAILS);
-        if (component == null) {
-            component = getComponent(clusterId, ComponentType.HDF_REPO_DETAILS);
-        }
+        ClusterComponent component = Optional.ofNullable(getComponent(clusterId, ComponentType.HDP_REPO_DETAILS))
+                .orElse(getComponent(clusterId, ComponentType.HDF_REPO_DETAILS));
         try {
             return component.getAttributes().get(StackRepoDetails.class);
         } catch (IOException e) {
@@ -64,11 +59,8 @@ public class ClusterComponentConfigProvider {
 
     public StackRepoDetails getStackRepo(Iterable<ClusterComponent> clusterComponents) {
         try {
-            StackRepoDetails component = getComponent(Lists.newArrayList(clusterComponents), StackRepoDetails.class, ComponentType.HDP_REPO_DETAILS);
-            if (component == null) {
-                component = getComponent(Lists.newArrayList(clusterComponents), StackRepoDetails.class, ComponentType.HDF_REPO_DETAILS);
-            }
-            return component;
+            return Optional.ofNullable(getComponent(Lists.newArrayList(clusterComponents), StackRepoDetails.class, ComponentType.HDP_REPO_DETAILS))
+                        .orElse(getComponent(Lists.newArrayList(clusterComponents), StackRepoDetails.class, ComponentType.HDF_REPO_DETAILS));
         } catch (Exception e) {
             throw new CloudbreakServiceException("Failed to read HDP repo details.", e);
         }
@@ -77,10 +69,7 @@ public class ClusterComponentConfigProvider {
     public AmbariRepo getAmbariRepo(Long clusterId) {
         try {
             ClusterComponent component = getComponent(clusterId, ComponentType.AMBARI_REPO_DETAILS);
-            if (component == null) {
-                return null;
-            }
-            return component.getAttributes().get(AmbariRepo.class);
+            return component == null ? null : component.getAttributes().get(AmbariRepo.class);
         } catch (IOException e) {
             throw new CloudbreakServiceException("Failed to read Ambari repo", e);
         }
@@ -107,10 +96,7 @@ public class ClusterComponentConfigProvider {
     public AmbariDatabase getAmbariDatabase(Long clusterId) {
         try {
             ClusterComponent component = getComponent(clusterId, ComponentType.AMBARI_DATABASE_DETAILS);
-            if (component == null) {
-                return null;
-            }
-            return component.getAttributes().get(AmbariDatabase.class);
+            return component == null ? null : component.getAttributes().get(AmbariDatabase.class);
         } catch (IOException e) {
             throw new CloudbreakServiceException("Failed to read Ambari database", e);
         }

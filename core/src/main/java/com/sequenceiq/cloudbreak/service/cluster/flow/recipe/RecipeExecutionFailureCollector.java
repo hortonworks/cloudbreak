@@ -25,21 +25,23 @@ import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 @Component
 public class RecipeExecutionFailureCollector {
 
-    public boolean canProcessExecutionFailure(Exception e) {
-        return getNodesWithErrors(e).isPresent() && e.getMessage().contains("/opt/scripts/recipe-runner.sh ");
+    public boolean canProcessExecutionFailure(CloudbreakOrchestratorException exception) {
+        return !getNodesWithErrors(exception).isEmpty() && exception.getMessage().contains("/opt/scripts/recipe-runner.sh ");
     }
 
-    public Set<RecipeExecutionFailure> collectErrors(CloudbreakOrchestratorException exception,
-            Map<HostGroup, List<RecipeModel>> hostgroupToRecipeMap, Set<InstanceGroup> instanceGroups) {
+    public Set<RecipeExecutionFailure> collectErrors(CloudbreakOrchestratorException exception, Map<HostGroup, List<RecipeModel>> hostgroupToRecipeMap,
+            Set<InstanceGroup> instanceGroups) {
 
-        if (!getNodesWithErrors(exception).isPresent()) {
+        Multimap<String, String> nodesWithErrors = getNodesWithErrors(exception);
+
+        if (nodesWithErrors.isEmpty()) {
             throw new CloudbreakServiceException("Failed to collect recipe execution failures. Cause exception contains no information.", exception);
         }
 
-        return getNodesWithErrors(exception).get().asMap().entrySet().stream().flatMap((Entry<String, Collection<String>> nodeWithErrors) -> {
+        return nodesWithErrors.asMap().entrySet().stream().flatMap((Entry<String, Collection<String>> nodeWithErrors) -> {
 
             Map<String, Optional<String>> errorsWithPhase = nodeWithErrors.getValue().stream()
-                    .collect(Collectors.toMap(error -> error, this::getInstallPhase, (phase1, phase2) -> phase1.map(Optional::of).orElse(phase2)));
+                    .collect(Collectors.toMap(error -> error, this::getInstallPhase, (phase1, phase2) -> phase1.or(() -> phase2)));
 
             return errorsWithPhase.entrySet().stream()
                     .filter(errorWithPhase -> errorWithPhase.getValue().isPresent())
@@ -64,20 +66,16 @@ public class RecipeExecutionFailureCollector {
         }).collect(Collectors.toSet());
     }
 
-    private Optional<Multimap<String, String>> getNodesWithErrors(Throwable throwable) {
-        if (throwable instanceof CloudbreakOrchestratorException) {
-            CloudbreakOrchestratorException exception = (CloudbreakOrchestratorException) throwable;
-            if (exception.getNodesWithErrors().isEmpty()) {
-                if (throwable.getCause() != null) {
-                    return getNodesWithErrors(throwable.getCause());
-                } else {
-                    return Optional.empty();
-                }
+    private Multimap<String, String> getNodesWithErrors(CloudbreakOrchestratorException exception) {
+        Throwable current = exception;
+        Multimap<String, String> errors = exception.getNodesWithErrors();
+        while (current != null && errors.isEmpty()) {
+            if (current instanceof CloudbreakOrchestratorException) {
+                errors = ((CloudbreakOrchestratorException) current).getNodesWithErrors();
             }
-            return Optional.of(exception.getNodesWithErrors());
-        } else {
-            return getNodesWithErrors(throwable.getCause());
+            current = current.getCause();
         }
+        return errors;
     }
 
     private Optional<String> getInstallPhase(String message) {

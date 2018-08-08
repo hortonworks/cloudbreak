@@ -141,14 +141,13 @@ class OrchestratorRecipeExecutor {
         }
     }
 
-    private String getRecipeExecutionFaiureMessage(Stack stack, CloudbreakOrchestratorFailedException e) {
-        if (!recipeExecutionFailureCollector.canProcessExecutionFailure(e)) {
-            return e.getMessage();
+    private String getRecipeExecutionFaiureMessage(Stack stack, CloudbreakOrchestratorException exception) {
+        if (!recipeExecutionFailureCollector.canProcessExecutionFailure(exception)) {
+            return exception.getMessage();
         }
         Map<HostGroup, List<RecipeModel>> recipeMap = getHostgroupToRecipeMap(hostGroupService.getByCluster(stack.getCluster().getId()));
-        Set<RecipeExecutionFailure> failures = recipeExecutionFailureCollector.collectErrors((CloudbreakOrchestratorException) e.getCause().getCause(),
-                recipeMap, instanceGroupService.findByStackId(stack.getId()));
-        StringBuilder messagePrefix = new StringBuilder("Failed to execute recipe(s): \n");
+        Set<RecipeExecutionFailure> failures = recipeExecutionFailureCollector.collectErrors(exception, recipeMap,
+                instanceGroupService.findByStackId(stack.getId()));
         String message = failures.stream().map(failure -> new StringBuilder("[Recipe: '")
                 .append(failure.getRecipe().getName())
                 .append("' - \n")
@@ -160,7 +159,7 @@ class OrchestratorRecipeExecutor {
                 .append(']')
                 .toString()).collect(Collectors.joining(" ---------------------------------------------- ")
         );
-        return messagePrefix.append(message).toString();
+        return new StringBuilder("Failed to execute recipe(s): \n").append(message).toString();
     }
 
     private Map<HostGroup, List<RecipeModel>> getHostgroupToRecipeMap(Set<HostGroup> hostGroups) {

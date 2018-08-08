@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.image.update;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -35,18 +37,17 @@ public class PackageVersionChecker {
     public CheckResult compareImageAndInstancesMandatoryPackageVersion(StatedImage newImage, Set<InstanceMetaData> instanceMetaDataSet) {
         Map<String, String> packageVersions = newImage.getImage().getPackageVersions();
         List<String> packagesToCompare;
-        if (newImage.getImage().isPrewarmed()) {
-            packagesToCompare = instanceMetadataUpdater.getPackages().stream().map(Package::getName).collect(Collectors.toList());
-        } else {
-            packagesToCompare = instanceMetadataUpdater.getPackages().stream().filter(pkg -> !pkg.isPrewarmed())
-                    .map(Package::getName).collect(Collectors.toList());
-        }
+        packagesToCompare = newImage.getImage().isPrewarmed()
+                ? instanceMetadataUpdater.getPackages().stream().map(Package::getName).collect(Collectors.toList())
+                : instanceMetadataUpdater.getPackages().stream().filter(pkg -> !pkg.isPrewarmed()).map(Package::getName).collect(Collectors.toList());
 
-        List<String> missingPackageVersion = Lists.newArrayList();
-        List<String> differentPackageVersion = Lists.newArrayList();
-        Map<String, String> instancePackageVersions = null;
+        List<String> missingPackageVersion = new ArrayList<>();
+        List<String> differentPackageVersion = new ArrayList<>();
+        Map<String, String> instancePackageVersions;
         try {
-            instancePackageVersions = instanceMetaDataSet.stream().findFirst().orElseThrow().getImage().get(Image.class).getPackageVersions();
+            instancePackageVersions = instanceMetaDataSet.stream()
+                    .findFirst().orElseThrow(() -> new NoSuchElementException("Package version is missing"))
+                    .getImage().get(Image.class).getPackageVersions();
         } catch (IOException e) {
             LOGGER.warn("Could not get image", e);
             return CheckResult.failed("Could not get image");
@@ -57,12 +58,10 @@ public class PackageVersionChecker {
             if (StringUtils.isBlank(packageVersionInImage)) {
                 LOGGER.warn("Missing package in image: " + packageToCompare);
                 missingPackageVersion.add(packageToCompare);
-            } else {
-                if (!removeBuildVersion(packageVersionInImage).equalsIgnoreCase(removeBuildVersion(instancePackageVersions.get(packageToCompare)))) {
-                    LOGGER.warn(String.format("Different package [%s] version on image [%s] and on instance [%s]",
-                            packageToCompare, packageVersionInImage, instancePackageVersions.get(packageToCompare)));
-                    differentPackageVersion.add(packageToCompare);
-                }
+            } else if (!removeBuildVersion(packageVersionInImage).equalsIgnoreCase(removeBuildVersion(instancePackageVersions.get(packageToCompare)))) {
+                LOGGER.warn(String.format("Different package [%s] version on image [%s] and on instance [%s]",
+                        packageToCompare, packageVersionInImage, instancePackageVersions.get(packageToCompare)));
+                differentPackageVersion.add(packageToCompare);
             }
         }
 
@@ -70,9 +69,8 @@ public class PackageVersionChecker {
             String message = messagesService.getMessage(Msg.PACKAGES_ARE_DIFFERENT_IN_IMAGE.code(),
                     Lists.newArrayList(StringUtils.join(missingPackageVersion, ","), StringUtils.join(differentPackageVersion, ",")));
             return CheckResult.failed(message);
-        } else {
-            return CheckResult.ok();
         }
+        return CheckResult.ok();
     }
 
     public CheckResult checkInstancesHaveAllMandatoryPackageVersion(Set<InstanceMetaData> instanceMetaDataSet) {
@@ -84,20 +82,18 @@ public class PackageVersionChecker {
                                     entry.getKey(), StringUtils.join(entry.getValue(), ",")))
                             .collect(Collectors.joining(" * "))));
             return CheckResult.failed(message);
-        } else {
-            return CheckResult.ok();
         }
+        return CheckResult.ok();
     }
 
     public CheckResult checkInstancesHaveMultiplePackageVersions(Set<InstanceMetaData> instanceMetaDataSet) {
         List<String> packagesWithMultipleVersions = instanceMetadataUpdater.collectPackagesWithMultipleVersions(instanceMetaDataSet);
         if (!packagesWithMultipleVersions.isEmpty()) {
             String message = messagesService.getMessage(InstanceMetadataUpdater.Msg.PACKAGES_ON_INSTANCES_ARE_DIFFERENT.code(),
-                    Collections.singletonList(packagesWithMultipleVersions.stream().collect(Collectors.joining(","))));
+                    Collections.singletonList(String.join(",", packagesWithMultipleVersions)));
             return CheckResult.failed(message);
-        } else {
-            return CheckResult.ok();
         }
+        return CheckResult.ok();
     }
 
     private String removeBuildVersion(String version) {

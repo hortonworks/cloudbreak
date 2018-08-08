@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.controller.validation.stack;
 
 import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -10,29 +9,29 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import com.sequenceiq.cloudbreak.api.model.EncryptionKeyConfigJson;
-import com.sequenceiq.cloudbreak.api.model.PlatformEncryptionKeysResponse;
-import com.sequenceiq.cloudbreak.api.model.PlatformResourceRequestJson;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupRequest;
-import com.sequenceiq.cloudbreak.api.model.v2.template.EncryptionType;
-import com.sequenceiq.cloudbreak.controller.PlatformParameterV1Controller;
-import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.api.model.EncryptionKeyConfigJson;
+import com.sequenceiq.cloudbreak.api.model.PlatformEncryptionKeysResponse;
+import com.sequenceiq.cloudbreak.api.model.PlatformResourceRequestJson;
 import com.sequenceiq.cloudbreak.api.model.TemplateRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupBase;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupBase;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupRequest;
+import com.sequenceiq.cloudbreak.api.model.v2.template.EncryptionType;
+import com.sequenceiq.cloudbreak.controller.PlatformParameterV1Controller;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.cloudbreak.controller.validation.Validator;
+import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 
 @Component
 public class StackRequestValidator implements Validator<StackRequest> {
@@ -96,13 +95,13 @@ public class StackRequestValidator implements Validator<StackRequest> {
                 Set<String> newHostGroupSet = Sets.newHashSet(hostGroupSet);
                 newHostGroupSet.removeAll(instanceGroupSet);
                 validationBuilder.error("There are host groups in the request that do not have a corresponding instance group: "
-                        + newHostGroupSet.stream().collect(Collectors.joining(", ")));
+                        + String.join(", ", newHostGroupSet));
             }
 
             if (!hostGroupSet.containsAll(instanceGroupSet)) {
                 instanceGroupSet.removeAll(hostGroupSet);
                 validationBuilder.error("There are instance groups in the request that do not have a corresponding host group: "
-                        + instanceGroupSet.stream().collect(Collectors.joining(", ")));
+                        + String.join(", ", instanceGroupSet));
             }
         }
     }
@@ -133,21 +132,18 @@ public class StackRequestValidator implements Validator<StackRequest> {
     }
 
     private void validateEncryptionKey(StackRequest stackRequest, ValidationResultBuilder validationBuilder) {
-        List<InstanceGroupRequest> instanceGroupsWithTypeKey = stackRequest.getInstanceGroups().stream()
-                .filter(request -> request.getTemplate().getParameters().containsKey(TYPE)).collect(Collectors.toList());
-        if (!instanceGroupsWithTypeKey.isEmpty()) {
-            for (InstanceGroupRequest instanceGroupRequest : instanceGroupsWithTypeKey) {
-                Optional<EncryptionType> valueForTypeKey = getEncryptionIfTypeMatches(instanceGroupRequest.getTemplate().getParameters().get(TYPE));
-                if (valueForTypeKey.isPresent() && EncryptionType.CUSTOM == getEncryptionIfTypeMatches(valueForTypeKey.get()).get()) {
-                    checkEncryptionKeyValidityForInstanceGroupWhenKeysAreListable(instanceGroupRequest, stackRequest.getCredentialName(),
-                            stackRequest.getAccount(), stackRequest.getRegion(), validationBuilder);
-                }
-            }
-        }
+        stackRequest.getInstanceGroups().stream()
+            .filter(request -> request.getTemplate().getParameters().containsKey(TYPE))
+            .filter(request -> {
+                EncryptionType valueForTypeKey = getEncryptionIfTypeMatches(request.getTemplate().getParameters().get(TYPE));
+                return valueForTypeKey != null && EncryptionType.CUSTOM.equals(getEncryptionIfTypeMatches(valueForTypeKey));
+            })
+            .forEach(request -> checkEncryptionKeyValidityForInstanceGroupWhenKeysAreListable(request, stackRequest.getCredentialName(),
+                    stackRequest.getAccount(), stackRequest.getRegion(), validationBuilder));
     }
 
-    private Optional<EncryptionType> getEncryptionIfTypeMatches(Object o) {
-        return o instanceof EncryptionType ? Optional.of((EncryptionType) o) : Optional.empty();
+    private EncryptionType getEncryptionIfTypeMatches(Object o) {
+        return o instanceof EncryptionType ? (EncryptionType) o : null;
     }
 
     private void checkEncryptionKeyValidityForInstanceGroupWhenKeysAreListable(InstanceGroupRequest instanceGroupRequest, String credentialName, String account,
