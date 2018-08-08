@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -14,12 +15,15 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.model.FailureReport;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
+import com.sequenceiq.periscope.aspects.AmbariRequestLogging;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.log.MDCBuilder;
+import com.sequenceiq.periscope.monitor.context.ClusterIdEvaluatorContext;
+import com.sequenceiq.periscope.monitor.context.EvaluatorContext;
 import com.sequenceiq.periscope.monitor.event.UpdateFailedEvent;
+import com.sequenceiq.periscope.service.AmbariClientProvider;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.configuration.CloudbreakClientConfiguration;
-import com.sequenceiq.periscope.service.AmbariClientProvider;
 
 @Component("AmbariAgentHealthEvaluator")
 @Scope("prototype")
@@ -48,11 +52,20 @@ public class AmbariAgentHealthEvaluator extends AbstractEventPublisher implement
     @Inject
     private CloudbreakClientConfiguration cloudbreakClientConfiguration;
 
+    @Inject
+    private AmbariRequestLogging ambariRequestLogging;
+
     private long clusterId;
 
     @Override
-    public void setContext(Map<String, Object> context) {
-        clusterId = (long) context.get(EvaluatorContext.CLUSTER_ID.name());
+    public void setContext(EvaluatorContext context) {
+        clusterId = (long) context.getData();
+    }
+
+    @Override
+    @Nonnull
+    public EvaluatorContext getContext() {
+        return new ClusterIdEvaluatorContext(clusterId);
     }
 
     @Override
@@ -63,7 +76,7 @@ public class AmbariAgentHealthEvaluator extends AbstractEventPublisher implement
         LOGGER.info("Checking '{}' alerts for cluster {}.", AMBARI_AGENT_HEARTBEAT, cluster.getId());
         try {
             AmbariClient ambariClient = ambariClientProvider.createAmbariClient(cluster);
-            List<Map<String, Object>> alertHistory = ambariClient.getAlert(AMBARI_AGENT_HEARTBEAT_DEF_NAME);
+            List<Map<String, Object>> alertHistory = ambariRequestLogging.logging(() -> ambariClient.getAlert(AMBARI_AGENT_HEARTBEAT_DEF_NAME), "alert");
             if (!alertHistory.isEmpty()) {
                 List<String> hostNamesToRecover = new ArrayList<>();
                 for (Map<String, Object> history : alertHistory) {

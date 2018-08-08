@@ -2,6 +2,7 @@ package com.sequenceiq.periscope.monitor;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionException;
 
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
@@ -9,15 +10,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 
-import com.sequenceiq.periscope.api.model.ClusterState;
-import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.log.MDCBuilder;
+import com.sequenceiq.periscope.monitor.context.EvaluatorContext;
 import com.sequenceiq.periscope.monitor.evaluator.EvaluatorExecutor;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.ha.PeriscopeNodeConfig;
 import com.sequenceiq.periscope.utils.LoggerUtils;
+import com.sequenceiq.periscope.service.RejectedThreadService;
 
-public abstract class AbstractMonitor implements Monitor {
+public abstract class AbstractMonitor<M extends Monitored> implements Monitor<M> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractMonitor.class);
 
@@ -31,17 +32,28 @@ public abstract class AbstractMonitor implements Monitor {
 
     private LoggerUtils loggerUtils;
 
+    private RejectedThreadService rejectedThreadService;
+
     @Override
     public void execute(JobExecutionContext context) {
         MDCBuilder.buildMdcContext();
         evalContext(context);
-        for (Cluster cluster : getClusters()) {
-            EvaluatorExecutor evaluatorExecutor = applicationContext.getBean(getEvaluatorType().getSimpleName(), EvaluatorExecutor.class);
-            evaluatorExecutor.setContext(getContext(cluster));
-            loggerUtils.logThreadPoolExecutorParameters(LOGGER, getEvaluatorType().getName(), executorService);
-            executorService.submit(evaluatorExecutor);
-            cluster.setLastEvaulated(System.currentTimeMillis());
-            clusterService.save(cluster);
+        List<M> monitoredData = getMonitored();
+        LOGGER.info("Job started: {}, monitored: {}", context.getJobDetail().getKey(), monitoredData.size());
+        for (M monitored : monitoredData) {
+            try {
+                loggerUtils.logThreadPoolExecutorParameters(LOGGER, getEvaluatorType(monitored).getName(), executorService);
+                EvaluatorExecutor evaluatorExecutor = getEvaluatorExecutorBean(monitored);
+                EvaluatorContext evaluatorContext = getContext(monitored);
+                evaluatorExecutor.setContext(evaluatorContext);
+                executorService.submit(evaluatorExecutor);
+                LOGGER.info("Succesfully submitted {}.", evaluatorContext.getData());
+                rejectedThreadService.remove(evaluatorContext.getData());
+                monitored.setLastEvaluated(System.currentTimeMillis());
+                save(monitored);
+            } catch (RejectedExecutionException ignore) {
+
+            }
         }
     }
 
@@ -52,17 +64,22 @@ public abstract class AbstractMonitor implements Monitor {
         clusterService = applicationContext.getBean(ClusterService.class);
         periscopeNodeConfig = applicationContext.getBean(PeriscopeNodeConfig.class);
         loggerUtils = applicationContext.getBean(LoggerUtils.class);
+        rejectedThreadService = applicationContext.getBean(RejectedThreadService.class);
     }
 
-    PeriscopeNodeConfig getPeriscopeNodeConfig() {
-        return periscopeNodeConfig;
+    protected ApplicationContext getApplicationContext() {
+        return applicationContext;
     }
 
-    ClusterService getClusterService() {
-        return clusterService;
+    protected EvaluatorExecutor getEvaluatorExecutorBean(M cluster) {
+        return applicationContext.getBean(getEvaluatorType(cluster).getSimpleName(), EvaluatorExecutor.class);
     }
 
-    List<Cluster> getClusters() {
-        return clusterService.findAllForNode(ClusterState.RUNNING, true, periscopeNodeConfig.getId());
+    protected abstract List<M> getMonitored();
+
+    protected abstract M save(M monitored);
+
+    protected RejectedThreadService getRejectedThreadService() {
+        return rejectedThreadService;
     }
 }

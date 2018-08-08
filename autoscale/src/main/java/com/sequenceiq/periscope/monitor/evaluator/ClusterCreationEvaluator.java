@@ -4,6 +4,7 @@ import static com.sequenceiq.periscope.api.model.ClusterState.PENDING;
 import static com.sequenceiq.periscope.api.model.ClusterState.RUNNING;
 import static com.sequenceiq.periscope.api.model.ClusterState.SUSPENDED;
 
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.model.AutoscaleStackResponse;
 import com.sequenceiq.periscope.api.model.ScalingStatus;
+import com.sequenceiq.periscope.aspects.AmbariRequestLogging;
 import com.sequenceiq.periscope.domain.Ambari;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.History;
@@ -21,7 +23,7 @@ import com.sequenceiq.periscope.domain.PeriscopeUser;
 import com.sequenceiq.periscope.domain.SecurityConfig;
 import com.sequenceiq.periscope.log.MDCBuilder;
 import com.sequenceiq.periscope.model.AmbariStack;
-import com.sequenceiq.periscope.model.ClusterCreationEvaluatorContext;
+import com.sequenceiq.periscope.monitor.context.EvaluatorContext;
 import com.sequenceiq.periscope.notification.HttpNotificationSender;
 import com.sequenceiq.periscope.service.AmbariClientProvider;
 import com.sequenceiq.periscope.service.ClusterService;
@@ -31,7 +33,7 @@ import com.sequenceiq.periscope.service.security.TlsSecurityService;
 
 @Component("ClusterCreationEvaluator")
 @Scope("prototype")
-public class ClusterCreationEvaluator implements Runnable {
+public class ClusterCreationEvaluator implements EvaluatorExecutor {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterCreationEvaluator.class);
 
     @Inject
@@ -49,13 +51,15 @@ public class ClusterCreationEvaluator implements Runnable {
     @Inject
     private HttpNotificationSender notificationSender;
 
-    private ClusterCreationEvaluatorContext context;
+    @Inject
+    private AmbariRequestLogging ambariRequestLogging;
+
+    private EvaluatorContext context;
 
     @Override
     public void run() {
-
         long start = System.currentTimeMillis();
-        AutoscaleStackResponse stack = context.getStack();
+        AutoscaleStackResponse stack = (AutoscaleStackResponse) context.getData();
         try {
             Cluster cluster = clusterService.findOneByStackId(stack.getStackId());
             AmbariStack resolvedAmbari = createAmbariStack(stack);
@@ -79,8 +83,15 @@ public class ClusterCreationEvaluator implements Runnable {
         }
     }
 
-    public void setContext(ClusterCreationEvaluatorContext context) {
+    @Override
+    public void setContext(EvaluatorContext context) {
         this.context = context;
+    }
+
+    @Override
+    @Nonnull
+    public EvaluatorContext getContext() {
+        return context;
     }
 
     private void createCluster(AutoscaleStackResponse stack, AmbariStack resolvedAmbari) {
@@ -113,7 +124,7 @@ public class ClusterCreationEvaluator implements Runnable {
         String host = ambariStack.getAmbari().getHost();
         try {
             AmbariClient client = ambariClientProvider.createAmbariClient(new Cluster(user, ambariStack));
-            String healthCheckResult = client.healthCheck();
+            String healthCheckResult = ambariRequestLogging.logging(client::healthCheck, "healthCheck");
             if (!"RUNNING".equals(healthCheckResult)) {
                 throw new AmbariHealtCheckException(String.format("Ambari on host '%s' is not in 'RUNNING' state.", host));
             }

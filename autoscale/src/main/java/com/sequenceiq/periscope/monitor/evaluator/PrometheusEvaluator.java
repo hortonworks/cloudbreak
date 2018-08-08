@@ -2,8 +2,8 @@ package com.sequenceiq.periscope.monitor.evaluator;
 
 import java.net.URLEncoder;
 import java.util.List;
-import java.util.Map;
 
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
@@ -25,6 +25,8 @@ import com.sequenceiq.periscope.log.MDCBuilder;
 import com.sequenceiq.periscope.model.PrometheusResponse;
 import com.sequenceiq.periscope.model.PrometheusResponse.Result;
 import com.sequenceiq.periscope.model.TlsConfiguration;
+import com.sequenceiq.periscope.monitor.context.ClusterIdEvaluatorContext;
+import com.sequenceiq.periscope.monitor.context.EvaluatorContext;
 import com.sequenceiq.periscope.monitor.event.ScalingEvent;
 import com.sequenceiq.periscope.monitor.event.UpdateFailedEvent;
 import com.sequenceiq.periscope.repository.PrometheusAlertRepository;
@@ -46,11 +48,17 @@ public class PrometheusEvaluator extends AbstractEventPublisher implements Evalu
     @Inject
     private TlsSecurityService tlsSecurityService;
 
-    private Long clusterId;
+    private long clusterId;
 
     @Override
-    public void setContext(Map<String, Object> context) {
-        clusterId = (Long) context.get(EvaluatorContext.CLUSTER_ID.name());
+    public void setContext(EvaluatorContext context) {
+        clusterId = (long) context.getData();
+    }
+
+    @Override
+    @Nonnull
+    public EvaluatorContext getContext() {
+        return new ClusterIdEvaluatorContext(clusterId);
     }
 
     @Override

@@ -1,12 +1,11 @@
 package com.sequenceiq.periscope.monitor.evaluator;
 
-import java.util.Map;
+import javax.annotation.Nonnull;
 
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.ApplicationEventPublisherAware;
+import com.sequenceiq.periscope.monitor.context.EvaluatorContext;
 
-public interface EvaluatorExecutor extends ApplicationEventPublisher, ApplicationEventPublisherAware, Runnable {
+public interface EvaluatorExecutor extends Runnable, EvaluatorContextAware {
 
-    void setContext(Map<String, Object> context);
-
+    @Nonnull
+    EvaluatorContext getContext();
 }

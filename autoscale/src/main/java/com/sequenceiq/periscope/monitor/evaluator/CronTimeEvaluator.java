@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -17,6 +18,8 @@ import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.TimeAlert;
 import com.sequenceiq.periscope.log.MDCBuilder;
 import com.sequenceiq.periscope.monitor.MonitorUpdateRate;
+import com.sequenceiq.periscope.monitor.context.ClusterIdEvaluatorContext;
+import com.sequenceiq.periscope.monitor.context.EvaluatorContext;
 import com.sequenceiq.periscope.monitor.event.ScalingEvent;
 import com.sequenceiq.periscope.repository.TimeAlertRepository;
 import com.sequenceiq.periscope.service.ClusterService;
@@ -40,8 +43,14 @@ public class CronTimeEvaluator extends AbstractEventPublisher implements Evaluat
     private long clusterId;
 
     @Override
-    public void setContext(Map<String, Object> context) {
-        clusterId = (long) context.get(EvaluatorContext.CLUSTER_ID.name());
+    public void setContext(EvaluatorContext context) {
+        clusterId = (long) context.getData();
+    }
+
+    @Override
+    @Nonnull
+    public EvaluatorContext getContext() {
+        return new ClusterIdEvaluatorContext(clusterId);
     }
 
     private boolean isTrigger(TimeAlert alert) {

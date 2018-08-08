@@ -170,7 +170,7 @@ public class LeaderElectionService {
         long now = clock.getCurrentTime();
         return cluster.getPeriscopeNodeId() != null
                 && cluster.isAutoscalingEnabled()
-                && cluster.getLastEvaulated() != 0L
+                && cluster.getLastEvaluated() != 0L
                 && now - cluster.getLastScalingActivity() < now - TimeUtil.convertMinToMillisec(cluster.getCoolDown())
                 && cluster.getTimeAlerts() != null && !cluster.getTimeAlerts().isEmpty();
     }
@@ -178,7 +178,7 @@ public class LeaderElectionService {
     private void executeMissedTimeBasedAlerts(Cluster cluster) {
         Map<TimeAlert, ZonedDateTime> alerts = new LinkedHashMap<>();
         ZonedDateTime now = dateTimeService.getDefaultZonedDateTime();
-        long millisDiff = clock.getCurrentTime() - cluster.getLastEvaulated();
+        long millisDiff = clock.getCurrentTime() - cluster.getLastEvaluated();
         long coolDown = TimeUtil.convertMinToMillisec(cluster.getCoolDown());
         long rewindMillis = Math.min(millisDiff, coolDown);
         LOGGER.debug("Start rewind for cluster {} at {} - millisDiff: {}, coolDown: {}, rewindMillis: {}",
