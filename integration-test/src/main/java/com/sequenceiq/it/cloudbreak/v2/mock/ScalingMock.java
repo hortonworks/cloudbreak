@@ -48,7 +48,7 @@ import spark.Service;
 public class ScalingMock extends MockServer {
     public static final String NAME = "ScalingMock";
 
-    private int grainsBaseAppendCount = 6;
+    private int grainsBaseAppendCount = 8;
 
     public ScalingMock(int mockPort, int sshPort, Map<String, CloudVmMetaDataStatus> instanceMap) {
         super(mockPort, sshPort, instanceMap);
