@@ -1,18 +1,15 @@
 package com.sequenceiq.periscope.monitor;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.monitor.evaluator.AmbariAgentHealthEvaluator;
-import com.sequenceiq.periscope.monitor.evaluator.EvaluatorContext;
 
 @Component
-public class AmbariAgentHealthMonitor extends AbstractMonitor {
+public class AmbariAgentHealthMonitor extends ClusterMonitor {
 
     @Override
     public String getIdentifier() {
@@ -25,17 +22,12 @@ public class AmbariAgentHealthMonitor extends AbstractMonitor {
     }
 
     @Override
-    public Class<?> getEvaluatorType() {
+    public Class<?> getEvaluatorType(Cluster cluster) {
         return AmbariAgentHealthEvaluator.class;
     }
 
     @Override
-    public Map<String, Object> getContext(Cluster cluster) {
-        return Collections.singletonMap(EvaluatorContext.CLUSTER_ID.name(), cluster.getId());
-    }
-
-    @Override
-    List<Cluster> getClusters() {
+    protected List<Cluster> getMonitored() {
         return getClusterService().findAllByStateAndNode(ClusterState.RUNNING, getPeriscopeNodeConfig().getId());
     }
 }

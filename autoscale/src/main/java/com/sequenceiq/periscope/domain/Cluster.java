@@ -20,9 +20,10 @@ import javax.persistence.SequenceGenerator;
 
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.model.AmbariStack;
+import com.sequenceiq.periscope.monitor.Monitored;
 
 @Entity
-public class Cluster {
+public class Cluster implements Monitored {
 
     private static final int DEFAULT_MIN_SIZE = 2;
 
@@ -77,7 +78,8 @@ public class Cluster {
 
     private String periscopeNodeId;
 
-    private long lastEvaulated;
+    @Column(name = "lastevaulated")
+    private long lastEvaluated;
 
     public Cluster() {
     }
@@ -252,12 +254,12 @@ public class Cluster {
         this.periscopeNodeId = periscopeNodeId;
     }
 
-    public long getLastEvaulated() {
-        return lastEvaulated;
+    public long getLastEvaluated() {
+        return lastEvaluated;
     }
 
-    public void setLastEvaulated(long lastEvaulated) {
-        this.lastEvaulated = lastEvaulated;
+    public void setLastEvaluated(long lastEvaluated) {
+        this.lastEvaluated = lastEvaluated;
     }
 }
 

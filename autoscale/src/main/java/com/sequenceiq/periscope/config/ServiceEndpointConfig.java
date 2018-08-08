@@ -3,6 +3,7 @@ package com.sequenceiq.periscope.config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 
 import com.sequenceiq.periscope.service.registry.DNSServiceAddressResolver;
 import com.sequenceiq.periscope.service.registry.RetryingServiceAddressResolver;
@@ -41,17 +42,20 @@ public class ServiceEndpointConfig {
     }
 
     @Bean
-    public String databaseAddress() throws ServiceAddressResolvingException {
-        return serviceAddressResolver().resolveHostPort(dbHost, dbPort, databaseId);
+    @DependsOn("serviceAddressResolver")
+    public String databaseAddress(ServiceAddressResolver serviceAddressResolver) throws ServiceAddressResolvingException {
+        return serviceAddressResolver.resolveHostPort(dbHost, dbPort, databaseId);
     }
 
     @Bean
-    public String identityServerUrl() throws ServiceAddressResolvingException {
-        return serviceAddressResolver().resolveUrl(identityServiceUrl, "http", identityServiceId);
+    @DependsOn("serviceAddressResolver")
+    public String identityServerUrl(ServiceAddressResolver serviceAddressResolver) throws ServiceAddressResolvingException {
+        return serviceAddressResolver.resolveUrl(identityServiceUrl, "http", identityServiceId);
     }
 
     @Bean
-    public String cloudbreakUrl() throws ServiceAddressResolvingException {
-        return serviceAddressResolver().resolveUrl(cloudbreakUrl, "http", cloudbreakServiceId);
+    @DependsOn("serviceAddressResolver")
+    public String cloudbreakUrl(ServiceAddressResolver serviceAddressResolver) throws ServiceAddressResolvingException {
+        return serviceAddressResolver.resolveUrl(cloudbreakUrl, "http", cloudbreakServiceId);
     }
 }

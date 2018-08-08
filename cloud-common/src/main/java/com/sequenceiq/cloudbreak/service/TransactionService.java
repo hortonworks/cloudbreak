@@ -128,9 +128,9 @@ public class TransactionService {
 
     @Service
     @Transactional
-    private static class TransactionExecutorService {
+    public static class TransactionExecutorService {
 
-        TransactionExecutorService() {
+        public TransactionExecutorService() {
         }
 
         @Transactional(TxType.REQUIRED)

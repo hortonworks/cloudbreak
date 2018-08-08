@@ -229,10 +229,15 @@ public class CloudbreakClient {
             tokenCache.put(TOKEN_KEY, accessToken.getToken(), ExpirationPolicy.CREATED, exp, TimeUnit.SECONDS);
             refreshEndpointWrapperHolder(token);
         }
-        return (T) endpointWrapperHolder.endpoints.stream()
+        Optional<?> first = endpointWrapperHolder.endpoints.stream()
                 .filter(e -> e.endpointType.equals(clazz))
                 .map(e -> e.endPointProxy)
-                .findFirst().get();
+                .findFirst();
+        if (first.isPresent()) {
+            return (T) first.get();
+        } else {
+            return null;
+        }
     }
 
     private void refreshEndpointWrapperHolder(String token) {

@@ -213,7 +213,7 @@ public class LeaderElectionServiceTest {
     public void testExecuteMissedTimeBasedAlertsNotNeedLastEvalLessThanRewind() throws Exception {
         Cluster cluster = new Cluster();
         cluster.setCoolDown(2);
-        cluster.setLastEvaulated(4900L);
+        cluster.setLastEvaluated(4900L);
         cluster.setTimeAlerts(Collections.singleton(new TimeAlert()));
 
         WhiteboxImpl.invokeMethod(underTest, "executeMissedTimeBasedAlerts", cluster);
@@ -226,7 +226,7 @@ public class LeaderElectionServiceTest {
     public void testExecuteMissedTimeBasedAlertsNotNeedCooldownLessThanRewind() throws Exception {
         Cluster cluster = new Cluster();
         cluster.setCoolDown(0);
-        cluster.setLastEvaulated(1L);
+        cluster.setLastEvaluated(1L);
         cluster.setTimeAlerts(Collections.singleton(new TimeAlert()));
 
         WhiteboxImpl.invokeMethod(underTest, "executeMissedTimeBasedAlerts", cluster);
@@ -242,7 +242,7 @@ public class LeaderElectionServiceTest {
         when(dateTimeService.getNextSecound(any())).thenReturn(now);
         Cluster cluster = new Cluster();
         cluster.setCoolDown(5);
-        cluster.setLastEvaulated(2900L);
+        cluster.setLastEvaluated(2900L);
         TimeAlert timeAlert = new TimeAlert();
         cluster.setTimeAlerts(Collections.singleton(timeAlert));
 
@@ -262,7 +262,7 @@ public class LeaderElectionServiceTest {
         cluster.setAutoscalingEnabled(true);
         cluster.setCoolDown(0);
         cluster.setLastScalingActivity(4900L);
-        cluster.setLastEvaulated(1L);
+        cluster.setLastEvaluated(1L);
         cluster.setTimeAlerts(Collections.singleton(null));
         return cluster;
     }
