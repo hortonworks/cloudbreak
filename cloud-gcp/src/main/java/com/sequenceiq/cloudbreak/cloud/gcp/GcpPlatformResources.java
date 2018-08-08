@@ -291,7 +291,7 @@ public class GcpPlatformResources implements PlatformResources {
 
     private Function<CryptoKey, CloudEncryptionKey> toCloudEncryptionKey(String projectId, String keyRing, String location) {
         return cryptoKey -> {
-            Map<String, Object> metadata = new HashMap<>(cryptoKey.getLabels());
+            Map<String, Object> metadata = new HashMap<>(Optional.ofNullable(cryptoKey.getLabels()).orElse(Map.of()));
             return new CloudEncryptionKey(cryptoKey.getName(), cryptoKey.getName(), cryptoKey.getPurpose(), cryptoKey.getName(), metadata);
         };
     }

@@ -5,6 +5,6 @@ UPDATE template SET secretAttributes='{}';
 
 -- //@UNDO
 -- SQL to undo the change goes here.
-ALTER TABLE IF EXISTS template DROP COLUMN IF EXISTS secretAttributes;
+ALTER TABLE template DROP COLUMN IF EXISTS secretAttributes;
 
 
