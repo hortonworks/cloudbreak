@@ -37,7 +37,6 @@ public class RecipeRequestToRecipeConverter extends AbstractConversionServiceAwa
 
             }
             recipe.setName(name);
-
         }
         recipe.setDescription(json.getDescription());
         recipe.setRecipeType(json.getRecipeType());

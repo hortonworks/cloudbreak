@@ -33,6 +33,7 @@ public class ControllerDescription {
     public static final String IMAGE_CATALOG_DESCRIPTION = "Operations on Image catalogs";
     public static final String REPOSITORY_CONFIGS_VALIDATION_DESCRIPTION = "Operations to validate repository configs";
     public static final String ORGANIZATION_DESCRIPTION = "Operations on organiztions";
+    public static final String RECIPE_V3_DESCRIPTION = "Operations on Recipes by Organization";
 
     private ControllerDescription() {
     }

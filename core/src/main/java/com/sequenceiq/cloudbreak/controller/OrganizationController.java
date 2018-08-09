@@ -54,21 +54,19 @@ public class OrganizationController extends NotificationController implements Or
 
     @Override
     public SortedSet<OrganizationResponse> getAll() {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        Set<Organization> organizations = organizationService.retrieveForUser(user);
+        Set<Organization> organizations = organizationService.retrieveForCurrentUser();
         return organizationsToSortedResponse(organizations);
     }
 
     @Override
     public OrganizationResponse getByName(String name) {
-        Organization organization = organizationService.getOrganizationOrThrowNotFound(name);
+        Organization organization = organizationService.getByNameForCurrentUserOrThrowNotFound(name);
         return conversionService.convert(organization, OrganizationResponse.class);
     }
 
     @Override
     public OrganizationResponse deleteByName(String name) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        Organization organization = organizationService.deleteByName(name, user);
+        Organization organization = organizationService.deleteByNameForCurrentUser(name);
         return conversionService.convert(organization, OrganizationResponse.class);
     }
 

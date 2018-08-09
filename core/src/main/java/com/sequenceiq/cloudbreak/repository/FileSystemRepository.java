@@ -4,7 +4,6 @@ import java.util.Set;
 
 import javax.transaction.Transactional;
 
-import com.sequenceiq.cloudbreak.aspect.BaseRepository;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.aspect.HasPermission;
 import com.sequenceiq.cloudbreak.service.EntityType;

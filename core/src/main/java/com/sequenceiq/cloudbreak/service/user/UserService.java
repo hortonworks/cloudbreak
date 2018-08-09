@@ -13,9 +13,9 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.security.Organization;
 import com.sequenceiq.cloudbreak.domain.security.Tenant;
 import com.sequenceiq.cloudbreak.domain.security.User;
-import com.sequenceiq.cloudbreak.repository.security.TenantRepository;
-import com.sequenceiq.cloudbreak.repository.security.UserOrgPermissionsRepository;
-import com.sequenceiq.cloudbreak.repository.security.UserRepository;
+import com.sequenceiq.cloudbreak.repository.organization.TenantRepository;
+import com.sequenceiq.cloudbreak.repository.organization.UserRepository;
+import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
@@ -33,10 +33,15 @@ public class UserService {
     private OrganizationService organizationService;
 
     @Inject
-    private UserOrgPermissionsRepository userOrgPermissionsRepository;
+    private TransactionService transactionService;
 
     @Inject
-    private TransactionService transactionService;
+    private AuthenticatedUserService authenticatedUserService;
+
+    public User getCurrentUser() {
+        IdentityUser identityUser = authenticatedUserService.getCbUser();
+        return getOrCreate(identityUser);
+    }
 
     public User getOrCreate(IdentityUser identityUser) {
         try {

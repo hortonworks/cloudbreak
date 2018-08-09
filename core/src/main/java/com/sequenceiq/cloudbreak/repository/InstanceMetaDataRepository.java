@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
-import com.sequenceiq.cloudbreak.aspect.DisablePermission;
+import com.sequenceiq.cloudbreak.aspect.DisableHasPermission;
 import com.sequenceiq.cloudbreak.aspect.DisabledBaseRepository;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.service.EntityType;
 
 @EntityType(entityClass = InstanceMetaData.class)
 @Transactional(Transactional.TxType.REQUIRED)
-@DisablePermission
+@DisableHasPermission
 public interface InstanceMetaDataRepository extends DisabledBaseRepository<InstanceMetaData, Long> {
 
     Set<InstanceMetaData> findAllByInstanceIdIn(Iterable<String> instanceId);

@@ -88,7 +88,7 @@ public class HostGroupDecorator {
     }
 
     private void prepareRecipesByName(HostGroup subject, IdentityUser user, Collection<String> recipeNames) {
-        Set<Recipe> recipes = recipeService.getPublicRecipes(user, recipeNames);
+        Set<Recipe> recipes = recipeService.getRecipesByNames(user, recipeNames);
         subject.getRecipes().addAll(recipes);
     }
 

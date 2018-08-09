@@ -1,22 +1,25 @@
 package com.sequenceiq.cloudbreak.validation;
 
-import static com.sequenceiq.cloudbreak.validation.Permissions.Action.INVITE;
-import static com.sequenceiq.cloudbreak.validation.Permissions.Action.MANAGE;
-import static com.sequenceiq.cloudbreak.validation.Permissions.Action.READ;
-import static com.sequenceiq.cloudbreak.validation.Permissions.Action.WRITE;
-import static com.sequenceiq.cloudbreak.validation.Permissions.Resource.ALL;
-import static com.sequenceiq.cloudbreak.validation.Permissions.Resource.BLUEPRINT;
-import static com.sequenceiq.cloudbreak.validation.Permissions.Resource.CREDENTIAL;
-import static com.sequenceiq.cloudbreak.validation.Permissions.Resource.IMAGECATALOG;
-import static com.sequenceiq.cloudbreak.validation.Permissions.Resource.LDAP;
-import static com.sequenceiq.cloudbreak.validation.Permissions.Resource.MPACK;
-import static com.sequenceiq.cloudbreak.validation.Permissions.Resource.ORG;
-import static com.sequenceiq.cloudbreak.validation.Permissions.Resource.PROXY;
-import static com.sequenceiq.cloudbreak.validation.Permissions.Resource.RDS;
-import static com.sequenceiq.cloudbreak.validation.Permissions.Resource.RECIPE;
-import static com.sequenceiq.cloudbreak.validation.Permissions.Resource.STACK;
+import static com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Action.INVITE;
+import static com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Action.MANAGE;
+import static com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Action.READ;
+import static com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Action.WRITE;
+import static com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Resource.ALL;
+import static com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Resource.BLUEPRINT;
+import static com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Resource.CREDENTIAL;
+import static com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Resource.IMAGECATALOG;
+import static com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Resource.LDAP;
+import static com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Resource.MPACK;
+import static com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Resource.ORG;
+import static com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Resource.PROXY;
+import static com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Resource.RDS;
+import static com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Resource.RECIPE;
+import static com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Resource.STACK;
 
-public enum Permissions {
+import java.util.Set;
+
+public enum OrganizationPermissions {
+
     ORG_INVITE(ORG, INVITE, "Invite users into the organization."),
     ORG_MANAGE(ORG, MANAGE, "Manage users and permissions in an organization."),
 
@@ -58,11 +61,35 @@ public enum Permissions {
 
     private String description;
 
-    Permissions(Resource resource, Action action, String description) {
+    OrganizationPermissions(Resource resource, Action action, String description) {
         this.resource = resource;
         this.action = action;
         this.description = description;
-        this.name = resource.name() + ":" + action.name();
+        this.name = getName(resource, action);
+    }
+
+    public static String getName(Resource resource, Action action) {
+        return resource.name() + ':' + action.name();
+    }
+
+    public static boolean hasPermission(Set<String> permissions, Resource resource, Action action) {
+        if (resource == ORG) {
+            if (action == INVITE && (permissions.contains(ORG_INVITE.name) || permissions.contains(ORG_MANAGE.name))) {
+                return true;
+            }
+            if (action == MANAGE && permissions.contains(ORG_MANAGE.name)) {
+                return true;
+            }
+            return false;
+        }
+        if (permissions.contains(ALL_WRITE.name)) {
+            return true;
+        }
+        if (permissions.contains(ALL_READ.name) && action == READ) {
+            return true;
+        }
+        String permissionName = getName(resource, action);
+        return permissions.contains(permissionName);
     }
 
     public String value() {
@@ -73,8 +100,8 @@ public enum Permissions {
         return description;
     }
 
-    public static Permissions of(String value) {
-        for (Permissions permission : Permissions.values()) {
+    public static OrganizationPermissions of(String value) {
+        for (OrganizationPermissions permission : OrganizationPermissions.values()) {
             if (value.equals(permission.value())) {
                 return permission;
             }
@@ -83,7 +110,7 @@ public enum Permissions {
     }
 
     public static boolean isValid(String value) {
-        for (Permissions p : values()) {
+        for (OrganizationPermissions p : values()) {
             if (value.equals(p.value())) {
                 return true;
             }
@@ -91,7 +118,7 @@ public enum Permissions {
         return false;
     }
 
-    enum Resource {
+    public enum Resource {
         ALL,
         ORG,
         BLUEPRINT,
@@ -105,7 +132,7 @@ public enum Permissions {
         MPACK
     }
 
-    enum Action {
+    public enum Action {
         READ,
         WRITE,
         INVITE,

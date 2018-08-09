@@ -47,7 +47,7 @@ import com.sequenceiq.cloudbreak.repository.SecurityConfigRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.StackStatusRepository;
 import com.sequenceiq.cloudbreak.repository.StackViewRepository;
-import com.sequenceiq.cloudbreak.repository.security.UserRepository;
+import com.sequenceiq.cloudbreak.repository.organization.UserRepository;
 import com.sequenceiq.cloudbreak.service.Clock;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.StackUpdater;

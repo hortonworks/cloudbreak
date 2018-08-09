@@ -35,17 +35,19 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
+import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredEventClient;
 import com.sequenceiq.cloudbreak.structuredevent.event.OperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredRestCallEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestCallDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestRequestDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestResponseDetails;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Component
 public class StructuredEventFilter implements WriterInterceptor, ContainerRequestFilter, ContainerResponseFilter {
@@ -72,6 +74,19 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
 
     private static final String RESOURCE_NAME = "RESOURCE_NAME";
 
+    private final List<String> urlBlackList = Lists.newArrayList("connectors", "flexsubscriptions", "accountpreferences", "users");
+
+    private final List<String> skippedHeadersList = Lists.newArrayList("authorization");
+
+    private final List<String> postUrlPatterns = Lists.newArrayList("\\/cb\\/api\\/v3\\/\\d+\\/([a-z]*).*", "\\/cb\\/api\\/v.\\/([a-z]*).*");
+
+    private final List<String> deleteUrlPatterns = Lists.newArrayList(
+            "\\/cb\\/api\\/v.\\/([a-z]*)\\/([0-9]+)",
+            "\\/cb\\/api\\/v.\\/([a-z]*)\\/(user|account)\\/(.*)");
+
+    private final List<String> putUrlPatterns = Lists.newArrayList(
+            "\\/cb\\/api\\/v.\\/([a-z]*)\\/([0-9]+).*", "\\/cb\\/api\\/v.\\/([a-z]*).*");
+
     @Inject
     private CloudbreakNodeConfig cloudbreakNodeConfig;
 
@@ -88,18 +103,7 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
     @Value("${cb.structuredevent.rest.contentlogging:false}")
     private Boolean contentLogging;
 
-    private final List<String> urlBlackList = Lists.newArrayList("connectors", "flexsubscriptions", "accountpreferences", "users");
-
-    private final List<String> skippedHeadersList = Lists.newArrayList("authorization");
-
-    private final List<String> postUrlPatterns = Lists.newArrayList("\\/cb\\/api\\/v.\\/([a-z]*).*");
-
-    private final List<String> deleteUrlPatterns = Lists.newArrayList(
-            "\\/cb\\/api\\/v.\\/([a-z]*)\\/([0-9]+)",
-            "\\/cb\\/api\\/v.\\/([a-z]*)\\/(user|account)\\/(.*)");
-
-    private final List<String> putUrlPatterns = Lists.newArrayList(
-            "\\/cb\\/api\\/v.\\/([a-z]*)\\/([0-9]+).*", "\\/cb\\/api\\/v.\\/([a-z]*).*");
+    private final Pattern extendRestParamsFromResponsePattern = Pattern.compile("\"id\":([0-9]*)");
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
@@ -196,11 +200,24 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
     }
 
     private void extendRestParamsFromResponse(Map<String, String> params, CharSequence responseBody) {
-        if (!params.containsKey(RESOURCE_ID)) {
-            Pattern pattern = Pattern.compile("\"id\":([0-9]*)");
-            Matcher matcher = pattern.matcher(responseBody);
-            if (matcher.find() && matcher.groupCount() >= 1) {
-                params.put(RESOURCE_ID, matcher.group(1));
+        if (responseBody != null && !params.containsKey(RESOURCE_ID)) {
+            String resourceId = null;
+            try {
+                JsonNode jsonNode = JsonUtil.readTree(responseBody.toString());
+                JsonNode idNode = jsonNode.path("id");
+                resourceId = idNode.asText();
+            } catch (IOException e) {
+                LOGGER.warn("Parsing of ID from JSON response failed", e);
+            }
+            if (StringUtils.isEmpty(resourceId)) {
+                Matcher matcher = extendRestParamsFromResponsePattern.matcher(responseBody);
+                if (matcher.find() && matcher.groupCount() >= 1) {
+                    resourceId = matcher.group(1);
+                }
+            }
+
+            if (resourceId != null) {
+                params.put(RESOURCE_ID, resourceId);
             }
         }
     }
@@ -215,7 +232,7 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
         String resoureceType = restParams.get(RESOURCE_TYPE);
         String resoureceId = restParams.get(RESOURCE_ID);
         String resoureceName = restParams.get(RESOURCE_NAME);
-        return new OperationDetails(requestTime, REST, resoureceType, resoureceId != null ? Long.valueOf(resoureceId) : null, resoureceName,
+        return new OperationDetails(requestTime, REST, resoureceType, StringUtils.isNotEmpty(resoureceId) ? Long.valueOf(resoureceId) : null, resoureceName,
                 user != null ? user.getAccount() : "", user != null ? user.getUserId() : "", user != null ? user.getUsername() : "",
                 cloudbreakNodeConfig.getId(), cbVersion);
     }

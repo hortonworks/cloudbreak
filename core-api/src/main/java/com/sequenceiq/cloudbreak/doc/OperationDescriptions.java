@@ -137,7 +137,11 @@ public class OperationDescriptions {
         public static final String DELETE_PRIVATE_BY_NAME = "delete private recipe by name";
         public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private recipe by name";
         public static final String DELETE_BY_ID = "delete recipe by id";
-        public static final String GET_BY_RECIPE_NAME = "retrieve recipe request by recipe name";
+        public static final String GET_RECIPE_REQUEST_BY_NAME = "retrieve recipe request by recipe name";
+        public static final String LIST_RECIPES_BY_ORGANIZATION = "list recipes for the given organization";
+        public static final String GET_RECIPE_BY_NAME_IN_ORG = "get recipe by name in organization";
+        public static final String CREATE_RECIPE_IN_ORG = "create recipe in organization";
+        public static final String DELETE_BY_NAME_IN_ORG = "delete recipe by name in organization";
     }
 
     public static class OrganizationOpDescription {

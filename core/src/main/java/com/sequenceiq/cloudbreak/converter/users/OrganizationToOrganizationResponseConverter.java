@@ -12,13 +12,13 @@ import com.sequenceiq.cloudbreak.api.model.users.UserOrgPermissionsJson;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.security.Organization;
 import com.sequenceiq.cloudbreak.domain.security.UserOrgPermissions;
-import com.sequenceiq.cloudbreak.repository.security.UserOrgPermissionsRepository;
+import com.sequenceiq.cloudbreak.service.user.UserOrgPermissionsService;
 
 @Component
 public class OrganizationToOrganizationResponseConverter extends AbstractConversionServiceAwareConverter<Organization, OrganizationResponse> {
 
     @Inject
-    private UserOrgPermissionsRepository userOrgPermissionsRepository;
+    private UserOrgPermissionsService userOrgPermissionService;
 
     @Override
     public OrganizationResponse convert(Organization organization) {
@@ -27,7 +27,7 @@ public class OrganizationToOrganizationResponseConverter extends AbstractConvers
         json.setName(organization.getName());
         json.setId(organization.getId());
         json.setStatus(organization.getStatus());
-        Set<UserOrgPermissions> userPermissions = userOrgPermissionsRepository.findForOrganization(organization);
+        Set<UserOrgPermissions> userPermissions = userOrgPermissionService.findForOrganization(organization);
         json.setUsers((Set<UserOrgPermissionsJson>) getConversionService().convert(userPermissions, TypeDescriptor.forObject(userPermissions),
                 TypeDescriptor.collection(Set.class, TypeDescriptor.valueOf(UserOrgPermissionsJson.class))));
         return json;

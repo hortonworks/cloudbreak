@@ -4,12 +4,12 @@ import java.util.List;
 
 import org.springframework.data.repository.query.Param;
 
-import com.sequenceiq.cloudbreak.aspect.DisablePermission;
+import com.sequenceiq.cloudbreak.aspect.DisableHasPermission;
 import com.sequenceiq.cloudbreak.aspect.DisabledBaseRepository;
 import com.sequenceiq.cloudbreak.service.EntityType;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
 
-@DisablePermission
+@DisableHasPermission
 @EntityType(entityClass = ScalingPolicy.class)
 public interface ScalingPolicyRepository extends DisabledBaseRepository<ScalingPolicy, Long> {
 

@@ -498,6 +498,10 @@ public class TestUtil {
             recipe.setUri("https://some/url");
             recipe.setContent("base64Content");
             recipe.setRecipeType(RecipeType.POST_AMBARI_START);
+            Organization organization = new Organization();
+            organization.setId(1L);
+            organization.setName("Top Secrert FBI");
+            recipe.setOrganization(organization);
             recipes.add(recipe);
         }
         return recipes;

@@ -13,6 +13,7 @@ import org.springframework.util.CollectionUtils;
 
 @Service
 public class RepositoryLookupService {
+
     @Inject
     private List<CrudRepository<?, ?>> repositoryList;
 

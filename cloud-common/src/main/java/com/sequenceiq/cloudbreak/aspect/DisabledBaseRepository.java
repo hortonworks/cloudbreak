@@ -7,7 +7,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.NoRepositoryBean;
 
 @NoRepositoryBean
-@DisablePermission
+@DisableHasPermission
 public interface DisabledBaseRepository<T, ID extends Serializable> extends CrudRepository<T, ID> {
 
     @Override
