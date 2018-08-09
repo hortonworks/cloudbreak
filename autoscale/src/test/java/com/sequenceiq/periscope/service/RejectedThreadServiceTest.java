@@ -1,5 +1,8 @@
 package com.sequenceiq.periscope.service;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import java.util.List;
 
 import javax.annotation.Nonnull;
@@ -23,8 +26,7 @@ public class RejectedThreadServiceTest {
     public void testCreateWhenAutoscaleStackResponse() {
         AutoscaleStackResponse response = new AutoscaleStackResponse();
         response.setStackId(1L);
-        EvaluatorContext context = () -> response;
-        EvaluatorExecutor task = new TestEvaluatorExecutor(context);
+        EvaluatorExecutor task = new TestEvaluatorExecutor(getContext(response));
 
         underTest.create(task);
 
@@ -37,8 +39,7 @@ public class RejectedThreadServiceTest {
     public void testCreateWhenAutoscaleStackResponseCountEqualsTwo() {
         AutoscaleStackResponse response = new AutoscaleStackResponse();
         response.setStackId(1L);
-        EvaluatorContext context = () -> response;
-        EvaluatorExecutor task = new TestEvaluatorExecutor(context);
+        EvaluatorExecutor task = new TestEvaluatorExecutor(getContext(response));
 
         underTest.create(task);
         underTest.create(task);
@@ -53,8 +54,7 @@ public class RejectedThreadServiceTest {
     public void testCreateWhenAutoscaleStackResponseAndRemove() {
         AutoscaleStackResponse response = new AutoscaleStackResponse();
         response.setStackId(1L);
-        EvaluatorContext context = () -> response;
-        EvaluatorExecutor task = new TestEvaluatorExecutor(context);
+        EvaluatorExecutor task = new TestEvaluatorExecutor(getContext(response));
 
         underTest.create(task);
 
@@ -71,8 +71,7 @@ public class RejectedThreadServiceTest {
     @Test
     public void testCreateWhenClusterId() {
         Long data = 1L;
-        EvaluatorContext context = () -> data;
-        EvaluatorExecutor task = new TestEvaluatorExecutor(context);
+        EvaluatorExecutor task = new TestEvaluatorExecutor(getContext(data));
 
         underTest.create(task);
 
@@ -84,8 +83,7 @@ public class RejectedThreadServiceTest {
     @Test
     public void testCreateWhenClusterIdCountEqualsTwo() {
         Long data = 1L;
-        EvaluatorContext context = () -> data;
-        EvaluatorExecutor task = new TestEvaluatorExecutor(context);
+        EvaluatorExecutor task = new TestEvaluatorExecutor(getContext(data));
 
         underTest.create(task);
         underTest.create(task);
@@ -99,8 +97,7 @@ public class RejectedThreadServiceTest {
     @Test
     public void testCreateWhenClusterIdAndRemove() {
         Long data = 1L;
-        EvaluatorContext context = () -> data;
-        EvaluatorExecutor task = new TestEvaluatorExecutor(context);
+        EvaluatorExecutor task = new TestEvaluatorExecutor(getContext(data));
 
         underTest.create(task);
 
@@ -112,6 +109,12 @@ public class RejectedThreadServiceTest {
 
         allRejectedCluster = underTest.getAllRejectedCluster();
         Assert.assertTrue(allRejectedCluster.isEmpty());
+    }
+
+    private EvaluatorContext getContext(Object data) {
+        EvaluatorContext context = mock(EvaluatorContext.class);
+        when(context.getData()).thenReturn(data);
+        return context;
     }
 
     private static class TestEvaluatorExecutor implements EvaluatorExecutor {
@@ -126,6 +129,11 @@ public class RejectedThreadServiceTest {
         @Override
         public EvaluatorContext getContext() {
             return context;
+        }
+
+        @Override
+        public String getName() {
+            return "";
         }
 
         @Override

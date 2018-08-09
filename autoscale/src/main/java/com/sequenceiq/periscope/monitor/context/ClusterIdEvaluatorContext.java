@@ -12,4 +12,9 @@ public class ClusterIdEvaluatorContext implements EvaluatorContext {
     public Object getData() {
         return clusterId;
     }
+
+    @Override
+    public long getItemId() {
+        return clusterId;
+    }
 }

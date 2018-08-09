@@ -1,6 +1,8 @@
 package com.sequenceiq.periscope.modul.rejected;
 
 import static com.sequenceiq.periscope.utils.DelayedAnswer.delayed;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -222,7 +224,7 @@ public class AmbariAgentHealthMonitorModulTest extends RejectedThreadContext {
 
         List<RejectedThread> allRejectedCluster = rejectedThreadService.getAllRejectedCluster();
 
-        Assert.assertFalse(allRejectedCluster.isEmpty());
+        Assert.assertThat(allRejectedCluster, not(empty()));
         RejectedThread rejectedThread = allRejectedCluster.get(0);
         Assert.assertEquals(5L, rejectedThread.getId());
         Assert.assertEquals(2L, rejectedThread.getRejectedCount());

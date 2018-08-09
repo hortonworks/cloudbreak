@@ -29,6 +29,7 @@ import com.sequenceiq.periscope.monitor.context.ClusterIdEvaluatorContext;
 import com.sequenceiq.periscope.monitor.context.EvaluatorContext;
 import com.sequenceiq.periscope.monitor.event.ScalingEvent;
 import com.sequenceiq.periscope.monitor.event.UpdateFailedEvent;
+import com.sequenceiq.periscope.monitor.executor.ExecutorServiceWithRegistry;
 import com.sequenceiq.periscope.repository.PrometheusAlertRepository;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.security.TlsSecurityService;
@@ -39,6 +40,8 @@ public class PrometheusEvaluator extends AbstractEventPublisher implements Evalu
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PrometheusEvaluator.class);
 
+    private static final String EVALUATOR_NAME = PrometheusEvaluator.class.getName();
+
     @Autowired
     private ClusterService clusterService;
 
@@ -47,6 +50,9 @@ public class PrometheusEvaluator extends AbstractEventPublisher implements Evalu
 
     @Inject
     private TlsSecurityService tlsSecurityService;
+
+    @Inject
+    private ExecutorServiceWithRegistry executorServiceWithRegistry;
 
     private long clusterId;
 
@@ -59,6 +65,11 @@ public class PrometheusEvaluator extends AbstractEventPublisher implements Evalu
     @Nonnull
     public EvaluatorContext getContext() {
         return new ClusterIdEvaluatorContext(clusterId);
+    }
+
+    @Override
+    public String getName() {
+        return EVALUATOR_NAME;
     }
 
     @Override
@@ -121,6 +132,7 @@ public class PrometheusEvaluator extends AbstractEventPublisher implements Evalu
             LOGGER.error("Failed to retrieve alerts from Prometheus", e);
             publishEvent(new UpdateFailedEvent(clusterId));
         } finally {
+            executorServiceWithRegistry.finished(this, clusterId);
             LOGGER.info("Finished prometheusEvaluator for cluster {} in {} ms", clusterId, System.currentTimeMillis() - start);
         }
     }

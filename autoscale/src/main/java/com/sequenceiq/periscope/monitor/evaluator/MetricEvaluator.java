@@ -21,6 +21,7 @@ import com.sequenceiq.periscope.monitor.context.ClusterIdEvaluatorContext;
 import com.sequenceiq.periscope.monitor.context.EvaluatorContext;
 import com.sequenceiq.periscope.monitor.event.ScalingEvent;
 import com.sequenceiq.periscope.monitor.event.UpdateFailedEvent;
+import com.sequenceiq.periscope.monitor.executor.ExecutorServiceWithRegistry;
 import com.sequenceiq.periscope.repository.MetricAlertRepository;
 import com.sequenceiq.periscope.service.AmbariClientProvider;
 import com.sequenceiq.periscope.service.ClusterService;
@@ -32,6 +33,8 @@ import com.sequenceiq.periscope.utils.TimeUtil;
 public class MetricEvaluator extends AbstractEventPublisher implements EvaluatorExecutor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MetricEvaluator.class);
+
+    private static final String EVALUATOR_NAME = MetricEvaluator.class.getName();
 
     private static final String ALERT_STATE = "state";
 
@@ -49,6 +52,9 @@ public class MetricEvaluator extends AbstractEventPublisher implements Evaluator
     @Inject
     private AmbariRequestLogging ambariRequestLogging;
 
+    @Inject
+    private ExecutorServiceWithRegistry executorServiceWithRegistry;
+
     private long clusterId;
 
     @Override
@@ -63,12 +69,17 @@ public class MetricEvaluator extends AbstractEventPublisher implements Evaluator
     }
 
     @Override
+    public String getName() {
+        return EVALUATOR_NAME;
+    }
+
+    @Override
     public void run() {
         long start = System.currentTimeMillis();
-        Cluster cluster = clusterService.find(clusterId);
-        MDCBuilder.buildMdcContext(cluster);
-        AmbariClient ambariClient = ambariClientProvider.createAmbariClient(cluster);
         try {
+            Cluster cluster = clusterService.find(clusterId);
+            MDCBuilder.buildMdcContext(cluster);
+            AmbariClient ambariClient = ambariClientProvider.createAmbariClient(cluster);
             for (MetricAlert alert : alertRepository.findAllByCluster(clusterId)) {
                 String alertName = alert.getName();
                 LOGGER.info("Checking metric based alert: '{}'", alertName);
@@ -97,6 +108,7 @@ public class MetricEvaluator extends AbstractEventPublisher implements Evaluator
             LOGGER.error("Failed to retrieve alert history", e);
             publishEvent(new UpdateFailedEvent(clusterId));
         } finally {
+            executorServiceWithRegistry.finished(this, clusterId);
             LOGGER.info("Finished metricEvaluator for cluster {} in {} ms", clusterId, System.currentTimeMillis() - start);
         }
     }

@@ -17,8 +17,11 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean;
 import org.springframework.test.context.TestPropertySource;
 
+import com.sequenceiq.cloudbreak.service.Clock;
 import com.sequenceiq.periscope.aspects.AmbariRequestLogging;
 import com.sequenceiq.periscope.monitor.evaluator.ClusterCreationEvaluator;
+import com.sequenceiq.periscope.monitor.executor.EvaluatorExecutorRegistry;
+import com.sequenceiq.periscope.monitor.executor.ExecutorServiceWithRegistry;
 import com.sequenceiq.periscope.monitor.handler.PersistRejectedThreadExecutionHandler;
 import com.sequenceiq.periscope.notification.HttpNotificationSender;
 import com.sequenceiq.periscope.service.AmbariClientProvider;
@@ -34,7 +37,7 @@ import com.sequenceiq.periscope.service.security.TlsSecurityService;
 public class StackCollectorContext {
 
     @Configuration
-    @ComponentScan(basePackages = "com.sequenceiq.periscope",
+    @ComponentScan(basePackages = {"com.sequenceiq.periscope", "com.sequenceiq.cloudbreak.service"},
             useDefaultFilters = false,
             includeFilters = @Filter(type = FilterType.ASSIGNABLE_TYPE,
                     value = {
@@ -43,7 +46,10 @@ public class StackCollectorContext {
                             AmbariRequestLogging.class,
                             PeriscopeNodeConfig.class,
                             ClusterCreationEvaluator.class,
-                            StackCollectorService.class
+                            StackCollectorService.class,
+                            ExecutorServiceWithRegistry.class,
+                            EvaluatorExecutorRegistry.class,
+                            Clock.class
                     })
     )
     @MockBean({ClusterService.class, AmbariClientProvider.class, CloudbreakClientConfiguration.class, TlsSecurityService.class, HistoryService.class,

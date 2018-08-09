@@ -14,4 +14,9 @@ public class ClusterCreationEvaluatorContext implements EvaluatorContext {
     public Object getData() {
         return stack;
     }
+
+    @Override
+    public long getItemId() {
+        return stack.getStackId();
+    }
 }
