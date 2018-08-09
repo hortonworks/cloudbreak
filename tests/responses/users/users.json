@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1,
+    "username": null,
+    "userId": "mock@hortonworks.com"
+  },
+  {
+    "id": 2,
+    "username": null,
+    "userId": "auto.teszt.elek@mailinator.com"
+  },
+  {
+    "id": 3,
+    "username": null,
+    "userId": "mikka.makka@hortonworks.com"
+  },
+  {
+    "id": 4,
+    "username": null,
+    "userId": "szomszed.neni@hortonworks.com"
+  },
+  {
+    "id": 5,
+    "username": null,
+    "userId": "pistike@hortonworks.com"
+  },
+  {
+    "id": 6,
+    "username": null,
+    "userId": "azannya@hortonworks.com"
+  }
+]

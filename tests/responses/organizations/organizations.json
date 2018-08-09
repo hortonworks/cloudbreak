@@ -1,0 +1,19 @@
+[
+    {
+        "description": "Default organization for the user.",
+        "id": 1,
+        "name": "mock@hortonworks.com",
+        "status": "ACTIVE",
+        "users": [
+            {
+                "permissions": [
+                    "ALL:READ",
+                    "ORG:MANAGE",
+                    "ALL:WRITE"
+                ],
+                "userId": "mock@hortonworks.com",
+                "userName": null
+            }
+        ]
+    }
+]

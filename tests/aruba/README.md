@@ -19,8 +19,9 @@ cd ${YOUR_PATH}/cb-cli/tests/aruba
 6. `gem install json`
 7. `gem install rspec-json_expectations`
 8. `gem install rspec_junit_formatter`
-9. Edit localvars (you can find an example at [localvars](localvars))
-10. Source localvars (`. localvars` or `source localvars`)
+9. `gem install allure-rspec`
+10. Edit localvars (you can find an example at [localvars](localvars))
+11. Source localvars (`. localvars` or `source localvars`)
 
 **Run a specific test:**
 ```

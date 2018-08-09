@@ -3,3 +3,5 @@ swagger.json
 *.html
 *.xml
 .cb
+allure
+ruby-uuid
