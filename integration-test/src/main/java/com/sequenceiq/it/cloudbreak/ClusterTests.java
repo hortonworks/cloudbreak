@@ -226,8 +226,16 @@ public class ClusterTests extends CloudbreakTest {
     private String getLastUuid(List<? extends ImageResponse> images, String stackVersion) {
         List<? extends ImageResponse> result = images.stream()
                 .filter(ImageResponse::isDefaultImage)
-                .filter(image -> ((ImageResponse) image)
-                        .getStackDetails().getVersion().startsWith(stackVersion))
+                .filter(image -> {
+                    ImageResponse imageResponse = (ImageResponse) image;
+                    if (imageResponse.getStackDetails() == null) {
+                        return true;
+                    }
+                    if (imageResponse.getStackDetails().getVersion() == null) {
+                        return true;
+                    }
+                    return image.getStackDetails().getVersion().startsWith(stackVersion);
+                })
                 .collect(Collectors.toList());
         if (result.isEmpty()) {
             result = images;
