@@ -22,6 +22,7 @@ import com.sequenceiq.periscope.monitor.context.ClusterIdEvaluatorContext;
 import com.sequenceiq.periscope.monitor.context.EvaluatorContext;
 import com.sequenceiq.periscope.monitor.event.UpdateFailedEvent;
 import com.sequenceiq.periscope.service.AmbariClientProvider;
+import com.sequenceiq.periscope.monitor.executor.ExecutorServiceWithRegistry;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.configuration.CloudbreakClientConfiguration;
 
@@ -43,6 +44,8 @@ public class AmbariAgentHealthEvaluator extends AbstractEventPublisher implement
 
     private static final String HOST_NAME = "host_name";
 
+    private static final String EVALUATOR_NAME = AmbariAgentHealthEvaluator.class.getName();
+
     @Inject
     private ClusterService clusterService;
 
@@ -54,6 +57,9 @@ public class AmbariAgentHealthEvaluator extends AbstractEventPublisher implement
 
     @Inject
     private AmbariRequestLogging ambariRequestLogging;
+
+    @Inject
+    private ExecutorServiceWithRegistry executorServiceWithRegistry;
 
     private long clusterId;
 
@@ -69,12 +75,17 @@ public class AmbariAgentHealthEvaluator extends AbstractEventPublisher implement
     }
 
     @Override
+    public String getName() {
+        return EVALUATOR_NAME;
+    }
+
+    @Override
     public void run() {
         long start = System.currentTimeMillis();
-        Cluster cluster = clusterService.find(clusterId);
-        MDCBuilder.buildMdcContext(cluster);
-        LOGGER.info("Checking '{}' alerts for cluster {}.", AMBARI_AGENT_HEARTBEAT, cluster.getId());
         try {
+            Cluster cluster = clusterService.find(clusterId);
+            MDCBuilder.buildMdcContext(cluster);
+            LOGGER.info("Checking '{}' alerts for cluster {}.", AMBARI_AGENT_HEARTBEAT, cluster.getId());
             AmbariClient ambariClient = ambariClientProvider.createAmbariClient(cluster);
             List<Map<String, Object>> alertHistory = ambariRequestLogging.logging(() -> ambariClient.getAlert(AMBARI_AGENT_HEARTBEAT_DEF_NAME), "alert");
             if (!alertHistory.isEmpty()) {
@@ -99,6 +110,7 @@ public class AmbariAgentHealthEvaluator extends AbstractEventPublisher implement
             LOGGER.warn(String.format("Failed to retrieve '%s' alerts. Original message: %s", AMBARI_AGENT_HEARTBEAT, e.getMessage()));
             publishEvent(new UpdateFailedEvent(clusterId));
         } finally {
+            executorServiceWithRegistry.finished(this, clusterId);
             LOGGER.info("Finished {} for cluster {} in {} ms", AMBARI_AGENT_HEARTBEAT, clusterId, System.currentTimeMillis() - start);
         }
 

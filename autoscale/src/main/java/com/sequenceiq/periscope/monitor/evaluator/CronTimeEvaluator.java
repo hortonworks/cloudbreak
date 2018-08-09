@@ -21,6 +21,7 @@ import com.sequenceiq.periscope.monitor.MonitorUpdateRate;
 import com.sequenceiq.periscope.monitor.context.ClusterIdEvaluatorContext;
 import com.sequenceiq.periscope.monitor.context.EvaluatorContext;
 import com.sequenceiq.periscope.monitor.event.ScalingEvent;
+import com.sequenceiq.periscope.monitor.executor.ExecutorServiceWithRegistry;
 import com.sequenceiq.periscope.repository.TimeAlertRepository;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.DateService;
@@ -31,6 +32,8 @@ public class CronTimeEvaluator extends AbstractEventPublisher implements Evaluat
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CronTimeEvaluator.class);
 
+    private static final String EVALUATOR_NAME = CronTimeEvaluator.class.getName();
+
     @Inject
     private TimeAlertRepository alertRepository;
 
@@ -39,6 +42,9 @@ public class CronTimeEvaluator extends AbstractEventPublisher implements Evaluat
 
     @Inject
     private DateService dateService;
+
+    @Inject
+    private ExecutorServiceWithRegistry executorServiceWithRegistry;
 
     private long clusterId;
 
@@ -51,6 +57,11 @@ public class CronTimeEvaluator extends AbstractEventPublisher implements Evaluat
     @Nonnull
     public EvaluatorContext getContext() {
         return new ClusterIdEvaluatorContext(clusterId);
+    }
+
+    @Override
+    public String getName() {
+        return EVALUATOR_NAME;
     }
 
     private boolean isTrigger(TimeAlert alert) {
@@ -68,10 +79,14 @@ public class CronTimeEvaluator extends AbstractEventPublisher implements Evaluat
     @Override
     public void run() {
         long start = System.currentTimeMillis();
-        Cluster cluster = clusterService.find(clusterId);
-        MDCBuilder.buildMdcContext(cluster);
-        publishIfNeeded(alertRepository.findAllByCluster(clusterId));
-        LOGGER.info("Finished cronTimeEvaluator for cluster {} in {} ms", clusterId, System.currentTimeMillis() - start);
+        try {
+            Cluster cluster = clusterService.find(clusterId);
+            MDCBuilder.buildMdcContext(cluster);
+            publishIfNeeded(alertRepository.findAllByCluster(clusterId));
+            LOGGER.info("Finished cronTimeEvaluator for cluster {} in {} ms", clusterId, System.currentTimeMillis() - start);
+        } finally {
+            executorServiceWithRegistry.finished(this, clusterId);
+        }
     }
 
     public void publishIfNeeded(List<TimeAlert> alerts) {

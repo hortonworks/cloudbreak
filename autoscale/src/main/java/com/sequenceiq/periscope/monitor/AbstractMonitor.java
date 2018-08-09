@@ -1,7 +1,6 @@
 package com.sequenceiq.periscope.monitor;
 
 import java.util.List;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
 
 import org.quartz.JobDataMap;
@@ -13,10 +12,11 @@ import org.springframework.context.ApplicationContext;
 import com.sequenceiq.periscope.log.MDCBuilder;
 import com.sequenceiq.periscope.monitor.context.EvaluatorContext;
 import com.sequenceiq.periscope.monitor.evaluator.EvaluatorExecutor;
+import com.sequenceiq.periscope.monitor.executor.ExecutorServiceWithRegistry;
 import com.sequenceiq.periscope.service.ClusterService;
+import com.sequenceiq.periscope.service.RejectedThreadService;
 import com.sequenceiq.periscope.service.ha.PeriscopeNodeConfig;
 import com.sequenceiq.periscope.utils.LoggerUtils;
-import com.sequenceiq.periscope.service.RejectedThreadService;
 
 public abstract class AbstractMonitor<M extends Monitored> implements Monitor<M> {
 
@@ -28,7 +28,7 @@ public abstract class AbstractMonitor<M extends Monitored> implements Monitor<M>
 
     private ApplicationContext applicationContext;
 
-    private ExecutorService executorService;
+    private ExecutorServiceWithRegistry executorServiceWithRegistry;
 
     private LoggerUtils loggerUtils;
 
@@ -42,12 +42,12 @@ public abstract class AbstractMonitor<M extends Monitored> implements Monitor<M>
         LOGGER.info("Job started: {}, monitored: {}", context.getJobDetail().getKey(), monitoredData.size());
         for (M monitored : monitoredData) {
             try {
-                loggerUtils.logThreadPoolExecutorParameters(LOGGER, getEvaluatorType(monitored).getName(), executorService);
+                loggerUtils.logThreadPoolExecutorParameters(LOGGER, getEvaluatorType(monitored).getName(), executorServiceWithRegistry.getExecutorService());
                 EvaluatorExecutor evaluatorExecutor = getEvaluatorExecutorBean(monitored);
                 EvaluatorContext evaluatorContext = getContext(monitored);
                 evaluatorExecutor.setContext(evaluatorContext);
-                executorService.submit(evaluatorExecutor);
-                LOGGER.info("Succesfully submitted {}.", evaluatorContext.getData());
+                executorServiceWithRegistry.submitIfAbsent(evaluatorExecutor, evaluatorContext.getItemId());
+                LOGGER.info("Succesfully submitted {} for cluster {}.", evaluatorExecutor.getName(), evaluatorContext.getData());
                 rejectedThreadService.remove(evaluatorContext.getData());
                 monitored.setLastEvaluated(System.currentTimeMillis());
                 save(monitored);
@@ -60,7 +60,7 @@ public abstract class AbstractMonitor<M extends Monitored> implements Monitor<M>
     void evalContext(JobExecutionContext context) {
         JobDataMap monitorContext = context.getJobDetail().getJobDataMap();
         applicationContext = (ApplicationContext) monitorContext.get(MonitorContext.APPLICATION_CONTEXT.name());
-        executorService = applicationContext.getBean(ExecutorService.class);
+        executorServiceWithRegistry = applicationContext.getBean(ExecutorServiceWithRegistry.class);
         clusterService = applicationContext.getBean(ClusterService.class);
         periscopeNodeConfig = applicationContext.getBean(PeriscopeNodeConfig.class);
         loggerUtils = applicationContext.getBean(LoggerUtils.class);
