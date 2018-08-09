@@ -2,8 +2,6 @@ package com.sequenceiq.cloudbreak.cloud.openstack.auth;
 
 import static com.sequenceiq.cloudbreak.cloud.model.CloudCredential.SMART_SENSE_ID;
 
-import java.util.Map;
-
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
@@ -13,16 +11,13 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
-import com.sequenceiq.cloudbreak.cloud.credential.CredentialNotifier;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
-import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.openstack.OpenStackSmartSenseIdGenerator;
 
 @Service
-public class OpenStackCredentialConnector implements CredentialConnector {
+public class OpenStackCredentialConnector extends CredentialConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackCredentialConnector.class);
 
@@ -46,12 +41,6 @@ public class OpenStackCredentialConnector implements CredentialConnector {
     public CloudCredentialStatus create(AuthenticatedContext auth) {
         LOGGER.info("Create credential: {}", auth.getCloudCredential());
         return new CloudCredentialStatus(auth.getCloudCredential(), CredentialStatus.CREATED);
-    }
-
-    @Override
-    public Map<String, String> interactiveLogin(CloudContext cloudContext, ExtendedCloudCredential extendedCloudCredential,
-            CredentialNotifier credentialNotifier) {
-        throw new UnsupportedOperationException("Interactive login not supported on Openstack");
     }
 
     @Override

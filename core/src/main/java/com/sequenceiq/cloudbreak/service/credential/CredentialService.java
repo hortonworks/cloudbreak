@@ -32,7 +32,6 @@ import com.sequenceiq.cloudbreak.domain.security.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
@@ -40,8 +39,8 @@ import com.sequenceiq.cloudbreak.service.notification.Notification;
 import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderCredentialAdapter;
-import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.user.UserProfileHandler;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Service
 public class CredentialService {
@@ -77,9 +76,6 @@ public class CredentialService {
 
     @Inject
     private OrganizationService organizationService;
-
-    @Inject
-    private AuthenticatedUserService authenticatedUserService;
 
     public Set<Credential> retrievePrivateCredentials(IdentityUser user) {
         return credentialRepository.findForUser(user.getUserId());
@@ -144,11 +140,10 @@ public class CredentialService {
         return saveCredentialAndNotify(credentialToModify, ResourceEvent.CREDENTIAL_MODIFIED);
     }
 
-    public Credential create(String userId, String account, Credential credential) {
+    public Credential create(String userId, String account, Credential credential, IdentityUser identityUser) {
         LOGGER.debug("Creating credential: [UserId: '{}', Account: '{}']", userId, account);
         credential.setOwner(userId);
         credential.setAccount(account);
-        IdentityUser identityUser = authenticatedUserService.getCbUser();
         User user = userService.getOrCreate(identityUser);
         Organization organization = organizationService.getDefaultOrganizationForUser(user);
         credential.setOrganization(organization);
@@ -156,8 +151,8 @@ public class CredentialService {
     }
 
     @Retryable(value = BadRequestException.class, maxAttempts = 30, backoff = @Backoff(delay = 2000))
-    public Credential createWithRetry(String userId, String account, Credential credential) {
-        return create(userId, account, credential);
+    public Credential createWithRetry(String userId, String account, Credential credential, IdentityUser identityUser) {
+        return create(userId, account, credential, identityUser);
     }
 
     private Credential saveCredentialAndNotify(Credential credential, ResourceEvent resourceEvent) {

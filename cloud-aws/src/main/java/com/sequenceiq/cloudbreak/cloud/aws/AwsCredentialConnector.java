@@ -4,8 +4,6 @@ import static com.sequenceiq.cloudbreak.cloud.model.CloudCredential.SMART_SENSE_
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
 
-import java.util.Map;
-
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -18,15 +16,12 @@ import com.amazonaws.services.ec2.model.DescribeRegionsRequest;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
-import com.sequenceiq.cloudbreak.cloud.credential.CredentialNotifier;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
-import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 
 @Service
-public class AwsCredentialConnector implements CredentialConnector {
+public class AwsCredentialConnector extends CredentialConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsCredentialConnector.class);
 
@@ -69,12 +64,6 @@ public class AwsCredentialConnector implements CredentialConnector {
     @Override
     public CloudCredentialStatus create(AuthenticatedContext auth) {
         return new CloudCredentialStatus(auth.getCloudCredential(), CredentialStatus.CREATED);
-    }
-
-    @Override
-    public Map<String, String> interactiveLogin(CloudContext cloudContext, ExtendedCloudCredential extendedCloudCredential,
-            CredentialNotifier credentialNotifier) {
-        throw new UnsupportedOperationException("Interactive login not supported on AWS");
     }
 
     @Override

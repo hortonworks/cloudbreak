@@ -4,16 +4,19 @@ import java.util.Map;
 
 import javax.annotation.Nonnull;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.credential.CredentialNotifier;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 
 /**
  * Manages the credentials e.g public keys on Cloud Plarform side
  */
-public interface CredentialConnector {
+public abstract class CredentialConnector {
 
     /**
      * Check whether the credential (e.g public key) associated with a stack (cluster) has present on Cloud provider.
@@ -21,7 +24,7 @@ public interface CredentialConnector {
      * @param authenticatedContext the authenticated context which holds the client object
      * @return the status respone of method call
      */
-    CloudCredentialStatus verify(@Nonnull AuthenticatedContext authenticatedContext);
+    public abstract CloudCredentialStatus verify(@Nonnull AuthenticatedContext authenticatedContext);
 
 
     /**
@@ -30,7 +33,7 @@ public interface CredentialConnector {
      * @param authenticatedContext the authenticated context which holds the client object
      * @return the status respone of method call
      */
-    CloudCredentialStatus create(@Nonnull AuthenticatedContext authenticatedContext);
+    public abstract CloudCredentialStatus create(@Nonnull AuthenticatedContext authenticatedContext);
 
 
     /**
@@ -38,8 +41,10 @@ public interface CredentialConnector {
      *
      * @return parameters for interactive login
      */
-    Map<String, String> interactiveLogin(CloudContext cloudContext, ExtendedCloudCredential extendedCloudCredential,
-            CredentialNotifier credentialNotifier);
+    public Map<String, String> interactiveLogin(CloudContext cloudContext, ExtendedCloudCredential extendedCloudCredential,
+            CredentialNotifier credentialNotifier, IdentityUser identityUser) {
+        throw new UnsupportedOperationException(StringUtils.join("Interactive login not supported!"));
+    }
 
     /**
      * Delete the credential (e.g public key) associated with a stack (cluster) from Cloud provider.
@@ -47,6 +52,6 @@ public interface CredentialConnector {
      * @param authenticatedContext the authenticated context which holds the client object
      * @return the status respone of method call
      */
-    CloudCredentialStatus delete(@Nonnull AuthenticatedContext authenticatedContext);
+    public abstract CloudCredentialStatus delete(@Nonnull AuthenticatedContext authenticatedContext);
 
 }

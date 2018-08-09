@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.gcp;
 
 import java.io.IOException;
-import java.util.Map;
 import java.util.Optional;
 
 import javax.annotation.Nonnull;
@@ -16,18 +15,15 @@ import com.google.api.client.auth.oauth2.TokenResponseException;
 import com.google.gson.JsonParser;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
-import com.sequenceiq.cloudbreak.cloud.credential.CredentialNotifier;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContextBuilder;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.InvalidGcpContextException;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
-import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 
 @Service
-public class GcpCredentialConnector implements CredentialConnector {
+public class GcpCredentialConnector extends CredentialConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpCredentialConnector.class);
 
@@ -56,12 +52,6 @@ public class GcpCredentialConnector implements CredentialConnector {
     @Override
     public CloudCredentialStatus create(@Nonnull AuthenticatedContext authenticatedContext) {
         return new CloudCredentialStatus(authenticatedContext.getCloudCredential(), CredentialStatus.CREATED);
-    }
-
-    @Override
-    public Map<String, String> interactiveLogin(CloudContext cloudContext, ExtendedCloudCredential extendedCloudCredential,
-            CredentialNotifier credentialNotifier) {
-        throw new UnsupportedOperationException("Interactive login not supported on GCP");
     }
 
     @Override
