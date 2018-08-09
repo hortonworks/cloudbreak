@@ -16,6 +16,7 @@ public class ModelDescriptions {
     public static final String DATALAKEINPUTS = "datalakeinputs object";
     public static final String CREATED = "creation time of the resource in long";
     public static final String AMBARI_SERVER = "ambari server address";
+    public static final String ORGANIZATION_OF_THE_RESOURCE = "organization of the resource";
 
     private ModelDescriptions() {
     }
@@ -343,6 +344,8 @@ public class ModelDescriptions {
         public static final String CONTENT = "content of recipe";
         public static final String TYPE = "type of recipe";
         public static final String RECIPE_URI = "recipe uri";
+        public static final String ORGANIZATION_ID = "id of the organization";
+        public static final String ORGANIZATION_NAME = "name of the organization";
     }
 
     public static class InstanceGroupModelDescription {

@@ -32,10 +32,18 @@ public class TransactionRuntimeExecutionExceptionMapper extends SendNotification
 
     @Override
     Status getResponseStatus() {
+        TransactionRuntimeExecutionException deepest = getDeepestTransactionException(CURRENT_EXCEPTION.get());
         return exceptionMappers.stream()
-            .filter(m -> m.getExceptionType().equals(CURRENT_EXCEPTION.get().getCause().getCause().getClass()))
+            .filter(m -> m.getExceptionType().equals(deepest.getCause().getCause().getClass()))
             .map(BaseExceptionMapper::getResponseStatus)
             .findFirst().orElse(Status.INTERNAL_SERVER_ERROR);
+    }
+
+    private TransactionRuntimeExecutionException getDeepestTransactionException(TransactionRuntimeExecutionException e) {
+        if (e.getCause().getCause() instanceof TransactionRuntimeExecutionException) {
+            return getDeepestTransactionException((TransactionRuntimeExecutionException) e.getCause().getCause());
+        }
+        return e;
     }
 
     @Override
@@ -45,6 +53,7 @@ public class TransactionRuntimeExecutionExceptionMapper extends SendNotification
 
     @Override
     protected String getErrorMessage(TransactionRuntimeExecutionException exception) {
-        return exception.getCause().getCause().getMessage();
+        TransactionRuntimeExecutionException deepest = getDeepestTransactionException(exception);
+        return deepest.getCause().getCause().getMessage();
     }
 }

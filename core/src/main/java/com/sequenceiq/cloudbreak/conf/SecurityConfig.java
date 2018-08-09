@@ -90,6 +90,8 @@ public class SecurityConfig {
 
         private static final String SECURITY_RULE_URL_PATTERNS = API_ROOT_CONTEXT + "/v1/securityrules/**";
 
+        private static final String V3_API = API_ROOT_CONTEXT + "/v3/**";
+
         @Inject
         private ResourceServerTokenServices resourceServerTokenServices;
 
@@ -131,6 +133,8 @@ public class SecurityConfig {
                     .antMatchers(HttpMethod.GET, IMAGE_CATALOG_PATTERN)
                     .access("#oauth2.hasScope('cloudbreak.templates.read') or #oauth2.hasScope('cloudbreak.templates')")
                     .antMatchers(HttpMethod.GET, ACCOUNT_PREFERENCES)
+                    .permitAll()
+                    .antMatchers(V3_API)
                     .permitAll()
 
                     .antMatchers(API_ROOT_CONTEXT + "/v1/users/**").access("#oauth2.hasScope('openid')")

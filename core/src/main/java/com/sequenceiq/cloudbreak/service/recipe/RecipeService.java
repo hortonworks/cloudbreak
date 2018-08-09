@@ -1,12 +1,10 @@
 package com.sequenceiq.cloudbreak.service.recipe;
 
 import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
-import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -14,26 +12,25 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.security.Organization;
-import com.sequenceiq.cloudbreak.domain.security.User;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
+import com.sequenceiq.cloudbreak.repository.OrganizationResourceRepository;
 import com.sequenceiq.cloudbreak.repository.RecipeRepository;
-import com.sequenceiq.cloudbreak.service.AuthorizationService;
+import com.sequenceiq.cloudbreak.service.AbstractOrganizationResourceService;
+import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Service
-public class RecipeService {
+public class RecipeService extends AbstractOrganizationResourceService<Recipe> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RecipeService.class);
 
@@ -44,7 +41,7 @@ public class RecipeService {
     private HostGroupRepository hostGroupRepository;
 
     @Inject
-    private AuthorizationService authorizationService;
+    private TransactionService transactionService;
 
     @Inject
     private OrganizationService organizationService;
@@ -52,44 +49,25 @@ public class RecipeService {
     @Inject
     private UserService userService;
 
-    public Recipe create(IdentityUser identityUser, Recipe recipe) {
-        recipe.setOwner(identityUser.getUserId());
-        recipe.setAccount(identityUser.getAccount());
-        User user = userService.getOrCreate(identityUser);
+    public Set<Recipe> getRecipesByNames(IdentityUser user, Collection<String> recipeNames) {
         Organization organization = organizationService.getDefaultOrganizationForUser(user);
-        recipe.setOrganization(organization);
-        try {
-            return recipeRepository.save(recipe);
-        } catch (DataIntegrityViolationException ex) {
-            String msg = String.format("Error with resource [%s], %s", APIResourceType.RECIPE, getProperSqlErrorMessage(ex));
-            throw new BadRequestException(msg);
-        }
-    }
-
-    public Recipe get(Long id) {
-        return recipeRepository.findById(id).orElseThrow(notFound("Recipe", id));
-    }
-
-    public Set<Recipe> retrievePrivateRecipes(IdentityUser user) {
-        return recipeRepository.findForUser(user.getUserId());
-    }
-
-    public Set<Recipe> retrieveAccountRecipes(IdentityUser user) {
-        return user.getRoles().contains(IdentityUserRole.ADMIN) ? recipeRepository.findAllInAccount(user.getAccount())
-                : recipeRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
-    }
-
-    public Recipe getPrivateRecipe(String name, IdentityUser user) {
-        return Optional.ofNullable(recipeRepository.findByNameForUser(name, user.getUserId()))
-                .orElseThrow(notFound("Recipe", name));
-    }
-
-    public Set<Recipe> getPublicRecipes(IdentityUser user, Collection<String> recipeNames) {
-        Set<Recipe> recipes = recipeRepository.findByNameInAccount(recipeNames, user.getAccount());
+        Set<Recipe> recipes = recipeRepository.findByNamesInOrganization(recipeNames, organization.getId());
         if (recipeNames.size() != recipes.size()) {
             throw new NotFoundException(String.format("Recipes '%s' not found.", collectMissingRecipeNames(recipes, recipeNames)));
         }
         return recipes;
+    }
+
+    public Set<Recipe> listByOrganizationId(Long organizationId) {
+        return recipeRepository.listByOrganizationId(organizationId);
+    }
+
+    public Recipe get(Long id) {
+        return repository().findById(id).orElseThrow(notFound("Recipe", id));
+    }
+
+    public Recipe delete(Long id) {
+        return delete(get(id));
     }
 
     private String collectMissingRecipeNames(Set<Recipe> recipes, Collection<String> recipeNames) {
@@ -97,28 +75,43 @@ public class RecipeService {
         return recipeNames.stream().filter(r -> !foundRecipes.contains(r)).collect(Collectors.joining(","));
     }
 
-    public Recipe getPublicRecipe(String name, IdentityUser user) {
-        return Optional.ofNullable(recipeRepository.findByNameInAccount(name, user.getAccount()))
-                .orElseThrow(notFound("Recipe", name));
+    @Override
+    protected OrganizationResourceRepository<Recipe, Long> repository() {
+        return recipeRepository;
     }
 
-    public void delete(Long id, IdentityUser user) {
-        deleteImpl(get(id));
+    @Override
+    protected TransactionService transactionService() {
+        return transactionService;
     }
 
-    public void delete(String name, IdentityUser user) {
-        Recipe recipe = Optional.ofNullable(recipeRepository.findByNameInAccount(name, user.getAccount()))
-                .orElseThrow(notFound("Recipe", name));
-        deleteImpl(recipe);
+    @Override
+    protected OrganizationService organizationService() {
+        return organizationService;
     }
 
-    public void delete(Recipe recipe) {
-        deleteImpl(recipe);
+    @Override
+    protected UserService userService() {
+        return userService;
     }
 
-    private void deleteImpl(Recipe recipe) {
-        LOGGER.info("Deleting recipe. {} - {}", new Object[]{recipe.getId(), recipe.getName()});
-        List<HostGroup> hostGroupsWithRecipe = new ArrayList<>(hostGroupRepository.findAllHostGroupsByRecipe(recipe.getId()));
+    @Override
+    protected APIResourceType apiResourceType() {
+        return APIResourceType.RECIPE;
+    }
+
+    @Override
+    protected String resourceName() {
+        return "recipe";
+    }
+
+    @Override
+    protected boolean canDelete(Recipe resource) {
+        if (resource == null) {
+            throw new NotFoundException("Recipe not found.");
+        }
+        LOGGER.info("Deleting recipe. {} - {}", new Object[]{resource.getId(), resource.getName()});
+        List<HostGroup> hostGroupsWithRecipe = new ArrayList<>(hostGroupRepository.findAllHostGroupsByRecipe(resource.getId()));
         if (!hostGroupsWithRecipe.isEmpty()) {
             if (hostGroupsWithRecipe.size() > 1) {
                 String clusters = hostGroupsWithRecipe
@@ -127,12 +120,17 @@ public class RecipeService {
                         .collect(Collectors.joining(", "));
                 throw new BadRequestException(String.format(
                         "There are clusters associated with recipe '%s'. Please remove these before deleting the recipe. "
-                                + "The following clusters are using this recipe: [%s]", recipe.getId(), clusters));
+                                + "The following clusters are using this recipe: [%s]", resource.getId(), clusters));
             } else {
                 throw new BadRequestException(String.format("There is a cluster ['%s'] which uses recipe '%s'. Please remove this "
-                        + "cluster before deleting the recipe", hostGroupsWithRecipe.get(0).getCluster().getName(), recipe.getName()));
+                        + "cluster before deleting the recipe", hostGroupsWithRecipe.get(0).getCluster().getName(), resource.getName()));
             }
         }
-        recipeRepository.delete(recipe);
+        return true;
+    }
+
+    @Override
+    protected void prepareCreation(Recipe resource) {
+
     }
 }

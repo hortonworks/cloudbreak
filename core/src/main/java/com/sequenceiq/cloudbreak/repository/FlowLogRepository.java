@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.sequenceiq.cloudbreak.aspect.DisablePermission;
+import com.sequenceiq.cloudbreak.aspect.DisableHasPermission;
 import com.sequenceiq.cloudbreak.aspect.DisabledBaseRepository;
 import com.sequenceiq.cloudbreak.domain.FlowLog;
 import com.sequenceiq.cloudbreak.domain.StateStatus;
@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.service.EntityType;
 
 @EntityType(entityClass = FlowLog.class)
 @Transactional(Transactional.TxType.REQUIRED)
-@DisablePermission
+@DisableHasPermission
 public interface FlowLogRepository extends DisabledBaseRepository<FlowLog, Long> {
 
     FlowLog findFirstByFlowIdOrderByCreatedDesc(String flowId);

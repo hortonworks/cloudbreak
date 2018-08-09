@@ -1,11 +1,10 @@
 package com.sequenceiq.cloudbreak.service.organization;
 
 import static com.sequenceiq.cloudbreak.api.model.v2.OrganizationStatus.DELETED;
-import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
-import static com.sequenceiq.cloudbreak.validation.Permissions.ALL_READ;
-import static com.sequenceiq.cloudbreak.validation.Permissions.ALL_WRITE;
-import static com.sequenceiq.cloudbreak.validation.Permissions.ORG_MANAGE;
+import static com.sequenceiq.cloudbreak.validation.OrganizationPermissions.ALL_READ;
+import static com.sequenceiq.cloudbreak.validation.OrganizationPermissions.ALL_WRITE;
+import static com.sequenceiq.cloudbreak.validation.OrganizationPermissions.ORG_MANAGE;
 
 import java.util.Calendar;
 import java.util.HashSet;
@@ -20,6 +19,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.users.ChangeOrganizationUsersJson;
@@ -30,14 +30,17 @@ import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.security.Organization;
 import com.sequenceiq.cloudbreak.domain.security.User;
 import com.sequenceiq.cloudbreak.domain.security.UserOrgPermissions;
-import com.sequenceiq.cloudbreak.repository.security.OrganizationRepository;
-import com.sequenceiq.cloudbreak.repository.security.UserOrgPermissionsRepository;
+import com.sequenceiq.cloudbreak.repository.organization.OrganizationRepository;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
+import com.sequenceiq.cloudbreak.service.user.UserOrgPermissionsService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.validation.OrganizationPermissions;
+import com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Action;
+import com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Resource;
 
 @Service
 public class OrganizationService {
@@ -50,7 +53,7 @@ public class OrganizationService {
     private OrganizationRepository organizationRepository;
 
     @Inject
-    private UserOrgPermissionsRepository userOrgPermissionsRepository;
+    private UserOrgPermissionsService userOrgPermissionsService;
 
     @Inject
     private AuthorizationService authorizationService;
@@ -65,32 +68,58 @@ public class OrganizationService {
     private OrganizationDeleteVerifierService organizationDeleteVerifierService;
 
     public Organization create(IdentityUser identityUser, Organization organization) {
-        User user = userService.getOrCreate(identityUser);
         try {
-            organization = organizationRepository.save(organization);
-
-            UserOrgPermissions userOrgPermissions = new UserOrgPermissions();
-            userOrgPermissions.setOrganization(organization);
-            userOrgPermissions.setUser(user);
-            userOrgPermissions.setPermissionSet(Set.of(ALL_READ.value(), ALL_WRITE.value(), ORG_MANAGE.value()));
-            userOrgPermissionsRepository.save(userOrgPermissions);
-
-            return organization;
-
-        } catch (DataIntegrityViolationException ex) {
-            String msg = String.format("Error with resource [%s], %s", APIResourceType.ORGANIZATION, getProperSqlErrorMessage(ex));
-            throw new BadRequestException(msg);
+            // TODO: check: does the user in this tenant have the right to create an org?
+            return transactionService.required(() -> {
+                try {
+                    User user = userService.getOrCreate(identityUser);
+                    Organization created = organizationRepository.save(organization);
+                    UserOrgPermissions userOrgPermissions = new UserOrgPermissions();
+                    userOrgPermissions.setOrganization(created);
+                    userOrgPermissions.setUser(user);
+                    userOrgPermissions.setPermissionSet(Set.of(ALL_READ.value(), ALL_WRITE.value(), ORG_MANAGE.value()));
+                    userOrgPermissionsService.save(userOrgPermissions);
+                    return created;
+                } catch (DataIntegrityViolationException ex) {
+                    String msg = String.format("Error with resource [%s], %s", APIResourceType.ORGANIZATION, getProperSqlErrorMessage(ex));
+                    throw new BadRequestException(msg);
+                }
+            });
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
         }
     }
 
-    public Set<Organization> retrieveForUser(IdentityUser identityUser) {
-        User user = userService.getOrCreate(identityUser);
-        return userOrgPermissionsRepository.findForUser(user).stream().map(UserOrgPermissions::getOrganization).collect(Collectors.toSet());
+    public Set<Organization> retrieveForCurrentUser() {
+        return userOrgPermissionsService.findForCurrentUser().stream()
+                .map(UserOrgPermissions::getOrganization).collect(Collectors.toSet());
+    }
+
+    public Set<Organization> retrieveForUser(User user) {
+        return userOrgPermissionsService.findForUser(user).stream()
+                .map(UserOrgPermissions::getOrganization).collect(Collectors.toSet());
     }
 
     public Optional<Organization> getByName(String name, IdentityUser identityUser) {
+        try {
+            return transactionService.required(() -> {
+                User user = userService.getOrCreate(identityUser);
+                return getByName(name, user);
+            });
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
+        }
+    }
+
+    public Organization getDefaultOrganizationForCurrentUser() {
+        IdentityUser identityUser = authenticatedUserService.getCbUser();
         User user = userService.getOrCreate(identityUser);
-        return getByName(name, user);
+        return getDefaultOrganizationForUser(user);
+    }
+
+    public Organization getDefaultOrganizationForUser(IdentityUser identityUser) {
+        User user = userService.getOrCreate(identityUser);
+        return getDefaultOrganizationForUser(user);
     }
 
     public Organization getDefaultOrganizationForUser(User user) {
@@ -108,26 +137,23 @@ public class OrganizationService {
     }
 
     public Organization get(Long id) {
-        IdentityUser identityUser = authenticatedUserService.getCbUser();
-        User user = userService.getOrCreate(identityUser);
-        Organization organization = organizationRepository.findById(id).orElseThrow(notFound("Organization", id));
-        if (!user.getTenant().equals(organization.getTenant())) {
-            throw new NotFoundException("Organization not found.");
+        UserOrgPermissions userOrgPermissions = userOrgPermissionsService.findForCurrentUserByOrganizationId(id);
+        if (userOrgPermissions == null) {
+            throw new AccessDeniedException("You have no access for this resource.");
         }
-        // TODO: check permissions (does the user have the right to do this in this org?)
-        return organization;
+        return userOrgPermissions.getOrganization();
     }
 
     public Set<User> removeUsers(String orgName, Set<String> userIds) {
         try {
             return transactionService.required(() -> {
-                Organization organization = getOrganizationOrThrowNotFound(orgName);
+                Organization organization = getByNameForCurrentUserOrThrowNotFound(orgName);
+                User currentUser = userService.getCurrentUser();
+                authorizeOrgManipulation(currentUser, organization, Action.MANAGE);
+
                 Set<User> users = userService.getByUsersIds(userIds);
                 Set<UserOrgPermissions> toBeDeleted = validateAllUsersAreInTheOrganization(organization, users);
-
-                // TODO: check permissions (does the user have the right to do this in this org?)
-                userOrgPermissionsRepository.deleteAll(toBeDeleted);
-
+                userOrgPermissionsService.deleteAll(toBeDeleted);
                 return toBeDeleted.stream()
                         .map(UserOrgPermissions::getUser)
                         .collect(Collectors.toSet());
@@ -140,7 +166,10 @@ public class OrganizationService {
     public Set<User> addUsers(String orgName, Set<ChangeOrganizationUsersJson> changeOrganizationUsersJsons) {
         try {
             return transactionService.required(() -> {
-                Organization organization = getOrganizationOrThrowNotFound(orgName);
+                Organization organization = getByNameForCurrentUserOrThrowNotFound(orgName);
+                User currentUser = userService.getCurrentUser();
+                authorizeOrgManipulation(currentUser, organization, Action.INVITE);
+
                 Map<User, Set<String>> usersToAddWithPermissions = orgUserPermissionJsonSetToMap(changeOrganizationUsersJsons);
                 validateNoUserIsInTheOrganization(organization, usersToAddWithPermissions.keySet());
 
@@ -154,8 +183,7 @@ public class OrganizationService {
                         })
                         .collect(Collectors.toSet());
 
-                // TODO: check permissions (does the user have the right to do this in this org?)
-                userOrgPermissionsRepository.saveAll(userOrgPermsToAdd);
+                userOrgPermissionsService.saveAll(userOrgPermsToAdd);
                 return userOrgPermsToAdd.stream().map(UserOrgPermissions::getUser)
                         .collect(Collectors.toSet());
             });
@@ -167,7 +195,10 @@ public class OrganizationService {
     public Set<User> updateUsers(String orgName, Set<ChangeOrganizationUsersJson> updateOrganizationUsersJsons) {
         try {
             return transactionService.required(() -> {
-                Organization organization = getOrganizationOrThrowNotFound(orgName);
+                Organization organization = getByNameForCurrentUserOrThrowNotFound(orgName);
+                User currentUser = userService.getCurrentUser();
+                authorizeOrgManipulation(currentUser, organization, Action.MANAGE);
+
                 Map<User, Set<String>> usersToUpdateWithPermissions = orgUserPermissionJsonSetToMap(updateOrganizationUsersJsons);
                 Map<User, UserOrgPermissions> toBeUpdated = validateAllUsersAreInTheOrganization(organization, usersToUpdateWithPermissions.keySet())
                         .stream()
@@ -180,8 +211,7 @@ public class OrganizationService {
                         })
                         .collect(Collectors.toSet());
 
-                // TODO: check permissions (does the user have the right to do this in this org?)
-                userOrgPermissionsRepository.saveAll(userOrgPermissions);
+                userOrgPermissionsService.saveAll(userOrgPermissions);
                 return toBeUpdated.keySet();
             });
         } catch (TransactionExecutionException e) {
@@ -189,23 +219,63 @@ public class OrganizationService {
         }
     }
 
-    public Organization getOrganizationOrThrowNotFound(String orgName) {
+    public Organization getByNameForCurrentUserOrThrowNotFound(String orgName) {
         Optional<Organization> organization = getByNameForCurrentUser(orgName);
         return organization.orElseThrow(() -> new NotFoundException("Cannot find organization with name: " + orgName));
+    }
+
+    public Set<User> changeUsers(String orgName, Map<String, Set<String>> userPermissions) {
+        try {
+            return transactionService.required(() -> {
+                User currentUser = userService.getCurrentUser();
+                Organization organization = getByNameForCurrentUserOrThrowNotFound(orgName);
+                authorizeOrgManipulation(currentUser, organization, Action.MANAGE);
+                Set<UserOrgPermissions> oldPermissions = userOrgPermissionsService.findForOrganization(organization);
+                userOrgPermissionsService.deleteAll(oldPermissions);
+                Map<String, User> usersToAdd = userService.getByUsersIds(userPermissions.keySet()).stream()
+                        .collect(Collectors.toMap(User::getUserId, user -> user));
+
+                userPermissions.entrySet().stream()
+                        .map(userPermission -> {
+                            User user = usersToAdd.get(userPermission.getKey());
+                            UserOrgPermissions newUserPermission = new UserOrgPermissions();
+                            newUserPermission.setPermissionSet(userPermission.getValue());
+                            newUserPermission.setUser(user);
+                            newUserPermission.setOrganization(organization);
+                            return newUserPermission;
+                        })
+                        .forEach(userOrgPermissionsService::save);
+
+                return new HashSet<>(usersToAdd.values());
+            });
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
+        }
+    }
+
+    public Organization deleteByNameForCurrentUser(String orgName) {
+        try {
+            return transactionService.required(() -> {
+                User currentUser = userService.getCurrentUser();
+                Organization organizationForDelete = getByNameForCurrentUserOrThrowNotFound(orgName);
+                authorizeOrgManipulation(currentUser, organizationForDelete, Action.MANAGE);
+
+                Organization defaultOrg = getDefaultOrganizationForCurrentUser();
+                organizationDeleteVerifierService.checkThatOrganizationIsDeletable(currentUser, organizationForDelete, defaultOrg);
+                Long deleted = userOrgPermissionsService.deleteByOrganization(organizationForDelete);
+                setupDeletionDateAndFlag(organizationForDelete);
+                organizationRepository.save(organizationForDelete);
+                LOGGER.info("Deleted organisation: {}, related permissions: {}", orgName, deleted);
+                return organizationForDelete;
+            });
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
+        }
     }
 
     private Map<User, Set<String>> orgUserPermissionJsonSetToMap(Set<ChangeOrganizationUsersJson> updateOrganizationUsersJsons) {
         return updateOrganizationUsersJsons.stream()
                 .collect(Collectors.toMap(json -> userService.getByUserId(json.getUserId()), json -> json.getPermissions()));
-    }
-
-    private void validateAllUsersAreInTheTenant(Organization organization, Set<User> users) {
-        boolean anyUserNotInTenantOfOrg = users.stream()
-                .anyMatch(user -> !user.getTenant().equals(organization.getTenant()));
-
-        if (anyUserNotInTenantOfOrg) {
-            throw new NotFoundException("User not found in tenant.");
-        }
     }
 
     private Set<UserOrgPermissions> validateAllUsersAreInTheOrganization(Organization organization, Set<User> users) {
@@ -214,7 +284,7 @@ public class OrganizationService {
 
         Set<UserOrgPermissions> userOrgPermissionsSet = users.stream()
                 .map(user -> {
-                    UserOrgPermissions userOrgPermissions = userOrgPermissionsRepository.findForUserAndOrganization(user, organization);
+                    UserOrgPermissions userOrgPermissions = userOrgPermissionsService.findForUserAndOrganization(user, organization);
                     if (userOrgPermissions == null) {
                         usersNotInTheOrganization.add(user.getUserId());
                     }
@@ -234,7 +304,7 @@ public class OrganizationService {
         validateAllUsersAreInTheTenant(organization, users);
 
         Set<String> usersInOrganization = users.stream()
-                .filter(user -> userOrgPermissionsRepository.findForUserAndOrganization(user, organization) != null)
+                .filter(user -> userOrgPermissionsService.findForUserAndOrganization(user, organization) != null)
                 .map(User::getUserId)
                 .collect(Collectors.toSet());
 
@@ -244,56 +314,27 @@ public class OrganizationService {
         }
     }
 
-    public Set<User> changeUsers(String orgName, Map<String, Set<String>> userPermissions) {
-        try {
-            return transactionService.required(() -> {
-                Organization organization = getOrganizationOrThrowNotFound(orgName);
-                Set<UserOrgPermissions> oldPermissions = userOrgPermissionsRepository.findForOrganization(organization);
-                userOrgPermissionsRepository.deleteAll(oldPermissions);
+    private void validateAllUsersAreInTheTenant(Organization organization, Set<User> users) {
+        boolean anyUserNotInTenantOfOrg = users.stream()
+                .anyMatch(user -> !user.getTenant().equals(organization.getTenant()));
 
-                Map<String, User> usersToAdd = userService.getByUsersIds(userPermissions.keySet()).stream()
-                        .collect(Collectors.toMap(User::getUserId, user -> user));
-
-                userPermissions.entrySet().stream()
-                        .map(userPermission -> {
-                            User user = usersToAdd.get(userPermission.getKey());
-                            UserOrgPermissions newUserPermission = new UserOrgPermissions();
-                            newUserPermission.setPermissionSet(userPermission.getValue());
-                            newUserPermission.setUser(user);
-                            newUserPermission.setOrganization(organization);
-                            return newUserPermission;
-                        })
-                        // TODO: check permissions (does the user have the right to do this in this org?)
-                        .forEach(userOrgPermissionsRepository::save);
-
-                return new HashSet<>(usersToAdd.values());
-            });
-        } catch (TransactionExecutionException e) {
-            throw new TransactionRuntimeExecutionException(e);
+        if (anyUserNotInTenantOfOrg) {
+            throw new NotFoundException("User not found in tenant.");
         }
     }
 
-    public Organization deleteByName(String orgName, IdentityUser identityUser) {
-        // TODO: check permissions (does the user have the right to delete this org?)
-        try {
-            return transactionService.required(() -> {
-                Organization organizationForDelete = getOrganizationOrThrowNotFound(orgName);
-                User userWhoRequestTheDeletion = userService.getOrCreate(identityUser);
-                Organization defaultOrganizationOfUserWhoRequestTheDeletion = getDefaultOrganizationForUser(userWhoRequestTheDeletion);
-                organizationDeleteVerifierService.checkThatOrganizationIsDeletable(userWhoRequestTheDeletion, organizationForDelete,
-                        defaultOrganizationOfUserWhoRequestTheDeletion);
-                Long deleted = userOrgPermissionsRepository.deleteByOrganization(organizationForDelete);
-                setupDeletionDateAndFlag(organizationForDelete);
-                organizationRepository.save(organizationForDelete);
-                LOGGER.info("Deleted organisation: {}, related permissions: {}", orgName, deleted);
-                return organizationForDelete;
-            });
-        } catch (TransactionExecutionException e) {
-            throw new TransactionRuntimeExecutionException(e);
+    private void authorizeOrgManipulation(User currentUser, Organization organizationToManipulate, Action action) {
+        UserOrgPermissions userOrgPermissions = userOrgPermissionsService.findForUserAndOrganization(currentUser, organizationToManipulate);
+        if (userOrgPermissions == null) {
+            throw new AccessDeniedException("You have no access for this resource.");
+        }
+        boolean hasPermission = OrganizationPermissions.hasPermission(userOrgPermissions.getPermissionSet(), Resource.ORG, action);
+        if (!hasPermission) {
+            throw new AccessDeniedException("You cannot delete this organization.");
         }
     }
 
-    public void setupDeletionDateAndFlag(Organization organizationForDelete) {
+    private void setupDeletionDateAndFlag(Organization organizationForDelete) {
         organizationForDelete.setStatus(DELETED);
         organizationForDelete.setDeletionTimestamp(Calendar.getInstance().getTimeInMillis());
     }

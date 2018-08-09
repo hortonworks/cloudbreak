@@ -40,7 +40,7 @@ public class HasPermissionService {
         }
 
         MethodSignature methodSignature = (MethodSignature) proceedingJoinPoint.getSignature();
-        DisablePermission disabled = getAnnotation(methodSignature, DisablePermission.class);
+        DisableHasPermission disabled = getAnnotation(methodSignature, DisableHasPermission.class);
         if (disabled != null) {
             return proceedingJoinPoint.proceed();
         }

@@ -124,6 +124,10 @@ public class TransactionService {
         public TransactionRuntimeExecutionException(TransactionExecutionException cause) {
             super(cause);
         }
+
+        public RuntimeException getOriginalCause() {
+            return ((TransactionExecutionException) getCause()).getCause();
+        }
     }
 
     @Service

@@ -16,10 +16,12 @@ import javax.persistence.UniqueConstraint;
 import com.sequenceiq.cloudbreak.api.model.RecipeType;
 import com.sequenceiq.cloudbreak.domain.converter.EncryptionConverter;
 import com.sequenceiq.cloudbreak.domain.security.Organization;
+import com.sequenceiq.cloudbreak.domain.security.OrganizationResource;
+import com.sequenceiq.cloudbreak.validation.OrganizationPermissions;
 
 @Entity
 @Table(name = "recipe", uniqueConstraints = @UniqueConstraint(columnNames = {"account", "name"}))
-public class Recipe implements ProvisionEntity {
+public class Recipe implements ProvisionEntity, OrganizationResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "recipe_generator")
@@ -125,10 +127,17 @@ public class Recipe implements ProvisionEntity {
         this.publicInAccount = publicInAccount;
     }
 
+    @Override
     public Organization getOrganization() {
         return organization;
     }
 
+    @Override
+    public OrganizationPermissions.Resource getResource() {
+        return OrganizationPermissions.Resource.RECIPE;
+    }
+
+    @Override
     public void setOrganization(Organization organization) {
         this.organization = organization;
     }

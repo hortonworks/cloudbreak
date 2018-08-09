@@ -1,6 +1,6 @@
 package com.sequenceiq.periscope.repository;
 
-import com.sequenceiq.cloudbreak.aspect.BaseRepository;
+import com.sequenceiq.cloudbreak.repository.BaseRepository;
 import com.sequenceiq.cloudbreak.aspect.HasPermission;
 import com.sequenceiq.cloudbreak.service.EntityType;
 import com.sequenceiq.periscope.domain.PeriscopeUser;

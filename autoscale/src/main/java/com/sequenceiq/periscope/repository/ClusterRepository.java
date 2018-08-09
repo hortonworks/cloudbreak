@@ -6,8 +6,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.sequenceiq.cloudbreak.aspect.BaseRepository;
-import com.sequenceiq.cloudbreak.aspect.DisablePermission;
+import com.sequenceiq.cloudbreak.repository.BaseRepository;
+import com.sequenceiq.cloudbreak.aspect.DisableHasPermission;
 import com.sequenceiq.cloudbreak.aspect.HasPermission;
 import com.sequenceiq.cloudbreak.service.EntityType;
 import com.sequenceiq.periscope.api.model.ClusterState;
@@ -25,7 +25,7 @@ public interface ClusterRepository extends BaseRepository<Cluster, Long> {
 
     List<Cluster> findByStateAndAutoscalingEnabledAndPeriscopeNodeId(ClusterState state, boolean autoscalingEnabled, String nodeId);
 
-    @DisablePermission
+    @DisableHasPermission
     int countByStateAndAutoscalingEnabledAndPeriscopeNodeId(ClusterState state, boolean autoscalingEnabled, String nodeId);
 
     List<Cluster> findAllByPeriscopeNodeIdNotInOrPeriscopeNodeIdIsNull(List<String> nodes);

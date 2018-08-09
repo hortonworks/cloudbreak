@@ -1,44 +1,34 @@
 package com.sequenceiq.cloudbreak.repository;
 
+import static com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Action.READ;
+
 import java.util.Collection;
 import java.util.Set;
 
 import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.sequenceiq.cloudbreak.api.model.RecipeType;
-import com.sequenceiq.cloudbreak.aspect.BaseRepository;
+import com.sequenceiq.cloudbreak.aspect.DisableHasPermission;
+import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByOrganizationId;
+import com.sequenceiq.cloudbreak.aspect.organization.OrganizationResourceType;
 import com.sequenceiq.cloudbreak.domain.Recipe;
-import com.sequenceiq.cloudbreak.aspect.HasPermission;
 import com.sequenceiq.cloudbreak.service.EntityType;
+import com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Resource;
 
+@DisableHasPermission
 @EntityType(entityClass = Recipe.class)
-@Transactional(Transactional.TxType.REQUIRED)
-@HasPermission
-public interface RecipeRepository extends BaseRepository<Recipe, Long> {
+@Transactional(TxType.REQUIRED)
+@OrganizationResourceType(resource = Resource.RECIPE)
+public interface RecipeRepository extends OrganizationResourceRepository<Recipe, Long> {
 
-    @Query("SELECT r FROM Recipe r WHERE r.name= :name AND r.account= :account")
-    Recipe findByNameInAccount(@Param("name") String name, @Param("account") String account);
+    @CheckPermissionsByOrganizationId(action = READ, organizationIdIndex = 1)
+    @Query("SELECT r FROM Recipe r WHERE r. name in :names AND r.organization.id = :orgId")
+    Set<Recipe> findByNamesInOrganization(@Param("names") Collection<String> names, @Param("orgId") Long orgId);
 
-    @Query("SELECT r FROM Recipe r WHERE r.name IN :names AND r.account= :account")
-    Set<Recipe> findByNameInAccount(@Param("names") Collection<String> names, @Param("account") String account);
-
-    @Query("SELECT r FROM Recipe r WHERE (r.account= :account AND r.publicInAccount= true AND r.recipeType "
-            + "NOT IN ('LEGACY','MIGRATED')) OR (r.owner= :owner AND r.recipeType NOT IN ('LEGACY','MIGRATED'))")
-    Set<Recipe> findPublicInAccountForUser(@Param("owner") String userId, @Param("account") String account);
-
-    @Query("SELECT r FROM Recipe r WHERE r.account= :account AND r.recipeType NOT IN ('LEGACY','MIGRATED')")
-    Set<Recipe> findAllInAccount(@Param("account") String account);
-
-    @Query("SELECT r FROM Recipe r WHERE r.owner= :owner AND r.recipeType NOT IN ('LEGACY','MIGRATED')")
-    Set<Recipe> findForUser(@Param("owner") String userId);
-
-    @Query("SELECT r FROM Recipe r WHERE recipeType= :recipeType")
-    Set<Recipe> findByType(@Param("recipeType") RecipeType recipeType);
-
-    @Query("SELECT r FROM Recipe r WHERE r.name= :name AND r.owner= :owner AND r.recipeType NOT IN ('LEGACY','MIGRATED')")
-    Recipe findByNameForUser(@Param("name") String name, @Param("owner") String userId);
-
+    @CheckPermissionsByOrganizationId(action = READ, organizationIdIndex = 0)
+    @Query("SELECT r FROM Recipe r WHERE r.organization.id = :orgId")
+    Set<Recipe> listByOrganizationId(@Param("orgId") Long orgId);
 }

@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.repository.security;
+package com.sequenceiq.cloudbreak.repository.organization;
 
 import java.util.Optional;
 
@@ -7,7 +7,7 @@ import javax.transaction.Transactional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.sequenceiq.cloudbreak.aspect.DisablePermission;
+import com.sequenceiq.cloudbreak.aspect.DisableHasPermission;
 import com.sequenceiq.cloudbreak.aspect.DisabledBaseRepository;
 import com.sequenceiq.cloudbreak.domain.security.Organization;
 import com.sequenceiq.cloudbreak.domain.security.Tenant;
@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.service.EntityType;
 
 @EntityType(entityClass = Organization.class)
 @Transactional(Transactional.TxType.REQUIRED)
-@DisablePermission
+@DisableHasPermission
 public interface OrganizationRepository extends DisabledBaseRepository<Organization, Long> {
 
     @Query("SELECT o FROM Organization o WHERE o.name= :name AND o.tenant= :tenant AND o.status <> 'DELETED'")
@@ -23,17 +23,17 @@ public interface OrganizationRepository extends DisabledBaseRepository<Organizat
 
     @Override
     @Query("SELECT o FROM Organization o WHERE o.id= :id AND o.status <> 'DELETED'")
-    Optional<Organization> findById(Long id);
+    Optional<Organization> findById(@Param("id") Long id);
 
     @Override
     @Query("SELECT o FROM Organization o WHERE o.id= :id AND o.status <> 'DELETED'")
-    boolean existsById(Long id);
+    boolean existsById(@Param("id") Long id);
 
     @Override
     @Query("SELECT o FROM Organization o WHERE o.status <> 'DELETED'")
     Iterable<Organization> findAll();
 
     @Override
-    @Query("SELECT o FROM Organization o WHERE o.status <> 'DELETED'")
-    Iterable<Organization> findAllById(Iterable<Long> ids);
+    @Query("SELECT o FROM Organization o WHERE o.status <> 'DELETED' AND o.id IN :ids")
+    Iterable<Organization> findAllById(@Param("ids") Iterable<Long> ids);
 }

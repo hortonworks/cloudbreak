@@ -12,12 +12,12 @@ import org.springframework.data.repository.query.Param;
 import com.sequenceiq.cloudbreak.aspect.DisabledBaseRepository;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
-import com.sequenceiq.cloudbreak.aspect.DisablePermission;
+import com.sequenceiq.cloudbreak.aspect.DisableHasPermission;
 import com.sequenceiq.cloudbreak.service.EntityType;
 
 @EntityType(entityClass = ClusterComponent.class)
 @Transactional(Transactional.TxType.REQUIRED)
-@DisablePermission
+@DisableHasPermission
 public interface ClusterComponentRepository extends DisabledBaseRepository<ClusterComponent, Long> {
 
     @Query("SELECT cv FROM ClusterComponent cv WHERE cv.cluster.id = :clusterId AND cv.componentType = :componentType AND cv.name = :name")

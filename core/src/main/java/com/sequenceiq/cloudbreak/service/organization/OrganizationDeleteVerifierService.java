@@ -13,7 +13,8 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Service
 public class OrganizationDeleteVerifierService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(OrganizationService.class);
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(OrganizationDeleteVerifierService.class);
 
     @Inject
     private StackService stackService;

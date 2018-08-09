@@ -121,7 +121,7 @@ public class Stack implements ProvisionEntity {
     @Column(columnDefinition = "TEXT")
     private String cloudPlatform;
 
-    @OneToOne(mappedBy = "stack", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToOne(mappedBy = "stack", cascade = {CascadeType.REMOVE, CascadeType.PERSIST}, orphanRemoval = true)
     private Cluster cluster;
 
     @OneToOne(cascade = CascadeType.ALL)

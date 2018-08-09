@@ -6,12 +6,12 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.sequenceiq.cloudbreak.aspect.DisablePermission;
+import com.sequenceiq.cloudbreak.aspect.DisableHasPermission;
 import com.sequenceiq.cloudbreak.aspect.DisabledBaseRepository;
 import com.sequenceiq.cloudbreak.service.EntityType;
 import com.sequenceiq.periscope.domain.PeriscopeNode;
 
-@DisablePermission
+@DisableHasPermission
 @EntityType(entityClass = PeriscopeNode.class)
 public interface PeriscopeNodeRepository extends DisabledBaseRepository<PeriscopeNode, String> {
 
