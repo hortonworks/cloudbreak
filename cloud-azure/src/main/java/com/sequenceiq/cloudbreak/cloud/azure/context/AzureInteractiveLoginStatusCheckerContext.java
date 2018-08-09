@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.azure.context;
 
 import com.sequenceiq.cloudbreak.cloud.credential.CredentialNotifier;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 
 public class AzureInteractiveLoginStatusCheckerContext {
 
@@ -13,10 +14,14 @@ public class AzureInteractiveLoginStatusCheckerContext {
 
     private final ExtendedCloudCredential extendedCloudCredential;
 
-    public AzureInteractiveLoginStatusCheckerContext(String deviceCode, ExtendedCloudCredential extendedCloudCredential, CredentialNotifier credentialNotifier) {
+    private final IdentityUser identityUser;
+
+    public AzureInteractiveLoginStatusCheckerContext(String deviceCode, ExtendedCloudCredential extendedCloudCredential,
+            CredentialNotifier credentialNotifier, IdentityUser identityUser) {
         this.deviceCode = deviceCode;
         this.extendedCloudCredential = extendedCloudCredential;
         this.credentialNotifier = credentialNotifier;
+        this.identityUser = identityUser;
     }
 
     public String getDeviceCode() {
@@ -37,5 +42,9 @@ public class AzureInteractiveLoginStatusCheckerContext {
 
     public CredentialNotifier getCredentialNotifier() {
         return credentialNotifier;
+    }
+
+    public IdentityUser getIdentityUser() {
+        return identityUser;
     }
 }

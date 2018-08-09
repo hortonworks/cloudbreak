@@ -24,11 +24,13 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
 
 import reactor.bus.EventBus;
@@ -49,6 +51,9 @@ public class ServiceProviderCredentialAdapter {
 
     @Inject
     private CredentialToExtendedCloudCredentialConverter extendedCloudCredentialConverter;
+
+    @Inject
+    private AuthenticatedUserService authenticatedUserService;
 
     public Credential init(Credential credential) {
         CloudContext cloudContext = new CloudContext(credential.getId(), credential.getName(), credential.cloudPlatform(), credential.getOwner());
@@ -82,7 +87,8 @@ public class ServiceProviderCredentialAdapter {
     public Map<String, String> interactiveLogin(Credential credential) {
         CloudContext cloudContext = new CloudContext(credential.getId(), credential.getName(), credential.cloudPlatform(), credential.getOwner());
         ExtendedCloudCredential cloudCredential = extendedCloudCredentialConverter.convert(credential);
-        InteractiveLoginRequest request = new InteractiveLoginRequest(cloudContext, cloudCredential);
+        IdentityUser identityUser = authenticatedUserService.getCbUser();
+        InteractiveLoginRequest request = new InteractiveLoginRequest(cloudContext, cloudCredential, identityUser);
         LOGGER.info("Triggering event: {}", request);
         eventBus.notify(request.selector(), eventFactory.createEvent(request));
         try {

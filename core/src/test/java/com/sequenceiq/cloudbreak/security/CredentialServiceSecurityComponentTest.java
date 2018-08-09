@@ -223,7 +223,7 @@ public class CredentialServiceSecurityComponentTest extends SecurityComponentTes
         setupLoggedInUser(loggedInUser);
 
         try (HasPermissionAspectForMockitoTest.StubbingDeactivator deactivator = hasPermissionAspectForMockitoTest.new StubbingDeactivator()) {
-            underTest.create(loggedInUser.getUserId(), loggedInUser.getAccount(), credential);
+            underTest.create(loggedInUser.getUserId(), loggedInUser.getAccount(), credential, loggedInUser);
         }
 
         verify(ownerBasedPermissionEvaluator).hasPermission(any(), eq(credential), eq(PERMISSION_WRITE));

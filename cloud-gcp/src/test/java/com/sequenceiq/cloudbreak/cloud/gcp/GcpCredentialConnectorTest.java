@@ -165,7 +165,7 @@ public class GcpCredentialConnectorTest {
     @Test
     public void testInteractiveLoginIsProhibitedOnGcp() {
         expectedException.expect(UnsupportedOperationException.class);
-        underTest.interactiveLogin(null, null, null);
+        underTest.interactiveLogin(null, null, null, null);
     }
 
 

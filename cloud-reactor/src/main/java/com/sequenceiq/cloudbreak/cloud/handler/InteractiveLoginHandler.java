@@ -40,7 +40,8 @@ public class InteractiveLoginHandler implements CloudPlatformEventHandler<Intera
         CloudContext cloudContext = request.getCloudContext();
         try {
             CloudConnector connector = cloudPlatformConnectors.getDefault(cloudContext.getPlatform());
-            Map<String, String> parameters = connector.credentials().interactiveLogin(cloudContext, request.getExtendedCloudCredential(), credentialNotifier);
+            Map<String, String> parameters = connector.credentials().interactiveLogin(cloudContext, request.getExtendedCloudCredential(),
+                    credentialNotifier, request.getIdentityUser());
             InteractiveLoginResult interactiveLoginResult = new InteractiveLoginResult(request, parameters);
             request.getResult().onNext(interactiveLoginResult);
             LOGGER.info("Interactive login request successfully processed");
