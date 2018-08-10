@@ -1,6 +1,5 @@
 package com.sequenceiq.periscope.monitor.handler;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -55,7 +54,7 @@ public class UpdateFailedHandlerTest {
     @Test
     public void testOnApplicationEventWhenStatusDelete() {
         Cluster cluster = getARunningCluster();
-        when(clusterService.find(anyLong())).thenReturn(cluster);
+        when(clusterService.findById(anyLong())).thenReturn(cluster);
         when(cloudbreakCommunicator.getById(anyLong())).thenReturn(getStackResponse(Status.DELETE_IN_PROGRESS, Status.DELETE_IN_PROGRESS));
 
         underTest.onApplicationEvent(new UpdateFailedEvent(CLUSTER_ID));
@@ -67,29 +66,28 @@ public class UpdateFailedHandlerTest {
     @Test
     public void testOnApplicationEventWhenGetStatusFails() {
         Cluster cluster = getARunningCluster();
-        when(clusterService.find(anyLong())).thenReturn(cluster);
+        when(clusterService.findById(anyLong())).thenReturn(cluster);
         when(cloudbreakCommunicator.getById(anyLong())).thenThrow(new RuntimeException("some error in communication"));
 
         underTest.onApplicationEvent(new UpdateFailedEvent(CLUSTER_ID));
 
-        assertEquals(ClusterState.SUSPENDED, cluster.getState());
-        verify(clusterService).find(CLUSTER_ID);
-        verify(clusterService).save(cluster);
+        verify(clusterService).setState(cluster, ClusterState.SUSPENDED);
+        verify(clusterService).findById(CLUSTER_ID);
+        verify(clusterService).setState(cluster, ClusterState.SUSPENDED);
         verify(clusterService, never()).removeById(CLUSTER_ID);
     }
 
     @Test
     public void testOnApplicationEventWhenFailsFirstTime() {
         Cluster cluster = getARunningCluster();
-        when(clusterService.find(anyLong())).thenReturn(cluster);
+        when(clusterService.findById(anyLong())).thenReturn(cluster);
         when(cloudbreakCommunicator.getById(anyLong())).thenReturn(getStackResponse(Status.AVAILABLE, Status.AVAILABLE));
         when(stackResponseUtils.getNotTerminatedPrimaryGateways(any())).thenReturn(getPrimaryGateway());
 
         underTest.onApplicationEvent(new UpdateFailedEvent(CLUSTER_ID));
 
-        assertEquals(ClusterState.RUNNING, cluster.getState());
-        verify(clusterService).find(CLUSTER_ID);
-        verify(clusterService, never()).save(cluster);
+        verify(clusterService).findById(CLUSTER_ID);
+        verify(clusterService, never()).setState(cluster, ClusterState.SUSPENDED);
         verify(clusterService, never()).removeById(CLUSTER_ID);
         verify(cloudbreakCommunicator, never()).failureReport(anyLong(), any());
     }
@@ -97,16 +95,15 @@ public class UpdateFailedHandlerTest {
     @Test
     public void testOnApplicationEventWhenFailsFourTimes() {
         Cluster cluster = getARunningCluster();
-        when(clusterService.find(anyLong())).thenReturn(cluster);
+        when(clusterService.findById(anyLong())).thenReturn(cluster);
         when(cloudbreakCommunicator.getById(anyLong())).thenReturn(getStackResponse(Status.AVAILABLE, Status.AVAILABLE));
         when(stackResponseUtils.getNotTerminatedPrimaryGateways(any())).thenReturn(getPrimaryGateway());
 
         IntStream.range(0, 3).forEach(i -> underTest.onApplicationEvent(new UpdateFailedEvent(CLUSTER_ID)));
         underTest.onApplicationEvent(new UpdateFailedEvent(CLUSTER_ID));
 
-        assertEquals(ClusterState.RUNNING, cluster.getState());
-        verify(clusterService, times(4)).find(CLUSTER_ID);
-        verify(clusterService, never()).save(cluster);
+        verify(clusterService, times(4)).findById(CLUSTER_ID);
+        verify(clusterService, never()).setState(cluster, ClusterState.SUSPENDED);
         verify(clusterService, never()).removeById(CLUSTER_ID);
         verify(cloudbreakCommunicator, never()).failureReport(anyLong(), any());
     }
@@ -114,16 +111,15 @@ public class UpdateFailedHandlerTest {
     @Test
     public void testOnApplicationEventWhenFailsFiveTimes() {
         Cluster cluster = getARunningCluster();
-        when(clusterService.find(anyLong())).thenReturn(cluster);
+        when(clusterService.findById(anyLong())).thenReturn(cluster);
         when(cloudbreakCommunicator.getById(anyLong())).thenReturn(getStackResponse(Status.AVAILABLE, Status.AVAILABLE));
         when(stackResponseUtils.getNotTerminatedPrimaryGateways(any())).thenReturn(getPrimaryGateway());
 
         IntStream.range(0, 4).forEach(i -> underTest.onApplicationEvent(new UpdateFailedEvent(CLUSTER_ID)));
         underTest.onApplicationEvent(new UpdateFailedEvent(CLUSTER_ID));
 
-        assertEquals(ClusterState.SUSPENDED, cluster.getState());
-        verify(clusterService, times(5)).find(CLUSTER_ID);
-        verify(clusterService).save(cluster);
+        verify(clusterService, times(5)).findById(CLUSTER_ID);
+        verify(clusterService).setState(cluster, ClusterState.SUSPENDED);
         verify(clusterService, never()).removeById(CLUSTER_ID);
         verify(cloudbreakCommunicator).failureReport(eq(STACK_ID), any());
     }
@@ -131,16 +127,15 @@ public class UpdateFailedHandlerTest {
     @Test
     public void testOnApplicationEventWhenFailsFiveTimesNotAvailable() {
         Cluster cluster = getARunningCluster();
-        when(clusterService.find(anyLong())).thenReturn(cluster);
+        when(clusterService.findById(anyLong())).thenReturn(cluster);
         when(cloudbreakCommunicator.getById(anyLong())).thenReturn(getStackResponse(Status.AVAILABLE, Status.UPDATE_FAILED));
         when(stackResponseUtils.getNotTerminatedPrimaryGateways(any())).thenReturn(getPrimaryGateway());
 
         IntStream.range(0, 4).forEach(i -> underTest.onApplicationEvent(new UpdateFailedEvent(CLUSTER_ID)));
         underTest.onApplicationEvent(new UpdateFailedEvent(CLUSTER_ID));
 
-        assertEquals(ClusterState.SUSPENDED, cluster.getState());
-        verify(clusterService, times(5)).find(CLUSTER_ID);
-        verify(clusterService).save(cluster);
+        verify(clusterService, times(5)).findById(CLUSTER_ID);
+        verify(clusterService).setState(cluster, ClusterState.SUSPENDED);
         verify(clusterService, never()).removeById(CLUSTER_ID);
         verify(cloudbreakCommunicator, never()).failureReport(eq(STACK_ID), any());
     }
@@ -148,7 +143,7 @@ public class UpdateFailedHandlerTest {
     @Test
     public void testOnApplicationEventWhenReportFailureThrows() {
         Cluster cluster = getARunningCluster();
-        when(clusterService.find(anyLong())).thenReturn(cluster);
+        when(clusterService.findById(anyLong())).thenReturn(cluster);
         when(cloudbreakCommunicator.getById(anyLong())).thenReturn(getStackResponse(Status.AVAILABLE, Status.AVAILABLE));
         when(stackResponseUtils.getNotTerminatedPrimaryGateways(any())).thenReturn(getPrimaryGateway());
         doThrow(new RuntimeException("error sending failure report")).when(cloudbreakCommunicator).failureReport(anyLong(), any());
@@ -156,9 +151,8 @@ public class UpdateFailedHandlerTest {
         IntStream.range(0, 4).forEach(i -> underTest.onApplicationEvent(new UpdateFailedEvent(CLUSTER_ID)));
         underTest.onApplicationEvent(new UpdateFailedEvent(CLUSTER_ID));
 
-        assertEquals(ClusterState.SUSPENDED, cluster.getState());
-        verify(clusterService, times(5)).find(CLUSTER_ID);
-        verify(clusterService).save(cluster);
+        verify(clusterService, times(5)).findById(CLUSTER_ID);
+        verify(clusterService).setState(cluster, ClusterState.SUSPENDED);
         verify(clusterService, never()).removeById(CLUSTER_ID);
         verify(cloudbreakCommunicator).failureReport(eq(STACK_ID), any());
     }
@@ -166,16 +160,15 @@ public class UpdateFailedHandlerTest {
     @Test
     public void testOnApplicationEventWhenFailsFourTimesWithStatusNull() {
         Cluster cluster = getARunningCluster();
-        when(clusterService.find(anyLong())).thenReturn(cluster);
+        when(clusterService.findById(anyLong())).thenReturn(cluster);
         when(cloudbreakCommunicator.getById(anyLong())).thenReturn(getStackResponse(null, null));
         when(stackResponseUtils.getNotTerminatedPrimaryGateways(any())).thenReturn(getPrimaryGateway());
 
         IntStream.range(0, 3).forEach(i -> underTest.onApplicationEvent(new UpdateFailedEvent(CLUSTER_ID)));
         underTest.onApplicationEvent(new UpdateFailedEvent(CLUSTER_ID));
 
-        assertEquals(ClusterState.RUNNING, cluster.getState());
-        verify(clusterService, times(4)).find(CLUSTER_ID);
-        verify(clusterService, never()).save(cluster);
+        verify(clusterService, times(4)).findById(CLUSTER_ID);
+        verify(clusterService, never()).setState(cluster, ClusterState.SUSPENDED);
         verify(clusterService, never()).removeById(CLUSTER_ID);
         verify(cloudbreakCommunicator, never()).failureReport(anyLong(), any());
     }
@@ -183,16 +176,15 @@ public class UpdateFailedHandlerTest {
     @Test
     public void testOnApplicationEventWhenFailsFiveTimesWithStatusNull() {
         Cluster cluster = getARunningCluster();
-        when(clusterService.find(anyLong())).thenReturn(cluster);
+        when(clusterService.findById(anyLong())).thenReturn(cluster);
         when(cloudbreakCommunicator.getById(anyLong())).thenReturn(getStackResponse(null, null));
         when(stackResponseUtils.getNotTerminatedPrimaryGateways(any())).thenReturn(getPrimaryGateway());
 
         IntStream.range(0, 4).forEach(i -> underTest.onApplicationEvent(new UpdateFailedEvent(CLUSTER_ID)));
         underTest.onApplicationEvent(new UpdateFailedEvent(CLUSTER_ID));
 
-        assertEquals(ClusterState.SUSPENDED, cluster.getState());
-        verify(clusterService, times(5)).find(CLUSTER_ID);
-        verify(clusterService).save(cluster);
+        verify(clusterService, times(5)).findById(CLUSTER_ID);
+        verify(clusterService).setState(cluster, ClusterState.SUSPENDED);
         verify(clusterService, never()).removeById(CLUSTER_ID);
         verify(cloudbreakCommunicator, never()).failureReport(anyLong(), any());
     }
@@ -200,15 +192,15 @@ public class UpdateFailedHandlerTest {
     @Test
     public void testOnApplicationEventWhenFailsAfterClusterRemove() {
         Cluster cluster = getARunningCluster();
-        when(clusterService.find(anyLong())).thenReturn(null);
+        when(clusterService.findById(anyLong())).thenReturn(null);
         when(cloudbreakCommunicator.getById(anyLong())).thenReturn(getStackResponse(null, null));
         when(stackResponseUtils.getNotTerminatedPrimaryGateways(any())).thenReturn(getPrimaryGateway());
 
         IntStream.range(0, 4).forEach(i -> underTest.onApplicationEvent(new UpdateFailedEvent(CLUSTER_ID)));
         underTest.onApplicationEvent(new UpdateFailedEvent(CLUSTER_ID));
 
-        verify(clusterService, times(5)).find(CLUSTER_ID);
-        verify(clusterService, never()).save(cluster);
+        verify(clusterService, times(5)).findById(CLUSTER_ID);
+        verify(clusterService, never()).setState(cluster, ClusterState.SUSPENDED);
         verify(clusterService, never()).removeById(CLUSTER_ID);
         verify(cloudbreakCommunicator, never()).failureReport(anyLong(), any());
     }
