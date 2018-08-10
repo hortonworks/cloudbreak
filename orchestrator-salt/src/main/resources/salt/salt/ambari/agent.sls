@@ -25,10 +25,18 @@ parallel_task_execution:
     - unless: cat /etc/environment | grep SPARK_CLASSPATH
 {% endif %}
 
+set_ambari_server_address:
+  file.replace:
+    - name: /etc/ambari-agent/conf/ambari-agent.ini
+    - pattern: "^hostname[ ]{0,1}=.*"
+    - repl: "hostname=ambari-server.{{ ambari.cluster_domain }}"
+
 /etc/ambari-agent/conf/internal_hostname.sh:
   file.managed:
     - source: salt://ambari/scripts/internal_hostname.sh
     - mode: 755
+
+{% if not 'YARN' in salt['pillar.get']('platform') %}
 
 /etc/ambari-agent/conf/public_hostname.sh:
   file.managed:
@@ -39,12 +47,6 @@ parallel_task_execution:
       private_address: {{ host.private_address }}
     - mode: 755
 
-set_ambari_server_address:
-  file.replace:
-    - name: /etc/ambari-agent/conf/ambari-agent.ini
-    - pattern: "^hostname[ ]{0,1}=.*"
-    - repl: "hostname=ambari-server.{{ ambari.cluster_domain }}"
-
 set_public_hostname_script:
   file.replace:
     - name: /etc/ambari-agent/conf/ambari-agent.ini
@@ -53,6 +55,8 @@ set_public_hostname_script:
     - unless: cat /etc/ambari-agent/conf/ambari-agent.ini | grep public_hostname_script
     - watch:
       - file: /etc/ambari-agent/conf/public_hostname.sh
+
+{% endif %}
 
 set_internal_hostname_script:
   file.replace:

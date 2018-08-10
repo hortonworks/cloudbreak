@@ -11,6 +11,8 @@ public class CloudConstants {
 
     public static final String YARN = "YARN";
 
+    public static final String CUMULUS_YARN = "CUMULUS_YARN";
+
     private CloudConstants() {
     }
 }
