@@ -9,9 +9,9 @@ import com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Action;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface CheckPermissionsByOrganizationId {
+public @interface CheckPermissionsByTargetId {
 
     Action action() default Action.READ;
 
-    int organizationIdIndex() default 0;
+    int targetIdIndex() default 0;
 }

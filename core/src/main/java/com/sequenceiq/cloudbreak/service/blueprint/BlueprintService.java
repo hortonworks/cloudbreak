@@ -30,13 +30,11 @@ import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.security.Organization;
-import com.sequenceiq.cloudbreak.domain.security.User;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
-import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.util.NameUtil;
 
 @Service
@@ -58,9 +56,6 @@ public class BlueprintService {
 
     @Inject
     private CentralBlueprintParameterQueryService centralBlueprintParameterQueryService;
-
-    @Inject
-    private UserService userService;
 
     @Inject
     private OrganizationService organizationService;
@@ -91,8 +86,7 @@ public class BlueprintService {
         Blueprint savedBlueprint;
         blueprint.setOwner(identityUser.getUserId());
         blueprint.setAccount(identityUser.getAccount());
-        User user = userService.getOrCreate(identityUser);
-        Organization organization = organizationService.getDefaultOrganizationForUser(user);
+        Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
         blueprint.setOrganization(organization);
         if (properties != null && !properties.isEmpty()) {
             LOGGER.info("Extend blueprint with the following properties: {}", properties);

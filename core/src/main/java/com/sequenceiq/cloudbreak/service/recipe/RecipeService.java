@@ -24,13 +24,11 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.OrganizationResourceRepository;
 import com.sequenceiq.cloudbreak.repository.RecipeRepository;
-import com.sequenceiq.cloudbreak.service.AbstractOrganizationResourceService;
-import com.sequenceiq.cloudbreak.service.TransactionService;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.AbstractOrganizationAwareResourceService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Service
-public class RecipeService extends AbstractOrganizationResourceService<Recipe> {
+public class RecipeService extends AbstractOrganizationAwareResourceService<Recipe> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RecipeService.class);
 
@@ -41,16 +39,10 @@ public class RecipeService extends AbstractOrganizationResourceService<Recipe> {
     private HostGroupRepository hostGroupRepository;
 
     @Inject
-    private TransactionService transactionService;
-
-    @Inject
-    private OrganizationService organizationService;
-
-    @Inject
     private UserService userService;
 
     public Set<Recipe> getRecipesByNames(IdentityUser user, Collection<String> recipeNames) {
-        Organization organization = organizationService.getDefaultOrganizationForUser(user);
+        Organization organization = getOrganizationService().getDefaultOrganizationForUser(user);
         Set<Recipe> recipes = recipeRepository.findByNamesInOrganization(recipeNames, organization.getId());
         if (recipeNames.size() != recipes.size()) {
             throw new NotFoundException(String.format("Recipes '%s' not found.", collectMissingRecipeNames(recipes, recipeNames)));
@@ -81,21 +73,6 @@ public class RecipeService extends AbstractOrganizationResourceService<Recipe> {
     }
 
     @Override
-    protected TransactionService transactionService() {
-        return transactionService;
-    }
-
-    @Override
-    protected OrganizationService organizationService() {
-        return organizationService;
-    }
-
-    @Override
-    protected UserService userService() {
-        return userService;
-    }
-
-    @Override
     protected APIResourceType apiResourceType() {
         return APIResourceType.RECIPE;
     }
@@ -121,16 +98,14 @@ public class RecipeService extends AbstractOrganizationResourceService<Recipe> {
                 throw new BadRequestException(String.format(
                         "There are clusters associated with recipe '%s'. Please remove these before deleting the recipe. "
                                 + "The following clusters are using this recipe: [%s]", resource.getId(), clusters));
-            } else {
-                throw new BadRequestException(String.format("There is a cluster ['%s'] which uses recipe '%s'. Please remove this "
-                        + "cluster before deleting the recipe", hostGroupsWithRecipe.get(0).getCluster().getName(), resource.getName()));
             }
+            throw new BadRequestException(String.format("There is a cluster ['%s'] which uses recipe '%s'. Please remove this "
+                    + "cluster before deleting the recipe", hostGroupsWithRecipe.get(0).getCluster().getName(), resource.getName()));
         }
         return true;
     }
 
     @Override
     protected void prepareCreation(Recipe resource) {
-
     }
 }

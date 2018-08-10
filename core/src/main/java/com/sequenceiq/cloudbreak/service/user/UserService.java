@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 
 @Service
 public class UserService {
+
     @Inject
     private UserRepository userRepository;
 
@@ -45,7 +46,7 @@ public class UserService {
 
     public User getOrCreate(IdentityUser identityUser) {
         try {
-            return transactionService.required(() -> {
+            return transactionService.requiresNew(() -> {
                 User user = userRepository.findByUserId(identityUser.getUsername());
                 if (user == null) {
                     user = new User();
@@ -62,7 +63,7 @@ public class UserService {
                     organization.setName(identityUser.getUsername());
                     organization.setStatus(ACTIVE);
                     organization.setDescription("Default organization for the user.");
-                    organizationService.create(identityUser, organization);
+                    organizationService.create(user, organization);
                 }
                 return user;
             });

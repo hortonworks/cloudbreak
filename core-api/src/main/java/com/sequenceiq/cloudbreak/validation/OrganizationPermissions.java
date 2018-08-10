@@ -53,13 +53,13 @@ public enum OrganizationPermissions {
     MANAGEMENTPACK_READ(MPACK, READ, "Write management pack configs in an organization."),
     MANAGEMENTPACK_WRITE(MPACK, WRITE, "Write management pack configs in an organization.");
 
-    private String name;
+    private final String name;
 
-    private Resource resource;
+    private final Resource resource;
 
-    private Action action;
+    private final Action action;
 
-    private String description;
+    private final String description;
 
     OrganizationPermissions(Resource resource, Action action, String description) {
         this.resource = resource;
@@ -77,15 +77,10 @@ public enum OrganizationPermissions {
             if (action == INVITE && (permissions.contains(ORG_INVITE.name) || permissions.contains(ORG_MANAGE.name))) {
                 return true;
             }
-            if (action == MANAGE && permissions.contains(ORG_MANAGE.name)) {
-                return true;
-            }
-            return false;
-        }
-        if (permissions.contains(ALL_WRITE.name)) {
+            return action == MANAGE && permissions.contains(ORG_MANAGE.name);
+        } else if (permissions.contains(ALL_WRITE.name)) {
             return true;
-        }
-        if (permissions.contains(ALL_READ.name) && action == READ) {
+        } else if (permissions.contains(ALL_READ.name) && action == READ) {
             return true;
         }
         String permissionName = getName(resource, action);
@@ -119,17 +114,27 @@ public enum OrganizationPermissions {
     }
 
     public enum Resource {
-        ALL,
-        ORG,
-        BLUEPRINT,
-        IMAGECATALOG,
-        CREDENTIAL,
-        RECIPE,
-        STACK,
-        LDAP,
-        RDS,
-        PROXY,
-        MPACK
+        ALL("All resources"),
+        ORG("Organizations"),
+        BLUEPRINT("Blueprints"),
+        IMAGECATALOG("Image catalogs"),
+        CREDENTIAL("Credentials"),
+        RECIPE("Recipes"),
+        STACK("Stacks"),
+        LDAP("LDAP resource"),
+        RDS("RDS resource"),
+        PROXY("Proxys"),
+        MPACK("MPACK resource");
+
+        private final String readableName;
+
+        Resource(String readableName) {
+            this.readableName = readableName;
+        }
+
+        public String getReadableName() {
+            return readableName;
+        }
     }
 
     public enum Action {

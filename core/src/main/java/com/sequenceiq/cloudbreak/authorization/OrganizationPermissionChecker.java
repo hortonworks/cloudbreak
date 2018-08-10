@@ -26,7 +26,6 @@ public class OrganizationPermissionChecker implements PermissionChecker<CheckPer
     @Override
     public <T extends Annotation> Object checkPermissions(T rawMethodAnnotation, Resource resource, User user,
             ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature) {
-
         Long orgId = getOrgId(rawMethodAnnotation, proceedingJoinPoint);
         Action action = getAction(rawMethodAnnotation);
         return permissionCheckingUtils.checkPermissionsByPermissionSetAndProceed(resource, user, orgId, action, proceedingJoinPoint, methodSignature);
@@ -44,11 +43,9 @@ public class OrganizationPermissionChecker implements PermissionChecker<CheckPer
         permissionCheckingUtils.validateIndex(organizationIndex, length, "organizationIndex");
         Object organization = proceedingJoinPoint.getArgs()[organizationIndex];
         if (!(organization instanceof Organization)) {
-            throw new IllegalArgumentException(format("Type of organization should be %s! It is instead: %s",
-                    Organization.class.getCanonicalName(), organization));
+            throw new IllegalArgumentException(format("Type of organization should be %s!", Organization.class.getCanonicalName()));
         }
     }
-
 
     private <T extends Annotation> Action getAction(T rawMethodAnnotation) {
         return ((CheckPermissionsByOrganization) rawMethodAnnotation).action();

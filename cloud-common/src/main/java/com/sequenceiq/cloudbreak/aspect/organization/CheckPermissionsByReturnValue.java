@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Action;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface CheckPermissionsInPostPhase {
+public @interface CheckPermissionsByReturnValue {
 
     Action action() default Action.READ;
 }

@@ -67,12 +67,11 @@ public class OrganizationService {
     @Inject
     private OrganizationDeleteVerifierService organizationDeleteVerifierService;
 
-    public Organization create(IdentityUser identityUser, Organization organization) {
+    public Organization create(User user, Organization organization) {
         try {
             // TODO: check: does the user in this tenant have the right to create an org?
             return transactionService.required(() -> {
                 try {
-                    User user = userService.getOrCreate(identityUser);
                     Organization created = organizationRepository.save(organization);
                     UserOrgPermissions userOrgPermissions = new UserOrgPermissions();
                     userOrgPermissions.setOrganization(created);
@@ -100,10 +99,10 @@ public class OrganizationService {
                 .map(UserOrgPermissions::getOrganization).collect(Collectors.toSet());
     }
 
-    public Optional<Organization> getByName(String name, IdentityUser identityUser) {
+    public Optional<Organization> getByName(String name) {
         try {
             return transactionService.required(() -> {
-                User user = userService.getOrCreate(identityUser);
+                User user = userService.getCurrentUser();
                 return getByName(name, user);
             });
         } catch (TransactionExecutionException e) {
@@ -112,8 +111,7 @@ public class OrganizationService {
     }
 
     public Organization getDefaultOrganizationForCurrentUser() {
-        IdentityUser identityUser = authenticatedUserService.getCbUser();
-        User user = userService.getOrCreate(identityUser);
+        User user = userService.getCurrentUser();
         return getDefaultOrganizationForUser(user);
     }
 
@@ -131,8 +129,7 @@ public class OrganizationService {
     }
 
     public Optional<Organization> getByNameForCurrentUser(String name) {
-        IdentityUser identityUser = authenticatedUserService.getCbUser();
-        User user = userService.getOrCreate(identityUser);
+        User user = userService.getCurrentUser();
         return Optional.ofNullable(organizationRepository.getByName(name, user.getTenant()));
     }
 

@@ -14,17 +14,17 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.ConstraintJson;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupRequest;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.ConstraintTemplate;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.repository.ConstraintRepository;
 import com.sequenceiq.cloudbreak.repository.ConstraintTemplateRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
@@ -81,7 +81,7 @@ public class HostGroupDecorator {
             prepareRecipesByName(subject, user, recipeNames);
         }
         if (recipes != null && !recipes.isEmpty()) {
-            prepareRecipesByRequests(subject, user, recipes, publicInAccount);
+            prepareRecipesByRequests(subject, recipes, publicInAccount);
         }
 
         return subject;
@@ -92,11 +92,11 @@ public class HostGroupDecorator {
         subject.getRecipes().addAll(recipes);
     }
 
-    private void prepareRecipesByRequests(HostGroup subject, IdentityUser user, Iterable<RecipeRequest> recipes, Boolean publicInAccount) {
+    private void prepareRecipesByRequests(HostGroup subject, Iterable<RecipeRequest> recipes, Boolean publicInAccount) {
         for (RecipeRequest recipe : recipes) {
             Recipe convert = conversionService.convert(recipe, Recipe.class);
             convert.setPublicInAccount(publicInAccount);
-            convert = recipeService.create(user, convert);
+            convert = recipeService.create(convert);
             subject.getRecipes().add(convert);
         }
     }

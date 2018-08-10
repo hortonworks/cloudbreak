@@ -22,10 +22,10 @@ public class CheckPermissionsAspects {
     private PermissionCheckerService permissionCheckerService;
 
     @Pointcut("execution(public * com.sequenceiq.cloudbreak.repository.*.*(..)) ")
-    public void allRepositories2() {
+    public void allRepositories() {
     }
 
-    @Around("allRepositories2()")
+    @Around("allRepositories()")
     public Object hasPermission(ProceedingJoinPoint proceedingJoinPoint) {
         return permissionCheckerService.hasPermission(proceedingJoinPoint);
     }

@@ -2,10 +2,14 @@ package com.sequenceiq.cloudbreak.authorization;
 
 import static java.lang.String.format;
 
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import javax.inject.Inject;
 
@@ -16,10 +20,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.aspect.organization.OrganizationResourceType;
 import com.sequenceiq.cloudbreak.domain.security.Organization;
-import com.sequenceiq.cloudbreak.domain.security.OrganizationResource;
+import com.sequenceiq.cloudbreak.domain.security.OrganizationAwareResource;
 import com.sequenceiq.cloudbreak.domain.security.User;
 import com.sequenceiq.cloudbreak.domain.security.UserOrgPermissions;
+import com.sequenceiq.cloudbreak.repository.OrganizationResourceRepository;
 import com.sequenceiq.cloudbreak.service.user.UserOrgPermissionsService;
 import com.sequenceiq.cloudbreak.validation.OrganizationPermissions;
 import com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Action;
@@ -35,11 +41,13 @@ public class PermissionCheckingUtils {
 
     public void checkPermissionsByTarget(Object target, User user, Resource resource, Action action) {
         Iterable<?> iterableTarget = targetToIterable(target);
-        validateTarget(iterableTarget);
-        Set<Long> organizationIds = collectOrganizationIds((Iterable<OrganizationResource>) iterableTarget);
+        Set<Long> organizationIds = collectOrganizationIds(iterableTarget);
+        if (organizationIds.isEmpty()) {
+            throw new AccessDeniedException(format("You have no access to %s.", resource.getReadableName()));
+        }
         Set<UserOrgPermissions> userOrgPermissionSet = userOrgPermissionsService.findForUserByOrganizationIds(user, organizationIds);
         if (userOrgPermissionSet.size() != organizationIds.size()) {
-            throw new AccessDeniedException("You have no access to this resource.");
+            throw new AccessDeniedException(format("You have no access to %s.", resource.getReadableName()));
         }
         userOrgPermissionSet.stream()
                 .map(UserOrgPermissions::getPermissionSet)
@@ -50,28 +58,22 @@ public class PermissionCheckingUtils {
         return target instanceof Iterable<?> ? (Iterable<?>) target : Collections.singletonList(target);
     }
 
-    private void validateTarget(Iterable<?> iterableTarget) {
-        Iterator<?> iterator = iterableTarget.iterator();
-        if (iterator.hasNext()) {
-            Object firstElement = iterator.next();
-            if (!(firstElement instanceof OrganizationResource)) {
-                throw new IllegalArgumentException(format("Type of target in Iterable<?> should be %s! It is instead: %s",
-                        OrganizationResource.class.getCanonicalName(), firstElement));
-            }
-        }
+    private Set<Long> collectOrganizationIds(Iterable<?> target) {
+        return StreamSupport.stream(target.spliterator(), false)
+                .map(resource -> {
+                    if (resource instanceof Optional && ((Optional<?>) resource).isPresent()) {
+                        return (OrganizationAwareResource) ((Optional<?>) resource).get();
+                    } else if (resource instanceof OrganizationAwareResource) {
+                        return (OrganizationAwareResource) resource;
+                    }
+                    return null;
+                })
+                .filter(Objects::nonNull)
+                .map(this::getOrganizationId)
+                .collect(Collectors.toSet());
     }
 
-    private Set<Long> collectOrganizationIds(Iterable<OrganizationResource> target) {
-        Iterable<OrganizationResource> iterableTarget = target;
-        Set<Long> organizationIds = new HashSet<>();
-        iterableTarget.forEach(organizationResource -> {
-            Long organizationId = getOrganizationId(organizationResource);
-            organizationIds.add(organizationId);
-        });
-        return organizationIds;
-    }
-
-    private Long getOrganizationId(OrganizationResource organizationResource) {
+    private Long getOrganizationId(OrganizationAwareResource organizationResource) {
         Organization organization = organizationResource.getOrganization();
         if (organization == null) {
             throw new IllegalArgumentException("Organization cannot be null!");
@@ -83,15 +85,14 @@ public class PermissionCheckingUtils {
         return organizationId;
     }
 
-    public Object checkPermissionsByPermissionSetAndProceed(Resource resource, User user, Long orgId, Action action,
-            ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature) {
-
+    public Object checkPermissionsByPermissionSetAndProceed(Resource resource, User user, Long orgId, Action action, ProceedingJoinPoint proceedingJoinPoint,
+            MethodSignature methodSignature) {
         if (orgId == null) {
             throw new IllegalArgumentException("organizationId cannot be null!");
         }
         UserOrgPermissions userOrgPermissions = userOrgPermissionsService.findForUserByOrganizationId(user, orgId);
         if (userOrgPermissions == null) {
-            throw new AccessDeniedException("You have no access to this resource.");
+            throw new AccessDeniedException(format("You have no access to %s.", resource.getReadableName()));
         }
         Set<String> permissionSet = userOrgPermissions.getPermissionSet();
         LOGGER.info("Checking {} permission for: {}", action, resource);
@@ -102,7 +103,7 @@ public class PermissionCheckingUtils {
     public void checkPermissionByPermissionSet(Action action, Resource resource, Set<String> permissionSet) {
         boolean hasPermission = OrganizationPermissions.hasPermission(permissionSet, resource, action);
         if (!hasPermission) {
-            throw new AccessDeniedException("You have no access to this resource.");
+            throw new AccessDeniedException(format("You have no access to %s.", resource.getReadableName()));
         }
     }
 
@@ -121,7 +122,19 @@ public class PermissionCheckingUtils {
             }
             return proceed;
         } catch (Throwable t) {
-            throw new IllegalStateException("Proceeding failed!", t);
+            throw new AccessDeniedException(t.getMessage(), t);
         }
+    }
+
+    public Optional<Class<?>> getRepositoryClass(ProceedingJoinPoint proceedingJoinPoint) {
+        return Arrays.stream(proceedingJoinPoint.getTarget().getClass().getInterfaces())
+                .filter(i -> Arrays.asList(i.getInterfaces()).contains(OrganizationResourceRepository.class))
+                .findFirst();
+    }
+
+    public Optional<Annotation> getAnnotation(Optional<Class<?>> repositoryClass) {
+        return repositoryClass.flatMap(repo -> Arrays.stream(repo.getAnnotations())
+                .filter(a -> a.annotationType().equals(OrganizationResourceType.class))
+                .findFirst());
     }
 }

@@ -63,7 +63,7 @@ public class Cluster implements ProvisionEntity {
     @SequenceGenerator(name = "cluster_generator", sequenceName = "cluster_id_seq", allocationSize = 1)
     private Long id;
 
-    @OneToOne(cascade = CascadeType.PERSIST)
+    @OneToOne
     private Stack stack;
 
     @ManyToOne

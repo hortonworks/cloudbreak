@@ -20,13 +20,10 @@ import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.security.Organization;
-import com.sequenceiq.cloudbreak.domain.security.User;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.LdapConfigRepository;
-import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
-import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Service
 public class LdapConfigService {
@@ -40,19 +37,12 @@ public class LdapConfigService {
     private ClusterRepository clusterRepository;
 
     @Inject
-    private AuthorizationService authorizationService;
-
-    @Inject
-    private UserService userService;
-
-    @Inject
     private OrganizationService organizationService;
 
     public LdapConfig create(IdentityUser identityUser, LdapConfig ldapConfig) {
         ldapConfig.setOwner(identityUser.getUserId());
         ldapConfig.setAccount(identityUser.getAccount());
-        User user = userService.getOrCreate(identityUser);
-        Organization organization = organizationService.getDefaultOrganizationForUser(user);
+        Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
         ldapConfig.setOrganization(organization);
         try {
             return ldapConfigRepository.save(ldapConfig);

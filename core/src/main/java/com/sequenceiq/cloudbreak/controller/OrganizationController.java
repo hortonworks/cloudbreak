@@ -22,12 +22,12 @@ import com.sequenceiq.cloudbreak.api.model.users.OrganizationResponse;
 import com.sequenceiq.cloudbreak.api.model.users.OrganizationResponse.NameComparator;
 import com.sequenceiq.cloudbreak.api.model.users.UserResponseJson;
 import com.sequenceiq.cloudbreak.api.model.users.UserResponseJson.UserIdComparator;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.security.Organization;
 import com.sequenceiq.cloudbreak.domain.security.User;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Component
 @Transactional(TxType.NEVER)
@@ -43,12 +43,15 @@ public class OrganizationController extends NotificationController implements Or
     @Inject
     private AuthenticatedUserService authenticatedUserService;
 
+    @Inject
+    private UserService userService;
+
     @Override
     public OrganizationResponse create(@Valid OrganizationRequest organizationRequest) {
-        IdentityUser user = authenticatedUserService.getCbUser();
+        User user = userService.getCurrentUser();
         Organization organization = conversionService.convert(organizationRequest, Organization.class);
         organization = organizationService.create(user, organization);
-        notify(user, ResourceEvent.ORGANIZATION_CREATED);
+        notify(authenticatedUserService.getCbUser(), ResourceEvent.ORGANIZATION_CREATED);
         return conversionService.convert(organization, OrganizationResponse.class);
     }
 
@@ -67,6 +70,7 @@ public class OrganizationController extends NotificationController implements Or
     @Override
     public OrganizationResponse deleteByName(String name) {
         Organization organization = organizationService.deleteByNameForCurrentUser(name);
+        notify(authenticatedUserService.getCbUser(), ResourceEvent.ORGANIZATION_DELETED);
         return conversionService.convert(organization, OrganizationResponse.class);
     }
 
