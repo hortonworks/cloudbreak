@@ -1,0 +1,10 @@
+{
+  "items": [
+    {
+      "name": "Local",
+      "zones": [
+        "local"
+      ]
+    }
+  ]
+}

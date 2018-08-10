@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AZURE;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.GCP;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.OPENSTACK;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.YARN;
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.CUMULUS_YARN;
 
 import java.util.Map;
 import java.util.Optional;
@@ -42,27 +43,7 @@ public class TemplateToTemplateResponseConverter extends AbstractConversionServi
             Optional.ofNullable(source.getSecretAttributes()).ifPresent(attr -> atributesMap.putAll(attr.getMap()));
             Map<String, Object> map = atributesMap;
 
-            Object platformType = map.get(BaseTemplateParameter.PLATFORM_TYPE);
-            if (platformType != null) {
-                switch (platformType.toString()) {
-                    case AWS:
-                        templateJson.setAwsParameters(getConversionService().convert(atributesMap, AwsParameters.class));
-                        break;
-                    case OPENSTACK:
-                        templateJson.setOpenStackParameters(getConversionService().convert(atributesMap, OpenStackParameters.class));
-                        break;
-                    case AZURE:
-                        templateJson.setAzureParameters(getConversionService().convert(atributesMap, AzureParameters.class));
-                        break;
-                    case GCP:
-                        templateJson.setGcpParameters(getConversionService().convert(atributesMap, GcpParameters.class));
-                        break;
-                    case YARN:
-                        templateJson.setYarnParameters(getConversionService().convert(atributesMap, YarnParameters.class));
-                        break;
-                    default:
-                }
-            }
+            setParameterByPlatform(templateJson, atributesMap, map);
         }
         templateJson.setCloudPlatform(source.cloudPlatform());
         templateJson.setDescription(source.getDescription() == null ? "" : source.getDescription());
@@ -70,5 +51,30 @@ public class TemplateToTemplateResponseConverter extends AbstractConversionServi
             templateJson.setTopologyId(source.getTopology().getId());
         }
         return templateJson;
+    }
+
+    private void setParameterByPlatform(TemplateResponse templateJson, Map<String, Object> atributesMap, Map<String, Object> map) {
+        Object platformType = map.get(BaseTemplateParameter.PLATFORM_TYPE);
+        if (platformType != null) {
+            switch (platformType.toString()) {
+                case AWS:
+                    templateJson.setAwsParameters(getConversionService().convert(atributesMap, AwsParameters.class));
+                    break;
+                case OPENSTACK:
+                    templateJson.setOpenStackParameters(getConversionService().convert(atributesMap, OpenStackParameters.class));
+                    break;
+                case AZURE:
+                    templateJson.setAzureParameters(getConversionService().convert(atributesMap, AzureParameters.class));
+                    break;
+                case GCP:
+                    templateJson.setGcpParameters(getConversionService().convert(atributesMap, GcpParameters.class));
+                    break;
+                case YARN:
+                case CUMULUS_YARN:
+                    templateJson.setYarnParameters(getConversionService().convert(atributesMap, YarnParameters.class));
+                    break;
+                default:
+            }
+        }
     }
 }

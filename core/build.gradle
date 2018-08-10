@@ -208,6 +208,7 @@ dependencies {
   runtime project(':cloud-mock')
   runtime project(':cloud-azure')
   runtime project(':cloud-yarn')
+  runtime project(':cloud-cumulus-yarn')
 
   runtime group: 'activation',                    name: 'activation'
 
