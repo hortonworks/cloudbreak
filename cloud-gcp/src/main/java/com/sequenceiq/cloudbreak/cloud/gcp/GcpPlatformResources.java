@@ -13,6 +13,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -293,7 +295,11 @@ public class GcpPlatformResources implements PlatformResources {
     private Function<CryptoKey, CloudEncryptionKey> toCloudEncryptionKey(String projectId, String keyRing, String location) {
         return cryptoKey -> {
             Map<String, Object> metadata = new HashMap<>(Optional.ofNullable(cryptoKey.getLabels()).orElse(Map.of()));
-            return new CloudEncryptionKey(cryptoKey.getName(), cryptoKey.getName(), cryptoKey.getPurpose(), cryptoKey.getName(), metadata);
+            Pattern pattern = Pattern.compile(".*\\/keyRings\\/(.+)\\/cryptoKeys\\/([a-z0-9\\-]+)");
+            Matcher matcher = pattern.matcher(cryptoKey.getName());
+
+            String displayName = matcher.matches() ? String.format("%s/%s", matcher.group(1), matcher.group(2)) : cryptoKey.getName();
+            return new CloudEncryptionKey(cryptoKey.getName(), cryptoKey.getName(), cryptoKey.getPurpose(), displayName, metadata);
         };
     }
 
