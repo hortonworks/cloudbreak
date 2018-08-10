@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.openstack.OpenStackSmartSenseIdGenerator;
 
 @Service
-public class OpenStackCredentialConnector extends CredentialConnector {
+public class OpenStackCredentialConnector implements CredentialConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackCredentialConnector.class);
 

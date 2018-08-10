@@ -23,6 +23,6 @@ public class YarnCredentialConnectorTest {
     @Test
     public void testInteractiveLoginIsProhibitedOnYarn() {
         expectedException.expect(UnsupportedOperationException.class);
-        underTest.interactiveLogin(null, null, null, null);
+        underTest.interactiveLogin(null, null, null);
     }
 }

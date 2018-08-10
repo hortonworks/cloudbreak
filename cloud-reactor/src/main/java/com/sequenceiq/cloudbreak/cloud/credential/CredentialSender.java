@@ -11,7 +11,6 @@ import com.sequenceiq.cloudbreak.cloud.event.credential.InteractiveCredentialCre
 import com.sequenceiq.cloudbreak.cloud.event.credential.InteractiveCredentialCreationStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 
 import reactor.bus.EventBus;
 
@@ -30,9 +29,9 @@ public class CredentialSender implements CredentialNotifier {
     private ErrorHandlerAwareReactorEventFactory eventFactory;
 
     @Override
-    public void createCredential(CloudContext cloudContext, ExtendedCloudCredential extendedCloudCredential, IdentityUser identityUser) {
+    public void createCredential(CloudContext cloudContext, ExtendedCloudCredential extendedCloudCredential) {
         InteractiveCredentialCreationRequest credentialCreationRequest =
-                new InteractiveCredentialCreationRequest(cloudContext, extendedCloudCredential, identityUser);
+                new InteractiveCredentialCreationRequest(cloudContext, extendedCloudCredential);
         LOGGER.info("Triggering event: {}", credentialCreationRequest);
         eventBus.notify(credentialCreationRequest.selector(), eventFactory.createEvent(credentialCreationRequest));
     }

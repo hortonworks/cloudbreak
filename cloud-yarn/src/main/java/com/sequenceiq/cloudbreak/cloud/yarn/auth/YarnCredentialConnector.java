@@ -8,7 +8,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
 
 @Service
-public class YarnCredentialConnector extends CredentialConnector {
+public class YarnCredentialConnector implements CredentialConnector {
     @Override
     public CloudCredentialStatus verify(AuthenticatedContext authenticatedContext) {
         return new CloudCredentialStatus(authenticatedContext.getCloudCredential(), CredentialStatus.VERIFIED);

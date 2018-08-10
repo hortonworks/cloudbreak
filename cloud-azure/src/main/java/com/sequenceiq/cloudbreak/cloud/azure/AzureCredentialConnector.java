@@ -16,10 +16,9 @@ import com.sequenceiq.cloudbreak.cloud.credential.CredentialNotifier;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 
 @Service
-public class AzureCredentialConnector extends CredentialConnector {
+public class AzureCredentialConnector implements CredentialConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureCredentialConnector.class);
 
@@ -45,8 +44,8 @@ public class AzureCredentialConnector extends CredentialConnector {
 
     @Override
     public Map<String, String> interactiveLogin(CloudContext cloudContext, ExtendedCloudCredential extendedCloudCredential,
-            CredentialNotifier credentialNotifier, IdentityUser identityUser) {
-        return azureInteractiveLogin.login(cloudContext, extendedCloudCredential, credentialNotifier, identityUser);
+            CredentialNotifier credentialNotifier) {
+        return azureInteractiveLogin.login(cloudContext, extendedCloudCredential, credentialNotifier);
     }
 
     @Override

@@ -32,7 +32,6 @@ import com.sequenceiq.cloudbreak.cloud.credential.CredentialNotifier;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 
 /**
  * Created by perdos on 9/22/16.
@@ -63,7 +62,7 @@ public class AzureInteractiveLogin {
     }
 
     public Map<String, String> login(CloudContext cloudContext, ExtendedCloudCredential extendedCloudCredential,
-            CredentialNotifier credentialNotifier, IdentityUser identityUser) {
+            CredentialNotifier credentialNotifier) {
         Response deviceCodeResponse = getDeviceCode();
 
         if (deviceCodeResponse.getStatusInfo().getFamily() == Family.SUCCESSFUL) {
@@ -77,7 +76,7 @@ public class AzureInteractiveLogin {
                 int expiresIn = deviceCodeJsonNode.get("expires_in").asInt();
                 String deviceCode = deviceCodeJsonNode.get("device_code").asText();
 
-                createCheckerContextAndCancelPrevious(extendedCloudCredential, deviceCode, credentialNotifier, identityUser);
+                createCheckerContextAndCancelPrevious(extendedCloudCredential, deviceCode, credentialNotifier);
                 startAsyncPolling(cloudContext, pollInterval, expiresIn);
 
                 return extractParameters(deviceCodeJsonNode);
@@ -103,12 +102,12 @@ public class AzureInteractiveLogin {
     }
 
     private void createCheckerContextAndCancelPrevious(ExtendedCloudCredential extendedCloudCredential, String deviceCode,
-            CredentialNotifier credentialNotifier, IdentityUser identityUser) {
+            CredentialNotifier credentialNotifier) {
         if (azureInteractiveLoginStatusCheckerContext != null) {
             azureInteractiveLoginStatusCheckerContext.cancel();
         }
         azureInteractiveLoginStatusCheckerContext = new AzureInteractiveLoginStatusCheckerContext(deviceCode, extendedCloudCredential,
-                credentialNotifier, identityUser);
+                credentialNotifier);
     }
 
     private Map<String, String> extractParameters(JsonNode deviceCodeJsonNode) {
