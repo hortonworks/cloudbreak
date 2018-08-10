@@ -23,7 +23,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
 
 @Service
-public class GcpCredentialConnector extends CredentialConnector {
+public class GcpCredentialConnector implements CredentialConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpCredentialConnector.class);
 

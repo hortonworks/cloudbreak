@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.cloud.model;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+
 public class ExtendedCloudCredential extends CloudCredential {
 
     private final String description;
@@ -15,18 +17,21 @@ public class ExtendedCloudCredential extends CloudCredential {
 
     private final boolean publicInAccount;
 
+    private final IdentityUser identityUser;
+
     public ExtendedCloudCredential(Long id, String cloudPlatform, String name, String description, String owner,
-            String account, boolean publicInAccount) {
+            String account, boolean publicInAccount, IdentityUser identityUser) {
         super(id, name);
         this.cloudPlatform = cloudPlatform;
         this.description = description;
         this.owner = owner;
         this.account = account;
         this.publicInAccount = publicInAccount;
+        this.identityUser = identityUser;
     }
 
     public ExtendedCloudCredential(CloudCredential cloudCredential, String cloudPlatform, String description, String owner, String account,
-            boolean publicInAccount) {
+            boolean publicInAccount, IdentityUser identityUser) {
         super(cloudCredential.getId(), cloudCredential.getName());
         Map<String, Object> parameters = cloudCredential.getParameters();
         for (Entry<String, Object> parameter : parameters.entrySet()) {
@@ -37,6 +42,7 @@ public class ExtendedCloudCredential extends CloudCredential {
         this.owner = owner;
         this.account = account;
         this.publicInAccount = publicInAccount;
+        this.identityUser = identityUser;
     }
 
     public String getDescription() {
@@ -57,5 +63,9 @@ public class ExtendedCloudCredential extends CloudCredential {
 
     public String getCloudPlatform() {
         return cloudPlatform;
+    }
+
+    public IdentityUser getIdentityUser() {
+        return identityUser;
     }
 }

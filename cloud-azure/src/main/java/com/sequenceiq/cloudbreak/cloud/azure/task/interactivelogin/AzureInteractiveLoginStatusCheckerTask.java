@@ -29,7 +29,6 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.task.PollBooleanStateTask;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 
 import reactor.bus.EventBus;
 
@@ -95,7 +94,6 @@ public class AzureInteractiveLoginStatusCheckerTask extends PollBooleanStateTask
                 LOGGER.info("Access token received");
 
                 ExtendedCloudCredential extendedCloudCredential = armInteractiveLoginStatusCheckerContext.getExtendedCloudCredential();
-                IdentityUser identityUser = armInteractiveLoginStatusCheckerContext.getIdentityUser();
                 AzureCredentialView armCredentialView = new AzureCredentialView(extendedCloudCredential);
 
                 try {
@@ -127,7 +125,7 @@ public class AzureInteractiveLoginStatusCheckerTask extends PollBooleanStateTask
                     extendedCloudCredential.putParameter("spDisplayName", sp.displayName());
 
                     armInteractiveLoginStatusCheckerContext.getCredentialNotifier().createCredential(getAuthenticatedContext().getCloudContext(),
-                            extendedCloudCredential, identityUser);
+                            extendedCloudCredential);
                 } catch (InteractiveLoginException | InteractiveLoginUnrecoverableException e) {
                     LOGGER.error("Interactive login failed", e);
                     sendErrorStatusMessage(extendedCloudCredential, e.getMessage());

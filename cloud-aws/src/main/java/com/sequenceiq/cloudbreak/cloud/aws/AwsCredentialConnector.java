@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
 
 @Service
-public class AwsCredentialConnector extends CredentialConnector {
+public class AwsCredentialConnector implements CredentialConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsCredentialConnector.class);
 

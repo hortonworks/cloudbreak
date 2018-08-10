@@ -23,6 +23,6 @@ public class MockCredentialConnectorTest {
     @Test
     public void testInteractiveLoginIsProhibitedOnMock() {
         expectedException.expect(UnsupportedOperationException.class);
-        underTest.interactiveLogin(null, null, null, null);
+        underTest.interactiveLogin(null, null, null);
     }
 }

@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
 
 @Service
-public class MockCredentialConnector extends CredentialConnector {
+public class MockCredentialConnector implements CredentialConnector {
     @Override
     public CloudCredentialStatus verify(AuthenticatedContext authenticatedContext) {
         CloudCredential credential = authenticatedContext.getCloudCredential();
