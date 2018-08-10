@@ -13,11 +13,9 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.domain.ManagementPack;
 import com.sequenceiq.cloudbreak.domain.security.Organization;
-import com.sequenceiq.cloudbreak.domain.security.User;
 import com.sequenceiq.cloudbreak.repository.ManagementPackRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
-import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Service
 public class ManagementPackService {
@@ -28,9 +26,6 @@ public class ManagementPackService {
 
     @Inject
     private AuthorizationService authorizationService;
-
-    @Inject
-    private UserService userService;
 
     @Inject
     private OrganizationService organizationService;
@@ -74,8 +69,7 @@ public class ManagementPackService {
         LOGGER.debug("Creating Management Pack: [User: '{}', Account: '{}']", identityUser.getUsername(), identityUser.getAccount());
         mpack.setOwner(identityUser.getUserId());
         mpack.setAccount(identityUser.getAccount());
-        User user = userService.getOrCreate(identityUser);
-        Organization organization = organizationService.getDefaultOrganizationForUser(user);
+        Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
         mpack.setOrganization(organization);
         return mpackRepository.save(mpack);
     }

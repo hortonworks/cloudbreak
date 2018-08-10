@@ -10,11 +10,11 @@ import org.springframework.data.repository.NoRepositoryBean;
 import com.sequenceiq.cloudbreak.aspect.DisableHasPermission;
 import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByOrganization;
 import com.sequenceiq.cloudbreak.domain.security.Organization;
-import com.sequenceiq.cloudbreak.domain.security.OrganizationResource;
+import com.sequenceiq.cloudbreak.domain.security.OrganizationAwareResource;
 
 @NoRepositoryBean
 @DisableHasPermission
-public interface OrganizationResourceRepository<T extends OrganizationResource, ID extends Serializable> extends BaseRepository<T, ID> {
+public interface OrganizationResourceRepository<T extends OrganizationAwareResource, ID extends Serializable> extends BaseRepository<T, ID> {
 
     @CheckPermissionsByOrganization(action = READ, organizationIndex = 0)
     Set<T> findByOrganization(Organization organization);

@@ -28,7 +28,6 @@ import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.security.Organization;
-import com.sequenceiq.cloudbreak.domain.security.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
@@ -40,7 +39,6 @@ import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderCredentialAdapter;
 import com.sequenceiq.cloudbreak.service.user.UserProfileHandler;
-import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Service
 public class CredentialService {
@@ -70,9 +68,6 @@ public class CredentialService {
 
     @Inject
     private CloudbreakMessagesService messagesService;
-
-    @Inject
-    private UserService userService;
 
     @Inject
     private OrganizationService organizationService;
@@ -144,8 +139,7 @@ public class CredentialService {
         LOGGER.debug("Creating credential: [UserId: '{}', Account: '{}']", userId, account);
         credential.setOwner(userId);
         credential.setAccount(account);
-        User user = userService.getOrCreate(identityUser);
-        Organization organization = organizationService.getDefaultOrganizationForUser(user);
+        Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
         credential.setOrganization(organization);
         return saveCredentialAndNotify(credential, ResourceEvent.CREDENTIAL_CREATED);
     }

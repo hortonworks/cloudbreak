@@ -500,7 +500,7 @@ public class TestUtil {
             recipe.setRecipeType(RecipeType.POST_AMBARI_START);
             Organization organization = new Organization();
             organization.setId(1L);
-            organization.setName("Top Secrert FBI");
+            organization.setName("Top Secret FBI");
             recipe.setOrganization(organization);
             recipes.add(recipe);
         }

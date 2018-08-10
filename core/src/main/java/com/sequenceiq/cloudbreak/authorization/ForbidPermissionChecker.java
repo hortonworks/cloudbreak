@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.authorization;
 
+import static java.lang.String.format;
+
 import java.lang.annotation.Annotation;
 
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -19,11 +21,10 @@ public class ForbidPermissionChecker implements PermissionChecker<ForbidForOrgan
     private static final Logger LOGGER = LoggerFactory.getLogger(ForbidPermissionChecker.class);
 
     @Override
-    public <T extends Annotation> Object checkPermissions(T rawMethodAnnotation, Resource resource, User user,
-            ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature) {
-        LOGGER.error(String.format("Calling this method is forbidden. %s # %s",
-                methodSignature.getDeclaringTypeName(), methodSignature.getMethod().getName()));
-        throw new AccessDeniedException("You have no access to this resource.");
+    public <T extends Annotation> Object checkPermissions(T rawMethodAnnotation, Resource resource, User user, ProceedingJoinPoint proceedingJoinPoint,
+            MethodSignature methodSignature) {
+        LOGGER.error(String.format("Calling this method is forbidden. %s # %s", methodSignature.getDeclaringTypeName(), methodSignature.getMethod().getName()));
+        throw new AccessDeniedException(format("You have no access to %s.", resource.getReadableName()));
     }
 
     @Override

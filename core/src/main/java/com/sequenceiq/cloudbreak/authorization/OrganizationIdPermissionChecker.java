@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.authorization;
 
-import static java.lang.String.format;
-
 import java.lang.annotation.Annotation;
 
 import javax.inject.Inject;
@@ -23,9 +21,8 @@ public class OrganizationIdPermissionChecker implements PermissionChecker<CheckP
     private PermissionCheckingUtils permissionCheckingUtils;
 
     @Override
-    public <T extends Annotation> Object checkPermissions(T rawMethodAnnotation, Resource resource, User user,
-            ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature) {
-
+    public <T extends Annotation> Object checkPermissions(T rawMethodAnnotation, Resource resource, User user, ProceedingJoinPoint proceedingJoinPoint,
+            MethodSignature methodSignature) {
         Long orgId = getOrgId(rawMethodAnnotation, proceedingJoinPoint);
         Action action = getAction(rawMethodAnnotation);
         return permissionCheckingUtils.checkPermissionsByPermissionSetAndProceed(resource, user, orgId, action, proceedingJoinPoint, methodSignature);
@@ -43,7 +40,7 @@ public class OrganizationIdPermissionChecker implements PermissionChecker<CheckP
         permissionCheckingUtils.validateIndex(organizationIdIndex, length, "organizationIdIndex");
         Object orgId = proceedingJoinPoint.getArgs()[organizationIdIndex];
         if (!(orgId instanceof Long)) {
-            throw new IllegalArgumentException(format("Type of organizationId should be Long! It is instead: %s", orgId));
+            throw new IllegalArgumentException("Type of organizationId should be Long!");
         }
     }
 

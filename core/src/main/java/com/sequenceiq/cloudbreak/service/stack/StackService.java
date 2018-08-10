@@ -61,7 +61,6 @@ import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.security.Organization;
-import com.sequenceiq.cloudbreak.domain.security.User;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
@@ -100,7 +99,6 @@ import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
-import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 
 @Service
@@ -198,9 +196,6 @@ public class StackService {
 
     @Inject
     private TransactionService transactionService;
-
-    @Inject
-    private UserService userService;
 
     @Inject
     private OrganizationService organizationService;
@@ -360,8 +355,7 @@ public class StackService {
         stack.setOwner(identityUser.getUserId());
         stack.setAccount(identityUser.getAccount());
         stack.setGatewayPort(nginxPort);
-        User user = userService.getOrCreate(identityUser);
-        Organization organization = organizationService.getDefaultOrganizationForUser(user);
+        Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
         stack.setOrganization(organization);
         setPlatformVariant(stack);
         String stackName = stack.getName();

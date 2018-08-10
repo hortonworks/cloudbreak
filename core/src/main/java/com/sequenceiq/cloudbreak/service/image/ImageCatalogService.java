@@ -48,7 +48,6 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateS
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.domain.security.Organization;
-import com.sequenceiq.cloudbreak.domain.security.User;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
@@ -58,7 +57,6 @@ import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserProfileHandler;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
-import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Component
 public class ImageCatalogService {
@@ -104,9 +102,6 @@ public class ImageCatalogService {
 
     @Inject
     private StackImageUpdateService stackImageUpdateService;
-
-    @Inject
-    private UserService userService;
 
     @Inject
     private OrganizationService organizationService;
@@ -224,9 +219,7 @@ public class ImageCatalogService {
                 throw new BadRequestException(String
                         .format("%s cannot be created because it is an environment default image catalog.", imageCatalog.getImageCatalogName()));
             }
-            IdentityUser identityUser = authenticatedUserService.getCbUser();
-            User user = userService.getOrCreate(identityUser);
-            Organization organization = organizationService.getDefaultOrganizationForUser(user);
+            Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
             imageCatalog.setOrganization(organization);
             return imageCatalogRepository.save(imageCatalog);
         } catch (DataIntegrityViolationException ex) {

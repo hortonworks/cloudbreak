@@ -10,8 +10,8 @@ import com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Resource;
 
 public interface PermissionChecker<T extends Annotation> {
 
-    <T extends Annotation> Object checkPermissions(T rawMethodAnnotation, Resource resource, User user,
-            ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature);
+    <T extends Annotation> Object checkPermissions(T rawMethodAnnotation, Resource resource, User user, ProceedingJoinPoint proceedingJoinPoint,
+            MethodSignature methodSignature);
 
     Class<T> supportedAnnotation();
 }

@@ -24,13 +24,10 @@ import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.security.Organization;
-import com.sequenceiq.cloudbreak.domain.security.User;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.RdsConfigRepository;
-import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
-import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.util.NameUtil;
 
 @Service
@@ -43,12 +40,6 @@ public class RdsConfigService {
 
     @Inject
     private ClusterRepository clusterRepository;
-
-    @Inject
-    private AuthorizationService authorizationService;
-
-    @Inject
-    private UserService userService;
 
     @Inject
     private OrganizationService organizationService;
@@ -97,8 +88,7 @@ public class RdsConfigService {
         LOGGER.debug("Creating RDS configuration: [User: '{}', Account: '{}']", identityUser.getUsername(), identityUser.getAccount());
         rdsConfig.setOwner(identityUser.getUserId());
         rdsConfig.setAccount(identityUser.getAccount());
-        User user = userService.getOrCreate(identityUser);
-        Organization organization = organizationService.getDefaultOrganizationForUser(user);
+        Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
         rdsConfig.setOrganization(organization);
         return rdsConfigRepository.save(rdsConfig);
     }

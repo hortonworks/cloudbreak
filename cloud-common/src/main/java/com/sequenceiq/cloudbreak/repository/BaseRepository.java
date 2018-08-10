@@ -13,8 +13,9 @@ import org.springframework.data.repository.NoRepositoryBean;
 import com.sequenceiq.cloudbreak.aspect.DisableHasPermission;
 import com.sequenceiq.cloudbreak.aspect.HasPermission;
 import com.sequenceiq.cloudbreak.aspect.PermissionType;
+import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByReturnValue;
 import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByTarget;
-import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsInPostPhase;
+import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByTargetId;
 
 @NoRepositoryBean
 public interface BaseRepository<T, ID extends Serializable> extends CrudRepository<T, ID> {
@@ -31,20 +32,22 @@ public interface BaseRepository<T, ID extends Serializable> extends CrudReposito
 
     @Override
     @HasPermission
+    @CheckPermissionsByReturnValue(action = READ)
     Optional<T> findById(ID id);
 
     @Override
-    @HasPermission(condition = PRE)
+    @DisableHasPermission
+    @CheckPermissionsByTargetId(action = READ)
     boolean existsById(ID id);
 
     @Override
     @HasPermission
-    @CheckPermissionsInPostPhase(action = READ)
+    @CheckPermissionsByReturnValue(action = READ)
     Iterable<T> findAll();
 
     @Override
     @DisableHasPermission
-    @CheckPermissionsInPostPhase(action = READ)
+    @CheckPermissionsByReturnValue(action = READ)
     Iterable<T> findAllById(Iterable<ID> ids);
 
     @Override
@@ -52,6 +55,7 @@ public interface BaseRepository<T, ID extends Serializable> extends CrudReposito
     long count();
 
     @Override
+    @CheckPermissionsByTargetId(action = READ)
     @HasPermission(condition = PRE, targetIndex = 0, permission = PermissionType.WRITE)
     void deleteById(ID id);
 

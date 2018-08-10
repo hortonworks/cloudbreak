@@ -2,15 +2,14 @@ package com.sequenceiq.cloudbreak.service.organization;
 
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.security.Organization;
-import com.sequenceiq.cloudbreak.domain.security.OrganizationResource;
+import com.sequenceiq.cloudbreak.domain.security.OrganizationAwareResource;
 
-public interface OrganizationResourceService<T extends OrganizationResource> {
+public interface OrganizationAwareResourceService<T extends OrganizationAwareResource> {
 
-    T create(IdentityUser identityUser, T resource);
+    T create(T resource);
 
-    T create(IdentityUser identityUser, T resource, Long organizationId);
+    T create(T resource, Long organizationId);
 
     T getByNameForOrganization(String name, Long organizationId);
 

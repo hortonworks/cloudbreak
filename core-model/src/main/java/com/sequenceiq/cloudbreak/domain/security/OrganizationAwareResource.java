@@ -3,9 +3,11 @@ package com.sequenceiq.cloudbreak.domain.security;
 
 import com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Resource;
 
-public interface OrganizationResource {
+public interface OrganizationAwareResource {
 
     Organization getOrganization();
+
+    String getName();
 
     void setOrganization(Organization organization);
 
