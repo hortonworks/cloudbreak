@@ -157,7 +157,7 @@ tests:
       - testStopCluster
       - testStartCluster
       - testTerminateCluster
-  - name: "aws prewarm image hdp3"
+  - name: "aws base image hdp3"
     preserveOrder: true
     parameters:
       clusterName: aws-base-hdp3

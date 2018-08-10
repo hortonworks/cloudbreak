@@ -155,7 +155,7 @@ tests:
       - testStopCluster
       - testStartCluster
       - testTerminateCluster
-  - name: "openstack prewarm image hdp3"
+  - name: "openstack base image hdp3"
     preserveOrder: true
     parameters:
       clusterName: os-base-hdp3
