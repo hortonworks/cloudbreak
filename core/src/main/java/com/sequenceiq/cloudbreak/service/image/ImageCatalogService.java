@@ -507,7 +507,7 @@ public class ImageCatalogService {
 
     private void removeDefaultFlag() {
         ImageCatalog imageCatalog = getDefaultImageCatalog();
-        if (imageCatalog.getImageCatalogName() != null) {
+        if (imageCatalog.getImageCatalogName() != null && !CLOUDBREAK_DEFAULT_CATALOG_NAME.equalsIgnoreCase(imageCatalog.getImageCatalogName())) {
             setImageCatalogAsDefault(null);
             imageCatalogRepository.save(imageCatalog);
         }
@@ -520,7 +520,7 @@ public class ImageCatalogService {
         if (imageCatalog == null) {
             imageCatalog = new ImageCatalog();
             imageCatalog.setImageCatalogUrl(defaultCatalogUrl);
-            imageCatalog.setImageCatalogName(null);
+            imageCatalog.setImageCatalogName(CLOUDBREAK_DEFAULT_CATALOG_NAME);
         }
         return imageCatalog;
     }

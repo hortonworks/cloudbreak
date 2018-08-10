@@ -31,4 +31,13 @@ public class StatedImage {
     public static StatedImage statedImage(Image image, String imageCatalogUrl, String imageCatalogName) {
         return new StatedImage(image, imageCatalogUrl, imageCatalogName);
     }
+
+    @Override
+    public String toString() {
+        return "StatedImage{"
+                + "image=" + image
+                + ", imageCatalogUrl='" + imageCatalogUrl + '\''
+                + ", imageCatalogName='" + imageCatalogName + '\''
+                + '}';
+    }
 }
