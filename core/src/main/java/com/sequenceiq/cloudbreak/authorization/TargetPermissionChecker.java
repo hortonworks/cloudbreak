@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByTarget;
 import com.sequenceiq.cloudbreak.domain.organization.User;
-import com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Resource;
 
 @Component
 public class TargetPermissionChecker implements PermissionChecker<CheckPermissionsByTarget> {
@@ -18,7 +17,7 @@ public class TargetPermissionChecker implements PermissionChecker<CheckPermissio
     @Inject
     private PermissionCheckingUtils permissionCheckingUtils;
 
-    public <T extends Annotation> Object checkPermissions(T rawMethodAnnotation, Resource resource, User user,
+    public <T extends Annotation> Object checkPermissions(T rawMethodAnnotation, OrganizationResource resource, User user,
             ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature) {
 
         CheckPermissionsByTarget methodAnnotation = (CheckPermissionsByTarget) rawMethodAnnotation;

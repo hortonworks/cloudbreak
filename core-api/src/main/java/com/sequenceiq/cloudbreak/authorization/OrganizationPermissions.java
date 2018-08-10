@@ -1,20 +1,20 @@
-package com.sequenceiq.cloudbreak.validation;
+package com.sequenceiq.cloudbreak.authorization;
 
-import static com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Action.INVITE;
-import static com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Action.MANAGE;
-import static com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Action.READ;
-import static com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Action.WRITE;
-import static com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Resource.ALL;
-import static com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Resource.BLUEPRINT;
-import static com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Resource.CREDENTIAL;
-import static com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Resource.IMAGECATALOG;
-import static com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Resource.LDAP;
-import static com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Resource.MPACK;
-import static com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Resource.ORG;
-import static com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Resource.PROXY;
-import static com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Resource.RDS;
-import static com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Resource.RECIPE;
-import static com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Resource.STACK;
+import static com.sequenceiq.cloudbreak.authorization.OrganizationPermissions.Action.INVITE;
+import static com.sequenceiq.cloudbreak.authorization.OrganizationPermissions.Action.MANAGE;
+import static com.sequenceiq.cloudbreak.authorization.OrganizationPermissions.Action.READ;
+import static com.sequenceiq.cloudbreak.authorization.OrganizationPermissions.Action.WRITE;
+import static com.sequenceiq.cloudbreak.authorization.OrganizationResource.ALL;
+import static com.sequenceiq.cloudbreak.authorization.OrganizationResource.BLUEPRINT;
+import static com.sequenceiq.cloudbreak.authorization.OrganizationResource.CREDENTIAL;
+import static com.sequenceiq.cloudbreak.authorization.OrganizationResource.IMAGECATALOG;
+import static com.sequenceiq.cloudbreak.authorization.OrganizationResource.LDAP;
+import static com.sequenceiq.cloudbreak.authorization.OrganizationResource.MPACK;
+import static com.sequenceiq.cloudbreak.authorization.OrganizationResource.ORG;
+import static com.sequenceiq.cloudbreak.authorization.OrganizationResource.PROXY;
+import static com.sequenceiq.cloudbreak.authorization.OrganizationResource.RDS;
+import static com.sequenceiq.cloudbreak.authorization.OrganizationResource.RECIPE;
+import static com.sequenceiq.cloudbreak.authorization.OrganizationResource.STACK;
 
 import java.util.Set;
 
@@ -55,24 +55,24 @@ public enum OrganizationPermissions {
 
     private final String name;
 
-    private final Resource resource;
+    private final OrganizationResource resource;
 
     private final Action action;
 
     private final String description;
 
-    OrganizationPermissions(Resource resource, Action action, String description) {
+    OrganizationPermissions(OrganizationResource resource, Action action, String description) {
         this.resource = resource;
         this.action = action;
         this.description = description;
         this.name = getName(resource, action);
     }
 
-    public static String getName(Resource resource, Action action) {
+    public static String getName(OrganizationResource resource, Action action) {
         return resource.name() + ':' + action.name();
     }
 
-    public static boolean hasPermission(Set<String> permissions, Resource resource, Action action) {
+    public static boolean hasPermission(Set<String> permissions, OrganizationResource resource, Action action) {
         if (resource == ORG) {
             if (action == INVITE && (permissions.contains(ORG_INVITE.name) || permissions.contains(ORG_MANAGE.name))) {
                 return true;
@@ -111,30 +111,6 @@ public enum OrganizationPermissions {
             }
         }
         return false;
-    }
-
-    public enum Resource {
-        ALL("All resources"),
-        ORG("Organizations"),
-        BLUEPRINT("Blueprints"),
-        IMAGECATALOG("Image catalogs"),
-        CREDENTIAL("Credentials"),
-        RECIPE("Recipes"),
-        STACK("Stacks"),
-        LDAP("LDAP resource"),
-        RDS("RDS resource"),
-        PROXY("Proxys"),
-        MPACK("MPACK resource");
-
-        private final String readableName;
-
-        Resource(String readableName) {
-            this.readableName = readableName;
-        }
-
-        public String getReadableName() {
-            return readableName;
-        }
     }
 
     public enum Action {

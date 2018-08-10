@@ -206,7 +206,7 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
     private LdapConfig getLdapConfig(StackV2Request source, IdentityUser identityUser) {
         LdapConfig ldapConfig = null;
         if (source.getCluster().getLdapConfigName() != null) {
-            ldapConfig = ldapConfigService.getPublicConfig(source.getCluster().getLdapConfigName(), identityUser);
+            ldapConfig = ldapConfigService.getByNameFromUsersDefaultOrganization(source.getCluster().getLdapConfigName());
         }
         return ldapConfig;
     }

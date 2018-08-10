@@ -11,15 +11,16 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 
 import com.sequenceiq.cloudbreak.api.model.DirectoryType;
+import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
 import com.sequenceiq.cloudbreak.domain.converter.EncryptionConverter;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.OrganizationAwareResource;
 
 @Entity
-@Table(name = "ldapconfig", uniqueConstraints = @UniqueConstraint(columnNames = {"account", "name"}))
-public class LdapConfig implements ProvisionEntity {
+@Table(name = "ldapconfig")
+public class LdapConfig implements ProvisionEntity, OrganizationAwareResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "ldapconfig_generator")
@@ -287,11 +288,18 @@ public class LdapConfig implements ProvisionEntity {
         this.userDnPattern = userDnPattern;
     }
 
+    @Override
     public Organization getOrganization() {
         return organization;
     }
 
+    @Override
     public void setOrganization(Organization organization) {
         this.organization = organization;
+    }
+
+    @Override
+    public OrganizationResource getResource() {
+        return OrganizationResource.LDAP;
     }
 }

@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.domain.organization;
 
 
-import com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Resource;
+import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
 
 public interface OrganizationAwareResource {
 
@@ -11,5 +11,5 @@ public interface OrganizationAwareResource {
 
     void setOrganization(Organization organization);
 
-    Resource getResource();
+    OrganizationResource getResource();
 }

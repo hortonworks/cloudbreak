@@ -7,6 +7,7 @@ import javax.inject.Inject;
 
 import org.springframework.dao.DataIntegrityViolationException;
 
+import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
@@ -54,7 +55,7 @@ public abstract class AbstractOrganizationAwareResourceService<T extends Organiz
         } catch (TransactionExecutionException e) {
             if (e.getCause() instanceof DataIntegrityViolationException) {
                 String message = String.format("%s already exists with name '%s' in organization %s",
-                        resourceName(), resource.getName(), resource.getOrganization().getName());
+                        resource().getShortName(), resource.getName(), resource.getOrganization().getName());
                 throw new BadRequestException(message, e);
             }
             throw new TransactionRuntimeExecutionException(e);
@@ -65,7 +66,7 @@ public abstract class AbstractOrganizationAwareResourceService<T extends Organiz
     public T getByNameForOrganization(String name, Organization organization) {
         T object = repository().findByNameAndOrganization(name, organization);
         if (object == null) {
-            throw new NotFoundException(String.format("No %s found with name '%s'", resourceName(), name));
+            throw new NotFoundException(String.format("No %s found with name '%s'", resource().getShortName(), name));
         }
         return object;
     }
@@ -141,7 +142,7 @@ public abstract class AbstractOrganizationAwareResourceService<T extends Organiz
 
     protected abstract OrganizationResourceRepository<T, Long> repository();
 
-    protected abstract String resourceName();
+    protected abstract OrganizationResource resource();
 
     protected abstract boolean canDelete(T resource);
 

@@ -14,10 +14,10 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import com.sequenceiq.cloudbreak.api.model.RecipeType;
+import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
 import com.sequenceiq.cloudbreak.domain.converter.EncryptionConverter;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.organization.OrganizationAwareResource;
-import com.sequenceiq.cloudbreak.validation.OrganizationPermissions;
 
 @Entity
 @Table(name = "recipe", uniqueConstraints = @UniqueConstraint(columnNames = {"account", "name"}))
@@ -134,8 +134,8 @@ public class Recipe implements ProvisionEntity, OrganizationAwareResource {
     }
 
     @Override
-    public OrganizationPermissions.Resource getResource() {
-        return OrganizationPermissions.Resource.RECIPE;
+    public OrganizationResource getResource() {
+        return OrganizationResource.RECIPE;
     }
 
     @Override

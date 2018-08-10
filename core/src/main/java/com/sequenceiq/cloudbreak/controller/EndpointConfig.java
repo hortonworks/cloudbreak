@@ -89,6 +89,7 @@ public class EndpointConfig extends ResourceConfig {
         register(FlexSubscriptionV3Controller.class);
         register(ImageCatalogV1Controller.class);
         register(LdapController.class);
+        register(LdapV3Controller.class);
         register(ManagementPackController.class);
         register(OrganizationV3Controller.class);
         register(PlatformParameterV1Controller.class);

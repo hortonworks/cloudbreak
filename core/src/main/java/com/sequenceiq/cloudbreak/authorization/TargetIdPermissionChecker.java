@@ -17,7 +17,6 @@ import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.organization.OrganizationAwareResource;
 import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.repository.OrganizationResourceRepository;
-import com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Resource;
 
 @Component
 public class TargetIdPermissionChecker implements PermissionChecker<CheckPermissionsByTargetId> {
@@ -28,8 +27,8 @@ public class TargetIdPermissionChecker implements PermissionChecker<CheckPermiss
     @Inject
     private PermissionCheckingUtils permissionCheckingUtils;
 
-    public <T extends Annotation> Object checkPermissions(T rawMethodAnnotation, Resource resource, User user, ProceedingJoinPoint proceedingJoinPoint,
-            MethodSignature methodSignature) {
+    public <T extends Annotation> Object checkPermissions(T rawMethodAnnotation, OrganizationResource resource, User user,
+            ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature) {
         CheckPermissionsByTargetId methodAnnotation = (CheckPermissionsByTargetId) rawMethodAnnotation;
         int targetIdIndex = methodAnnotation.targetIdIndex();
         int length = proceedingJoinPoint.getArgs().length;

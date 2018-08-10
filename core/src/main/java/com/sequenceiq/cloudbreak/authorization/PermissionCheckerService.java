@@ -31,7 +31,6 @@ import com.sequenceiq.cloudbreak.aspect.organization.DisableCheckPermissions;
 import com.sequenceiq.cloudbreak.aspect.organization.OrganizationResourceType;
 import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.service.user.UserService;
-import com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Resource;
 
 @Service
 public class PermissionCheckerService {
@@ -75,7 +74,7 @@ public class PermissionCheckerService {
         }
 
         OrganizationResourceType classOrgResourceType = (OrganizationResourceType) classAnnotation.get();
-        if (classOrgResourceType.resource() == Resource.ALL) {
+        if (classOrgResourceType.resource() == OrganizationResource.ALL) {
             throw getAccessDeniedAndLogMissingAnnotation(repositoryClass.get());
         }
 
@@ -90,7 +89,7 @@ public class PermissionCheckerService {
             throw new IllegalStateException(format("Annotation %s is not supported.", methodAnnotation.annotationType().getCanonicalName()));
         }
 
-        Resource resource = classOrgResourceType.resource();
+        OrganizationResource resource = classOrgResourceType.resource();
         return permissionChecker.checkPermissions(methodAnnotation, resource, user, proceedingJoinPoint, methodSignature);
     }
 

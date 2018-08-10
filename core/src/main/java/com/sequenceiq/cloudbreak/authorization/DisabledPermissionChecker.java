@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.aspect.organization.DisableCheckPermissions;
 import com.sequenceiq.cloudbreak.domain.organization.User;
-import com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Resource;
 
 @Component
 public class DisabledPermissionChecker implements PermissionChecker<DisableCheckPermissions> {
@@ -19,7 +18,7 @@ public class DisabledPermissionChecker implements PermissionChecker<DisableCheck
     private PermissionCheckingUtils permissionCheckingUtils;
 
     @Override
-    public <T extends Annotation> Object checkPermissions(T rawMethodAnnotation, Resource resource, User user,
+    public <T extends Annotation> Object checkPermissions(T rawMethodAnnotation, OrganizationResource resource, User user,
             ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature) {
         return permissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature);
     }

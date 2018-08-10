@@ -157,7 +157,7 @@ public class ClusterDecorator {
             LdapConfig ldapConfig = ldapConfigService.get(ldapConfigId.get());
             subject.setLdapConfig(ldapConfig);
         } else if (ldapName.isPresent()) {
-            LdapConfig ldapConfig = ldapConfigService.getPublicConfig(ldapName.get(), user);
+            LdapConfig ldapConfig = ldapConfigService.getByNameFromUsersDefaultOrganization(ldapName.get());
             subject.setLdapConfig(ldapConfig);
         } else if (ldapConfigRequest.isPresent()) {
             LdapConfig ldapConfig = conversionService.convert(ldapConfigRequest.get(), LdapConfig.class);

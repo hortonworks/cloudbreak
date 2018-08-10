@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.repository;
 
-import static com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Action.READ;
+import static com.sequenceiq.cloudbreak.authorization.OrganizationPermissions.Action.READ;
 
 import java.util.Collection;
 import java.util.Set;
@@ -16,12 +16,12 @@ import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByOrganizat
 import com.sequenceiq.cloudbreak.aspect.organization.OrganizationResourceType;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.service.EntityType;
-import com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Resource;
+import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
 
 @DisableHasPermission
 @EntityType(entityClass = Recipe.class)
 @Transactional(TxType.REQUIRED)
-@OrganizationResourceType(resource = Resource.RECIPE)
+@OrganizationResourceType(resource = OrganizationResource.RECIPE)
 public interface RecipeRepository extends OrganizationResourceRepository<Recipe, Long> {
 
     @CheckPermissionsByOrganizationId(action = READ, organizationIdIndex = 1)

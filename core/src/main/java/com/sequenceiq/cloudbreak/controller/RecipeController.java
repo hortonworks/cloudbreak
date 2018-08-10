@@ -104,9 +104,7 @@ public class RecipeController extends NotificationController implements RecipeEn
     }
 
     private void deleteInDefaultOrganization(String name) {
-        Recipe deleted = recipeService.deleteByNameFromDefaultOrganization(name);
-        IdentityUser identityUser = authenticatedUserService.getCbUser();
-        notifyAndReturn(deleted, identityUser, ResourceEvent.RECIPE_DELETED);
+        executeAndNotify(user -> recipeService.deleteByNameFromDefaultOrganization(name), ResourceEvent.RECIPE_DELETED);
     }
 
     private RecipeResponse createInDefaultOrganization(RecipeRequest request) {
