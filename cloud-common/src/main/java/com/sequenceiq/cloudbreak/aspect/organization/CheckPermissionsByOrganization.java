@@ -5,7 +5,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Action;
+import com.sequenceiq.cloudbreak.authorization.OrganizationPermissions.Action;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)

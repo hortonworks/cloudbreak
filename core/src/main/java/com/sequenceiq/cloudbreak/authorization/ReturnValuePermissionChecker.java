@@ -11,8 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByReturnValue;
 import com.sequenceiq.cloudbreak.domain.organization.User;
-import com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Action;
-import com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Resource;
+import com.sequenceiq.cloudbreak.authorization.OrganizationPermissions.Action;
 
 @Component
 public class ReturnValuePermissionChecker implements PermissionChecker<CheckPermissionsByReturnValue> {
@@ -21,8 +20,8 @@ public class ReturnValuePermissionChecker implements PermissionChecker<CheckPerm
     private PermissionCheckingUtils permissionCheckingUtils;
 
     @Override
-    public <T extends Annotation> Object checkPermissions(T rawMethodAnnotation, Resource resource, User user, ProceedingJoinPoint proceedingJoinPoint,
-            MethodSignature methodSignature) {
+    public <T extends Annotation> Object checkPermissions(T rawMethodAnnotation, OrganizationResource resource, User user,
+            ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature) {
         CheckPermissionsByReturnValue methodAnnotation = (CheckPermissionsByReturnValue) rawMethodAnnotation;
         Action action = methodAnnotation.action();
         Object proceed = permissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature);

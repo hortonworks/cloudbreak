@@ -14,8 +14,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByOrganization;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.organization.User;
-import com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Action;
-import com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Resource;
+import com.sequenceiq.cloudbreak.authorization.OrganizationPermissions.Action;
 
 @Component
 public class OrganizationPermissionChecker implements PermissionChecker<CheckPermissionsByOrganization> {
@@ -24,7 +23,7 @@ public class OrganizationPermissionChecker implements PermissionChecker<CheckPer
     private PermissionCheckingUtils permissionCheckingUtils;
 
     @Override
-    public <T extends Annotation> Object checkPermissions(T rawMethodAnnotation, Resource resource, User user,
+    public <T extends Annotation> Object checkPermissions(T rawMethodAnnotation, OrganizationResource resource, User user,
             ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature) {
         Long orgId = getOrgId(rawMethodAnnotation, proceedingJoinPoint);
         Action action = getAction(rawMethodAnnotation);

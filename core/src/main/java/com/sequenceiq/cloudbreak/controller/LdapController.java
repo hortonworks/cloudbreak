@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.controller;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -8,7 +9,6 @@ import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
 import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v1.LdapConfigEndpoint;
@@ -34,52 +34,44 @@ public class LdapController extends NotificationController implements LdapConfig
     private ConversionService conversionService;
 
     @Inject
+    private LdapConfigValidator ldapConfigValidator;
+
+    @Inject
     private AuthenticatedUserService authenticatedUserService;
 
     @Inject
     private LdapConfigService ldapConfigService;
 
-    @Inject
-    private LdapConfigValidator ldapConfigValidator;
-
     @Override
     public LdapConfigResponse postPrivate(LdapConfigRequest ldapConfigRequest) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        return createConfig(user, ldapConfigRequest, false);
+        return createConfig(user, ldapConfigRequest);
     }
 
     @Override
     public LdapConfigResponse postPublic(LdapConfigRequest ldapConfigRequest) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        return createConfig(user, ldapConfigRequest, true);
+        return createConfig(user, ldapConfigRequest);
     }
 
     @Override
     public Set<LdapConfigResponse> getPrivates() {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        Set<LdapConfig> configs = ldapConfigService.retrievePrivateConfigs(user);
-        return toJsonSet(configs);
+        return listForUsersDefaultOrganization();
     }
 
     @Override
     public Set<LdapConfigResponse> getPublics() {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        Set<LdapConfig> configs = ldapConfigService.retrieveAccountConfigs(user);
-        return toJsonSet(configs);
+        return listForUsersDefaultOrganization();
     }
 
     @Override
     public LdapConfigResponse getPrivate(String name) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        LdapConfig config = ldapConfigService.getPrivateConfig(name, user);
-        return conversionService.convert(config, LdapConfigResponse.class);
+        return getLdapConfigResponse(name);
     }
 
     @Override
     public LdapConfigResponse getPublic(String name) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        LdapConfig config = ldapConfigService.getPublicConfig(name, user);
-        return conversionService.convert(config, LdapConfigResponse.class);
+        return getLdapConfigResponse(name);
     }
 
     @Override
@@ -90,17 +82,17 @@ public class LdapController extends NotificationController implements LdapConfig
 
     @Override
     public void delete(Long id) {
-        executeAndNotify(user -> ldapConfigService.delete(id, user), ResourceEvent.LDAP_DELETED);
+        executeAndNotify(user -> ldapConfigService.delete(id), ResourceEvent.LDAP_DELETED);
     }
 
     @Override
     public void deletePublic(String name) {
-        executeAndNotify(user -> ldapConfigService.delete(name, user), ResourceEvent.LDAP_DELETED);
+        deleteInDefaultOrganization(name);
     }
 
     @Override
     public void deletePrivate(String name) {
-        executeAndNotify(user -> ldapConfigService.delete(name, user), ResourceEvent.LDAP_DELETED);
+        deleteInDefaultOrganization(name);
     }
 
     @Override
@@ -114,7 +106,7 @@ public class LdapController extends NotificationController implements LdapConfig
         LdapTestResult ldapTestResult = new LdapTestResult();
         try {
             if (existingLDAPConfigName != null) {
-                LdapConfig ldapConfig = ldapConfigService.getByName(existingLDAPConfigName, authenticatedUserService.getCbUser());
+                LdapConfig ldapConfig = ldapConfigService.getByNameFromUsersDefaultOrganization(existingLDAPConfigName);
                 ldapConfigValidator.validateLdapConnection(ldapConfig);
             } else {
                 ldapConfigValidator.validateLdapConnection(validationRequest);
@@ -128,21 +120,28 @@ public class LdapController extends NotificationController implements LdapConfig
 
     @Override
     public LdapConfigRequest getRequestFromName(String name) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        LdapConfig ldapConfig = ldapConfigService.getPublicConfig(name, user);
+        LdapConfig ldapConfig = ldapConfigService.getByNameFromUsersDefaultOrganization(name);
         return conversionService.convert(ldapConfig, LdapConfigRequest.class);
     }
 
-    private LdapConfigResponse createConfig(IdentityUser user, LdapConfigRequest request, boolean publicInAccount) {
-        LdapConfig config = conversionService.convert(request, LdapConfig.class);
-        config.setPublicInAccount(publicInAccount);
-        config = ldapConfigService.create(user, config);
+    private LdapConfigResponse createConfig(IdentityUser user, LdapConfigRequest request) {
+        LdapConfig ldapConfig = conversionService.convert(request, LdapConfig.class);
+        LdapConfig response = ldapConfigService.createInDefaultOrganization(ldapConfig);
         notify(user, ResourceEvent.LDAP_CREATED);
-        return conversionService.convert(config, LdapConfigResponse.class);
+        return conversionService.convert(response, LdapConfigResponse.class);
     }
 
-    private Set<LdapConfigResponse> toJsonSet(Set<LdapConfig> configs) {
-        return (Set<LdapConfigResponse>) conversionService.convert(configs, TypeDescriptor.forObject(configs),
-                TypeDescriptor.collection(Set.class, TypeDescriptor.valueOf(LdapConfigResponse.class)));
+    private LdapConfigResponse getLdapConfigResponse(String name) {
+        return conversionService.convert(ldapConfigService.getByNameFromUsersDefaultOrganization(name), LdapConfigResponse.class);
+    }
+
+    private Set<LdapConfigResponse> listForUsersDefaultOrganization() {
+        return ldapConfigService.listForUsersDefaultOrganization().stream()
+                .map(ldapConfig -> conversionService.convert(ldapConfig, LdapConfigResponse.class))
+                .collect(Collectors.toSet());
+    }
+
+    private void deleteInDefaultOrganization(String name) {
+        executeAndNotify(user -> ldapConfigService.deleteByNameFromDefaultOrganization(name), ResourceEvent.LDAP_DELETED);
     }
 }

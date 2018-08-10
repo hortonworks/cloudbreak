@@ -34,6 +34,7 @@ public class ControllerDescription {
     public static final String REPOSITORY_CONFIGS_VALIDATION_DESCRIPTION = "Operations to validate repository configs";
     public static final String ORGANIZATION_DESCRIPTION = "Operations on organiztions";
 
+    public static final String LDAP_V3_CONFIG_DESCRIPTION = "Operations on LDAP server configurations by organization";
     public static final String BLUEPRINT_V3_DESCRIPTION = "Operations on blueprints by organization";
     public static final String CREDENTIAL_V3_DESCRIPTION = "Operations on credentials by organization";
     public static final String FLEX_SUBSCRIPTION_V3_DESCRIPTION = "Operations on Flex subscriptions by organization";

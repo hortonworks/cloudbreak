@@ -2,9 +2,9 @@ package com.sequenceiq.cloudbreak.service.organization;
 
 import static com.sequenceiq.cloudbreak.api.model.v2.OrganizationStatus.DELETED;
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
-import static com.sequenceiq.cloudbreak.validation.OrganizationPermissions.ALL_READ;
-import static com.sequenceiq.cloudbreak.validation.OrganizationPermissions.ALL_WRITE;
-import static com.sequenceiq.cloudbreak.validation.OrganizationPermissions.ORG_MANAGE;
+import static com.sequenceiq.cloudbreak.authorization.OrganizationPermissions.ALL_READ;
+import static com.sequenceiq.cloudbreak.authorization.OrganizationPermissions.ALL_WRITE;
+import static com.sequenceiq.cloudbreak.authorization.OrganizationPermissions.ORG_MANAGE;
 
 import java.util.Calendar;
 import java.util.HashSet;
@@ -38,9 +38,9 @@ import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecution
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.user.UserOrgPermissionsService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
-import com.sequenceiq.cloudbreak.validation.OrganizationPermissions;
-import com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Action;
-import com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Resource;
+import com.sequenceiq.cloudbreak.authorization.OrganizationPermissions;
+import com.sequenceiq.cloudbreak.authorization.OrganizationPermissions.Action;
+import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
 
 @Service
 public class OrganizationService {
@@ -325,7 +325,7 @@ public class OrganizationService {
         if (userOrgPermissions == null) {
             throw new AccessDeniedException("You have no access for this resource.");
         }
-        boolean hasPermission = OrganizationPermissions.hasPermission(userOrgPermissions.getPermissionSet(), Resource.ORG, action);
+        boolean hasPermission = OrganizationPermissions.hasPermission(userOrgPermissions.getPermissionSet(), OrganizationResource.ORG, action);
         if (!hasPermission) {
             throw new AccessDeniedException("You cannot delete this organization.");
         }

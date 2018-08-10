@@ -6,6 +6,7 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 import com.sequenceiq.cloudbreak.api.model.users.ChangeOrganizationUsersJson;
+import com.sequenceiq.cloudbreak.authorization.OrganizationPermissions;
 
 public class ChangeOrganizationUsersJsonValidator implements ConstraintValidator<ValidChangeOrganizationUsersJson, ChangeOrganizationUsersJson> {
     @Override

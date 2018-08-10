@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.repository;
 
 import static com.sequenceiq.cloudbreak.aspect.ConditionType.PRE;
-import static com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Action.READ;
-import static com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Action.WRITE;
+import static com.sequenceiq.cloudbreak.authorization.OrganizationPermissions.Action.READ;
+import static com.sequenceiq.cloudbreak.authorization.OrganizationPermissions.Action.WRITE;
 
 import java.io.Serializable;
 import java.util.Optional;

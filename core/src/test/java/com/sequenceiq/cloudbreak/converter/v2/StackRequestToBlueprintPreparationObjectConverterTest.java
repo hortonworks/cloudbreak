@@ -387,7 +387,7 @@ public class StackRequestToBlueprintPreparationObjectConverterTest {
         expected.setProtocol("");
         String ldapConfigName = "configName";
         when(cluster.getLdapConfigName()).thenReturn(ldapConfigName);
-        when(ldapConfigService.getPublicConfig(ldapConfigName, user)).thenReturn(expected);
+        when(ldapConfigService.getByNameFromUsersDefaultOrganization(ldapConfigName)).thenReturn(expected);
 
         BlueprintPreparationObject result = underTest.convert(source);
 

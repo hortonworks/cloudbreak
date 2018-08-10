@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.repository;
 
-import static com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Action.READ;
+import static com.sequenceiq.cloudbreak.authorization.OrganizationPermissions.Action.READ;
 
 import java.io.Serializable;
 import java.util.Set;

@@ -27,9 +27,7 @@ import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.domain.organization.UserOrgPermissions;
 import com.sequenceiq.cloudbreak.repository.OrganizationResourceRepository;
 import com.sequenceiq.cloudbreak.service.user.UserOrgPermissionsService;
-import com.sequenceiq.cloudbreak.validation.OrganizationPermissions;
-import com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Action;
-import com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Resource;
+import com.sequenceiq.cloudbreak.authorization.OrganizationPermissions.Action;
 
 @Component
 public class PermissionCheckingUtils {
@@ -39,7 +37,7 @@ public class PermissionCheckingUtils {
     @Inject
     private UserOrgPermissionsService userOrgPermissionsService;
 
-    public void checkPermissionsByTarget(Object target, User user, Resource resource, Action action) {
+    public void checkPermissionsByTarget(Object target, User user, OrganizationResource resource, Action action) {
         Iterable<?> iterableTarget = targetToIterable(target);
         Set<Long> organizationIds = collectOrganizationIds(iterableTarget);
         if (organizationIds.isEmpty()) {
@@ -85,8 +83,8 @@ public class PermissionCheckingUtils {
         return organizationId;
     }
 
-    public Object checkPermissionsByPermissionSetAndProceed(Resource resource, User user, Long orgId, Action action, ProceedingJoinPoint proceedingJoinPoint,
-            MethodSignature methodSignature) {
+    public Object checkPermissionsByPermissionSetAndProceed(OrganizationResource resource, User user, Long orgId, Action action,
+            ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature) {
         if (orgId == null) {
             throw new IllegalArgumentException("organizationId cannot be null!");
         }
@@ -100,7 +98,7 @@ public class PermissionCheckingUtils {
         return proceed(proceedingJoinPoint, methodSignature);
     }
 
-    public void checkPermissionByPermissionSet(Action action, Resource resource, Set<String> permissionSet) {
+    public void checkPermissionByPermissionSet(Action action, OrganizationResource resource, Set<String> permissionSet) {
         boolean hasPermission = OrganizationPermissions.hasPermission(permissionSet, resource, action);
         if (!hasPermission) {
             throw new AccessDeniedException(format("You have no access to %s.", resource.getReadableName()));

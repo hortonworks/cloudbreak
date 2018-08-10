@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
@@ -68,8 +69,8 @@ public class RecipeService extends AbstractOrganizationAwareResourceService<Reci
     }
 
     @Override
-    protected String resourceName() {
-        return "recipe";
+    protected OrganizationResource resource() {
+        return OrganizationResource.RECIPE;
     }
 
     @Override
