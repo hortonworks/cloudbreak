@@ -217,6 +217,7 @@ public class GcpPlatformResources implements PlatformResources {
                                     1, machineType.getMaximumPersistentDisks())
 
                             .withMaximumPersistentDisksSizeGb(machineType.getMaximumPersistentDisksSizeGb().toString())
+                            .withVolumeEncryptionSupport(true)
                             .create();
                     VmType vmType = VmType.vmTypeWithMeta(machineType.getName(), vmTypeMeta, true);
                     types.add(vmType);
