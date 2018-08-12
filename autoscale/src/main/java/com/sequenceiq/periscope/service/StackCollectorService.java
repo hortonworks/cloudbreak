@@ -3,7 +3,6 @@ package com.sequenceiq.periscope.service;
 import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
 
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -20,6 +19,7 @@ import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.periscope.monitor.context.ClusterCreationEvaluatorContext;
 import com.sequenceiq.periscope.monitor.evaluator.ClusterCreationEvaluator;
+import com.sequenceiq.periscope.monitor.executor.ExecutorServiceWithRegistry;
 import com.sequenceiq.periscope.service.configuration.CloudbreakClientConfiguration;
 
 @Service
@@ -33,7 +33,7 @@ public class StackCollectorService {
     private ApplicationContext applicationContext;
 
     @Inject
-    private ExecutorService executorService;
+    private ExecutorServiceWithRegistry executorServiceWithRegistry;
 
     @Inject
     private CloudbreakClientConfiguration cloudbreakClientConfiguration;
@@ -54,8 +54,9 @@ public class StackCollectorService {
                                 LOGGER.info("Evaluate cluster management for stack: {} (ID:{})", stack.getName(), stack.getStackId());
                                 ClusterCreationEvaluator clusterCreationEvaluator = applicationContext.getBean(ClusterCreationEvaluator.class);
                                 clusterCreationEvaluator.setContext(new ClusterCreationEvaluatorContext(stack));
-                                executorService.submit(clusterCreationEvaluator);
-                                LOGGER.info("Succesfully submitted, the stack id: {}. Executor: {}", stack.getStackId(), executorService);
+                                executorServiceWithRegistry.submitIfAbsent(clusterCreationEvaluator, stack.getStackId());
+                                LOGGER.info("Succesfully submitted, the stack id: {}. Executor: {}", stack.getStackId(),
+                                        executorServiceWithRegistry.getExecutorService());
                                 rejectedThreadService.remove(stack);
                             } catch (RejectedExecutionException ignore) {
 

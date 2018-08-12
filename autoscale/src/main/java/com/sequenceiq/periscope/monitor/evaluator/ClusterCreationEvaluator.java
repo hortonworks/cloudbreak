@@ -24,6 +24,7 @@ import com.sequenceiq.periscope.domain.SecurityConfig;
 import com.sequenceiq.periscope.log.MDCBuilder;
 import com.sequenceiq.periscope.model.AmbariStack;
 import com.sequenceiq.periscope.monitor.context.EvaluatorContext;
+import com.sequenceiq.periscope.monitor.executor.ExecutorServiceWithRegistry;
 import com.sequenceiq.periscope.notification.HttpNotificationSender;
 import com.sequenceiq.periscope.service.AmbariClientProvider;
 import com.sequenceiq.periscope.service.ClusterService;
@@ -35,6 +36,8 @@ import com.sequenceiq.periscope.service.security.TlsSecurityService;
 @Scope("prototype")
 public class ClusterCreationEvaluator implements EvaluatorExecutor {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterCreationEvaluator.class);
+
+    private static final String EVALUATOR_NAME = ClusterCreationEvaluator.class.getName();
 
     @Inject
     private ClusterService clusterService;
@@ -55,6 +58,14 @@ public class ClusterCreationEvaluator implements EvaluatorExecutor {
     private AmbariRequestLogging ambariRequestLogging;
 
     private EvaluatorContext context;
+
+    @Inject
+    private ExecutorServiceWithRegistry executorServiceWithRegistry;
+
+    @Override
+    public String getName() {
+        return EVALUATOR_NAME;
+    }
 
     @Override
     public void run() {
@@ -79,6 +90,7 @@ public class ClusterCreationEvaluator implements EvaluatorExecutor {
         } catch (Exception ex) {
             LOGGER.error(String.format("Could not create cluster for Cloudbreak stack: %s (ID:%s)", stack.getStackId(), stack.getName()), ex);
         } finally {
+            executorServiceWithRegistry.finished(this, stack.getStackId());
             LOGGER.info("Finished clusterCreationEvaluator in {} ms", System.currentTimeMillis() - start);
         }
     }
