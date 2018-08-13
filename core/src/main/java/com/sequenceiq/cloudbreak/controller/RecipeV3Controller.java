@@ -19,22 +19,22 @@ public class RecipeV3Controller extends AbstractRecipeController implements Reci
 
     @Override
     public Set<RecipeResponse> listByOrganization(Long organizationId) {
-        return listRecipesByOrganizationId(organizationId);
+        return listByOrganizationId(organizationId);
     }
 
     @Override
-    public RecipeResponse getByNameInOrganization(Long organizationId, String recipeName) {
-        Recipe recipe = getRecipeService().getByNameForOrganization(recipeName, organizationId);
+    public RecipeResponse getByNameInOrganization(Long organizationId, String name) {
+        Recipe recipe = getRecipeService().getByNameForOrganization(name, organizationId);
         return getConversionService().convert(recipe, RecipeResponse.class);
     }
 
     @Override
-    public RecipeResponse createInOrganization(Long organizationId, @Valid RecipeRequest recipeRequest) {
-        return createRecipe(recipeRequest, organizationId);
+    public RecipeResponse createInOrganization(Long organizationId, @Valid RecipeRequest request) {
+        return create(request, organizationId);
     }
 
     @Override
-    public RecipeResponse deleteInOrganization(Long organizationId, String recipeName) {
-        return deleteRecipeByNameFromOrg(recipeName, organizationId);
+    public RecipeResponse deleteInOrganization(Long organizationId, String name) {
+        return deleteByNameFromOrg(name, organizationId);
     }
 }

@@ -42,43 +42,43 @@ public class RecipeController extends AbstractRecipeController implements Recipe
 
     @Override
     public RecipeResponse postPublic(RecipeRequest recipeRequest) {
-        return createRecipe(recipeRequest, null);
+        return create(recipeRequest, null);
     }
 
     @Override
     public RecipeResponse postPrivate(RecipeRequest recipeRequest) {
-        return createRecipe(recipeRequest, null);
+        return create(recipeRequest, null);
     }
 
     @Override
     public Set<RecipeResponse> getPrivates() {
         Organization organization = getOrganizationService().getDefaultOrganizationForCurrentUser();
-        return listRecipesByOrganizationId(organization.getId());
+        return listByOrganizationId(organization.getId());
     }
 
     @Override
     public Set<RecipeResponse> getPublics() {
         Organization organization = getOrganizationService().getDefaultOrganizationForCurrentUser();
-        return listRecipesByOrganizationId(organization.getId());
+        return listByOrganizationId(organization.getId());
     }
 
     @Override
     public RecipeResponse getPrivate(String name) {
-        return getRecipeByName(name);
+        return getByName(name);
     }
 
     @Override
     public RecipeResponse getPublic(String name) {
-        return getRecipeByName(name);
+        return getByName(name);
     }
 
     @Override
     public void deletePublic(String name) {
-        deleteRecipeByNameFromOrg(name, null);
+        deleteByNameFromOrg(name, null);
     }
 
     @Override
     public void deletePrivate(String name) {
-        deleteRecipeByNameFromOrg(name, null);
+        deleteByNameFromOrg(name, null);
     }
 }

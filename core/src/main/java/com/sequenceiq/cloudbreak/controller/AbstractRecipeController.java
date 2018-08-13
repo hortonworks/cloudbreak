@@ -34,26 +34,26 @@ public abstract class AbstractRecipeController extends NotificationController {
     @Inject
     private RecipeService recipeService;
 
-    protected RecipeResponse getRecipeByName(String name) {
+    protected RecipeResponse getByName(String name) {
         Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
         Recipe recipe = recipeService.getByNameForOrganization(name, organization.getId());
         return conversionService.convert(recipe, RecipeResponse.class);
     }
 
-    protected Set<RecipeResponse> listRecipesByOrganizationId(Long organizationId) {
+    protected Set<RecipeResponse> listByOrganizationId(Long organizationId) {
         return recipeService.listByOrganizationId(organizationId).stream()
                 .map(recipe -> conversionService.convert(recipe, RecipeResponse.class))
                 .collect(Collectors.toSet());
     }
 
-    protected RecipeResponse createRecipe(@Valid RecipeRequest recipeRequest, Long organizationId) {
-        Recipe recipe = conversionService.convert(recipeRequest, Recipe.class);
+    protected RecipeResponse create(@Valid RecipeRequest request, Long organizationId) {
+        Recipe recipe = conversionService.convert(request, Recipe.class);
         recipe = recipeService.create(recipe, organizationId);
         notify(authenticatedUserService.getCbUser(), ResourceEvent.RECIPE_CREATED);
         return conversionService.convert(recipe, RecipeResponse.class);
     }
 
-    protected RecipeResponse deleteRecipeByNameFromOrg(String name, Long organizationId) {
+    protected RecipeResponse deleteByNameFromOrg(String name, Long organizationId) {
         Recipe deleted = recipeService.deleteByNameFromOrganization(name, organizationId);
         IdentityUser identityUser = authenticatedUserService.getCbUser();
         notify(identityUser, ResourceEvent.RECIPE_DELETED);
