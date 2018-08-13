@@ -39,7 +39,9 @@ docker run -i \
        --privileged \
        --net=host \
        --name $TEST_CONTAINER_NAME \
-       -v $(pwd)/aruba:/tmp \
+       -v $(pwd)/aruba:/aruba \
+       -v $(pwd)/responses:/responses \
+       -v $(pwd)/requests:/requests \
        -v $(pwd)/../build/Linux:/usr/local/bin \
        -e "BASE_URL=$BASE_URL" \
        -e "USERNAME_CLI=$USERNAME_CLI" \
