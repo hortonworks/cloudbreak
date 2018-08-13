@@ -374,7 +374,7 @@ public class StackToCloudStackConverterTest {
         Template template = mock(Template.class);
         SecurityGroup securityGroup = new SecurityGroup();
         securityGroup.setId(1L);
-        securityGroup.setSecurityGroupId(TEST_STRING_ID);
+        securityGroup.setSecurityGroupIds(Collections.singleton(TEST_STRING_ID));
         when(template.getVolumeCount()).thenReturn(0);
         when(instanceGroup.getTemplate()).thenReturn(template);
         when(instanceGroup.getSecurityGroup()).thenReturn(securityGroup);
@@ -385,7 +385,7 @@ public class StackToCloudStackConverterTest {
 
         assertEquals(1L, result.getGroups().size());
         assertTrue(result.getGroups().get(0).getSecurity().getRules().isEmpty());
-        assertEquals(securityGroup.getSecurityGroupId(), result.getGroups().get(0).getSecurity().getCloudSecurityId());
+        assertEquals(securityGroup.getFirstSecurityGroupId(), result.getGroups().get(0).getSecurity().getCloudSecurityId());
     }
 
     @Test

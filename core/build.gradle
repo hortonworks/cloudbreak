@@ -220,6 +220,7 @@ dependencies {
   testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-freemarker'
   testCompile group: 'com.jayway.restassured',   name: 'rest-assured'
   testCompile group: 'com.jayway.restassured',   name: 'json-path'
+  testCompile group: 'com.h2database',           name: 'h2'
 }
 
 jacoco {

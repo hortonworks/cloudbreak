@@ -3,17 +3,19 @@ package com.sequenceiq.cloudbreak.cloud.model;
 import java.util.Collection;
 import java.util.List;
 
+import javax.annotation.Nonnull;
+
 import com.google.common.collect.ImmutableList;
 
 public class Security {
 
     private final List<SecurityRule> rules;
 
-    private final String cloudSecurityId;
+    private final List<String> cloudSecurityIds;
 
-    public Security(Collection<SecurityRule> rules, String cloudSecurityId) {
+    public Security(@Nonnull Collection<SecurityRule> rules, @Nonnull Collection<String> cloudSecurityIds) {
         this.rules = ImmutableList.copyOf(rules);
-        this.cloudSecurityId = cloudSecurityId;
+        this.cloudSecurityIds = ImmutableList.copyOf(cloudSecurityIds);
     }
 
     public List<SecurityRule> getRules() {
@@ -21,7 +23,11 @@ public class Security {
     }
 
     public String getCloudSecurityId() {
-        return cloudSecurityId;
+        return cloudSecurityIds.isEmpty() ? null : cloudSecurityIds.get(0);
+    }
+
+    public List<String> getCloudSecurityIds() {
+        return cloudSecurityIds;
     }
 
     @Override

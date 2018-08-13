@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.openstack.heat;
 
 
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
@@ -12,7 +14,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -114,10 +115,10 @@ public class HeatTemplateBuilderTest {
                 new HashMap<>(), 0L, "cb-centos66-amb200-2015-05-25");
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         CloudInstance instance = new CloudInstance("SOME_ID", instanceTemplate, instanceAuthentication);
-        List<SecurityRule> rules = Collections.singletonList(new SecurityRule("0.0.0.0/0",
+        List<SecurityRule> rules = singletonList(new SecurityRule("0.0.0.0/0",
                 new PortDefinition[]{new PortDefinition("22", "22"), new PortDefinition("443", "443")}, "tcp"));
-        Security security = new Security(rules, null);
-        groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
+        Security security = new Security(rules, emptyList());
+        groups.add(new Group(name, InstanceGroupType.CORE, singletonList(instance), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), 50));
         Map<InstanceGroupType, String> userData = ImmutableMap.of(
                 InstanceGroupType.CORE, "CORE",
@@ -171,7 +172,7 @@ public class HeatTemplateBuilderTest {
         Group group = groups.get(0);
         groups.clear();
         String cloudSecurityId = "sec-group-id";
-        Security security = new Security(Collections.emptyList(), cloudSecurityId);
+        Security security = new Security(emptyList(), singletonList(cloudSecurityId));
         Group groupWithSecGroup = new Group(group.getName(), InstanceGroupType.CORE, group.getInstances(), security, null,
                 group.getInstanceAuthentication(), group.getInstanceAuthentication().getLoginUserName(), group.getInstanceAuthentication().getPublicKey(), 50);
         groups.add(groupWithSecGroup);

@@ -364,8 +364,11 @@
         <#else>
         "ImageId"        : { "Ref" : "AMI" },
         </#if>
-        <#if group.cloudSecurityId??>
-        "SecurityGroups" : [ "${group.cloudSecurityId}" ],
+        <#if group.cloudSecurityIds?size != 0>
+        "SecurityGroups" : [ <#list group.cloudSecurityIds as cloudSecurityId>
+                               "${cloudSecurityId}"<#if cloudSecurityId_has_next>,</#if>
+                             </#list>
+                           ],
         <#else>
         "SecurityGroups" : [ { "Ref" : "ClusterNodeSecurityGroup${group.groupName?replace('_', '')}" } ],
         </#if>
@@ -381,9 +384,9 @@
         "UserData"       : { "Fn::Base64" : { "Ref" : "CBGateWayUserData"}}
         </#if>
       }
-    },
+    }
 
-	<#if !group.cloudSecurityId??>
+	<#if group.cloudSecurityIds?size == 0>,
     "ClusterNodeSecurityGroup${group.groupName?replace('_', '')}" : {
       "Type" : "AWS::EC2::SecurityGroup",
       "Properties" : {
@@ -407,8 +410,9 @@
           </#list>
         ]
       }
-    }<#if (group_index + 1) != instanceGroups?size>,</#if>
+    }
     </#if>
+    <#if group_has_next>,</#if>
     </#list>
   }
   <#if mapPublicIpOnLaunch || (enableInstanceProfile && !existingRole)>

@@ -447,6 +447,7 @@ public class ModelDescriptions {
     public static class SecurityGroupModelDescription {
         public static final String SECURITY_RULES = "list of security rules that relates to the security group";
         public static final String SECURITY_GROUP_ID = "Exisiting security group id";
+        public static final String SECURITY_GROUP_IDS = "Exisiting security group ids";
     }
 
     public static class SecurityRuleModelDescription {
