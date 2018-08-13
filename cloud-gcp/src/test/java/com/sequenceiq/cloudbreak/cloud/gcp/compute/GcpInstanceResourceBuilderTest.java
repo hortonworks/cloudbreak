@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.compute;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -133,7 +134,7 @@ public class GcpInstanceResourceBuilderTest {
         volumes = Arrays.asList(new Volume("/hadoop/fs1", "HDD", 1), new Volume("/hadoop/fs2", "HDD", 1));
         List<SecurityRule> rules = Collections.singletonList(new SecurityRule("0.0.0.0/0",
                 new PortDefinition[]{new PortDefinition("22", "22"), new PortDefinition("443", "443")}, "tcp"));
-        security = new Security(rules, null);
+        security = new Security(rules, emptyList());
         Location location = Location.location(Region.region("region"), AvailabilityZone.availabilityZone("az"));
         Map<InstanceGroupType, String> userData = ImmutableMap.of(InstanceGroupType.CORE, "CORE", InstanceGroupType.GATEWAY, "GATEWAY");
         image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "", "default", "default-id", new HashMap<>());

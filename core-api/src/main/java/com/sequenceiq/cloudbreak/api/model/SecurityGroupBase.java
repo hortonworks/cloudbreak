@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.api.model;
 
+import java.util.Set;
+
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -18,6 +20,9 @@ public abstract class SecurityGroupBase implements JsonEntity {
 
     @ApiModelProperty(SecurityGroupModelDescription.SECURITY_GROUP_ID)
     private String securityGroupId;
+
+    @ApiModelProperty(SecurityGroupModelDescription.SECURITY_GROUP_IDS)
+    private Set<String> securityGroupIds;
 
     @ApiModelProperty(value = ModelDescriptions.CLOUD_PLATFORM, required = true)
     @NotNull
@@ -45,5 +50,13 @@ public abstract class SecurityGroupBase implements JsonEntity {
 
     public void setCloudPlatform(String cloudPlatform) {
         this.cloudPlatform = cloudPlatform;
+    }
+
+    public Set<String> getSecurityGroupIds() {
+        return securityGroupIds;
+    }
+
+    public void setSecurityGroupIds(Set<String> securityGroupIds) {
+        this.securityGroupIds = securityGroupIds;
     }
 }

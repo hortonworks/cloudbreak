@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
 import static com.sequenceiq.cloudbreak.cloud.azure.subnetstrategy.AzureSubnetStrategy.SubnetStratgyType.FILL;
+import static java.util.Collections.emptyList;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
@@ -167,7 +168,7 @@ public class AzureTemplateBuilderTest {
         instance = new CloudInstance("SOME_ID", instanceTemplate, instanceAuthentication, params);
         List<SecurityRule> rules = Collections.singletonList(new SecurityRule("0.0.0.0/0",
                 new PortDefinition[]{new PortDefinition("22", "22"), new PortDefinition("443", "443")}, "tcp"));
-        security = new Security(rules, null);
+        security = new Security(rules, emptyList());
         image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "", "default", "default-id", new HashMap<>());
         cloudContext = new CloudContext(7899L, "thisisaverylongazureresourcenamewhichneedstobeshortened", "dummy1", "dummy2", "test",
                 Location.location(Region.region("EU"), new AvailabilityZone("availabilityZone")));

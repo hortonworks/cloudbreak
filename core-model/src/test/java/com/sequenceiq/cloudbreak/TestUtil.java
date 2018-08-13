@@ -623,7 +623,7 @@ public class TestUtil {
         securityGroup.setName(DUMMY_NAME);
         securityGroup.setStatus(ResourceStatus.DEFAULT);
         securityGroup.setSecurityRules(securityRules);
-        securityGroup.setSecurityGroupId(DUMMY_SECURITY_GROUP_ID);
+        securityGroup.setSecurityGroupIds(Collections.singleton(DUMMY_SECURITY_GROUP_ID));
         securityGroup.setCloudPlatform(AWS);
         return securityGroup;
     }

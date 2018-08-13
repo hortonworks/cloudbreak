@@ -24,7 +24,8 @@ public class SecurityGroupToSecurityGroupDetailsConverter extends AbstractConver
         securityGroupDetails.setId(source.getId());
         securityGroupDetails.setName(source.getName());
         securityGroupDetails.setDescription(source.getDescription());
-        securityGroupDetails.setSecurityGroupId(source.getSecurityGroupId());
+        securityGroupDetails.setSecurityGroupId(source.getFirstSecurityGroupId());
+        securityGroupDetails.setSecurityGroupIds(source.getSecurityGroupIds());
         securityGroupDetails.setSecurityRules((List<SecurityRuleDetails>) conversionService.convert(source.getSecurityRules(),
                 TypeDescriptor.forObject(source.getSecurityRules()),
                 TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(SecurityRuleDetails.class))));

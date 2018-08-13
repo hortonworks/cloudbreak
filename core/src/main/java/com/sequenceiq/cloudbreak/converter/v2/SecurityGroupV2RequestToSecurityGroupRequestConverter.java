@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.converter.v2;
 
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
@@ -18,10 +19,11 @@ public class SecurityGroupV2RequestToSecurityGroupRequestConverter
     private MissingResourceNameGenerator missingResourceNameGenerator;
 
     @Override
-    public SecurityGroupRequest convert(SecurityGroupV2Request source) {
+    public SecurityGroupRequest convert(@Nonnull SecurityGroupV2Request source) {
         SecurityGroupRequest entity = new SecurityGroupRequest();
         entity.setName(missingResourceNameGenerator.generateName(APIResourceType.SECURITY_GROUP));
         entity.setSecurityGroupId(source.getSecurityGroupId());
+        entity.setSecurityGroupIds(source.getSecurityGroupIds());
         if (source.getSecurityRules() != null) {
             entity.setSecurityRules(source.getSecurityRules());
         }

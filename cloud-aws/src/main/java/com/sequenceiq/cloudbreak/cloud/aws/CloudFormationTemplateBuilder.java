@@ -57,7 +57,7 @@ public class CloudFormationTemplateBuilder {
                     awsInstanceView.getVolumeType(),
                     awsInstanceView.getSpotPrice(),
                     group.getSecurity().getRules(),
-                    group.getSecurity().getCloudSecurityId(),
+                    group.getSecurity().getCloudSecurityIds(),
                     getSubnetIds(context.existingSubnetIds, i, group, multigw),
                     awsInstanceView.isKmsEnabled(),
                     awsInstanceView.getKmsKey(),

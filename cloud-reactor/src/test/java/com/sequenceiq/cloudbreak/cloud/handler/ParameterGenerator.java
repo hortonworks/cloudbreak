@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.handler;
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
+import static java.util.Collections.emptyList;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -72,7 +73,7 @@ public class ParameterGenerator {
 
         List<SecurityRule> rules = Collections.singletonList(new SecurityRule("0.0.0.0/0",
                 new PortDefinition[]{new PortDefinition("22", "22"), new PortDefinition("443", "443")}, "tcp"));
-        Security security = new Security(rules, null);
+        Security security = new Security(rules, emptyList());
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), 50));
 

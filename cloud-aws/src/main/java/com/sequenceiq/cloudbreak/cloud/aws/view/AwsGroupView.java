@@ -35,7 +35,7 @@ public class AwsGroupView {
 
     private final List<SecurityRule> rules;
 
-    private final String cloudSecurityId;
+    private final List<String> cloudSecurityIds;
 
     private final String subnetId;
 
@@ -46,7 +46,7 @@ public class AwsGroupView {
     private final String autoScalingGroupName;
 
     public AwsGroupView(Integer instanceCount, String type, String flavor, String groupName, Integer volumeCount, Boolean ebsEncrypted, Integer volumeSize,
-            Integer rootVolumeSize, String volumeType, Double spotPrice, List<SecurityRule> rules, String cloudSecurityId, String subnetId,
+            Integer rootVolumeSize, String volumeType, Double spotPrice, List<SecurityRule> rules, List<String> cloudSecurityIds, String subnetId,
             Boolean kmsKeyDefined, String kmsKey, String snapshotId, String encryptedAMI) {
         this.instanceCount = instanceCount;
         this.type = type;
@@ -59,7 +59,7 @@ public class AwsGroupView {
         this.spotPrice = spotPrice;
         this.volumeType = volumeType;
         this.rules = rules;
-        this.cloudSecurityId = cloudSecurityId;
+        this.cloudSecurityIds = cloudSecurityIds;
         this.subnetId = subnetId;
         this.kmsKeyDefined = kmsKeyDefined;
         this.kmsKey = kmsKey;
@@ -116,8 +116,12 @@ public class AwsGroupView {
         return AwsDiskType.St1.value().equals(volumeType);
     }
 
+    public List<String> getCloudSecurityIds() {
+        return cloudSecurityIds;
+    }
+
     public String getCloudSecurityId() {
-        return cloudSecurityId;
+        return cloudSecurityIds.isEmpty() ? null : cloudSecurityIds.get(0);
     }
 
     public String getSubnetId() {

@@ -240,7 +240,7 @@ public class StackToCloudStackConverter {
     private Security buildSecurity(InstanceGroup ig) {
         List<SecurityRule> rules = new ArrayList<>();
         if (ig.getSecurityGroup() == null) {
-            return new Security(rules, null);
+            return new Security(rules, Collections.emptyList());
         }
         Long id = ig.getSecurityGroup().getId();
         List<com.sequenceiq.cloudbreak.domain.SecurityRule> securityRules = securityRuleRepository.findAllBySecurityGroupId(id);
@@ -258,7 +258,7 @@ public class StackToCloudStackConverter {
             rules.add(new SecurityRule(securityRule.getCidr(), portDefinitions.toArray(new PortDefinition[portDefinitions.size()]),
                     securityRule.getProtocol()));
         }
-        return new Security(rules, ig.getSecurityGroup().getSecurityGroupId());
+        return new Security(rules, ig.getSecurityGroup().getSecurityGroupIds());
     }
 
     private SpiFileSystem buildCloudFileSystem(Stack stack) {

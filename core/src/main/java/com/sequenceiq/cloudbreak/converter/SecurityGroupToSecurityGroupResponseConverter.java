@@ -24,7 +24,8 @@ public class SecurityGroupToSecurityGroupResponseConverter extends AbstractConve
         json.setOwner(source.getOwner());
         json.setPublicInAccount(source.isPublicInAccount());
         json.setSecurityRules(convertSecurityRules(source.getSecurityRules()));
-        json.setSecurityGroupId(source.getSecurityGroupId());
+        json.setSecurityGroupId(source.getFirstSecurityGroupId());
+        json.setSecurityGroupIds(source.getSecurityGroupIds());
         json.setCloudPlatform(source.getCloudPlatform());
         return json;
     }

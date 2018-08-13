@@ -5,9 +5,11 @@ import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -46,10 +48,12 @@ public class SecurityGroup implements ProvisionEntity {
     @Enumerated(EnumType.STRING)
     private ResourceStatus status;
 
-    @OneToMany(mappedBy = "securityGroup", cascade = { CascadeType.REMOVE, CascadeType.PERSIST }, orphanRemoval = true)
+    @OneToMany(mappedBy = "securityGroup", cascade = {CascadeType.REMOVE, CascadeType.PERSIST}, orphanRemoval = true)
     private Set<SecurityRule> securityRules = new HashSet<>();
 
-    private String securityGroupId;
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Column(name = "securitygroupid_value")
+    private Set<String> securityGroupIds = new HashSet<>();
 
     private String cloudPlatform;
 
@@ -117,12 +121,16 @@ public class SecurityGroup implements ProvisionEntity {
         this.securityRules = securityRules;
     }
 
-    public String getSecurityGroupId() {
-        return securityGroupId;
+    public String getFirstSecurityGroupId() {
+        return securityGroupIds.isEmpty() ? null : securityGroupIds.iterator().next();
     }
 
-    public void setSecurityGroupId(String securityGroupId) {
-        this.securityGroupId = securityGroupId;
+    public Set<String> getSecurityGroupIds() {
+        return securityGroupIds;
+    }
+
+    public void setSecurityGroupIds(Set<String> securityGroupIds) {
+        this.securityGroupIds = securityGroupIds;
     }
 
     public String getCloudPlatform() {

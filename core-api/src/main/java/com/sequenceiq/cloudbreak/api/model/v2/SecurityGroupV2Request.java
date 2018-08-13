@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.api.model.v2;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import javax.validation.Valid;
 
@@ -20,8 +21,15 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonInclude(Include.NON_NULL)
 public class SecurityGroupV2Request implements JsonEntity {
 
+    /**
+     * @deprecated in 2.8.0. We support multiple security groups.
+     */
+    @Deprecated(since = "2.8.0")
     @ApiModelProperty(SecurityGroupModelDescription.SECURITY_GROUP_ID)
     private String securityGroupId;
+
+    @ApiModelProperty(SecurityGroupModelDescription.SECURITY_GROUP_IDS)
+    private Set<String> securityGroupIds;
 
     @Valid
     @ApiModelProperty(SecurityGroupModelDescription.SECURITY_RULES)
@@ -41,5 +49,13 @@ public class SecurityGroupV2Request implements JsonEntity {
 
     public void setSecurityGroupId(String securityGroupId) {
         this.securityGroupId = securityGroupId;
+    }
+
+    public Set<String> getSecurityGroupIds() {
+        return securityGroupIds;
+    }
+
+    public void setSecurityGroupIds(Set<String> securityGroupIds) {
+        this.securityGroupIds = securityGroupIds;
     }
 }

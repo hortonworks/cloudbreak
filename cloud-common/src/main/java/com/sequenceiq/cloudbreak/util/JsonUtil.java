@@ -108,4 +108,12 @@ public class JsonUtil {
         return MAPPER.treeToValue(n, valueType);
     }
 
+    public static boolean isValid(String content) {
+        try {
+            readTree(content);
+            return true;
+        } catch (IOException ignore) {
+            return false;
+        }
+    }
 }

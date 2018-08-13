@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
@@ -9,12 +12,12 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -50,13 +53,16 @@ import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.cloudbreak.common.type.CloudbreakResourceType;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 import freemarker.template.Configuration;
 
 @RunWith(Parameterized.class)
 public class CloudFormationTemplateBuilderTest {
 
-    public static final String LATEST_AWS_CLOUD_FORMATION_TEMPLATE_PATH = "templates/aws-cf-stack.ftl";
+    private static final String LATEST_AWS_CLOUD_FORMATION_TEMPLATE_PATH = "templates/aws-cf-stack.ftl";
+
+    private static final String CIDR = "10.0.0.0/16";
 
     private static final int ROOT_VOLUME_SIZE = 17;
 
@@ -81,6 +87,12 @@ public class CloudFormationTemplateBuilderTest {
     private final String templatePath;
 
     private final Map<String, String> defaultTags = new HashMap<>();
+
+    private Image image;
+
+    private InstanceAuthentication instanceAuthentication;
+
+    private CloudInstance instance;
 
     public CloudFormationTemplateBuilderTest(String templatePath) {
         this.templatePath = templatePath;
@@ -116,20 +128,20 @@ public class CloudFormationTemplateBuilderTest {
         List<Volume> volumes = Arrays.asList(new Volume("/hadoop/fs1", "HDD", 1), new Volume("/hadoop/fs2", "HDD", 1));
         InstanceTemplate instanceTemplate = new InstanceTemplate("m1.medium", name, 0L, volumes, InstanceStatus.CREATE_REQUESTED,
                 new HashMap<>(), 0L, "cb-centos66-amb200-2015-05-25");
-        InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
-        CloudInstance instance = new CloudInstance("SOME_ID", instanceTemplate, instanceAuthentication);
-        List<SecurityRule> rules = Collections.singletonList(new SecurityRule("0.0.0.0/0",
+        instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
+        instance = new CloudInstance("SOME_ID", instanceTemplate, instanceAuthentication);
+        List<SecurityRule> rules = singletonList(new SecurityRule("0.0.0.0/0",
                 new PortDefinition[]{new PortDefinition("22", "22"), new PortDefinition("443", "443")}, "tcp"));
-        Security security = new Security(rules, null);
+        Security security = new Security(rules, emptyList());
         Map<InstanceGroupType, String> userData = ImmutableMap.of(
                 InstanceGroupType.CORE, "CORE",
                 InstanceGroupType.GATEWAY, "GATEWAY"
         );
-        Image image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "", "default", "default-id", new HashMap<>());
+        image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "", "default", "default-id", new HashMap<>());
         List<Group> groups = new ArrayList<>();
-        groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
+        groups.add(new Group(name, InstanceGroupType.CORE, singletonList(instance), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE));
-        groups.add(new Group(name, InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null,
+        groups.add(new Group(name, InstanceGroupType.GATEWAY, singletonList(instance), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE));
         Network network = new Network(new Subnet("testSubnet"));
         Map<String, String> parameters = new HashMap<>();
@@ -157,7 +169,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withStack(cloudStack)
                 .withExistingVpc(true)
                 .withExistingIGW(true)
-                .withExistingSubnetCidr(Collections.singletonList(existingSubnetCidr))
+                .withExistingSubnetCidr(singletonList(existingSubnetCidr))
                 .mapPublicIpOnLaunch(true)
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(true)
@@ -166,6 +178,7 @@ public class CloudFormationTemplateBuilderTest {
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
+        Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
         assertThat(templateString, containsString("AmbariNodes" + name));
         assertThat(templateString, containsString("AmbariNodeLaunchConfig" + name));
         assertThat(templateString, containsString("ClusterNodeSecurityGroup" + name));
@@ -182,7 +195,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withStack(cloudStack)
                 .withExistingVpc(true)
                 .withExistingIGW(true)
-                .withExistingSubnetCidr(Collections.singletonList(existingSubnetCidr))
+                .withExistingSubnetCidr(singletonList(existingSubnetCidr))
                 .mapPublicIpOnLaunch(true)
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(true)
@@ -191,6 +204,7 @@ public class CloudFormationTemplateBuilderTest {
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
+        Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
         assertThat(templateString, containsString("InstanceProfile"));
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, not(containsString("SubnetCIDR")));
@@ -210,7 +224,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withStack(cloudStack)
                 .withExistingVpc(true)
                 .withExistingIGW(true)
-                .withExistingSubnetCidr(Collections.singletonList(existingSubnetCidr))
+                .withExistingSubnetCidr(singletonList(existingSubnetCidr))
                 .mapPublicIpOnLaunch(true)
                 .withEnableInstanceProfile(false)
                 .withInstanceProfileAvailable(true)
@@ -219,6 +233,7 @@ public class CloudFormationTemplateBuilderTest {
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
+        Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
         assertThat(templateString, containsString("InstanceProfile"));
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, not(containsString("SubnetCIDR")));
@@ -238,7 +253,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withStack(cloudStack)
                 .withExistingVpc(true)
                 .withExistingIGW(true)
-                .withExistingSubnetCidr(Collections.singletonList(existingSubnetCidr))
+                .withExistingSubnetCidr(singletonList(existingSubnetCidr))
                 .mapPublicIpOnLaunch(true)
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(false)
@@ -247,6 +262,7 @@ public class CloudFormationTemplateBuilderTest {
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
+        Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
         assertThat(templateString, containsString("InstanceProfile"));
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, not(containsString("SubnetCIDR")));
@@ -266,7 +282,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withStack(cloudStack)
                 .withExistingVpc(true)
                 .withExistingIGW(true)
-                .withExistingSubnetCidr(Collections.singletonList(existingSubnetCidr))
+                .withExistingSubnetCidr(singletonList(existingSubnetCidr))
                 .mapPublicIpOnLaunch(true)
                 .withEnableInstanceProfile(false)
                 .withInstanceProfileAvailable(false)
@@ -275,6 +291,7 @@ public class CloudFormationTemplateBuilderTest {
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
+        Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
         assertThat(templateString, not(containsString("InstanceProfile")));
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, not(containsString("SubnetCIDR")));
@@ -294,7 +311,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withStack(cloudStack)
                 .withExistingVpc(true)
                 .withExistingIGW(true)
-                .withExistingSubnetCidr(Collections.singletonList(existingSubnetCidr))
+                .withExistingSubnetCidr(singletonList(existingSubnetCidr))
                 .mapPublicIpOnLaunch(false)
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(true)
@@ -303,6 +320,7 @@ public class CloudFormationTemplateBuilderTest {
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
+        Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
         assertThat(templateString, containsString("InstanceProfile"));
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, not(containsString("SubnetCIDR")));
@@ -322,7 +340,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withStack(cloudStack)
                 .withExistingVpc(true)
                 .withExistingIGW(true)
-                .withExistingSubnetCidr(Collections.singletonList(existingSubnetCidr))
+                .withExistingSubnetCidr(singletonList(existingSubnetCidr))
                 .mapPublicIpOnLaunch(false)
                 .withEnableInstanceProfile(false)
                 .withInstanceProfileAvailable(true)
@@ -331,6 +349,7 @@ public class CloudFormationTemplateBuilderTest {
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
+        Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
         assertThat(templateString, containsString("InstanceProfile"));
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, not(containsString("SubnetCIDR")));
@@ -350,7 +369,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withStack(cloudStack)
                 .withExistingVpc(true)
                 .withExistingIGW(true)
-                .withExistingSubnetCidr(Collections.singletonList(existingSubnetCidr))
+                .withExistingSubnetCidr(singletonList(existingSubnetCidr))
                 .mapPublicIpOnLaunch(false)
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(false)
@@ -359,6 +378,7 @@ public class CloudFormationTemplateBuilderTest {
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
+        Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
         assertThat(templateString, containsString("InstanceProfile"));
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, not(containsString("SubnetCIDR")));
@@ -378,7 +398,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withStack(cloudStack)
                 .withExistingVpc(true)
                 .withExistingIGW(true)
-                .withExistingSubnetCidr(Collections.singletonList(existingSubnetCidr))
+                .withExistingSubnetCidr(singletonList(existingSubnetCidr))
                 .mapPublicIpOnLaunch(false)
                 .withEnableInstanceProfile(false)
                 .withInstanceProfileAvailable(false)
@@ -387,6 +407,7 @@ public class CloudFormationTemplateBuilderTest {
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
+        Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
         assertThat(templateString, not(containsString("InstanceProfile")));
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, not(containsString("SubnetCIDR")));
@@ -406,7 +427,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withStack(cloudStack)
                 .withExistingVpc(true)
                 .withExistingIGW(false)
-                .withExistingSubnetCidr(Collections.singletonList(existingSubnetCidr))
+                .withExistingSubnetCidr(singletonList(existingSubnetCidr))
                 .mapPublicIpOnLaunch(false)
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(true)
@@ -415,6 +436,7 @@ public class CloudFormationTemplateBuilderTest {
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
+        Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
         assertThat(templateString, containsString("InstanceProfile"));
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, not(containsString("SubnetCIDR")));
@@ -434,7 +456,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withStack(cloudStack)
                 .withExistingVpc(true)
                 .withExistingIGW(false)
-                .withExistingSubnetCidr(Collections.singletonList(existingSubnetCidr))
+                .withExistingSubnetCidr(singletonList(existingSubnetCidr))
                 .mapPublicIpOnLaunch(false)
                 .withEnableInstanceProfile(false)
                 .withInstanceProfileAvailable(true)
@@ -443,6 +465,7 @@ public class CloudFormationTemplateBuilderTest {
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
+        Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
         assertThat(templateString, containsString("InstanceProfile"));
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, not(containsString("SubnetCIDR")));
@@ -462,7 +485,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withStack(cloudStack)
                 .withExistingVpc(true)
                 .withExistingIGW(false)
-                .withExistingSubnetCidr(Collections.singletonList(existingSubnetCidr))
+                .withExistingSubnetCidr(singletonList(existingSubnetCidr))
                 .mapPublicIpOnLaunch(false)
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(false)
@@ -471,6 +494,7 @@ public class CloudFormationTemplateBuilderTest {
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
+        Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
         assertThat(templateString, containsString("InstanceProfile"));
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, not(containsString("SubnetCIDR")));
@@ -490,7 +514,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withStack(cloudStack)
                 .withExistingVpc(true)
                 .withExistingIGW(false)
-                .withExistingSubnetCidr(Collections.singletonList(existingSubnetCidr))
+                .withExistingSubnetCidr(singletonList(existingSubnetCidr))
                 .mapPublicIpOnLaunch(false)
                 .withEnableInstanceProfile(false)
                 .withInstanceProfileAvailable(false)
@@ -499,6 +523,7 @@ public class CloudFormationTemplateBuilderTest {
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
+        Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
         assertThat(templateString, not(containsString("InstanceProfile")));
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, not(containsString("SubnetCIDR")));
@@ -518,7 +543,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withStack(cloudStack)
                 .withExistingVpc(false)
                 .withExistingIGW(false)
-                .withExistingSubnetCidr(Collections.singletonList(existingSubnetCidr))
+                .withExistingSubnetCidr(singletonList(existingSubnetCidr))
                 .mapPublicIpOnLaunch(false)
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(true)
@@ -527,6 +552,7 @@ public class CloudFormationTemplateBuilderTest {
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
+        Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
         assertThat(templateString, containsString("InstanceProfile"));
         assertThat(templateString, not(containsString("VPCId")));
         assertThat(templateString, not(containsString("SubnetCIDR")));
@@ -546,7 +572,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withStack(cloudStack)
                 .withExistingVpc(false)
                 .withExistingIGW(false)
-                .withExistingSubnetCidr(Collections.singletonList(existingSubnetCidr))
+                .withExistingSubnetCidr(singletonList(existingSubnetCidr))
                 .mapPublicIpOnLaunch(false)
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(false)
@@ -555,6 +581,7 @@ public class CloudFormationTemplateBuilderTest {
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
+        Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
         assertThat(templateString, containsString("InstanceProfile"));
         assertThat(templateString, not(containsString("VPCId")));
         assertThat(templateString, not(containsString("SubnetCIDR")));
@@ -574,7 +601,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withStack(cloudStack)
                 .withExistingVpc(false)
                 .withExistingIGW(false)
-                .withExistingSubnetCidr(Collections.singletonList(existingSubnetCidr))
+                .withExistingSubnetCidr(singletonList(existingSubnetCidr))
                 .mapPublicIpOnLaunch(false)
                 .withEnableInstanceProfile(false)
                 .withInstanceProfileAvailable(true)
@@ -583,6 +610,7 @@ public class CloudFormationTemplateBuilderTest {
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
+        Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
         assertThat(templateString, containsString("InstanceProfile"));
         assertThat(templateString, not(containsString("VPCId")));
         assertThat(templateString, not(containsString("SubnetCIDR")));
@@ -605,7 +633,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withStack(cloudStack)
                 .withExistingVpc(false)
                 .withExistingIGW(false)
-                .withExistingSubnetCidr(Collections.singletonList(existingSubnetCidr))
+                .withExistingSubnetCidr(singletonList(existingSubnetCidr))
                 .mapPublicIpOnLaunch(false)
                 .withEnableInstanceProfile(false)
                 .withInstanceProfileAvailable(false)
@@ -614,6 +642,7 @@ public class CloudFormationTemplateBuilderTest {
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
+        Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
         assertThat(templateString, not(containsString("InstanceProfile")));
         assertThat(templateString, not(containsString("VPCId")));
         assertThat(templateString, not(containsString("SubnetCIDR")));
@@ -623,6 +652,105 @@ public class CloudFormationTemplateBuilderTest {
         assertThat(templateString, containsString("\"InternetGateway\""));
         assertThat(templateString, containsString("AvailabilitySet"));
         assertThat(templateString, not(containsString("EIP")));
+    }
+
+    @Test
+    public void buildTestWithVPCAndIGWAndSingleSG() {
+        //GIVEN
+        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
+        List<Group> groups = new ArrayList<>();
+        Security security = new Security(emptyList(), singletonList("single-sg-id"));
+        groups.add(new Group(name, InstanceGroupType.CORE, emptyList(), security, instance,
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), "publickey", ROOT_VOLUME_SIZE));
+        CloudStack cloudStack = new CloudStack(groups, new Network(new Subnet(CIDR)), image, emptyMap(), emptyMap(), "template",
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), "publicKey", null);
+        //WHEN
+        modelContext = new ModelContext()
+                .withAuthenticatedContext(authenticatedContext)
+                .withStack(cloudStack)
+                .withExistingVpc(true)
+                .withExistingIGW(true)
+                .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .withStack(cloudStack)
+                .mapPublicIpOnLaunch(false)
+                .withTemplate(awsCloudFormationTemplate);
+        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
+
+        String templateString = cloudFormationTemplateBuilder.build(modelContext);
+        //THEN
+        // older templates are invalids
+        if ("templates/aws-cf-stack.ftl".equals(templatePath)) {
+            Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        }
+        assertThat(templateString, containsString("VPCId"));
+        assertThat(templateString, containsString("\"single-sg-id\""));
+    }
+
+    @Test
+    public void buildTestWithVPCAndIGWAndSingleSGAndMultiGroup() {
+        //GIVEN
+        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
+        List<Group> groups = new ArrayList<>();
+        Security security = new Security(emptyList(), singletonList("single-sg-id"));
+        groups.add(new Group(name, InstanceGroupType.GATEWAY, emptyList(), security, instance,
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), "publickey", ROOT_VOLUME_SIZE));
+        groups.add(new Group(name, InstanceGroupType.CORE, emptyList(), security, instance,
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), "publickey", ROOT_VOLUME_SIZE));
+        CloudStack cloudStack = new CloudStack(groups, new Network(new Subnet(CIDR)), image, emptyMap(), emptyMap(), "template",
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), "publicKey", null);
+        //WHEN
+        modelContext = new ModelContext()
+                .withAuthenticatedContext(authenticatedContext)
+                .withStack(cloudStack)
+                .withExistingVpc(true)
+                .withExistingIGW(true)
+                .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .withStack(cloudStack)
+                .mapPublicIpOnLaunch(false)
+                .withTemplate(awsCloudFormationTemplate);
+        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
+
+        String templateString = cloudFormationTemplateBuilder.build(modelContext);
+        //THEN
+        // older templates are invalids
+        if ("templates/aws-cf-stack.ftl".equals(templatePath)) {
+            Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        }
+        assertThat(templateString, containsString("VPCId"));
+        assertThat(templateString, containsString("\"single-sg-id\""));
+    }
+
+    @Test
+    public void buildTestWithVPCAndIGWAndMultiSG() {
+        //GIVEN
+        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
+        List<Group> groups = new ArrayList<>();
+        Security security = new Security(emptyList(), List.of("multi-sg-id1", "multi-sg-id2"));
+        groups.add(new Group(name, InstanceGroupType.CORE, emptyList(), security, instance,
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), "publickey", ROOT_VOLUME_SIZE));
+        CloudStack cloudStack = new CloudStack(groups, new Network(new Subnet(CIDR)), image, emptyMap(), emptyMap(), "template",
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), "publicKey", null);
+        //WHEN
+        modelContext = new ModelContext()
+                .withAuthenticatedContext(authenticatedContext)
+                .withStack(cloudStack)
+                .withExistingVpc(true)
+                .withExistingIGW(true)
+                .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .withStack(cloudStack)
+                .mapPublicIpOnLaunch(false)
+                .withTemplate(awsCloudFormationTemplate);
+        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
+
+        String templateString = cloudFormationTemplateBuilder.build(modelContext);
+        //THEN
+        // older templates are invalids
+        if ("templates/aws-cf-stack.ftl".equals(templatePath)) {
+            Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
+            // we don't support the multiple security groups in older templates
+            assertThat(templateString, containsString("\"multi-sg-id1\",\"multi-sg-id2\""));
+        }
+        assertThat(templateString, containsString("VPCId"));
     }
 
     private AuthenticatedContext authenticatedContext() {
