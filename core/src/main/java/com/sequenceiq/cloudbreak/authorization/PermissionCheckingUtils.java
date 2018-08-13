@@ -54,7 +54,7 @@ public class PermissionCheckingUtils {
         Iterable<?> iterableTarget = targetToIterable(target);
         Set<Long> organizationIds = collectOrganizationIds(iterableTarget);
         if (organizationIds.isEmpty()) {
-            throw new AccessDeniedException(format("You have no access to %s.", resource.getReadableName()));
+            return;
         }
         Set<UserOrgPermissions> userOrgPermissionSet = userOrgPermissionsService.findForUserByOrganizationIds(user, organizationIds);
         if (userOrgPermissionSet.size() != organizationIds.size()) {

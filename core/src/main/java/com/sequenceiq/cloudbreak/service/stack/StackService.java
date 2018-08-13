@@ -61,6 +61,7 @@ import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
@@ -98,6 +99,7 @@ import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 
 @Service
@@ -110,6 +112,9 @@ public class StackService {
     private static final String STACK_NOT_FOUND_EXCEPTION_FORMAT_TEXT = "Stack '%s' has not found";
 
     private static final String STACK_NOT_FOUND_BY_ID_EXCEPTION_FORMAT_TEXT = "Stack not found by id '%d'";
+
+    @Inject
+    private UserService userService;
 
     @Inject
     private StackRepository stackRepository;
@@ -412,6 +417,9 @@ public class StackService {
         stack.setOwner(identityUser.getUserId());
         stack.setAccount(identityUser.getAccount());
         stack.setGatewayPort(nginxPort);
+
+        User user = userService.getCurrentUser();
+        stack.setCreator(user);
 
         if (stack.getOrganization() == null) {
             Organization organization = organizationService.getDefaultOrganizationForCurrentUser();

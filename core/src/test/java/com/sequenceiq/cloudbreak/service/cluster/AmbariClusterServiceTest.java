@@ -113,7 +113,7 @@ public class AmbariClusterServiceTest {
                 + " To reset Ambari Server schema you must first drop and then create it using DDL scripts from /var/lib/ambari-server/resources")));
         RDSConfig rdsConfig = new RDSConfig();
         rdsConfig.setDatabaseEngine(DatabaseVendor.POSTGRES);
-        when(rdsConfigService.findByClusterIdAndType(nullable(String.class), nullable(String.class), any(Long.class), any(RdsType.class))).thenReturn(rdsConfig);
+        when(rdsConfigService.findByClusterIdAndType(any(Long.class), any(RdsType.class))).thenReturn(rdsConfig);
         clusterService.recreate(1L, 1L, new HashSet<>(), false, new StackRepoDetails(), null, null);
     }
 

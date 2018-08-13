@@ -131,26 +131,26 @@ public class StackDecorator {
             prepareInstanceGroups(subject, request, subject.getCredential(), user);
             prepareFlexSubscription(subject, request.getFlexId());
             validate(subject);
-            checkSharedServiceStackRequirements(request, user);
+            checkSharedServiceStackRequirements(request);
         }
         return subject;
     }
 
-    private void checkSharedServiceStackRequirements(StackRequest request, IdentityUser user) {
-        if (request.getClusterToAttach() != null && !isSharedServiceRequirementsMeets(request, user)) {
+    private void checkSharedServiceStackRequirements(StackRequest request) {
+        if (request.getClusterToAttach() != null && !isSharedServiceRequirementsMeets(request)) {
             throw new BadRequestException("Shared service stack should contains both Hive RDS and Ranger RDS and a properly configured LDAP also. "
                     + "One of them may be missing");
         }
     }
 
-    private boolean isSharedServiceRequirementsMeets(StackRequest request, IdentityUser user) {
+    private boolean isSharedServiceRequirementsMeets(StackRequest request) {
         boolean hasConfiguredLdap = hasConfiguredLdap(request);
-        boolean hasConfiguredHiveRds = hasConfiguredRdsByType(request, user, RdsType.HIVE);
-        boolean hasConfiguredRangerRds = hasConfiguredRdsByType(request, user, RdsType.RANGER);
+        boolean hasConfiguredHiveRds = hasConfiguredRdsByType(request, RdsType.HIVE);
+        boolean hasConfiguredRangerRds = hasConfiguredRdsByType(request, RdsType.RANGER);
         return hasConfiguredHiveRds && hasConfiguredRangerRds && hasConfiguredLdap;
     }
 
-    private boolean hasConfiguredRdsByType(StackRequest request, IdentityUser user, RdsType rdsType) {
+    private boolean hasConfiguredRdsByType(StackRequest request, RdsType rdsType) {
         boolean hasConfiguredRds = false;
         if (!request.getClusterRequest().getRdsConfigJsons().isEmpty()) {
             hasConfiguredRds = request.getClusterRequest().getRdsConfigJsons().stream()
@@ -158,7 +158,7 @@ public class StackDecorator {
         }
         if (!hasConfiguredRds && !request.getClusterRequest().getRdsConfigNames().isEmpty()) {
             for (String rds : request.getClusterRequest().getRdsConfigNames()) {
-                if (rdsType.name().equalsIgnoreCase(rdsConfigService.getPublicRdsConfig(rds, user).getType())) {
+                if (rdsType.name().equalsIgnoreCase(rdsConfigService.getByNameForDefaultOrg(rds).getType())) {
                     hasConfiguredRds = true;
                     break;
                 }

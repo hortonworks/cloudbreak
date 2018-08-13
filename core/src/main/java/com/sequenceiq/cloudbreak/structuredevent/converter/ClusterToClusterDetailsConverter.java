@@ -50,7 +50,7 @@ public class ClusterToClusterDetailsConverter extends AbstractConversionServiceA
     }
 
     private void addDatabaseInfo(ClusterDetails clusterDetails, Cluster source) {
-        RDSConfig rdsConfig = rdsConfigService.findByClusterIdAndType(source.getOwner(), source.getAccount(), source.getId(), RdsType.AMBARI);
+        RDSConfig rdsConfig = rdsConfigService.findByClusterIdAndType(source.getId(), RdsType.AMBARI);
         if (rdsConfig == null || DatabaseVendor.EMBEDDED == rdsConfig.getDatabaseEngine()) {
             clusterDetails.setDatabaseType(DatabaseVendor.EMBEDDED.name());
             clusterDetails.setExternalDatabase(Boolean.FALSE);

@@ -285,7 +285,8 @@ public class StackRequestToBlueprintPreparationObjectConverterTest {
     public void testConvertWhenClusterHaveSomeRdsConfigNamesThenTheSameAmountOfRdsConfigShouldBeStored() {
         Set<String> rdsConfigNames = createRdsConfigNames();
         when(cluster.getRdsConfigNames()).thenReturn(rdsConfigNames);
-        rdsConfigNames.forEach(rdsConfigName -> when(rdsConfigService.getPrivateRdsConfig(rdsConfigName, user)).thenReturn(new RDSConfig()));
+        rdsConfigNames.forEach(rdsConfigName -> when(rdsConfigService.getByNameForDefaultOrg(rdsConfigName)).
+                thenReturn(new RDSConfig()));
 
         BlueprintPreparationObject result = underTest.convert(source);
 

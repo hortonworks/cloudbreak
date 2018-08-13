@@ -134,7 +134,7 @@ public class ClusterCreationSetupService {
         }
         fileSystemValidator.validateFileSystem(stack.cloudPlatform(), credential, request.getFileSystem());
         mpackValidator.validateMpacks(request, user);
-        rdsConfigValidator.validateRdsConfigs(request, user);
+        rdsConfigValidator.validateRdsConfigs(request);
     }
 
     public Cluster prepare(ClusterRequest request, Stack stack, IdentityUser user) throws CloudbreakImageNotFoundException,

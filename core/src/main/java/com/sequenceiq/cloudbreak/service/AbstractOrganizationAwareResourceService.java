@@ -50,9 +50,13 @@ public abstract class AbstractOrganizationAwareResourceService<T extends Organiz
 
     @Override
     public T create(T resource, Organization organization) {
+        User user = userService.getCurrentUser();
+        return createWithUser(user, resource, organization);
+    }
+
+    public T createWithUser(User user, T resource, Organization organization) {
         try {
             prepareCreation(resource);
-            User user = userService.getCurrentUser();
             return transactionService.required(() -> {
                 setOrganization(resource, user, organization);
                 return repository().save(resource);

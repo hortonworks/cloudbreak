@@ -13,18 +13,17 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 
 import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
 import com.sequenceiq.cloudbreak.domain.converter.EncryptionConverter;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.OrganizationAwareResource;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"account", "name"}))
-public class RDSConfig implements ProvisionEntity {
+public class RDSConfig implements ProvisionEntity, OrganizationAwareResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "rdsconfig_generator")
@@ -57,10 +56,10 @@ public class RDSConfig implements ProvisionEntity {
     @Column(nullable = false)
     private String stackVersion;
 
-    @Column(nullable = false)
+    @Column
     private String owner;
 
-    @Column(nullable = false)
+    @Column
     private String account;
 
     @Column(nullable = false)
@@ -216,5 +215,10 @@ public class RDSConfig implements ProvisionEntity {
 
     public void setOrganization(Organization organization) {
         this.organization = organization;
+    }
+
+    @Override
+    public OrganizationResource getResource() {
+        return OrganizationResource.RDS;
     }
 }
