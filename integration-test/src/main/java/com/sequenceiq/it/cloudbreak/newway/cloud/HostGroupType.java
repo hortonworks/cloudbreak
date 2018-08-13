@@ -76,6 +76,7 @@ public enum HostGroupType {
         r.setType(groupType);
         r.setSecurityGroup(securityGroupV2Request);
         r.setTemplate(cloudProvider.template());
+        r.setRecoveryMode(cloudProvider.getRecoveryModeParam(getName()));
         return r;
     }
 

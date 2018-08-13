@@ -100,6 +100,10 @@ public class Stack extends StackEntity {
         return delete(STACK, strategy);
     }
 
+    public static Action<Stack> makeNodeUnhealthy(String  hostgroup, int nodeCount) {
+        return new Action<>(getTestContextStack(STACK), new UnhealthyNodeStrategy(hostgroup, nodeCount));
+    }
+
     public static Assertion<Stack> assertThis(BiConsumer<Stack, IntegrationTestContext> check) {
         return new Assertion<>(getTestContextStack(GherkinTest.RESULT), check);
     }
@@ -110,6 +114,22 @@ public class Stack extends StackEntity {
             Assert.assertNotNull(stack.getResponse().getId());
             waitAndCheckStackStatus(client.getCloudbreakClient(), stack.getResponse().getId().toString(), "AVAILABLE");
             waitAndCheckClusterStatus(client.getCloudbreakClient(), stack.getResponse().getId().toString(), "AVAILABLE");
+            waitAndCheckStackStatus(client.getCloudbreakClient(), stack.getResponse().getId().toString(), "AVAILABLE");
+        });
+    }
+
+    public static Assertion<Stack> waitAndCheckClusterIsAvailable() {
+        return assertThis((stack, t) -> {
+            CloudbreakClient client = CloudbreakClient.getTestContextCloudbreakClient().apply(t);
+            Assert.assertNotNull(stack.getResponse().getId());
+            waitAndCheckClusterStatus(client.getCloudbreakClient(), stack.getResponse().getId().toString(), "AVAILABLE");
+        });
+    }
+
+    public static Assertion<Stack> waitAndCheckStackIsAvailable() {
+        return assertThis((stack, t) -> {
+            CloudbreakClient client = CloudbreakClient.getTestContextCloudbreakClient().apply(t);
+            Assert.assertNotNull(stack.getResponse().getId());
             waitAndCheckStackStatus(client.getCloudbreakClient(), stack.getResponse().getId().toString(), "AVAILABLE");
         });
     }
@@ -206,5 +226,9 @@ public class Stack extends StackEntity {
             assertTrue(imageIds.size() > 1);
             assertTrue(imageIds.contains(stack.getResponse().getImage().getImageId()));
         });
+    }
+
+    public static Action<Stack> repair(String hostgroupName) {
+        return new Action<>(getTestContextStack(), new RepairNodeStrategy(hostgroupName));
     }
 }

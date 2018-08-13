@@ -299,7 +299,7 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
         }
     }
 
-    private String getImageIdWithPkgVersions(String provider, String imageDescription) throws Exception {
+    protected String getImageIdWithPkgVersions(String provider, String imageDescription) throws Exception {
         given(CloudbreakClient.isCreated());
         CloudbreakClient clientContext = CloudbreakClient.getTestContextCloudbreakClient().apply(getItContext());
         com.sequenceiq.cloudbreak.client.CloudbreakClient client = clientContext.getCloudbreakClient();
@@ -338,6 +338,7 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
         if (result.isEmpty()) {
             result = images;
         }
-        return result.stream().max(Comparator.comparing(ImageResponse::getDate)).orElseThrow().getUuid();
+        result = result.stream().sorted(Comparator.comparing(ImageResponse::getDate)).collect(Collectors.toList());
+        return result.get(result.size() - 1).getUuid();
     }
 }

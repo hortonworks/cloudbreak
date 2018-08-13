@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
+import com.sequenceiq.cloudbreak.api.model.RecoveryMode;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.StackAuthenticationRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
@@ -46,6 +47,12 @@ public abstract class CloudProviderHelper extends CloudProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudProviderHelper.class);
 
     private static final String DEFAULT_DATALAKE_BLUEPRINT = "Data Lake: Apache Ranger, Apache Hive Metastore";
+
+    private static final String RECOVERY_MODE = "RecoveryMode";
+
+    private static final String AUTO = "auto";
+
+    private static final String MANUAL = "manual";
 
     private final TestParameter testParameter;
 
@@ -174,6 +181,17 @@ public abstract class CloudProviderHelper extends CloudProvider {
             }
         }
         return requests;
+    }
+
+    @Override
+    public RecoveryMode getRecoveryModeParam(String hostgroupName) {
+        String argumentName = String.join("", hostgroupName, RECOVERY_MODE);
+        String argumentValue = getTestParameter().getWithDefault(argumentName, MANUAL);
+        if (argumentValue.equals(AUTO)) {
+            return RecoveryMode.AUTO;
+        } else {
+            return RecoveryMode.MANUAL;
+        }
     }
 
     public List<InstanceGroupV2Request> instanceGroups(String securityGroupId) {
