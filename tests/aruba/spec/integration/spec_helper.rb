@@ -1,18 +1,23 @@
 require 'aruba/rspec'
 require "rspec/json_expectations"
 require 'json'
-require 'rest-client'
 require 'allure-rspec'
 require_relative "../common/command_builder"
-
-def html_print(&blk)
-  puts "<pre>"
-  blk.call
-  puts "</pre>"
-end
+require "oauth"
 
 RSpec.configure do |c|
   c.include AllureRSpec::Adaptor
+
+  c.expect_with(:rspec) { |c| c.syntax = :expect }
+  c.color = true
+  c.tty = true
+  c.formatter = :documentation
+
+  def html_print(&blk)
+    puts "<pre>"
+    blk.call
+    puts "</pre>"
+  end
 end
 
 AllureRSpec.configure do |c|

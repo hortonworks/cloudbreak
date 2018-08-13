@@ -1,4 +1,5 @@
-FROM alpine:edge
+FROM ubuntu
+MAINTAINER Hortonworks
 
 RUN apk --no-cache --update add \
     ruby-dev \
