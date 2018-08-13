@@ -82,6 +82,7 @@ public class EndpointConfig extends ResourceConfig {
         register(ClusterV1Controller.class);
         register(CredentialController.class);
         register(RecipeController.class);
+        register(RecipeV3Controller.class);
         register(StackV1Controller.class);
         register(StackV2Controller.class);
         register(UserController.class);
