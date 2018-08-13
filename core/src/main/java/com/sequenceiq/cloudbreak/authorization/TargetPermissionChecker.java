@@ -9,7 +9,7 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByTarget;
-import com.sequenceiq.cloudbreak.domain.security.User;
+import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Resource;
 
 @Component

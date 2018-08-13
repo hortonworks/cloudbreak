@@ -4,7 +4,7 @@ import javax.transaction.Transactional;
 
 import com.sequenceiq.cloudbreak.aspect.DisableHasPermission;
 import com.sequenceiq.cloudbreak.aspect.DisabledBaseRepository;
-import com.sequenceiq.cloudbreak.domain.security.Tenant;
+import com.sequenceiq.cloudbreak.domain.organization.Tenant;
 import com.sequenceiq.cloudbreak.service.EntityType;
 
 @EntityType(entityClass = Tenant.class)

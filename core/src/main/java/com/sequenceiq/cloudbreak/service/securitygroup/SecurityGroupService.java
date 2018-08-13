@@ -22,10 +22,12 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.SecurityGroupRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.util.NameUtil;
 
 @Service
@@ -41,10 +43,18 @@ public class SecurityGroupService {
     @Inject
     private AuthorizationService authorizationService;
 
-    public SecurityGroup create(IdentityUser user, SecurityGroup securityGroup) {
+    @Inject
+    private OrganizationService organizationService;
+
+    public SecurityGroup create(IdentityUser user, SecurityGroup securityGroup, Organization organization) {
         LOGGER.info("Creating SecurityGroup: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         securityGroup.setOwner(user.getUserId());
         securityGroup.setAccount(user.getAccount());
+        if (organization != null) {
+            securityGroup.setOrganization(organization);
+        } else {
+            securityGroup.setOrganization(organizationService.getDefaultOrganizationForCurrentUser());
+        }
         try {
             return groupRepository.save(securityGroup);
         } catch (DataIntegrityViolationException ex) {

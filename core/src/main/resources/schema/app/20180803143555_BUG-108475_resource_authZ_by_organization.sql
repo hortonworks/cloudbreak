@@ -63,3 +63,57 @@ CREATE INDEX IF NOT EXISTS              proxyconfig_org_id_idx              ON p
 -- SQL to undo the change goes here.
 
 -- re-adding NOT NULL constraint is not possible, cannot repopulate NULLs with confidence
+
+DROP INDEX IF EXISTS       stack_id_idx;
+DROP INDEX IF EXISTS       stack_name_idx;
+DROP INDEX IF EXISTS       stack_org_id_idx;
+
+DROP INDEX IF EXISTS       recipe_id_idx;
+DROP INDEX IF EXISTS       recipe_name_idx;
+DROP INDEX IF EXISTS       recipe_org_id_idx;
+
+DROP INDEX IF EXISTS       blueprint_id_idx;
+DROP INDEX IF EXISTS       blueprint_name_idx;
+DROP INDEX IF EXISTS       blueprint_org_id_idx;
+
+DROP INDEX IF EXISTS       credential_id_idx;
+DROP INDEX IF EXISTS       credential_name_idx;
+DROP INDEX IF EXISTS       credential_org_id_idx;
+
+DROP INDEX IF EXISTS       managementpack_id_idx;
+DROP INDEX IF EXISTS       managementpack_name_idx;
+DROP INDEX IF EXISTS       managementpack_org_id_idx;
+
+DROP INDEX IF EXISTS       ldapconfig_id_idx;
+DROP INDEX IF EXISTS       ldapconfig_name_idx;
+DROP INDEX IF EXISTS       ldapconfig_org_id_idx;
+
+DROP INDEX IF EXISTS       rdsconfig_id_idx;
+DROP INDEX IF EXISTS       rdsconfig_name_idx;
+DROP INDEX IF EXISTS       rdsconfig_org_id_idx;
+
+DROP INDEX IF EXISTS       imagecatalog_id_idx;
+DROP INDEX IF EXISTS       imagecatalog_name_idx;
+DROP INDEX IF EXISTS       imagecatalog_org_id_idx;
+
+DROP INDEX IF EXISTS       proxyconfig_id_idx;
+DROP INDEX IF EXISTS       proxyconfig_name_idx;
+DROP INDEX IF EXISTS       proxyconfig_org_id_idx;
+
+
+DROP INDEX IF EXISTS       tenant_id_idx;
+DROP INDEX IF EXISTS       tenant_name_idx;
+
+DROP INDEX IF EXISTS       organization_id_idx;
+DROP INDEX IF EXISTS       organization_name_idx;
+DROP INDEX IF EXISTS       organization_tenant_id_idx;
+DROP INDEX IF EXISTS       organization_deletiontimestamp_idx;
+
+DROP INDEX IF EXISTS       user_org_permissions_id_idx;
+DROP INDEX IF EXISTS       user_org_permissions_user_id_idx;
+DROP INDEX IF EXISTS       user_org_permissions_org_id_idx;
+
+DROP INDEX IF EXISTS       users_id_idx;
+DROP INDEX IF EXISTS       users_userid_idx;
+DROP INDEX IF EXISTS       users_username_idx;
+DROP INDEX IF EXISTS       users_tenant_id_idx;

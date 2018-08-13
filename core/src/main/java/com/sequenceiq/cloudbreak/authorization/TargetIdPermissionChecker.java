@@ -14,8 +14,8 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByTargetId;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.domain.security.OrganizationAwareResource;
-import com.sequenceiq.cloudbreak.domain.security.User;
+import com.sequenceiq.cloudbreak.domain.organization.OrganizationAwareResource;
+import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.repository.OrganizationResourceRepository;
 import com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Resource;
 

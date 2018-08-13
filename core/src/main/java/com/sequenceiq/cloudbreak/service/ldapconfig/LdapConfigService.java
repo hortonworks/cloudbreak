@@ -19,10 +19,10 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
-import com.sequenceiq.cloudbreak.domain.security.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.LdapConfigRepository;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 
 @Service
@@ -34,7 +34,7 @@ public class LdapConfigService {
     private LdapConfigRepository ldapConfigRepository;
 
     @Inject
-    private ClusterRepository clusterRepository;
+    private ClusterService clusterService;
 
     @Inject
     private OrganizationService organizationService;
@@ -92,7 +92,7 @@ public class LdapConfigService {
 
     private void delete(LdapConfig ldapConfig) {
         LOGGER.info("Deleting ldap configuration with name: {}", ldapConfig.getName());
-        List<Cluster> clustersWithLdap = clusterRepository.findByLdapConfig(ldapConfig);
+        List<Cluster> clustersWithLdap = clusterService.findByLdapConfig(ldapConfig);
         if (!clustersWithLdap.isEmpty()) {
             if (clustersWithLdap.size() > 1) {
                 String clusters = clustersWithLdap

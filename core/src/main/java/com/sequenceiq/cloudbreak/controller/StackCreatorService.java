@@ -53,6 +53,7 @@ import com.sequenceiq.cloudbreak.service.account.AccountPreferencesValidator;
 import com.sequenceiq.cloudbreak.service.decorator.StackDecorator;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -110,6 +111,9 @@ public class StackCreatorService {
     @Inject
     private StackUnderOperationService stackUnderOperationService;
 
+    @Inject
+    private OrganizationService organizationService;
+
     public StackResponse createStack(IdentityUser user, StackRequest stackRequest, boolean publicInAccount) {
         ValidationResult validationResult = stackRequestValidator.validate(stackRequest);
         if (validationResult.getState() == State.ERROR) {
@@ -126,6 +130,10 @@ public class StackCreatorService {
             savedStack = transactionService.required(() -> {
                 long start = System.currentTimeMillis();
                 Stack stack = conversionService.convert(stackRequest, Stack.class);
+
+                // TODO: add organization based on requested org id later
+                stack.setOrganization(organizationService.getDefaultOrganizationForCurrentUser());
+
                 String stackName = stack.getName();
                 LOGGER.info("Stack request converted to stack in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 

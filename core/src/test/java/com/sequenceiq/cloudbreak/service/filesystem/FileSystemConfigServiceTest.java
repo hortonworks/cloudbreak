@@ -27,6 +27,7 @@ import org.mockito.stubbing.Answer;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.repository.FileSystemRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
 
@@ -49,6 +50,8 @@ public class FileSystemConfigServiceTest {
     private static final Long TEST_FILES_SYSTEM_ID = 1L;
 
     private static final int TEST_QUANTITY = 3;
+
+    private static final String ORGANIZATION_NAME = "TOP SECRET - FBI";
 
     @Rule
     public final ExpectedException expectedException = ExpectedException.none();
@@ -79,13 +82,16 @@ public class FileSystemConfigServiceTest {
     @Test
     public void testCreateWhenUserHasRightToCreateAndProvideValidFileSystemThenAnotherOneWithSameDataAndFilledIdShouldReturn() {
         FileSystem expected = createFileSystem();
+        Organization organization = new Organization();
+        organization.setName(ORGANIZATION_NAME);
         when(fileSystemRepository.save(expected)).thenAnswer((Answer<FileSystem>) this::setIdForCreatedFileSystemEntry);
 
-        FileSystem actual = underTest.create(user, expected);
+        FileSystem actual = underTest.create(user, expected, organization);
 
         Assert.assertEquals(TEST_FILES_SYSTEM_ID, actual.getId());
         Assert.assertEquals(USER_ACCOUNT, actual.getAccount());
         Assert.assertEquals(USER_ID, actual.getOwner());
+        Assert.assertEquals(ORGANIZATION_NAME, actual.getOrganization().getName());
         verify(fileSystemRepository, times(1)).save(expected);
     }
 

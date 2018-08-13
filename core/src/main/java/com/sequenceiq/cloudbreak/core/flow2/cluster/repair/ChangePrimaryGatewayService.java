@@ -19,11 +19,10 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
-import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
-import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
+import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -41,9 +40,6 @@ public class ChangePrimaryGatewayService {
 
     @Inject
     private StackService stackService;
-
-    @Inject
-    private ClusterRepository clusterRepository;
 
     @Inject
     private AmbariClusterConnector ambariClusterConnector;
@@ -88,7 +84,7 @@ public class ChangePrimaryGatewayService {
 
                 Cluster cluster = updatedStack.getCluster();
                 cluster.setAmbariIp(gatewayIp);
-                clusterRepository.save(cluster);
+                clusterService.save(cluster);
                 return null;
             });
         } else {

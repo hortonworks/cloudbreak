@@ -5,7 +5,7 @@ import java.lang.annotation.Annotation;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 
-import com.sequenceiq.cloudbreak.domain.security.User;
+import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Resource;
 
 public interface PermissionChecker<T extends Annotation> {

@@ -29,7 +29,7 @@ import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByTarget;
 import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByTargetId;
 import com.sequenceiq.cloudbreak.aspect.organization.ForbidForOrganizationResource;
 import com.sequenceiq.cloudbreak.aspect.organization.OrganizationResourceType;
-import com.sequenceiq.cloudbreak.domain.security.User;
+import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Resource;
 

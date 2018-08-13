@@ -38,6 +38,9 @@ public class UserProfileService {
     @Inject
     private ImageCatalogService imageCatalogService;
 
+    @Inject
+    private UserService userService;
+
     public UserProfile getOrCreate(String account, String owner) {
         return getOrCreate(account, owner, null);
     }
@@ -50,6 +53,7 @@ public class UserProfileService {
             userProfile.setOwner(owner);
             userProfile.setUserName(userName);
             addUiProperties(userProfile);
+            userProfile.setUser(userService.getCurrentUser());
             userProfile = userProfileRepository.save(userProfile);
         } else if (userProfile.getUserName() == null && userName != null) {
             userProfile.setUserName(userName);

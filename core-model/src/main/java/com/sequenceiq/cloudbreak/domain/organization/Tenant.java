@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.domain.security;
+package com.sequenceiq.cloudbreak.domain.organization;
 
 import java.util.HashSet;
 import java.util.Set;

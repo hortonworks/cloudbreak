@@ -15,7 +15,7 @@ import javax.persistence.UniqueConstraint;
 
 import com.sequenceiq.cloudbreak.api.model.DirectoryType;
 import com.sequenceiq.cloudbreak.domain.converter.EncryptionConverter;
-import com.sequenceiq.cloudbreak.domain.security.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
 
 @Entity
 @Table(name = "ldapconfig", uniqueConstraints = @UniqueConstraint(columnNames = {"account", "name"}))

@@ -21,8 +21,8 @@ import com.sequenceiq.cloudbreak.converter.mapper.AmbariDatabaseMapper;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
-import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 
 @Service
 public class AmbariDatabaseToRdsConfigMigrationService {
@@ -38,7 +38,7 @@ public class AmbariDatabaseToRdsConfigMigrationService {
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
     @Inject
-    private ClusterRepository clusterRepository;
+    private ClusterService clusterService;
 
     public void migrateAmbariDatabaseClusterComponentsToRdsConfig() {
         Set<ClusterComponent> clusterComponents = clusterComponentConfigProvider.findByComponentType(ComponentType.AMBARI_DATABASE_DETAILS);
@@ -72,7 +72,7 @@ public class AmbariDatabaseToRdsConfigMigrationService {
         }
         if (cluster.getRdsConfigs().stream().noneMatch(rdsConf -> RdsType.AMBARI.name().equalsIgnoreCase(rdsConf.getType()))) {
             cluster.getRdsConfigs().add(rdsConfig);
-            clusterRepository.save(cluster);
+            clusterService.save(cluster);
         } else {
             cluster.getRdsConfigs().stream().findFirst().ifPresent(rdsConf -> {
                 LOGGER.warn("RdsConfig with AMBARI type already exists for cluster [{}] RdsConfig id: [{}]", cluster.getId(), rdsConf.getId());

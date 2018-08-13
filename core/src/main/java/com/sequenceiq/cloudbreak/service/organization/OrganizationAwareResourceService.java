@@ -2,8 +2,8 @@ package com.sequenceiq.cloudbreak.service.organization;
 
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.domain.security.Organization;
-import com.sequenceiq.cloudbreak.domain.security.OrganizationAwareResource;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.OrganizationAwareResource;
 
 public interface OrganizationAwareResourceService<T extends OrganizationAwareResource> {
 

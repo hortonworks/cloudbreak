@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.domain.security;
+package com.sequenceiq.cloudbreak.domain.organization;
 
 
 import com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Resource;

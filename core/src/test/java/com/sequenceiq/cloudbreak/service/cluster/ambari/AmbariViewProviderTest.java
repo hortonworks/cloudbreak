@@ -19,7 +19,7 @@ import com.google.common.collect.Lists;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.repository.ClusterRepository;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AmbariViewProviderTest {
@@ -28,7 +28,7 @@ public class AmbariViewProviderTest {
     public final ExpectedException thrown = ExpectedException.none();
 
     @Mock
-    private ClusterRepository clusterRepository;
+    private ClusterService clusterService;
 
     @InjectMocks
     private final AmbariViewProvider underTest = new AmbariViewProvider();
@@ -38,14 +38,14 @@ public class AmbariViewProviderTest {
         Cluster cluster = TestUtil.cluster();
         AmbariClient ambariClient = mock(AmbariClient.class);
 
-        when(clusterRepository.save(cluster)).thenReturn(cluster);
+        when(clusterService.save(cluster)).thenReturn(cluster);
         when(ambariClient.getViewDefinitions()).thenReturn(Lists.newArrayList("test1", "test2"));
 
         Cluster result = underTest.provideViewInformation(ambariClient, cluster);
 
         Assert.assertEquals(cluster, result);
 
-        verify(clusterRepository, times(1)).save(any(Cluster.class));
+        verify(clusterService, times(1)).save(any(Cluster.class));
         verify(ambariClient, times(1)).getViewDefinitions();
     }
 
@@ -60,7 +60,7 @@ public class AmbariViewProviderTest {
 
         Assert.assertEquals(cluster, result);
 
-        verify(clusterRepository, times(0)).save(any(Cluster.class));
+        verify(clusterService, times(0)).save(any(Cluster.class));
         verify(ambariClient, times(1)).getViewDefinitions();
     }
 

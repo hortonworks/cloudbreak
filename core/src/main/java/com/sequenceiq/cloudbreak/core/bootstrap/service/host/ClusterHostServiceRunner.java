@@ -57,7 +57,6 @@ import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
-import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackViewRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
@@ -66,6 +65,7 @@ import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.SmartSenseCredentialConfigService;
 import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariRepositoryVersionService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariSecurityConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
@@ -85,7 +85,7 @@ public class ClusterHostServiceRunner {
     private StackViewRepository stackViewRepository;
 
     @Inject
-    private ClusterRepository clusterRepository;
+    private ClusterService clusterService;
 
     @Inject
     private HostOrchestratorResolver hostOrchestratorResolver;
@@ -300,7 +300,7 @@ public class ClusterHostServiceRunner {
         Long datalakeId = stack.getDatalakeId();
         if (datalakeId != null) {
             StackView dataLakeStack = getStackView(datalakeId);
-            Cluster dataLakeCluster = clusterRepository.findOneWithLists(dataLakeStack.getClusterView().getId());
+            Cluster dataLakeCluster = clusterService.findOneWithLists(dataLakeStack.getClusterView().getId());
             BlueprintTextProcessor blueprintTextProcessor = blueprintProcessorFactory.get(dataLakeCluster.getBlueprint().getBlueprintText());
 
             Set<String> groupNames = blueprintTextProcessor.getHostGroupsWithComponent("RANGER_ADMIN");

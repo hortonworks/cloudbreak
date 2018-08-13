@@ -12,7 +12,7 @@ import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.repository.ClusterRepository;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.notification.Notification;
 import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -23,7 +23,7 @@ public class UptimeNotifier {
     private static final String UPTIME_NOTIFICATION = "UPTIME_NOTIFICATION";
 
     @Inject
-    private ClusterRepository clusterRepository;
+    private ClusterService clusterService;
 
     @Inject
     private StackService stackService;
@@ -37,7 +37,7 @@ public class UptimeNotifier {
     @Scheduled(fixedDelay = 60000)
     public void sendUptime() {
         EnumSet<Status> statuses = EnumSet.complementOf(EnumSet.of(Status.DELETE_COMPLETED));
-        List<Cluster> clusters = clusterRepository.findByStatuses(statuses);
+        List<Cluster> clusters = clusterService.findByStatuses(statuses);
         for (Cluster cluster : clusters) {
             Stack stack = stackService.getForCluster(cluster.getId());
             if (stack != null && !stack.isDeleteCompleted()) {

@@ -12,8 +12,8 @@ import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 
 @Component
 public class UpdateStackRequestV2ToUpdateClusterRequestConverter extends AbstractConversionServiceAwareConverter<StackScaleRequestV2, UpdateClusterJson> {
@@ -22,12 +22,12 @@ public class UpdateStackRequestV2ToUpdateClusterRequestConverter extends Abstrac
     private HostGroupRepository hostGroupRepository;
 
     @Inject
-    private ClusterRepository clusterRepository;
+    private ClusterService clusterService;
 
     @Override
     public UpdateClusterJson convert(StackScaleRequestV2 source) {
         UpdateClusterJson updateStackJson = new UpdateClusterJson();
-        Cluster oneByStackId = clusterRepository.findOneByStackId(source.getStackId());
+        Cluster oneByStackId = clusterService.findOneByStackId(source.getStackId());
         HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(oneByStackId.getId(), source.getGroup());
         if (hostGroup != null) {
             String blueprintText = oneByStackId.getBlueprint().getBlueprintText();

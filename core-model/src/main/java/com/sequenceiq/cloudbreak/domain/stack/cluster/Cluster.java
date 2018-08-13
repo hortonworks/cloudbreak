@@ -50,6 +50,7 @@ import com.sequenceiq.cloudbreak.domain.converter.EncryptionConverter;
 import com.sequenceiq.cloudbreak.domain.json.EncryptedJsonToString;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -170,6 +171,9 @@ public class Cluster implements ProvisionEntity {
 
     @ManyToOne
     private ProxyConfig proxyConfig;
+
+    @ManyToOne
+    private Organization organization;
 
     public boolean hasGateway() {
         return gateway != null && gateway.isGatewayEnabled();
@@ -529,5 +533,13 @@ public class Cluster implements ProvisionEntity {
 
     public void setExtendedBlueprintText(String extendedBlueprintText) {
         this.extendedBlueprintText = extendedBlueprintText;
+    }
+
+    public Organization getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(Organization organization) {
+        this.organization = organization;
     }
 }

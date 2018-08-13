@@ -13,6 +13,7 @@ import javax.persistence.UniqueConstraint;
 
 import com.sequenceiq.cloudbreak.domain.json.EncryptedJsonToString;
 import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.domain.organization.User;
 
 @Entity
 @Table(name = "UserProfile", uniqueConstraints = @UniqueConstraint(columnNames = {"account", "owner"}))
@@ -41,6 +42,9 @@ public class UserProfile {
     @Convert(converter = EncryptedJsonToString.class)
     @Column(columnDefinition = "TEXT")
     private Json uiProperties;
+
+    @OneToOne
+    private User user;
 
     public Long getId() {
         return id;
@@ -96,5 +100,13 @@ public class UserProfile {
 
     public void setImageCatalog(ImageCatalog imageCatalog) {
         this.imageCatalog = imageCatalog;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

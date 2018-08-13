@@ -13,16 +13,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.repository.ClusterRepository;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 
 @Service
 public class AmbariViewProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariViewProvider.class);
 
     @Inject
-    private ClusterRepository clusterRepository;
+    private ClusterService clusterService;
 
     public Cluster provideViewInformation(AmbariClient ambariClient, Cluster cluster) {
         try {
@@ -35,7 +35,7 @@ public class AmbariViewProvider {
             }
             obj.put(VIEW_DEFINITIONS.name(), viewDefinitions);
             cluster.setAttributes(new Json(obj));
-            return clusterRepository.save(cluster);
+            return clusterService.save(cluster);
         } catch (Exception e) {
             LOGGER.warn("Failed to provide view definitions.", e);
         }

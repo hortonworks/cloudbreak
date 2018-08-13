@@ -60,7 +60,7 @@ import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.domain.security.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
@@ -74,7 +74,6 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
-import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.OrchestratorRepository;
@@ -128,10 +127,7 @@ public class StackService {
     private ImageService imageService;
 
     @Inject
-    private ClusterService ambariClusterService;
-
-    @Inject
-    private ClusterRepository clusterRepository;
+    private ClusterService clusterService;
 
     @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
@@ -355,8 +351,12 @@ public class StackService {
         stack.setOwner(identityUser.getUserId());
         stack.setAccount(identityUser.getAccount());
         stack.setGatewayPort(nginxPort);
-        Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
-        stack.setOrganization(organization);
+
+        if (stack.getOrganization() == null) {
+            Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
+            stack.setOrganization(organization);
+        }
+
         setPlatformVariant(stack);
         String stackName = stack.getName();
         MDCBuilder.buildMdcContext(stack);
@@ -460,7 +460,7 @@ public class StackService {
         Stack stack = getByIdWithLists(stackId);
         Cluster cluster = null;
         if (stack.getCluster() != null) {
-            cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
+            cluster = clusterService.findOneWithLists(stack.getCluster().getId());
         }
         switch (status) {
             case SYNC:
@@ -539,7 +539,7 @@ public class StackService {
                         stack.getName()));
             } else if (cluster.isClusterReadyForStop() || cluster.isStopFailed()) {
                 setStackStatusToStopRequested(stack);
-                ambariClusterService.updateStatus(stack.getId(), StatusRequest.STOPPED);
+                clusterService.updateStatus(stack.getId(), StatusRequest.STOPPED);
             } else {
                 throw new BadRequestException(String.format("Cannot update the status of cluster '%s' to STOPPED, because the cluster's state is %s.",
                         cluster.getName(), cluster.getStatus()));
@@ -586,7 +586,7 @@ public class StackService {
             Stack startStack = stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.START_REQUESTED);
             flowManager.triggerStackStart(stack.getId());
             if (updateCluster && cluster != null) {
-                ambariClusterService.updateStatus(startStack, StatusRequest.STARTED);
+                clusterService.updateStatus(startStack, StatusRequest.STARTED);
             }
         }
     }
@@ -756,13 +756,6 @@ public class StackService {
         if (instanceGroup == null) {
             throw new BadRequestException(String.format("Stack '%s' does not have an instanceGroup named '%s'.", stack.getName(), instanceGroupName));
         }
-    }
-
-    public void delete(Stack stack) throws TransactionExecutionException {
-        transactionService.required(() -> {
-            stackRepository.delete(stack);
-            return null;
-        });
     }
 
     public Set<Stack> findAllForOrganization(Long organizationId) {

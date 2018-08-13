@@ -26,9 +26,9 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.repository.ConstraintRepository;
-import com.sequenceiq.cloudbreak.repository.ConstraintTemplateRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.constraint.ConstraintTemplateService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
 
@@ -40,7 +40,7 @@ public class HostGroupDecorator {
     private InstanceGroupRepository instanceGroupRepository;
 
     @Inject
-    private ConstraintTemplateRepository constraintTemplateRepository;
+    private ConstraintTemplateService constraintTemplateService;
 
     @Inject
     private ConstraintRepository constraintRepository;
@@ -118,7 +118,7 @@ public class HostGroupDecorator {
             constraint.setInstanceGroup(instanceGroup);
         }
         if (constraintTemplateName != null) {
-            ConstraintTemplate constraintTemplate = constraintTemplateRepository.findByNameInAccount(constraintTemplateName,
+            ConstraintTemplate constraintTemplate = constraintTemplateService.findByNameInAccount(constraintTemplateName,
                     user.getAccount(), user.getUserId());
             if (constraintTemplate == null) {
                 throw new BadRequestException(String.format("Couldn't find constraint template with name: %s", constraintTemplateName));

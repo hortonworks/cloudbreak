@@ -23,10 +23,10 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.domain.security.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.RdsConfigRepository;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.util.NameUtil;
 
@@ -39,7 +39,7 @@ public class RdsConfigService {
     private RdsConfigRepository rdsConfigRepository;
 
     @Inject
-    private ClusterRepository clusterRepository;
+    private ClusterService clusterService;
 
     @Inject
     private OrganizationService organizationService;
@@ -137,7 +137,7 @@ public class RdsConfigService {
 
     private void checkRdsConfigNotAssociated(RDSConfig rdsConfig) {
         LOGGER.info("Deleting rds configuration with name: {}", rdsConfig.getName());
-        List<Cluster> clustersWithProvidedRds = new ArrayList<>(clusterRepository.findAllClustersByRDSConfig(rdsConfig.getId()));
+        List<Cluster> clustersWithProvidedRds = new ArrayList<>(clusterService.findAllClustersByRDSConfig(rdsConfig.getId()));
         if (!clustersWithProvidedRds.isEmpty()) {
             if (clustersWithProvidedRds.size() > 1) {
                 String clusters = clustersWithProvidedRds
