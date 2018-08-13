@@ -7,7 +7,7 @@ import com.sequenceiq.cloudbreak.validation.ValidCredentialRequest;
 
 import io.swagger.annotations.ApiModel;
 
-@ValidCredentialRequest()
+@ValidCredentialRequest
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)

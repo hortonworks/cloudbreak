@@ -15,7 +15,7 @@ import javax.validation.Valid;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v1.OrganizationEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.OrganizationV3Endpoint;
 import com.sequenceiq.cloudbreak.api.model.users.ChangeOrganizationUsersJson;
 import com.sequenceiq.cloudbreak.api.model.users.OrganizationRequest;
 import com.sequenceiq.cloudbreak.api.model.users.OrganizationResponse;
@@ -31,7 +31,7 @@ import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Component
 @Transactional(TxType.NEVER)
-public class OrganizationController extends NotificationController implements OrganizationEndpoint {
+public class OrganizationV3Controller extends NotificationController implements OrganizationV3Endpoint {
 
     @Inject
     @Named("conversionService")

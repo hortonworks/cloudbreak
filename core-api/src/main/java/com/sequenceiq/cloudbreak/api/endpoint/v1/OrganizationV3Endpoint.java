@@ -26,10 +26,10 @@ import com.sequenceiq.cloudbreak.doc.OperationDescriptions.OrganizationOpDescrip
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Path("/v1/organizations")
+@Path("/v3/organizations")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v1/organizations", description = ControllerDescription.ORGANIZATION_DESCRIPTION, protocols = "http,https")
-public interface OrganizationEndpoint {
+@Api(value = "/v3/organizations", description = ControllerDescription.ORGANIZATION_DESCRIPTION, protocols = "http,https")
+public interface OrganizationV3Endpoint {
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)

@@ -4,7 +4,6 @@ import java.util.Set;
 
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
-import javax.validation.Valid;
 
 import org.springframework.stereotype.Controller;
 
@@ -27,7 +26,7 @@ public class ProxyConfigV3Controller implements ProxyConfigV3Endpoint {
     }
 
     @Override
-    public ProxyConfigResponse createInOrganization(Long organizationId, @Valid ProxyConfigRequest request) {
+    public ProxyConfigResponse createInOrganization(Long organizationId, ProxyConfigRequest request) {
         return null;
     }
 

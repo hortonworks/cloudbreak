@@ -7,7 +7,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
-import javax.validation.Valid;
 
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Controller;
@@ -49,7 +48,7 @@ public class RecipeV3Controller extends NotificationController implements Recipe
     }
 
     @Override
-    public RecipeResponse createInOrganization(Long organizationId, @Valid RecipeRequest request) {
+    public RecipeResponse createInOrganization(Long organizationId, RecipeRequest request) {
         Recipe recipe = conversionService.convert(request, Recipe.class);
         recipe = recipeService.create(recipe, organizationId);
         notify(authenticatedUserService.getCbUser(), ResourceEvent.RECIPE_CREATED);

@@ -22,15 +22,15 @@ public class RecipeRequestToRecipeConverter extends AbstractConversionServiceAwa
     private MissingResourceNameGenerator missingResourceNameGenerator;
 
     @Override
-    public Recipe convert(RecipeRequest json) {
+    public Recipe convert(RecipeRequest source) {
         Recipe recipe = new Recipe();
-        if (!Strings.isNullOrEmpty(json.getName())) {
-            recipe.setName(json.getName());
+        if (!Strings.isNullOrEmpty(source.getName())) {
+            recipe.setName(source.getName());
         } else {
             String name = missingResourceNameGenerator.generateName(APIResourceType.RECIPE);
 
-            if (json.getUri() != null) {
-                String[] splitUrl = json.getUri().split("/");
+            if (source.getUri() != null) {
+                String[] splitUrl = source.getUri().split("/");
                 String lastPart = splitUrl[splitUrl.length - 1];
                 String[] lastPartQueryArray = lastPart.split("\\?");
                 name += lastPartQueryArray[0];
@@ -38,10 +38,10 @@ public class RecipeRequestToRecipeConverter extends AbstractConversionServiceAwa
             }
             recipe.setName(name);
         }
-        recipe.setDescription(json.getDescription());
-        recipe.setRecipeType(json.getRecipeType());
-        recipe.setContent(json.getContent());
-        recipe.setUri(json.getUri());
+        recipe.setDescription(source.getDescription());
+        recipe.setRecipeType(source.getRecipeType());
+        recipe.setContent(source.getContent());
+        recipe.setUri(source.getUri());
         if (recipe.getUri() != null && recipe.getContent() == null) {
             recipe.setContent(fetchScriptContent(recipe.getUri()));
         }
@@ -56,5 +56,4 @@ public class RecipeRequestToRecipeConverter extends AbstractConversionServiceAwa
             throw new BadRequestException("Cannot download script from URL: " + url);
         }
     }
-
 }

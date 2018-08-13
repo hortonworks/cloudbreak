@@ -13,6 +13,10 @@ public class OperationDescriptions {
         public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private blueprint by name";
         public static final String DELETE_BY_ID = "delete blueprint by id";
         public static final String GET_BY_BLUEPRINT_ID = "retrieve validation request by blueprint name";
+        public static final String LIST_BY_ORGANIZATION = "list blueprints for the given organization";
+        public static final String GET_BY_NAME_IN_ORG = "get blueprint by name in organization";
+        public static final String CREATE_IN_ORG = "create blueprint in organization";
+        public static final String DELETE_BY_NAME_IN_ORG = "delete blueprint by name in organization";
     }
 
     public static class TemplateOpDescription {
@@ -66,6 +70,10 @@ public class OperationDescriptions {
         public static final String PUT_CERTIFICATE_BY_ID = "update azure credential by credential id";
         public static final String GET_SSH_FILE = "retrieve azure ssh key file for credential by credential id";
         public static final String GET_BY_CREDENTIAL_NAME = "retrieve credential request by credential name";
+        public static final String LIST_BY_ORGANIZATION = "list credentials for the given organization";
+        public static final String GET_BY_NAME_IN_ORG = "get credential by name in organization";
+        public static final String CREATE_IN_ORG = "create credential in organization";
+        public static final String DELETE_BY_NAME_IN_ORG = "delete credential by name in organization";
     }
 
     public static class StackOpDescription {
@@ -92,6 +100,10 @@ public class OperationDescriptions {
         public static final String GET_ALL = "retrieve all stacks";
         public static final String GET_BY_STACK_NAME = "retrieve stack request by stack name";
         public static final String RETRY_BY_ID = "retry stack and cluster provisioning of failed stack";
+        public static final String LIST_BY_ORGANIZATION = "list stacks for the given organization";
+        public static final String GET_BY_NAME_IN_ORG = "get stack by name in organization";
+        public static final String CREATE_IN_ORG = "create stack in organization";
+        public static final String DELETE_BY_NAME_IN_ORG = "delete stack by name in organization";
     }
 
     public static class ClusterOpDescription {
@@ -353,6 +365,10 @@ public class OperationDescriptions {
         public static final String DELETE_BY_ID = "delete Flex subscription by id";
         public static final String SET_DEFAULT_IN_ACCOUNT = "sets the account default flag on the Flex subscription";
         public static final String SET_USED_FOR_CONTROLLER_IN_ACCOUNT = "sets the account 'used for controller' flag on the Flex subscription";
+        public static final String LIST_BY_ORGANIZATION = "list Flex subscriptions for the given organization";
+        public static final String GET_BY_NAME_IN_ORG = "get Flex subscription by name in organization";
+        public static final String CREATE_IN_ORG = "create Flex subscription in organization";
+        public static final String DELETE_BY_NAME_IN_ORG = "delete Flex subscription by name in organization";
     }
 
     public static class ImageCatalogOpDescription {

@@ -76,34 +76,38 @@ public class EndpointConfig extends ResourceConfig {
     }
 
     private void registerEndpoints() {
+        register(AccountPreferencesController.class);
+        register(AuditController.class);
         register(BlueprintController.class);
-        register(PlatformParameterV1Controller.class);
-        register(PlatformParameterV2Controller.class);
+        register(BlueprintV3Controller.class);
+        register(CloudbreakEventController.class);
+        register(CloudbreakUsageController.class);
         register(ClusterV1Controller.class);
         register(CredentialController.class);
+        register(CredentialV3Controller.class);
+        register(FlexSubscriptionController.class);
+        register(FlexSubscriptionV3Controller.class);
+        register(ImageCatalogV1Controller.class);
+        register(LdapController.class);
+        register(ManagementPackController.class);
+        register(OrganizationV3Controller.class);
+        register(PlatformParameterV1Controller.class);
+        register(PlatformParameterV2Controller.class);
+        register(ProxyConfigController.class);
+        register(ProxyConfigV3Controller.class);
+        register(RdsConfigController.class);
         register(RecipeController.class);
         register(RecipeV3Controller.class);
+        register(RepositoryConfigValidationController.class);
+        register(SecurityRuleController.class);
+        register(SettingsController.class);
+        register(SmartSenseSubscriptionController.class);
         register(StackV1Controller.class);
         register(StackV2Controller.class);
-        register(UserController.class);
-        register(CloudbreakEventController.class);
+        register(StackV3Controller.class);
         register(SubscriptionController.class);
-        register(CloudbreakUsageController.class);
-        register(AccountPreferencesController.class);
-        register(SettingsController.class);
+        register(UserController.class);
         register(UtilController.class);
-        register(RdsConfigController.class);
-        register(ProxyConfigController.class);
-        register(LdapController.class);
-        register(SmartSenseSubscriptionController.class);
-        register(FlexSubscriptionController.class);
-        register(ImageCatalogV1Controller.class);
-        register(SecurityRuleController.class);
-        register(RepositoryConfigValidationController.class);
-        register(ManagementPackController.class);
-        register(AuditController.class);
-        register(OrganizationController.class);
-        register(ProxyConfigV3Controller.class);
 
         register(io.swagger.jaxrs.listing.ApiListingResource.class);
         register(io.swagger.jaxrs.listing.SwaggerSerializers.class);
