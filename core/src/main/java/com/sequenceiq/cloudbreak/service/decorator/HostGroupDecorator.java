@@ -94,10 +94,10 @@ public class HostGroupDecorator {
 
     private void prepareRecipesByRequests(HostGroup subject, Iterable<RecipeRequest> recipes, Boolean publicInAccount) {
         for (RecipeRequest recipe : recipes) {
-            Recipe convert = conversionService.convert(recipe, Recipe.class);
-            convert.setPublicInAccount(publicInAccount);
-            convert = recipeService.create(convert);
-            subject.getRecipes().add(convert);
+            Recipe convertedRecipe = conversionService.convert(recipe, Recipe.class);
+            convertedRecipe.setPublicInAccount(publicInAccount);
+            convertedRecipe = recipeService.createInDefaultOrganization(convertedRecipe);
+            subject.getRecipes().add(convertedRecipe);
         }
     }
 

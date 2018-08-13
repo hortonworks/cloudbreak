@@ -2,11 +2,11 @@ package com.sequenceiq.cloudbreak.service;
 
 import java.util.Set;
 
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
 import org.springframework.dao.DataIntegrityViolationException;
 
-import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.security.Organization;
@@ -31,17 +31,24 @@ public abstract class AbstractOrganizationAwareResourceService<T extends Organiz
     private UserService userService;
 
     @Override
-    public T create(T resource) {
-        return create(resource, null);
+    public T createInDefaultOrganization(T resource) {
+        User user = userService.getCurrentUser();
+        Organization organization = organizationService.getDefaultOrganizationForUser(user);
+        return create(resource, organization);
     }
 
     @Override
-    public T create(T resource, Long organizationId) {
+    public T create(T resource, @Nonnull Long organizationId) {
+        Organization organization = organizationService.get(organizationId);
+        return create(resource, organization);
+    }
+
+    private T create(T resource, Organization organization) {
         try {
             prepareCreation(resource);
             User user = userService.getCurrentUser();
             return transactionService.required(() -> {
-                setOrganization(resource, user, organizationId);
+                setOrganization(resource, user, organization);
                 return repository().save(resource);
             });
         } catch (TransactionExecutionException e) {
@@ -102,25 +109,20 @@ public abstract class AbstractOrganizationAwareResourceService<T extends Organiz
 
     @Override
     public T deleteByNameFromOrganization(String name, Long organizationId) {
-        T toBeDeleted = organizationId == null ? getByNameFromUsersDefaultOrganization(name) : getByNameForOrganization(name, organizationId);
+        T toBeDeleted = getByNameForOrganization(name, organizationId);
         return delete(toBeDeleted);
     }
 
     @Override
     public T deleteByNameFromDefaultOrganization(String name) {
-        return deleteByNameFromOrganization(name, null);
+        T toBeDeleted = getByNameFromUsersDefaultOrganization(name);
+        return delete(toBeDeleted);
     }
 
-    private void setOrganization(T resource, User user, Long organizationId) {
-        Organization organization;
-        if (organizationId != null) {
-            Set<Organization> usersOrganizations = organizationService.retrieveForUser(user);
-            organization = organizationService.get(organizationId);
-            if (!usersOrganizations.contains(organization)) {
-                throw new NotFoundException("Organization not found for user.");
-            }
-        } else {
-            organization = organizationService.getDefaultOrganizationForUser(user);
+    private void setOrganization(T resource, User user, Organization organization) {
+        Set<Organization> usersOrganizations = organizationService.retrieveForUser(user);
+        if (!usersOrganizations.contains(organization)) {
+            throw new NotFoundException("Organization not found for user.");
         }
         resource.setOrganization(organization);
     }
@@ -138,8 +140,6 @@ public abstract class AbstractOrganizationAwareResourceService<T extends Organiz
     }
 
     protected abstract OrganizationResourceRepository<T, Long> repository();
-
-    protected abstract APIResourceType apiResourceType();
 
     protected abstract String resourceName();
 

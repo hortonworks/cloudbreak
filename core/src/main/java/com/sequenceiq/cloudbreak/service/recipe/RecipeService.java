@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.Recipe;
@@ -25,7 +24,6 @@ import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.OrganizationResourceRepository;
 import com.sequenceiq.cloudbreak.repository.RecipeRepository;
 import com.sequenceiq.cloudbreak.service.AbstractOrganizationAwareResourceService;
-import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Service
 public class RecipeService extends AbstractOrganizationAwareResourceService<Recipe> {
@@ -37,9 +35,6 @@ public class RecipeService extends AbstractOrganizationAwareResourceService<Reci
 
     @Inject
     private HostGroupRepository hostGroupRepository;
-
-    @Inject
-    private UserService userService;
 
     public Set<Recipe> getRecipesByNames(IdentityUser user, Collection<String> recipeNames) {
         Organization organization = getOrganizationService().getDefaultOrganizationForUser(user);
@@ -73,22 +68,17 @@ public class RecipeService extends AbstractOrganizationAwareResourceService<Reci
     }
 
     @Override
-    protected APIResourceType apiResourceType() {
-        return APIResourceType.RECIPE;
-    }
-
-    @Override
     protected String resourceName() {
         return "recipe";
     }
 
     @Override
-    protected boolean canDelete(Recipe resource) {
-        if (resource == null) {
+    protected boolean canDelete(Recipe recipe) {
+        if (recipe == null) {
             throw new NotFoundException("Recipe not found.");
         }
-        LOGGER.info("Deleting recipe. {} - {}", new Object[]{resource.getId(), resource.getName()});
-        List<HostGroup> hostGroupsWithRecipe = new ArrayList<>(hostGroupRepository.findAllHostGroupsByRecipe(resource.getId()));
+        LOGGER.info("Check if recipe can be deleted. {} - {}", recipe.getId(), recipe.getName());
+        List<HostGroup> hostGroupsWithRecipe = new ArrayList<>(hostGroupRepository.findAllHostGroupsByRecipe(recipe.getId()));
         if (!hostGroupsWithRecipe.isEmpty()) {
             if (hostGroupsWithRecipe.size() > 1) {
                 String clusters = hostGroupsWithRecipe
@@ -97,10 +87,10 @@ public class RecipeService extends AbstractOrganizationAwareResourceService<Reci
                         .collect(Collectors.joining(", "));
                 throw new BadRequestException(String.format(
                         "There are clusters associated with recipe '%s'. Please remove these before deleting the recipe. "
-                                + "The following clusters are using this recipe: [%s]", resource.getId(), clusters));
+                                + "The following clusters are using this recipe: [%s]", recipe.getId(), clusters));
             }
             throw new BadRequestException(String.format("There is a cluster ['%s'] which uses recipe '%s'. Please remove this "
-                    + "cluster before deleting the recipe", hostGroupsWithRecipe.get(0).getCluster().getName(), resource.getName()));
+                    + "cluster before deleting the recipe", hostGroupsWithRecipe.get(0).getCluster().getName(), recipe.getName()));
         }
         return true;
     }

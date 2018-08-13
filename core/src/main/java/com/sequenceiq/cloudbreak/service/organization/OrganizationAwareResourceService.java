@@ -7,7 +7,7 @@ import com.sequenceiq.cloudbreak.domain.security.OrganizationAwareResource;
 
 public interface OrganizationAwareResourceService<T extends OrganizationAwareResource> {
 
-    T create(T resource);
+    T createInDefaultOrganization(T resource);
 
     T create(T resource, Long organizationId);
 
