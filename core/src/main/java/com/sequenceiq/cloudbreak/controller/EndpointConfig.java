@@ -103,6 +103,7 @@ public class EndpointConfig extends ResourceConfig {
         register(AuditController.class);
         register(OrganizationController.class);
         register(RecipeV3Controller.class);
+        register(ProxyConfigV3Controller.class);
 
         register(io.swagger.jaxrs.listing.ApiListingResource.class);
         register(io.swagger.jaxrs.listing.SwaggerSerializers.class);

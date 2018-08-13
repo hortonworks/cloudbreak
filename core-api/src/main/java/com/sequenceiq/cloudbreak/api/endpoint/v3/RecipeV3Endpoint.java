@@ -30,29 +30,29 @@ public interface RecipeV3Endpoint {
     @GET
     @Path("{organizationId}/recipes")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = RecipeOpDescription.LIST_RECIPES_BY_ORGANIZATION, produces = ContentType.JSON, notes = Notes.RECIPE_NOTES,
+    @ApiOperation(value = RecipeOpDescription.LIST_BY_ORGANIZATION, produces = ContentType.JSON, notes = Notes.RECIPE_NOTES,
             nickname = "listRecipesByOrganization")
-    Set<RecipeResponse> listRecipesByOrganization(@PathParam("organizationId") Long organizationId);
+    Set<RecipeResponse> listByOrganization(@PathParam("organizationId") Long organizationId);
 
     @GET
-    @Path("{organizationId}/recipes/{recipeName}")
+    @Path("{organizationId}/recipes/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = RecipeOpDescription.GET_RECIPE_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.RECIPE_NOTES,
+    @ApiOperation(value = RecipeOpDescription.GET_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.RECIPE_NOTES,
             nickname = "getRecipeInOrganization")
-    RecipeResponse getByNameInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("recipeName") String recipeName);
+    RecipeResponse getByNameInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
 
     @POST
     @Path("{organizationId}/recipes")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = RecipeOpDescription.CREATE_RECIPE_IN_ORG, produces = ContentType.JSON, notes = Notes.RECIPE_NOTES,
+    @ApiOperation(value = RecipeOpDescription.CREATE_IN_ORG, produces = ContentType.JSON, notes = Notes.RECIPE_NOTES,
             nickname = "createRecipeInOrganization")
-    RecipeResponse createInOrganization(@PathParam("organizationId") Long organizationId, @Valid RecipeRequest recipeRequest);
+    RecipeResponse createInOrganization(@PathParam("organizationId") Long organizationId, @Valid RecipeRequest request);
 
     @DELETE
-    @Path("{organizationId}/recipes/{recipeName}")
+    @Path("{organizationId}/recipes/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = RecipeOpDescription.DELETE_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.RECIPE_NOTES,
             nickname = "deleteRecipeInOrganization")
-    RecipeResponse deleteInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("recipeName") String recipeName);
+    RecipeResponse deleteInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
 
 }

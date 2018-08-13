@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.domain.Recipe;
 public class RecipeV3Controller extends AbstractRecipeController implements RecipeV3Endpoint {
 
     @Override
-    public Set<RecipeResponse> listRecipesByOrganization(Long organizationId) {
+    public Set<RecipeResponse> listByOrganization(Long organizationId) {
         return listRecipesByOrganizationId(organizationId);
     }
 

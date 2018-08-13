@@ -109,7 +109,6 @@ public class OperationDescriptions {
     }
 
     public static class GatewayOpDescription {
-
         public static final String UPDATE_GATEWAY_TOPOLOGIES = "update topologies of a gateway";
     }
 
@@ -137,10 +136,10 @@ public class OperationDescriptions {
         public static final String DELETE_PRIVATE_BY_NAME = "delete private recipe by name";
         public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private recipe by name";
         public static final String DELETE_BY_ID = "delete recipe by id";
-        public static final String GET_RECIPE_REQUEST_BY_NAME = "retrieve recipe request by recipe name";
-        public static final String LIST_RECIPES_BY_ORGANIZATION = "list recipes for the given organization";
-        public static final String GET_RECIPE_BY_NAME_IN_ORG = "get recipe by name in organization";
-        public static final String CREATE_RECIPE_IN_ORG = "create recipe in organization";
+        public static final String GET_REQUEST_BY_NAME = "retrieve recipe request by recipe name";
+        public static final String LIST_BY_ORGANIZATION = "list recipes for the given organization";
+        public static final String GET_BY_NAME_IN_ORG = "get recipe by name in organization";
+        public static final String CREATE_IN_ORG = "create recipe in organization";
         public static final String DELETE_BY_NAME_IN_ORG = "delete recipe by name in organization";
     }
 
@@ -270,6 +269,10 @@ public class OperationDescriptions {
         public static final String DELETE_PRIVATE_BY_NAME = "delete private proxy configuration by name";
         public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private proxy configuration by name";
         public static final String DELETE_BY_ID = "delete proxy configuration by id";
+        public static final String LIST_BY_ORGANIZATION = "list proxy configurations for the given organization";
+        public static final String GET_BY_NAME_IN_ORG = "get proxy configuration by name in organization";
+        public static final String CREATE_IN_ORG = "create proxy configuration in organization";
+        public static final String DELETE_BY_NAME_IN_ORG = "delete proxy configuration by name in organization";
     }
 
     public static class ManagementPackOpDescription {

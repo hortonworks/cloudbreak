@@ -100,7 +100,7 @@ public interface RecipeEndpoint {
     @GET
     @Path("{name}/request")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = RecipeOpDescription.GET_RECIPE_REQUEST_BY_NAME, produces = ContentType.JSON, notes = Notes.RECIPE_NOTES,
+    @ApiOperation(value = RecipeOpDescription.GET_REQUEST_BY_NAME, produces = ContentType.JSON, notes = Notes.RECIPE_NOTES,
             nickname = "getRecipeRequestFromName")
     RecipeRequest getRequestfromName(@PathParam("name") String name);
 }
