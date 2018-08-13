@@ -162,7 +162,7 @@ tests:
     parameters:
       clusterName: aws-prewarm-hdp3
       provider: aws
-      blueprintName: "HDP 3.0 - Data Science: Apache Spark 2, Apache Zeppelin2"
+      blueprintName: "HDP 3.0 - Data Science: Apache Spark 2, Apache Zeppelin"
       image: hdp
       instancegroupName: worker
     classes:
