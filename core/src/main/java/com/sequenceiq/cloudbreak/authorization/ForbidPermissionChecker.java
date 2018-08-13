@@ -12,7 +12,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.aspect.organization.ForbidForOrganizationResource;
-import com.sequenceiq.cloudbreak.domain.security.User;
+import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.validation.OrganizationPermissions.Resource;
 
 @Component

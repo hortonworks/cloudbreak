@@ -13,8 +13,10 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.repository.FileSystemRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 
 @Service
 public class FileSystemConfigService {
@@ -25,11 +27,19 @@ public class FileSystemConfigService {
     @Inject
     private AuthorizationService authService;
 
+    @Inject
+    private OrganizationService organizationService;
+
     public Set<FileSystem> retrievePrivateFileSystems(@Nonnull IdentityUser user) {
         return fileSystemRepository.findByOwner(user.getUserId());
     }
 
-    public FileSystem create(@Nonnull IdentityUser user, @Nonnull FileSystem fileSystem) {
+    public FileSystem create(@Nonnull IdentityUser user, @Nonnull FileSystem fileSystem, Organization organization) {
+        if (organization != null) {
+            fileSystem.setOrganization(organization);
+        } else {
+            fileSystem.setOrganization(organizationService.getDefaultOrganizationForCurrentUser());
+        }
         setUserDataRelatedFields(user, fileSystem);
         return fileSystemRepository.save(fileSystem);
     }

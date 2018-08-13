@@ -8,6 +8,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -15,6 +16,7 @@ import javax.persistence.UniqueConstraint;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterTemplateType;
 import com.sequenceiq.cloudbreak.domain.json.EncryptedJsonToString;
 import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
 
 @Entity
 @Table(name = "ClusterTemplate", uniqueConstraints = @UniqueConstraint(columnNames = {"account", "name"}))
@@ -43,6 +45,17 @@ public class ClusterTemplate implements ProvisionEntity {
 
     @Column(nullable = false)
     private String account;
+
+    @ManyToOne
+    private Organization organization;
+
+    public Organization getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(Organization organization) {
+        this.organization = organization;
+    }
 
     public Long getId() {
         return id;

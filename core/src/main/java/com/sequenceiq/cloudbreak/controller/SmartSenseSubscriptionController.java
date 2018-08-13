@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.converter.SmartSenseSubscriptionRequestToSmartS
 import com.sequenceiq.cloudbreak.converter.SmartSenseSubscriptionToSmartSenseSubscriptionJsonConverter;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
 
 @Component
@@ -37,6 +38,9 @@ public class SmartSenseSubscriptionController implements SmartSenseSubscriptionE
 
     @Inject
     private SmartSenseSubscriptionRequestToSmartSenseSubscriptionConverter toSmartSenseSubscriptionConverter;
+
+    @Inject
+    private OrganizationService organizationService;
 
     @Override
     public SmartSenseSubscriptionJson get() {
@@ -96,6 +100,8 @@ public class SmartSenseSubscriptionController implements SmartSenseSubscriptionE
         subscription.setAccount(identityUser.getAccount());
         subscription.setOwner(identityUser.getUserId());
         subscription.setPublicInAccount(publicInAccount);
+        // TODO: set org from requested org id later
+        subscription.setOrganization(organizationService.getDefaultOrganizationForCurrentUser());
         subscription = smartSenseSubService.create(subscription);
         return toJsonConverter.convert(subscription);
     }

@@ -10,8 +10,8 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.model.users.OrganizationResponse;
 import com.sequenceiq.cloudbreak.api.model.users.UserOrgPermissionsJson;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.cloudbreak.domain.security.Organization;
-import com.sequenceiq.cloudbreak.domain.security.UserOrgPermissions;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.UserOrgPermissions;
 import com.sequenceiq.cloudbreak.service.user.UserOrgPermissionsService;
 
 @Component

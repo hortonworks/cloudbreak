@@ -9,8 +9,8 @@ import org.springframework.data.repository.NoRepositoryBean;
 
 import com.sequenceiq.cloudbreak.aspect.DisableHasPermission;
 import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByOrganization;
-import com.sequenceiq.cloudbreak.domain.security.Organization;
-import com.sequenceiq.cloudbreak.domain.security.OrganizationAwareResource;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.OrganizationAwareResource;
 
 @NoRepositoryBean
 @DisableHasPermission

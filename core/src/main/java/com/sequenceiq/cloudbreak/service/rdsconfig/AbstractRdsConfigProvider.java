@@ -23,8 +23,8 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.RdsConfigRepository;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 
 public abstract class AbstractRdsConfigProvider {
@@ -38,7 +38,7 @@ public abstract class AbstractRdsConfigProvider {
     private RdsConfigService rdsConfigService;
 
     @Inject
-    private ClusterRepository clusterRepository;
+    private ClusterService clusterService;
 
     public Map<String, Object> createServicePillarConfigMapIfNeeded(Stack stack, Cluster cluster) {
         if (isRdsConfigNeeded(cluster.getBlueprint())) {
@@ -88,7 +88,7 @@ public abstract class AbstractRdsConfigProvider {
         }
         rdsConfigs.add(rdsConfig);
         cluster.setRdsConfigs(rdsConfigs);
-        clusterRepository.save(cluster);
+        clusterService.save(cluster);
         return rdsConfigs;
     }
 

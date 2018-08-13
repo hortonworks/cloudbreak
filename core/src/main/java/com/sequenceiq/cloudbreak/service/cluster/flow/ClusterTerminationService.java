@@ -39,7 +39,6 @@ import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.model.ContainerInfo;
 import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
-import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.ConstraintRepository;
 import com.sequenceiq.cloudbreak.repository.ContainerRepository;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
@@ -47,6 +46,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TerminationFailedException;
 
@@ -58,7 +58,7 @@ public class ClusterTerminationService {
     private static final String DELIMITER = "_";
 
     @Inject
-    private ClusterRepository clusterRepository;
+    private ClusterService clusterService;
 
     @Inject
     private HostGroupRepository hostGroupRepository;
@@ -91,7 +91,7 @@ public class ClusterTerminationService {
     private FileSystemConfigurationsViewProvider fileSystemConfigurationsViewProvider;
 
     public Boolean deleteClusterComponents(Long clusterId) {
-        Optional<Cluster> clusterOpt = clusterRepository.findById(clusterId);
+        Optional<Cluster> clusterOpt = clusterService.findById(clusterId);
         if (!clusterOpt.isPresent()) {
             LOGGER.warn("Failed to delete containers of cluster (id:'{}'), because the cluster could not be found in the database.", clusterId);
             return Boolean.TRUE;
@@ -137,7 +137,7 @@ public class ClusterTerminationService {
     }
 
     public void finalizeClusterTermination(Long clusterId) throws TransactionExecutionException {
-        Cluster cluster = clusterRepository.findOneWithLists(clusterId);
+        Cluster cluster = clusterService.findOneWithLists(clusterId);
         Set<RDSConfig> rdsConfigs = cluster.getRdsConfigs();
         Long stackId = cluster.getStack().getId();
         String terminatedName = cluster.getName() + DELIMITER + new Date().getTime();
@@ -175,7 +175,7 @@ public class ClusterTerminationService {
         constraintRepository.deleteAll(constraintsToDelete);
         cluster.getHostGroups().clear();
         cluster.getContainers().clear();
-        clusterRepository.save(cluster);
+        clusterService.save(cluster);
     }
 
     private void deleteFileSystemResources(Long stackId, FileSystem fileSystem) {

@@ -20,9 +20,12 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Network;
+import com.sequenceiq.cloudbreak.domain.Topology;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.repository.NetworkRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.NameUtil;
 
@@ -39,10 +42,18 @@ public class NetworkService {
     @Inject
     private AuthorizationService authorizationService;
 
-    public Network create(IdentityUser user, Network network) {
+    @Inject
+    private OrganizationService organizationService;
+
+    public Network create(IdentityUser user, Network network, Organization organization) {
         LOGGER.info("Creating network: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         network.setOwner(user.getUserId());
         network.setAccount(user.getAccount());
+        if (organization != null) {
+            network.setOrganization(organization);
+        } else {
+            network.setOrganization(organizationService.getDefaultOrganizationForCurrentUser());
+        }
         try {
             return networkRepository.save(network);
         } catch (DataIntegrityViolationException ex) {
@@ -109,5 +120,9 @@ public class NetworkService {
             network.setStatus(ResourceStatus.DEFAULT_DELETED);
             networkRepository.save(network);
         }
+    }
+
+    public Set<Network> findByTopology(Topology topology) {
+        return networkRepository.findByTopology(topology);
     }
 }

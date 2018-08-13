@@ -9,9 +9,9 @@ import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.aspect.DisableHasPermission;
 import com.sequenceiq.cloudbreak.aspect.DisabledBaseRepository;
-import com.sequenceiq.cloudbreak.domain.security.Organization;
-import com.sequenceiq.cloudbreak.domain.security.User;
-import com.sequenceiq.cloudbreak.domain.security.UserOrgPermissions;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.organization.UserOrgPermissions;
 import com.sequenceiq.cloudbreak.service.EntityType;
 
 @EntityType(entityClass = UserOrgPermissions.class)

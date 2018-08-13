@@ -13,7 +13,7 @@ import javax.persistence.UniqueConstraint;
 
 import com.sequenceiq.cloudbreak.domain.json.EncryptedJsonToString;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.domain.security.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"account", "name"}))

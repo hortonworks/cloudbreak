@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.users.UserOrgPermissionsJson;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.cloudbreak.domain.security.UserOrgPermissions;
+import com.sequenceiq.cloudbreak.domain.organization.UserOrgPermissions;
 
 @Component
 public class UserOrgPermissionsToUserOrgPermissionsJsonConverter extends AbstractConversionServiceAwareConverter<UserOrgPermissions, UserOrgPermissionsJson> {

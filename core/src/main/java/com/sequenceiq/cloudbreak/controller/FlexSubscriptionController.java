@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 
 @Controller
 @Transactional(TxType.NEVER)
@@ -35,6 +36,9 @@ public class FlexSubscriptionController implements FlexSubscriptionEndpoint {
 
     @Inject
     private FlexSubscriptionToJsonConverter toJsonConverter;
+
+    @Inject
+    private OrganizationService organizationService;
 
     @Override
     public FlexSubscriptionResponse get(Long id) {
@@ -137,6 +141,8 @@ public class FlexSubscriptionController implements FlexSubscriptionEndpoint {
         subscription.setAccount(identityUser.getAccount());
         subscription.setOwner(identityUser.getUserId());
         subscription.setPublicInAccount(publicInAccount);
+        // TODO: set org from requested org id later
+        subscription.setOrganization(organizationService.getDefaultOrganizationForCurrentUser());
         subscription = flexSubscriptionService.create(subscription);
         return toJsonConverter.convert(subscription);
     }

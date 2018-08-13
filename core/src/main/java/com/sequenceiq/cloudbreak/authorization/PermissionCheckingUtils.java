@@ -21,10 +21,10 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.aspect.organization.OrganizationResourceType;
-import com.sequenceiq.cloudbreak.domain.security.Organization;
-import com.sequenceiq.cloudbreak.domain.security.OrganizationAwareResource;
-import com.sequenceiq.cloudbreak.domain.security.User;
-import com.sequenceiq.cloudbreak.domain.security.UserOrgPermissions;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.OrganizationAwareResource;
+import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.organization.UserOrgPermissions;
 import com.sequenceiq.cloudbreak.repository.OrganizationResourceRepository;
 import com.sequenceiq.cloudbreak.service.user.UserOrgPermissionsService;
 import com.sequenceiq.cloudbreak.validation.OrganizationPermissions;

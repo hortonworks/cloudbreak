@@ -247,7 +247,7 @@ public class StackDecorator {
                             request.getAvailabilityZone(), request.getPlatformVariant());
                     template = templateDecorator.decorate(credential, template, request.getRegion(),
                             request.getAvailabilityZone(), request.getPlatformVariant());
-                    template = templateService.create(user, template);
+                    template = templateService.create(user, template, subject.getOrganization());
                 }
                 instanceGroup.setTemplate(template);
             }
@@ -256,7 +256,7 @@ public class StackDecorator {
                 if (securityGroup.getId() == null) {
                     securityGroup.setPublicInAccount(subject.isPublicInAccount());
                     securityGroup.setCloudPlatform(getCloudPlatform(subject, request, securityGroup.getCloudPlatform()));
-                    securityGroup = securityGroupService.create(user, securityGroup);
+                    securityGroup = securityGroupService.create(user, securityGroup, subject.getOrganization());
                     instanceGroup.setSecurityGroup(securityGroup);
                 }
             }
@@ -291,7 +291,7 @@ public class StackDecorator {
             if (network.getId() == null) {
                 network.setPublicInAccount(subject.isPublicInAccount());
                 network.setCloudPlatform(getCloudPlatform(subject, request, network.cloudPlatform()));
-                network = networkService.create(user, network);
+                network = networkService.create(user, network, subject.getOrganization());
             }
             subject.setNetwork(network);
         }

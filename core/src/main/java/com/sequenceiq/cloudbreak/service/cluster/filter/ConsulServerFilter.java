@@ -13,14 +13,14 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 
 @Component
 public class ConsulServerFilter implements HostFilter {
 
     @Inject
-    private ClusterRepository clusterRepository;
+    private ClusterService clusterService;
 
     @Inject
     private InstanceMetaDataRepository instanceMetadataRepository;
@@ -39,6 +39,6 @@ public class ConsulServerFilter implements HostFilter {
     }
 
     private Cluster getCluster(long clusterId) {
-        return clusterRepository.findById(clusterId).orElseThrow(notFound("Cluster", clusterId));
+        return clusterService.findById(clusterId).orElseThrow(notFound("Cluster", clusterId));
     }
 }

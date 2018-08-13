@@ -13,12 +13,14 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"account", "name"}))
@@ -56,6 +58,17 @@ public class SecurityGroup implements ProvisionEntity {
     private Set<String> securityGroupIds = new HashSet<>();
 
     private String cloudPlatform;
+
+    @ManyToOne
+    private Organization organization;
+
+    public Organization getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(Organization organization) {
+        this.organization = organization;
+    }
 
     public Long getId() {
         return id;

@@ -18,11 +18,11 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
-import com.sequenceiq.cloudbreak.domain.security.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.ProxyConfigRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 
 @Service
@@ -34,7 +34,7 @@ public class ProxyConfigService {
     private ProxyConfigRepository proxyConfigRepository;
 
     @Inject
-    private ClusterRepository clusterRepository;
+    private ClusterService clusterService;
 
     @Inject
     private AuthorizationService authorizationService;
@@ -89,7 +89,7 @@ public class ProxyConfigService {
 
     private void delete(ProxyConfig proxyConfig) {
         LOGGER.info("Deleting proxy configuration with name: {}", proxyConfig.getName());
-        List<Cluster> clustersWithThisProxy = new ArrayList<>(clusterRepository.findByProxyConfig(proxyConfig));
+        List<Cluster> clustersWithThisProxy = new ArrayList<>(clusterService.findByProxyConfig(proxyConfig));
         if (!clustersWithThisProxy.isEmpty()) {
             if (clustersWithThisProxy.size() > 1) {
                 String clusters = clustersWithThisProxy

@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -44,12 +45,12 @@ import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.model.RecoveryMode;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.StatusRequest;
-import com.sequenceiq.cloudbreak.api.model.users.UserNamePasswordJson;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.model.users.UserNamePasswordJson;
 import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
@@ -69,9 +70,12 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
+import com.sequenceiq.cloudbreak.domain.LdapConfig;
+import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -101,6 +105,7 @@ import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -201,6 +206,9 @@ public class ClusterService {
     @Inject
     private BlueprintUtils blueprintUtils;
 
+    @Inject
+    private OrganizationService organizationService;
+
     public Cluster create(IdentityUser user, Stack stack, Cluster cluster, List<ClusterComponent> components) throws TransactionExecutionException {
         LOGGER.info("Cluster requested [BlueprintId: {}]", cluster.getBlueprint().getId());
         String stackName = stack.getName();
@@ -208,6 +216,8 @@ public class ClusterService {
             throw new BadRequestException(String.format("A cluster is already created on this stack! [cluster: '%s']", stack.getCluster().getName()));
         }
         return transactionService.required(() -> {
+            setOrganizationForCluster(stack, cluster);
+
             long start = System.currentTimeMillis();
             if (findByNameInAccount(cluster.getName(), user.getAccount()) != null) {
                 throw new DuplicateKeyValueException(APIResourceType.CLUSTER, cluster.getName());
@@ -224,7 +234,7 @@ public class ClusterService {
 
             start = System.currentTimeMillis();
             if (cluster.getFileSystem() != null) {
-                cluster.setFileSystem(fileSystemConfigService.create(user, cluster.getFileSystem()));
+                cluster.setFileSystem(fileSystemConfigService.create(user, cluster.getFileSystem(), cluster.getOrganization()));
             }
             LOGGER.info("Filesystem config saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
@@ -251,6 +261,12 @@ public class ClusterService {
             }
             return savedCluster;
         });
+    }
+
+    private void setOrganizationForCluster(Stack stack, Cluster cluster) {
+        Organization organization = stack.getOrganization() != null
+                ? stack.getOrganization() : organizationService.getDefaultOrganizationForCurrentUser();
+        cluster.setOrganization(organization);
     }
 
     private Cluster saveClusterAndComponent(Cluster cluster, List<ClusterComponent> components, String stackName) {
@@ -282,6 +298,17 @@ public class ClusterService {
             }
         }
         return gatewayCount > 1;
+    }
+
+    public Cluster save(Cluster cluster) {
+        if (cluster.getOrganization() == null) {
+            if (cluster.getStack() != null) {
+                setOrganizationForCluster(cluster.getStack(), cluster);
+            } else {
+                cluster.setOrganization(organizationService.getDefaultOrganizationForCurrentUser());
+            }
+        }
+        return clusterRepository.save(cluster);
     }
 
     public Cluster findByNameInAccount(String clusterName, String account) {
@@ -990,6 +1017,38 @@ public class ClusterService {
 
     public List<Cluster> getByBlueprint(Blueprint blueprint) {
         return clusterRepository.findByBlueprint(blueprint);
+    }
+
+    public List<Cluster> findByStatuses(Collection<Status> statuses) {
+        return clusterRepository.findByStatuses(statuses);
+    }
+
+    public Cluster findOneByStackId(Long stackId) {
+        return clusterRepository.findOneByStackId(stackId);
+    }
+
+    public Cluster findOneWithLists(Long id) {
+        return clusterRepository.findOneWithLists(id);
+    }
+
+    public Set<Cluster> findAllClustersByRDSConfig(Long rdsConfigId) {
+        return clusterRepository.findAllClustersByRDSConfig(rdsConfigId);
+    }
+
+    public Set<Cluster> findByProxyConfig(ProxyConfig proxyConfig) {
+        return clusterRepository.findByProxyConfig(proxyConfig);
+    }
+
+    public List<Cluster> findByLdapConfig(LdapConfig ldapConfig) {
+        return clusterRepository.findByLdapConfig(ldapConfig);
+    }
+
+    public Optional<Cluster> findById(Long clusterId) {
+        return clusterRepository.findById(clusterId);
+    }
+
+    public List<Cluster> findAllClustersForConstraintTemplate(Long constraintTemplateId) {
+        return clusterRepository.findAllClustersForConstraintTemplate(constraintTemplateId);
     }
 
     private enum Msg {

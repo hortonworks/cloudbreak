@@ -26,7 +26,7 @@ import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.repository.ClusterRepository;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.notification.Notification;
 import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -39,7 +39,7 @@ public class UptimeNotifierTest {
     private UptimeNotifier underTest;
 
     @Mock
-    private ClusterRepository clusterRepository;
+    private ClusterService clusterService;
 
     @Mock
     private StackService stackService;
@@ -60,7 +60,7 @@ public class UptimeNotifierTest {
         doNothing().when(notificationSender).send(any(Notification.class));
         List<Cluster> clusters = TestUtil.generateCluster(1);
 
-        when(clusterRepository.findByStatuses(any())).thenReturn(Collections.singletonList(clusters.get(0)));
+        when(clusterService.findByStatuses(any())).thenReturn(Collections.singletonList(clusters.get(0)));
         Stack stack1 = TestUtil.stack();
         when(stackService.getForCluster(anyLong())).thenReturn(stack1);
 
@@ -81,7 +81,7 @@ public class UptimeNotifierTest {
         doNothing().when(notificationSender).send(any(Notification.class));
         List<Cluster> clusters = TestUtil.generateCluster(1);
 
-        when(clusterRepository.findByStatuses(any())).thenReturn(Collections.singletonList(clusters.get(0)));
+        when(clusterService.findByStatuses(any())).thenReturn(Collections.singletonList(clusters.get(0)));
 
         Stack stack2 = TestUtil.stack();
         stack2.setCluster(clusters.get(0));
@@ -104,7 +104,7 @@ public class UptimeNotifierTest {
         doNothing().when(notificationSender).send(any(Notification.class));
         List<Cluster> clusters = TestUtil.generateCluster(1);
 
-        when(clusterRepository.findByStatuses(any())).thenReturn(Collections.singletonList(clusters.get(0)));
+        when(clusterService.findByStatuses(any())).thenReturn(Collections.singletonList(clusters.get(0)));
 
         Stack stack2 = TestUtil.stack();
         stack2.setCluster(clusters.get(0));

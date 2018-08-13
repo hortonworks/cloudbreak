@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.domain.json.EncryptedJsonToString;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"account", "name"}))
@@ -74,6 +75,9 @@ public class Template implements ProvisionEntity {
     @Convert(converter = EncryptedJsonToString.class)
     @Column(columnDefinition = "TEXT")
     private Json secretAttributes;
+
+    @ManyToOne
+    private Organization organization;
 
     public Template() {
         deleted = false;
@@ -213,5 +217,13 @@ public class Template implements ProvisionEntity {
 
     public void setTopology(Topology topology) {
         this.topology = topology;
+    }
+
+    public Organization getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(Organization organization) {
+        this.organization = organization;
     }
 }

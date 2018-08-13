@@ -15,8 +15,8 @@ import javax.persistence.UniqueConstraint;
 
 import com.sequenceiq.cloudbreak.api.model.RecipeType;
 import com.sequenceiq.cloudbreak.domain.converter.EncryptionConverter;
-import com.sequenceiq.cloudbreak.domain.security.Organization;
-import com.sequenceiq.cloudbreak.domain.security.OrganizationAwareResource;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.OrganizationAwareResource;
 import com.sequenceiq.cloudbreak.validation.OrganizationPermissions;
 
 @Entity

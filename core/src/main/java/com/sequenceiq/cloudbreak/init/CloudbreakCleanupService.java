@@ -34,12 +34,12 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
-import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.FlowLogRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialMigrationService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.flowlog.FlowLogService;
@@ -63,7 +63,7 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
     private StackUpdater stackUpdater;
 
     @Inject
-    private ClusterRepository clusterRepository;
+    private ClusterService clusterService;
 
     @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
@@ -139,12 +139,12 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
     }
 
     private List<Cluster> resetClusterStatus(Collection<Stack> stacksToSync, Collection<Long> excludeStackIds) {
-        return clusterRepository.findByStatuses(Arrays.asList(UPDATE_REQUESTED, UPDATE_IN_PROGRESS, WAIT_FOR_SYNC, START_IN_PROGRESS, STOP_IN_PROGRESS))
+        return clusterService.findByStatuses(Arrays.asList(UPDATE_REQUESTED, UPDATE_IN_PROGRESS, WAIT_FOR_SYNC, START_IN_PROGRESS, STOP_IN_PROGRESS))
                 .stream().filter(c -> !excludeStackIds.contains(c.getStack().getId()))
                 .peek(c -> {
                     loggingStatusChange("Cluster", c.getId(), c.getStatus(), WAIT_FOR_SYNC);
                     c.setStatus(WAIT_FOR_SYNC);
-                    clusterRepository.save(c);
+                    clusterService.save(c);
                 }).filter(c -> !isStackToSyncContainsCluster(stacksToSync, c)).collect(Collectors.toList());
     }
 

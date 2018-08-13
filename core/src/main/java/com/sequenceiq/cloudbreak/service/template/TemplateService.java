@@ -21,9 +21,12 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Template;
+import com.sequenceiq.cloudbreak.domain.Topology;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.NameUtil;
 
@@ -44,6 +47,9 @@ public class TemplateService {
     @Inject
     private AuthorizationService authorizationService;
 
+    @Inject
+    private OrganizationService organizationService;
+
     public Set<Template> retrievePrivateTemplates(IdentityUser user) {
         return templateRepository.findForUser(user.getUserId());
     }
@@ -57,11 +63,17 @@ public class TemplateService {
         return templateRepository.findById(id).orElseThrow(notFound("Template", id));
     }
 
-    public Template create(IdentityUser user, Template template) {
+    public Template create(IdentityUser user, Template template, Organization organization) {
         LOGGER.debug("Creating template: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         Template savedTemplate;
         template.setOwner(user.getUserId());
         template.setAccount(user.getAccount());
+        if (organization != null) {
+            template.setOrganization(organization);
+        } else {
+            template.setOrganization(organizationService.getDefaultOrganizationForCurrentUser());
+        }
+
         try {
             savedTemplate = templateRepository.save(template);
         } catch (DataIntegrityViolationException ex) {
@@ -123,4 +135,7 @@ public class TemplateService {
         return allStackForTemplate.stream().anyMatch(s -> !s.isDeleteCompleted());
     }
 
+    public Set<Template> findByTopology(Topology topology) {
+        return templateRepository.findByTopology(topology);
+    }
 }

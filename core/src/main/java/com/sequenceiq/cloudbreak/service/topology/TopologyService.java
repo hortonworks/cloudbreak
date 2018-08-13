@@ -23,11 +23,13 @@ import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.Topology;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
-import com.sequenceiq.cloudbreak.repository.NetworkRepository;
-import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 import com.sequenceiq.cloudbreak.repository.TopologyRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
+import com.sequenceiq.cloudbreak.service.network.NetworkService;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.template.TemplateService;
 
 @Service
 public class TopologyService {
@@ -45,13 +47,16 @@ public class TopologyService {
     private CredentialRepository credentialRepository;
 
     @Inject
-    private TemplateRepository templateRepository;
+    private TemplateService templateService;
 
     @Inject
-    private NetworkRepository networkRepository;
+    private NetworkService networkService;
 
     @Inject
     private AuthorizationService authorizationService;
+
+    @Inject
+    private OrganizationService organizationService;
 
     public Topology get(Long id) {
         return topologyRepository.findById(id).orElseThrow(notFound("Topology", id));
@@ -61,11 +66,16 @@ public class TopologyService {
         return topologyRepository.findAllInAccount(account);
     }
 
-    public Topology create(IdentityUser user, Topology topology) {
+    public Topology create(IdentityUser user, Topology topology, Organization organization) {
         LOGGER.debug("Creating topology: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         Topology savedTopology;
         topology.setOwner(user.getUserId());
         topology.setAccount(user.getAccount());
+        if (organization != null) {
+            topology.setOrganization(organization);
+        } else {
+            topology.setOrganization(organizationService.getDefaultOrganizationForCurrentUser());
+        }
         try {
             savedTopology = topologyRepository.save(topology);
         } catch (DataIntegrityViolationException ex) {
@@ -83,8 +93,8 @@ public class TopologyService {
 
     private void delete(Topology topology) {
         Set<Credential> credentialsByTopology = credentialRepository.findByTopology(topology);
-        Set<Template> templatesByTopology = templateRepository.findByTopology(topology);
-        Set<Network> networksByTopology = networkRepository.findByTopology(topology);
+        Set<Template> templatesByTopology = templateService.findByTopology(topology);
+        Set<Network> networksByTopology = networkService.findByTopology(topology);
         if (!credentialsByTopology.isEmpty() || !templatesByTopology.isEmpty() || !networksByTopology.isEmpty()) {
             String conflicts = String.format("%s%s%s",
                     getDetailedExceptionMessage("Credential", credentialsByTopology, credentialsByTopology.stream().map(Credential::getName)),

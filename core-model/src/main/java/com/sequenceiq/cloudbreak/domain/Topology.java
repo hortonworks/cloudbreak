@@ -10,7 +10,10 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
+
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
 
 @Entity
 public class Topology implements ProvisionEntity {
@@ -40,6 +43,17 @@ public class Topology implements ProvisionEntity {
 
     @ElementCollection(fetch = FetchType.EAGER)
     private List<TopologyRecord> records = new ArrayList<>();
+
+    @ManyToOne
+    private Organization organization;
+
+    public Organization getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(Organization organization) {
+        this.organization = organization;
+    }
 
     public Long getId() {
         return id;
