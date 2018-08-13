@@ -8,7 +8,7 @@ import org.junit.Test;
 import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 
-public class RecipeRequestToRecipeConverterTest extends AbstractJsonConverterTest<RecipeRequest> {
+public class RecipeBaseToRecipeConverterTest extends AbstractJsonConverterTest<RecipeRequest> {
 
     private RecipeRequestToRecipeConverter underTest;
 

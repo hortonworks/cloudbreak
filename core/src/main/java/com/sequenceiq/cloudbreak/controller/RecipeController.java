@@ -7,7 +7,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
-import javax.validation.Valid;
 
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
@@ -110,7 +109,7 @@ public class RecipeController extends NotificationController implements RecipeEn
         notifyAndReturn(deleted, identityUser, ResourceEvent.RECIPE_DELETED);
     }
 
-    private RecipeResponse createInDefaultOrganization(@Valid RecipeRequest request) {
+    private RecipeResponse createInDefaultOrganization(RecipeRequest request) {
         Recipe recipe = conversionService.convert(request, Recipe.class);
         recipe = recipeService.createInDefaultOrganization(recipe);
         return notifyAndReturn(recipe, authenticatedUserService.getCbUser(), ResourceEvent.RECIPE_CREATED);

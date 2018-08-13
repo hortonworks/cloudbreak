@@ -33,8 +33,13 @@ public class ControllerDescription {
     public static final String IMAGE_CATALOG_DESCRIPTION = "Operations on Image catalogs";
     public static final String REPOSITORY_CONFIGS_VALIDATION_DESCRIPTION = "Operations to validate repository configs";
     public static final String ORGANIZATION_DESCRIPTION = "Operations on organiztions";
-    public static final String RECIPE_V3_DESCRIPTION = "Operations on Recipes by Organization";
-    public static final String PROXYCONFIG_V3_DESCRIPTION = "Operations on Proxy config by Organization";
+
+    public static final String BLUEPRINT_V3_DESCRIPTION = "Operations on blueprints by organization";
+    public static final String CREDENTIAL_V3_DESCRIPTION = "Operations on credentials by organization";
+    public static final String FLEX_SUBSCRIPTION_V3_DESCRIPTION = "Operations on Flex subscriptions by organization";
+    public static final String RECIPE_V3_DESCRIPTION = "Operations on recipes by organization";
+    public static final String PROXY_CONFIG_V3_DESCRIPTION = "Operations on proxy config by organization";
+    public static final String STACK_V3_DESCRIPTION = "Operations on stack by organization";
 
     private ControllerDescription() {
     }

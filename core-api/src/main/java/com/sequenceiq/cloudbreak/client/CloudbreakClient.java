@@ -34,7 +34,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v1.EventEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.FlexSubscriptionEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ImageCatalogV1Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.LdapConfigEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.OrganizationEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.OrganizationV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ProxyConfigEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.RdsConfigEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.RecipeEndpoint;
@@ -137,8 +137,8 @@ public class CloudbreakClient {
         return refreshIfNeededAndGet(RecipeEndpoint.class);
     }
 
-    public OrganizationEndpoint organizationEndpoint() {
-        return refreshIfNeededAndGet(OrganizationEndpoint.class);
+    public OrganizationV3Endpoint organizationEndpoint() {
+        return refreshIfNeededAndGet(OrganizationV3Endpoint.class);
     }
 
     public RdsConfigEndpoint rdsConfigEndpoint() {
