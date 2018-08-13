@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.api.model.RecoveryMode;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
@@ -86,4 +87,6 @@ public abstract class CloudProvider {
     public abstract List<InstanceGroupV2Request> instanceGroups(String securityGroupId, HostGroupType... groupTypes);
 
     public abstract List<InstanceGroupV2Request> instanceGroups(Set<String> recipes, HostGroupType... groupTypes);
+
+    public abstract RecoveryMode getRecoveryModeParam(String hostgroupName);
 }
