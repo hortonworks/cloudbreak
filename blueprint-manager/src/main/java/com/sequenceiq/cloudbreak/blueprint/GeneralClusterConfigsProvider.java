@@ -32,7 +32,9 @@ public class GeneralClusterConfigsProvider {
         boolean instanceMetadataPresented = false;
         if (stack.getInstanceGroups() != null && !stack.getInstanceGroups().isEmpty()) {
             List<InstanceMetaData> gatewayInstanceMetadata = stack.getGatewayInstanceMetadata();
-            gatewayInstanceMetadataPresented = gatewayInstanceMetadata.size() > 1;
+            gatewayInstanceMetadataPresented = gatewayInstanceMetadata.size() > 0
+                    && stack.getCluster().getGateway() != null
+                    && stack.getCluster().getGateway().isGatewayEnabled();
             instanceMetadataPresented = true;
         }
         GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();

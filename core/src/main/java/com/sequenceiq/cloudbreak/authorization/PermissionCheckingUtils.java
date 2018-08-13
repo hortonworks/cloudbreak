@@ -120,7 +120,11 @@ public class PermissionCheckingUtils {
             }
             return proceed;
         } catch (Throwable t) {
-            throw new AccessDeniedException(t.getMessage(), t);
+            if (t.getCause() != null && t.getCause().getClass().equals(org.hibernate.exception.ConstraintViolationException.class)) {
+                throw new AccessDeniedException("Access is denied.", t);
+            } else {
+                throw new AccessDeniedException(t.getMessage(), t);
+            }
         }
     }
 
