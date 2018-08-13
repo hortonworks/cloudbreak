@@ -149,6 +149,14 @@ public class OrganizationService {
         throw new IllegalArgumentException(String.format("No Organization found with id: %s", id));
     }
 
+    public Organization get(User user, Long id) {
+        UserOrgPermissions userOrgPermissions = userOrgPermissionsService.findForUserByOrganizationId(user, id);
+        if (userOrgPermissions == null) {
+            throw new NotFoundException("Cannot find organization by user.");
+        }
+        return userOrgPermissions.getOrganization();
+    }
+
     public Set<User> removeUsers(String orgName, Set<String> userIds) {
         try {
             return transactionService.required(() -> {

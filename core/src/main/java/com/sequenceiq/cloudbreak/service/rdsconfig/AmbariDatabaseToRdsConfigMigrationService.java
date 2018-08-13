@@ -88,8 +88,7 @@ public class AmbariDatabaseToRdsConfigMigrationService {
         if (DatabaseVendor.EMBEDDED == rdsConfig.getDatabaseEngine()) {
             rdsConfig.setStatus(ResourceStatus.DEFAULT);
         }
-        rdsConfig.setOrganization(cluster.getStack().getOrganization());
-        return rdsConfigService.create(rdsConfig);
+        return rdsConfigService.createInDefaultOrganization(rdsConfig);
     }
 
 }

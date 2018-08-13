@@ -263,7 +263,7 @@ public class ClusterHostServiceRunner {
 
     private void decoratePillarWithAmbariDatabase(Cluster cluster, Map<String, SaltPillarProperties> servicePillar)
             throws CloudbreakOrchestratorFailedException {
-        RDSConfig ambariRdsConfig = rdsConfigService.findByClusterIdAndType(cluster.getOwner(), cluster.getAccount(), cluster.getId(), RdsType.AMBARI);
+        RDSConfig ambariRdsConfig = rdsConfigService.findByClusterIdAndType(cluster.getId(), RdsType.AMBARI);
         if (ambariRdsConfig == null) {
             throw new CloudbreakOrchestratorFailedException("Ambari RDSConfig is missing for stack");
         }
@@ -433,7 +433,7 @@ public class ClusterHostServiceRunner {
     }
 
     private void decoratePillarWithJdbcConnectors(Cluster cluster, Map<String, SaltPillarProperties> servicePillar) {
-        Set<RDSConfig> rdsConfigs = rdsConfigService.findByClusterId(cluster.getOwner(), cluster.getAccount(), cluster.getId());
+        Set<RDSConfig> rdsConfigs = rdsConfigService.findByClusterId(cluster.getId());
         Map<String, Object> connectorJarUrlsByVendor = new HashMap<>();
         rdsConfigs.stream()
                 .filter(rds -> StringUtils.isNoneEmpty(rds.getConnectorJarUrl()))

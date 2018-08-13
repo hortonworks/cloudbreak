@@ -56,7 +56,7 @@ public abstract class AbstractRdsConfigProvider {
     }
 
     public Set<RDSConfig> createPostgresRdsConfigIfNeeded(Stack stack, Cluster cluster) {
-        Set<RDSConfig> rdsConfigs = rdsConfigRepository.findByClusterId(stack.getOwner(), stack.getAccount(), cluster.getId());
+        Set<RDSConfig> rdsConfigs = rdsConfigRepository.findByClusterId(cluster.getId());
         if (isRdsConfigNeeded(cluster.getBlueprint())
                 && rdsConfigs.stream().noneMatch(rdsConfig -> rdsConfig.getType().equalsIgnoreCase(getRdsType().name()))) {
             LOGGER.info("Creating postgres RDSConfig for {}", getRdsType().name());
@@ -65,7 +65,8 @@ public abstract class AbstractRdsConfigProvider {
         return rdsConfigs;
     }
 
-    private Set<RDSConfig> createPostgresRdsConf(Stack stack, Cluster cluster, Set<RDSConfig> rdsConfigs, String dbUserName, String dbPort, String dbName) {
+    private Set<RDSConfig> createPostgresRdsConf(Stack stack, Cluster cluster,
+            Set<RDSConfig> rdsConfigs, String dbUserName, String dbPort, String dbName) {
         RDSConfig rdsConfig = new RDSConfig();
         rdsConfig.setName(getRdsType().name() + '_' + stack.getName() + stack.getId());
         rdsConfig.setConnectionUserName(dbUserName);
@@ -80,8 +81,7 @@ public abstract class AbstractRdsConfigProvider {
         rdsConfig.setOwner(stack.getOwner());
         rdsConfig.setAccount(stack.getAccount());
         rdsConfig.setClusters(Collections.singleton(cluster));
-        rdsConfig.setOrganization(stack.getOrganization());
-        rdsConfig = rdsConfigService.create(rdsConfig);
+        rdsConfig = rdsConfigService.createIfNotExists(stack.getCreator(), rdsConfig, stack.getOrganization().getId());
 
         if (rdsConfigs == null) {
             rdsConfigs = new HashSet<>();

@@ -86,7 +86,7 @@ public class ClusterDecorator {
         prepareBlueprint(cluster, request, organization, stack, Optional.ofNullable(blueprint));
         prepareHostGroups(stack, user, cluster, request.getHostGroups());
         validateBlueprintIfRequired(cluster, request, stack);
-        prepareRds(cluster, user, request, stack);
+        prepareRds(cluster, request, stack);
         cluster = clusterProxyDecorator.prepareProxyConfig(cluster, request.getProxyName(), stack);
         prepareLdap(cluster, request, organization);
         cluster = sharedServiceConfigProvider.configureCluster(cluster, request.getConnectedCluster());
@@ -169,7 +169,7 @@ public class ClusterDecorator {
         cluster.setLdapConfig(ldapConfig);
     }
 
-    private void prepareRds(Cluster subject, IdentityUser user, ClusterRequest request, Stack stack) {
+    private void prepareRds(Cluster subject, ClusterRequest request, Stack stack) {
         subject.setRdsConfigs(new HashSet<>());
         if (request.getRdsConfigIds() != null) {
             for (Long rdsConfigId : request.getRdsConfigIds()) {
@@ -181,17 +181,18 @@ public class ClusterDecorator {
             for (RDSConfigRequest requestRdsConfig : request.getRdsConfigJsons()) {
                 RDSConfig rdsConfig = conversionService.convert(requestRdsConfig, RDSConfig.class);
                 rdsConfig.setPublicInAccount(stack.isPublicInAccount());
-                rdsConfig = rdsConfigService.createIfNotExists(user, rdsConfig);
+                rdsConfig = rdsConfigService.createIfNotExists(stack.getCreator(), rdsConfig, stack.getOrganization().getId());
                 subject.getRdsConfigs().add(rdsConfig);
             }
         }
         Optional.of(request.getRdsConfigNames())
-                .ifPresent(confs -> confs.forEach(confName -> subject.getRdsConfigs().add(rdsConfigService.getPublicRdsConfig(confName, user))));
+                .ifPresent(confs -> confs.forEach(confName -> subject.getRdsConfigs().add(
+                        rdsConfigService.getByNameForOrganization(confName, stack.getOrganization()))));
 
         if (request.getAmbariDatabaseDetails() != null) {
             RDSConfig rdsConfig = ambariDatabaseMapper.mapAmbariDatabaseDetailsJsonToRdsConfig(request.getAmbariDatabaseDetails(), subject, stack,
                     stack.isPublicInAccount());
-            subject.getRdsConfigs().add(rdsConfigService.createIfNotExists(user, rdsConfig));
+            subject.getRdsConfigs().add(rdsConfigService.createIfNotExists(stack.getCreator(), rdsConfig, stack.getOrganization().getId()));
         }
     }
 

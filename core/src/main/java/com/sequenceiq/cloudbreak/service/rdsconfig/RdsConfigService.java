@@ -15,23 +15,24 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
-import com.google.common.base.Preconditions;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
+import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionValidator;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.repository.organization.OrganizationResourceRepository;
 import com.sequenceiq.cloudbreak.repository.RdsConfigRepository;
+import com.sequenceiq.cloudbreak.service.AbstractOrganizationAwareResourceService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.util.NameUtil;
 
 @Service
-public class RdsConfigService {
+public class RdsConfigService extends AbstractOrganizationAwareResourceService<RDSConfig> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RdsConfigService.class);
 
@@ -42,97 +43,61 @@ public class RdsConfigService {
     private ClusterService clusterService;
 
     @Inject
-    private OrganizationService organizationService;
+    private RdsConnectionValidator rdsConnectionValidator;
 
-    public Set<RDSConfig> retrievePrivateRdsConfigs(IdentityUser user) {
-        return rdsConfigRepository.findForUser(user.getUserId());
+    private Organization getDefaultOrg() {
+        return getOrganizationService().getDefaultOrganizationForCurrentUser();
     }
 
-    public RDSConfig getPrivateRdsConfig(String name, IdentityUser user) {
-        return Optional.ofNullable(rdsConfigRepository.findByNameInUser(name, user.getUserId()))
-                .orElseThrow(notFound("RDS configuration", name));
+    public Set<RDSConfig> retrieveRdsConfigsInDefaultOrg() {
+        return rdsConfigRepository.findAllByOrganizationId(getDefaultOrg().getId());
     }
 
-    public RDSConfig getPublicRdsConfig(String name, IdentityUser user) {
-        return Optional.ofNullable(rdsConfigRepository.findByNameBasedOnAccount(name, user.getAccount(), user.getUserId()))
-                .orElseThrow(notFound("RDS configuration", name));
-    }
-
-    public RDSConfig getByName(String name, IdentityUser user) {
-        return Optional.ofNullable(rdsConfigRepository.findOneByName(name, user.getAccount()))
-                .orElseThrow(notFound("RDS configuration", name));
-    }
-
-    public Set<RDSConfig> retrieveAccountRdsConfigs(IdentityUser user) {
-        return user.getRoles().contains(IdentityUserRole.ADMIN) ? rdsConfigRepository.findAllBasedOnAccount(user.getAccount())
-                : rdsConfigRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
+    public RDSConfig getByNameForDefaultOrg(String name) {
+        return getByNameForOrganizationId(name, getDefaultOrg().getId());
     }
 
     public RDSConfig get(Long id) {
         return rdsConfigRepository.findById(id).orElseThrow(notFound("RDS configuration", id));
     }
 
-    public void delete(Long id, IdentityUser user) {
-        RDSConfig rdsConfig = Optional.ofNullable(rdsConfigRepository.findByIdInAccount(id, user.getAccount()))
+    public void delete(Long id) {
+        RDSConfig rdsConfig = rdsConfigRepository.findById(id)
                 .orElseThrow(notFound("RDS configuration", id));
         delete(rdsConfig);
     }
 
-    public void delete(String name, IdentityUser user) {
-        RDSConfig rdsConfig = Optional.ofNullable(rdsConfigRepository.findByNameBasedOnAccount(name, user.getAccount(), user.getUserId()))
+    public RDSConfig delete(String name) {
+        RDSConfig rdsConfig = Optional.ofNullable(rdsConfigRepository.findUserManagedByName(name))
                 .orElseThrow(notFound("RDS configuration", name));
         delete(rdsConfig);
+        return rdsConfig;
     }
 
-    public RDSConfig create(IdentityUser identityUser, RDSConfig rdsConfig) {
-        LOGGER.debug("Creating RDS configuration: [User: '{}', Account: '{}']", identityUser.getUsername(), identityUser.getAccount());
-        rdsConfig.setOwner(identityUser.getUserId());
-        rdsConfig.setAccount(identityUser.getAccount());
-        Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
-        rdsConfig.setOrganization(organization);
-        return rdsConfigRepository.save(rdsConfig);
-    }
-
-    public RDSConfig create(RDSConfig rdsConfig) {
-        Preconditions.checkNotNull(rdsConfig.getOwner(), "Owner cannot be null");
-        Preconditions.checkNotNull(rdsConfig.getAccount(), "Account cannot be null");
-        Preconditions.checkNotNull(rdsConfig.getOrganization(), "Organization cannot be null");
-        LOGGER.debug("Creating RDS configuration: [User: '{}', Account: '{}', Organization: '{}']",
-                rdsConfig.getOwner(), rdsConfig.getAccount(), rdsConfig.getOrganization().getId());
-        return rdsConfigRepository.save(rdsConfig);
-    }
-
-    public RDSConfig createIfNotExists(IdentityUser user, RDSConfig rdsConfig) {
-        try {
-            return getPrivateRdsConfig(rdsConfig.getName(), user);
-        } catch (AccessDeniedException | NotFoundException ignored) {
-            return create(user, rdsConfig);
+    public RDSConfig createIfNotExists(User user, RDSConfig rdsConfig, Long organizationId) {
+        RDSConfig configByName = rdsConfigRepository.findByNameAndOrganizationId(rdsConfig.getName(), organizationId);
+        if (configByName == null) {
+            Organization organization = getOrganizationService().get(user, organizationId);
+            return createWithUser(user, rdsConfig, organization);
         }
+        return rdsConfig;
+
     }
 
-    public Set<RDSConfig> findByClusterId(String user, String account, Long clusterId) {
-        return rdsConfigRepository.findByClusterId(user, account, clusterId);
+    public Set<RDSConfig> findByClusterId(Long clusterId) {
+        return rdsConfigRepository.findByClusterId(clusterId);
     }
 
-    public RDSConfig findByClusterIdAndType(String user, String account, Long clusterId, RdsType rdsType) {
-        return rdsConfigRepository.findByClusterIdAndType(user, account, clusterId, rdsType.name());
+    public RDSConfig findByClusterIdAndType(Long clusterId, RdsType rdsType) {
+        return rdsConfigRepository.findByClusterIdAndType(clusterId, rdsType.name());
     }
 
-    public Set<RDSConfig> findUserManagedByClusterId(String user, String account, Long clusterId) {
-        return rdsConfigRepository.findUserManagedByClusterId(user, account, clusterId);
+    public Set<RDSConfig> findUserManagedByClusterId(Long clusterId) {
+        return rdsConfigRepository.findUserManagedByClusterId(clusterId);
     }
 
     public void deleteDefaultRdsConfigs(Set<RDSConfig> rdsConfigs) {
         rdsConfigs.stream().filter(rdsConfig -> ResourceStatus.DEFAULT == rdsConfig.getStatus()).forEach(this::setStatusToDeleted);
-    }
-
-    private void delete(RDSConfig rdsConfig) {
-        checkRdsConfigNotAssociated(rdsConfig);
-        if (ResourceStatus.USER_MANAGED.equals(rdsConfig.getStatus())) {
-            rdsConfigRepository.delete(rdsConfig);
-        } else {
-            setStatusToDeleted(rdsConfig);
-        }
     }
 
     private void checkRdsConfigNotAssociated(RDSConfig rdsConfig) {
@@ -158,5 +123,53 @@ public class RdsConfigService {
         rdsConfig.setName(NameUtil.postfixWithTimestamp(rdsConfig.getName()));
         rdsConfig.setStatus(ResourceStatus.DEFAULT_DELETED);
         rdsConfigRepository.save(rdsConfig);
+    }
+
+    public Set<RDSConfig> findAllByOrganizationId(Long organizationId) {
+        return rdsConfigRepository.findAllByOrganizationId(organizationId);
+    }
+
+    @Override
+    protected OrganizationResourceRepository<RDSConfig, Long> repository() {
+        return rdsConfigRepository;
+    }
+
+    @Override
+    protected OrganizationResource resource() {
+        return OrganizationResource.RDS;
+    }
+
+    @Override
+    protected void prepareDeletion(RDSConfig resource) {
+        checkRdsConfigNotAssociated(resource);
+        if (!ResourceStatus.USER_MANAGED.equals(resource.getStatus())) {
+            setStatusToDeleted(resource);
+            throw new BadRequestException(String.format("RDS config '%s' is not usr managed", resource.getName()));
+        }
+    }
+
+    @Override
+    protected void prepareCreation(RDSConfig resource) {
+    }
+
+    public String testRdsConnection(String existingRDSConfigName, Organization organization) {
+        try {
+            RDSConfig config = getByNameForOrganization(existingRDSConfigName, organization);
+            return testRdsConnection(config);
+        } catch (AccessDeniedException | NotFoundException e) {
+            return "access is denied";
+        }
+    }
+
+    public String testRdsConnection(RDSConfig rdsConfig) {
+        try {
+            if (rdsConfig == null) {
+                return "access is denied";
+            }
+            rdsConnectionValidator.validateRdsConnection(rdsConfig);
+            return "connected";
+        } catch (RuntimeException e) {
+            return e.getMessage();
+        }
     }
 }

@@ -214,7 +214,7 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
     }
 
     private void convertRdsConfigs(Cluster source, ClusterResponse clusterResponse) {
-        Set<RDSConfig> rdsConfigs = rdsConfigService.findUserManagedByClusterId(source.getOwner(), source.getAccount(), source.getId());
+        Set<RDSConfig> rdsConfigs = rdsConfigService.findUserManagedByClusterId(source.getId());
         for (RDSConfig rdsConfig : rdsConfigs) {
             clusterResponse.getRdsConfigs().add(getConversionService().convert(rdsConfig, RDSConfigResponse.class));
         }

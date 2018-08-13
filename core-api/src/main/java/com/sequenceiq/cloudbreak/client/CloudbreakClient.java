@@ -267,6 +267,7 @@ public class CloudbreakClient {
         endpointWrapperHolder.setEndpoint(newEndpoint(RepositoryConfigValidationEndpoint.class, headers));
         endpointWrapperHolder.setEndpoint(newEndpoint(ManagementPackV3Endpoint.class, headers));
         endpointWrapperHolder.setEndpoint(newEndpoint(ImageCatalogV3Endpoint.class, headers));
+        endpointWrapperHolder.setEndpoint(newEndpoint(RdsConfigV3Endpoint.class, headers));
         logger.info("Endpoints have been renewed for CloudbreakClient");
     }
 

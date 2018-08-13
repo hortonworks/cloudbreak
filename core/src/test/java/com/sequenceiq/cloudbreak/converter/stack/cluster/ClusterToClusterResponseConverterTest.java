@@ -135,7 +135,7 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
         underTest = new ClusterToClusterResponseConverter();
         MockitoAnnotations.initMocks(this);
         given(orchestratorTypeResolver.resolveType(any(Orchestrator.class))).willReturn(OrchestratorType.HOST);
-        given(rdsConfigService.findByClusterId(anyString(), anyString(), anyLong())).willReturn(new HashSet<>());
+        given(rdsConfigService.findByClusterId(anyLong())).willReturn(new HashSet<>());
         given(stackService.findClustersConnectedToDatalake(anyLong())).willReturn(new HashSet<>());
         stackServiceComponentDescriptor = createStackServiceComponentDescriptor();
     }

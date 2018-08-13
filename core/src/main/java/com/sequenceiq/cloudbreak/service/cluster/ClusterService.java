@@ -535,7 +535,7 @@ public class ClusterService {
     }
 
     private boolean withEmbeddedAmbariDB(Cluster cluster) {
-        RDSConfig rdsConfig = rdsConfigService.findByClusterIdAndType(cluster.getOwner(), cluster.getAccount(), cluster.getId(), RdsType.AMBARI);
+        RDSConfig rdsConfig = rdsConfigService.findByClusterIdAndType(cluster.getId(), RdsType.AMBARI);
         return rdsConfig == null || DatabaseVendor.EMBEDDED == rdsConfig.getDatabaseEngine();
     }
 

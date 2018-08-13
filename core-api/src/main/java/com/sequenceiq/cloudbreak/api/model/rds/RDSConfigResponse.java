@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.api.model.rds;
 
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.api.model.users.OrganizationResourceResponse;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.RDSConfigModelDescription;
 
@@ -34,6 +35,9 @@ public class RDSConfigResponse extends RDSConfigJson {
 
     @ApiModelProperty(value = ModelDescriptions.RDSConfig.DB_ENGINE_DISPLAYNAME, required = true)
     private String databaseEngineDisplayName;
+
+    @ApiModelProperty(ModelDescriptions.ORGANIZATION_OF_THE_RESOURCE)
+    private OrganizationResourceResponse organization;
 
     public Long getId() {
         return id;
@@ -97,5 +101,13 @@ public class RDSConfigResponse extends RDSConfigJson {
 
     public void setDatabaseEngineDisplayName(String databaseEngineDisplayName) {
         this.databaseEngineDisplayName = databaseEngineDisplayName;
+    }
+
+    public OrganizationResourceResponse getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(OrganizationResourceResponse organization) {
+        this.organization = organization;
     }
 }
