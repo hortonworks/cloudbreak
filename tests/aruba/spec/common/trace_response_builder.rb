@@ -9,8 +9,8 @@ class TraceResponseBuilder
     @@create_blueprint_endpoint = "#{@@blueprint_base}/user"
     @@cluster_base = "#{@@api_base}/v2/stacks"
     @@create_cluster_endpoint = "#{@@cluster_base}/user"
-    @@create_organization_endpoint = "#{@@api_base}/v1/organizations"
-    @@get_organization_endpoint = "#{@@api_base}/v1/organizations"
+    @@create_organization_endpoint = "#{@@api_base}/v3/organizations"
+    @@get_organization_endpoint = "#{@@api_base}/v3/organizations"
     @@get_users_endpoint = "#{@@api_base}/v1/users"
 
     def self.createOrganizationRequestFactory(requestBody)
