@@ -48,6 +48,10 @@ type SecurityGroupResponse struct {
 	// Exisiting security group id
 	SecurityGroupID string `json:"securityGroupId,omitempty"`
 
+	// Exisiting security group ids
+	// Unique: true
+	SecurityGroupIds []string `json:"securityGroupIds"`
+
 	// list of security rules that relates to the security group
 	SecurityRules []*SecurityRuleResponse `json:"securityRules"`
 }
@@ -68,6 +72,8 @@ type SecurityGroupResponse struct {
 
 /* polymorph SecurityGroupResponse securityGroupId false */
 
+/* polymorph SecurityGroupResponse securityGroupIds false */
+
 /* polymorph SecurityGroupResponse securityRules false */
 
 // Validate validates this security group response
@@ -85,6 +91,11 @@ func (m *SecurityGroupResponse) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validatePublicInAccount(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateSecurityGroupIds(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -129,6 +140,19 @@ func (m *SecurityGroupResponse) validateDescription(formats strfmt.Registry) err
 func (m *SecurityGroupResponse) validatePublicInAccount(formats strfmt.Registry) error {
 
 	if err := validate.Required("publicInAccount", "body", bool(m.PublicInAccount)); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *SecurityGroupResponse) validateSecurityGroupIds(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.SecurityGroupIds) { // not required
+		return nil
+	}
+
+	if err := validate.UniqueItems("securityGroupIds", "body", m.SecurityGroupIds); err != nil {
 		return err
 	}
 

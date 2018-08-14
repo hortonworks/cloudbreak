@@ -29,13 +29,13 @@ DeletePrivateProxyConfig deletes private proxy configuration by name
 
 An proxy Configuration describe a connection to an external proxy server which provides internet access cluster members. It's applied for package manager and Ambari too
 */
-func (a *Client) DeletePrivateProxyConfig(params *DeletePrivateProxyConfigParams) error {
+func (a *Client) DeletePrivateProxyConfig(params *DeletePrivateProxyConfigParams) (*DeletePrivateProxyConfigOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewDeletePrivateProxyConfigParams()
 	}
 
-	_, err := a.transport.Submit(&runtime.ClientOperation{
+	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "deletePrivateProxyConfig",
 		Method:             "DELETE",
 		PathPattern:        "/v1/proxyconfigs/user/{name}",
@@ -48,9 +48,9 @@ func (a *Client) DeletePrivateProxyConfig(params *DeletePrivateProxyConfigParams
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return result.(*DeletePrivateProxyConfigOK), nil
 
 }
 
@@ -59,13 +59,13 @@ DeleteProxyConfig deletes proxy configuration by id
 
 An proxy Configuration describe a connection to an external proxy server which provides internet access cluster members. It's applied for package manager and Ambari too
 */
-func (a *Client) DeleteProxyConfig(params *DeleteProxyConfigParams) error {
+func (a *Client) DeleteProxyConfig(params *DeleteProxyConfigParams) (*DeleteProxyConfigOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewDeleteProxyConfigParams()
 	}
 
-	_, err := a.transport.Submit(&runtime.ClientOperation{
+	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "deleteProxyConfig",
 		Method:             "DELETE",
 		PathPattern:        "/v1/proxyconfigs/{id}",
@@ -78,9 +78,9 @@ func (a *Client) DeleteProxyConfig(params *DeleteProxyConfigParams) error {
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return result.(*DeleteProxyConfigOK), nil
 
 }
 
@@ -89,13 +89,13 @@ DeletePublicProxyConfig deletes public owned or private proxy configuration by n
 
 An proxy Configuration describe a connection to an external proxy server which provides internet access cluster members. It's applied for package manager and Ambari too
 */
-func (a *Client) DeletePublicProxyConfig(params *DeletePublicProxyConfigParams) error {
+func (a *Client) DeletePublicProxyConfig(params *DeletePublicProxyConfigParams) (*DeletePublicProxyConfigOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewDeletePublicProxyConfigParams()
 	}
 
-	_, err := a.transport.Submit(&runtime.ClientOperation{
+	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "deletePublicProxyConfig",
 		Method:             "DELETE",
 		PathPattern:        "/v1/proxyconfigs/account/{name}",
@@ -108,9 +108,9 @@ func (a *Client) DeletePublicProxyConfig(params *DeletePublicProxyConfigParams) 
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return result.(*DeletePublicProxyConfigOK), nil
 
 }
 

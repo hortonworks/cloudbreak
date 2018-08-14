@@ -7,10 +7,13 @@ package v1proxyconfigs
 
 import (
 	"fmt"
+	"io"
 
 	"github.com/go-openapi/runtime"
 
 	strfmt "github.com/go-openapi/strfmt"
+
+	"github.com/hortonworks/cb-cli/models_cloudbreak"
 )
 
 // DeletePrivateProxyConfigReader is a Reader for the DeletePrivateProxyConfig structure.
@@ -20,43 +23,45 @@ type DeletePrivateProxyConfigReader struct {
 
 // ReadResponse reads a server response into the received o.
 func (o *DeletePrivateProxyConfigReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
+	switch response.Code() {
 
-	result := NewDeletePrivateProxyConfigDefault(response.Code())
-	if err := result.readResponse(response, consumer, o.formats); err != nil {
-		return nil, err
-	}
-	if response.Code()/100 == 2 {
+	case 200:
+		result := NewDeletePrivateProxyConfigOK()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
 		return result, nil
-	}
-	return nil, result
 
-}
-
-// NewDeletePrivateProxyConfigDefault creates a DeletePrivateProxyConfigDefault with default headers values
-func NewDeletePrivateProxyConfigDefault(code int) *DeletePrivateProxyConfigDefault {
-	return &DeletePrivateProxyConfigDefault{
-		_statusCode: code,
+	default:
+		return nil, runtime.NewAPIError("unknown error", response, response.Code())
 	}
 }
 
-/*DeletePrivateProxyConfigDefault handles this case with default header values.
+// NewDeletePrivateProxyConfigOK creates a DeletePrivateProxyConfigOK with default headers values
+func NewDeletePrivateProxyConfigOK() *DeletePrivateProxyConfigOK {
+	return &DeletePrivateProxyConfigOK{}
+}
+
+/*DeletePrivateProxyConfigOK handles this case with default header values.
 
 successful operation
 */
-type DeletePrivateProxyConfigDefault struct {
-	_statusCode int
+type DeletePrivateProxyConfigOK struct {
+	Payload *models_cloudbreak.ProxyConfigResponse
 }
 
-// Code gets the status code for the delete private proxy config default response
-func (o *DeletePrivateProxyConfigDefault) Code() int {
-	return o._statusCode
+func (o *DeletePrivateProxyConfigOK) Error() string {
+	return fmt.Sprintf("[DELETE /v1/proxyconfigs/user/{name}][%d] deletePrivateProxyConfigOK  %+v", 200, o.Payload)
 }
 
-func (o *DeletePrivateProxyConfigDefault) Error() string {
-	return fmt.Sprintf("[DELETE /v1/proxyconfigs/user/{name}][%d] deletePrivateProxyConfig default ", o._statusCode)
-}
+func (o *DeletePrivateProxyConfigOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-func (o *DeletePrivateProxyConfigDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+	o.Payload = new(models_cloudbreak.ProxyConfigResponse)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
 
 	return nil
 }

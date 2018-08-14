@@ -15,13 +15,25 @@ all: start-mock docker-aruba-test stop-mock
 
 clean: stop-mock clean-test-result
 
+# Start a new Cloudbreak Mock with new Swagger JSON and renewed Mock IP
+# For custom version apply as: 'GIT_FIRST_PARENT=2.8.0-dev.374 make start-mock'
 start-mock: download-s3
 	ORIGINAL_IP=127.0.0.1 NEW_IP=$(DOCKER_IP) make replace-ip
 	GIT_VERSION=$(GIT_FIRST_PARENT) GIT_TAG=$(GIT_LATEST_TAG) BASE_URL=https://$(DOCKER_IP) ./scripts/cbm.sh
 
+# Stop Cloudbreak Mock then set back the 127.0.0.1 as default Mock IP
 stop-mock:
 	GIT_VERSION=$(GIT_FIRST_PARENT) docker-compose -f docker-compose.yml -p cbreak down
 	ORIGINAL_IP=$(DOCKER_IP) NEW_IP=127.0.0.1 make replace-ip
+
+# Restart Cloudbreak Mock (only Containers are restarted) with same Swagger JSON and Mock IP as was set previously
+restart-mock:
+	GIT_VERSION=$(GIT_FIRST_PARENT) docker-compose -f integration-tests/docker-compose.yml -p cbreak down
+	GIT_VERSION=$(GIT_FIRST_PARENT) GIT_TAG=$(GIT_LATEST_TAG) BASE_URL=https://$(DOCKER_IP) ./scripts/cbm.sh
+
+# For custom version apply as: 'GIT_FIRST_PARENT=2.8.0-dev.374 make download-s3'
+download-s3:
+	curl -k https://s3-eu-central-1.amazonaws.com/cloudbreak-swagger/swagger-$(GIT_FIRST_PARENT).json -o swagger.json
 
 integration-test:
 	BASE_URL=https://$(DOCKER_IP) ./scripts/integration-test.sh
@@ -50,9 +62,7 @@ generate-xunit-result:
 clean-test-result:
 	rm -f test-result.tap
 
-download-s3:
-	curl -k https://s3-eu-central-1.amazonaws.com/cloudbreak-swagger/swagger-$(GIT_FIRST_PARENT).json -o swagger.json
-
+# Replace the default Mock IP to the locally found Docker IP
 replace-ip:
 ifneq ($(ORIGINAL_IP), $(NEW_IP))
 	find . -not -path "./Makefile" -type f -exec sed -i 's/$(ORIGINAL_IP)/$(NEW_IP)/g' {} +

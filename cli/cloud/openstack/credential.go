@@ -14,7 +14,7 @@ const (
 var FACINGS = []string{"public", "admin", "internal"}
 var SCOPES = []string{"project", "domain"}
 
-func (p *OpenstackProvider) GetCredentialParameters(stringFinder func(string) string, boolFinder func(string) bool) (map[string]interface{}, error) {
+func (p *OpenstackProvider) GetCredentialParameters(stringFinder func(string) string) (map[string]interface{}, error) {
 	facing, err := validateAndGet(stringFinder("facing"), FACINGS)
 	if err != nil {
 		return nil, err

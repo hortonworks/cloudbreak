@@ -1,12 +1,13 @@
 package cli
 
 import (
-	"github.com/hortonworks/cb-cli/cli/types"
-	"github.com/hortonworks/cb-cli/cli/utils"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/v1mpacks"
-	"github.com/hortonworks/cb-cli/models_cloudbreak"
 	"strings"
 	"testing"
+
+	"github.com/hortonworks/cb-cli/cli/types"
+	"github.com/hortonworks/cb-cli/cli/utils"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_organization_id_mpacks"
+	"github.com/hortonworks/cb-cli/models_cloudbreak"
 )
 
 type mockMpackClient struct {
@@ -14,9 +15,9 @@ type mockMpackClient struct {
 	postPrivateCapture *models_cloudbreak.ManagementPackRequest
 }
 
-func (m *mockMpackClient) PostPublicManagementPack(params *v1mpacks.PostPublicManagementPackParams) (*v1mpacks.PostPublicManagementPackOK, error) {
+func (m *mockMpackClient) CreateManagementPackInOrganization(params *v3_organization_id_mpacks.CreateManagementPackInOrganizationParams) (*v3_organization_id_mpacks.CreateManagementPackInOrganizationOK, error) {
 	m.postPublicCapture = params.Body
-	return &v1mpacks.PostPublicManagementPackOK{
+	return &v3_organization_id_mpacks.CreateManagementPackInOrganizationOK{
 		Payload: &models_cloudbreak.ManagementPackResponse{
 			ID:   1,
 			Name: &(&types.S{S: "mpack"}).S,
@@ -24,19 +25,9 @@ func (m *mockMpackClient) PostPublicManagementPack(params *v1mpacks.PostPublicMa
 	}, nil
 }
 
-func (m *mockMpackClient) PostPrivateManagementPack(params *v1mpacks.PostPrivateManagementPackParams) (*v1mpacks.PostPrivateManagementPackOK, error) {
-	m.postPrivateCapture = params.Body
-	return &v1mpacks.PostPrivateManagementPackOK{
-		Payload: &models_cloudbreak.ManagementPackResponse{
-			ID:   1,
-			Name: &(&types.S{S: "mpack"}).S,
-		},
-	}, nil
-}
-
-func (m *mockMpackClient) GetPublicManagementPacks(params *v1mpacks.GetPublicManagementPacksParams) (*v1mpacks.GetPublicManagementPacksOK, error) {
+func (m *mockMpackClient) ListManagementPacksByOrganization(params *v3_organization_id_mpacks.ListManagementPacksByOrganizationParams) (*v3_organization_id_mpacks.ListManagementPacksByOrganizationOK, error) {
 	yes := true
-	resp := v1mpacks.GetPublicManagementPacksOK{
+	resp := v3_organization_id_mpacks.ListManagementPacksByOrganizationOK{
 		Payload: []*models_cloudbreak.ManagementPackResponse{
 			{
 				Name:     &(&types.S{S: "mpack"}).S,
@@ -80,7 +71,7 @@ func TestListMpacksImpl(t *testing.T) {
 	client := new(mockMpackClient)
 	listMpacksImpl(client, func(header []string, rows []utils.Row) {
 		mpackRows = rows
-	})
+	}, int64(2))
 
 	if len(mpackRows) != 5 {
 		t.Errorf("invalid number of mpack rows returned %d == %d", len(mpackRows), 5)
@@ -130,7 +121,7 @@ func TestCreateMpackImplForPublic(t *testing.T) {
 	t.Parallel()
 
 	client := new(mockMpackClient)
-	createMpackImpl(client, "mpack", "mpack description", "http://localhost/mpack.tar.gz", true, "stack-definitions,service-definitions,mpacks", true, true)
+	createMpackImpl(client, int64(2), "mpack", "mpack description", "http://localhost/mpack.tar.gz", true, "stack-definitions,service-definitions,mpacks", true)
 
 	if client.postPublicCapture == nil {
 		t.Errorf("no public mpack request was sent")
@@ -139,29 +130,16 @@ func TestCreateMpackImplForPublic(t *testing.T) {
 	checkReqParams(req, "stack-definitions,service-definitions,mpacks", t)
 }
 
-func TestCreateMpackImplForPrivate(t *testing.T) {
-	t.Parallel()
-
-	client := new(mockMpackClient)
-	createMpackImpl(client, "mpack", "mpack description", "http://localhost/mpack.tar.gz", true, "stack-definitions,service-definitions,mpacks", true, false)
-
-	if client.postPrivateCapture == nil {
-		t.Errorf("no private mpack request was sent")
-	}
-	req := client.postPrivateCapture
-	checkReqParams(req, "stack-definitions,service-definitions,mpacks", t)
-}
-
 func TestCreateMpackForEmptyPurgeList(t *testing.T) {
 	t.Parallel()
 
 	client := new(mockMpackClient)
-	createMpackImpl(client, "mpack", "mpack description", "http://localhost/mpack.tar.gz", true, "", true, false)
+	createMpackImpl(client, int64(2), "mpack", "mpack description", "http://localhost/mpack.tar.gz", true, "", true)
 
-	if client.postPrivateCapture == nil {
-		t.Errorf("no private mpack request was sent")
+	if client.postPublicCapture == nil {
+		t.Errorf("no mpack request was sent")
 	}
-	req := client.postPrivateCapture
+	req := client.postPublicCapture
 	checkReqParams(req, "", t)
 }
 

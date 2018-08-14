@@ -3,12 +3,14 @@ require 'json'
 require_relative "../integration/spec_helper"
 
 class TraceResponseBuilder
+    @@default_organization = 1
+
     @@cloudbreak_base = "cb"
     @@api_base = "#{@@cloudbreak_base}/api"
-    @@blueprint_base = "#{@@api_base}/v1/blueprints"
-    @@create_blueprint_endpoint = "#{@@blueprint_base}/user"
-    @@cluster_base = "#{@@api_base}/v2/stacks"
-    @@create_cluster_endpoint = "#{@@cluster_base}/user"
+    @@blueprint_base = "#{@@api_base}/v3/#{@@default_organization}/blueprints"
+    @@create_blueprint_endpoint = "#{@@blueprint_base}"
+    @@cluster_base = "#{@@api_base}/v3/#{@@default_organization}/stack"
+    @@create_cluster_endpoint = "#{@@cluster_base}"
     @@create_organization_endpoint = "#{@@api_base}/v3/organizations"
     @@get_organization_endpoint = "#{@@api_base}/v3/organizations"
     @@get_users_endpoint = "#{@@api_base}/v1/users"

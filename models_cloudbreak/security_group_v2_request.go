@@ -12,6 +12,7 @@ import (
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 )
 
 // SecurityGroupV2Request security group v2 request
@@ -22,17 +23,28 @@ type SecurityGroupV2Request struct {
 	// Exisiting security group id
 	SecurityGroupID string `json:"securityGroupId,omitempty"`
 
+	// Exisiting security group ids
+	// Unique: true
+	SecurityGroupIds []string `json:"securityGroupIds"`
+
 	// list of security rules that relates to the security group
 	SecurityRules []*SecurityRuleRequest `json:"securityRules"`
 }
 
 /* polymorph SecurityGroupV2Request securityGroupId false */
 
+/* polymorph SecurityGroupV2Request securityGroupIds false */
+
 /* polymorph SecurityGroupV2Request securityRules false */
 
 // Validate validates this security group v2 request
 func (m *SecurityGroupV2Request) Validate(formats strfmt.Registry) error {
 	var res []error
+
+	if err := m.validateSecurityGroupIds(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
 
 	if err := m.validateSecurityRules(formats); err != nil {
 		// prop
@@ -42,6 +54,19 @@ func (m *SecurityGroupV2Request) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *SecurityGroupV2Request) validateSecurityGroupIds(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.SecurityGroupIds) { // not required
+		return nil
+	}
+
+	if err := validate.UniqueItems("securityGroupIds", "body", m.SecurityGroupIds); err != nil {
+		return err
+	}
+
 	return nil
 }
 

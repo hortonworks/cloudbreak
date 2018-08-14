@@ -5,13 +5,14 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_organization_id_credentials"
+
 	"errors"
 
 	"github.com/hortonworks/cb-cli/cli/cloud"
 	_ "github.com/hortonworks/cb-cli/cli/cloud/aws"
 	"github.com/hortonworks/cb-cli/cli/types"
 	"github.com/hortonworks/cb-cli/cli/utils"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/v1credentials"
 	"github.com/hortonworks/cb-cli/models_cloudbreak"
 )
 
@@ -23,37 +24,29 @@ type mockCredentialCreate struct {
 	request chan *models_cloudbreak.CredentialRequest
 }
 
-func (m *mockCredentialCreate) PostPublicCredential(params *v1credentials.PostPublicCredentialParams) (*v1credentials.PostPublicCredentialOK, error) {
+func (m *mockCredentialCreate) CreateCredentialInOrganization(params *v3_organization_id_credentials.CreateCredentialInOrganizationParams) (*v3_organization_id_credentials.CreateCredentialInOrganizationOK, error) {
 	m.request <- params.Body
 	defer close(m.request)
-	return &v1credentials.PostPublicCredentialOK{Payload: &models_cloudbreak.CredentialResponse{ID: int64(1), Name: &(&types.S{S: ""}).S, Public: &(&types.B{B: true}).B}}, nil
-}
-
-func (m *mockCredentialCreate) PostPrivateCredential(params *v1credentials.PostPrivateCredentialParams) (*v1credentials.PostPrivateCredentialOK, error) {
-	m.request <- params.Body
-	defer close(m.request)
-	return &v1credentials.PostPrivateCredentialOK{Payload: &models_cloudbreak.CredentialResponse{ID: int64(2), Name: &(&types.S{S: ""}).S, Public: &(&types.B{B: false}).B}}, nil
+	return &v3_organization_id_credentials.CreateCredentialInOrganizationOK{Payload: &models_cloudbreak.CredentialResponse{ID: int64(1), Name: &(&types.S{S: ""}).S, Public: &(&types.B{B: true}).B}}, nil
 }
 
 func TestCreateCredentialPublic(t *testing.T) {
 	t.Parallel()
 
-	boolFinder := func(in string) bool {
+	mockInt64Finder := func(in string) int64 {
 		switch in {
-		case FlPublicOptional.Name:
-			return true
+		case FlOrganizationOptional.Name:
+			return int64(2)
 		default:
-			return false
+			t.Error("organization option expected")
+			return int64(-1)
 		}
 	}
 
 	mock := mockCredentialCreate{request: make(chan *models_cloudbreak.CredentialRequest)}
 	parameters := map[string]interface{}{}
 	go func() {
-		credential := createCredentialImpl(mockStringFinder, boolFinder, &mock, parameters)
-		if !*credential.Public {
-			t.Errorf("not public true == %t", *credential.Public)
-		}
+		createCredentialImpl(mockStringFinder, mockInt64Finder, &mock, parameters)
 	}()
 
 	actualCredential := <-mock.request
@@ -69,25 +62,10 @@ func TestCreateCredentialPublic(t *testing.T) {
 	}
 }
 
-func TestCreateCredentialPrivate(t *testing.T) {
-	t.Parallel()
-
-	mock := mockCredentialCreate{request: make(chan *models_cloudbreak.CredentialRequest)}
-	parameters := map[string]interface{}{}
-	go func() {
-		credential := createCredentialImpl(mockStringFinder, mockBoolFinder, &mock, parameters)
-		if *credential.Public {
-			t.Errorf("not private false == %t", *credential.Public)
-		}
-	}()
-
-	<-mock.request
+type mockListCredentialsByOrganization struct {
 }
 
-type mockGetPublicsCredential struct {
-}
-
-func (m *mockGetPublicsCredential) GetPublicsCredential(params *v1credentials.GetPublicsCredentialParams) (*v1credentials.GetPublicsCredentialOK, error) {
+func (m *mockListCredentialsByOrganization) ListCredentialsByOrganization(params *v3_organization_id_credentials.ListCredentialsByOrganizationParams) (*v3_organization_id_credentials.ListCredentialsByOrganizationOK, error) {
 	resp := make([]*models_cloudbreak.CredentialResponse, 0)
 	for i := 0; i < 3; i++ {
 		resp = append(resp, &models_cloudbreak.CredentialResponse{
@@ -97,7 +75,7 @@ func (m *mockGetPublicsCredential) GetPublicsCredential(params *v1credentials.Ge
 		})
 	}
 
-	return &v1credentials.GetPublicsCredentialOK{Payload: resp}, nil
+	return &v3_organization_id_credentials.ListCredentialsByOrganizationOK{Payload: resp}, nil
 }
 
 func TestListCredentialsImpl(t *testing.T) {
@@ -105,7 +83,7 @@ func TestListCredentialsImpl(t *testing.T) {
 
 	var rows []utils.Row
 
-	listCredentialsImpl(new(mockGetPublicsCredential), func(h []string, r []utils.Row) { rows = r })
+	listCredentialsImpl(new(mockListCredentialsByOrganization), int64(2), func(h []string, r []utils.Row) { rows = r })
 
 	if len(rows) != 3 {
 		t.Fatalf("row number not match 3 == %d", len(rows))
@@ -122,20 +100,8 @@ func TestListCredentialsImpl(t *testing.T) {
 type mockCredentialModifyClient struct {
 }
 
-func (m *mockCredentialModifyClient) PutPrivateCredential(params *v1credentials.PutPrivateCredentialParams) (*v1credentials.PutPrivateCredentialOK, error) {
-	return &v1credentials.PutPrivateCredentialOK{Payload: &models_cloudbreak.CredentialResponse{
-		ID:            int64(1),
-		Name:          params.Body.Name,
-		Description:   params.Body.Description,
-		CloudPlatform: params.Body.CloudPlatform,
-		Parameters:    params.Body.Parameters,
-		Public:        &(&types.B{B: false}).B,
-	},
-	}, nil
-}
-
-func (m *mockCredentialModifyClient) PutPublicCredential(params *v1credentials.PutPublicCredentialParams) (*v1credentials.PutPublicCredentialOK, error) {
-	return &v1credentials.PutPublicCredentialOK{Payload: &models_cloudbreak.CredentialResponse{
+func (m *mockCredentialModifyClient) PutCredentialInOrganization(params *v3_organization_id_credentials.PutCredentialInOrganizationParams) (*v3_organization_id_credentials.PutCredentialInOrganizationOK, error) {
+	return &v3_organization_id_credentials.PutCredentialInOrganizationOK{Payload: &models_cloudbreak.CredentialResponse{
 		ID:            int64(1),
 		Name:          params.Body.Name,
 		Description:   params.Body.Description,
@@ -146,7 +112,7 @@ func (m *mockCredentialModifyClient) PutPublicCredential(params *v1credentials.P
 	}, nil
 }
 
-func (m *mockCredentialModifyClient) GetPublicCredential(params *v1credentials.GetPublicCredentialParams) (*v1credentials.GetPublicCredentialOK, error) {
+func (m *mockCredentialModifyClient) GetCredentialInOrganization(params *v3_organization_id_credentials.GetCredentialInOrganizationParams) (*v3_organization_id_credentials.GetCredentialInOrganizationOK, error) {
 	var credentialMap = make(map[string]interface{})
 	credentialMap["selector"] = "role-based"
 	credentialMap["roleArn"] = "default-role-arn"
@@ -159,7 +125,7 @@ func (m *mockCredentialModifyClient) GetPublicCredential(params *v1credentials.G
 		return nil, errors.New("credential does not exist")
 	}
 
-	return &v1credentials.GetPublicCredentialOK{Payload: &models_cloudbreak.CredentialResponse{
+	return &v3_organization_id_credentials.GetCredentialInOrganizationOK{Payload: &models_cloudbreak.CredentialResponse{
 		ID:            int64(1),
 		Name:          &(&types.S{S: "name"}).S,
 		Description:   &(&types.S{S: "default description"}).S,
@@ -172,6 +138,7 @@ func (m *mockCredentialModifyClient) GetPublicCredential(params *v1credentials.G
 
 func TestModifyCredentialImplForValidChange(t *testing.T) {
 	t.Parallel()
+
 	expectedArn := "my-role-arn"
 	expectedDesc := "default description"
 
@@ -187,8 +154,19 @@ func TestModifyCredentialImplForValidChange(t *testing.T) {
 			return "empty"
 		}
 	}
+
+	mockInt64Finder := func(in string) int64 {
+		switch in {
+		case FlOrganizationOptional.Name:
+			return int64(2)
+		default:
+			t.Error("organization option expected")
+			return int64(-1)
+		}
+	}
+
 	parameters := map[string]interface{}{}
-	credentialResponse := modifyCredentialImpl(stringFinder, mockBoolFinder, new(mockCredentialModifyClient), parameters)
+	credentialResponse := modifyCredentialImpl(stringFinder, mockInt64Finder, new(mockCredentialModifyClient), parameters)
 	resultArn := credentialResponse.Parameters["roleArn"].(string)
 	if resultArn != expectedArn {
 		t.Errorf("roleArn does not match %s != %s", resultArn, expectedArn)
@@ -196,9 +174,6 @@ func TestModifyCredentialImplForValidChange(t *testing.T) {
 	resultDesc := *credentialResponse.Description
 	if resultDesc != expectedDesc {
 		t.Errorf("description does not match %s != %s", resultDesc, expectedDesc)
-	}
-	if *credentialResponse.Public {
-		t.Error("the credential is not supposed to be public")
 	}
 }
 
@@ -220,8 +195,19 @@ func TestModifyCredentialImplForDescriptionChange(t *testing.T) {
 			return "empty"
 		}
 	}
+
+	mockInt64Finder := func(in string) int64 {
+		switch in {
+		case FlOrganizationOptional.Name:
+			return int64(2)
+		default:
+			t.Error("organization option expected")
+			return int64(-1)
+		}
+	}
+
 	parameters := map[string]interface{}{}
-	credentialResponse := modifyCredentialImpl(stringFinder, mockBoolFinder, new(mockCredentialModifyClient), parameters)
+	credentialResponse := modifyCredentialImpl(stringFinder, mockInt64Finder, new(mockCredentialModifyClient), parameters)
 	resultArn := credentialResponse.Parameters["roleArn"].(string)
 	if resultArn != expectedArn {
 		t.Errorf("roleArn does not match %s != %s", resultArn, expectedArn)
@@ -229,9 +215,6 @@ func TestModifyCredentialImplForDescriptionChange(t *testing.T) {
 	resultDesc := *credentialResponse.Description
 	if resultDesc != expectedDesc {
 		t.Errorf("description does not match %s != %s", resultDesc, expectedDesc)
-	}
-	if *credentialResponse.Public {
-		t.Error("the credential is not supposed to be public")
 	}
 }
 
@@ -253,8 +236,19 @@ func TestModifyCredentialImplForDescriptionPublicChange(t *testing.T) {
 			return "empty"
 		}
 	}
+
+	mockInt64Finder := func(in string) int64 {
+		switch in {
+		case FlOrganizationOptional.Name:
+			return int64(2)
+		default:
+			t.Error("organization option expected")
+			return int64(-1)
+		}
+	}
+
 	parameters := map[string]interface{}{}
-	credentialResponse := modifyCredentialImpl(stringFinder, mockBoolFinder, new(mockCredentialModifyClient), parameters)
+	credentialResponse := modifyCredentialImpl(stringFinder, mockInt64Finder, new(mockCredentialModifyClient), parameters)
 	resultArn := credentialResponse.Parameters["roleArn"].(string)
 	if resultArn != expectedArn {
 		t.Errorf("roleArn does not match %s != %s", resultArn, expectedArn)
@@ -290,8 +284,19 @@ func TestModifyCredentialImplForInvalidCredential(t *testing.T) {
 			return "empty"
 		}
 	}
+
+	mockInt64Finder := func(in string) int64 {
+		switch in {
+		case FlOrganizationOptional.Name:
+			return int64(2)
+		default:
+			t.Error("organization option expected")
+			return int64(-1)
+		}
+	}
+
 	parameters := map[string]interface{}{}
-	modifyCredentialImpl(stringFinder, mockBoolFinder, new(mockCredentialModifyClient), parameters)
+	modifyCredentialImpl(stringFinder, mockInt64Finder, new(mockCredentialModifyClient), parameters)
 	t.Error("the credential modification should fail")
 }
 

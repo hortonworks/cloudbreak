@@ -3,15 +3,15 @@ package cli
 import (
 	"testing"
 
-	"github.com/hortonworks/cb-cli/client_cloudbreak/v1stacks"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_organization_id_stack"
 	"github.com/hortonworks/cb-cli/models_cloudbreak"
 )
 
 type getStackAvailableClient struct {
 }
 
-func (c getStackAvailableClient) GetStack(*v1stacks.GetStackParams) (*v1stacks.GetStackOK, error) {
-	return &v1stacks.GetStackOK{
+func (c getStackAvailableClient) GetStackInOrganization(*v3_organization_id_stack.GetStackInOrganizationParams) (*v3_organization_id_stack.GetStackInOrganizationOK, error) {
+	return &v3_organization_id_stack.GetStackInOrganizationOK{
 		Payload: &models_cloudbreak.StackResponse{
 			Status: "AVAILABLE",
 			Cluster: &models_cloudbreak.ClusterResponse{
@@ -24,23 +24,23 @@ func (c getStackAvailableClient) GetStack(*v1stacks.GetStackParams) (*v1stacks.G
 func TestWaitForOperationToFinishImplAvailable(t *testing.T) {
 	t.Parallel()
 
-	waitForOperationToFinishImpl(int64(1), AVAILABLE, AVAILABLE, getStackAvailableClient{})
+	waitForOperationToFinishImpl(int64(2), "name", AVAILABLE, AVAILABLE, getStackAvailableClient{})
 }
 
 func TestWaitForOperationToFinishImplSkip(t *testing.T) {
 	t.Parallel()
 
 	client := getStackAvailableClient{}
-	waitForOperationToFinishImpl(int64(1), SKIP, AVAILABLE, client)
-	waitForOperationToFinishImpl(int64(1), AVAILABLE, SKIP, client)
-	waitForOperationToFinishImpl(int64(1), SKIP, SKIP, client)
+	waitForOperationToFinishImpl(int64(2), "name", SKIP, AVAILABLE, client)
+	waitForOperationToFinishImpl(int64(2), "name", AVAILABLE, SKIP, client)
+	waitForOperationToFinishImpl(int64(2), "name", SKIP, SKIP, client)
 }
 
 type getStackFailedClient struct {
 }
 
-func (c getStackFailedClient) GetStack(*v1stacks.GetStackParams) (*v1stacks.GetStackOK, error) {
-	return &v1stacks.GetStackOK{
+func (c getStackFailedClient) GetStackInOrganization(*v3_organization_id_stack.GetStackInOrganizationParams) (*v3_organization_id_stack.GetStackInOrganizationOK, error) {
+	return &v3_organization_id_stack.GetStackInOrganizationOK{
 		Payload: &models_cloudbreak.StackResponse{
 			Status: "STOP_FAILED",
 			Cluster: &models_cloudbreak.ClusterResponse{
@@ -62,7 +62,7 @@ func TestWaitForOperationToFinishImplFailedStack(t *testing.T) {
 	}()
 
 	client := getStackFailedClient{}
-	waitForOperationToFinishImpl(int64(1), SKIP, AVAILABLE, client)
+	waitForOperationToFinishImpl(int64(2), "name", SKIP, AVAILABLE, client)
 
 	t.Error("Exit not happened")
 }
@@ -79,7 +79,7 @@ func TestWaitForOperationToFinishImplFailedCluster(t *testing.T) {
 	}()
 
 	client := getStackFailedClient{}
-	waitForOperationToFinishImpl(int64(1), AVAILABLE, SKIP, client)
+	waitForOperationToFinishImpl(int64(2), "name", AVAILABLE, SKIP, client)
 
 	t.Error("Exit not happened")
 }

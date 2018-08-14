@@ -22,7 +22,7 @@ func TestKeystoneV2(t *testing.T) {
 		}
 	}
 
-	actualMap, _ := provider.GetCredentialParameters(stringFinder, nil)
+	actualMap, _ := provider.GetCredentialParameters(stringFinder)
 
 	if actualMap["selector"] != KEYSTONE_V2 {
 		t.Errorf("selector not match %s == %s", KEYSTONE_V2, actualMap["selector"])
@@ -49,7 +49,7 @@ func TestKeystoneV3(t *testing.T) {
 		}
 	}
 
-	actualMap, _ := provider.GetCredentialParameters(stringFinder, nil)
+	actualMap, _ := provider.GetCredentialParameters(stringFinder)
 
 	if actualMap["selector"] != "cb-keystone-v3-project-scope" {
 		t.Errorf("selector not match cb-keystone-v3-project-scope == %s", actualMap["selector"])

@@ -28,44 +28,44 @@ var maxCardinality = map[string]int{
 	"ALL": 3,
 }
 
-var getBlueprintClient = func(server, userName, password, authType string) getPublicBlueprint {
+var getBlueprintClient = func(server, userName, password, authType string) getBlueprintInOrganization {
 	cbClient := NewCloudbreakHTTPClient(server, userName, password, authType)
-	return cbClient.Cloudbreak.V1blueprints
+	return cbClient.Cloudbreak.V3OrganizationIDBlueprints
 }
 
-var stackClient = func(server, userName, password, authType string) getPublicStack {
+var stackClient = func(server, userName, password, authType string) getStackInOrganization {
 	cbClient := NewCloudbreakHTTPClient(server, userName, password, authType)
-	return cbClient.Cloudbreak.V1stacks
+	return cbClient.Cloudbreak.V3OrganizationIDStack
 }
 
 func GenerateAwsStackTemplate(c *cli.Context) error {
 	cloud.SetProviderType(cloud.AWS)
-	return printTemplate(*generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, getBlueprintClient, getCloudStorageType(c, c.String)))
+	return printTemplate(*generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, c.Int64, getBlueprintClient, getCloudStorageType(c, c.String)))
 }
 
 func GenerateAzureStackTemplate(c *cli.Context) error {
 	cloud.SetProviderType(cloud.AZURE)
-	return printTemplate(*generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, getBlueprintClient, getCloudStorageType(c, c.String)))
+	return printTemplate(*generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, c.Int64, getBlueprintClient, getCloudStorageType(c, c.String)))
 }
 
 func GenerateGcpStackTemplate(c *cli.Context) error {
 	cloud.SetProviderType(cloud.GCP)
-	return printTemplate(*generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, getBlueprintClient, getCloudStorageType(c, c.String)))
+	return printTemplate(*generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, c.Int64, getBlueprintClient, getCloudStorageType(c, c.String)))
 }
 
 func GenerateOpenstackStackTemplate(c *cli.Context) error {
 	cloud.SetProviderType(cloud.OPENSTACK)
-	return printTemplate(*generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, getBlueprintClient, getCloudStorageType(c, c.String)))
+	return printTemplate(*generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, c.Int64, getBlueprintClient, getCloudStorageType(c, c.String)))
 }
 
 func GenerateYarnStackTemplate(c *cli.Context) error {
 	cloud.SetProviderType(cloud.YARN)
-	return printTemplate(*generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, getBlueprintClient, getCloudStorageType(c, c.String)))
+	return printTemplate(*generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, c.Int64, getBlueprintClient, getCloudStorageType(c, c.String)))
 }
 
 func GenerateAtachedStackTemplate(c *cli.Context) error {
 	checkRequiredFlagsAndArguments(c)
-	return generateAttachedtackTemplateImpl(c.String, c.Bool, stackClient, getCloudStorageType(c, c.String))
+	return generateAttachedtackTemplateImpl(c.String, c.Bool, c.Int64, stackClient, getCloudStorageType(c, c.String))
 }
 
 func getNetworkMode(c *cli.Context) cloud.NetworkMode {
@@ -121,7 +121,7 @@ func getStringPointer(skippedFields map[string]bool, fieldName string, defaultVa
 	return &defaultValue
 }
 
-func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string) string, boolFinder func(string) bool, getBlueprintClient func(string, string, string, string) getPublicBlueprint, storageType cloud.CloudStorageType) *models_cloudbreak.StackV2Request {
+func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string) string, boolFinder func(string) bool, int64Finder func(string) int64, getBlueprintClient func(string, string, string, string) getBlueprintInOrganization, storageType cloud.CloudStorageType) *models_cloudbreak.StackV2Request {
 	provider := cloud.GetProvider()
 	skippedFields := provider.SkippedFields()
 
@@ -148,7 +148,8 @@ func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string)
 	preExtendTemplateWithOptionalBlocks(&template, boolFinder, storageType)
 	nodes := defaultNodes
 	if bpName := stringFinder(FlBlueprintNameOptional.Name); len(bpName) != 0 {
-		bpResp := fetchBlueprint(bpName, getBlueprintClient(stringFinder(FlServerOptional.Name), stringFinder(FlUsername.Name), stringFinder(FlPassword.Name), stringFinder(FlAuthTypeOptional.Name)))
+		organization := int64Finder(FlOrganizationOptional.Name)
+		bpResp := fetchBlueprint(organization, bpName, getBlueprintClient(stringFinder(FlServerOptional.Name), stringFinder(FlUsername.Name), stringFinder(FlPassword.Name), stringFinder(FlAuthTypeOptional.Name)))
 		bp, err := base64.StdEncoding.DecodeString(bpResp.AmbariBlueprint)
 		if err != nil {
 			utils.LogErrorAndExit(err)
@@ -170,9 +171,9 @@ func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string)
 	return &template
 }
 
-func generateAttachedtackTemplateImpl(stringFinder func(string) string, boolFinder func(string) bool, getStackClient func(string, string, string, string) getPublicStack, storageType cloud.CloudStorageType) error {
+func generateAttachedtackTemplateImpl(stringFinder func(string) string, boolFinder func(string) bool, int64Finder func(string) int64, getStackClient func(string, string, string, string) getStackInOrganization, storageType cloud.CloudStorageType) error {
 
-	datalake := fetchStack(stringFinder(FlWithSourceCluster.Name), stackClient(stringFinder(FlServerOptional.Name), stringFinder(FlUsername.Name), stringFinder(FlPassword.Name), stringFinder(FlAuthTypeOptional.Name)))
+	datalake := fetchStack(int64Finder(FlOrganizationOptional.Name), stringFinder(FlWithSourceCluster.Name), stackClient(stringFinder(FlServerOptional.Name), stringFinder(FlUsername.Name), stringFinder(FlPassword.Name), stringFinder(FlAuthTypeOptional.Name)))
 	isSharedServiceReady, _ := datalake.Cluster.Blueprint.Tags["shared_services_ready"].(bool)
 	if !isSharedServiceReady {
 		utils.LogErrorMessageAndExit("The source cluster must be a datalake")
@@ -180,7 +181,7 @@ func generateAttachedtackTemplateImpl(stringFinder func(string) string, boolFind
 		utils.LogErrorMessageAndExit("Datalake must be available state")
 	} else {
 		cloud.SetProviderType(cloud.CloudType(datalake.CloudPlatform))
-		attachedClusterTemplate := generateStackTemplateImpl(cloud.EXISTING_NETWORK_EXISTING_SUBNET, stringFinder, boolFinder, getBlueprintClient, storageType)
+		attachedClusterTemplate := generateStackTemplateImpl(cloud.EXISTING_NETWORK_EXISTING_SUBNET, stringFinder, boolFinder, int64Finder, getBlueprintClient, storageType)
 		attachedClusterTemplate.Placement.Region = &datalake.Region
 		attachedClusterTemplate.Placement.AvailabilityZone = datalake.AvailabilityZone
 		attachedClusterTemplate.General.CredentialName = datalake.Credential.Name
@@ -462,15 +463,17 @@ func GenerateReinstallTemplate(c *cli.Context) {
 		InstanceGroups: []*models_cloudbreak.InstanceGroupsV2{},
 	}
 
+	orgID := c.Int64(FlOrganizationOptional.Name)
 	stackName := c.String(FlName.Name)
-	stackResp := fetchStack(stackName, stackClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name), c.String(FlAuthTypeOptional.Name)))
+	stackResp := fetchStack(orgID, stackName, stackClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name), c.String(FlAuthTypeOptional.Name)))
 	provider, ok := cloud.CloudProviders[cloud.CloudType(stackResp.CloudPlatform)]
 	if !ok {
 		utils.LogErrorMessageAndExit("Not supported CloudProvider: " + stackResp.CloudPlatform)
 	}
 
 	bpName := c.String(FlBlueprintNameOptional.Name)
-	bpResp := fetchBlueprint(bpName, getBlueprintClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name), c.String(FlAuthTypeOptional.Name)))
+	organization := c.Int64(FlOrganizationOptional.Name)
+	bpResp := fetchBlueprint(organization, bpName, getBlueprintClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name), c.String(FlAuthTypeOptional.Name)))
 	bp, err := base64.StdEncoding.DecodeString(bpResp.AmbariBlueprint)
 	if err != nil {
 		utils.LogErrorAndExit(err)

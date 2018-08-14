@@ -68,12 +68,12 @@ responses.getCloudbreakHealth= responseObject({ "status":"UP" }, OK);
 responses.getAccountPreferencesEndpoint= responseObject(acc, OK);
 responses.isPlatformSelectionDisabled= responseObject(platforms, OK);
 responses.platformEnablement= responseObject(platforms, OK);
-responses.getPublicsBlueprint= responseObject(qablueprint, OK);
-responses.getPublicBlueprint= responseObject(defaultblueprint, OK);
+responses.listBlueprintsByOrganization = responseObject(qablueprint, OK);
+responses.getBlueprintInOrganization = responseObject(defaultblueprint, OK);
 responses.getPrivatesBlueprint= responseObject(qablueprint, OK);
 responses.getPrivateBlueprint= responseObject(defaultblueprint, OK);
 responses.getBlueprint= responseObject(defaultblueprint, OK);
-responses.postPublicBlueprint= responseObject(defaultblueprint, OK);
+responses.createBlueprintInOrganization= responseObject(defaultblueprint, OK);
 responses.postPrivateBlueprint= responseObject(defaultblueprint, OK);
 responses.getBlueprintRequestFromId= responseObject(defaultblueprint, OK);
 responses.getDisktypes= responseObject(disktypes, OK);
@@ -84,43 +84,43 @@ responses.getPublicsNetwork= responseObject(networks, OK);
 responses.createRecommendation= responseObject(recommendations, OK);
 responses.getRegions= responseObject(regions, OK);
 responses.getPlatformSShKeys= responseObject(sshkeys, OK);
-responses.getCredential = responseObject(credentialopenstack, OK);
-responses.postPrivateCredential = responseObject(credentialopenstack, OK);
-responses.getPublicsCredential= responseObject([credentialopenstack,credentialgcp,credentialazure,credentialaws], OK);
+responses.getCredentialInOrganization = responseObject(credentialopenstack, OK);
+responses.createCredentialInOrganization = responseObject(credentialopenstack, OK);
+responses.listCredentialsByOrganization = responseObject([credentialopenstack, credentialgcp, credentialazure, credentialaws], OK);
 responses.getPublicCredential= responseObject(credentialopenstack, OK);
 responses.getPrivatesCredential= responseObject([credentialopenstack,credentialgcp,credentialazure,credentialaws], OK);
 responses.getPrivateCredential= responseObject(credentialopenstack, OK);
-responses.getPublicsImageCatalogs= responseObject(defimagec, OK);
-responses.postPublicImageCatalog= responseObject(defimagec, OK);
-responses.putPublicImageCatalog= responseObject(defimagec, OK);
+responses.listImageCatalogsByOrganization = responseObject(defimagec, OK);
+responses.getImageCatalogInOrganization = responseObject(defimagec, OK);
+responses.createImageCatalogInOrganization = responseObject(defimagec, OK);
 responses.getPublicImageCatalogsByName= responseObject(defimagec, OK);
-responses.getPublicImagesByProviderAndCustomImageCatalog= responseObject(qaimages, OK);
+responses.getImagesByProviderAndCustomImageCatalogInOrganization= responseObject(qaimages, OK);
 responses.putSetDefaultImageCatalogByName= responseObject(defimagec, OK);
 responses.postPrivateImageCatalog= responseObject(defimagec, OK);
 responses.getImageCatalogRequestFromName= responseObject(defimagec, OK);
-responses.getPublicsLdap= responseObject(ldap, OK);
-responses.postPublicLdap= responseObject(ldap, OK);
-responses.getPublicLdap= responseObject(ldap, OK);
-responses.postLdapConnectionTest= responseObject({ "connectionResult":"Failed to connect to LDAP server: hwxad-1a2bcd3e45678f90.elb.eu-west-1.amazonaws.com:123" }, OK);
+responses.listLdapsByOrganization = responseObject(ldap, OK);
+responses.getLdapConfigInOrganization = responseObject(ldap, OK);
+responses.createLdapConfigsInOrganization = responseObject(ldap, OK);
+responses.postLdapConnectionTestInOrganization = responseObject({ "connectionResult":"Failed to connect to LDAP server: hwxad-1a2bcd3e45678f90.elb.eu-west-1.amazonaws.com:123" }, OK);
 responses.getPrivatesLdap= responseObject(ldap, OK);
 responses.postPrivateLdap= responseObject(ldap, OK);
 responses.getPrivateLdap= responseObject(ldap, OK);
 responses.getLdap= responseObject(ldap, OK);
-responses.getPublicsProxyConfig= responseObject(proxy, OK);
-responses.postPublicProxyConfig= responseObject(proxy, OK);
-responses.getPublicProxyConfig= responseObject(proxy, OK);
+responses.listProxyconfigsByOrganization = responseObject(proxy, OK);
+responses.getProxyconfigInOrganization = responseObject(proxy, OK);
+responses.createProxyconfigInOrganization = responseObject(proxy, OK);
 responses.getPrivatesProxyConfig= responseObject(proxy, OK);
 responses.postPrivateProxyConfig= responseObject(proxy, OK);
 responses.getPrivateProxyConfig= responseObject(proxy, OK);
 responses.getProxyConfig= responseObject(proxy, OK);
-responses.getPublicsRds= responseObject(rds, OK);
-responses.postPublicRds= responseObject(rds, OK);
-responses.getPublicRds= responseObject(rds, OK);
+responses.listRdsConfigsByOrganization = responseObject(rds, OK);
+responses.createRdsConfigInOrganization = responseObject(rds, OK);
+responses.getRdsConfigInOrganization = responseObject(rds, OK);
 responses.testRdsConnection= responseObject({ "connectionResult":"Failed to connect to RDS: The connection attempt failed." }, OK);
 responses.getPrivatesRds= responseObject(rds, OK);
 responses.postPrivateRds= responseObject(rds, OK);
 responses.getPrivateRds= responseObject(rds, OK);
-responses.getPublicsRecipe= responseObject(recipes, OK);
+responses.listRecipesByOrganization= responseObject(recipes, OK);
 responses.getPublicRecipe= responseObject(recipes[0], OK);
 responses.postPublicRecipe= responseObject(recipes[0], OK);
 responses.postPrivateRecipe= responseObject(recipes[0], OK);
@@ -132,13 +132,13 @@ responses.getPublicStack= stackResponses;
 responses.getPublicsTemplate= responseObject(templates, OK);
 responses.getUserProfile= responseObject(profile, OK);
 responses.getRegionsByCredentialId= responseObject(regions, OK);
-responses.getPublicsStackV2= responseObject([openstack, aws, azure, gcp], OK);
+responses.listStacksByOrganization= responseObject([openstack, aws, azure, gcp], OK);
 responses.getPublicStackV2= responseObject(stackResponses, OK);
 responses.postPrivateStackV2= responseObject(openstack, OK);
 responses.getPrivateStackV2= responseObject(openstack, OK);
 responses.getStackV2= responseObject(openstack, OK);
 responses.getPlatformSecurityGroups= responseObject(securitygroups, OK);
-responses.postPublicManagementPack = responseObject(mpacks, OK);
+responses.createManagementPackInOrganization = responseObject(mpacks, OK);
 responses.postPrivateManagementPack = responseObject(mpacks, OK);
 
 responses.postRepositoryConfigsValidation= responseObject({
@@ -150,7 +150,7 @@ responses.postRepositoryConfigsValidation= responseObject({
   "ambariBaseUrl" : true
 }, OK);
 responses.getStackMatrixUtil= responseObject(matrix , OK);
-responses.getSmartSenseSubscription= responseObject({
+responses.getDefaultSmartSenseSubscriptionInOrganization= responseObject({
   "owner" : "owner",
   "publicInAccount" : false,
   "id" : 1,
@@ -159,7 +159,7 @@ responses.getSmartSenseSubscription= responseObject({
   "account" : "account"
 }, OK);
 responses.getTagSpecifications = responseObject({ "specifications" : { "key" : { "key" : "{}" } } }, OK);
-responses.getPublicManagementPacks = responseObject([ {
+responses.listManagementPacksByOrganization = responseObject([ {
   "public" : false,
   "name" : "name",
   "description" : "description",
@@ -178,7 +178,7 @@ responses.getPublicManagementPacks = responseObject([ {
   "mpackUrl" : "mpackUrl",
   "purgeList" : [ "purgeList", "purgeList" ]
 } ],OK);
-responses.getPublicFlexSubscriptions = responseObject([ {
+responses.listFlexSubscriptionsByOrganization = responseObject([ {
   "owner" : "owner",
   "publicInAccount" : false,
   "smartSenseSubscriptionId" : 0,

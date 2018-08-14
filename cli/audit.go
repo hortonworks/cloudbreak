@@ -6,7 +6,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/cb-cli/cli/utils"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/v1audits"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_organization_id_audits"
 	"github.com/hortonworks/cb-cli/models_cloudbreak"
 	"github.com/urfave/cli"
 	yaml "gopkg.in/yaml.v2"
@@ -43,6 +43,7 @@ func ListAudits(c *cli.Context) {
 	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "list audits")
 	log.Infof("[ListAudits] List all audits for a resource identified by Resource ID")
+	orgID := c.Int64(FlOrganizationOptional.Name)
 	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
 	resourceID, err := strconv.ParseInt(c.String(FlResourceID.Name), 10, 64)
 	if err != nil {
@@ -52,7 +53,7 @@ func ListAudits(c *cli.Context) {
 
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 
-	resp, err := cbClient.Cloudbreak.V1audits.GetAuditEvents(v1audits.NewGetAuditEventsParams().WithResourceType(resourceType).WithResourceID(resourceID))
+	resp, err := cbClient.Cloudbreak.V3OrganizationIDAudits.GetAuditEventsInOrganization(v3_organization_id_audits.NewGetAuditEventsInOrganizationParams().WithOrganizationID(orgID).WithResourceType(resourceType).WithResourceID(resourceID))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -73,6 +74,7 @@ func DescribeAudit(c *cli.Context) {
 	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "describe audit")
 	log.Infof("[DescribeAudit] Show audit entry identified by Audit ID")
+	orgID := c.Int64(FlOrganizationOptional.Name)
 	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
 	auditID, err := strconv.ParseInt(c.String(FlAuditID.Name), 10, 64)
 	if err != nil {
@@ -81,7 +83,7 @@ func DescribeAudit(c *cli.Context) {
 
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 
-	resp, err := cbClient.Cloudbreak.V1audits.GetAuditEvent(v1audits.NewGetAuditEventParams().WithAuditID(auditID))
+	resp, err := cbClient.Cloudbreak.V3OrganizationIDAudits.GetAuditEventByOrganization(v3_organization_id_audits.NewGetAuditEventByOrganizationParams().WithOrganizationID(orgID).WithAuditID(auditID))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}

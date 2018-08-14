@@ -22,11 +22,12 @@ const (
 )
 
 type Config struct {
-	Username string `json:"username" yaml:"username"`
-	Password string `json:"password,omitempty" yaml:"password,omitempty"`
-	Server   string `json:"server" yaml:"server"`
-	AuthType string `json:"authType,omitempty" yaml:"authType,omitempty"`
-	Output   string `json:"output,omitempty" yaml:"output,omitempty"`
+	Username     string `json:"username" yaml:"username"`
+	Password     string `json:"password,omitempty" yaml:"password,omitempty"`
+	Server       string `json:"server" yaml:"server"`
+	AuthType     string `json:"authType,omitempty" yaml:"authType,omitempty"`
+	Organization string `json:"organization,omitempty" yaml:"organization,omitempty"`
+	Output       string `json:"output,omitempty" yaml:"output,omitempty"`
 }
 
 type ConfigList map[string]Config
@@ -49,9 +50,10 @@ func (c ConfigList) Yaml() string {
 func Configure(c *cli.Context) {
 	checkRequiredFlagsAndArguments(c)
 
-	err := writeConfigToFile(GetHomeDirectory(), c.String(FlServerOptional.Name),
+	err := WriteConfigToFile(GetHomeDirectory(), c.String(FlServerOptional.Name),
 		c.String(FlUsername.Name), c.String(FlPassword.Name),
-		c.String(FlOutputOptional.Name), c.String(FlProfileOptional.Name), c.String(FlAuthTypeOptional.Name))
+		c.String(FlOutputOptional.Name), c.String(FlProfileOptional.Name),
+		c.String(FlAuthTypeOptional.Name), c.String(FlOrganizationOptional.Name))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -88,7 +90,7 @@ func ReadConfig(baseDir string, profile string) (*Config, error) {
 	}
 }
 
-func writeConfigToFile(baseDir, server, username, password, output, profile, authType string) error {
+func WriteConfigToFile(baseDir, server, username, password, output, profile, authType, organization string) error {
 	configDir := baseDir + "/" + Config_dir
 	configFile := configDir + "/" + Config_file
 	if len(profile) == 0 {
@@ -115,7 +117,13 @@ func writeConfigToFile(baseDir, server, username, password, output, profile, aut
 		}
 	}
 
-	configList[profile] = Config{Server: server, Username: username, Password: password, Output: output, AuthType: authType}
+	configList[profile] = Config{Server: server,
+		Organization: organization,
+		Username:     username,
+		Password:     password,
+		Output:       output,
+		AuthType:     authType,
+	}
 
 	err := ioutil.WriteFile(configFile, []byte(configList.Yaml()), 0600)
 	if err != nil {

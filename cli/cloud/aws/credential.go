@@ -1,6 +1,6 @@
 package aws
 
-func (p *AwsProvider) GetCredentialParameters(stringFinder func(string) string, boolFinder func(string) bool) (map[string]interface{}, error) {
+func (p *AwsProvider) GetCredentialParameters(stringFinder func(string) string) (map[string]interface{}, error) {
 	var credentialMap = make(map[string]interface{})
 	if len(stringFinder("role-arn")) != 0 {
 		credentialMap["selector"] = "role-based"

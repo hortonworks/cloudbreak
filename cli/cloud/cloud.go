@@ -58,7 +58,7 @@ var CloudProviders = make(map[CloudType]CloudProvider)
 
 type CloudProvider interface {
 	GetName() *string
-	GetCredentialParameters(func(string) string, func(string) bool) (map[string]interface{}, error)
+	GetCredentialParameters(func(string) string) (map[string]interface{}, error)
 	GetNetworkParamatersTemplate(NetworkMode) map[string]interface{}
 	GetInstanceGroupParamatersTemplate(node Node) map[string]interface{}
 	GetParamatersTemplate() map[string]interface{}
@@ -86,7 +86,7 @@ func (p *DefaultCloudProvider) SkippedFields() map[string]bool {
 	return make(map[string]bool)
 }
 
-func (p *DefaultCloudProvider) GetCredentialParameters(func(string) string, func(string) bool) (map[string]interface{}, error) {
+func (p *DefaultCloudProvider) GetCredentialParameters(func(string) string) (map[string]interface{}, error) {
 	return make(map[string]interface{}), nil
 }
 

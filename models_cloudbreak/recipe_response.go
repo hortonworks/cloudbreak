@@ -37,8 +37,8 @@ type RecipeResponse struct {
 	// Pattern: (^[a-z][-a-z0-9]*[a-z0-9]$)
 	Name string `json:"name,omitempty"`
 
-	// resource is visible in account
-	Public *bool `json:"public,omitempty"`
+	// organization of the resource
+	Organization *OrganizationResourceResponse `json:"organization,omitempty"`
 
 	// type of recipe
 	// Required: true
@@ -56,7 +56,7 @@ type RecipeResponse struct {
 
 /* polymorph RecipeResponse name false */
 
-/* polymorph RecipeResponse public false */
+/* polymorph RecipeResponse organization false */
 
 /* polymorph RecipeResponse recipeType false */
 
@@ -72,6 +72,11 @@ func (m *RecipeResponse) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateName(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateOrganization(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -120,6 +125,25 @@ func (m *RecipeResponse) validateName(formats strfmt.Registry) error {
 
 	if err := validate.Pattern("name", "body", string(m.Name), `(^[a-z][-a-z0-9]*[a-z0-9]$)`); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *RecipeResponse) validateOrganization(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Organization) { // not required
+		return nil
+	}
+
+	if m.Organization != nil {
+
+		if err := m.Organization.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("organization")
+			}
+			return err
+		}
 	}
 
 	return nil

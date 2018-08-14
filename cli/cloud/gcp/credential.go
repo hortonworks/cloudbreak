@@ -2,11 +2,12 @@ package gcp
 
 import (
 	"encoding/base64"
+
 	"github.com/hortonworks/cb-cli/cli"
 	"github.com/hortonworks/cb-cli/cli/utils"
 )
 
-func (p *GcpProvider) GetCredentialParameters(stringFinder func(string) string, boolFinder func(string) bool) (map[string]interface{}, error) {
+func (p *GcpProvider) GetCredentialParameters(stringFinder func(string) string) (map[string]interface{}, error) {
 	var credentialMap = make(map[string]interface{})
 	if len(stringFinder(cli.FlServiceAccountPrivateKeyFile.Name)) != 0 {
 		credentialMap["projectId"] = stringFinder("project-id")

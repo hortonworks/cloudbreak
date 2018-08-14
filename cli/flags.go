@@ -133,13 +133,6 @@ var (
 			Usage: "description of resource",
 		},
 	}
-	FlPublicOptional = BoolFlag{
-		RequiredFlag: OPTIONAL,
-		BoolFlag: cli.BoolFlag{
-			Name:  "public",
-			Usage: "public in account",
-		},
-	}
 	FlDlOptional = BoolFlag{
 		RequiredFlag: OPTIONAL,
 		BoolFlag: cli.BoolFlag{
@@ -862,6 +855,13 @@ var (
 			Usage: "id of audit",
 		},
 	}
+	FlOrganizationOptional = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name:  "org",
+			Usage: "name of the organization",
+		},
+	}
 )
 
 type RequiredFlag struct {
@@ -974,21 +974,21 @@ func (fb *FlagBuilder) AddFlags(flags ...cli.Flag) *FlagBuilder {
 }
 
 func (fb *FlagBuilder) AddAuthenticationFlags() *FlagBuilder {
-	for _, f := range []cli.Flag{FlServerOptional, FlUsername, FlPassword, FlProfileOptional, FlAuthTypeOptional} {
+	for _, f := range []cli.Flag{FlServerOptional, FlUsername, FlPassword, FlOrganizationOptional, FlProfileOptional, FlAuthTypeOptional} {
 		fb.flags = append(fb.flags, f)
 	}
 	return fb
 }
 
 func (fb *FlagBuilder) AddResourceDefaultFlags() *FlagBuilder {
-	for _, f := range []cli.Flag{FlName, FlDescriptionOptional, FlPublicOptional} {
+	for _, f := range []cli.Flag{FlName, FlDescriptionOptional} {
 		fb.flags = append(fb.flags, f)
 	}
 	return fb
 }
 
 func (fb *FlagBuilder) AddResourceFlagsWithOptionalName() *FlagBuilder {
-	for _, f := range []cli.Flag{FlNameOptional, FlDescriptionOptional, FlPublicOptional} {
+	for _, f := range []cli.Flag{FlNameOptional, FlDescriptionOptional} {
 		fb.flags = append(fb.flags, f)
 	}
 	return fb

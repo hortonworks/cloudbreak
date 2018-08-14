@@ -7,9 +7,10 @@ import (
 	"net/http"
 
 	"encoding/base64"
+
 	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/cb-cli/cli/utils"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/v1recipes"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_organization_id_recipes"
 	"github.com/hortonworks/cb-cli/models_cloudbreak"
 	"github.com/urfave/cli"
 )
@@ -33,10 +34,10 @@ func CreateRecipeFromUrl(c *cli.Context) {
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	urlLocation := c.String(FlURL.Name)
 	createRecipeImpl(
-		cbClient.Cloudbreak.V1recipes,
+		cbClient.Cloudbreak.V3OrganizationIDRecipes,
+		c.Int64(FlOrganizationOptional.Name),
 		c.String(FlName.Name),
 		c.String(FlDescriptionOptional.Name),
-		c.Bool(FlPublicOptional.Name),
 		getExecutionType(c.String(FlExecutionType.Name)),
 		base64.StdEncoding.EncodeToString(utils.ReadContentFromURL(urlLocation, new(http.Client))))
 }
@@ -48,10 +49,10 @@ func CreateRecipeFromFile(c *cli.Context) {
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	fileLocation := c.String(FlFile.Name)
 	createRecipeImpl(
-		cbClient.Cloudbreak.V1recipes,
+		cbClient.Cloudbreak.V3OrganizationIDRecipes,
+		c.Int64(FlOrganizationOptional.Name),
 		c.String(FlName.Name),
 		c.String(FlDescriptionOptional.Name),
-		c.Bool(FlPublicOptional.Name),
 		getExecutionType(c.String(FlExecutionType.Name)),
 		base64.StdEncoding.EncodeToString(utils.ReadFile(fileLocation)))
 }
@@ -73,11 +74,10 @@ func getExecutionType(executionType string) string {
 }
 
 type recipeClient interface {
-	PostPrivateRecipe(params *v1recipes.PostPrivateRecipeParams) (*v1recipes.PostPrivateRecipeOK, error)
-	PostPublicRecipe(params *v1recipes.PostPublicRecipeParams) (*v1recipes.PostPublicRecipeOK, error)
+	CreateRecipeInOrganization(params *v3_organization_id_recipes.CreateRecipeInOrganizationParams) (*v3_organization_id_recipes.CreateRecipeInOrganizationOK, error)
 }
 
-func createRecipeImpl(client recipeClient, name string, description string, public bool, executionType string, recipeContent string) *models_cloudbreak.RecipeResponse {
+func createRecipeImpl(client recipeClient, orgID int64, name string, description string, executionType string, recipeContent string) *models_cloudbreak.RecipeResponse {
 	defer utils.TimeTrack(time.Now(), "create recipe")
 	recipeRequest := &models_cloudbreak.RecipeRequest{
 		Name:        name,
@@ -86,21 +86,13 @@ func createRecipeImpl(client recipeClient, name string, description string, publ
 		RecipeType:  &executionType,
 	}
 	var recipe *models_cloudbreak.RecipeResponse
-	if public {
-		log.Infof("[createRecipeImpl] sending create public recipe request")
-		resp, err := client.PostPublicRecipe(v1recipes.NewPostPublicRecipeParams().WithBody(recipeRequest))
-		if err != nil {
-			utils.LogErrorAndExit(err)
-		}
-		recipe = resp.Payload
-	} else {
-		log.Infof("[createRecipeImpl] sending create private recipe request")
-		resp, err := client.PostPrivateRecipe(v1recipes.NewPostPrivateRecipeParams().WithBody(recipeRequest))
-		if err != nil {
-			utils.LogErrorAndExit(err)
-		}
-		recipe = resp.Payload
+	log.Infof("[createRecipeImpl] sending create public recipe request")
+	resp, err := client.CreateRecipeInOrganization(v3_organization_id_recipes.NewCreateRecipeInOrganizationParams().WithOrganizationID(orgID).WithBody(recipeRequest))
+	if err != nil {
+		utils.LogErrorAndExit(err)
 	}
+	recipe = resp.Payload
+
 	log.Infof("[createRecipeImpl] recipe created: %s (id: %d)", recipe.Name, recipe.ID)
 	return recipe
 }
@@ -111,7 +103,8 @@ func DescribeRecipe(c *cli.Context) {
 
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
-	resp, err := cbClient.Cloudbreak.V1recipes.GetPublicRecipe(v1recipes.NewGetPublicRecipeParams().WithName(c.String(FlName.Name)))
+	orgID := c.Int64(FlOrganizationOptional.Name)
+	resp, err := cbClient.Cloudbreak.V3OrganizationIDRecipes.GetRecipeInOrganization(v3_organization_id_recipes.NewGetRecipeInOrganizationParams().WithOrganizationID(orgID).WithName(c.String(FlName.Name)))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -125,8 +118,9 @@ func DeleteRecipe(c *cli.Context) {
 
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	name := c.String(FlName.Name)
+	orgID := c.Int64(FlOrganizationOptional.Name)
 	log.Infof("[DeleteRecipe] sending delete recipe request with name: %s", name)
-	if err := cbClient.Cloudbreak.V1recipes.DeletePublicRecipe(v1recipes.NewDeletePublicRecipeParams().WithName(name)); err != nil {
+	if _, err := cbClient.Cloudbreak.V3OrganizationIDRecipes.DeleteRecipeInOrganization(v3_organization_id_recipes.NewDeleteRecipeInOrganizationParams().WithOrganizationID(orgID).WithName(name)); err != nil {
 		utils.LogErrorAndExit(err)
 	}
 	log.Infof("[DeleteRecipe] recipe deleted, name: %s", name)
@@ -138,16 +132,17 @@ func ListRecipes(c *cli.Context) {
 
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
-	listRecipesImpl(cbClient.Cloudbreak.V1recipes, output.WriteList)
+	orgID := c.Int64(FlOrganizationOptional.Name)
+	listRecipesImpl(cbClient.Cloudbreak.V3OrganizationIDRecipes, output.WriteList, orgID)
 }
 
 type getPublicsRecipeClient interface {
-	GetPublicsRecipe(*v1recipes.GetPublicsRecipeParams) (*v1recipes.GetPublicsRecipeOK, error)
+	ListRecipesByOrganization(*v3_organization_id_recipes.ListRecipesByOrganizationParams) (*v3_organization_id_recipes.ListRecipesByOrganizationOK, error)
 }
 
-func listRecipesImpl(client getPublicsRecipeClient, writer func([]string, []utils.Row)) {
+func listRecipesImpl(client getPublicsRecipeClient, writer func([]string, []utils.Row), orgID int64) {
 	log.Infof("[listRecipesImpl] sending recipe list request")
-	recipesResp, err := client.GetPublicsRecipe(v1recipes.NewGetPublicsRecipeParams())
+	recipesResp, err := client.ListRecipesByOrganization(v3_organization_id_recipes.NewListRecipesByOrganizationParams().WithOrganizationID(orgID))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}

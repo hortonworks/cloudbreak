@@ -37,6 +37,10 @@ type SecurityGroupRequest struct {
 	// Exisiting security group id
 	SecurityGroupID string `json:"securityGroupId,omitempty"`
 
+	// Exisiting security group ids
+	// Unique: true
+	SecurityGroupIds []string `json:"securityGroupIds"`
+
 	// list of security rules that relates to the security group
 	SecurityRules []*SecurityRuleRequest `json:"securityRules"`
 }
@@ -48,6 +52,8 @@ type SecurityGroupRequest struct {
 /* polymorph SecurityGroupRequest name false */
 
 /* polymorph SecurityGroupRequest securityGroupId false */
+
+/* polymorph SecurityGroupRequest securityGroupIds false */
 
 /* polymorph SecurityGroupRequest securityRules false */
 
@@ -66,6 +72,11 @@ func (m *SecurityGroupRequest) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateName(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateSecurityGroupIds(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -114,6 +125,19 @@ func (m *SecurityGroupRequest) validateName(formats strfmt.Registry) error {
 	}
 
 	if err := validate.Pattern("name", "body", string(*m.Name), `(^[a-z][-a-z0-9]*[a-z0-9]$)`); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *SecurityGroupRequest) validateSecurityGroupIds(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.SecurityGroupIds) { // not required
+		return nil
+	}
+
+	if err := validate.UniqueItems("securityGroupIds", "body", m.SecurityGroupIds); err != nil {
 		return err
 	}
 

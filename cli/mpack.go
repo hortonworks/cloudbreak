@@ -1,19 +1,19 @@
 package cli
 
 import (
-	log "github.com/Sirupsen/logrus"
-	"github.com/hortonworks/cb-cli/cli/utils"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/v1mpacks"
-	"github.com/hortonworks/cb-cli/models_cloudbreak"
-	"github.com/urfave/cli"
 	"strings"
 	"time"
+
+	log "github.com/Sirupsen/logrus"
+	"github.com/hortonworks/cb-cli/cli/utils"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_organization_id_mpacks"
+	"github.com/hortonworks/cb-cli/models_cloudbreak"
+	"github.com/urfave/cli"
 )
 
 type mpackClient interface {
-	PostPublicManagementPack(params *v1mpacks.PostPublicManagementPackParams) (*v1mpacks.PostPublicManagementPackOK, error)
-	PostPrivateManagementPack(params *v1mpacks.PostPrivateManagementPackParams) (*v1mpacks.PostPrivateManagementPackOK, error)
-	GetPublicManagementPacks(params *v1mpacks.GetPublicManagementPacksParams) (*v1mpacks.GetPublicManagementPacksOK, error)
+	CreateManagementPackInOrganization(params *v3_organization_id_mpacks.CreateManagementPackInOrganizationParams) (*v3_organization_id_mpacks.CreateManagementPackInOrganizationOK, error)
+	ListManagementPacksByOrganization(params *v3_organization_id_mpacks.ListManagementPacksByOrganizationParams) (*v3_organization_id_mpacks.ListManagementPacksByOrganizationOK, error)
 }
 
 var mpackHeader = []string{"Name", "Description", "URL", "Purge", "PurgeList", "Force"}
@@ -35,17 +35,17 @@ func CreateMpack(c *cli.Context) {
 	checkRequiredFlagsAndArguments(c)
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	createMpackImpl(
-		cbClient.Cloudbreak.V1mpacks,
+		cbClient.Cloudbreak.V3OrganizationIDMpacks,
+		c.Int64(FlOrganizationOptional.Name),
 		c.String(FlName.Name),
 		c.String(FlDescriptionOptional.Name),
 		c.String(FLMpackURL.Name),
 		c.Bool(FLMpackPurge.Name),
 		c.String(FLMpackPurgeList.Name),
-		c.Bool(FLMpackForce.Name),
-		c.Bool(FlPublicOptional.Name))
+		c.Bool(FLMpackForce.Name))
 }
 
-func createMpackImpl(client mpackClient, name, description, url string, purge bool, purgeList string, force, public bool) {
+func createMpackImpl(client mpackClient, orgID int64, name, description, url string, purge bool, purgeList string, force bool) {
 	defer utils.TimeTrack(time.Now(), "create management pack")
 	pList := make([]string, 0)
 	if len(purgeList) > 0 {
@@ -62,21 +62,12 @@ func createMpackImpl(client mpackClient, name, description, url string, purge bo
 	}
 
 	var mpackResponse *models_cloudbreak.ManagementPackResponse
-	if public {
-		log.Infof("[createMpackImpl] sending create public management pack request with name: %s", name)
-		resp, err := client.PostPublicManagementPack(v1mpacks.NewPostPublicManagementPackParams().WithBody(req))
-		if err != nil {
-			utils.LogErrorAndExit(err)
-		}
-		mpackResponse = resp.Payload
-	} else {
-		log.Infof("[createMpackImpl] sending create private management pack request with name: %s", name)
-		resp, err := client.PostPrivateManagementPack(v1mpacks.NewPostPrivateManagementPackParams().WithBody(req))
-		if err != nil {
-			utils.LogErrorAndExit(err)
-		}
-		mpackResponse = resp.Payload
+	log.Infof("[createMpackImpl] sending create public management pack request with name: %s", name)
+	resp, err := client.CreateManagementPackInOrganization(v3_organization_id_mpacks.NewCreateManagementPackInOrganizationParams().WithOrganizationID(orgID).WithBody(req))
+	if err != nil {
+		utils.LogErrorAndExit(err)
 	}
+	mpackResponse = resp.Payload
 	log.Infof("[createMpackImpl] management pack created: %s (id: %d)", *mpackResponse.Name, mpackResponse.ID)
 }
 
@@ -84,11 +75,12 @@ func DeleteMpack(c *cli.Context) error {
 	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "delete a management pack")
 
+	orgID := c.Int64(FlOrganizationOptional.Name)
 	mpackName := c.String(FlName.Name)
 	log.Infof("[DeleteMpack] delete management pack by name: %s", mpackName)
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 
-	if err := cbClient.Cloudbreak.V1mpacks.DeletePublicManagementPack(v1mpacks.NewDeletePublicManagementPackParams().WithName(mpackName)); err != nil {
+	if _, err := cbClient.Cloudbreak.V3OrganizationIDMpacks.DeleteManagementPackInOrganization(v3_organization_id_mpacks.NewDeleteManagementPackInOrganizationParams().WithOrganizationID(orgID).WithName(mpackName)); err != nil {
 		utils.LogErrorAndExit(err)
 	}
 	log.Infof("[DeleteMpack] management pack deleted: %s", mpackName)
@@ -102,11 +94,12 @@ func ListMpacks(c *cli.Context) error {
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 
 	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
-	return listMpacksImpl(cbClient.Cloudbreak.V1mpacks, output.WriteList)
+	orgID := c.Int64(FlOrganizationOptional.Name)
+	return listMpacksImpl(cbClient.Cloudbreak.V3OrganizationIDMpacks, output.WriteList, orgID)
 }
 
-func listMpacksImpl(mpackClient mpackClient, writer func([]string, []utils.Row)) error {
-	resp, err := mpackClient.GetPublicManagementPacks(v1mpacks.NewGetPublicManagementPacksParams())
+func listMpacksImpl(mpackClient mpackClient, writer func([]string, []utils.Row), orgID int64) error {
+	resp, err := mpackClient.ListManagementPacksByOrganization(v3_organization_id_mpacks.NewListManagementPacksByOrganizationParams().WithOrganizationID(orgID))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}

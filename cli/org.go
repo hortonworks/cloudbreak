@@ -5,7 +5,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/cb-cli/cli/utils"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/v1organizations"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v3organizations"
 	"github.com/hortonworks/cb-cli/models_cloudbreak"
 	"github.com/urfave/cli"
 	yaml "gopkg.in/yaml.v2"
@@ -42,7 +42,7 @@ func CreateOrg(c *cli.Context) {
 		Description: &orgDesc,
 	}
 
-	_, err := cbClient.Cloudbreak.V1organizations.CreateOrganization(v1organizations.NewCreateOrganizationParams().WithBody(&req))
+	_, err := cbClient.Cloudbreak.V3organizations.CreateOrganization(v3organizations.NewCreateOrganizationParams().WithBody(&req))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -58,7 +58,7 @@ func DeleteOrg(c *cli.Context) {
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 
 	orgName := c.String(FlName.Name)
-	_, err := cbClient.Cloudbreak.V1organizations.DeleteOrganizationByName(v1organizations.NewDeleteOrganizationByNameParams().WithName(orgName))
+	_, err := cbClient.Cloudbreak.V3organizations.DeleteOrganizationByName(v3organizations.NewDeleteOrganizationByNameParams().WithName(orgName))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -75,7 +75,7 @@ func DescribeOrg(c *cli.Context) {
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 
 	orgName := c.String(FlName.Name)
-	resp, err := cbClient.Cloudbreak.V1organizations.GetOrganizationByName(v1organizations.NewGetOrganizationByNameParams().WithName(orgName))
+	resp, err := cbClient.Cloudbreak.V3organizations.GetOrganizationByName(v3organizations.NewGetOrganizationByNameParams().WithName(orgName))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -93,7 +93,7 @@ func ListOrgs(c *cli.Context) {
 
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 
-	resp, err := cbClient.Cloudbreak.V1organizations.GetOrganizations(v1organizations.NewGetOrganizationsParams())
+	resp, err := cbClient.Cloudbreak.V3organizations.GetOrganizations(v3organizations.NewGetOrganizationsParams())
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -103,4 +103,26 @@ func ListOrgs(c *cli.Context) {
 		tableRows = append(tableRows, &orgListOut{org})
 	}
 	output.WriteList(orgListHeader, tableRows)
+}
+
+func GetOrgIdByName(c *cli.Context, orgName string) int64 {
+	cbClient := NewCloudbreakHTTPClientFromContext(c)
+
+	resp, err := cbClient.Cloudbreak.V3organizations.GetOrganizationByName(v3organizations.NewGetOrganizationByNameParams().WithName(orgName))
+	if err != nil {
+		utils.LogErrorAndExit(err)
+	}
+
+	return resp.Payload.ID
+}
+
+func GetOrgList(c *cli.Context) []*models_cloudbreak.OrganizationResponse {
+	cbClient := NewCloudbreakHTTPClientFromContext(c)
+
+	resp, err := cbClient.Cloudbreak.V3organizations.GetOrganizations(v3organizations.NewGetOrganizationsParams())
+	if err != nil {
+		utils.LogErrorAndExit(err)
+	}
+
+	return resp.Payload
 }
