@@ -42,6 +42,7 @@ public class ControllerDescription {
     public static final String RECIPE_V3_DESCRIPTION = "Operations on recipes by organization";
     public static final String SMARTSENSE_SUBSCRIPTION_V3_DESCRIPTION = "Operations on SmartSense subscriptions by organization";
     public static final String STACK_V3_DESCRIPTION = "Operations on stack by organization";
+    public static final String IMAGE_CATALOG_V3_DESCRIPTION = "Operations on Image Catalog by Organization";
 
     private ControllerDescription() {
     }

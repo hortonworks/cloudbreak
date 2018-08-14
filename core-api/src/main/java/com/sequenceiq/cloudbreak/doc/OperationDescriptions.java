@@ -396,6 +396,10 @@ public class OperationDescriptions {
                 + "from the given imagecatalog name";
         public static final String GET_IMAGES_BY_STACK_NAME = "determines available images for the given stack"
                 + "from the default image catalog";
+        public static final String LIST_BY_ORGANIZATION = "list image catalogs for the given organization";
+        public static final String GET_BY_NAME_IN_ORG = "get image catalog by name in organization";
+        public static final String CREATE_IN_ORG = "create image catalog in organization";
+        public static final String DELETE_BY_NAME_IN_ORG = "delete image catalog by name in organization";
     }
 
     public static class SecurityRuleOpDescription {
