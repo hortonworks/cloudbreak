@@ -268,6 +268,10 @@ public class OperationDescriptions {
         public static final String DELETE_BY_ID = "delete RDS configuration by id";
         public static final String POST_CONNECTION_TEST = "test RDS connectivity";
         public static final String GET_REQUEST = "get request";
+        public static final String LIST_BY_ORGANIZATION = "list RDS configs for the given organization";
+        public static final String GET_BY_NAME_IN_ORG = "get RDS config by name in organization";
+        public static final String CREATE_IN_ORG = "create RDS config in organization";
+        public static final String DELETE_BY_NAME_IN_ORG = "delete RDS config by name in organization";
     }
 
     public static class ProxyConfigOpDescription {
