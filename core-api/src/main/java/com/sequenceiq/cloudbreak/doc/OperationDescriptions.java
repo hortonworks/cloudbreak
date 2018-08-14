@@ -354,6 +354,10 @@ public class OperationDescriptions {
         public static final String DELETE_PRIVATE_BY_ID = "delete private SmartSense subscription by subscription ID";
         public static final String DELETE_PUBLIC_BY_ID = "delete public (owned) or private SmartSense subscription by subscription ID";
         public static final String DELETE_BY_ID = "delete SmartSense subscription by id";
+        public static final String LIST_BY_ORGANIZATION = "list SmartSense subscriptions for the given organization";
+        public static final String GET_BY_NAME_IN_ORG = "get SmartSense subscription by name in organization";
+        public static final String CREATE_IN_ORG = "create SmartSense subscription in organization";
+        public static final String DELETE_BY_NAME_IN_ORG = "delete SmartSense subscription by name in organization";
     }
 
     public static class FlexSubOpDescription {

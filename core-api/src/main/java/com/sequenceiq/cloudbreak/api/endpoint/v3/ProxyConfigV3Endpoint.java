@@ -22,34 +22,34 @@ import com.sequenceiq.cloudbreak.doc.OperationDescriptions.ProxyConfigOpDescript
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Path("/v3")
+@Path("/v3/{organizationId}/proxyconfigs")
 @Consumes(MediaType.APPLICATION_JSON)
 @Api(value = "/v3/{organizationId}/proxyconfigs", description = ControllerDescription.RECIPE_V3_DESCRIPTION, protocols = "http,https")
 public interface ProxyConfigV3Endpoint {
 
     @GET
-    @Path("{organizationId}/proxyconfigs")
+    @Path("")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ProxyConfigOpDescription.LIST_BY_ORGANIZATION, produces = ContentType.JSON, notes = Notes.PROXY_CONFIG_NOTES,
             nickname = "listProxyconfigsByOrganization")
     Set<ProxyConfigResponse> listByOrganization(@PathParam("organizationId") Long organizationId);
 
     @GET
-    @Path("{organizationId}/proxyconfigs/{name}")
+    @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ProxyConfigOpDescription.GET_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.PROXY_CONFIG_NOTES,
             nickname = "getProxyconfigInOrganization")
     ProxyConfigResponse getByNameInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
 
     @POST
-    @Path("{organizationId}/proxyconfigs")
+    @Path("")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ProxyConfigOpDescription.CREATE_IN_ORG, produces = ContentType.JSON, notes = Notes.PROXY_CONFIG_NOTES,
             nickname = "createProxyconfigInOrganization")
     ProxyConfigResponse createInOrganization(@PathParam("organizationId") Long organizationId, @Valid ProxyConfigRequest request);
 
     @DELETE
-    @Path("{organizationId}/proxyconfigs/{name}")
+    @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ProxyConfigOpDescription.DELETE_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.PROXY_CONFIG_NOTES,
             nickname = "deleteProxyconfigInOrganization")

@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.endpoint.v1;
+package com.sequenceiq.cloudbreak.api.endpoint.v3;
 
 import java.util.Set;
 import java.util.SortedSet;

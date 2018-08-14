@@ -22,34 +22,34 @@ import com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Path("/v3")
+@Path("/v3/{organizationId}/stack")
 @Consumes(MediaType.APPLICATION_JSON)
 @Api(value = "/v3/{organizationId}/stack", description = ControllerDescription.STACK_V3_DESCRIPTION, protocols = "http,https")
 public interface StackV3Endpoint {
 
     @GET
-    @Path("{organizationId}/stack")
+    @Path("")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.LIST_BY_ORGANIZATION, produces = ContentType.JSON, notes = Notes.PROXY_CONFIG_NOTES,
             nickname = "listStacksByOrganization")
     Set<StackResponse> listByOrganization(@PathParam("organizationId") Long organizationId);
 
     @GET
-    @Path("{organizationId}/stack/{name}")
+    @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.GET_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.PROXY_CONFIG_NOTES,
             nickname = "getStackInOrganization")
     StackResponse getByNameInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
 
     @POST
-    @Path("{organizationId}/stack")
+    @Path("")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.CREATE_IN_ORG, produces = ContentType.JSON, notes = Notes.PROXY_CONFIG_NOTES,
             nickname = "createStackInOrganization")
     StackResponse createInOrganization(@PathParam("organizationId") Long organizationId, @Valid StackV2Request request);
 
     @DELETE
-    @Path("{organizationId}/stack/{name}")
+    @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.DELETE_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.PROXY_CONFIG_NOTES,
             nickname = "deleteStackInOrganization")

@@ -22,34 +22,34 @@ import com.sequenceiq.cloudbreak.doc.OperationDescriptions.RecipeOpDescription;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Path("/v3")
+@Path("/v3/{organizationId}/recipes")
 @Consumes(MediaType.APPLICATION_JSON)
 @Api(value = "/v3/{organizationId}/recipes", description = ControllerDescription.RECIPE_V3_DESCRIPTION, protocols = "http,https")
 public interface RecipeV3Endpoint {
 
     @GET
-    @Path("{organizationId}/recipes")
+    @Path("")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = RecipeOpDescription.LIST_BY_ORGANIZATION, produces = ContentType.JSON, notes = Notes.RECIPE_NOTES,
             nickname = "listRecipesByOrganization")
     Set<RecipeResponse> listByOrganization(@PathParam("organizationId") Long organizationId);
 
     @GET
-    @Path("{organizationId}/recipes/{name}")
+    @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = RecipeOpDescription.GET_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.RECIPE_NOTES,
             nickname = "getRecipeInOrganization")
     RecipeResponse getByNameInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
 
     @POST
-    @Path("{organizationId}/recipes")
+    @Path("")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = RecipeOpDescription.CREATE_IN_ORG, produces = ContentType.JSON, notes = Notes.RECIPE_NOTES,
             nickname = "createRecipeInOrganization")
     RecipeResponse createInOrganization(@PathParam("organizationId") Long organizationId, @Valid RecipeRequest request);
 
     @DELETE
-    @Path("{organizationId}/recipes/{name}")
+    @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = RecipeOpDescription.DELETE_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.RECIPE_NOTES,
             nickname = "deleteRecipeInOrganization")

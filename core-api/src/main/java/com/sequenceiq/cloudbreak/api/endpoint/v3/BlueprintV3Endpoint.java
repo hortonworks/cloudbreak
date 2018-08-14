@@ -22,34 +22,34 @@ import com.sequenceiq.cloudbreak.doc.OperationDescriptions.BlueprintOpDescriptio
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Path("/v3")
+@Path("/v3/{organizationId}/blueprints")
 @Consumes(MediaType.APPLICATION_JSON)
 @Api(value = "/v3/{organizationId}/blueprints", description = ControllerDescription.BLUEPRINT_V3_DESCRIPTION, protocols = "http,https")
 public interface BlueprintV3Endpoint {
 
     @GET
-    @Path("{organizationId}/blueprints")
+    @Path("")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = BlueprintOpDescription.LIST_BY_ORGANIZATION, produces = ContentType.JSON, notes = Notes.BLUEPRINT_NOTES,
             nickname = "listBlueprintsByOrganization")
     Set<BlueprintResponse> listByOrganization(@PathParam("organizationId") Long organizationId);
 
     @GET
-    @Path("{organizationId}/blueprints/{name}")
+    @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = BlueprintOpDescription.GET_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.BLUEPRINT_NOTES,
             nickname = "getBlueprintInOrganization")
     BlueprintResponse getByNameInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
 
     @POST
-    @Path("{organizationId}/blueprints")
+    @Path("")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = BlueprintOpDescription.CREATE_IN_ORG, produces = ContentType.JSON, notes = Notes.BLUEPRINT_NOTES,
             nickname = "createBlueprintInOrganization")
     BlueprintResponse createInOrganization(@PathParam("organizationId") Long organizationId, @Valid BlueprintRequest request);
 
     @DELETE
-    @Path("{organizationId}/blueprints/{name}")
+    @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = BlueprintOpDescription.DELETE_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.BLUEPRINT_NOTES,
             nickname = "deleteBlueprintInOrganization")

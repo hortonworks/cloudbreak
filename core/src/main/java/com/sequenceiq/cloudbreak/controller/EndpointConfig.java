@@ -102,6 +102,7 @@ public class EndpointConfig extends ResourceConfig {
         register(SecurityRuleController.class);
         register(SettingsController.class);
         register(SmartSenseSubscriptionController.class);
+        register(SmartSenseSubscriptionV3Controller.class);
         register(StackV1Controller.class);
         register(StackV2Controller.class);
         register(StackV3Controller.class);
