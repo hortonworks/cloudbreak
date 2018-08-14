@@ -1,4 +1,4 @@
-FROM ubuntu
+FROM alpine:edge
 MAINTAINER Hortonworks
 
 RUN apk --no-cache --update add \
