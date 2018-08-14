@@ -298,6 +298,10 @@ public class OperationDescriptions {
         public static final String DELETE_PRIVATE_BY_NAME = "delete private management pack by name";
         public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private management pack by name";
         public static final String DELETE_BY_ID = "delete management pack by id";
+        public static final String LIST_BY_ORGANIZATION = "list management packs for the given organization";
+        public static final String GET_BY_NAME_IN_ORG = "get management pack by name in organization";
+        public static final String CREATE_IN_ORG = "create management pack in organization";
+        public static final String DELETE_BY_NAME_IN_ORG = "delete management pack by name in organization";
     }
 
     public static class ConnectorOpDescription {

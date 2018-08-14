@@ -48,6 +48,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v1.UserEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.UtilEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v2.ConnectorV2Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v2.StackV2Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v3.ManagementPackV3Endpoint;
 
 import net.jodah.expiringmap.ExpirationPolicy;
 import net.jodah.expiringmap.ExpiringMap;
@@ -189,6 +190,10 @@ public class CloudbreakClient {
         return refreshIfNeededAndGet(UtilEndpoint.class);
     }
 
+    public ManagementPackV3Endpoint managementPackV3Endpoint() {
+        return refreshIfNeededAndGet(ManagementPackV3Endpoint.class);
+    }
+
     public RepositoryConfigValidationEndpoint repositoryConfigValidationEndpoint() {
         return refreshIfNeededAndGet(RepositoryConfigValidationEndpoint.class);
     }
@@ -250,6 +255,7 @@ public class CloudbreakClient {
         endpointWrapperHolder.setEndpoint(newEndpoint(FlexSubscriptionEndpoint.class, headers));
         endpointWrapperHolder.setEndpoint(newEndpoint(ImageCatalogV1Endpoint.class, headers));
         endpointWrapperHolder.setEndpoint(newEndpoint(RepositoryConfigValidationEndpoint.class, headers));
+        endpointWrapperHolder.setEndpoint(newEndpoint(ManagementPackV3Endpoint.class, headers));
         logger.info("Endpoints have been renewed for CloudbreakClient");
     }
 
