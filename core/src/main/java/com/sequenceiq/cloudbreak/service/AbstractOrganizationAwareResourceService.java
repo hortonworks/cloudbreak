@@ -5,6 +5,8 @@ import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 
 import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
@@ -21,6 +23,8 @@ import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
 public abstract class AbstractOrganizationAwareResourceService<T extends OrganizationAwareResource> implements OrganizationAwareResourceService<T> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractOrganizationAwareResourceService.class);
 
     @Inject
     private TransactionService transactionService;
@@ -87,26 +91,26 @@ public abstract class AbstractOrganizationAwareResourceService<T extends Organiz
     }
 
     @Override
-    public Set<T> listByOrganizationId(Long organizationId) {
-        return repository().findAllByOrganizationId(organizationId);
-    }
-
-    @Override
-    public Set<T> listByOrganization(Organization organization) {
+    public Set<T> findAllByOrganization(Organization organization) {
         return repository().findAllByOrganization(organization);
     }
 
     @Override
-    public Set<T> listForUsersDefaultOrganization() {
+    public Set<T> findAllByOrganizationId(Long organizationId) {
+        return repository().findAllByOrganizationId(organizationId);
+    }
+
+    @Override
+    public Set<T> findAllForUsersDefaultOrganization() {
         Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
-        return listByOrganization(organization);
+        return findAllByOrganization(organization);
     }
 
     @Override
     public T delete(T resource) {
-        if (canDelete(resource)) {
-            repository().delete(resource);
-        }
+        LOGGER.info("Deleting proxy configuration with name: {}", resource.getName());
+        prepareDeletion(resource);
+        repository().delete(resource);
         return resource;
     }
 
@@ -146,7 +150,7 @@ public abstract class AbstractOrganizationAwareResourceService<T extends Organiz
 
     protected abstract OrganizationResource resource();
 
-    protected abstract boolean canDelete(T resource);
+    protected abstract void prepareDeletion(T resource);
 
     protected abstract void prepareCreation(T resource);
 }

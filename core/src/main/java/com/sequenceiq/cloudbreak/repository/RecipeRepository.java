@@ -28,7 +28,8 @@ public interface RecipeRepository extends OrganizationResourceRepository<Recipe,
     @Query("SELECT r FROM Recipe r WHERE r. name in :names AND r.organization.id = :orgId")
     Set<Recipe> findByNamesInOrganization(@Param("names") Collection<String> names, @Param("orgId") Long orgId);
 
+    @Override
     @CheckPermissionsByOrganizationId(action = READ)
     @Query("SELECT r FROM Recipe r WHERE r.organization.id = :orgId")
-    Set<Recipe> listByOrganizationId(@Param("orgId") Long orgId);
+    Set<Recipe> findAllByOrganizationId(@Param("orgId") Long orgId);
 }

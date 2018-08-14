@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.service.EntityType;
 @DisableHasPermission
 @OrganizationResourceType(resource = OrganizationResource.MPACK)
 public interface ManagementPackRepository extends OrganizationResourceRepository<ManagementPack, Long> {
+
     ManagementPack findOneById(Long id);
 
     Set<ManagementPack> findByOwner(String owner);

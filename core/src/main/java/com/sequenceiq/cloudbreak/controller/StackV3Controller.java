@@ -6,7 +6,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
-import javax.validation.Valid;
 import javax.ws.rs.core.Response;
 
 import org.springframework.core.convert.ConversionService;
@@ -85,7 +84,7 @@ public class StackV3Controller extends NotificationController implements StackV3
     }
 
     @Override
-    public Response putScalingInOrganization(Long organizationId, String name, @Valid StackScaleRequestV2 updateRequest) {
+    public Response putScalingInOrganization(Long organizationId, String name, StackScaleRequestV2 updateRequest) {
         return stackCommonService.putScalingInOrganization(name, organizationId, updateRequest);
     }
 
@@ -106,7 +105,7 @@ public class StackV3Controller extends NotificationController implements StackV3
     }
 
     @Override
-    public GeneratedBlueprintResponse postStackForBlueprint(Long organizationId, String name, @Valid StackV2Request stackRequest) {
+    public GeneratedBlueprintResponse postStackForBlueprint(Long organizationId, String name, StackV2Request stackRequest) {
         return stackCommonService.postStackForBlueprint(stackRequest);
     }
 
@@ -116,12 +115,12 @@ public class StackV3Controller extends NotificationController implements StackV3
     }
 
     @Override
-    public Response changeImage(Long organizationId, String name, @Valid StackImageChangeRequest stackImageChangeRequest) {
+    public Response changeImage(Long organizationId, String name, StackImageChangeRequest stackImageChangeRequest) {
         return stackCommonService.changeImageByNameInOrg(name, organizationId, stackImageChangeRequest);
     }
 
     @Override
-    public Response putReinstall(Long organizationId, String name, @Valid ReinstallRequestV2 reinstallRequestV2) {
+    public Response putReinstall(Long organizationId, String name, ReinstallRequestV2 reinstallRequestV2) {
         Stack stack = stackService.getByNameInOrg(name, organizationId);
         UpdateClusterJson updateClusterJson = conversionService.convert(reinstallRequestV2, UpdateClusterJson.class);
         return clusterCommonService.put(stack.getId(), updateClusterJson);

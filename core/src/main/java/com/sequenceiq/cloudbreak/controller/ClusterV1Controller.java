@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.UpdateGatewayTo
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -82,11 +83,12 @@ public class ClusterV1Controller implements ClusterV1Endpoint {
     @Override
     public ClusterResponse post(Long stackId, ClusterRequest request) throws Exception {
         IdentityUser user = authenticatedUserService.getCbUser();
+        Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
 
         Stack stack = stackService.getByIdWithListsWithoutAuthorization(stackId);
 
         clusterCreationSetupService.validate(request, stack, user);
-        Cluster cluster = clusterCreationSetupService.prepare(request, stack, user);
+        Cluster cluster = clusterCreationSetupService.prepare(request, stack, user, organization);
         Optional<StackInputs> stackInputs = sharedServiceConfigProvider.prepareDatalakeConfigs(cluster.getBlueprint(), stack);
         if (stackInputs.isPresent()) {
             sharedServiceConfigProvider.updateStackinputs(stackInputs.get(), stack);

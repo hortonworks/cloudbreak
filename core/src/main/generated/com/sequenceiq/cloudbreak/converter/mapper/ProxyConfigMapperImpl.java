@@ -15,23 +15,20 @@ import org.springframework.stereotype.Component;
 public class ProxyConfigMapperImpl implements ProxyConfigMapper {
 
     @Override
-    public ProxyConfig mapRequestToEntity(ProxyConfigRequest proxyConfigRequest, boolean publicInAccount) {
+    public ProxyConfig mapRequestToEntity(ProxyConfigRequest proxyConfigRequest) {
         if ( proxyConfigRequest == null ) {
             return null;
         }
 
         ProxyConfig proxyConfig = new ProxyConfig();
 
-        if ( proxyConfigRequest != null ) {
-            proxyConfig.setName( proxyConfigRequest.getName() );
-            proxyConfig.setServerHost( proxyConfigRequest.getServerHost() );
-            proxyConfig.setServerPort( proxyConfigRequest.getServerPort() );
-            proxyConfig.setProtocol( proxyConfigRequest.getProtocol() );
-            proxyConfig.setUserName( proxyConfigRequest.getUserName() );
-            proxyConfig.setPassword( proxyConfigRequest.getPassword() );
-            proxyConfig.setDescription( proxyConfigRequest.getDescription() );
-        }
-        proxyConfig.setPublicInAccount( publicInAccount );
+        proxyConfig.setName( proxyConfigRequest.getName() );
+        proxyConfig.setServerHost( proxyConfigRequest.getServerHost() );
+        proxyConfig.setServerPort( proxyConfigRequest.getServerPort() );
+        proxyConfig.setProtocol( proxyConfigRequest.getProtocol() );
+        proxyConfig.setUserName( proxyConfigRequest.getUserName() );
+        proxyConfig.setPassword( proxyConfigRequest.getPassword() );
+        proxyConfig.setDescription( proxyConfigRequest.getDescription() );
 
         return proxyConfig;
     }

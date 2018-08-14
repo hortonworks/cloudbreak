@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.controller.validation.ldapconfig.LdapConfigVali
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionValidator;
 import com.sequenceiq.cloudbreak.converter.mapper.AmbariDatabaseMapper;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.AmbariHaComponentFilter;
@@ -105,10 +106,10 @@ public class ClusterDecoratorTest {
         when(request.getConnectedCluster()).thenReturn(mock(ConnectedClusterRequest.class));
         when(sharedServiceConfigProvider.configureCluster(any(Cluster.class), any(ConnectedClusterRequest.class)))
                 .thenReturn(expectedClusterInstance);
-        when(clusterProxyDecorator.prepareProxyConfig(any(Cluster.class), any(IdentityUser.class), any(), any(Stack.class))).thenReturn(expectedClusterInstance);
+        when(clusterProxyDecorator.prepareProxyConfig(any(Cluster.class), any(), any(Stack.class))).thenReturn(expectedClusterInstance);
         when(ambariHaComponentFilter.getHaComponents(any())).thenReturn(Collections.emptySet());
 
-        Cluster result = underTest.decorate(expectedClusterInstance, request, blueprint, user, stack);
+        Cluster result = underTest.decorate(expectedClusterInstance, request, blueprint, user, new Organization(), stack);
 
         Assert.assertEquals(expectedClusterInstance, result);
         verify(sharedServiceConfigProvider, times(1)).configureCluster(any(Cluster.class),

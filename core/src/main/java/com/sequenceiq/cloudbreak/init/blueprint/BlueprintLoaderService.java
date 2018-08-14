@@ -19,7 +19,11 @@ import org.springframework.stereotype.Service;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Service
 public class BlueprintLoaderService {
@@ -30,6 +34,12 @@ public class BlueprintLoaderService {
 
     @Inject
     private BlueprintService blueprintService;
+
+    @Inject
+    private UserService userService;
+
+    @Inject
+    private OrganizationService organizationService;
 
     public boolean addingDefaultBlueprintsAreNecessaryForTheUser(Collection<Blueprint> blueprints) {
         Map<String, Blueprint> defaultBlueprints = defaultBlueprintCache.defaultBlueprints();
@@ -62,7 +72,7 @@ public class BlueprintLoaderService {
 
     private Iterable<Blueprint> getResultSetFromUpdateAndOriginalBlueprints(Iterable<Blueprint> blueprints, Iterable<Blueprint> blueprintsWhichAreMissing) {
         LOGGER.info("Updating blueprints which should be modified.");
-        Iterable<Blueprint> savedBlueprints = blueprintService.save(blueprintsWhichAreMissing);
+        Iterable<Blueprint> savedBlueprints = blueprintService.saveAll(blueprintsWhichAreMissing);
         LOGGER.info("Finished to update blueprints which should be modified.");
         Map<String, Blueprint> resultBlueprints = new HashMap<>();
         for (Blueprint blueprint : blueprints) {
@@ -119,9 +129,9 @@ public class BlueprintLoaderService {
     }
 
     private Blueprint setupBlueprint(IdentityUser user, Blueprint blueprint) {
-        blueprint.setAccount(user.getAccount());
-        blueprint.setOwner(user.getUserId());
-        blueprint.setPublicInAccount(true);
+        User orgUser = userService.getOrCreate(user);
+        Organization organization = organizationService.getDefaultOrganizationForUser(orgUser);
+        blueprint.setOrganization(organization);
         blueprint.setStatus(DEFAULT);
         return blueprint;
     }

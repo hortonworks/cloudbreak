@@ -37,7 +37,7 @@ public interface ProxyConfigEndpoint {
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ProxyConfigOpDescription.DELETE_BY_ID, produces = ContentType.JSON, notes = Notes.PROXY_CONFIG_NOTES, nickname = "deleteProxyConfig")
-    void delete(@PathParam("id") Long id);
+    ProxyConfigResponse delete(@PathParam("id") Long id);
 
     @POST
     @Path("user")
@@ -65,7 +65,7 @@ public interface ProxyConfigEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ProxyConfigOpDescription.DELETE_PRIVATE_BY_NAME, produces = ContentType.JSON, notes = Notes.PROXY_CONFIG_NOTES,
             nickname = "deletePrivateProxyConfig")
-    void deletePrivate(@PathParam("name") String name);
+    ProxyConfigResponse deletePrivate(@PathParam("name") String name);
 
     @POST
     @Path("account")
@@ -93,5 +93,5 @@ public interface ProxyConfigEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ProxyConfigOpDescription.DELETE_PUBLIC_BY_NAME, produces = ContentType.JSON, notes = Notes.PROXY_CONFIG_NOTES,
             nickname = "deletePublicProxyConfig")
-    void deletePublic(@PathParam("name") String name);
+    ProxyConfigResponse deletePublic(@PathParam("name") String name);
 }

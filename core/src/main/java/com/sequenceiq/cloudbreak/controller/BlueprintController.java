@@ -42,43 +42,70 @@ public class BlueprintController extends NotificationController implements Bluep
     private BlueprintLoaderService blueprintLoaderService;
 
     @Override
-    public BlueprintResponse postPrivate(BlueprintRequest blueprintRequest) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        return createBlueprint(user, blueprintRequest, false);
+    public BlueprintResponse get(Long id) {
+        return conversionService.convert(blueprintService.get(id), BlueprintResponse.class);
     }
 
     @Override
-    public BlueprintResponse postPublic(BlueprintRequest blueprintRequest) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        return createBlueprint(user, blueprintRequest, true);
+    public void delete(Long id) {
+        Blueprint deleted = blueprintService.delete(id);
+        notify(ResourceEvent.RECIPE_DELETED);
+        conversionService.convert(deleted, BlueprintResponse.class);
+    }
+
+    @Override
+    public BlueprintResponse postPublic(BlueprintRequest request) {
+        return createInDefaultOrganization(request);
+    }
+
+    @Override
+    public BlueprintResponse postPrivate(BlueprintRequest request) {
+        return createInDefaultOrganization(request);
     }
 
     @Override
     public Set<BlueprintResponse> getPrivates() {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        Set<Blueprint> blueprints = blueprintService.retrievePrivateBlueprints(user);
-        return getBlueprintResponses(user, blueprints);
-    }
-
-    @Override
-    public BlueprintResponse getPrivate(String name) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        Blueprint blueprint = blueprintService.getPrivateBlueprint(name, user);
-        return conversionService.convert(blueprint, BlueprintResponse.class);
-    }
-
-    @Override
-    public BlueprintResponse getPublic(String name) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        Blueprint blueprint = blueprintService.getPublicBlueprint(name, user);
-        return conversionService.convert(blueprint, BlueprintResponse.class);
+        return listForUsersDefaultOrganization();
     }
 
     @Override
     public Set<BlueprintResponse> getPublics() {
+        return listForUsersDefaultOrganization();
+    }
+
+    @Override
+    public BlueprintResponse getPrivate(String name) {
+        return getBlueprintResponse(name);
+    }
+
+    @Override
+    public BlueprintResponse getPublic(String name) {
+        return getBlueprintResponse(name);
+    }
+
+    @Override
+    public void deletePublic(String name) {
+        deleteInDefaultOrganization(name);
+    }
+
+    @Override
+    public BlueprintRequest getRequestfromId(Long id) {
+        Blueprint blueprint = blueprintService.get(id);
+        return conversionService.convert(blueprint, BlueprintRequest.class);
+    }
+
+    @Override
+    public void deletePrivate(String name) {
+        deleteInDefaultOrganization(name);
+    }
+
+    private BlueprintResponse getBlueprintResponse(String name) {
+        return conversionService.convert(blueprintService.getByNameFromUsersDefaultOrganization(name), BlueprintResponse.class);
+    }
+
+    private Set<BlueprintResponse> listForUsersDefaultOrganization() {
         IdentityUser user = authenticatedUserService.getCbUser();
-        Set<Blueprint> blueprints = blueprintService.retrieveAccountBlueprints(user);
-        return getBlueprintResponses(user, blueprints);
+        return getBlueprintResponses(user, blueprintService.findAllForUsersDefaultOrganization());
     }
 
     private Set<BlueprintResponse> getBlueprintResponses(IdentityUser user, Set<Blueprint> blueprints) {
@@ -90,45 +117,24 @@ public class BlueprintController extends NotificationController implements Bluep
         return toJsonList(blueprints);
     }
 
-    @Override
-    public BlueprintResponse get(Long id) {
-        Blueprint blueprint = blueprintService.get(id);
-        return conversionService.convert(blueprint, BlueprintResponse.class);
-    }
-
-    @Override
-    public void delete(Long id) {
-        executeAndNotify(user -> blueprintService.delete(id, user), ResourceEvent.BLUEPRINT_DELETED);
-    }
-
-    @Override
-    public void deletePublic(String name) {
-        executeAndNotify(user -> blueprintService.delete(name, user), ResourceEvent.BLUEPRINT_DELETED);
-    }
-
-    @Override
-    public BlueprintRequest getRequestfromId(Long id) {
-        Blueprint blueprint = blueprintService.get(id);
-        return conversionService.convert(blueprint, BlueprintRequest.class);
-    }
-
-    @Override
-    public void deletePrivate(String name) {
-        executeAndNotify(user -> blueprintService.delete(name, user), ResourceEvent.BLUEPRINT_DELETED);
-    }
-
-    private BlueprintResponse createBlueprint(IdentityUser user, BlueprintRequest blueprintRequest, boolean publicInAccount) {
-        Blueprint blueprint = conversionService.convert(blueprintRequest, Blueprint.class);
-        blueprint.setPublicInAccount(publicInAccount);
-        blueprint = blueprintService.create(user, blueprint, blueprintRequest.getProperties());
-        notify(user, ResourceEvent.BLUEPRINT_CREATED);
-        return conversionService.convert(blueprint, BlueprintResponse.class);
-    }
-
     private Set<BlueprintResponse> toJsonList(Set<Blueprint> blueprints) {
         return (Set<BlueprintResponse>) conversionService.convert(blueprints,
                 TypeDescriptor.forObject(blueprints),
                 TypeDescriptor.collection(Set.class, TypeDescriptor.valueOf(BlueprintResponse.class)));
     }
 
+    private void deleteInDefaultOrganization(String name) {
+        executeAndNotify(user -> blueprintService.deleteByNameFromDefaultOrganization(name), ResourceEvent.BLUEPRINT_DELETED);
+    }
+
+    private BlueprintResponse createInDefaultOrganization(BlueprintRequest request) {
+        Blueprint blueprint = conversionService.convert(request, Blueprint.class);
+        blueprint = blueprintService.createInDefaultOrganization(blueprint);
+        return notifyAndReturn(blueprint, ResourceEvent.BLUEPRINT_CREATED);
+    }
+
+    private BlueprintResponse notifyAndReturn(Blueprint blueprint, ResourceEvent resourceEvent) {
+        notify(resourceEvent);
+        return conversionService.convert(blueprint, BlueprintResponse.class);
+    }
 }

@@ -106,14 +106,14 @@ public class ImageCatalogService extends AbstractOrganizationAwareResourceServic
     private ComponentConfigProvider componentConfigProvider;
 
     @Override
-    public Set<ImageCatalog> listByOrganizationId(Long organizationId) {
-        Set<ImageCatalog> imageCatalogs = super.listByOrganizationId(organizationId);
+    public Set<ImageCatalog> findAllByOrganizationId(Long organizationId) {
+        Set<ImageCatalog> imageCatalogs = super.findAllByOrganizationId(organizationId);
         imageCatalogs.add(getCloudbreakDefaultImageCatalog());
         return imageCatalogs;
     }
 
     @Override
-    public Set<ImageCatalog> listByOrganization(Organization organization) {
+    public Set<ImageCatalog> findAllByOrganization(Organization organization) {
         Set<ImageCatalog> imageCatalogs = repository().findAllByOrganization(organization);
         imageCatalogs.add(getCloudbreakDefaultImageCatalog());
         return imageCatalogs;
@@ -531,8 +531,8 @@ public class ImageCatalogService extends AbstractOrganizationAwareResourceServic
     }
 
     @Override
-    protected boolean canDelete(ImageCatalog resource) {
-        return true;
+    protected void prepareDeletion(ImageCatalog resource) {
+
     }
 
     @Override

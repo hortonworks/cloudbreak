@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.controller;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
@@ -11,19 +12,14 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ProxyConfigEndpoint;
 import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigResponse;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.converter.mapper.ProxyConfigMapper;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
-import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigService;
 
 @Component
 @Transactional(TxType.NEVER)
 public class ProxyConfigController extends NotificationController implements ProxyConfigEndpoint {
-
-    @Autowired
-    private AuthenticatedUserService authenticatedUserService;
 
     @Autowired
     private ProxyConfigService proxyConfigService;
@@ -33,69 +29,79 @@ public class ProxyConfigController extends NotificationController implements Pro
 
     @Override
     public ProxyConfigResponse get(Long id) {
-        ProxyConfig proxyConfig = proxyConfigService.get(id);
-        return proxyConfigMapper.mapEntityToResponse(proxyConfig);
+        return proxyConfigMapper.mapEntityToResponse(proxyConfigService.get(id));
     }
 
     @Override
-    public void delete(Long id) {
-        executeAndNotify(user -> proxyConfigService.delete(id, user), ResourceEvent.PROXY_CONFIG_DELETED);
+    public ProxyConfigResponse delete(Long id) {
+        ProxyConfig deleted = proxyConfigService.delete(id);
+        notify(ResourceEvent.RECIPE_DELETED);
+        return proxyConfigMapper.mapEntityToResponse(deleted);
     }
 
     @Override
-    public ProxyConfigResponse postPrivate(ProxyConfigRequest proxyConfigRequest) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        return createProxyConfig(user, proxyConfigRequest, false);
+    public ProxyConfigResponse postPublic(ProxyConfigRequest request) {
+        return createInDefaultOrganization(request);
+    }
+
+    @Override
+    public ProxyConfigResponse postPrivate(ProxyConfigRequest request) {
+        return createInDefaultOrganization(request);
     }
 
     @Override
     public Set<ProxyConfigResponse> getPrivates() {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        Set<ProxyConfig> proxyConfigs = proxyConfigService.retrievePrivateProxyConfigs(user);
-        return proxyConfigMapper.mapEntityToResponse(proxyConfigs);
-    }
-
-    @Override
-    public ProxyConfigResponse getPrivate(String name) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        ProxyConfig proxyConfig = proxyConfigService.getPrivateProxyConfig(name, user);
-        return proxyConfigMapper.mapEntityToResponse(proxyConfig);
-    }
-
-    @Override
-    public void deletePrivate(String name) {
-        executeAndNotify(user -> proxyConfigService.delete(name, user), ResourceEvent.PROXY_CONFIG_DELETED);
-    }
-
-    @Override
-    public ProxyConfigResponse postPublic(ProxyConfigRequest proxyConfigRequest) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        return createProxyConfig(user, proxyConfigRequest, true);
+        return listForUsersDefaultOrganization();
     }
 
     @Override
     public Set<ProxyConfigResponse> getPublics() {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        Set<ProxyConfig> proxyConfigs = proxyConfigService.retrieveAccountProxyConfigs(user);
-        return proxyConfigMapper.mapEntityToResponse(proxyConfigs);
+        return listForUsersDefaultOrganization();
+    }
+
+    @Override
+    public ProxyConfigResponse getPrivate(String name) {
+        return getProxyConfigResponse(name);
     }
 
     @Override
     public ProxyConfigResponse getPublic(String name) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        ProxyConfig proxyConfig = proxyConfigService.getPublicProxyConfig(name, user);
-        return proxyConfigMapper.mapEntityToResponse(proxyConfig);
+        return getProxyConfigResponse(name);
     }
 
     @Override
-    public void deletePublic(String name) {
-        executeAndNotify(user -> proxyConfigService.delete(name, user), ResourceEvent.PROXY_CONFIG_DELETED);
+    public ProxyConfigResponse deletePublic(String name) {
+        return deleteInDefaultOrganization(name);
     }
 
-    private ProxyConfigResponse createProxyConfig(IdentityUser user, ProxyConfigRequest request, boolean publicInAccount) {
-        ProxyConfig proxyConfig = proxyConfigMapper.mapRequestToEntity(request, publicInAccount);
-        proxyConfig = proxyConfigService.create(user, proxyConfig);
-        notify(user, ResourceEvent.PROXY_CONFIG_CREATED);
+    @Override
+    public ProxyConfigResponse deletePrivate(String name) {
+        return deleteInDefaultOrganization(name);
+    }
+
+    private ProxyConfigResponse getProxyConfigResponse(String name) {
+        return proxyConfigMapper.mapEntityToResponse(proxyConfigService.getByNameFromUsersDefaultOrganization(name));
+    }
+
+    private Set<ProxyConfigResponse> listForUsersDefaultOrganization() {
+        return proxyConfigService.findAllForUsersDefaultOrganization().stream()
+                .map(config -> proxyConfigMapper.mapEntityToResponse(config))
+                .collect(Collectors.toSet());
+    }
+
+    private ProxyConfigResponse deleteInDefaultOrganization(String name) {
+        ProxyConfig config = proxyConfigService.deleteByNameFromDefaultOrganization(name);
+        return notifyAndReturn(config, ResourceEvent.PROXY_CONFIG_DELETED);
+    }
+
+    private ProxyConfigResponse createInDefaultOrganization(ProxyConfigRequest request) {
+        ProxyConfig proxyConfig = proxyConfigMapper.mapRequestToEntity(request);
+        proxyConfig = proxyConfigService.createInDefaultOrganization(proxyConfig);
+        return notifyAndReturn(proxyConfig, ResourceEvent.PROXY_CONFIG_CREATED);
+    }
+
+    private ProxyConfigResponse notifyAndReturn(ProxyConfig proxyConfig, ResourceEvent resourceEvent) {
+        notify(resourceEvent);
         return proxyConfigMapper.mapEntityToResponse(proxyConfig);
     }
 }

@@ -31,14 +31,14 @@ import com.sequenceiq.cloudbreak.api.model.rds.RDSBuildRequest;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsBuildResult;
 import com.sequenceiq.cloudbreak.api.model.stack.StackMatrix;
 import com.sequenceiq.cloudbreak.blueprint.filesystem.query.ConfigQueryEntry;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionBuilder;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
-import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.StackMatrixService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemSupportMatrixService;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.util.ClientVersionUtil;
 
 @Component
@@ -57,14 +57,14 @@ public class UtilController implements UtilEndpoint {
     private ServiceEndpointCollector serviceEndpointCollector;
 
     @Autowired
-    private AuthenticatedUserService authenticatedUserService;
-
-    @Autowired
     private FileSystemSupportMatrixService fileSystemSupportMatrixService;
 
     @Autowired
     @Qualifier("conversionService")
     private ConversionService conversionService;
+
+    @Inject
+    private OrganizationService organizationService;
 
     @Value("${info.app.version:}")
     private String cbVersion;
@@ -110,8 +110,7 @@ public class UtilController implements UtilEndpoint {
 
     @Override
     public Collection<ExposedServiceResponse> getKnoxServices(String blueprintName) {
-        IdentityUser cbUser = authenticatedUserService.getCbUser();
-        return serviceEndpointCollector.getKnoxServices(cbUser, blueprintName);
+        return serviceEndpointCollector.getKnoxServices(blueprintName);
     }
 
     @Override
@@ -121,8 +120,8 @@ public class UtilController implements UtilEndpoint {
 
     @Override
     public ParametersQueryResponse getCustomParameters(ParametersQueryRequest parametersQueryRequest) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        Set<String> strings = blueprintService.queryCustomParameters(parametersQueryRequest.getBlueprintName(), user);
+        Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
+        Set<String> strings = blueprintService.queryCustomParameters(parametersQueryRequest.getBlueprintName(), organization);
         Map<String, String> result = new HashMap<>();
         for (String customParameter : strings) {
             result.put(customParameter, "");
@@ -134,7 +133,7 @@ public class UtilController implements UtilEndpoint {
 
     @Override
     public StructuredParameterQueriesResponse getFileSystemParameters(StructuredParametersQueryRequest structuredParametersQueryRequest) {
-        IdentityUser user = authenticatedUserService.getCbUser();
+        Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
         Set<ConfigQueryEntry> entries = blueprintService.queryFileSystemParameters(
                 structuredParametersQueryRequest.getBlueprintName(),
                 structuredParametersQueryRequest.getClusterName(),
@@ -142,7 +141,7 @@ public class UtilController implements UtilEndpoint {
                 structuredParametersQueryRequest.getFileSystemType(),
                 structuredParametersQueryRequest.getAccountName(),
                 structuredParametersQueryRequest.isAttachedCluster(),
-                user);
+                organization);
         List<StructuredParameterQueryResponse> result = new ArrayList<>();
         for (ConfigQueryEntry configQueryEntry : entries) {
             result.add(conversionService.convert(configQueryEntry, StructuredParameterQueryResponse.class));

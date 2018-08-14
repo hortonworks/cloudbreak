@@ -25,7 +25,6 @@ import com.sequenceiq.cloudbreak.api.model.users.UserResponseJson.UserIdComparat
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.organization.User;
-import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
@@ -41,9 +40,6 @@ public class OrganizationV3Controller extends NotificationController implements 
     private OrganizationService organizationService;
 
     @Inject
-    private AuthenticatedUserService authenticatedUserService;
-
-    @Inject
     private UserService userService;
 
     @Override
@@ -51,7 +47,7 @@ public class OrganizationV3Controller extends NotificationController implements 
         User user = userService.getCurrentUser();
         Organization organization = conversionService.convert(organizationRequest, Organization.class);
         organization = organizationService.create(user, organization);
-        notify(authenticatedUserService.getCbUser(), ResourceEvent.ORGANIZATION_CREATED);
+        notify(ResourceEvent.ORGANIZATION_CREATED);
         return conversionService.convert(organization, OrganizationResponse.class);
     }
 
@@ -70,7 +66,7 @@ public class OrganizationV3Controller extends NotificationController implements 
     @Override
     public OrganizationResponse deleteByName(String name) {
         Organization organization = organizationService.deleteByNameForCurrentUser(name);
-        notify(authenticatedUserService.getCbUser(), ResourceEvent.ORGANIZATION_DELETED);
+        notify(ResourceEvent.ORGANIZATION_DELETED);
         return conversionService.convert(organization, OrganizationResponse.class);
     }
 

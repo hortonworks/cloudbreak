@@ -26,12 +26,14 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Network;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 
 @Component
@@ -52,6 +54,9 @@ public class StackValidationRequestToStackValidationConverter extends AbstractCo
 
     @Inject
     private CloudParameterCache cloudParameterCache;
+
+    @Inject
+    private OrganizationService organizationService;
 
     @Override
     public StackValidation convert(StackValidationRequest stackValidationRequest) {
@@ -108,7 +113,8 @@ public class StackValidationRequestToStackValidationConverter extends AbstractCo
             Blueprint blueprint = blueprintService.get(stackValidationRequest.getBlueprintId());
             stackValidation.setBlueprint(blueprint);
         } else if (stackValidationRequest.getBlueprintName() != null) {
-            Blueprint blueprint = blueprintService.get(stackValidationRequest.getBlueprintName(), stackValidationRequest.getAccount());
+            Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
+            Blueprint blueprint = blueprintService.getByNameForOrganization(stackValidationRequest.getBlueprintName(), organization);
             stackValidation.setBlueprint(blueprint);
         } else if (stackValidationRequest.getBlueprint() != null) {
             Blueprint blueprint = conversionService.convert(stackValidationRequest.getBlueprint(), Blueprint.class);

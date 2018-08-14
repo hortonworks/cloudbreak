@@ -65,7 +65,7 @@ public enum OrganizationPermissions {
         this.resource = resource;
         this.action = action;
         this.description = description;
-        this.name = getName(resource, action);
+        name = getName(resource, action);
     }
 
     public static String getName(OrganizationResource resource, Action action) {

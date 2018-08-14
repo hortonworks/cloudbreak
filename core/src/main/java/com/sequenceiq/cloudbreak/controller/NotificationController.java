@@ -29,10 +29,11 @@ public abstract class NotificationController {
     protected final void executeAndNotify(Consumer<IdentityUser> consumer, ResourceEvent resourceEvent) {
         IdentityUser user = authenticatedUserService.getCbUser();
         consumer.accept(user);
-        notify(user, resourceEvent);
+        notify(resourceEvent);
     }
 
-    protected final void notify(IdentityUser user, ResourceEvent resourceEvent) {
+    protected final void notify(ResourceEvent resourceEvent) {
+        IdentityUser user = authenticatedUserService.getCbUser();
         CloudbreakEventsJson notification = new CloudbreakEventsJson();
         notification.setEventTimestamp(new Date().getTime());
         notification.setOwner(user.getUserId());

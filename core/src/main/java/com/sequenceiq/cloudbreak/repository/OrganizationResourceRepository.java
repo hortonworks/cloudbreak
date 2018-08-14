@@ -20,12 +20,12 @@ public interface OrganizationResourceRepository<T extends OrganizationAwareResou
     @CheckPermissionsByOrganization(action = READ, organizationIndex = 0)
     Set<T> findAllByOrganization(Organization organization);
 
+    @CheckPermissionsByOrganizationId(action = READ)
+    Set<T> findAllByOrganizationId(Long organizationId);
+
     @CheckPermissionsByOrganization(action = READ, organizationIndex = 1)
     T findByNameAndOrganization(String name, Organization organization);
 
     @CheckPermissionsByOrganizationId(action = READ, organizationIdIndex = 1)
     T findByNameAndOrganizationId(String name, Long organizationId);
-
-    @CheckPermissionsByOrganizationId(action = READ)
-    Set<T> findAllByOrganizationId(Long organizationId);
 }
