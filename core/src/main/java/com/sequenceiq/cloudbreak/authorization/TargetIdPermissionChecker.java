@@ -33,7 +33,7 @@ public class TargetIdPermissionChecker implements PermissionChecker<CheckPermiss
         int targetIdIndex = methodAnnotation.targetIdIndex();
         int length = proceedingJoinPoint.getArgs().length;
         permissionCheckingUtils.validateIndex(targetIdIndex, length, "targetIdIndex");
-        Optional<Class<?>> repositoryClass = permissionCheckingUtils.getRepositoryClass(proceedingJoinPoint);
+        Optional<Class<?>> repositoryClass = permissionCheckingUtils.getOrgAwareRepositoryClass(proceedingJoinPoint);
         if (!repositoryClass.isPresent()) {
             throw new IllegalArgumentException("Unable to determine entity class!");
         }

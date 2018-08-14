@@ -128,15 +128,15 @@ public class PermissionCheckingUtils {
         }
     }
 
-    public Optional<Class<?>> getRepositoryClass(ProceedingJoinPoint proceedingJoinPoint) {
+    public Optional<Class<?>> getOrgAwareRepositoryClass(ProceedingJoinPoint proceedingJoinPoint) {
         return Arrays.stream(proceedingJoinPoint.getTarget().getClass().getInterfaces())
                 .filter(i -> Arrays.asList(i.getInterfaces()).contains(OrganizationResourceRepository.class))
                 .findFirst();
     }
 
-    public Optional<Annotation> getAnnotation(Optional<Class<?>> repositoryClass) {
-        return repositoryClass.flatMap(repo -> Arrays.stream(repo.getAnnotations())
+    public Optional<Annotation> getClassAnnotation(Class<?> repositoryClass) {
+        return Arrays.stream(repositoryClass.getAnnotations())
                 .filter(a -> a.annotationType().equals(OrganizationResourceType.class))
-                .findFirst());
+                .findFirst();
     }
 }

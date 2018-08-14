@@ -45,6 +45,9 @@ public class UserService {
     }
 
     public User getOrCreate(IdentityUser identityUser) {
+        if (identityUser == null) {
+            throw new NullIdentityUserException();
+        }
         try {
             return transactionService.requiresNew(() -> {
                 User user = userRepository.findByUserId(identityUser.getUsername());
