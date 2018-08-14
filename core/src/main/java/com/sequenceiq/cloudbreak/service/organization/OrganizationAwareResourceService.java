@@ -17,11 +17,11 @@ public interface OrganizationAwareResourceService<T extends OrganizationAwareRes
 
     T getByNameFromUsersDefaultOrganization(String name);
 
-    Set<T> listByOrganizationId(Long organizationId);
+    Set<T> findAllByOrganization(Organization organization);
 
-    Set<T> listByOrganization(Organization organization);
+    Set<T> findAllByOrganizationId(Long organizationId);
 
-    Set<T> listForUsersDefaultOrganization();
+    Set<T> findAllForUsersDefaultOrganization();
 
     T delete(T resource);
 

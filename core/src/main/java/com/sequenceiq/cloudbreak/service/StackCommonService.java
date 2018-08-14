@@ -130,7 +130,7 @@ public class StackCommonService implements StackEndpoint {
 
     public StackResponse createInOrganization(StackRequest stackRequest, Long organizationId) {
         Organization organization = organizationService.get(organizationId);
-        return stackCreatorService.createStack(authenticatedUserService.getCbUser(), stackRequest, organization);
+        return stackCreatorService.createStack(authenticatedUserService.getCbUser(), organization, stackRequest);
     }
 
     public StackResponse createInDefaultOrganization(StackRequest stackRequest) {

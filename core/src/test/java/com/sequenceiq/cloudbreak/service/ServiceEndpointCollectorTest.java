@@ -40,19 +40,20 @@ import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptors;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.stack.cluster.gateway.ExposedServiceListValidator;
 import com.sequenceiq.cloudbreak.converter.stack.cluster.gateway.GatewayTopologyJsonToExposedServicesConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -82,6 +83,9 @@ public class ServiceEndpointCollectorTest {
 
     @Mock
     private ExposedServiceListValidator exposedServiceListValidator;
+
+    @Mock
+    private OrganizationService organizationService;
 
     @InjectMocks
     private final GatewayTopologyJsonToExposedServicesConverter exposedServicesConverter = new GatewayTopologyJsonToExposedServicesConverter();
@@ -199,23 +203,24 @@ public class ServiceEndpointCollectorTest {
 
     @Test
     public void testGetKnoxServices() {
-        when(blueprintService.getByName(any(), any())).thenReturn(new Blueprint());
+        when(organizationService.getDefaultOrganizationForCurrentUser()).thenReturn(new Organization());
+        when(blueprintService.getByNameForOrganization(any(), any(Organization.class))).thenReturn(new Blueprint());
         BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
         when(blueprintProcessorFactory.get(any())).thenReturn(blueprintTextProcessor);
         when(blueprintTextProcessor.getAllComponents()).thenReturn(new HashSet<>(Arrays.asList("HIVE", "PIG")));
         when(blueprintTextProcessor.getStackName()).thenReturn("HDF");
         when(blueprintTextProcessor.getStackVersion()).thenReturn("3.1");
-        Collection<ExposedServiceResponse> exposedServiceResponses = underTest.getKnoxServices(mock(IdentityUser.class), "blueprint");
+        Collection<ExposedServiceResponse> exposedServiceResponses = underTest.getKnoxServices("blueprint");
         assertEquals(0L, exposedServiceResponses.size());
 
         when(blueprintTextProcessor.getStackName()).thenReturn("HDF");
         when(blueprintTextProcessor.getStackVersion()).thenReturn("3.2");
-        exposedServiceResponses = underTest.getKnoxServices(mock(IdentityUser.class), "blueprint");
+        exposedServiceResponses = underTest.getKnoxServices("blueprint");
         assertEquals(1L, exposedServiceResponses.size());
 
         when(blueprintTextProcessor.getStackName()).thenReturn("HDP");
         when(blueprintTextProcessor.getStackVersion()).thenReturn("2.6");
-        exposedServiceResponses = underTest.getKnoxServices(mock(IdentityUser.class), "blueprint");
+        exposedServiceResponses = underTest.getKnoxServices("blueprint");
         assertEquals(1L, exposedServiceResponses.size());
     }
 

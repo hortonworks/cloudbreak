@@ -63,6 +63,7 @@ import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
 import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -156,6 +157,9 @@ public class StackRequestToBlueprintPreparationObjectConverterTest {
 
     @Mock
     private BlueprintStackInfo blueprintStackInfo;
+
+    @Mock
+    private OrganizationService organizationService;
 
     @Before
     public void setUp() {

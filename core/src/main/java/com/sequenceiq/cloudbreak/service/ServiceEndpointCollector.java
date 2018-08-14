@@ -30,13 +30,13 @@ import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.SSOType;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.cloud.VersionComparator;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 
 @Service
 public class ServiceEndpointCollector {
@@ -54,8 +54,11 @@ public class ServiceEndpointCollector {
     @Inject
     private AmbariHaComponentFilter ambariHaComponentFilter;
 
-    public Collection<ExposedServiceResponse> getKnoxServices(IdentityUser cbUser, String blueprintName) {
-        Blueprint blueprint = blueprintService.getByName(blueprintName, cbUser);
+    @Inject
+    private OrganizationService organizationService;
+
+    public Collection<ExposedServiceResponse> getKnoxServices(String blueprintName) {
+        Blueprint blueprint = blueprintService.getByNameForOrganization(blueprintName, organizationService.getDefaultOrganizationForCurrentUser());
         BlueprintTextProcessor blueprintTextProcessor = blueprintProcessorFactory.get(blueprint.getBlueprintText());
         Set<String> blueprintComponents = blueprintTextProcessor.getAllComponents();
         Set<String> haComponents = ambariHaComponentFilter.getHaComponents(blueprintTextProcessor);

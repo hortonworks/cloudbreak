@@ -72,8 +72,7 @@ public class LdapConfigService extends AbstractOrganizationAwareResourceService<
     }
 
     @Override
-    protected boolean canDelete(LdapConfig ldapConfig) {
-        LOGGER.info("Deleting ldap configuration with name: {}", ldapConfig.getName());
+    protected void prepareDeletion(LdapConfig ldapConfig) {
         List<Cluster> clustersWithLdap = clusterService.findByLdapConfig(ldapConfig);
         if (!clustersWithLdap.isEmpty()) {
             if (clustersWithLdap.size() > 1) {
@@ -84,17 +83,14 @@ public class LdapConfigService extends AbstractOrganizationAwareResourceService<
                 throw new BadRequestException(String.format(
                         "There are clusters associated with LDAP config '%s'. Please remove these before deleting the LDAP config. "
                                 + "The following clusters are using this LDAP: [%s]", ldapConfig.getName(), clusters));
-            } else {
-                throw new BadRequestException(String.format("There is a cluster ['%s'] which uses LDAP config '%s'. Please remove this "
-                        + "cluster before deleting the LDAP config", clustersWithLdap.get(0).getName(), ldapConfig.getName()));
             }
+            throw new BadRequestException(String.format("There is a cluster ['%s'] which uses LDAP config '%s'. Please remove this "
+                    + "cluster before deleting the LDAP config", clustersWithLdap.get(0).getName(), ldapConfig.getName()));
         }
-        return true;
     }
 
     @Override
     protected void prepareCreation(LdapConfig resource) {
 
     }
-
 }

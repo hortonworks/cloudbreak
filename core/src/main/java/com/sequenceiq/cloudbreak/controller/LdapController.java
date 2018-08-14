@@ -17,12 +17,10 @@ import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapTestResult;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapValidationRequest;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.ldapconfig.LdapConfigValidator;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
-import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 
 @Component
@@ -37,21 +35,16 @@ public class LdapController extends NotificationController implements LdapConfig
     private LdapConfigValidator ldapConfigValidator;
 
     @Inject
-    private AuthenticatedUserService authenticatedUserService;
-
-    @Inject
     private LdapConfigService ldapConfigService;
 
     @Override
     public LdapConfigResponse postPrivate(LdapConfigRequest ldapConfigRequest) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        return createConfig(user, ldapConfigRequest);
+        return createConfig(ldapConfigRequest);
     }
 
     @Override
     public LdapConfigResponse postPublic(LdapConfigRequest ldapConfigRequest) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        return createConfig(user, ldapConfigRequest);
+        return createConfig(ldapConfigRequest);
     }
 
     @Override
@@ -124,10 +117,10 @@ public class LdapController extends NotificationController implements LdapConfig
         return conversionService.convert(ldapConfig, LdapConfigRequest.class);
     }
 
-    private LdapConfigResponse createConfig(IdentityUser user, LdapConfigRequest request) {
+    private LdapConfigResponse createConfig(LdapConfigRequest request) {
         LdapConfig ldapConfig = conversionService.convert(request, LdapConfig.class);
         LdapConfig response = ldapConfigService.createInDefaultOrganization(ldapConfig);
-        notify(user, ResourceEvent.LDAP_CREATED);
+        notify(ResourceEvent.LDAP_CREATED);
         return conversionService.convert(response, LdapConfigResponse.class);
     }
 
@@ -136,7 +129,7 @@ public class LdapController extends NotificationController implements LdapConfig
     }
 
     private Set<LdapConfigResponse> listForUsersDefaultOrganization() {
-        return ldapConfigService.listForUsersDefaultOrganization().stream()
+        return ldapConfigService.findAllForUsersDefaultOrganization().stream()
                 .map(ldapConfig -> conversionService.convert(ldapConfig, LdapConfigResponse.class))
                 .collect(Collectors.toSet());
     }

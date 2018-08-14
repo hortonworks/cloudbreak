@@ -17,19 +17,14 @@ import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImageCatalogResponse;
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImagesResponse;
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.UpdateImageCatalogRequest;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
-import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.StackImageFilterService;
 
 @Controller
 @Transactional(TxType.NEVER)
 public class ImageCatalogV3Controller extends NotificationController implements ImageCatalogV3Endpoint {
-
-    @Inject
-    private AuthenticatedUserService authenticatedUserService;
 
     @Inject
     private ImageCatalogService imageCatalogService;
@@ -43,7 +38,7 @@ public class ImageCatalogV3Controller extends NotificationController implements 
 
     @Override
     public Set<ImageCatalogResponse> listByOrganization(Long organizationId) {
-        return imageCatalogService.listByOrganizationId(organizationId).stream()
+        return imageCatalogService.findAllByOrganizationId(organizationId).stream()
                 .map(imageCatalog -> conversionService.convert(imageCatalog, ImageCatalogResponse.class))
                 .collect(Collectors.toSet());
     }
@@ -62,15 +57,14 @@ public class ImageCatalogV3Controller extends NotificationController implements 
     public ImageCatalogResponse createInOrganization(Long organizationId, ImageCatalogRequest request) {
         ImageCatalog imageCatalog = conversionService.convert(request, ImageCatalog.class);
         imageCatalog = imageCatalogService.create(imageCatalog, organizationId);
-        notify(authenticatedUserService.getCbUser(), ResourceEvent.IMAGE_CATALOG_CREATED);
+        notify(ResourceEvent.IMAGE_CATALOG_CREATED);
         return conversionService.convert(imageCatalog, ImageCatalogResponse.class);
     }
 
     @Override
     public ImageCatalogResponse deleteInOrganization(Long organizationId, String name) {
         ImageCatalog deleted = imageCatalogService.delete(organizationId, name);
-        IdentityUser identityUser = authenticatedUserService.getCbUser();
-        notify(identityUser, ResourceEvent.IMAGE_CATALOG_DELETED);
+        notify(ResourceEvent.IMAGE_CATALOG_DELETED);
         return conversionService.convert(deleted, ImageCatalogResponse.class);
     }
 

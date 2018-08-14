@@ -75,8 +75,8 @@ public class ManagementPackService extends AbstractOrganizationAwareResourceServ
     }
 
     @Override
-    protected boolean canDelete(ManagementPack resource) {
-        return true;
+    protected void prepareDeletion(ManagementPack resource) {
+
     }
 
     @Override

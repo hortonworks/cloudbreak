@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.util.Optional;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -118,10 +117,10 @@ public class StackCreatorService {
 
     public StackResponse createStackInDefaultOrg(IdentityUser user, StackRequest stackRequest) {
         Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
-        return createStack(user, stackRequest, organization);
+        return createStack(user, organization, stackRequest);
     }
 
-    public StackResponse createStack(IdentityUser user, StackRequest stackRequest, @NotNull Organization organization) {
+    public StackResponse createStack(IdentityUser user, Organization organization, StackRequest stackRequest) {
         ValidationResult validationResult = stackRequestValidator.validate(stackRequest);
         if (validationResult.getState() == State.ERROR) {
             LOGGER.info("Stack request has validation error(s): {}.", validationResult.getFormattedErrors());
@@ -210,7 +209,7 @@ public class StackCreatorService {
                 LOGGER.info("Stack object and its dependencies has been created in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
                 try {
-                    createClusterIfNeed(user, stackRequest, stack, stackName, blueprint);
+                    createClusterIfNeed(user, organization, stackRequest, stack, stackName, blueprint);
                 } catch (CloudbreakImageNotFoundException | IOException | TransactionExecutionException e) {
                     throw new RuntimeException(e.getMessage(), e);
                 }
@@ -265,11 +264,11 @@ public class StackCreatorService {
         return stack;
     }
 
-    private void createClusterIfNeed(IdentityUser user, StackRequest stackRequest, Stack stack, String stackName, Blueprint blueprint)
+    private void createClusterIfNeed(IdentityUser user, Organization organization, StackRequest stackRequest, Stack stack, String stackName, Blueprint blueprint)
             throws CloudbreakImageNotFoundException, IOException, TransactionExecutionException {
         if (stackRequest.getClusterRequest() != null) {
             long start = System.currentTimeMillis();
-            Cluster cluster = clusterCreationService.prepare(stackRequest.getClusterRequest(), stack, blueprint, user);
+            Cluster cluster = clusterCreationService.prepare(stackRequest.getClusterRequest(), stack, blueprint, user, organization);
             LOGGER.info("Cluster object and its dependencies has been created in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
             stack.setCluster(cluster);
         }

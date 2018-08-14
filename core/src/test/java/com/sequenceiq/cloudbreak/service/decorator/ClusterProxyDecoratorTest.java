@@ -2,9 +2,9 @@ package com.sequenceiq.cloudbreak.service.decorator;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.Date;
@@ -19,9 +19,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.converter.mapper.ProxyConfigMapper;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigService;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -44,24 +45,25 @@ public class ClusterProxyDecoratorTest {
 
     @Before
     public void setUp() {
-        when(service.getPublicProxyConfig(anyString(), eq(identityUser))).thenReturn(new ProxyConfig());
+        when(service.getByNameForOrganization(anyString(), any(Organization.class))).thenReturn(new ProxyConfig());
         cluster = new Cluster();
+        cluster.setOrganization(new Organization());
         stack.setPublicInAccount(true);
     }
 
     @Test
     public void testProxyNameProvided() {
-        Cluster result = clusterProxyDecorator.prepareProxyConfig(cluster, identityUser, "test", stack);
+        Cluster result = clusterProxyDecorator.prepareProxyConfig(cluster, "test", stack);
         assertNotNull(result.getProxyConfig());
-        Mockito.verify(service, Mockito.times(1)).getPublicProxyConfig(anyString(), eq(identityUser));
-        Mockito.verify(service, Mockito.times(0)).create(any(IdentityUser.class), any(ProxyConfig.class));
+        Mockito.verify(service, Mockito.times(1)).getByNameForOrganization(anyString(), any(Organization.class));
+        Mockito.verify(service, Mockito.times(0)).create(any(ProxyConfig.class), anyLong());
     }
 
     @Test
     public void testNothingProvided() {
-        Cluster result = clusterProxyDecorator.prepareProxyConfig(cluster, identityUser, null, stack);
+        Cluster result = clusterProxyDecorator.prepareProxyConfig(cluster, null, stack);
         assertNull(result.getProxyConfig());
-        Mockito.verify(service, Mockito.times(0)).create(any(IdentityUser.class), any(ProxyConfig.class));
-        Mockito.verify(service, Mockito.times(0)).getPublicProxyConfig(anyString(), eq(identityUser));
+        Mockito.verify(service, Mockito.times(0)).create(any(ProxyConfig.class), anyLong());
+        Mockito.verify(service, Mockito.times(0)).getByNameForOrganization(anyString(), any(Organization.class));
     }
 }

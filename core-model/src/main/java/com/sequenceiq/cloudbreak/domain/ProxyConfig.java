@@ -8,15 +8,14 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 
+import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
 import com.sequenceiq.cloudbreak.domain.converter.EncryptionConverter;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.OrganizationAwareResource;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"account", "name"}))
-public class ProxyConfig implements ProvisionEntity {
+public class ProxyConfig implements ProvisionEntity, OrganizationAwareResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "proxyconfig_generator")
@@ -151,5 +150,10 @@ public class ProxyConfig implements ProvisionEntity {
 
     public void setOrganization(Organization organization) {
         this.organization = organization;
+    }
+
+    @Override
+    public OrganizationResource getResource() {
+        return OrganizationResource.PROXY;
     }
 }

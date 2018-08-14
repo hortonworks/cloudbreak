@@ -14,18 +14,13 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.RecipeEndpoint;
 import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
 import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.Recipe;
-import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
 
 @Component
 @Transactional(TxType.NEVER)
 public class RecipeController extends NotificationController implements RecipeEndpoint {
-
-    @Inject
-    private AuthenticatedUserService authenticatedUserService;
 
     @Inject
     private RecipeService recipeService;
@@ -41,9 +36,8 @@ public class RecipeController extends NotificationController implements RecipeEn
 
     @Override
     public void delete(Long id) {
-        IdentityUser identityUser = authenticatedUserService.getCbUser();
         Recipe deleted = recipeService.delete(id);
-        notify(identityUser, ResourceEvent.RECIPE_DELETED);
+        notify(ResourceEvent.RECIPE_DELETED);
         conversionService.convert(deleted, RecipeResponse.class);
     }
 
@@ -98,7 +92,7 @@ public class RecipeController extends NotificationController implements RecipeEn
     }
 
     private Set<RecipeResponse> listForUsersDefaultOrganization() {
-        return recipeService.listForUsersDefaultOrganization().stream()
+        return recipeService.findAllForUsersDefaultOrganization().stream()
                 .map(recipe -> conversionService.convert(recipe, RecipeResponse.class))
                 .collect(Collectors.toSet());
     }
@@ -110,11 +104,11 @@ public class RecipeController extends NotificationController implements RecipeEn
     private RecipeResponse createInDefaultOrganization(RecipeRequest request) {
         Recipe recipe = conversionService.convert(request, Recipe.class);
         recipe = recipeService.createInDefaultOrganization(recipe);
-        return notifyAndReturn(recipe, authenticatedUserService.getCbUser(), ResourceEvent.RECIPE_CREATED);
+        return notifyAndReturn(recipe, ResourceEvent.RECIPE_CREATED);
     }
 
-    private RecipeResponse notifyAndReturn(Recipe recipe, IdentityUser cbUser, ResourceEvent recipeCreated) {
-        notify(cbUser, recipeCreated);
+    private RecipeResponse notifyAndReturn(Recipe recipe, ResourceEvent resourceEvent) {
+        notify(resourceEvent);
         return conversionService.convert(recipe, RecipeResponse.class);
     }
 }

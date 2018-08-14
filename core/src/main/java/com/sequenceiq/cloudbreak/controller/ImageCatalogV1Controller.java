@@ -131,7 +131,7 @@ public class ImageCatalogV1Controller implements ImageCatalogV1Endpoint {
     }
 
     private List<ImageCatalogResponse> getAll() {
-        return toJsonList(imageCatalogService.listForUsersDefaultOrganization(), ImageCatalogResponse.class);
+        return toJsonList(imageCatalogService.findAllForUsersDefaultOrganization(), ImageCatalogResponse.class);
     }
 
     private ImageCatalogResponse post(ImageCatalogRequest imageCatalogRequest) {

@@ -16,10 +16,11 @@ public interface ProxyConfigMapper {
     @Mappings({
             @Mapping(target = "owner", ignore = true),
             @Mapping(target = "account", ignore = true),
+            @Mapping(target = "publicInAccount", ignore = true),
             @Mapping(target = "id", ignore = true),
             @Mapping(target = "organization", ignore = true)
     })
-    ProxyConfig mapRequestToEntity(ProxyConfigRequest proxyConfigRequest, boolean publicInAccount);
+    ProxyConfig mapRequestToEntity(ProxyConfigRequest proxyConfigRequest);
 
     ProxyConfigResponse mapEntityToResponse(ProxyConfig proxyConfigRequest);
 

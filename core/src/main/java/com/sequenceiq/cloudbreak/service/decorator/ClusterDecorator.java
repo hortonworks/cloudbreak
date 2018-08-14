@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
@@ -91,12 +92,13 @@ public class ClusterDecorator {
     @Inject
     private AmbariHaComponentFilter ambariHaComponentFilter;
 
-    public Cluster decorate(@Nonnull Cluster subject, @Nonnull ClusterRequest request, Blueprint blueprint, @Nonnull IdentityUser user, @Nonnull Stack stack) {
-        prepareBlueprint(subject, request, user, stack, Optional.ofNullable(blueprint));
+    public Cluster decorate(@Nonnull Cluster subject, @Nonnull ClusterRequest request, Blueprint blueprint, @Nonnull IdentityUser user,
+            Organization organization, @Nonnull Stack stack) {
+        prepareBlueprint(subject, request, organization, stack, Optional.ofNullable(blueprint));
         prepareHostGroups(stack, user, subject, request.getHostGroups());
         validateBlueprintIfRequired(subject, request, stack);
         prepareRds(subject, user, request, stack);
-        subject = clusterProxyDecorator.prepareProxyConfig(subject, user, request.getProxyName(), stack);
+        subject = clusterProxyDecorator.prepareProxyConfig(subject, request.getProxyName(), stack);
         prepareLdap(subject, user, stack, Optional.ofNullable(request.getLdapConfigId()), Optional.ofNullable(request.getLdapConfig()),
                 Optional.ofNullable(request.getLdapConfigName()));
         subject = sharedServiceConfigProvider.configureCluster(subject, request.getConnectedCluster());
@@ -109,7 +111,8 @@ public class ClusterDecorator {
         }
     }
 
-    private void prepareBlueprint(Cluster subject, ClusterRequest request, IdentityUser user, Stack stack, Optional<Blueprint> blueprint) {
+    private void prepareBlueprint(Cluster subject, ClusterRequest request, Organization organization, Stack stack,
+            Optional<Blueprint> blueprint) {
         if (blueprint.isPresent()) {
             subject.setBlueprint(blueprint.get());
         } else {
@@ -118,10 +121,10 @@ public class ClusterDecorator {
             } else if (request.getBlueprint() != null) {
                 Blueprint newBlueprint = conversionService.convert(request.getBlueprint(), Blueprint.class);
                 newBlueprint.setPublicInAccount(stack.isPublicInAccount());
-                newBlueprint = blueprintService.create(user, newBlueprint, new ArrayList<>());
+                newBlueprint = blueprintService.create(organization, newBlueprint, new ArrayList<>());
                 subject.setBlueprint(newBlueprint);
             } else if (!Strings.isNullOrEmpty(request.getBlueprintName())) {
-                subject.setBlueprint(blueprintService.get(request.getBlueprintName(), user.getAccount()));
+                subject.setBlueprint(blueprintService.getByNameForOrganization(request.getBlueprintName(), organization));
             } else {
                 throw new BadRequestException("Blueprint is not configured for the cluster!");
             }

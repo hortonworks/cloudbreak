@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
@@ -49,6 +50,7 @@ import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
 import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -105,10 +107,14 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
     @Inject
     private CloudStorageValidationUtil cloudStorageValidationUtil;
 
+    @Inject
+    private OrganizationService organizationService;
+
     @Override
     public BlueprintPreparationObject convert(StackV2Request source) {
         try {
             IdentityUser identityUser = cachedUserDetailsService.getDetails(source.getOwner(), UserFilterField.USERID);
+            Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
             Credential credential = credentialService.get(source.getGeneral().getCredentialName(), identityUser.getAccount());
             Optional<FlexSubscription> flexSubscription = getFlexSubscription(source);
             SmartSenseSubscription smartsenseSubscription = flexSubscription.isPresent() ? flexSubscription.get().getSmartSenseSubscription() : null;
@@ -116,7 +122,7 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
             LdapConfig ldapConfig = getLdapConfig(source, identityUser);
             BaseFileSystemConfigurationsView fileSystemConfigurationView = getFileSystemConfigurationView(source, credential);
             Set<RDSConfig> rdsConfigs = getRdsConfigs(source, identityUser);
-            Blueprint blueprint = getBlueprint(source, identityUser);
+            Blueprint blueprint = getBlueprint(source, organization);
             BlueprintStackInfo blueprintStackInfo = stackInfoService.blueprintStackInfo(blueprint.getBlueprintText());
             Set<HostgroupView> hostgroupViews = getHostgroupViews(source);
             Gateway gateway = source.getCluster().getAmbari().getGateway() == null ? null : getConversionService().convert(source, Gateway.class);
@@ -152,11 +158,11 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
         }
     }
 
-    private Blueprint getBlueprint(StackV2Request source, IdentityUser identityUser) {
+    private Blueprint getBlueprint(StackV2Request source, Organization organization) {
         Blueprint blueprint;
         blueprint = Strings.isNullOrEmpty(source.getCluster().getAmbari().getBlueprintName())
                 ? blueprintService.get(source.getCluster().getAmbari().getBlueprintId())
-                : blueprintService.get(source.getCluster().getAmbari().getBlueprintName(), identityUser.getAccount());
+                : blueprintService.getByNameForOrganization(source.getCluster().getAmbari().getBlueprintName(), organization);
         return blueprint;
     }
 

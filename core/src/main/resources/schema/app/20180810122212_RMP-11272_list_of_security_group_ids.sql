@@ -15,4 +15,4 @@ WHERE securitygroupid IS NOT NULL;
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-drop TABLE SecurityGroup_securityGroupIds;
+drop TABLE securitygroup_securitygroupids;

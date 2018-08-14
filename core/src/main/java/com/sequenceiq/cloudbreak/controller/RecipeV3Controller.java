@@ -14,10 +14,8 @@ import org.springframework.stereotype.Controller;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.RecipeV3Endpoint;
 import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
 import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.Recipe;
-import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
 
 @Controller
@@ -31,12 +29,9 @@ public class RecipeV3Controller extends NotificationController implements Recipe
     @Named("conversionService")
     private ConversionService conversionService;
 
-    @Inject
-    private AuthenticatedUserService authenticatedUserService;
-
     @Override
     public Set<RecipeResponse> listByOrganization(Long organizationId) {
-        return recipeService.listByOrganizationId(organizationId).stream()
+        return recipeService.findAllByOrganizationId(organizationId).stream()
                 .map(recipe -> conversionService.convert(recipe, RecipeResponse.class))
                 .collect(Collectors.toSet());
     }
@@ -51,15 +46,14 @@ public class RecipeV3Controller extends NotificationController implements Recipe
     public RecipeResponse createInOrganization(Long organizationId, RecipeRequest request) {
         Recipe recipe = conversionService.convert(request, Recipe.class);
         recipe = recipeService.create(recipe, organizationId);
-        notify(authenticatedUserService.getCbUser(), ResourceEvent.RECIPE_CREATED);
+        notify(ResourceEvent.RECIPE_CREATED);
         return conversionService.convert(recipe, RecipeResponse.class);
     }
 
     @Override
     public RecipeResponse deleteInOrganization(Long organizationId, String name) {
         Recipe deleted = recipeService.deleteByNameFromOrganization(name, organizationId);
-        IdentityUser identityUser = authenticatedUserService.getCbUser();
-        notify(identityUser, ResourceEvent.RECIPE_DELETED);
+        notify(ResourceEvent.RECIPE_DELETED);
         return conversionService.convert(deleted, RecipeResponse.class);
     }
 

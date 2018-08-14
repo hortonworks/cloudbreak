@@ -46,10 +46,6 @@ public class RecipeService extends AbstractOrganizationAwareResourceService<Reci
         return recipes;
     }
 
-    public Set<Recipe> listByOrganizationId(Long organizationId) {
-        return recipeRepository.listByOrganizationId(organizationId);
-    }
-
     public Recipe get(Long id) {
         return repository().findById(id).orElseThrow(notFound("Recipe", id));
     }
@@ -74,7 +70,7 @@ public class RecipeService extends AbstractOrganizationAwareResourceService<Reci
     }
 
     @Override
-    protected boolean canDelete(Recipe recipe) {
+    protected void prepareDeletion(Recipe recipe) {
         if (recipe == null) {
             throw new NotFoundException("Recipe not found.");
         }
@@ -93,7 +89,6 @@ public class RecipeService extends AbstractOrganizationAwareResourceService<Reci
             throw new BadRequestException(String.format("There is a cluster ['%s'] which uses recipe '%s'. Please remove this "
                     + "cluster before deleting the recipe", hostGroupsWithRecipe.get(0).getCluster().getName(), recipe.getName()));
         }
-        return true;
     }
 
     @Override

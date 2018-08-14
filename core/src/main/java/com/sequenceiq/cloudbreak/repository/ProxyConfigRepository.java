@@ -3,33 +3,26 @@ package com.sequenceiq.cloudbreak.repository;
 import java.util.Set;
 
 import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.sequenceiq.cloudbreak.aspect.DisableHasPermission;
+import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByOrganizationId;
+import com.sequenceiq.cloudbreak.aspect.organization.OrganizationResourceType;
+import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
-import com.sequenceiq.cloudbreak.aspect.HasPermission;
 import com.sequenceiq.cloudbreak.service.EntityType;
 
 @EntityType(entityClass = ProxyConfig.class)
-@Transactional(Transactional.TxType.REQUIRED)
-@HasPermission
-public interface ProxyConfigRepository extends BaseRepository<ProxyConfig, Long> {
+@Transactional(TxType.REQUIRED)
+@DisableHasPermission
+@OrganizationResourceType(resource = OrganizationResource.PROXY)
+public interface ProxyConfigRepository extends OrganizationResourceRepository<ProxyConfig, Long> {
 
-    Set<ProxyConfig> findAllByOwner(String owner);
-
-    @Query("SELECT p FROM ProxyConfig p WHERE (p.account= :account AND p.publicInAccount= true) OR p.owner= :user")
-    Set<ProxyConfig> findPublicInAccountForUser(@Param("user") String user, @Param("account") String account);
-
-    Set<ProxyConfig> findAllByAccount(String account);
-
-    ProxyConfig findByNameAndOwner(String name, String owner);
-
-    ProxyConfig findByNameAndAccount(String name, String account);
-
-    ProxyConfig findByIdAndAccount(Long id, String account);
-
-    @Query("SELECT p FROM ProxyConfig p WHERE  p.name= :name "
-            + "and ((p.publicInAccount=true and p.account= :account) or p.owner= :owner)")
-    ProxyConfig findByNameBasedOnAccount(@Param("name") String name, @Param("account") String account, @Param("owner") String owner);
+    @Override
+    @CheckPermissionsByOrganizationId
+    @Query("SELECT p FROM ProxyConfig p WHERE p.organization.id = :orgId")
+    Set<ProxyConfig> findAllByOrganizationId(@Param("orgId") Long orgId);
 }

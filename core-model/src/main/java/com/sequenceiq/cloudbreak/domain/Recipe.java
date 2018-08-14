@@ -10,7 +10,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
 
 import com.sequenceiq.cloudbreak.api.model.RecipeType;
 import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
@@ -19,7 +18,6 @@ import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.organization.OrganizationAwareResource;
 
 @Entity
-@Table(name = "recipe")
 public class Recipe implements ProvisionEntity, OrganizationAwareResource {
 
     @Id
@@ -133,12 +131,12 @@ public class Recipe implements ProvisionEntity, OrganizationAwareResource {
     }
 
     @Override
-    public OrganizationResource getResource() {
-        return OrganizationResource.RECIPE;
+    public void setOrganization(Organization organization) {
+        this.organization = organization;
     }
 
     @Override
-    public void setOrganization(Organization organization) {
-        this.organization = organization;
+    public OrganizationResource getResource() {
+        return OrganizationResource.RECIPE;
     }
 }
