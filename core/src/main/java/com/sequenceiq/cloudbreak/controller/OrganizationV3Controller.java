@@ -15,7 +15,7 @@ import javax.validation.Valid;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v1.OrganizationV3Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v3.OrganizationV3Endpoint;
 import com.sequenceiq.cloudbreak.api.model.users.ChangeOrganizationUsersJson;
 import com.sequenceiq.cloudbreak.api.model.users.OrganizationRequest;
 import com.sequenceiq.cloudbreak.api.model.users.OrganizationResponse;

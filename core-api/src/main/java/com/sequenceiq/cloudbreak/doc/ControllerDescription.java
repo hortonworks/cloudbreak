@@ -37,10 +37,11 @@ public class ControllerDescription {
     public static final String BLUEPRINT_V3_DESCRIPTION = "Operations on blueprints by organization";
     public static final String CREDENTIAL_V3_DESCRIPTION = "Operations on credentials by organization";
     public static final String FLEX_SUBSCRIPTION_V3_DESCRIPTION = "Operations on Flex subscriptions by organization";
-    public static final String RECIPE_V3_DESCRIPTION = "Operations on recipes by organization";
-    public static final String PROXY_CONFIG_V3_DESCRIPTION = "Operations on proxy config by organization";
-    public static final String STACK_V3_DESCRIPTION = "Operations on stack by organization";
     public static final String MANAGEMENT_PACK_V3_DESCRIPTION = "Operations on Management pack by Organization";
+    public static final String PROXY_CONFIG_V3_DESCRIPTION = "Operations on proxy config by organization";
+    public static final String RECIPE_V3_DESCRIPTION = "Operations on recipes by organization";
+    public static final String SMARTSENSE_SUBSCRIPTION_V3_DESCRIPTION = "Operations on SmartSense subscriptions by organization";
+    public static final String STACK_V3_DESCRIPTION = "Operations on stack by organization";
 
     private ControllerDescription() {
     }

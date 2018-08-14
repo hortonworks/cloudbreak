@@ -22,34 +22,34 @@ import com.sequenceiq.cloudbreak.doc.OperationDescriptions.FlexSubOpDescription;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Path("/v3")
+@Path("/v3/{organizationId}/flexsubscriptions")
 @Consumes(MediaType.APPLICATION_JSON)
 @Api(value = "/v3/{organizationId}/flexsubscriptions", description = ControllerDescription.FLEX_SUBSCRIPTION_V3_DESCRIPTION, protocols = "http,https")
 public interface FlexSubscriptionV3Endpoint {
 
     @GET
-    @Path("{organizationId}/flexsubscriptions")
+    @Path("")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = FlexSubOpDescription.LIST_BY_ORGANIZATION, produces = ContentType.JSON, notes = Notes.FLEX_SUBSCRIPTION_NOTES,
             nickname = "listFlexSubscriptionsByOrganization")
     Set<FlexSubscriptionResponse> listByOrganization(@PathParam("organizationId") Long organizationId);
 
     @GET
-    @Path("{organizationId}/flexsubscriptions/{name}")
+    @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = FlexSubOpDescription.GET_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.FLEX_SUBSCRIPTION_NOTES,
             nickname = "getFlexSubscriptionInOrganization")
     FlexSubscriptionResponse getByNameInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
 
     @POST
-    @Path("{organizationId}/flexsubscriptions")
+    @Path("")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = FlexSubOpDescription.CREATE_IN_ORG, produces = ContentType.JSON, notes = Notes.FLEX_SUBSCRIPTION_NOTES,
             nickname = "createFlexSubscriptionInOrganization")
     FlexSubscriptionResponse createInOrganization(@PathParam("organizationId") Long organizationId, @Valid FlexSubscriptionRequest request);
 
     @DELETE
-    @Path("{organizationId}/flexsubscriptions/{name}")
+    @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = FlexSubOpDescription.DELETE_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.FLEX_SUBSCRIPTION_NOTES,
             nickname = "deleteFlexSubscriptionInOrganization")

@@ -22,34 +22,34 @@ import com.sequenceiq.cloudbreak.doc.OperationDescriptions.CredentialOpDescripti
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Path("/v3")
+@Path("/v3/{organizationId}/credentials")
 @Consumes(MediaType.APPLICATION_JSON)
 @Api(value = "/v3/{organizationId}/credentials", description = ControllerDescription.CREDENTIAL_V3_DESCRIPTION, protocols = "http,https")
 public interface CredentialV3Endpoint {
 
     @GET
-    @Path("{organizationId}/credentials")
+    @Path("")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = CredentialOpDescription.LIST_BY_ORGANIZATION, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES,
             nickname = "listCredentialsByOrganization")
     Set<CredentialResponse> listByOrganization(@PathParam("organizationId") Long organizationId);
 
     @GET
-    @Path("{organizationId}/credentials/{name}")
+    @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = CredentialOpDescription.GET_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES,
             nickname = "getCredentialInOrganization")
     CredentialResponse getByNameInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
 
     @POST
-    @Path("{organizationId}/credentials")
+    @Path("")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = CredentialOpDescription.CREATE_IN_ORG, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES,
             nickname = "createCredentialInOrganization")
     CredentialResponse createInOrganization(@PathParam("organizationId") Long organizationId, @Valid CredentialRequest request);
 
     @DELETE
-    @Path("{organizationId}/credentials/{name}")
+    @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = CredentialOpDescription.DELETE_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES,
             nickname = "deleteCredentialInOrganization")
