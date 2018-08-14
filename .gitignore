@@ -11,6 +11,7 @@ gradle
 .idea
 *.ipr
 *.iws
+.shelf/
 
 .vscode
 .nb-gradle-properties

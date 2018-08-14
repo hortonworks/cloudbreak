@@ -299,7 +299,8 @@ public class GcpPlatformResources implements PlatformResources {
             Matcher matcher = pattern.matcher(cryptoKey.getName());
 
             String displayName = matcher.matches() ? String.format("%s/%s", matcher.group(1), matcher.group(2)) : cryptoKey.getName();
-            return new CloudEncryptionKey(cryptoKey.getName(), cryptoKey.getName(), cryptoKey.getPurpose(), displayName, metadata);
+            String name = cryptoKey.getPrimary().getName();
+            return new CloudEncryptionKey(name, name, cryptoKey.getPurpose(), displayName, metadata);
         };
     }
 

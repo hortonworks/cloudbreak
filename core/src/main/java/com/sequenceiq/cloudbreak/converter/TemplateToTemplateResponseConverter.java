@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.common.type.CloudConstants.OPENSTACK;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.YARN;
 
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.stereotype.Component;
 
@@ -38,6 +39,7 @@ public class TemplateToTemplateResponseConverter extends AbstractConversionServi
             Map<String, Object> atributesMap = attributes.getMap();
             templateJson.setParameters(atributesMap);
 
+            Optional.ofNullable(source.getSecretAttributes()).ifPresent(attr -> atributesMap.putAll(attr.getMap()));
             Map<String, Object> map = atributesMap;
 
             Object platformType = map.get(BaseTemplateParameter.PLATFORM_TYPE);
