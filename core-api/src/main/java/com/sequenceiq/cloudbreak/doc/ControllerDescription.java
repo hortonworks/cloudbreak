@@ -24,7 +24,7 @@ public class ControllerDescription {
     public static final String UTIL_DESCRIPTION = "Miscellaneous utility operations";
     public static final String RDSCONFIG_DESCRIPTION = "Operations on RDS configs";
     public static final String PROXYCONFIG_DESCRIPTION = "Operations on proxy configs";
-    public static final String MANAGEMENTPACK_DESCRIPTION = "Operations on management packs";
+    public static final String MANAGEMENT_PACK_DESCRIPTION = "Operations on management packs";
     public static final String CONNECTOR_DESCRIPTION = "Returns cloud provider specific resource types";
     public static final String SETTINGS_DESCRIPTION = "Returns Cloudbreak specific resource settings";
     public static final String SUBSCRIPTION_DESCRIPTION = "Client subscription for event notifications";
@@ -40,6 +40,7 @@ public class ControllerDescription {
     public static final String RECIPE_V3_DESCRIPTION = "Operations on recipes by organization";
     public static final String PROXY_CONFIG_V3_DESCRIPTION = "Operations on proxy config by organization";
     public static final String STACK_V3_DESCRIPTION = "Operations on stack by organization";
+    public static final String MANAGEMENT_PACK_V3_DESCRIPTION = "Operations on Management pack by Organization";
 
     private ControllerDescription() {
     }

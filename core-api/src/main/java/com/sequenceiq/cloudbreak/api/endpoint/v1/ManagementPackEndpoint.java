@@ -24,7 +24,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Path("/v1/mpacks")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v1/mpacks", description = ControllerDescription.MANAGEMENTPACK_DESCRIPTION, protocols = "http,https")
+@Api(value = "/v1/mpacks", description = ControllerDescription.MANAGEMENT_PACK_DESCRIPTION, protocols = "http,https")
 public interface ManagementPackEndpoint {
     @GET
     @Path("{id}")

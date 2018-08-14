@@ -108,6 +108,7 @@ public class EndpointConfig extends ResourceConfig {
         register(SubscriptionController.class);
         register(UserController.class);
         register(UtilController.class);
+        register(ManagementPackV3Controller.class);
 
         register(io.swagger.jaxrs.listing.ApiListingResource.class);
         register(io.swagger.jaxrs.listing.SwaggerSerializers.class);
