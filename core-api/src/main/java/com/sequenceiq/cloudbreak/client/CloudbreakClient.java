@@ -50,6 +50,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v2.ConnectorV2Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v2.StackV2Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.ImageCatalogV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.ManagementPackV3Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v3.RdsConfigV3Endpoint;
 
 import net.jodah.expiringmap.ExpirationPolicy;
 import net.jodah.expiringmap.ExpiringMap;
@@ -197,6 +198,10 @@ public class CloudbreakClient {
 
     public ImageCatalogV3Endpoint imageCatalogV3Endpoint() {
         return refreshIfNeededAndGet(ImageCatalogV3Endpoint.class);
+    }
+
+    public RdsConfigV3Endpoint rdsConfigV3Endpoint() {
+        return refreshIfNeededAndGet(RdsConfigV3Endpoint.class);
     }
 
     public RepositoryConfigValidationEndpoint repositoryConfigValidationEndpoint() {
