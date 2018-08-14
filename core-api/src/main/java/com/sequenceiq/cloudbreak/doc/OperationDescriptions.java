@@ -104,6 +104,18 @@ public class OperationDescriptions {
         public static final String GET_BY_NAME_IN_ORG = "get stack by name in organization";
         public static final String CREATE_IN_ORG = "create stack in organization";
         public static final String DELETE_BY_NAME_IN_ORG = "delete stack by name in organization";
+        public static final String SYNC_BY_NAME_IN_ORG = "syncs the stack by name in organization";
+        public static final String RETRY_BY_NAME_IN_ORG = "retries the stack by name in organization";
+        public static final String STOP_BY_NAME_IN_ORG = "stops the stack by name in organization";
+        public static final String START_BY_NAME_IN_ORG = "starts the stack by name in organization";
+        public static final String SCALE_BY_NAME_IN_ORG = "scales the stack by name in organization";
+        public static final String REPAIR_CLUSTER_IN_ORG = "repairs the stack by name in organization";
+        public static final String DELETE_WITH_KERBEROS_IN_ORG = "deletes the stack (with kerberos cluster) "
+                + "by name in organization";
+        public static final String GET_STACK_REQUEST_IN_ORG = "gets StackRequest by name in organization";
+        public static final String POST_STACK_FOR_BLUEPRINT_IN_ORG = "posts stack for blueprint in organization";
+        public static final String DELETE_INSTANCE_BY_ID_IN_ORG = "deletes instance from the stack's cluster in organization";
+        public static final String CHECK_IMAGE_IN_ORG = "checks image in stack by name in organization";
     }
 
     public static class ClusterOpDescription {
