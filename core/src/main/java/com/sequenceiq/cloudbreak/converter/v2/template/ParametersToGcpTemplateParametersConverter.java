@@ -34,7 +34,9 @@ public class ParametersToGcpTemplateParametersConverter extends AbstractConversi
             encryption.setType(EncryptionType.CUSTOM.name());
             Object keyEncryptionMethod = source.getOrDefault(KEY_ENCRYPTION_METHOD_FIELD, KeyEncryptionMethod.RSA.name());
             encryption.setKeyEncryptionMethod(KeyEncryptionMethod.valueOf(keyEncryptionMethod.toString()).name());
-            encryption.setKey(key.toString());
+            if (KeyEncryptionMethod.KMS.name().equalsIgnoreCase((String) keyEncryptionMethod)) {
+                encryption.setKey(key.toString());
+            }
             gcpParameters.setEncryption(encryption);
         }
         return gcpParameters;

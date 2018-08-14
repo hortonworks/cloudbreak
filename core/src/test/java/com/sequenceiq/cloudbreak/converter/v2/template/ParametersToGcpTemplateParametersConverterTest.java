@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.converter.v2.template;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -46,7 +47,7 @@ public class ParametersToGcpTemplateParametersConverterTest {
         assertNotNull(convert.getEncryption());
         assertEquals(EncryptionType.CUSTOM.name(), convert.getEncryption().getType());
         assertEquals(KeyEncryptionMethod.RSA.name(), convert.getEncryption().getKeyEncryptionMethod());
-        assertEquals("someKey", convert.getEncryption().getKey());
+        assertNull(convert.getEncryption().getKey());
     }
 
     @Test(expected = IllegalArgumentException.class)
