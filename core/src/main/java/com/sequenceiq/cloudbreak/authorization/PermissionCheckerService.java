@@ -27,7 +27,7 @@ import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByOrganizat
 import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByReturnValue;
 import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByTarget;
 import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByTargetId;
-import com.sequenceiq.cloudbreak.aspect.organization.ForbidForOrganizationResource;
+import com.sequenceiq.cloudbreak.aspect.organization.DisableCheckPermissions;
 import com.sequenceiq.cloudbreak.aspect.organization.OrganizationResourceType;
 import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.service.user.UserService;
@@ -80,9 +80,10 @@ public class PermissionCheckerService {
         }
 
         List<Annotation> annotations = Stream.of(CheckPermissionsByOrganization.class, CheckPermissionsByOrganizationId.class,
-                CheckPermissionsByTarget.class, CheckPermissionsByTargetId.class, CheckPermissionsByReturnValue.class, ForbidForOrganizationResource.class)
+                CheckPermissionsByTarget.class, CheckPermissionsByTargetId.class, CheckPermissionsByReturnValue.class, DisableCheckPermissions.class)
                 .map(c -> methodSignature.getMethod().getAnnotation(c))
                 .collect(Collectors.toList());
+
         Annotation methodAnnotation = validateNumberOfAnnotations(methodSignature, annotations);
         PermissionChecker<? extends Annotation> permissionChecker = permissionCheckerMap.get(methodAnnotation.annotationType());
         if (permissionChecker == null) {
