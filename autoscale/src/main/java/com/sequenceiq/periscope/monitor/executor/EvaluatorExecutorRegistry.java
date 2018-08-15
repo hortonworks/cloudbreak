@@ -25,88 +25,79 @@ public class EvaluatorExecutorRegistry {
     @Inject
     private Clock clock;
 
-    private final Map<Key, Element> submittedEvaluators = new ConcurrentHashMap<>();
+    private final Map<Element, Element> submittedEvaluators = new ConcurrentHashMap<>();
 
-    public boolean putIfAbsent(EvaluatorExecutor evaluator, long clusterOrStackId) {
-        Element elementToSubmit = new Element(evaluator, clusterOrStackId);
-        Element elementAlreadyPresent = submittedEvaluators.putIfAbsent(elementToSubmit.getKey(), elementToSubmit);
+    boolean putIfAbsent(EvaluatorExecutor evaluator, long resourceId) {
+        long now = clock.getCurrentTime();
+        Element elementToSubmit = new Element(evaluator, resourceId, now);
+        Element elementAlreadyPresent = submittedEvaluators.putIfAbsent(elementToSubmit, elementToSubmit);
+
         if (elementAlreadyPresent == null) {
             return true;
-        }
-
-        if (clock.getCurrentTime() - elementAlreadyPresent.getTimestampMillis() > timeout) {
+        } else if (now - elementAlreadyPresent.getTimestampMillis() > timeout) {
             LOGGER.info("timeout after {}: {} for cluster {} still present, resubmitting",
-                    clock.getCurrentTime() - elementAlreadyPresent.getTimestampMillis(),
-                    elementAlreadyPresent.getKey().getEvaluatorExecutor().getName(),
-                    elementAlreadyPresent.getKey().getClusterId());
+                    now - elementAlreadyPresent.getTimestampMillis(),
+                    elementAlreadyPresent.getEvaluatorExecutor().getName(),
+                    elementAlreadyPresent.getResourceId());
             return true;
         }
 
         LOGGER.info("submitting {} for cluster {} failed, it has been present in the system for {} ms",
-                elementAlreadyPresent.getKey().getEvaluatorExecutor().getName(),
-                elementAlreadyPresent.getKey().getClusterId(),
-                clock.getCurrentTime() - elementAlreadyPresent.getTimestampMillis());
+                elementAlreadyPresent.getEvaluatorExecutor().getName(),
+                elementAlreadyPresent.getResourceId(),
+                now - elementAlreadyPresent.getTimestampMillis());
         return false;
     }
 
     public void remove(EvaluatorExecutor evaluator, long clusterId) {
-        Key key = new Key(evaluator, clusterId);
-        submittedEvaluators.remove(key);
+        Element element = new Element(evaluator, clusterId);
+        submittedEvaluators.remove(element);
     }
 
-    private static class Key {
+    private static class Element {
+
         private final EvaluatorExecutor evaluatorExecutor;
 
-        private final long elementId;
+        private final long resourceId;
 
-        private Key(EvaluatorExecutor evaluatorExecutor, long elementId) {
-            this.evaluatorExecutor = evaluatorExecutor;
-            this.elementId = elementId;
+        private final long timestampMillis;
+
+        Element(EvaluatorExecutor evaluatorExecutor, long resourceId) {
+            this(evaluatorExecutor, resourceId, -1);
         }
 
-        private EvaluatorExecutor getEvaluatorExecutor() {
+        Element(EvaluatorExecutor evaluatorExecutor, long resourceId, long timestampMillis) {
+            this.evaluatorExecutor = evaluatorExecutor;
+            this.resourceId = resourceId;
+            this.timestampMillis = timestampMillis;
+        }
+
+        public EvaluatorExecutor getEvaluatorExecutor() {
             return evaluatorExecutor;
         }
 
-        private long getClusterId() {
-            return elementId;
+        public long getResourceId() {
+            return resourceId;
+        }
+
+        public long getTimestampMillis() {
+            return timestampMillis;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(evaluatorExecutor.getName(), elementId);
+            return Objects.hash(resourceId, evaluatorExecutor.getName());
         }
 
         @Override
         public boolean equals(Object o) {
             if (this == o) {
                 return true;
-            }
-            if (o == null || !getClass().equals(o.getClass())) {
+            } else if (o == null || !getClass().equals(o.getClass())) {
                 return false;
             }
-            Key key = (Key) o;
-            return elementId == key.elementId && Objects.equals(evaluatorExecutor.getName(), key.evaluatorExecutor.getName());
-        }
-    }
-
-    private class Element {
-
-        private final Key key;
-
-        private final long timestampMillis;
-
-        Element(EvaluatorExecutor evaluatorExecutor, long clusterId) {
-            key = new Key(evaluatorExecutor, clusterId);
-            timestampMillis = clock.getCurrentTime();
-        }
-
-        private Key getKey() {
-            return key;
-        }
-
-        private long getTimestampMillis() {
-            return timestampMillis;
+            Element element = (Element) o;
+            return resourceId == element.resourceId && Objects.equals(evaluatorExecutor.getName(), element.evaluatorExecutor.getName());
         }
     }
 }
