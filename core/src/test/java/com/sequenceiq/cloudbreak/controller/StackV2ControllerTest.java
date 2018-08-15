@@ -99,17 +99,17 @@ public class StackV2ControllerTest {
     @Test
     public void testChangeImageWithImageCatalog() {
         ImageCatalog imageCatalog = new ImageCatalog();
-        imageCatalog.setImageCatalogName("hgfjfg");
+        imageCatalog.setName("hgfjfg");
         imageCatalog.setImageCatalogUrl("url");
 
-        when(imageCatalogService.get(eq(imageCatalog.getImageCatalogName()))).thenReturn(imageCatalog);
+        when(imageCatalogService.get(eq(imageCatalog.getName()))).thenReturn(imageCatalog);
 
         StackImageChangeRequest stackImageChangeRequest = new StackImageChangeRequest();
         stackImageChangeRequest.setImageId("asdf");
-        stackImageChangeRequest.setImageCatalogName(imageCatalog.getImageCatalogName());
+        stackImageChangeRequest.setImageCatalogName(imageCatalog.getName());
         underTest.changeImage(stack.getName(), stackImageChangeRequest);
 
-        verify(stackService).updateImage(eq(stack.getId()), eq(stackImageChangeRequest.getImageId()), eq(imageCatalog.getImageCatalogName()),
+        verify(stackService).updateImage(eq(stack.getId()), eq(stackImageChangeRequest.getImageId()), eq(imageCatalog.getName()),
                 eq(imageCatalog.getImageCatalogUrl()));
     }
 }

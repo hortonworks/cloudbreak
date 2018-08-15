@@ -30,7 +30,7 @@ public class ImageCatalogAction {
                 CloudbreakClient.class);
         imageCatalogEntity.setResponse(
                 client.getCloudbreakClient()
-                        .imageCatalogEndpoint().getPublicByName(imageCatalogEntity.getName(), false));
+                        .imageCatalogEndpoint().getByName(imageCatalogEntity.getName(), false));
         logJSON("Imagecatalog get response: ", imageCatalogEntity.getResponse());
     }
 

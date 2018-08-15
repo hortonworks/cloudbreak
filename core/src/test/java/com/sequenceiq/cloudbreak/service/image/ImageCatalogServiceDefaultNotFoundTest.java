@@ -66,7 +66,7 @@ public class ImageCatalogServiceDefaultNotFoundTest {
         IdentityUser user = getIdentityUser();
         when(authenticatedUserService.getCbUser()).thenReturn(user);
 
-        when(userProfileService.getOrCreate(user.getAccount(), user.getUserId())).thenReturn(new UserProfile());
+        when(userProfileService.getOrCreate(user.getAccount(), user.getUserId(), user.getUsername())).thenReturn(new UserProfile());
     }
 
     @Test(expected = CloudbreakImageNotFoundException.class)

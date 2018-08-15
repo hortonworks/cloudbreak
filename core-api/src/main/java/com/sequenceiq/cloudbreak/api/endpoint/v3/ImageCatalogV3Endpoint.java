@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.doc.OperationDescriptions.ImageCatalogOpDescrip
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Path("/v3/{organizationId}/imagecatalogs/")
+@Path("/v3/{organizationId}/imagecatalogs")
 @Consumes(MediaType.APPLICATION_JSON)
 @Api(value = "/v3/{organizationId}/imagecatalogs", description = ControllerDescription.IMAGE_CATALOG_V3_DESCRIPTION, protocols = "http,https")
 public interface ImageCatalogV3Endpoint {
@@ -35,7 +35,7 @@ public interface ImageCatalogV3Endpoint {
     Set<ImageCatalogResponse> listByOrganization(@PathParam("organizationId") Long organizationId);
 
     @GET
-    @Path("{name}")
+    @Path("/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ImageCatalogOpDescription.GET_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.IMAGE_CATALOG_NOTES,
             nickname = "getImageCatalogInOrganization")
@@ -49,7 +49,7 @@ public interface ImageCatalogV3Endpoint {
     ImageCatalogResponse createInOrganization(@PathParam("organizationId") Long organizationId, @Valid ImageCatalogRequest request);
 
     @DELETE
-    @Path("{name}")
+    @Path("/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ImageCatalogOpDescription.DELETE_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.IMAGE_CATALOG_NOTES,
             nickname = "deleteImageCatalogInOrganization")

@@ -14,6 +14,8 @@ public enum ResourceEvent {
     LDAP_DELETED("resource.ldap.deleted"),
     MANAGEMENT_PACK_CREATED("resource.mpack.created"),
     MANAGEMENT_PACK_DELETED("resource.mpack.deleted"),
+    IMAGE_CATALOG_CREATED("resource.imagecatalog.created"),
+    IMAGE_CATALOG_DELETED("resource.imagecatalog.deleted"),
     NETWORK_CREATED("resource.network.created"),
     NETWORK_DELETED("resource.network.deleted"),
     RECIPE_CREATED("resource.recipe.created"),

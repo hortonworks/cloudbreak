@@ -289,7 +289,7 @@ public class StackV2Controller extends NotificationController implements StackV2
         Stack stack = stackService.getPublicStack(stackName, user);
         if (StringUtils.isNotBlank(stackImageChangeRequest.getImageCatalogName())) {
             ImageCatalog imageCatalog = imageCatalogService.get(stackImageChangeRequest.getImageCatalogName());
-            stackService.updateImage(stack.getId(), stackImageChangeRequest.getImageId(), imageCatalog.getImageCatalogName(), imageCatalog.getImageCatalogUrl());
+            stackService.updateImage(stack.getId(), stackImageChangeRequest.getImageId(), imageCatalog.getName(), imageCatalog.getImageCatalogUrl());
         } else {
             stackService.updateImage(stack.getId(), stackImageChangeRequest.getImageId(), null, null);
         }

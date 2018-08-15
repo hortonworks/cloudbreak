@@ -5,7 +5,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -42,11 +44,13 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateService;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserProfileHandler;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
@@ -131,6 +135,9 @@ public class ImageCatalogServiceTest {
 
     @Mock
     private ComponentConfigProvider componentConfigProvider;
+
+    @Mock
+    private OrganizationService organizationService;
 
     @Before
     public void beforeTest() throws Exception {
@@ -361,7 +368,9 @@ public class ImageCatalogServiceTest {
     public void testGetImagesWhenCustomImageCatalogExists() throws Exception {
         ImageCatalog ret = new ImageCatalog();
         ret.setImageCatalogUrl("");
-        when(imageCatalogRepository.findByName("name", "userId", "account")).thenReturn(ret);
+        Organization organization = mock(Organization.class);
+        when(organizationService.getDefaultOrganizationForCurrentUser()).thenReturn(organization);
+        when(imageCatalogRepository.findByNameAndOrganization("name", organization)).thenReturn(ret);
         when(imageCatalogProvider.getImageCatalogV2("")).thenReturn(null);
         underTest.getImages("name", "aws");
 
@@ -371,7 +380,7 @@ public class ImageCatalogServiceTest {
 
     @Test
     public void testGetImagesWhenCustomImageCatalogDoesNotExists() throws Exception {
-        when(imageCatalogRepository.findByName("verycool", "userId", "account")).thenThrow(new AccessDeniedException("denied"));
+        when(organizationService.getDefaultOrganizationForCurrentUser()).thenThrow(new AccessDeniedException("denied"));
 
         thrown.expectMessage("The verycool catalog does not exist or does not belongs to your account.");
         thrown.expect(CloudbreakImageCatalogException.class);
@@ -387,18 +396,20 @@ public class ImageCatalogServiceTest {
         IdentityUser user = getIdentityUser();
         UserProfile userProfile = new UserProfile();
         ImageCatalog imageCatalog = new ImageCatalog();
-        imageCatalog.setImageCatalogName(name);
+        imageCatalog.setName(name);
         imageCatalog.setArchived(false);
+        Organization organization = mock(Organization.class);
         doNothing().when(userProfileHandler).destroyProfileImageCatalogPreparation(any(ImageCatalog.class));
         when(authenticatedUserService.getCbUser()).thenReturn(user);
-        when(imageCatalogRepository.findByName(name, user.getUserId(), user.getAccount())).thenReturn(imageCatalog);
+        when(organizationService.getDefaultOrganizationForCurrentUser()).thenReturn(organization);
+        when(imageCatalogRepository.findByNameAndOrganization(name, organization)).thenReturn(imageCatalog);
         when(userProfileService.getOrCreate(user.getAccount(), user.getUserId(), user.getUsername())).thenReturn(userProfile);
         underTest.delete(name);
 
         verify(imageCatalogRepository, times(1)).save(imageCatalog);
 
         assertTrue(imageCatalog.isArchived());
-        assertTrue(imageCatalog.getImageCatalogName().startsWith(name) && imageCatalog.getImageCatalogName().indexOf('_') == name.length());
+        assertTrue(imageCatalog.getName().startsWith(name) && imageCatalog.getName().indexOf('_') == name.length());
     }
 
     @Test
@@ -415,9 +426,9 @@ public class ImageCatalogServiceTest {
     public void testGet() {
         String name = "img-name";
         ImageCatalog imageCatalog = new ImageCatalog();
-        IdentityUser user = getIdentityUser();
-        when(authenticatedUserService.getCbUser()).thenReturn(user);
-        when(imageCatalogRepository.findByName(name, user.getUserId(), user.getAccount())).thenReturn(imageCatalog);
+        Organization organization = mock(Organization.class);
+        when(organizationService.getDefaultOrganizationForCurrentUser()).thenReturn(organization);
+        when(imageCatalogRepository.findByNameAndOrganization(name, organization)).thenReturn(imageCatalog);
         ImageCatalog actual = underTest.get(name);
 
         assertEquals(actual, imageCatalog);
@@ -428,9 +439,9 @@ public class ImageCatalogServiceTest {
         String name = "cloudbreak-default";
         ImageCatalog actual = underTest.get(name);
 
-        verify(imageCatalogRepository, times(0)).findByName(name, USER_ID, ACCOUNT);
+        verify(imageCatalogRepository, times(0)).findByNameAndOrganization(eq(name), any(Organization.class));
 
-        assertEquals(actual.getImageCatalogName(), name);
+        assertEquals(actual.getName(), name);
         assertNull(actual.getId());
     }
 
@@ -443,13 +454,13 @@ public class ImageCatalogServiceTest {
     private void setupUserProfileService() {
         IdentityUser user = getIdentityUser();
         UserProfile userProfile = new UserProfile();
-        when(userProfileService.getOrCreate(user.getAccount(), user.getUserId())).thenReturn(userProfile);
+        when(userProfileService.getOrCreate(user.getAccount(), user.getUserId(), user.getUsername())).thenReturn(userProfile);
     }
 
     private ImageCatalog getImageCatalog() {
         ImageCatalog imageCatalog = new ImageCatalog();
         imageCatalog.setImageCatalogUrl(CUSTOM_IMAGE_CATALOG_URL);
-        imageCatalog.setImageCatalogName("default");
+        imageCatalog.setName("default");
         return imageCatalog;
     }
 

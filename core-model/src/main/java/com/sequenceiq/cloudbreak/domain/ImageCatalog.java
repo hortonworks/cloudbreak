@@ -10,11 +10,13 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.OrganizationAwareResource;
 
 @Entity
-@Table(name = "ImageCatalog", uniqueConstraints = @UniqueConstraint(columnNames = {"account", "name"}))
-public class ImageCatalog implements ProvisionEntity {
+@Table(name = "ImageCatalog", uniqueConstraints = @UniqueConstraint(columnNames = {"organization_id", "name"}))
+public class ImageCatalog implements ProvisionEntity, OrganizationAwareResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "imagecatalog_generator")
@@ -27,8 +29,8 @@ public class ImageCatalog implements ProvisionEntity {
     @Column(nullable = false)
     private String account;
 
-    @Column(name = "name", nullable = false)
-    private String imageCatalogName;
+    @Column(nullable = false)
+    private String name;
 
     @Column(name = "url", nullable = false)
     private String imageCatalogUrl;
@@ -66,12 +68,8 @@ public class ImageCatalog implements ProvisionEntity {
         this.account = account;
     }
 
-    public String getImageCatalogName() {
-        return imageCatalogName;
-    }
-
-    public void setImageCatalogName(String imageCatalogName) {
-        this.imageCatalogName = imageCatalogName;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getImageCatalogUrl() {
@@ -102,7 +100,17 @@ public class ImageCatalog implements ProvisionEntity {
         return organization;
     }
 
+    @Override
+    public String getName() {
+        return name;
+    }
+
     public void setOrganization(Organization organization) {
         this.organization = organization;
+    }
+
+    @Override
+    public OrganizationResource getResource() {
+        return OrganizationResource.IMAGECATALOG;
     }
 }
