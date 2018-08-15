@@ -12,8 +12,10 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import com.sequenceiq.cloudbreak.api.model.ldap.LDAPTestRequest;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
+import com.sequenceiq.cloudbreak.api.model.ldap.LdapTestResult;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
@@ -22,36 +24,42 @@ import com.sequenceiq.cloudbreak.doc.OperationDescriptions.LdapConfigOpDescripti
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Path("/v3")
+@Path("/v3/{organizationId}/ldapconfigs")
 @Consumes(MediaType.APPLICATION_JSON)
 @Api(value = "/v3/{organizationId}/ldapconfigs", description = ControllerDescription.LDAP_V3_CONFIG_DESCRIPTION, protocols = "http,https")
 public interface LdapConfigV3Endpoint {
 
     @GET
-    @Path("{organizationId}/ldapconfigs")
+    @Path("")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = LdapConfigOpDescription.LIST_BY_ORGANIZATION, produces = ContentType.JSON, notes = Notes.LDAP_CONFIG_NOTES,
             nickname = "listLdapsByOrganization")
     Set<LdapConfigResponse> listConfigsByOrganization(@PathParam("organizationId") Long organizationId);
 
     @GET
-    @Path("{organizationId}/ldapconfigs/{ldapConfigName}")
+    @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = LdapConfigOpDescription.GET_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.LDAP_CONFIG_NOTES,
             nickname = "getLdapConfigInOrganization")
-    LdapConfigResponse getByNameInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("ldapConfigName") String ldapConfigName);
+    LdapConfigResponse getByNameInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String ldapConfigName);
 
     @POST
-    @Path("{organizationId}/ldapconfigs")
+    @Path("")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = LdapConfigOpDescription.CREATE_IN_ORG, produces = ContentType.JSON, notes = Notes.LDAP_CONFIG_NOTES,
             nickname = "createLdapConfigsInOrganization")
     LdapConfigResponse createInOrganization(@PathParam("organizationId") Long organizationId, @Valid LdapConfigRequest request);
 
     @DELETE
-    @Path("{organizationId}/ldapconfigs/{ldapConfigName}")
+    @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = LdapConfigOpDescription.DELETE_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.LDAP_CONFIG_NOTES,
             nickname = "deleteLdapConfigsInOrganization")
-    LdapConfigResponse deleteInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("ldapConfigName") String ldapConfigName);
+    LdapConfigResponse deleteInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String ldapConfigName);
+
+    @POST
+    @Path("testconnect")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = LdapConfigOpDescription.POST_CONNECTION_TEST, produces = ContentType.JSON, nickname = "postLdapConnectionTestInOrganization")
+    LdapTestResult testLdapConnection(@PathParam("organizationId") Long organizationId, @Valid LDAPTestRequest ldapValidationRequest);
 }

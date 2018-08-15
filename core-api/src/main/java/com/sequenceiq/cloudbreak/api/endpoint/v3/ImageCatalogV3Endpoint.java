@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v3;
 
+import static com.sequenceiq.cloudbreak.doc.Notes.IMAGE_CATALOG_NOTES;
+
 import java.util.Set;
 
 import javax.validation.Valid;
@@ -7,6 +9,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -14,6 +17,8 @@ import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImageCatalogRequest;
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImageCatalogResponse;
+import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImagesResponse;
+import com.sequenceiq.cloudbreak.api.model.imagecatalog.UpdateImageCatalogRequest;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
@@ -54,5 +59,43 @@ public interface ImageCatalogV3Endpoint {
     @ApiOperation(value = ImageCatalogOpDescription.DELETE_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.IMAGE_CATALOG_NOTES,
             nickname = "deleteImageCatalogInOrganization")
     ImageCatalogResponse deleteInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
+
+    @GET
+    @Path("account/{name}/{platform}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ImageCatalogOpDescription.GET_IMAGES_BY_PROVIDER_AND_CUSTOM_IMAGE_CATALOG, produces = ContentType.JSON,
+            notes = IMAGE_CATALOG_NOTES, nickname = "getImagesByProviderAndCustomImageCatalogInOrganization")
+    ImagesResponse getImagesByProviderFromImageCatalogInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name,
+            @PathParam("platform") String platform) throws Exception;
+
+    @GET
+    @Path("upgrade/{stackName}/{name}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ImageCatalogOpDescription.GET_IMAGES_BY_STACK_NAME_AND_CUSTOM_IMAGE_CATALOG, produces = ContentType.JSON,
+            notes = Notes.IMAGE_CATALOG_STACK_UPGRADE_NOTES, nickname = "getImagesByStackNameAndCustomImageCatalogInOrganization")
+    ImagesResponse getImagesFromCustomImageCatalogByStackInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name,
+            @PathParam("stackName") String stackName) throws Exception;
+
+    @GET
+    @Path("upgrade/{stackName}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ImageCatalogOpDescription.GET_IMAGES_BY_STACK_NAME, produces = ContentType.JSON,
+            notes = Notes.IMAGE_CATALOG_STACK_UPGRADE_NOTES, nickname = "getImagesByStackNameAndDefaultImageCatalogInOrganization")
+    ImagesResponse getImagesFromDefaultImageCatalogByStackInOrganization(@PathParam("organizationId") Long organizationId,
+            @PathParam("stackName") String stackName) throws Exception;
+
+    @PUT
+    @Path("")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ImageCatalogOpDescription.PUT_PUBLIC_BY_NAME, produces = ContentType.JSON, notes = IMAGE_CATALOG_NOTES,
+            nickname = "putPublicImageCatalogInOrganization")
+    ImageCatalogResponse putPublicInOrganization(@PathParam("organizationId") Long organizationId, @Valid UpdateImageCatalogRequest request);
+
+    @PUT
+    @Path("setdefault/{name}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ImageCatalogOpDescription.PUT_PUBLIC_BY_NAME, produces = ContentType.JSON, notes = IMAGE_CATALOG_NOTES,
+            nickname = "putSetDefaultImageCatalogByNameInOrganization")
+    ImageCatalogResponse putSetDefaultByNameInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
 
 }

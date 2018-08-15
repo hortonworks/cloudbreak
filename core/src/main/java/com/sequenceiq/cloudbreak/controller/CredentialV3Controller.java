@@ -34,4 +34,9 @@ public class CredentialV3Controller implements CredentialV3Endpoint {
     public CredentialResponse deleteInOrganization(Long organizationId, String name) {
         return null;
     }
+
+    @Override
+    public CredentialResponse putInOrganization(Long organizationId, CredentialRequest credentialRequest) {
+        return null;
+    }
 }

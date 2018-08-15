@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v3;
 
+import static com.sequenceiq.cloudbreak.doc.Notes.SMARTSENSE_SUBSCRIPTION_NOTES;
+
 import java.util.Set;
 
 import javax.validation.Valid;
@@ -40,6 +42,12 @@ public interface SmartSenseSubscriptionV3Endpoint {
     @ApiOperation(value = SmartSenseSubOpDescription.GET_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.SMARTSENSE_SUBSCRIPTION_NOTES,
             nickname = "getSmartSenseSubscriptionInOrganization")
     SmartSenseSubscriptionJson getByNameInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = SmartSenseSubOpDescription.GET_DEFAULT_IN_ORG, produces = ContentType.JSON, notes = SMARTSENSE_SUBSCRIPTION_NOTES,
+            nickname = "getDefaultSmartSenseSubscriptionInOrganization")
+    SmartSenseSubscriptionJson getDefaultInOrganization(@PathParam("organizationId") Long organizationId);
 
     @POST
     @Path("")

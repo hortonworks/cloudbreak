@@ -7,6 +7,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -54,5 +55,12 @@ public interface CredentialV3Endpoint {
     @ApiOperation(value = CredentialOpDescription.DELETE_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES,
             nickname = "deleteCredentialInOrganization")
     CredentialResponse deleteInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
+
+    @PUT
+    @Path("")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = CredentialOpDescription.PUT_IN_ORG, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES,
+            nickname = "putCredentialInOrganization")
+    CredentialResponse putInOrganization(@PathParam("organizationId") Long organizationId, @Valid CredentialRequest credentialRequest);
 
 }
