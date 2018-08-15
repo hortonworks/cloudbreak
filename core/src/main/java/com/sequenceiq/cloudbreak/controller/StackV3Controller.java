@@ -87,7 +87,7 @@ public class StackV3Controller extends NotificationController implements StackV3
     }
 
     @Override
-    public StackResponse deleteInstance(Long organizationId, String name, Long stackId, String instanceId, boolean forced) {
+    public StackResponse deleteInstance(Long organizationId, String name, String instanceId, boolean forced) {
         return null;
     }
 
