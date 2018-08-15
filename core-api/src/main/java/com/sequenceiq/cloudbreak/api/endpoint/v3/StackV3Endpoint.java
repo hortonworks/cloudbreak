@@ -150,7 +150,7 @@ public interface StackV3Endpoint {
     @ApiOperation(value = StackOpDescription.DELETE_INSTANCE_BY_ID_IN_ORG, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
             nickname = "deleteInstanceStackV3")
     StackResponse deleteInstance(@PathParam("organizationId") Long organizationId, @PathParam("name") String name,
-            @PathParam("stackId") Long stackId, @PathParam("instanceId") String instanceId,
+            @PathParam("instanceId") String instanceId,
             @QueryParam("forced") @DefaultValue("false") boolean forced);
 
     // changeImage

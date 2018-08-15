@@ -49,7 +49,7 @@ public interface SmartSenseSubscriptionV3Endpoint {
     SmartSenseSubscriptionJson createInOrganization(@PathParam("organizationId") Long organizationId, @Valid SmartSenseSubscriptionJson request);
 
     @DELETE
-    @Path("{organizationId}/smartsensesubscriptions{name}")
+    @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = SmartSenseSubOpDescription.DELETE_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.SMARTSENSE_SUBSCRIPTION_NOTES,
             nickname = "deleteSmartSenseSubscriptionInOrganization")
