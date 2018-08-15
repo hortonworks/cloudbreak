@@ -289,6 +289,7 @@ public class OperationDescriptions {
         public static final String GET_BY_NAME_IN_ORG = "get RDS config by name in organization";
         public static final String CREATE_IN_ORG = "create RDS config in organization";
         public static final String DELETE_BY_NAME_IN_ORG = "delete RDS config by name in organization";
+        public static final String GET_REQUEST_IN_ORG = "get request in organization";
     }
 
     public static class ProxyConfigOpDescription {
