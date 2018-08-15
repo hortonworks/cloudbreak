@@ -5,3 +5,4 @@ swagger.json
 .cb
 allure
 ruby-uuid
+cloudbreak_start.log

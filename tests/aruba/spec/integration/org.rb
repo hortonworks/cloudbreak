@@ -18,7 +18,7 @@ RSpec.describe 'Organization test cases', :type => :aruba, :feature => "Organiza
     MockHelper.resetMock()
   end
 
-  it "Organization - List", :story => "List Organizations", :severity => :normal, :testId => 1 do
+  xit "Organization - List", :story => "List Organizations", :severity => :normal, :testId => 1 do
     with_environment 'DEBUG' => '1' do
       responseHash = MockHelper.getResponseHash("../../../responses/organizations/organizations.json")
 
@@ -34,7 +34,7 @@ RSpec.describe 'Organization test cases', :type => :aruba, :feature => "Organiza
     end
   end
 
-  it "Organization - Describe", :story => "Describe Organizations", :severity => :normal, :testId => 2 do
+  xit "Organization - Describe", :story => "Describe Organizations", :severity => :normal, :testId => 2 do
     with_environment 'DEBUG' => '1' do
       responseHash = MockHelper.getResponseHash("../../../responses/organizations/organizations.json")
 
@@ -50,7 +50,7 @@ RSpec.describe 'Organization test cases', :type => :aruba, :feature => "Organiza
     end
   end
 
-  it "Organization - Create", :story => "Create Organizations", :severity => :critical, :testId => 3 do
+  xit "Organization - Create", :story => "Create Organizations", :severity => :critical, :testId => 3 do
     with_environment 'DEBUG' => '1' do
       requestHash = MockHelper.getResponseHash("../../../requests/organizations/organizations.json")
 
@@ -64,7 +64,7 @@ RSpec.describe 'Organization test cases', :type => :aruba, :feature => "Organiza
     end
   end
 
-  it "Organization - Delete", :story => "Delete Organizations", :severity => :critical, :testId => 4 do
+  xit "Organization - Delete", :story => "Delete Organizations", :severity => :critical, :testId => 4 do
     with_environment 'DEBUG' => '1' do
       responseHash = MockHelper.getResponseHash("../../../responses/organizations/deleted-organization.json")
 

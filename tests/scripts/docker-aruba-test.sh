@@ -5,36 +5,61 @@
 : ${BASE_URL:=https://127.0.0.1}
 : ${USERNAME_CLI:=admin@example.com}
 : ${PASSWORD_CLI:=cloudbreak}
+: ${DOCKER_TAG:=latest}
 : ${CLI_TEST_FILES:=spec/integration/*.rb}
 
-export TEST_CONTAINER_NAME=aruba-test-runner
+readonly TEST_CONTAINER_NAME=aruba-test-runner
 
-echo "Refresh the Test Runner Docker image"
-docker pull hortonworks/cloud-cli-e2e
+image-update() {
+    declare desc="Refresh the Test Runner Docker image"
 
-echo "Checking stopped containers"
-if [[ -n "$(docker ps -a -f status=exited -f status=dead -q)" ]]; then
-  echo "Delete stopped containers"
-  docker rm $(docker ps -a -f status=exited -f status=dead -q)
-else
-  echo "There is no Exited or Dead container"
-fi
+    docker pull hortonworks/cloud-cli-e2e:$DOCKER_TAG
+}
 
-echo "Checking " $TEST_CONTAINER_NAME " container is running"
-if [[ "$(docker inspect -f {{.State.Running}} $TEST_CONTAINER_NAME 2> /dev/null)" == "true" ]]; then
-  echo "Delete the running " $TEST_CONTAINER_NAME " container"
-  docker rm -f $TEST_CONTAINER_NAME
-fi
+image-cleanup() {
+    declare desc="Removes all exited containers and old images"
 
-if [[ -z "$(echo $TARGET_CBD_VERSION)" ]]; then
-	export TARGET_CBD_VERSION=$(curl -sk $BASE_URL/cb/info | grep -oP "(?<=\"version\":\")[^\"]*")
-	if [[ -z "$(echo $TARGET_CBD_VERSION)" ]]; then
-	    export TARGET_CBD_VERSION=MOCK
-	fi
-fi
-echo "CBD version: "$TARGET_CBD_VERSION
+    container-remove-stuck
+    container-remove-exited
 
-docker run -i \
+    docker rmi $(docker images -q -f dangling=true)
+    docker images | grep cloud-cli-e2e | tr -s ' ' | cut -d ' ' -f 2 | xargs -I {} docker rmi hortonworks/cloud-cli-e2e:{}
+}
+
+container-remove-exited() {
+    declare desc="Remove Exited or Dead containers"
+    local exited_containers=$(docker ps -a -f status=exited -f status=dead -q)
+
+    if [[ -n "$exited_containers" ]]; then
+        echo "Remove Exited or Dead docker containers"
+        docker rm $exited_containers;
+    else
+        echo "There is no Exited or Dead container"
+    fi
+}
+
+container-remove-stuck() {
+    declare desc="Checking $TEST_CONTAINER_NAME container is running"
+
+    if [[ "$(docker inspect -f {{.State.Running}} $TEST_CONTAINER_NAME 2> /dev/null)" == "true" ]]; then
+        echo "Delete the running " $TEST_CONTAINER_NAME " container"
+        docker rm -f $TEST_CONTAINER_NAME
+    fi
+}
+
+cbd-version() {
+    if [[ -z "$(echo $TARGET_CBD_VERSION)" ]]; then
+	    export TARGET_CBD_VERSION=$(curl -sk $BASE_URL/cb/info | grep -oP "(?<=\"version\":\")[^\"]*")
+
+	    if [[ -z "$(echo $TARGET_CBD_VERSION)" ]]; then
+	        export TARGET_CBD_VERSION=MOCK
+	    fi
+    fi
+    echo "CBD version: "$TARGET_CBD_VERSION
+}
+
+test-regression() {
+    docker run -i \
        --rm \
        --privileged \
        --net=host \
@@ -70,7 +95,16 @@ docker run -i \
        -e "INTEGRATIONTEST_PROXYCONFIG_PROXYUSER=$INTEGRATIONTEST_PROXYCONFIG_PROXYUSER" \
        -e "INTEGRATIONTEST_PROXYCONFIG_PROXYPASSWORD=$INTEGRATIONTEST_PROXYCONFIG_PROXYPASSWORD" \
        -e "CLI_TEST_FILES=$CLI_TEST_FILES" \
-       hortonworks/cloud-cli-e2e
-RESULT=$?
+       hortonworks/cloud-cli-e2e:$DOCKER_TAG
+    RESULT=$?
+}
 
-exit $RESULT
+main() {
+    image-cleanup
+    image-update
+    cbd-version
+    test-regression
+    exit $RESULT
+}
+
+main "$@"

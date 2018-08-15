@@ -36,7 +36,7 @@ docker-e2e-test:
 	./scripts/run-e2e-test.sh
 
 docker-aruba-test:
-	./scripts/docker-aruba-test.sh
+	DOCKER_TAG=$(GIT_FIRST_PARENT) BASE_URL=https://$(DOCKER_IP) ./scripts/docker-aruba-test.sh
 
 run-e2e-suite:
 	$(call run_test,${test})

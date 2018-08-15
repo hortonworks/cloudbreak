@@ -18,19 +18,29 @@ RSpec.describe 'Users test cases', :type => :aruba, :feature => "Users", :severi
     MockHelper.resetMock()
   end
 
-  it "User - List", :story => "List Users", :severity => :critical, :testId => 5 do
+  before(:step) do |step|
+    puts "Before step #{step.current_step}"
+  end
+
+  it "User - List", :story => "List Users", :severity => :critical, :testId => 5 do |test|
     with_environment 'DEBUG' => '1' do
-      responseHash = MockHelper.getResponseHash("../../../responses/users/users.json")
+      test.step "step1" do
+        @responseHash = MockHelper.getResponseHash("../../../responses/users/users.json")
 
-      expectedEndpointResponse = TraceResponseBuilder.getAllUsersResponseFactory(responseHash)
-      MockHelper.setupResponse("getAllUsers", responseHash)
+        @expectedEndpointResponse = TraceResponseBuilder.getAllUsersResponseFactory(@responseHash)
+        MockHelper.setupResponse("getAllUsers", @responseHash)
+      end
 
-      result = cb.user.list.build(false)
-      resultHash = MockHelper.getResultHash(result.output, true)
+      test.step "step2" do
+        @result = cb.user.list.build(false)
+        @resultHash = MockHelper.getResultHash(@result.output, true)
+      end
 
-      expect(result.exit_status).to eql 0
-      expect(result.stderr.to_s.downcase).not_to include("error")
-      expect(MockHelper.getResponseDiff(expectedEndpointResponse, resultHash)).to be_truthy
+      test.step "step3" do
+        expect(@result.exit_status).to eql(0), "expected 0 exit status, got #{@result.exit_status}"
+        expect(@result.stderr.to_s.downcase).not_to include("error"), "expected no ERROR in result, got #{@result.stderr.to_s.downcase}"
+        expect(MockHelper.getResponseDiff(@expectedEndpointResponse, @resultHash)).to be_truthy, "expected response should be, got #{JSON.pretty_generate(@resultHash)}"
+      end
     end
   end
 end
