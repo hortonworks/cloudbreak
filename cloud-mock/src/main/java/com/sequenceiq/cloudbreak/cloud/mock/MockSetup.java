@@ -90,4 +90,9 @@ public class MockSetup implements Setup {
     @Override
     public void validateFileSystem(CloudCredential credential, FileSystem fileSystem) throws Exception {
     }
+
+    @Override
+    public void scalingPrerequisites(AuthenticatedContext authenticatedContext, CloudStack stack, boolean upscale) {
+
+    }
 }

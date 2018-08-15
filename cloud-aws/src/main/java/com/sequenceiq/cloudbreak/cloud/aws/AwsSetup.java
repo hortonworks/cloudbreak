@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
 import java.net.URLDecoder;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -12,6 +15,12 @@ import org.springframework.stereotype.Component;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
+import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
+import com.amazonaws.services.autoscaling.model.AutoScalingGroup;
+import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
+import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsResult;
+import com.amazonaws.services.autoscaling.model.Instance;
+import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeInternetGatewaysRequest;
 import com.amazonaws.services.ec2.model.DescribeInternetGatewaysResult;
@@ -42,16 +51,18 @@ import com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.FileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.type.ImageStatus;
 import com.sequenceiq.cloudbreak.common.type.ImageStatusResult;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
-
 
 @Component
 public class AwsSetup implements Setup {
@@ -84,6 +95,9 @@ public class AwsSetup implements Setup {
 
     @Inject
     private AwsClient awsClient;
+
+    @Inject
+    private AwsInstanceConnector instanceConnector;
 
     @Override
     public ImageStatusResult checkImageStatus(AuthenticatedContext authenticatedContext, CloudStack stack, Image image) {
@@ -264,6 +278,51 @@ public class AwsSetup implements Setup {
             }
             if (!keyPairIsPresentOnEC2) {
                 throw new CloudConnectorException(String.format("The key pair '%s' could not be found in the '%s' region of EC2.", keyPairName, region));
+            }
+        }
+    }
+
+    @Override
+    public void scalingPrerequisites(AuthenticatedContext ac, CloudStack stack, boolean upscale) {
+        if (!upscale) {
+            return;
+        }
+        AmazonCloudFormationClient cloudFormationClient = awsClient.createCloudFormationClient(new AwsCredentialView(ac.getCloudCredential()),
+                ac.getCloudContext().getLocation().getRegion().value());
+        AmazonAutoScalingClient amazonASClient = awsClient.createAutoScalingClient(new AwsCredentialView(ac.getCloudCredential()),
+                ac.getCloudContext().getLocation().getRegion().value());
+        List<Group> groups = stack.getGroups().stream().filter(g -> g.getInstances().stream().anyMatch(
+                inst -> InstanceStatus.CREATE_REQUESTED == inst.getTemplate().getStatus())).collect(Collectors.toList());
+        Map<String, Group> groupMap = groups.stream().collect(
+                Collectors.toMap(g -> cfStackUtil.getAutoscalingGroupName(ac, cloudFormationClient, g.getName()), g -> g));
+        DescribeAutoScalingGroupsResult result = amazonASClient.describeAutoScalingGroups(
+                new DescribeAutoScalingGroupsRequest().withAutoScalingGroupNames(groupMap.keySet()));
+        for (AutoScalingGroup asg : result.getAutoScalingGroups()) {
+            Group group = groupMap.get(asg.getAutoScalingGroupName());
+            List<CloudInstance> groupInstances = group.getInstances().stream().filter(
+                    inst -> InstanceStatus.CREATED.equals(inst.getTemplate().getStatus())).collect(Collectors.toList());
+            List<CloudVmInstanceStatus> instanceStatuses = instanceConnector.check(ac, groupInstances);
+            if (!instanceStatuses.stream().allMatch(inst -> inst.getStatus().equals(InstanceStatus.STARTED))) {
+                String errorMessage = "Not all the existing instances are in [Started] state, upscale is not possible!";
+                LOGGER.error(errorMessage);
+                throw new CloudConnectorException(errorMessage);
+            }
+            List<Instance> asgOnlyInstances = asg.getInstances().stream()
+                    .filter(inst -> groupInstances.stream().noneMatch(gi -> gi.getInstanceId().equals(inst.getInstanceId()))).collect(Collectors.toList());
+            List<CloudInstance> cbOnlyInstances = groupInstances.stream()
+                    .filter(gi -> asg.getInstances().stream().noneMatch(inst -> inst.getInstanceId().equals(gi.getInstanceId()))).collect(Collectors.toList());
+            if (!asgOnlyInstances.isEmpty() || !cbOnlyInstances.isEmpty()) {
+                String errorMessage = "The instances in the autoscaling group are not in sync with the instances in cloudbreak! Cloudbreak only instances: ["
+                        + cbOnlyInstances.stream().map(CloudInstance::getInstanceId).collect(Collectors.joining(",")) + "], AWS only instances: ["
+                        + asgOnlyInstances.stream().map(Instance::getInstanceId).collect(Collectors.joining(",")) + "]. Upscale is not possible!";
+                LOGGER.error(errorMessage);
+                throw new CloudConnectorException(errorMessage);
+            }
+            if (groupInstances.size() != asg.getDesiredCapacity()) {
+                String errorMessage = String.format("The autoscale group's desired instance count is not match with the instance count in the cloudbreak."
+                        + " Desired count: %d <> cb instance count: %d. Upscale is not possible!", asg.getDesiredCapacity(), groupInstances.size());
+                LOGGER.error(errorMessage);
+                throw new CloudConnectorException(errorMessage);
             }
         }
     }

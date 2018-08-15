@@ -123,6 +123,11 @@ public class GcpProvisionSetup implements Setup {
     public void validateFileSystem(CloudCredential credential, FileSystem fileSystem) throws Exception {
     }
 
+    @Override
+    public void scalingPrerequisites(AuthenticatedContext authenticatedContext, CloudStack stack, boolean upscale) {
+
+    }
+
     private boolean containsSpecificImage(ImageList imageList, String imageUrl) {
         try {
             for (Image image : imageList.getItems()) {

@@ -154,6 +154,11 @@ public class AzureSetup implements Setup {
         }
     }
 
+    @Override
+    public void scalingPrerequisites(AuthenticatedContext authenticatedContext, CloudStack stack, boolean upscale) {
+
+    }
+
     private void validateWasbFileSystem(FileSystem fileSystem, String fileSystemType) throws URISyntaxException, InvalidKeyException, StorageException {
         String accountName = fileSystem.getParameter(WasbFileSystemConfiguration.ACCOUNT_NAME, String.class);
         String accountKey = fileSystem.getParameter(WasbFileSystemConfiguration.ACCOUNT_KEY, String.class);
