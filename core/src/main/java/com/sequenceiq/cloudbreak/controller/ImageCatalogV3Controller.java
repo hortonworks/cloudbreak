@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.controller;
 
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -43,7 +44,8 @@ public class ImageCatalogV3Controller extends NotificationController implements 
 
     @Override
     public Set<ImageCatalogResponse> listByOrganization(Long organizationId) {
-        return imageCatalogService.listByOrganizationId(organizationId).stream()
+        return Stream.concat(Stream.of(imageCatalogService.getCloudbreakDefaultImageCatalog()),
+                imageCatalogService.listByOrganizationId(organizationId).stream())
                 .map(imageCatalog -> conversionService.convert(imageCatalog, ImageCatalogResponse.class))
                 .collect(Collectors.toSet());
     }
