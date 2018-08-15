@@ -52,22 +52,17 @@ public class ManagementPackController extends NotificationController implements 
 
     @Override
     public ManagementPackResponse postPrivate(ManagementPackRequest mpackRequest) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        return createRdsConfig(user, mpackRequest, false);
+        return post(mpackRequest);
     }
 
     @Override
     public Set<ManagementPackResponse> getPrivates() {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        Set<ManagementPack> mpacks = mpackService.retrievePrivateManagementPacks(user);
-        return toJsonList(mpacks);
+        return getAll();
     }
 
     @Override
     public ManagementPackResponse getPrivate(String name) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        ManagementPack mpack = mpackService.getPrivateManagementPack(name, user);
-        return conversionService.convert(mpack, ManagementPackResponse.class);
+        return getByName(name);
     }
 
     @Override
@@ -77,22 +72,17 @@ public class ManagementPackController extends NotificationController implements 
 
     @Override
     public ManagementPackResponse postPublic(ManagementPackRequest mpackRequest) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        return createRdsConfig(user, mpackRequest, true);
+        return post(mpackRequest);
     }
 
     @Override
     public Set<ManagementPackResponse> getPublics() {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        Set<ManagementPack> mpacks = mpackService.retrieveAccountManagementPacks(user);
-        return toJsonList(mpacks);
+        return getAll();
     }
 
     @Override
     public ManagementPackResponse getPublic(String name) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        ManagementPack mpack = mpackService.getPublicManagementPack(name, user);
-        return conversionService.convert(mpack, ManagementPackResponse.class);
+        return getByName(name);
     }
 
     @Override
@@ -100,9 +90,8 @@ public class ManagementPackController extends NotificationController implements 
         executeAndNotify(user -> mpackService.delete(name, user), ResourceEvent.MANAGEMENT_PACK_DELETED);
     }
 
-    private ManagementPackResponse createRdsConfig(IdentityUser user, ManagementPackRequest mpackRequest, boolean publicInAccount) {
+    private ManagementPackResponse createMpack(IdentityUser user, ManagementPackRequest mpackRequest) {
         ManagementPack mpack = conversionService.convert(mpackRequest, ManagementPack.class);
-        mpack.setPublicInAccount(publicInAccount);
         try {
             mpack = mpackService.create(user, mpack);
             notify(user, ResourceEvent.MANAGEMENT_PACK_CREATED);
@@ -117,5 +106,18 @@ public class ManagementPackController extends NotificationController implements 
         return (Set<ManagementPackResponse>) conversionService.convert(mpacks,
                 TypeDescriptor.forObject(mpacks),
                 TypeDescriptor.collection(Set.class, TypeDescriptor.valueOf(ManagementPackResponse.class)));
+    }
+
+    private ManagementPackResponse post(ManagementPackRequest mpackRequest) {
+        IdentityUser user = authenticatedUserService.getCbUser();
+        return createMpack(user, mpackRequest);
+    }
+
+    private Set<ManagementPackResponse> getAll() {
+        return toJsonList(mpackService.listForUsersDefaultOrganization());
+    }
+
+    private ManagementPackResponse getByName(String name) {
+        return conversionService.convert(mpackService.getByNameFromUsersDefaultOrganization(name), ManagementPackResponse.class);
     }
 }

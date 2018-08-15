@@ -10,11 +10,13 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.OrganizationAwareResource;
 
 @Entity
-@Table(name = "ManagementPack", uniqueConstraints = @UniqueConstraint(columnNames = {"account", "name"}))
-public class ManagementPack implements ProvisionEntity {
+@Table(name = "ManagementPack", uniqueConstraints = @UniqueConstraint(columnNames = {"organization_id", "name"}))
+public class ManagementPack implements ProvisionEntity, OrganizationAwareResource {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "managementpack_generator")
     @SequenceGenerator(name = "managementpack_generator", sequenceName = "managementpack_id_seq", allocationSize = 1)
@@ -26,13 +28,13 @@ public class ManagementPack implements ProvisionEntity {
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String description;
 
-    @Column(nullable = false)
+    @Column
     private String owner;
 
-    @Column(nullable = false)
+    @Column
     private String account;
 
-    @Column(nullable = false)
+    @Column
     private boolean publicInAccount;
 
     @Column(nullable = false)
@@ -133,5 +135,10 @@ public class ManagementPack implements ProvisionEntity {
 
     public void setOrganization(Organization organization) {
         this.organization = organization;
+    }
+
+    @Override
+    public OrganizationResource getResource() {
+        return OrganizationResource.MPACK;
     }
 }

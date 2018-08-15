@@ -35,7 +35,7 @@ public class LdapV3Controller extends NotificationController implements LdapConf
 
     @Override
     public Set<LdapConfigResponse> listConfigsByOrganization(Long organizationId) {
-        return ldapConfigService.listByOrganization(organizationId).stream()
+        return ldapConfigService.listByOrganizationId(organizationId).stream()
                 .map(ldapConfig -> conversionService.convert(ldapConfig, LdapConfigResponse.class))
                 .collect(Collectors.toSet());
     }

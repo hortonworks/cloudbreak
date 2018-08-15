@@ -45,7 +45,7 @@ public interface ImageCatalogV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ImageCatalogOpDescription.GET_PUBLIC_IMAGE_CATALOG_BY_NAME, produces = ContentType.JSON,
             notes = IMAGE_CATALOG_NOTES, nickname = "getPublicImageCatalogsByName")
-    ImageCatalogResponse getPublicByName(@PathParam("name") String name, @QueryParam("withImages") boolean withImages);
+    ImageCatalogResponse getByName(@PathParam("name") String name, @QueryParam("withImages") boolean withImages);
 
     @GET
     @Path("account/{name}/{platform}")

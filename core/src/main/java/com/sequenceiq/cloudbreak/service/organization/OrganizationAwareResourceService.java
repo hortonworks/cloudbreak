@@ -17,7 +17,7 @@ public interface OrganizationAwareResourceService<T extends OrganizationAwareRes
 
     T getByNameFromUsersDefaultOrganization(String name);
 
-    Set<T> listByOrganization(Long organizationId);
+    Set<T> listByOrganizationId(Long organizationId);
 
     Set<T> listByOrganization(Organization organization);
 

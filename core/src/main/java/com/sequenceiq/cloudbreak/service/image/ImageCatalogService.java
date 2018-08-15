@@ -33,6 +33,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import com.google.common.collect.ImmutableSet;
+import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
 import com.sequenceiq.cloudbreak.cloud.VersionComparator;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV2;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakVersion;
@@ -47,8 +48,9 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateService;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
+import com.sequenceiq.cloudbreak.repository.OrganizationResourceRepository;
+import com.sequenceiq.cloudbreak.service.AbstractOrganizationAwareResourceService;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
@@ -59,7 +61,7 @@ import com.sequenceiq.cloudbreak.service.user.UserProfileHandler;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
 
 @Component
-public class ImageCatalogService {
+public class ImageCatalogService extends AbstractOrganizationAwareResourceService<ImageCatalog> {
 
     public static final String UNDEFINED = "";
 
@@ -203,7 +205,7 @@ public class ImageCatalogService {
         } else {
             ImageCatalog imageCatalog = get(catalogName);
             if (imageCatalog != null) {
-                image = getImage(imageCatalog.getImageCatalogUrl(), imageCatalog.getImageCatalogName(), imageId);
+                image = getImage(imageCatalog.getImageCatalogUrl(), imageCatalog.getName(), imageId);
             } else {
                 String msg = String.format("The specified image catalog '%s' could not be found.", catalogName);
                 LOGGER.error(msg);
@@ -215,13 +217,11 @@ public class ImageCatalogService {
 
     public ImageCatalog create(ImageCatalog imageCatalog) {
         try {
-            if (isEnvDefault(imageCatalog.getImageCatalogName())) {
+            if (isEnvDefault(imageCatalog.getName())) {
                 throw new BadRequestException(String
-                        .format("%s cannot be created because it is an environment default image catalog.", imageCatalog.getImageCatalogName()));
+                        .format("%s cannot be created because it is an environment default image catalog.", imageCatalog.getName()));
             }
-            Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
-            imageCatalog.setOrganization(organization);
-            return imageCatalogRepository.save(imageCatalog);
+            return createInDefaultOrganization(imageCatalog);
         } catch (DataIntegrityViolationException ex) {
             String msg = String.format("Error with resource [%s], %s", APIResourceType.IMAGE_CATALOG, getProperSqlErrorMessage(ex));
             throw new BadRequestException(msg);
@@ -235,7 +235,7 @@ public class ImageCatalogService {
         ImageCatalog imageCatalog = get(name);
         imageCatalog.setArchived(true);
         setImageCatalogAsDefault(null);
-        imageCatalog.setImageCatalogName(generateArchiveName(name));
+        imageCatalog.setName(generateArchiveName(name));
         imageCatalogRepository.save(imageCatalog);
         userProfileHandler.destroyProfileImageCatalogPreparation(imageCatalog);
         LOGGER.info("Image catalog has been archived: {}", imageCatalog);
@@ -246,16 +246,14 @@ public class ImageCatalogService {
         if (isEnvDefault(name)) {
             imageCatalog = getCloudbreakDefaultImageCatalog();
         } else {
-            IdentityUser user = authenticatedUserService.getCbUser();
-            imageCatalog = imageCatalogRepository.findByName(name, user.getUserId(), user.getAccount());
+            imageCatalog = getByNameFromUsersDefaultOrganization(name);
         }
         return imageCatalog;
     }
 
     public ImageCatalog get(Long id) {
         ImageCatalog imageCatalog;
-        IdentityUser user = authenticatedUserService.getCbUser();
-        imageCatalog = imageCatalogRepository.findAllPublicInAccount(user.getAccount(), user.getUserId()).isEmpty() ? getCloudbreakDefaultImageCatalog()
+        imageCatalog = listForUsersDefaultOrganization().isEmpty() ? getCloudbreakDefaultImageCatalog()
                 : findImageCatalog(id);
         return imageCatalog;
     }
@@ -288,7 +286,7 @@ public class ImageCatalogService {
     public ImageCatalog update(ImageCatalog source) {
         ImageCatalog imageCatalog = findImageCatalog(source.getId());
         checkImageCatalog(imageCatalog, source.getId());
-        imageCatalog.setImageCatalogName(source.getImageCatalogName());
+        imageCatalog.setName(source.getName());
         imageCatalog.setImageCatalogUrl(source.getImageCatalogUrl());
         return create(imageCatalog);
     }
@@ -303,16 +301,9 @@ public class ImageCatalogService {
         }
     }
 
-    public Iterable<ImageCatalog> getAllPublicInAccount() {
-        IdentityUser cbUser = authenticatedUserService.getCbUser();
-        List<ImageCatalog> allPublicInAccount = imageCatalogRepository.findAllPublicInAccount(cbUser.getUserId(), cbUser.getAccount());
-        allPublicInAccount.add(getCloudbreakDefaultImageCatalog());
-        return allPublicInAccount;
-    }
-
     public ImageCatalog getCloudbreakDefaultImageCatalog() {
         ImageCatalog imageCatalog = new ImageCatalog();
-        imageCatalog.setImageCatalogName(CLOUDBREAK_DEFAULT_CATALOG_NAME);
+        imageCatalog.setName(CLOUDBREAK_DEFAULT_CATALOG_NAME);
         imageCatalog.setImageCatalogUrl(defaultCatalogUrl);
         imageCatalog.setPublicInAccount(true);
         return imageCatalog;
@@ -374,11 +365,11 @@ public class ImageCatalogService {
 
             images = statedImages(new Images(baseImages, hdpImages, hdfImages, suppertedVersions),
                     imageCatalog.getImageCatalogUrl(),
-                    imageCatalog.getImageCatalogName());
+                    imageCatalog.getName());
         } else {
             images = statedImages(emptyImages(),
                     imageCatalog.getImageCatalogUrl(),
-                    imageCatalog.getImageCatalogName());
+                    imageCatalog.getName());
         }
         return images;
     }
@@ -500,7 +491,7 @@ public class ImageCatalogService {
 
     private void removeDefaultFlag() {
         ImageCatalog imageCatalog = getDefaultImageCatalog();
-        if (imageCatalog.getImageCatalogName() != null && !CLOUDBREAK_DEFAULT_CATALOG_NAME.equalsIgnoreCase(imageCatalog.getImageCatalogName())) {
+        if (imageCatalog.getName() != null && !CLOUDBREAK_DEFAULT_CATALOG_NAME.equalsIgnoreCase(imageCatalog.getName())) {
             setImageCatalogAsDefault(null);
             imageCatalogRepository.save(imageCatalog);
         }
@@ -508,18 +499,17 @@ public class ImageCatalogService {
 
     @Nonnull
     private ImageCatalog getDefaultImageCatalog() {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        ImageCatalog imageCatalog = userProfileService.getOrCreate(user.getAccount(), user.getUserId()).getImageCatalog();
+        ImageCatalog imageCatalog = getUserProfile().getImageCatalog();
         if (imageCatalog == null) {
             imageCatalog = new ImageCatalog();
             imageCatalog.setImageCatalogUrl(defaultCatalogUrl);
-            imageCatalog.setImageCatalogName(CLOUDBREAK_DEFAULT_CATALOG_NAME);
+            imageCatalog.setName(CLOUDBREAK_DEFAULT_CATALOG_NAME);
         }
         return imageCatalog;
     }
 
     public String getDefaultImageCatalogName() {
-        return getDefaultImageCatalog().getImageCatalogName();
+        return getDefaultImageCatalog().getName();
     }
 
     public String getImageDefaultCatalogUrl() {
@@ -550,6 +540,26 @@ public class ImageCatalogService {
             default:
                 return emptyList();
         }
+    }
+
+    @Override
+    protected OrganizationResourceRepository<ImageCatalog, Long> repository() {
+        return imageCatalogRepository;
+    }
+
+    @Override
+    protected OrganizationResource resource() {
+        return OrganizationResource.IMAGECATALOG;
+    }
+
+    @Override
+    protected boolean canDelete(ImageCatalog resource) {
+        return true;
+    }
+
+    @Override
+    protected void prepareCreation(ImageCatalog resource) {
+
     }
 
     private static class PrefixMatchImages {

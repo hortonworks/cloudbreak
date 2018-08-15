@@ -43,11 +43,11 @@ public class ImageCatalogV1Controller implements ImageCatalogV1Endpoint {
 
     @Override
     public List<ImageCatalogResponse> getPublics() {
-        return toJsonList(imageCatalogService.getAllPublicInAccount(), ImageCatalogResponse.class);
+        return getAll();
     }
 
     @Override
-    public ImageCatalogResponse getPublicByName(String name, boolean withImages) {
+    public ImageCatalogResponse getByName(String name, boolean withImages) {
         ImageCatalogResponse imageCatalogResponse = convert(imageCatalogService.get(name));
         Images images = imageCatalogService.propagateImagesIfRequested(name, withImages);
         if (images != null) {
@@ -64,12 +64,12 @@ public class ImageCatalogV1Controller implements ImageCatalogV1Endpoint {
 
     @Override
     public ImageCatalogResponse postPublic(ImageCatalogRequest imageCatalogRequest) {
-        return createImageCatalog(imageCatalogRequest, true);
+        return post(imageCatalogRequest);
     }
 
     @Override
     public ImageCatalogResponse postPrivate(ImageCatalogRequest imageCatalogRequest) {
-        return createImageCatalog(imageCatalogRequest, false);
+        return post(imageCatalogRequest);
     }
 
     @Override
@@ -112,16 +112,6 @@ public class ImageCatalogV1Controller implements ImageCatalogV1Endpoint {
         return conversionService.convert(images, ImagesResponse.class);
     }
 
-    private ImageCatalogResponse createImageCatalog(ImageCatalogRequest imageCatalogRequest, boolean publicInAccount) {
-        IdentityUser identityUser = authenticatedUserService.getCbUser();
-        ImageCatalog imageCatalog = conversionService.convert(imageCatalogRequest, ImageCatalog.class);
-        imageCatalog.setAccount(identityUser.getAccount());
-        imageCatalog.setOwner(identityUser.getUserId());
-        imageCatalog.setPublicInAccount(publicInAccount);
-        imageCatalog = imageCatalogService.create(imageCatalog);
-        return convert(imageCatalog);
-    }
-
     private ImageCatalogResponse convert(ImageCatalog imageCatalog) {
         return conversionService.convert(imageCatalog, ImageCatalogResponse.class);
     }
@@ -130,5 +120,18 @@ public class ImageCatalogV1Controller implements ImageCatalogV1Endpoint {
         return (List<T>) conversionService.convert(objs,
                 TypeDescriptor.forObject(objs),
                 TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(clss)));
+    }
+
+    private List<ImageCatalogResponse> getAll() {
+        return toJsonList(imageCatalogService.listForUsersDefaultOrganization(), ImageCatalogResponse.class);
+    }
+
+    private ImageCatalogResponse post(ImageCatalogRequest imageCatalogRequest) {
+        IdentityUser identityUser = authenticatedUserService.getCbUser();
+        ImageCatalog imageCatalog = conversionService.convert(imageCatalogRequest, ImageCatalog.class);
+        imageCatalog.setAccount(identityUser.getAccount());
+        imageCatalog.setOwner(identityUser.getUserId());
+        imageCatalog = imageCatalogService.create(imageCatalog);
+        return convert(imageCatalog);
     }
 }

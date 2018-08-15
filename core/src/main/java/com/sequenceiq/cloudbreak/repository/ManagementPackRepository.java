@@ -3,18 +3,22 @@ package com.sequenceiq.cloudbreak.repository;
 import java.util.Set;
 
 import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.sequenceiq.cloudbreak.aspect.DisableHasPermission;
+import com.sequenceiq.cloudbreak.aspect.organization.OrganizationResourceType;
+import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
 import com.sequenceiq.cloudbreak.domain.ManagementPack;
-import com.sequenceiq.cloudbreak.aspect.HasPermission;
 import com.sequenceiq.cloudbreak.service.EntityType;
 
 @EntityType(entityClass = ManagementPack.class)
-@Transactional(Transactional.TxType.REQUIRED)
-@HasPermission
-public interface ManagementPackRepository extends BaseRepository<ManagementPack, Long> {
+@Transactional(TxType.REQUIRED)
+@DisableHasPermission
+@OrganizationResourceType(resource = OrganizationResource.MPACK)
+public interface ManagementPackRepository extends OrganizationResourceRepository<ManagementPack, Long> {
     ManagementPack findOneById(Long id);
 
     Set<ManagementPack> findByOwner(String owner);

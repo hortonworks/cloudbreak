@@ -12,7 +12,7 @@ public class ImageCatalogRequestToImageCatalogConverter extends AbstractConversi
     public ImageCatalog convert(ImageCatalogRequest source) {
         ImageCatalog imageCatalog = new ImageCatalog();
         imageCatalog.setImageCatalogUrl(source.getUrl());
-        imageCatalog.setImageCatalogName(source.getName());
+        imageCatalog.setName(source.getName());
         return imageCatalog;
     }
 }

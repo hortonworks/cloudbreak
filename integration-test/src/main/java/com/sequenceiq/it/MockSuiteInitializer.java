@@ -68,7 +68,7 @@ public class MockSuiteInitializer extends AbstractTestNGSpringContextTests {
 
     private boolean isImageCatalogExists(ImageCatalogV1Endpoint endpoint, String mockImageCatalogName) {
         try {
-            return endpoint.getPublicByName(mockImageCatalogName, false) != null;
+            return endpoint.getByName(mockImageCatalogName, false) != null;
         } catch (ForbiddenException e) {
             return false;
         }

@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.doc.OperationDescriptions.ManagementPackOpDescr
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Path("/v3/{organizationId}/mpacks/")
+@Path("/v3/{organizationId}/mpacks")
 @Consumes(MediaType.APPLICATION_JSON)
 @Api(value = "/v3/{organizationId}/mpacks", description = ControllerDescription.MANAGEMENT_PACK_V3_DESCRIPTION, protocols = "http,https")
 public interface ManagementPackV3Endpoint {
@@ -35,7 +35,7 @@ public interface ManagementPackV3Endpoint {
     Set<ManagementPackResponse> listByOrganization(@PathParam("organizationId") Long organizationId);
 
     @GET
-    @Path("{name}")
+    @Path("/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ManagementPackOpDescription.GET_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.MANAGEMENT_PACK_NOTES,
             nickname = "getManagementPackInOrganization")
@@ -49,7 +49,7 @@ public interface ManagementPackV3Endpoint {
     ManagementPackResponse createInOrganization(@PathParam("organizationId") Long organizationId, @Valid ManagementPackRequest request);
 
     @DELETE
-    @Path("{name}")
+    @Path("/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ManagementPackOpDescription.DELETE_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.MANAGEMENT_PACK_NOTES,
             nickname = "deleteManagementPackInOrganization")

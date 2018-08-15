@@ -17,9 +17,8 @@ public class ImageCatalogToImageCatalogRequestConverter
     @Override
     public ImageCatalogRequest convert(ImageCatalog source) {
         ImageCatalogRequest imageCatalogRequest = new ImageCatalogRequest();
-        imageCatalogRequest.setName(source.getImageCatalogName());
+        imageCatalogRequest.setName(source.getName());
         imageCatalogRequest.setUrl(source.getImageCatalogUrl());
         return imageCatalogRequest;
     }
-
 }

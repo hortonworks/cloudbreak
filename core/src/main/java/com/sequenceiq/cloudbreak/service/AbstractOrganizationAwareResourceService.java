@@ -84,20 +84,19 @@ public abstract class AbstractOrganizationAwareResourceService<T extends Organiz
     }
 
     @Override
-    public Set<T> listByOrganization(Long organizationId) {
-        Organization organization = organizationService.get(organizationId);
-        return repository().findByOrganization(organization);
+    public Set<T> listByOrganizationId(Long organizationId) {
+        return repository().findAllByOrganizationId(organizationId);
     }
 
     @Override
     public Set<T> listByOrganization(Organization organization) {
-        return repository().findByOrganization(organization);
+        return repository().findAllByOrganization(organization);
     }
 
     @Override
     public Set<T> listForUsersDefaultOrganization() {
         Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
-        return repository().findByOrganization(organization);
+        return repository().findAllByOrganization(organization);
     }
 
     @Override

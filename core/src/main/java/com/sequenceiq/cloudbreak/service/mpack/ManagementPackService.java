@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.service.mpack;
 
-import java.util.Set;
-
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -9,16 +7,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Preconditions;
+import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.domain.ManagementPack;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.repository.ManagementPackRepository;
+import com.sequenceiq.cloudbreak.repository.OrganizationResourceRepository;
+import com.sequenceiq.cloudbreak.service.AbstractOrganizationAwareResourceService;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 
 @Service
-public class ManagementPackService {
+public class ManagementPackService extends AbstractOrganizationAwareResourceService<ManagementPack> {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ManagementPackService.class);
 
     @Inject
@@ -30,25 +30,8 @@ public class ManagementPackService {
     @Inject
     private OrganizationService organizationService;
 
-    public Set<ManagementPack> retrievePrivateManagementPacks(IdentityUser user) {
-        return mpackRepository.findByOwner(user.getUserId());
-    }
-
-    public ManagementPack getPrivateManagementPack(String name, IdentityUser user) {
-        return mpackRepository.findOneByNameAndOwner(name, user.getUserId());
-    }
-
-    public ManagementPack getPublicManagementPack(String name, IdentityUser user) {
-        return mpackRepository.findOneByNameBasedOnAccount(name, user.getAccount(), user.getUserId());
-    }
-
     public ManagementPack getByName(String name, IdentityUser user) {
         return mpackRepository.findOneByNameAndAccount(name, user.getAccount());
-    }
-
-    public Set<ManagementPack> retrieveAccountManagementPacks(IdentityUser user) {
-        return user.getRoles().contains(IdentityUserRole.ADMIN) ? mpackRepository.findByAccount(user.getAccount())
-                : mpackRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
     }
 
     public ManagementPack get(Long id) {
@@ -69,22 +52,35 @@ public class ManagementPackService {
         LOGGER.debug("Creating Management Pack: [User: '{}', Account: '{}']", identityUser.getUsername(), identityUser.getAccount());
         mpack.setOwner(identityUser.getUserId());
         mpack.setAccount(identityUser.getAccount());
-        Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
-        mpack.setOrganization(organization);
-        return mpackRepository.save(mpack);
+        return createInDefaultOrganization(mpack);
     }
 
     public ManagementPack create(ManagementPack mpack) {
         Preconditions.checkNotNull(mpack.getOwner(), "Owner cannot be null");
         Preconditions.checkNotNull(mpack.getAccount(), "Account cannot be null");
         Preconditions.checkNotNull(mpack.getOrganization(), "Organization cannot be null");
-        LOGGER.debug("Creating RDS configuration: [User: '{}', Account: '{}', Organization: '{}']",
+        LOGGER.debug("Creating Management Pack: [User: '{}', Account: '{}', Organization: '{}']",
                 mpack.getOwner(), mpack.getAccount(), mpack.getOrganization().getId());
         return mpackRepository.save(mpack);
     }
 
-    private void delete(ManagementPack mpack) {
-        LOGGER.info("Deleting Management Pack. {} - {}", new Object[]{mpack.getId(), mpack.getName()});
-        mpackRepository.delete(mpack);
+    @Override
+    protected OrganizationResourceRepository<ManagementPack, Long> repository() {
+        return mpackRepository;
+    }
+
+    @Override
+    protected OrganizationResource resource() {
+        return OrganizationResource.MPACK;
+    }
+
+    @Override
+    protected boolean canDelete(ManagementPack resource) {
+        return true;
+    }
+
+    @Override
+    protected void prepareCreation(ManagementPack resource) {
+
     }
 }
