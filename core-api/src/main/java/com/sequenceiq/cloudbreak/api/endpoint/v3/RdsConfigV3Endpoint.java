@@ -14,6 +14,8 @@ import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigResponse;
+import com.sequenceiq.cloudbreak.api.model.rds.RDSTestRequest;
+import com.sequenceiq.cloudbreak.api.model.rds.RdsTestResult;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
@@ -34,13 +36,6 @@ public interface RdsConfigV3Endpoint {
             nickname = "listRdsConfigsByOrganization")
     Set<RDSConfigResponse> listByOrganization(@PathParam("organizationId") Long organizationId);
 
-    @GET
-    @Path("{name}")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.RdsConfigOpDescription.GET_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
-            nickname = "getRdsConfigInOrganization")
-    RDSConfigResponse getByNameInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
-
     @POST
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
@@ -48,11 +43,32 @@ public interface RdsConfigV3Endpoint {
             nickname = "createRdsConfigInOrganization")
     RDSConfigResponse createInOrganization(@PathParam("organizationId") Long organizationId, @Valid RDSConfigRequest request);
 
+    @GET
+    @Path("{name}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OperationDescriptions.RdsConfigOpDescription.GET_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
+            nickname = "getRdsConfigInOrganization")
+    RDSConfigResponse getByNameInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
+
     @DELETE
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.RdsConfigOpDescription.DELETE_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
             nickname = "deleteRdsConfigInOrganization")
     RDSConfigResponse deleteInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
+
+    @GET
+    @Path("{name}/request")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OperationDescriptions.RdsConfigOpDescription.GET_REQUEST_IN_ORG, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
+            nickname = "getRdsRequestFromNameInOrganization")
+    RDSConfigRequest getRequestFromName(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
+
+    @POST
+    @Path("testconnect")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OperationDescriptions.RdsConfigOpDescription.POST_CONNECTION_TEST, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
+            nickname = "testRdsConnectionInOrganization")
+    RdsTestResult testRdsConnection(@PathParam("organizationId") Long organizationId, @Valid RDSTestRequest rdsTestRequest);
 
 }
