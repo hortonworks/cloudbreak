@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 
@@ -35,6 +36,7 @@ import org.quartz.JobKey;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.TestContextManager;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ClusterV1Endpoint;
@@ -103,6 +105,8 @@ public class AmbariAgentHealthMonitorModulTest extends RejectedThreadContext {
 
         when(ambariClientProvider.createAmbariClient(any())).thenReturn(ambariClient);
         when(cloudbreakClientConfiguration.cloudbreakClient()).thenReturn(cloudbreakClient);
+
+        ReflectionTestUtils.setField(rejectedThreadService, "rejectedThreads", new ConcurrentHashMap<>());
     }
 
     @Test
@@ -240,6 +244,11 @@ public class AmbariAgentHealthMonitorModulTest extends RejectedThreadContext {
     }
 
     private void waitForThreadPool() {
-        while (executorService.getActiveCount() != 0) ;
+        while (executorService.getActiveCount() != 0) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException ignore) {
+            }
+        }
     }
 }
