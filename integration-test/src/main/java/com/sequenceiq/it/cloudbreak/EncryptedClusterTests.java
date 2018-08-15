@@ -3,46 +3,30 @@ package com.sequenceiq.it.cloudbreak;
 import static com.sequenceiq.it.cloudbreak.newway.cloud.AwsCloudProvider.AWS;
 import static com.sequenceiq.it.cloudbreak.newway.cloud.GcpCloudProvider.GCP;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.SkipException;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImageResponse;
 import com.sequenceiq.cloudbreak.api.model.v2.template.AwsEncryption;
 import com.sequenceiq.cloudbreak.api.model.v2.template.AwsParameters;
 import com.sequenceiq.cloudbreak.api.model.v2.template.GcpEncryption;
 import com.sequenceiq.cloudbreak.api.model.v2.template.GcpParameters;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Cluster;
 import com.sequenceiq.it.cloudbreak.newway.ImageSettings;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
-import com.sequenceiq.it.cloudbreak.newway.StackOperation;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
 
-public class EncryptedClusterTests extends CloudbreakTest {
+public class EncryptedClusterTests extends ClusterTests {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EncryptedClusterTests.class);
 
-    private String clusterName;
-
-    @BeforeTest
-    public void initializeCloudProviderAndClusterNameValues() {
-        clusterName = getTestParameter().get("clusterName");
-    }
-
     @Test(dataProvider = "providernameblueprintimage", priority = 10)
-    public void testCreateNewEncryptedCluster(CloudProvider cloudProvider, String blueprintName, String imageId) throws Exception {
+    public void testCreateNewEncryptedCluster(CloudProvider cloudProvider, String clusterName, String blueprintName, String imageId) throws Exception {
         given(CloudbreakClient.isCreated());
         given(cloudProvider.aValidCredential());
         given(Cluster.request()
@@ -60,81 +44,6 @@ public class EncryptedClusterTests extends CloudbreakTest {
                 getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_USER),
                 getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_PASSWORD)),
                 "check ambari is running and components available");
-    }
-
-    @Test(dataProvider = "provider", priority = 30)
-    public void testStopCluster(CloudProvider cloudProvider) throws Exception {
-        given(CloudbreakClient.isCreated());
-        given(cloudProvider.aValidCredential());
-        given(cloudProvider.aValidStackIsCreated()
-                .withName(clusterName), "a stack is created");
-        given(StackOperation.request());
-        when(StackOperation.stop());
-        when(Stack.get());
-        then(Stack.waitAndCheckClusterAndStackStoppedStatus(), "stack has been stopped");
-    }
-
-    @Test(dataProvider = "provider", priority = 40)
-    public void testStartCluster(CloudProvider cloudProvider) throws Exception {
-        given(CloudbreakClient.isCreated());
-        given(cloudProvider.aValidCredential());
-        given(cloudProvider.aValidStackIsCreated()
-                .withName(clusterName), "a stack is created");
-        given(StackOperation.request());
-        when(StackOperation.start());
-        when(Stack.get());
-        then(Stack.waitAndCheckClusterAndStackAvailabilityStatus(), "stack has been started");
-        then(Stack.checkClusterHasAmbariRunning(
-                getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_PORT),
-                getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_USER),
-                getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_PASSWORD)),
-                "ambari check");
-    }
-
-    @Test(dataProvider = "provider", alwaysRun = true, priority = 50)
-    public void testTerminateCluster(CloudProvider cloudProvider) throws Exception {
-        given(CloudbreakClient.isCreated());
-        given(cloudProvider.aValidCredential());
-        given(cloudProvider.aValidStackIsCreated()
-                .withName(clusterName), "a stack is created");
-        when(Stack.delete());
-        then(Stack.waitAndCheckClusterDeleted(), "stack has been deleted");
-    }
-
-    @DataProvider(name = "providernameblueprintimage")
-    public Object[][] providerAndImage() throws Exception {
-        String provider = getTestParameter().get("provider").toLowerCase();
-        CloudProvider cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter());
-        var blueprint = getTestParameter().get("blueprintName");
-        var imageDescription = getTestParameter().get("image");
-        var image = getImageId(imageDescription, provider);
-        return new Object[][]{
-                {cloudProvider, blueprint, image}
-        };
-    }
-
-    @DataProvider(name = "provider")
-    public Object[][] provider() throws Exception {
-        String provider = getTestParameter().get("provider").toLowerCase();
-        CloudProvider cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter());
-        return new Object[][]{
-                {cloudProvider}
-        };
-    }
-
-    private String getImageId(String imageDescription, String provider) throws Exception {
-        given(CloudbreakClient.isCreated());
-        var clientContext = CloudbreakClient.getTestContextCloudbreakClient().apply(getItContext());
-        var client = clientContext.getCloudbreakClient();
-        var imagesByProvider = client.imageCatalogEndpoint().getImagesByProvider(provider);
-        switch (imageDescription) {
-            case "hdf":
-                return getLastUuid(imagesByProvider.getHdfImages());
-            case "hdp":
-                return getLastUuid(imagesByProvider.getHdpImages());
-            default:
-                return getLastUuid(imagesByProvider.getBaseImages());
-        }
     }
 
     private StackEntity aValidStackRequestWithDifferentEncryptedTypes(CloudProvider cloudProvider) {
@@ -159,15 +68,6 @@ public class EncryptedClusterTests extends CloudbreakTest {
         var params = new GcpParameters();
         params.setEncryption(encryptionMethod.getEncryption(getTestParameter()));
         return params;
-    }
-
-    private String getLastUuid(List<? extends ImageResponse> images) {
-        var result = images.stream().filter(ImageResponse::isDefaultImage).collect(Collectors.toList());
-        if (result.isEmpty()) {
-            result = images;
-        }
-        result = result.stream().sorted(Comparator.comparing(ImageResponse::getDate)).collect(Collectors.toList());
-        return result.get(result.size() - 1).getUuid();
     }
 
     private AwsParameters getAwsParametersWithEncryption(EncryptionType type) {
