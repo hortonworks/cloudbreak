@@ -34,4 +34,14 @@ public class FlexSubscriptionV3Controller implements FlexSubscriptionV3Endpoint 
     public FlexSubscriptionResponse deleteInOrganization(Long organizationId, String name) {
         return null;
     }
+
+    @Override
+    public void setUsedForControllerInOrganization(Long organizationId, Long name) {
+
+    }
+
+    @Override
+    public void setDefaultInOrganization(Long organizationId, Long id) {
+
+    }
 }

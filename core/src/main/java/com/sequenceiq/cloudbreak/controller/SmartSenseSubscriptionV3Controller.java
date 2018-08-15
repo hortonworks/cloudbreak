@@ -25,6 +25,11 @@ public class SmartSenseSubscriptionV3Controller implements SmartSenseSubscriptio
     }
 
     @Override
+    public SmartSenseSubscriptionJson getDefaultInOrganization(Long organizationId) {
+        return null;
+    }
+
+    @Override
     public SmartSenseSubscriptionJson createInOrganization(Long organizationId, SmartSenseSubscriptionJson request) {
         return null;
     }

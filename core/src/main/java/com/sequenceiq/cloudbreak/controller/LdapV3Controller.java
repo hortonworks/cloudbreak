@@ -12,9 +12,14 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v3.LdapConfigV3Endpoint;
+import com.sequenceiq.cloudbreak.api.model.ldap.LDAPTestRequest;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
+import com.sequenceiq.cloudbreak.api.model.ldap.LdapTestResult;
+import com.sequenceiq.cloudbreak.api.model.ldap.LdapValidationRequest;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.validation.ldapconfig.LdapConfigValidator;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
@@ -33,6 +38,9 @@ public class LdapV3Controller extends NotificationController implements LdapConf
     @Inject
     private AuthenticatedUserService authenticatedUserService;
 
+    @Inject
+    private LdapConfigValidator ldapConfigValidator;
+
     @Override
     public Set<LdapConfigResponse> listConfigsByOrganization(Long organizationId) {
         return ldapConfigService.listByOrganizationId(organizationId).stream()
@@ -41,8 +49,8 @@ public class LdapV3Controller extends NotificationController implements LdapConf
     }
 
     @Override
-    public LdapConfigResponse getByNameInOrganization(Long organizationId, String ldapConfigName) {
-        LdapConfig ldapConfig = ldapConfigService.getByNameForOrganization(ldapConfigName, organizationId);
+    public LdapConfigResponse getByNameInOrganization(Long organizationId, String name) {
+        LdapConfig ldapConfig = ldapConfigService.getByNameForOrganization(name, organizationId);
         return conversionService.convert(ldapConfig, LdapConfigResponse.class);
     }
 
@@ -55,9 +63,32 @@ public class LdapV3Controller extends NotificationController implements LdapConf
     }
 
     @Override
-    public LdapConfigResponse deleteInOrganization(Long organizationId, String configName) {
-        LdapConfig config = ldapConfigService.deleteByNameFromOrganization(configName, organizationId);
+    public LdapConfigResponse deleteInOrganization(Long organizationId, String name) {
+        LdapConfig config = ldapConfigService.deleteByNameFromOrganization(name, organizationId);
         notify(authenticatedUserService.getCbUser(), ResourceEvent.LDAP_DELETED);
         return conversionService.convert(config, LdapConfigResponse.class);
+    }
+
+    @Override
+    public LdapTestResult testLdapConnection(Long organizationId, LDAPTestRequest ldapValidationRequest) {
+        String existingLDAPConfigName = ldapValidationRequest.getName();
+        LdapValidationRequest validationRequest = ldapValidationRequest.getValidationRequest();
+        if (existingLDAPConfigName == null && validationRequest == null) {
+            throw new BadRequestException("Either an existing resource 'name' or an LDAP 'validationRequest' needs to be specified in the request. ");
+        }
+
+        LdapTestResult ldapTestResult = new LdapTestResult();
+        try {
+            if (existingLDAPConfigName != null) {
+                LdapConfig ldapConfig = ldapConfigService.getByNameForOrganization(existingLDAPConfigName, organizationId);
+                ldapConfigValidator.validateLdapConnection(ldapConfig);
+            } else {
+                ldapConfigValidator.validateLdapConnection(validationRequest);
+            }
+            ldapTestResult.setConnectionResult("connected");
+        } catch (BadRequestException e) {
+            ldapTestResult.setConnectionResult(e.getMessage());
+        }
+        return ldapTestResult;
     }
 }

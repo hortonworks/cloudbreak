@@ -57,6 +57,7 @@ public class OperationDescriptions {
         public static final String PUT_PRIVATE = "modify private credential resource";
         public static final String POST_PUBLIC = "create credential as public resource";
         public static final String PUT_PUBLIC = "modify public credential resource";
+        public static final String PUT_IN_ORG = "modify public credential resource in organization";
         public static final String GET_PRIVATE = "retrieve private credentials";
         public static final String GET_PUBLIC = "retrieve public and private (owned) credentials";
         public static final String GET_PRIVATE_BY_NAME = "retrieve a private credential by name";
@@ -376,6 +377,7 @@ public class OperationDescriptions {
         public static final String DELETE_BY_ID = "delete SmartSense subscription by id";
         public static final String LIST_BY_ORGANIZATION = "list SmartSense subscriptions for the given organization";
         public static final String GET_BY_NAME_IN_ORG = "get SmartSense subscription by name in organization";
+        public static final String GET_DEFAULT_IN_ORG = "get default SmartSense subscription by name in organization";
         public static final String CREATE_IN_ORG = "create SmartSense subscription in organization";
         public static final String DELETE_BY_NAME_IN_ORG = "delete SmartSense subscription by name in organization";
     }
@@ -392,7 +394,9 @@ public class OperationDescriptions {
         public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private Flex subscription by name";
         public static final String DELETE_BY_ID = "delete Flex subscription by id";
         public static final String SET_DEFAULT_IN_ACCOUNT = "sets the account default flag on the Flex subscription";
+        public static final String SET_DEFAULT_IN_ORG = "sets the organization default flag on the Flex subscription";
         public static final String SET_USED_FOR_CONTROLLER_IN_ACCOUNT = "sets the account 'used for controller' flag on the Flex subscription";
+        public static final String SET_USED_FOR_CONTROLLER_IN_ORG = "sets the organization 'used for controller' flag on the Flex subscription";
         public static final String LIST_BY_ORGANIZATION = "list Flex subscriptions for the given organization";
         public static final String GET_BY_NAME_IN_ORG = "get Flex subscription by name in organization";
         public static final String CREATE_IN_ORG = "create Flex subscription in organization";
