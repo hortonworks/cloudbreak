@@ -58,6 +58,11 @@ public class OpenStackSetup implements Setup {
     public void validateFileSystem(CloudCredential credential, FileSystem fileSystem) throws Exception {
     }
 
+    @Override
+    public void scalingPrerequisites(AuthenticatedContext authenticatedContext, CloudStack stack, boolean upscale) {
+
+    }
+
     private void verifyFlavors(OSClient osClient, List<Group> instanceGroups) {
         List<? extends Flavor> flavors = osClient.compute().flavors().list();
         Set<String> notFoundFlavors = new HashSet<>();
