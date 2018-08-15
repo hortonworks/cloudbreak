@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.controller;
 
+import java.util.Map;
 import java.util.Set;
 
 import javax.transaction.Transactional;
@@ -37,6 +38,11 @@ public class CredentialV3Controller implements CredentialV3Endpoint {
 
     @Override
     public CredentialResponse putInOrganization(Long organizationId, CredentialRequest credentialRequest) {
+        return null;
+    }
+
+    @Override
+    public Map<String, String> interactiveLogin(Long organizationId, CredentialRequest credentialRequest) {
         return null;
     }
 }
