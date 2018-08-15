@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v3;
 
+import java.util.Map;
 import java.util.Set;
 
 import javax.validation.Valid;
@@ -62,5 +63,12 @@ public interface CredentialV3Endpoint {
     @ApiOperation(value = CredentialOpDescription.PUT_IN_ORG, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES,
             nickname = "putCredentialInOrganization")
     CredentialResponse putInOrganization(@PathParam("organizationId") Long organizationId, @Valid CredentialRequest credentialRequest);
+
+    @POST
+    @Path("interactivelogin")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = CredentialOpDescription.INTERACTIVE_LOGIN, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES,
+            nickname = "interactiveLoginCredentialInOrganization")
+    Map<String, String> interactiveLogin(@PathParam("organizationId") Long organizationId, @Valid CredentialRequest credentialRequest);
 
 }

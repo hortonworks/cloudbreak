@@ -63,13 +63,13 @@ public interface FlexSubscriptionV3Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = FlexSubOpDescription.SET_USED_FOR_CONTROLLER_IN_ORG, produces = ContentType.JSON, notes = FLEX_SUBSCRIPTION_NOTES,
             nickname = "putUsedForControllerFlexSubscriptionByNameInOrganization")
-    void setUsedForControllerInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") Long name);
+    void setUsedForControllerInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
 
     @PUT
     @Path("setdefault/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = FlexSubOpDescription.SET_DEFAULT_IN_ORG, produces = ContentType.JSON, notes = FLEX_SUBSCRIPTION_NOTES,
             nickname = "putDefaultFlexSubscriptionByNameInOrganization")
-    void setDefaultInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") Long id);
+    void setDefaultInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
 
 }

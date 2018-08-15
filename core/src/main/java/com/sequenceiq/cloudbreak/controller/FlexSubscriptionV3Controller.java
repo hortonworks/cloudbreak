@@ -36,12 +36,12 @@ public class FlexSubscriptionV3Controller implements FlexSubscriptionV3Endpoint 
     }
 
     @Override
-    public void setUsedForControllerInOrganization(Long organizationId, Long name) {
+    public void setUsedForControllerInOrganization(Long organizationId, String name) {
 
     }
 
     @Override
-    public void setDefaultInOrganization(Long organizationId, Long id) {
+    public void setDefaultInOrganization(Long organizationId, String name) {
 
     }
 }
