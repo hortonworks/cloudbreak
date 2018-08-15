@@ -32,4 +32,9 @@ public class BYOSSetup implements Setup {
     public void validateFileSystem(CloudCredential credential, FileSystem fileSystem) throws Exception {
 
     }
+
+    @Override
+    public void scalingPrerequisites(AuthenticatedContext authenticatedContext, CloudStack stack, boolean upscale) {
+
+    }
 }
