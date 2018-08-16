@@ -33,7 +33,7 @@ public class AmbariUserHandlerTest {
     @MockBean
     private AmbariClientFactory ambariClientFactory;
 
-    @InjectMocks
+    @Inject
     private final AmbariUserHandler underTest = new AmbariUserHandler();
 
     @Test
