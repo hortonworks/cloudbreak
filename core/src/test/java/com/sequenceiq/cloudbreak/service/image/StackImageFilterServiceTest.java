@@ -62,6 +62,8 @@ public class StackImageFilterServiceTest {
 
     private static final long STACK_ID = 1L;
 
+    private static final long ORG_ID = 100L;
+
     @Rule
     public final ExpectedException thrown = ExpectedException.none();
 
@@ -93,17 +95,17 @@ public class StackImageFilterServiceTest {
         Stack stack = getStack(Status.AVAILABLE, Status.AVAILABLE);
         setupLoggedInUser();
         when(stackService.getByName(eq(STACK_NAME), any())).thenReturn(stack);
-        when(imageCatalogService.getImages(anyString(), anyString())).thenReturn(getStatedImages());
+        when(imageCatalogService.getImages(anyLong(), anyString(), anyString())).thenReturn(getStatedImages());
         when(stackImageUpdateService.isValidImage(any(), anyString(), anyString(), anyString())).thenReturn(true);
         when(stackImageUpdateService.getStackType(any())).thenReturn(StackType.HDP);
         when(componentConfigProvider.getImage(anyLong())).thenReturn(getImage(""));
 
-        Images images = underTest.getApplicableImages(IMAGE_CATALOG_NAME, STACK_NAME);
+        Images images = underTest.getApplicableImages(ORG_ID, IMAGE_CATALOG_NAME, STACK_NAME);
 
         assertEquals(IMAGE_BASE_ID, images.getBaseImages().get(0).getUuid());
         assertEquals(IMAGE_HDP_ID, images.getHdpImages().get(0).getUuid());
         assertThat(images.getHdfImages(), empty());
-        verify(imageCatalogService).getImages(eq(IMAGE_CATALOG_NAME), eq(PROVIDER_AWS));
+        verify(imageCatalogService).getImages(eq(ORG_ID), eq(IMAGE_CATALOG_NAME), eq(PROVIDER_AWS));
         verify(componentConfigProvider).getImage(STACK_ID);
         verify(stackImageUpdateService).isValidImage(eq(stack), eq(IMAGE_BASE_ID), eq(IMAGE_CATALOG_NAME), eq(CUSTOM_IMAGE_CATALOG_URL));
         verify(stackImageUpdateService).isValidImage(eq(stack), eq(IMAGE_HDP_ID), eq(IMAGE_CATALOG_NAME), eq(CUSTOM_IMAGE_CATALOG_URL));
@@ -115,17 +117,17 @@ public class StackImageFilterServiceTest {
         Stack stack = getStack(Status.AVAILABLE, Status.AVAILABLE);
         setupLoggedInUser();
         when(stackService.getByName(eq(STACK_NAME), any())).thenReturn(stack);
-        when(imageCatalogService.getImages(anyString(), anyString())).thenReturn(getStatedImages());
+        when(imageCatalogService.getImages(anyLong(), anyString(), anyString())).thenReturn(getStatedImages());
         when(stackImageUpdateService.isValidImage(any(), anyString(), anyString(), anyString())).thenReturn(true);
         when(stackImageUpdateService.getStackType(any())).thenReturn(StackType.HDF);
         when(componentConfigProvider.getImage(anyLong())).thenReturn(getImage(""));
 
-        Images images = underTest.getApplicableImages(IMAGE_CATALOG_NAME, STACK_NAME);
+        Images images = underTest.getApplicableImages(ORG_ID, IMAGE_CATALOG_NAME, STACK_NAME);
 
         assertEquals(IMAGE_BASE_ID, images.getBaseImages().get(0).getUuid());
         assertThat(images.getHdpImages(), empty());
         assertEquals(IMAGE_HDF_ID, images.getHdfImages().get(0).getUuid());
-        verify(imageCatalogService).getImages(eq(IMAGE_CATALOG_NAME), eq(PROVIDER_AWS));
+        verify(imageCatalogService).getImages(eq(ORG_ID), eq(IMAGE_CATALOG_NAME), eq(PROVIDER_AWS));
         verify(componentConfigProvider).getImage(STACK_ID);
         verify(stackImageUpdateService).isValidImage(eq(stack), eq(IMAGE_BASE_ID), eq(IMAGE_CATALOG_NAME), eq(CUSTOM_IMAGE_CATALOG_URL));
         verify(stackImageUpdateService, never()).isValidImage(eq(stack), eq(IMAGE_HDP_ID), eq(IMAGE_CATALOG_NAME), eq(CUSTOM_IMAGE_CATALOG_URL));
@@ -137,17 +139,17 @@ public class StackImageFilterServiceTest {
         Stack stack = getStack(Status.AVAILABLE, Status.AVAILABLE);
         setupLoggedInUser();
         when(stackService.getByName(eq(STACK_NAME), any())).thenReturn(stack);
-        when(imageCatalogService.getImages(anyString(), anyString())).thenReturn(getStatedImages());
+        when(imageCatalogService.getImages(anyLong(), anyString(), anyString())).thenReturn(getStatedImages());
         when(stackImageUpdateService.isValidImage(any(), anyString(), anyString(), anyString())).thenReturn(true);
         when(stackImageUpdateService.getStackType(any())).thenReturn(StackType.HDP);
         when(componentConfigProvider.getImage(anyLong())).thenReturn(getImage(IMAGE_HDP_ID));
 
-        Images images = underTest.getApplicableImages(IMAGE_CATALOG_NAME, STACK_NAME);
+        Images images = underTest.getApplicableImages(ORG_ID, IMAGE_CATALOG_NAME, STACK_NAME);
 
         assertEquals(IMAGE_BASE_ID, images.getBaseImages().get(0).getUuid());
         assertThat(images.getHdpImages(), empty());
         assertThat(images.getHdfImages(), empty());
-        verify(imageCatalogService).getImages(eq(IMAGE_CATALOG_NAME), eq(PROVIDER_AWS));
+        verify(imageCatalogService).getImages(eq(ORG_ID), eq(IMAGE_CATALOG_NAME), eq(PROVIDER_AWS));
         verify(componentConfigProvider).getImage(STACK_ID);
         verify(stackImageUpdateService).isValidImage(eq(stack), eq(IMAGE_BASE_ID), eq(IMAGE_CATALOG_NAME), eq(CUSTOM_IMAGE_CATALOG_URL));
         verify(stackImageUpdateService, never()).isValidImage(eq(stack), eq(IMAGE_HDP_ID), eq(IMAGE_CATALOG_NAME), eq(CUSTOM_IMAGE_CATALOG_URL));
@@ -159,17 +161,17 @@ public class StackImageFilterServiceTest {
         Stack stack = getStack(Status.AVAILABLE, Status.AVAILABLE);
         setupLoggedInUser();
         when(stackService.getByName(eq(STACK_NAME), any())).thenReturn(stack);
-        when(imageCatalogService.getImages(anyString(), anyString())).thenReturn(getStatedImages());
+        when(imageCatalogService.getImages(anyLong(), anyString(), anyString())).thenReturn(getStatedImages());
         when(stackImageUpdateService.isValidImage(any(), anyString(), anyString(), anyString())).thenReturn(false);
         when(stackImageUpdateService.getStackType(any())).thenReturn(StackType.HDP);
         when(componentConfigProvider.getImage(anyLong())).thenReturn(getImage(""));
 
-        Images images = underTest.getApplicableImages(IMAGE_CATALOG_NAME, STACK_NAME);
+        Images images = underTest.getApplicableImages(ORG_ID, IMAGE_CATALOG_NAME, STACK_NAME);
 
         assertThat(images.getHdpImages(), empty());
         assertThat(images.getHdfImages(), empty());
         assertThat(images.getBaseImages(), empty());
-        verify(imageCatalogService).getImages(eq(IMAGE_CATALOG_NAME), eq(PROVIDER_AWS));
+        verify(imageCatalogService).getImages(eq(ORG_ID), eq(IMAGE_CATALOG_NAME), eq(PROVIDER_AWS));
         verify(componentConfigProvider).getImage(STACK_ID);
         verify(stackImageUpdateService).isValidImage(eq(stack), eq(IMAGE_BASE_ID), eq(IMAGE_CATALOG_NAME), eq(CUSTOM_IMAGE_CATALOG_URL));
         verify(stackImageUpdateService).isValidImage(eq(stack), eq(IMAGE_HDP_ID), eq(IMAGE_CATALOG_NAME), eq(CUSTOM_IMAGE_CATALOG_URL));
@@ -184,7 +186,7 @@ public class StackImageFilterServiceTest {
         thrown.expectMessage("To retrieve list of images for upgrade both stack and cluster have to be in AVAILABLE state");
         thrown.expect(BadRequestException.class);
 
-        underTest.getApplicableImages(IMAGE_CATALOG_NAME, STACK_NAME);
+        underTest.getApplicableImages(ORG_ID, IMAGE_CATALOG_NAME, STACK_NAME);
     }
 
     @Test
@@ -195,7 +197,7 @@ public class StackImageFilterServiceTest {
         thrown.expectMessage("To retrieve list of images for upgrade both stack and cluster have to be in AVAILABLE state");
         thrown.expect(BadRequestException.class);
 
-        underTest.getApplicableImages(IMAGE_CATALOG_NAME, STACK_NAME);
+        underTest.getApplicableImages(ORG_ID, IMAGE_CATALOG_NAME, STACK_NAME);
     }
 
     private StatedImages getStatedImages() {

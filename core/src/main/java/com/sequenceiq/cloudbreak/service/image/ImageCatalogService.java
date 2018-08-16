@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.n
 import static com.sequenceiq.cloudbreak.service.image.StatedImage.statedImage;
 import static com.sequenceiq.cloudbreak.service.image.StatedImages.statedImages;
 import static com.sequenceiq.cloudbreak.util.NameUtil.generateArchiveName;
-import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 
@@ -26,7 +25,6 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -40,7 +38,6 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakVersion;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
@@ -55,7 +52,6 @@ import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserProfileHandler;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
@@ -104,9 +100,6 @@ public class ImageCatalogService extends AbstractOrganizationAwareResourceServic
 
     @Inject
     private StackImageUpdateService stackImageUpdateService;
-
-    @Inject
-    private OrganizationService organizationService;
 
     @Inject
     private ComponentConfigProvider componentConfigProvider;
@@ -167,13 +160,13 @@ public class ImageCatalogService extends AbstractOrganizationAwareResourceServic
         return String.format("Could not find any image for platform '%s' and Cloudbreak version '%s'.", platform, cbVersion);
     }
 
-    public StatedImages getImages(String name, String provider) throws CloudbreakImageCatalogException {
-        return getImages(name, ImmutableSet.of(provider));
+    public StatedImages getImages(Long organizationId, String name, String provider) throws CloudbreakImageCatalogException {
+        return getImages(organizationId, name, ImmutableSet.of(provider));
     }
 
-    public StatedImages getImages(String name, Set<String> providers) throws CloudbreakImageCatalogException {
+    public StatedImages getImages(Long organizationId, String name, Set<String> providers) throws CloudbreakImageCatalogException {
         try {
-            ImageCatalog imageCatalog = get(name);
+            ImageCatalog imageCatalog = get(organizationId, name);
             return getImages(imageCatalog, providers, cbVersion);
         } catch (AccessDeniedException | NotFoundException ignore) {
             throw new CloudbreakImageCatalogException(String.format("The %s catalog does not exist or does not belongs to your account.", name));
@@ -198,12 +191,13 @@ public class ImageCatalogService extends AbstractOrganizationAwareResourceServic
         return statedImage(image.get(), catalogUrl, catalogName);
     }
 
-    public StatedImage getImageByCatalogName(String imageId, String catalogName) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+    public StatedImage getImageByCatalogName(Long organizationId, String imageId, String catalogName) throws
+            CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         StatedImage image;
         if (StringUtils.isEmpty(catalogName)) {
             image = getImage(imageId);
         } else {
-            ImageCatalog imageCatalog = get(catalogName);
+            ImageCatalog imageCatalog = get(organizationId, catalogName);
             if (imageCatalog != null) {
                 image = getImage(imageCatalog.getImageCatalogUrl(), imageCatalog.getName(), imageId);
             } else {
@@ -215,55 +209,30 @@ public class ImageCatalogService extends AbstractOrganizationAwareResourceServic
         return image;
     }
 
-    public ImageCatalog create(ImageCatalog imageCatalog) {
-        try {
-            if (isEnvDefault(imageCatalog.getName())) {
-                throw new BadRequestException(String
-                        .format("%s cannot be created because it is an environment default image catalog.", imageCatalog.getName()));
-            }
-            return createInDefaultOrganization(imageCatalog);
-        } catch (DataIntegrityViolationException ex) {
-            String msg = String.format("Error with resource [%s], %s", APIResourceType.IMAGE_CATALOG, getProperSqlErrorMessage(ex));
-            throw new BadRequestException(msg);
-        }
-    }
-
-    public void delete(String name) {
+    public ImageCatalog delete(Long organizationId, String name) {
         if (isEnvDefault(name)) {
             throw new BadRequestException(String.format("%s cannot be deleted because it is an environment default image catalog.", name));
         }
-        ImageCatalog imageCatalog = get(name);
+        ImageCatalog imageCatalog = get(organizationId, name);
         imageCatalog.setArchived(true);
         setImageCatalogAsDefault(null);
         imageCatalog.setName(generateArchiveName(name));
         imageCatalogRepository.save(imageCatalog);
         userProfileHandler.destroyProfileImageCatalogPreparation(imageCatalog);
         LOGGER.info("Image catalog has been archived: {}", imageCatalog);
-    }
-
-    public ImageCatalog get(String name) {
-        ImageCatalog imageCatalog;
-        if (isEnvDefault(name)) {
-            imageCatalog = getCloudbreakDefaultImageCatalog();
-        } else {
-            imageCatalog = getByNameFromUsersDefaultOrganization(name);
-        }
         return imageCatalog;
     }
 
-    public ImageCatalog get(Long id) {
-        ImageCatalog imageCatalog;
-        imageCatalog = listForUsersDefaultOrganization().isEmpty() ? getCloudbreakDefaultImageCatalog()
-                : findImageCatalog(id);
-        return imageCatalog;
+    public ImageCatalog get(Long organizationId, String name) {
+        return isEnvDefault(name) ? getCloudbreakDefaultImageCatalog() : getByNameForOrganizationId(name, organizationId);
     }
 
-    public ImageCatalog setAsDefault(String name) {
+    public ImageCatalog setAsDefault(Long organizationId, String name) {
 
         removeDefaultFlag();
 
         if (!isEnvDefault(name)) {
-            ImageCatalog imageCatalog = get(name);
+            ImageCatalog imageCatalog = get(organizationId, name);
             checkImageCatalog(imageCatalog, name);
 
             setImageCatalogAsDefault(imageCatalog);
@@ -283,16 +252,16 @@ public class ImageCatalogService extends AbstractOrganizationAwareResourceServic
         userProfileService.save(userProfile);
     }
 
-    public ImageCatalog update(ImageCatalog source) {
-        ImageCatalog imageCatalog = findImageCatalog(source.getId());
+    public ImageCatalog update(Long organizationId, ImageCatalog source) {
+        ImageCatalog imageCatalog = findImageCatalog(organizationId, source.getName());
         checkImageCatalog(imageCatalog, source.getId());
         imageCatalog.setName(source.getName());
         imageCatalog.setImageCatalogUrl(source.getImageCatalogUrl());
-        return create(imageCatalog);
+        return create(imageCatalog, organizationId);
     }
 
-    private ImageCatalog findImageCatalog(Long id) {
-        return imageCatalogRepository.findById(id).orElseThrow(notFound("Image catalog", id));
+    private ImageCatalog findImageCatalog(Long organizationId, String name) {
+        return Optional.ofNullable(get(organizationId, name)).orElseThrow(notFound("Image catalog", name));
     }
 
     private void checkImageCatalog(ImageCatalog imageCatalog, Object filter) {
@@ -374,7 +343,7 @@ public class ImageCatalogService extends AbstractOrganizationAwareResourceServic
         return images;
     }
 
-    public void validateRequestPlatforms(Set<String> platforms) throws CloudbreakImageCatalogException {
+    private void validateRequestPlatforms(Set<String> platforms) throws CloudbreakImageCatalogException {
         Set<String> collect = platforms.stream()
                 .filter(requestedPlatform -> accountPreferencesService.enabledPlatforms().stream()
                         .filter(enabledPlatform -> enabledPlatform.equalsIgnoreCase(requestedPlatform))
@@ -386,11 +355,11 @@ public class ImageCatalogService extends AbstractOrganizationAwareResourceServic
         }
     }
 
-    public Images propagateImagesIfRequested(String name, boolean withImages) {
+    public Images propagateImagesIfRequested(Long organizationId, String name, boolean withImages) {
         if (withImages) {
             Set<String> platforms = accountPreferencesService.enabledPlatforms();
             try {
-                return getImages(name, platforms).getImages();
+                return getImages(organizationId, name, platforms).getImages();
             } catch (CloudbreakImageCatalogException e) {
                 LOGGER.error("No images was found: ", e);
             }
@@ -559,7 +528,10 @@ public class ImageCatalogService extends AbstractOrganizationAwareResourceServic
 
     @Override
     protected void prepareCreation(ImageCatalog resource) {
-
+        if (isEnvDefault(resource.getName())) {
+            throw new BadRequestException(String
+                    .format("%s cannot be created because it is an environment default image catalog.", resource.getName()));
+        }
     }
 
     private static class PrefixMatchImages {

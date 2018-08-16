@@ -47,6 +47,7 @@ import com.sequenceiq.cloudbreak.service.OperationRetryService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -86,6 +87,9 @@ public class StackV2Controller extends NotificationController implements StackV2
 
     @Inject
     private ImageCatalogService imageCatalogService;
+
+    @Inject
+    private OrganizationService organizationService;
 
     @Override
     public Set<StackResponse> getPrivates() {
@@ -288,7 +292,8 @@ public class StackV2Controller extends NotificationController implements StackV2
         IdentityUser user = authenticatedUserService.getCbUser();
         Stack stack = stackService.getPublicStack(stackName, user);
         if (StringUtils.isNotBlank(stackImageChangeRequest.getImageCatalogName())) {
-            ImageCatalog imageCatalog = imageCatalogService.get(stackImageChangeRequest.getImageCatalogName());
+            Long organizationId = organizationService.getDefaultOrganizationForCurrentUser().getId();
+            ImageCatalog imageCatalog = imageCatalogService.get(organizationId, stackImageChangeRequest.getImageCatalogName());
             stackService.updateImage(stack.getId(), stackImageChangeRequest.getImageId(), imageCatalog.getName(), imageCatalog.getImageCatalogUrl());
         } else {
             stackService.updateImage(stack.getId(), stackImageChangeRequest.getImageId(), null, null);

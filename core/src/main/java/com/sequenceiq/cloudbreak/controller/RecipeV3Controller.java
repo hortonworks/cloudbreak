@@ -43,7 +43,7 @@ public class RecipeV3Controller extends NotificationController implements Recipe
 
     @Override
     public RecipeResponse getByNameInOrganization(Long organizationId, String name) {
-        Recipe recipe = recipeService.getByNameForOrganization(name, organizationId);
+        Recipe recipe = recipeService.getByNameForOrganizationId(name, organizationId);
         return conversionService.convert(recipe, RecipeResponse.class);
     }
 

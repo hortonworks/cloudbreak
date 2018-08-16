@@ -13,6 +13,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImageCatalogRequest;
@@ -40,33 +41,35 @@ public interface ImageCatalogV3Endpoint {
     Set<ImageCatalogResponse> listByOrganization(@PathParam("organizationId") Long organizationId);
 
     @GET
-    @Path("/{name}")
+    @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ImageCatalogOpDescription.GET_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.IMAGE_CATALOG_NOTES,
             nickname = "getImageCatalogInOrganization")
-    ImageCatalogResponse getByNameInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
-
-    @POST
-    @Path("")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ImageCatalogOpDescription.CREATE_IN_ORG, produces = ContentType.JSON, notes = Notes.IMAGE_CATALOG_NOTES,
-            nickname = "createImageCatalogInOrganization")
-    ImageCatalogResponse createInOrganization(@PathParam("organizationId") Long organizationId, @Valid ImageCatalogRequest request);
-
-    @DELETE
-    @Path("/{name}")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ImageCatalogOpDescription.DELETE_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.IMAGE_CATALOG_NOTES,
-            nickname = "deleteImageCatalogInOrganization")
-    ImageCatalogResponse deleteInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
+    ImageCatalogResponse getByNameInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name,
+            @QueryParam("withImages") boolean withImages);
 
     @GET
-    @Path("account/{name}/{platform}")
+    @Path("{name}/platform/{platform}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ImageCatalogOpDescription.GET_IMAGES_BY_PROVIDER_AND_CUSTOM_IMAGE_CATALOG, produces = ContentType.JSON,
             notes = IMAGE_CATALOG_NOTES, nickname = "getImagesByProviderAndCustomImageCatalogInOrganization")
     ImagesResponse getImagesByProviderFromImageCatalogInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name,
             @PathParam("platform") String platform) throws Exception;
+
+    @GET
+    @Path("platform/{platform}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ImageCatalogOpDescription.GET_IMAGES_BY_PROVIDER, produces = ContentType.JSON, notes = IMAGE_CATALOG_NOTES,
+            nickname = "getImagesByProvider")
+    ImagesResponse getImagesByProvider(@PathParam("organizationId") Long organizationId, @PathParam("platform") String platform) throws Exception;
+
+    @GET
+    @Path("upgrade/{stackName}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ImageCatalogOpDescription.GET_IMAGES_BY_STACK_NAME, produces = ContentType.JSON,
+            notes = Notes.IMAGE_CATALOG_STACK_UPGRADE_NOTES, nickname = "getImagesByStackNameAndDefaultImageCatalogInOrganization")
+    ImagesResponse getImagesFromDefaultImageCatalogByStackInOrganization(@PathParam("organizationId") Long organizationId,
+            @PathParam("stackName") String stackName) throws Exception;
 
     @GET
     @Path("upgrade/{stackName}/{name}")
@@ -76,13 +79,19 @@ public interface ImageCatalogV3Endpoint {
     ImagesResponse getImagesFromCustomImageCatalogByStackInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name,
             @PathParam("stackName") String stackName) throws Exception;
 
-    @GET
-    @Path("upgrade/{stackName}")
+    @POST
+    @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ImageCatalogOpDescription.GET_IMAGES_BY_STACK_NAME, produces = ContentType.JSON,
-            notes = Notes.IMAGE_CATALOG_STACK_UPGRADE_NOTES, nickname = "getImagesByStackNameAndDefaultImageCatalogInOrganization")
-    ImagesResponse getImagesFromDefaultImageCatalogByStackInOrganization(@PathParam("organizationId") Long organizationId,
-            @PathParam("stackName") String stackName) throws Exception;
+    @ApiOperation(value = ImageCatalogOpDescription.CREATE_IN_ORG, produces = ContentType.JSON, notes = Notes.IMAGE_CATALOG_NOTES,
+            nickname = "createImageCatalogInOrganization")
+    ImageCatalogResponse createInOrganization(@PathParam("organizationId") Long organizationId, @Valid ImageCatalogRequest request);
+
+    @DELETE
+    @Path("{name}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ImageCatalogOpDescription.DELETE_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.IMAGE_CATALOG_NOTES,
+            nickname = "deleteImageCatalogInOrganization")
+    ImageCatalogResponse deleteInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
 
     @PUT
     @Path("")

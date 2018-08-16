@@ -51,9 +51,13 @@ public class ImageCatalogV3Controller extends NotificationController implements 
     }
 
     @Override
-    public ImageCatalogResponse getByNameInOrganization(Long organizationId, String name) {
-        ImageCatalog imageCatalog = imageCatalogService.getByNameForOrganization(name, organizationId);
-        return conversionService.convert(imageCatalog, ImageCatalogResponse.class);
+    public ImageCatalogResponse getByNameInOrganization(Long organizationId, String name, boolean withImages) {
+        ImageCatalogResponse imageCatalogResponse = conversionService.convert(imageCatalogService.get(organizationId, name), ImageCatalogResponse.class);
+        Images images = imageCatalogService.propagateImagesIfRequested(organizationId, name, withImages);
+        if (images != null) {
+            imageCatalogResponse.setImagesResponse(conversionService.convert(images, ImagesResponse.class));
+        }
+        return imageCatalogResponse;
     }
 
     @Override
@@ -66,7 +70,7 @@ public class ImageCatalogV3Controller extends NotificationController implements 
 
     @Override
     public ImageCatalogResponse deleteInOrganization(Long organizationId, String name) {
-        ImageCatalog deleted = imageCatalogService.deleteByNameFromOrganization(name, organizationId);
+        ImageCatalog deleted = imageCatalogService.delete(organizationId, name);
         IdentityUser identityUser = authenticatedUserService.getCbUser();
         notify(identityUser, ResourceEvent.IMAGE_CATALOG_DELETED);
         return conversionService.convert(deleted, ImageCatalogResponse.class);
@@ -74,30 +78,36 @@ public class ImageCatalogV3Controller extends NotificationController implements 
 
     @Override
     public ImagesResponse getImagesByProviderFromImageCatalogInOrganization(Long organizationId, String name, String platform) throws Exception {
-        Images images = imageCatalogService.getImages(name, platform).getImages();
+        Images images = imageCatalogService.getImages(organizationId, name, platform).getImages();
+        return conversionService.convert(images, ImagesResponse.class);
+    }
+
+    @Override
+    public ImagesResponse getImagesByProvider(Long organizationId, String platform) throws Exception {
+        Images images = imageCatalogService.getImagesOsFiltered(platform, null).getImages();
         return conversionService.convert(images, ImagesResponse.class);
     }
 
     @Override
     public ImagesResponse getImagesFromCustomImageCatalogByStackInOrganization(Long organizationId, String name, String stackName) throws Exception {
-        Images images = stackImageFilterService.getApplicableImages(name, stackName);
+        Images images = stackImageFilterService.getApplicableImages(organizationId, name, stackName);
         return conversionService.convert(images, ImagesResponse.class);
     }
 
     @Override
     public ImagesResponse getImagesFromDefaultImageCatalogByStackInOrganization(Long organizationId, String stackName) throws Exception {
-        Images images = stackImageFilterService.getApplicableImages(stackName);
+        Images images = stackImageFilterService.getApplicableImages(organizationId, stackName);
         return conversionService.convert(images, ImagesResponse.class);
     }
 
     @Override
     public ImageCatalogResponse putPublicInOrganization(Long organizationId, UpdateImageCatalogRequest request) {
-        ImageCatalog imageCatalog = imageCatalogService.update(conversionService.convert(request, ImageCatalog.class));
+        ImageCatalog imageCatalog = imageCatalogService.update(organizationId, conversionService.convert(request, ImageCatalog.class));
         return conversionService.convert(imageCatalog, ImageCatalogResponse.class);
     }
 
     @Override
     public ImageCatalogResponse putSetDefaultByNameInOrganization(Long organizationId, String name) {
-        return conversionService.convert(imageCatalogService.setAsDefault(name), ImageCatalogResponse.class);
+        return conversionService.convert(imageCatalogService.setAsDefault(organizationId, name), ImageCatalogResponse.class);
     }
 }

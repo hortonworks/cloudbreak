@@ -72,9 +72,12 @@ public abstract class AbstractOrganizationAwareResourceService<T extends Organiz
     }
 
     @Override
-    public T getByNameForOrganization(String name, Long organizationId) {
-        Organization organization = organizationService.get(organizationId);
-        return getByNameForOrganization(name, organization);
+    public T getByNameForOrganizationId(String name, Long organizationId) {
+        T object = repository().findByNameAndOrganizationId(name, organizationId);
+        if (object == null) {
+            throw new NotFoundException(String.format("No %s found with name '%s'", resource().getShortName(), name));
+        }
+        return object;
     }
 
     @Override
@@ -109,7 +112,7 @@ public abstract class AbstractOrganizationAwareResourceService<T extends Organiz
 
     @Override
     public T deleteByNameFromOrganization(String name, Long organizationId) {
-        T toBeDeleted = getByNameForOrganization(name, organizationId);
+        T toBeDeleted = getByNameForOrganizationId(name, organizationId);
         return delete(toBeDeleted);
     }
 

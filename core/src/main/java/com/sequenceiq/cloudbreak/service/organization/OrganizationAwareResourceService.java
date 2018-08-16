@@ -11,7 +11,7 @@ public interface OrganizationAwareResourceService<T extends OrganizationAwareRes
 
     T create(T resource, Long organizationId);
 
-    T getByNameForOrganization(String name, Long organizationId);
+    T getByNameForOrganizationId(String name, Long organizationId);
 
     T getByNameForOrganization(String name, Organization organization);
 

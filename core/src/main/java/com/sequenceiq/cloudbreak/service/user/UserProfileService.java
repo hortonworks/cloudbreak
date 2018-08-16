@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.repository.UserProfileRepository;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 
 @Service
 public class UserProfileService {
@@ -37,6 +38,9 @@ public class UserProfileService {
 
     @Inject
     private ImageCatalogService imageCatalogService;
+
+    @Inject
+    private OrganizationService organizationService;
 
     @Inject
     private UserService userService;
@@ -100,7 +104,8 @@ public class UserProfileService {
             userProfile.setCredential(credential);
         }
         if (request.getImageCatalogName() != null) {
-            ImageCatalog imageCatalog = imageCatalogService.get(request.getImageCatalogName());
+            Long organizationId = organizationService.getDefaultOrganizationForCurrentUser().getId();
+            ImageCatalog imageCatalog = imageCatalogService.get(organizationId, request.getImageCatalogName());
             userProfile.setImageCatalog(imageCatalog);
         }
         for (Entry<String, Object> uiStringObjectEntry : request.getUiProperties().entrySet()) {

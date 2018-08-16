@@ -50,7 +50,7 @@ public class LdapV3Controller extends NotificationController implements LdapConf
 
     @Override
     public LdapConfigResponse getByNameInOrganization(Long organizationId, String name) {
-        LdapConfig ldapConfig = ldapConfigService.getByNameForOrganization(name, organizationId);
+        LdapConfig ldapConfig = ldapConfigService.getByNameForOrganizationId(name, organizationId);
         return conversionService.convert(ldapConfig, LdapConfigResponse.class);
     }
 
@@ -80,7 +80,7 @@ public class LdapV3Controller extends NotificationController implements LdapConf
         LdapTestResult ldapTestResult = new LdapTestResult();
         try {
             if (existingLDAPConfigName != null) {
-                LdapConfig ldapConfig = ldapConfigService.getByNameForOrganization(existingLDAPConfigName, organizationId);
+                LdapConfig ldapConfig = ldapConfigService.getByNameForOrganizationId(existingLDAPConfigName, organizationId);
                 ldapConfigValidator.validateLdapConnection(ldapConfig);
             } else {
                 ldapConfigValidator.validateLdapConnection(validationRequest);

@@ -100,11 +100,11 @@ public class ImageService {
         }
     }
 
-    public StatedImage determineImageFromCatalog(String imageId, String platformString, String catalogName,
+    public StatedImage determineImageFromCatalog(Long organizationId, String imageId, String platformString, String catalogName,
         Blueprint blueprint, boolean useBaseImage, String os) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         StatedImage statedImage;
         if (imageId != null) {
-            statedImage = imageCatalogService.getImageByCatalogName(imageId, catalogName);
+            statedImage = imageCatalogService.getImageByCatalogName(organizationId, imageId, catalogName);
         } else {
             String clusterType = ImageCatalogService.UNDEFINED;
             String clusterVersion = ImageCatalogService.UNDEFINED;
