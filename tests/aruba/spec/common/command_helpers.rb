@@ -121,6 +121,10 @@ RSpec.shared_context "shared command helpers", :a => :b do
         puts "Cluster Name:    " + json["name"].to_s
         puts "Stack Id:        " + json["id"].to_s + "\n"     
       end   
+  end
+
+  def parse_debug_json(str)
+    return str[str.index("{")..str.rindex("}")]
   end  
 
   let(:shared_let) { {'arbitrary' => 'object'} } 
