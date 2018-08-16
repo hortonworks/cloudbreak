@@ -41,7 +41,7 @@ public class ManagementPackV3Controller extends NotificationController implement
 
     @Override
     public ManagementPackResponse getByNameInOrganization(Long organizationId, String name) {
-        ManagementPack managementPack = mpackService.getByNameForOrganization(name, organizationId);
+        ManagementPack managementPack = mpackService.getByNameForOrganizationId(name, organizationId);
         return conversionService.convert(managementPack, ManagementPackResponse.class);
     }
 

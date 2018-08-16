@@ -46,14 +46,18 @@ public class StackImageFilterService {
     @Inject
     private ComponentConfigProvider componentConfigProvider;
 
-    public Images getApplicableImages(String stackName) throws CloudbreakImageCatalogException {
-        return getApplicableImages(CLOUDBREAK_DEFAULT_CATALOG_NAME, stackName);
+    public Images getApplicableImages(Long organizationId, String stackName) throws CloudbreakImageCatalogException {
+        return getApplicableImages(organizationId, CLOUDBREAK_DEFAULT_CATALOG_NAME, stackName);
     }
 
-    public Images getApplicableImages(String imageCatalogName, String stackName) throws CloudbreakImageCatalogException {
+    public Images getApplicableImages(Long organizationId, String imageCatalogName, String stackName) throws CloudbreakImageCatalogException {
         IdentityUser user = authenticatedUserService.getCbUser();
         Stack stack = stackService.getByName(stackName, user);
+        StatedImages statedImages = imageCatalogService.getImages(organizationId, imageCatalogName, stack.cloudPlatform());
+        return getApplicableImages(imageCatalogName, statedImages, stack);
+    }
 
+    private Images getApplicableImages(String imageCatalogName, StatedImages statedImages, Stack stack) {
         if (!Status.AVAILABLE.equals(stack.getStackStatus().getStatus()) || !Status.AVAILABLE.equals(stack.getCluster().getStatus())) {
             throw new BadRequestException("To retrieve list of images for upgrade both stack and cluster have to be in AVAILABLE state");
         }
@@ -61,7 +65,6 @@ public class StackImageFilterService {
         StackType stackType = stackImageUpdateService.getStackType(stack);
         String currentImageUuid = getCurrentImageUuid(stack);
 
-        StatedImages statedImages = imageCatalogService.getImages(imageCatalogName, stack.cloudPlatform());
         List<Image> filteredBaseImages =
                 filterByApplicability(imageCatalogName, statedImages.getImageCatalogUrl(), stack, statedImages.getImages().getBaseImages(), currentImageUuid);
 

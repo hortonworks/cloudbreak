@@ -22,15 +22,19 @@ import com.sequenceiq.cloudbreak.api.model.stack.StackImageChangeRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRepairRequest;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.OperationRetryService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StackV2ControllerTest {
+
+    private static final long ORG_ID = 100L;
 
     @InjectMocks
     private StackV2Controller underTest;
@@ -49,6 +53,9 @@ public class StackV2ControllerTest {
 
     @Mock
     private ImageCatalogService imageCatalogService;
+
+    @Mock
+    private OrganizationService organizationService;
 
     private IdentityUser identityUser;
 
@@ -101,8 +108,10 @@ public class StackV2ControllerTest {
         ImageCatalog imageCatalog = new ImageCatalog();
         imageCatalog.setName("hgfjfg");
         imageCatalog.setImageCatalogUrl("url");
-
-        when(imageCatalogService.get(eq(imageCatalog.getName()))).thenReturn(imageCatalog);
+        Organization organization = new Organization();
+        organization.setId(ORG_ID);
+        when(organizationService.getDefaultOrganizationForCurrentUser()).thenReturn(organization);
+        when(imageCatalogService.get(eq(ORG_ID), eq(imageCatalog.getName()))).thenReturn(imageCatalog);
 
         StackImageChangeRequest stackImageChangeRequest = new StackImageChangeRequest();
         stackImageChangeRequest.setImageId("asdf");

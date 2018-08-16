@@ -6,7 +6,6 @@ import java.io.Serializable;
 import java.util.Set;
 
 import org.springframework.data.repository.NoRepositoryBean;
-import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.aspect.DisableHasPermission;
 import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByOrganization;
@@ -24,6 +23,9 @@ public interface OrganizationResourceRepository<T extends OrganizationAwareResou
     @CheckPermissionsByOrganization(action = READ, organizationIndex = 1)
     T findByNameAndOrganization(String name, Organization organization);
 
+    @CheckPermissionsByOrganizationId(action = READ, organizationIdIndex = 1)
+    T findByNameAndOrganizationId(String name, Long organizationId);
+
     @CheckPermissionsByOrganizationId(action = READ)
-    Set<T> findAllByOrganizationId(@Param("organizationId") Long organizationId);
+    Set<T> findAllByOrganizationId(Long organizationId);
 }

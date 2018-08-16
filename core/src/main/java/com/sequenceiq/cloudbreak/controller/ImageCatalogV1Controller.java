@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.StackImageFilterService;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 
 @Component
 @Transactional(TxType.NEVER)
@@ -41,6 +42,9 @@ public class ImageCatalogV1Controller implements ImageCatalogV1Endpoint {
     @Named("conversionService")
     private ConversionService conversionService;
 
+    @Inject
+    private OrganizationService organizationService;
+
     @Override
     public List<ImageCatalogResponse> getPublics() {
         return getAll();
@@ -48,8 +52,8 @@ public class ImageCatalogV1Controller implements ImageCatalogV1Endpoint {
 
     @Override
     public ImageCatalogResponse getByName(String name, boolean withImages) {
-        ImageCatalogResponse imageCatalogResponse = convert(imageCatalogService.get(name));
-        Images images = imageCatalogService.propagateImagesIfRequested(name, withImages);
+        ImageCatalogResponse imageCatalogResponse = convert(imageCatalogService.get(getDefOrgId(), name));
+        Images images = imageCatalogService.propagateImagesIfRequested(getDefOrgId(), name, withImages);
         if (images != null) {
             imageCatalogResponse.setImagesResponse(conversionService.convert(images, ImagesResponse.class));
         }
@@ -74,41 +78,45 @@ public class ImageCatalogV1Controller implements ImageCatalogV1Endpoint {
 
     @Override
     public ImagesResponse getImagesByProviderFromImageCatalog(String name, String platform) throws Exception {
-        Images images = imageCatalogService.getImages(name, platform).getImages();
+        Images images = imageCatalogService.getImages(getDefOrgId(), name, platform).getImages();
         return conversionService.convert(images, ImagesResponse.class);
     }
 
     @Override
     public void deletePublic(String name) {
-        imageCatalogService.delete(name);
+        imageCatalogService.delete(getDefOrgId(), name);
     }
 
     @Override
     public ImageCatalogResponse putPublic(UpdateImageCatalogRequest request) {
-        ImageCatalog imageCatalog = imageCatalogService.update(conversionService.convert(request, ImageCatalog.class));
+        ImageCatalog imageCatalog = imageCatalogService.update(getDefOrgId(), conversionService.convert(request, ImageCatalog.class));
         return convert(imageCatalog);
     }
 
     @Override
     public ImageCatalogResponse putSetDefaultByName(String name) {
-        return conversionService.convert(imageCatalogService.setAsDefault(name), ImageCatalogResponse.class);
+        return conversionService.convert(imageCatalogService.setAsDefault(getDefOrgId(), name), ImageCatalogResponse.class);
     }
 
     @Override
     public ImageCatalogRequest getRequestfromName(String name) {
-        ImageCatalog imageCatalog = imageCatalogService.get(name);
+        ImageCatalog imageCatalog = imageCatalogService.get(getDefOrgId(), name);
         return conversionService.convert(imageCatalog, ImageCatalogRequest.class);
     }
 
     @Override
     public ImagesResponse getImagesFromCustomImageCatalogByStack(String imageCatalogName, String stackName) throws CloudbreakImageCatalogException {
-        Images images = stackImageFilterService.getApplicableImages(imageCatalogName, stackName);
+        Images images = stackImageFilterService.getApplicableImages(getDefOrgId(), imageCatalogName, stackName);
         return conversionService.convert(images, ImagesResponse.class);
+    }
+
+    private Long getDefOrgId() {
+        return organizationService.getDefaultOrganizationForCurrentUser().getId();
     }
 
     @Override
     public ImagesResponse getImagesFromDefaultImageCatalogByStack(String stackName) throws Exception {
-        Images images = stackImageFilterService.getApplicableImages(stackName);
+        Images images = stackImageFilterService.getApplicableImages(getDefOrgId(), stackName);
         return conversionService.convert(images, ImagesResponse.class);
     }
 
@@ -131,7 +139,7 @@ public class ImageCatalogV1Controller implements ImageCatalogV1Endpoint {
         ImageCatalog imageCatalog = conversionService.convert(imageCatalogRequest, ImageCatalog.class);
         imageCatalog.setAccount(identityUser.getAccount());
         imageCatalog.setOwner(identityUser.getUserId());
-        imageCatalog = imageCatalogService.create(imageCatalog);
+        imageCatalog = imageCatalogService.create(imageCatalog, getDefOrgId());
         return convert(imageCatalog);
     }
 }

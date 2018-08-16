@@ -192,8 +192,9 @@ public class StackCreatorService {
                 String platformString = platform(stack.cloudPlatform()).value().toLowerCase();
                 StatedImage imgFromCatalog;
                 try {
-                    imgFromCatalog = imageService.determineImageFromCatalog(stackRequest.getImageId(), platformString,
-                            stackRequest.getImageCatalog(), blueprint, shouldUseBaseImage(stackRequest.getClusterRequest()), stackRequest.getOs());
+                    imgFromCatalog = imageService.determineImageFromCatalog(organizationService.getDefaultOrganizationForCurrentUser().getId(),
+                            stackRequest.getImageId(), platformString, stackRequest.getImageCatalog(), blueprint,
+                            shouldUseBaseImage(stackRequest.getClusterRequest()), stackRequest.getOs());
                 } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
                     throw new RuntimeException(e.getMessage(), e);
                 }

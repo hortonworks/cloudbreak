@@ -5,9 +5,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -93,6 +94,8 @@ public class ImageCatalogServiceTest {
     private static final String IMAGE_HDF_ID = "hdf-3";
 
     private static final long STACK_ID = 1L;
+
+    private static final long ORG_ID = 100L;
 
     @Rule
     public final ExpectedException thrown = ExpectedException.none();
@@ -368,11 +371,9 @@ public class ImageCatalogServiceTest {
     public void testGetImagesWhenCustomImageCatalogExists() throws Exception {
         ImageCatalog ret = new ImageCatalog();
         ret.setImageCatalogUrl("");
-        Organization organization = mock(Organization.class);
-        when(organizationService.getDefaultOrganizationForCurrentUser()).thenReturn(organization);
-        when(imageCatalogRepository.findByNameAndOrganization("name", organization)).thenReturn(ret);
+        when(imageCatalogRepository.findByNameAndOrganizationId("name", ORG_ID)).thenReturn(ret);
         when(imageCatalogProvider.getImageCatalogV2("")).thenReturn(null);
-        underTest.getImages("name", "aws");
+        underTest.getImages(ORG_ID, "name", "aws");
 
         verify(imageCatalogProvider, times(1)).getImageCatalogV2("");
 
@@ -380,12 +381,12 @@ public class ImageCatalogServiceTest {
 
     @Test
     public void testGetImagesWhenCustomImageCatalogDoesNotExists() throws Exception {
-        when(organizationService.getDefaultOrganizationForCurrentUser()).thenThrow(new AccessDeniedException("denied"));
+        when(imageCatalogRepository.findByNameAndOrganizationId(anyString(), anyLong())).thenThrow(new AccessDeniedException("denied"));
 
         thrown.expectMessage("The verycool catalog does not exist or does not belongs to your account.");
         thrown.expect(CloudbreakImageCatalogException.class);
 
-        underTest.getImages("verycool", "aws").getImages();
+        underTest.getImages(ORG_ID, "verycool", "aws").getImages();
 
         verify(imageCatalogProvider, times(0)).getImageCatalogV2("");
     }
@@ -398,13 +399,11 @@ public class ImageCatalogServiceTest {
         ImageCatalog imageCatalog = new ImageCatalog();
         imageCatalog.setName(name);
         imageCatalog.setArchived(false);
-        Organization organization = mock(Organization.class);
         doNothing().when(userProfileHandler).destroyProfileImageCatalogPreparation(any(ImageCatalog.class));
         when(authenticatedUserService.getCbUser()).thenReturn(user);
-        when(organizationService.getDefaultOrganizationForCurrentUser()).thenReturn(organization);
-        when(imageCatalogRepository.findByNameAndOrganization(name, organization)).thenReturn(imageCatalog);
+        when(imageCatalogRepository.findByNameAndOrganizationId(name, ORG_ID)).thenReturn(imageCatalog);
         when(userProfileService.getOrCreate(user.getAccount(), user.getUserId(), user.getUsername())).thenReturn(userProfile);
-        underTest.delete(name);
+        underTest.delete(ORG_ID, name);
 
         verify(imageCatalogRepository, times(1)).save(imageCatalog);
 
@@ -419,17 +418,15 @@ public class ImageCatalogServiceTest {
         thrown.expectMessage("cloudbreak-default cannot be deleted because it is an environment default image catalog.");
         thrown.expect(BadRequestException.class);
 
-        underTest.delete(name);
+        underTest.delete(ORG_ID, name);
     }
 
     @Test
     public void testGet() {
         String name = "img-name";
         ImageCatalog imageCatalog = new ImageCatalog();
-        Organization organization = mock(Organization.class);
-        when(organizationService.getDefaultOrganizationForCurrentUser()).thenReturn(organization);
-        when(imageCatalogRepository.findByNameAndOrganization(name, organization)).thenReturn(imageCatalog);
-        ImageCatalog actual = underTest.get(name);
+        when(imageCatalogRepository.findByNameAndOrganizationId(name, ORG_ID)).thenReturn(imageCatalog);
+        ImageCatalog actual = underTest.get(ORG_ID, name);
 
         assertEquals(actual, imageCatalog);
     }
@@ -437,7 +434,7 @@ public class ImageCatalogServiceTest {
     @Test
     public void testGetWhenEnvDefault() {
         String name = "cloudbreak-default";
-        ImageCatalog actual = underTest.get(name);
+        ImageCatalog actual = underTest.get(ORG_ID, name);
 
         verify(imageCatalogRepository, times(0)).findByNameAndOrganization(eq(name), any(Organization.class));
 
