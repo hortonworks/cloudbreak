@@ -581,7 +581,7 @@ public class SaltOrchestrator implements HostOrchestrator {
 
             Set<String> all = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
             runSaltCommand(sc, new SyncGrainsRunner(all, allNodes), exitCriteriaModel);
-            runNewService(sc, new HighStateRunner(all, allNodes), exitCriteriaModel, maxRetryRecipe, false);
+            runNewService(sc, new HighStateRunner(all, allNodes), exitCriteriaModel, maxRetryRecipe, true);
 
             // remove 'recipe' grain from all nodes
             targets = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
