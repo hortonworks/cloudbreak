@@ -74,7 +74,7 @@
             </param>
             <param>
                 <name>main.ldapRealm.contextFactory.systemPassword</name>
-                <value>{{ salt['pillar.get']('ldap:bindPassword') }}</value>
+                <value><![CDATA[{{ salt['pillar.get']('ldap:bindPassword') }}]]></value>
             </param>
             <param>
                 <name>main.ldapRealm.searchBase</name>
