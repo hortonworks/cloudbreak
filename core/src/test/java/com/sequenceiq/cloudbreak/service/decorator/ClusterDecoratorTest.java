@@ -103,7 +103,7 @@ public class ClusterDecoratorTest {
         String blueprintText = FileReaderUtil.readResourceFile(this, "ha-components.bp");
         blueprint.setBlueprintText(blueprintText);
         when(request.getConnectedCluster()).thenReturn(mock(ConnectedClusterRequest.class));
-        when(sharedServiceConfigProvider.configureCluster(any(Cluster.class), any(IdentityUser.class), any(ConnectedClusterRequest.class)))
+        when(sharedServiceConfigProvider.configureCluster(any(Cluster.class), any(ConnectedClusterRequest.class)))
                 .thenReturn(expectedClusterInstance);
         when(clusterProxyDecorator.prepareProxyConfig(any(Cluster.class), any(IdentityUser.class), any(), any(Stack.class))).thenReturn(expectedClusterInstance);
         when(ambariHaComponentFilter.getHaComponents(any())).thenReturn(Collections.emptySet());
@@ -111,7 +111,7 @@ public class ClusterDecoratorTest {
         Cluster result = underTest.decorate(expectedClusterInstance, request, blueprint, user, stack);
 
         Assert.assertEquals(expectedClusterInstance, result);
-        verify(sharedServiceConfigProvider, times(1)).configureCluster(any(Cluster.class), any(IdentityUser.class),
+        verify(sharedServiceConfigProvider, times(1)).configureCluster(any(Cluster.class),
                 any(ConnectedClusterRequest.class));
     }
 

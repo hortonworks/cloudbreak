@@ -67,7 +67,7 @@ public class StackDownscaleService {
         Set<Long> privateIds = stackDownscaleTriggerEvent.getPrivateIds();
         List<String> instanceIdList = Collections.emptyList();
         if (privateIds != null) {
-            Stack stack = stackService.getByIdWithLists(context.getStack().getId());
+            Stack stack = stackService.getByIdWithListsWithoutAuthorization(context.getStack().getId());
             instanceIdList = stackService.getInstanceIdsForPrivateIds(stack.getInstanceMetaDataAsList(), privateIds);
         }
         Object msgParam = instanceIdList.isEmpty() ? Math.abs(stackDownscaleTriggerEvent.getAdjustment()) : instanceIdList;

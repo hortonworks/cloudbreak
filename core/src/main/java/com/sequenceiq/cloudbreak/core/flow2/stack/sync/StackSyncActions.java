@@ -128,7 +128,7 @@ public class StackSyncActions {
         protected StackSyncContext createFlowContext(String flowId, StateContext<StackSyncState, StackSyncEvent> stateContext, P payload) {
             Map<Object, Object> variables = stateContext.getExtendedState().getVariables();
             Long stackId = payload.getStackId();
-            Stack stack = stackService.getByIdWithLists(stackId);
+            Stack stack = stackService.getByIdWithListsWithoutAuthorization(stackId);
             MDCBuilder.buildMdcContext(stack);
             Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
             CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getOwner(), stack.getPlatformVariant(),

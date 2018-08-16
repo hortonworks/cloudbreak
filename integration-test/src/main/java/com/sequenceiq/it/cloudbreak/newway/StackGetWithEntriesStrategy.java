@@ -29,7 +29,7 @@ public class StackGetWithEntriesStrategy implements Strategy {
         Log.log(" get stack " + stackEntity.getName());
         stackEntity.setResponse(
                 client.getCloudbreakClient().stackV2Endpoint()
-                        .getPrivate(stackEntity.getName(), entries.stream().map(StackResponseEntries::getEntryName).collect(Collectors.toSet())));
+                        .getStackFromDefaultOrg(stackEntity.getName(), entries.stream().map(StackResponseEntries::getEntryName).collect(Collectors.toSet())));
         Log.logJSON(" stack get response: ", stackEntity.getResponse());
     }
 }

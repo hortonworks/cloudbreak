@@ -51,7 +51,7 @@ public class DownscaleFlowEventChainFactory implements FlowEventChainFactory<Clu
         }
         flowEventChain.add(cste);
         if (event.getScalingType() == ScalingType.DOWNSCALE_TOGETHER) {
-            StackView stackView = stackService.getByIdView(event.getStackId());
+            StackView stackView = stackService.getViewByIdWithoutAuth(event.getStackId());
             HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stackView.getClusterView().getId(), event.getHostGroupName());
             Constraint hostGroupConstraint = hostGroup.getConstraint();
             String instanceGroupName = Optional.ofNullable(hostGroupConstraint.getInstanceGroup()).map(InstanceGroup::getGroupName).orElse(null);

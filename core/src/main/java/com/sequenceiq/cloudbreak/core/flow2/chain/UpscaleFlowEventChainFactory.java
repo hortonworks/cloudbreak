@@ -38,7 +38,7 @@ public class UpscaleFlowEventChainFactory implements FlowEventChainFactory<Stack
 
     @Override
     public Queue<Selectable> createFlowTriggerEventQueue(StackAndClusterUpscaleTriggerEvent event) {
-        StackView stackView = stackService.getByIdView(event.getStackId());
+        StackView stackView = stackService.getViewByIdWithoutAuth(event.getStackId());
         ClusterView clusterView = stackView.getClusterView();
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         flowEventChain.add(new StackSyncTriggerEvent(STACK_SYNC_EVENT.event(), event.getStackId(), false, event.accepted()));

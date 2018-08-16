@@ -407,7 +407,7 @@ public class ClusterService {
     }
 
     public void updateStatus(Long stackId, StatusRequest statusRequest) {
-        Stack stack = stackService.getByIdWithLists(stackId);
+        Stack stack = stackService.getByIdWithListsWithoutAuthorization(stackId);
         updateStatus(stack, statusRequest);
     }
 
@@ -450,7 +450,7 @@ public class ClusterService {
     public void failureReport(Long stackId, List<String> failedNodes) {
         try {
             transactionService.required(() -> {
-                Stack stack = stackService.getById(stackId);
+                Stack stack = stackService.getByIdWithoutAuth(stackId);
                 Cluster cluster = stack.getCluster();
                 Map<String, List<String>> autoRecoveryNodesMap = new HashMap<>();
                 Map<String, HostMetadata> autoRecoveryHostMetadata = new HashMap<>();
@@ -729,7 +729,7 @@ public class ClusterService {
             String kerberosPassword, String kerberosPrincipal) throws TransactionExecutionException {
         return transactionService.required(() -> {
             checkBlueprintIdAndHostGroups(blueprintId, hostGroups);
-            Stack stack = stackService.getByIdWithLists(stackId);
+            Stack stack = stackService.getByIdWithListsWithoutAuthorization(stackId);
             Cluster cluster = getCluster(stack);
             if (cluster != null && stack.getCluster().isSecure()) {
                 initKerberos(kerberosPassword, kerberosPrincipal, cluster);
@@ -807,7 +807,7 @@ public class ClusterService {
 
     public void upgrade(Long stackId, AmbariRepo ambariRepoUpgrade) throws TransactionExecutionException {
         if (ambariRepoUpgrade != null) {
-            Stack stack = stackService.getByIdWithLists(stackId);
+            Stack stack = stackService.getByIdWithListsWithoutAuthorization(stackId);
             Cluster cluster = getCluster(stack);
             if (cluster == null) {
                 throw new BadRequestException(String.format("Cluster does not exist on stack with '%s' id.", stackId));
@@ -1002,7 +1002,7 @@ public class ClusterService {
     }
 
     private AmbariClient getAmbariClient(Long stackId) {
-        Stack stack = stackService.getByIdWithLists(stackId);
+        Stack stack = stackService.getByIdWithListsWithoutAuthorization(stackId);
         return getAmbariClient(stack);
     }
 

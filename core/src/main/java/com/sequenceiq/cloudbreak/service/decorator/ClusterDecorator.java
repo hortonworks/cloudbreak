@@ -99,7 +99,7 @@ public class ClusterDecorator {
         subject = clusterProxyDecorator.prepareProxyConfig(subject, user, request.getProxyName(), stack);
         prepareLdap(subject, user, stack, Optional.ofNullable(request.getLdapConfigId()), Optional.ofNullable(request.getLdapConfig()),
                 Optional.ofNullable(request.getLdapConfigName()));
-        subject = sharedServiceConfigProvider.configureCluster(subject, user, request.getConnectedCluster());
+        subject = sharedServiceConfigProvider.configureCluster(subject, request.getConnectedCluster());
         return subject;
     }
 

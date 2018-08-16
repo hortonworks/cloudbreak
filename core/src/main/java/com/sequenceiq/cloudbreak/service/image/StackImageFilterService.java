@@ -16,7 +16,6 @@ import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
@@ -51,8 +50,7 @@ public class StackImageFilterService {
     }
 
     public Images getApplicableImages(Long organizationId, String imageCatalogName, String stackName) throws CloudbreakImageCatalogException {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        Stack stack = stackService.getByName(stackName, user);
+        Stack stack = stackService.getByNameInOrg(stackName, organizationId);
         StatedImages statedImages = imageCatalogService.getImages(organizationId, imageCatalogName, stack.cloudPlatform());
         return getApplicableImages(imageCatalogName, statedImages, stack);
     }

@@ -48,7 +48,7 @@ public class StackUpdaterTest {
         Stack stack = TestUtil.stack();
 
         DetailedStackStatus newStatus = DetailedStackStatus.DELETE_COMPLETED;
-        when(stackService.getById(anyLong())).thenReturn(stack);
+        when(stackService.getByIdWithoutAuth(anyLong())).thenReturn(stack);
         when(stackService.save(any(Stack.class))).thenReturn(stack);
 
         Stack newStack = underTest.updateStackStatus(1L, DetailedStackStatus.DELETE_COMPLETED);
@@ -63,7 +63,7 @@ public class StackUpdaterTest {
 
         DetailedStackStatus newStatus = DetailedStackStatus.DELETE_COMPLETED;
         String newStatusReason = "test";
-        when(stackService.getById(anyLong())).thenReturn(stack);
+        when(stackService.getByIdWithoutAuth(anyLong())).thenReturn(stack);
         when(stackService.save(any(Stack.class))).thenReturn(stack);
 
         Stack newStack = underTest.updateStackStatus(1L, newStatus, newStatusReason);

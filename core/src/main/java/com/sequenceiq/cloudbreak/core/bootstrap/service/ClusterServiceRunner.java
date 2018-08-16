@@ -67,7 +67,7 @@ public class ClusterServiceRunner {
     private GatewayConfigService gatewayConfigService;
 
     public void runAmbariServices(Long stackId) throws CloudbreakException {
-        Stack stack = stackService.getByIdWithLists(stackId);
+        Stack stack = stackService.getByIdWithListsWithoutAuthorization(stackId);
         Cluster cluster = stack.getCluster();
         Orchestrator orchestrator = stack.getOrchestrator();
         MDCBuilder.buildMdcContext(cluster);
@@ -108,7 +108,7 @@ public class ClusterServiceRunner {
     }
 
     public void updateSaltState(Long stackId) throws CloudbreakException {
-        Stack stack = stackService.getByIdWithLists(stackId);
+        Stack stack = stackService.getByIdWithListsWithoutAuthorization(stackId);
         Orchestrator orchestrator = stack.getOrchestrator();
         OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(orchestrator.getType());
         if (orchestratorType.containerOrchestrator()) {
@@ -120,7 +120,7 @@ public class ClusterServiceRunner {
     }
 
     public String changePrimaryGateway(Long stackId) throws CloudbreakException {
-        Stack stack = stackService.getByIdWithLists(stackId);
+        Stack stack = stackService.getByIdWithListsWithoutAuthorization(stackId);
         Orchestrator orchestrator = stack.getOrchestrator();
         if (orchestratorTypeResolver.resolveType(orchestrator.getType()).hostOrchestrator()) {
             return hostRunner.changePrimaryGateway(stack);

@@ -135,7 +135,7 @@ public class SharedServiceConfigProviderTest {
     public void testConfigureClusterWhenConnectedClusterRequestIsNullThenOriginalClusterInstanceShouldReturn() {
         Cluster cluster = new Cluster();
 
-        Cluster result = underTest.configureCluster(cluster, user, null);
+        Cluster result = underTest.configureCluster(cluster, null);
 
         Assert.assertEquals(cluster, result);
     }
@@ -157,12 +157,12 @@ public class SharedServiceConfigProviderTest {
         when(configsResponse.getInputs()).thenReturn(Collections.emptySet());
         when(newInputs.get(Map.class)).thenReturn(Collections.emptyMap());
 
-        Cluster result = underTest.configureCluster(requestedCluster, user, connectedClusterRequest);
+        Cluster result = underTest.configureCluster(requestedCluster, connectedClusterRequest);
 
         Assert.assertEquals(ldapConfig, result.getLdapConfig());
         Assert.assertTrue(result.getRdsConfigs().isEmpty());
         verify(stackService, times(1)).getById(TEST_LONG_VALUE);
-        verify(stackService, times(0)).getPublicStack(anyString(), any(IdentityUser.class));
+        verify(stackService, times(0)).getByNameInDefaultOrg(anyString());
     }
 
     @Test
@@ -172,7 +172,7 @@ public class SharedServiceConfigProviderTest {
         String clusterName = "some value representing a cluster name";
         when(connectedClusterRequest.getSourceClusterName()).thenReturn(clusterName);
         when(connectedClusterRequest.getSourceClusterId()).thenReturn(TEST_LONG_VALUE);
-        when(stackService.getPublicStack(clusterName, user)).thenReturn(publicStack);
+        when(stackService.getByNameInDefaultOrg(clusterName)).thenReturn(publicStack);
         when(publicStack.getId()).thenReturn(TEST_LONG_VALUE);
         when(publicStackCluster.getId()).thenReturn(TEST_LONG_VALUE);
         when(publicStack.getCluster()).thenReturn(publicStackCluster);
@@ -183,12 +183,12 @@ public class SharedServiceConfigProviderTest {
         when(configsResponse.getInputs()).thenReturn(Collections.emptySet());
         when(newInputs.get(Map.class)).thenReturn(Collections.emptyMap());
 
-        Cluster result = underTest.configureCluster(requestedCluster, user, connectedClusterRequest);
+        Cluster result = underTest.configureCluster(requestedCluster, connectedClusterRequest);
 
         Assert.assertEquals(ldapConfig, result.getLdapConfig());
         Assert.assertTrue(result.getRdsConfigs().isEmpty());
         verify(stackService, times(0)).getById(TEST_LONG_VALUE);
-        verify(stackService, times(1)).getPublicStack(clusterName, user);
+        verify(stackService, times(1)).getByNameInDefaultOrg(clusterName);
     }
 
     @Test
@@ -211,7 +211,7 @@ public class SharedServiceConfigProviderTest {
         when(configsResponse.getInputs()).thenReturn(Collections.emptySet());
         when(newInputs.get(Map.class)).thenReturn(Collections.emptyMap());
 
-        Cluster result = underTest.configureCluster(requestedCluster, user, connectedClusterRequest);
+        Cluster result = underTest.configureCluster(requestedCluster, connectedClusterRequest);
 
         Assert.assertEquals(2L, result.getRdsConfigs().size());
         result.getRdsConfigs().forEach(rdsConfig -> Assert.assertNotEquals(DEFAULT, rdsConfig.getStatus()));
@@ -234,7 +234,7 @@ public class SharedServiceConfigProviderTest {
         when(configsResponse.getInputs()).thenReturn(Collections.emptySet());
         when(newInputs.get(Map.class)).thenReturn(Collections.emptyMap());
 
-        underTest.configureCluster(requestedCluster, user, connectedClusterRequest);
+        underTest.configureCluster(requestedCluster, connectedClusterRequest);
 
         verify(clusterService, times(1)).getById(TEST_LONG_VALUE);
         verify(stackService, times(1)).getById(TEST_LONG_VALUE);    }
@@ -258,7 +258,7 @@ public class SharedServiceConfigProviderTest {
         when(configsResponse.getInputs()).thenReturn(Collections.emptySet());
         when(newInputs.get(Map.class)).thenReturn(Collections.emptyMap());
 
-        underTest.configureCluster(requestedCluster, user, connectedClusterRequest);
+        underTest.configureCluster(requestedCluster, connectedClusterRequest);
 
         verify(clusterService, times(1)).getById(TEST_LONG_VALUE);
         verify(stackService, times(1)).getById(TEST_LONG_VALUE);
@@ -283,7 +283,7 @@ public class SharedServiceConfigProviderTest {
         when(configsResponse.getInputs()).thenReturn(Collections.emptySet());
         when(newInputs.get(Map.class)).thenReturn(Collections.emptyMap());
 
-        underTest.configureCluster(requestedCluster, user, connectedClusterRequest);
+        underTest.configureCluster(requestedCluster, connectedClusterRequest);
 
         verify(clusterService, times(1)).getById(TEST_LONG_VALUE);
         verify(stackService, times(1)).getById(TEST_LONG_VALUE);    }
@@ -310,7 +310,7 @@ public class SharedServiceConfigProviderTest {
         when(configsResponse.getInputs()).thenReturn(Collections.emptySet());
         when(newInputs.get(Map.class)).thenReturn(Collections.emptyMap());
 
-        underTest.configureCluster(requestedCluster, user, connectedClusterRequest);
+        underTest.configureCluster(requestedCluster, connectedClusterRequest);
 
         verify(clusterService, times(0)).retrieveOutputs(TEST_LONG_VALUE, new HashSet<>());
     }

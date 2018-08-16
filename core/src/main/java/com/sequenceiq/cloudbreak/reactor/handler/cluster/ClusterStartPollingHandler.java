@@ -36,7 +36,7 @@ public class ClusterStartPollingHandler implements ReactorEventHandler<ClusterSt
         ClusterStartPollingRequest request = event.getData();
         ClusterStartPollingResult result;
         try {
-            Stack stack = stackService.getByIdWithLists(request.getStackId());
+            Stack stack = stackService.getByIdWithListsWithoutAuthorization(request.getStackId());
             ambariClusterConnector.waitForServices(stack, request.getRequestId());
             result = new ClusterStartPollingResult(request);
         } catch (Exception e) {

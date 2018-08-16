@@ -127,7 +127,7 @@ public class ClusterBootstrapper {
     private ComponentConfigProvider componentConfigProvider;
 
     public void bootstrapMachines(Long stackId) throws CloudbreakException {
-        Stack stack = stackService.getByIdWithLists(stackId);
+        Stack stack = stackService.getByIdWithListsWithoutAuthorization(stackId);
         String stackOrchestratorType = stack.getOrchestrator().getType();
         OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(stackOrchestratorType);
 
@@ -203,7 +203,7 @@ public class ClusterBootstrapper {
     }
 
     public void bootstrapNewNodes(Long stackId, Set<String> upscaleCandidateAddresses, Collection<String> recoveryHostNames) throws CloudbreakException {
-        Stack stack = stackService.getByIdWithLists(stackId);
+        Stack stack = stackService.getByIdWithListsWithoutAuthorization(stackId);
         Set<Node> nodes = new HashSet<>();
         Set<Node> allNodes = new HashSet<>();
         boolean recoveredNodes = Integer.valueOf(recoveryHostNames.size()).equals(upscaleCandidateAddresses.size());

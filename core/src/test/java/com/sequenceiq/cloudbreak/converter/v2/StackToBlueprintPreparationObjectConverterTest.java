@@ -349,7 +349,7 @@ public class StackToBlueprintPreparationObjectConverterTest {
         Stack dataLakeStack = new Stack();
         SharedServiceConfigsView expected = new SharedServiceConfigsView();
         when(source.getDatalakeId()).thenReturn(testDataLakeId);
-        when(stackService.getById(testDataLakeId)).thenReturn(dataLakeStack);
+        when(stackService.getByIdWithoutAuth(testDataLakeId)).thenReturn(dataLakeStack);
         when(sharedServiceConfigProvider.createSharedServiceConfigs(source, dataLakeStack)).thenReturn(expected);
 
         BlueprintPreparationObject result = underTest.convert(source);

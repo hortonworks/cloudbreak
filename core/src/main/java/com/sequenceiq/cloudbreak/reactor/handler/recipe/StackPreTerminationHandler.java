@@ -43,7 +43,7 @@ public class StackPreTerminationHandler implements ReactorEventHandler<StackPreT
     @Override
     public void accept(Event<StackPreTerminationRequest> requestEvent) {
         StackPreTerminationRequest request = requestEvent.getData();
-        Stack stack = stackService.getByIdWithLists(request.getStackId());
+        Stack stack = stackService.getByIdWithListsWithoutAuthorization(request.getStackId());
         try {
             Cluster cluster = stack.getCluster();
             if (cluster != null) {

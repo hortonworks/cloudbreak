@@ -126,7 +126,7 @@ public class UsageService {
     }
 
     private CloudbreakUsage closeUsageIfStackKilled(CloudbreakUsage usage) {
-        Stack s = stackService.getById(usage.getStackId());
+        Stack s = stackService.getByIdWithoutAuth(usage.getStackId());
         if (s == null || s.getStatus() == Status.DELETE_COMPLETED) {
             return closeUsage(usage);
         }
@@ -139,7 +139,7 @@ public class UsageService {
         List<Stack> stacks = stackService.getAllAliveAndProvisioned();
         for (Stack stack : stacks) {
             if (!stackIdsForOpenUsages.contains(stack.getId())) {
-                Stack fullStack = stackService.getByIdWithLists(stack.getId());
+                Stack fullStack = stackService.getByIdWithListsWithoutAuthorization(stack.getId());
                 openUsagesForStack(fullStack);
                 if (fullStack.getStatus() == Status.STOPPED) {
                     stopUsagesForStack(fullStack);

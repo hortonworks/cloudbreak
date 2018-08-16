@@ -8,20 +8,23 @@ import static com.sequenceiq.cloudbreak.api.model.Status.STOP_REQUESTED;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 
 import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.OrganizationAwareResource;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 @Entity
-@Table(name = "Stack", uniqueConstraints = @UniqueConstraint(columnNames = {"account", "name"}))
+@Table(name = "Stack")
 // It's only here, because of findbugs does not know the fields will be set by JPA with Reflection
 @SuppressFBWarnings("UWF_UNWRITTEN_FIELD")
-public class StackView implements ProvisionEntity {
+public class StackView implements ProvisionEntity, OrganizationAwareResource {
 
     @Id
     private Long id;
@@ -49,6 +52,9 @@ public class StackView implements ProvisionEntity {
 
     private Long created;
 
+    @ManyToOne
+    private Organization organization;
+
     public StackView() {
     }
 
@@ -64,8 +70,23 @@ public class StackView implements ProvisionEntity {
         return id;
     }
 
+    @Override
+    public Organization getOrganization() {
+        return organization;
+    }
+
     public String getName() {
         return name;
+    }
+
+    @Override
+    public void setOrganization(Organization organization) {
+        this.organization = organization;
+    }
+
+    @Override
+    public OrganizationResource getResource() {
+        return OrganizationResource.STACK;
     }
 
     public String getOwner() {

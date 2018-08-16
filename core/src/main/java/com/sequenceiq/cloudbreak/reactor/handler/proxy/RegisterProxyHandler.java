@@ -39,7 +39,7 @@ public class RegisterProxyHandler implements ReactorEventHandler<RegisterProxyRe
         Long stackId = event.getData().getStackId();
         Selectable response;
         try {
-            Stack stack = stackService.getByIdWithLists(stackId);
+            Stack stack = stackService.getByIdWithListsWithoutAuthorization(stackId);
             proxyRegistrator.registerIfNeed(stack);
             response = new RegisterProxySuccess(stackId);
         } catch (RuntimeException e) {

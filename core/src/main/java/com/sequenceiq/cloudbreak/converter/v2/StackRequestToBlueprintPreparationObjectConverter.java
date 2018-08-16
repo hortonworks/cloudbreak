@@ -137,7 +137,7 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
 
             SharedServiceRequest sharedService = source.getCluster().getSharedService();
             if (sharedService != null && !Strings.isNullOrEmpty(sharedService.getSharedCluster())) {
-                Stack dataLakeStack = stackService.getPublicStack(sharedService.getSharedCluster(), identityUser);
+                Stack dataLakeStack = stackService.getByNameInDefaultOrg(sharedService.getSharedCluster());
                 SharedServiceConfigsView sharedServiceConfigsView = sharedServiceConfigsViewProvider
                         .createSharedServiceConfigs(blueprint, source.getCluster().getAmbari().getPassword(), dataLakeStack);
                 ConfigsResponse configsResponse = sharedServiceConfigProvider.retrieveOutputs(dataLakeStack, blueprint, source.getGeneral().getName());

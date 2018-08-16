@@ -55,7 +55,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
 
     @Override
     public Queue<Selectable> createFlowTriggerEventQueue(ClusterRepairTriggerEvent event) {
-        StackView stackView = stackService.getByIdView(event.getStackId());
+        StackView stackView = stackService.getViewByIdWithoutAuth(event.getStackId());
         Queue<Selectable> flowChainTriggers = new ConcurrentLinkedDeque<>();
         Map<String, List<String>> failedNodesMap = event.getFailedNodesMap();
         for (Entry<String, List<String>> failedNodes : failedNodesMap.entrySet()) {
@@ -72,7 +72,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
                             event.getStackId(), event.accepted()));
                 }
             }
-            Stack stack = stackService.getByIdWithLists(event.getStackId());
+            Stack stack = stackService.getByIdWithListsWithoutAuthorization(event.getStackId());
             Set<Long> privateIdsForHostNames = stackService.getPrivateIdsForHostNames(stack.getInstanceMetaDataAsList(), hostNames);
             flowChainTriggers.add(new ClusterAndStackDownscaleTriggerEvent(FlowChainTriggers.FULL_DOWNSCALE_TRIGGER_EVENT, event.getStackId(),
                     hostGroupName, Sets.newHashSet(privateIdsForHostNames), ScalingType.DOWNSCALE_TOGETHER, event.accepted(), new ClusterDownscaleDetails()));

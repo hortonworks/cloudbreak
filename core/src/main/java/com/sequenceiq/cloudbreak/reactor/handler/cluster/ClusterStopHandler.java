@@ -36,7 +36,7 @@ public class ClusterStopHandler implements ReactorEventHandler<ClusterStopReques
         ClusterStopRequest request = event.getData();
         ClusterStopResult result;
         try {
-            Stack stack = stackService.getByIdWithLists(request.getStackId());
+            Stack stack = stackService.getByIdWithListsWithoutAuthorization(request.getStackId());
             ambariClusterConnector.stopCluster(stack);
             result = new ClusterStopResult(request);
         } catch (Exception e) {

@@ -57,7 +57,7 @@ public class CollectDownscaleCandidatesHandlerTest {
     public void testFlowWithPrivateIds() throws CloudbreakException {
         //given
         Stack stack = generateStackData();
-        when(stackService.getByIdWithLists(STACK_ID)).thenReturn(stack);
+        when(stackService.getByIdWithListsWithoutAuthorization(STACK_ID)).thenReturn(stack);
         Event<CollectDownscaleCandidatesRequest> event = generateTestDataEvent(Collections.singleton(PRIVATE_ID));
         //when
         testedClass.accept(event);
@@ -76,7 +76,7 @@ public class CollectDownscaleCandidatesHandlerTest {
         //given
         Stack stack = generateStackData();
         Event<CollectDownscaleCandidatesRequest> event = generateTestDataEvent(Collections.singleton(PRIVATE_ID));
-        when(stackService.getByIdWithLists(STACK_ID)).thenReturn(stack);
+        when(stackService.getByIdWithListsWithoutAuthorization(STACK_ID)).thenReturn(stack);
         //when
         testedClass.accept(event);
         //then
@@ -94,7 +94,7 @@ public class CollectDownscaleCandidatesHandlerTest {
         //given
         Stack stack = generateStackData();
         Event<CollectDownscaleCandidatesRequest> event = generateTestDataEvent(Collections.singleton(PRIVATE_ID), new ClusterDownscaleDetails(true));
-        when(stackService.getByIdWithLists(STACK_ID)).thenReturn(stack);
+        when(stackService.getByIdWithListsWithoutAuthorization(STACK_ID)).thenReturn(stack);
         //when
         testedClass.accept(event);
         //then

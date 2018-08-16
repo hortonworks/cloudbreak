@@ -109,7 +109,7 @@ public class ClusterContainerRunnerTest {
 
         when(containerService.findContainersInCluster(anyLong())).thenReturn(containers);
         when(hostGroupRepository.findHostGroupInClusterByName(anyLong(), anyString())).thenReturn(TestUtil.hostGroup());
-        when(stackService.getByIdWithLists(anyLong())).thenReturn(stack);
+        when(stackService.getByIdWithListsWithoutAuthorization(anyLong())).thenReturn(stack);
         underTest.addClusterContainers(stack.getId(), hostGroupAdjustment.getHostGroup(), hostGroupAdjustment.getScalingAdjustment());
     }
 
@@ -122,7 +122,7 @@ public class ClusterContainerRunnerTest {
         HostGroupAdjustmentJson hostGroupAdjustment = new HostGroupAdjustmentJson();
         hostGroupAdjustment.setHostGroup("agent");
         when(containerOrchestratorResolver.get(anyString())).thenReturn(new CancelledMockContainerOrchestrator());
-        when(stackService.getByIdWithLists(anyLong())).thenReturn(stack);
+        when(stackService.getByIdWithListsWithoutAuthorization(anyLong())).thenReturn(stack);
         when(clusterService.retrieveClusterByStackId(anyLong())).thenReturn(cluster);
         when(hostGroupRepository.findHostGroupInClusterByName(anyLong(), anyString())).thenReturn(TestUtil.hostGroup());
 

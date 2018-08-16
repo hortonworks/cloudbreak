@@ -260,7 +260,7 @@ public class StackCreationActions {
             protected StackFailureContext createFlowContext(
                 String flowId, StateContext<StackCreationState, StackCreationEvent> stateContext, StackFailureEvent payload) {
                 Flow flow = getFlow(flowId);
-                StackView stackView = stackService.getByIdView(payload.getStackId());
+                StackView stackView = stackService.getViewByIdWithoutAuth(payload.getStackId());
                 MDCBuilder.buildMdcContext(stackView);
                 flow.setFlowFailed(payload.getException());
                 return new StackFailureContext(flowId, stackView);

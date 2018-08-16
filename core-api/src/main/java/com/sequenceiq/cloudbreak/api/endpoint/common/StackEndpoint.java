@@ -19,23 +19,16 @@ import com.sequenceiq.cloudbreak.api.model.stack.StackValidationRequest;
 
 public interface StackEndpoint {
 
-    Set<StackResponse> getPrivates();
+    Set<StackResponse> getStacksInDefaultOrg();
 
-    Set<StackResponse> getPublics();
-
-    StackResponse getPrivate(@PathParam("name") String name, @QueryParam("entry") Set<String> entries);
-
-    StackResponse getPublic(@PathParam("name") String name, @QueryParam("entry") Set<String> entries);
+    StackResponse getStackFromDefaultOrg(@PathParam("name") String name, @QueryParam("entry") Set<String> entries);
 
     StackResponse get(@PathParam("id") Long id, @QueryParam("entry") Set<String> entries);
 
-    void deletePublic(@PathParam("name") String name, @QueryParam("forced") @DefaultValue("false") Boolean forced,
+    void deleteInDefaultOrg(@PathParam("name") String name, @QueryParam("forced") @DefaultValue("false") Boolean forced,
             @QueryParam("deleteDependencies") @DefaultValue("false") Boolean deleteDependencies);
 
-    void deletePrivate(@PathParam("name") String name, @QueryParam("forced") @DefaultValue("false") Boolean forced,
-            @QueryParam("deleteDependencies") @DefaultValue("false") Boolean deleteDependencies);
-
-    void delete(@PathParam("id") Long id, @QueryParam("forced") @DefaultValue("false") Boolean forced,
+    void deleteById(@PathParam("id") Long id, @QueryParam("forced") @DefaultValue("false") Boolean forced,
             @QueryParam("deleteDependencies") @DefaultValue("false") Boolean deleteDependencies);
 
     Map<String, Object> status(@PathParam("id") Long id);

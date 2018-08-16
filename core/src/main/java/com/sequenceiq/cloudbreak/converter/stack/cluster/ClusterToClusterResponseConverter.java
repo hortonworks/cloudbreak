@@ -193,7 +193,7 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
         SharedServiceResponse sharedServiceResponse = new SharedServiceResponse();
         if (cluster.getStack().getDatalakeId() != null) {
             sharedServiceResponse.setSharedClusterId(cluster.getStack().getDatalakeId());
-            sharedServiceResponse.setSharedClusterName(stackService.getById(cluster.getStack().getDatalakeId()).getName());
+            sharedServiceResponse.setSharedClusterName(stackService.getByIdWithoutAuth(cluster.getStack().getDatalakeId()).getName());
         } else {
             for (Stack stack : stackService.findClustersConnectedToDatalake(cluster.getStack().getId())) {
                 AttachedClusterInfoResponse attachedClusterInfoResponse = new AttachedClusterInfoResponse();

@@ -4,16 +4,13 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
@@ -24,29 +21,22 @@ import com.sequenceiq.cloudbreak.api.model.CertificateResponse;
 import com.sequenceiq.cloudbreak.api.model.GeneratedBlueprintResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformVariantsJson;
 import com.sequenceiq.cloudbreak.api.model.ReinstallRequestV2;
-import com.sequenceiq.cloudbreak.api.model.StatusRequest;
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
-import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
-import com.sequenceiq.cloudbreak.api.model.users.UserNamePasswordJson;
 import com.sequenceiq.cloudbreak.api.model.stack.StackImageChangeRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.StackScaleRequestV2;
 import com.sequenceiq.cloudbreak.api.model.stack.StackValidationRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRepairRequest;
+import com.sequenceiq.cloudbreak.api.model.users.UserNamePasswordJson;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
-import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintUpdater;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.domain.ImageCatalog;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
-import com.sequenceiq.cloudbreak.service.OperationRetryService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -57,58 +47,49 @@ public class StackV2Controller extends NotificationController implements StackV2
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackV2Controller.class);
 
-    @Autowired
+    @Inject
     private StackCommonService stackCommonService;
 
-    @Autowired
+    @Inject
     private ClusterCommonService clusterCommonController;
 
-    @Autowired
+    @Inject
     private AuthenticatedUserService authenticatedUserService;
 
-    @Autowired
+    @Inject
     private StackService stackService;
 
-    @Autowired
-    @Qualifier("conversionService")
+    @Inject
+    @Named("conversionService")
     private ConversionService conversionService;
 
-    @Autowired
+    @Inject
     private CloudParameterCache cloudParameterCache;
 
-    @Autowired
-    private CentralBlueprintUpdater centralBlueprintUpdater;
-
-    @Autowired
-    private OperationRetryService operationRetryService;
-
-    @Autowired
-    private ClusterService clusterService;
-
     @Inject
-    private ImageCatalogService imageCatalogService;
+    private ClusterService clusterService;
 
     @Inject
     private OrganizationService organizationService;
 
     @Override
-    public Set<StackResponse> getPrivates() {
-        return stackCommonService.getPrivates();
+    public Set<StackResponse> getStacksInDefaultOrg() {
+        return stackCommonService.getStacksInDefaultOrg();
     }
 
     @Override
     public Set<StackResponse> getPublics() {
-        return stackCommonService.getPublics();
+        return stackCommonService.getStacksInDefaultOrg();
     }
 
     @Override
-    public StackResponse getPrivate(String name, Set<String> entries) {
-        return stackCommonService.getPrivate(name, entries);
+    public StackResponse getStackFromDefaultOrg(String name, Set<String> entries) {
+        return stackCommonService.getStackFromDefaultOrg(name, entries);
     }
 
     @Override
     public StackResponse getPublic(String name, Set<String> entries) {
-        return stackCommonService.getPublic(name, entries);
+        return stackCommonService.getStackFromDefaultOrg(name, entries);
     }
 
     @Override
@@ -117,86 +98,56 @@ public class StackV2Controller extends NotificationController implements StackV2
     }
 
     @Override
-    public void deletePublic(String name, Boolean forced, Boolean deleteDependencies) {
-        stackCommonService.deletePublic(name, forced, deleteDependencies);
+    public void deleteInDefaultOrg(String name, Boolean forced, Boolean deleteDependencies) {
+        stackCommonService.deleteInDefaultOrg(name, forced, deleteDependencies);
     }
 
     @Override
     public void deletePrivate(String name, Boolean forced, Boolean deleteDependencies) {
-        stackCommonService.deletePrivate(name, forced, deleteDependencies);
+        stackCommonService.deleteInDefaultOrg(name, forced, deleteDependencies);
     }
 
     @Override
-    public void delete(Long id, Boolean forced, Boolean deleteDependencies) {
-        stackCommonService.delete(id, forced, deleteDependencies);
+    public void deleteById(Long id, Boolean forced, Boolean deleteDependencies) {
+        stackCommonService.deleteById(id, forced, deleteDependencies);
     }
 
     @Override
     public Response putScaling(String name, StackScaleRequestV2 updateRequest) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        Stack stack = stackService.getPublicStack(name, user);
-        if (!cloudParameterCache.isScalingSupported(stack.cloudPlatform())) {
-            throw new BadRequestException(String.format("Scaling is not supported on %s cloudplatform", stack.cloudPlatform()));
-        }
-        updateRequest.setStackId(stack.getId());
-        UpdateStackJson updateStackJson = conversionService.convert(updateRequest, UpdateStackJson.class);
-        if (updateStackJson.getInstanceGroupAdjustment().getScalingAdjustment() > 0) {
-            return stackCommonService.put(stack.getId(), updateStackJson);
-        } else {
-            UpdateClusterJson updateClusterJson = conversionService.convert(updateRequest, UpdateClusterJson.class);
-            return clusterCommonController.put(stack.getId(), updateClusterJson);
-        }
+        Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
+        return stackCommonService.putScalingInOrganization(name, organization.getId(), updateRequest);
     }
 
     @Override
     public Response putStart(String name) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        Stack stack = stackService.getPublicStack(name, user);
-        if (!cloudParameterCache.isStartStopSupported(stack.cloudPlatform())) {
-            throw new BadRequestException(String.format("Start is not supported on %s cloudplatform", stack.cloudPlatform()));
-        }
-        UpdateStackJson updateStackJson = new UpdateStackJson();
-        updateStackJson.setStatus(StatusRequest.STARTED);
-        updateStackJson.setWithClusterEvent(true);
-        return stackCommonService.put(stack.getId(), updateStackJson);
+        Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
+        return stackCommonService.putStartInOrganization(name, organization.getId());
     }
 
     @Override
     public Response putStop(String name) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        Stack stack = stackService.getPublicStack(name, user);
-        if (!cloudParameterCache.isStartStopSupported(stack.cloudPlatform())) {
-            throw new BadRequestException(String.format("Stop is not supported on %s cloudplatform", stack.cloudPlatform()));
-        }
-        UpdateStackJson updateStackJson = new UpdateStackJson();
-        updateStackJson.setStatus(StatusRequest.STOPPED);
-        updateStackJson.setWithClusterEvent(true);
-        return stackCommonService.put(stack.getId(), updateStackJson);
+        Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
+        return stackCommonService.putStopInOrganization(name, organization.getId());
     }
 
     @Override
     public Response putSync(String name) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        Stack stack = stackService.getPublicStack(name, user);
-        UpdateStackJson updateStackJson = new UpdateStackJson();
-        updateStackJson.setStatus(StatusRequest.FULL_SYNC);
-        updateStackJson.setWithClusterEvent(true);
-        return stackCommonService.put(stack.getId(), updateStackJson);
+        Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
+        return stackCommonService.putSyncInOrganization(name, organization.getId());
     }
 
     @Override
     public Response putReinstall(String name, ReinstallRequestV2 reinstallRequestV2) {
         IdentityUser user = authenticatedUserService.getCbUser();
         reinstallRequestV2.setAccount(user.getAccount());
-        Stack stack = stackService.getPublicStack(name, user);
+        Stack stack = stackService.getByNameInDefaultOrg(name);
         UpdateClusterJson updateClusterJson = conversionService.convert(reinstallRequestV2, UpdateClusterJson.class);
         return clusterCommonController.put(stack.getId(), updateClusterJson);
     }
 
     @Override
     public Response putPassword(String name, UserNamePasswordJson userNamePasswordJson) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        Stack stack = stackService.getPublicStack(name, user);
+        Stack stack = stackService.getByNameInDefaultOrg(name);
         UpdateClusterJson updateClusterJson = conversionService.convert(userNamePasswordJson, UpdateClusterJson.class);
         return clusterCommonController.put(stack.getId(), updateClusterJson);
     }
@@ -248,57 +199,40 @@ public class StackV2Controller extends NotificationController implements StackV2
 
     @Override
     public StackV2Request getRequestfromName(String name) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        return stackService.getStackRequestByName(name, user);
+        return stackService.getStackRequestByNameInDefaultOrg(name);
     }
 
     @Override
     public StackResponse postPrivate(StackV2Request stackRequest) {
-        return stackCommonService.postPrivate(conversionService.convert(stackRequest, StackRequest.class));
+        return stackCommonService.createInDefaultOrganization(conversionService.convert(stackRequest, StackRequest.class));
     }
 
     @Override
     public StackResponse postPublic(StackV2Request stackRequest) {
-        return stackCommonService.postPublic(conversionService.convert(stackRequest, StackRequest.class));
+        return stackCommonService.createInDefaultOrganization(conversionService.convert(stackRequest, StackRequest.class));
     }
 
     @Override
     public GeneratedBlueprintResponse postStackForBlueprint(StackV2Request stackRequest) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        stackRequest.setAccount(user.getAccount());
-        stackRequest.setOwner(user.getUserId());
-        BlueprintPreparationObject blueprintPreparationObject = conversionService.convert(stackRequest, BlueprintPreparationObject.class);
-        String blueprintText = centralBlueprintUpdater.getBlueprintText(blueprintPreparationObject);
-        return new GeneratedBlueprintResponse(blueprintText);
+        return stackCommonService.postStackForBlueprint(stackRequest);
     }
 
     @Override
     public void retry(String stackName) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        Stack stack = stackService.getPublicStack(stackName, user);
-        operationRetryService.retry(stack);
+        Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
+        stackCommonService.retryInOrganization(stackName, organization.getId());
     }
 
     @Override
     public Response repairCluster(String name, ClusterRepairRequest clusterRepairRequest) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        Stack stack = stackService.getPublicStack(name, user);
+        Stack stack = stackService.getByNameInDefaultOrg(name);
         clusterService.repairCluster(stack.getId(), clusterRepairRequest.getHostGroups(), clusterRepairRequest.isRemoveOnly());
         return Response.accepted().build();
     }
 
     @Override
     public Response changeImage(String stackName, StackImageChangeRequest stackImageChangeRequest) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        Stack stack = stackService.getPublicStack(stackName, user);
-        if (StringUtils.isNotBlank(stackImageChangeRequest.getImageCatalogName())) {
-            Long organizationId = organizationService.getDefaultOrganizationForCurrentUser().getId();
-            ImageCatalog imageCatalog = imageCatalogService.get(organizationId, stackImageChangeRequest.getImageCatalogName());
-            stackService.updateImage(stack.getId(), stackImageChangeRequest.getImageId(), imageCatalog.getName(), imageCatalog.getImageCatalogUrl());
-        } else {
-            stackService.updateImage(stack.getId(), stackImageChangeRequest.getImageId(), null, null);
-        }
-
-        return Response.status(Status.NO_CONTENT).build();
-        }
+        Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
+        return stackCommonService.changeImageByNameInOrg(stackName, organization.getId(), stackImageChangeRequest);
+    }
 }

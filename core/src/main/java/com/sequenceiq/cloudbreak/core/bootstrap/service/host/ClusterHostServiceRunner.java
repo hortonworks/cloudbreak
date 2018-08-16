@@ -159,7 +159,7 @@ public class ClusterHostServiceRunner {
     public Map<String, String> addAmbariServices(Long stackId, String hostGroupName, Integer scalingAdjustment) throws CloudbreakException {
         Map<String, String> candidates;
         try {
-            Stack stack = stackService.getByIdWithLists(stackId);
+            Stack stack = stackService.getByIdWithListsWithoutAuthorization(stackId);
             Cluster cluster = stack.getCluster();
             candidates = collectUpscaleCandidates(cluster.getId(), hostGroupName, scalingAdjustment);
             Set<Node> allNodes = stackUtil.collectNodes(stack);
@@ -288,7 +288,7 @@ public class ClusterHostServiceRunner {
     private void saveDatalakeNameservers(Stack stack, Map<String, SaltPillarProperties> servicePillar) {
         Long datalakeId = stack.getDatalakeId();
         if (datalakeId != null) {
-            Stack dataLakeStack = stackService.getByIdWithLists(datalakeId);
+            Stack dataLakeStack = stackService.getByIdWithListsWithoutAuthorization(datalakeId);
             String datalakeDomain = dataLakeStack.getGatewayInstanceMetadata().get(0).getDomain();
             List<String> ipList = dataLakeStack.getGatewayInstanceMetadata().stream().map(InstanceMetaData::getPrivateIp).collect(Collectors.toList());
             servicePillar.put("forwarder-zones", new SaltPillarProperties("/unbound/forwarders.sls",
@@ -321,7 +321,7 @@ public class ClusterHostServiceRunner {
     }
 
     private StackView getStackView(Long datalakeId) {
-        return stackViewRepository.findById(datalakeId).orElseThrow(notFound("Stack view", datalakeId));
+        return stackViewRepository.findByIdWithoutAuthorization(datalakeId).orElseThrow(notFound("Stack view", datalakeId));
     }
 
     private void saveGatewayPillar(GatewayConfig gatewayConfig, Cluster cluster, Map<String, SaltPillarProperties> servicePillar) throws IOException {

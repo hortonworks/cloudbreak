@@ -17,10 +17,10 @@ import com.sequenceiq.cloudbreak.api.model.AmbariAddressJson;
 import com.sequenceiq.cloudbreak.api.model.AutoscaleStackResponse;
 import com.sequenceiq.cloudbreak.api.model.CertificateResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformVariantsJson;
+import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
 import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.StackValidationRequest;
-import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
 
 @Component
@@ -37,32 +37,32 @@ public class StackV1Controller extends NotificationController implements StackV1
 
     @Override
     public StackResponse postPrivate(StackRequest stackRequest) {
-        return stackCommonService.postPrivate(stackRequest);
+        return stackCommonService.createInDefaultOrganization(stackRequest);
     }
 
     @Override
     public StackResponse postPublic(StackRequest stackRequest) {
-        return stackCommonService.postPublic(stackRequest);
+        return stackCommonService.createInDefaultOrganization(stackRequest);
     }
 
     @Override
-    public Set<StackResponse> getPrivates() {
-        return stackCommonService.getPrivates();
+    public Set<StackResponse> getStacksInDefaultOrg() {
+        return stackCommonService.getStacksInDefaultOrg();
     }
 
     @Override
     public Set<StackResponse> getPublics() {
-        return stackCommonService.getPublics();
+        return stackCommonService.getStacksInDefaultOrg();
     }
 
     @Override
-    public StackResponse getPrivate(String name, Set<String> entries) {
-        return stackCommonService.getPrivate(name, entries);
+    public StackResponse getStackFromDefaultOrg(String name, Set<String> entries) {
+        return stackCommonService.getStackFromDefaultOrg(name, entries);
     }
 
     @Override
     public StackResponse getPublic(String name, Set<String> entries) {
-        return stackCommonService.getPublic(name, entries);
+        return stackCommonService.getStackFromDefaultOrg(name, entries);
     }
 
     @Override
@@ -71,23 +71,23 @@ public class StackV1Controller extends NotificationController implements StackV1
     }
 
     @Override
-    public void deletePublic(String name, Boolean forced, Boolean deleteDependencies) {
-        stackCommonService.deletePublic(name, forced, deleteDependencies);
+    public void deleteInDefaultOrg(String name, Boolean forced, Boolean deleteDependencies) {
+        stackCommonService.deleteInDefaultOrg(name, forced, deleteDependencies);
     }
 
     @Override
     public void deletePrivate(String name, Boolean forced, Boolean deleteDependencies) {
-        stackCommonService.deletePrivate(name, forced, deleteDependencies);
+        stackCommonService.deleteInDefaultOrg(name, forced, deleteDependencies);
     }
 
     @Override
-    public void delete(Long id, Boolean forced, Boolean deleteDependencies) {
-        stackCommonService.delete(id, forced, deleteDependencies);
+    public void deleteById(Long id, Boolean forced, Boolean deleteDependencies) {
+        stackCommonService.deleteById(id, forced, deleteDependencies);
     }
 
     @Override
     public Response put(Long id, UpdateStackJson updateRequest) {
-        return stackCommonService.put(id, updateRequest);
+        return stackCommonService.putInDefaultOrg(id, updateRequest);
     }
 
     @Override

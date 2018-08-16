@@ -38,7 +38,7 @@ public class WaitingAmbariServerHandler implements ReactorEventHandler<WaitForAm
         Long stackId = event.getData().getStackId();
         Selectable response;
         try {
-            Stack stack = stackService.getById(stackId);
+            Stack stack = stackService.getByIdWithoutAuth(stackId);
             ambariClusterConnector.waitForServer(stack);
             response = new WaitForAmbariServerSuccess(stackId);
         } catch (Exception e) {

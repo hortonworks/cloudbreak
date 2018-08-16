@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
 import com.sequenceiq.cloudbreak.structuredevent.event.BlueprintDetails;
@@ -53,6 +54,9 @@ public class StructuredFlowEventFactory {
     @Inject
     private AuthenticatedUserService authenticatedUserService;
 
+    @Inject
+    private TransactionService transactionService;
+
     @Value("${info.app.version:}")
     private String cbVersion;
 
@@ -61,7 +65,7 @@ public class StructuredFlowEventFactory {
     }
 
     public StructuredFlowEvent createStucturedFlowEvent(Long stackId, FlowDetails flowDetails, Boolean detailed, Exception exception) {
-        Stack stack = stackService.getById(stackId);
+        Stack stack = stackService.getByIdWithoutAuth(stackId);
         UserProfile userProfile = userProfileService.getOrCreate(stack.getAccount(), stack.getOwner());
         OperationDetails operationDetails = new OperationDetails(FLOW, "stacks", stackId, stack.getName(), stack.getAccount(), stack.getOwner(),
                 userProfile.getUserName(), cloudbreakNodeConfig.getId(), cbVersion);
@@ -93,7 +97,7 @@ public class StructuredFlowEventFactory {
         String stackName = null;
 
         try {
-            Stack stack = stackService.getById(stackId);
+            Stack stack = stackService.getByIdWithoutAuth(stackId);
 
             UserProfile userProfile = userProfileService.getOrCreate(stack.getAccount(), stack.getOwner());
             account = stack.getAccount();

@@ -28,7 +28,7 @@ public class WaitForSyncRestartAction extends DefaultRestartAction {
     @Override
     public void restart(String flowId, String flowChainId, String event, Object payload) {
         Payload stackPayload = (Payload) payload;
-        Stack stack = stackService.getByIdWithLists(stackPayload.getStackId());
+        Stack stack = stackService.getByIdWithListsWithoutAuthorization(stackPayload.getStackId());
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.WAIT_FOR_SYNC, stack.getStatusReason());
         try {
             flowLogService.terminate(stackPayload.getStackId(), flowId);
