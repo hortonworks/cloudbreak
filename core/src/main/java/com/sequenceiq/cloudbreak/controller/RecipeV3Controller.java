@@ -62,4 +62,10 @@ public class RecipeV3Controller extends NotificationController implements Recipe
         notify(identityUser, ResourceEvent.RECIPE_DELETED);
         return conversionService.convert(deleted, RecipeResponse.class);
     }
+
+    @Override
+    public RecipeRequest getRequestFromName(Long organizationId, String name) {
+        Recipe recipe = recipeService.getByNameForOrganizationId(name, organizationId);
+        return conversionService.convert(recipe, RecipeRequest.class);
+    }
 }

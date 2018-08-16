@@ -15,6 +15,11 @@ public class NotFoundExceptionMapper extends BaseExceptionMapper<NotFoundExcepti
     }
 
     @Override
+    protected String getErrorMessage(NotFoundException exception) {
+        return "Access denied";
+    }
+
+    @Override
     Class<NotFoundException> getExceptionType() {
         return NotFoundException.class;
     }
