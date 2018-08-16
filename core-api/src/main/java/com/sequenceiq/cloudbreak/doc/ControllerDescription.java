@@ -45,6 +45,7 @@ public class ControllerDescription {
     public static final String STACK_V3_DESCRIPTION = "Operations on stack by organization";
     public static final String IMAGE_CATALOG_V3_DESCRIPTION = "Operations on Image Catalog by O";
     public static final String RDSCONFIGS_V3_DESCRIPTION = "Operations on RDS configs by organization";
+    public static final String AUDIT_V3_DESCRIPTION = "Operations on audit events by organization";
 
     private ControllerDescription() {
     }
