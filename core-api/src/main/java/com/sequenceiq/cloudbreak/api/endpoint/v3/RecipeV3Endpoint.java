@@ -55,4 +55,10 @@ public interface RecipeV3Endpoint {
             nickname = "deleteRecipeInOrganization")
     RecipeResponse deleteInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
 
+    @GET
+    @Path("{name}/request")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = RecipeOpDescription.GET_REQUEST_BY_NAME, produces = ContentType.JSON, notes = Notes.RECIPE_NOTES,
+            nickname = "getRecipeRequestFromName")
+    RecipeRequest getRequestFromName(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
 }
