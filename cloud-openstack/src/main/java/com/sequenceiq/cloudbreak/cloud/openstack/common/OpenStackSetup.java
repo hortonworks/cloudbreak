@@ -89,4 +89,9 @@ public class OpenStackSetup implements Setup {
     @Override
     public void validateFileSystem(CloudCredential credential, SpiFileSystem spiFileSystem) {
     }
+
+    @Override
+    public void scalingPrerequisites(AuthenticatedContext authenticatedContext, CloudStack stack, boolean upscale) {
+
+    }
 }
