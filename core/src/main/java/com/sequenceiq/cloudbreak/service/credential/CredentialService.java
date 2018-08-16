@@ -1,29 +1,36 @@
 package com.sequenceiq.cloudbreak.service.credential;
 
+import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.util.NameUtil.generateArchiveName;
-import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
 import java.util.Date;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
+import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
+import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
+import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.domain.Topology;
+import com.sequenceiq.cloudbreak.repository.OrganizationResourceRepository;
+import com.sequenceiq.cloudbreak.service.AbstractOrganizationAwareResourceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
-import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Credential;
@@ -31,7 +38,6 @@ import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.notification.Notification;
@@ -41,9 +47,17 @@ import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProvider
 import com.sequenceiq.cloudbreak.service.user.UserProfileHandler;
 
 @Service
-public class CredentialService {
+public class CredentialService extends AbstractOrganizationAwareResourceService<Credential> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialService.class);
+
+    private static final String NOT_FOUND_FORMAT_MESS_ID = "Credential with id:";
+
+    private static final String NOT_FOUND_FORMAT_MESS_NAME = "Credential with name:";
+
+    @Resource
+    @Qualifier("conversionService")
+    private ConversionService conversionService;
 
     @Inject
     private CredentialRepository credentialRepository;
@@ -53,9 +67,6 @@ public class CredentialService {
 
     @Inject
     private ServiceProviderCredentialAdapter credentialAdapter;
-
-    @Inject
-    private AuthorizationService authorizationService;
 
     @Inject
     private UserProfileHandler userProfileHandler;
@@ -72,135 +83,125 @@ public class CredentialService {
     @Inject
     private OrganizationService organizationService;
 
-    public Set<Credential> retrievePrivateCredentials(IdentityUser user) {
-        return credentialRepository.findForUser(user.getUserId());
+    public Set<Credential> listForUsersDefaultOrganization() {
+        return credentialRepository.findActiveForOrganizationFilterByPlatforms(getDefaultOrg().getId(), accountPreferencesService.enabledPlatforms());
     }
 
-    public Set<Credential> retrieveAccountCredentials(IdentityUser user) {
-        Set<String> platforms = accountPreferencesService.enabledPlatforms();
-        return user.getRoles().contains(IdentityUserRole.ADMIN)
-                ? credentialRepository.findAllInAccountAndFilterByPlatforms(user.getAccount(), platforms)
-                : credentialRepository.findPublicInAccountForUserFilterByPlatforms(user.getUserId(), user.getAccount(), platforms);
+    public Set<Credential> listAvailablesByOrganizationId(Long orgId) {
+        return credentialRepository.findActiveForOrganizationFilterByPlatforms(orgId, accountPreferencesService.enabledPlatforms());
     }
 
     public Credential get(Long id) {
-        return credentialRepository.findById(id)
-                .orElseThrow(accessDenied(String.format("Access is denied: Credential not found by id '%d'.", id)));
+        return Optional.ofNullable(credentialRepository.findActiveByIdAndOrganizationFilterByPlatforms(id, getDefaultOrg().getId(),
+                accountPreferencesService.enabledPlatforms())).orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_ID, id));
     }
 
-    public Supplier<AccessDeniedException> accessDenied(String accessDeniedMessage) {
-        return () -> new AccessDeniedException(accessDeniedMessage);
+    public Map<String, String> interactiveLogin(Credential credential) {
+        return interactiveLogin(getDefaultOrg().getId(), credential);
     }
 
-    public Credential get(Long id, String account) {
-        return Optional.ofNullable(credentialRepository.findByIdInAccount(id, account))
-                .orElseThrow(accessDenied(String.format("Access is denied: Credential not found by id '%d' in %s account.", id, account)));
-    }
-
-    public Credential get(String name, String account) {
-        return Optional.ofNullable(credentialRepository.findOneByName(name, account))
-                .orElseThrow(accessDenied(String.format("Access is denied: Credential not found by name '%s' in %s account.", name, account)));
-    }
-
-    public Map<String, String> interactiveLogin(IdentityUser user, Credential credential) {
-        LOGGER.debug("Interactive login: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
-        credential.setOwner(user.getUserId());
-        credential.setAccount(user.getAccount());
+    public Map<String, String> interactiveLogin(Long organizationId, Credential credential) {
+        credential.setOrganization(organizationService.get(organizationId));
         return credentialAdapter.interactiveLogin(credential);
     }
 
-    public Credential create(IdentityUser user, Credential credential) {
-        LOGGER.debug("Creating credential: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
-        credential.setOwner(user.getUserId());
-        credential.setAccount(user.getAccount());
-        return saveCredentialAndNotify(credential, ResourceEvent.CREDENTIAL_CREATED);
+    public Credential update(Credential credential) {
+        return updateByOrganizationId(getDefaultOrg().getId(), credential);
     }
 
-    public Credential modify(IdentityUser user, Credential credential) {
-        LOGGER.debug("Modifying credential: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
-        Credential credentialToModify = credential.isPublicInAccount() ? getPublicCredential(credential.getName(), user)
-                : getPrivateCredential(credential.getName(), user);
-        if (!credentialToModify.cloudPlatform().equals(credential.cloudPlatform())) {
+    public Credential updateByOrganizationId(Long organizationId, Credential credential) {
+        checkCredentialCloudPlatform(credential.cloudPlatform());
+        Credential original = Optional.ofNullable(
+                credentialRepository.findActiveByNameAndOrgIdFilterByPlatforms(credential.getName(), organizationId,
+                        accountPreferencesService.enabledPlatforms()))
+                .orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, credential.getName()));
+        if (original.cloudPlatform() != null && !Objects.equals(credential.cloudPlatform(), original.cloudPlatform())) {
             throw new BadRequestException("Modifying credential platform is forbidden");
         }
-        if (credential.getAttributes() != null) {
-            credentialToModify.setAttributes(credential.getAttributes());
-        }
-        if (credential.getDescription() != null) {
-            credentialToModify.setDescription(credential.getDescription());
-        }
-        if (credential.getTopology() != null) {
-            credentialToModify.setTopology(credential.getTopology());
-        }
-        return saveCredentialAndNotify(credentialToModify, ResourceEvent.CREDENTIAL_MODIFIED);
-    }
-
-    public Credential create(String userId, String account, Credential credential, IdentityUser identityUser) {
-        LOGGER.debug("Creating credential: [UserId: '{}', Account: '{}']", userId, account);
-        credential.setOwner(userId);
-        credential.setAccount(account);
-        Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
-        credential.setOrganization(organization);
-        return saveCredentialAndNotify(credential, ResourceEvent.CREDENTIAL_CREATED);
+        credential.setId(original.getId());
+        credential.setOrganization(organizationService.get(organizationId));
+        Credential updated = super.create(credentialAdapter.init(credential), organizationId);
+        sendCredentialNotification(credential, ResourceEvent.CREDENTIAL_MODIFIED);
+        return updated;
     }
 
     @Retryable(value = BadRequestException.class, maxAttempts = 30, backoff = @Backoff(delay = 2000))
-    public Credential createWithRetry(String userId, String account, Credential credential, IdentityUser identityUser) {
-        return create(userId, account, credential, identityUser);
+    public void createWithRetry(Credential credential) {
+        create(credential);
     }
 
-    private Credential saveCredentialAndNotify(Credential credential, ResourceEvent resourceEvent) {
-        credential = credentialAdapter.init(credential);
-        Credential savedCredential;
-        try {
-            savedCredential = credentialRepository.save(credential);
-            userProfileHandler.createProfilePreparation(credential);
-            sendCredentialNotification(credential, resourceEvent);
-        } catch (DataIntegrityViolationException ex) {
-            String msg = String.format("Error with resource [%s], %s", APIResourceType.CREDENTIAL, getProperSqlErrorMessage(ex));
-            throw new BadRequestException(msg);
+    public Credential create(Credential credential) {
+        credential.setOrganization(getDefaultOrg());
+        return create(credential, getDefaultOrg().getId());
+    }
+
+    @Override
+    public Credential create(Credential credential, Long orgId) {
+        LOGGER.debug("Creating credential for organization: {}", getOrganizationService().get(orgId).getName());
+        checkCredentialCloudPlatform(credential.cloudPlatform());
+        Credential created = super.create(credentialAdapter.init(credential), orgId);
+        sendCredentialNotification(credential, ResourceEvent.CREDENTIAL_CREATED);
+        return created;
+    }
+
+    public void delete(Long id) {
+        Credential credential = Optional.ofNullable(
+                credentialRepository.findActiveByIdAndOrganizationFilterByPlatforms(id, getDefaultOrg().getId(), accountPreferencesService.enabledPlatforms()))
+                .orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_ID, id));
+        delete(credential);
+    }
+
+    public void delete(String name) {
+        Credential credential = Optional.ofNullable(
+                credentialRepository.findActiveByNameAndOrgIdFilterByPlatforms(name, getDefaultOrg().getId(), accountPreferencesService.enabledPlatforms()))
+                .orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, name));
+        delete(credential);
+    }
+
+    @Override
+    public Credential delete(Credential credential) {
+        if (canDelete(credential)) {
+            LOGGER.info(String.format("Starting to delete credential [name: %s, organization: %s]", credential.getName(), getDefaultOrg().getName()));
+            userProfileHandler.destroyProfileCredentialPreparation(credential);
+            archiveCredential(credential);
+            sendCredentialNotification(credential, ResourceEvent.CREDENTIAL_DELETED);
         }
-        return savedCredential;
+        return credential;
     }
 
-    private void sendCredentialNotification(Credential credential, ResourceEvent resourceEvent) {
-        CloudbreakEventsJson notification = new CloudbreakEventsJson();
-        notification.setEventType(resourceEvent.name());
-        notification.setEventTimestamp(new Date().getTime());
-        notification.setEventMessage(messagesService.getMessage(resourceEvent.getMessage()));
-        notification.setOwner(credential.getOwner());
-        notification.setAccount(credential.getAccount());
-        notification.setCloud(credential.cloudPlatform());
-        notificationSender.send(new Notification<>(notification));
+    public Set<CredentialResponse> convertAllToResponse(@Nonnull Iterable<Credential> credentials) {
+        Set<CredentialResponse> jsonSet = new LinkedHashSet<>();
+        for (Credential credential : credentials) {
+            jsonSet.add(convertToResponse(credential));
+        }
+        return jsonSet;
     }
 
-    public Credential getPublicCredential(String name, IdentityUser user) {
-        return Optional.ofNullable(credentialRepository.findOneByName(name, user.getAccount()))
-                .orElseThrow(accessDenied(String.format("Access is denied: Credential not found by name '%s'", name)));
+    public CredentialResponse convertToResponse(Credential credential) {
+        return conversionService.convert(credential, CredentialResponse.class);
     }
 
-    public Credential getPrivateCredential(String name, IdentityUser user) {
-        return Optional.ofNullable(credentialRepository.findByNameInUser(name, user.getUserId()))
-                .orElseThrow(accessDenied(String.format("Access is denied: Credential not found by name '%s'.", name)));
+    public Credential convertToCredential(CredentialRequest request) {
+        return conversionService.convert(request, Credential.class);
     }
 
-    public void delete(Long id, IdentityUser user) {
-        Credential credential = Optional.ofNullable(credentialRepository.findByIdInAccount(id, user.getAccount()))
-                .orElseThrow(accessDenied(String.format("Access is denied: Credential not found by id: '%d'.", id)));
-        delete(credential);
+    public Set<Credential> findAllByCloudPlatform(String cloudPlatform) {
+        return credentialRepository.findAllByCloudPlatform(cloudPlatform);
     }
 
-    public void delete(String name, IdentityUser user) {
-        Credential credential = Optional.ofNullable(credentialRepository.findByNameInAccount(name, user.getAccount(), user.getUserId()))
-                .orElseThrow(accessDenied(String.format("Access is denied: Credential not found by name '%s'.", name)));
-        delete(credential);
+    public void saveAllCredential(Iterable<Credential> credentials) {
+        credentialRepository.saveAll(credentials);
     }
 
-    public Credential update(Long id) {
-        return credentialAdapter.update(get(id));
+    public Set<Credential> findAllCredentialByTopology(Topology topology) {
+        return credentialRepository.findByTopology(topology);
     }
 
-    private void delete(Credential credential) {
+    protected boolean canDelete(Credential credential) {
+        LOGGER.info("Checking whether the desired credential is able to delete or not.");
+        if (credential == null) {
+            throw new NotFoundException("Credential not found.");
+        }
         Set<Stack> stacksForCredential = stackRepository.findByCredential(credential);
         if (!stacksForCredential.isEmpty()) {
             String clusters;
@@ -218,8 +219,27 @@ public class CredentialService {
             }
             throw new BadRequestException(String.format(message, credential.getName(), clusters));
         }
-        userProfileHandler.destroyProfileCredentialPreparation(credential);
-        archiveCredential(credential);
+        return true;
+    }
+
+    @Override
+    protected OrganizationResourceRepository<Credential, Long> repository() {
+        return credentialRepository;
+    }
+
+    @Override
+    protected OrganizationResource resource() {
+        return OrganizationResource.CREDENTIAL;
+    }
+
+    @Override
+    protected void prepareDeletion(Credential resource) {
+
+    }
+
+    @Override
+    protected void prepareCreation(Credential resource) {
+
     }
 
     public void archiveCredential(Credential credential) {
@@ -227,5 +247,24 @@ public class CredentialService {
         credential.setArchived(true);
         credential.setTopology(null);
         credentialRepository.save(credential);
+    }
+
+    private void sendCredentialNotification(Credential credential, ResourceEvent resourceEvent) {
+        CloudbreakEventsJson notification = new CloudbreakEventsJson();
+        notification.setEventType(resourceEvent.name());
+        notification.setEventTimestamp(new Date().getTime());
+        notification.setEventMessage(messagesService.getMessage(resourceEvent.getMessage()));
+        notification.setCloud(credential.cloudPlatform());
+        notificationSender.send(new Notification<>(notification));
+    }
+
+    private void checkCredentialCloudPlatform(String cloudPlatform) {
+        if (!accountPreferencesService.enabledPlatforms().contains(cloudPlatform)) {
+            throw new BadRequestException(String.format("There is no such cloud platform as '%s'", cloudPlatform));
+        }
+    }
+
+    private Organization getDefaultOrg() {
+        return organizationService.getDefaultOrganizationForCurrentUser();
     }
 }

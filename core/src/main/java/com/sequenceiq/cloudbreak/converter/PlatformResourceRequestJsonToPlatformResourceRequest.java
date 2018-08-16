@@ -21,7 +21,7 @@ public class PlatformResourceRequestJsonToPlatformResourceRequest extends
     public PlatformResourceRequest convert(PlatformResourceRequestJson source) {
         PlatformResourceRequest platformResourceRequest = new PlatformResourceRequest();
         if (!Strings.isNullOrEmpty(source.getCredentialName())) {
-            platformResourceRequest.setCredential(credentialService.get(source.getCredentialName(), source.getAccount()));
+            platformResourceRequest.setCredential(credentialService.getByNameFromUsersDefaultOrganization(source.getCredentialName()));
         } else if (source.getCredentialId() != null) {
             platformResourceRequest.setCredential(credentialService.get(source.getCredentialId()));
         } else {

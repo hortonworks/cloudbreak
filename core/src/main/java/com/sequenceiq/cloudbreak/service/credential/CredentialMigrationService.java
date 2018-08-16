@@ -14,17 +14,17 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 
 @Service
 public class CredentialMigrationService {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialMigrationService.class);
 
     @Inject
-    private CredentialRepository credentialRepository;
+    private CredentialService credentialService;
 
     public void migrateGcpCredentials() {
-        Set<Credential> gcpCredentials = credentialRepository.findAllByCloudPlatform(CloudConstants.GCP);
+        Set<Credential> gcpCredentials = credentialService.findAllByCloudPlatform(CloudConstants.GCP);
         Set<Credential> updatedCredentials = new HashSet<>();
         for (Credential credential : gcpCredentials) {
             Json attributes = credential.getAttributes();
@@ -40,7 +40,7 @@ public class CredentialMigrationService {
             }
         }
         if (!updatedCredentials.isEmpty()) {
-            credentialRepository.saveAll(updatedCredentials);
+            credentialService.saveAllCredential(updatedCredentials);
         }
     }
 }

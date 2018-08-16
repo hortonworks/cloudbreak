@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.converter.util.ExceptionMessageFormatter
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -98,7 +99,7 @@ public class StackValidationRequestToStackValidationConverter extends AbstractCo
             Credential credential = credentialService.get(stackValidationRequest.getCredentialId());
             stackValidation.setCredential(credential);
         } else if (stackValidationRequest.getCredentialName() != null) {
-            Credential credential = credentialService.get(stackValidationRequest.getCredentialName(), stackValidationRequest.getAccount());
+            Credential credential = credentialService.getByNameFromUsersDefaultOrganization(stackValidationRequest.getCredentialName());
             stackValidation.setCredential(credential);
         } else if (stackValidationRequest.getCredential() != null) {
             Credential credential = conversionService.convert(stackValidationRequest.getCredential(), Credential.class);
@@ -132,12 +133,12 @@ public class StackValidationRequestToStackValidationConverter extends AbstractCo
             Constraint constraint = getConversionService().convert(json.getConstraint(), Constraint.class);
             String instanceGroupName = json.getConstraint().getInstanceGroupName();
             if (instanceGroupName != null) {
-                InstanceGroup instanceGroup =
-                        instanceGroups.stream().filter(instanceGroup1 -> instanceGroup1.getGroupName().equals(instanceGroupName)).findFirst().get();
-                if (instanceGroup == null) {
+                Optional<InstanceGroup> instanceGroup =
+                        instanceGroups.stream().filter(instanceGroup1 -> instanceGroup1.getGroupName().equals(instanceGroupName)).findFirst();
+                if (!instanceGroup.isPresent()) {
                     throw new BadRequestException(String.format("Cannot find instance group named '%s' in instance group list", instanceGroupName));
                 }
-                constraint.setInstanceGroup(instanceGroup);
+                constraint.setInstanceGroup(instanceGroup.get());
             }
             hostGroup.setConstraint(constraint);
             hostGroups.add(hostGroup);

@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.converter.v2;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -89,7 +88,7 @@ public class StackV2RequestToStackRequestConverterTest {
         credentialService = mock(CredentialService.class);
         MockitoAnnotations.initMocks(this);
         when(authenticatedUserService.getCbUser()).thenReturn(cbUser);
-        when(credentialService.get(anyString(), any())).thenReturn(credential);
+        when(credentialService.getByNameFromUsersDefaultOrganization(any())).thenReturn(credential);
         when(credential.cloudPlatform()).thenReturn(CLOUD_PLATFORM);
         when(conversionService.convert(any(NetworkV2Request.class), any())).thenReturn(NETWORK_REQUEST);
     }

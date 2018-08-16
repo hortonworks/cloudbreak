@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -17,7 +17,6 @@ import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -84,7 +83,7 @@ public class StackAwsEncryptionValidatorTest {
         ValidationResult result = underTest.validate(subject);
 
         assertTrue(result.getErrors().isEmpty());
-        verify(credentialService, times(0)).get(anyString(), anyString());
+        verify(credentialService, times(0)).getByNameFromUsersDefaultOrganization(nullable(String.class));
         verify(parameterV1Controller, times(0)).getEncryptionKeys(any(PlatformResourceRequestJson.class));
     }
 
@@ -96,7 +95,7 @@ public class StackAwsEncryptionValidatorTest {
         ValidationResult result = underTest.validate(subject);
 
         assertTrue(result.getErrors().isEmpty());
-        verify(credentialService, times(0)).get(anyString(), anyString());
+        verify(credentialService, times(0)).getByNameFromUsersDefaultOrganization(nullable(String.class));
         verify(parameterV1Controller, times(0)).getEncryptionKeys(any(PlatformResourceRequestJson.class));
     }
 
@@ -108,7 +107,7 @@ public class StackAwsEncryptionValidatorTest {
         ValidationResult result = underTest.validate(subject);
 
         assertTrue(result.getErrors().isEmpty());
-        verify(credentialService, times(0)).get(anyString(), anyString());
+        verify(credentialService, times(0)).getByNameFromUsersDefaultOrganization(nullable(String.class));
         verify(parameterV1Controller, times(0)).getEncryptionKeys(any(PlatformResourceRequestJson.class));
     }
 
@@ -116,13 +115,13 @@ public class StackAwsEncryptionValidatorTest {
     public void testValidateEncryptionKeyWhenEncryptionKeysCouldNotBeRetrievedThenThereIsNoEncryptionKeyCheck() {
         parameters.put(TYPE, EncryptionType.CUSTOM);
         when(subject.getInstanceGroups()).thenReturn(getInstanceGroupWithRequest(createRequestWithParameters(parameters)));
-        when(credentialService.get(ArgumentMatchers.<String>any(), any())).thenReturn(new Credential());
+        when(credentialService.getByNameFromUsersDefaultOrganization(any())).thenReturn(new Credential());
         when(parameterV1Controller.getEncryptionKeys(any(PlatformResourceRequestJson.class))).thenReturn(null);
 
         ValidationResult result = underTest.validate(subject);
 
         assertTrue(result.getErrors().isEmpty());
-        verify(credentialService, times(1)).get(ArgumentMatchers.<String>any(), any());
+        verify(credentialService, times(1)).getByNameFromUsersDefaultOrganization(any());
         verify(parameterV1Controller, times(1)).getEncryptionKeys(any(PlatformResourceRequestJson.class));
     }
 
@@ -130,13 +129,13 @@ public class StackAwsEncryptionValidatorTest {
     public void testValidateEncryptionKeyWhenThereIsNoReturningEncryptionKeyFromControllerThenThereIsNoEncryptionKeyCheck() {
         parameters.put(TYPE, EncryptionType.CUSTOM);
         when(subject.getInstanceGroups()).thenReturn(getInstanceGroupWithRequest(createRequestWithParameters(parameters)));
-        when(credentialService.get(ArgumentMatchers.<String>any(), any())).thenReturn(new Credential());
+        when(credentialService.getByNameFromUsersDefaultOrganization(any())).thenReturn(new Credential());
         when(parameterV1Controller.getEncryptionKeys(any(PlatformResourceRequestJson.class))).thenReturn(new PlatformEncryptionKeysResponse());
 
         ValidationResult result = underTest.validate(subject);
 
         assertTrue(result.getErrors().isEmpty());
-        verify(credentialService, times(1)).get(ArgumentMatchers.<String>any(), any());
+        verify(credentialService, times(1)).getByNameFromUsersDefaultOrganization(any());
         verify(parameterV1Controller, times(1)).getEncryptionKeys(any(PlatformResourceRequestJson.class));
     }
 
@@ -145,7 +144,7 @@ public class StackAwsEncryptionValidatorTest {
         parameters.put(TYPE, EncryptionType.CUSTOM);
         PlatformEncryptionKeysResponse encryptionKeysResponse = createPlatformEncryptionKeysResponseWithoutNameValue();
         when(subject.getInstanceGroups()).thenReturn(getInstanceGroupWithRequest(createRequestWithParameters(parameters)));
-        when(credentialService.get(ArgumentMatchers.<String>any(), any())).thenReturn(new Credential());
+        when(credentialService.getByNameFromUsersDefaultOrganization(any())).thenReturn(new Credential());
         when(parameterV1Controller.getEncryptionKeys(any(PlatformResourceRequestJson.class))).thenReturn(encryptionKeysResponse);
 
         ValidationResult result = underTest.validate(subject);
@@ -153,7 +152,7 @@ public class StackAwsEncryptionValidatorTest {
         assertFalse(result.getErrors().isEmpty());
         assertEquals(1, result.getErrors().size());
         assertEquals("There is no encryption key provided but CUSTOM type is given for encryption.", result.getErrors().get(0));
-        verify(credentialService, times(1)).get(ArgumentMatchers.<String>any(), any());
+        verify(credentialService, times(1)).getByNameFromUsersDefaultOrganization(any());
         verify(parameterV1Controller, times(1)).getEncryptionKeys(any(PlatformResourceRequestJson.class));
     }
 
@@ -163,7 +162,7 @@ public class StackAwsEncryptionValidatorTest {
         parameters.put(KEY, "some invalid value which does not exists in the listed encryption keys");
         PlatformEncryptionKeysResponse encryptionKeysResponse = createPlatformEncryptionKeysResponseWithoutNameValue();
         when(subject.getInstanceGroups()).thenReturn(getInstanceGroupWithRequest(createRequestWithParameters(parameters)));
-        when(credentialService.get(ArgumentMatchers.<String>any(), any())).thenReturn(new Credential());
+        when(credentialService.getByNameFromUsersDefaultOrganization(any())).thenReturn(new Credential());
         when(parameterV1Controller.getEncryptionKeys(any(PlatformResourceRequestJson.class))).thenReturn(encryptionKeysResponse);
 
         ValidationResult result = underTest.validate(subject);
@@ -171,7 +170,7 @@ public class StackAwsEncryptionValidatorTest {
         assertFalse(result.getErrors().isEmpty());
         assertEquals(1, result.getErrors().size());
         assertEquals("The provided encryption key does not exists in the given region's encryption key list for this credential.", result.getErrors().get(0));
-        verify(credentialService, times(1)).get(ArgumentMatchers.<String>any(), any());
+        verify(credentialService, times(1)).getByNameFromUsersDefaultOrganization(any());
         verify(parameterV1Controller, times(1)).getEncryptionKeys(any(PlatformResourceRequestJson.class));
     }
 
@@ -181,13 +180,13 @@ public class StackAwsEncryptionValidatorTest {
         parameters.put(KEY, TEST_ENCRYPTION_KEY);
         PlatformEncryptionKeysResponse encryptionKeysResponse = createPlatformEncryptionKeysResponseWithNameValue();
         when(subject.getInstanceGroups()).thenReturn(getInstanceGroupWithRequest(createRequestWithParameters(parameters)));
-        when(credentialService.get(ArgumentMatchers.<String>any(), any())).thenReturn(new Credential());
+        when(credentialService.getByNameFromUsersDefaultOrganization(any())).thenReturn(new Credential());
         when(parameterV1Controller.getEncryptionKeys(any(PlatformResourceRequestJson.class))).thenReturn(encryptionKeysResponse);
 
         ValidationResult result = underTest.validate(subject);
 
         assertTrue(result.getErrors().isEmpty());
-        verify(credentialService, times(1)).get(ArgumentMatchers.<String>any(), any());
+        verify(credentialService, times(1)).getByNameFromUsersDefaultOrganization(any());
         verify(parameterV1Controller, times(1)).getEncryptionKeys(any(PlatformResourceRequestJson.class));
     }
 
