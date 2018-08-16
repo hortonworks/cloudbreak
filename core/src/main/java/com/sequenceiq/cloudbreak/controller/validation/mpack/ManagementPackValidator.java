@@ -29,20 +29,23 @@ public class ManagementPackValidator {
         }
         String mpackUrl = stackDetails.getMpackUrl();
         List<ManagementPackDetails> mpackList = stackDetails.getMpacks();
-        Map<String, ManagementPackDetails> mpackDetailsMap = stackDetails.getMpacks().stream().collect(Collectors.toMap(
-                mp -> mp.getName(), mp -> mp, (mp1, mp2) -> mp1));
+        Map<String, ManagementPackDetails> mpackDetailsMap = stackDetails.getMpacks().stream()
+                .collect(Collectors.toMap(ManagementPackDetails::getName, mp -> mp, (mp1, mp2) -> mp1));
         if (mpackDetailsMap.size() != mpackList.size()) {
             throw new BadRequestException("Mpack list contains entries with the same name");
         }
-        Map<String, ManagementPack> mpackMap = mpackDetailsMap.values().stream().map(mpd -> mpackService.getByName(mpd.getName(), user)).collect(
-                Collectors.toMap(mp -> mp.getMpackUrl(), mp -> mp, (mp1, mp2) -> mp1));
+        Map<String, ManagementPack> mpackMap = mpackDetailsMap.values().stream()
+                .map(mpd -> mpackService.getByNameFromUsersDefaultOrganization(mpd.getName()))
+                .collect(Collectors.toMap(ManagementPack::getMpackUrl, mp -> mp, (mp1, mp2) -> mp1));
         if (mpackMap.size() != mpackList.size()) {
             throw new BadRequestException("Mpack list contains entries with the same mpackUrl");
         }
         if (mpackMap.get(mpackUrl) != null) {
             throw new BadRequestException("Mpack list contains entries with the stackDefault mpackUrl");
         }
-        List<ManagementPack> purgedMpacks = mpackMap.values().stream().filter(mp -> mp.isPurge()).collect(Collectors.toList());
+        List<ManagementPack> purgedMpacks = mpackMap.values().stream()
+                .filter(ManagementPack::isPurge)
+                .collect(Collectors.toList());
         if (purgedMpacks.size() > 1) {
             throw new BadRequestException("Mpack list contains more than one entries with purge option");
         }

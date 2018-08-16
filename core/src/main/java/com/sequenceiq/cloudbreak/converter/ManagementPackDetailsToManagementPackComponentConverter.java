@@ -27,7 +27,7 @@ public class ManagementPackDetailsToManagementPackComponentConverter
     public ManagementPackComponent convert(ManagementPackDetails source) {
         ManagementPackComponent mpack = new ManagementPackComponent();
         if (StringUtils.isNoneEmpty(source.getName())) {
-            ManagementPack dmpack = managementPackService.getByName(source.getName(), authenticatedUserService.getCbUser());
+            ManagementPack dmpack = managementPackService.getByNameFromUsersDefaultOrganization(source.getName());
             mpack.setName(source.getName());
             mpack.setMpackUrl(dmpack.getMpackUrl());
             mpack.setStackDefault(false);

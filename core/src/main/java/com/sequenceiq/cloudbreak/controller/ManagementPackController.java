@@ -41,13 +41,18 @@ public class ManagementPackController extends NotificationController implements 
 
     @Override
     public ManagementPackResponse get(Long id) {
-        ManagementPack mpack = mpackService.get(id);
-        return conversionService.convert(mpack, ManagementPackResponse.class);
+        return conversionService.convert(mpackService.getById(id), ManagementPackResponse.class);
+    }
+
+    private String getMpackName(Long id) {
+        return mpackService.getById(id).getName();
     }
 
     @Override
     public void delete(Long id) {
-        executeAndNotify(user -> mpackService.delete(id, user), ResourceEvent.MANAGEMENT_PACK_DELETED);
+        ManagementPack managementPack = mpackService.getById(id);
+        executeAndNotify(user -> mpackService.delete(managementPack),
+                ResourceEvent.MANAGEMENT_PACK_DELETED);
     }
 
     @Override
@@ -67,7 +72,7 @@ public class ManagementPackController extends NotificationController implements 
 
     @Override
     public void deletePrivate(String name) {
-        executeAndNotify(user -> mpackService.delete(name, user), ResourceEvent.MANAGEMENT_PACK_DELETED);
+        executeAndNotify(user -> mpackService.deleteByNameFromDefaultOrganization(name), ResourceEvent.MANAGEMENT_PACK_DELETED);
     }
 
     @Override
@@ -87,13 +92,13 @@ public class ManagementPackController extends NotificationController implements 
 
     @Override
     public void deletePublic(String name) {
-        executeAndNotify(user -> mpackService.delete(name, user), ResourceEvent.MANAGEMENT_PACK_DELETED);
+        executeAndNotify(user -> mpackService.deleteByNameFromDefaultOrganization(name), ResourceEvent.MANAGEMENT_PACK_DELETED);
     }
 
     private ManagementPackResponse createMpack(IdentityUser user, ManagementPackRequest mpackRequest) {
         ManagementPack mpack = conversionService.convert(mpackRequest, ManagementPack.class);
         try {
-            mpack = mpackService.create(user, mpack);
+            mpack = mpackService.createInDefaultOrganization(mpack);
             notify(ResourceEvent.MANAGEMENT_PACK_CREATED);
         } catch (DataIntegrityViolationException ex) {
             String msg = String.format("Error with resource [%s], %s", APIResourceType.MANAGEMENT_PACK, getProperSqlErrorMessage(ex));
