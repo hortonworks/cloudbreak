@@ -16,7 +16,7 @@ import javax.persistence.UniqueConstraint;
 import com.sequenceiq.cloudbreak.api.model.UsageStatus;
 
 @Entity
-@Table(name = "CloudbreakUsage", uniqueConstraints = @UniqueConstraint(columnNames = {"stackId", "instanceGroup", "day"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"stackId", "instanceGroup", "day"}))
 public class CloudbreakUsage implements ProvisionEntity {
 
     @Id

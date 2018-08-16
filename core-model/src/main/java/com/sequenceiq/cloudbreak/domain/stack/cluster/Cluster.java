@@ -56,7 +56,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 
 @Entity
-@Table(name = "Cluster", uniqueConstraints = @UniqueConstraint(columnNames = {"account", "name"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"account", "name"}))
 public class Cluster implements ProvisionEntity {
 
     @Id

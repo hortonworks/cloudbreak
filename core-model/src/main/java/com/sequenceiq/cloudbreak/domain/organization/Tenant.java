@@ -13,12 +13,10 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
 
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 
 @Entity
-@Table(name = "tenant")
 public class Tenant implements ProvisionEntity {
 
     @Id

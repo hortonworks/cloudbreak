@@ -67,7 +67,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 
 @Entity
-@Table(name = "Stack", uniqueConstraints = @UniqueConstraint(columnNames = {"organization_id", "name"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"organization_id", "name"}))
 public class Stack implements ProvisionEntity, OrganizationAwareResource {
 
     @Id

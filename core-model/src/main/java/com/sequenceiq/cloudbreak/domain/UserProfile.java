@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.organization.User;
 
 @Entity
-@Table(name = "UserProfile", uniqueConstraints = @UniqueConstraint(columnNames = {"account", "owner"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"account", "owner"}))
 public class UserProfile {
 
     @Id

@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.organization.OrganizationAwareResource;
 
 @Entity
-@Table(name = "ManagementPack", uniqueConstraints = @UniqueConstraint(columnNames = {"organization_id", "name"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"organization_id", "name"}))
 public class ManagementPack implements ProvisionEntity, OrganizationAwareResource {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "managementpack_generator")

@@ -11,13 +11,11 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
 
 import com.sequenceiq.cloudbreak.api.model.v2.OrganizationStatus;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 
 @Entity
-@Table(name = "organization")
 public class Organization implements ProvisionEntity {
 
     @Id

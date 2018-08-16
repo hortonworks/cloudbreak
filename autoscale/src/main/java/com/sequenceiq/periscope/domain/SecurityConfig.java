@@ -10,14 +10,12 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
 
 import org.apache.commons.codec.binary.Base64;
 
 import com.sequenceiq.cloudbreak.domain.converter.EncryptionConverter;
 
 @Entity
-@Table(name = "SecurityConfig")
 @NamedQueries(@NamedQuery(name = "SecurityConfig.findByClusterId", query = "SELECT s FROM SecurityConfig s WHERE s.cluster.id= :id"))
 public class SecurityConfig {
 

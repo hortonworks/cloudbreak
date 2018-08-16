@@ -9,7 +9,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
 
 import org.apache.commons.codec.binary.Base64;
 
@@ -17,7 +16,6 @@ import com.sequenceiq.cloudbreak.domain.converter.EncryptionConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 
 @Entity
-@Table(name = "SecurityConfig")
 public class SecurityConfig implements ProvisionEntity {
 
     @Id
