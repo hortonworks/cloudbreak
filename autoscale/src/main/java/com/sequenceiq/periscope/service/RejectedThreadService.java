@@ -4,9 +4,9 @@ import static com.sequenceiq.cloudbreak.util.JsonUtil.writeValueAsStringSilent;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +21,7 @@ public class RejectedThreadService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RejectedThreadService.class);
 
-    private final Map<Long, RejectedThread> rejectedThreads = new HashMap<>();
+    private final Map<Long, RejectedThread> rejectedThreads = new ConcurrentHashMap<>();
 
     public RejectedThread save(RejectedThread rejectedThread) {
         rejectedThreads.put(rejectedThread.getId(), rejectedThread);
@@ -38,8 +38,10 @@ public class RejectedThreadService {
         if (data instanceof AutoscaleStackResponse) {
             Long stackId = ((AutoscaleStackResponse) data).getStackId();
             rejectedThread = createOrUpdateRejectedThread(data, stackId);
-        } else {
+        } else if (data instanceof Long) {
             rejectedThread = createOrUpdateRejectedThread(Collections.singletonMap("id", data), (Long) data);
+        } else {
+            throw new IllegalArgumentException("The given data is not match to AutoscaleStackResponse or Long, not possible to create");
         }
 
         LOGGER.info("Rejected task: {}, count: {}", rejectedThread.getJson(), rejectedThread.getRejectedCount());
@@ -64,8 +66,10 @@ public class RejectedThreadService {
         RejectedThread removed;
         if (data instanceof AutoscaleStackResponse) {
             removed = rejectedThreads.remove(((AutoscaleStackResponse) data).getStackId());
-        } else {
+        } else if (data instanceof Long) {
             removed = rejectedThreads.remove(data);
+        } else {
+            throw new IllegalArgumentException("The given data is not match to AutoscaleStackResponse or Long, so not removable");
         }
         if (removed != null) {
             LOGGER.info("Rejected thread removed {} with count {}", removed.getJson(), removed.getRejectedCount());

@@ -13,8 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.AutoscaleStackResponse;
-import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.monitor.evaluator.EvaluatorExecutor;
 import com.sequenceiq.periscope.service.RejectedThreadService;
 
@@ -49,11 +47,7 @@ public class PersistRejectedThreadExecutionHandler extends AbortPolicy {
         if (task instanceof FutureTask) {
             try {
                 Object callable = callableInFutureTask.get(task);
-                if (adapterClass.isInstance(callable)) {
-                    return runnableInAdapter.get(callable);
-                } else {
-                    return callable;
-                }
+                return adapterClass.isInstance(callable) ? runnableInAdapter.get(callable) : callable;
             } catch (IllegalAccessException e) {
                 throw new IllegalStateException(e);
             }
@@ -69,17 +63,6 @@ public class PersistRejectedThreadExecutionHandler extends AbortPolicy {
             LOGGER.info("Thread is rejected: {} from {}", realTask, executor);
             rejectedThreadService.create((EvaluatorExecutor) realTask);
             super.rejectedExecution(r, executor);
-        }
-    }
-
-    private Object getObject(EvaluatorExecutor evaluatorExecutor) {
-        Object data = evaluatorExecutor.getContext().getData();
-        if (data instanceof AutoscaleStackResponse) {
-            return data;
-        } else {
-            Cluster cluster = new Cluster();
-            cluster.setId((long) data);
-            return cluster;
         }
     }
 }

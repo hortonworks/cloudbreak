@@ -4,12 +4,16 @@ import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.periscope.monitor.evaluator.EvaluatorExecutor;
 
 @Service
 public class ExecutorServiceWithRegistry {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExecutorServiceWithRegistry.class);
 
     @Inject
     private EvaluatorExecutorRegistry evaluatorExecutorRegistry;
@@ -24,6 +28,8 @@ public class ExecutorServiceWithRegistry {
             } finally {
                 evaluatorExecutorRegistry.remove(evaluatorExecutor, clusterId);
             }
+        } else {
+            LOGGER.info("Evaluator {} is not accepted for cluster {}", evaluatorExecutor.getName(), clusterId);
         }
     }
 
