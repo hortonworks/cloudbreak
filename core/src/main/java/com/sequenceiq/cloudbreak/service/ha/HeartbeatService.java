@@ -284,7 +284,7 @@ public class HeartbeatService {
 
     private void cleanupInMemoryStore(Long stackId) {
         LOGGER.info("All running flows has been canceled for stack: {}. Remove id from memory store.", stackId);
-        Stack stack = stackService.getById(stackId);
+        Stack stack = stackService.getByIdWithoutAuth(stackId);
         InMemoryStateStore.deleteStack(stackId);
         if (stack.getCluster() != null) {
             InMemoryStateStore.deleteCluster(stack.getCluster().getId());

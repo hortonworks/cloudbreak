@@ -35,7 +35,7 @@ public class PrepareClusterTerminationHandler implements ReactorEventHandler<Pre
     public void accept(Event<PrepareClusterTerminationRequest> event) {
         PrepareClusterTerminationResult result;
         try {
-            ambariClusterConnector.prepareSecurity(stackService.getByIdWithLists(event.getData().getStackId()));
+            ambariClusterConnector.prepareSecurity(stackService.getByIdWithListsWithoutAuthorization(event.getData().getStackId()));
             result = new PrepareClusterTerminationResult(event.getData());
         } catch (Exception e) {
             result = new PrepareClusterTerminationResult(e.getMessage(), e, event.getData());

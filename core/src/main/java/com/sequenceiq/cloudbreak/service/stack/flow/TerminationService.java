@@ -55,7 +55,7 @@ public class TerminationService {
     private TransactionService transactionService;
 
     public void finalizeTermination(Long stackId, boolean force) {
-        Stack stack = stackService.getByIdWithLists(stackId);
+        Stack stack = stackService.getByIdWithListsWithoutAuthorization(stackId);
         Date now = new Date();
         String terminatedName = stack.getName() + DELIMITER + now.getTime();
         Cluster cluster = stack.getCluster();

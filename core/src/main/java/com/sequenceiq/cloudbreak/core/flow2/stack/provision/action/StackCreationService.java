@@ -141,7 +141,7 @@ public class StackCreationService {
         validateResourceResults(context.getCloudContext(), result);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.METADATA_COLLECTION, "Metadata collection");
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_TIME, UPDATE_IN_PROGRESS.name(), calculateStackCreationTime(startDate));
-        return stackService.getByIdWithLists(stack.getId());
+        return stackService.getByIdWithListsWithoutAuthorization(stack.getId());
     }
 
     private Date getStartDateIfExist(Map<Object, Object> variables) {
@@ -179,7 +179,7 @@ public class StackCreationService {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.TLS_SETUP, "TLS setup");
         flowMessageService.fireEventAndLog(stack.getId(), Msg.FLOW_STACK_METADATA_COLLECTED, UPDATE_IN_PROGRESS.name());
         LOGGER.debug("Metadata setup DONE.");
-        return stackService.getByIdWithLists(stack.getId());
+        return stackService.getByIdWithListsWithoutAuthorization(stack.getId());
     }
 
     public Stack saveTlsInfo(StackContext context, TlsInfo tlsInfo) {
@@ -189,7 +189,7 @@ public class StackCreationService {
             SecurityConfig securityConfig = stack.getSecurityConfig();
             securityConfig.setUsePrivateIpToTls(usePrivateIpToTls);
             stackUpdater.updateStackSecurityConfig(stack, securityConfig);
-            stack = stackService.getByIdWithLists(stack.getId());
+            stack = stackService.getByIdWithListsWithoutAuthorization(stack.getId());
             LOGGER.info("Update Stack and it's SecurityConfig to use private ip when TLS is built.");
         }
         return stack;
@@ -245,7 +245,7 @@ public class StackCreationService {
     }
 
     private void handleFailure(StackView stackView, String errorReason) {
-        Stack stack = stackService.getByIdWithLists(stackView.getId());
+        Stack stack = stackService.getByIdWithListsWithoutAuthorization(stackView.getId());
         try {
             if (!stack.getOnFailureActionAction().equals(OnFailureAction.ROLLBACK)) {
                 LOGGER.debug("Nothing to do. OnFailureAction {}", stack.getOnFailureActionAction());

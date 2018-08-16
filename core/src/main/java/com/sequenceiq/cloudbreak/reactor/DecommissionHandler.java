@@ -64,7 +64,7 @@ public class DecommissionHandler implements ReactorEventHandler<DecommissionRequ
         DecommissionResult result;
         String hostGroupName = request.getHostGroupName();
         try {
-            Stack stack = stackService.getByIdWithLists(request.getStackId());
+            Stack stack = stackService.getByIdWithListsWithoutAuthorization(request.getStackId());
             Set<String> hostNames = getHostNamesForPrivateIds(request, stack);
             Map<String, HostMetadata> hostsToRemove = ambariDecommissioner.collectHostsToRemove(stack, hostGroupName, hostNames);
             Set<String> decomissionedHostNames;

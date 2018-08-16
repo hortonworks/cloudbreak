@@ -185,7 +185,7 @@ public class FlexUsageGenerator {
                 usageJson.setRegion(usage.getRegion());
                 usageJson.setPeakUsage(usage.getPeak());
                 usageJson.setUsageDate(formatInstant(usage.getDay().toInstant(), FLEX_USAGE_DAY_FORMAT_PATTERN));
-                StackView stack = stackService.getByIdView(usage.getStackId());
+                StackView stack = stackService.getViewByIdWithoutAuth(usage.getStackId());
                 usageJson.setCreationTime(formatInstant(Instant.ofEpochMilli(stack.getCreated()), FLEX_TIME_ZONE_FORMAT_PATTERN));
                 usageJson.setTerminationTime(getTerminationTime(stack));
                 flexUsageJsonsByStackId.put(stackId, usageJson);

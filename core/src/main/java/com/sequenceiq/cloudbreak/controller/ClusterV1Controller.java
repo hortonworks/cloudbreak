@@ -34,10 +34,12 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
 import com.sequenceiq.cloudbreak.service.ClusterCreationSetupService;
+import com.sequenceiq.cloudbreak.service.StackCommonService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.gateway.GatewayService;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -71,11 +73,17 @@ public class ClusterV1Controller implements ClusterV1Endpoint {
     @Autowired
     private GatewayService gatewayService;
 
+    @Autowired
+    private StackCommonService stackCommonService;
+
+    @Autowired
+    private OrganizationService organizationService;
+
     @Override
     public ClusterResponse post(Long stackId, ClusterRequest request) throws Exception {
         IdentityUser user = authenticatedUserService.getCbUser();
 
-        Stack stack = stackService.getByIdWithLists(stackId);
+        Stack stack = stackService.getByIdWithListsWithoutAuthorization(stackId);
 
         clusterCreationSetupService.validate(request, stack, user);
         Cluster cluster = clusterCreationSetupService.prepare(request, stack, user);
@@ -104,8 +112,7 @@ public class ClusterV1Controller implements ClusterV1Endpoint {
 
     @Override
     public ClusterResponse getPrivate(String name) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        Stack stack = stackService.getPrivateStack(name, user);
+        Stack stack = stackService.getByNameInDefaultOrg(name);
         ClusterResponse cluster = clusterService.retrieveClusterForCurrentUser(stack.getId(), ClusterResponse.class);
         String clusterJson = clusterService.getClusterJson(stack.getAmbariIp(), stack.getId());
         return clusterService.getClusterResponse(cluster, clusterJson);
@@ -113,8 +120,7 @@ public class ClusterV1Controller implements ClusterV1Endpoint {
 
     @Override
     public ClusterResponse getPublic(String name) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        Stack stack = stackService.getPublicStack(name, user);
+        Stack stack = stackService.getByNameInDefaultOrg(name);
         ClusterResponse cluster = clusterService.retrieveClusterForCurrentUser(stack.getId(), ClusterResponse.class);
         String clusterJson = clusterService.getClusterJson(stack.getAmbariIp(), stack.getId());
         return clusterService.getClusterResponse(cluster, clusterJson);

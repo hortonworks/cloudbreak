@@ -212,7 +212,7 @@ public class ReactorFlowManager {
     }
 
     public void triggerClusterTermination(Long stackId, Boolean withStackDelete, Boolean deleteDependencies) {
-        Boolean secure = stackService.getById(stackId).getCluster().isSecure();
+        Boolean secure = stackService.getByIdWithoutAuth(stackId).getCluster().isSecure();
         if (withStackDelete) {
             String selector = secure ? FlowChainTriggers.PROPER_TERMINATION_TRIGGER_EVENT : FlowChainTriggers.TERMINATION_TRIGGER_EVENT;
             notify(selector, new TerminationEvent(selector, stackId, false, deleteDependencies));
@@ -248,11 +248,11 @@ public class ReactorFlowManager {
     }
 
     private void notify(String selector, Acceptable acceptable) {
-        notify(selector, acceptable, stackService::getById);
+        notify(selector, acceptable, stackService::getByIdWithoutAuth);
     }
 
     private void notifyWithoutCheck(String selector, Acceptable acceptable) {
-        notify(selector, acceptable, stackService::getById);
+        notify(selector, acceptable, stackService::getByIdWithoutAuth);
     }
 
     private void notify(String selector, Acceptable acceptable, Function<Long, Stack> getStackFn) {

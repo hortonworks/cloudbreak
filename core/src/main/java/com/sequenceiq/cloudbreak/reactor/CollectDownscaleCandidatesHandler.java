@@ -43,7 +43,7 @@ public class CollectDownscaleCandidatesHandler implements ReactorEventHandler<Co
         CollectDownscaleCandidatesRequest request = event.getData();
         CollectDownscaleCandidatesResult result;
         try {
-            Stack stack = stackService.getByIdWithLists(request.getStackId());
+            Stack stack = stackService.getByIdWithListsWithoutAuthorization(request.getStackId());
             Set<Long> privateIds = request.getPrivateIds();
             if (noSelectedInstancesForDownscale(privateIds)) {
                 privateIds = collectCandidates(request, stack);

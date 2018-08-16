@@ -25,12 +25,12 @@ import com.sequenceiq.cloudbreak.api.model.CertificateResponse;
 import com.sequenceiq.cloudbreak.api.model.GeneratedBlueprintResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformVariantsJson;
 import com.sequenceiq.cloudbreak.api.model.ReinstallRequestV2;
-import com.sequenceiq.cloudbreak.api.model.users.UserNamePasswordJson;
 import com.sequenceiq.cloudbreak.api.model.stack.StackImageChangeRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.StackScaleRequestV2;
 import com.sequenceiq.cloudbreak.api.model.stack.StackValidationRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRepairRequest;
+import com.sequenceiq.cloudbreak.api.model.users.UserNamePasswordJson;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
@@ -73,12 +73,11 @@ public interface StackV2Endpoint extends StackEndpoint {
     @Override
     @ApiOperation(value = StackOpDescription.GET_PRIVATE, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
             nickname = "getPrivatesStackV2")
-    Set<StackResponse> getPrivates();
+    Set<StackResponse> getStacksInDefaultOrg();
 
     @GET
     @Path("account")
     @Produces(MediaType.APPLICATION_JSON)
-    @Override
     @ApiOperation(value = StackOpDescription.GET_PUBLIC, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
             nickname = "getPublicsStackV2")
     Set<StackResponse> getPublics();
@@ -89,12 +88,11 @@ public interface StackV2Endpoint extends StackEndpoint {
     @Override
     @ApiOperation(value = StackOpDescription.GET_PRIVATE_BY_NAME, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
             nickname = "getPrivateStackV2")
-    StackResponse getPrivate(@PathParam("name") String name, @QueryParam("entry") Set<String> entries);
+    StackResponse getStackFromDefaultOrg(@PathParam("name") String name, @QueryParam("entry") Set<String> entries);
 
     @GET
     @Path("account/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Override
     @ApiOperation(value = StackOpDescription.GET_PUBLIC_BY_NAME, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
             nickname = "getPublicStackV2")
     StackResponse getPublic(@PathParam("name") String name, @QueryParam("entry") Set<String> entries);
@@ -113,13 +111,12 @@ public interface StackV2Endpoint extends StackEndpoint {
     @Override
     @ApiOperation(value = StackOpDescription.DELETE_PUBLIC_BY_NAME, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
             nickname = "deletePublicStackV2")
-    void deletePublic(@PathParam("name") String name, @QueryParam("forced") @DefaultValue("false") Boolean forced,
+    void deleteInDefaultOrg(@PathParam("name") String name, @QueryParam("forced") @DefaultValue("false") Boolean forced,
             @QueryParam("deleteDependencies") @DefaultValue("false") Boolean deleteDependencies);
 
     @DELETE
     @Path("user/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Override
     @ApiOperation(value = StackOpDescription.DELETE_PRIVATE_BY_NAME, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
             nickname = "deletePrivateStackV2")
     void deletePrivate(@PathParam("name") String name, @QueryParam("forced") @DefaultValue("false") Boolean forced,
@@ -131,7 +128,7 @@ public interface StackV2Endpoint extends StackEndpoint {
     @Override
     @ApiOperation(value = StackOpDescription.DELETE_BY_ID, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
             nickname = "deleteStackV2")
-    void delete(@PathParam("id") Long id, @QueryParam("forced") @DefaultValue("false") Boolean forced,
+    void deleteById(@PathParam("id") Long id, @QueryParam("forced") @DefaultValue("false") Boolean forced,
             @QueryParam("deleteDependencies") @DefaultValue("false") Boolean deleteDependencies);
 
     @PUT

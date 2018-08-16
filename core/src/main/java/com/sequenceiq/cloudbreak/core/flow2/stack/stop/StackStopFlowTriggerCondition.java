@@ -19,7 +19,7 @@ public class StackStopFlowTriggerCondition implements FlowTriggerCondition {
 
     @Override
     public boolean isFlowTriggerable(Long stackId) {
-        StackView stack = stackService.getByIdView(stackId);
+        StackView stack = stackService.getViewByIdWithoutAuth(stackId);
         return stackStartStopService.isStopPossible(stack);
     }
 }

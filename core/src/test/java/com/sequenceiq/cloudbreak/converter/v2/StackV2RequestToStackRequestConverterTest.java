@@ -458,7 +458,7 @@ public class StackV2RequestToStackRequestConverterTest {
         when(conversionService.convert(source.getCluster(), ClusterRequest.class)).thenReturn(convertedRequest);
         when(sharedServiceConfigProvider.isConfigured(source.getCluster())).thenReturn(true);
         Stack mockStack = mock(Stack.class);
-        when(stackService.getPublicStack(source.getCluster().getSharedService().getSharedCluster(), cbUser)).thenReturn(mockStack);
+        when(stackService.getByNameInDefaultOrg(source.getCluster().getSharedService().getSharedCluster())).thenReturn(mockStack);
         Long id = 1L;
         when(mockStack.getId()).thenReturn(id);
 
@@ -469,9 +469,9 @@ public class StackV2RequestToStackRequestConverterTest {
         Assert.assertEquals(id, result.getClusterToAttach());
         verify(conversionService, times(2)).convert(any(), any());
         verify(sharedServiceConfigProvider, times(1)).isConfigured(source.getCluster());
-        verify(stackService, times(1)).getPublicStack(source.getCluster().getSharedService().getSharedCluster(), cbUser);
+        verify(stackService, times(1)).getByNameInDefaultOrg(source.getCluster().getSharedService().getSharedCluster());
         verify(mockStack, times(1)).getId();
-        verify(authenticatedUserService, times(4)).getCbUser();
+        verify(authenticatedUserService, times(3)).getCbUser();
     }
 
     private StackV2Request createStackV2Request() {

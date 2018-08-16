@@ -36,7 +36,7 @@ public class StackAction {
         Log.log(" get stack " + stackEntity.getName());
         stackEntity.setResponse(
                 client.getCloudbreakClient().stackV2Endpoint()
-                        .getPrivate(stackEntity.getName(), null));
+                        .getStackFromDefaultOrg(stackEntity.getName(), null));
         Log.logJSON(" stack get response: ", stackEntity.getResponse());
     }
 
@@ -49,7 +49,7 @@ public class StackAction {
         stackEntity.setResponses(
                 client.getCloudbreakClient()
                         .stackV2Endpoint()
-                        .getPrivates());
+                        .getStacksInDefaultOrg());
     }
 
     public static void delete(IntegrationTestContext integrationTestContext, Entity entity) {

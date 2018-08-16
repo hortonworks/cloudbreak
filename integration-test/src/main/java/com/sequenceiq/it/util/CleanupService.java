@@ -32,7 +32,7 @@ public class CleanupService {
         }
         cleanedUp = true;
         cloudbreakClient.stackV2Endpoint()
-                .getPrivates()
+                .getStacksInDefaultOrg()
                 .stream()
                 .filter(stack -> stack.getName().startsWith("it-"))
                 .forEach(stack -> deleteStackAndWait(cloudbreakClient, String.valueOf(stack.getId())));
@@ -93,7 +93,7 @@ public class CleanupService {
     public boolean deleteStack(CloudbreakClient cloudbreakClient, String stackId) {
         boolean result = false;
         if (stackId != null) {
-            cloudbreakClient.stackV2Endpoint().delete(Long.valueOf(stackId), false, false);
+            cloudbreakClient.stackV2Endpoint().deleteById(Long.valueOf(stackId), false, false);
             result = true;
         }
         return result;

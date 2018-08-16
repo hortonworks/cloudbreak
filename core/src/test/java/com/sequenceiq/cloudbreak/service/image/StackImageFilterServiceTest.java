@@ -94,8 +94,8 @@ public class StackImageFilterServiceTest {
     public void testGetApplicableImagesHdp() throws CloudbreakImageCatalogException, IOException, CloudbreakImageNotFoundException {
         Stack stack = getStack(Status.AVAILABLE, Status.AVAILABLE);
         setupLoggedInUser();
-        when(stackService.getByName(eq(STACK_NAME), any())).thenReturn(stack);
         when(imageCatalogService.getImages(anyLong(), anyString(), anyString())).thenReturn(getStatedImages());
+        when(stackService.getByNameInOrg(eq(STACK_NAME), eq(ORG_ID))).thenReturn(stack);
         when(stackImageUpdateService.isValidImage(any(), anyString(), anyString(), anyString())).thenReturn(true);
         when(stackImageUpdateService.getStackType(any())).thenReturn(StackType.HDP);
         when(componentConfigProvider.getImage(anyLong())).thenReturn(getImage(""));
@@ -116,8 +116,8 @@ public class StackImageFilterServiceTest {
     public void testGetApplicableImagesHdf() throws CloudbreakImageCatalogException, IOException, CloudbreakImageNotFoundException {
         Stack stack = getStack(Status.AVAILABLE, Status.AVAILABLE);
         setupLoggedInUser();
-        when(stackService.getByName(eq(STACK_NAME), any())).thenReturn(stack);
         when(imageCatalogService.getImages(anyLong(), anyString(), anyString())).thenReturn(getStatedImages());
+        when(stackService.getByNameInOrg(eq(STACK_NAME), eq(ORG_ID))).thenReturn(stack);
         when(stackImageUpdateService.isValidImage(any(), anyString(), anyString(), anyString())).thenReturn(true);
         when(stackImageUpdateService.getStackType(any())).thenReturn(StackType.HDF);
         when(componentConfigProvider.getImage(anyLong())).thenReturn(getImage(""));
@@ -138,8 +138,8 @@ public class StackImageFilterServiceTest {
     public void testGetApplicableImagesFiltersCurrentImage() throws CloudbreakImageCatalogException, IOException, CloudbreakImageNotFoundException {
         Stack stack = getStack(Status.AVAILABLE, Status.AVAILABLE);
         setupLoggedInUser();
-        when(stackService.getByName(eq(STACK_NAME), any())).thenReturn(stack);
         when(imageCatalogService.getImages(anyLong(), anyString(), anyString())).thenReturn(getStatedImages());
+        when(stackService.getByNameInOrg(eq(STACK_NAME), eq(ORG_ID))).thenReturn(stack);
         when(stackImageUpdateService.isValidImage(any(), anyString(), anyString(), anyString())).thenReturn(true);
         when(stackImageUpdateService.getStackType(any())).thenReturn(StackType.HDP);
         when(componentConfigProvider.getImage(anyLong())).thenReturn(getImage(IMAGE_HDP_ID));
@@ -160,8 +160,8 @@ public class StackImageFilterServiceTest {
     public void testGetApplicableImagesWhenStackImageUpdateServiceRejectsAll() throws CloudbreakImageCatalogException, CloudbreakImageNotFoundException {
         Stack stack = getStack(Status.AVAILABLE, Status.AVAILABLE);
         setupLoggedInUser();
-        when(stackService.getByName(eq(STACK_NAME), any())).thenReturn(stack);
         when(imageCatalogService.getImages(anyLong(), anyString(), anyString())).thenReturn(getStatedImages());
+        when(stackService.getByNameInOrg(eq(STACK_NAME), eq(ORG_ID))).thenReturn(stack);
         when(stackImageUpdateService.isValidImage(any(), anyString(), anyString(), anyString())).thenReturn(false);
         when(stackImageUpdateService.getStackType(any())).thenReturn(StackType.HDP);
         when(componentConfigProvider.getImage(anyLong())).thenReturn(getImage(""));
@@ -181,7 +181,7 @@ public class StackImageFilterServiceTest {
     @Test
     public void testGetApplicableImagesWhenStackNotInAvailableState() throws CloudbreakImageCatalogException, IOException {
         Stack stack = getStack(Status.CREATE_IN_PROGRESS, Status.AVAILABLE);
-        when(stackService.getByName(eq(STACK_NAME), any())).thenReturn(stack);
+        when(stackService.getByNameInOrg(eq(STACK_NAME), eq(ORG_ID))).thenReturn(stack);
         setupLoggedInUser();
         thrown.expectMessage("To retrieve list of images for upgrade both stack and cluster have to be in AVAILABLE state");
         thrown.expect(BadRequestException.class);
@@ -192,7 +192,7 @@ public class StackImageFilterServiceTest {
     @Test
     public void testGetApplicableImagesWhenClusterNotInAvailableState() throws CloudbreakImageCatalogException, IOException {
         Stack stack = getStack(Status.AVAILABLE, Status.UPDATE_FAILED);
-        when(stackService.getByName(eq(STACK_NAME), any())).thenReturn(stack);
+        when(stackService.getByNameInOrg(eq(STACK_NAME), eq(ORG_ID))).thenReturn(stack);
         setupLoggedInUser();
         thrown.expectMessage("To retrieve list of images for upgrade both stack and cluster have to be in AVAILABLE state");
         thrown.expect(BadRequestException.class);

@@ -79,7 +79,7 @@ public class ChangePrimaryGatewayService {
                 InstanceMetaData npg = newPrimaryGateway.get();
                 npg.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
                 instanceMetaDataRepository.save(npg);
-                Stack updatedStack = stackService.getByIdWithLists(stackId);
+                Stack updatedStack = stackService.getByIdWithListsWithoutAuthorization(stackId);
                 String gatewayIp = gatewayConfigService.getPrimaryGatewayIp(updatedStack);
 
                 Cluster cluster = updatedStack.getCluster();

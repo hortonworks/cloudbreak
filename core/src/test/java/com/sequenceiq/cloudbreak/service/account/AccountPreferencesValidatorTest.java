@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
-import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -24,8 +23,8 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
 import com.sequenceiq.cloudbreak.domain.AccountPreferences;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.CachedUserDetailsService;
 
@@ -60,8 +59,6 @@ public class AccountPreferencesValidatorTest {
         underTest = Mockito.spy(underTest);
         when(accountPreferencesService.getByAccount("")).thenReturn(preferences);
         when(preferences.getMaxNumberOfNodesPerCluster()).thenReturn(0L);
-        when(preferences.getMaxNumberOfClusters()).thenReturn(0L);
-        when(preferences.getMaxNumberOfClustersPerUser()).thenReturn(0L);
         when(preferences.getUserTimeToLive()).thenReturn(0L);
         when(preferences.getAllowedInstanceTypes()).thenReturn(new ArrayList<>());
     }
@@ -85,53 +82,6 @@ public class AccountPreferencesValidatorTest {
     public void testValidateShouldNotThrowExceptionWhenTheStackNodeCountIsLessThanTheAccountMaximum() throws AccountPreferencesValidationException {
         when(preferences.getMaxNumberOfNodesPerCluster()).thenReturn(4L);
         when(stack.getFullNodeCount()).thenReturn(3);
-
-        underTest.validate(stack, EMPTY_STRING, EMPTY_STRING);
-    }
-
-    @Test
-    public void testValidateShouldThrowExceptionWhenTheNumberOfClusterInAccountIsGreaterOrEqualThanTheAccountMaximum()
-            throws AccountPreferencesValidationException {
-        when(preferences.getMaxNumberOfClusters()).thenReturn(400L);
-        Set<Stack> stacks = Mockito.mock(Set.class);
-        when(stackService.retrieveAccountStacks(anyString())).thenReturn(stacks);
-        when(stacks.size()).thenReturn(400);
-        thrown.expect(AccountPreferencesValidationException.class);
-        thrown.expectMessage("No more cluster could be created! The number of clusters exceeded the account's limit(400)!");
-
-        underTest.validate(stack, EMPTY_STRING, EMPTY_STRING);
-    }
-
-    @Test
-    public void testValidateShouldNotThrowExceptionWhenTheNumberOfClusterInAccountIsLessThanTheAccountMaximum() throws AccountPreferencesValidationException {
-        when(preferences.getMaxNumberOfClusters()).thenReturn(400L);
-        Set<Stack> stacks = Mockito.mock(Set.class);
-        when(stackService.retrieveAccountStacks(anyString())).thenReturn(stacks);
-        when(stacks.size()).thenReturn(200);
-
-        underTest.validate(stack, EMPTY_STRING, EMPTY_STRING);
-    }
-
-    @Test
-    public void testValidateShouldThrowExceptionWhenTheNumberOfClusterInAccountForAUserIsGreaterOrEqualThanTheAccountMaximum()
-            throws AccountPreferencesValidationException {
-        when(preferences.getMaxNumberOfClustersPerUser()).thenReturn(4L);
-        Set<Stack> stacks = Mockito.mock(Set.class);
-        when(stackService.retrieveOwnerStacks(anyString())).thenReturn(stacks);
-        when(stacks.size()).thenReturn(4);
-        thrown.expect(AccountPreferencesValidationException.class);
-        thrown.expectMessage("No more cluster could be created! The number of clusters exceeded the user's limit(4)!");
-
-        underTest.validate(stack, EMPTY_STRING, EMPTY_STRING);
-    }
-
-    @Test
-    public void testValidateShouldNotThrowExceptionWhenTheNumberOfClusterInAccountForAUserIsLessThanTheAccountMaximum()
-            throws AccountPreferencesValidationException {
-        when(preferences.getMaxNumberOfClustersPerUser()).thenReturn(4L);
-        Set<Stack> stacks = Mockito.mock(Set.class);
-        when(stackService.retrieveOwnerStacks(anyString())).thenReturn(stacks);
-        when(stacks.size()).thenReturn(2);
 
         underTest.validate(stack, EMPTY_STRING, EMPTY_STRING);
     }

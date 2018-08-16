@@ -21,13 +21,13 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.aspect.organization.OrganizationResourceType;
+import com.sequenceiq.cloudbreak.authorization.OrganizationPermissions.Action;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.organization.OrganizationAwareResource;
 import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.domain.organization.UserOrgPermissions;
 import com.sequenceiq.cloudbreak.repository.OrganizationResourceRepository;
 import com.sequenceiq.cloudbreak.service.user.UserOrgPermissionsService;
-import com.sequenceiq.cloudbreak.authorization.OrganizationPermissions.Action;
 
 @Component
 public class PermissionCheckingUtils {
@@ -36,6 +36,19 @@ public class PermissionCheckingUtils {
 
     @Inject
     private UserOrgPermissionsService userOrgPermissionsService;
+
+    public void checkPermissionByOrgIdForCurrentUser(Long organizationId, OrganizationResource resource, Action action) {
+        UserOrgPermissions userOrgPermissions = userOrgPermissionsService.findForCurrentUserByOrganizationId(organizationId);
+        if (userOrgPermissions != null) {
+            Set<String> permissionSet = userOrgPermissions.getPermissionSet();
+            boolean hasPermission = OrganizationPermissions.hasPermission(permissionSet, resource, action);
+            if (!hasPermission) {
+                throw new AccessDeniedException(format("You cannot modify this %s", resource));
+            }
+        } else {
+            throw new AccessDeniedException(format("You cannot modify this %s", resource));
+        }
+    }
 
     public void checkPermissionsByTarget(Object target, User user, OrganizationResource resource, Action action) {
         Iterable<?> iterableTarget = targetToIterable(target);

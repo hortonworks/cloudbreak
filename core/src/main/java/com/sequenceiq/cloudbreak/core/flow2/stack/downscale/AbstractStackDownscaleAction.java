@@ -62,7 +62,7 @@ public abstract class AbstractStackDownscaleAction<P extends Payload>
     @Override
     protected StackScalingFlowContext createFlowContext(String flowId, StateContext<StackDownscaleState, StackDownscaleEvent> stateContext, P payload) {
         Map<Object, Object> variables = stateContext.getExtendedState().getVariables();
-        Stack stack = stackService.getByIdWithLists(payload.getStackId());
+        Stack stack = stackService.getByIdWithListsWithoutAuthorization(payload.getStackId());
         MDCBuilder.buildMdcContext(stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getOwner(), stack.getPlatformVariant(),

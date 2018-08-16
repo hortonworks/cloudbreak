@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.Optional;
 
 import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +37,7 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -114,7 +116,12 @@ public class StackCreatorService {
     @Inject
     private OrganizationService organizationService;
 
-    public StackResponse createStack(IdentityUser user, StackRequest stackRequest, boolean publicInAccount) {
+    public StackResponse createStackInDefaultOrg(IdentityUser user, StackRequest stackRequest) {
+        Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
+        return createStack(user, stackRequest, organization);
+    }
+
+    public StackResponse createStack(IdentityUser user, StackRequest stackRequest, @NotNull Organization organization) {
         ValidationResult validationResult = stackRequestValidator.validate(stackRequest);
         if (validationResult.getState() == State.ERROR) {
             LOGGER.info("Stack request has validation error(s): {}.", validationResult.getFormattedErrors());
@@ -131,8 +138,7 @@ public class StackCreatorService {
                 long start = System.currentTimeMillis();
                 Stack stack = conversionService.convert(stackRequest, Stack.class);
 
-                // TODO: add organization based on requested org id later
-                stack.setOrganization(organizationService.getDefaultOrganizationForCurrentUser());
+                stack.setOrganization(organization);
 
                 String stackName = stack.getName();
                 LOGGER.info("Stack request converted to stack in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
@@ -146,8 +152,6 @@ public class StackCreatorService {
                 start = System.currentTimeMillis();
                 stack = stackDecorator.decorate(stack, stackRequest, user);
                 LOGGER.info("Stack object has been decorated in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
-
-                stack.setPublicInAccount(publicInAccount);
 
                 start = System.currentTimeMillis();
                 validateAccountPreferences(stack, user);

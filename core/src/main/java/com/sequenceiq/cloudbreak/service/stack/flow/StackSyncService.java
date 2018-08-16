@@ -119,7 +119,7 @@ public class StackSyncService {
     }
 
     public void sync(Long stackId, boolean stackStatusUpdateEnabled) {
-        Stack stack = stackService.getByIdWithLists(stackId);
+        Stack stack = stackService.getByIdWithListsWithoutAuthorization(stackId);
         if (stack.isStackInDeletionPhase() || stack.isModificationInProgress()) {
             LOGGER.warn("Stack could not be synchronized in {} state!", stack.getStatus());
         } else {

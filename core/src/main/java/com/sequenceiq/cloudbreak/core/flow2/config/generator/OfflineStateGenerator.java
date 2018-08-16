@@ -60,6 +60,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleConfig;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.domain.Network;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
@@ -272,92 +273,67 @@ public class OfflineStateGenerator {
         }
 
         @Override
-        public Set<Stack> findForUserWithLists(String user) {
+        public Set<Stack> findForOrganizationIdWithLists(Long orgId) {
             return null;
         }
 
         @Override
-        public Set<Stack> findForUser(String user) {
+        public Stack findByNameAndOrganizationId(String name, Long orgId) {
             return null;
         }
 
         @Override
-        public Set<Stack> findPublicInAccountForUser(String user, String account) {
+        public Stack findByNameAndOrganizationIdWithLists(String name, Long orgId) {
             return null;
         }
 
         @Override
-        public Set<Stack> findAllInAccountWithLists(String account) {
-            return null;
-        }
-
-        @Override
-        public Set<Stack> findAllInAccount(String account) {
-            return null;
-        }
-
-        @Override
-        public Stack findOneWithLists(Long id) {
+        public Stack findOneWithListsWithoutAuthorization(Long id) {
             return new Stack();
         }
 
         @Override
-        public Set<Stack> findEphemeralClusters(Long id) {
+        public Stack findOneWithLists(Long id) {
             return null;
         }
 
         @Override
-        public List<Stack> findAllStackForTemplate(Long id) {
+        public Optional<Stack> findByIdWithoutAuth(Long id) {
+            return Optional.empty();
+        }
+
+        @Override
+        public Set<Stack> findEphemeralClustersWithoutAuth(Long id) {
             return null;
         }
 
         @Override
-        public List<Object[]> findStackStatuses(Set<Long> ids) {
+        public List<Stack> findAllStackForTemplateWithoutAuth(Long id) {
             return null;
         }
 
         @Override
-        public Stack findStackForCluster(Long id) {
+        public List<Object[]> findStackStatusesWithoutAuth(Set<Long> ids) {
             return null;
         }
 
         @Override
-        public Stack findByIdInAccount(Long id, String account) {
+        public Stack findStackForClusterWithoutAuth(Long id) {
             return null;
         }
 
         @Override
-        public Stack findByNameInAccountOrOwner(String name, String account, String owner) {
+        public Stack findByNameInOrganizationWithLists(String name, Organization organization) {
             return null;
         }
 
         @Override
-        public Stack findByNameInAccountWithLists(String name, String account) {
+        public List<Stack> findAllAliveWithoutAuth() {
             return null;
         }
 
         @Override
-        public Stack findByNameInAccount(String name, String account) {
-            return null;
-        }
-
-        @Override
-        public Stack findByNameInUserWithLists(String name, String owner) {
-            return null;
-        }
-
-        @Override
-        public Stack findByNameInUser(String name, String owner) {
-            return null;
-        }
-
-        @Override
-        public List<Stack> findAllAlive() {
-            return null;
-        }
-
-        @Override
-        public List<Stack> findAllAliveAndProvisioned() {
+        public List<Stack> findAllAliveAndProvisionedWithoutAuth() {
             return null;
         }
 
@@ -367,12 +343,12 @@ public class OfflineStateGenerator {
         }
 
         @Override
-        public List<Stack> findByStatuses(List<Status> statuses) {
+        public List<Stack> findByStatusesWithoutAuth(List<Status> statuses) {
             return null;
         }
 
         @Override
-        public Set<Stack> findAliveOnes() {
+        public Set<Stack> findAliveOnesWithoutAuthorization() {
             return null;
         }
 
@@ -454,6 +430,21 @@ public class OfflineStateGenerator {
         @Override
         public void deleteAll() {
 
+        }
+
+        @Override
+        public Set<Stack> findAllByOrganization(Organization organization) {
+            return null;
+        }
+
+        @Override
+        public Stack findByNameAndOrganization(String name, Organization organization) {
+            return null;
+        }
+
+        @Override
+        public Set<Stack> findAllByOrganizationId(Long organizationId) {
+            return null;
         }
     }
 

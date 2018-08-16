@@ -56,7 +56,7 @@ public class LdapSSOConfigurationHandler implements ReactorEventHandler<LdapSSOC
         Long stackId = ldapConfigurationRequestEvent.getData().getStackId();
         Selectable response;
         try {
-            Stack stack = stackService.getByIdWithLists(stackId);
+            Stack stack = stackService.getByIdWithListsWithoutAuthorization(stackId);
             AmbariRepo ambariRepo = clusterComponentConfigProvider.getAmbariRepo(stack.getCluster().getId());
             if (ambariRepositoryVersionService.setupLdapAndSsoOnApi(ambariRepo)) {
                 LOGGER.info("Setup LDAP and SSO on API");

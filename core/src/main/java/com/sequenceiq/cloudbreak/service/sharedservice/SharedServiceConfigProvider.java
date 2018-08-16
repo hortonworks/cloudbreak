@@ -29,7 +29,6 @@ import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
 import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintParameterQueryService;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.BlueprintInputParameters;
@@ -57,10 +56,10 @@ public class SharedServiceConfigProvider {
     @Inject
     private CentralBlueprintParameterQueryService centralBlueprintParameterQueryService;
 
-    public Cluster configureCluster(@Nonnull Cluster requestedCluster, IdentityUser user, ConnectedClusterRequest connectedClusterRequest) {
+    public Cluster configureCluster(@Nonnull Cluster requestedCluster, ConnectedClusterRequest connectedClusterRequest) {
         Objects.requireNonNull(requestedCluster);
         if (connectedClusterRequest != null) {
-            Stack publicStack = queryStack(user, connectedClusterRequest.getSourceClusterId(),
+            Stack publicStack = queryStack(connectedClusterRequest.getSourceClusterId(),
                     Optional.ofNullable(connectedClusterRequest.getSourceClusterName()));
             Cluster sourceCluster = queryCluster(publicStack);
             if (sourceCluster != null) {
@@ -171,8 +170,8 @@ public class SharedServiceConfigProvider {
         return clusterService.getById(publicStack.getCluster().getId());
     }
 
-    private Stack queryStack(IdentityUser user, Long sourceClusterId, Optional<String> sourceClusterName) {
-        return sourceClusterName.isPresent() ? stackService.getPublicStack(sourceClusterName.get(), user) : stackService.getById(sourceClusterId);
+    private Stack queryStack(Long sourceClusterId, Optional<String> sourceClusterName) {
+        return sourceClusterName.isPresent() ? stackService.getByNameInDefaultOrg(sourceClusterName.get()) : stackService.getById(sourceClusterId);
     }
 
     private void setupLdap(Cluster requestedCluster, Stack publicStack) {

@@ -97,7 +97,7 @@ public class AmbariClusterServiceTest {
         stack.setOrchestrator(new Orchestrator());
         stack.setCluster(cluster);
         when(clusterRepository.findById(any(Long.class))).thenReturn(Optional.of(cluster));
-        when(stackService.getByIdWithLists(any(Long.class))).thenReturn(stack);
+        when(stackService.getByIdWithListsWithoutAuthorization(any(Long.class))).thenReturn(stack);
         when(orchestratorTypeResolver.resolveType(nullable(Orchestrator.class))).thenReturn(OrchestratorType.HOST);
         when(orchestratorTypeResolver.resolveType(nullable(String.class))).thenReturn(OrchestratorType.HOST);
         when(clusterComponentConfigProvider.getHDPRepo(any(Long.class))).thenReturn(new StackRepoDetails());

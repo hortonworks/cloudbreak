@@ -5,9 +5,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.time.Instant;
-import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import org.assertj.core.util.Lists;
@@ -20,12 +17,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.model.stack.StackImageChangeRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRepairRequest;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.OperationRetryService;
+import com.sequenceiq.cloudbreak.service.StackCommonService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
@@ -34,13 +29,10 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 @RunWith(MockitoJUnitRunner.class)
 public class StackV2ControllerTest {
 
-    private static final long ORG_ID = 100L;
+    private static final Long ORGANIZATION_ID = 1L;
 
     @InjectMocks
     private StackV2Controller underTest;
-
-    @Mock
-    private AuthenticatedUserService authenticatedUserService;
 
     @Mock
     private StackService stackService;
@@ -57,29 +49,31 @@ public class StackV2ControllerTest {
     @Mock
     private OrganizationService organizationService;
 
-    private IdentityUser identityUser;
+    @Mock
+    private StackCommonService stackCommonService;
 
     private Stack stack;
 
     @Before
     public void setUp() {
-        identityUser = new IdentityUser("userId", "username", "account", Collections.emptyList(),
-                "givenName", "familyName", Date.from(Instant.now()));
-        when(authenticatedUserService.getCbUser()).thenReturn(identityUser);
 
         String stackName = "stack-name";
         stack = new Stack();
         stack.setId(1L);
         stack.setName(stackName);
+        Organization organization = new Organization();
+        organization.setId(ORGANIZATION_ID);
+        organization.setName("Top Sercet FBI");
 
-        when(stackService.getPublicStack(eq(stackName), eq(identityUser))).thenReturn(stack);
+        when(stackService.getByNameInDefaultOrg(eq(stackName))).thenReturn(stack);
+        when(organizationService.getDefaultOrganizationForCurrentUser()).thenReturn(organization);
     }
 
     @Test
     public void retry() {
         underTest.retry(stack.getName());
 
-        verify(operationRetryService, times(1)).retry(stack);
+        verify(stackCommonService, times(1)).retryInOrganization(stack.getName(), ORGANIZATION_ID);
     }
 
     @Test
@@ -99,26 +93,6 @@ public class StackV2ControllerTest {
         StackImageChangeRequest stackImageChangeRequest = new StackImageChangeRequest();
         stackImageChangeRequest.setImageId("asdf");
         underTest.changeImage(stack.getName(), stackImageChangeRequest);
-
-        verify(stackService).updateImage(eq(stack.getId()), eq(stackImageChangeRequest.getImageId()), eq(null), eq(null));
-    }
-
-    @Test
-    public void testChangeImageWithImageCatalog() {
-        ImageCatalog imageCatalog = new ImageCatalog();
-        imageCatalog.setName("hgfjfg");
-        imageCatalog.setImageCatalogUrl("url");
-        Organization organization = new Organization();
-        organization.setId(ORG_ID);
-        when(organizationService.getDefaultOrganizationForCurrentUser()).thenReturn(organization);
-        when(imageCatalogService.get(eq(ORG_ID), eq(imageCatalog.getName()))).thenReturn(imageCatalog);
-
-        StackImageChangeRequest stackImageChangeRequest = new StackImageChangeRequest();
-        stackImageChangeRequest.setImageId("asdf");
-        stackImageChangeRequest.setImageCatalogName(imageCatalog.getName());
-        underTest.changeImage(stack.getName(), stackImageChangeRequest);
-
-        verify(stackService).updateImage(eq(stack.getId()), eq(stackImageChangeRequest.getImageId()), eq(imageCatalog.getName()),
-                eq(imageCatalog.getImageCatalogUrl()));
+        verify(stackCommonService).changeImageByNameInOrg(eq(stack.getName()), eq(ORGANIZATION_ID), eq(stackImageChangeRequest));
     }
 }

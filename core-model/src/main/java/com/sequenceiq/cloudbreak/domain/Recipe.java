@@ -11,7 +11,6 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 
 import com.sequenceiq.cloudbreak.api.model.RecipeType;
 import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
@@ -20,7 +19,7 @@ import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.organization.OrganizationAwareResource;
 
 @Entity
-@Table(name = "recipe", uniqueConstraints = @UniqueConstraint(columnNames = {"account", "name"}))
+@Table(name = "recipe")
 public class Recipe implements ProvisionEntity, OrganizationAwareResource {
 
     @Id

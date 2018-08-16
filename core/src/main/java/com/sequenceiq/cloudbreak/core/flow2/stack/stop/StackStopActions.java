@@ -132,7 +132,7 @@ public class StackStopActions {
         @Override
         protected StackStartStopContext createFlowContext(String flowId, StateContext<StackStopState, StackStopEvent> stateContext, P payload) {
             Long stackId = payload.getStackId();
-            Stack stack = stackService.getByIdWithLists(stackId);
+            Stack stack = stackService.getByIdWithListsWithoutAuthorization(stackId);
             MDCBuilder.buildMdcContext(stack);
             List<InstanceMetaData> instances = new ArrayList<>(instanceMetaDataRepository.findNotTerminatedForStack(stackId));
             Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));

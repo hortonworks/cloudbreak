@@ -173,7 +173,7 @@ public class StackImageUpdateActionsTest {
         stack.setId(1L);
         stack.setRegion("region");
         stack.setAvailabilityZone("az");
-        when(stackService.getByIdWithLists(anyLong())).thenReturn(stack);
+        when(stackService.getByIdWithListsWithoutAuthorization(anyLong())).thenReturn(stack);
         when(stackService.getById(anyLong())).thenReturn(stack);
 
         variables.clear();
@@ -298,7 +298,7 @@ public class StackImageUpdateActionsTest {
                 new StackFailureEvent(StackImageUpdateEvent.STACK_IMAGE_UPDATE_FAILED_EVENT.event(), 1L, new CloudbreakServiceException("test"));
         when(stateContext.getMessageHeader(MessageFactory.HEADERS.DATA.name())).thenReturn(payload);
         when(state.getId()).thenReturn(StackImageUpdateState.STACK_IMAGE_UPDATE_FAILED_STATE);
-        when(stackService.getByIdView(anyLong())).thenReturn(new StackView(1L, null, null, null, null));
+        when(stackService.getViewByIdWithoutAuth(anyLong())).thenReturn(new StackView(1L, null, null, null, null));
         when(runningFlows.get(anyString())).thenReturn(flow);
 
         handleImageUpdateFailureAction.execute(stateContext);

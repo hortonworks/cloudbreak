@@ -20,7 +20,7 @@ public class ClusterStartFlowTriggerCondition implements FlowTriggerCondition {
 
     @Override
     public boolean isFlowTriggerable(Long stackId) {
-        StackView stackView = stackService.getByIdView(stackId);
+        StackView stackView = stackService.getViewByIdWithoutAuth(stackId);
         ClusterView clusterView = stackView.getClusterView();
         boolean result = clusterView != null && clusterView.isStartRequested();
         if (!result) {

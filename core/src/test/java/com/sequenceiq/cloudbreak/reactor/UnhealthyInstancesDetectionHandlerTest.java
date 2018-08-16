@@ -58,7 +58,7 @@ public class UnhealthyInstancesDetectionHandlerTest {
 
         Stack stack = mock(Stack.class);
         when(stack.getId()).thenReturn(stackId);
-        when(stackService.getById(stackId)).thenReturn(stack);
+        when(stackService.getByIdWithoutAuth(stackId)).thenReturn(stack);
 
         when(candidateUnhealthyInstanceSelector.selectCandidateUnhealthyInstances(stackId)).thenReturn(Collections.emptySet());
 
@@ -77,7 +77,7 @@ public class UnhealthyInstancesDetectionHandlerTest {
         when(event.getData()).thenReturn(unhealthyInstancesDetectionRequest);
 
         Stack stack = mock(Stack.class);
-        when(stackService.getById(stackId)).thenReturn(stack);
+        when(stackService.getByIdWithoutAuth(stackId)).thenReturn(stack);
         Set<InstanceMetaData> unhealthyInstances = new HashSet<>();
         InstanceMetaData imd1 = mock(InstanceMetaData.class);
         InstanceMetaData imd2 = mock(InstanceMetaData.class);
