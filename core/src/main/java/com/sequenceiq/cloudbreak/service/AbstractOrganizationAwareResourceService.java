@@ -127,7 +127,7 @@ public abstract class AbstractOrganizationAwareResourceService<T extends Organiz
         return delete(toBeDeleted);
     }
 
-    private void setOrganization(T resource, User user, Organization organization) {
+    protected void setOrganization(T resource, User user, Organization organization) {
         Set<Organization> usersOrganizations = organizationService.retrieveForUser(user);
         if (!usersOrganizations.contains(organization)) {
             throw new NotFoundException("Organization not found for user.");

@@ -10,11 +10,13 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.OrganizationAwareResource;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"account", "name"}))
-public class FlexSubscription implements ProvisionEntity {
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"subscriptionid", "organization_id"}))
+public class FlexSubscription implements ProvisionEntity, OrganizationAwareResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "flexsubscription_generator")
@@ -30,13 +32,13 @@ public class FlexSubscription implements ProvisionEntity {
     @ManyToOne
     private SmartSenseSubscription smartSenseSubscription;
 
-    @Column(nullable = false)
+    @Column
     private String owner;
 
-    @Column(nullable = false)
+    @Column
     private String account;
 
-    @Column(nullable = false)
+    @Column
     private boolean publicInAccount;
 
     @Column
@@ -54,6 +56,11 @@ public class FlexSubscription implements ProvisionEntity {
 
     public void setOrganization(Organization organization) {
         this.organization = organization;
+    }
+
+    @Override
+    public OrganizationResource getResource() {
+        return OrganizationResource.FLEXSUBSCRIPTION;
     }
 
     public Long getId() {

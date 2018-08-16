@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.authorization.OrganizationPermissions.Ac
 import static com.sequenceiq.cloudbreak.authorization.OrganizationResource.ALL;
 import static com.sequenceiq.cloudbreak.authorization.OrganizationResource.BLUEPRINT;
 import static com.sequenceiq.cloudbreak.authorization.OrganizationResource.CREDENTIAL;
+import static com.sequenceiq.cloudbreak.authorization.OrganizationResource.FLEXSUBSCRIPTION;
 import static com.sequenceiq.cloudbreak.authorization.OrganizationResource.IMAGECATALOG;
 import static com.sequenceiq.cloudbreak.authorization.OrganizationResource.LDAP;
 import static com.sequenceiq.cloudbreak.authorization.OrganizationResource.MPACK;
@@ -51,7 +52,10 @@ public enum OrganizationPermissions {
     PROXYCONFIG_WRITE(PROXY, WRITE, "Read proxy configs in an organization."),
 
     MANAGEMENTPACK_READ(MPACK, READ, "Write management pack configs in an organization."),
-    MANAGEMENTPACK_WRITE(MPACK, WRITE, "Write management pack configs in an organization.");
+    MANAGEMENTPACK_WRITE(MPACK, WRITE, "Write management pack configs in an organization."),
+
+    FLEXSUBSCRIPTION_READ(FLEXSUBSCRIPTION, READ, "Write management pack configs in an organization."),
+    FLEXSUBSCRIPTION_WRITE(FLEXSUBSCRIPTION, WRITE, "Write management pack configs in an organization.");
 
     private final String name;
 

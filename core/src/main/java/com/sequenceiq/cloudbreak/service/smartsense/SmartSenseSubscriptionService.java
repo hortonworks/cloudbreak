@@ -29,7 +29,6 @@ import com.sequenceiq.cloudbreak.controller.exception.SmartSenseConfigurationNot
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.repository.SmartSenseSubscriptionRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
-import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
 
 @Service
 public class SmartSenseSubscriptionService {
@@ -38,9 +37,6 @@ public class SmartSenseSubscriptionService {
 
     @Inject
     private SmartSenseSubscriptionRepository smartSenseSubscriptionRepository;
-
-    @Inject
-    private FlexSubscriptionService flexSubscriptionService;
 
     @Inject
     private AuthorizationService authorizationService;
@@ -72,24 +68,6 @@ public class SmartSenseSubscriptionService {
 
     public SmartSenseSubscription update(SmartSenseSubscription subscription) {
         return smartSenseSubscriptionRepository.save(subscription);
-    }
-
-    public void delete(SmartSenseSubscription subscription) {
-        if (!flexSubscriptionService.hasBySmartSenseSubscription(subscription)) {
-            throw new BadRequestException("Subscription could not be deleted, because it is assigned to Flex subscription(s).");
-        }
-        smartSenseSubscriptionRepository.delete(subscription);
-        LOGGER.info("SmartSense subscription has been deleted: {}", subscription);
-    }
-
-    public void delete(Long id) {
-        SmartSenseSubscription subscription = smartSenseSubscriptionRepository.findById(id).orElseThrow(notFound("SmartSense subscription", id));
-        delete(subscription);
-    }
-
-    public void delete(String subscriptionId, IdentityUser cbUser) {
-        SmartSenseSubscription subscription = smartSenseSubscriptionRepository.findBySubscriptionIdAndAccount(subscriptionId, cbUser.getAccount());
-        delete(subscription);
     }
 
     public SmartSenseSubscription findById(Long id) {

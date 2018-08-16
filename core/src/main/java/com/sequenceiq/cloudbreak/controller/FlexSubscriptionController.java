@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.controller;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -15,9 +16,8 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.converter.FlexSubscriptionRequestToFlexSubscriptionConverter;
 import com.sequenceiq.cloudbreak.converter.FlexSubscriptionToJsonConverter;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
-import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
-import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 
@@ -53,37 +53,28 @@ public class FlexSubscriptionController implements FlexSubscriptionEndpoint {
 
     @Override
     public void deletePublic(String name) {
-        IdentityUser cbUser = authenticatedUserService.getCbUser();
-        FlexSubscription subscription = flexSubscriptionService.findByNameInAccount(name, cbUser.getUserId(), cbUser.getAccount());
-        flexSubscriptionService.delete(subscription);
+        flexSubscriptionService.deleteByNameFromDefaultOrganization(name);
     }
 
     @Override
     public void deletePrivate(String name) {
-        FlexSubscription subscription = flexSubscriptionService.findOneByName(name);
-        flexSubscriptionService.delete(subscription);
+        flexSubscriptionService.deleteByNameFromDefaultOrganization(name);
     }
 
     @Override
     public FlexSubscriptionResponse postPublic(FlexSubscriptionRequest flexSubscription) {
-        try {
-            return createFlexSubscription(flexSubscription, true);
-        } catch (TransactionExecutionException e) {
-            throw new TransactionRuntimeExecutionException(e);
-        }
+        return createFlexSubscription(flexSubscription);
     }
 
     @Override
     public List<FlexSubscriptionResponse> getPublics() {
-        IdentityUser identityUser = authenticatedUserService.getCbUser();
-        List<FlexSubscription> subscriptions = flexSubscriptionService.findPublicInAccountForUser(identityUser);
+        Set<FlexSubscription> subscriptions = flexSubscriptionService.findAllForUsersDefaultOrganization();
         return toJsonConverter.convert(subscriptions);
     }
 
     @Override
     public FlexSubscriptionResponse getPublic(String name) {
-        IdentityUser identityUser = authenticatedUserService.getCbUser();
-        FlexSubscription subscription = flexSubscriptionService.findByNameInAccount(name, identityUser.getUserId(), identityUser.getAccount());
+        FlexSubscription subscription = flexSubscriptionService.getByNameFromUsersDefaultOrganization(name);
         return toJsonConverter.convert(subscription);
     }
 
@@ -101,23 +92,18 @@ public class FlexSubscriptionController implements FlexSubscriptionEndpoint {
 
     @Override
     public FlexSubscriptionResponse postPrivate(FlexSubscriptionRequest flexSubscription) {
-        try {
-            return createFlexSubscription(flexSubscription, false);
-        } catch (TransactionExecutionException e) {
-            throw new TransactionRuntimeExecutionException(e);
-        }
+        return createFlexSubscription(flexSubscription);
     }
 
     @Override
     public List<FlexSubscriptionResponse> getPrivates() {
-        IdentityUser identityUser = authenticatedUserService.getCbUser();
-        List<FlexSubscription> subscriptions = flexSubscriptionService.findByOwner(identityUser.getUserId());
+        Set<FlexSubscription> subscriptions = flexSubscriptionService.findAllForUsersDefaultOrganization();
         return toJsonConverter.convert(subscriptions);
     }
 
     @Override
     public FlexSubscriptionResponse getPrivate(String name) {
-        FlexSubscription subscription = flexSubscriptionService.findOneByName(name);
+        FlexSubscription subscription = flexSubscriptionService.getByNameFromUsersDefaultOrganization(name);
         return toJsonConverter.convert(subscription);
     }
 
@@ -135,15 +121,10 @@ public class FlexSubscriptionController implements FlexSubscriptionEndpoint {
         flexSubscriptionService.setUsedForControllerFlexSubscription(flexSubscription.getName(), identityUser);
     }
 
-    private FlexSubscriptionResponse createFlexSubscription(FlexSubscriptionRequest json, boolean publicInAccount) throws TransactionExecutionException {
-        IdentityUser identityUser = authenticatedUserService.getCbUser();
+    private FlexSubscriptionResponse createFlexSubscription(FlexSubscriptionRequest json) {
         FlexSubscription subscription = toFlexSubscriptionConverter.convert(json);
-        subscription.setAccount(identityUser.getAccount());
-        subscription.setOwner(identityUser.getUserId());
-        subscription.setPublicInAccount(publicInAccount);
-        // TODO: set org from requested org id later
-        subscription.setOrganization(organizationService.getDefaultOrganizationForCurrentUser());
-        subscription = flexSubscriptionService.create(subscription);
+        Organization defaultOrganizationForCurrentUser = organizationService.getDefaultOrganizationForCurrentUser();
+        subscription = flexSubscriptionService.create(subscription, defaultOrganizationForCurrentUser);
         return toJsonConverter.convert(subscription);
     }
 }
