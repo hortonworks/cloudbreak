@@ -110,4 +110,10 @@ public class ImageCatalogV3Controller extends NotificationController implements 
     public ImageCatalogResponse putSetDefaultByNameInOrganization(Long organizationId, String name) {
         return conversionService.convert(imageCatalogService.setAsDefault(organizationId, name), ImageCatalogResponse.class);
     }
+
+    @Override
+    public ImageCatalogRequest getRequestFromName(Long organizationId, String name) {
+        ImageCatalog imageCatalog = imageCatalogService.get(organizationId, name);
+        return conversionService.convert(imageCatalog, ImageCatalogRequest.class);
+    }
 }

@@ -107,4 +107,11 @@ public interface ImageCatalogV3Endpoint {
             nickname = "putSetDefaultImageCatalogByNameInOrganization")
     ImageCatalogResponse putSetDefaultByNameInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
 
+    @GET
+    @Path("{name}/request")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ImageCatalogOpDescription.GET_BY_IMAGE_CATALOG_NAME, produces = ContentType.JSON,
+            notes = IMAGE_CATALOG_NOTES, nickname = "getImageCatalogRequestFromName")
+    ImageCatalogRequest getRequestFromName(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
+
 }
