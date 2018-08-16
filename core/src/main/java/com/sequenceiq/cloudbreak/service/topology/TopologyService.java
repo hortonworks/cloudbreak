@@ -11,6 +11,7 @@ import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -24,7 +25,6 @@ import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.Topology;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.repository.TopologyRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
@@ -44,7 +44,7 @@ public class TopologyService {
     private TopologyRepository topologyRepository;
 
     @Inject
-    private CredentialRepository credentialRepository;
+    private CredentialService credentialService;
 
     @Inject
     private TemplateService templateService;
@@ -92,7 +92,7 @@ public class TopologyService {
     }
 
     private void delete(Topology topology) {
-        Set<Credential> credentialsByTopology = credentialRepository.findByTopology(topology);
+        Set<Credential> credentialsByTopology = credentialService.findAllCredentialByTopology(topology);
         Set<Template> templatesByTopology = templateService.findByTopology(topology);
         Set<Network> networksByTopology = networkService.findByTopology(topology);
         if (!credentialsByTopology.isEmpty() || !templatesByTopology.isEmpty() || !networksByTopology.isEmpty()) {

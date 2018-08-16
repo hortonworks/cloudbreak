@@ -30,7 +30,7 @@ public class CredentialSourceDecorator {
     public Credential decorate(Credential credential, CredentialSourceRequest credentialSourceRequest, IdentityUser user) {
         if (credential == null) {
             credential = Strings.isNullOrEmpty(credentialSourceRequest.getSourceName()) ? credentialService.get(credentialSourceRequest.getSourceId())
-                    : credentialService.get(credentialSourceRequest.getSourceName(), user.getAccount());
+                    : credentialService.getByNameFromUsersDefaultOrganization(credentialSourceRequest.getSourceName());
 
             if (credential == null) {
                 throw new BadRequestException("Source credential does not exist!");

@@ -109,7 +109,7 @@ public class StackDecorator {
     private List<ParameterValidator> parameterValidators;
 
     public Stack decorate(@Nonnull Stack subject, @Nonnull StackRequest request, IdentityUser user) {
-        prepareCredential(subject, request, user);
+        prepareCredential(subject, request);
         prepareDomainIfDefined(subject, request, user);
         Long credentialId = request.getCredentialId();
         String credentialName = request.getCredentialName();
@@ -185,14 +185,14 @@ public class StackDecorator {
         return hasConfiguredLdap;
     }
 
-    private void prepareCredential(Stack subject, StackRequest request, IdentityUser user) {
+    private void prepareCredential(Stack subject, StackRequest request) {
         if (subject.getCredential() == null) {
             if (request.getCredentialId() != null) {
                 Credential credential = credentialService.get(request.getCredentialId());
                 subject.setCredential(credential);
             }
             if (request.getCredentialName() != null) {
-                Credential credential = credentialService.getPublicCredential(request.getCredentialName(), user);
+                Credential credential = credentialService.getByNameFromUsersDefaultOrganization(request.getCredentialName());
                 subject.setCredential(credential);
             }
         }
@@ -300,7 +300,7 @@ public class StackDecorator {
             if (credentialForStack.getId() == null) {
                 credentialForStack.setPublicInAccount(subject.isPublicInAccount());
                 credentialForStack.setCloudPlatform(getCloudPlatform(subject, request, credentialForStack.cloudPlatform()));
-                credentialForStack = credentialService.create(user, credentialForStack);
+                credentialForStack = credentialService.create(credentialForStack);
             }
             subject.setCredential(credentialForStack);
         }

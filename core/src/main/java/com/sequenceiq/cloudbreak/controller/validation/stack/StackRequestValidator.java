@@ -139,16 +139,16 @@ public class StackRequestValidator implements Validator<StackRequest> {
                 return valueForTypeKey != null && EncryptionType.CUSTOM.equals(getEncryptionIfTypeMatches(valueForTypeKey));
             })
             .forEach(request -> checkEncryptionKeyValidityForInstanceGroupWhenKeysAreListable(request, stackRequest.getCredentialName(),
-                    stackRequest.getAccount(), stackRequest.getRegion(), validationBuilder));
+                    stackRequest.getRegion(), validationBuilder));
     }
 
     private EncryptionType getEncryptionIfTypeMatches(Object o) {
         return o instanceof EncryptionType ? (EncryptionType) o : null;
     }
 
-    private void checkEncryptionKeyValidityForInstanceGroupWhenKeysAreListable(InstanceGroupRequest instanceGroupRequest, String credentialName, String account,
+    private void checkEncryptionKeyValidityForInstanceGroupWhenKeysAreListable(InstanceGroupRequest instanceGroupRequest, String credentialName,
                     String region, ValidationResultBuilder validationBuilder) {
-        Credential cred = credentialService.get(credentialName, account);
+        Credential cred = credentialService.getByNameFromUsersDefaultOrganization(credentialName);
         Optional<PlatformEncryptionKeysResponse> keys = getEncryptionKeysWithExceptionHandling(cred.getId(), region, cred.getOwner(), cred.getOwner());
         if (keys.isPresent() && !keys.get().getEncryptionKeyConfigs().isEmpty()) {
             if (!instanceGroupRequest.getTemplate().getParameters().containsKey(KEY)) {

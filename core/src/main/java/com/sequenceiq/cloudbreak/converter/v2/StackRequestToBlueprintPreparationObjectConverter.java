@@ -115,7 +115,7 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
         try {
             IdentityUser identityUser = cachedUserDetailsService.getDetails(source.getOwner(), UserFilterField.USERID);
             Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
-            Credential credential = credentialService.get(source.getGeneral().getCredentialName(), identityUser.getAccount());
+            Credential credential = credentialService.getByNameFromUsersDefaultOrganization(source.getGeneral().getCredentialName());
             Optional<FlexSubscription> flexSubscription = getFlexSubscription(source);
             SmartSenseSubscription smartsenseSubscription = flexSubscription.isPresent() ? flexSubscription.get().getSmartSenseSubscription() : null;
             KerberosConfig kerberosConfig = getKerberosConfig(source);
