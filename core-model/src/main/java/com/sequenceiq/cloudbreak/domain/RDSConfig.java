@@ -23,7 +23,7 @@ import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 
 @Entity
-@Table(name = "RDSConfig", uniqueConstraints = @UniqueConstraint(columnNames = {"account", "name"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"account", "name"}))
 public class RDSConfig implements ProvisionEntity {
 
     @Id
