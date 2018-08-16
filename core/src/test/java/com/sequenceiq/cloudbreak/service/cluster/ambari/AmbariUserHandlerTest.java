@@ -24,7 +24,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 
 @RunWith(SpringRunner.class)
-@ContextConfiguration(classes = {AmbariUserHandler.class})
+@ContextConfiguration(classes = AmbariUserHandler.class)
 public class AmbariUserHandlerTest {
 
     @Rule
@@ -33,7 +33,7 @@ public class AmbariUserHandlerTest {
     @MockBean
     private AmbariClientFactory ambariClientFactory;
 
-    @InjectMocks
+    @Inject
     private final AmbariUserHandler underTest = new AmbariUserHandler();
 
     @Test

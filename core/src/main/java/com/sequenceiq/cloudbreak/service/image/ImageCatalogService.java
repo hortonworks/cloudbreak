@@ -45,6 +45,7 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateService;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
 import com.sequenceiq.cloudbreak.repository.OrganizationResourceRepository;
 import com.sequenceiq.cloudbreak.service.AbstractOrganizationAwareResourceService;
@@ -103,6 +104,20 @@ public class ImageCatalogService extends AbstractOrganizationAwareResourceServic
 
     @Inject
     private ComponentConfigProvider componentConfigProvider;
+
+    @Override
+    public Set<ImageCatalog> listByOrganizationId(Long organizationId) {
+        Set<ImageCatalog> imageCatalogs = super.listByOrganizationId(organizationId);
+        imageCatalogs.add(getCloudbreakDefaultImageCatalog());
+        return imageCatalogs;
+    }
+
+    @Override
+    public Set<ImageCatalog> listByOrganization(Organization organization) {
+        Set<ImageCatalog> imageCatalogs = repository().findAllByOrganization(organization);
+        imageCatalogs.add(getCloudbreakDefaultImageCatalog());
+        return imageCatalogs;
+    }
 
     public StatedImages getImagesOsFiltered(String provider, String os) throws CloudbreakImageCatalogException {
         StatedImages images = getImages(getDefaultImageCatalog(), provider, cbVersion);
@@ -198,13 +213,7 @@ public class ImageCatalogService extends AbstractOrganizationAwareResourceServic
             image = getImage(imageId);
         } else {
             ImageCatalog imageCatalog = get(organizationId, catalogName);
-            if (imageCatalog != null) {
-                image = getImage(imageCatalog.getImageCatalogUrl(), imageCatalog.getName(), imageId);
-            } else {
-                String msg = String.format("The specified image catalog '%s' could not be found.", catalogName);
-                LOGGER.error(msg);
-                throw new CloudbreakImageNotFoundException(msg);
-            }
+            image = getImage(imageCatalog.getImageCatalogUrl(), imageCatalog.getName(), imageId);
         }
         return image;
     }

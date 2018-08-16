@@ -99,7 +99,7 @@ public abstract class AbstractOrganizationAwareResourceService<T extends Organiz
     @Override
     public Set<T> listForUsersDefaultOrganization() {
         Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
-        return repository().findAllByOrganization(organization);
+        return listByOrganization(organization);
     }
 
     @Override
