@@ -131,7 +131,7 @@ public class AmbariClusterSecurityService implements ClusterSecurityService {
     public void updateUserNamePassword(Stack stack, String newPassword) throws CloudbreakException {
         Cluster cluster = clusterService.getById(stack.getCluster().getId());
         AmbariClient client = clientFactory.getAmbariClient(stack, cluster.getUserName(), cluster.getPassword());
-        changeAmbariPassword(cluster.getUserName(), cluster.getPassword(), newPassword, stack, client);
+        ambariUserHandler.changeAmbariPassword(cluster.getUserName(), cluster.getPassword(), newPassword, stack, client);
     }
 
     @Override
@@ -144,26 +144,11 @@ public class AmbariClusterSecurityService implements ClusterSecurityService {
         ambariUserHandler.createAmbariUser(cloudbreakUserName, cloudbreakPassword, stack, client);
         if (ADMIN.equals(cluster.getUserName())) {
             if (!ADMIN.equals(cluster.getPassword())) {
-                changeAmbariPassword(ADMIN, ADMIN, cluster.getPassword(), stack, client);
+                ambariUserHandler.changeAmbariPassword(ADMIN, ADMIN, cluster.getPassword(), stack, client);
             }
         } else {
             client = ambariUserHandler.createAmbariUser(cluster.getUserName(), cluster.getPassword(), stack, client);
             client.deleteUser(ADMIN);
         }
     }
-
-    private void changeAmbariPassword(String userName, String oldPassword, String newPassword, Stack stack, AmbariClient ambariClient)
-            throws CloudbreakException {
-        try {
-            ambariClient.changePassword(userName, oldPassword, newPassword, true);
-        } catch (Exception e) {
-            try {
-                ambariClient = clientFactory.getAmbariClient(stack, userName, newPassword);
-                ambariClient.ambariServerVersion();
-            } catch (Exception ignored) {
-                throw new CloudbreakException(e.getMessage(), e);
-            }
-        }
-    }
-
 }
