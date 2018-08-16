@@ -11,7 +11,8 @@ public enum OrganizationResource {
     LDAP("LDAP resource", "ldap"),
     RDS("RDS resource", "rds"),
     PROXY("Proxys", "proxy"),
-    MPACK("MPACK resource", "mpack");
+    MPACK("MPACK resource", "mpack"),
+    FLEXSUBSCRIPTION("Flex subscription", "flexsubscription");
 
     private final String readableName;
 

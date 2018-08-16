@@ -3,28 +3,30 @@ package com.sequenceiq.cloudbreak.service.flex;
 import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.Set;
 import java.util.function.BiConsumer;
 
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
-import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.repository.FlexSubscriptionRepository;
-import com.sequenceiq.cloudbreak.service.AuthorizationService;
+import com.sequenceiq.cloudbreak.repository.OrganizationResourceRepository;
+import com.sequenceiq.cloudbreak.service.AbstractOrganizationAwareResourceService;
 import com.sequenceiq.cloudbreak.service.TransactionService;
-import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Service
-public class FlexSubscriptionService {
+public class FlexSubscriptionService extends AbstractOrganizationAwareResourceService<FlexSubscription> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FlexSubscriptionService.class);
 
@@ -35,35 +37,57 @@ public class FlexSubscriptionService {
     private StackService stackService;
 
     @Inject
-    private AuthorizationService authorizationService;
-
-    @Inject
     private TransactionService transactionService;
 
-    public FlexSubscription create(FlexSubscription subscription) throws TransactionExecutionException {
-        if (!flexSubscriptionRepository.countByNameAndAccount(subscription.getName(), subscription.getAccount()).equals(0L)) {
+    @Override
+    public FlexSubscription create(FlexSubscription subscription, @Nonnull Organization organization) {
+        prepareCreation(subscription, organization);
+
+        try {
+            User user = getUserService().getCurrentUser();
+            return transactionService.required(() -> {
+                setOrganization(subscription, user, organization);
+                FlexSubscription updated = flexSubscriptionRepository.save(subscription);
+                Set<FlexSubscription> allInAccount = flexSubscriptionRepository.findAllByOrganization(organization);
+                setSubscriptionAsDefaultIfNeeded(updated, allInAccount);
+                updateSubscriptionsDefaultFlagsIfNeeded(updated, allInAccount);
+                LOGGER.info("Flex subscription has been created: {}", updated);
+                return updated;
+            });
+        } catch (TransactionService.TransactionExecutionException e) {
+            throw new TransactionService.TransactionRuntimeExecutionException(e);
+        }
+    }
+
+    @Override
+    protected OrganizationResourceRepository<FlexSubscription, Long> repository() {
+        return flexSubscriptionRepository;
+    }
+
+    @Override
+    protected OrganizationResource resource() {
+        return OrganizationResource.FLEXSUBSCRIPTION;
+    }
+
+    @Override
+    protected void prepareDeletion(FlexSubscription resource) {
+        if (stackService.countByFlexSubscription(resource) != 0L) {
+            throw new BadRequestException("The given Flex subscription cannot be deleted, there are associated clusters");
+        }
+    }
+
+    private void prepareCreation(FlexSubscription subscription, Organization organization) {
+        if (!flexSubscriptionRepository.countByNameAndOrganization(subscription.getName(), organization).equals(0L)) {
             throw new BadRequestException(String.format("The name: '%s' has already taken by an other FlexSubscription.", subscription.getName()));
-        } else if (!flexSubscriptionRepository.countBySubscriptionId(subscription.getSubscriptionId()).equals(0L)) {
+        } else if (!flexSubscriptionRepository.countBySubscriptionIdAndOrganization(subscription.getSubscriptionId(), organization).equals(0L)) {
             throw new BadRequestException(String.format("The subscriptionId: '%s' has already taken by an other FlexSubscription.",
                     subscription.getSubscriptionId()));
         }
-        return transactionService.required(() -> {
-            FlexSubscription updated = flexSubscriptionRepository.save(subscription);
-
-            List<FlexSubscription> allInAccount = flexSubscriptionRepository.findAllByAccount(updated.getAccount());
-            setSubscriptionAsDefaultIfNeeded(updated, allInAccount);
-            updateSubscriptionsDefaultFlagsIfNeeded(updated, allInAccount);
-            LOGGER.info("Flex subscription has been created: {}", updated);
-            return updated;
-        });
     }
 
-    public void delete(FlexSubscription subscription) {
-        if (stackService.countByFlexSubscription(subscription) != 0L) {
-            throw new BadRequestException("The given Flex subscription cannot be deleted, there are associated clusters");
-        }
-        flexSubscriptionRepository.delete(subscription);
-        LOGGER.info("Flex subscription has been deleted: {}", subscription);
+    @Override
+    protected void prepareCreation(FlexSubscription resource) {
+
     }
 
     public void delete(Long id) {
@@ -71,25 +95,29 @@ public class FlexSubscriptionService {
         delete(subscription);
     }
 
-    public List<FlexSubscription> findByOwner(String owner) {
-        LOGGER.info("Looking for Flex subscriptions for owner: {}", owner);
-        return flexSubscriptionRepository.findAllByOwner(owner);
+    public FlexSubscription findOneByName(String name, IdentityUser user) {
+        Organization organization = getOrganizationService().getDefaultOrganizationForUser(user);
+        return getFlexSubscription(name, organization);
     }
 
-    public FlexSubscription findOneByName(String name) {
-        LOGGER.info("Looking for Flex subscription name id: {}", name);
-        return flexSubscriptionRepository.findByName(name);
+    public FlexSubscription findOneByNameAndOrganization(String name, Long organizationId) {
+        Organization organization = getOrganizationService().get(organizationId);
+        return getFlexSubscription(name, organization);
     }
 
-    public FlexSubscription findByNameInAccount(String name, String owner, String account) {
-        LOGGER.info("Looking for Flex subscription with name: {}, in account: {}", name, account);
-        return flexSubscriptionRepository.findPublicInAccountByNameForUser(name, owner, account);
+    private FlexSubscription getFlexSubscription(String name, Organization organization) {
+        LOGGER.info("Looking for Flex subscription name: {}", name);
+        return flexSubscriptionRepository.findByNameAndOrganization(name, organization);
     }
 
-    public List<FlexSubscription> findPublicInAccountForUser(IdentityUser user) {
+    public Set<FlexSubscription> findAllForUser(IdentityUser user) {
+        Organization organization = getOrganizationService().getDefaultOrganizationForUser(user);
+        return findAllForUserAndOrganization(user, organization.getId());
+    }
+
+    public Set<FlexSubscription> findAllForUserAndOrganization(IdentityUser user, Long organizationId) {
         LOGGER.info("Looking for public Flex subscriptions for user: {}", user.getUsername());
-        return user.getRoles().contains(IdentityUserRole.ADMIN) ? flexSubscriptionRepository.findAllByAccount(user.getAccount())
-                : flexSubscriptionRepository.findAllPublicInAccountForUser(user.getUserId(), user.getAccount());
+        return flexSubscriptionRepository.findAllByOrganizationId(organizationId);
     }
 
     public void setDefaultFlexSubscription(String name, IdentityUser identityUser) {
@@ -125,7 +153,8 @@ public class FlexSubscriptionService {
     }
 
     private void setFlexSubscriptionFlag(String name, IdentityUser identityUser, BiConsumer<FlexSubscription, Boolean> setter) {
-        List<FlexSubscription> allInAccount = flexSubscriptionRepository.findAllByAccount(identityUser.getAccount());
+        Organization organization = getOrganizationService().getDefaultOrganizationForUser(identityUser);
+        Set<FlexSubscription> allInAccount = flexSubscriptionRepository.findAllByOrganization(organization);
         setFlagOnFlexSubscriptionCollection(name, setter, allInAccount);
         flexSubscriptionRepository.saveAll(allInAccount);
     }
@@ -137,10 +166,6 @@ public class FlexSubscriptionService {
         for (FlexSubscription flex : allInAccount) {
             setter.accept(flex, name.equals(flex.getName()));
         }
-    }
-
-    public boolean hasBySmartSenseSubscription(SmartSenseSubscription subscription) {
-        return flexSubscriptionRepository.countBySmartSenseSubscription(subscription).equals(0L);
     }
 
     public FlexSubscription findFirstByUsedForController(boolean usedForController) {
