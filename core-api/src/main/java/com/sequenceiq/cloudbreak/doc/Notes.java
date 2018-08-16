@@ -77,6 +77,7 @@ public class Notes {
             + "was eliminated. The operations will continue at the state, where the previous process failed.";
     public static final String ORGANIZATION_NOTES = "Organizations are a way of grouping resources, organization owners can add users to their organizations"
             + " with different permission sets";
+    public static final String AUDIT_EVENTS_NOTES = "Audit event operations";
 
     private Notes() {
     }

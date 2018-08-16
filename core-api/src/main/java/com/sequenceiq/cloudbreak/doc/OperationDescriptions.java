@@ -434,4 +434,10 @@ public class OperationDescriptions {
     public static class RepositoryConfigsValidationOpDescription {
         public static final String POST_REPOSITORY_CONFIGS_VALIDATION = "validate repository configs fields, check their availability";
     }
+
+    public static class AuditOpDescription {
+        public static final String LIST_IN_ORG = "list audit events for the given organization";
+        public static final String GET_BY_ORG = "Get audit event in organization";
+        public static final String LIST_IN_ORG_ZIP = "list audit events for the given organization in zip file";
+    }
 }
