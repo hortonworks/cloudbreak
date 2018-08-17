@@ -1,10 +1,10 @@
 package com.sequenceiq.cloudbreak.service.organization;
 
 import static com.sequenceiq.cloudbreak.api.model.v2.OrganizationStatus.DELETED;
-import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 import static com.sequenceiq.cloudbreak.authorization.OrganizationPermissions.ALL_READ;
 import static com.sequenceiq.cloudbreak.authorization.OrganizationPermissions.ALL_WRITE;
 import static com.sequenceiq.cloudbreak.authorization.OrganizationPermissions.ORG_MANAGE;
+import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
 import java.util.Calendar;
 import java.util.HashSet;
@@ -23,6 +23,9 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.users.ChangeOrganizationUsersJson;
+import com.sequenceiq.cloudbreak.authorization.OrganizationPermissions;
+import com.sequenceiq.cloudbreak.authorization.OrganizationPermissions.Action;
+import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
@@ -38,9 +41,6 @@ import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecution
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.user.UserOrgPermissionsService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
-import com.sequenceiq.cloudbreak.authorization.OrganizationPermissions;
-import com.sequenceiq.cloudbreak.authorization.OrganizationPermissions.Action;
-import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
 
 @Service
 public class OrganizationService {
