@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 
@@ -24,6 +25,7 @@ import org.mockito.junit.MockitoJUnitRunner.Silent;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.TestContextManager;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.ambari.client.AmbariClient;
@@ -92,6 +94,8 @@ public class StackCollectorServiceModulTest extends StackCollectorContext {
         when(ambariClientProvider.createAmbariClient(any())).thenReturn(ambariClient);
         when(cloudbreakClientConfiguration.cloudbreakClient()).thenReturn(cloudbreakClient);
         when(cloudbreakClient.stackV1Endpoint()).thenReturn(stackV1Endpoint);
+
+        ReflectionTestUtils.setField(rejectedThreadService, "rejectedThreads", new ConcurrentHashMap<>());
     }
 
     @Test

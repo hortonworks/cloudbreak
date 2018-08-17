@@ -108,7 +108,7 @@ public abstract class AbstractOrganizationAwareResourceService<T extends Organiz
 
     @Override
     public T delete(T resource) {
-        LOGGER.info("Deleting proxy configuration with name: {}", resource.getName());
+        LOGGER.info("Deleting resource with name: {}", resource.getName());
         prepareDeletion(resource);
         repository().delete(resource);
         return resource;
