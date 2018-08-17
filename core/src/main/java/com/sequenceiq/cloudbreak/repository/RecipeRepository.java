@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.aspect.DisableHasPermission;
 import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByOrganizationId;
 import com.sequenceiq.cloudbreak.aspect.organization.OrganizationResourceType;
 import com.sequenceiq.cloudbreak.domain.Recipe;
+import com.sequenceiq.cloudbreak.repository.organization.OrganizationResourceRepository;
 import com.sequenceiq.cloudbreak.service.EntityType;
 import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
 

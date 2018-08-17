@@ -135,7 +135,7 @@ public class HostGroupDecorator {
         HostGroup result = subject;
         String instanceGroupName = constraintJson.getInstanceGroupName();
         String constraintTemplateName = constraintJson.getConstraintTemplateName();
-        Cluster cluster = clusterService.retrieveClusterByStackId(stackId);
+        Cluster cluster = clusterService.retrieveClusterByStackIdWithoutAuth(stackId);
         Constraint decoratedConstraint = decorateConstraint(stackId, user, constraint, instanceGroupName, constraintTemplateName);
         if (!isEmpty(instanceGroupName)) {
             result = getHostGroupByInstanceGroupName(decoratedConstraint, subject, cluster, instanceGroupName);

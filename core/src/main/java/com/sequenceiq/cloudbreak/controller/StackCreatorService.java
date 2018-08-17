@@ -209,7 +209,7 @@ public class StackCreatorService {
                 LOGGER.info("Stack object and its dependencies has been created in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
                 try {
-                    createClusterIfNeed(user, organization, stackRequest, stack, stackName, blueprint);
+                    createClusterIfNeed(user, stackRequest, stack, stackName, blueprint);
                 } catch (CloudbreakImageNotFoundException | IOException | TransactionExecutionException e) {
                     throw new RuntimeException(e.getMessage(), e);
                 }
@@ -264,11 +264,11 @@ public class StackCreatorService {
         return stack;
     }
 
-    private void createClusterIfNeed(IdentityUser user, Organization organization, StackRequest stackRequest, Stack stack, String stackName, Blueprint blueprint)
+    private void createClusterIfNeed(IdentityUser user, StackRequest stackRequest, Stack stack, String stackName, Blueprint blueprint)
             throws CloudbreakImageNotFoundException, IOException, TransactionExecutionException {
         if (stackRequest.getClusterRequest() != null) {
             long start = System.currentTimeMillis();
-            Cluster cluster = clusterCreationService.prepare(stackRequest.getClusterRequest(), stack, blueprint, user, organization);
+            Cluster cluster = clusterCreationService.prepare(stackRequest.getClusterRequest(), stack, blueprint, user);
             LOGGER.info("Cluster object and its dependencies has been created in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
             stack.setCluster(cluster);
         }

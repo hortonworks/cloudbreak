@@ -102,7 +102,7 @@ public class ClusterContainerRunner {
         OrchestrationCredential credential = new OrchestrationCredential(orchestrator.getApiEndpoint(), map);
         ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get(orchestrator.getType());
         Map<String, List<ContainerInfo>> containers = new HashMap<>();
-        Cluster cluster = clusterService.retrieveClusterByStackId(stack.getId());
+        Cluster cluster = clusterService.retrieveClusterByStackIdWithoutAuth(stack.getId());
 
         String gatewayHostname = getGatewayHostName(stack);
 
@@ -169,7 +169,7 @@ public class ClusterContainerRunner {
         OrchestrationCredential credential = new OrchestrationCredential(orchestrator.getApiEndpoint(), map);
         ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get(orchestrator.getType());
         Map<String, List<ContainerInfo>> containers = new HashMap<>();
-        Cluster cluster = clusterService.retrieveClusterByStackId(stack.getId());
+        Cluster cluster = clusterService.retrieveClusterByStackIdWithoutAuth(stack.getId());
 
         try {
             Set<Container> existingContainers = containerService.findContainersInCluster(cluster.getId());

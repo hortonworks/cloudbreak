@@ -42,7 +42,7 @@ public class ClusterStopService {
     }
 
     private void updateClusterUptime(long stackId) {
-        Cluster cluster = clusterService.retrieveClusterByStackId(stackId);
+        Cluster cluster = clusterService.retrieveClusterByStackIdWithoutAuth(stackId);
         cluster.setUptime(Duration.ofMillis(stackUtil.getUptimeForCluster(cluster, true)).toString());
         clusterService.updateCluster(cluster);
     }

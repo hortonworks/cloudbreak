@@ -60,7 +60,7 @@ public class UptimeNotifierTest {
         doNothing().when(notificationSender).send(any(Notification.class));
         List<Cluster> clusters = TestUtil.generateCluster(1);
 
-        when(clusterService.findByStatuses(any())).thenReturn(Collections.singletonList(clusters.get(0)));
+        when(clusterService.findByStatusesWithoutAuth(any())).thenReturn(Collections.singletonList(clusters.get(0)));
         Stack stack1 = TestUtil.stack();
         when(stackService.getForCluster(anyLong())).thenReturn(stack1);
 
@@ -81,7 +81,7 @@ public class UptimeNotifierTest {
         doNothing().when(notificationSender).send(any(Notification.class));
         List<Cluster> clusters = TestUtil.generateCluster(1);
 
-        when(clusterService.findByStatuses(any())).thenReturn(Collections.singletonList(clusters.get(0)));
+        when(clusterService.findByStatusesWithoutAuth(any())).thenReturn(Collections.singletonList(clusters.get(0)));
 
         Stack stack2 = TestUtil.stack();
         stack2.setCluster(clusters.get(0));
@@ -104,7 +104,7 @@ public class UptimeNotifierTest {
         doNothing().when(notificationSender).send(any(Notification.class));
         List<Cluster> clusters = TestUtil.generateCluster(1);
 
-        when(clusterService.findByStatuses(any())).thenReturn(Collections.singletonList(clusters.get(0)));
+        when(clusterService.findByStatusesWithoutAuth(any())).thenReturn(Collections.singletonList(clusters.get(0)));
 
         Stack stack2 = TestUtil.stack();
         stack2.setCluster(clusters.get(0));

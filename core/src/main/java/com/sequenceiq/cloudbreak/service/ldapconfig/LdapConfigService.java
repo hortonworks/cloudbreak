@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.repository.LdapConfigRepository;
-import com.sequenceiq.cloudbreak.repository.OrganizationResourceRepository;
+import com.sequenceiq.cloudbreak.repository.organization.OrganizationResourceRepository;
 import com.sequenceiq.cloudbreak.service.AbstractOrganizationAwareResourceService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 
@@ -51,7 +51,7 @@ public class LdapConfigService extends AbstractOrganizationAwareResourceService<
 
     @Override
     protected void prepareDeletion(LdapConfig ldapConfig) {
-        List<Cluster> clustersWithLdap = clusterService.findByLdapConfig(ldapConfig);
+        List<Cluster> clustersWithLdap = clusterService.findByLdapConfigWithoutAuth(ldapConfig);
         if (!clustersWithLdap.isEmpty()) {
             if (clustersWithLdap.size() > 1) {
                 String clusters = clustersWithLdap

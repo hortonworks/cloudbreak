@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByOrganizat
 import com.sequenceiq.cloudbreak.aspect.organization.OrganizationResourceType;
 import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
+import com.sequenceiq.cloudbreak.repository.organization.OrganizationResourceRepository;
 import com.sequenceiq.cloudbreak.service.EntityType;
 
 @EntityType(entityClass = ProxyConfig.class)

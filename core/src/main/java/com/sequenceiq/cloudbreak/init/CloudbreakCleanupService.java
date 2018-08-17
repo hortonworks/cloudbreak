@@ -139,7 +139,7 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
     }
 
     private List<Cluster> resetClusterStatus(Collection<Stack> stacksToSync, Collection<Long> excludeStackIds) {
-        return clusterService.findByStatuses(Arrays.asList(UPDATE_REQUESTED, UPDATE_IN_PROGRESS, WAIT_FOR_SYNC, START_IN_PROGRESS, STOP_IN_PROGRESS))
+        return clusterService.findByStatusesWithoutAuth(Arrays.asList(UPDATE_REQUESTED, UPDATE_IN_PROGRESS, WAIT_FOR_SYNC, START_IN_PROGRESS, STOP_IN_PROGRESS))
                 .stream().filter(c -> !excludeStackIds.contains(c.getStack().getId()))
                 .peek(c -> {
                     loggingStatusChange("Cluster", c.getId(), c.getStatus(), WAIT_FOR_SYNC);

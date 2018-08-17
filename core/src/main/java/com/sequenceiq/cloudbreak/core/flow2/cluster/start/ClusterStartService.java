@@ -47,7 +47,7 @@ public class ClusterStartService {
     }
 
     public void clusterStartFinished(StackView stack) {
-        Cluster cluster = clusterService.retrieveClusterByStackId(stack.getId());
+        Cluster cluster = clusterService.retrieveClusterByStackIdWithoutAuth(stack.getId());
         String ambariIp = stackUtil.extractAmbariIp(stack);
         cluster.setUpSince(new Date().getTime());
         clusterService.updateCluster(cluster);

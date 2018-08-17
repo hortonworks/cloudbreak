@@ -37,7 +37,7 @@ public class UptimeNotifier {
     @Scheduled(fixedDelay = 60000)
     public void sendUptime() {
         EnumSet<Status> statuses = EnumSet.complementOf(EnumSet.of(Status.DELETE_COMPLETED));
-        List<Cluster> clusters = clusterService.findByStatuses(statuses);
+        List<Cluster> clusters = clusterService.findByStatusesWithoutAuth(statuses);
         for (Cluster cluster : clusters) {
             Stack stack = stackService.getForCluster(cluster.getId());
             if (stack != null && !stack.isDeleteCompleted()) {
