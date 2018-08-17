@@ -11,6 +11,8 @@ import javax.inject.Inject;
 import org.apache.cb.yarn.service.api.ApiException;
 import org.apache.cb.yarn.service.api.ApiResponse;
 import org.apache.cb.yarn.service.api.impl.DefaultApi;
+import org.apache.cb.yarn.service.api.records.Artifact;
+import org.apache.cb.yarn.service.api.records.Component;
 import org.apache.cb.yarn.service.api.records.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +20,10 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.cumulus.yarn.client.CumulusYarnClient;
+import com.sequenceiq.cloudbreak.cloud.cumulus.yarn.client.CumulusYarnResourceConstants;
+import com.sequenceiq.cloudbreak.cloud.cumulus.yarn.client.ServiceCreator;
+import com.sequenceiq.cloudbreak.cloud.cumulus.yarn.util.CumulusYarnApplicationStatus;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudOperationNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.exception.TemplatingDoesNotSupportedException;
@@ -25,12 +31,11 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
-import com.sequenceiq.cloudbreak.cloud.cumulus.yarn.client.ServiceCreator;
-import com.sequenceiq.cloudbreak.cloud.cumulus.yarn.client.CumulusYarnClient;
-import com.sequenceiq.cloudbreak.cloud.cumulus.yarn.client.CumulusYarnResourceConstants;
+import com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper;
 
 @org.springframework.stereotype.Service
 public class CumulusYarnResourceConnector implements ResourceConnector<Object> {
@@ -41,6 +46,9 @@ public class CumulusYarnResourceConnector implements ResourceConnector<Object> {
 
     @Inject
     private ServiceCreator serviceCreator;
+
+    @Inject
+    private CloudResourceHelper cloudResourceHelper;
 
     @Override
     public List<CloudResourceStatus> launch(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier,
@@ -141,7 +149,47 @@ public class CumulusYarnResourceConnector implements ResourceConnector<Object> {
 
     @Override
     public List<CloudResourceStatus> upscale(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) {
-        throw new CloudOperationNotSupportedException("Upscale stack operation is not supported on YARN");
+        for (CloudResource resource : resources) {
+            switch (resource.getType()) {
+                case CUMULUS_YARN_SERVICE:
+                    DefaultApi api = client.createApi(authenticatedContext);
+                    String yarnApplicationName = resource.getName();
+                    String stackName = authenticatedContext.getCloudContext().getName();
+                    LOGGER.info("Upscale stack: {}", stackName);
+                    try {
+                        List<Group> scaledGroups = cloudResourceHelper.getScaledGroups(stack);
+                        Artifact artifact = serviceCreator.createArtifact(stack);
+                        for (Group scaledGroup : scaledGroups) {
+                            Component component = serviceCreator.mapGroupToYarnComponent(scaledGroup, stack, artifact);
+                            LOGGER.info("Upscale group [{}] with component name [{}] to size [{}]", scaledGroup.getName(), component.getName(),
+                                    component.getNumberOfContainers());
+                            ApiResponse<Void> response =
+                                    api.appV1ServicesServiceNameComponentsComponentNamePutWithHttpInfo(yarnApplicationName, component.getName(), component);
+                            LOGGER.info("Cumulus Yarn group [{}] upscale triggered", scaledGroup.getName());
+                            if (response.getStatusCode() == CumulusYarnResourceConstants.HTTP_ACCEPTED
+                                    || response.getStatusCode() == CumulusYarnResourceConstants.HTTP_NO_CONTENT
+                                    || response.getStatusCode() == CumulusYarnResourceConstants.HTTP_SUCCESS) {
+                                String msg = String.format("Successfully upscaled group %s", scaledGroup.getName());
+                                LOGGER.debug(msg);
+                            } else {
+                                if (response.getData() != null) {
+                                    throw new CloudConnectorException(String.format("Yarn Application upscale failed: HttpStatusCode: %d, Error: %s",
+                                            response.getStatusCode(), response.getData()));
+                                } else {
+                                    throw new CloudConnectorException(String.format("Yarn Application upscale failed: Invalid HttpStatusCode: %d",
+                                            response.getStatusCode()));
+                                }
+                            }
+                        }
+                    } catch (ApiException e) {
+                        throw new CloudConnectorException("Stack cannot be upscaled", e);
+                    }
+                    break;
+                default:
+                    throw new CloudConnectorException(String.format("Invalid resource type: %s", resource.getType()));
+            }
+        }
+        return check(authenticatedContext, resources);
     }
 
     @Override
