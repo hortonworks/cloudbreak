@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.apache.cb.yarn.service.api.records.Artifact;
 import org.apache.cb.yarn.service.api.records.Component;
 import org.apache.cb.yarn.service.api.records.ConfigFile;
@@ -14,10 +16,10 @@ import org.apache.cb.yarn.service.api.records.Resource;
 import org.apache.cb.yarn.service.api.records.Service;
 import org.springframework.beans.factory.annotation.Value;
 
-import com.google.common.base.Splitter;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.cumulus.yarn.CumulusYarnConstants;
+import com.sequenceiq.cloudbreak.cloud.cumulus.yarn.util.CumulusYarnResourceNameHelper;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -31,27 +33,25 @@ public class ServiceCreator {
 
     private static final int MB_TO_KB = 1024;
 
-    @Value("${cb.max.yarn.resource.name.length:}")
-    private int maxResourceNameLength;
-
     @Value("${cb.yarn.defaultQueue}")
     private String defaultQueue;
 
     @Value("${cb.yarn.defaultLifeTime:}")
     private Integer defaultLifeTime;
 
+    @Inject
+    private CumulusYarnResourceNameHelper cumulusYarnResourceNameHelper;
+
     public Service create(AuthenticatedContext ac, CloudStack stack) {
         Service service = new Service();
-        service.setName(createApplicationName(ac));
+        service.setName(cumulusYarnResourceNameHelper.createApplicationName(ac));
         service.setQueue(stack.getParameters().getOrDefault(CumulusYarnConstants.CUMULUS_YARN_QUEUE_PARAMETER, defaultQueue));
         service.setVersion("1.0.0");
 
         String lifeTimeStr = stack.getParameters().get(CumulusYarnConstants.CUMULUS_YARN_LIFETIME_PARAMETER);
         service.setLifetime(lifeTimeStr != null ? Long.parseLong(lifeTimeStr) : defaultLifeTime.longValue());
 
-        Artifact artifact = new Artifact();
-        artifact.setId(stack.getImage().getImageName());
-        artifact.setType(Artifact.TypeEnum.DOCKER);
+        Artifact artifact = createArtifact(stack);
 
         List<Component> components = stack.getGroups().stream().map(group -> mapGroupToYarnComponent(group, stack, artifact)).collect(Collectors.toList());
         service.setComponents(components);
@@ -59,12 +59,14 @@ public class ServiceCreator {
         return service;
     }
 
-    private String createApplicationName(AuthenticatedContext ac) {
-        return String.format("%s-%s", Splitter.fixedLength(maxResourceNameLength - (ac.getCloudContext().getId().toString().length() + 1))
-                .splitToList(ac.getCloudContext().getName()).get(0), ac.getCloudContext().getId());
+    public Artifact createArtifact(CloudStack stack) {
+        Artifact artifact = new Artifact();
+        artifact.setId(stack.getImage().getImageName());
+        artifact.setType(Artifact.TypeEnum.DOCKER);
+        return artifact;
     }
 
-    private Component mapGroupToYarnComponent(Group group, CloudStack stack, Artifact artifact) {
+    public Component mapGroupToYarnComponent(Group group, CloudStack stack, Artifact artifact) {
         Component component = new Component();
         String userData = stack.getImage().getUserDataByType(group.getType());
         setupComponentProperties(group, stack, artifact, component, userData);
@@ -122,7 +124,7 @@ public class ServiceCreator {
     }
 
     private String setupComponentProperties(Group group, CloudStack stack, Artifact artifact, Component component, String userData) {
-        component.setName(group.getName().replaceAll("_", "-"));
+        component.setName(cumulusYarnResourceNameHelper.getComponentNameFromGroupName(group.getName()));
         component.setNumberOfContainers(group.getInstancesSize().longValue());
 
 

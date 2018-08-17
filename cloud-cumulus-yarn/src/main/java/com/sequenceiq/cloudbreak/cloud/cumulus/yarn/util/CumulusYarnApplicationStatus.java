@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.cumulus.yarn;
+package com.sequenceiq.cloudbreak.cloud.cumulus.yarn.util;
 
 import org.apache.cb.yarn.service.api.records.ServiceState;
 

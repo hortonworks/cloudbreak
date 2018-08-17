@@ -102,6 +102,7 @@ import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
+import com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper;
 import com.sequenceiq.cloudbreak.common.type.CommonResourceType;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.service.Retry;
@@ -176,6 +177,9 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
 
     @Inject
     private AwsImageUpdateService awsImageUpdateService;
+
+    @Inject
+    private CloudResourceHelper cloudResourceHelper;
 
     @Override
     public List<CloudResourceStatus> launch(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier resourceNotifier,
@@ -651,9 +655,9 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
                 ac.getCloudContext().getLocation().getRegion().value());
         AmazonEC2Client amazonEC2Client = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()),
                 ac.getCloudContext().getLocation().getRegion().value());
-        List<Group> groups = stack.getGroups().stream().filter(g -> g.getInstances().stream().anyMatch(
-                inst -> InstanceStatus.CREATE_REQUESTED == inst.getTemplate().getStatus())).collect(Collectors.toList());
-        Map<String, Group> groupMap = groups.stream().collect(
+
+        List<Group> scaledGroups = cloudResourceHelper.getScaledGroups(stack);
+        Map<String, Group> groupMap = scaledGroups.stream().collect(
                 Collectors.toMap(g -> cfStackUtil.getAutoscalingGroupName(ac, cloudFormationClient, g.getName()), g -> g));
         resumeAutoScaling(amazonASClient, groupMap.keySet(), UPSCALE_PROCESSES);
         for (Map.Entry<String, Group> groupEntry : groupMap.entrySet()) {
@@ -669,7 +673,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
         suspendAutoScaling(ac, stack);
 
         boolean mapPublicIpOnLaunch = isMapPublicOnLaunch(new AwsNetworkView(stack.getNetwork()), amazonEC2Client);
-        List<Group> gateways = getGatewayGroups(groups);
+        List<Group> gateways = getGatewayGroups(scaledGroups);
         if (mapPublicIpOnLaunch && !gateways.isEmpty()) {
             String cFStackName = getCloudFormationStackResource(resources).getName();
             Map<String, String> eipAllocationIds = getElasticIpAllocationIds(cFStackName, cloudFormationClient);
@@ -769,11 +773,6 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
         } catch (IOException e) {
             throw new CloudConnectorException("can't get freemarker template", e);
         }
-    }
-
-    private List<Group> getScaledGroups(CloudStack stack) {
-        return stack.getGroups().stream().filter(g -> g.getInstances().stream().anyMatch(
-                inst -> InstanceStatus.CREATE_REQUESTED == inst.getTemplate().getStatus())).collect(Collectors.toList());
     }
 
     private List<String> getEipsForGatewayGroup(Map<String, String> eipAllocationIds, Group gateway) {
