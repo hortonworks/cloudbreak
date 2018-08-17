@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +27,6 @@ import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.ldapconfig.LdapConfigValidator;
-import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionValidator;
 import com.sequenceiq.cloudbreak.converter.mapper.AmbariDatabaseMapper;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
@@ -39,11 +39,9 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.service.AmbariHaComponentFilter;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Component
 public class ClusterDecorator {
@@ -55,9 +53,6 @@ public class ClusterDecorator {
 
     @Inject
     private BlueprintValidator blueprintValidator;
-
-    @Inject
-    private StackService stackService;
 
     @Inject
     private ConversionService conversionService;
@@ -75,12 +70,6 @@ public class ClusterDecorator {
     private LdapConfigValidator ldapConfigValidator;
 
     @Inject
-    private ClusterService clusterService;
-
-    @Inject
-    private RdsConnectionValidator rdsConnectionValidator;
-
-    @Inject
     private ClusterProxyDecorator clusterProxyDecorator;
 
     @Inject
@@ -92,17 +81,26 @@ public class ClusterDecorator {
     @Inject
     private AmbariHaComponentFilter ambariHaComponentFilter;
 
-    public Cluster decorate(@Nonnull Cluster subject, @Nonnull ClusterRequest request, Blueprint blueprint, @Nonnull IdentityUser user,
+    public Cluster decorate(@Nonnull Cluster cluster, @Nonnull ClusterRequest request, Blueprint blueprint, @Nonnull IdentityUser user,
             Organization organization, @Nonnull Stack stack) {
-        prepareBlueprint(subject, request, organization, stack, Optional.ofNullable(blueprint));
-        prepareHostGroups(stack, user, subject, request.getHostGroups());
-        validateBlueprintIfRequired(subject, request, stack);
-        prepareRds(subject, user, request, stack);
-        subject = clusterProxyDecorator.prepareProxyConfig(subject, request.getProxyName(), stack);
-        prepareLdap(subject, user, stack, Optional.ofNullable(request.getLdapConfigId()), Optional.ofNullable(request.getLdapConfig()),
-                Optional.ofNullable(request.getLdapConfigName()));
-        subject = sharedServiceConfigProvider.configureCluster(subject, request.getConnectedCluster());
-        return subject;
+        prepareBlueprint(cluster, request, organization, stack, Optional.ofNullable(blueprint));
+        prepareHostGroups(stack, user, cluster, request.getHostGroups());
+        validateBlueprintIfRequired(cluster, request, stack);
+        prepareRds(cluster, user, request, stack);
+        cluster = clusterProxyDecorator.prepareProxyConfig(cluster, request.getProxyName(), stack);
+        prepareLdap(cluster, request, organization);
+        cluster = sharedServiceConfigProvider.configureCluster(cluster, request.getConnectedCluster());
+        return cluster;
+    }
+
+    private void prepareLdap(@Nonnull Cluster cluster, @Nonnull ClusterRequest request, Organization organization) {
+        if (request.getLdapConfig() != null) {
+            prepareLdap(cluster, organization, request.getLdapConfig());
+        } else if (request.getLdapConfigName() != null) {
+            prepareLdap(cluster, organization, request.getLdapConfigName());
+        } else if (request.getLdapConfigId() != null) {
+            prepareLdap(cluster, request.getLdapConfigId());
+        }
     }
 
     private void validateBlueprintIfRequired(Cluster subject, ClusterRequest request, Stack stack) {
@@ -154,21 +152,21 @@ public class ClusterDecorator {
         }
     }
 
-    private void prepareLdap(Cluster subject, IdentityUser user, Stack stack, Optional<Long> ldapConfigId, Optional<LdapConfigRequest> ldapConfigRequest,
-            Optional<String> ldapName) {
-        if (ldapConfigId.isPresent()) {
-            LdapConfig ldapConfig = ldapConfigService.get(ldapConfigId.get());
-            subject.setLdapConfig(ldapConfig);
-        } else if (ldapName.isPresent()) {
-            LdapConfig ldapConfig = ldapConfigService.getByNameFromUsersDefaultOrganization(ldapName.get());
-            subject.setLdapConfig(ldapConfig);
-        } else if (ldapConfigRequest.isPresent()) {
-            LdapConfig ldapConfig = conversionService.convert(ldapConfigRequest.get(), LdapConfig.class);
-            ldapConfig.setPublicInAccount(stack.isPublicInAccount());
-            ldapConfigValidator.validateLdapConnection(ldapConfig);
-            ldapConfig = ldapConfigService.create(user, ldapConfig);
-            subject.setLdapConfig(ldapConfig);
-        }
+    private void prepareLdap(Cluster cluster, @NotNull Long ldapConfigId) {
+        LdapConfig ldapConfig = ldapConfigService.get(ldapConfigId);
+        cluster.setLdapConfig(ldapConfig);
+    }
+
+    private void prepareLdap(Cluster cluster, Organization organization, @NotNull LdapConfigRequest ldapConfigRequest) {
+        LdapConfig ldapConfig = conversionService.convert(ldapConfigRequest, LdapConfig.class);
+        ldapConfigValidator.validateLdapConnection(ldapConfig);
+        ldapConfig = ldapConfigService.create(ldapConfig, organization);
+        cluster.setLdapConfig(ldapConfig);
+    }
+
+    private void prepareLdap(Cluster cluster, Organization organization, @NotNull String ldapName) {
+        LdapConfig ldapConfig = ldapConfigService.getByNameForOrganization(ldapName, organization);
+        cluster.setLdapConfig(ldapConfig);
     }
 
     private void prepareRds(Cluster subject, IdentityUser user, ClusterRequest request, Stack stack) {
