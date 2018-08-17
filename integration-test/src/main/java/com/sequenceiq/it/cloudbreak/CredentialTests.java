@@ -6,7 +6,6 @@ import javax.ws.rs.ForbiddenException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.access.AccessDeniedException;
 import org.testng.Assert;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
@@ -108,7 +107,7 @@ public class CredentialTests extends CloudbreakTest {
         );
     }
 
-    @Test(expectedExceptions = AccessDeniedException.class, priority = 1, groups = "credentials")
+    @Test(expectedExceptions = ForbiddenException.class, priority = 1, groups = "credentials")
     public void testCreateAgainCredentialException() throws Exception {
         credentialName = AGAIN_CRED_NAME + cloudProvider.getPlatform().toLowerCase();
 
@@ -212,7 +211,7 @@ public class CredentialTests extends CloudbreakTest {
                 .withDescription(CRED_DESCRIPTION)
                 .withCloudPlatform(cloudProvider.getPlatform()), credentialName + " credential is created.");
         when(Credential.delete(), credentialName + " credential delete request has been posted.");
-        when(Credential.get(),  credentialName + " credential should not be present in response.");
+        when(Credential.get(), credentialName + " credential should not be present in response.");
     }
 
     @Test(priority = 9, groups = "credentials")
