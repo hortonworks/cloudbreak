@@ -59,6 +59,6 @@ public interface RecipeV3Endpoint {
     @Path("{name}/request")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = RecipeOpDescription.GET_REQUEST_BY_NAME, produces = ContentType.JSON, notes = Notes.RECIPE_NOTES,
-            nickname = "getRecipeRequestFromName")
+            nickname = "getRecipeRequestFromNameInOrganization")
     RecipeRequest getRequestFromName(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
 }

@@ -30,4 +30,5 @@ echo -e "\n\033[1;96m--- Test finished\033[0m\n"
 
 echo -e "\n\033[1;96m--- Swagger check\033[0m\n"
 $INTEGCB_LOCATION/.deps/bin/docker-compose up swagger-diff
+$INTEGCB_LOCATION/.deps/bin/docker-compose up swagger-validation | tee swagger-validation-result.out
 
