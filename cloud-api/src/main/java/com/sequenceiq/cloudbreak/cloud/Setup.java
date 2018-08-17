@@ -48,11 +48,18 @@ public interface Setup {
     /**
      * Hadoop supports multiple filesystems instead of HDFS. These filesystems can be validated before cluster creation.
      *
-     *
      * @param credential credenital to enable validation
      * @param spiFileSystem filesystem to validate
      * @throws Exception exception is thrown when the filesystem does not meet the desired requirements
      */
     void validateFileSystem(CloudCredential credential, SpiFileSystem spiFileSystem) throws Exception;
 
+    /**
+     * Implementation of this method shall contain basic checks if scaling is possible or not.
+     *
+     * @param authenticatedContext the context which already contains the authenticated client
+     * @param stack                stack the definition of infrastucture that needs to be launched
+     * @param upscale              true in case of upscale, false in case of downscale
+     */
+    void scalingPrerequisites(AuthenticatedContext authenticatedContext, CloudStack stack, boolean upscale);
 }

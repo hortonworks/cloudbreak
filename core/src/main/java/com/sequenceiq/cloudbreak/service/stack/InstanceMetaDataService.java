@@ -55,7 +55,7 @@ public class InstanceMetaDataService {
         }
     }
 
-    public Stack saveInstanceAndGetUpdatedStack(Stack stack, List<CloudInstance> cloudInstances) {
+    public Stack saveInstanceAndGetUpdatedStack(Stack stack, List<CloudInstance> cloudInstances, boolean save) {
         for (CloudInstance cloudInstance : cloudInstances) {
             InstanceGroup instanceGroup = getInstanceGroup(stack.getInstanceGroups(), cloudInstance.getTemplate().getGroupName());
             if (instanceGroup != null) {
@@ -63,7 +63,9 @@ public class InstanceMetaDataService {
                 instanceMetaData.setPrivateId(cloudInstance.getTemplate().getPrivateId());
                 instanceMetaData.setInstanceStatus(com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus.REQUESTED);
                 instanceMetaData.setInstanceGroup(instanceGroup);
-                instanceMetaDataRepository.save(instanceMetaData);
+                if (save) {
+                    instanceMetaDataRepository.save(instanceMetaData);
+                }
                 instanceGroup.getInstanceMetaDataSet().add(instanceMetaData);
             }
         }

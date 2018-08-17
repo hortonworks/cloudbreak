@@ -8,6 +8,7 @@ import com.sequenceiq.cloudbreak.core.flow2.restart.FillInMemoryStateStoreRestar
 public enum StackUpscaleState implements FlowState {
     INIT_STATE,
     UPSCALE_FAILED_STATE,
+    UPSCALE_PREVALIDATION_STATE,
     ADD_INSTANCES_STATE(DisableOnGCPRestartAction.class),
     ADD_INSTANCES_FINISHED_STATE,
     EXTEND_METADATA_STATE,

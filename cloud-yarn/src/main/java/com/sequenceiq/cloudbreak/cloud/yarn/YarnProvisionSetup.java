@@ -33,4 +33,9 @@ public class YarnProvisionSetup implements Setup {
     public void validateFileSystem(CloudCredential credential, SpiFileSystem spiFileSystem) {
 
     }
+
+    @Override
+    public void scalingPrerequisites(AuthenticatedContext authenticatedContext, CloudStack stack, boolean upscale) {
+
+    }
 }

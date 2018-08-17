@@ -21,6 +21,8 @@ import com.sequenceiq.cloudbreak.cloud.event.instance.GetSSHFingerprintsRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.GetSSHFingerprintsResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackResult;
+import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackValidationRequest;
+import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackValidationResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
@@ -80,8 +82,8 @@ public class StackUpscaleActions {
     @Inject
     private StackService stackService;
 
-    @Bean(name = "ADD_INSTANCES_STATE")
-    public Action<?, ?> addInstances() {
+    @Bean(name = "UPSCALE_PREVALIDATION_STATE")
+    public Action<?, ?> prevalidate() {
         return new AbstractStackUpscaleAction<StackScaleTriggerEvent>(StackScaleTriggerEvent.class) {
             @Override
             protected void prepareExecution(StackScaleTriggerEvent payload, Map<Object, Object> variables) {
@@ -112,7 +114,27 @@ public class StackUpscaleActions {
                 LOGGER.debug("Assembling upscale stack event for stack: {}", context.getStack());
                 List<CloudInstance> newInstances = stackUpscaleService.buildNewInstances(context.getStack(), context.getInstanceGroupName(),
                         getInstanceCountToCreate(context.getStack(), context.getInstanceGroupName(), context.getAdjustment()));
-                Stack updatedStack = instanceMetaDataService.saveInstanceAndGetUpdatedStack(context.getStack(), newInstances);
+                Stack updatedStack = instanceMetaDataService.saveInstanceAndGetUpdatedStack(context.getStack(), newInstances, false);
+                CloudStack cloudStack = cloudStackConverter.convert(updatedStack);
+                return new UpscaleStackValidationRequest<UpscaleStackValidationResult>(context.getCloudContext(), context.getCloudCredential(), cloudStack);
+            }
+        };
+    }
+
+    @Bean(name = "ADD_INSTANCES_STATE")
+    public Action<?, ?> addInstances() {
+        return new AbstractStackUpscaleAction<UpscaleStackValidationResult>(UpscaleStackValidationResult.class) {
+            @Override
+            protected void doExecute(StackScalingFlowContext context, UpscaleStackValidationResult payload, Map<Object, Object> variables) throws Exception {
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(StackScalingFlowContext context) {
+                LOGGER.debug("Assembling upscale stack event for stack: {}", context.getStack());
+                List<CloudInstance> newInstances = stackUpscaleService.buildNewInstances(context.getStack(), context.getInstanceGroupName(),
+                        getInstanceCountToCreate(context.getStack(), context.getInstanceGroupName(), context.getAdjustment()));
+                Stack updatedStack = instanceMetaDataService.saveInstanceAndGetUpdatedStack(context.getStack(), newInstances, true);
                 List<CloudResource> resources = cloudResourceConverter.convert(context.getStack().getResources());
                 CloudStack updatedCloudStack = cloudStackConverter.convert(updatedStack);
                 return new UpscaleStackRequest<UpscaleStackResult>(context.getCloudContext(), context.getCloudCredential(), updatedCloudStack, resources);
