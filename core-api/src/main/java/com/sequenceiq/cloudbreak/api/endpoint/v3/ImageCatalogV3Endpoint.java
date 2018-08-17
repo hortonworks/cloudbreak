@@ -60,7 +60,7 @@ public interface ImageCatalogV3Endpoint {
     @Path("platform/{platform}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ImageCatalogOpDescription.GET_IMAGES_BY_PROVIDER, produces = ContentType.JSON, notes = IMAGE_CATALOG_NOTES,
-            nickname = "getImagesByProvider")
+            nickname = "getImagesByProviderInOrganization")
     ImagesResponse getImagesByProvider(@PathParam("organizationId") Long organizationId, @PathParam("platform") String platform) throws Exception;
 
     @GET
@@ -111,7 +111,7 @@ public interface ImageCatalogV3Endpoint {
     @Path("{name}/request")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ImageCatalogOpDescription.GET_BY_IMAGE_CATALOG_NAME, produces = ContentType.JSON,
-            notes = IMAGE_CATALOG_NOTES, nickname = "getImageCatalogRequestFromName")
+            notes = IMAGE_CATALOG_NOTES, nickname = "getImageCatalogRequestFromNameInOrganization")
     ImageCatalogRequest getRequestFromName(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
 
 }
