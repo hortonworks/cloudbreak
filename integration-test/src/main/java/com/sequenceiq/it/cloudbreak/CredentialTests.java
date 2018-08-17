@@ -6,7 +6,6 @@ import javax.ws.rs.ForbiddenException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.access.AccessDeniedException;
 import org.testng.Assert;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
@@ -108,7 +107,7 @@ public class CredentialTests extends CloudbreakTest {
         );
     }
 
-    @Test(expectedExceptions = AccessDeniedException.class, priority = 1, groups = "credentials")
+    @Test(expectedExceptions = ForbiddenException.class, priority = 1, groups = "credentials")
     public void testCreateAgainCredentialException() throws Exception {
         credentialName = AGAIN_CRED_NAME + cloudProvider.getPlatform().toLowerCase();
 
