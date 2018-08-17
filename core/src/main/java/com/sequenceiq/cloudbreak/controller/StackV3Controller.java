@@ -6,6 +6,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
+import javax.validation.Valid;
 import javax.ws.rs.core.Response;
 
 import org.springframework.core.convert.ConversionService;
@@ -20,6 +21,7 @@ import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.StackScaleRequestV2;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRepairRequest;
+import com.sequenceiq.cloudbreak.api.model.users.UserNamePasswordJson;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
@@ -123,6 +125,13 @@ public class StackV3Controller extends NotificationController implements StackV3
     public Response putReinstall(Long organizationId, String name, ReinstallRequestV2 reinstallRequestV2) {
         Stack stack = stackService.getByNameInOrg(name, organizationId);
         UpdateClusterJson updateClusterJson = conversionService.convert(reinstallRequestV2, UpdateClusterJson.class);
+        return clusterCommonService.put(stack.getId(), updateClusterJson);
+    }
+
+    @Override
+    public Response putPassword(Long organizationId, String name, @Valid UserNamePasswordJson userNamePasswordJson) {
+        Stack stack = stackService.getByNameInOrg(name, organizationId);
+        UpdateClusterJson updateClusterJson = conversionService.convert(userNamePasswordJson, UpdateClusterJson.class);
         return clusterCommonService.put(stack.getId(), updateClusterJson);
     }
 }

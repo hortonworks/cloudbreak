@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.api.model.stack.StackImageChangeRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.StackScaleRequestV2;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRepairRequest;
+import com.sequenceiq.cloudbreak.api.model.users.UserNamePasswordJson;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
@@ -171,4 +172,12 @@ public interface StackV3Endpoint {
             nickname = "putreinstallStackV3")
     Response putReinstall(@PathParam("organizationId") Long organizationId, @PathParam("name") String name,
             @Valid ReinstallRequestV2 reinstallRequestV2);
+
+    // putpasswordStackV2
+    @PUT
+    @Path("ambari_password/{name}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = StackOpDescription.PUT_BY_NAME, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
+            nickname = "putpasswordStackV3")
+    Response putPassword(@PathParam("organizationId") Long organizationId, @PathParam("name") String name, @Valid UserNamePasswordJson userNamePasswordJson);
 }
