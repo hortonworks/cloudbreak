@@ -114,7 +114,7 @@ public class ClusterServiceRunner {
         if (orchestratorType.containerOrchestrator()) {
             LOGGER.info("Container orchestrator is not supported for this action.");
         } else {
-            Cluster cluster = clusterService.retrieveClusterByStackId(stack.getId());
+            Cluster cluster = clusterService.retrieveClusterByStackIdWithoutAuth(stack.getId());
             hostRunner.runAmbariServices(stack, cluster);
         }
     }

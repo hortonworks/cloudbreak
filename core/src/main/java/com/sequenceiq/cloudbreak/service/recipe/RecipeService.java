@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
-import com.sequenceiq.cloudbreak.repository.OrganizationResourceRepository;
+import com.sequenceiq.cloudbreak.repository.organization.OrganizationResourceRepository;
 import com.sequenceiq.cloudbreak.repository.RecipeRepository;
 import com.sequenceiq.cloudbreak.service.AbstractOrganizationAwareResourceService;
 

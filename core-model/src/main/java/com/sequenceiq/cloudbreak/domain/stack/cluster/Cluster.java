@@ -38,6 +38,7 @@ import javax.persistence.UniqueConstraint;
 import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Container;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
@@ -51,13 +52,14 @@ import com.sequenceiq.cloudbreak.domain.json.EncryptedJsonToString;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.OrganizationAwareResource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"account", "name"}))
-public class Cluster implements ProvisionEntity {
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"organization_id", "name"}))
+public class Cluster implements ProvisionEntity, OrganizationAwareResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "cluster_generator")
@@ -535,11 +537,18 @@ public class Cluster implements ProvisionEntity {
         this.extendedBlueprintText = extendedBlueprintText;
     }
 
+    @Override
     public Organization getOrganization() {
         return organization;
     }
 
+    @Override
     public void setOrganization(Organization organization) {
         this.organization = organization;
+    }
+
+    @Override
+    public OrganizationResource getResource() {
+        return OrganizationResource.STACK;
     }
 }

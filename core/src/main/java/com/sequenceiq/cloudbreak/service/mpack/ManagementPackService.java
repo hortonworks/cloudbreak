@@ -12,7 +12,7 @@ import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.ManagementPack;
 import com.sequenceiq.cloudbreak.repository.ManagementPackRepository;
-import com.sequenceiq.cloudbreak.repository.OrganizationResourceRepository;
+import com.sequenceiq.cloudbreak.repository.organization.OrganizationResourceRepository;
 import com.sequenceiq.cloudbreak.service.AbstractOrganizationAwareResourceService;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 

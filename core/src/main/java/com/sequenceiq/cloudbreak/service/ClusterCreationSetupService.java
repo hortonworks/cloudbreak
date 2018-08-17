@@ -137,12 +137,12 @@ public class ClusterCreationSetupService {
         rdsConfigValidator.validateRdsConfigs(request, user);
     }
 
-    public Cluster prepare(ClusterRequest request, Stack stack, IdentityUser user, Organization organization) throws CloudbreakImageNotFoundException,
+    public Cluster prepare(ClusterRequest request, Stack stack, IdentityUser user) throws CloudbreakImageNotFoundException,
             IOException, TransactionExecutionException {
-        return prepare(request, stack, null, user, organization);
+        return prepare(request, stack, null, user);
     }
 
-    public Cluster prepare(ClusterRequest request, Stack stack, Blueprint blueprint, IdentityUser user, Organization organization)throws IOException,
+    public Cluster prepare(ClusterRequest request, Stack stack, Blueprint blueprint, IdentityUser user)throws IOException,
             CloudbreakImageNotFoundException, TransactionExecutionException {
         String stackName = stack.getName();
 
@@ -160,7 +160,7 @@ public class ClusterCreationSetupService {
 
         start = System.currentTimeMillis();
 
-        cluster = clusterDecorator.decorate(cluster, request, blueprint, user, organization, stack);
+        cluster = clusterDecorator.decorate(cluster, request, blueprint, user, stack.getOrganization(), stack);
         LOGGER.info("Cluster object decorated in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
         start = System.currentTimeMillis();
@@ -175,7 +175,7 @@ public class ClusterCreationSetupService {
                 && c.getName().equalsIgnoreCase(ComponentType.IMAGE.name())).findAny();
         ClusterComponent ambariRepoConfig = determineAmbariRepoConfig(stackAmbariRepoConfig, request.getAmbariRepoDetailsJson(), stackImageComponent, cluster);
         components.add(ambariRepoConfig);
-        ClusterComponent hdpRepoConfig = determineHDPRepoConfig(blueprint, stack.getId(), stackHdpRepoConfig, request, cluster, organization,
+        ClusterComponent hdpRepoConfig = determineHDPRepoConfig(blueprint, stack.getId(), stackHdpRepoConfig, request, cluster, stack.getOrganization(),
                 stackImageComponent);
         components.add(hdpRepoConfig);
 

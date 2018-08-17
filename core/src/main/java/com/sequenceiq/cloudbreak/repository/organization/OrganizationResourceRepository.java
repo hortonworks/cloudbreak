@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.repository;
+package com.sequenceiq.cloudbreak.repository.organization;
 
 import static com.sequenceiq.cloudbreak.authorization.OrganizationPermissions.Action.READ;
 
@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByOrganizat
 import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByOrganizationId;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.organization.OrganizationAwareResource;
+import com.sequenceiq.cloudbreak.repository.BaseRepository;
 
 @NoRepositoryBean
 @DisableHasPermission

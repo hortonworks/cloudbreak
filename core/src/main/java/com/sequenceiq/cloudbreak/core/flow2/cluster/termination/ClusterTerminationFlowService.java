@@ -85,7 +85,7 @@ public class ClusterTerminationFlowService {
         LOGGER.info("Handling cluster delete failure event.");
         Exception errorDetails = payload.getException();
         LOGGER.error("Error during cluster termination flow: ", errorDetails);
-        Cluster cluster = clusterService.retrieveClusterByStackId(payload.getStackId());
+        Cluster cluster = clusterService.retrieveClusterByStackIdWithoutAuth(payload.getStackId());
         if (cluster != null) {
             cluster.setStatus(DELETE_FAILED);
             cluster.setStatusReason(errorDetails.getMessage());

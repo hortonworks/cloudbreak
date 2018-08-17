@@ -118,7 +118,7 @@ public class StackRequestValidator implements Validator<StackRequest> {
         if (stackRequest.getClusterToAttach() != null) {
             Optional<Stack> stack = stackRepository.findById(stackRequest.getClusterToAttach());
             if (stack.isPresent() && AVAILABLE.equals(stack.get().getStatus())) {
-                Optional<Cluster> cluster = Optional.ofNullable(clusterService.retrieveClusterByStackId(stackRequest.getClusterToAttach()));
+                Optional<Cluster> cluster = Optional.ofNullable(clusterService.retrieveClusterByStackIdWithoutAuth(stackRequest.getClusterToAttach()));
                 if (cluster.isPresent() && !AVAILABLE.equals(cluster.get().getStatus())) {
                     validationBuilder.error("Ambari installation in progress or some of it's components has failed. "
                             + "Please check Ambari before trying to attach cluster to datalake.");

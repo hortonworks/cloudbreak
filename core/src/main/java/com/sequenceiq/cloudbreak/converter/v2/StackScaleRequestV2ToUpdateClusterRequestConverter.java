@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 
 @Component
-public class UpdateStackRequestV2ToUpdateClusterRequestConverter extends AbstractConversionServiceAwareConverter<StackScaleRequestV2, UpdateClusterJson> {
+public class StackScaleRequestV2ToUpdateClusterRequestConverter extends AbstractConversionServiceAwareConverter<StackScaleRequestV2, UpdateClusterJson> {
 
     @Inject
     private HostGroupRepository hostGroupRepository;

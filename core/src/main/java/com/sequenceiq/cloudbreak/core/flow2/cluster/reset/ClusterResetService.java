@@ -43,7 +43,7 @@ public class ClusterResetService {
     }
 
     public void handleResetClusterFailure(StackView stackView, Exception exception) {
-        Cluster cluster = clusterService.retrieveClusterByStackId(stackView.getId());
+        Cluster cluster = clusterService.retrieveClusterByStackIdWithoutAuth(stackView.getId());
         clusterService.cleanupKerberosCredential(cluster.getId());
         String errorMessage = exception instanceof CloudbreakException && exception.getCause() != null
                 ? exception.getCause().getMessage() : exception.getMessage();

@@ -86,7 +86,7 @@ public class ClusterContainerRunnerTest {
         HostGroupAdjustmentJson hostGroupAdjustment = new HostGroupAdjustmentJson();
         hostGroupAdjustment.setHostGroup("agent");
         when(containerOrchestratorResolver.get(anyString())).thenReturn(new FailedMockContainerOrchestrator());
-        when(clusterService.retrieveClusterByStackId(anyLong())).thenReturn(cluster);
+        when(clusterService.retrieveClusterByStackIdWithoutAuth(anyLong())).thenReturn(cluster);
         thrown.expect(CloudbreakException.class);
         thrown.expectMessage("com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException: failed");
 
@@ -123,7 +123,7 @@ public class ClusterContainerRunnerTest {
         hostGroupAdjustment.setHostGroup("agent");
         when(containerOrchestratorResolver.get(anyString())).thenReturn(new CancelledMockContainerOrchestrator());
         when(stackService.getByIdWithListsWithoutAuthorization(anyLong())).thenReturn(stack);
-        when(clusterService.retrieveClusterByStackId(anyLong())).thenReturn(cluster);
+        when(clusterService.retrieveClusterByStackIdWithoutAuth(anyLong())).thenReturn(cluster);
         when(hostGroupRepository.findHostGroupInClusterByName(anyLong(), anyString())).thenReturn(TestUtil.hostGroup());
 
         Set<Container> containers = new HashSet<>();

@@ -32,7 +32,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -75,7 +74,6 @@ import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -216,10 +214,10 @@ public class ClusterService {
             throw new BadRequestException(String.format("A cluster is already created on this stack! [cluster: '%s']", stack.getCluster().getName()));
         }
         return transactionService.required(() -> {
-            setOrganizationForCluster(stack, cluster);
+            cluster.setOrganization(stack.getOrganization());
 
             long start = System.currentTimeMillis();
-            if (findByNameInAccount(cluster.getName(), user.getAccount()) != null) {
+            if (clusterRepository.findByNameAndOrganization(cluster.getName(), stack.getOrganization()) != null) {
                 throw new DuplicateKeyValueException(APIResourceType.CLUSTER, cluster.getName());
             }
             LOGGER.info("Cluster name collision check took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
@@ -263,12 +261,6 @@ public class ClusterService {
         });
     }
 
-    private void setOrganizationForCluster(Stack stack, Cluster cluster) {
-        Organization organization = stack.getOrganization() != null
-                ? stack.getOrganization() : organizationService.getDefaultOrganizationForCurrentUser();
-        cluster.setOrganization(organization);
-    }
-
     private Cluster saveClusterAndComponent(Cluster cluster, List<ClusterComponent> components, String stackName) {
         long start;
         Cluster savedCluster;
@@ -301,22 +293,7 @@ public class ClusterService {
     }
 
     public Cluster save(Cluster cluster) {
-        if (cluster.getOrganization() == null) {
-            if (cluster.getStack() != null) {
-                setOrganizationForCluster(cluster.getStack(), cluster);
-            } else {
-                cluster.setOrganization(organizationService.getDefaultOrganizationForCurrentUser());
-            }
-        }
         return clusterRepository.save(cluster);
-    }
-
-    public Cluster findByNameInAccount(String clusterName, String account) {
-        try {
-            return clusterRepository.findByNameInAccount(clusterName, account);
-        } catch (AccessDeniedException ignore) {
-            return null;
-        }
     }
 
     public void delete(Long stackId, Boolean withStackDelete, Boolean deleteDependencies) {
@@ -328,8 +305,8 @@ public class ClusterService {
         flowManager.triggerClusterTermination(stackId, withStackDelete, deleteDependencies);
     }
 
-    public Cluster retrieveClusterByStackId(Long stackId) {
-        return clusterRepository.findOneByStackId(stackId);
+    public Cluster retrieveClusterByStackIdWithoutAuth(Long stackId) {
+        return clusterRepository.findOneByStackIdWithoutAuth(stackId);
     }
 
     public <R extends ClusterResponse> R retrieveClusterForCurrentUser(Long stackId, Class<R> clazz) {
@@ -636,7 +613,7 @@ public class ClusterService {
     public Cluster updateClusterStatusByStackId(Long stackId, Status status, String statusReason) {
         LOGGER.debug("Updating cluster status. stackId: {}, status: {}, statusReason: {}", stackId, status, statusReason);
         StackStatus stackStatus = stackService.getCurrentStatusByStackId(stackId);
-        Cluster cluster = retrieveClusterByStackId(stackId);
+        Cluster cluster = retrieveClusterByStackIdWithoutAuth(stackId);
         if (cluster != null) {
             cluster.setStatus(status);
             cluster.setStatusReason(statusReason);
@@ -1019,8 +996,8 @@ public class ClusterService {
         return clusterRepository.findByBlueprint(blueprint);
     }
 
-    public List<Cluster> findByStatuses(Collection<Status> statuses) {
-        return clusterRepository.findByStatuses(statuses);
+    public List<Cluster> findByStatusesWithoutAuth(Collection<Status> statuses) {
+        return clusterRepository.findByStatusesWithoutAuth(statuses);
     }
 
     public Cluster findOneByStackId(Long stackId) {
@@ -1039,7 +1016,7 @@ public class ClusterService {
         return clusterRepository.findByProxyConfig(proxyConfig);
     }
 
-    public List<Cluster> findByLdapConfig(LdapConfig ldapConfig) {
+    public List<Cluster> findByLdapConfigWithoutAuth(LdapConfig ldapConfig) {
         return clusterRepository.findByLdapConfig(ldapConfig);
     }
 
