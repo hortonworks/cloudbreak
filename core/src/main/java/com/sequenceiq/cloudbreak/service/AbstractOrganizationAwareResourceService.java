@@ -48,7 +48,8 @@ public abstract class AbstractOrganizationAwareResourceService<T extends Organiz
         return create(resource, organization);
     }
 
-    private T create(T resource, Organization organization) {
+    @Override
+    public T create(T resource, Organization organization) {
         try {
             prepareCreation(resource);
             User user = userService.getCurrentUser();
