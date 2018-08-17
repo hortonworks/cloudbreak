@@ -6,6 +6,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.cloudbreak.controller.validation.credential.CredentialValidator;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -25,11 +26,15 @@ public class CredentialRequestToCredentialConverter extends AbstractConversionSe
     @Inject
     private TopologyService topologyService;
 
+    @Inject
+    private CredentialValidator credentialValidator;
+
     @Override
     public Credential convert(CredentialRequest source) {
         Credential credential = new Credential();
         credential.setName(source.getName());
         credential.setDescription(source.getDescription());
+        credentialValidator.validateCredentialCloudPlatform(source.getCloudPlatform());
         String cloudPlatform = source.getCloudPlatform();
         credential.setCloudPlatform(cloudPlatform);
         Map<String, Object> parameters = credentialDefinitionService.processProperties(platform(cloudPlatform), source.getParameters());
