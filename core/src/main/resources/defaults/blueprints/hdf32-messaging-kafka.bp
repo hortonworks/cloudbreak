@@ -1,0 +1,66 @@
+{
+  "inputs": [],
+  "description": "Useful for messaging management with Apache Kafka",
+  "blueprint":
+  {
+      "Blueprints": {
+        "blueprint_name": "hdf31-messaging-management",
+        "stack_name": "HDF",
+        "stack_version": "3.2"
+      },
+      "configurations": [
+        {
+          "ams-grafana-env": {
+            "metrics_grafana_password": "admin"
+          }
+        }
+      ],
+      "host_groups": [
+        {
+          "name": "Services",
+          "components": [
+            {
+              "name": "METRICS_COLLECTOR"
+            },
+            {
+              "name": "METRICS_MONITOR"
+            },
+            {
+              "name": "METRICS_GRAFANA"
+            },
+            {
+              "name": "ZOOKEEPER_CLIENT"
+            }
+          ],
+          "cardinality": "1"
+        },
+        {
+          "name": "Messaging",
+          "components": [
+            {
+              "name": "KAFKA_BROKER"
+            },
+            {
+              "name": "METRICS_MONITOR"
+            },
+            {
+              "name": "ZOOKEEPER_CLIENT"
+            }
+          ],
+          "cardinality": "3+"
+        },
+        {
+          "name": "ZooKeeper",
+          "components": [
+            {
+              "name": "ZOOKEEPER_SERVER"
+            },
+            {
+              "name": "ZOOKEEPER_CLIENT"
+            }
+          ],
+          "cardinality": "3+"
+        }
+      ]
+  }
+}

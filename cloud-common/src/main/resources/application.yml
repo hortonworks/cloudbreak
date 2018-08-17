@@ -96,7 +96,15 @@ cb:
     defaultLifeTime: -1
 
   blueprint:
-     defaults: "EDW-ETL: Apache Hive, Apache Spark 2=hdp26-etl-edw-spark2;EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin=hdp26-edw-analytics;Data Science: Apache Spark 2, Apache Zeppelin=hdp26-data-science-spark2;Flow Management: Apache NiFi, Apache NiFi Registry=hdf31-flow-management;Messaging Management: Apache Kafka=hdf31-messaging-kafka;Data Lake: Apache Ranger, Apache Atlas, Apache Hive Metastore=hdp26-shared-services;HDP 3.0 - Data Science: Apache Spark 2, Apache Zeppelin=hdp30-data-science-spark2;HDP 3.0 - EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin=hdp30-edw-analytics"
+     defaults: >
+                EDW-ETL: Apache Hive, Apache Spark 2=hdp26-etl-edw-spark2;
+                EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin=hdp26-edw-analytics;
+                Data Science: Apache Spark 2, Apache Zeppelin=hdp26-data-science-spark2;
+                Flow Management: Apache NiFi, Apache NiFi Registry=hdf32-flow-management;
+                Messaging Management: Apache Kafka=hdf32-messaging-kafka;
+                Data Lake: Apache Ranger, Apache Atlas, Apache Hive Metastore=hdp26-shared-services;
+                HDP 3.0 - Data Science: Apache Spark 2, Apache Zeppelin=hdp30-data-science-spark2;
+                HDP 3.0 - EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin=hdp30-edw-analytics
      internal: "HDP 3.0 - Data Lake: Apache Ranger, Apache Hive Metastore=hdp30-shared-services"
   template.defaults: minviable-gcp,minviable-azure-managed-disks,minviable-aws
   custom.user.data: |
@@ -314,7 +322,46 @@ cb:
             sles12:
               - mpackUrl: http://public-repo-1.hortonworks.com/HDF/sles12/3.x/updates/3.1.2.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.1.2.0-7.tar.gz
                 stackDefault: true
-
+      3.2:
+        version: 3.2.0.0-520
+        min-ambari: 2.7
+        repo:
+          stack:
+            repoid: HDF-3.2
+            redhat6: http://public-repo-1.hortonworks.com/HDF/centos6/3.x/updates/3.2.0.0
+            redhat7: http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.2.0.0
+            debian9: http://public-repo-1.hortonworks.com/HDF/debian9/3.x/updates/3.2.0.0
+            ubuntu16: http://public-repo-1.hortonworks.com/HDF/ubuntu16/3.x/updates/3.2.0.0
+            sles12: http://public-repo-1.hortonworks.com/HDF/sles12/3.x/updates/3.2.0.0
+            repository-version: 3.2.0.0-520
+            vdf-redhat6: http://public-repo-1.hortonworks.com/HDF/centos6/3.x/updates/3.2.0.0/HDF-3.2.0.0-520.xml
+            vdf-redhat7: http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.2.0.0/HDF-3.2.0.0-520.xml
+            vdf-debian9: http://public-repo-1.hortonworks.com/HDF/debian9/3.x/updates/3.2.0.0/HDF-3.2.0.0-520.xml
+            vdf-ubuntu16: http://public-repo-1.hortonworks.com/HDF/ubuntu16/3.x/updates/3.2.0.0/HDF-3.2.0.0-520.xml
+            vdf-sles12: http://public-repo-1.hortonworks.com/HDF/sles12/3.x/updates/3.2.0.0/HDF-3.2.0.0-520.xml
+          util:
+            repoid: HDP-UTILS-1.1.0.21
+            redhat6: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos6
+            redhat7: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos7
+            debian9: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/debian9
+            ubuntu16: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/ubuntu16
+            sles12: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/sles12
+          mpacks:
+            redhat6:
+              - mpackUrl: http://public-repo-1.hortonworks.com/HDF/centos6/3.x/updates/3.2.0.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.2.0.0-520.tar.gz
+                stackDefault: true
+            redhat7:
+              - mpackUrl: http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.2.0.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.2.0.0-520.tar.gz
+                stackDefault: true
+            debian9:
+              - mpackUrl: http://public-repo-1.hortonworks.com/HDF/debian9/3.x/updates/3.2.0.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.2.0.0-520.tar.gz
+                stackDefault: true
+            ubuntu16:
+              - mpackUrl: http://public-repo-1.hortonworks.com/HDF/ubuntu16/3.x/updates/3.2.0.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.2.0.0-520.tar.gz
+                stackDefault: true
+            sles12:
+              - mpackUrl: http://public-repo-1.hortonworks.com/HDF/sles12/3.x/updates/3.2.0.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.2.0.0-520.tar.gz
+                stackDefault: true
   smartsense.configure: false
   smartsense.enabled: true
   smartsense.id.pattern: A-9990%s-C-%s
