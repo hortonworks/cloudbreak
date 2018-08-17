@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.CoreApi;
 import com.sequenceiq.cloudbreak.controller.audit.AuditController;
+import com.sequenceiq.cloudbreak.controller.audit.AuditV3Controller;
 import com.sequenceiq.cloudbreak.controller.mapper.DefaultExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.WebApplicaitonExceptionMapper;
 import com.sequenceiq.cloudbreak.structuredevent.rest.StructuredEventFilter;

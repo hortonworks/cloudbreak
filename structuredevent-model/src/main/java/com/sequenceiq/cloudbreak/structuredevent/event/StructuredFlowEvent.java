@@ -23,18 +23,18 @@ public class StructuredFlowEvent extends StructuredEvent {
     public StructuredFlowEvent() {
     }
 
-    public StructuredFlowEvent(OperationDetails operation, FlowDetails flow, StackDetails stack) {
-        this(operation, flow, stack, null, null);
+    public StructuredFlowEvent(OperationDetails operation, FlowDetails flow, StackDetails stack, long orgId) {
+        this(operation, flow, stack, null, null, orgId);
     }
 
     public StructuredFlowEvent(OperationDetails operation, FlowDetails flow, StackDetails stack, ClusterDetails cluster,
-            BlueprintDetails blueprint) {
-        this(StructuredFlowEvent.class.getSimpleName(), operation, flow, stack, cluster, blueprint);
+            BlueprintDetails blueprint, long orgId) {
+        this(StructuredFlowEvent.class.getSimpleName(), operation, flow, stack, cluster, blueprint, orgId);
     }
 
     public StructuredFlowEvent(String type, OperationDetails operation, FlowDetails flow, StackDetails stack,
-            ClusterDetails cluster, BlueprintDetails blueprint) {
-        super(type, operation);
+            ClusterDetails cluster, BlueprintDetails blueprint, long orgId) {
+        super(type, operation, orgId);
         this.flow = flow;
         this.stack = stack;
         this.cluster = cluster;
@@ -42,13 +42,13 @@ public class StructuredFlowEvent extends StructuredEvent {
     }
 
     public StructuredFlowEvent(OperationDetails operation, FlowDetails flow, StackDetails stack,
-            ClusterDetails cluster, BlueprintDetails blueprint, String exception) {
-        this(StructuredFlowEvent.class.getSimpleName(), operation, flow, stack, cluster, blueprint);
+            ClusterDetails cluster, BlueprintDetails blueprint, long orgId, String exception) {
+        this(StructuredFlowEvent.class.getSimpleName(), operation, flow, stack, cluster, blueprint, orgId);
         this.exception = exception;
     }
 
-    public StructuredFlowEvent(OperationDetails operation, FlowDetails flow, StackDetails stack, String exception) {
-        this(operation, flow, stack, null, null, exception);
+    public StructuredFlowEvent(OperationDetails operation, FlowDetails flow, StackDetails stack, String exception, long orgId) {
+        this(operation, flow, stack, null, null, orgId, exception);
     }
 
     @Override

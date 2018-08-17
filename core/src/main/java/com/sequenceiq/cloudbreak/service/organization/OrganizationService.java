@@ -141,6 +141,14 @@ public class OrganizationService {
         return userOrgPermissions.getOrganization();
     }
 
+    public Organization getByIdWithoutPermissionCheck(Long id) {
+        Optional<Organization> organization = organizationRepository.findById(id);
+        if (organization.isPresent()) {
+            return organization.get();
+        }
+        throw new IllegalArgumentException(String.format("No Organization found with id: %s", id));
+    }
+
     public Set<User> removeUsers(String orgName, Set<String> userIds) {
         try {
             return transactionService.required(() -> {

@@ -41,6 +41,8 @@ import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredEventClient;
 import com.sequenceiq.cloudbreak.structuredevent.event.OperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredRestCallEvent;
@@ -95,6 +97,12 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
 
     @Inject
     private AuthenticatedUserService authenticatedUserService;
+
+    @Inject
+    private OrganizationService organizationService;
+
+    @Inject
+    private RestRequestThreadLocalService restRequestThreadLocalService;
 
     @Inject
     @Named("structuredEventClient")
@@ -159,7 +167,11 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
         restCall.setRestRequest(restRequest);
         restCall.setRestResponse(restResponse);
         restCall.setDuration(System.currentTimeMillis() - requestTime);
-        structuredEventClient.sendStructuredEvent(new StructuredRestCallEvent(createOperationDetails(restParams, requestTime), restCall));
+        Long orgId = restRequestThreadLocalService.getRequestedOrgId();
+        if (orgId == null) {
+            orgId = organizationService.getDefaultOrganizationForCurrentUser().getId();
+        }
+        structuredEventClient.sendStructuredEvent(new StructuredRestCallEvent(createOperationDetails(restParams, requestTime), restCall, orgId));
     }
 
     private Map<String, String> getRequestUrlParameters(String method, CharSequence url) {

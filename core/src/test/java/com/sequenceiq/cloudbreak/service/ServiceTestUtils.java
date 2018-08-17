@@ -27,13 +27,15 @@ import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEve
 
 public final class ServiceTestUtils {
 
-    public static final String DUMMY_OWNER = "gipsz@jakab.kom";
+    private static final String DUMMY_OWNER = "gipsz@jakab.kom";
 
-    public static final String DUMMY_ACCOUNT = "acmecorp";
+    private static final String DUMMY_ACCOUNT = "acmecorp";
 
     private static final String C3LARGE_INSTANCE = "c3.large";
 
     private static final String N1_STANDARD_1 = "n1-standard-1";
+
+    private static final long ORG_ID = 1L;
 
     private ServiceTestUtils() {
     }
@@ -199,7 +201,7 @@ public final class ServiceTestUtils {
         NotificationDetails notification = new NotificationDetails();
         notification.setNotificationType(eventStatus);
         notification.setNodeCount(nodeCount);
-        return new StructuredNotificationEvent(operation, notification);
+        return new StructuredNotificationEvent(operation, notification, ORG_ID);
     }
 
     public static IdentityUser cbUser() {

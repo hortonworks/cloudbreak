@@ -67,8 +67,8 @@ public class StructuredFlowEventFactory {
     public StructuredFlowEvent createStucturedFlowEvent(Long stackId, FlowDetails flowDetails, Boolean detailed, Exception exception) {
         Stack stack = stackService.getByIdWithoutAuth(stackId);
         UserProfile userProfile = userProfileService.getOrCreate(stack.getAccount(), stack.getOwner());
-        OperationDetails operationDetails = new OperationDetails(FLOW, "stacks", stackId, stack.getName(), stack.getAccount(), stack.getOwner(),
-                userProfile.getUserName(), cloudbreakNodeConfig.getId(), cbVersion);
+        OperationDetails operationDetails = new OperationDetails(FLOW, "stacks", stackId, stack.getName(), stack.getAccount(),
+                stack.getOwner(), userProfile.getUserName(), cloudbreakNodeConfig.getId(), cbVersion);
         StackDetails stackDetails = null;
         ClusterDetails clusterDetails = null;
         BlueprintDetails blueprintDetails = null;
@@ -81,8 +81,9 @@ public class StructuredFlowEventFactory {
             }
         }
         return exception != null ? new StructuredFlowEvent(operationDetails, flowDetails, stackDetails, clusterDetails, blueprintDetails,
-                ExceptionUtils.getStackTrace(exception)) : new StructuredFlowEvent(operationDetails, flowDetails, stackDetails, clusterDetails,
-                blueprintDetails);
+                stack.getOrganization().getId(), ExceptionUtils.getStackTrace(exception))
+                : new StructuredFlowEvent(operationDetails, flowDetails, stackDetails, clusterDetails,
+                blueprintDetails, stack.getOrganization().getId());
     }
 
     public StructuredNotificationEvent createStructuredNotificationEvent(Long stackId, String notificationType, String message, String instanceGroupName) {
@@ -96,9 +97,8 @@ public class StructuredFlowEventFactory {
         String userName = null;
         String stackName = null;
 
+        Stack stack = stackService.getByIdWithoutAuth(stackId);
         try {
-            Stack stack = stackService.getByIdWithoutAuth(stackId);
-
             UserProfile userProfile = userProfileService.getOrCreate(stack.getAccount(), stack.getOwner());
             account = stack.getAccount();
             userId = stack.getOwner();
@@ -136,6 +136,6 @@ public class StructuredFlowEventFactory {
 
         OperationDetails operationDetails = new OperationDetails(NOTIFICATION, "stacks", stackId, stackName, account, userId, userName,
                 cloudbreakNodeConfig.getInstanceUUID(), cbVersion);
-        return new StructuredNotificationEvent(operationDetails, notificationDetails);
+        return new StructuredNotificationEvent(operationDetails, notificationDetails, stack.getOrganization().getId());
     }
 }
