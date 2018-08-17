@@ -23,6 +23,7 @@ public class FilterConfiguration {
         FilterRegistrationBean registrationBean = new FilterRegistrationBean();
         RestRequestThreadLocalFilter filter = new RestRequestThreadLocalFilter(restRequestThreadLocalService);
         registrationBean.setFilter(filter);
+        registrationBean.setOrder(0);
         return registrationBean;
     }
 

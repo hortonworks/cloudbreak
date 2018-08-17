@@ -9,8 +9,8 @@ public class StructuredNotificationEvent extends StructuredEvent {
     public StructuredNotificationEvent() {
     }
 
-    public StructuredNotificationEvent(OperationDetails operation, NotificationDetails notificationDetails) {
-        super(StructuredNotificationEvent.class.getSimpleName(), operation);
+    public StructuredNotificationEvent(OperationDetails operation, NotificationDetails notificationDetails, long orgId) {
+        super(StructuredNotificationEvent.class.getSimpleName(), operation, orgId);
         this.notificationDetails = notificationDetails;
     }
 

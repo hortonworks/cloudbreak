@@ -18,6 +18,9 @@ import com.sequenceiq.cloudbreak.structuredevent.event.OperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEvent;
 
 public class StructuredNotificationEventToCloudbreakEventJsonConverterTest extends AbstractEntityConverterTest<StructuredNotificationEvent> {
+
+    private static final long ORG_ID = 1L;
+
     private StructuredNotificationEventToCloudbreakEventJsonConverter underTest;
 
     @Before
@@ -54,6 +57,6 @@ public class StructuredNotificationEventToCloudbreakEventJsonConverterTest exten
         notification.setClusterStatus(AVAILABLE.name());
         notification.setClusterId(1L);
         notification.setClusterName("test");
-        return new StructuredNotificationEvent(operation, notification);
+        return new StructuredNotificationEvent(operation, notification, ORG_ID);
     }
 }

@@ -8,16 +8,20 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.OrganizationAwareResource;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType;
 
 @Entity
 @Table(name = "structuredevent")
-public class StructuredEventEntity {
+public class StructuredEventEntity implements OrganizationAwareResource {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "structuredevent_generator")
     @SequenceGenerator(name = "structuredevent_generator", sequenceName = "structuredevent_id_seq", allocationSize = 1)
@@ -36,16 +40,19 @@ public class StructuredEventEntity {
     @Column(nullable = false)
     private Long timestamp;
 
-    @Column(nullable = false)
+    @Column
     private String account;
 
     // inconsistent name, the authorization cannot find the "userId" field
-    @Column(nullable = false, name = "userid")
+    @Column(name = "userid")
     private String owner;
 
     @Convert(converter = JsonToString.class)
     @Column(columnDefinition = "TEXT")
     private Json structuredEventJson;
+
+    @ManyToOne
+    private Organization organization;
 
     public Long getId() {
         return id;
@@ -109,5 +116,25 @@ public class StructuredEventEntity {
 
     public void setStructuredEventJson(Json structuredEventJson) {
         this.structuredEventJson = structuredEventJson;
+    }
+
+    @Override
+    public Organization getOrganization() {
+        return organization;
+    }
+
+    @Override
+    public String getName() {
+        return resourceType;
+    }
+
+    @Override
+    public void setOrganization(Organization organization) {
+        this.organization = organization;
+    }
+
+    @Override
+    public OrganizationResource getResource() {
+        return OrganizationResource.STRUCTURED_EVENT;
     }
 }

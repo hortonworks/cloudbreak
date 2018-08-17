@@ -12,6 +12,7 @@ public enum OrganizationResource {
     RDS("RDS resource", "rds"),
     PROXY("Proxys", "proxy"),
     MPACK("MPACK resource", "mpack"),
+    STRUCTURED_EVENT("Structured event resource", "structuredevent"),
     FLEXSUBSCRIPTION("Flex subscription", "flexsubscription");
 
     private final String readableName;
