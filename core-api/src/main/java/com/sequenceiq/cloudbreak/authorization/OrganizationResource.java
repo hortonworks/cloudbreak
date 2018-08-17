@@ -13,7 +13,8 @@ public enum OrganizationResource {
     PROXY("Proxys", "proxy"),
     MPACK("MPACK resource", "mpack"),
     STRUCTURED_EVENT("Structured event resource", "structuredevent"),
-    FLEXSUBSCRIPTION("Flex subscription", "flexsubscription");
+    FLEXSUBSCRIPTION("Flex subscription", "flexsubscription"),
+    NETWORK("Network", "network");
 
     private final String readableName;
 

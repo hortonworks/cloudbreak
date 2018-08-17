@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.api.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sequenceiq.cloudbreak.api.model.users.OrganizationResourceResponse;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
 import io.swagger.annotations.ApiModel;
@@ -17,17 +18,15 @@ public class NetworkResponse extends NetworkBase {
     @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
     private String name;
 
-    @ApiModelProperty(ModelDescriptions.PUBLIC_IN_ACCOUNT)
-    private boolean publicInAccount;
+    @ApiModelProperty(ModelDescriptions.ORGANIZATION_OF_THE_RESOURCE)
+    private OrganizationResourceResponse organization;
 
-    @JsonProperty("publicInAccount")
-    public boolean isPublicInAccount() {
-        return publicInAccount;
+    public OrganizationResourceResponse getOrganization() {
+        return organization;
     }
 
-    @JsonIgnore
-    public void setPublicInAccount(boolean publicInAccount) {
-        this.publicInAccount = publicInAccount;
+    public void setOrganization(OrganizationResourceResponse organization) {
+        this.organization = organization;
     }
 
     @JsonProperty("id")

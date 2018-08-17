@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.network;
 
+import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
 import java.util.ArrayList;
@@ -15,8 +16,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
+import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Network;
@@ -24,13 +24,14 @@ import com.sequenceiq.cloudbreak.domain.Topology;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.repository.NetworkRepository;
-import com.sequenceiq.cloudbreak.service.AuthorizationService;
+import com.sequenceiq.cloudbreak.repository.OrganizationResourceRepository;
+import com.sequenceiq.cloudbreak.service.AbstractOrganizationAwareResourceService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.NameUtil;
 
 @Service
-public class NetworkService {
+public class NetworkService extends AbstractOrganizationAwareResourceService<Network> {
     private static final Logger LOGGER = LoggerFactory.getLogger(NetworkService.class);
 
     @Inject
@@ -40,15 +41,9 @@ public class NetworkService {
     private StackService stackService;
 
     @Inject
-    private AuthorizationService authorizationService;
-
-    @Inject
     private OrganizationService organizationService;
 
-    public Network create(IdentityUser user, Network network, Organization organization) {
-        LOGGER.info("Creating network: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
-        network.setOwner(user.getUserId());
-        network.setAccount(user.getAccount());
+    public Network create(Network network, Organization organization) {
         if (organization != null) {
             network.setOrganization(organization);
         } else {
@@ -63,36 +58,20 @@ public class NetworkService {
     }
 
     public Network get(Long id) {
-        return networkRepository.findOneById(id);
+        return repository().findById(id).orElseThrow(notFound("Network", id));
     }
 
-    public Network getPrivateNetwork(String name, IdentityUser user) {
-        return networkRepository.findByNameForUser(name, user.getUserId());
-    }
-
-    public Network getPublicNetwork(String name, IdentityUser user) {
-        return networkRepository.findByNameInAccount(name, user.getAccount());
-    }
-
-    public void delete(Long id, IdentityUser user) {
+    public void delete(Long id) {
         deleteImpl(get(id));
     }
 
-    public void delete(String name, IdentityUser user) {
-        deleteImpl(networkRepository.findByNameInAccount(name, user.getAccount()));
+    @Override
+    protected void prepareDeletion(Network network) {
     }
 
-    public void delete(Network network) {
-        deleteImpl(network);
-    }
+    @Override
+    protected void prepareCreation(Network resource) {
 
-    public Set<Network> retrievePrivateNetworks(IdentityUser user) {
-        return networkRepository.findForUser(user.getUserId());
-    }
-
-    public Set<Network> retrieveAccountNetworks(IdentityUser user) {
-        return user.getRoles().contains(IdentityUserRole.ADMIN) ? networkRepository.findAllInAccount(user.getAccount())
-                : networkRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
     }
 
     private void deleteImpl(Network network) {
@@ -125,4 +104,15 @@ public class NetworkService {
     public Set<Network> findByTopology(Topology topology) {
         return networkRepository.findByTopology(topology);
     }
+
+    @Override
+    protected OrganizationResourceRepository<Network, Long> repository() {
+        return networkRepository;
+    }
+
+    @Override
+    protected OrganizationResource resource() {
+        return OrganizationResource.NETWORK;
+    }
+
 }

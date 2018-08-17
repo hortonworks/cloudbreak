@@ -110,7 +110,7 @@ public class StackDecorator {
 
     public Stack decorate(@Nonnull Stack subject, @Nonnull StackRequest request, IdentityUser user) {
         prepareCredential(subject, request);
-        prepareDomainIfDefined(subject, request, user);
+        prepareDomainIfDefined(subject, request);
         Long credentialId = request.getCredentialId();
         String credentialName = request.getCredentialName();
         if (credentialId != null || subject.getCredential() != null || credentialName != null) {
@@ -285,13 +285,13 @@ public class StackDecorator {
         }
     }
 
-    private void prepareDomainIfDefined(Stack subject, StackRequest request, IdentityUser user) {
+    private void prepareDomainIfDefined(Stack subject, StackRequest request) {
         if (subject.getNetwork() != null) {
             Network network = subject.getNetwork();
             if (network.getId() == null) {
-                network.setPublicInAccount(subject.isPublicInAccount());
+                network.setOrganization(subject.getOrganization());
                 network.setCloudPlatform(getCloudPlatform(subject, request, network.cloudPlatform()));
-                network = networkService.create(user, network, subject.getOrganization());
+                network = networkService.create(network, subject.getOrganization());
             }
             subject.setNetwork(network);
         }
