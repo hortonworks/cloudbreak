@@ -89,13 +89,6 @@
       }
     },
     {
-      "hbase-site": {
-        "properties": {
-          "zookeeper.recovery.retry": "10"
-        }
-      }
-    },
-    {
       "core-site": {
         "properties": {
           "hadoop.security.group.mapping.ldap.search.attr.member": "member",

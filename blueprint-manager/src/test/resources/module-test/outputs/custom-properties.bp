@@ -53,13 +53,6 @@
           "recovery_type": "AUTO_START"
         }
       }
-    },
-    {
-      "hbase-site": {
-        "properties": {
-          "zookeeper.recovery.retry": "10"
-        }
-      }
     }
   ],
   "host_groups": [

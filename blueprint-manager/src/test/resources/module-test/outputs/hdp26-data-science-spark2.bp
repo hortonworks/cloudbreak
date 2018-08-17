@@ -117,13 +117,6 @@
       }
     },
     {
-      "hbase-site": {
-        "properties": {
-          "zookeeper.recovery.retry": "10"
-        }
-      }
-    },
-    {
       "hive-env": {
         "properties": {
           "hive_database": "Existing PostgreSQL Database",
