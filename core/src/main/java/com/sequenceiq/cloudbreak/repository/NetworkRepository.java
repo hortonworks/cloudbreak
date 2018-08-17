@@ -1,49 +1,25 @@
 package com.sequenceiq.cloudbreak.repository;
 
+import static com.sequenceiq.cloudbreak.authorization.OrganizationPermissions.Action.READ;
+
 import java.util.Set;
 
 import javax.transaction.Transactional;
 
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-
+import com.sequenceiq.cloudbreak.aspect.DisableHasPermission;
+import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByOrganizationId;
+import com.sequenceiq.cloudbreak.aspect.organization.OrganizationResourceType;
+import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Topology;
-import com.sequenceiq.cloudbreak.aspect.DisableHasPermission;
-import com.sequenceiq.cloudbreak.aspect.HasPermission;
 import com.sequenceiq.cloudbreak.service.EntityType;
 
+@DisableHasPermission
 @EntityType(entityClass = Network.class)
 @Transactional(Transactional.TxType.REQUIRED)
-@HasPermission
-public interface NetworkRepository extends BaseRepository<Network, Long> {
+@OrganizationResourceType(resource = OrganizationResource.NETWORK)
+public interface NetworkRepository extends OrganizationResourceRepository<Network, Long> {
 
-    @Query("SELECT r FROM Network r WHERE r.id= :id")
-    Network findOneById(@Param("id") Long id);
-
-    @Query("SELECT r FROM Network r WHERE r.name= :name AND r.status <> 'DEFAULT_DELETED'")
-    Network findOneByName(@Param("name") String name);
-
-    @Query("SELECT r FROM Network r WHERE r.name= :name AND r.owner= :owner AND r.status <> 'DEFAULT_DELETED'")
-    Network findByNameForUser(@Param("name") String name, @Param("owner") String userId);
-
-    @Query("SELECT r FROM Network r WHERE r.name= :name AND r.account= :account AND r.status <> 'DEFAULT_DELETED'")
-    Network findByNameInAccount(@Param("name") String name, @Param("account") String account);
-
-    @Query("SELECT r FROM Network r WHERE r.owner= :owner AND r.status <> 'DEFAULT_DELETED'")
-    Set<Network> findForUser(@Param("owner") String user);
-
-    @Query("SELECT r FROM Network r WHERE ((r.account= :account AND r.publicInAccount= true) OR r.owner= :owner) AND r.status <> 'DEFAULT_DELETED'")
-    Set<Network> findPublicInAccountForUser(@Param("owner") String user, @Param("account") String account);
-
-    @Query("SELECT r FROM Network r WHERE r.account= :account AND r.status <> 'DEFAULT_DELETED'")
-    Set<Network> findAllInAccount(@Param("account") String account);
-
-    @Query("SELECT r FROM Network r WHERE r.account= :account AND (r.status = 'DEFAULT_DELETED' OR r.status = 'DEFAULT') ")
-    Set<Network> findAllDefaultInAccount(@Param("account") String account);
-
-    @DisableHasPermission
-    Long countByTopology(Topology topology);
-
+    @CheckPermissionsByOrganizationId(action = READ)
     Set<Network> findByTopology(Topology topology);
 }
