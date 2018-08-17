@@ -8,6 +8,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.cloudbreak.controller.validation.credential.CredentialValidator;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
@@ -27,10 +28,14 @@ public class CredentialToCredentialResponseConverter extends AbstractConversionS
     @Inject
     private TopologyService topologyService;
 
+    @Inject
+    private CredentialValidator credentialValidator;
+
     @Override
     public CredentialResponse convert(Credential source) {
         CredentialResponse credentialJson = new CredentialResponse();
         credentialJson.setId(source.getId());
+        credentialValidator.validateCredentialCloudPlatform(source.cloudPlatform());
         credentialJson.setCloudPlatform(source.cloudPlatform());
         credentialJson.setName(source.getName());
         credentialJson.setPublicInAccount(source.isPublicInAccount());

@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
 import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
 import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.controller.validation.credential.CredentialValidator;
 import com.sequenceiq.cloudbreak.domain.Topology;
 import com.sequenceiq.cloudbreak.repository.OrganizationResourceRepository;
 import com.sequenceiq.cloudbreak.service.AbstractOrganizationAwareResourceService;
@@ -83,6 +84,9 @@ public class CredentialService extends AbstractOrganizationAwareResourceService<
     @Inject
     private OrganizationService organizationService;
 
+    @Inject
+    private CredentialValidator credentialValidator;
+
     public Set<Credential> listForUsersDefaultOrganization() {
         return credentialRepository.findActiveForOrganizationFilterByPlatforms(getDefaultOrg().getId(), accountPreferencesService.enabledPlatforms());
     }
@@ -110,7 +114,7 @@ public class CredentialService extends AbstractOrganizationAwareResourceService<
     }
 
     public Credential updateByOrganizationId(Long organizationId, Credential credential) {
-        checkCredentialCloudPlatform(credential.cloudPlatform());
+        credentialValidator.validateCredentialCloudPlatform(credential.cloudPlatform());
         Credential original = Optional.ofNullable(
                 credentialRepository.findActiveByNameAndOrgIdFilterByPlatforms(credential.getName(), organizationId,
                         accountPreferencesService.enabledPlatforms()))
@@ -138,7 +142,7 @@ public class CredentialService extends AbstractOrganizationAwareResourceService<
     @Override
     public Credential create(Credential credential, Long orgId) {
         LOGGER.debug("Creating credential for organization: {}", getOrganizationService().get(orgId).getName());
-        checkCredentialCloudPlatform(credential.cloudPlatform());
+        credentialValidator.validateCredentialCloudPlatform(credential.cloudPlatform());
         Credential created = super.create(credentialAdapter.init(credential), orgId);
         sendCredentialNotification(credential, ResourceEvent.CREDENTIAL_CREATED);
         return created;
@@ -256,12 +260,6 @@ public class CredentialService extends AbstractOrganizationAwareResourceService<
         notification.setEventMessage(messagesService.getMessage(resourceEvent.getMessage()));
         notification.setCloud(credential.cloudPlatform());
         notificationSender.send(new Notification<>(notification));
-    }
-
-    private void checkCredentialCloudPlatform(String cloudPlatform) {
-        if (!accountPreferencesService.enabledPlatforms().contains(cloudPlatform)) {
-            throw new BadRequestException(String.format("There is no such cloud platform as '%s'", cloudPlatform));
-        }
     }
 
     private Organization getDefaultOrg() {
