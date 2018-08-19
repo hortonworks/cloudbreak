@@ -33,12 +33,13 @@ public class FileSystemValidator {
     @Inject
     private FileSystemRequestToSpiFileSystemConverter converter;
 
-    public void validateFileSystem(String platform, CloudCredential cloudCredential, FileSystemRequest fileSystemRequest) {
+    public void validateFileSystem(String platform, CloudCredential cloudCredential, FileSystemRequest fileSystemRequest,
+            String userId, Long organizationId) {
         if (fileSystemRequest == null) {
             return;
         }
         LOGGER.debug("Sending fileSystemRequest to {} to validate the file system", platform);
-        CloudContext cloudContext = new CloudContext(null, null, platform, null, null, null);
+        CloudContext cloudContext = new CloudContext(null, null, platform, null, userId, organizationId);
         SpiFileSystem spiFileSystem = converter.convert(fileSystemRequest);
         FileSystemValidationRequest request = new FileSystemValidationRequest(spiFileSystem, cloudCredential, cloudContext);
         eventBus.notify(request.selector(), eventFactory.createEvent(request));

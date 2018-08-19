@@ -147,7 +147,14 @@ public class TestUtil {
     }
 
     public static Stack stack(Status stackStatus, Credential credential) {
+        User user = new User();
+        user.setUserId("alma@hortonmunkak.hu");
+        user.setUserName("Alma ur");
+        Organization organization = new Organization();
+        organization.setId(1L);
         Stack stack = new Stack();
+        stack.setCreator(user);
+        stack.setOrganization(organization);
         stack.setStackStatus(new StackStatus(stack, stackStatus, "statusReason", DetailedStackStatus.UNKNOWN));
         stack.setCredential(credential);
         stack.setName("simplestack");
@@ -159,6 +166,7 @@ public class TestUtil {
         stack.setCreated(123L);
         stack.setCloudPlatform(credential.cloudPlatform());
         stack.setOrchestrator(orchestrator());
+
         switch (credential.cloudPlatform()) {
             case AWS:
                 stack.setInstanceGroups(generateAwsInstanceGroups(3));

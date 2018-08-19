@@ -39,11 +39,10 @@ import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConver
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
-import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
 
 import reactor.bus.EventBus;
@@ -75,7 +74,7 @@ public class ServiceProviderConnectorAdapter {
         LOGGER.debug("Assembling downscale stack event for stack: {}", stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getOwner(), stack.getPlatformVariant(),
-                location);
+                location, stack.getCreator().getUserId(), stack.getOrganization().getId());
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         List<CloudResource> resources = cloudResourceConverter.convert(stack.getResources());
         List<CloudInstance> instances = new ArrayList<>();
@@ -105,11 +104,11 @@ public class ServiceProviderConnectorAdapter {
         }
     }
 
-    public void deleteStack(Stack stack, Credential credential) {
+    public void deleteStack(Stack stack) {
         LOGGER.debug("Assembling terminate stack event for stack: {}", stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getOwner(), stack.getPlatformVariant(),
-                location);
+                location, stack.getCreator().getUserId(), stack.getOrganization().getId());
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         List<CloudResource> resources = cloudResourceConverter.convert(stack.getResources());
         CloudStack cloudStack = cloudStackConverter.convert(stack);
@@ -134,13 +133,13 @@ public class ServiceProviderConnectorAdapter {
 
     public void rollback(Stack stack, Set<Resource> resourceSet) {
         LOGGER.info("Rollback the whole stack for {}", stack.getId());
-        deleteStack(stack, stack.getCredential());
+        deleteStack(stack);
     }
 
     public String getTemplate(Stack stack) {
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getOwner(), stack.getPlatformVariant(),
-                location);
+                location, stack.getCreator().getUserId(), stack.getOrganization().getId());
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         GetPlatformTemplateRequest getPlatformTemplateRequest = new GetPlatformTemplateRequest(cloudContext, cloudCredential);
         eventBus.notify(getPlatformTemplateRequest.selector(), eventFactory.createEvent(getPlatformTemplateRequest));
@@ -162,7 +161,7 @@ public class ServiceProviderConnectorAdapter {
         LOGGER.debug("Get platform parameters for: {}", stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getOwner(), stack.getPlatformVariant(),
-                location);
+                location, stack.getCreator().getUserId(), stack.getOrganization().getId());
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         PlatformParameterRequest parameterRequest = new PlatformParameterRequest(cloudContext, cloudCredential);
         eventBus.notify(parameterRequest.selector(), eventFactory.createEvent(parameterRequest));
@@ -184,7 +183,7 @@ public class ServiceProviderConnectorAdapter {
         LOGGER.debug("Get platform variant for: {}", stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getOwner(), stack.getPlatformVariant(),
-                location);
+                location, stack.getCreator().getUserId(), stack.getOrganization().getId());
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         CheckPlatformVariantRequest checkPlatformVariantRequest = new CheckPlatformVariantRequest(cloudContext, cloudCredential);
         eventBus.notify(checkPlatformVariantRequest.selector(), eventFactory.createEvent(checkPlatformVariantRequest));

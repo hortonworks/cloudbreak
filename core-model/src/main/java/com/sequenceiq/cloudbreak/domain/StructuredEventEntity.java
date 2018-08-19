@@ -8,6 +8,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -17,6 +18,7 @@ import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.organization.OrganizationAwareResource;
+import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType;
 
 @Entity
@@ -53,6 +55,10 @@ public class StructuredEventEntity implements OrganizationAwareResource {
 
     @ManyToOne
     private Organization organization;
+
+    @ManyToOne
+    @JoinColumn(name = "users_user_id")
+    private User user;
 
     public Long getId() {
         return id;
@@ -136,5 +142,13 @@ public class StructuredEventEntity implements OrganizationAwareResource {
     @Override
     public OrganizationResource getResource() {
         return OrganizationResource.STRUCTURED_EVENT;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

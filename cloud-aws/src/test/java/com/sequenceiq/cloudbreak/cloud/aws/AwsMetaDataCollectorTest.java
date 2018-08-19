@@ -44,6 +44,10 @@ import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 @RunWith(MockitoJUnitRunner.class)
 public class AwsMetaDataCollectorTest {
 
+    private static final String USER_ID = "alma@hortonmunkak.hu";
+
+    private static final Long ORGANIZATION_ID = 1L;
+
     @Mock
     private AwsClient awsClient;
 
@@ -309,7 +313,8 @@ public class AwsMetaDataCollectorTest {
 
     private AuthenticatedContext authenticatedContext() {
         Location location = Location.location(Region.region("region"), AvailabilityZone.availabilityZone("az"));
-        CloudContext cloudContext = new CloudContext(5L, "name", "platform", "owner", "variant", location);
+        CloudContext cloudContext = new CloudContext(5L, "name", "platform", "owner", "variant",
+                location, USER_ID, ORGANIZATION_ID);
         CloudCredential credential = new CloudCredential(1L, null, null);
         return new AuthenticatedContext(cloudContext, credential);
     }

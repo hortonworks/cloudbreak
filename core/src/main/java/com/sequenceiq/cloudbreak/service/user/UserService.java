@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.user;
 import static com.sequenceiq.cloudbreak.api.model.v2.OrganizationStatus.ACTIVE;
 
 import java.util.Collections;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -73,6 +74,10 @@ public class UserService {
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }
+    }
+
+    public Optional<User> getById(Long id) {
+        return userRepository.findById(id);
     }
 
     public User getByUserId(String userId) {

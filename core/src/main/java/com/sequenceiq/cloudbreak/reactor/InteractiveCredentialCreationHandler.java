@@ -51,22 +51,22 @@ public class InteractiveCredentialCreationHandler implements ReactorEventHandler
         try {
             credentialService.createWithRetry(credential);
         } catch (DuplicateKeyValueException e) {
-            sendErrorNotification(extendedCloudCredential.getOwner(), extendedCloudCredential.getAccount(),
-                    extendedCloudCredential.getCloudPlatform(), DuplicatedKeyValueExceptionMapper.errorMessage(e));
+            sendErrorNotification(extendedCloudCredential, DuplicatedKeyValueExceptionMapper.errorMessage(e));
         } catch (BadRequestException e) {
-            sendErrorNotification(extendedCloudCredential.getOwner(), extendedCloudCredential.getAccount(),
-                    extendedCloudCredential.getCloudPlatform(), e.getMessage());
+            sendErrorNotification(extendedCloudCredential, e.getMessage());
         }
     }
 
-    public void sendErrorNotification(String owner, String account, String cloudPlatform, String errorMessage) {
+    public void sendErrorNotification(ExtendedCloudCredential extendedCloudCredential, String errorMessage) {
         CloudbreakEventsJson notification = new CloudbreakEventsJson();
         notification.setEventType("CREDENTIAL_CREATE_FAILED");
         notification.setEventTimestamp(new Date().getTime());
         notification.setEventMessage(errorMessage);
-        notification.setOwner(owner);
-        notification.setAccount(account);
-        notification.setCloud(cloudPlatform);
+        notification.setUserIdV3(extendedCloudCredential.getUserId());
+        notification.setOrganizationId(extendedCloudCredential.getOrganziationId());
+        notification.setOwner(extendedCloudCredential.getOwner());
+        notification.setAccount(extendedCloudCredential.getAccount());
+        notification.setCloud(extendedCloudCredential.getCloudPlatform());
         notificationSender.send(new Notification<>(notification));
     }
 }

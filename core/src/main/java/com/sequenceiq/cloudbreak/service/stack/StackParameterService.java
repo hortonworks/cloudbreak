@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.cloud.event.platform.GetStackParamValidationRes
 import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
 
 import reactor.bus.EventBus;
@@ -31,10 +32,12 @@ public class StackParameterService {
     @Inject
     private ErrorHandlerAwareReactorEventFactory eventFactory;
 
-    public List<StackParamValidation> getStackParams(String name, Credential credential) {
+    public List<StackParamValidation> getStackParams(String name, Stack stack) {
         LOGGER.debug("Get stack params");
+        Credential credential = stack.getCredential();
         if (credential != null) {
-            CloudContext cloudContext = new CloudContext(null, name, credential.cloudPlatform(), credential.getOwner());
+            CloudContext cloudContext = new CloudContext(null, name, credential.cloudPlatform(),
+                    credential.getOwner(), stack.getCreator().getUserId(), stack.getOrganization().getId());
 
             GetStackParamValidationRequest getStackParamValidationRequest = new GetStackParamValidationRequest(cloudContext);
             eventBus.notify(getStackParamValidationRequest.selector(), eventFactory.createEvent(getStackParamValidationRequest));

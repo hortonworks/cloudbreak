@@ -50,9 +50,11 @@ public class UptimeNotifier {
 
     private Notification<CloudbreakEventsJson> createUptimeNotification(Stack stack, Long uptime) {
         CloudbreakEventsJson notification = new CloudbreakEventsJson();
+        notification.setUserIdV3(stack.getCreator().getUserId());
+        notification.setOrganizationId(stack.getOrganization().getId());
+        notification.setStackId(stack.getId());
         notification.setOwner(stack.getOwner());
         notification.setAccount(stack.getAccount());
-        notification.setStackId(stack.getId());
         notification.setEventType(UPTIME_NOTIFICATION);
         notification.setEventMessage(String.valueOf(uptime));
         if (stack.getCredential() == null) {

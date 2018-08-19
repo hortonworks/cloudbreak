@@ -21,6 +21,10 @@ public class StructuredNotificationEventToCloudbreakEventJsonConverterTest exten
 
     private static final long ORG_ID = 1L;
 
+    private static final String USER_ID = "alma@hortonmunkak.hu";
+
+    private static final String USER_NAME = "Alma Ur";
+
     private StructuredNotificationEventToCloudbreakEventJsonConverter underTest;
 
     @Before
@@ -40,8 +44,9 @@ public class StructuredNotificationEventToCloudbreakEventJsonConverterTest exten
 
     @Override
     public StructuredNotificationEvent createSource() {
-        OperationDetails operation = new OperationDetails(Calendar.getInstance().getTimeInMillis(), NOTIFICATION, "stacks", 1L,
-                "usagestack", "account", "owner", "userName", "cbId", "cbVersion");
+        OperationDetails operation = new OperationDetails(Calendar.getInstance().getTimeInMillis(), NOTIFICATION,
+                "stacks", 1L, "usagestack", USER_ID, USER_NAME, "cbId",
+                "cbVersion", ORG_ID, "account", "owner", "userName");
         NotificationDetails notification = new NotificationDetails();
         notification.setInstanceGroup("master");
         notification.setRegion("us");
@@ -57,6 +62,6 @@ public class StructuredNotificationEventToCloudbreakEventJsonConverterTest exten
         notification.setClusterStatus(AVAILABLE.name());
         notification.setClusterId(1L);
         notification.setClusterName("test");
-        return new StructuredNotificationEvent(operation, notification, ORG_ID);
+        return new StructuredNotificationEvent(operation, notification, ORG_ID, USER_ID);
     }
 }

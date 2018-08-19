@@ -82,6 +82,10 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
 @RunWith(MockitoJUnitRunner.class)
 public class GcpInstanceResourceBuilderTest {
 
+    private static final String USER_ID = "alma@hortonmunkak.hu";
+
+    private static final Long ORGANIZATION_ID = 1L;
+
     private long privateId;
 
     private String instanceId;
@@ -138,7 +142,7 @@ public class GcpInstanceResourceBuilderTest {
         Location location = Location.location(Region.region("region"), AvailabilityZone.availabilityZone("az"));
         Map<InstanceGroupType, String> userData = ImmutableMap.of(InstanceGroupType.CORE, "CORE", InstanceGroupType.GATEWAY, "GATEWAY");
         image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "", "default", "default-id", new HashMap<>());
-        CloudContext cloudContext = new CloudContext(privateId, "testname", "GCP", "owner");
+        CloudContext cloudContext = new CloudContext(privateId, "testname", "GCP", "owner", USER_ID, ORGANIZATION_ID);
         CloudCredential cloudCredential = new CloudCredential(privateId, "credentialname");
         cloudCredential.putParameter("projectId", "projectId");
         String projectId = GcpStackUtil.getProjectId(cloudCredential);

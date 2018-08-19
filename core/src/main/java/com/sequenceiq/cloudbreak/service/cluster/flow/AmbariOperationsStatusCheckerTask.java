@@ -70,6 +70,8 @@ public class AmbariOperationsStatusCheckerTask extends ClusterBasedStatusChecker
         notification.setEventType(ambariOperationType.name());
         notification.setEventTimestamp(new Date().getTime());
         notification.setEventMessage(String.valueOf(progressValue));
+        notification.setUserIdV3(stack.getCreator().getUserId());
+        notification.setOrganizationId(stack.getOrganization().getId());
         notification.setOwner(stack.getOwner());
         notification.setAccount(stack.getAccount());
         notification.setCloud(stack.cloudPlatform());

@@ -62,6 +62,10 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
 @ExtendWith(MockitoExtension.class)
 class GcpAttachedDiskResourceBuilderTest {
 
+    private static final String USER_ID = "alma@hortonmunkak.hu";
+
+    private static final Long ORGANIZATION_ID = 1L;
+
     @InjectMocks
     private GcpAttachedDiskResourceBuilder underTest;
 
@@ -111,7 +115,7 @@ class GcpAttachedDiskResourceBuilderTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        CloudContext cloudContext = new CloudContext(privateId, "testname", "GCP", "owner");
+        CloudContext cloudContext = new CloudContext(privateId, "testname", "GCP", "owner", USER_ID, ORGANIZATION_ID);
         CloudCredential cloudCredential = new CloudCredential(privateId, "credentialname");
         cloudCredential.putParameter("projectId", "projectId");
 

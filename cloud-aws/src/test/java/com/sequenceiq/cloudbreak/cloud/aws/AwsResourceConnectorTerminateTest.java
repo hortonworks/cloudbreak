@@ -27,14 +27,20 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.service.Retry;
+import com.sequenceiq.cloudbreak.service.Retry.ActionWentFailException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AwsResourceConnectorTerminateTest {
+
+    private static final String USER_ID = "alma@hortonmunkak.hu";
+
+    private static final Long ORGANIZATION_ID = 1L;
 
     @Rule
     public final ExpectedException thrown = ExpectedException.none();
@@ -83,9 +89,9 @@ public class AwsResourceConnectorTerminateTest {
         when(awsClient.createCloudFormationClient(any(), any())).thenReturn(cloudFormationClient);
         when(awsClient.createAccess(any(), any())).thenReturn(ec2Client);
 
-        List<CloudResource> resources = List.of(new CloudResource.Builder().name("ami-87654321").type(ResourceType.AWS_ENCRYPTED_AMI).build(),
-                new CloudResource.Builder().name("snap-1234567812345678").type(ResourceType.AWS_SNAPSHOT).build(),
-                new CloudResource.Builder().name("vol-1234567812345678").type(ResourceType.AWS_ENCRYPTED_VOLUME).build());
+        List<CloudResource> resources = List.of(new Builder().name("ami-87654321").type(ResourceType.AWS_ENCRYPTED_AMI).build(),
+                new Builder().name("snap-1234567812345678").type(ResourceType.AWS_SNAPSHOT).build(),
+                new Builder().name("vol-1234567812345678").type(ResourceType.AWS_ENCRYPTED_VOLUME).build());
 
         underTest.terminate(authenticatedContext(), cloudStack, resources);
 
@@ -97,12 +103,12 @@ public class AwsResourceConnectorTerminateTest {
     public void testTerminateShouldCleanupEncryptedResourcesWhenCloudformationStackDoesNotExist() {
         when(awsClient.createCloudFormationClient(any(), any())).thenReturn(cloudFormationClient);
         when(awsClient.createAccess(any(), any())).thenReturn(ec2Client);
-        when(retryService.testWith2SecDelayMax5Times(any())).thenThrow(new Retry.ActionWentFailException("Stack not exists"));
+        when(retryService.testWith2SecDelayMax5Times(any())).thenThrow(new ActionWentFailException("Stack not exists"));
 
-        List<CloudResource> resources = List.of(new CloudResource.Builder().name("ami-87654321").type(ResourceType.AWS_ENCRYPTED_AMI).build(),
-                new CloudResource.Builder().name("snap-1234567812345678").type(ResourceType.AWS_SNAPSHOT).build(),
-                new CloudResource.Builder().name("vol-1234567812345678").type(ResourceType.AWS_ENCRYPTED_VOLUME).build(),
-                new CloudResource.Builder().name("cfn-12345678").type(ResourceType.CLOUDFORMATION_STACK).build());
+        List<CloudResource> resources = List.of(new Builder().name("ami-87654321").type(ResourceType.AWS_ENCRYPTED_AMI).build(),
+                new Builder().name("snap-1234567812345678").type(ResourceType.AWS_SNAPSHOT).build(),
+                new Builder().name("vol-1234567812345678").type(ResourceType.AWS_ENCRYPTED_VOLUME).build(),
+                new Builder().name("cfn-12345678").type(ResourceType.CLOUDFORMATION_STACK).build());
 
         underTest.terminate(authenticatedContext(), cloudStack, resources);
 
@@ -117,10 +123,10 @@ public class AwsResourceConnectorTerminateTest {
         when(awsPollTaskFactory.newAwsTerminateStackStatusCheckerTask(any(), any(), any(), any(), any(), any())).thenReturn(awsTerminateStackStatusCheckerTask);
         when(awsTerminateStackStatusCheckerTask.completed(any())).thenReturn(true);
 
-        List<CloudResource> resources = List.of(new CloudResource.Builder().name("ami-87654321").type(ResourceType.AWS_ENCRYPTED_AMI).build(),
-                new CloudResource.Builder().name("snap-1234567812345678").type(ResourceType.AWS_SNAPSHOT).build(),
-                new CloudResource.Builder().name("vol-1234567812345678").type(ResourceType.AWS_ENCRYPTED_VOLUME).build(),
-                new CloudResource.Builder().name("cfn-12345678").type(ResourceType.CLOUDFORMATION_STACK).build());
+        List<CloudResource> resources = List.of(new Builder().name("ami-87654321").type(ResourceType.AWS_ENCRYPTED_AMI).build(),
+                new Builder().name("snap-1234567812345678").type(ResourceType.AWS_SNAPSHOT).build(),
+                new Builder().name("vol-1234567812345678").type(ResourceType.AWS_ENCRYPTED_VOLUME).build(),
+                new Builder().name("cfn-12345678").type(ResourceType.CLOUDFORMATION_STACK).build());
 
         underTest.terminate(authenticatedContext(), cloudStack, resources);
 
@@ -131,7 +137,8 @@ public class AwsResourceConnectorTerminateTest {
 
     private static AuthenticatedContext authenticatedContext() {
         Location location = Location.location(Region.region("region"), AvailabilityZone.availabilityZone("az"));
-        CloudContext cloudContext = new CloudContext(5L, "name", "platform", "owner", "variant", location);
+        CloudContext cloudContext = new CloudContext(5L, "name", "platform", "owner", "variant",
+                location, USER_ID, ORGANIZATION_ID);
         CloudCredential credential = new CloudCredential(1L, null);
         return new AuthenticatedContext(cloudContext, credential);
     }

@@ -22,6 +22,10 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 @RunWith(MockitoJUnitRunner.class)
 public class AzureUtilsTest {
 
+    private static final String USER_ID = "alma@hortonmunkak.hu";
+
+    private static final Long ORGANIZATION_ID = 1L;
+
     private static final String MAX_RESOURCE_NAME_LENGTH = "50";
 
     @Rule
@@ -41,7 +45,8 @@ public class AzureUtilsTest {
     @Test
     public void shouldAdjustResourceNameLengthIfItsTooLong() {
         //GIVEN
-        CloudContext context = new CloudContext(7899L, "thisisaverylongazureresourcenamewhichneedstobeshortened", "dummy1", "dummy2");
+        CloudContext context = new CloudContext(7899L, "thisisaverylongazureresourcenamewhichneedstobeshortened", "dummy1",
+                "dummy2", USER_ID, ORGANIZATION_ID);
 
         //WHEN
         String testResult = underTest.getStackName(context);

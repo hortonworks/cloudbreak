@@ -28,6 +28,9 @@ public class CloudbreakEventsJson implements JsonEntity {
     @ApiModelProperty(ModelDescriptions.ACCOUNT)
     private String account;
 
+    @ApiModelProperty(ModelDescriptions.USER_ID_V3)
+    private String userIdV3;
+
     @ApiModelProperty(ModelDescriptions.CLOUD_PLATFORM)
     private String cloud;
 
@@ -67,6 +70,9 @@ public class CloudbreakEventsJson implements JsonEntity {
     @ApiModelProperty(StackModelDescription.CLUSTER_STATUS)
     private Status clusterStatus;
 
+    @ApiModelProperty(ModelDescriptions.ORGANIZATION_ID)
+    private Long organizationId;
+
     public Integer getNodeCount() {
         return nodeCount;
     }
@@ -99,20 +105,12 @@ public class CloudbreakEventsJson implements JsonEntity {
         this.eventMessage = eventMessage;
     }
 
-    public String getOwner() {
-        return owner;
+    public String getUserIdV3() {
+        return userIdV3;
     }
 
-    public void setOwner(String owner) {
-        this.owner = owner;
-    }
-
-    public String getAccount() {
-        return account;
-    }
-
-    public void setAccount(String account) {
-        this.account = account;
+    public void setUserIdV3(String userIdV3) {
+        this.userIdV3 = userIdV3;
     }
 
     public String getCloud() {
@@ -209,5 +207,29 @@ public class CloudbreakEventsJson implements JsonEntity {
 
     public void setAvailabilityZone(String availabilityZone) {
         this.availabilityZone = availabilityZone;
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
+    }
+
+    public String getOwner() {
+        return owner;
+    }
+
+    public void setOwner(String owner) {
+        this.owner = owner;
+    }
+
+    public String getAccount() {
+        return account;
+    }
+
+    public void setAccount(String account) {
+        this.account = account;
     }
 }

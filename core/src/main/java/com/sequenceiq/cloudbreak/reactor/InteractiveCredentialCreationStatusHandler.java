@@ -45,7 +45,9 @@ public class InteractiveCredentialCreationStatusHandler implements ReactorEventH
         }
         notification.setEventTimestamp(new Date().getTime());
         notification.setEventMessage(message);
-        notification.setOwner(interactiveCredentialCreationStatus.getCloudContext().getOwner());
+        notification.setUserIdV3(interactiveCredentialCreationStatus.getCloudContext().getUserId());
+        notification.setOrganizationId(interactiveCredentialCreationStatus.getCloudContext().getOrganizationId());
+        notification.setOwner(interactiveCredentialCreationStatus.getExtendedCloudCredential().getOwner());
         notification.setAccount(interactiveCredentialCreationStatus.getExtendedCloudCredential().getAccount());
         notification.setCloud(interactiveCredentialCreationStatus.getExtendedCloudCredential().getCloudPlatform());
         notificationSender.send(new Notification<>(notification));
