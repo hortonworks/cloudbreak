@@ -8,7 +8,9 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.cloudbreak.api.model.users.OrganizationResourceResponse;
 import com.sequenceiq.cloudbreak.controller.validation.credential.CredentialValidator;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
@@ -31,6 +33,9 @@ public class CredentialToCredentialResponseConverter extends AbstractConversionS
     @Inject
     private CredentialValidator credentialValidator;
 
+    @Inject
+    private OrganizationService organizationService;
+
     @Override
     public CredentialResponse convert(Credential source) {
         CredentialResponse credentialJson = new CredentialResponse();
@@ -48,6 +53,7 @@ public class CredentialToCredentialResponseConverter extends AbstractConversionS
         if (source.getTopology() != null) {
             credentialJson.setTopologyId(source.getTopology().getId());
         }
+        credentialJson.setOrganization(getConversionService().convert(source.getOrganization(), OrganizationResourceResponse.class));
         coverSensitiveData(credentialJson);
         return credentialJson;
     }
