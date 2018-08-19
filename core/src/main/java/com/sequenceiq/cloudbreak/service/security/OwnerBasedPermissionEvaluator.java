@@ -21,7 +21,6 @@ import com.sequenceiq.cloudbreak.aspect.PermissionType;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
-import com.sequenceiq.cloudbreak.repository.organization.UserRepository;
 import com.sequenceiq.cloudbreak.service.user.CachedUserDetailsService;
 
 @Service
@@ -35,9 +34,6 @@ public class OwnerBasedPermissionEvaluator implements PermissionEvaluator {
     @Inject
     @Lazy
     private CachedUserDetailsService cachedUserDetailsService;
-
-    @Inject
-    private UserRepository userRepository;
 
     @Override
     public boolean hasPermission(Authentication authentication, Object target, Object permission) {

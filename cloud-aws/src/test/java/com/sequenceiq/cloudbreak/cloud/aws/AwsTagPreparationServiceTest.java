@@ -21,6 +21,10 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 @RunWith(MockitoJUnitRunner.class)
 public class AwsTagPreparationServiceTest {
 
+    private static final String USER_ID = "alma@hortonmunkak.hu";
+
+    private static final Long ORGANIZATION_ID = 1L;
+
     @InjectMocks
     private AwsTagPreparationService awsTagPreparationService;
 
@@ -63,7 +67,7 @@ public class AwsTagPreparationServiceTest {
     }
 
     private AuthenticatedContext authenticatedContext() {
-        CloudContext cloudContext = new CloudContext(1L, "testname", "AWS", "owner");
+        CloudContext cloudContext = new CloudContext(1L, "testname", "AWS", "owner", USER_ID, ORGANIZATION_ID);
         CloudCredential cloudCredential = new CloudCredential(1L, "credentialname");
         return new AuthenticatedContext(cloudContext, cloudCredential);
     }

@@ -57,6 +57,7 @@ import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Service
 public class StackCreatorService {
@@ -115,6 +116,9 @@ public class StackCreatorService {
     @Inject
     private OrganizationService organizationService;
 
+    @Inject
+    private UserService userService;
+
     public StackResponse createStackInDefaultOrg(IdentityUser user, StackRequest stackRequest) {
         Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
         return createStack(user, organization, stackRequest);
@@ -138,6 +142,7 @@ public class StackCreatorService {
                 Stack stack = conversionService.convert(stackRequest, Stack.class);
 
                 stack.setOrganization(organization);
+                stack.setCreator(userService.getCurrentUser());
 
                 String stackName = stack.getName();
                 LOGGER.info("Stack request converted to stack in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
@@ -184,7 +189,8 @@ public class StackCreatorService {
                     CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(stack.getCredential());
 
                     start = System.currentTimeMillis();
-                    fileSystemValidator.validateFileSystem(stackValidationRequest.getPlatform(), cloudCredential, stackValidationRequest.getFileSystem());
+                    fileSystemValidator.validateFileSystem(stackValidationRequest.getPlatform(), cloudCredential, stackValidationRequest.getFileSystem(),
+                            stack.getCreator().getUserId(), stack.getOrganization().getId());
                     LOGGER.info("Filesystem has been validated in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
                     start = System.currentTimeMillis();

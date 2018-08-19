@@ -24,22 +24,31 @@ public class CloudContext {
 
     private final Location location;
 
-    public CloudContext(Long id, String name, String platform, String owner) {
+    private final String userId;
+
+    private final Long organizationId;
+
+    public CloudContext(Long id, String name, String platform, String owner, String userId, Long organizationId) {
         this.id = id;
         this.name = name;
         this.platform = Platform.platform(platform);
         this.owner = owner;
+        this.userId = userId;
+        this.organizationId = organizationId;
         variant = null;
         location = null;
     }
 
-    public CloudContext(Long id, String name, String platform, String owner, String variant, Location location) {
+    public CloudContext(Long id, String name, String platform, String owner, String variant,
+            Location location, String userId, Long organizationId) {
         this.id = id;
         this.name = name;
         this.platform = Platform.platform(platform);
         this.owner = owner;
         this.variant = Variant.variant(variant);
         this.location = location;
+        this.userId = userId;
+        this.organizationId = organizationId;
     }
 
     public Long getId() {
@@ -70,14 +79,24 @@ public class CloudContext {
         return location;
     }
 
+    public String getUserId() {
+        return userId;
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("CloudContext{");
-        sb.append("id=").append(id);
-        sb.append(", name='").append(name).append('\'');
-        sb.append(", platform='").append(platform).append('\'');
-        sb.append(", owner='").append(owner).append('\'');
-        sb.append('}');
+        StringBuilder sb = new StringBuilder("CloudContext{")
+        .append("id=").append(id)
+        .append(", name='").append(name).append('\'')
+        .append(", platform='").append(platform).append('\'')
+        .append(", owner='").append(owner).append('\'')
+        .append(", userId='").append(userId).append('\'')
+        .append(", organizationId='").append(organizationId).append('\'')
+        .append('}');
         return sb.toString();
     }
 }

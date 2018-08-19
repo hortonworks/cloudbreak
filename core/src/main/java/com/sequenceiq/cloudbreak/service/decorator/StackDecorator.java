@@ -203,7 +203,7 @@ public class StackDecorator {
         Map<String, String> params = new HashMap<>();
         Map<String, String> userParams = stackRequest.getParameters();
         if (userParams != null) {
-            List<StackParamValidation> stackParams = stackParameterService.getStackParams(stackRequest.getName(), stack.getCredential());
+            List<StackParamValidation> stackParams = stackParameterService.getStackParams(stackRequest.getName(), stack);
             for (StackParamValidation stackParamValidation : stackParams) {
                 String paramName = stackParamValidation.getName();
                 String value = userParams.get(paramName);

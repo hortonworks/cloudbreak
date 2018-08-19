@@ -35,6 +35,10 @@ import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
 @RunWith(MockitoJUnitRunner.class)
 public class GcpCredentialConnectorTest {
 
+    private static final String USER_ID = "alma@hortonmunkak.hu";
+
+    private static final Long ORGANIZATION_ID = 1L;
+
     private static final Map<String, Object> CREDENTIAL_PARAMETERS = new HashMap<>();
 
     static {
@@ -200,7 +204,7 @@ public class GcpCredentialConnectorTest {
     }
 
     private CloudContext createCloudContext() {
-        return new CloudContext(1L, "name", "platform", "owner");
+        return new CloudContext(1L, "name", "platform", "owner", USER_ID, ORGANIZATION_ID);
     }
 
     private CloudCredential createCloudCredential() {

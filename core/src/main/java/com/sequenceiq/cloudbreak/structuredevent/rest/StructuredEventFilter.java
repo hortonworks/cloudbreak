@@ -39,10 +39,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredEventClient;
 import com.sequenceiq.cloudbreak.structuredevent.event.OperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredRestCallEvent;
@@ -100,6 +102,9 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
 
     @Inject
     private OrganizationService organizationService;
+
+    @Inject
+    private UserService userService;
 
     @Inject
     private RestRequestThreadLocalService restRequestThreadLocalService;
@@ -171,7 +176,9 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
         if (orgId == null) {
             orgId = organizationService.getDefaultOrganizationForCurrentUser().getId();
         }
-        structuredEventClient.sendStructuredEvent(new StructuredRestCallEvent(createOperationDetails(restParams, requestTime), restCall, orgId));
+        User user = userService.getCurrentUser();
+        structuredEventClient.sendStructuredEvent(new StructuredRestCallEvent(createOperationDetails(restParams, requestTime, orgId),
+                restCall, orgId, user.getUserId()));
     }
 
     private Map<String, String> getRequestUrlParameters(String method, CharSequence url) {
@@ -239,14 +246,16 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
         return !"GET".equals(requestContext.getMethod()) && urlBlackList.stream().noneMatch(path::contains);
     }
 
-    private OperationDetails createOperationDetails(Map<String, String> restParams, Long requestTime) {
-        IdentityUser user = authenticatedUserService.getCbUser();
+    private OperationDetails createOperationDetails(Map<String, String> restParams, Long requestTime, Long orgId) {
+        IdentityUser identityUser = authenticatedUserService.getCbUser();
+        User currentUser = userService.getCurrentUser();
         String resoureceType = restParams.get(RESOURCE_TYPE);
         String resoureceId = restParams.get(RESOURCE_ID);
         String resoureceName = restParams.get(RESOURCE_NAME);
         return new OperationDetails(requestTime, REST, resoureceType, StringUtils.isNotEmpty(resoureceId) ? Long.valueOf(resoureceId) : null, resoureceName,
-                user != null ? user.getAccount() : "", user != null ? user.getUserId() : "", user != null ? user.getUsername() : "",
-                cloudbreakNodeConfig.getId(), cbVersion);
+                currentUser != null ? currentUser.getUserId() : "", currentUser != null ? currentUser.getUserName() : "",
+                cloudbreakNodeConfig.getId(), cbVersion, orgId, identityUser != null ? identityUser.getAccount() : "",
+                identityUser != null ? identityUser.getUserId() : "", identityUser != null ? identityUser.getUsername() : "");
     }
 
     private RestRequestDetails createRequestDetails(ContainerRequestContext requestContext, String body) {

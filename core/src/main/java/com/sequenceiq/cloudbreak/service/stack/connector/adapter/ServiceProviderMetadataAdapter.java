@@ -49,7 +49,7 @@ public class ServiceProviderMetadataAdapter {
     public InstanceSyncState getState(Stack stack, InstanceGroup instanceGroup, String instanceId) {
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getOwner(), stack.getPlatformVariant(),
-                location);
+                location, stack.getCreator().getUserId(), stack.getOrganization().getId());
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         InstanceGroup ig = stack.getInstanceGroupByInstanceGroupName(instanceGroup.getGroupName());
         CloudInstance instance = null;

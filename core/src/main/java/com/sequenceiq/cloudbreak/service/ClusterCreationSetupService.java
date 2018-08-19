@@ -132,7 +132,8 @@ public class ClusterCreationSetupService {
         if (credential == null) {
             credential = credentialToCloudCredentialConverter.convert(stack.getCredential());
         }
-        fileSystemValidator.validateFileSystem(stack.cloudPlatform(), credential, request.getFileSystem());
+        fileSystemValidator.validateFileSystem(stack.cloudPlatform(), credential, request.getFileSystem(),
+                stack.getCreator().getUserId(), stack.getOrganization().getId());
         mpackValidator.validateMpacks(request, user);
         rdsConfigValidator.validateRdsConfigs(request);
     }

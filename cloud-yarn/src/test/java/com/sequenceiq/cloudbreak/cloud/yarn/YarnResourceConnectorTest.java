@@ -57,6 +57,10 @@ import com.sequenceiq.cloudbreak.common.type.CommonStatus;
 @RunWith(MockitoJUnitRunner.class)
 public class YarnResourceConnectorTest {
 
+    private static final String USER_ID = "alma@hortonmunkak.hu";
+
+    private static final Long ORGANIZATION_ID = 1L;
+
     private static final String YARN_QUEUE = "YARN_QUEUE";
 
     private static final Integer YARN_LIFE_TIME = 2;
@@ -233,7 +237,8 @@ public class YarnResourceConnectorTest {
 
     private void setUpHappyPath(ArgumentCaptor<CreateApplicationRequest> createRequestCaptor, ArgumentCaptor<ApplicationDetailRequest> requestCaptor)
             throws MalformedURLException {
-        when(authenticatedContextMock.getCloudContext()).thenReturn(new CloudContext(1L, "name", "platform", "owner"));
+        when(authenticatedContextMock.getCloudContext()).thenReturn(new CloudContext(1L, "name",
+                "platform", "owner", USER_ID, ORGANIZATION_ID));
         when(stackMock.getImage()).thenReturn(imageMock);
         when(imageMock.getImageName()).thenReturn(IMAGE_NAME);
         List<Group> groupList = Collections.emptyList();
@@ -264,7 +269,8 @@ public class YarnResourceConnectorTest {
 
     @Test
     public void testLaunchApplicationAlreadyCreated() throws Exception {
-        when(authenticatedContextMock.getCloudContext()).thenReturn(new CloudContext(1L, "name", "platform", "owner"));
+        when(authenticatedContextMock.getCloudContext()).thenReturn(new CloudContext(1L, "name", "platform",
+                "owner", USER_ID, ORGANIZATION_ID));
 
         when(yarnClientUtilMock.createYarnClient(authenticatedContextMock)).thenReturn(yarnClientMock);
         ArgumentCaptor<ApplicationDetailRequest> requestCaptor = ArgumentCaptor.forClass(ApplicationDetailRequest.class);

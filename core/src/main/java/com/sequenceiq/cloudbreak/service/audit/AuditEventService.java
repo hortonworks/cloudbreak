@@ -38,8 +38,9 @@ public class AuditEventService extends AbstractOrganizationAwareResourceService<
         return event != null ? conversionService.convert(event, AuditEvent.class) : null;
     }
 
-    public List<AuditEvent> getAuditEvents(String resourceType, Long resourceId) {
-        List<AuditEvent> auditEvents = getEventsForUserWithTypeAndResourceId(resourceType, resourceId);
+    public List<AuditEvent> getAuditEventsForDefaultOrg(String resourceType, Long resourceId) {
+        Organization organization = getOrganizationService().getDefaultOrganizationForCurrentUser();
+        List<AuditEvent> auditEvents = getEventsForUserWithTypeAndResourceIdByOrg(organization, resourceType, resourceId);
         Collections.sort(auditEvents, new AuditEventComparator().reversed());
         return auditEvents;
     }
@@ -49,11 +50,6 @@ public class AuditEventService extends AbstractOrganizationAwareResourceService<
         List<AuditEvent> auditEvents = getEventsForUserWithTypeAndResourceIdByOrg(organization, resourceType, resourceId);
         Collections.sort(auditEvents, new AuditEventComparator().reversed());
         return auditEvents;
-    }
-
-    private List<AuditEvent> getEventsForUserWithTypeAndResourceId(String resourceType, Long resourceId) {
-        Organization organization = getOrganizationService().getDefaultOrganizationForCurrentUser();
-        return getEventsForUserWithTypeAndResourceIdByOrg(organization, resourceType, resourceId);
     }
 
     private List<AuditEvent> getEventsForUserWithTypeAndResourceIdByOrg(Organization organization, String resourceType, Long resourceId) {

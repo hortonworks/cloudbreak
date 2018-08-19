@@ -60,6 +60,10 @@ import freemarker.template.Configuration;
 @RunWith(Parameterized.class)
 public class CloudFormationTemplateBuilderTest {
 
+    private static final String USER_ID = "alma@hortonmunkak.hu";
+
+    private static final Long ORGANIZATION_ID = 1L;
+
     private static final String LATEST_AWS_CLOUD_FORMATION_TEMPLATE_PATH = "templates/aws-cf-stack.ftl";
 
     private static final String CIDR = "10.0.0.0/16";
@@ -755,7 +759,8 @@ public class CloudFormationTemplateBuilderTest {
 
     private AuthenticatedContext authenticatedContext() {
         Location location = Location.location(Region.region("region"), AvailabilityZone.availabilityZone("az"));
-        CloudContext cloudContext = new CloudContext(5L, "name", "platform", "owner", "variant", location);
+        CloudContext cloudContext = new CloudContext(5L, "name", "platform", "owner", "variant",
+                location, USER_ID, ORGANIZATION_ID);
         CloudCredential credential = new CloudCredential(1L, null);
         return new AuthenticatedContext(cloudContext, credential);
     }

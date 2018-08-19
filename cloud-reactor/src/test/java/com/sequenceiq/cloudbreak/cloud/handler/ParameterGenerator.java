@@ -43,11 +43,16 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
 @Component
 public class ParameterGenerator {
 
+    private static final String USER_ID = "alma@hortonmunkak.hu";
+
+    private static final Long ORGANIZATION_ID = 1L;
+
     private static final long STACK_ID = 5L;
 
     public CloudContext createCloudContext() {
         Location location = location(region("region"), availabilityZone("availabilityZone"));
-        return new CloudContext(STACK_ID, "teststack", "TESTCONNECTOR", "owner", "TESTVARIANT", location);
+        return new CloudContext(STACK_ID, "teststack", "TESTCONNECTOR", "owner", "TESTVARIANT",
+                location, USER_ID, ORGANIZATION_ID);
     }
 
     public CloudCredential createCloudCredential() {

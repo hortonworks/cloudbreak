@@ -17,6 +17,8 @@ public class ModelDescriptions {
     public static final String CREATED = "creation time of the resource in long";
     public static final String AMBARI_SERVER = "ambari server address";
     public static final String ORGANIZATION_OF_THE_RESOURCE = "organization of the resource";
+    public static final String USER_ID_V3 = "User ID in the new authorization model";
+    public static final String ORGANIZATION_ID = "Organization ID of the resource";
 
     private ModelDescriptions() {
     }

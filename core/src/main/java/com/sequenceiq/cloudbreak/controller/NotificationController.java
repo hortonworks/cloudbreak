@@ -5,19 +5,20 @@ import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
 import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.notification.Notification;
 import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 
 public abstract class NotificationController {
 
-    @Autowired
+    @Inject
     private AuthenticatedUserService authenticatedUserService;
 
     @Inject
@@ -26,6 +27,15 @@ public abstract class NotificationController {
     @Inject
     private NotificationSender notificationSender;
 
+    @Inject
+    private UserService userService;
+
+    @Inject
+    private OrganizationService organizationService;
+
+    @Inject
+    private RestRequestThreadLocalService restRequestThreadLocalService;
+
     protected final void executeAndNotify(Consumer<IdentityUser> consumer, ResourceEvent resourceEvent) {
         IdentityUser user = authenticatedUserService.getCbUser();
         consumer.accept(user);
@@ -33,11 +43,17 @@ public abstract class NotificationController {
     }
 
     protected final void notify(ResourceEvent resourceEvent) {
-        IdentityUser user = authenticatedUserService.getCbUser();
+        IdentityUser identityUser = authenticatedUserService.getCbUser();
+        Long orgId = restRequestThreadLocalService.getRequestedOrgId();
+        if (orgId == null) {
+            orgId = organizationService.getDefaultOrganizationForCurrentUser().getId();
+        }
         CloudbreakEventsJson notification = new CloudbreakEventsJson();
         notification.setEventTimestamp(new Date().getTime());
-        notification.setOwner(user.getUserId());
-        notification.setAccount(user.getAccount());
+        notification.setUserIdV3(userService.getCurrentUser().getUserId());
+        notification.setOrganizationId(orgId);
+        notification.setOwner(identityUser.getUserId());
+        notification.setAccount(identityUser.getAccount());
         notification.setEventType(resourceEvent.name());
         notification.setEventMessage(messagesService.getMessage(resourceEvent.getMessage()));
         notificationSender.send(new Notification<>(notification));

@@ -67,8 +67,9 @@ public class StructuredFlowEventFactory {
     public StructuredFlowEvent createStucturedFlowEvent(Long stackId, FlowDetails flowDetails, Boolean detailed, Exception exception) {
         Stack stack = stackService.getByIdWithoutAuth(stackId);
         UserProfile userProfile = userProfileService.getOrCreate(stack.getAccount(), stack.getOwner());
-        OperationDetails operationDetails = new OperationDetails(FLOW, "stacks", stackId, stack.getName(), stack.getAccount(),
-                stack.getOwner(), userProfile.getUserName(), cloudbreakNodeConfig.getId(), cbVersion);
+        OperationDetails operationDetails = new OperationDetails(FLOW, "stacks", stackId, stack.getName(),
+                stack.getCreator().getUserId(), stack.getCreator().getUserName(), cloudbreakNodeConfig.getId(), cbVersion,
+                stack.getOrganization().getId(), stack.getAccount(), stack.getOwner(), userProfile.getUserName());
         StackDetails stackDetails = null;
         ClusterDetails clusterDetails = null;
         BlueprintDetails blueprintDetails = null;
@@ -81,9 +82,9 @@ public class StructuredFlowEventFactory {
             }
         }
         return exception != null ? new StructuredFlowEvent(operationDetails, flowDetails, stackDetails, clusterDetails, blueprintDetails,
-                stack.getOrganization().getId(), ExceptionUtils.getStackTrace(exception))
+                stack.getOrganization().getId(), stack.getCreator().getUserId(), ExceptionUtils.getStackTrace(exception))
                 : new StructuredFlowEvent(operationDetails, flowDetails, stackDetails, clusterDetails,
-                blueprintDetails, stack.getOrganization().getId());
+                blueprintDetails, stack.getOrganization().getId(), stack.getCreator().getUserId());
     }
 
     public StructuredNotificationEvent createStructuredNotificationEvent(Long stackId, String notificationType, String message, String instanceGroupName) {
@@ -134,8 +135,9 @@ public class StructuredFlowEventFactory {
             }
         }
 
-        OperationDetails operationDetails = new OperationDetails(NOTIFICATION, "stacks", stackId, stackName, account, userId, userName,
-                cloudbreakNodeConfig.getInstanceUUID(), cbVersion);
-        return new StructuredNotificationEvent(operationDetails, notificationDetails, stack.getOrganization().getId());
+        OperationDetails operationDetails = new OperationDetails(NOTIFICATION, "stacks", stackId, stackName,
+                stack.getCreator().getUserId(), stack.getCreator().getUserName(), cloudbreakNodeConfig.getInstanceUUID(), cbVersion,
+                stack.getOrganization().getId(), account, userId, userName);
+        return new StructuredNotificationEvent(operationDetails, notificationDetails, stack.getOrganization().getId(), stack.getCreator().getUserId());
     }
 }

@@ -295,7 +295,7 @@ public class StackCommonService implements StackEndpoint {
         StackValidation stackValidation = conversionService.convert(request, StackValidation.class);
         stackService.validateStack(stackValidation, true);
         CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(stackValidation.getCredential());
-        fileSystemValidator.validateFileSystem(request.getPlatform(), cloudCredential, request.getFileSystem());
+        fileSystemValidator.validateFileSystem(request.getPlatform(), cloudCredential, request.getFileSystem(), null, null);
         return Response.status(Status.NO_CONTENT).build();
     }
 

@@ -23,32 +23,24 @@ public class StructuredFlowEvent extends StructuredEvent {
     public StructuredFlowEvent() {
     }
 
-    public StructuredFlowEvent(OperationDetails operation, FlowDetails flow, StackDetails stack, long orgId) {
-        this(operation, flow, stack, null, null, orgId);
-    }
-
-    public StructuredFlowEvent(OperationDetails operation, FlowDetails flow, StackDetails stack, ClusterDetails cluster,
-            BlueprintDetails blueprint, long orgId) {
-        this(StructuredFlowEvent.class.getSimpleName(), operation, flow, stack, cluster, blueprint, orgId);
-    }
-
     public StructuredFlowEvent(String type, OperationDetails operation, FlowDetails flow, StackDetails stack,
-            ClusterDetails cluster, BlueprintDetails blueprint, long orgId) {
-        super(type, operation, orgId);
+            ClusterDetails cluster, BlueprintDetails blueprint, Long orgId, String userId) {
+        super(type, operation, orgId, userId);
         this.flow = flow;
         this.stack = stack;
         this.cluster = cluster;
         this.blueprint = blueprint;
     }
 
-    public StructuredFlowEvent(OperationDetails operation, FlowDetails flow, StackDetails stack,
-            ClusterDetails cluster, BlueprintDetails blueprint, long orgId, String exception) {
-        this(StructuredFlowEvent.class.getSimpleName(), operation, flow, stack, cluster, blueprint, orgId);
-        this.exception = exception;
+    public StructuredFlowEvent(OperationDetails operation, FlowDetails flow, StackDetails stack, ClusterDetails cluster,
+            BlueprintDetails blueprint, Long orgId, String userId) {
+        this(StructuredFlowEvent.class.getSimpleName(), operation, flow, stack, cluster, blueprint, orgId, userId);
     }
 
-    public StructuredFlowEvent(OperationDetails operation, FlowDetails flow, StackDetails stack, String exception, long orgId) {
-        this(operation, flow, stack, null, null, orgId, exception);
+    public StructuredFlowEvent(OperationDetails operation, FlowDetails flow, StackDetails stack,
+            ClusterDetails cluster, BlueprintDetails blueprint, Long orgId, String userId, String exception) {
+        this(StructuredFlowEvent.class.getSimpleName(), operation, flow, stack, cluster, blueprint, orgId, userId);
+        this.exception = exception;
     }
 
     @Override

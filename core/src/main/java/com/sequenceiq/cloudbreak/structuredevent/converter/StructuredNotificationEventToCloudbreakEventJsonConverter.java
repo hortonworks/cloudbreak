@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.structuredevent.converter;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
@@ -14,7 +12,6 @@ import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEve
 @Component
 public class StructuredNotificationEventToCloudbreakEventJsonConverter
         extends AbstractConversionServiceAwareConverter<StructuredNotificationEvent, CloudbreakEventsJson> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(StructuredNotificationEventToCloudbreakEventJsonConverter.class);
 
     @Override
     public CloudbreakEventsJson convert(StructuredNotificationEvent source) {
@@ -24,6 +21,8 @@ public class StructuredNotificationEventToCloudbreakEventJsonConverter
         cloudbreakEvent.setEventType(notificationDetails.getNotificationType());
         cloudbreakEvent.setEventTimestamp(operationDetails.getTimestamp());
         cloudbreakEvent.setEventMessage(notificationDetails.getNotification());
+        cloudbreakEvent.setUserIdV3(operationDetails.getUserIdV3());
+        cloudbreakEvent.setOrganizationId(operationDetails.getOrganizationId());
         cloudbreakEvent.setOwner(operationDetails.getUserId());
         cloudbreakEvent.setAccount(operationDetails.getAccount());
         cloudbreakEvent.setCloud(notificationDetails.getCloud());

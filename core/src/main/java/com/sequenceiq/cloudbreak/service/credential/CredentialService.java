@@ -46,6 +46,7 @@ import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderCredentialAdapter;
 import com.sequenceiq.cloudbreak.service.user.UserProfileHandler;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Service
 public class CredentialService extends AbstractOrganizationAwareResourceService<Credential> {
@@ -87,6 +88,9 @@ public class CredentialService extends AbstractOrganizationAwareResourceService<
     @Inject
     private CredentialValidator credentialValidator;
 
+    @Inject
+    private UserService userService;
+
     public Set<Credential> listForUsersDefaultOrganization() {
         return credentialRepository.findActiveForOrganizationFilterByPlatforms(getDefaultOrg().getId(), accountPreferencesService.enabledPlatforms());
     }
@@ -106,7 +110,7 @@ public class CredentialService extends AbstractOrganizationAwareResourceService<
 
     public Map<String, String> interactiveLogin(Long organizationId, Credential credential) {
         credential.setOrganization(organizationService.get(organizationId));
-        return credentialAdapter.interactiveLogin(credential);
+        return credentialAdapter.interactiveLogin(credential, organizationId, userService.getCurrentUser().getUserId());
     }
 
     public Credential update(Credential credential) {
@@ -124,7 +128,8 @@ public class CredentialService extends AbstractOrganizationAwareResourceService<
         }
         credential.setId(original.getId());
         credential.setOrganization(organizationService.get(organizationId));
-        Credential updated = super.create(credentialAdapter.init(credential), organizationId);
+        Credential updated = super.create(credentialAdapter.init(credential, organizationId, userService.getCurrentUser().getUserId()),
+                organizationId);
         sendCredentialNotification(credential, ResourceEvent.CREDENTIAL_MODIFIED);
         return updated;
     }
@@ -143,7 +148,7 @@ public class CredentialService extends AbstractOrganizationAwareResourceService<
     public Credential create(Credential credential, Long orgId) {
         LOGGER.debug("Creating credential for organization: {}", getOrganizationService().get(orgId).getName());
         credentialValidator.validateCredentialCloudPlatform(credential.cloudPlatform());
-        Credential created = super.create(credentialAdapter.init(credential), orgId);
+        Credential created = super.create(credentialAdapter.init(credential, orgId, userService.getCurrentUser().getUserId()), orgId);
         sendCredentialNotification(credential, ResourceEvent.CREDENTIAL_CREATED);
         return created;
     }

@@ -40,7 +40,7 @@ import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.Flow;
 import com.sequenceiq.cloudbreak.core.flow2.FlowRegister;
-import com.sequenceiq.cloudbreak.core.flow2.MessageFactory;
+import com.sequenceiq.cloudbreak.core.flow2.MessageFactory.HEADERS;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackImageUpdateTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
@@ -48,6 +48,8 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.action.StackCreationService;
 import com.sequenceiq.cloudbreak.domain.Resource;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
@@ -65,6 +67,10 @@ import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 public class StackImageUpdateActionsTest {
+
+    private static final String USER_ID = "alma@hortonmunkak.hu";
+
+    private static final Long ORGANIZATION_ID = 1L;
 
     @Mock
     private FlowMessageService flowMessageService;
@@ -133,34 +139,32 @@ public class StackImageUpdateActionsTest {
     private StackFailureContext failureContext;
 
     @InjectMocks
-    private AbstractStackImageUpdateAction<?> checkImageAction = spy(new StackImageUpdateActions().checkImageVersion());
+    private final AbstractStackImageUpdateAction<?> checkImageAction = spy(new StackImageUpdateActions().checkImageVersion());
 
     @InjectMocks
-    private AbstractStackImageUpdateAction<?> checkPackageVersionsAction = spy(new StackImageUpdateActions().checkPackageVersions());
+    private final AbstractStackImageUpdateAction<?> checkPackageVersionsAction = spy(new StackImageUpdateActions().checkPackageVersions());
 
     @InjectMocks
-    private AbstractStackImageUpdateAction<?> updateImageAction = spy(new StackImageUpdateActions().updateImage());
+    private final AbstractStackImageUpdateAction<?> updateImageAction = spy(new StackImageUpdateActions().updateImage());
 
     @InjectMocks
-    private AbstractStackImageUpdateAction<?> prepareImageAction = spy(new StackImageUpdateActions().prepareImageAction());
+    private final AbstractStackImageUpdateAction<?> prepareImageAction = spy(new StackImageUpdateActions().prepareImageAction());
 
     @InjectMocks
-    private AbstractStackImageUpdateAction<?> setImageAction = spy(new StackImageUpdateActions().setImageAction());
+    private final AbstractStackImageUpdateAction<?> setImageAction = spy(new StackImageUpdateActions().setImageAction());
 
     @InjectMocks
-    private AbstractStackImageUpdateAction<?> finishAction = spy(new StackImageUpdateActions().finishAction());
+    private final AbstractStackImageUpdateAction<?> finishAction = spy(new StackImageUpdateActions().finishAction());
 
     @InjectMocks
-    private AbstractStackFailureAction<?, ?> handleImageUpdateFailureAction = spy(new StackImageUpdateActions().handleImageUpdateFailure());
+    private final AbstractStackFailureAction<?, ?> handleImageUpdateFailureAction = spy(new StackImageUpdateActions().handleImageUpdateFailure());
 
-    private Map<Object, Object> variables = new HashMap<>();
-
-    private Stack stack;
+    private final Map<Object, Object> variables = new HashMap<>();
 
     @Before
     public void setUp() throws CloudbreakImageNotFoundException {
         MockitoAnnotations.initMocks(this);
-        when(stateContext.getMessageHeader(MessageFactory.HEADERS.FLOW_ID.name())).thenReturn("flowId");
+        when(stateContext.getMessageHeader(HEADERS.FLOW_ID.name())).thenReturn("flowId");
         when(stateContext.getExtendedState()).thenReturn(extendedState);
         when(stateContext.getStateMachine()).thenReturn(stateMachine);
         when(stateMachine.getState()).thenReturn(state);
@@ -169,7 +173,14 @@ public class StackImageUpdateActionsTest {
         when(reactorEventFactory.createEvent(any(Map.class), any(Object.class))).thenReturn(new Event("dummy"));
         when(imageService.getImage(anyLong())).thenReturn(image);
 
-        stack = new Stack();
+        User user = new User();
+        user.setUserId("alma@hortonmunkak.hu");
+        user.setUserName("Alma ur");
+        Organization organization = new Organization();
+        organization.setId(1L);
+        Stack stack = new Stack();
+        stack.setCreator(user);
+        stack.setOrganization(organization);
         stack.setId(1L);
         stack.setRegion("region");
         stack.setAvailabilityZone("az");
@@ -182,7 +193,7 @@ public class StackImageUpdateActionsTest {
     @Test
     public void checkImageVersion() {
         StackImageUpdateTriggerEvent payload = new StackImageUpdateTriggerEvent(StackImageUpdateEvent.STACK_IMAGE_UPDATE_EVENT.event(), 1L, "imageId");
-        when(stateContext.getMessageHeader(MessageFactory.HEADERS.DATA.name())).thenReturn(payload);
+        when(stateContext.getMessageHeader(HEADERS.DATA.name())).thenReturn(payload);
         when(state.getId()).thenReturn(StackImageUpdateState.CHECK_IMAGE_VERSIONS_STATE);
         when(stackImageUpdateService.isCbVersionOk(any(Stack.class))).thenReturn(true);
 
@@ -197,7 +208,7 @@ public class StackImageUpdateActionsTest {
     @Test
     public void checkImageVersionNotOk() {
         StackImageUpdateTriggerEvent payload = new StackImageUpdateTriggerEvent(StackImageUpdateEvent.STACK_IMAGE_UPDATE_EVENT.event(), 1L, "imageId");
-        when(stateContext.getMessageHeader(MessageFactory.HEADERS.DATA.name())).thenReturn(payload);
+        when(stateContext.getMessageHeader(HEADERS.DATA.name())).thenReturn(payload);
         when(state.getId()).thenReturn(StackImageUpdateState.CHECK_IMAGE_VERSIONS_STATE);
         when(stackImageUpdateService.isCbVersionOk(any(Stack.class))).thenReturn(false);
         checkImageAction.setFailureEvent(StackImageUpdateEvent.STACK_IMAGE_UPDATE_FAILED_EVENT);
@@ -214,7 +225,7 @@ public class StackImageUpdateActionsTest {
     @Test
     public void checkPackageVersions() {
         ImageUpdateEvent payload = new ImageUpdateEvent(StackImageUpdateEvent.STACK_IMAGE_UPDATE_EVENT.event(), 1L, statedImage);
-        when(stateContext.getMessageHeader(MessageFactory.HEADERS.DATA.name())).thenReturn(payload);
+        when(stateContext.getMessageHeader(HEADERS.DATA.name())).thenReturn(payload);
         when(state.getId()).thenReturn(StackImageUpdateState.CHECK_IMAGE_VERSIONS_STATE);
         when(stackImageUpdateService.checkPackageVersions(any(Stack.class), any(StatedImage.class))).thenReturn(CheckResult.ok());
 
@@ -227,7 +238,7 @@ public class StackImageUpdateActionsTest {
     @Test
     public void checkPackageVersionsNotOk() {
         ImageUpdateEvent payload = new ImageUpdateEvent(StackImageUpdateEvent.CHECK_IMAGE_VERESIONS_FINISHED_EVENT.event(), 1L, statedImage);
-        when(stateContext.getMessageHeader(MessageFactory.HEADERS.DATA.name())).thenReturn(payload);
+        when(stateContext.getMessageHeader(HEADERS.DATA.name())).thenReturn(payload);
         when(state.getId()).thenReturn(StackImageUpdateState.CHECK_PACKAGE_VERSIONS_STATE);
         when(stackImageUpdateService.checkPackageVersions(any(Stack.class), any(StatedImage.class))).thenReturn(CheckResult.failed(""));
         checkPackageVersionsAction.setFailureEvent(StackImageUpdateEvent.STACK_IMAGE_UPDATE_FAILED_EVENT);
@@ -240,9 +251,9 @@ public class StackImageUpdateActionsTest {
     }
 
     @Test
-    public void updateImage() throws CloudbreakImageNotFoundException {
+    public void updateImage() {
         ImageUpdateEvent payload = new ImageUpdateEvent(StackImageUpdateEvent.CHECK_PACKAGE_VERSIONS_FINISHED_EVENT.event(), 1L, statedImage);
-        when(stateContext.getMessageHeader(MessageFactory.HEADERS.DATA.name())).thenReturn(payload);
+        when(stateContext.getMessageHeader(HEADERS.DATA.name())).thenReturn(payload);
         when(state.getId()).thenReturn(StackImageUpdateState.UPDATE_IMAGE_STATE);
 
         updateImageAction.execute(stateContext);
@@ -255,7 +266,7 @@ public class StackImageUpdateActionsTest {
     @Test
     public void prepareImageAction() {
         StackEvent payload = new StackEvent(StackImageUpdateEvent.UPDATE_IMAGE_FINESHED_EVENT.event(), 1L);
-        when(stateContext.getMessageHeader(MessageFactory.HEADERS.DATA.name())).thenReturn(payload);
+        when(stateContext.getMessageHeader(HEADERS.DATA.name())).thenReturn(payload);
         when(state.getId()).thenReturn(StackImageUpdateState.IMAGE_PREPARE_STATE);
 
         prepareImageAction.execute(stateContext);
@@ -266,8 +277,9 @@ public class StackImageUpdateActionsTest {
 
     @Test
     public void setImageAction() {
+        Stack stack = new Stack();
         StackEvent payload = new StackEvent(StackImageUpdateEvent.UPDATE_IMAGE_FINESHED_EVENT.event(), 1L);
-        when(stateContext.getMessageHeader(MessageFactory.HEADERS.DATA.name())).thenReturn(payload);
+        when(stateContext.getMessageHeader(HEADERS.DATA.name())).thenReturn(payload);
         when(state.getId()).thenReturn(StackImageUpdateState.SET_IMAGE_STATE);
         when(resourceRepository.findAllByStackId(anyLong()))
                 .thenReturn(Collections.singletonList(new Resource(ResourceType.CLOUDFORMATION_STACK, "cf", stack)));
@@ -282,8 +294,8 @@ public class StackImageUpdateActionsTest {
     @Test
     public void finishAction() {
         CloudPlatformResult payload = new CloudPlatformResult(new CloudPlatformRequest(
-                new CloudContext(1L, "asdf", "Asdf", "Asdf"), null));
-        when(stateContext.getMessageHeader(MessageFactory.HEADERS.DATA.name())).thenReturn(payload);
+                new CloudContext(1L, "asdf", "Asdf", "Asdf", USER_ID, ORGANIZATION_ID), null));
+        when(stateContext.getMessageHeader(HEADERS.DATA.name())).thenReturn(payload);
         when(state.getId()).thenReturn(StackImageUpdateState.STACK_IMAGE_UPDATE_FINISHED);
 
         finishAction.execute(stateContext);
@@ -296,7 +308,7 @@ public class StackImageUpdateActionsTest {
     public void handleImageUpdateFailure() {
         StackFailureEvent payload =
                 new StackFailureEvent(StackImageUpdateEvent.STACK_IMAGE_UPDATE_FAILED_EVENT.event(), 1L, new CloudbreakServiceException("test"));
-        when(stateContext.getMessageHeader(MessageFactory.HEADERS.DATA.name())).thenReturn(payload);
+        when(stateContext.getMessageHeader(HEADERS.DATA.name())).thenReturn(payload);
         when(state.getId()).thenReturn(StackImageUpdateState.STACK_IMAGE_UPDATE_FAILED_STATE);
         when(stackService.getViewByIdWithoutAuth(anyLong())).thenReturn(new StackView(1L, null, null, null, null));
         when(runningFlows.get(anyString())).thenReturn(flow);

@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredEventService;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredFlowEventFactory;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEvent;
@@ -60,18 +61,18 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     }
 
     @Override
-    public List<StructuredNotificationEvent> cloudbreakEvents(String owner, Long since) {
+    public List<StructuredNotificationEvent> cloudbreakEvents(Organization organization, Long since) {
         List<StructuredNotificationEvent> events;
-        events = null == since ? structuredEventService.getEventsForUserWithType(owner, StructuredNotificationEvent.class)
-                : structuredEventService.getEventsForUserWithTypeSince(owner, StructuredNotificationEvent.class, since);
+        events = null == since ? structuredEventService.getEventsForOrgWithType(organization, StructuredNotificationEvent.class)
+                : structuredEventService.getEventsForOrgWithTypeSince(organization, StructuredNotificationEvent.class, since);
         return events;
     }
 
     @Override
-    public List<StructuredNotificationEvent> cloudbreakEventsForStack(String owner, Long stackId) {
+    public List<StructuredNotificationEvent> cloudbreakEventsForStack(Long stackId) {
         List<StructuredNotificationEvent> events = new ArrayList<>();
         if (stackId != null) {
-            events = structuredEventService.getEventsForUserWithTypeAndResourceId(owner, StructuredNotificationEvent.class, "stacks", stackId);
+            events = structuredEventService.getEventsWithTypeAndResourceId(StructuredNotificationEvent.class, "stacks", stackId);
         }
         return events;
     }

@@ -26,13 +26,13 @@ public class AuditController extends BaseAuditController implements AuditEndpoin
     }
 
     @Override
-    public List<AuditEvent> getAuditEvents(String resourceType, Long resourceId) {
-        return auditEventService.getAuditEvents(resourceType, resourceId);
-    }
-
-    @Override
     public Response getAuditEventsZip(String resourceType, Long resourceId) {
         List<AuditEvent> auditEvents = getAuditEvents(resourceType, resourceId);
         return getAuditEventsZipResponse(auditEvents, resourceType, resourceId);
+    }
+
+    @Override
+    public List<AuditEvent> getAuditEvents(String resourceType, Long resourceId) {
+        return auditEventService.getAuditEventsForDefaultOrg(resourceType, resourceId);
     }
 }

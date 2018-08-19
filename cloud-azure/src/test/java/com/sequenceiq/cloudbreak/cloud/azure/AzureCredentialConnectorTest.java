@@ -19,6 +19,10 @@ import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 
 public class AzureCredentialConnectorTest {
 
+    private static final String USER_ID = "alma@hortonmunkak.hu";
+
+    private static final Long ORGANIZATION_ID = 1L;
+
     @InjectMocks
     private AzureCredentialConnector underTest;
 
@@ -37,9 +41,9 @@ public class AzureCredentialConnectorTest {
     public void testInteractiveLoginIsEnabled() {
         when(azureInteractiveLogin.login(any(CloudContext.class), any(ExtendedCloudCredential.class),
                 any(CredentialNotifier.class))).thenReturn(Maps.newHashMap());
-        CloudContext cloudContext = new CloudContext(1L, "test", "test", "test");
+        CloudContext cloudContext = new CloudContext(1L, "test", "test", "test", USER_ID, ORGANIZATION_ID);
         ExtendedCloudCredential extendedCloudCredential = new ExtendedCloudCredential(null, null, null,
-                null, null, null, false, null);
+                null, null, null, false, null, USER_ID, ORGANIZATION_ID);
         underTest.interactiveLogin(cloudContext, extendedCloudCredential, credentialSender);
         verify(azureInteractiveLogin, times(1)).login(any(CloudContext.class), any(ExtendedCloudCredential.class),
                 any(CredentialNotifier.class));

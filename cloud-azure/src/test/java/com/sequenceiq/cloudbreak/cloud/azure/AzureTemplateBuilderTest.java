@@ -68,15 +68,19 @@ import freemarker.template.Configuration;
 @RunWith(Parameterized.class)
 public class AzureTemplateBuilderTest {
 
-    public static final String CORE_CUSTOM_DATA = "CORE";
+    private static final String USER_ID = "alma@hortonmunkak.hu";
 
-    public static final String GATEWAY_CUSTOM_DATA = "GATEWAY";
+    private static final Long ORGANIZATION_ID = 1L;
 
-    public static final String CUSTOM_IMAGE_NAME = "cloudbreak-image.vhd";
+    private static final String CORE_CUSTOM_DATA = "CORE";
 
-    public static final String LATEST_TEMPLATE_PATH = "templates/arm-v2.ftl";
+    private static final String GATEWAY_CUSTOM_DATA = "GATEWAY";
 
-    public static final int ROOT_VOLUME_SIZE = 50;
+    private static final String CUSTOM_IMAGE_NAME = "cloudbreak-image.vhd";
+
+    private static final String LATEST_TEMPLATE_PATH = "templates/arm-v2.ftl";
+
+    private static final int ROOT_VOLUME_SIZE = 50;
 
     @Mock
     private AzureUtils azureUtils;
@@ -171,7 +175,7 @@ public class AzureTemplateBuilderTest {
         security = new Security(rules, emptyList());
         image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "", "default", "default-id", new HashMap<>());
         cloudContext = new CloudContext(7899L, "thisisaverylongazureresourcenamewhichneedstobeshortened", "dummy1", "dummy2", "test",
-                Location.location(Region.region("EU"), new AvailabilityZone("availabilityZone")));
+                Location.location(Region.region("EU"), new AvailabilityZone("availabilityZone")), USER_ID, ORGANIZATION_ID);
         azureCredentialView = new AzureCredentialView(cloudCredential());
         azureStorageView = new AzureStorageView(azureCredentialView, cloudContext, azureStorage, null);
 

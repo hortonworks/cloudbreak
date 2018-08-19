@@ -36,6 +36,10 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 public class AwsImageUpdateServiceTest {
 
+    private static final String USER_ID = "alma@hortonmunkak.hu";
+
+    private static final Long ORGANIZATION_ID = 1L;
+
     @Mock
     private AwsClient awsClient;
 
@@ -69,10 +73,11 @@ public class AwsImageUpdateServiceTest {
     private AuthenticatedContext ac;
 
     @Before
-    public void setUp() {
+    public void setup() {
         MockitoAnnotations.initMocks(this);
         Location location = Location.location(Region.region("region"));
-        CloudContext cloudContext = new CloudContext(1L, "cloudContext", "AWS", "owner", "variant", location);
+        CloudContext cloudContext = new CloudContext(1L, "cloudContext", "AWS", "owner", "variant",
+                location, USER_ID, ORGANIZATION_ID);
         CloudCredential cc = new CloudCredential(1L, "cc");
         ac = new AuthenticatedContext(cloudContext, cc);
         when(stack.getImage()).thenReturn(image);
