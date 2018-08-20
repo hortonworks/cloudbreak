@@ -16,15 +16,14 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.OrganizationAwareResource;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"account", "name"}))
-public class SecurityGroup implements ProvisionEntity {
+public class SecurityGroup implements ProvisionEntity, OrganizationAwareResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "securitygroup_generator")
@@ -33,15 +32,6 @@ public class SecurityGroup implements ProvisionEntity {
 
     @Column(nullable = false)
     private String name;
-
-    @Column(nullable = false)
-    private String owner;
-
-    @Column(nullable = false)
-    private String account;
-
-    @Column(nullable = false)
-    private boolean publicInAccount;
 
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String description;
@@ -70,6 +60,11 @@ public class SecurityGroup implements ProvisionEntity {
         this.organization = organization;
     }
 
+    @Override
+    public OrganizationResource getResource() {
+        return OrganizationResource.SECURITY_GROUP;
+    }
+
     public Long getId() {
         return id;
     }
@@ -84,30 +79,6 @@ public class SecurityGroup implements ProvisionEntity {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getOwner() {
-        return owner;
-    }
-
-    public void setOwner(String owner) {
-        this.owner = owner;
-    }
-
-    public String getAccount() {
-        return account;
-    }
-
-    public void setAccount(String account) {
-        this.account = account;
-    }
-
-    public boolean isPublicInAccount() {
-        return publicInAccount;
-    }
-
-    public void setPublicInAccount(boolean publicInAccount) {
-        this.publicInAccount = publicInAccount;
     }
 
     public String getDescription() {

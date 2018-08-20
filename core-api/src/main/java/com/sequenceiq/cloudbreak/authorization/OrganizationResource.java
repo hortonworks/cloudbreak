@@ -14,7 +14,9 @@ public enum OrganizationResource {
     MPACK("MPACK resource", "mpack"),
     STRUCTURED_EVENT("Structured event resource", "structuredevent"),
     FLEXSUBSCRIPTION("Flex subscription", "flexsubscription"),
-    NETWORK("Network", "network");
+    NETWORK("Network", "network"),
+    TOPOLOGY("Topology", "topology"),
+    SECURITY_GROUP("Security group", "securitygroup");
 
     private final String readableName;
 

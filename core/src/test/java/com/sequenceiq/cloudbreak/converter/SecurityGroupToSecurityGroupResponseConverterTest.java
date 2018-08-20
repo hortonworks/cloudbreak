@@ -42,7 +42,7 @@ public class SecurityGroupToSecurityGroupResponseConverterTest extends AbstractE
         // WHEN
         SecurityGroupResponse result = underTest.convert(getSource());
         // THEN
-        assertAllFieldsNotNull(result, Arrays.asList("owner", "account"));
+        assertAllFieldsNotNull(result, Arrays.asList("owner", "account", "organization"));
     }
 
     @Override

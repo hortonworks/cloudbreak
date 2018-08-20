@@ -13,10 +13,12 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 
+import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.OrganizationAwareResource;
 
 @Entity
-public class Topology implements ProvisionEntity {
+public class Topology implements ProvisionEntity, OrganizationAwareResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "topology_generator")
@@ -33,12 +35,6 @@ public class Topology implements ProvisionEntity {
     private String cloudPlatform;
 
     @Column(nullable = false)
-    private String account;
-
-    @Column(nullable = false)
-    private String owner;
-
-    @Column(nullable = false)
     private boolean deleted;
 
     @ElementCollection(fetch = FetchType.EAGER)
@@ -53,6 +49,11 @@ public class Topology implements ProvisionEntity {
 
     public void setOrganization(Organization organization) {
         this.organization = organization;
+    }
+
+    @Override
+    public OrganizationResource getResource() {
+        return OrganizationResource.TOPOLOGY;
     }
 
     public Long getId() {
@@ -93,22 +94,6 @@ public class Topology implements ProvisionEntity {
 
     public void setRecords(List<TopologyRecord> records) {
         this.records = records;
-    }
-
-    public String getAccount() {
-        return account;
-    }
-
-    public void setAccount(String account) {
-        this.account = account;
-    }
-
-    public String getOwner() {
-        return owner;
-    }
-
-    public void setOwner(String owner) {
-        this.owner = owner;
     }
 
     public boolean isDeleted() {

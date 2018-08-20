@@ -216,7 +216,6 @@ public class TestUtil {
         SecurityGroup sg = new SecurityGroup();
         sg.setId(id);
         sg.setName("security-group");
-        sg.setPublicInAccount(true);
         sg.setSecurityRules(new HashSet<>());
         sg.setStatus(ResourceStatus.DEFAULT);
         return sg;
@@ -625,7 +624,6 @@ public class TestUtil {
 
     public static SecurityGroup securityGroup(Set<SecurityRule> securityRules) {
         SecurityGroup securityGroup = new SecurityGroup();
-        securityGroup.setPublicInAccount(true);
         securityGroup.setDescription(DUMMY_DESCRIPTION);
         securityGroup.setId(1L);
         securityGroup.setName(DUMMY_NAME);

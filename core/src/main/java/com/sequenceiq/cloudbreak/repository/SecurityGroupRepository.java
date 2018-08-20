@@ -1,42 +1,38 @@
 package com.sequenceiq.cloudbreak.repository;
 
 import java.util.Optional;
-import java.util.Set;
 
 import javax.transaction.Transactional;
 
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-
+import com.sequenceiq.cloudbreak.aspect.DisableHasPermission;
+import com.sequenceiq.cloudbreak.aspect.organization.DisableCheckPermissions;
+import com.sequenceiq.cloudbreak.aspect.organization.OrganizationResourceType;
+import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
+import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
-import com.sequenceiq.cloudbreak.aspect.HasPermission;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.repository.organization.OrganizationResourceRepository;
 import com.sequenceiq.cloudbreak.service.EntityType;
 
-@EntityType(entityClass = SecurityGroup.class)
+@DisableHasPermission
+@EntityType(entityClass = Network.class)
 @Transactional(Transactional.TxType.REQUIRED)
-@HasPermission
-public interface SecurityGroupRepository extends BaseRepository<SecurityGroup, Long> {
+@OrganizationResourceType(resource = OrganizationResource.SECURITY_GROUP)
+public interface SecurityGroupRepository extends OrganizationResourceRepository<SecurityGroup, Long> {
 
     @Override
-    @Query("SELECT r FROM SecurityGroup r LEFT JOIN FETCH r.securityRules WHERE r.id= :id")
-    Optional<SecurityGroup> findById(@Param("id") Long id);
+    @DisableCheckPermissions
+    SecurityGroup save(SecurityGroup entity);
 
-    @Query("SELECT r FROM SecurityGroup r LEFT JOIN FETCH r.securityRules WHERE r.name= :name AND r.owner= :owner AND r.status <> 'DEFAULT_DELETED'")
-    SecurityGroup findByNameForUser(@Param("name") String name, @Param("owner") String userId);
+    @Override
+    @DisableCheckPermissions
+    void delete(SecurityGroup entity);
 
-    @Query("SELECT r FROM SecurityGroup r LEFT JOIN FETCH r.securityRules WHERE r.name= :name AND r.account= :account AND r.status <> 'DEFAULT_DELETED' ")
-    SecurityGroup findByNameInAccount(@Param("name") String name, @Param("account") String account);
+    @Override
+    @DisableCheckPermissions
+    Optional<SecurityGroup> findById(Long id);
 
-    @Query("SELECT r FROM SecurityGroup r LEFT JOIN FETCH r.securityRules WHERE r.owner= :owner AND r.status <> 'DEFAULT_DELETED'")
-    Set<SecurityGroup> findForUser(@Param("owner") String user);
-
-    @Query("SELECT r FROM SecurityGroup r LEFT JOIN FETCH r.securityRules "
-            + "WHERE ((r.account= :account AND r.publicInAccount= true) OR r.owner= :owner) AND r.status <> 'DEFAULT_DELETED' ")
-    Set<SecurityGroup> findPublicInAccountForUser(@Param("owner") String user, @Param("account") String account);
-
-    @Query("SELECT r FROM SecurityGroup r LEFT JOIN FETCH r.securityRules WHERE r.account= :account AND r.status <> 'DEFAULT_DELETED'")
-    Set<SecurityGroup> findAllInAccount(@Param("account") String account);
-
-    @Query("SELECT r FROM SecurityGroup r LEFT JOIN FETCH r.securityRules WHERE r.account= :account AND (r.status = 'DEFAULT_DELETED' OR r.status = 'DEFAULT')")
-    Set<SecurityGroup> findAllDefaultInAccount(@Param("account") String account);
+    @Override
+    @DisableCheckPermissions
+    SecurityGroup findByNameAndOrganization(String name, Organization organization);
 }
