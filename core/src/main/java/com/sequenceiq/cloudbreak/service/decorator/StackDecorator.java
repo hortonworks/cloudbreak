@@ -254,7 +254,6 @@ public class StackDecorator {
             if (instanceGroup.getSecurityGroup() != null) {
                 SecurityGroup securityGroup = instanceGroup.getSecurityGroup();
                 if (securityGroup.getId() == null) {
-                    securityGroup.setPublicInAccount(subject.isPublicInAccount());
                     securityGroup.setCloudPlatform(getCloudPlatform(subject, request, securityGroup.getCloudPlatform()));
                     securityGroup = securityGroupService.create(user, securityGroup, subject.getOrganization());
                     instanceGroup.setSecurityGroup(securityGroup);

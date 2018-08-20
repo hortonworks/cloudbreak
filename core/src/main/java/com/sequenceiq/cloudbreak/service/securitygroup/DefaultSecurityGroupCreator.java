@@ -50,10 +50,7 @@ public class DefaultSecurityGroupCreator {
     private SecurityGroup createSecurityGroup(IdentityUser user, String platform, String name, String description) {
         SecurityGroup securityGroup = new SecurityGroup();
         securityGroup.setName(name);
-        securityGroup.setOwner(user.getUserId());
-        securityGroup.setAccount(user.getAccount());
         securityGroup.setDescription(description);
-        securityGroup.setPublicInAccount(true);
         securityGroup.setCloudPlatform(platform);
         securityGroup.setStatus(ResourceStatus.DEFAULT);
         return securityGroup;

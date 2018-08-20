@@ -32,9 +32,6 @@ public class SecurityGroupComponentTest {
     public void testGetSecurityGroupIds() {
         SecurityGroup securityGroup = new SecurityGroup();
         securityGroup.setName("sg1");
-        securityGroup.setOwner("owner");
-        securityGroup.setAccount("account");
-        securityGroup.setPublicInAccount(false);
         securityGroup.setStatus(ResourceStatus.DEFAULT);
         securityGroup.setSecurityGroupIds(Set.of("1234", "2345"));
         securityGroup = underTest.save(securityGroup);

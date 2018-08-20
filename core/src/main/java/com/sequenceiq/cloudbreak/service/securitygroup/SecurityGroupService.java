@@ -6,7 +6,6 @@ import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -17,8 +16,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
@@ -26,12 +25,14 @@ import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.SecurityGroupRepository;
+import com.sequenceiq.cloudbreak.repository.organization.OrganizationResourceRepository;
+import com.sequenceiq.cloudbreak.service.AbstractOrganizationAwareResourceService;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.util.NameUtil;
 
 @Service
-public class SecurityGroupService {
+public class SecurityGroupService extends AbstractOrganizationAwareResourceService<SecurityGroup> {
     private static final Logger LOGGER = LoggerFactory.getLogger(SecurityGroupService.class);
 
     @Inject
@@ -48,8 +49,6 @@ public class SecurityGroupService {
 
     public SecurityGroup create(IdentityUser user, SecurityGroup securityGroup, Organization organization) {
         LOGGER.info("Creating SecurityGroup: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
-        securityGroup.setOwner(user.getUserId());
-        securityGroup.setAccount(user.getAccount());
         if (organization != null) {
             securityGroup.setOrganization(organization);
         } else {
@@ -67,36 +66,17 @@ public class SecurityGroupService {
         return groupRepository.findById(id).orElseThrow(notFound("SecurityGroup", id));
     }
 
-    public SecurityGroup getPrivateSecurityGroup(String name, IdentityUser user) {
-        return Optional.ofNullable(groupRepository.findByNameForUser(name, user.getUserId()))
-                .orElseThrow(notFound("SecurityGroup", name));
-    }
-
-    public SecurityGroup getPublicSecurityGroup(String name, IdentityUser user) {
-        return Optional.ofNullable(groupRepository.findByNameInAccount(name, user.getAccount()))
-                .orElseThrow(notFound("SecurityGroup", name));
-    }
-
-    public void delete(Long id, IdentityUser user) {
+    public void delete(Long id) {
         delete(get(id));
     }
 
-    public void delete(String name, IdentityUser user) {
-        SecurityGroup securityGroup = Optional.ofNullable(groupRepository.findByNameInAccount(name, user.getAccount()))
+    public void delete(String name, Organization organization) {
+        SecurityGroup securityGroup = Optional.ofNullable(groupRepository.findByNameAndOrganization(name, organization))
                 .orElseThrow(notFound("SecurityGroup", name));
-        delete(securityGroup);
+        deleteImpl(securityGroup);
     }
 
-    public Set<SecurityGroup> retrievePrivateSecurityGroups(IdentityUser user) {
-        return groupRepository.findForUser(user.getUserId());
-    }
-
-    public Set<SecurityGroup> retrieveAccountSecurityGroups(IdentityUser user) {
-        return user.getRoles().contains(IdentityUserRole.ADMIN) ? groupRepository.findAllInAccount(user.getAccount())
-                : groupRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
-    }
-
-    public void delete(SecurityGroup securityGroup) {
+    public void deleteImpl(SecurityGroup securityGroup) {
         LOGGER.info("Deleting SecurityGroup with name: {}", securityGroup.getName());
         List<InstanceGroup> instanceGroupsWithThisSecurityGroup = new ArrayList<>(instanceGroupRepository.findBySecurityGroup(securityGroup));
         if (!instanceGroupsWithThisSecurityGroup.isEmpty()) {
@@ -122,5 +102,25 @@ public class SecurityGroupService {
             securityGroup.setStatus(ResourceStatus.DEFAULT_DELETED);
             groupRepository.save(securityGroup);
         }
+    }
+
+    @Override
+    protected OrganizationResourceRepository<SecurityGroup, Long> repository() {
+        return groupRepository;
+    }
+
+    @Override
+    protected OrganizationResource resource() {
+        return OrganizationResource.SECURITY_GROUP;
+    }
+
+    @Override
+    protected void prepareDeletion(SecurityGroup resource) {
+
+    }
+
+    @Override
+    protected void prepareCreation(SecurityGroup resource) {
+
     }
 }

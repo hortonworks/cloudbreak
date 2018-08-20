@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.SecurityGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.SecurityRuleResponse;
+import com.sequenceiq.cloudbreak.api.model.users.OrganizationResourceResponse;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 
@@ -20,9 +21,8 @@ public class SecurityGroupToSecurityGroupResponseConverter extends AbstractConve
         json.setId(source.getId());
         json.setName(source.getName());
         json.setDescription(source.getDescription());
-        json.setAccount(source.getAccount());
-        json.setOwner(source.getOwner());
-        json.setPublicInAccount(source.isPublicInAccount());
+        OrganizationResourceResponse organization = getConversionService().convert(source.getOrganization(), OrganizationResourceResponse.class);
+        json.setOrganization(organization);
         json.setSecurityRules(convertSecurityRules(source.getSecurityRules()));
         json.setSecurityGroupId(source.getFirstSecurityGroupId());
         json.setSecurityGroupIds(source.getSecurityGroupIds());
