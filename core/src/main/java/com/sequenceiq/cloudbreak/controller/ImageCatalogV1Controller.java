@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.StackImageFilterService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
@@ -44,6 +45,9 @@ public class ImageCatalogV1Controller implements ImageCatalogV1Endpoint {
 
     @Inject
     private OrganizationService organizationService;
+
+    @Inject
+    private RestRequestThreadLocalService restRequestThreadLocalService;
 
     @Override
     public List<ImageCatalogResponse> getPublics() {
@@ -131,7 +135,8 @@ public class ImageCatalogV1Controller implements ImageCatalogV1Endpoint {
     }
 
     private List<ImageCatalogResponse> getAll() {
-        return toJsonList(imageCatalogService.findAllForUsersDefaultOrganization(), ImageCatalogResponse.class);
+        Long requestedOrgId = organizationService.getDefaultOrganizationForCurrentUser().getId();
+        return toJsonList(imageCatalogService.findAllByOrganizationId(requestedOrgId), ImageCatalogResponse.class);
     }
 
     private ImageCatalogResponse post(ImageCatalogRequest imageCatalogRequest) {
