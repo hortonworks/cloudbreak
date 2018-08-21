@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.structuredevent.db;
 
 import java.util.List;
-import java.util.Optional;
 
 import javax.transaction.Transactional;
 
@@ -30,10 +29,6 @@ public interface StructuredEventRepository extends OrganizationResourceRepositor
     @Override
     @DisableCheckPermissions
     StructuredEventEntity save(StructuredEventEntity entity);
-
-    @Override
-    @CheckPermissionsByReturnValue
-    Optional<StructuredEventEntity> findById(Long id);
 
     @CheckPermissionsByOrganizationId
     @Query("SELECT se from StructuredEventEntity se WHERE se.organization.id = :orgId AND se.id = :id")
