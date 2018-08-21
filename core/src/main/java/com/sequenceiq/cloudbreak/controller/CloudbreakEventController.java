@@ -15,9 +15,11 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.EventEndpoint;
 import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.facade.CloudbreakEventsFacade;
-import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredEventService;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventContainer;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
@@ -30,17 +32,21 @@ public class CloudbreakEventController implements EventEndpoint {
     private CloudbreakEventsFacade cloudbreakEventsFacade;
 
     @Inject
-    private AuthenticatedUserService authenticatedUserService;
+    private StructuredEventService structuredEventService;
 
     @Inject
-    private StructuredEventService structuredEventService;
+    private UserService userService;
+
+    @Inject
+    private RestRequestThreadLocalService restRequestThreadLocalService;
 
     @Inject
     private OrganizationService organizationService;
 
     @Override
     public List<CloudbreakEventsJson> getCloudbreakEventsSince(Long since) {
-        Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
         return cloudbreakEventsFacade.retrieveEventsForOrganiztion(organization, since);
     }
 

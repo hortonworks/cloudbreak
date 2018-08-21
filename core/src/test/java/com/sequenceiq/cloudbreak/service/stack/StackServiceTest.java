@@ -24,7 +24,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
@@ -32,18 +31,17 @@ import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.SecurityConfigRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.TransactionService;
-import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
@@ -95,9 +93,6 @@ public class StackServiceTest {
     private StackDownscaleValidatorService downscaleValidatorService;
 
     @Mock
-    private AuthorizationService authorizationService;
-
-    @Mock
     private Stack stack;
 
     @Mock
@@ -107,7 +102,10 @@ public class StackServiceTest {
     private InstanceMetaData instanceMetaData2;
 
     @Mock
-    private IdentityUser user;
+    private User user;
+
+    @Mock
+    private Organization organization;
 
     @Mock
     private ServiceProviderConnectorAdapter connector;
@@ -160,13 +158,10 @@ public class StackServiceTest {
     @Mock
     private UserService userService;
 
-    private final Organization organization = new Organization();
-
     @Before
-    public void setup() throws TransactionExecutionException {
+    public void setup() {
         organization.setName("Top Secret FBI");
         organization.setId(ORGANIZATION_ID);
-        when(stack.getOrganization()).thenReturn(organization);
     }
 
     // TODO: have to write new tests
@@ -200,7 +195,7 @@ public class StackServiceTest {
                 .create(eq(stack), eq(platformString), eq(parameters), nullable(StatedImage.class));
 
         try {
-            stack = underTest.create(user, stack, platformString, mock(StatedImage.class));
+            stack = underTest.create(stack, platformString, mock(StatedImage.class), user, organization);
         } finally {
             verify(stack, times(1)).setPlatformVariant(eq(VARIANT_VALUE));
             verify(securityConfig, times(1)).setSaltPassword(anyObject());
@@ -225,7 +220,7 @@ public class StackServiceTest {
         when(connector.getPlatformParameters(stack)).thenReturn(parameters);
 
         try {
-            stack = underTest.create(user, stack, "AWS", mock(StatedImage.class));
+            stack = underTest.create(stack, "AWS", mock(StatedImage.class), user, organization);
         } finally {
             verify(stack, times(1)).setPlatformVariant(eq(VARIANT_VALUE));
             verify(securityConfig, times(1)).setSaltPassword(anyObject());

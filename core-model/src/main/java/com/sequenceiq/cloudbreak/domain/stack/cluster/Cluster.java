@@ -75,10 +75,8 @@ public class Cluster implements ProvisionEntity, OrganizationAwareResource {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
     private String owner;
 
-    @Column(nullable = false)
     private String account;
 
     @Column(length = 1000000, columnDefinition = "TEXT")

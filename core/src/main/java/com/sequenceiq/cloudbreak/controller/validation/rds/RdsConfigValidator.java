@@ -15,19 +15,17 @@ import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 
 @Component
 public class RdsConfigValidator {
 
     @Inject
-    private RestRequestThreadLocalService restRequestThreadLocalService;
-
-    @Inject
     private RdsConfigService rdsConfigService;
 
-    public void validateRdsConfigs(ClusterRequest request) {
+    public void validateRdsConfigs(ClusterRequest request, User user, Organization organization) {
         Map<String, Integer> typeCountMap = new HashMap<>();
         Set<String> multipleTypes = new HashSet<>();
         if (request.getRdsConfigIds() != null) {
@@ -38,11 +36,7 @@ public class RdsConfigValidator {
         }
         if (request.getRdsConfigNames() != null) {
             for (String rdsConfigName : request.getRdsConfigNames()) {
-                Long organizationId = restRequestThreadLocalService.getRequestedOrgId();
-
-                RDSConfig rdsConfig = organizationId != null
-                        ? rdsConfigService.getByNameForOrganizationId(rdsConfigName, organizationId)
-                        : rdsConfigService.getByNameForDefaultOrg(rdsConfigName);
+                RDSConfig rdsConfig = rdsConfigService.getByNameForOrg(rdsConfigName, organization);
                 increaseCount(rdsConfig.getType(), typeCountMap, multipleTypes);
             }
         }

@@ -30,12 +30,12 @@ import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.repository.organization.OrganizationResourceRepository;
 import com.sequenceiq.cloudbreak.service.AbstractOrganizationAwareResourceService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.util.NameUtil;
 
 @Service
@@ -55,14 +55,11 @@ public class BlueprintService extends AbstractOrganizationAwareResourceService<B
     @Inject
     private CentralBlueprintParameterQueryService centralBlueprintParameterQueryService;
 
-    @Inject
-    private OrganizationService organizationService;
-
     public Blueprint get(Long id) {
         return blueprintRepository.findById(id).orElseThrow(notFound("Blueprint", id));
     }
 
-    public Blueprint create(Organization organization, Blueprint blueprint, Collection<Map<String, Map<String, String>>> properties) {
+    public Blueprint create(Organization organization, Blueprint blueprint, Collection<Map<String, Map<String, String>>> properties, User user) {
         LOGGER.debug("Creating blueprint: Organization: {} ({})", organization.getId(), organization.getName());
         Blueprint savedBlueprint;
         if (properties != null && !properties.isEmpty()) {
@@ -84,7 +81,7 @@ public class BlueprintService extends AbstractOrganizationAwareResourceService<B
             blueprint.setBlueprintText(extendedBlueprint);
         }
         try {
-            savedBlueprint = create(blueprint, organization.getId());
+            savedBlueprint = create(blueprint, organization.getId(), user);
         } catch (DataIntegrityViolationException ex) {
             String msg = String.format("Error with resource [%s], %s", APIResourceType.BLUEPRINT, getProperSqlErrorMessage(ex));
             throw new BadRequestException(msg, ex);

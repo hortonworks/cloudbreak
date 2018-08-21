@@ -17,18 +17,16 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.SecurityGroupRepository;
 import com.sequenceiq.cloudbreak.repository.organization.OrganizationResourceRepository;
 import com.sequenceiq.cloudbreak.service.AbstractOrganizationAwareResourceService;
-import com.sequenceiq.cloudbreak.service.AuthorizationService;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.util.NameUtil;
 
 @Service
@@ -41,19 +39,9 @@ public class SecurityGroupService extends AbstractOrganizationAwareResourceServi
     @Inject
     private InstanceGroupRepository instanceGroupRepository;
 
-    @Inject
-    private AuthorizationService authorizationService;
-
-    @Inject
-    private OrganizationService organizationService;
-
-    public SecurityGroup create(IdentityUser user, SecurityGroup securityGroup, Organization organization) {
-        LOGGER.info("Creating SecurityGroup: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
-        if (organization != null) {
-            securityGroup.setOrganization(organization);
-        } else {
-            securityGroup.setOrganization(organizationService.getDefaultOrganizationForCurrentUser());
-        }
+    public SecurityGroup create(User user, SecurityGroup securityGroup, Organization organization) {
+        LOGGER.info("Creating SecurityGroup: [User: '{}']", user.getUserId());
+        securityGroup.setOrganization(organization);
         try {
             return groupRepository.save(securityGroup);
         } catch (DataIntegrityViolationException ex) {

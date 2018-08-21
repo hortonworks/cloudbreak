@@ -12,10 +12,6 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -25,16 +21,19 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Topology;
 import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
-import com.sequenceiq.cloudbreak.service.AuthorizationService;
+import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderCredentialAdapter;
 import com.sequenceiq.cloudbreak.service.user.UserProfileHandler;
 
@@ -54,9 +53,6 @@ public class CredentialServiceTest {
 
     @Mock
     private CredentialRepository credentialRepository;
-
-    @Mock
-    private AuthorizationService authorizationService;
 
     @Mock
     private ServiceProviderCredentialAdapter credentialAdapter;
@@ -109,9 +105,6 @@ public class CredentialServiceTest {
         when(credentialRepository.save(any(Credential.class))).then(invocation -> invocation.getArgument(0));
         testCredential = mock(Credential.class);
         when(testCredential.getName()).thenReturn(TEST_CREDENTIAL_NAME);
-        when(organizationService.getDefaultOrganizationForCurrentUser()).thenReturn(defaultOrg);
-        when(defaultOrg.getId()).thenReturn(DEFAULT_ORG_ID);
-        when(defaultOrg.getName()).thenReturn(TEST_ORGANIZATION_NAME);
     }
 
     @Test
@@ -169,17 +162,6 @@ public class CredentialServiceTest {
     }
 
     @Test
-    public void testDeleteWhenCredentialIsNullThenNotFoundExceptionShouldCome() {
-        thrown.expect(NotFoundException.class);
-
-        credentialService.delete(DEFAULT_ORG_ID);
-
-        verify(stackRepository, times(0)).findByCredential(any(Credential.class));
-        verify(userProfileHandler, times(0)).destroyProfileCredentialPreparation(testCredential);
-        verify(credentialRepository, times(0)).save(testCredential);
-    }
-
-    @Test
     public void testDeleteWhenOneStackUsesTheGivenCredentialThenBadRequestExceptionShouldComeWithExpectedMessage() {
         String stackName = "testStackName";
         Stack stack = mock(Stack.class);
@@ -190,7 +172,7 @@ public class CredentialServiceTest {
         thrown.expectMessage(String.format("There is a cluster associated with credential config '%s'. Please remove before deleting the credential. "
                 + "The following cluster is using this credential: [%s]", TEST_CREDENTIAL_NAME, stackName));
 
-        credentialService.delete(testCredential);
+        credentialService.delete(testCredential, defaultOrg);
 
         verify(stackRepository, times(1)).findByCredential(testCredential);
         verify(userProfileHandler, times(0)).destroyProfileCredentialPreparation(testCredential);
@@ -211,7 +193,7 @@ public class CredentialServiceTest {
         thrown.expectMessage(String.format("There are clusters associated with credential config '%s'. Please remove these before deleting the credential. "
                 + "The following clusters are using this credential: [%s]", TEST_CREDENTIAL_NAME, String.format("%s, %s", stack1Name, stack2Name)));
 
-        credentialService.delete(testCredential);
+        credentialService.delete(testCredential, defaultOrg);
 
         verify(stackRepository, times(1)).findByCredential(testCredential);
         verify(userProfileHandler, times(0)).destroyProfileCredentialPreparation(testCredential);
@@ -226,7 +208,7 @@ public class CredentialServiceTest {
         credential.setTopology(new Topology());
         when(stackRepository.findByCredential(credential)).thenReturn(Collections.emptySet());
 
-        Credential deleted = credentialService.delete(credential);
+        Credential deleted = credentialService.delete(credential, defaultOrg);
 
         assertTrue(deleted.isArchived());
         assertNull(deleted.getTopology());

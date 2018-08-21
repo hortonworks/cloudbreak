@@ -16,7 +16,10 @@ import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigResponse;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
+import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Controller
 @Transactional(TxType.NEVER)
@@ -28,6 +31,12 @@ public class ProxyConfigV3Controller extends NotificationController implements P
     @Inject
     @Named("conversionService")
     private ConversionService conversionService;
+
+    @Inject
+    private UserService userService;
+
+    @Inject
+    private RestRequestThreadLocalService restRequestThreadLocalService;
 
     @Override
     public Set<ProxyConfigResponse> listByOrganization(Long organizationId) {
@@ -45,7 +54,8 @@ public class ProxyConfigV3Controller extends NotificationController implements P
     @Override
     public ProxyConfigResponse createInOrganization(Long organizationId, ProxyConfigRequest request) {
         ProxyConfig config = conversionService.convert(request, ProxyConfig.class);
-        config = proxyConfigService.create(config, organizationId);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        config = proxyConfigService.create(config, organizationId, user);
         notify(ResourceEvent.PROXY_CONFIG_CREATED);
         return conversionService.convert(config, ProxyConfigResponse.class);
     }

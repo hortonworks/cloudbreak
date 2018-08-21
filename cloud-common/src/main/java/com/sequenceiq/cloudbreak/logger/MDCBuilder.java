@@ -56,6 +56,12 @@ public class MDCBuilder {
         }
     }
 
+    public static void buildUserMdcContext(String userName) {
+        if (userName != null && !userName.isEmpty()) {
+            MDC.put(LoggerContextKey.OWNER_ID.toString(), userName);
+        }
+    }
+
     public static void buildMdcContextFromMap(Map<String, String> map) {
         cleanupMdc();
         if (map != null) {

@@ -10,13 +10,12 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 
 @Entity
-@Table(name = "Cluster", uniqueConstraints = @UniqueConstraint(columnNames = {"account", "name"}))
+@Table(name = "Cluster")
 public class ClusterView implements ProvisionEntity {
 
     @Id

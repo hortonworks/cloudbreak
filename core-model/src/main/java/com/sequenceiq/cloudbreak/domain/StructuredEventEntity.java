@@ -42,7 +42,6 @@ public class StructuredEventEntity implements OrganizationAwareResource {
     @Column(nullable = false)
     private Long timestamp;
 
-    @Column
     private String account;
 
     // inconsistent name, the authorization cannot find the "userId" field

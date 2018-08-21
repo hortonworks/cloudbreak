@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.controller;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 import javax.ws.rs.core.Response;
@@ -21,7 +22,13 @@ import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
 import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.StackValidationRequest;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Component
 @Transactional(TxType.NEVER)
@@ -35,14 +42,29 @@ public class StackV1Controller extends NotificationController implements StackV1
     @Autowired
     private StackCommonService stackCommonService;
 
+    @Inject
+    private UserService userService;
+
+    @Inject
+    private OrganizationService organizationService;
+
+    @Inject
+    private RestRequestThreadLocalService restRequestThreadLocalService;
+
     @Override
     public StackResponse postPrivate(StackRequest stackRequest) {
-        return stackCommonService.createInDefaultOrganization(stackRequest);
+        IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
+        User user = userService.getOrCreate(identityUser);
+        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
+        return stackCommonService.createInOrganization(stackRequest, identityUser, user, organization);
     }
 
     @Override
     public StackResponse postPublic(StackRequest stackRequest) {
-        return stackCommonService.createInDefaultOrganization(stackRequest);
+        IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
+        User user = userService.getOrCreate(identityUser);
+        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
+        return stackCommonService.createInOrganization(stackRequest, identityUser, user, organization);
     }
 
     @Override

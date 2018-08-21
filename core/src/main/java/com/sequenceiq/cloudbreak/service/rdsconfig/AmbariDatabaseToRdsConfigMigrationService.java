@@ -51,6 +51,7 @@ public class AmbariDatabaseToRdsConfigMigrationService {
         LOGGER.debug("Mapping component with id: {} from cluster name: [{}] id: [{}]", component.getId(), cluster.getName(), cluster.getId());
         try {
             if (cluster.getStatus() != Status.DELETE_COMPLETED) {
+
                 RDSConfig rdsConfig = createRdsConfig(component, cluster);
                 addRdsConfigToCluster(cluster, rdsConfig);
             }
@@ -74,9 +75,8 @@ public class AmbariDatabaseToRdsConfigMigrationService {
             cluster.getRdsConfigs().add(rdsConfig);
             clusterService.save(cluster);
         } else {
-            cluster.getRdsConfigs().stream().findFirst().ifPresent(rdsConf -> {
-                LOGGER.warn("RdsConfig with AMBARI type already exists for cluster [{}] RdsConfig id: [{}]", cluster.getId(), rdsConf.getId());
-            });
+            cluster.getRdsConfigs().stream().findFirst().ifPresent(rdsConf ->
+                    LOGGER.warn("RdsConfig with AMBARI type already exists for cluster [{}] RdsConfig id: [{}]", cluster.getId(), rdsConf.getId()));
         }
     }
 
@@ -88,7 +88,8 @@ public class AmbariDatabaseToRdsConfigMigrationService {
         if (DatabaseVendor.EMBEDDED == rdsConfig.getDatabaseEngine()) {
             rdsConfig.setStatus(ResourceStatus.DEFAULT);
         }
-        return rdsConfigService.createInDefaultOrganization(rdsConfig);
+
+        return rdsConfigService.create(rdsConfig, cluster.getStack().getOrganization(), cluster.getStack().getCreator());
     }
 
 }

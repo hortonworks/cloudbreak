@@ -16,7 +16,10 @@ import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
 import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.Recipe;
+import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Controller
 @Transactional(TxType.NEVER)
@@ -28,6 +31,12 @@ public class RecipeV3Controller extends NotificationController implements Recipe
     @Inject
     @Named("conversionService")
     private ConversionService conversionService;
+
+    @Inject
+    private UserService userService;
+
+    @Inject
+    private RestRequestThreadLocalService restRequestThreadLocalService;
 
     @Override
     public Set<RecipeResponse> listByOrganization(Long organizationId) {
@@ -45,7 +54,8 @@ public class RecipeV3Controller extends NotificationController implements Recipe
     @Override
     public RecipeResponse createInOrganization(Long organizationId, RecipeRequest request) {
         Recipe recipe = conversionService.convert(request, Recipe.class);
-        recipe = recipeService.create(recipe, organizationId);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        recipe = recipeService.create(recipe, organizationId, user);
         notify(ResourceEvent.RECIPE_CREATED);
         return conversionService.convert(recipe, RecipeResponse.class);
     }

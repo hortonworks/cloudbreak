@@ -7,14 +7,11 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.repository.FileSystemRepository;
 import com.sequenceiq.cloudbreak.repository.organization.OrganizationResourceRepository;
 import com.sequenceiq.cloudbreak.service.AbstractOrganizationAwareResourceService;
-import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 
 @Service
 public class FileSystemConfigService extends AbstractOrganizationAwareResourceService<FileSystem> {
@@ -24,12 +21,6 @@ public class FileSystemConfigService extends AbstractOrganizationAwareResourceSe
 
     @Inject
     private AuthorizationService authService;
-
-    @Inject
-    private OrganizationService organizationService;
-
-    @Inject
-    private AuthenticatedUserService authenticatedUserService;
 
     @Override
     protected OrganizationResourceRepository<FileSystem, Long> repository() {
@@ -55,8 +46,5 @@ public class FileSystemConfigService extends AbstractOrganizationAwareResourceSe
 
     @Override
     protected void prepareCreation(FileSystem resource) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        resource.setAccount(user.getAccount());
-        resource.setOwner(user.getUserId());
     }
 }

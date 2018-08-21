@@ -56,14 +56,12 @@ public class RDSConfig implements ProvisionEntity, OrganizationAwareResource {
     @Column(nullable = false)
     private String stackVersion;
 
-    @Column
     private String owner;
 
-    @Column
     private String account;
 
     @Column(nullable = false)
-    private boolean publicInAccount;
+    private boolean publicInAccount = true;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)

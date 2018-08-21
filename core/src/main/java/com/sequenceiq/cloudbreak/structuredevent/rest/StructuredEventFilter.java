@@ -41,7 +41,6 @@ import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
-import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
@@ -96,9 +95,6 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
 
     @Value("${info.app.version:}")
     private String cbVersion;
-
-    @Inject
-    private AuthenticatedUserService authenticatedUserService;
 
     @Inject
     private OrganizationService organizationService;
@@ -173,10 +169,7 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
         restCall.setRestResponse(restResponse);
         restCall.setDuration(System.currentTimeMillis() - requestTime);
         Long orgId = restRequestThreadLocalService.getRequestedOrgId();
-        if (orgId == null) {
-            orgId = organizationService.getDefaultOrganizationForCurrentUser().getId();
-        }
-        User user = userService.getCurrentUser();
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
         structuredEventClient.sendStructuredEvent(new StructuredRestCallEvent(createOperationDetails(restParams, requestTime, orgId),
                 restCall, orgId, user.getUserId()));
     }
@@ -247,8 +240,8 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
     }
 
     private OperationDetails createOperationDetails(Map<String, String> restParams, Long requestTime, Long orgId) {
-        IdentityUser identityUser = authenticatedUserService.getCbUser();
-        User currentUser = userService.getCurrentUser();
+        IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
+        User currentUser = userService.getOrCreate(identityUser);
         String resoureceType = restParams.get(RESOURCE_TYPE);
         String resoureceId = restParams.get(RESOURCE_ID);
         String resoureceName = restParams.get(RESOURCE_NAME);

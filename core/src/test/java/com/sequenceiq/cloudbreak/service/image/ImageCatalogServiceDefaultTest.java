@@ -23,9 +23,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV2;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
+import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
-import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
-import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
@@ -52,12 +51,6 @@ public class ImageCatalogServiceDefaultTest {
     @Mock
     private ImageCatalogProvider imageCatalogProvider;
 
-    @Mock
-    private AuthenticatedUserService authenticatedUserService;
-
-    @Mock
-    private AuthorizationService authorizationService;
-
     @Spy
     private ImageCatalogVersionFilter versionFilter;
 
@@ -69,6 +62,12 @@ public class ImageCatalogServiceDefaultTest {
 
     @Mock
     private AccountPreferencesService accountPreferencesService;
+
+    @Mock
+    private IdentityUser identityUser;
+
+    @Mock
+    private User user;
 
     @InjectMocks
     private ImageCatalogService underTest;
@@ -119,11 +118,9 @@ public class ImageCatalogServiceDefaultTest {
         when(imageCatalogProvider.getImageCatalogV2("")).thenReturn(catalog);
         when(accountPreferencesService.enabledPlatforms()).thenReturn(new HashSet<>(Arrays.asList(PROVIDERS)));
 
-        IdentityUser user = getIdentityUser();
-        when(authenticatedUserService.getCbUser()).thenReturn(user);
-
-        when(userProfileService.getOrCreate(user.getAccount(), user.getUserId())).thenReturn(new UserProfile());
-        when(userProfileService.getOrCreate(user.getAccount(), user.getUserId(), user.getUsername())).thenReturn(new UserProfile());
+        when(userProfileService.getOrCreate(identityUser.getAccount(), identityUser.getUserId(), user)).thenReturn(new UserProfile());
+        when(userProfileService.getOrCreate(identityUser.getAccount(), identityUser.getUserId(), identityUser.getUsername(), user))
+                .thenReturn(new UserProfile());
     }
 
     @Test
@@ -132,7 +129,7 @@ public class ImageCatalogServiceDefaultTest {
         ReflectionTestUtils.setField(underTest, "cbVersion", cbVersion);
         ReflectionTestUtils.setField(underTest, "defaultCatalogUrl", "");
         // WHEN
-        StatedImage statedImage = underTest.getPrewarmImageDefaultPreferred(provider, clusterType, clusterVersion, os);
+        StatedImage statedImage = underTest.getPrewarmImageDefaultPreferred(provider, clusterType, clusterVersion, os, identityUser, user);
         // THEN
         Assert.assertEquals("Wrong default image has been selected", expectedImageId, statedImage.getImage().getUuid());
     }

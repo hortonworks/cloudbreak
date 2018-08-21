@@ -1,5 +1,14 @@
 package com.sequenceiq.cloudbreak.converter.v2.filesystem;
 
+import static com.sequenceiq.cloudbreak.common.type.APIResourceType.FILESYSTEM;
+
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Component;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.model.filesystem.AdlsFileSystem;
 import com.sequenceiq.cloudbreak.api.model.filesystem.BaseFileSystem;
@@ -9,29 +18,17 @@ import com.sequenceiq.cloudbreak.api.model.filesystem.WasbFileSystem;
 import com.sequenceiq.cloudbreak.api.model.v2.CloudStorageRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.StorageLocationRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.filesystem.CloudStorageParameters;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.StorageLocation;
 import com.sequenceiq.cloudbreak.domain.StorageLocations;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemResolver;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-import java.util.HashSet;
-import java.util.Set;
-
-import static com.sequenceiq.cloudbreak.common.type.APIResourceType.FILESYSTEM;
 
 @Component
 public class CloudStorageRequestToFileSystemConverter extends AbstractConversionServiceAwareConverter<CloudStorageRequest, FileSystem> {
-
-    @Inject
-    private AuthenticatedUserService authenticatedUserService;
 
     @Inject
     private MissingResourceNameGenerator nameGenerator;
@@ -44,9 +41,6 @@ public class CloudStorageRequestToFileSystemConverter extends AbstractConversion
         FileSystem fileSystem = new FileSystem();
         fileSystem.setName(nameGenerator.generateName(FILESYSTEM));
         fileSystem.setDefaultFs(false);
-        IdentityUser user = authenticatedUserService.getCbUser();
-        fileSystem.setOwner(user.getUserId());
-        fileSystem.setAccount(user.getAccount());
         CloudStorageParameters cloudStorageParameters = fileSystemResolver.propagateConfiguration(source);
         fileSystem.setType(cloudStorageParameters.getType());
 

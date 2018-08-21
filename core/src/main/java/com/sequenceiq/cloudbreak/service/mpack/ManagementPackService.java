@@ -9,12 +9,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.ManagementPack;
 import com.sequenceiq.cloudbreak.repository.ManagementPackRepository;
 import com.sequenceiq.cloudbreak.repository.organization.OrganizationResourceRepository;
 import com.sequenceiq.cloudbreak.service.AbstractOrganizationAwareResourceService;
-import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 
 @Service
 public class ManagementPackService extends AbstractOrganizationAwareResourceService<ManagementPack> {
@@ -23,9 +21,6 @@ public class ManagementPackService extends AbstractOrganizationAwareResourceServ
 
     @Inject
     private ManagementPackRepository mpackRepository;
-
-    @Inject
-    private AuthenticatedUserService authenticatedUserService;
 
     /**
      * @param id id of mpack
@@ -54,8 +49,6 @@ public class ManagementPackService extends AbstractOrganizationAwareResourceServ
 
     @Override
     protected void prepareCreation(ManagementPack resource) {
-        IdentityUser identityUser = authenticatedUserService.getCbUser();
-        resource.setOwner(identityUser.getUserId());
-        resource.setAccount(identityUser.getAccount());
+
     }
 }

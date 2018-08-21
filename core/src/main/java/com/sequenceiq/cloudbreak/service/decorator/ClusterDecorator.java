@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
@@ -80,21 +81,21 @@ public class ClusterDecorator {
     @Inject
     private AmbariHaComponentFilter ambariHaComponentFilter;
 
-    public Cluster decorate(@Nonnull Cluster cluster, @Nonnull ClusterRequest request, Blueprint blueprint,
-            Organization organization, @Nonnull Stack stack) {
-        prepareBlueprint(cluster, request, organization, stack, Optional.ofNullable(blueprint));
-        prepareHostGroups(stack, cluster, request.getHostGroups());
+    public Cluster decorate(@Nonnull Cluster cluster, @Nonnull ClusterRequest request, Blueprint blueprint, User user, Organization organization,
+            @Nonnull Stack stack) {
+        prepareBlueprint(cluster, request, organization, stack, Optional.ofNullable(blueprint), user);
+        prepareHostGroups(stack, cluster, request.getHostGroups(), organization, user);
         validateBlueprintIfRequired(cluster, request, stack);
         prepareRds(cluster, request, stack);
         cluster = clusterProxyDecorator.prepareProxyConfig(cluster, request.getProxyName(), stack);
-        prepareLdap(cluster, request, organization);
-        cluster = sharedServiceConfigProvider.configureCluster(cluster, request.getConnectedCluster());
+        prepareLdap(cluster, request, user, organization);
+        cluster = sharedServiceConfigProvider.configureCluster(cluster, request.getConnectedCluster(), user, organization);
         return cluster;
     }
 
-    private void prepareLdap(@Nonnull Cluster cluster, @Nonnull ClusterRequest request, Organization organization) {
+    private void prepareLdap(@Nonnull Cluster cluster, @Nonnull ClusterRequest request, User user, Organization organization) {
         if (request.getLdapConfig() != null) {
-            prepareLdap(cluster, organization, request.getLdapConfig());
+            prepareLdap(cluster, organization, request.getLdapConfig(), user);
         } else if (request.getLdapConfigName() != null) {
             prepareLdap(cluster, organization, request.getLdapConfigName());
         } else if (request.getLdapConfigId() != null) {
@@ -109,7 +110,7 @@ public class ClusterDecorator {
     }
 
     private void prepareBlueprint(Cluster subject, ClusterRequest request, Organization organization, Stack stack,
-            Optional<Blueprint> blueprint) {
+            Optional<Blueprint> blueprint, User user) {
         if (blueprint.isPresent()) {
             subject.setBlueprint(blueprint.get());
         } else {
@@ -118,7 +119,7 @@ public class ClusterDecorator {
             } else if (request.getBlueprint() != null) {
                 Blueprint newBlueprint = conversionService.convert(request.getBlueprint(), Blueprint.class);
                 newBlueprint.setPublicInAccount(stack.isPublicInAccount());
-                newBlueprint = blueprintService.create(organization, newBlueprint, new ArrayList<>());
+                newBlueprint = blueprintService.create(organization, newBlueprint, new ArrayList<>(), user);
                 subject.setBlueprint(newBlueprint);
             } else if (!Strings.isNullOrEmpty(request.getBlueprintName())) {
                 subject.setBlueprint(blueprintService.getByNameForOrganization(request.getBlueprintName(), organization));
@@ -156,10 +157,10 @@ public class ClusterDecorator {
         cluster.setLdapConfig(ldapConfig);
     }
 
-    private void prepareLdap(Cluster cluster, Organization organization, @NotNull LdapConfigRequest ldapConfigRequest) {
+    private void prepareLdap(Cluster cluster, Organization organization, @NotNull LdapConfigRequest ldapConfigRequest, User user) {
         LdapConfig ldapConfig = conversionService.convert(ldapConfigRequest, LdapConfig.class);
         ldapConfigValidator.validateLdapConnection(ldapConfig);
-        ldapConfig = ldapConfigService.create(ldapConfig, organization);
+        ldapConfig = ldapConfigService.create(ldapConfig, organization, user);
         cluster.setLdapConfig(ldapConfig);
     }
 
@@ -195,12 +196,12 @@ public class ClusterDecorator {
         }
     }
 
-    private void prepareHostGroups(Stack stack, Cluster cluster, Iterable<HostGroupRequest> hostGroupsJsons) {
+    private void prepareHostGroups(Stack stack, Cluster cluster, Iterable<HostGroupRequest> hostGroupsJsons, Organization organization, User user) {
         Set<HostGroup> hostGroups = new HashSet<>();
         for (HostGroupRequest json : hostGroupsJsons) {
             HostGroup hostGroup = conversionService.convert(json, HostGroup.class);
             hostGroup.setCluster(cluster);
-            hostGroup = hostGroupDecorator.decorate(hostGroup, json, stack, true, stack.isPublicInAccount());
+            hostGroup = hostGroupDecorator.decorate(hostGroup, json, stack, true, organization, user);
             hostGroups.add(hostGroup);
         }
         cluster.setHostGroups(hostGroups);

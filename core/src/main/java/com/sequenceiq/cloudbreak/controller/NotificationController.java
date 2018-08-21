@@ -8,7 +8,6 @@ import javax.inject.Inject;
 import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
-import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.notification.Notification;
@@ -17,9 +16,6 @@ import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
 public abstract class NotificationController {
-
-    @Inject
-    private AuthenticatedUserService authenticatedUserService;
 
     @Inject
     private CloudbreakMessagesService messagesService;
@@ -37,20 +33,17 @@ public abstract class NotificationController {
     private RestRequestThreadLocalService restRequestThreadLocalService;
 
     protected final void executeAndNotify(Consumer<IdentityUser> consumer, ResourceEvent resourceEvent) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        consumer.accept(user);
+        IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
+        consumer.accept(identityUser);
         notify(resourceEvent);
     }
 
     protected final void notify(ResourceEvent resourceEvent) {
-        IdentityUser identityUser = authenticatedUserService.getCbUser();
+        IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
         Long orgId = restRequestThreadLocalService.getRequestedOrgId();
-        if (orgId == null) {
-            orgId = organizationService.getDefaultOrganizationForCurrentUser().getId();
-        }
         CloudbreakEventsJson notification = new CloudbreakEventsJson();
         notification.setEventTimestamp(new Date().getTime());
-        notification.setUserIdV3(userService.getCurrentUser().getUserId());
+        notification.setUserIdV3(userService.getOrCreate(identityUser).getUserId());
         notification.setOrganizationId(orgId);
         notification.setOwner(identityUser.getUserId());
         notification.setAccount(identityUser.getAccount());

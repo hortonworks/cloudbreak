@@ -28,8 +28,6 @@ import com.sequenceiq.cloudbreak.blueprint.template.views.SharedServiceConfigsVi
 import com.sequenceiq.cloudbreak.blueprint.templates.BlueprintStackInfo;
 import com.sequenceiq.cloudbreak.blueprint.templates.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.blueprint.utils.StackInfoService;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -41,10 +39,11 @@ import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
-import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
@@ -54,7 +53,7 @@ import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.user.CachedUserDetailsService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Component
 public class StackRequestToBlueprintPreparationObjectConverter extends AbstractConversionServiceAwareConverter<StackV2Request, BlueprintPreparationObject> {
@@ -73,9 +72,6 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
 
     @Inject
     private GeneralClusterConfigsProvider generalClusterConfigsProvider;
-
-    @Inject
-    private CachedUserDetailsService cachedUserDetailsService;
 
     @Inject
     private BlueprintService blueprintService;
@@ -99,13 +95,16 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
     private FileSystemConfigService fileSystemConfigService;
 
     @Inject
-    private AuthenticatedUserService authenticatedUserService;
-
-    @Inject
     private FileSystemConfigurationsViewProvider fileSystemConfigurationsViewProvider;
 
     @Inject
     private CloudStorageValidationUtil cloudStorageValidationUtil;
+
+    @Inject
+    private UserService userService;
+
+    @Inject
+    private RestRequestThreadLocalService restRequestThreadLocalService;
 
     @Inject
     private OrganizationService organizationService;
@@ -113,21 +112,22 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
     @Override
     public BlueprintPreparationObject convert(StackV2Request source) {
         try {
-            IdentityUser identityUser = cachedUserDetailsService.getDetails(source.getOwner(), UserFilterField.USERID);
-            Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
-            Credential credential = credentialService.getByNameFromUsersDefaultOrganization(source.getGeneral().getCredentialName());
+            User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+            Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
+            Credential credential = credentialService.getByNameForOrganization(source.getGeneral().getCredentialName(), organization);
             Optional<FlexSubscription> flexSubscription = getFlexSubscription(source);
             SmartSenseSubscription smartsenseSubscription = flexSubscription.isPresent() ? flexSubscription.get().getSmartSenseSubscription() : null;
             KerberosConfig kerberosConfig = getKerberosConfig(source);
-            LdapConfig ldapConfig = getLdapConfig(source, identityUser);
+            LdapConfig ldapConfig = getLdapConfig(source, organization);
             BaseFileSystemConfigurationsView fileSystemConfigurationView = getFileSystemConfigurationView(source, credential);
-            Set<RDSConfig> rdsConfigs = getRdsConfigs(source);
+            Set<RDSConfig> rdsConfigs = getRdsConfigs(source, organization);
             Blueprint blueprint = getBlueprint(source, organization);
             BlueprintStackInfo blueprintStackInfo = stackInfoService.blueprintStackInfo(blueprint.getBlueprintText());
             Set<HostgroupView> hostgroupViews = getHostgroupViews(source);
             Gateway gateway = source.getCluster().getAmbari().getGateway() == null ? null : getConversionService().convert(source, Gateway.class);
             BlueprintView blueprintView = new BlueprintView(blueprint.getBlueprintText(), blueprintStackInfo.getVersion(), blueprintStackInfo.getType());
-            GeneralClusterConfigs generalClusterConfigs = generalClusterConfigsProvider.generalClusterConfigs(source, identityUser);
+            GeneralClusterConfigs generalClusterConfigs = generalClusterConfigsProvider.generalClusterConfigs(source, user,
+                    restRequestThreadLocalService.getIdentityUser().getUsername());
             Builder builder = Builder.builder()
                     .withFlexSubscription(flexSubscription.orElse(null))
                     .withRdsConfigs(rdsConfigs)
@@ -143,7 +143,7 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
 
             SharedServiceRequest sharedService = source.getCluster().getSharedService();
             if (sharedService != null && !Strings.isNullOrEmpty(sharedService.getSharedCluster())) {
-                Stack dataLakeStack = stackService.getByNameInDefaultOrg(sharedService.getSharedCluster());
+                Stack dataLakeStack = stackService.getByNameInOrg(sharedService.getSharedCluster(), organization.getId());
                 SharedServiceConfigsView sharedServiceConfigsView = sharedServiceConfigsViewProvider
                         .createSharedServiceConfigs(blueprint, source.getCluster().getAmbari().getPassword(), dataLakeStack);
                 ConfigsResponse configsResponse = sharedServiceConfigProvider.retrieveOutputs(dataLakeStack, blueprint, source.getGeneral().getName());
@@ -191,10 +191,10 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
         return hostgroupViews;
     }
 
-    private Set<RDSConfig> getRdsConfigs(StackV2Request source) {
+    private Set<RDSConfig> getRdsConfigs(StackV2Request source, Organization organization) {
         Set<RDSConfig> rdsConfigs = new HashSet<>();
         for (String rdsConfigRequest : source.getCluster().getRdsConfigNames()) {
-            RDSConfig rdsConfig = rdsConfigService.getByNameForDefaultOrg(rdsConfigRequest);
+            RDSConfig rdsConfig = rdsConfigService.getByNameForOrg(rdsConfigRequest, organization);
             rdsConfigs.add(rdsConfig);
         }
         return rdsConfigs;
@@ -209,10 +209,10 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
         return fileSystemConfigurationView;
     }
 
-    private LdapConfig getLdapConfig(StackV2Request source, IdentityUser identityUser) {
+    private LdapConfig getLdapConfig(StackV2Request source, Organization organization) {
         LdapConfig ldapConfig = null;
         if (source.getCluster().getLdapConfigName() != null) {
-            ldapConfig = ldapConfigService.getByNameFromUsersDefaultOrganization(source.getCluster().getLdapConfigName());
+            ldapConfig = ldapConfigService.getByNameForOrganization(source.getCluster().getLdapConfigName(), organization);
         }
         return ldapConfig;
     }

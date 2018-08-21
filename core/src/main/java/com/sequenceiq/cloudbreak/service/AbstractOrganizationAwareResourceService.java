@@ -20,7 +20,6 @@ import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecution
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationAwareResourceService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
-import com.sequenceiq.cloudbreak.service.user.UserService;
 
 public abstract class AbstractOrganizationAwareResourceService<T extends OrganizationAwareResource> implements OrganizationAwareResourceService<T> {
 
@@ -32,29 +31,14 @@ public abstract class AbstractOrganizationAwareResourceService<T extends Organiz
     @Inject
     private OrganizationService organizationService;
 
-    @Inject
-    private UserService userService;
-
     @Override
-    public T createInDefaultOrganization(T resource) {
-        User user = userService.getCurrentUser();
-        Organization organization = organizationService.getDefaultOrganizationForUser(user);
-        return create(resource, organization);
+    public T create(T resource, @Nonnull Long organizationId, User user) {
+        Organization organization = organizationService.get(organizationId, user);
+        return create(resource, organization, user);
     }
 
     @Override
-    public T create(T resource, @Nonnull Long organizationId) {
-        Organization organization = organizationService.get(organizationId);
-        return create(resource, organization);
-    }
-
-    @Override
-    public T create(T resource, Organization organization) {
-        User user = userService.getCurrentUser();
-        return createWithUser(user, resource, organization);
-    }
-
-    public T createWithUser(User user, T resource, Organization organization) {
+    public T create(T resource, Organization organization, User user) {
         try {
             prepareCreation(resource);
             return transactionService.required(() -> {
@@ -90,12 +74,6 @@ public abstract class AbstractOrganizationAwareResourceService<T extends Organiz
     }
 
     @Override
-    public T getByNameFromUsersDefaultOrganization(String name) {
-        Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
-        return getByNameForOrganization(name, organization);
-    }
-
-    @Override
     public Set<T> findAllByOrganization(Organization organization) {
         return repository().findAllByOrganization(organization);
     }
@@ -103,12 +81,6 @@ public abstract class AbstractOrganizationAwareResourceService<T extends Organiz
     @Override
     public Set<T> findAllByOrganizationId(Long organizationId) {
         return repository().findAllByOrganizationId(organizationId);
-    }
-
-    @Override
-    public Set<T> findAllForUsersDefaultOrganization() {
-        Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
-        return findAllByOrganization(organization);
     }
 
     @Override
@@ -122,12 +94,6 @@ public abstract class AbstractOrganizationAwareResourceService<T extends Organiz
     @Override
     public T deleteByNameFromOrganization(String name, Long organizationId) {
         T toBeDeleted = getByNameForOrganizationId(name, organizationId);
-        return delete(toBeDeleted);
-    }
-
-    @Override
-    public T deleteByNameFromDefaultOrganization(String name) {
-        T toBeDeleted = getByNameFromUsersDefaultOrganization(name);
         return delete(toBeDeleted);
     }
 
@@ -145,10 +111,6 @@ public abstract class AbstractOrganizationAwareResourceService<T extends Organiz
 
     public OrganizationService getOrganizationService() {
         return organizationService;
-    }
-
-    public UserService getUserService() {
-        return userService;
     }
 
     protected abstract OrganizationResourceRepository<T, Long> repository();

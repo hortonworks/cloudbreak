@@ -24,10 +24,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.init.blueprint.BlueprintLoaderService;
 import com.sequenceiq.cloudbreak.init.blueprint.DefaultBlueprintCache;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
-import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BlueprintLoaderServiceTest {
@@ -61,10 +61,10 @@ public class BlueprintLoaderServiceTest {
     private BlueprintService blueprintService;
 
     @Mock
-    private UserService userService;
+    private Organization organization;
 
     @Mock
-    private OrganizationService organizationService;
+    private User user;
 
     @Test
     public void testBlueprintLoaderWhenTheUserWhenUserHaveAllTheDefaultBlueprintThenItShouldReturnWithFalse() {
@@ -110,7 +110,7 @@ public class BlueprintLoaderServiceTest {
 
         when(blueprintService.saveAll(resultList)).thenReturn(resultList);
 
-        Collection<Blueprint> resultSet = underTest.loadBlueprintsForTheSpecifiedUser(identityUser(), blueprints);
+        Collection<Blueprint> resultSet = underTest.loadBlueprintsForTheSpecifiedUser(user, blueprints, organization);
         verify(blueprintService).saveAll(argumentCaptor.capture());
 
         Assert.assertEquals(1L, argumentCaptor.getAllValues().size());
@@ -124,7 +124,7 @@ public class BlueprintLoaderServiceTest {
         ArgumentCaptor<Set<Blueprint>> argumentCaptor = ArgumentCaptor.forClass(Set.class);
         when(blueprintService.saveAll(anySet())).thenReturn(stringBlueprintMap.values());
 
-        Collection<Blueprint> resultSet = underTest.loadBlueprintsForTheSpecifiedUser(identityUser(), blueprints);
+        Collection<Blueprint> resultSet = underTest.loadBlueprintsForTheSpecifiedUser(user, blueprints, organization);
         verify(blueprintService).saveAll(argumentCaptor.capture());
 
         Assert.assertEquals(3L, argumentCaptor.getValue().size());
@@ -136,7 +136,7 @@ public class BlueprintLoaderServiceTest {
         generateCacheData(3);
         Set<Blueprint> blueprints = generateDatabaseData(3);
 
-        Collection<Blueprint> resultSet = underTest.loadBlueprintsForTheSpecifiedUser(identityUser(), blueprints);
+        Collection<Blueprint> resultSet = underTest.loadBlueprintsForTheSpecifiedUser(user, blueprints, organization);
         Assert.assertEquals(3L, resultSet.size());
     }
 

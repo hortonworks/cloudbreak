@@ -17,20 +17,20 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ManagementPackEndpoint;
 import com.sequenceiq.cloudbreak.api.model.mpack.ManagementPackRequest;
 import com.sequenceiq.cloudbreak.api.model.mpack.ManagementPackResponse;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.ManagementPack;
-import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.mpack.ManagementPackService;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Component
 @Transactional(TxType.NEVER)
 public class ManagementPackController extends NotificationController implements ManagementPackEndpoint {
-
-    @Inject
-    private AuthenticatedUserService authenticatedUserService;
 
     @Inject
     private ManagementPackService mpackService;
@@ -38,6 +38,15 @@ public class ManagementPackController extends NotificationController implements 
     @Inject
     @Named("conversionService")
     private ConversionService conversionService;
+
+    @Inject
+    private UserService userService;
+
+    @Inject
+    private RestRequestThreadLocalService restRequestThreadLocalService;
+
+    @Inject
+    private OrganizationService organizationService;
 
     @Override
     public ManagementPackResponse get(Long id) {
@@ -72,7 +81,9 @@ public class ManagementPackController extends NotificationController implements 
 
     @Override
     public void deletePrivate(String name) {
-        executeAndNotify(user -> mpackService.deleteByNameFromDefaultOrganization(name), ResourceEvent.MANAGEMENT_PACK_DELETED);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
+        executeAndNotify(identityUser -> mpackService.deleteByNameFromOrganization(name, organization.getId()), ResourceEvent.MANAGEMENT_PACK_DELETED);
     }
 
     @Override
@@ -92,13 +103,16 @@ public class ManagementPackController extends NotificationController implements 
 
     @Override
     public void deletePublic(String name) {
-        executeAndNotify(user -> mpackService.deleteByNameFromDefaultOrganization(name), ResourceEvent.MANAGEMENT_PACK_DELETED);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
+        executeAndNotify(identityUser -> mpackService.deleteByNameFromOrganization(name, organization.getId()), ResourceEvent.MANAGEMENT_PACK_DELETED);
     }
 
-    private ManagementPackResponse createMpack(IdentityUser user, ManagementPackRequest mpackRequest) {
+    private ManagementPackResponse createMpack(User user, ManagementPackRequest mpackRequest) {
         ManagementPack mpack = conversionService.convert(mpackRequest, ManagementPack.class);
+        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
         try {
-            mpack = mpackService.createInDefaultOrganization(mpack);
+            mpack = mpackService.create(mpack, organization, user);
             notify(ResourceEvent.MANAGEMENT_PACK_CREATED);
         } catch (DataIntegrityViolationException ex) {
             String msg = String.format("Error with resource [%s], %s", APIResourceType.MANAGEMENT_PACK, getProperSqlErrorMessage(ex));
@@ -114,15 +128,19 @@ public class ManagementPackController extends NotificationController implements 
     }
 
     private ManagementPackResponse post(ManagementPackRequest mpackRequest) {
-        IdentityUser user = authenticatedUserService.getCbUser();
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
         return createMpack(user, mpackRequest);
     }
 
     private Set<ManagementPackResponse> getAll() {
-        return toJsonList(mpackService.findAllForUsersDefaultOrganization());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
+        return toJsonList(mpackService.findAllByOrganization(organization));
     }
 
     private ManagementPackResponse getByName(String name) {
-        return conversionService.convert(mpackService.getByNameFromUsersDefaultOrganization(name), ManagementPackResponse.class);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
+        return conversionService.convert(mpackService.getByNameForOrganization(name, organization), ManagementPackResponse.class);
     }
 }

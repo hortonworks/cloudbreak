@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 
@@ -46,9 +45,8 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateS
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
-import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
-import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
@@ -103,14 +101,8 @@ public class ImageCatalogServiceTest {
     @Mock
     private ImageCatalogProvider imageCatalogProvider;
 
-    @Mock
-    private AuthenticatedUserService authenticatedUserService;
-
     @Spy
     private ImageCatalogVersionFilter versionFilter;
-
-    @Mock
-    private AuthorizationService authorizationService;
 
     @Mock
     private UserProfileService userProfileService;
@@ -142,13 +134,19 @@ public class ImageCatalogServiceTest {
     @Mock
     private OrganizationService organizationService;
 
+    @Mock
+    private IdentityUser identityUser;
+
+    @Mock
+    private User user;
+
     @Before
     public void beforeTest() throws Exception {
         setupImageCatalogProvider(CUSTOM_IMAGE_CATALOG_URL, V2_CATALOG_FILE);
 
-        IdentityUser user = getIdentityUser();
-        when(authenticatedUserService.getCbUser()).thenReturn(user);
         when(accountPreferencesService.enabledPlatforms()).thenReturn(new HashSet<>(Arrays.asList("AZURE", "AWS", "GCP", "OPENSTACK")));
+        when(identityUser.getUserId()).thenReturn("userid");
+        when(identityUser.getAccount()).thenReturn("account");
 
         constants.addAll(Collections.singletonList(new AwsCloudConstant()));
 
@@ -160,17 +158,12 @@ public class ImageCatalogServiceTest {
         ReflectionTestUtils.setField(underTest, ImageCatalogService.class, cbVersion, versionValue, String.class);
     }
 
-    private IdentityUser getIdentityUser() {
-        return new IdentityUser(USER_ID, USERNAME, ACCOUNT,
-                Collections.emptyList(), "givenName", "familyName", new Date());
-    }
-
     @Test
     public void testGetLatestBaseImageDefaultPreferredWithNoDefaultsLatest() throws Exception {
         setupUserProfileService();
         setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CATALOG_FILE);
 
-        StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS", null);
+        StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS", null, identityUser, user);
 
         assertEquals("7aca1fa6-980c-44e2-a75e-3144b18a5993", image.getImage().getUuid());
         assertFalse(image.getImage().isDefaultImage());
@@ -182,7 +175,7 @@ public class ImageCatalogServiceTest {
         setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CATALOG_FILE);
         ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "cbVersion", "2.1.0-dev.200", null);
 
-        StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS", null);
+        StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS", null, identityUser, user);
 
         assertEquals("7aca1fa6-980c-44e2-a75e-3144b18a5993", image.getImage().getUuid());
         assertTrue(image.getImage().isDefaultImage());
@@ -194,7 +187,7 @@ public class ImageCatalogServiceTest {
         setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CATALOG_FILE);
         ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "cbVersion", "2.1.0-dev.1", null);
 
-        StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS", null);
+        StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS", null, identityUser, user);
 
         assertEquals("7aca1fa6-980c-44e2-a75e-3144b18a5993", image.getImage().getUuid());
         assertTrue(image.getImage().isDefaultImage());
@@ -206,7 +199,7 @@ public class ImageCatalogServiceTest {
         setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CATALOG_FILE);
         ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "cbVersion", "2.1.0-dev.2", null);
 
-        StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS", null);
+        StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS", null, identityUser, user);
 
         assertEquals("f6e778fc-7f17-4535-9021-515351df3691", image.getImage().getUuid());
         assertTrue(image.getImage().isDefaultImage());
@@ -394,16 +387,14 @@ public class ImageCatalogServiceTest {
     @Test
     public void testDeleteImageCatalog() {
         String name = "img-name";
-        IdentityUser user = getIdentityUser();
-        UserProfile userProfile = new UserProfile();
         ImageCatalog imageCatalog = new ImageCatalog();
         imageCatalog.setName(name);
         imageCatalog.setArchived(false);
         doNothing().when(userProfileHandler).destroyProfileImageCatalogPreparation(any(ImageCatalog.class));
-        when(authenticatedUserService.getCbUser()).thenReturn(user);
         when(imageCatalogRepository.findByNameAndOrganizationId(name, ORG_ID)).thenReturn(imageCatalog);
-        when(userProfileService.getOrCreate(user.getAccount(), user.getUserId(), user.getUsername())).thenReturn(userProfile);
-        underTest.delete(ORG_ID, name);
+        setupUserProfileService();
+
+        underTest.delete(ORG_ID, name, identityUser, user);
 
         verify(imageCatalogRepository, times(1)).save(imageCatalog);
 
@@ -418,7 +409,7 @@ public class ImageCatalogServiceTest {
         thrown.expectMessage("cloudbreak-default cannot be deleted because it is an environment default image catalog.");
         thrown.expect(BadRequestException.class);
 
-        underTest.delete(ORG_ID, name);
+        underTest.delete(ORG_ID, name, identityUser, user);
     }
 
     @Test
@@ -449,9 +440,8 @@ public class ImageCatalogServiceTest {
     }
 
     private void setupUserProfileService() {
-        IdentityUser user = getIdentityUser();
         UserProfile userProfile = new UserProfile();
-        when(userProfileService.getOrCreate(user.getAccount(), user.getUserId(), user.getUsername())).thenReturn(userProfile);
+        when(userProfileService.getOrCreate(anyString(), anyString(), any(User.class))).thenReturn(userProfile);
     }
 
     private ImageCatalog getImageCatalog() {

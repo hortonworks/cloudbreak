@@ -21,7 +21,6 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -29,9 +28,6 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 public class StackImageFilterService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackImageFilterService.class);
-
-    @Inject
-    private AuthenticatedUserService authenticatedUserService;
 
     @Inject
     private StackService stackService;

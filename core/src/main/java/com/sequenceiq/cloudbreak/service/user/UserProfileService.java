@@ -20,10 +20,11 @@ import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.repository.UserProfileRepository;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 
 @Service
 public class UserProfileService {
@@ -40,16 +41,13 @@ public class UserProfileService {
     private ImageCatalogService imageCatalogService;
 
     @Inject
-    private OrganizationService organizationService;
-
-    @Inject
     private UserService userService;
 
-    public UserProfile getOrCreate(String account, String owner) {
-        return getOrCreate(account, owner, null);
+    public UserProfile getOrCreate(String account, String owner, User user) {
+        return getOrCreate(account, owner, null, user);
     }
 
-    public UserProfile getOrCreate(String account, String owner, String userName) {
+    public UserProfile getOrCreate(String account, String owner, String userName, User user) {
         UserProfile userProfile = getSilently(account, owner);
         if (userProfile == null) {
             userProfile = new UserProfile();
@@ -57,7 +55,7 @@ public class UserProfileService {
             userProfile.setOwner(owner);
             userProfile.setUserName(userName);
             addUiProperties(userProfile);
-            userProfile.setUser(userService.getCurrentUser());
+            userProfile.setUser(user);
             userProfile = userProfileRepository.save(userProfile);
         } else if (userProfile.getUserName() == null && userName != null) {
             userProfile.setUserName(userName);
@@ -94,17 +92,17 @@ public class UserProfileService {
         }
     }
 
-    public void put(UserProfileRequest request, IdentityUser user) {
-        UserProfile userProfile = getOrCreate(user.getAccount(), user.getUserId(), user.getUsername());
+    public void put(UserProfileRequest request, IdentityUser identityUser, User user, Organization organization) {
+        UserProfile userProfile = getOrCreate(identityUser.getAccount(), user.getUserId(), identityUser.getUsername(), user);
         if (request.getCredentialId() != null) {
-            Credential credential = credentialService.get(request.getCredentialId());
+            Credential credential = credentialService.get(request.getCredentialId(), organization);
             userProfile.setCredential(credential);
         } else if (request.getCredentialName() != null) {
-            Credential credential = credentialService.getByNameFromUsersDefaultOrganization(request.getCredentialName());
+            Credential credential = credentialService.getByNameForOrganization(request.getCredentialName(), organization);
             userProfile.setCredential(credential);
         }
         if (request.getImageCatalogName() != null) {
-            Long organizationId = organizationService.getDefaultOrganizationForCurrentUser().getId();
+            Long organizationId = organization.getId();
             ImageCatalog imageCatalog = imageCatalogService.get(organizationId, request.getImageCatalogName());
             userProfile.setImageCatalog(imageCatalog);
         }

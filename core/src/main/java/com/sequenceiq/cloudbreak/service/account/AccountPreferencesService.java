@@ -19,7 +19,6 @@ import com.sequenceiq.cloudbreak.cloud.CloudConstant;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.AccountPreferences;
 import com.sequenceiq.cloudbreak.repository.AccountPreferencesRepository;
-import com.sequenceiq.cloudbreak.service.AuthorizationService;
 
 @Service
 public class AccountPreferencesService {
@@ -34,9 +33,6 @@ public class AccountPreferencesService {
 
     @Inject
     private List<CloudConstant> cloudConstants;
-
-    @Inject
-    private AuthorizationService authorizationService;
 
     public AccountPreferences save(AccountPreferences accountPreferences) {
         return accountPreferencesRepository.save(accountPreferences);

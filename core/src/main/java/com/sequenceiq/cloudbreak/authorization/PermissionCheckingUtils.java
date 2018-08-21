@@ -37,8 +37,8 @@ public class PermissionCheckingUtils {
     @Inject
     private UserOrgPermissionsService userOrgPermissionsService;
 
-    public void checkPermissionByOrgIdForCurrentUser(Long organizationId, OrganizationResource resource, Action action) {
-        UserOrgPermissions userOrgPermissions = userOrgPermissionsService.findForCurrentUserByOrganizationId(organizationId);
+    public void checkPermissionByOrgIdForUser(Long organizationId, OrganizationResource resource, Action action, User user) {
+        UserOrgPermissions userOrgPermissions = userOrgPermissionsService.findForUserByOrganizationId(organizationId, user);
         if (userOrgPermissions != null) {
             Set<String> permissionSet = userOrgPermissions.getPermissionSet();
             boolean hasPermission = OrganizationPermissions.hasPermission(permissionSet, resource, action);

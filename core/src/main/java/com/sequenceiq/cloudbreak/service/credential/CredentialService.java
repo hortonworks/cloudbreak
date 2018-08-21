@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.controller.validation.credential.CredentialVali
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Topology;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
@@ -46,7 +47,6 @@ import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderCredentialAdapter;
 import com.sequenceiq.cloudbreak.service.user.UserProfileHandler;
-import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Service
 public class CredentialService extends AbstractOrganizationAwareResourceService<Credential> {
@@ -88,36 +88,25 @@ public class CredentialService extends AbstractOrganizationAwareResourceService<
     @Inject
     private CredentialValidator credentialValidator;
 
-    @Inject
-    private UserService userService;
-
-    public Set<Credential> listForUsersDefaultOrganization() {
-        return credentialRepository.findActiveForOrganizationFilterByPlatforms(getDefaultOrg().getId(), accountPreferencesService.enabledPlatforms());
-    }
-
     public Set<Credential> listAvailablesByOrganizationId(Long orgId) {
         return credentialRepository.findActiveForOrganizationFilterByPlatforms(orgId, accountPreferencesService.enabledPlatforms());
     }
 
-    public Credential get(Long id) {
-        return Optional.ofNullable(credentialRepository.findActiveByIdAndOrganizationFilterByPlatforms(id, getDefaultOrg().getId(),
+    public Credential get(Long id, Organization organization) {
+        return Optional.ofNullable(credentialRepository.findActiveByIdAndOrganizationFilterByPlatforms(id, organization.getId(),
                 accountPreferencesService.enabledPlatforms())).orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_ID, id));
     }
 
-    public Map<String, String> interactiveLogin(Credential credential) {
-        return interactiveLogin(getDefaultOrg().getId(), credential);
+    public Map<String, String> interactiveLogin(Long organizationId, Credential credential, Organization organization, User user) {
+        credential.setOrganization(organization);
+        return credentialAdapter.interactiveLogin(credential, organizationId, user.getUserId());
     }
 
-    public Map<String, String> interactiveLogin(Long organizationId, Credential credential) {
-        credential.setOrganization(organizationService.get(organizationId));
-        return credentialAdapter.interactiveLogin(credential, organizationId, userService.getCurrentUser().getUserId());
+    public Credential update(Credential credential, Organization organization, User user) {
+        return updateByOrganizationId(organization.getId(), credential, user);
     }
 
-    public Credential update(Credential credential) {
-        return updateByOrganizationId(getDefaultOrg().getId(), credential);
-    }
-
-    public Credential updateByOrganizationId(Long organizationId, Credential credential) {
+    public Credential updateByOrganizationId(Long organizationId, Credential credential, User user) {
         credentialValidator.validateCredentialCloudPlatform(credential.cloudPlatform());
         Credential original = Optional.ofNullable(
                 credentialRepository.findActiveByNameAndOrgIdFilterByPlatforms(credential.getName(), organizationId,
@@ -127,50 +116,43 @@ public class CredentialService extends AbstractOrganizationAwareResourceService<
             throw new BadRequestException("Modifying credential platform is forbidden");
         }
         credential.setId(original.getId());
-        credential.setOrganization(organizationService.get(organizationId));
-        Credential updated = super.create(credentialAdapter.init(credential, organizationId, userService.getCurrentUser().getUserId()),
-                organizationId);
+        credential.setOrganization(organizationService.get(organizationId, user));
+        Credential updated = super.create(credentialAdapter.init(credential, organizationId, user.getUserId()), organizationId, user);
         sendCredentialNotification(credential, ResourceEvent.CREDENTIAL_MODIFIED);
         return updated;
     }
 
     @Retryable(value = BadRequestException.class, maxAttempts = 30, backoff = @Backoff(delay = 2000))
-    public void createWithRetry(Credential credential) {
-        create(credential);
-    }
-
-    public Credential create(Credential credential) {
-        credential.setOrganization(getDefaultOrg());
-        return create(credential, getDefaultOrg().getId());
+    public void createWithRetry(Credential credential, Long organizationId, User user) {
+        create(credential, organizationId, user);
     }
 
     @Override
-    public Credential create(Credential credential, Long orgId) {
-        LOGGER.debug("Creating credential for organization: {}", getOrganizationService().get(orgId).getName());
+    public Credential create(Credential credential, Long organizationId, User user) {
+        LOGGER.debug("Creating credential for organization: {}", getOrganizationService().get(organizationId, user).getName());
         credentialValidator.validateCredentialCloudPlatform(credential.cloudPlatform());
-        Credential created = super.create(credentialAdapter.init(credential, orgId, userService.getCurrentUser().getUserId()), orgId);
+        Credential created = super.create(credentialAdapter.init(credential, organizationId, user.getUserId()), organizationId, user);
         sendCredentialNotification(credential, ResourceEvent.CREDENTIAL_CREATED);
         return created;
     }
 
-    public void delete(Long id) {
+    public void delete(Long id, Organization organization) {
         Credential credential = Optional.ofNullable(
-                credentialRepository.findActiveByIdAndOrganizationFilterByPlatforms(id, getDefaultOrg().getId(), accountPreferencesService.enabledPlatforms()))
+                credentialRepository.findActiveByIdAndOrganizationFilterByPlatforms(id, organization.getId(), accountPreferencesService.enabledPlatforms()))
                 .orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_ID, id));
         delete(credential);
     }
 
-    public void delete(String name) {
+    public void delete(String name, Organization organization) {
         Credential credential = Optional.ofNullable(
-                credentialRepository.findActiveByNameAndOrgIdFilterByPlatforms(name, getDefaultOrg().getId(), accountPreferencesService.enabledPlatforms()))
+                credentialRepository.findActiveByNameAndOrgIdFilterByPlatforms(name, organization.getId(), accountPreferencesService.enabledPlatforms()))
                 .orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, name));
         delete(credential);
     }
 
-    @Override
-    public Credential delete(Credential credential) {
+    public Credential delete(Credential credential, Organization organization) {
         if (canDelete(credential)) {
-            LOGGER.info(String.format("Starting to delete credential [name: %s, organization: %s]", credential.getName(), getDefaultOrg().getName()));
+            LOGGER.info(String.format("Starting to delete credential [name: %s, organization: %s]", credential.getName(), organization.getName()));
             userProfileHandler.destroyProfileCredentialPreparation(credential);
             archiveCredential(credential);
             sendCredentialNotification(credential, ResourceEvent.CREDENTIAL_DELETED);
@@ -265,9 +247,5 @@ public class CredentialService extends AbstractOrganizationAwareResourceService<
         notification.setEventMessage(messagesService.getMessage(resourceEvent.getMessage()));
         notification.setCloud(credential.cloudPlatform());
         notificationSender.send(new Notification<>(notification));
-    }
-
-    private Organization getDefaultOrg() {
-        return organizationService.getDefaultOrganizationForCurrentUser();
     }
 }

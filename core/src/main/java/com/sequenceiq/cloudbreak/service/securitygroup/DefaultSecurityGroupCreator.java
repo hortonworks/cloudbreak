@@ -11,11 +11,11 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.Port;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.User;
 
 @Service
 public class DefaultSecurityGroupCreator {
@@ -30,7 +30,7 @@ public class DefaultSecurityGroupCreator {
     @Value("${cb.nginx.port:9443}")
     private int nginxPort;
 
-    private void addSecurityGroup(IdentityUser user, String platform, String name, Iterable<Port> securityGroupPorts,
+    private void addSecurityGroup(User user, String platform, String name, Iterable<Port> securityGroupPorts,
             String securityGroupDesc, Organization organization) {
         SecurityGroup onlySshAndSsl = createSecurityGroup(user, platform, name, securityGroupDesc);
         SecurityRule sshAndSslRule = createSecurityRule(concatenatePorts(securityGroupPorts), onlySshAndSsl);
@@ -47,7 +47,7 @@ public class DefaultSecurityGroupCreator {
         return allPortsOpenDescBuilder.toString();
     }
 
-    private SecurityGroup createSecurityGroup(IdentityUser user, String platform, String name, String description) {
+    private SecurityGroup createSecurityGroup(User user, String platform, String name, String description) {
         SecurityGroup securityGroup = new SecurityGroup();
         securityGroup.setName(name);
         securityGroup.setDescription(description);

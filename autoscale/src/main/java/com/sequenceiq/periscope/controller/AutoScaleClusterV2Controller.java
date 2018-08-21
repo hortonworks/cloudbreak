@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.periscope.api.endpoint.v2.AutoScaleClusterV2Endpoint;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterRequest;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterResponse;
@@ -25,9 +24,6 @@ public class AutoScaleClusterV2Controller implements AutoScaleClusterV2Endpoint 
 
     @Inject
     private ClusterService clusterService;
-
-    @Inject
-    private AuthorizationService authorizationService;
 
     @Override
     public AutoscaleClusterResponse modifyByCloudbreakCluster(AutoscaleClusterRequest ambariServer, Long stackId) {

@@ -11,18 +11,16 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Topology;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.repository.TopologyRepository;
 import com.sequenceiq.cloudbreak.repository.organization.OrganizationResourceRepository;
 import com.sequenceiq.cloudbreak.service.AbstractOrganizationAwareResourceService;
-import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
 
 @Service
@@ -46,24 +44,14 @@ public class TopologyService extends AbstractOrganizationAwareResourceService<To
     @Inject
     private NetworkService networkService;
 
-    @Inject
-    private AuthorizationService authorizationService;
-
-    @Inject
-    private OrganizationService organizationService;
-
     public Topology get(Long id) {
         return topologyRepository.findById(id).orElseThrow(notFound("Topology", id));
     }
 
-    public Topology create(IdentityUser user, Topology topology, Organization organization) {
-        LOGGER.debug("Creating topology: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
+    public Topology create(User user, Topology topology, Organization organization) {
+        LOGGER.debug("Creating topology: [User: '{}']", user.getUserId());
         Topology savedTopology;
-        if (organization != null) {
-            topology.setOrganization(organization);
-        } else {
-            topology.setOrganization(organizationService.getDefaultOrganizationForCurrentUser());
-        }
+        topology.setOrganization(organization);
         try {
             savedTopology = topologyRepository.save(topology);
         } catch (DataIntegrityViolationException ex) {

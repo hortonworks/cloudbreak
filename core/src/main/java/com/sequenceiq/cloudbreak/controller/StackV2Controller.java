@@ -32,14 +32,16 @@ import com.sequenceiq.cloudbreak.api.model.users.UserNamePasswordJson;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
+import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Component
 @Transactional(TxType.NEVER)
@@ -52,9 +54,6 @@ public class StackV2Controller extends NotificationController implements StackV2
 
     @Inject
     private ClusterCommonService clusterCommonController;
-
-    @Inject
-    private AuthenticatedUserService authenticatedUserService;
 
     @Inject
     private StackService stackService;
@@ -71,6 +70,12 @@ public class StackV2Controller extends NotificationController implements StackV2
 
     @Inject
     private OrganizationService organizationService;
+
+    @Inject
+    private UserService userService;
+
+    @Inject
+    private RestRequestThreadLocalService restRequestThreadLocalService;
 
     @Override
     public Set<StackResponse> getStacksInDefaultOrg() {
@@ -114,42 +119,48 @@ public class StackV2Controller extends NotificationController implements StackV2
 
     @Override
     public Response putScaling(String name, StackScaleRequestV2 updateRequest) {
-        Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
         return stackCommonService.putScalingInOrganization(name, organization.getId(), updateRequest);
     }
 
     @Override
     public Response putStart(String name) {
-        Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
         return stackCommonService.putStartInOrganization(name, organization.getId());
     }
 
     @Override
     public Response putStop(String name) {
-        Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
         return stackCommonService.putStopInOrganization(name, organization.getId());
     }
 
     @Override
     public Response putSync(String name) {
-        Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
         return stackCommonService.putSyncInOrganization(name, organization.getId());
     }
 
     @Override
     public Response putReinstall(String name, ReinstallRequestV2 reinstallRequestV2) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        reinstallRequestV2.setAccount(user.getAccount());
-        Stack stack = stackService.getByNameInDefaultOrg(name);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        Stack stack = stackService.getByNameInOrg(name, restRequestThreadLocalService.getRequestedOrgId());
         UpdateClusterJson updateClusterJson = conversionService.convert(reinstallRequestV2, UpdateClusterJson.class);
-        return clusterCommonController.put(stack.getId(), updateClusterJson);
+        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
+        return clusterCommonController.put(stack.getId(), updateClusterJson, user, organization);
     }
 
     @Override
     public Response putPassword(String name, UserNamePasswordJson userNamePasswordJson) {
-        Stack stack = stackService.getByNameInDefaultOrg(name);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
+        Stack stack = stackService.getByNameInOrg(name, organization.getId());
         UpdateClusterJson updateClusterJson = conversionService.convert(userNamePasswordJson, UpdateClusterJson.class);
-        return clusterCommonController.put(stack.getId(), updateClusterJson);
+        return clusterCommonController.put(stack.getId(), updateClusterJson, user, organization);
     }
 
     @Override
@@ -199,17 +210,25 @@ public class StackV2Controller extends NotificationController implements StackV2
 
     @Override
     public StackV2Request getRequestfromName(String name) {
-        return stackService.getStackRequestByNameInDefaultOrg(name);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
+        return stackService.getStackRequestByNameInDefaultOrgForUser(name, user, organization);
     }
 
     @Override
     public StackResponse postPrivate(StackV2Request stackRequest) {
-        return stackCommonService.createInDefaultOrganization(conversionService.convert(stackRequest, StackRequest.class));
+        IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
+        User user = userService.getOrCreate(identityUser);
+        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
+        return stackCommonService.createInOrganization(conversionService.convert(stackRequest, StackRequest.class), identityUser, user, organization);
     }
 
     @Override
     public StackResponse postPublic(StackV2Request stackRequest) {
-        return stackCommonService.createInDefaultOrganization(conversionService.convert(stackRequest, StackRequest.class));
+        IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
+        User user = userService.getOrCreate(identityUser);
+        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
+        return stackCommonService.createInOrganization(conversionService.convert(stackRequest, StackRequest.class), identityUser, user, organization);
     }
 
     @Override
@@ -219,20 +238,22 @@ public class StackV2Controller extends NotificationController implements StackV2
 
     @Override
     public void retry(String stackName) {
-        Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
         stackCommonService.retryInOrganization(stackName, organization.getId());
     }
 
     @Override
     public Response repairCluster(String name, ClusterRepairRequest clusterRepairRequest) {
-        Stack stack = stackService.getByNameInDefaultOrg(name);
+        Stack stack = stackService.getByNameInOrg(name, restRequestThreadLocalService.getRequestedOrgId());
         clusterService.repairCluster(stack.getId(), clusterRepairRequest.getHostGroups(), clusterRepairRequest.isRemoveOnly());
         return Response.accepted().build();
     }
 
     @Override
     public Response changeImage(String stackName, StackImageChangeRequest stackImageChangeRequest) {
-        Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
         return stackCommonService.changeImageByNameInOrg(stackName, organization.getId(), stackImageChangeRequest);
     }
 }

@@ -15,7 +15,10 @@ import com.sequenceiq.cloudbreak.api.model.mpack.ManagementPackRequest;
 import com.sequenceiq.cloudbreak.api.model.mpack.ManagementPackResponse;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.ManagementPack;
+import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.mpack.ManagementPackService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Controller
 public class ManagementPackV3Controller extends NotificationController implements ManagementPackV3Endpoint {
@@ -26,6 +29,12 @@ public class ManagementPackV3Controller extends NotificationController implement
     @Inject
     @Named("conversionService")
     private ConversionService conversionService;
+
+    @Inject
+    private UserService userService;
+
+    @Inject
+    private RestRequestThreadLocalService restRequestThreadLocalService;
 
     @Override
     public Set<ManagementPackResponse> listByOrganization(Long organizationId) {
@@ -43,7 +52,8 @@ public class ManagementPackV3Controller extends NotificationController implement
     @Override
     public ManagementPackResponse createInOrganization(Long organizationId, @Valid ManagementPackRequest request) {
         ManagementPack managementPack = conversionService.convert(request, ManagementPack.class);
-        managementPack = mpackService.create(managementPack, organizationId);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        managementPack = mpackService.create(managementPack, organizationId, user);
         notify(ResourceEvent.MANAGEMENT_PACK_CREATED);
         return conversionService.convert(managementPack, ManagementPackResponse.class);
     }

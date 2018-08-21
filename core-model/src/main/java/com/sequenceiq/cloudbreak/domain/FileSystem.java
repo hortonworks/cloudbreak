@@ -33,17 +33,14 @@ public class FileSystem implements ProvisionEntity, OrganizationAwareResource {
     @Enumerated(EnumType.STRING)
     private FileSystemType type;
 
-    @Column
     private boolean defaultFs;
 
-    @Column(nullable = false)
     private String owner;
 
-    @Column(name = "account", nullable = false)
     private String account;
 
     @Column(nullable = false)
-    private boolean publicInAccount;
+    private boolean publicInAccount = true;
 
     @Column(nullable = false)
     private String description;

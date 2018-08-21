@@ -17,10 +17,14 @@ import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImageCatalogResponse;
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImagesResponse;
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.UpdateImageCatalogRequest;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
+import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.StackImageFilterService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Controller
 @Transactional(TxType.NEVER)
@@ -35,6 +39,12 @@ public class ImageCatalogV3Controller extends NotificationController implements 
     @Inject
     @Named("conversionService")
     private ConversionService conversionService;
+
+    @Inject
+    private UserService userService;
+
+    @Inject
+    private RestRequestThreadLocalService restRequestThreadLocalService;
 
     @Override
     public Set<ImageCatalogResponse> listByOrganization(Long organizationId) {
@@ -56,14 +66,17 @@ public class ImageCatalogV3Controller extends NotificationController implements 
     @Override
     public ImageCatalogResponse createInOrganization(Long organizationId, ImageCatalogRequest request) {
         ImageCatalog imageCatalog = conversionService.convert(request, ImageCatalog.class);
-        imageCatalog = imageCatalogService.create(imageCatalog, organizationId);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        imageCatalog = imageCatalogService.create(imageCatalog, organizationId, user);
         notify(ResourceEvent.IMAGE_CATALOG_CREATED);
         return conversionService.convert(imageCatalog, ImageCatalogResponse.class);
     }
 
     @Override
     public ImageCatalogResponse deleteInOrganization(Long organizationId, String name) {
-        ImageCatalog deleted = imageCatalogService.delete(organizationId, name);
+        IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
+        User user = userService.getOrCreate(identityUser);
+        ImageCatalog deleted = imageCatalogService.delete(organizationId, name, identityUser, user);
         notify(ResourceEvent.IMAGE_CATALOG_DELETED);
         return conversionService.convert(deleted, ImageCatalogResponse.class);
     }
@@ -76,7 +89,9 @@ public class ImageCatalogV3Controller extends NotificationController implements 
 
     @Override
     public ImagesResponse getImagesByProvider(Long organizationId, String platform) throws Exception {
-        Images images = imageCatalogService.getImagesOsFiltered(platform, null).getImages();
+        IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
+        User user = userService.getOrCreate(identityUser);
+        Images images = imageCatalogService.getImagesOsFiltered(platform, null, identityUser, user).getImages();
         return conversionService.convert(images, ImagesResponse.class);
     }
 
@@ -94,13 +109,16 @@ public class ImageCatalogV3Controller extends NotificationController implements 
 
     @Override
     public ImageCatalogResponse putPublicInOrganization(Long organizationId, UpdateImageCatalogRequest request) {
-        ImageCatalog imageCatalog = imageCatalogService.update(organizationId, conversionService.convert(request, ImageCatalog.class));
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        ImageCatalog imageCatalog = imageCatalogService.update(organizationId, conversionService.convert(request, ImageCatalog.class), user);
         return conversionService.convert(imageCatalog, ImageCatalogResponse.class);
     }
 
     @Override
     public ImageCatalogResponse putSetDefaultByNameInOrganization(Long organizationId, String name) {
-        return conversionService.convert(imageCatalogService.setAsDefault(organizationId, name), ImageCatalogResponse.class);
+        IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
+        User user = userService.getOrCreate(identityUser);
+        return conversionService.convert(imageCatalogService.setAsDefault(organizationId, name, identityUser, user), ImageCatalogResponse.class);
     }
 
     @Override

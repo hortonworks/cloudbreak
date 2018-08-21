@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.controller;
 
 import java.util.Map;
 
+import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 import javax.ws.rs.core.Response;
@@ -19,7 +20,7 @@ import com.sequenceiq.cloudbreak.api.model.AccountPreferencesResponse;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.domain.AccountPreferences;
-import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
 import com.sequenceiq.cloudbreak.service.account.ScheduledAccountPreferencesValidator;
 
@@ -34,28 +35,28 @@ public class AccountPreferencesController implements AccountPreferencesEndpoint 
     private ScheduledAccountPreferencesValidator validator;
 
     @Autowired
-    private AuthenticatedUserService authenticatedUserService;
-
-    @Autowired
     @Qualifier("conversionService")
     private ConversionService conversionService;
 
+    @Inject
+    private RestRequestThreadLocalService restRequestThreadLocalService;
+
     @Override
     public AccountPreferencesResponse get() {
-        IdentityUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = restRequestThreadLocalService.getIdentityUser();
         AccountPreferences preferences = accountPreferencesService.getByUser(user);
         return convert(preferences);
     }
 
     @Override
     public AccountPreferencesResponse put(AccountPreferencesRequest updateRequest) {
-        IdentityUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = restRequestThreadLocalService.getIdentityUser();
         return convert(accountPreferencesService.saveOne(user, convert(updateRequest)));
     }
 
     @Override
     public AccountPreferencesResponse post(AccountPreferencesRequest updateRequest) {
-        IdentityUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = restRequestThreadLocalService.getIdentityUser();
         return convert(accountPreferencesService.saveOne(user, convert(updateRequest)));
     }
 
@@ -71,7 +72,7 @@ public class AccountPreferencesController implements AccountPreferencesEndpoint 
 
     @Override
     public Response validate() {
-        IdentityUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = restRequestThreadLocalService.getIdentityUser();
         if (user.getRoles().contains(IdentityUserRole.ADMIN)) {
             validator.validate();
         }

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
+import com.sequenceiq.cloudbreak.domain.organization.User;
 
 @Service
 public class UserProfileHandler {
@@ -16,8 +17,8 @@ public class UserProfileHandler {
     @Inject
     private UserProfileService userProfileService;
 
-    public void createProfilePreparation(Credential credential) {
-        UserProfile userProfile = userProfileService.getOrCreate(credential.getAccount(), credential.getOwner());
+    public void createProfilePreparation(Credential credential, User user) {
+        UserProfile userProfile = userProfileService.getOrCreate(credential.getAccount(), credential.getOwner(), user);
         if (userProfile != null && userProfile.getCredential() == null) {
             userProfile.setCredential(credential);
             userProfileService.save(userProfile);

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.v2;
 
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -21,14 +23,14 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.core.convert.ConversionService;
 
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.FailurePolicyRequest;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupRequest;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.NetworkRequest;
 import com.sequenceiq.cloudbreak.api.model.SharedServiceRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.StackAuthenticationRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.GeneralSettings;
 import com.sequenceiq.cloudbreak.api.model.v2.ImageSettings;
@@ -38,12 +40,16 @@ import com.sequenceiq.cloudbreak.api.model.v2.PlacementSettings;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.Tags;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 
 public class StackV2RequestToStackRequestConverterTest {
 
@@ -52,10 +58,6 @@ public class StackV2RequestToStackRequestConverterTest {
     private static final String CLOUD_PLATFORM = "somePlatform";
 
     private static final int GENERAL_TEST_QUANTITY = 2;
-
-    private static final String TEST_OWNER = "owner";
-
-    private static final String TEST_ACCOUNT = "account";
 
     private static final String TEST_OWNER_EMAIL = "owneremail@email.com";
 
@@ -75,7 +77,13 @@ public class StackV2RequestToStackRequestConverterTest {
     private SharedServiceConfigProvider sharedServiceConfigProvider;
 
     @Mock
-    private AuthenticatedUserService authenticatedUserService;
+    private RestRequestThreadLocalService restRequestThreadLocalService;
+
+    @Mock
+    private UserService userService;
+
+    @Mock
+    private OrganizationService organizationService;
 
     @Mock
     private Credential credential;
@@ -83,12 +91,20 @@ public class StackV2RequestToStackRequestConverterTest {
     @Mock
     private IdentityUser cbUser;
 
+    @Mock
+    private User user;
+
+    @Mock
+    private Organization organization;
+
     @Before
     public void setUp() {
         credentialService = mock(CredentialService.class);
         MockitoAnnotations.initMocks(this);
-        when(authenticatedUserService.getCbUser()).thenReturn(cbUser);
-        when(credentialService.getByNameFromUsersDefaultOrganization(any())).thenReturn(credential);
+        when(restRequestThreadLocalService.getIdentityUser()).thenReturn(cbUser);
+        when(userService.getOrCreate(eq(cbUser))).thenReturn(user);
+        when(organizationService.get(anyLong(), eq(user))).thenReturn(organization);
+        when(credentialService.getByNameForOrganization(any(), any(Organization.class))).thenReturn(credential);
         when(credential.cloudPlatform()).thenReturn(CLOUD_PLATFORM);
         when(conversionService.convert(any(NetworkV2Request.class), any())).thenReturn(NETWORK_REQUEST);
     }
@@ -114,7 +130,7 @@ public class StackV2RequestToStackRequestConverterTest {
         Assert.assertEquals(source.getGeneral().getCredentialName(), result.getCredentialName());
         Assert.assertEquals(CLOUD_PLATFORM, result.getCloudPlatform());
         verify(conversionService, times(1)).convert(any(), any());
-        verify(authenticatedUserService, times(3)).getCbUser();
+        verify(restRequestThreadLocalService, times(1)).getIdentityUser();
     }
 
     @Test
@@ -145,7 +161,7 @@ public class StackV2RequestToStackRequestConverterTest {
             Assert.assertEquals(s2, result.getParameters().get(s));
         });
         verify(conversionService, times(1)).convert(any(), any());
-        verify(authenticatedUserService, times(3)).getCbUser();
+        verify(restRequestThreadLocalService, times(1)).getIdentityUser();
     }
 
     @Test
@@ -162,7 +178,7 @@ public class StackV2RequestToStackRequestConverterTest {
         Assert.assertEquals(placementSettings.getAvailabilityZone(), result.getAvailabilityZone());
         Assert.assertEquals(placementSettings.getRegion(), result.getRegion());
         verify(conversionService, times(1)).convert(any(), any());
-        verify(authenticatedUserService, times(3)).getCbUser();
+        verify(restRequestThreadLocalService, times(1)).getIdentityUser();
     }
 
     @Test
@@ -176,7 +192,7 @@ public class StackV2RequestToStackRequestConverterTest {
         Assert.assertNull(result.getAvailabilityZone());
         Assert.assertNull(result.getRegion());
         verify(conversionService, times(1)).convert(any(), any());
-        verify(authenticatedUserService, times(3)).getCbUser();
+        verify(restRequestThreadLocalService, times(1)).getIdentityUser();
     }
 
     @Test
@@ -194,7 +210,7 @@ public class StackV2RequestToStackRequestConverterTest {
         Assert.assertNotNull(result.getUserDefinedTags());
         Assert.assertTrue(result.getUserDefinedTags().isEmpty());
         verify(conversionService, times(1)).convert(any(), any());
-        verify(authenticatedUserService, times(3)).getCbUser();
+        verify(restRequestThreadLocalService, times(1)).getIdentityUser();
     }
 
     @Test
@@ -230,7 +246,7 @@ public class StackV2RequestToStackRequestConverterTest {
             Assert.assertEquals(s2, result.getUserDefinedTags().get(s));
         });
         verify(conversionService, times(1)).convert(any(), any());
-        verify(authenticatedUserService, times(3)).getCbUser();
+        verify(restRequestThreadLocalService, times(1)).getIdentityUser();
     }
 
     @Test
@@ -250,7 +266,7 @@ public class StackV2RequestToStackRequestConverterTest {
         instanceGroupRequest.forEach(request -> Assert.assertTrue(result.getInstanceGroups().contains(request)));
 
         verify(conversionService, times(instanceGroupV2Requests.size() + 1)).convert(any(), any());
-        verify(authenticatedUserService, times(3)).getCbUser();
+        verify(restRequestThreadLocalService, times(1)).getIdentityUser();
     }
 
     @Test
@@ -264,7 +280,7 @@ public class StackV2RequestToStackRequestConverterTest {
         Assert.assertNull(result.getImageCatalog());
         Assert.assertNull(result.getImageId());
         verify(conversionService, times(1)).convert(any(), any());
-        verify(authenticatedUserService, times(3)).getCbUser();
+        verify(restRequestThreadLocalService, times(1)).getIdentityUser();
     }
 
     @Test
@@ -281,19 +297,17 @@ public class StackV2RequestToStackRequestConverterTest {
         Assert.assertEquals(source.getImageSettings().getImageCatalog(), result.getImageCatalog());
         Assert.assertEquals(source.getImageSettings().getImageId(), result.getImageId());
         verify(conversionService, times(1)).convert(any(), any());
-        verify(authenticatedUserService, times(3)).getCbUser();
+        verify(restRequestThreadLocalService, times(1)).getIdentityUser();
     }
 
     @Test
     public void testConvertWhenOwnerIsNullThenAuthenticatedUserServiceShouldProvideTheValue() {
         StackV2Request source = createStackV2Request();
         source.setOwner(null);
-        when(cbUser.getUserId()).thenReturn(TEST_OWNER);
 
-        StackRequest result = underTest.convert(source);
+        underTest.convert(source);
 
-        Assert.assertEquals(TEST_OWNER, result.getOwner());
-        verify(authenticatedUserService, times(3)).getCbUser();
+        verify(restRequestThreadLocalService, times(1)).getIdentityUser();
         verify(conversionService, times(1)).convert(any(), any());
     }
 
@@ -301,24 +315,20 @@ public class StackV2RequestToStackRequestConverterTest {
     public void testConvertWhenOwnerIsEmptyThenAuthenticatedUserServiceShouldProvideTheValue() {
         StackV2Request source = createStackV2Request();
         source.setOwner("");
-        when(cbUser.getUserId()).thenReturn(TEST_OWNER);
 
-        StackRequest result = underTest.convert(source);
+        underTest.convert(source);
 
-        Assert.assertEquals(TEST_OWNER, result.getOwner());
-        verify(authenticatedUserService, times(3)).getCbUser();
+        verify(restRequestThreadLocalService, times(1)).getIdentityUser();
         verify(conversionService, times(1)).convert(any(), any());
     }
 
     @Test
     public void testConvertWhenOwnerIsNotEmptyThenTheProvidedValueShouldBeSet() {
         StackV2Request source = createStackV2Request();
-        source.setOwner(TEST_OWNER);
 
-        StackRequest result = underTest.convert(source);
+        underTest.convert(source);
 
-        Assert.assertEquals(TEST_OWNER, result.getOwner());
-        verify(authenticatedUserService, times(2)).getCbUser();
+        verify(restRequestThreadLocalService, times(1)).getIdentityUser();
         verify(conversionService, times(1)).convert(any(), any());
     }
 
@@ -326,12 +336,10 @@ public class StackV2RequestToStackRequestConverterTest {
     public void testConvertWhenAccountIsNullThenAuthenticatedUserServiceShouldProvideTheValue() {
         StackV2Request source = createStackV2Request();
         source.setAccount(null);
-        when(cbUser.getAccount()).thenReturn(TEST_ACCOUNT);
 
-        StackRequest result = underTest.convert(source);
+        underTest.convert(source);
 
-        Assert.assertEquals(TEST_ACCOUNT, result.getAccount());
-        verify(authenticatedUserService, times(3)).getCbUser();
+        verify(restRequestThreadLocalService, times(1)).getIdentityUser();
         verify(conversionService, times(1)).convert(any(), any());
     }
 
@@ -339,24 +347,20 @@ public class StackV2RequestToStackRequestConverterTest {
     public void testConvertWhenAccountIsEmptyThenAuthenticatedUserServiceShouldProvideTheValue() {
         StackV2Request source = createStackV2Request();
         source.setAccount("");
-        when(cbUser.getAccount()).thenReturn(TEST_ACCOUNT);
 
-        StackRequest result = underTest.convert(source);
+        underTest.convert(source);
 
-        Assert.assertEquals(TEST_ACCOUNT, result.getAccount());
-        verify(authenticatedUserService, times(3)).getCbUser();
+        verify(restRequestThreadLocalService, times(1)).getIdentityUser();
         verify(conversionService, times(1)).convert(any(), any());
     }
 
     @Test
     public void testConvertWhenAccountIsNotEmptyThenTheProvidedValueShouldBeSet() {
         StackV2Request source = createStackV2Request();
-        source.setAccount(TEST_ACCOUNT);
 
-        StackRequest result = underTest.convert(source);
+        underTest.convert(source);
 
-        Assert.assertEquals(TEST_ACCOUNT, result.getAccount());
-        verify(authenticatedUserService, times(2)).getCbUser();
+        verify(restRequestThreadLocalService, times(1)).getIdentityUser();
         verify(conversionService, times(1)).convert(any(), any());
     }
 
@@ -369,7 +373,7 @@ public class StackV2RequestToStackRequestConverterTest {
         StackRequest result = underTest.convert(source);
 
         Assert.assertEquals(TEST_OWNER_EMAIL, result.getOwnerEmail());
-        verify(authenticatedUserService, times(3)).getCbUser();
+        verify(restRequestThreadLocalService, times(1)).getIdentityUser();
         verify(conversionService, times(1)).convert(any(), any());
     }
 
@@ -382,7 +386,7 @@ public class StackV2RequestToStackRequestConverterTest {
         StackRequest result = underTest.convert(source);
 
         Assert.assertEquals(TEST_OWNER_EMAIL, result.getOwnerEmail());
-        verify(authenticatedUserService, times(3)).getCbUser();
+        verify(restRequestThreadLocalService, times(1)).getIdentityUser();
         verify(conversionService, times(1)).convert(any(), any());
     }
 
@@ -394,7 +398,7 @@ public class StackV2RequestToStackRequestConverterTest {
         StackRequest result = underTest.convert(source);
 
         Assert.assertEquals(TEST_OWNER_EMAIL, result.getOwnerEmail());
-        verify(authenticatedUserService, times(2)).getCbUser();
+        verify(restRequestThreadLocalService, times(1)).getIdentityUser();
         verify(conversionService, times(1)).convert(any(), any());
     }
 
@@ -457,7 +461,7 @@ public class StackV2RequestToStackRequestConverterTest {
         when(conversionService.convert(source.getCluster(), ClusterRequest.class)).thenReturn(convertedRequest);
         when(sharedServiceConfigProvider.isConfigured(source.getCluster())).thenReturn(true);
         Stack mockStack = mock(Stack.class);
-        when(stackService.getByNameInDefaultOrg(source.getCluster().getSharedService().getSharedCluster())).thenReturn(mockStack);
+        when(stackService.getByNameInOrg(eq(source.getCluster().getSharedService().getSharedCluster()), anyLong())).thenReturn(mockStack);
         Long id = 1L;
         when(mockStack.getId()).thenReturn(id);
 
@@ -468,9 +472,9 @@ public class StackV2RequestToStackRequestConverterTest {
         Assert.assertEquals(id, result.getClusterToAttach());
         verify(conversionService, times(2)).convert(any(), any());
         verify(sharedServiceConfigProvider, times(1)).isConfigured(source.getCluster());
-        verify(stackService, times(1)).getByNameInDefaultOrg(source.getCluster().getSharedService().getSharedCluster());
+        verify(stackService, times(1)).getByNameInOrg(eq(source.getCluster().getSharedService().getSharedCluster()), anyLong());
         verify(mockStack, times(1)).getId();
-        verify(authenticatedUserService, times(3)).getCbUser();
+        verify(restRequestThreadLocalService, times(1)).getIdentityUser();
     }
 
     private StackV2Request createStackV2Request() {

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
 import com.sequenceiq.cloudbreak.domain.StructuredEventEntity;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.repository.organization.OrganizationResourceRepository;
 import com.sequenceiq.cloudbreak.service.AbstractOrganizationAwareResourceService;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredEventService;
@@ -35,17 +36,17 @@ public class StructuredEventDBService extends AbstractOrganizationAwareResourceS
     @Override
     public void storeStructuredEvent(StructuredEvent structuredEvent) {
         StructuredEventEntity structuredEventEntityEntity = conversionService.convert(structuredEvent, StructuredEventEntity.class);
-        create(structuredEventEntityEntity, structuredEvent.getOrgId());
+        create(structuredEventEntityEntity, structuredEvent.getOrgId(), null);
     }
 
     @Override
-    public StructuredEventEntity create(StructuredEventEntity resource, @Nonnull Long organizationId) {
+    public StructuredEventEntity create(StructuredEventEntity resource, @Nonnull Long organizationId, User user) {
         Organization organization = getOrganizationService().getByIdWithoutPermissionCheck(organizationId);
-        return create(resource, organization);
+        return create(resource, organization, user);
     }
 
     @Override
-    public StructuredEventEntity create(StructuredEventEntity resource, Organization organization) {
+    public StructuredEventEntity create(StructuredEventEntity resource, Organization organization, User user) {
         resource.setOrganization(organization);
         return repository().save(resource);
     }

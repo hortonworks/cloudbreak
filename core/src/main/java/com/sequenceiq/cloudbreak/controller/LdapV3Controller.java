@@ -21,7 +21,10 @@ import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.ldapconfig.LdapConfigValidator;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
+import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Component
 @Transactional(TxType.NEVER)
@@ -36,6 +39,12 @@ public class LdapV3Controller extends NotificationController implements LdapConf
 
     @Inject
     private LdapConfigValidator ldapConfigValidator;
+
+    @Inject
+    private UserService userService;
+
+    @Inject
+    private RestRequestThreadLocalService restRequestThreadLocalService;
 
     @Override
     public Set<LdapConfigResponse> listConfigsByOrganization(Long organizationId) {
@@ -53,7 +62,8 @@ public class LdapV3Controller extends NotificationController implements LdapConf
     @Override
     public LdapConfigResponse createInOrganization(Long organizationId, LdapConfigRequest request) {
         LdapConfig ldapConfig = conversionService.convert(request, LdapConfig.class);
-        ldapConfig = ldapConfigService.create(ldapConfig, organizationId);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        ldapConfig = ldapConfigService.create(ldapConfig, organizationId, user);
         notify(ResourceEvent.LDAP_CREATED);
         return conversionService.convert(ldapConfig, LdapConfigResponse.class);
     }

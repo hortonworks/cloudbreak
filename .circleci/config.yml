@@ -96,7 +96,7 @@ jobs:
           key: gradle-cache
       - run:
           name: test
-          command: ./gradlew -Penv=jenkins -b build.gradle test --info --stacktrace --parallel  -x checkstyleMain -x checkstyleTest -x spotbugsMain -x spotbugsTest --no-daemon --max-workers 1
+          command: ./gradlew -Penv=jenkins -b build.gradle test --info --stacktrace --parallel -x checkstyleMain -x checkstyleTest -x spotbugsMain -x spotbugsTest --no-daemon --max-workers 1
       - run:
           name: Save test results
           command: |

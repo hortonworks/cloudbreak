@@ -38,12 +38,10 @@ public class ClusterTemplate implements ProvisionEntity {
     private ClusterTemplateType type;
 
     @Column(nullable = false)
-    private boolean publicInAccount;
+    private boolean publicInAccount = true;
 
-    @Column(nullable = false)
     private String owner;
 
-    @Column(nullable = false)
     private String account;
 
     @ManyToOne
