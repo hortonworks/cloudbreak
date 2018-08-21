@@ -232,7 +232,7 @@ public class ClusterService {
 
             start = System.currentTimeMillis();
             if (cluster.getFileSystem() != null) {
-                cluster.setFileSystem(fileSystemConfigService.create(user, cluster.getFileSystem(), cluster.getOrganization()));
+                cluster.setFileSystem(fileSystemConfigService.create(cluster.getFileSystem(), cluster.getOrganization()));
             }
             LOGGER.info("Filesystem config saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 

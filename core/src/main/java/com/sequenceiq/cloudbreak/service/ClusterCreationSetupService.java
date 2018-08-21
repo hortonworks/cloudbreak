@@ -150,7 +150,7 @@ public class ClusterCreationSetupService {
         long start = System.currentTimeMillis();
 
         if (request.getFileSystem() != null) {
-            FileSystem fs = fileSystemConfigService.create(user, conversionService.convert(request.getFileSystem(), FileSystem.class), stack.getOrganization());
+            FileSystem fs = fileSystemConfigService.create(conversionService.convert(request.getFileSystem(), FileSystem.class), stack.getOrganization());
             request.getFileSystem().setName(fs.getName());
             LOGGER.info("File system saving took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
         }

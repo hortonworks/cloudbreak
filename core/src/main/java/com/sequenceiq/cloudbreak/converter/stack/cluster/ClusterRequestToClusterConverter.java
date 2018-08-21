@@ -24,7 +24,7 @@ import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
-import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 
@@ -37,7 +37,7 @@ public class ClusterRequestToClusterConverter extends AbstractConversionServiceA
     private FileSystemConfigService fileSystemConfigService;
 
     @Inject
-    private AuthenticatedUserService authenticatedUserService;
+    private RestRequestThreadLocalService restRequestThreadLocalService;
 
     @Override
     public Cluster convert(ClusterRequest source) {
@@ -64,7 +64,7 @@ public class ClusterRequestToClusterConverter extends AbstractConversionServiceA
         FileSystemBase fileSystem = source.getFileSystem();
         convertAttributes(source, cluster);
         if (fileSystem != null) {
-            cluster.setFileSystem(fileSystemConfigService.getPrivateFileSystem(fileSystem.getName(), authenticatedUserService.getCbUser()));
+            cluster.setFileSystem(fileSystemConfigService.getByNameForOrganizationId(fileSystem.getName(), restRequestThreadLocalService.getRequestedOrgId()));
         }
         try {
             Json json = new Json(convertContainerConfigs(source.getCustomContainer()));
