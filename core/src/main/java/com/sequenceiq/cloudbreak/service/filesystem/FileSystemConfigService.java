@@ -2,24 +2,22 @@ package com.sequenceiq.cloudbreak.service.filesystem;
 
 import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
 
-import java.util.Optional;
-import java.util.Set;
-
-import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.repository.FileSystemRepository;
+import com.sequenceiq.cloudbreak.repository.organization.OrganizationResourceRepository;
+import com.sequenceiq.cloudbreak.service.AbstractOrganizationAwareResourceService;
+import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 
 @Service
-public class FileSystemConfigService {
+public class FileSystemConfigService extends AbstractOrganizationAwareResourceService<FileSystem> {
 
     @Inject
     private FileSystemRepository fileSystemRepository;
@@ -30,54 +28,35 @@ public class FileSystemConfigService {
     @Inject
     private OrganizationService organizationService;
 
-    public Set<FileSystem> retrievePrivateFileSystems(@Nonnull IdentityUser user) {
-        return fileSystemRepository.findByOwner(user.getUserId());
+    @Inject
+    private AuthenticatedUserService authenticatedUserService;
+
+    @Override
+    protected OrganizationResourceRepository<FileSystem, Long> repository() {
+        return fileSystemRepository;
     }
 
-    public FileSystem create(@Nonnull IdentityUser user, @Nonnull FileSystem fileSystem, Organization organization) {
-        if (organization != null) {
-            fileSystem.setOrganization(organization);
-        } else {
-            fileSystem.setOrganization(organizationService.getDefaultOrganizationForCurrentUser());
-        }
-        setUserDataRelatedFields(user, fileSystem);
-        return fileSystemRepository.save(fileSystem);
+    @Override
+    protected OrganizationResource resource() {
+        return OrganizationResource.FILESYSTEM;
     }
 
-    public FileSystem getPrivateFileSystem(String name, @Nonnull IdentityUser user) {
-        return fileSystemRepository.findByNameAndOwner(name, user.getUserId());
+    public FileSystem getByIdFromAnyAvailableOrganization(Long id) {
+        return fileSystemRepository.findById(id).orElseThrow(notFound("File system", id));
     }
 
-    public FileSystem get(Long id) {
-        return getFileSystem(id);
+    @Override
+    protected void prepareDeletion(FileSystem resource) {
     }
 
-    public Set<FileSystem> retrieveAccountFileSystems(@Nonnull IdentityUser user) {
-        return user.getRoles().contains(IdentityUserRole.ADMIN)
-                ? fileSystemRepository.findByAccount(user.getAccount())
-                : fileSystemRepository.findByAccountAndOwner(user.getAccount(), user.getUserId());
+    public FileSystem deleteByIdFromAnyAvailableOrganization(Long id) {
+        return delete(getByIdFromAnyAvailableOrganization(id));
     }
 
-    public void delete(Long id, IdentityUser user) {
-        FileSystem fileSystem = getFileSystem(id);
-        setUserDataRelatedFields(user, fileSystem);
-        fileSystemRepository.delete(fileSystem);
+    @Override
+    protected void prepareCreation(FileSystem resource) {
+        IdentityUser user = authenticatedUserService.getCbUser();
+        resource.setAccount(user.getAccount());
+        resource.setOwner(user.getUserId());
     }
-
-    public void delete(String name, @Nonnull IdentityUser user) {
-        FileSystem fileSystem = Optional.ofNullable(fileSystemRepository.findByNameAndAccountAndOwner(name, user.getAccount(), user.getUserId()))
-                .orElseThrow(notFound("Record", name));
-        setUserDataRelatedFields(user, fileSystem);
-        fileSystemRepository.delete(fileSystem);
-    }
-
-    private FileSystem getFileSystem(Long id) {
-        return fileSystemRepository.findById(id).orElseThrow(notFound("Record", id));
-    }
-
-    private void setUserDataRelatedFields(IdentityUser user, FileSystem fileSystem) {
-        fileSystem.setAccount(user.getAccount());
-        fileSystem.setOwner(user.getUserId());
-    }
-
 }

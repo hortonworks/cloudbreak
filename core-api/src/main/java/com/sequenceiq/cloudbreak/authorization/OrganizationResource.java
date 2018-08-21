@@ -17,7 +17,8 @@ public enum OrganizationResource {
     NETWORK("Network", "network"),
     TOPOLOGY("Topology", "topology"),
     SECURITY_GROUP("Security group", "securitygroup"),
-    CONSTRAINT_TEMPLATE("Constraint template", "constrainttemplate");
+    CONSTRAINT_TEMPLATE("Constraint template", "constrainttemplate"),
+    FILESYSTEM("File system", "filesystem");
 
     private final String readableName;
 
