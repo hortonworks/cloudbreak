@@ -16,7 +16,8 @@ public enum OrganizationResource {
     FLEXSUBSCRIPTION("Flex subscription", "flexsubscription"),
     NETWORK("Network", "network"),
     TOPOLOGY("Topology", "topology"),
-    SECURITY_GROUP("Security group", "securitygroup");
+    SECURITY_GROUP("Security group", "securitygroup"),
+    CONSTRAINT_TEMPLATE("Constraint template", "constrainttemplate");
 
     private final String readableName;
 

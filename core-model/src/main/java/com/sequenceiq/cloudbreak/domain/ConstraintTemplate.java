@@ -13,11 +13,13 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.OrganizationAwareResource;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"account", "name"}))
-public class ConstraintTemplate implements ProvisionEntity {
+public class ConstraintTemplate implements ProvisionEntity, OrganizationAwareResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "constraint_template_generator")
@@ -61,12 +63,19 @@ public class ConstraintTemplate implements ProvisionEntity {
     @ManyToOne
     private Organization organization;
 
+    @Override
     public Organization getOrganization() {
         return organization;
     }
 
+    @Override
     public void setOrganization(Organization organization) {
         this.organization = organization;
+    }
+
+    @Override
+    public OrganizationResource getResource() {
+        return OrganizationResource.CONSTRAINT_TEMPLATE;
     }
 
     public Long getId() {

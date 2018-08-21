@@ -15,15 +15,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
-import com.sequenceiq.cloudbreak.repository.organization.OrganizationResourceRepository;
 import com.sequenceiq.cloudbreak.repository.RecipeRepository;
+import com.sequenceiq.cloudbreak.repository.organization.OrganizationResourceRepository;
 import com.sequenceiq.cloudbreak.service.AbstractOrganizationAwareResourceService;
 
 @Service
@@ -37,8 +36,7 @@ public class RecipeService extends AbstractOrganizationAwareResourceService<Reci
     @Inject
     private HostGroupRepository hostGroupRepository;
 
-    public Set<Recipe> getRecipesByNames(IdentityUser user, Collection<String> recipeNames) {
-        Organization organization = getOrganizationService().getDefaultOrganizationForUser(user);
+    public Set<Recipe> getRecipesByNamesForOrg(Organization organization, Collection<String> recipeNames) {
         Set<Recipe> recipes = recipeRepository.findByNamesInOrganization(recipeNames, organization.getId());
         if (recipeNames.size() != recipes.size()) {
             throw new NotFoundException(String.format("Recipes '%s' not found.", collectMissingRecipeNames(recipes, recipeNames)));

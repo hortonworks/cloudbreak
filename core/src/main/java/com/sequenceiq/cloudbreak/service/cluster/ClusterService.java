@@ -702,13 +702,13 @@ public class ClusterService {
         }
     }
 
-    public Cluster recreate(Long stackId, Long blueprintId, Set<HostGroup> hostGroups, boolean validateBlueprint, StackRepoDetails stackRepoDetails,
+    public Cluster recreate(Stack stack, Long blueprintId, Set<HostGroup> hostGroups, boolean validateBlueprint, StackRepoDetails stackRepoDetails,
             String kerberosPassword, String kerberosPrincipal) throws TransactionExecutionException {
         return transactionService.required(() -> {
             checkBlueprintIdAndHostGroups(blueprintId, hostGroups);
-            Stack stack = stackService.getByIdWithListsWithoutAuthorization(stackId);
-            Cluster cluster = getCluster(stack);
-            if (cluster != null && stack.getCluster().isSecure()) {
+            Stack stackWithLists = stackService.getByIdWithListsWithoutAuthorization(stack.getId());
+            Cluster cluster = getCluster(stackWithLists);
+            if (cluster != null && stackWithLists.getCluster().isSecure()) {
                 initKerberos(kerberosPassword, kerberosPrincipal, cluster);
             }
             Blueprint blueprint = blueprintService.get(blueprintId);
@@ -717,27 +717,27 @@ public class ClusterService {
                         + "and then create it using DDL scripts from /var/lib/ambari-server/resources");
             }
             if (validateBlueprint) {
-                blueprintValidator.validateBlueprintForStack(cluster, blueprint, hostGroups, stack.getInstanceGroups());
+                blueprintValidator.validateBlueprintForStack(cluster, blueprint, hostGroups, stackWithLists.getInstanceGroups());
             }
             Boolean containerOrchestrator;
             try {
-                containerOrchestrator = orchestratorTypeResolver.resolveType(stack.getOrchestrator()).containerOrchestrator();
+                containerOrchestrator = orchestratorTypeResolver.resolveType(stackWithLists.getOrchestrator()).containerOrchestrator();
             } catch (CloudbreakException ignored) {
                 containerOrchestrator = false;
             }
             if (containerOrchestrator) {
                 clusterTerminationService.deleteClusterComponents(cluster.getId());
-                cluster = getCluster(stack);
+                cluster = getCluster(stackWithLists);
             }
 
             try {
                 Set<HostGroup> newHostGroups = hostGroupService.saveOrUpdateWithMetadata(hostGroups, cluster);
-                cluster = prepareCluster(hostGroups, stackRepoDetails, blueprint, stack, cluster);
-                triggerClusterInstall(stack, cluster);
+                cluster = prepareCluster(hostGroups, stackRepoDetails, blueprint, stackWithLists, cluster);
+                triggerClusterInstall(stackWithLists, cluster);
             } catch (TransactionExecutionException | CloudbreakException e) {
                 throw new CloudbreakServiceException(e);
             }
-            return stack.getCluster();
+            return stackWithLists.getCluster();
         });
     }
 

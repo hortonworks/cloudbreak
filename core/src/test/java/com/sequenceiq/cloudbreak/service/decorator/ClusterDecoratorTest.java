@@ -20,7 +20,6 @@ import com.sequenceiq.cloudbreak.FileReaderUtil;
 import com.sequenceiq.cloudbreak.api.model.ConnectedClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.validation.ldapconfig.LdapConfigValidator;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionValidator;
 import com.sequenceiq.cloudbreak.converter.mapper.AmbariDatabaseMapper;
@@ -84,9 +83,6 @@ public class ClusterDecoratorTest {
     private ClusterRequest request;
 
     @Mock
-    private IdentityUser user;
-
-    @Mock
     private Stack stack;
 
     @Mock
@@ -109,7 +105,7 @@ public class ClusterDecoratorTest {
         when(clusterProxyDecorator.prepareProxyConfig(any(Cluster.class), any(), any(Stack.class))).thenReturn(expectedClusterInstance);
         when(ambariHaComponentFilter.getHaComponents(any())).thenReturn(Collections.emptySet());
 
-        Cluster result = underTest.decorate(expectedClusterInstance, request, blueprint, user, new Organization(), stack);
+        Cluster result = underTest.decorate(expectedClusterInstance, request, blueprint, new Organization(), stack);
 
         Assert.assertEquals(expectedClusterInstance, result);
         verify(sharedServiceConfigProvider, times(1)).configureCluster(any(Cluster.class),

@@ -143,7 +143,7 @@ public class ClusterCreationSetupService {
         return prepare(request, stack, null, user);
     }
 
-    public Cluster prepare(ClusterRequest request, Stack stack, Blueprint blueprint, IdentityUser user)throws IOException,
+    public Cluster prepare(ClusterRequest request, Stack stack, Blueprint blueprint, IdentityUser user) throws IOException,
             CloudbreakImageNotFoundException, TransactionExecutionException {
         String stackName = stack.getName();
 
@@ -161,7 +161,7 @@ public class ClusterCreationSetupService {
 
         start = System.currentTimeMillis();
 
-        cluster = clusterDecorator.decorate(cluster, request, blueprint, user, stack.getOrganization(), stack);
+        cluster = clusterDecorator.decorate(cluster, request, blueprint, stack.getOrganization(), stack);
         LOGGER.info("Cluster object decorated in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
         start = System.currentTimeMillis();

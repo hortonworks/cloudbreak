@@ -24,7 +24,6 @@ import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupRequest;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.ldapconfig.LdapConfigValidator;
 import com.sequenceiq.cloudbreak.converter.mapper.AmbariDatabaseMapper;
@@ -81,10 +80,10 @@ public class ClusterDecorator {
     @Inject
     private AmbariHaComponentFilter ambariHaComponentFilter;
 
-    public Cluster decorate(@Nonnull Cluster cluster, @Nonnull ClusterRequest request, Blueprint blueprint, @Nonnull IdentityUser user,
+    public Cluster decorate(@Nonnull Cluster cluster, @Nonnull ClusterRequest request, Blueprint blueprint,
             Organization organization, @Nonnull Stack stack) {
         prepareBlueprint(cluster, request, organization, stack, Optional.ofNullable(blueprint));
-        prepareHostGroups(stack, user, cluster, request.getHostGroups());
+        prepareHostGroups(stack, cluster, request.getHostGroups());
         validateBlueprintIfRequired(cluster, request, stack);
         prepareRds(cluster, request, stack);
         cluster = clusterProxyDecorator.prepareProxyConfig(cluster, request.getProxyName(), stack);
@@ -196,12 +195,12 @@ public class ClusterDecorator {
         }
     }
 
-    private void prepareHostGroups(Stack stack, IdentityUser user, Cluster cluster, Iterable<HostGroupRequest> hostGroupsJsons) {
+    private void prepareHostGroups(Stack stack, Cluster cluster, Iterable<HostGroupRequest> hostGroupsJsons) {
         Set<HostGroup> hostGroups = new HashSet<>();
         for (HostGroupRequest json : hostGroupsJsons) {
             HostGroup hostGroup = conversionService.convert(json, HostGroup.class);
             hostGroup.setCluster(cluster);
-            hostGroup = hostGroupDecorator.decorate(hostGroup, json, user, stack.getId(), true, stack.isPublicInAccount());
+            hostGroup = hostGroupDecorator.decorate(hostGroup, json, stack, true, stack.isPublicInAccount());
             hostGroups.add(hostGroup);
         }
         cluster.setHostGroups(hostGroups);
