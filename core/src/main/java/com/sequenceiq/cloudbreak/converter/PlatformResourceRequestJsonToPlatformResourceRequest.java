@@ -34,6 +34,7 @@ public class PlatformResourceRequestJsonToPlatformResourceRequest extends
     @Override
     public PlatformResourceRequest convert(PlatformResourceRequestJson source) {
         PlatformResourceRequest platformResourceRequest = new PlatformResourceRequest();
+
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
         Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
         if (!Strings.isNullOrEmpty(source.getCredentialName())) {
