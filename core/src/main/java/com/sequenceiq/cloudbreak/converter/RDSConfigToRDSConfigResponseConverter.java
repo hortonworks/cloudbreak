@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigResponse;
+import com.sequenceiq.cloudbreak.api.model.users.OrganizationResourceResponse;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 
@@ -34,6 +35,7 @@ public class RDSConfigToRDSConfigResponseConverter extends AbstractConversionSer
         }
         json.setStackVersion(source.getStackVersion());
         json.setType(source.getType());
+        json.setOrganization(getConversionService().convert(source.getOrganization(), OrganizationResourceResponse.class));
         return json;
     }
 }
