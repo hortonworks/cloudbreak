@@ -29,12 +29,12 @@ public interface RdsConfigRepository extends OrganizationResourceRepository<RDSC
 
     @Override
     @CheckPermissionsByOrganizationId(action = READ)
-    @Query("SELECT r FROM RDSConfig r LEFT JOIN FETCH r.clusters WHERE r.organization.id = :orgId")
+    @Query("SELECT r FROM RDSConfig r LEFT JOIN FETCH r.clusters WHERE r.organization.id = :orgId AND r.status = 'USER_MANAGED'")
     Set<RDSConfig> findAllByOrganizationId(@Param("orgId") Long orgId);
 
     @Override
     @CheckPermissionsByOrganization(action = READ, organizationIndex = 0)
-    @Query("SELECT r FROM RDSConfig r LEFT JOIN FETCH r.clusters WHERE r.organization = :org")
+    @Query("SELECT r FROM RDSConfig r LEFT JOIN FETCH r.clusters WHERE r.organization = :org AND r.status = 'USER_MANAGED'")
     Set<RDSConfig> findAllByOrganization(@Param("org") Organization org);
 
     @CheckPermissionsByReturnValue(action = READ)
