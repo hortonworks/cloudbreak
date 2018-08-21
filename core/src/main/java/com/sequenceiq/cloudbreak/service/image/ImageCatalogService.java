@@ -107,7 +107,7 @@ public class ImageCatalogService extends AbstractOrganizationAwareResourceServic
 
     @Override
     public Set<ImageCatalog> findAllByOrganizationId(Long organizationId) {
-        Set<ImageCatalog> imageCatalogs = super.findAllByOrganizationId(organizationId);
+        Set<ImageCatalog> imageCatalogs = imageCatalogRepository.findAllByOrganizationIdAndArchived(organizationId, false);
         imageCatalogs.add(getCloudbreakDefaultImageCatalog());
         return imageCatalogs;
     }
