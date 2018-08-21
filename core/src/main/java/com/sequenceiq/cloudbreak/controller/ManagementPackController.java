@@ -23,7 +23,7 @@ import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.ManagementPack;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
-import com.sequenceiq.cloudbreak.service.mpack.ManagementPackService;
+import com.sequenceiq.cloudbreak.service.mpack.LegacyManagementPackService;
 
 @Component
 @Transactional(TxType.NEVER)
@@ -33,7 +33,7 @@ public class ManagementPackController extends NotificationController implements 
     private AuthenticatedUserService authenticatedUserService;
 
     @Inject
-    private ManagementPackService mpackService;
+    private LegacyManagementPackService mpackService;
 
     @Inject
     @Named("conversionService")
@@ -41,16 +41,16 @@ public class ManagementPackController extends NotificationController implements 
 
     @Override
     public ManagementPackResponse get(Long id) {
-        return conversionService.convert(mpackService.getById(id), ManagementPackResponse.class);
+        return conversionService.convert(mpackService.getByIdFromAnyAvailableOrganization(id), ManagementPackResponse.class);
     }
 
     private String getMpackName(Long id) {
-        return mpackService.getById(id).getName();
+        return mpackService.getByIdFromAnyAvailableOrganization(id).getName();
     }
 
     @Override
     public void delete(Long id) {
-        ManagementPack managementPack = mpackService.getById(id);
+        ManagementPack managementPack = mpackService.getByIdFromAnyAvailableOrganization(id);
         executeAndNotify(user -> mpackService.delete(managementPack),
                 ResourceEvent.MANAGEMENT_PACK_DELETED);
     }

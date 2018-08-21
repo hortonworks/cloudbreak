@@ -51,7 +51,7 @@ import com.sequenceiq.cloudbreak.json.JsonHelper;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
+import com.sequenceiq.cloudbreak.service.rdsconfig.LegacyRdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
@@ -71,7 +71,7 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
     private StackServiceComponentDescriptors stackServiceComponentDescs;
 
     @Inject
-    private RdsConfigService rdsConfigService;
+    private LegacyRdsConfigService rdsConfigService;
 
     @Inject
     private JsonHelper jsonHelper;

@@ -11,12 +11,16 @@ import com.sequenceiq.cloudbreak.api.model.rds.RdsTestResult;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 
 public abstract class AbstractRdsConfigController extends NotificationController {
 
     @Inject
     private RdsConfigService rdsConfigService;
+
+    @Inject
+    private OrganizationService organizationService;
 
     @Inject
     @Named("conversionService")
@@ -40,5 +44,9 @@ public abstract class AbstractRdsConfigController extends NotificationController
 
     public ConversionService getConversionService() {
         return conversionService;
+    }
+
+    public OrganizationService getOrganizationService() {
+        return organizationService;
     }
 }

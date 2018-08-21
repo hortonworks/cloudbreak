@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.converter.FlexSubscriptionToJsonConverter;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
-import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
+import com.sequenceiq.cloudbreak.service.flex.LegacyFlexSubscriptionService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 
 @Controller
@@ -26,7 +26,7 @@ import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 public class FlexSubscriptionController implements FlexSubscriptionEndpoint {
 
     @Inject
-    private FlexSubscriptionService flexSubscriptionService;
+    private LegacyFlexSubscriptionService flexSubscriptionService;
 
     @Inject
     private AuthenticatedUserService authenticatedUserService;
@@ -42,13 +42,13 @@ public class FlexSubscriptionController implements FlexSubscriptionEndpoint {
 
     @Override
     public FlexSubscriptionResponse get(Long id) {
-        FlexSubscription flexSubscription = flexSubscriptionService.get(id);
+        FlexSubscription flexSubscription = flexSubscriptionService.getByIdFromAnyAvailableOrganization(id);
         return toJsonConverter.convert(flexSubscription);
     }
 
     @Override
     public void delete(Long id) {
-        flexSubscriptionService.delete(id);
+        flexSubscriptionService.deleteByIdFromAnyAvailableOrganization(id);
     }
 
     @Override
@@ -110,14 +110,14 @@ public class FlexSubscriptionController implements FlexSubscriptionEndpoint {
     @Override
     public void setDefaultInAccount(Long id) {
         IdentityUser identityUser = authenticatedUserService.getCbUser();
-        FlexSubscription flexSubscription = flexSubscriptionService.get(id);
+        FlexSubscription flexSubscription = flexSubscriptionService.getByIdFromAnyAvailableOrganization(id);
         flexSubscriptionService.setDefaultFlexSubscription(flexSubscription.getName(), identityUser);
     }
 
     @Override
     public void setUsedForControllerInAccount(Long id) {
         IdentityUser identityUser = authenticatedUserService.getCbUser();
-        FlexSubscription flexSubscription = flexSubscriptionService.get(id);
+        FlexSubscription flexSubscription = flexSubscriptionService.getByIdFromAnyAvailableOrganization(id);
         flexSubscriptionService.setUsedForControllerFlexSubscription(flexSubscription.getName(), identityUser);
     }
 

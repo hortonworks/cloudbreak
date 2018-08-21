@@ -55,8 +55,8 @@ public class CredentialV3Controller extends NotificationController implements Cr
 
     @Override
     public CredentialResponse putInOrganization(Long organizationId, CredentialRequest credentialRequest) {
-        return conversionService.convert(credentialService.updateByOrganizationId(
-                organizationId, conversionService.convert(credentialRequest, Credential.class)), CredentialResponse.class);
+        Credential credential = conversionService.convert(credentialRequest, Credential.class);
+        return conversionService.convert(credentialService.updateInOrganization(organizationId, credential), CredentialResponse.class);
     }
 
     @Override

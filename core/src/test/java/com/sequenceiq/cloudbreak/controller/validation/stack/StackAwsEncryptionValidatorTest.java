@@ -35,8 +35,8 @@ import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateRequestValidator;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.credential.LegacyCredentialService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StackAwsEncryptionValidatorTest {
@@ -51,7 +51,7 @@ public class StackAwsEncryptionValidatorTest {
     private PlatformParameterV1Controller parameterV1Controller;
 
     @Mock
-    private CredentialService credentialService;
+    private LegacyCredentialService credentialService;
 
     @Mock
     private TemplateRequestValidator templateRequestValidator;

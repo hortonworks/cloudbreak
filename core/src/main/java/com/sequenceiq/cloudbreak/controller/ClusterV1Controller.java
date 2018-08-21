@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.UpdateGatewayTo
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -133,7 +134,8 @@ public class ClusterV1Controller implements ClusterV1Endpoint {
 
     @Override
     public Response put(Long stackId, UpdateClusterJson updateJson) {
-        return clusterCommonService.put(stackId, updateJson);
+        Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
+        return clusterCommonService.put(stackId, updateJson, organization.getId());
     }
 
     @Override

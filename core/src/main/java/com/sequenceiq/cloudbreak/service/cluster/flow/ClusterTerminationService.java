@@ -155,7 +155,7 @@ public class ClusterTerminationService {
         cluster.setFileSystem(null);
         transactionService.required(() -> {
             deleteClusterHostGroupsWithItsMetadata(cluster);
-            rdsConfigService.deleteDefaultRdsConfigs(rdsConfigs);
+            rdsConfigs.forEach(rdsConfigService::delete);
             componentConfigProvider.deleteComponentsForStack(stackId);
             return null;
         });

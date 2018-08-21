@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service;
 
+import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
+
 import java.util.Set;
 
 import javax.annotation.Nonnull;
@@ -18,11 +20,11 @@ import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.repository.organization.OrganizationResourceRepository;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationAwareResourceService;
+import com.sequenceiq.cloudbreak.service.organization.LegacyOrganizationAwareResourceService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
-public abstract class AbstractOrganizationAwareResourceService<T extends OrganizationAwareResource> implements OrganizationAwareResourceService<T> {
+public abstract class AbstractOrganizationAwareResourceService<T extends OrganizationAwareResource> implements LegacyOrganizationAwareResourceService<T> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractOrganizationAwareResourceService.class);
 
@@ -120,6 +122,20 @@ public abstract class AbstractOrganizationAwareResourceService<T extends Organiz
     }
 
     @Override
+    public T update(T resource) {
+        return repository().save(resource);
+    }
+
+    @Override
+    public T updateInOrganization(Long organizationId, T resource) {
+        T exists = repository().findByNameAndOrganizationId(resource.getName(), organizationId);
+        if (exists == null) {
+            throw notFound(resource().getReadableName(), resource.getName()).get();
+        }
+        return update(resource);
+    }
+
+    @Override
     public T deleteByNameFromOrganization(String name, Long organizationId) {
         T toBeDeleted = getByNameForOrganizationId(name, organizationId);
         return delete(toBeDeleted);
@@ -137,6 +153,14 @@ public abstract class AbstractOrganizationAwareResourceService<T extends Organiz
             throw new NotFoundException("Organization not found for user.");
         }
         resource.setOrganization(organization);
+    }
+
+    public T getByIdFromAnyAvailableOrganization(Long id) {
+        return repository().findById(id).orElseThrow(notFound(resource().getReadableName(), id));
+    }
+
+    public T deleteByIdFromAnyAvailableOrganization(Long id) {
+        return delete(getByIdFromAnyAvailableOrganization(id));
     }
 
     public TransactionService getTransactionService() {

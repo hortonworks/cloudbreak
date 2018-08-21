@@ -41,7 +41,7 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.service.credential.CredentialService;
+import com.sequenceiq.cloudbreak.service.credential.DefaultCredentialService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -66,7 +66,7 @@ public class StackV2RequestToStackRequestConverterTest {
     private ConversionService conversionService;
 
     @Mock
-    private CredentialService credentialService;
+    private DefaultCredentialService credentialService;
 
     @Mock
     private StackService stackService;
@@ -85,7 +85,7 @@ public class StackV2RequestToStackRequestConverterTest {
 
     @Before
     public void setUp() {
-        credentialService = mock(CredentialService.class);
+        credentialService = mock(DefaultCredentialService.class);
         MockitoAnnotations.initMocks(this);
         when(authenticatedUserService.getCbUser()).thenReturn(cbUser);
         when(credentialService.getByNameFromUsersDefaultOrganization(any())).thenReturn(credential);

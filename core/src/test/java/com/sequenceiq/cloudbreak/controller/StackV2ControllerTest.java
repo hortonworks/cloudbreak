@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.OperationRetryService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
+import com.sequenceiq.cloudbreak.service.image.DefaultImageCatalogService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -44,7 +44,7 @@ public class StackV2ControllerTest {
     private ClusterService clusterService;
 
     @Mock
-    private ImageCatalogService imageCatalogService;
+    private DefaultImageCatalogService imageCatalogService;
 
     @Mock
     private OrganizationService organizationService;

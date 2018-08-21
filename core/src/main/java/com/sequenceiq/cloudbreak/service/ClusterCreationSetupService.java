@@ -58,11 +58,11 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.blueprint.LegacyBlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariRepositoryVersionService;
 import com.sequenceiq.cloudbreak.service.decorator.ClusterDecorator;
-import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
+import com.sequenceiq.cloudbreak.service.filesystem.FileSystemService;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Service
@@ -74,7 +74,7 @@ public class ClusterCreationSetupService {
     private FileSystemValidator fileSystemValidator;
 
     @Inject
-    private FileSystemConfigService fileSystemConfigService;
+    private FileSystemService fileSystemService;
 
     @Inject
     private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
@@ -105,7 +105,7 @@ public class ClusterCreationSetupService {
     private DefaultHDFEntries defaultHDFEntries;
 
     @Inject
-    private BlueprintService blueprintService;
+    private LegacyBlueprintService blueprintService;
 
     @Inject
     private AmbariRepositoryVersionService ambariRepositoryVersionService;
@@ -150,7 +150,7 @@ public class ClusterCreationSetupService {
         long start = System.currentTimeMillis();
 
         if (request.getFileSystem() != null) {
-            FileSystem fs = fileSystemConfigService.create(user, conversionService.convert(request.getFileSystem(), FileSystem.class), stack.getOrganization());
+            FileSystem fs = fileSystemService.create(conversionService.convert(request.getFileSystem(), FileSystem.class), stack.getOrganization().getId());
             request.getFileSystem().setName(fs.getName());
             LOGGER.info("File system saving took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
         }
@@ -161,7 +161,7 @@ public class ClusterCreationSetupService {
 
         start = System.currentTimeMillis();
 
-        cluster = clusterDecorator.decorate(cluster, request, blueprint, user, stack.getOrganization(), stack);
+        cluster = clusterDecorator.decorate(cluster, request, blueprint, stack.getOrganization(), stack);
         LOGGER.info("Cluster object decorated in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
         start = System.currentTimeMillis();
@@ -332,7 +332,7 @@ public class ClusterCreationSetupService {
         } else {
             // Backward compatibility to V1 cluster API
             if (request.getBlueprintId() != null) {
-                root = JsonUtil.readTree(blueprintService.get(request.getBlueprintId()).getBlueprintText());
+                root = JsonUtil.readTree(blueprintService.getByIdFromAnyAvailableOrganization(request.getBlueprintId()).getBlueprintText());
             } else if (request.getBlueprintName() != null) {
                 root = JsonUtil.readTree(blueprintService.getByNameForOrganization(request.getBlueprintName(), organization).getBlueprintText());
             } else {

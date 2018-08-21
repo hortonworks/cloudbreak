@@ -238,7 +238,7 @@ public class StackCommonService implements StackEndpoint {
             return put(stack, updateStackJson);
         } else {
             UpdateClusterJson updateClusterJson = conversionService.convert(updateRequest, UpdateClusterJson.class);
-            return clusterCommonService.put(stack.getId(), updateClusterJson);
+            return clusterCommonService.put(stack.getId(), updateClusterJson, organizationId);
         }
     }
 
@@ -344,7 +344,7 @@ public class StackCommonService implements StackEndpoint {
     public Response changeImageByNameInOrg(String name, Long organziationId, StackImageChangeRequest stackImageChangeRequest) {
         Stack stack = stackService.getByNameInOrg(name, organziationId);
         if (StringUtils.isNotBlank(stackImageChangeRequest.getImageCatalogName())) {
-            ImageCatalog imageCatalog = imageCatalogService.get(organziationId, stackImageChangeRequest.getImageCatalogName());
+            ImageCatalog imageCatalog = imageCatalogService.getByNameForOrganizationId(stackImageChangeRequest.getImageCatalogName(), organziationId);
             stackService.updateImage(stack.getId(), organziationId, stackImageChangeRequest.getImageId(),
                     imageCatalog.getName(), imageCatalog.getImageCatalogUrl());
         } else {

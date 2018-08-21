@@ -83,7 +83,7 @@ public class CredentialServiceTest {
     private Organization defaultOrg;
 
     @InjectMocks
-    private final CredentialService credentialService = new CredentialService();
+    private final DefaultCredentialService credentialService = new DefaultCredentialService();
 
     private Credential credentialToModify;
 

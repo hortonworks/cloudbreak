@@ -39,65 +39,73 @@ public class RdsConfigController extends AbstractRdsConfigController implements 
 
     @Override
     public Set<RDSConfigResponse> getPrivates() {
-        Set<RDSConfig> rdsConfigs = getRdsConfigService().retrieveRdsConfigsInDefaultOrg();
+        Organization organization = getOrganizationService().getDefaultOrganizationForCurrentUser();
+        Set<RDSConfig> rdsConfigs = getRdsConfigService().retrieveRdsConfigsInOrg(organization.getId());
         return toJsonList(rdsConfigs);
     }
 
     @Override
     public RDSConfigResponse getPrivate(String name) {
-        RDSConfig rdsConfig = getRdsConfigService().getByNameForDefaultOrg(name);
+        Organization organization = getOrganizationService().getDefaultOrganizationForCurrentUser();
+        RDSConfig rdsConfig = getRdsConfigService().getByNameForOrganization(name, organization);
         return getConversionService().convert(rdsConfig, RDSConfigResponse.class);
     }
 
     @Override
     public RDSConfigResponse getPublic(String name) {
-        RDSConfig rdsConfig = getRdsConfigService().getByNameForDefaultOrg(name);
+        Organization organization = getOrganizationService().getDefaultOrganizationForCurrentUser();
+        RDSConfig rdsConfig = getRdsConfigService().getByNameForOrganization(name, organization);
         return getConversionService().convert(rdsConfig, RDSConfigResponse.class);
     }
 
     @Override
     public Set<RDSConfigResponse> getPublics() {
-        Set<RDSConfig> rdsConfigs = getRdsConfigService().retrieveRdsConfigsInDefaultOrg();
+        Organization organization = getOrganizationService().getDefaultOrganizationForCurrentUser();
+        Set<RDSConfig> rdsConfigs = getRdsConfigService().retrieveRdsConfigsInOrg(organization.getId());
         return toJsonList(rdsConfigs);
     }
 
     @Override
     public RDSConfigResponse get(Long id) {
-        RDSConfig rdsConfig = getRdsConfigService().get(id);
+        RDSConfig rdsConfig = getRdsConfigService().getByIdFromAnyAvailableOrganization(id);
         return getConversionService().convert(rdsConfig, RDSConfigResponse.class);
     }
 
     @Override
     public void delete(Long id) {
-        executeAndNotify(user -> getRdsConfigService().delete(id), ResourceEvent.RDS_CONFIG_DELETED);
+        executeAndNotify(user -> getRdsConfigService().deleteByIdFromAnyAvailableOrganization(id), ResourceEvent.RDS_CONFIG_DELETED);
     }
 
     @Override
     public void deletePublic(String name) {
-        executeAndNotify(user -> getRdsConfigService().delete(name), ResourceEvent.RDS_CONFIG_DELETED);
+        Organization organization = getOrganizationService().getDefaultOrganizationForCurrentUser();
+        executeAndNotify(user -> getRdsConfigService().deleteByNameFromOrganization(name, organization.getId()), ResourceEvent.RDS_CONFIG_DELETED);
     }
 
     @Override
     public void deletePrivate(String name) {
-        executeAndNotify(user -> getRdsConfigService().delete(name), ResourceEvent.RDS_CONFIG_DELETED);
+        Organization organization = getOrganizationService().getDefaultOrganizationForCurrentUser();
+        executeAndNotify(user -> getRdsConfigService().deleteByNameFromOrganization(name, organization.getId()), ResourceEvent.RDS_CONFIG_DELETED);
     }
 
     @Override
     public RdsTestResult testRdsConnection(RDSTestRequest rdsTestRequest) {
-        Organization organization = getRdsConfigService().getOrganizationService().getDefaultOrganizationForCurrentUser();
+        Organization organization = getOrganizationService().getDefaultOrganizationForCurrentUser();
         return testRdsConnection(rdsTestRequest, organization);
     }
 
     @Override
     public RDSConfigRequest getRequestFromName(String name) {
-        RDSConfig rdsConfig = getRdsConfigService().getByNameForDefaultOrg(name);
+        Organization organization = getOrganizationService().getDefaultOrganizationForCurrentUser();
+        RDSConfig rdsConfig = getRdsConfigService().getByNameForOrganization(name, organization);
         return getConversionService().convert(rdsConfig, RDSConfigRequest.class);
     }
 
     private RDSConfigResponse createRdsConfig(RDSConfigRequest rdsConfigJson) {
+        Organization organization = getOrganizationService().getDefaultOrganizationForCurrentUser();
         RDSConfig rdsConfig = getConversionService().convert(rdsConfigJson, RDSConfig.class);
         try {
-            rdsConfig = getRdsConfigService().createInDefaultOrganization(rdsConfig);
+            rdsConfig = getRdsConfigService().create(rdsConfig, organization);
             notify(ResourceEvent.RDS_CONFIG_CREATED);
         } catch (DataIntegrityViolationException ex) {
             String msg = String.format("Error with resource [%s], %s", APIResourceType.RDS_CONFIG, getProperSqlErrorMessage(ex));

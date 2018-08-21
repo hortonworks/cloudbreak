@@ -142,14 +142,14 @@ public class StackV2Controller extends NotificationController implements StackV2
         reinstallRequestV2.setAccount(user.getAccount());
         Stack stack = stackService.getByNameInDefaultOrg(name);
         UpdateClusterJson updateClusterJson = conversionService.convert(reinstallRequestV2, UpdateClusterJson.class);
-        return clusterCommonController.put(stack.getId(), updateClusterJson);
+        return clusterCommonController.put(stack.getId(), updateClusterJson, organizationService.getDefaultOrganizationForCurrentUser().getId());
     }
 
     @Override
     public Response putPassword(String name, UserNamePasswordJson userNamePasswordJson) {
         Stack stack = stackService.getByNameInDefaultOrg(name);
         UpdateClusterJson updateClusterJson = conversionService.convert(userNamePasswordJson, UpdateClusterJson.class);
-        return clusterCommonController.put(stack.getId(), updateClusterJson);
+        return clusterCommonController.put(stack.getId(), updateClusterJson, organizationService.getDefaultOrganizationForCurrentUser().getId());
     }
 
     @Override

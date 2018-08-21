@@ -2,11 +2,13 @@ package com.sequenceiq.cloudbreak.structuredevent;
 
 import java.util.List;
 
+import com.sequenceiq.cloudbreak.domain.StructuredEventEntity;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationAwareResourceService;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventContainer;
 
-public interface StructuredEventService extends StructuredEventSenderService {
+public interface StructuredEventService extends StructuredEventSenderService, OrganizationAwareResourceService<StructuredEventEntity> {
 
     <T extends StructuredEvent> List<T> getEventsForOrgWithType(Organization organization, Class<T> eventClass);
 

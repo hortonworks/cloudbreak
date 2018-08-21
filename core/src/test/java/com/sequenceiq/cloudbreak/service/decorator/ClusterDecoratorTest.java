@@ -29,10 +29,10 @@ import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.AmbariHaComponentFilter;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.blueprint.LegacyBlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
-import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
+import com.sequenceiq.cloudbreak.service.ldapconfig.DefaultLdapConfigService;
+import com.sequenceiq.cloudbreak.service.rdsconfig.DefaultRdsConfigService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -42,7 +42,7 @@ public class ClusterDecoratorTest {
     private ClusterDecorator underTest;
 
     @Mock
-    private BlueprintService blueprintService;
+    private LegacyBlueprintService blueprintService;
 
     @Mock
     private BlueprintValidator blueprintValidator;
@@ -57,10 +57,10 @@ public class ClusterDecoratorTest {
     private HostGroupDecorator hostGroupDecorator;
 
     @Mock
-    private RdsConfigService rdsConfigService;
+    private DefaultRdsConfigService rdsConfigService;
 
     @Mock
-    private LdapConfigService ldapConfigService;
+    private DefaultLdapConfigService ldapConfigService;
 
     @Mock
     private LdapConfigValidator ldapConfigValidator;
@@ -109,7 +109,7 @@ public class ClusterDecoratorTest {
         when(clusterProxyDecorator.prepareProxyConfig(any(Cluster.class), any(), any(Stack.class))).thenReturn(expectedClusterInstance);
         when(ambariHaComponentFilter.getHaComponents(any())).thenReturn(Collections.emptySet());
 
-        Cluster result = underTest.decorate(expectedClusterInstance, request, blueprint, user, new Organization(), stack);
+        Cluster result = underTest.decorate(expectedClusterInstance, request, blueprint, new Organization(), stack);
 
         Assert.assertEquals(expectedClusterInstance, result);
         verify(sharedServiceConfigProvider, times(1)).configureCluster(any(Cluster.class),

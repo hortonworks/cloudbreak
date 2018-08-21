@@ -26,10 +26,11 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 
 @Service
 public class AmbariDatabaseToRdsConfigMigrationService {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariDatabaseToRdsConfigMigrationService.class);
 
     @Inject
-    private RdsConfigService rdsConfigService;
+    private LegacyRdsConfigService rdsConfigService;
 
     @Inject
     private AmbariDatabaseMapper ambariDatabaseMapper;

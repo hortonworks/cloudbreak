@@ -49,7 +49,7 @@ public class FlexSubscriptionServiceTest {
     private UserService userService;
 
     @InjectMocks
-    private FlexSubscriptionService underTest;
+    private DefaultFlexSubscriptionService underTest;
 
     private Organization organization;
 

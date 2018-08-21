@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.ldapconfig.LdapConfigValidator;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
-import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
+import com.sequenceiq.cloudbreak.service.ldapconfig.LegacyLdapConfigService;
 
 @Component
 @Transactional(TxType.NEVER)
@@ -35,7 +35,7 @@ public class LdapController extends NotificationController implements LdapConfig
     private LdapConfigValidator ldapConfigValidator;
 
     @Inject
-    private LdapConfigService ldapConfigService;
+    private LegacyLdapConfigService ldapConfigService;
 
     @Override
     public LdapConfigResponse postPrivate(LdapConfigRequest ldapConfigRequest) {
@@ -69,13 +69,13 @@ public class LdapController extends NotificationController implements LdapConfig
 
     @Override
     public LdapConfigResponse get(Long id) {
-        LdapConfig config = ldapConfigService.get(id);
+        LdapConfig config = ldapConfigService.getByIdFromAnyAvailableOrganization(id);
         return conversionService.convert(config, LdapConfigResponse.class);
     }
 
     @Override
     public void delete(Long id) {
-        executeAndNotify(user -> ldapConfigService.delete(id), ResourceEvent.LDAP_DELETED);
+        executeAndNotify(user -> ldapConfigService.deleteByIdFromAnyAvailableOrganization(id), ResourceEvent.LDAP_DELETED);
     }
 
     @Override

@@ -5,6 +5,7 @@ import static org.springframework.util.StringUtils.isEmpty;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -27,6 +28,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.repository.ConstraintRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
+import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.constraint.ConstraintTemplateService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
@@ -35,6 +37,9 @@ import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
 @Component
 public class HostGroupDecorator {
     private static final Logger LOGGER = LoggerFactory.getLogger(HostGroupDecorator.class);
+
+    @Inject
+    private AuthenticatedUserService authenticatedUserService;
 
     @Inject
     private InstanceGroupRepository instanceGroupRepository;
@@ -57,8 +62,7 @@ public class HostGroupDecorator {
     @Inject
     private ClusterService clusterService;
 
-    public HostGroup decorate(HostGroup subject, HostGroupRequest hostGroupRequest, IdentityUser user, Long stackId,
-            boolean postRequest, Boolean publicInAccount) {
+    public HostGroup decorate(HostGroup subject, HostGroupRequest hostGroupRequest, Long stackId, boolean postRequest, Long organizationId) {
         ConstraintJson constraintJson = hostGroupRequest.getConstraint();
         Set<Long> recipeIds = hostGroupRequest.getRecipeIds();
         Set<RecipeRequest> recipes = hostGroupRequest.getRecipes();
@@ -67,10 +71,10 @@ public class HostGroupDecorator {
         LOGGER.debug("Decorating hostgroup on [{}] request.", postRequest ? "POST" : "PUT");
         Constraint constraint = conversionService.convert(constraintJson, Constraint.class);
         if (postRequest) {
-            constraint = decorateConstraint(stackId, user, constraint, constraintJson.getInstanceGroupName(), constraintJson.getConstraintTemplateName());
+            constraint = decorateConstraint(stackId, constraint, constraintJson.getInstanceGroupName(), constraintJson.getConstraintTemplateName());
             subject.setConstraint(constraint);
         } else {
-            subject = getHostGroup(stackId, constraint, constraintJson, subject, user);
+            subject = getHostGroup(stackId, constraint, constraintJson, subject);
         }
 
         subject.getRecipes().clear();
@@ -78,37 +82,38 @@ public class HostGroupDecorator {
             prepareRecipesByIds(subject, recipeIds);
         }
         if (recipeNames != null && !recipeNames.isEmpty()) {
-            prepareRecipesByName(subject, user, recipeNames);
+            prepareRecipesByName(subject, recipeNames, organizationId);
         }
         if (recipes != null && !recipes.isEmpty()) {
-            prepareRecipesByRequests(subject, recipes, publicInAccount);
+            prepareRecipesByRequests(subject, recipes, organizationId);
         }
 
         return subject;
     }
 
-    private void prepareRecipesByName(HostGroup subject, IdentityUser user, Collection<String> recipeNames) {
-        Set<Recipe> recipes = recipeService.getRecipesByNames(user, recipeNames);
+    private void prepareRecipesByName(HostGroup subject, Collection<String> recipeNames, Long organizationId) {
+        Set<Recipe> recipes = recipeNames.stream()
+                .map(name -> recipeService.getByNameForOrganizationId(name, organizationId))
+                .collect(Collectors.toSet());
         subject.getRecipes().addAll(recipes);
     }
 
-    private void prepareRecipesByRequests(HostGroup subject, Iterable<RecipeRequest> recipes, Boolean publicInAccount) {
+    private void prepareRecipesByRequests(HostGroup subject, Iterable<RecipeRequest> recipes, Long organizationId) {
         for (RecipeRequest recipe : recipes) {
             Recipe convertedRecipe = conversionService.convert(recipe, Recipe.class);
-            convertedRecipe.setPublicInAccount(publicInAccount);
-            convertedRecipe = recipeService.createInDefaultOrganization(convertedRecipe);
+            convertedRecipe = recipeService.create(convertedRecipe, organizationId);
             subject.getRecipes().add(convertedRecipe);
         }
     }
 
     private void prepareRecipesByIds(HostGroup subject, Iterable<Long> recipeIds) {
         for (Long recipeId : recipeIds) {
-            Recipe recipe = recipeService.get(recipeId);
+            Recipe recipe = recipeService.getByIdFromAnyAvailableOrganization(recipeId);
             subject.getRecipes().add(recipe);
         }
     }
 
-    private Constraint decorateConstraint(Long stackId, IdentityUser user, Constraint constraint, String instanceGroupName, String constraintTemplateName) {
+    private Constraint decorateConstraint(Long stackId, Constraint constraint, String instanceGroupName, String constraintTemplateName) {
         if (instanceGroupName != null) {
             InstanceGroup instanceGroup = instanceGroupRepository.findOneByGroupNameInStack(stackId, instanceGroupName);
             if (instanceGroup == null) {
@@ -118,8 +123,8 @@ public class HostGroupDecorator {
             constraint.setInstanceGroup(instanceGroup);
         }
         if (constraintTemplateName != null) {
-            ConstraintTemplate constraintTemplate = constraintTemplateService.findByNameInAccount(constraintTemplateName,
-                    user.getAccount(), user.getUserId());
+            IdentityUser user = authenticatedUserService.getCbUser();
+            ConstraintTemplate constraintTemplate = constraintTemplateService.findByNameInAccount(constraintTemplateName, user.getAccount(), user.getUserId());
             if (constraintTemplate == null) {
                 throw new BadRequestException(String.format("Couldn't find constraint template with name: %s", constraintTemplateName));
             }
@@ -128,7 +133,7 @@ public class HostGroupDecorator {
         return constraint;
     }
 
-    private HostGroup getHostGroup(Long stackId, Constraint constraint, ConstraintJson constraintJson, HostGroup subject, IdentityUser user) {
+    private HostGroup getHostGroup(Long stackId, Constraint constraint, ConstraintJson constraintJson, HostGroup subject) {
         if (constraintJson == null) {
             throw new BadRequestException("The constraint field must be set in the reinstall request!");
         }
@@ -136,7 +141,7 @@ public class HostGroupDecorator {
         String instanceGroupName = constraintJson.getInstanceGroupName();
         String constraintTemplateName = constraintJson.getConstraintTemplateName();
         Cluster cluster = clusterService.retrieveClusterByStackIdWithoutAuth(stackId);
-        Constraint decoratedConstraint = decorateConstraint(stackId, user, constraint, instanceGroupName, constraintTemplateName);
+        Constraint decoratedConstraint = decorateConstraint(stackId, constraint, instanceGroupName, constraintTemplateName);
         if (!isEmpty(instanceGroupName)) {
             result = getHostGroupByInstanceGroupName(decoratedConstraint, subject, cluster, instanceGroupName);
         } else if (!isEmpty(constraintTemplateName)) {

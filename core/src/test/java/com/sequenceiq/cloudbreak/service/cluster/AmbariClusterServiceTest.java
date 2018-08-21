@@ -39,10 +39,10 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.blueprint.LegacyBlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
-import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
+import com.sequenceiq.cloudbreak.service.rdsconfig.DefaultRdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -55,7 +55,7 @@ public class AmbariClusterServiceTest {
     private StackService stackService;
 
     @Mock
-    private BlueprintService blueprintService;
+    private LegacyBlueprintService blueprintService;
 
     @Mock
     private BlueprintValidator blueprintValidator;
@@ -70,7 +70,7 @@ public class AmbariClusterServiceTest {
     private HostGroupService hostGroupService;
 
     @Mock
-    private RdsConfigService rdsConfigService;
+    private DefaultRdsConfigService rdsConfigService;
 
     @Mock
     private OrchestratorTypeResolver orchestratorTypeResolver;
@@ -103,7 +103,7 @@ public class AmbariClusterServiceTest {
         when(clusterComponentConfigProvider.getHDPRepo(any(Long.class))).thenReturn(new StackRepoDetails());
         when(clusterComponentConfigProvider.store(any(ClusterComponent.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(clusterComponentConfigProvider.getComponent(any(Long.class), any(ComponentType.class))).thenReturn(new ClusterComponent());
-        when(blueprintService.get(any(Long.class))).thenReturn(cluster.getBlueprint());
+        when(blueprintService.getByIdFromAnyAvailableOrganization(any(Long.class))).thenReturn(cluster.getBlueprint());
         doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).required(any());
     }
 

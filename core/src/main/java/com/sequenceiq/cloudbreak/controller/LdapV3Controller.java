@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.ldapconfig.LdapConfigValidator;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
-import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
+import com.sequenceiq.cloudbreak.service.ldapconfig.DefaultLdapConfigService;
 
 @Component
 @Transactional(TxType.NEVER)
@@ -32,7 +32,7 @@ public class LdapV3Controller extends NotificationController implements LdapConf
     private ConversionService conversionService;
 
     @Inject
-    private LdapConfigService ldapConfigService;
+    private DefaultLdapConfigService ldapConfigService;
 
     @Inject
     private LdapConfigValidator ldapConfigValidator;

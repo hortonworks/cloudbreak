@@ -77,7 +77,7 @@ public class StackImageFilterServiceTest {
     private StackImageUpdateService stackImageUpdateService;
 
     @Mock
-    private ImageCatalogService imageCatalogService;
+    private DefaultImageCatalogService imageCatalogService;
 
     @Mock
     private ComponentConfigProvider componentConfigProvider;

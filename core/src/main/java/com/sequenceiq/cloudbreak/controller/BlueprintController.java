@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.init.blueprint.BlueprintLoaderService;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.blueprint.LegacyBlueprintService;
 
 @Component
 @Transactional(TxType.NEVER)
@@ -29,7 +29,7 @@ public class BlueprintController extends NotificationController implements Bluep
     private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintController.class);
 
     @Autowired
-    private BlueprintService blueprintService;
+    private LegacyBlueprintService blueprintService;
 
     @Autowired
     private AuthenticatedUserService authenticatedUserService;
@@ -43,12 +43,12 @@ public class BlueprintController extends NotificationController implements Bluep
 
     @Override
     public BlueprintResponse get(Long id) {
-        return conversionService.convert(blueprintService.get(id), BlueprintResponse.class);
+        return conversionService.convert(blueprintService.getByIdFromAnyAvailableOrganization(id), BlueprintResponse.class);
     }
 
     @Override
     public void delete(Long id) {
-        Blueprint deleted = blueprintService.delete(id);
+        Blueprint deleted = blueprintService.deleteByIdFromAnyAvailableOrganization(id);
         notify(ResourceEvent.RECIPE_DELETED);
         conversionService.convert(deleted, BlueprintResponse.class);
     }
@@ -90,7 +90,7 @@ public class BlueprintController extends NotificationController implements Bluep
 
     @Override
     public BlueprintRequest getRequestfromId(Long id) {
-        Blueprint blueprint = blueprintService.get(id);
+        Blueprint blueprint = blueprintService.getByIdFromAnyAvailableOrganization(id);
         return conversionService.convert(blueprint, BlueprintRequest.class);
     }
 

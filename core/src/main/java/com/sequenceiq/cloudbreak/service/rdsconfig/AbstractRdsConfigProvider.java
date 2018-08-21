@@ -23,7 +23,6 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.repository.RdsConfigRepository;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 
@@ -32,10 +31,7 @@ public abstract class AbstractRdsConfigProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRdsConfigProvider.class);
 
     @Inject
-    private RdsConfigRepository rdsConfigRepository;
-
-    @Inject
-    private RdsConfigService rdsConfigService;
+    private TrustedRdsConfigService rdsConfigService;
 
     @Inject
     private ClusterService clusterService;
@@ -56,7 +52,7 @@ public abstract class AbstractRdsConfigProvider {
     }
 
     public Set<RDSConfig> createPostgresRdsConfigIfNeeded(Stack stack, Cluster cluster) {
-        Set<RDSConfig> rdsConfigs = rdsConfigRepository.findByClusterId(cluster.getId());
+        Set<RDSConfig> rdsConfigs = rdsConfigService.findByClusterId(cluster.getId());
         if (isRdsConfigNeeded(cluster.getBlueprint())
                 && rdsConfigs.stream().noneMatch(rdsConfig -> rdsConfig.getType().equalsIgnoreCase(getRdsType().name()))) {
             LOGGER.info("Creating postgres RDSConfig for {}", getRdsType().name());

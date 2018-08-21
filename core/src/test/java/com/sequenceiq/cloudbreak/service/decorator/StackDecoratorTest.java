@@ -40,8 +40,8 @@ import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidato
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.service.credential.CredentialService;
-import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
+import com.sequenceiq.cloudbreak.service.credential.DefaultCredentialService;
+import com.sequenceiq.cloudbreak.service.flex.DefaultFlexSubscriptionService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
 import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
@@ -71,7 +71,7 @@ public class StackDecoratorTest {
     private StackParameterService stackParameterService;
 
     @Mock
-    private CredentialService credentialService;
+    private DefaultCredentialService credentialService;
 
     @Mock
     private NetworkService networkService;
@@ -95,7 +95,7 @@ public class StackDecoratorTest {
     private CloudParameterService cloudParameterService;
 
     @Mock
-    private FlexSubscriptionService flexSubscriptionService;
+    private DefaultFlexSubscriptionService flexSubscriptionService;
 
     @Mock
     private CloudParameterCache cloudParameterCache;

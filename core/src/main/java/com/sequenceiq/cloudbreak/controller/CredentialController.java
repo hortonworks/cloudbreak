@@ -1,12 +1,17 @@
 package com.sequenceiq.cloudbreak.controller;
 
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Resource;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v1.CredentialEndpoint;
@@ -14,14 +19,18 @@ import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
 import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.service.credential.CredentialService;
+import com.sequenceiq.cloudbreak.service.credential.LegacyCredentialService;
 
 @Component
 @Transactional(TxType.NEVER)
 public class CredentialController extends NotificationController implements CredentialEndpoint {
 
     @Autowired
-    private CredentialService credentialService;
+    private LegacyCredentialService credentialService;
+
+    @Resource
+    @Qualifier("conversionService")
+    private ConversionService conversionService;
 
     @Override
     public CredentialResponse postPrivate(CredentialRequest credentialRequest) {
@@ -50,7 +59,7 @@ public class CredentialController extends NotificationController implements Cred
 
     @Override
     public Set<CredentialResponse> getPublics() {
-        return credentialService.convertAllToResponse(credentialService.listForUsersDefaultOrganization());
+        return convertAllToResponse(credentialService.listForUsersDefaultOrganization());
     }
 
     @Override
@@ -60,17 +69,17 @@ public class CredentialController extends NotificationController implements Cred
 
     @Override
     public CredentialResponse getPublic(String name) {
-        return credentialService.convertToResponse(credentialService.getByNameFromUsersDefaultOrganization(name));
+        return convertToResponse(credentialService.getByNameFromUsersDefaultOrganization(name));
     }
 
     @Override
     public CredentialResponse get(Long id) {
-        return credentialService.convertToResponse(credentialService.get(id));
+        return convertToResponse(credentialService.getByIdFromAnyAvailableOrganization(id));
     }
 
     @Override
     public void delete(Long id) {
-        executeAndNotify(user -> credentialService.delete(id), ResourceEvent.CREDENTIAL_DELETED);
+        executeAndNotify(user -> credentialService.deleteByIdFromAnyAvailableOrganization(id), ResourceEvent.CREDENTIAL_DELETED);
     }
 
     @Override
@@ -80,7 +89,7 @@ public class CredentialController extends NotificationController implements Cred
 
     @Override
     public void deletePrivate(String name) {
-        executeAndNotify(user -> credentialService.delete(name), ResourceEvent.CREDENTIAL_DELETED);
+        executeAndNotify(user -> credentialService.deleteByNameFromDefaultOrganization(name), ResourceEvent.CREDENTIAL_DELETED);
     }
 
     @Override
@@ -94,17 +103,33 @@ public class CredentialController extends NotificationController implements Cred
     }
 
     private Map<String, String> interactiveLogin(CredentialRequest credentialRequest) {
-        Credential credential = credentialService.convertToCredential(credentialRequest);
+        Credential credential = convertToCredential(credentialRequest);
         return credentialService.interactiveLogin(credential);
     }
 
     private CredentialResponse createCredential(CredentialRequest credentialRequest) {
-        Credential credential = credentialService.create(credentialService.convertToCredential(credentialRequest));
-        return credentialService.convertToResponse(credential);
+        Credential credential = credentialService.createInDefaultOrganization(convertToCredential(credentialRequest));
+        return convertToResponse(credential);
     }
 
     private CredentialResponse modifyCredential(CredentialRequest credentialRequest) {
-        Credential credential = credentialService.update(credentialService.convertToCredential(credentialRequest));
-        return credentialService.convertToResponse(credential);
+        Credential credential = credentialService.update(convertToCredential(credentialRequest));
+        return convertToResponse(credential);
+    }
+
+    public Set<CredentialResponse> convertAllToResponse(@Nonnull Iterable<Credential> credentials) {
+        Set<CredentialResponse> jsonSet = new LinkedHashSet<>();
+        for (Credential credential : credentials) {
+            jsonSet.add(convertToResponse(credential));
+        }
+        return jsonSet;
+    }
+
+    public CredentialResponse convertToResponse(Credential credential) {
+        return conversionService.convert(credential, CredentialResponse.class);
+    }
+
+    public Credential convertToCredential(CredentialRequest request) {
+        return conversionService.convert(request, Credential.class);
     }
 }

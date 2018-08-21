@@ -54,7 +54,7 @@ public class ImageCatalogServiceDefaultNotFoundTest {
     private AccountPreferencesService accountPreferencesService;
 
     @InjectMocks
-    private ImageCatalogService underTest;
+    private DefaultImageCatalogService underTest;
 
     @Before
     public void beforeTest() throws Exception {
