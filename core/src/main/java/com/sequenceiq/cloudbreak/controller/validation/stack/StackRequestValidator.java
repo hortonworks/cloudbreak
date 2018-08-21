@@ -16,7 +16,6 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.model.EncryptionKeyConfigJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformEncryptionKeysResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformResourceRequestJson;
-import com.sequenceiq.cloudbreak.api.model.TemplateRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupBase;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupBase;
@@ -26,12 +25,15 @@ import com.sequenceiq.cloudbreak.controller.PlatformParameterV1Controller;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.cloudbreak.controller.validation.Validator;
+import com.sequenceiq.cloudbreak.controller.validation.template.TemplateRequestValidator;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 
 @Component
 public class StackRequestValidator implements Validator<StackRequest> {
@@ -52,11 +54,14 @@ public class StackRequestValidator implements Validator<StackRequest> {
     @Inject
     private CredentialService credentialService;
 
-    private final Validator<TemplateRequest> templateRequestValidator;
+    @Inject
+    private OrganizationService organizationService;
 
-    public StackRequestValidator(Validator<TemplateRequest> templateRequestValidator) {
-        this.templateRequestValidator = templateRequestValidator;
-    }
+    @Inject
+    private RestRequestThreadLocalService restRequestThreadLocalService;
+
+    @Inject
+    private TemplateRequestValidator templateRequestValidator;
 
     @Override
     public ValidationResult validate(StackRequest subject) {
@@ -69,14 +74,6 @@ public class StackRequestValidator implements Validator<StackRequest> {
         validateSharedService(subject, validationBuilder);
         validateEncryptionKey(subject, validationBuilder);
         return validationBuilder.build();
-    }
-
-    void setParameterV1Controller(PlatformParameterV1Controller parameterV1Controller) {
-        this.parameterV1Controller = parameterV1Controller;
-    }
-
-    void setCredentialService(CredentialService credentialService) {
-        this.credentialService = credentialService;
     }
 
     private void validateHostgroupInstanceGroupMapping(StackRequest stackRequest, ValidationResultBuilder validationBuilder) {
@@ -133,13 +130,13 @@ public class StackRequestValidator implements Validator<StackRequest> {
 
     private void validateEncryptionKey(StackRequest stackRequest, ValidationResultBuilder validationBuilder) {
         stackRequest.getInstanceGroups().stream()
-            .filter(request -> request.getTemplate().getParameters().containsKey(TYPE))
-            .filter(request -> {
-                EncryptionType valueForTypeKey = getEncryptionIfTypeMatches(request.getTemplate().getParameters().get(TYPE));
-                return valueForTypeKey != null && EncryptionType.CUSTOM.equals(getEncryptionIfTypeMatches(valueForTypeKey));
-            })
-            .forEach(request -> checkEncryptionKeyValidityForInstanceGroupWhenKeysAreListable(request, stackRequest.getCredentialName(),
-                    stackRequest.getRegion(), validationBuilder));
+                .filter(request -> request.getTemplate().getParameters().containsKey(TYPE))
+                .filter(request -> {
+                    EncryptionType valueForTypeKey = getEncryptionIfTypeMatches(request.getTemplate().getParameters().get(TYPE));
+                    return valueForTypeKey != null && EncryptionType.CUSTOM.equals(getEncryptionIfTypeMatches(valueForTypeKey));
+                })
+                .forEach(request -> checkEncryptionKeyValidityForInstanceGroupWhenKeysAreListable(request, stackRequest.getCredentialName(),
+                        stackRequest.getRegion(), validationBuilder));
     }
 
     private EncryptionType getEncryptionIfTypeMatches(Object o) {
@@ -147,8 +144,13 @@ public class StackRequestValidator implements Validator<StackRequest> {
     }
 
     private void checkEncryptionKeyValidityForInstanceGroupWhenKeysAreListable(InstanceGroupRequest instanceGroupRequest, String credentialName,
-                    String region, ValidationResultBuilder validationBuilder) {
-        Credential cred = credentialService.getByNameFromUsersDefaultOrganization(credentialName);
+            String region, ValidationResultBuilder validationBuilder) {
+
+        Long orgId = restRequestThreadLocalService.getRequestedOrgId();
+        if (orgId == null) {
+            orgId = organizationService.getDefaultOrganizationForCurrentUser().getId();
+        }
+        Credential cred = credentialService.getByNameForOrganizationId(credentialName, orgId);
         Optional<PlatformEncryptionKeysResponse> keys = getEncryptionKeysWithExceptionHandling(cred.getId(), region, cred.getOwner(), cred.getOwner());
         if (keys.isPresent() && !keys.get().getEncryptionKeyConfigs().isEmpty()) {
             if (!instanceGroupRequest.getTemplate().getParameters().containsKey(KEY)) {

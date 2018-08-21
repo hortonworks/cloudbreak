@@ -60,7 +60,7 @@ import freemarker.template.Configuration;
 @RunWith(Parameterized.class)
 public class CloudFormationTemplateBuilderTest {
 
-    private static final String USER_ID = "alma@hortonmunkak.hu";
+    private static final String USER_ID = "horton@hortonworks.com";
 
     private static final Long ORGANIZATION_ID = 1L;
 

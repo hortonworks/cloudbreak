@@ -8,7 +8,9 @@ import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.PlatformResourceRequestJson;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.PlatformResourceRequest;
+import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 
 @Component
 public class PlatformResourceRequestJsonToPlatformResourceRequest extends
@@ -17,11 +19,21 @@ public class PlatformResourceRequestJsonToPlatformResourceRequest extends
     @Inject
     private CredentialService credentialService;
 
+    @Inject
+    private OrganizationService organizationService;
+
+    @Inject
+    private RestRequestThreadLocalService restRequestThreadLocalService;
+
     @Override
     public PlatformResourceRequest convert(PlatformResourceRequestJson source) {
         PlatformResourceRequest platformResourceRequest = new PlatformResourceRequest();
         if (!Strings.isNullOrEmpty(source.getCredentialName())) {
-            platformResourceRequest.setCredential(credentialService.getByNameFromUsersDefaultOrganization(source.getCredentialName()));
+            Long orgId = restRequestThreadLocalService.getRequestedOrgId();
+            if (orgId == null) {
+                orgId = organizationService.getDefaultOrganizationForCurrentUser().getId();
+            }
+            platformResourceRequest.setCredential(credentialService.getByNameForOrganizationId(source.getCredentialName(), orgId));
         } else if (source.getCredentialId() != null) {
             platformResourceRequest.setCredential(credentialService.get(source.getCredentialId()));
         } else {

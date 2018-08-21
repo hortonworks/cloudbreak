@@ -68,7 +68,7 @@ import reactor.bus.EventBus;
 
 public class StackImageUpdateActionsTest {
 
-    private static final String USER_ID = "alma@hortonmunkak.hu";
+    private static final String USER_ID = "horton@hortonworks.com";
 
     private static final Long ORGANIZATION_ID = 1L;
 
@@ -174,7 +174,7 @@ public class StackImageUpdateActionsTest {
         when(imageService.getImage(anyLong())).thenReturn(image);
 
         User user = new User();
-        user.setUserId("alma@hortonmunkak.hu");
+        user.setUserId("horton@hortonworks.com");
         user.setUserName("Alma ur");
         Organization organization = new Organization();
         organization.setId(1L);

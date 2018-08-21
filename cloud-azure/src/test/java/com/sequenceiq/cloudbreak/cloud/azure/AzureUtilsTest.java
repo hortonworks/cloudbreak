@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 @RunWith(MockitoJUnitRunner.class)
 public class AzureUtilsTest {
 
-    private static final String USER_ID = "alma@hortonmunkak.hu";
+    private static final String USER_ID = "horton@hortonworks.com";
 
     private static final Long ORGANIZATION_ID = 1L;
 

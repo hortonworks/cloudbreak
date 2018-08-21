@@ -32,7 +32,7 @@ public class StructuredEventToStructuredEventEntityConverter extends AbstractCon
             structuredEventEntity.setResourceId(operationDetails.getResourceId());
             structuredEventEntity.setTimestamp(operationDetails.getTimestamp());
             structuredEventEntity.setAccount(operationDetails.getAccount());
-            structuredEventEntity.setOwner(operationDetails.getUserIdV3());
+            structuredEventEntity.setOwner(operationDetails.getUserId());
             structuredEventEntity.setOrganization(organizationService.getByIdWithoutPermissionCheck(source.getOrgId()));
             structuredEventEntity.setStructuredEventJson(new Json(source));
             structuredEventEntity.setUser(userService.getByUserId(source.getUserId()));

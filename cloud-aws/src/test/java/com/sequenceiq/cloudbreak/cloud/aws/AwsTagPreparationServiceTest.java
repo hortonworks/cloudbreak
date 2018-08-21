@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 @RunWith(MockitoJUnitRunner.class)
 public class AwsTagPreparationServiceTest {
 
-    private static final String USER_ID = "alma@hortonmunkak.hu";
+    private static final String USER_ID = "horton@hortonworks.com";
 
     private static final Long ORGANIZATION_ID = 1L;
 

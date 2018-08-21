@@ -43,7 +43,7 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
 @Component
 public class ParameterGenerator {
 
-    private static final String USER_ID = "alma@hortonmunkak.hu";
+    private static final String USER_ID = "horton@hortonworks.com";
 
     private static final Long ORGANIZATION_ID = 1L;
 
