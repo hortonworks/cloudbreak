@@ -59,20 +59,12 @@ public class ServiceEndpointCollector {
 
     public Collection<ExposedServiceResponse> getKnoxServices(String blueprintName) {
         Blueprint blueprint = blueprintService.getByNameForOrganization(blueprintName, organizationService.getDefaultOrganizationForCurrentUser());
-        BlueprintTextProcessor blueprintTextProcessor = blueprintProcessorFactory.get(blueprint.getBlueprintText());
-        Set<String> blueprintComponents = blueprintTextProcessor.getAllComponents();
-        Set<String> haComponents = ambariHaComponentFilter.getHaComponents(blueprintTextProcessor);
-        haComponents.remove(ExposedService.RANGER.getServiceName());
-        blueprintComponents.removeAll(haComponents);
-        String stackName = blueprintTextProcessor.getStackName();
-        String stackVersion = blueprintTextProcessor.getStackVersion();
-        VersionComparator versionComparator = new VersionComparator();
-        if ("HDF".equals(stackName) && versionComparator.compare(() -> stackVersion, () -> "3.2") < 0) {
-            return Collections.emptyList();
-        } else {
-            Collection<ExposedService> exposedServices = ExposedService.knoxServicesForComponents(blueprintComponents);
-            return ExposedServiceResponse.fromExposedServices(exposedServices);
-        }
+        return getKnoxServices(blueprint);
+    }
+
+    public Collection<ExposedServiceResponse> getKnoxServices(Long organizationId, String blueprintName) {
+        Blueprint blueprint = blueprintService.getByNameForOrganizationId(blueprintName, organizationId);
+        return getKnoxServices(blueprint);
     }
 
     public String getAmbariServerUrl(Cluster cluster, String ambariIp) {
@@ -125,6 +117,23 @@ public class ServiceEndpointCollector {
         }
 
         return clusterExposedServiceMap;
+    }
+
+    private Collection<ExposedServiceResponse> getKnoxServices(Blueprint blueprint) {
+        BlueprintTextProcessor blueprintTextProcessor = blueprintProcessorFactory.get(blueprint.getBlueprintText());
+        Set<String> blueprintComponents = blueprintTextProcessor.getAllComponents();
+        Set<String> haComponents = ambariHaComponentFilter.getHaComponents(blueprintTextProcessor);
+        haComponents.remove(ExposedService.RANGER.getServiceName());
+        blueprintComponents.removeAll(haComponents);
+        String stackName = blueprintTextProcessor.getStackName();
+        String stackVersion = blueprintTextProcessor.getStackVersion();
+        VersionComparator versionComparator = new VersionComparator();
+        if ("HDF".equals(stackName) && versionComparator.compare(() -> stackVersion, () -> "3.2") < 0) {
+            return Collections.emptyList();
+        } else {
+            Collection<ExposedService> exposedServices = ExposedService.knoxServicesForComponents(blueprintComponents);
+            return ExposedServiceResponse.fromExposedServices(exposedServices);
+        }
     }
 
     private Stream<String> getExposedServiceStream(GatewayTopology gatewayTopology) {
