@@ -54,6 +54,7 @@ public class UptimeNotifier {
         notification.setOrganizationId(stack.getOrganization().getId());
         notification.setStackId(stack.getId());
         notification.setOwner(stack.getOwner());
+        notification.setStackName(stack.getName());
         notification.setAccount(stack.getAccount());
         notification.setEventType(UPTIME_NOTIFICATION);
         notification.setEventMessage(String.valueOf(uptime));

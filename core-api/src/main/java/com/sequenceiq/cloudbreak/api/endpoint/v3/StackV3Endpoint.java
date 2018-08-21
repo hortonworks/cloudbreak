@@ -49,7 +49,8 @@ public interface StackV3Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.GET_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.PROXY_CONFIG_NOTES,
             nickname = "getStackInOrganization")
-    StackResponse getByNameInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
+    StackResponse getByNameInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name,
+            @QueryParam("entry") Set<String> entries);
 
     @POST
     @Path("")
