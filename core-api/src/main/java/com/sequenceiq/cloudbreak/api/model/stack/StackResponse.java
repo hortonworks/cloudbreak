@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.hardware.HardwareInfoGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupResponse;
+import com.sequenceiq.cloudbreak.api.model.users.OrganizationResourceResponse;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 
@@ -96,6 +97,9 @@ public class StackResponse extends StackBase {
 
     @ApiModelProperty(StackModelDescription.USAGES)
     private List<CloudbreakUsageJson> cloudbreakUsages = new ArrayList<>();
+
+    @ApiModelProperty(ModelDescriptions.ORGANIZATION_OF_THE_RESOURCE)
+    private OrganizationResourceResponse organization;
 
     public String getAccount() {
         return account;
@@ -272,5 +276,13 @@ public class StackResponse extends StackBase {
 
     public void setStackAuthentication(StackAuthenticationResponse stackAuthentication) {
         this.stackAuthentication = stackAuthentication;
+    }
+
+    public OrganizationResourceResponse getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(OrganizationResourceResponse organization) {
+        this.organization = organization;
     }
 }

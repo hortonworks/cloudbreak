@@ -21,7 +21,7 @@ public class StructuredNotificationEventToCloudbreakEventJsonConverterTest exten
 
     private static final long ORG_ID = 1L;
 
-    private static final String USER_ID = "alma@hortonmunkak.hu";
+    private static final String USER_ID = "horton@hortonworks.com";
 
     private static final String USER_NAME = "Alma Ur";
 

@@ -38,7 +38,7 @@ import com.sequenceiq.cloudbreak.service.Retry.ActionWentFailException;
 @RunWith(MockitoJUnitRunner.class)
 public class AwsResourceConnectorTerminateTest {
 
-    private static final String USER_ID = "alma@hortonmunkak.hu";
+    private static final String USER_ID = "horton@hortonworks.com";
 
     private static final Long ORGANIZATION_ID = 1L;
 

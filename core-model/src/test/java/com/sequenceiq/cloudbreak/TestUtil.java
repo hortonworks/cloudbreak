@@ -148,7 +148,7 @@ public class TestUtil {
 
     public static Stack stack(Status stackStatus, Credential credential) {
         User user = new User();
-        user.setUserId("alma@hortonmunkak.hu");
+        user.setUserId("horton@hortonworks.com");
         user.setUserName("Alma ur");
         Organization organization = new Organization();
         organization.setId(1L);
@@ -430,6 +430,10 @@ public class TestUtil {
             cluster.setSecure(true);
             cluster.setKerberosConfig(kerberosConfig);
         }
+        Organization organization = new Organization();
+        organization.setName("org 1");
+        organization.setId(1L);
+        cluster.setOrganization(organization);
         return cluster;
     }
 

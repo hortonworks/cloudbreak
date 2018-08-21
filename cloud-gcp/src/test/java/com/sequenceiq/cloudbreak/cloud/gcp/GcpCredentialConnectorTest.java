@@ -35,7 +35,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
 @RunWith(MockitoJUnitRunner.class)
 public class GcpCredentialConnectorTest {
 
-    private static final String USER_ID = "alma@hortonmunkak.hu";
+    private static final String USER_ID = "horton@hortonworks.com";
 
     private static final Long ORGANIZATION_ID = 1L;
 

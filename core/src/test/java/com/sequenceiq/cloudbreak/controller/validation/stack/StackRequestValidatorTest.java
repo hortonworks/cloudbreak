@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.controller.validation.stack;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Collections;
@@ -9,25 +10,33 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Spy;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.api.model.TemplateRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupRequest;
-import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
-import com.sequenceiq.cloudbreak.api.model.TemplateRequest;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.State;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateRequestValidator;
 
+@RunWith(MockitoJUnitRunner.class)
 public class StackRequestValidatorTest {
 
-    private final TemplateRequestValidator templateRequestValidator = new TemplateRequestValidator();
+    @Spy
+    private TemplateRequestValidator templateRequestValidator = new TemplateRequestValidator();
 
-    private final StackRequestValidator underTest = new StackRequestValidator(templateRequestValidator);
+    @InjectMocks
+    private StackRequestValidator underTest;
 
     @Test
     public void testWithZeroRootVolumeSize() {
+        assertNotNull(templateRequestValidator);
         StackRequest stackRequest = stackRequestWithRootVolumeSize(0);
         ValidationResult validationResult = underTest.validate(stackRequest);
         assertEquals(State.ERROR, validationResult.getState());

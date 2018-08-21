@@ -32,7 +32,7 @@ import com.sequenceiq.cloudbreak.cloud.notification.ResourceNotifier;
 
 public class LaunchConfigurationHandlerTest {
 
-    private static final String USER_ID = "alma@hortonmunkak.hu";
+    private static final String USER_ID = "horton@hortonworks.com";
 
     private static final Long ORGANIZATION_ID = 1L;
 
