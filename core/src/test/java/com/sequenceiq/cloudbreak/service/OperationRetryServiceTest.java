@@ -50,9 +50,6 @@ public class OperationRetryServiceTest {
     private Stack stackMock;
 
     @Mock
-    private AuthorizationService authorizationService;
-
-    @Mock
     private Cluster clusterMock;
 
     @Test(expected = BadRequestException.class)

@@ -41,7 +41,7 @@ public interface FlexSubscriptionEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = FlexSubOpDescription.DELETE_BY_ID, produces = ContentType.JSON, notes = FLEX_SUBSCRIPTION_NOTES,
             nickname = "deleteFlexSubscriptionById")
-    void delete(@PathParam("id") Long id);
+    FlexSubscriptionResponse delete(@PathParam("id") Long id);
 
     @POST
     @Path("account")
@@ -69,14 +69,14 @@ public interface FlexSubscriptionEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = FlexSubOpDescription.DELETE_PUBLIC_BY_NAME, produces = ContentType.JSON, notes = FLEX_SUBSCRIPTION_NOTES,
             nickname = "deletePublicFlexSubscriptionByName")
-    void deletePublic(@PathParam("name") String name);
+    FlexSubscriptionResponse deletePublic(@PathParam("name") String name);
 
     @DELETE
     @Path("user/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = FlexSubOpDescription.DELETE_PRIVATE_BY_NAME, produces = ContentType.JSON, notes = FLEX_SUBSCRIPTION_NOTES,
             nickname = "deletePrivateFlexSubscriptionByName")
-    void deletePrivate(@PathParam("name") String name);
+    FlexSubscriptionResponse deletePrivate(@PathParam("name") String name);
 
     @PUT
     @Path("account/setdefault/{name}")

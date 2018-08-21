@@ -34,11 +34,14 @@ import com.sequenceiq.cloudbreak.blueprint.filesystem.query.ConfigQueryEntry;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionBuilder;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.StackMatrixService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemSupportMatrixService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.util.ClientVersionUtil;
 
 @Component
@@ -65,6 +68,12 @@ public class UtilController implements UtilEndpoint {
 
     @Inject
     private OrganizationService organizationService;
+
+    @Inject
+    private UserService userService;
+
+    @Inject
+    private RestRequestThreadLocalService restRequestThreadLocalService;
 
     @Value("${info.app.version:}")
     private String cbVersion;
@@ -110,7 +119,9 @@ public class UtilController implements UtilEndpoint {
 
     @Override
     public Collection<ExposedServiceResponse> getKnoxServices(String blueprintName) {
-        return serviceEndpointCollector.getKnoxServices(blueprintName);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
+        return serviceEndpointCollector.getKnoxServices(blueprintName, organization);
     }
 
     @Override
@@ -120,7 +131,8 @@ public class UtilController implements UtilEndpoint {
 
     @Override
     public ParametersQueryResponse getCustomParameters(ParametersQueryRequest parametersQueryRequest) {
-        Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
         Set<String> strings = blueprintService.queryCustomParameters(parametersQueryRequest.getBlueprintName(), organization);
         Map<String, String> result = new HashMap<>();
         for (String customParameter : strings) {
@@ -133,7 +145,8 @@ public class UtilController implements UtilEndpoint {
 
     @Override
     public StructuredParameterQueriesResponse getFileSystemParameters(StructuredParametersQueryRequest structuredParametersQueryRequest) {
-        Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
         Set<ConfigQueryEntry> entries = blueprintService.queryFileSystemParameters(
                 structuredParametersQueryRequest.getBlueprintName(),
                 structuredParametersQueryRequest.getClusterName(),

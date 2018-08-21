@@ -20,11 +20,13 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
-import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.StackImageFilterService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Component
 @Transactional(TxType.NEVER)
@@ -37,9 +39,6 @@ public class ImageCatalogV1Controller implements ImageCatalogV1Endpoint {
     private StackImageFilterService stackImageFilterService;
 
     @Inject
-    private AuthenticatedUserService authenticatedUserService;
-
-    @Inject
     @Named("conversionService")
     private ConversionService conversionService;
 
@@ -49,6 +48,9 @@ public class ImageCatalogV1Controller implements ImageCatalogV1Endpoint {
     @Inject
     private RestRequestThreadLocalService restRequestThreadLocalService;
 
+    @Inject
+    private UserService userService;
+
     @Override
     public List<ImageCatalogResponse> getPublics() {
         return getAll();
@@ -56,8 +58,8 @@ public class ImageCatalogV1Controller implements ImageCatalogV1Endpoint {
 
     @Override
     public ImageCatalogResponse getByName(String name, boolean withImages) {
-        ImageCatalogResponse imageCatalogResponse = convert(imageCatalogService.get(getDefOrgId(), name));
-        Images images = imageCatalogService.propagateImagesIfRequested(getDefOrgId(), name, withImages);
+        ImageCatalogResponse imageCatalogResponse = convert(imageCatalogService.get(restRequestThreadLocalService.getRequestedOrgId(), name));
+        Images images = imageCatalogService.propagateImagesIfRequested(restRequestThreadLocalService.getRequestedOrgId(), name, withImages);
         if (images != null) {
             imageCatalogResponse.setImagesResponse(conversionService.convert(images, ImagesResponse.class));
         }
@@ -66,61 +68,69 @@ public class ImageCatalogV1Controller implements ImageCatalogV1Endpoint {
 
     @Override
     public ImagesResponse getImagesByProvider(String platform) throws Exception {
-        Images images = imageCatalogService.getImagesOsFiltered(platform, null).getImages();
+        IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
+        User user = userService.getOrCreate(identityUser);
+        Images images = imageCatalogService.getImagesOsFiltered(platform, null, identityUser, user).getImages();
         return conversionService.convert(images, ImagesResponse.class);
     }
 
     @Override
     public ImageCatalogResponse postPublic(ImageCatalogRequest imageCatalogRequest) {
-        return post(imageCatalogRequest);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        return post(imageCatalogRequest, user);
     }
 
     @Override
     public ImageCatalogResponse postPrivate(ImageCatalogRequest imageCatalogRequest) {
-        return post(imageCatalogRequest);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        return post(imageCatalogRequest, user);
     }
 
     @Override
     public ImagesResponse getImagesByProviderFromImageCatalog(String name, String platform) throws Exception {
-        Images images = imageCatalogService.getImages(getDefOrgId(), name, platform).getImages();
+        Images images = imageCatalogService.getImages(restRequestThreadLocalService.getRequestedOrgId(), name, platform).getImages();
         return conversionService.convert(images, ImagesResponse.class);
     }
 
     @Override
     public void deletePublic(String name) {
-        imageCatalogService.delete(getDefOrgId(), name);
+        IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
+        User user = userService.getOrCreate(identityUser);
+        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
+        imageCatalogService.delete(organization.getId(), name, identityUser, user);
     }
 
     @Override
     public ImageCatalogResponse putPublic(UpdateImageCatalogRequest request) {
-        ImageCatalog imageCatalog = imageCatalogService.update(getDefOrgId(), conversionService.convert(request, ImageCatalog.class));
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        ImageCatalog imageCatalog = imageCatalogService.update(restRequestThreadLocalService.getRequestedOrgId(),
+                conversionService.convert(request, ImageCatalog.class), user);
         return convert(imageCatalog);
     }
 
     @Override
     public ImageCatalogResponse putSetDefaultByName(String name) {
-        return conversionService.convert(imageCatalogService.setAsDefault(getDefOrgId(), name), ImageCatalogResponse.class);
+        IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
+        User user = userService.getOrCreate(identityUser);
+        return conversionService.convert(imageCatalogService.setAsDefault(restRequestThreadLocalService.getRequestedOrgId(), name, identityUser, user),
+                ImageCatalogResponse.class);
     }
 
     @Override
     public ImageCatalogRequest getRequestfromName(String name) {
-        ImageCatalog imageCatalog = imageCatalogService.get(getDefOrgId(), name);
+        ImageCatalog imageCatalog = imageCatalogService.get(restRequestThreadLocalService.getRequestedOrgId(), name);
         return conversionService.convert(imageCatalog, ImageCatalogRequest.class);
     }
 
     @Override
     public ImagesResponse getImagesFromCustomImageCatalogByStack(String imageCatalogName, String stackName) throws CloudbreakImageCatalogException {
-        Images images = stackImageFilterService.getApplicableImages(getDefOrgId(), imageCatalogName, stackName);
+        Images images = stackImageFilterService.getApplicableImages(restRequestThreadLocalService.getRequestedOrgId(), imageCatalogName, stackName);
         return conversionService.convert(images, ImagesResponse.class);
-    }
-
-    private Long getDefOrgId() {
-        return organizationService.getDefaultOrganizationForCurrentUser().getId();
     }
 
     @Override
     public ImagesResponse getImagesFromDefaultImageCatalogByStack(String stackName) throws Exception {
-        Images images = stackImageFilterService.getApplicableImages(getDefOrgId(), stackName);
+        Images images = stackImageFilterService.getApplicableImages(restRequestThreadLocalService.getRequestedOrgId(), stackName);
         return conversionService.convert(images, ImagesResponse.class);
     }
 
@@ -135,16 +145,13 @@ public class ImageCatalogV1Controller implements ImageCatalogV1Endpoint {
     }
 
     private List<ImageCatalogResponse> getAll() {
-        Long requestedOrgId = organizationService.getDefaultOrganizationForCurrentUser().getId();
-        return toJsonList(imageCatalogService.findAllByOrganizationId(requestedOrgId), ImageCatalogResponse.class);
+        return toJsonList(imageCatalogService.findAllByOrganizationId(restRequestThreadLocalService.getRequestedOrgId()), ImageCatalogResponse.class);
     }
 
-    private ImageCatalogResponse post(ImageCatalogRequest imageCatalogRequest) {
-        IdentityUser identityUser = authenticatedUserService.getCbUser();
+    private ImageCatalogResponse post(ImageCatalogRequest imageCatalogRequest, User user) {
         ImageCatalog imageCatalog = conversionService.convert(imageCatalogRequest, ImageCatalog.class);
-        imageCatalog.setAccount(identityUser.getAccount());
-        imageCatalog.setOwner(identityUser.getUserId());
-        imageCatalog = imageCatalogService.create(imageCatalog, getDefOrgId());
+        Long orgId = restRequestThreadLocalService.getRequestedOrgId();
+        imageCatalog = imageCatalogService.create(imageCatalog, orgId, user);
         return convert(imageCatalog);
     }
 }

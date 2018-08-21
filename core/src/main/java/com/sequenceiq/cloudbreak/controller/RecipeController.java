@@ -16,7 +16,12 @@ import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
 import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.Recipe;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Component
 @Transactional(TxType.NEVER)
@@ -28,6 +33,15 @@ public class RecipeController extends NotificationController implements RecipeEn
     @Inject
     @Named("conversionService")
     private ConversionService conversionService;
+
+    @Inject
+    private OrganizationService organizationService;
+
+    @Inject
+    private UserService userService;
+
+    @Inject
+    private RestRequestThreadLocalService restRequestThreadLocalService;
 
     @Override
     public RecipeResponse get(Long id) {
@@ -43,67 +57,81 @@ public class RecipeController extends NotificationController implements RecipeEn
 
     @Override
     public RecipeRequest getRequestfromName(String name) {
-        Recipe recipe = recipeService.getByNameFromUsersDefaultOrganization(name);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
+        Recipe recipe = recipeService.getByNameForOrganization(name, organization);
         return conversionService.convert(recipe, RecipeRequest.class);
     }
 
     @Override
     public RecipeResponse postPublic(RecipeRequest recipeRequest) {
-        return createInDefaultOrganization(recipeRequest);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        return createInDefaultOrganization(recipeRequest, user);
     }
 
     @Override
     public RecipeResponse postPrivate(RecipeRequest recipeRequest) {
-        return createInDefaultOrganization(recipeRequest);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        return createInDefaultOrganization(recipeRequest, user);
     }
 
     @Override
     public Set<RecipeResponse> getPrivates() {
-        return listForUsersDefaultOrganization();
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        return listForUsersDefaultOrganization(user);
     }
 
     @Override
     public Set<RecipeResponse> getPublics() {
-        return listForUsersDefaultOrganization();
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        return listForUsersDefaultOrganization(user);
     }
 
     @Override
     public RecipeResponse getPrivate(String name) {
-        return getRecipeResponse(name);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        return getRecipeResponse(name, user);
     }
 
     @Override
     public RecipeResponse getPublic(String name) {
-        return getRecipeResponse(name);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        return getRecipeResponse(name, user);
     }
 
     @Override
     public void deletePublic(String name) {
-        deleteInDefaultOrganization(name);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        deleteInDefaultOrganization(name, user);
     }
 
     @Override
     public void deletePrivate(String name) {
-        deleteInDefaultOrganization(name);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        deleteInDefaultOrganization(name, user);
     }
 
-    private RecipeResponse getRecipeResponse(String name) {
-        return conversionService.convert(recipeService.getByNameFromUsersDefaultOrganization(name), RecipeResponse.class);
+    private RecipeResponse getRecipeResponse(String name, User user) {
+        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
+        return conversionService.convert(recipeService.getByNameForOrganization(name, organization), RecipeResponse.class);
     }
 
-    private Set<RecipeResponse> listForUsersDefaultOrganization() {
-        return recipeService.findAllForUsersDefaultOrganization().stream()
+    private Set<RecipeResponse> listForUsersDefaultOrganization(User user) {
+        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
+        return recipeService.findAllByOrganization(organization).stream()
                 .map(recipe -> conversionService.convert(recipe, RecipeResponse.class))
                 .collect(Collectors.toSet());
     }
 
-    private void deleteInDefaultOrganization(String name) {
-        executeAndNotify(user -> recipeService.deleteByNameFromDefaultOrganization(name), ResourceEvent.RECIPE_DELETED);
+    private void deleteInDefaultOrganization(String name, User user) {
+        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
+        executeAndNotify(identityUser -> recipeService.deleteByNameFromOrganization(name, organization.getId()), ResourceEvent.RECIPE_DELETED);
     }
 
-    private RecipeResponse createInDefaultOrganization(RecipeRequest request) {
+    private RecipeResponse createInDefaultOrganization(RecipeRequest request, User user) {
         Recipe recipe = conversionService.convert(request, Recipe.class);
-        recipe = recipeService.createInDefaultOrganization(recipe);
+        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
+        recipe = recipeService.create(recipe, organization, user);
         return notifyAndReturn(recipe, ResourceEvent.RECIPE_CREATED);
     }
 

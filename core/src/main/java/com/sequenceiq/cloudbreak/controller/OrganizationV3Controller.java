@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.api.model.users.UserResponseJson.UserIdComparat
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
@@ -42,9 +43,12 @@ public class OrganizationV3Controller extends NotificationController implements 
     @Inject
     private UserService userService;
 
+    @Inject
+    private RestRequestThreadLocalService restRequestThreadLocalService;
+
     @Override
     public OrganizationResponse create(@Valid OrganizationRequest organizationRequest) {
-        User user = userService.getCurrentUser();
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
         Organization organization = conversionService.convert(organizationRequest, Organization.class);
         organization = organizationService.create(user, organization);
         notify(ResourceEvent.ORGANIZATION_CREATED);
@@ -53,44 +57,52 @@ public class OrganizationV3Controller extends NotificationController implements 
 
     @Override
     public SortedSet<OrganizationResponse> getAll() {
-        Set<Organization> organizations = organizationService.retrieveForCurrentUser();
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        Set<Organization> organizations = organizationService.retrieveForUser(user);
         return organizationsToSortedResponse(organizations);
     }
 
     @Override
     public OrganizationResponse getByName(String name) {
-        Organization organization = organizationService.getByNameForCurrentUserOrThrowNotFound(name);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        Organization organization = organizationService.getByNameForUserOrThrowNotFound(name, user);
         return conversionService.convert(organization, OrganizationResponse.class);
     }
 
     @Override
     public OrganizationResponse deleteByName(String name) {
-        Organization organization = organizationService.deleteByNameForCurrentUser(name);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        Organization defaultOrg = organizationService.getDefaultOrganizationForUser(user);
+        Organization organization = organizationService.deleteByNameForUser(name, user, defaultOrg);
         notify(ResourceEvent.ORGANIZATION_DELETED);
         return conversionService.convert(organization, OrganizationResponse.class);
     }
 
     @Override
     public SortedSet<UserResponseJson> addUsers(String orgName, @Valid Set<ChangeOrganizationUsersJson> addOrganizationUsersJson) {
-        Set<User> users = organizationService.addUsers(orgName, addOrganizationUsersJson);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        Set<User> users = organizationService.addUsers(orgName, addOrganizationUsersJson, user);
         return usersToSortedResponse(users);
     }
 
     @Override
     public SortedSet<UserResponseJson> changeUsers(String orgName, @Valid Set<ChangeOrganizationUsersJson> changeOrganizationUsersJson) {
-        Set<User> users = organizationService.changeUsers(orgName, jsonToMap(changeOrganizationUsersJson));
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        Set<User> users = organizationService.changeUsers(orgName, jsonToMap(changeOrganizationUsersJson), user);
         return usersToSortedResponse(users);
     }
 
     @Override
     public SortedSet<UserResponseJson> removeUsers(String orgName, @Valid Set<String> userIds) {
-        Set<User> users = organizationService.removeUsers(orgName, userIds);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        Set<User> users = organizationService.removeUsers(orgName, userIds, user);
         return usersToSortedResponse(users);
     }
 
     @Override
     public SortedSet<UserResponseJson> updateUsers(String orgName, @Valid Set<ChangeOrganizationUsersJson> updateOrganizationUsersJson) {
-        Set<User> users = organizationService.updateUsers(orgName, updateOrganizationUsersJson);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        Set<User> users = organizationService.updateUsers(orgName, updateOrganizationUsersJson, user);
         return usersToSortedResponse(users);
     }
 

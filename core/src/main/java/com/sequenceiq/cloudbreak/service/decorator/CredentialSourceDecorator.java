@@ -10,11 +10,11 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.CredentialSourceRequest;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.service.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 
@@ -27,10 +27,11 @@ public class CredentialSourceDecorator {
     @Inject
     private MissingResourceNameGenerator missingResourceNameGenerator;
 
-    public Credential decorate(Credential credential, CredentialSourceRequest credentialSourceRequest, IdentityUser user) {
+    public Credential decorate(Credential credential, CredentialSourceRequest credentialSourceRequest, Organization organization) {
         if (credential == null) {
-            credential = Strings.isNullOrEmpty(credentialSourceRequest.getSourceName()) ? credentialService.get(credentialSourceRequest.getSourceId())
-                    : credentialService.getByNameFromUsersDefaultOrganization(credentialSourceRequest.getSourceName());
+            credential = Strings.isNullOrEmpty(credentialSourceRequest.getSourceName())
+                    ? credentialService.get(credentialSourceRequest.getSourceId(), organization)
+                    : credentialService.getByNameForOrganization(credentialSourceRequest.getSourceName(), organization);
 
             if (credential == null) {
                 throw new BadRequestException("Source credential does not exist!");

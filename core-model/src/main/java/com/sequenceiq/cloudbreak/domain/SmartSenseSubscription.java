@@ -24,14 +24,12 @@ public class SmartSenseSubscription implements ProvisionEntity {
     @Column(nullable = false)
     private String subscriptionId;
 
-    @Column(nullable = false)
     private String owner;
 
-    @Column(nullable = false)
     private String account;
 
     @Column(nullable = false)
-    private boolean publicInAccount;
+    private boolean publicInAccount = true;
 
     @ManyToOne
     private Organization organization;

@@ -20,9 +20,8 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV2;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
+import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
-import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
-import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
@@ -36,12 +35,6 @@ public class ImageCatalogServiceDefaultNotFoundTest {
     private ImageCatalogProvider imageCatalogProvider;
 
     @Mock
-    private AuthenticatedUserService authenticatedUserService;
-
-    @Mock
-    private AuthorizationService authorizationService;
-
-    @Mock
     private UserProfileService userProfileService;
 
     @Spy
@@ -53,20 +46,22 @@ public class ImageCatalogServiceDefaultNotFoundTest {
     @Mock
     private AccountPreferencesService accountPreferencesService;
 
+    @Mock
+    private User user;
+
     @InjectMocks
     private ImageCatalogService underTest;
+
+    private IdentityUser identityUser;
 
     @Before
     public void beforeTest() throws Exception {
         String catalogJson = FileReaderUtils.readFileFromClasspath("com/sequenceiq/cloudbreak/service/image/no-default-imagecatalog.json");
         CloudbreakImageCatalogV2 catalog = JsonUtil.readValue(catalogJson, CloudbreakImageCatalogV2.class);
+        identityUser = getIdentityUser();
         when(imageCatalogProvider.getImageCatalogV2("")).thenReturn(catalog);
         when(accountPreferencesService.enabledPlatforms()).thenReturn(new HashSet<>(Arrays.asList(PROVIDERS)));
-
-        IdentityUser user = getIdentityUser();
-        when(authenticatedUserService.getCbUser()).thenReturn(user);
-
-        when(userProfileService.getOrCreate(user.getAccount(), user.getUserId(), user.getUsername())).thenReturn(new UserProfile());
+        when(userProfileService.getOrCreate(identityUser.getAccount(), identityUser.getUserId(), user)).thenReturn(new UserProfile());
     }
 
     @Test(expected = CloudbreakImageNotFoundException.class)
@@ -75,7 +70,7 @@ public class ImageCatalogServiceDefaultNotFoundTest {
         ReflectionTestUtils.setField(underTest, "cbVersion", "5.0.0");
         ReflectionTestUtils.setField(underTest, "defaultCatalogUrl", "");
         // WHEN
-        underTest.getPrewarmImageDefaultPreferred("gcp", "notimportant", "notimportant", null);
+        underTest.getPrewarmImageDefaultPreferred("gcp", "notimportant", "notimportant", null, identityUser, user);
         // THEN throw CloudbreakImageNotFoundException
     }
 

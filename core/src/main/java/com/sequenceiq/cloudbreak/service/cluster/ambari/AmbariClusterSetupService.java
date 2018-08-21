@@ -166,9 +166,11 @@ public class AmbariClusterSetupService implements ClusterSetupService {
                     pollingResult.getRight() == null ? constructClusterFailedMessage(cluster.getId(), ambariClient) : pollingResult.getRight().getMessage();
             ambariClusterConnectorPollingResultChecker.checkPollingResult(pollingResult.getLeft(), message);
             Pair<PollingResult, Exception> pollingResultExceptionPair = ambariOperationService
-                    .waitForOperations(stack, ambariClient, new HashMap<String, Integer>() { {
-                        put("CLUSTER_INSTALL", 1);
-                    } }, INSTALL_AMBARI_PROGRESS_STATE);
+                    .waitForOperations(stack, ambariClient, new HashMap<>() {
+                        {
+                            put("CLUSTER_INSTALL", 1);
+                        }
+                    }, INSTALL_AMBARI_PROGRESS_STATE);
 
             ambariClusterConnectorPollingResultChecker
                     .checkPollingResult(pollingResultExceptionPair.getLeft(), constructClusterFailedMessage(cluster.getId(), ambariClient));

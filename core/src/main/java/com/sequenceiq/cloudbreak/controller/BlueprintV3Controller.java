@@ -16,7 +16,10 @@ import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
 import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Controller
 @Transactional(TxType.NEVER)
@@ -28,6 +31,12 @@ public class BlueprintV3Controller extends NotificationController implements Blu
     @Inject
     @Named("conversionService")
     private ConversionService conversionService;
+
+    @Inject
+    private UserService userService;
+
+    @Inject
+    private RestRequestThreadLocalService restRequestThreadLocalService;
 
     @Override
     public Set<BlueprintResponse> listByOrganization(Long organizationId) {
@@ -45,7 +54,8 @@ public class BlueprintV3Controller extends NotificationController implements Blu
     @Override
     public BlueprintResponse createInOrganization(Long organizationId, BlueprintRequest request) {
         Blueprint blueprint = conversionService.convert(request, Blueprint.class);
-        blueprint = blueprintService.create(blueprint, organizationId);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        blueprint = blueprintService.create(blueprint, organizationId, user);
         notify(ResourceEvent.BLUEPRINT_CREATED);
         return conversionService.convert(blueprint, BlueprintResponse.class);
     }

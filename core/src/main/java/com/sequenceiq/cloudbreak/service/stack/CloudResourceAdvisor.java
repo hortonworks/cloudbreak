@@ -27,12 +27,11 @@ import com.sequenceiq.cloudbreak.cloud.model.PlatformRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.VmRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.PlatformResourceRequest;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 
 @Service
 public class CloudResourceAdvisor {
@@ -53,10 +52,8 @@ public class CloudResourceAdvisor {
     @Inject
     private DefaultRootVolumeSizeProvider defaultRootVolumeSizeProvider;
 
-    @Inject
-    private OrganizationService organizationService;
-
-    public PlatformRecommendation createForBlueprint(String blueprintName, Long blueprintId, PlatformResourceRequest resourceRequest, IdentityUser cbUser) {
+    public PlatformRecommendation createForBlueprint(String blueprintName, Long blueprintId, PlatformResourceRequest resourceRequest, User user,
+            Organization organization) {
         String cloudPlatform = resourceRequest.getCloudPlatform();
         String region = resourceRequest.getRegion();
         String availabilityZone = resourceRequest.getAvailabilityZone();
@@ -65,7 +62,7 @@ public class CloudResourceAdvisor {
         LOGGER.info("Advising resources for blueprintId: {}, blueprintName: {}, provider: {} and region: {}.",
                 blueprintId, blueprintName, cloudPlatform, region);
 
-        String blueprintText = getBlueprint(blueprintName, blueprintId).getBlueprintText();
+        String blueprintText = getBlueprint(blueprintName, blueprintId, user, organization).getBlueprintText();
         Map<String, Set<String>> componentsByHostGroup = blueprintProcessorFactory.get(blueprintText).getComponentsByHostGroup();
         componentsByHostGroup
                 .forEach((hGName, components) -> hostGroupContainsMasterComp.put(hGName, isThereMasterComponents(components)));
@@ -105,15 +102,14 @@ public class CloudResourceAdvisor {
         return new PlatformRecommendation(vmTypesByHostGroup, availableVmTypes, diskTypes);
     }
 
-    private Blueprint getBlueprint(String blueprintName, Long blueprintId) {
+    private Blueprint getBlueprint(String blueprintName, Long blueprintId, User user, Organization organization) {
         Blueprint bp;
         if (blueprintId != null) {
             LOGGER.debug("Try to get validation by id: {}.", blueprintId);
             bp = blueprintService.get(blueprintId);
         } else {
             LOGGER.debug("Try to get validation by name: {}.", blueprintName);
-            Organization org = organizationService.getDefaultOrganizationForCurrentUser();
-            bp = blueprintService.getByNameForOrganization(blueprintName, org);
+            bp = blueprintService.getByNameForOrganization(blueprintName, organization);
         }
         return bp;
     }

@@ -9,8 +9,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
@@ -18,7 +16,6 @@ import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.organization.OrganizationAwareResource;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"account", "name"}))
 public class ConstraintTemplate implements ProvisionEntity, OrganizationAwareResource {
 
     @Id
@@ -32,14 +29,11 @@ public class ConstraintTemplate implements ProvisionEntity, OrganizationAwareRes
     @Column(length = 1000, columnDefinition = "TEXT")
     private String description;
 
-    @Column(nullable = false)
     private String owner;
 
-    @Column(nullable = false)
     private String account;
 
-    @Column(nullable = false)
-    private boolean publicInAccount;
+    private boolean publicInAccount = true;
 
     @Column(nullable = false)
     private Double cpu;

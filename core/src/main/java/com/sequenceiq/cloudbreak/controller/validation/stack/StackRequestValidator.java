@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Component
 public class StackRequestValidator implements Validator<StackRequest> {
@@ -59,6 +60,9 @@ public class StackRequestValidator implements Validator<StackRequest> {
 
     @Inject
     private RestRequestThreadLocalService restRequestThreadLocalService;
+
+    @Inject
+    private UserService userService;
 
     @Inject
     private TemplateRequestValidator templateRequestValidator;
@@ -145,11 +149,7 @@ public class StackRequestValidator implements Validator<StackRequest> {
 
     private void checkEncryptionKeyValidityForInstanceGroupWhenKeysAreListable(InstanceGroupRequest instanceGroupRequest, String credentialName,
             String region, ValidationResultBuilder validationBuilder) {
-
         Long orgId = restRequestThreadLocalService.getRequestedOrgId();
-        if (orgId == null) {
-            orgId = organizationService.getDefaultOrganizationForCurrentUser().getId();
-        }
         Credential cred = credentialService.getByNameForOrganizationId(credentialName, orgId);
         Optional<PlatformEncryptionKeysResponse> keys = getEncryptionKeysWithExceptionHandling(cred.getId(), region, cred.getOwner(), cred.getOwner());
         if (keys.isPresent() && !keys.get().getEncryptionKeyConfigs().isEmpty()) {

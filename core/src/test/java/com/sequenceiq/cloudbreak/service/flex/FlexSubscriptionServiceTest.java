@@ -32,7 +32,6 @@ import com.sequenceiq.cloudbreak.repository.FlexSubscriptionRepository;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
-import com.sequenceiq.cloudbreak.service.user.UserService;
 
 public class FlexSubscriptionServiceTest {
 
@@ -45,21 +44,19 @@ public class FlexSubscriptionServiceTest {
     @Mock
     private OrganizationService organizationService;
 
-    @Mock
-    private UserService userService;
-
     @InjectMocks
     private FlexSubscriptionService underTest;
 
+    @Mock
     private Organization organization;
+
+    @Mock
+    private User user;
 
     @Before
     public void setUp() throws TransactionExecutionException {
         initMocks(this);
         doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).required(any());
-        User user = new User();
-        organization = new Organization();
-        when(userService.getCurrentUser()).thenReturn(user);
         when(organizationService.getDefaultOrganizationForUser(user)).thenReturn(organization);
     }
 
@@ -68,7 +65,7 @@ public class FlexSubscriptionServiceTest {
         when(flexSubscriptionRepository.countByNameAndOrganization(anyString(), any())).thenReturn(1L);
         FlexSubscription subscription = getFlexSubscription("testFlexSubscription", "FLEX-000000000");
 
-        underTest.createInDefaultOrganization(subscription);
+        underTest.create(subscription, organization, user);
     }
 
     @Test(expected = BadRequestException.class)
@@ -77,7 +74,7 @@ public class FlexSubscriptionServiceTest {
         when(flexSubscriptionRepository.countBySubscriptionIdAndOrganization(anyString(), any())).thenReturn(1L);
         FlexSubscription subscription = getFlexSubscription("testFlexSubscription1", "FLEX-000000001");
 
-        underTest.createInDefaultOrganization(subscription);
+        underTest.create(subscription, organization, user);
     }
 
     @Test
@@ -90,7 +87,7 @@ public class FlexSubscriptionServiceTest {
         when(flexSubscriptionRepository.findAllByOrganization(any())).thenReturn(allByOrganization);
         when(organizationService.retrieveForUser(any())).thenReturn(Stream.of(organization).collect(Collectors.toSet()));
 
-        FlexSubscription result = underTest.createInDefaultOrganization(subscription);
+        FlexSubscription result = underTest.create(subscription, organization, user);
 
         verify(flexSubscriptionRepository, times(1)).save(subscription);
         verify(flexSubscriptionRepository, times(1)).saveAll(allByOrganization);
@@ -109,7 +106,7 @@ public class FlexSubscriptionServiceTest {
         when(flexSubscriptionRepository.findAllByOrganization(any())).thenReturn(allByOrganization);
         when(organizationService.retrieveForUser(any())).thenReturn(Stream.of(organization).collect(Collectors.toSet()));
 
-        FlexSubscription result = underTest.createInDefaultOrganization(subscription);
+        FlexSubscription result = underTest.create(subscription, organization, user);
 
         verify(flexSubscriptionRepository, times(1)).save(subscription);
         verify(flexSubscriptionRepository, times(1)).saveAll(allByOrganization);
@@ -130,7 +127,7 @@ public class FlexSubscriptionServiceTest {
         when(flexSubscriptionRepository.findAllByOrganization(any())).thenReturn(allByOrg);
         when(organizationService.retrieveForUser(any())).thenReturn(Stream.of(organization).collect(Collectors.toSet()));
 
-        FlexSubscription result = underTest.createInDefaultOrganization(subscription);
+        FlexSubscription result = underTest.create(subscription, organization, user);
 
         verify(flexSubscriptionRepository, times(1)).save(subscription);
         verify(flexSubscriptionRepository, times(1)).saveAll(allByOrg);
@@ -151,7 +148,7 @@ public class FlexSubscriptionServiceTest {
         when(flexSubscriptionRepository.findAllByOrganization(any())).thenReturn(allByOrg);
         when(organizationService.retrieveForUser(any())).thenReturn(Stream.of(organization).collect(Collectors.toSet()));
 
-        FlexSubscription result = underTest.createInDefaultOrganization(subscription);
+        FlexSubscription result = underTest.create(subscription, organization, user);
 
         verify(flexSubscriptionRepository, times(1)).save(subscription);
         verify(flexSubscriptionRepository, times(1)).saveAll(allByOrg);

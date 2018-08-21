@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
 import com.sequenceiq.cloudbreak.comparator.audit.AuditEventComparator;
 import com.sequenceiq.cloudbreak.domain.StructuredEventEntity;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.repository.organization.OrganizationResourceRepository;
 import com.sequenceiq.cloudbreak.service.AbstractOrganizationAwareResourceService;
 import com.sequenceiq.cloudbreak.structuredevent.db.StructuredEventRepository;
@@ -38,17 +39,16 @@ public class AuditEventService extends AbstractOrganizationAwareResourceService<
         return event != null ? conversionService.convert(event, AuditEvent.class) : null;
     }
 
-    public List<AuditEvent> getAuditEventsForDefaultOrg(String resourceType, Long resourceId) {
-        Organization organization = getOrganizationService().getDefaultOrganizationForCurrentUser();
+    public List<AuditEvent> getAuditEventsForOrg(String resourceType, Long resourceId, Organization organization) {
         List<AuditEvent> auditEvents = getEventsForUserWithTypeAndResourceIdByOrg(organization, resourceType, resourceId);
         Collections.sort(auditEvents, new AuditEventComparator().reversed());
         return auditEvents;
     }
 
-    public List<AuditEvent> getAuditEventsByOrgId(Long organizationId, String resourceType, Long resourceId) {
-        Organization organization = getOrganizationService().get(organizationId);
+    public List<AuditEvent> getAuditEventsByOrgId(Long organizationId, String resourceType, Long resourceId, User user) {
+        Organization organization = getOrganizationService().get(organizationId, user);
         List<AuditEvent> auditEvents = getEventsForUserWithTypeAndResourceIdByOrg(organization, resourceType, resourceId);
-        Collections.sort(auditEvents, new AuditEventComparator().reversed());
+        auditEvents.sort(new AuditEventComparator().reversed());
         return auditEvents;
     }
 

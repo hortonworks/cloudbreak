@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.controller;
 
 import java.util.Set;
 
+import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
@@ -16,12 +17,15 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.BlueprintEndpoint;
 import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
 import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.init.blueprint.BlueprintLoaderService;
-import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Component
 @Transactional(TxType.NEVER)
@@ -32,14 +36,20 @@ public class BlueprintController extends NotificationController implements Bluep
     private BlueprintService blueprintService;
 
     @Autowired
-    private AuthenticatedUserService authenticatedUserService;
-
-    @Autowired
     @Qualifier("conversionService")
     private ConversionService conversionService;
 
     @Autowired
     private BlueprintLoaderService blueprintLoaderService;
+
+    @Inject
+    private OrganizationService organizationService;
+
+    @Inject
+    private UserService userService;
+
+    @Inject
+    private RestRequestThreadLocalService restRequestThreadLocalService;
 
     @Override
     public BlueprintResponse get(Long id) {
@@ -55,12 +65,16 @@ public class BlueprintController extends NotificationController implements Bluep
 
     @Override
     public BlueprintResponse postPublic(BlueprintRequest request) {
-        return createInDefaultOrganization(request);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
+        return createInOrganization(request, user, organization);
     }
 
     @Override
     public BlueprintResponse postPrivate(BlueprintRequest request) {
-        return createInDefaultOrganization(request);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
+        return createInOrganization(request, user, organization);
     }
 
     @Override
@@ -100,18 +114,21 @@ public class BlueprintController extends NotificationController implements Bluep
     }
 
     private BlueprintResponse getBlueprintResponse(String name) {
-        return conversionService.convert(blueprintService.getByNameFromUsersDefaultOrganization(name), BlueprintResponse.class);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
+        return conversionService.convert(blueprintService.getByNameForOrganization(name, organization), BlueprintResponse.class);
     }
 
     private Set<BlueprintResponse> listForUsersDefaultOrganization() {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        return getBlueprintResponses(user, blueprintService.findAllForUsersDefaultOrganization());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
+        return getBlueprintResponses(user, blueprintService.findAllByOrganization(organization), organization);
     }
 
-    private Set<BlueprintResponse> getBlueprintResponses(IdentityUser user, Set<Blueprint> blueprints) {
+    private Set<BlueprintResponse> getBlueprintResponses(User user, Set<Blueprint> blueprints, Organization organization) {
         if (blueprintLoaderService.addingDefaultBlueprintsAreNecessaryForTheUser(blueprints)) {
             LOGGER.info("Blueprints should modify based on the defaults for the '{}' user.", user.getUserId());
-            blueprints = blueprintLoaderService.loadBlueprintsForTheSpecifiedUser(user, blueprints);
+            blueprints = blueprintLoaderService.loadBlueprintsForTheSpecifiedUser(user, blueprints, organization);
             LOGGER.info("Blueprints modification finished based on the defaults for '{}' user.", user.getUserId());
         }
         return toJsonList(blueprints);
@@ -124,12 +141,13 @@ public class BlueprintController extends NotificationController implements Bluep
     }
 
     private void deleteInDefaultOrganization(String name) {
-        executeAndNotify(user -> blueprintService.deleteByNameFromDefaultOrganization(name), ResourceEvent.BLUEPRINT_DELETED);
+        executeAndNotify(identityUser -> blueprintService.deleteByNameFromOrganization(name, restRequestThreadLocalService.getRequestedOrgId()),
+                ResourceEvent.BLUEPRINT_DELETED);
     }
 
-    private BlueprintResponse createInDefaultOrganization(BlueprintRequest request) {
+    private BlueprintResponse createInOrganization(BlueprintRequest request, User user, Organization organization) {
         Blueprint blueprint = conversionService.convert(request, Blueprint.class);
-        blueprint = blueprintService.createInDefaultOrganization(blueprint);
+        blueprint = blueprintService.create(blueprint, organization, user);
         return notifyAndReturn(blueprint, ResourceEvent.BLUEPRINT_CREATED);
     }
 

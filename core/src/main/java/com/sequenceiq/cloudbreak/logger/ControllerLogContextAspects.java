@@ -14,8 +14,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Maps;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Component
 @Aspect
@@ -23,7 +24,10 @@ public class ControllerLogContextAspects {
     private static final Logger LOGGER = LoggerFactory.getLogger(ControllerLogContextAspects.class);
 
     @Inject
-    private AuthenticatedUserService authenticatedUserService;
+    private UserService userService;
+
+    @Inject
+    private RestRequestThreadLocalService restRequestThreadLocalService;
 
     @Pointcut("execution(public * com.sequenceiq.cloudbreak.controller.*Controller.*(..))")
     public void interceptControllerMethodCalls() {
@@ -63,8 +67,8 @@ public class ControllerLogContextAspects {
         String controllerClassName = target.getClass().getSimpleName();
         String resourceType = controllerClassName.substring(0, controllerClassName.indexOf("Controller"));
         result.put(LoggerContextKey.RESOURCE_TYPE.toString(), resourceType);
-        IdentityUser cbUser = authenticatedUserService.getCbUser();
-        result.put(LoggerContextKey.OWNER_ID.toString(), cbUser != null ? cbUser.getUserId() : "undefined");
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        result.put(LoggerContextKey.OWNER_ID.toString(), user != null ? user.getUserId() : "undefined");
         return result;
     }
 }

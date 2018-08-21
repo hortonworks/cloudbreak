@@ -111,7 +111,7 @@ public class OwnerBasedPermissionEvaluatorTest {
         when(oauth.getUserAuthentication()).thenReturn(new TestingAuthenticationToken("principal", "credential"));
         IdentityUser user = new IdentityUser("admin", "", "account", Collections.emptyList(), "", "", null);
         when(cachedUserDetailsService.getDetails(anyString(), any(UserFilterField.class))).thenReturn(user);
-
+        stack.setPublicInAccount(false);
         boolean result = underTest.hasPermission(oauth, stack, "read");
 
         Assert.assertFalse(result);

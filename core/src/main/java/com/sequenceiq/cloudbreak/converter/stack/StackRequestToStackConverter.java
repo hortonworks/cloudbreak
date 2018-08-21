@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -49,6 +50,7 @@ import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -77,25 +79,34 @@ public class StackRequestToStackConverter extends AbstractConversionServiceAware
     @Inject
     private DefaultCostTaggingService defaultCostTaggingService;
 
+    @Inject
+    private RestRequestThreadLocalService restRequestThreadLocalService;
+
     @Value("${cb.platform.default.regions:}")
     private String defaultRegions;
 
     @Override
     public Stack convert(StackRequest source) {
         Stack stack = new Stack();
+
+        String account = Optional.ofNullable(source.getAccount()).orElse(restRequestThreadLocalService.getIdentityUser().getUserId());
+        stack.setAccount(account);
+        String owner = Optional.ofNullable(source.getOwner()).orElse(restRequestThreadLocalService.getIdentityUser().getAccount());
+        stack.setOwner(owner);
+
         stack.setName(source.getName());
         stack.setDisplayName(source.getName());
         stack.setRegion(getRegion(source));
         setPlatform(source);
         stack.setCloudPlatform(source.getCloudPlatform());
         Map<String, String> sourceTags = source.getApplicationTags();
-        stack.setTags(getTags(mergeTags(sourceTags, source.getUserDefinedTags(), getDefaultTags(source))));
+        String email = Optional.ofNullable(source.getOwnerEmail()).orElse(restRequestThreadLocalService.getIdentityUser().getUsername());
+        stack.setTags(getTags(mergeTags(sourceTags, source.getUserDefinedTags(), getDefaultTags(source, account, email))));
         stack.setInputs(getInputs(mergeInputs(source.getCustomInputs())));
         preparateSharedServiceProperties(source, stack, sourceTags);
         StackAuthentication stackAuthentication = conversionService.convert(source.getStackAuthentication(), StackAuthentication.class);
         stack.setStackAuthentication(stackAuthentication);
         validateStackAuthentication(source);
-        stack.setOwner(source.getOwner());
         stack.setAvailabilityZone(source.getAvailabilityZone());
         stack.setOnFailureActionAction(source.getOnFailureAction());
         stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.PROVISION_REQUESTED.getStatus(), "", DetailedStackStatus.PROVISION_REQUESTED));
@@ -160,14 +171,14 @@ public class StackRequestToStackConverter extends AbstractConversionServiceAware
         }
     }
 
-    private Map<String, String> getDefaultTags(StackRequest source) {
+    private Map<String, String> getDefaultTags(StackRequest source, String account, String email) {
         Map<String, String> result = new HashMap<>();
         try {
-            AccountPreferences pref = accountPreferencesService.getByAccount(source.getAccount());
+            AccountPreferences pref = accountPreferencesService.getByAccount(account);
             if (pref != null && pref.getDefaultTags() != null && StringUtils.isNoneBlank(pref.getDefaultTags().getValue())) {
                 result = pref.getDefaultTags().get(Map.class);
             }
-            result.putAll(defaultCostTaggingService.prepareDefaultTags(source.getAccount(), source.getOwnerEmail(), result, source.getCloudPlatform()));
+            result.putAll(defaultCostTaggingService.prepareDefaultTags(source.getAccount(), email, result, source.getCloudPlatform()));
         } catch (IOException e) {
             LOGGER.debug("Exception during reading default tags.", e);
         }

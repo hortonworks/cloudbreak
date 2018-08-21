@@ -36,7 +36,7 @@ public class Credential implements ProvisionEntity, OrganizationAwareResource {
     private String account;
 
     @Column(nullable = false)
-    private boolean publicInAccount;
+    private boolean publicInAccount = true;
 
     @Column(columnDefinition = "boolean default false")
     private boolean archived;

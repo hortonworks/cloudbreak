@@ -23,10 +23,8 @@ public class ImageCatalog implements ProvisionEntity, OrganizationAwareResource 
     @SequenceGenerator(name = "imagecatalog_generator", sequenceName = "imagecatalog_id_seq", allocationSize = 1)
     private Long id;
 
-    @Column(nullable = false)
     private String owner;
 
-    @Column(nullable = false)
     private String account;
 
     @Column(nullable = false)
@@ -36,7 +34,7 @@ public class ImageCatalog implements ProvisionEntity, OrganizationAwareResource 
     private String imageCatalogUrl;
 
     @Column(nullable = false)
-    private boolean publicInAccount;
+    private boolean publicInAccount = true;
 
     @Column(columnDefinition = "boolean default false")
     private boolean archived;

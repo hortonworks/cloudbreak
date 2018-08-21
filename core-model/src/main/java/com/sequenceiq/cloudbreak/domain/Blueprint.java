@@ -42,14 +42,12 @@ public class Blueprint implements ProvisionEntity, OrganizationAwareResource {
 
     private int hostGroupCount;
 
-    @Column(nullable = false)
     private String owner;
 
-    @Column(nullable = false)
     private String account;
 
     @Column(nullable = false)
-    private boolean publicInAccount;
+    private boolean publicInAccount = true;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)

@@ -80,14 +80,12 @@ public class Stack implements ProvisionEntity, OrganizationAwareResource {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
     private String owner;
 
-    @Column(nullable = false)
     private String account;
 
     @Column(nullable = false)
-    private boolean publicInAccount;
+    private boolean publicInAccount = true;
 
     @Column(nullable = false)
     private String region;

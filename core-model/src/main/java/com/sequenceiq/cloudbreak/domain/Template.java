@@ -44,7 +44,7 @@ public class Template implements ProvisionEntity {
     private String account;
 
     @Column(nullable = false)
-    private boolean publicInAccount;
+    private boolean publicInAccount = true;
 
     @Column(nullable = false)
     private Integer volumeCount;

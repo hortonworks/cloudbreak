@@ -8,7 +8,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Component
@@ -18,16 +19,17 @@ public class CredentialToExtendedCloudCredentialConverter {
     private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
 
     @Inject
-    private AuthenticatedUserService authenticatedUserService;
+    private UserService userService;
 
     @Inject
-    private UserService userService;
+    private RestRequestThreadLocalService restRequestThreadLocalService;
 
     public ExtendedCloudCredential convert(Credential credential) {
         CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(credential);
-        IdentityUser identityUser = authenticatedUserService.getCbUser();
+        IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
+        User user = userService.getOrCreate(identityUser);
         return new ExtendedCloudCredential(cloudCredential, credential.cloudPlatform(), credential.getDescription(), credential.getOwner(),
                 credential.getAccount(), credential.isPublicInAccount(), identityUser,
-                userService.getCurrentUser().getUserId(), credential.getOrganization().getId());
+                user.getUserId(), credential.getOrganization().getId());
     }
 }

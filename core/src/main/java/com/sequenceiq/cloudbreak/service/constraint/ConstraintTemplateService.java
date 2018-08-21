@@ -14,14 +14,11 @@ import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.ConstraintTemplate;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.repository.ConstraintTemplateRepository;
 import com.sequenceiq.cloudbreak.repository.organization.OrganizationResourceRepository;
 import com.sequenceiq.cloudbreak.service.AbstractOrganizationAwareResourceService;
-import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.util.NameUtil;
 
 @Service
@@ -38,19 +35,6 @@ public class ConstraintTemplateService extends AbstractOrganizationAwareResource
 
     @Inject
     private ClusterService clusterService;
-
-    @Inject
-    private AuthorizationService authorizationService;
-
-    @Inject
-    private OrganizationService organizationService;
-
-    @Override
-    public ConstraintTemplate deleteByNameFromDefaultOrganization(String name) {
-        Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
-        ConstraintTemplate constraintTemplate = constraintTemplateRepository.findByNameAndOrganization(name, organization);
-        return delete(constraintTemplate);
-    }
 
     @Override
     public ConstraintTemplate deleteByNameFromOrganization(String name, Long organizationId) {

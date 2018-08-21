@@ -26,7 +26,6 @@ import com.sequenceiq.cloudbreak.api.model.users.ChangeOrganizationUsersJson;
 import com.sequenceiq.cloudbreak.authorization.OrganizationPermissions;
 import com.sequenceiq.cloudbreak.authorization.OrganizationPermissions.Action;
 import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
@@ -34,8 +33,6 @@ import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.domain.organization.UserOrgPermissions;
 import com.sequenceiq.cloudbreak.repository.organization.OrganizationRepository;
-import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
-import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
@@ -56,13 +53,7 @@ public class OrganizationService {
     private UserOrgPermissionsService userOrgPermissionsService;
 
     @Inject
-    private AuthorizationService authorizationService;
-
-    @Inject
     private UserService userService;
-
-    @Inject
-    private AuthenticatedUserService authenticatedUserService;
 
     @Inject
     private OrganizationDeleteVerifierService organizationDeleteVerifierService;
@@ -89,35 +80,9 @@ public class OrganizationService {
         }
     }
 
-    public Set<Organization> retrieveForCurrentUser() {
-        return userOrgPermissionsService.findForCurrentUser().stream()
-                .map(UserOrgPermissions::getOrganization).collect(Collectors.toSet());
-    }
-
     public Set<Organization> retrieveForUser(User user) {
         return userOrgPermissionsService.findForUser(user).stream()
                 .map(UserOrgPermissions::getOrganization).collect(Collectors.toSet());
-    }
-
-    public Optional<Organization> getByName(String name) {
-        try {
-            return transactionService.required(() -> {
-                User user = userService.getCurrentUser();
-                return getByName(name, user);
-            });
-        } catch (TransactionExecutionException e) {
-            throw new TransactionRuntimeExecutionException(e);
-        }
-    }
-
-    public Organization getDefaultOrganizationForCurrentUser() {
-        User user = userService.getCurrentUser();
-        return getDefaultOrganizationForUser(user);
-    }
-
-    public Organization getDefaultOrganizationForUser(IdentityUser identityUser) {
-        User user = userService.getOrCreate(identityUser);
-        return getDefaultOrganizationForUser(user);
     }
 
     public Organization getDefaultOrganizationForUser(User user) {
@@ -128,17 +93,8 @@ public class OrganizationService {
         return Optional.ofNullable(organizationRepository.getByName(name, user.getTenant()));
     }
 
-    public Optional<Organization> getByNameForCurrentUser(String name) {
-        User user = userService.getCurrentUser();
+    public Optional<Organization> getByNameForUser(String name, User user) {
         return Optional.ofNullable(organizationRepository.getByName(name, user.getTenant()));
-    }
-
-    public Organization get(Long id) {
-        UserOrgPermissions userOrgPermissions = userOrgPermissionsService.findForCurrentUserByOrganizationId(id);
-        if (userOrgPermissions == null) {
-            throw new AccessDeniedException("You have no access for this resource.");
-        }
-        return userOrgPermissions.getOrganization();
     }
 
     public Organization getByIdWithoutPermissionCheck(Long id) {
@@ -149,7 +105,7 @@ public class OrganizationService {
         throw new IllegalArgumentException(String.format("No Organization found with id: %s", id));
     }
 
-    public Organization get(User user, Long id) {
+    public Organization get(Long id, User user) {
         UserOrgPermissions userOrgPermissions = userOrgPermissionsService.findForUserByOrganizationId(user, id);
         if (userOrgPermissions == null) {
             throw new NotFoundException("Cannot find organization by user.");
@@ -157,12 +113,11 @@ public class OrganizationService {
         return userOrgPermissions.getOrganization();
     }
 
-    public Set<User> removeUsers(String orgName, Set<String> userIds) {
+    public Set<User> removeUsers(String orgName, Set<String> userIds, User user) {
         try {
             return transactionService.required(() -> {
-                Organization organization = getByNameForCurrentUserOrThrowNotFound(orgName);
-                User currentUser = userService.getCurrentUser();
-                authorizeOrgManipulation(currentUser, organization, Action.MANAGE);
+                Organization organization = getByNameForUserOrThrowNotFound(orgName, user);
+                authorizeOrgManipulation(user, organization, Action.MANAGE);
 
                 Set<User> users = userService.getByUsersIds(userIds);
                 Set<UserOrgPermissions> toBeDeleted = validateAllUsersAreInTheOrganization(organization, users);
@@ -176,11 +131,10 @@ public class OrganizationService {
         }
     }
 
-    public Set<User> addUsers(String orgName, Set<ChangeOrganizationUsersJson> changeOrganizationUsersJsons) {
+    public Set<User> addUsers(String orgName, Set<ChangeOrganizationUsersJson> changeOrganizationUsersJsons, User currentUser) {
         try {
             return transactionService.required(() -> {
-                Organization organization = getByNameForCurrentUserOrThrowNotFound(orgName);
-                User currentUser = userService.getCurrentUser();
+                Organization organization = getByNameForUserOrThrowNotFound(orgName, currentUser);
                 authorizeOrgManipulation(currentUser, organization, Action.INVITE);
 
                 Map<User, Set<String>> usersToAddWithPermissions = orgUserPermissionJsonSetToMap(changeOrganizationUsersJsons);
@@ -205,11 +159,10 @@ public class OrganizationService {
         }
     }
 
-    public Set<User> updateUsers(String orgName, Set<ChangeOrganizationUsersJson> updateOrganizationUsersJsons) {
+    public Set<User> updateUsers(String orgName, Set<ChangeOrganizationUsersJson> updateOrganizationUsersJsons, User currentUser) {
         try {
             return transactionService.required(() -> {
-                Organization organization = getByNameForCurrentUserOrThrowNotFound(orgName);
-                User currentUser = userService.getCurrentUser();
+                Organization organization = getByNameForUserOrThrowNotFound(orgName, currentUser);
                 authorizeOrgManipulation(currentUser, organization, Action.MANAGE);
 
                 Map<User, Set<String>> usersToUpdateWithPermissions = orgUserPermissionJsonSetToMap(updateOrganizationUsersJsons);
@@ -232,16 +185,15 @@ public class OrganizationService {
         }
     }
 
-    public Organization getByNameForCurrentUserOrThrowNotFound(String orgName) {
-        Optional<Organization> organization = getByNameForCurrentUser(orgName);
+    public Organization getByNameForUserOrThrowNotFound(String orgName, User currentUser) {
+        Optional<Organization> organization = getByNameForUser(orgName, currentUser);
         return organization.orElseThrow(() -> new NotFoundException("Cannot find organization with name: " + orgName));
     }
 
-    public Set<User> changeUsers(String orgName, Map<String, Set<String>> userPermissions) {
+    public Set<User> changeUsers(String orgName, Map<String, Set<String>> userPermissions, User currentUser) {
         try {
             return transactionService.required(() -> {
-                User currentUser = userService.getCurrentUser();
-                Organization organization = getByNameForCurrentUserOrThrowNotFound(orgName);
+                Organization organization = getByNameForUserOrThrowNotFound(orgName, currentUser);
                 authorizeOrgManipulation(currentUser, organization, Action.MANAGE);
                 Set<UserOrgPermissions> oldPermissions = userOrgPermissionsService.findForOrganization(organization);
                 userOrgPermissionsService.deleteAll(oldPermissions);
@@ -266,14 +218,12 @@ public class OrganizationService {
         }
     }
 
-    public Organization deleteByNameForCurrentUser(String orgName) {
+    public Organization deleteByNameForUser(String orgName, User currentUser, Organization defaultOrg) {
         try {
             return transactionService.required(() -> {
-                User currentUser = userService.getCurrentUser();
-                Organization organizationForDelete = getByNameForCurrentUserOrThrowNotFound(orgName);
+                Organization organizationForDelete = getByNameForUserOrThrowNotFound(orgName, currentUser);
                 authorizeOrgManipulation(currentUser, organizationForDelete, Action.MANAGE);
 
-                Organization defaultOrg = getDefaultOrganizationForCurrentUser();
                 organizationDeleteVerifierService.checkThatOrganizationIsDeletable(currentUser, organizationForDelete, defaultOrg);
                 Long deleted = userOrgPermissionsService.deleteByOrganization(organizationForDelete);
                 setupDeletionDateAndFlag(organizationForDelete);

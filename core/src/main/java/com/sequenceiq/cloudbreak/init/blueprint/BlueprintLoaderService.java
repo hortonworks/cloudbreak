@@ -17,13 +17,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
-import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Service
 public class BlueprintLoaderService {
@@ -34,12 +31,6 @@ public class BlueprintLoaderService {
 
     @Inject
     private BlueprintService blueprintService;
-
-    @Inject
-    private UserService userService;
-
-    @Inject
-    private OrganizationService organizationService;
 
     public boolean addingDefaultBlueprintsAreNecessaryForTheUser(Collection<Blueprint> blueprints) {
         Map<String, Blueprint> defaultBlueprints = defaultBlueprintCache.defaultBlueprints();
@@ -55,9 +46,9 @@ public class BlueprintLoaderService {
         return defaultBlueprintDoesNotExistInTheDatabase(blueprints);
     }
 
-    public Set<Blueprint> loadBlueprintsForTheSpecifiedUser(IdentityUser user, Set<Blueprint> blueprints) {
-        Set<Blueprint> blueprintsWhichShouldBeUpdate = updateDefaultBlueprints(user, blueprints);
-        Set<Blueprint> blueprintsWhichAreMissing = addMissingBlueprints(user, blueprints);
+    public Set<Blueprint> loadBlueprintsForTheSpecifiedUser(User user, Set<Blueprint> blueprints, Organization organization) {
+        Set<Blueprint> blueprintsWhichShouldBeUpdate = updateDefaultBlueprints(user, blueprints, organization);
+        Set<Blueprint> blueprintsWhichAreMissing = addMissingBlueprints(user, blueprints, organization);
         try {
             LOGGER.info("Prepare Blueprint set for the user '{}' after the modifications.", user.getUserId());
             blueprintsWhichAreMissing.addAll(blueprintsWhichShouldBeUpdate);
@@ -65,7 +56,7 @@ public class BlueprintLoaderService {
                 return Sets.newHashSet(getResultSetFromUpdateAndOriginalBlueprints(blueprints, blueprintsWhichAreMissing));
             }
         } catch (Exception e) {
-            LOGGER.error("Blueprints {} is not available for {} user.", collectNames(blueprintsWhichAreMissing), user.getUsername());
+            LOGGER.error("Blueprints {} is not available for {} user.", collectNames(blueprintsWhichAreMissing), user.getUserId());
         }
         return blueprints;
     }
@@ -88,19 +79,19 @@ public class BlueprintLoaderService {
         return failedToUpdate.stream().map(Blueprint::getName).collect(Collectors.toSet());
     }
 
-    private Set<Blueprint> addMissingBlueprints(IdentityUser user, Iterable<Blueprint> blueprints) {
+    private Set<Blueprint> addMissingBlueprints(User user, Iterable<Blueprint> blueprints, Organization organization) {
         Set<Blueprint> resultList = new HashSet<>();
         LOGGER.info("Adding default blueprints which are missing for the user.");
         for (Map.Entry<String, Blueprint> diffBlueprint : collectDeviationOfExistingBlueprintsAndDefaultBlueprints(blueprints).entrySet()) {
             LOGGER.info("Default Blueprint '{}' needs to add for the '{}' user because the default validation missing.",
                     diffBlueprint.getKey(), user.getUserId());
-            resultList.add(setupBlueprint(user, diffBlueprint.getValue()));
+            resultList.add(setupBlueprint(user, diffBlueprint.getValue(), organization));
         }
         LOGGER.info("Finished to add default blueprints which are missing for the user.");
         return resultList;
     }
 
-    private Set<Blueprint> updateDefaultBlueprints(IdentityUser user, Iterable<Blueprint> blueprints) {
+    private Set<Blueprint> updateDefaultBlueprints(User user, Iterable<Blueprint> blueprints, Organization organization) {
         Set<Blueprint> resultList = new HashSet<>();
         LOGGER.info("Updating default blueprints which are contains text modifications.");
         Map<String, Blueprint> defaultBlueprints = defaultBlueprintCache.defaultBlueprints();
@@ -111,15 +102,15 @@ public class BlueprintLoaderService {
                     || defaultBlueprintContainsNewDescription(blueprintFromDatabase, newBlueprint))) {
                 LOGGER.info("Default Blueprint '{}' needs to modify for the '{}' user because the validation text changed.",
                         blueprintFromDatabase.getName(), user.getUserId());
-                resultList.add(prepateBlueprint(user, blueprintFromDatabase, newBlueprint));
+                resultList.add(prepateBlueprint(user, blueprintFromDatabase, newBlueprint, organization));
             }
         }
         LOGGER.info("Finished to Update default blueprints which are contains text modifications.");
         return resultList;
     }
 
-    private Blueprint prepateBlueprint(IdentityUser user, Blueprint blueprintFromDatabase, Blueprint newBlueprint) {
-        setupBlueprint(user, blueprintFromDatabase);
+    private Blueprint prepateBlueprint(User user, Blueprint blueprintFromDatabase, Blueprint newBlueprint, Organization organization) {
+        setupBlueprint(user, blueprintFromDatabase, organization);
         blueprintFromDatabase.setBlueprintText(newBlueprint.getBlueprintText());
         blueprintFromDatabase.setDescription(newBlueprint.getDescription());
         blueprintFromDatabase.setHostGroupCount(newBlueprint.getHostGroupCount());
@@ -128,9 +119,7 @@ public class BlueprintLoaderService {
         return blueprintFromDatabase;
     }
 
-    private Blueprint setupBlueprint(IdentityUser user, Blueprint blueprint) {
-        User orgUser = userService.getOrCreate(user);
-        Organization organization = organizationService.getDefaultOrganizationForUser(orgUser);
+    private Blueprint setupBlueprint(User user, Blueprint blueprint, Organization organization) {
         blueprint.setOrganization(organization);
         blueprint.setStatus(DEFAULT);
         return blueprint;

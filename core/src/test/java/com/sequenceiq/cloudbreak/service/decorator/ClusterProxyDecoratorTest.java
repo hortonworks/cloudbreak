@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.decorator;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
@@ -21,6 +22,7 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.converter.mapper.ProxyConfigMapper;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigService;
@@ -36,6 +38,9 @@ public class ClusterProxyDecoratorTest {
 
     @Mock
     private ProxyConfigService service;
+
+    @Mock
+    private User user;
 
     private final IdentityUser identityUser = new IdentityUser("test", "test", "test", null, "test", "test", new Date());
 
@@ -56,14 +61,14 @@ public class ClusterProxyDecoratorTest {
         Cluster result = clusterProxyDecorator.prepareProxyConfig(cluster, "test", stack);
         assertNotNull(result.getProxyConfig());
         Mockito.verify(service, Mockito.times(1)).getByNameForOrganization(anyString(), any(Organization.class));
-        Mockito.verify(service, Mockito.times(0)).create(any(ProxyConfig.class), anyLong());
+        Mockito.verify(service, Mockito.times(0)).create(any(ProxyConfig.class), anyLong(), eq(user));
     }
 
     @Test
     public void testNothingProvided() {
         Cluster result = clusterProxyDecorator.prepareProxyConfig(cluster, null, stack);
         assertNull(result.getProxyConfig());
-        Mockito.verify(service, Mockito.times(0)).create(any(ProxyConfig.class), anyLong());
+        Mockito.verify(service, Mockito.times(0)).create(any(ProxyConfig.class), anyLong(), eq(user));
         Mockito.verify(service, Mockito.times(0)).getByNameForOrganization(anyString(), any(Organization.class));
     }
 }

@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.ConstraintTemplate;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -57,8 +58,7 @@ public class HostGroupDecorator {
     @Inject
     private ClusterService clusterService;
 
-    public HostGroup decorate(HostGroup subject, HostGroupRequest hostGroupRequest, Stack stack,
-            boolean postRequest, Boolean publicInAccount) {
+    public HostGroup decorate(HostGroup subject, HostGroupRequest hostGroupRequest, Stack stack, boolean postRequest, Organization organization, User user) {
         ConstraintJson constraintJson = hostGroupRequest.getConstraint();
         Set<Long> recipeIds = hostGroupRequest.getRecipeIds();
         Set<RecipeRequest> recipes = hostGroupRequest.getRecipes();
@@ -80,7 +80,7 @@ public class HostGroupDecorator {
             prepareRecipesByName(subject, stack.getOrganization(), recipeNames);
         }
         if (recipes != null && !recipes.isEmpty()) {
-            prepareRecipesByRequests(subject, recipes, publicInAccount);
+            prepareRecipesByRequests(subject, recipes, organization, user);
         }
 
         return subject;
@@ -91,11 +91,10 @@ public class HostGroupDecorator {
         subject.getRecipes().addAll(recipes);
     }
 
-    private void prepareRecipesByRequests(HostGroup subject, Iterable<RecipeRequest> recipes, Boolean publicInAccount) {
+    private void prepareRecipesByRequests(HostGroup subject, Iterable<RecipeRequest> recipes, Organization organization, User user) {
         for (RecipeRequest recipe : recipes) {
             Recipe convertedRecipe = conversionService.convert(recipe, Recipe.class);
-            convertedRecipe.setPublicInAccount(publicInAccount);
-            convertedRecipe = recipeService.createInDefaultOrganization(convertedRecipe);
+            convertedRecipe = recipeService.create(convertedRecipe, organization, user);
             subject.getRecipes().add(convertedRecipe);
         }
     }

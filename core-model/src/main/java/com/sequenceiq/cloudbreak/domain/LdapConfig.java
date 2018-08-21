@@ -31,14 +31,12 @@ public class LdapConfig implements ProvisionEntity, OrganizationAwareResource {
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String description;
 
-    @Column(nullable = false)
     private String account;
 
-    @Column(nullable = false)
     private String owner;
 
     @Column(nullable = false)
-    private boolean publicInAccount;
+    private boolean publicInAccount = true;
 
     @Column(nullable = false)
     private String serverHost;

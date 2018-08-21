@@ -57,7 +57,6 @@ import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
@@ -74,6 +73,7 @@ import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -88,7 +88,6 @@ import com.sequenceiq.cloudbreak.repository.ConstraintRepository;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.KerberosConfigRepository;
-import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
@@ -103,7 +102,6 @@ import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -190,9 +188,6 @@ public class ClusterService {
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
     @Inject
-    private AuthorizationService authorizationService;
-
-    @Inject
     private RdsConfigService rdsConfigService;
 
     @Inject
@@ -204,10 +199,7 @@ public class ClusterService {
     @Inject
     private BlueprintUtils blueprintUtils;
 
-    @Inject
-    private OrganizationService organizationService;
-
-    public Cluster create(IdentityUser user, Stack stack, Cluster cluster, List<ClusterComponent> components) throws TransactionExecutionException {
+    public Cluster create(Stack stack, Cluster cluster, List<ClusterComponent> components, User user) throws TransactionExecutionException {
         LOGGER.info("Cluster requested [BlueprintId: {}]", cluster.getBlueprint().getId());
         String stackName = stack.getName();
         if (stack.getCluster() != null) {
@@ -232,7 +224,7 @@ public class ClusterService {
 
             start = System.currentTimeMillis();
             if (cluster.getFileSystem() != null) {
-                cluster.setFileSystem(fileSystemConfigService.create(cluster.getFileSystem(), cluster.getOrganization()));
+                cluster.setFileSystem(fileSystemConfigService.create(cluster.getFileSystem(), cluster.getOrganization(), user));
             }
             LOGGER.info("Filesystem config saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
@@ -240,8 +232,8 @@ public class ClusterService {
                 kerberosConfigRepository.save(cluster.getKerberosConfig());
             }
             cluster.setStack(stack);
-            cluster.setOwner(user.getUserId());
-            cluster.setAccount(user.getAccount());
+            cluster.setOwner(stack.getOwner());
+            cluster.setAccount(stack.getAccount());
             stack.setCluster(cluster);
 
             start = System.currentTimeMillis();

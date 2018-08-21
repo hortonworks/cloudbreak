@@ -45,16 +45,12 @@ public class RdsConfigService extends AbstractOrganizationAwareResourceService<R
     @Inject
     private RdsConnectionValidator rdsConnectionValidator;
 
-    private Organization getDefaultOrg() {
-        return getOrganizationService().getDefaultOrganizationForCurrentUser();
+    public Set<RDSConfig> retrieveRdsConfigsInOrg(Organization organization) {
+        return rdsConfigRepository.findAllByOrganizationId(organization.getId());
     }
 
-    public Set<RDSConfig> retrieveRdsConfigsInDefaultOrg() {
-        return rdsConfigRepository.findAllByOrganizationId(getDefaultOrg().getId());
-    }
-
-    public RDSConfig getByNameForDefaultOrg(String name) {
-        return getByNameForOrganizationId(name, getDefaultOrg().getId());
+    public RDSConfig getByNameForOrg(String name, Organization organization) {
+        return getByNameForOrganizationId(name, organization.getId());
     }
 
     public RDSConfig get(Long id) {
@@ -77,8 +73,8 @@ public class RdsConfigService extends AbstractOrganizationAwareResourceService<R
     public RDSConfig createIfNotExists(User user, RDSConfig rdsConfig, Long organizationId) {
         RDSConfig configByName = rdsConfigRepository.findByNameAndOrganizationId(rdsConfig.getName(), organizationId);
         if (configByName == null) {
-            Organization organization = getOrganizationService().get(user, organizationId);
-            return createWithUser(user, rdsConfig, organization);
+            Organization organization = getOrganizationService().get(organizationId, user);
+            return create(rdsConfig, organization, user);
         }
         return rdsConfig;
 

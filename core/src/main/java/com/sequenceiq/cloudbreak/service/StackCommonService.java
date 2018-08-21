@@ -47,6 +47,7 @@ import com.sequenceiq.cloudbreak.controller.validation.stack.StackRequestValidat
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -59,6 +60,7 @@ import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Service
 public class StackCommonService implements StackEndpoint {
@@ -82,9 +84,6 @@ public class StackCommonService implements StackEndpoint {
 
     @Inject
     private FileSystemValidator fileSystemValidator;
-
-    @Inject
-    private AuthenticatedUserService authenticatedUserService;
 
     @Inject
     private StackRequestValidator stackValidator;
@@ -129,22 +128,23 @@ public class StackCommonService implements StackEndpoint {
     @Qualifier("conversionService")
     private ConversionService conversionService;
 
-    public StackResponse createInOrganization(StackRequest stackRequest, Long organizationId) {
-        Organization organization = organizationService.get(organizationId);
-        return stackCreatorService.createStack(authenticatedUserService.getCbUser(), organization, stackRequest);
+    @Inject
+    private UserService userService;
+
+    @Inject
+    private RestRequestThreadLocalService restRequestThreadLocalService;
+
+    public StackResponse createInOrganization(StackRequest stackRequest, IdentityUser identityUser, User user, Organization organization) {
+        return stackCreatorService.createStack(identityUser, user, organization, stackRequest);
     }
 
-    public StackResponse createInDefaultOrganization(StackRequest stackRequest) {
-        return stackCreatorService.createStackInDefaultOrg(authenticatedUserService.getCbUser(), stackRequest);
-    }
-
-    public void deleteInOrganization(String name, Long organizationId, Boolean forced, Boolean deleteDependencies) {
-        stackService.delete(name, organizationId, forced, deleteDependencies);
+    public void deleteInOrganization(String name, Long organizationId, Boolean forced, Boolean deleteDependencies, User user) {
+        stackService.delete(name, organizationId, forced, deleteDependencies, user);
     }
 
     @Override
     public Set<StackResponse> getStacksInDefaultOrg() {
-        return stackService.retrieveStacksForDefaultOrganization();
+        return stackService.retrieveStacksByOrganizationId(restRequestThreadLocalService.getRequestedOrgId());
     }
 
     @Override
@@ -154,7 +154,9 @@ public class StackCommonService implements StackEndpoint {
 
     @Override
     public StackResponse getStackFromDefaultOrg(String name, Set<String> entries) {
-        return stackService.getStackByNameInDefaultOrg(name, entries);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
+        return stackService.getStackByNameInOrg(name, entries, user, organization);
     }
 
     @Override
@@ -164,13 +166,14 @@ public class StackCommonService implements StackEndpoint {
 
     @Override
     public void deleteById(Long id, Boolean forced, Boolean deleteDependencies) {
-        stackService.delete(id, forced, deleteDependencies);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        stackService.delete(id, forced, deleteDependencies, user);
     }
 
     @Override
     public void deleteInDefaultOrg(String name, Boolean forced, Boolean deleteDependencies) {
-        Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
-        stackService.delete(name, organization.getId(), forced, deleteDependencies);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        stackService.delete(name, restRequestThreadLocalService.getRequestedOrgId(), forced, deleteDependencies, user);
     }
 
     public Set<StackResponse> retrieveStacksByOrganizationId(Long organizationId) {
@@ -178,19 +181,21 @@ public class StackCommonService implements StackEndpoint {
     }
 
     public StackResponse findStackByNameAndOrganizationId(String name, Long organizationId, @QueryParam("entry") Set<String> entries) {
-        return stackService.getByNameInOrgWithEntries(name, organizationId, entries);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        return stackService.getByNameInOrgWithEntries(name, organizationId, entries, user);
     }
 
     public Response putInDefaultOrg(Long id, UpdateStackJson updateRequest) {
-        Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
-        permissionCheckingUtils.checkPermissionByOrgIdForCurrentUser(organization.getId(), OrganizationResource.STACK, Action.WRITE);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        permissionCheckingUtils.checkPermissionByOrgIdForUser(restRequestThreadLocalService.getRequestedOrgId(), OrganizationResource.STACK, Action.WRITE, user);
         Stack stack = stackService.getById(id);
         MDCBuilder.buildMdcContext(stack);
         return put(stack, updateRequest);
     }
 
     public Response putStopInOrganization(String name, Long organizationId) {
-        permissionCheckingUtils.checkPermissionByOrgIdForCurrentUser(organizationId, OrganizationResource.STACK, Action.WRITE);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        permissionCheckingUtils.checkPermissionByOrgIdForUser(organizationId, OrganizationResource.STACK, Action.WRITE, user);
         Stack stack = stackService.getByNameInOrg(name, organizationId);
         MDCBuilder.buildMdcContext(stack);
         if (!cloudParameterCache.isStartStopSupported(stack.cloudPlatform())) {
@@ -203,7 +208,8 @@ public class StackCommonService implements StackEndpoint {
     }
 
     public Response putSyncInOrganization(String name, Long organizationId) {
-        permissionCheckingUtils.checkPermissionByOrgIdForCurrentUser(organizationId, OrganizationResource.STACK, Action.WRITE);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        permissionCheckingUtils.checkPermissionByOrgIdForUser(organizationId, OrganizationResource.STACK, Action.WRITE, user);
         Stack stack = stackService.getByNameInOrg(name, organizationId);
         MDCBuilder.buildMdcContext(stack);
         UpdateStackJson updateStackJson = new UpdateStackJson();
@@ -213,7 +219,8 @@ public class StackCommonService implements StackEndpoint {
     }
 
     public Response putStartInOrganization(String name, Long organizationId) {
-        permissionCheckingUtils.checkPermissionByOrgIdForCurrentUser(organizationId, OrganizationResource.STACK, Action.WRITE);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        permissionCheckingUtils.checkPermissionByOrgIdForUser(organizationId, OrganizationResource.STACK, Action.WRITE, user);
         Stack stack = stackService.getByNameInOrg(name, organizationId);
         MDCBuilder.buildMdcContext(stack);
         if (!cloudParameterCache.isStartStopSupported(stack.cloudPlatform())) {
@@ -226,7 +233,8 @@ public class StackCommonService implements StackEndpoint {
     }
 
     public Response putScalingInOrganization(String name, Long organizationId, StackScaleRequestV2 updateRequest) {
-        permissionCheckingUtils.checkPermissionByOrgIdForCurrentUser(organizationId, OrganizationResource.STACK, Action.WRITE);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        permissionCheckingUtils.checkPermissionByOrgIdForUser(organizationId, OrganizationResource.STACK, Action.WRITE, user);
         Stack stack = stackService.getByNameInOrg(name, organizationId);
         MDCBuilder.buildMdcContext(stack);
         if (!cloudParameterCache.isScalingSupported(stack.cloudPlatform())) {
@@ -238,45 +246,49 @@ public class StackCommonService implements StackEndpoint {
             return put(stack, updateStackJson);
         } else {
             UpdateClusterJson updateClusterJson = conversionService.convert(updateRequest, UpdateClusterJson.class);
-            return clusterCommonService.put(stack.getId(), updateClusterJson);
+            Organization organization = organizationService.get(organizationId, user);
+            return clusterCommonService.put(stack.getId(), updateClusterJson, user, organization);
         }
     }
 
     public void deleteWithKerbereosInOrg(String name, Long organizationId, Boolean withStackDelete, Boolean deleteDependencies) {
-        permissionCheckingUtils.checkPermissionByOrgIdForCurrentUser(organizationId, OrganizationResource.STACK, Action.WRITE);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        permissionCheckingUtils.checkPermissionByOrgIdForUser(organizationId, OrganizationResource.STACK, Action.WRITE, user);
         Stack stack = stackService.getByNameInOrg(name, organizationId);
         MDCBuilder.buildMdcContext(stack);
         clusterService.delete(stack.getId(), withStackDelete, deleteDependencies);
     }
 
     public void repairCluster(Long organizationId, String name, ClusterRepairRequest clusterRepairRequest) {
-        permissionCheckingUtils.checkPermissionByOrgIdForCurrentUser(organizationId, OrganizationResource.STACK, Action.WRITE);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        permissionCheckingUtils.checkPermissionByOrgIdForUser(organizationId, OrganizationResource.STACK, Action.WRITE, user);
         Stack stack = stackService.getByNameInOrg(name, organizationId);
         clusterService.repairCluster(stack.getId(), clusterRepairRequest.getHostGroups(), clusterRepairRequest.isRemoveOnly());
     }
 
     public void retryInOrganization(String name, Long organizationId) {
-        permissionCheckingUtils.checkPermissionByOrgIdForCurrentUser(organizationId, OrganizationResource.STACK, Action.WRITE);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        permissionCheckingUtils.checkPermissionByOrgIdForUser(organizationId, OrganizationResource.STACK, Action.WRITE, user);
         Stack stack = stackService.getByNameInOrg(name, organizationId);
         operationRetryService.retry(stack);
     }
 
     private Response put(Stack stack, UpdateStackJson updateRequest) {
         MDCBuilder.buildMdcContext(stack);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
         if (updateRequest.getStatus() != null) {
-            stackService.updateStatus(stack.getId(), updateRequest.getStatus(), updateRequest.getWithClusterEvent());
+            stackService.updateStatus(stack.getId(), updateRequest.getStatus(), updateRequest.getWithClusterEvent(), user);
         } else {
             Integer scalingAdjustment = updateRequest.getInstanceGroupAdjustment().getScalingAdjustment();
             validateHardLimits(scalingAdjustment);
             validateAccountPreferences(stack.getId(), scalingAdjustment);
-            stackService.updateNodeCount(stack, updateRequest.getInstanceGroupAdjustment(), updateRequest.getWithClusterEvent());
+            stackService.updateNodeCount(stack, updateRequest.getInstanceGroupAdjustment(), updateRequest.getWithClusterEvent(), user);
         }
         return Response.status(Status.NO_CONTENT).build();
     }
 
     public GeneratedBlueprintResponse postStackForBlueprint(StackV2Request stackRequest) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        stackRequest.setAccount(user.getAccount());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
         stackRequest.setOwner(user.getUserId());
         BlueprintPreparationObject blueprintPreparationObject = conversionService.convert(stackRequest, BlueprintPreparationObject.class);
         String blueprintText = centralBlueprintUpdater.getBlueprintText(blueprintPreparationObject);
@@ -315,23 +327,25 @@ public class StackCommonService implements StackEndpoint {
 
     @Override
     public Response deleteInstance(Long stackId, String instanceId, boolean forced) {
-        Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
-        permissionCheckingUtils.checkPermissionByOrgIdForCurrentUser(organization.getId(), OrganizationResource.STACK, Action.WRITE);
-        stackService.removeInstance(stackId, organization.getId(), instanceId, forced);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        permissionCheckingUtils.checkPermissionByOrgIdForUser(restRequestThreadLocalService.getRequestedOrgId(), OrganizationResource.STACK,
+                Action.WRITE, user);
+        stackService.removeInstance(stackId, restRequestThreadLocalService.getRequestedOrgId(), instanceId, forced, user);
         return Response.status(Status.NO_CONTENT).build();
     }
 
     public Response deleteInstanceByNameInOrg(String name, Long organizationId, String instanceId, boolean forced) {
-        permissionCheckingUtils.checkPermissionByOrgIdForCurrentUser(organizationId, OrganizationResource.STACK, Action.WRITE);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        permissionCheckingUtils.checkPermissionByOrgIdForUser(organizationId, OrganizationResource.STACK, Action.WRITE, user);
         Stack stack = stackService.getByNameInOrg(name, organizationId);
-        stackService.removeInstance(stack, organizationId, instanceId, forced);
+        stackService.removeInstance(stack, organizationId, instanceId, forced, user);
         return Response.status(Status.NO_CONTENT).build();
     }
 
     @Override
     public Response deleteInstances(Long stackId, Set<String> instanceIds) {
-        Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
-        stackService.removeInstances(stackId, organization.getId(), instanceIds);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        stackService.removeInstances(stackId, restRequestThreadLocalService.getRequestedOrgId(), instanceIds, user);
         return Response.status(Status.NO_CONTENT).build();
     }
 
@@ -343,12 +357,13 @@ public class StackCommonService implements StackEndpoint {
 
     public Response changeImageByNameInOrg(String name, Long organziationId, StackImageChangeRequest stackImageChangeRequest) {
         Stack stack = stackService.getByNameInOrg(name, organziationId);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
         if (StringUtils.isNotBlank(stackImageChangeRequest.getImageCatalogName())) {
             ImageCatalog imageCatalog = imageCatalogService.get(organziationId, stackImageChangeRequest.getImageCatalogName());
             stackService.updateImage(stack.getId(), organziationId, stackImageChangeRequest.getImageId(),
-                    imageCatalog.getName(), imageCatalog.getImageCatalogUrl());
+                    imageCatalog.getName(), imageCatalog.getImageCatalogUrl(), user);
         } else {
-            stackService.updateImage(stack.getId(), organziationId, stackImageChangeRequest.getImageId(), null, null);
+            stackService.updateImage(stack.getId(), organziationId, stackImageChangeRequest.getImageId(), null, null, user);
         }
         return Response.status(Status.NO_CONTENT).build();
     }

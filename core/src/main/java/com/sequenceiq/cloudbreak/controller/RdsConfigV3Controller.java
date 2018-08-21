@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.controller;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
@@ -16,10 +17,19 @@ import com.sequenceiq.cloudbreak.api.model.rds.RdsTestResult;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Component
 @Transactional(TxType.NEVER)
 public class RdsConfigV3Controller extends AbstractRdsConfigController implements RdsConfigV3Endpoint {
+
+    @Inject
+    private UserService userService;
+
+    @Inject
+    private RestRequestThreadLocalService restRequestThreadLocalService;
 
     @Override
     public Set<RDSConfigResponse> listByOrganization(Long organizationId) {
@@ -37,7 +47,8 @@ public class RdsConfigV3Controller extends AbstractRdsConfigController implement
     @Override
     public RDSConfigResponse createInOrganization(Long organizationId, RDSConfigRequest request) {
         RDSConfig rdsConfig = getConversionService().convert(request, RDSConfig.class);
-        rdsConfig = getRdsConfigService().create(rdsConfig, organizationId);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        rdsConfig = getRdsConfigService().create(rdsConfig, organizationId, user);
         notify(ResourceEvent.RDS_CONFIG_CREATED);
         return getConversionService().convert(rdsConfig, RDSConfigResponse.class);
     }
@@ -51,7 +62,8 @@ public class RdsConfigV3Controller extends AbstractRdsConfigController implement
 
     @Override
     public RdsTestResult testRdsConnection(Long organizationId, RDSTestRequest rdsTestRequest) {
-        Organization organization = getRdsConfigService().getOrganizationService().get(organizationId);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        Organization organization = getRdsConfigService().getOrganizationService().get(organizationId, user);
         return testRdsConnection(rdsTestRequest, organization);
     }
 

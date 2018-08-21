@@ -17,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.domain.UserProfile;
+import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.repository.UserProfileRepository;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 
@@ -34,6 +35,9 @@ public class UserProfileServiceTest {
     @InjectMocks
     private UserProfileService userProfileService;
 
+    @Mock
+    private User user;
+
     @Before
     public void before() {
         MockitoAnnotations.initMocks(this);
@@ -45,7 +49,7 @@ public class UserProfileServiceTest {
         ArgumentCaptor<UserProfile> userProfileCaptor = ArgumentCaptor.forClass(UserProfile.class);
         String account = "account1";
         String owner = "123-123-123";
-        userProfileService.getOrCreate(account, owner);
+        userProfileService.getOrCreate(account, owner, user);
         verify(userProfileRepository).save(userProfileCaptor.capture());
 
         UserProfile capturedProfile = userProfileCaptor.getValue();
@@ -58,7 +62,7 @@ public class UserProfileServiceTest {
         ArgumentCaptor<UserProfile> userProfileCaptor = ArgumentCaptor.forClass(UserProfile.class);
         String account = "account1";
         String owner = "123-123-123";
-        UserProfile returnedUserProfile = userProfileService.getOrCreate(account, owner);
+        UserProfile returnedUserProfile = userProfileService.getOrCreate(account, owner, user);
         verify(userProfileRepository).save(userProfileCaptor.capture());
 
         UserProfile capturedProfile = userProfileCaptor.getValue();
@@ -76,7 +80,7 @@ public class UserProfileServiceTest {
         String account = "account1";
         String owner = "123-123-123";
         String username = "test@hortonworks.com";
-        UserProfile returnedUserProfile = userProfileService.getOrCreate(account, owner, username);
+        UserProfile returnedUserProfile = userProfileService.getOrCreate(account, owner, username, user);
         verify(userProfileRepository).save(userProfileCaptor.capture());
 
         UserProfile capturedProfile = userProfileCaptor.getValue();
@@ -101,7 +105,7 @@ public class UserProfileServiceTest {
         when(userProfileRepository.save(any(UserProfile.class))).thenReturn(new UserProfile());
 
         ArgumentCaptor<UserProfile> userProfileCaptor = ArgumentCaptor.forClass(UserProfile.class);
-        UserProfile returnedUserProfile = userProfileService.getOrCreate(account, owner, username);
+        UserProfile returnedUserProfile = userProfileService.getOrCreate(account, owner, username, user);
         verify(userProfileRepository).save(userProfileCaptor.capture());
 
         UserProfile capturedProfile = userProfileCaptor.getValue();
@@ -123,7 +127,7 @@ public class UserProfileServiceTest {
         when(userProfileRepository.findOneByOwnerAndAccount(anyString(), anyString())).thenReturn(foundProfile);
         when(userProfileRepository.save(any(UserProfile.class))).thenReturn(new UserProfile());
 
-        UserProfile returnedUserProfile = userProfileService.getOrCreate(account, owner);
+        UserProfile returnedUserProfile = userProfileService.getOrCreate(account, owner, user);
         verify(userProfileRepository, never()).save(any(UserProfile.class));
 
         assertEquals(account, returnedUserProfile.getAccount());
@@ -146,7 +150,7 @@ public class UserProfileServiceTest {
         when(userProfileRepository.findOneByOwnerAndAccount(anyString(), anyString())).thenReturn(foundProfile);
         when(userProfileRepository.save(any(UserProfile.class))).thenReturn(new UserProfile());
 
-        UserProfile returnedUserProfile = userProfileService.getOrCreate(account, owner);
+        UserProfile returnedUserProfile = userProfileService.getOrCreate(account, owner, user);
         verify(userProfileRepository, never()).save(any(UserProfile.class));
 
         assertNotNull(returnedUserProfile);

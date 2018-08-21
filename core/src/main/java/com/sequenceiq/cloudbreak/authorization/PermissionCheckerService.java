@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByTargetId;
 import com.sequenceiq.cloudbreak.aspect.organization.DisableCheckPermissions;
 import com.sequenceiq.cloudbreak.aspect.organization.OrganizationResourceType;
 import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.user.NullIdentityUserException;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
@@ -49,6 +50,9 @@ public class PermissionCheckerService {
 
     @Inject
     private PermissionCheckingUtils permissionCheckingUtils;
+
+    @Inject
+    private RestRequestThreadLocalService restRequestThreadLocalService;
 
     private final Map<Class<? extends Annotation>, PermissionChecker<? extends Annotation>> permissionCheckerMap = new HashMap<>();
 
@@ -92,7 +96,7 @@ public class PermissionCheckerService {
         }
 
         try {
-            User user = userService.getCurrentUser();
+            User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
             PermissionChecker<? extends Annotation> permissionChecker = permissionCheckerMap.get(methodAnnotation.annotationType());
             OrganizationResource resource = classOrgResourceType.resource();
             return permissionChecker.checkPermissions(methodAnnotation, resource, user, proceedingJoinPoint, methodSignature);

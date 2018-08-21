@@ -13,18 +13,17 @@ import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.mapper.DuplicatedKeyValueExceptionMapper;
 import com.sequenceiq.cloudbreak.converter.spi.ExtendedCloudCredentialToCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.notification.Notification;
 import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 
 import reactor.bus.Event;
 
-/**
- * Created by perdos on 9/23/16.
- */
 @Component
 public class InteractiveCredentialCreationHandler implements ReactorEventHandler<InteractiveCredentialCreationRequest> {
 
@@ -37,6 +36,9 @@ public class InteractiveCredentialCreationHandler implements ReactorEventHandler
     @Inject
     private ExtendedCloudCredentialToCredentialConverter extendedCloudCredentialToCredentialConverter;
 
+    @Inject
+    private UserService userService;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(InteractiveCredentialCreationRequest.class);
@@ -48,8 +50,9 @@ public class InteractiveCredentialCreationHandler implements ReactorEventHandler
 
         ExtendedCloudCredential extendedCloudCredential = interactiveCredentialCreationRequest.getExtendedCloudCredential();
         Credential credential = extendedCloudCredentialToCredentialConverter.convert(extendedCloudCredential);
+        User user = userService.getOrCreate(extendedCloudCredential.getIdentityUser());
         try {
-            credentialService.createWithRetry(credential);
+            credentialService.createWithRetry(credential, extendedCloudCredential.getOrganziationId(), user);
         } catch (DuplicateKeyValueException e) {
             sendErrorNotification(extendedCloudCredential, DuplicatedKeyValueExceptionMapper.errorMessage(e));
         } catch (BadRequestException e) {

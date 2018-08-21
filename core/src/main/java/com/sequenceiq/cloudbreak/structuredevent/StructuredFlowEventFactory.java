@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
-import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
@@ -52,10 +52,10 @@ public class StructuredFlowEventFactory {
     private UserProfileService userProfileService;
 
     @Inject
-    private AuthenticatedUserService authenticatedUserService;
+    private TransactionService transactionService;
 
     @Inject
-    private TransactionService transactionService;
+    private RestRequestThreadLocalService restRequestThreadLocalService;
 
     @Value("${info.app.version:}")
     private String cbVersion;
@@ -66,7 +66,7 @@ public class StructuredFlowEventFactory {
 
     public StructuredFlowEvent createStucturedFlowEvent(Long stackId, FlowDetails flowDetails, Boolean detailed, Exception exception) {
         Stack stack = stackService.getByIdWithoutAuth(stackId);
-        UserProfile userProfile = userProfileService.getOrCreate(stack.getAccount(), stack.getOwner());
+        UserProfile userProfile = userProfileService.getOrCreate(stack.getAccount(), stack.getOwner(), stack.getCreator());
         OperationDetails operationDetails = new OperationDetails(FLOW, "stacks", stackId, stack.getName(),
                 stack.getCreator().getUserId(), stack.getCreator().getUserName(), cloudbreakNodeConfig.getId(), cbVersion,
                 stack.getOrganization().getId(), stack.getAccount(), stack.getOwner(), userProfile.getUserName());
@@ -100,7 +100,7 @@ public class StructuredFlowEventFactory {
 
         Stack stack = stackService.getByIdWithoutAuth(stackId);
         try {
-            UserProfile userProfile = userProfileService.getOrCreate(stack.getAccount(), stack.getOwner());
+            UserProfile userProfile = userProfileService.getOrCreate(stack.getAccount(), stack.getOwner(), stack.getCreator());
             account = stack.getAccount();
             userId = stack.getOwner();
             userName = userProfile.getUserName();
@@ -125,7 +125,7 @@ public class StructuredFlowEventFactory {
                 }
             }
         } catch (AccessDeniedException e) {
-            IdentityUser cbUser = authenticatedUserService.getCbUser();
+            IdentityUser cbUser = restRequestThreadLocalService.getIdentityUser();
             LOGGER.info("Access denied in structured notification event creation, user: {}, stack: {}",
                     cbUser != null ? cbUser.getUsername() : "Unknown", stackId, e);
             if (cbUser != null) {

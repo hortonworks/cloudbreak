@@ -21,25 +21,26 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.core.convert.ConversionService;
 
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.SpecialParameters;
-import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceGroupParameterRequest;
 import com.sequenceiq.cloudbreak.cloud.model.Orchestrator;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrators;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.stack.StackRequestValidator;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
@@ -110,7 +111,10 @@ public class StackDecoratorTest {
     private StackRequest request;
 
     @Mock
-    private IdentityUser user;
+    private User user;
+
+    @Mock
+    private Organization organization;
 
     @Mock
     private Map<Platform, PlatformParameters> platformParametersMap;
@@ -159,7 +163,7 @@ public class StackDecoratorTest {
         when(subject.getInstanceGroups()).thenReturn(createInstanceGroups(GATEWAY));
         when(request.getClusterToAttach()).thenReturn(null);
 
-        Stack result = underTest.decorate(subject, request, user);
+        Stack result = underTest.decorate(subject, request, user, organization);
 
         Assert.assertEquals(expected, result);
     }
@@ -185,7 +189,7 @@ public class StackDecoratorTest {
         when(clusterRequest.getLdapConfig()).thenReturn(new LdapConfigRequest());
         when(clusterRequest.getRdsConfigJsons()).thenReturn(rdsConfigRequests);
 
-        underTest.decorate(subject, request, user);
+        underTest.decorate(subject, request, user, organization);
     }
 
     @Test
@@ -209,7 +213,7 @@ public class StackDecoratorTest {
         when(clusterRequest.getLdapConfig()).thenReturn(null);
         when(clusterRequest.getRdsConfigJsons()).thenReturn(rdsConfigRequests);
 
-        underTest.decorate(subject, request, user);
+        underTest.decorate(subject, request, user, organization);
     }
 
     @Test
@@ -236,7 +240,7 @@ public class StackDecoratorTest {
         thrown.expect(BadRequestException.class);
         thrown.expectMessage(MISCONFIGURED_STACK_FOR_SHARED_SERVICE);
 
-        underTest.decorate(subject, request, user);
+        underTest.decorate(subject, request, user, organization);
     }
 
     @Test
@@ -263,7 +267,7 @@ public class StackDecoratorTest {
         thrown.expect(BadRequestException.class);
         thrown.expectMessage(MISCONFIGURED_STACK_FOR_SHARED_SERVICE);
 
-        underTest.decorate(subject, request, user);
+        underTest.decorate(subject, request, user, organization);
     }
 
     @Test
@@ -290,7 +294,7 @@ public class StackDecoratorTest {
         thrown.expect(BadRequestException.class);
         thrown.expectMessage(MISCONFIGURED_STACK_FOR_SHARED_SERVICE);
 
-        underTest.decorate(subject, request, user);
+        underTest.decorate(subject, request, user, organization);
     }
 
     private Set<RDSConfigRequest> createRdsConfigRequests(String... types) {

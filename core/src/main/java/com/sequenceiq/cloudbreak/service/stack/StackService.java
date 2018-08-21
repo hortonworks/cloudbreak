@@ -42,7 +42,6 @@ import com.sequenceiq.cloudbreak.authorization.PermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.CloudbreakApiException;
@@ -82,7 +81,6 @@ import com.sequenceiq.cloudbreak.repository.SecurityConfigRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.StackStatusRepository;
 import com.sequenceiq.cloudbreak.repository.StackViewRepository;
-import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
@@ -190,9 +188,6 @@ public class StackService {
     private ConversionService conversionService;
 
     @Inject
-    private AuthorizationService authorizationService;
-
-    @Inject
     private StackDownscaleValidatorService downscaleValidatorService;
 
     @Inject
@@ -218,16 +213,6 @@ public class StackService {
             return transactionService.required(() ->
                     conversionService.convert(stackRepository
                             .findByNameAndOrganizationIdWithLists(name, organizationId), StackResponse.class));
-        } catch (TransactionExecutionException e) {
-            throw new TransactionRuntimeExecutionException(e);
-        }
-    }
-
-    public Set<StackResponse> retrieveStacksForDefaultOrganization() {
-        try {
-            Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
-            return transactionService.required(() ->
-                    convertStacks(stackRepository.findForOrganizationIdWithLists(organization.getId())));
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }
@@ -323,8 +308,8 @@ public class StackService {
         return stackViewRepository.findById(id).orElseThrow(notFound("Stack", id));
     }
 
-    public StackView getViewByNameInOrg(String name, Long organizationId) {
-        Organization organization = organizationService.get(organizationId);
+    public StackView getViewByNameInOrgForUser(String name, Long organizationId, User user) {
+        Organization organization = organizationService.get(organizationId, user);
         StackView stackView = stackViewRepository.findByNameAndOrganization(name, organization);
         if (stackView == null) {
             throw new NotFoundException(String.format("Stack not found with name '%s'", name));
@@ -344,10 +329,9 @@ public class StackService {
         }
     }
 
-    public StackResponse getStackByNameInDefaultOrg(String name, Collection<String> entries) {
+    public StackResponse getStackByNameInOrg(String name, Collection<String> entries, User user, Organization organization) {
         try {
             return transactionService.required(() -> {
-                Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
                 Stack stack = stackRepository.findByNameAndOrganizationIdWithLists(name, organization.getId());
                 StackResponse stackResponse = conversionService.convert(stack, StackResponse.class);
                 stackResponse = stackResponseDecorator.decorate(stackResponse, stack, entries);
@@ -358,10 +342,10 @@ public class StackService {
         }
     }
 
-    public StackResponse getByNameInOrgWithEntries(String name, Long organizationId, Set<String> entries) {
+    public StackResponse getByNameInOrgWithEntries(String name, Long organizationId, Set<String> entries, User user) {
         try {
             return transactionService.required(() -> {
-                Organization organization = organizationService.get(organizationId);
+                Organization organization = organizationService.get(organizationId, user);
                 Stack stack = stackRepository.findByNameAndOrganizationIdWithLists(name, organization.getId());
                 StackResponse stackResponse = conversionService.convert(stack, StackResponse.class);
                 stackResponse = stackResponseDecorator.decorate(stackResponse, stack, entries);
@@ -372,10 +356,9 @@ public class StackService {
         }
     }
 
-    public StackV2Request getStackRequestByNameInDefaultOrg(String name) {
+    public StackV2Request getStackRequestByNameInDefaultOrgForUser(String name, User user, Organization organization) {
         try {
             return transactionService.required(() -> {
-                Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
                 Stack stack = stackRepository.findByNameAndOrganizationIdWithLists(name, organization.getId());
                 return conversionService.convert(stack, StackV2Request.class);
             });
@@ -395,32 +378,15 @@ public class StackService {
         }
     }
 
-    public Stack getByNameInDefaultOrg(String name) {
-        Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
-        return stackRepository.findByNameAndOrganizationId(name, organization.getId());
-    }
-
     public Stack getByNameInOrg(String name, Long organizationId) {
         return stackRepository.findByNameAndOrganizationId(name, organizationId);
     }
 
-    public void delete(String name, Long organizationId, Boolean forced, Boolean deleteDependencies) {
-        Stack stack = stackRepository.findByNameAndOrganizationId(name, organizationId);
-        delete(stack, forced, deleteDependencies);
-    }
-
-    public Stack create(IdentityUser identityUser, Stack stack, String platformString, StatedImage imgFromCatalog) {
-        stack.setOwner(identityUser.getUserId());
-        stack.setAccount(identityUser.getAccount());
+    public Stack create(Stack stack, String platformString, StatedImage imgFromCatalog, User user, Organization organization) {
         stack.setGatewayPort(nginxPort);
-
-        User user = userService.getCurrentUser();
         stack.setCreator(user);
 
-        if (stack.getOrganization() == null) {
-            Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
-            stack.setOrganization(organization);
-        }
+        stack.setOrganization(organization);
 
         setPlatformVariant(stack);
         String stackName = stack.getName();
@@ -498,39 +464,42 @@ public class StackService {
         stack.setPlatformVariant(connector.checkAndGetPlatformVariant(stack).value());
     }
 
-    public void delete(Long id, Boolean forced, Boolean deleteDependencies) {
-        stackRepository.findById(id).ifPresent(stack -> {
-            delete(stack, forced, deleteDependencies);
-        });
+    public void delete(Long id, Boolean forced, Boolean deleteDependencies, User user) {
+        stackRepository.findById(id).ifPresent(stack -> delete(stack.getName(), stack.getOrganization().getId(), forced, deleteDependencies, user));
     }
 
-    public void removeInstance(Long stackId, Long organizationId, String instanceId) {
-        removeInstance(stackId, organizationId, instanceId, false);
+    public void delete(String name, Long organizationId, Boolean forced, Boolean deleteDependencies, User user) {
+        Stack stack = stackRepository.findByNameAndOrganizationId(name, organizationId);
+        delete(stack, forced, deleteDependencies, user);
     }
 
-    public void removeInstance(Long stackId, Long organizationId, String instanceId, boolean forced) {
+    public void removeInstance(Long stackId, Long organizationId, String instanceId, User user) {
+        removeInstance(stackId, organizationId, instanceId, false, user);
+    }
+
+    public void removeInstance(Long stackId, Long organizationId, String instanceId, boolean forced, User user) {
         Stack stack = getById(stackId);
-        InstanceMetaData metaData = validateInstanceForDownscale(instanceId, stack, organizationId);
+        InstanceMetaData metaData = validateInstanceForDownscale(instanceId, stack, organizationId, user);
         flowManager.triggerStackRemoveInstance(stackId, metaData.getInstanceGroupName(), metaData.getPrivateId(), forced);
     }
 
-    public void removeInstance(Stack stack, Long organizationId, String instanceId, boolean forced) {
-        InstanceMetaData metaData = validateInstanceForDownscale(instanceId, stack, organizationId);
+    public void removeInstance(Stack stack, Long organizationId, String instanceId, boolean forced, User user) {
+        InstanceMetaData metaData = validateInstanceForDownscale(instanceId, stack, organizationId, user);
         flowManager.triggerStackRemoveInstance(stack.getId(), metaData.getInstanceGroupName(), metaData.getPrivateId(), forced);
     }
 
-    public void removeInstances(Long stackId, Long organizationId, Set<String> instanceIds) {
+    public void removeInstances(Long stackId, Long organizationId, Set<String> instanceIds, User user) {
         Stack stack = getById(stackId);
-        permissionCheckingUtils.checkPermissionByOrgIdForCurrentUser(stack.getOrganization().getId(), OrganizationResource.STACK, Action.WRITE);
+        permissionCheckingUtils.checkPermissionByOrgIdForUser(stack.getOrganization().getId(), OrganizationResource.STACK, Action.WRITE, user);
         Map<String, Set<Long>> instanceIdsByHostgroupMap = new HashMap<>();
         for (String instanceId : instanceIds) {
-            InstanceMetaData metaData = validateInstanceForDownscale(instanceId, stack, organizationId);
+            InstanceMetaData metaData = validateInstanceForDownscale(instanceId, stack, organizationId, user);
             instanceIdsByHostgroupMap.computeIfAbsent(metaData.getInstanceGroupName(), s -> new LinkedHashSet<>()).add(metaData.getPrivateId());
         }
         flowManager.triggerStackRemoveInstances(stackId, instanceIdsByHostgroupMap);
     }
 
-    public void updateStatus(Long stackId, StatusRequest status, boolean updateCluster) {
+    public void updateStatus(Long stackId, StatusRequest status, boolean updateCluster, User user) {
         Stack stack = getByIdWithLists(stackId);
         Cluster cluster = null;
         if (stack.getCluster() != null) {
@@ -538,27 +507,27 @@ public class StackService {
         }
         switch (status) {
             case SYNC:
-                sync(stack, false);
+                sync(stack, false, user);
                 break;
             case FULL_SYNC:
-                sync(stack, true);
+                sync(stack, true, user);
                 break;
             case REPAIR_FAILED_NODES:
-                repairFailedNodes(stack);
+                repairFailedNodes(stack, user);
                 break;
             case STOPPED:
-                stop(stack, cluster, updateCluster);
+                stop(stack, cluster, updateCluster, user);
                 break;
             case STARTED:
-                start(stack, cluster, updateCluster);
+                start(stack, cluster, updateCluster, user);
                 break;
             default:
                 throw new BadRequestException("Cannot update the status of stack because status request not valid.");
         }
     }
 
-    private InstanceMetaData validateInstanceForDownscale(String instanceId, Stack stack, Long organizationId) {
-        permissionCheckingUtils.checkPermissionByOrgIdForCurrentUser(organizationId, OrganizationResource.STACK, Action.WRITE);
+    private InstanceMetaData validateInstanceForDownscale(String instanceId, Stack stack, Long organizationId, User user) {
+        permissionCheckingUtils.checkPermissionByOrgIdForUser(organizationId, OrganizationResource.STACK, Action.WRITE, user);
         InstanceMetaData metaData = instanceMetaDataRepository.findByInstanceId(stack.getId(), instanceId);
         if (metaData == null) {
             throw new NotFoundException(String.format("Metadata for instance %s has not found.", instanceId));
@@ -578,14 +547,14 @@ public class StackService {
                 TypeDescriptor.collection(Set.class, TypeDescriptor.valueOf(AutoscaleStackResponse.class)));
     }
 
-    private void repairFailedNodes(Stack stack) {
-        permissionCheckingUtils.checkPermissionByOrgIdForCurrentUser(stack.getOrganization().getId(), OrganizationResource.STACK, Action.WRITE);
+    private void repairFailedNodes(Stack stack, User user) {
+        permissionCheckingUtils.checkPermissionByOrgIdForUser(stack.getOrganization().getId(), OrganizationResource.STACK, Action.WRITE, user);
         LOGGER.warn("Received request to replace failed nodes: " + stack.getId());
         flowManager.triggerManualRepairFlow(stack.getId());
     }
 
-    private void sync(Stack stack, boolean full) {
-        permissionCheckingUtils.checkPermissionByOrgIdForCurrentUser(stack.getOrganization().getId(), OrganizationResource.STACK, Action.WRITE);
+    private void sync(Stack stack, boolean full, User user) {
+        permissionCheckingUtils.checkPermissionByOrgIdForUser(stack.getOrganization().getId(), OrganizationResource.STACK, Action.WRITE, user);
         if (!stack.isDeleteInProgress() && !stack.isStackInDeletionPhase() && !stack.isModificationInProgress()) {
             if (full) {
                 flowManager.triggerFullSync(stack.getId());
@@ -597,16 +566,16 @@ public class StackService {
         }
     }
 
-    private void stop(Stack stack, Cluster cluster, boolean updateCluster) {
+    private void stop(Stack stack, Cluster cluster, boolean updateCluster, User user) {
         if (cluster != null && cluster.isStopInProgress()) {
             setStackStatusToStopRequested(stack);
         } else {
-            triggerStackStopIfNeeded(stack, cluster, updateCluster);
+            triggerStackStopIfNeeded(stack, cluster, updateCluster, user);
         }
     }
 
-    private void triggerStackStopIfNeeded(Stack stack, Cluster cluster, boolean updateCluster) {
-        permissionCheckingUtils.checkPermissionByOrgIdForCurrentUser(stack.getOrganization().getId(), OrganizationResource.STACK, Action.WRITE);
+    private void triggerStackStopIfNeeded(Stack stack, Cluster cluster, boolean updateCluster, User user) {
+        permissionCheckingUtils.checkPermissionByOrgIdForUser(stack.getOrganization().getId(), OrganizationResource.STACK, Action.WRITE, user);
         if (!isStopNeeded(stack)) {
             return;
         }
@@ -651,8 +620,8 @@ public class StackService {
         eventService.fireCloudbreakEvent(stack.getId(), STOP_REQUESTED.name(), message);
     }
 
-    private void start(Stack stack, Cluster cluster, boolean updateCluster) {
-        permissionCheckingUtils.checkPermissionByOrgIdForCurrentUser(stack.getOrganization().getId(), OrganizationResource.STACK, Action.WRITE);
+    private void start(Stack stack, Cluster cluster, boolean updateCluster, User user) {
+        permissionCheckingUtils.checkPermissionByOrgIdForUser(stack.getOrganization().getId(), OrganizationResource.STACK, Action.WRITE, user);
         if (stack.isAvailable()) {
             String statusDesc = cloudbreakMessagesService.getMessage(Msg.STACK_START_IGNORED.code());
             LOGGER.info(statusDesc);
@@ -669,8 +638,8 @@ public class StackService {
         }
     }
 
-    public void updateNodeCount(Stack stack1, InstanceGroupAdjustmentJson instanceGroupAdjustmentJson, boolean withClusterEvent) {
-        permissionCheckingUtils.checkPermissionByOrgIdForCurrentUser(stack1.getOrganization().getId(), OrganizationResource.STACK, Action.WRITE);
+    public void updateNodeCount(Stack stack1, InstanceGroupAdjustmentJson instanceGroupAdjustmentJson, boolean withClusterEvent, User user) {
+        permissionCheckingUtils.checkPermissionByOrgIdForUser(stack1.getOrganization().getId(), OrganizationResource.STACK, Action.WRITE, user);
         try {
             transactionService.required(() -> {
                 Stack stackWithLists = getByIdWithLists(stack1.getId());
@@ -845,8 +814,8 @@ public class StackService {
         }
     }
 
-    private void delete(Stack stack, Boolean forced, Boolean deleteDependencies) {
-        permissionCheckingUtils.checkPermissionByOrgIdForCurrentUser(stack.getOrganization().getId(), OrganizationResource.STACK, Action.WRITE);
+    private void delete(Stack stack, Boolean forced, Boolean deleteDependencies, User user) {
+        permissionCheckingUtils.checkPermissionByOrgIdForUser(stack.getOrganization().getId(), OrganizationResource.STACK, Action.WRITE, user);
         MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Stack delete requested.");
         if (!stack.isDeleteCompleted()) {
@@ -896,8 +865,8 @@ public class StackService {
         return stackRepository.findStackForClusterWithoutAuth(id);
     }
 
-    public void updateImage(Long stackId, Long organizationId, String imageId, String imageCatalogName, String imageCatalogUrl) {
-        permissionCheckingUtils.checkPermissionByOrgIdForCurrentUser(organizationId, OrganizationResource.STACK, Action.WRITE);
+    public void updateImage(Long stackId, Long organizationId, String imageId, String imageCatalogName, String imageCatalogUrl, User user) {
+        permissionCheckingUtils.checkPermissionByOrgIdForUser(organizationId, OrganizationResource.STACK, Action.WRITE, user);
         flowManager.triggerStackImageUpdate(stackId, imageId, imageCatalogName, imageCatalogUrl);
     }
 

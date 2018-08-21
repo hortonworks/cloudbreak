@@ -28,14 +28,11 @@ public class ManagementPack implements ProvisionEntity, OrganizationAwareResourc
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String description;
 
-    @Column
     private String owner;
 
-    @Column
     private String account;
 
-    @Column
-    private boolean publicInAccount;
+    private boolean publicInAccount = true;
 
     @Column(nullable = false)
     private String mpackUrl;

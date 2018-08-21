@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.IntStream;
 
 import org.junit.Before;
@@ -41,6 +42,7 @@ public class EvaluatorExecutorRegistryTest {
     public void setup() {
         MockitoAnnotations.initMocks(this);
         ReflectionTestUtils.setField(underTest, "timeout", TIMEOUT);
+        ReflectionTestUtils.setField(underTest, "submittedEvaluators", new ConcurrentHashMap<>());
     }
 
     @Test

@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.repository;
 import static com.sequenceiq.cloudbreak.authorization.OrganizationPermissions.Action.READ;
 
 import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
 
 import com.sequenceiq.cloudbreak.aspect.DisableHasPermission;
 import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByOrganization;
@@ -16,7 +17,7 @@ import com.sequenceiq.cloudbreak.service.EntityType;
 
 @DisableHasPermission
 @EntityType(entityClass = FlexSubscription.class)
-@Transactional(Transactional.TxType.REQUIRED)
+@Transactional(TxType.REQUIRED)
 @OrganizationResourceType(resource = OrganizationResource.FLEXSUBSCRIPTION)
 public interface FlexSubscriptionRepository extends OrganizationResourceRepository<FlexSubscription, Long> {
 

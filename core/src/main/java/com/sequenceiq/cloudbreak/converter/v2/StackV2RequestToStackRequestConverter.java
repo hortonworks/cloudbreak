@@ -24,12 +24,17 @@ import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.ImageSettings;
 import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Component
 public class StackV2RequestToStackRequestConverter extends AbstractConversionServiceAwareConverter<StackV2Request, StackRequest> {
@@ -50,10 +55,16 @@ public class StackV2RequestToStackRequestConverter extends AbstractConversionSer
     private SharedServiceConfigProvider sharedServiceConfigProvider;
 
     @Inject
-    private AuthenticatedUserService authenticatedUserService;
+    private TemplateValidator templateValidator;
 
     @Inject
-    private TemplateValidator templateValidator;
+    private UserService userService;
+
+    @Inject
+    private RestRequestThreadLocalService restRequestThreadLocalService;
+
+    @Inject
+    private OrganizationService organizationService;
 
     @Override
     public StackRequest convert(StackV2Request source) {
@@ -100,11 +111,12 @@ public class StackV2RequestToStackRequestConverter extends AbstractConversionSer
         }
         stackRequest.setFlexId(source.getFlexId());
         stackRequest.setCredentialName(source.getGeneral().getCredentialName());
-        stackRequest.setOwner(Strings.isNullOrEmpty(source.getOwner()) ? authenticatedUserService.getCbUser().getUserId() : source.getOwner());
-        stackRequest.setAccount(Strings.isNullOrEmpty(source.getAccount()) ? authenticatedUserService.getCbUser().getAccount() : source.getAccount());
-        stackRequest.setOwnerEmail(Strings.isNullOrEmpty(source.getOwnerEmail()) ? authenticatedUserService.getCbUser().getUsername() : source.getOwnerEmail());
-        convertClusterRequest(source, stackRequest);
-        stackRequest.setCloudPlatform(credentialService.getByNameFromUsersDefaultOrganization(stackRequest.getCredentialName()).cloudPlatform());
+        IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
+        User user = userService.getOrCreate(identityUser);
+        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
+        convertClusterRequest(source, stackRequest, organization);
+        stackRequest.setOwnerEmail(Strings.isNullOrEmpty(source.getOwnerEmail()) ? identityUser.getUsername() : source.getOwnerEmail());
+        stackRequest.setCloudPlatform(credentialService.getByNameForOrganization(stackRequest.getCredentialName(), organization).cloudPlatform());
         convertCustomInputs(source, stackRequest);
         return stackRequest;
     }
@@ -128,7 +140,7 @@ public class StackV2RequestToStackRequestConverter extends AbstractConversionSer
         return result;
     }
 
-    private void convertClusterRequest(StackV2Request source, StackRequest stackRequest) {
+    private void convertClusterRequest(StackV2Request source, StackRequest stackRequest, Organization organization) {
         if (source.getCluster() != null) {
             stackRequest.setClusterRequest(conversionService.convert(source.getCluster(), ClusterRequest.class));
             for (InstanceGroupV2Request instanceGroupV2Request : source.getInstanceGroups()) {
@@ -138,7 +150,7 @@ public class StackV2RequestToStackRequestConverter extends AbstractConversionSer
             stackRequest.getClusterRequest().setName(source.getGeneral().getName());
             if (sharedServiceConfigProvider.isConfigured(source.getCluster())) {
                 SharedServiceRequest sharedService = source.getCluster().getSharedService();
-                stackRequest.setClusterToAttach(stackService.getByNameInDefaultOrg(sharedService.getSharedCluster()).getId());
+                stackRequest.setClusterToAttach(stackService.getByNameInOrg(sharedService.getSharedCluster(), organization.getId()).getId());
             }
         }
     }

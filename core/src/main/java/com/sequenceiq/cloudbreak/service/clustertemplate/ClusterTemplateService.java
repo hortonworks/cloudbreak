@@ -18,9 +18,8 @@ import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.ClusterTemplate;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.repository.ClusterTemplateRepository;
-import com.sequenceiq.cloudbreak.service.AuthorizationService;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 
 @Service
 public class ClusterTemplateService {
@@ -29,12 +28,6 @@ public class ClusterTemplateService {
 
     @Inject
     private ClusterTemplateRepository clusterTemplateRepository;
-
-    @Inject
-    private AuthorizationService authorizationService;
-
-    @Inject
-    private OrganizationService organizationService;
 
     public Set<ClusterTemplate> retrievePrivateClusterTemplates(IdentityUser user) {
         return clusterTemplateRepository.findForUser(user.getUserId());
@@ -53,16 +46,11 @@ public class ClusterTemplateService {
         return clusterTemplateRepository.findByNameInAccount(name, user.getAccount(), user.getUserId());
     }
 
-    public ClusterTemplate create(IdentityUser user, ClusterTemplate clusterTemplate, Organization organization) {
-        LOGGER.debug("Creating clusterTemplate: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
+    public ClusterTemplate create(User user, ClusterTemplate clusterTemplate, Organization organization) {
+        LOGGER.debug("Creating clusterTemplate: [User: '{}']", user.getUserId());
+        clusterTemplate.setOrganization(organization);
+
         ClusterTemplate savedClusterTemplate;
-        clusterTemplate.setOwner(user.getUserId());
-        clusterTemplate.setAccount(user.getAccount());
-        if (organization != null) {
-            clusterTemplate.setOrganization(organization);
-        } else {
-            clusterTemplate.setOrganization(organizationService.getDefaultOrganizationForCurrentUser());
-        }
         try {
             savedClusterTemplate = clusterTemplateRepository.save(clusterTemplate);
         } catch (DataIntegrityViolationException ex) {

@@ -32,12 +32,14 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.StackDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.ManagementPackComponent;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
@@ -100,8 +102,10 @@ public class ImageService {
         }
     }
 
+    //CHECKSTYLE:OFF
     public StatedImage determineImageFromCatalog(Long organizationId, String imageId, String platformString, String catalogName,
-        Blueprint blueprint, boolean useBaseImage, String os) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        Blueprint blueprint, boolean useBaseImage, String os, IdentityUser identityUser, User user) throws CloudbreakImageNotFoundException,
+            CloudbreakImageCatalogException {
         StatedImage statedImage;
         if (imageId != null) {
             statedImage = imageCatalogService.getImageByCatalogName(organizationId, imageId, catalogName);
@@ -119,15 +123,16 @@ public class ImageService {
             }
             if (useBaseImage) {
                 LOGGER.info("Image id isn't specified for the stack, falling back to a base image, because repo information is provided");
-                statedImage = imageCatalogService.getLatestBaseImageDefaultPreferred(platformString, os);
+                statedImage = imageCatalogService.getLatestBaseImageDefaultPreferred(platformString, os, identityUser, user);
             } else {
                 LOGGER.info("Image id isn't specified for the stack, falling back to a prewarmed "
                     + "image of {}-{} or to a base image if prewarmed doesn't exist", clusterType, clusterVersion);
-                statedImage = imageCatalogService.getPrewarmImageDefaultPreferred(platformString, clusterType, clusterVersion, os);
+                statedImage = imageCatalogService.getPrewarmImageDefaultPreferred(platformString, clusterType, clusterVersion, os, identityUser, user);
             }
         }
         return statedImage;
     }
+    //CHECKSTYLE:ON
 
     public String determineImageName(String platformString, String region, com.sequenceiq.cloudbreak.cloud.model.catalog.Image imgFromCatalog)
             throws CloudbreakImageNotFoundException {

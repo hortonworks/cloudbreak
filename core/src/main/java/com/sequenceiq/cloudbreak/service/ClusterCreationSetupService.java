@@ -39,7 +39,6 @@ import com.sequenceiq.cloudbreak.cloud.model.component.DefaultStackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.ManagementPackComponent;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
@@ -52,6 +51,7 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -119,38 +119,39 @@ public class ClusterCreationSetupService {
     @Inject
     private RdsConfigValidator rdsConfigValidator;
 
-    public void validate(ClusterRequest request, Stack stack, IdentityUser user) {
-        validate(request, null, stack, user);
+    public void validate(ClusterRequest request, Stack stack, User user, Organization organization) {
+        validate(request, null, stack, user, organization);
     }
 
-    public void validate(ClusterRequest request, CloudCredential cloudCredential, Stack stack, IdentityUser user) {
+    public void validate(ClusterRequest request, CloudCredential cloudCredential, Stack stack, User user, Organization organization) {
         if (request.getEnableSecurity() && request.getKerberos() == null) {
             throw new BadRequestException("If the security is enabled the kerberos parameters cannot be empty");
         }
-        MDCBuilder.buildUserMdcContext(user);
+        MDCBuilder.buildUserMdcContext(user.getUserId());
         CloudCredential credential = cloudCredential;
         if (credential == null) {
             credential = credentialToCloudCredentialConverter.convert(stack.getCredential());
         }
         fileSystemValidator.validateFileSystem(stack.cloudPlatform(), credential, request.getFileSystem(),
                 stack.getCreator().getUserId(), stack.getOrganization().getId());
-        mpackValidator.validateMpacks(request, user);
-        rdsConfigValidator.validateRdsConfigs(request);
+        mpackValidator.validateMpacks(request, organization);
+        rdsConfigValidator.validateRdsConfigs(request, user, organization);
     }
 
-    public Cluster prepare(ClusterRequest request, Stack stack, IdentityUser user) throws CloudbreakImageNotFoundException,
+    public Cluster prepare(ClusterRequest request, Stack stack, User user, Organization organization) throws CloudbreakImageNotFoundException,
             IOException, TransactionExecutionException {
-        return prepare(request, stack, null, user);
+        return prepare(request, stack, null, user, organization);
     }
 
-    public Cluster prepare(ClusterRequest request, Stack stack, Blueprint blueprint, IdentityUser user) throws IOException,
+    public Cluster prepare(ClusterRequest request, Stack stack, Blueprint blueprint, User user, Organization organization)throws IOException,
             CloudbreakImageNotFoundException, TransactionExecutionException {
         String stackName = stack.getName();
 
         long start = System.currentTimeMillis();
 
         if (request.getFileSystem() != null) {
-            FileSystem fs = fileSystemConfigService.create(conversionService.convert(request.getFileSystem(), FileSystem.class), stack.getOrganization());
+            FileSystem fs = fileSystemConfigService.create(conversionService.convert(request.getFileSystem(), FileSystem.class), stack.getOrganization(),
+                    stack.getCreator());
             request.getFileSystem().setName(fs.getName());
             LOGGER.info("File system saving took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
         }
@@ -161,7 +162,7 @@ public class ClusterCreationSetupService {
 
         start = System.currentTimeMillis();
 
-        cluster = clusterDecorator.decorate(cluster, request, blueprint, stack.getOrganization(), stack);
+        cluster = clusterDecorator.decorate(cluster, request, blueprint, user, stack.getOrganization(), stack);
         LOGGER.info("Cluster object decorated in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
         start = System.currentTimeMillis();
@@ -185,7 +186,7 @@ public class ClusterCreationSetupService {
         LOGGER.info("Cluster components saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
         start = System.currentTimeMillis();
-        Cluster savedCluster = clusterService.create(user, stack, cluster, components);
+        Cluster savedCluster = clusterService.create(stack, cluster, components, user);
         LOGGER.info("Cluster object creation took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
         return savedCluster;

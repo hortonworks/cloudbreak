@@ -32,19 +32,14 @@ public class FlexSubscription implements ProvisionEntity, OrganizationAwareResou
     @ManyToOne
     private SmartSenseSubscription smartSenseSubscription;
 
-    @Column
     private String owner;
 
-    @Column
     private String account;
 
-    @Column
-    private boolean publicInAccount;
+    private boolean publicInAccount = true;
 
-    @Column
     private boolean isDefault;
 
-    @Column
     private boolean usedForController;
 
     @ManyToOne

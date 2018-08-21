@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.controller;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
@@ -15,7 +16,10 @@ import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigResponse;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.converter.mapper.ProxyConfigMapper;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
+import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Component
 @Transactional(TxType.NEVER)
@@ -26,6 +30,12 @@ public class ProxyConfigController extends NotificationController implements Pro
 
     @Autowired
     private ProxyConfigMapper proxyConfigMapper;
+
+    @Inject
+    private UserService userService;
+
+    @Inject
+    private RestRequestThreadLocalService restRequestThreadLocalService;
 
     @Override
     public ProxyConfigResponse get(Long id) {
@@ -80,23 +90,24 @@ public class ProxyConfigController extends NotificationController implements Pro
     }
 
     private ProxyConfigResponse getProxyConfigResponse(String name) {
-        return proxyConfigMapper.mapEntityToResponse(proxyConfigService.getByNameFromUsersDefaultOrganization(name));
+        return proxyConfigMapper.mapEntityToResponse(proxyConfigService.getByNameForOrganizationId(name, restRequestThreadLocalService.getRequestedOrgId()));
     }
 
     private Set<ProxyConfigResponse> listForUsersDefaultOrganization() {
-        return proxyConfigService.findAllForUsersDefaultOrganization().stream()
+        return proxyConfigService.findAllByOrganizationId(restRequestThreadLocalService.getRequestedOrgId()).stream()
                 .map(config -> proxyConfigMapper.mapEntityToResponse(config))
                 .collect(Collectors.toSet());
     }
 
     private ProxyConfigResponse deleteInDefaultOrganization(String name) {
-        ProxyConfig config = proxyConfigService.deleteByNameFromDefaultOrganization(name);
+        ProxyConfig config = proxyConfigService.deleteByNameFromOrganization(name, restRequestThreadLocalService.getRequestedOrgId());
         return notifyAndReturn(config, ResourceEvent.PROXY_CONFIG_DELETED);
     }
 
     private ProxyConfigResponse createInDefaultOrganization(ProxyConfigRequest request) {
         ProxyConfig proxyConfig = proxyConfigMapper.mapRequestToEntity(request);
-        proxyConfig = proxyConfigService.createInDefaultOrganization(proxyConfig);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        proxyConfig = proxyConfigService.create(proxyConfig, restRequestThreadLocalService.getRequestedOrgId(), user);
         return notifyAndReturn(proxyConfig, ResourceEvent.PROXY_CONFIG_CREATED);
     }
 

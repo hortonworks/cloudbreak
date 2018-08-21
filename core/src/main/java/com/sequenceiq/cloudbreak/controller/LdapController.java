@@ -21,7 +21,12 @@ import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.ldapconfig.LdapConfigValidator;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Component
 @Transactional(TxType.NEVER)
@@ -36,6 +41,15 @@ public class LdapController extends NotificationController implements LdapConfig
 
     @Inject
     private LdapConfigService ldapConfigService;
+
+    @Inject
+    private OrganizationService organizationService;
+
+    @Inject
+    private UserService userService;
+
+    @Inject
+    private RestRequestThreadLocalService restRequestThreadLocalService;
 
     @Override
     public LdapConfigResponse postPrivate(LdapConfigRequest ldapConfigRequest) {
@@ -99,7 +113,9 @@ public class LdapController extends NotificationController implements LdapConfig
         LdapTestResult ldapTestResult = new LdapTestResult();
         try {
             if (existingLDAPConfigName != null) {
-                LdapConfig ldapConfig = ldapConfigService.getByNameFromUsersDefaultOrganization(existingLDAPConfigName);
+                User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+                Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
+                LdapConfig ldapConfig = ldapConfigService.getByNameForOrganizationId(existingLDAPConfigName, organization.getId());
                 ldapConfigValidator.validateLdapConnection(ldapConfig);
             } else {
                 ldapConfigValidator.validateLdapConnection(validationRequest);
@@ -113,28 +129,38 @@ public class LdapController extends NotificationController implements LdapConfig
 
     @Override
     public LdapConfigRequest getRequestFromName(String name) {
-        LdapConfig ldapConfig = ldapConfigService.getByNameFromUsersDefaultOrganization(name);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
+        LdapConfig ldapConfig = ldapConfigService.getByNameForOrganizationId(name, organization.getId());
         return conversionService.convert(ldapConfig, LdapConfigRequest.class);
     }
 
     private LdapConfigResponse createConfig(LdapConfigRequest request) {
         LdapConfig ldapConfig = conversionService.convert(request, LdapConfig.class);
-        LdapConfig response = ldapConfigService.createInDefaultOrganization(ldapConfig);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
+        LdapConfig response = ldapConfigService.create(ldapConfig, organization, user);
         notify(ResourceEvent.LDAP_CREATED);
         return conversionService.convert(response, LdapConfigResponse.class);
     }
 
     private LdapConfigResponse getLdapConfigResponse(String name) {
-        return conversionService.convert(ldapConfigService.getByNameFromUsersDefaultOrganization(name), LdapConfigResponse.class);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
+        return conversionService.convert(ldapConfigService.getByNameForOrganization(name, organization), LdapConfigResponse.class);
     }
 
     private Set<LdapConfigResponse> listForUsersDefaultOrganization() {
-        return ldapConfigService.findAllForUsersDefaultOrganization().stream()
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
+        return ldapConfigService.findAllByOrganization(organization).stream()
                 .map(ldapConfig -> conversionService.convert(ldapConfig, LdapConfigResponse.class))
                 .collect(Collectors.toSet());
     }
 
     private void deleteInDefaultOrganization(String name) {
-        executeAndNotify(user -> ldapConfigService.deleteByNameFromDefaultOrganization(name), ResourceEvent.LDAP_DELETED);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
+        executeAndNotify(identityUser -> ldapConfigService.deleteByNameFromOrganization(name, organization.getId()), ResourceEvent.LDAP_DELETED);
     }
 }

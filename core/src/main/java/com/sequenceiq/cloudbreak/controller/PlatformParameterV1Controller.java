@@ -49,12 +49,15 @@ import com.sequenceiq.cloudbreak.cloud.model.PlatformRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformRegions;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformVirtualMachines;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.PlatformResourceRequest;
-import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 import com.sequenceiq.cloudbreak.service.stack.CloudResourceAdvisor;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Component
 @Transactional(TxType.NEVER)
@@ -68,10 +71,16 @@ public class PlatformParameterV1Controller implements ConnectorV1Endpoint {
     private ConversionService conversionService;
 
     @Inject
-    private AuthenticatedUserService authenticatedUserService;
+    private CloudResourceAdvisor cloudResourceAdvisor;
 
     @Inject
-    private CloudResourceAdvisor cloudResourceAdvisor;
+    private UserService userService;
+
+    @Inject
+    private RestRequestThreadLocalService restRequestThreadLocalService;
+
+    @Inject
+    private OrganizationService organizationService;
 
     @Override
     public Map<String, Object> getPlatforms(Boolean extended) {
@@ -183,22 +192,22 @@ public class PlatformParameterV1Controller implements ConnectorV1Endpoint {
 
     @Override
     public RecommendationResponse createRecommendation(RecommendationRequestJson recommendationRequestJson) {
-        IdentityUser cbUser = authenticatedUserService.getCbUser();
         PlatformResourceRequest resourceRequest = conversionService.convert(recommendationRequestJson, PlatformResourceRequest.class);
         if (recommendationRequestJson.getBlueprintId() == null && Strings.isNullOrEmpty(recommendationRequestJson.getBlueprintName())) {
             fieldIsNotEmpty(recommendationRequestJson.getBlueprintId(), "blueprintId");
         }
         fieldIsNotEmpty(resourceRequest.getRegion(), "region");
         fieldIsNotEmpty(resourceRequest.getAvailabilityZone(), "availabilityZone");
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
         PlatformRecommendation recommendedVms =
                 cloudResourceAdvisor.createForBlueprint(recommendationRequestJson.getBlueprintName(), recommendationRequestJson.getBlueprintId(),
-                        resourceRequest, cbUser);
+                        resourceRequest, user, organization);
         return conversionService.convert(recommendedVms, RecommendationResponse.class);
     }
 
     @Override
     public PlatformNetworksResponse getCloudNetworks(PlatformResourceRequestJson resourceRequestJson) {
-        resourceRequestJson = prepareAccountAndOwner(resourceRequestJson, authenticatedUserService.getCbUser());
         PlatformResourceRequest convert = conversionService.convert(resourceRequestJson, PlatformResourceRequest.class);
         CloudNetworks cloudNetworks = cloudParameterService.getCloudNetworks(convert.getCredential(), convert.getRegion(),
                 convert.getPlatformVariant(), convert.getFilters());
@@ -207,7 +216,6 @@ public class PlatformParameterV1Controller implements ConnectorV1Endpoint {
 
     @Override
     public PlatformSshKeysResponse getCloudSshKeys(PlatformResourceRequestJson resourceRequestJson) {
-        resourceRequestJson = prepareAccountAndOwner(resourceRequestJson, authenticatedUserService.getCbUser());
         PlatformResourceRequest convert = conversionService.convert(resourceRequestJson, PlatformResourceRequest.class);
         CloudSshKeys cloudSshKeys = cloudParameterService.getCloudSshKeys(convert.getCredential(), convert.getRegion(),
                 convert.getPlatformVariant(), convert.getFilters());
@@ -216,7 +224,6 @@ public class PlatformParameterV1Controller implements ConnectorV1Endpoint {
 
     @Override
     public PlatformSecurityGroupsResponse getSecurityGroups(PlatformResourceRequestJson resourceRequestJson) {
-        resourceRequestJson = prepareAccountAndOwner(resourceRequestJson, authenticatedUserService.getCbUser());
         PlatformResourceRequest convert = conversionService.convert(resourceRequestJson, PlatformResourceRequest.class);
         CloudSecurityGroups securityGroups = cloudParameterService.getSecurityGroups(convert.getCredential(), convert.getRegion(),
                 convert.getPlatformVariant(), convert.getFilters());
@@ -225,7 +232,6 @@ public class PlatformParameterV1Controller implements ConnectorV1Endpoint {
 
     @Override
     public PlatformGatewaysResponse getGatewaysCredentialId(PlatformResourceRequestJson resourceRequestJson) {
-        resourceRequestJson = prepareAccountAndOwner(resourceRequestJson, authenticatedUserService.getCbUser());
         PlatformResourceRequest convert = conversionService.convert(resourceRequestJson, PlatformResourceRequest.class);
 
         CloudGateWays cloudGateWays = cloudParameterService.getGateways(convert.getCredential(), convert.getRegion(),
@@ -235,7 +241,6 @@ public class PlatformParameterV1Controller implements ConnectorV1Endpoint {
 
     @Override
     public PlatformIpPoolsResponse getIpPoolsCredentialId(PlatformResourceRequestJson resourceRequestJson) {
-        resourceRequestJson = prepareAccountAndOwner(resourceRequestJson, authenticatedUserService.getCbUser());
         PlatformResourceRequest convert = conversionService.convert(resourceRequestJson, PlatformResourceRequest.class);
 
         CloudIpPools cloudIpPools = cloudParameterService.getPublicIpPools(convert.getCredential(), convert.getRegion(),
@@ -245,7 +250,6 @@ public class PlatformParameterV1Controller implements ConnectorV1Endpoint {
 
     @Override
     public PlatformAccessConfigsResponse getAccessConfigs(PlatformResourceRequestJson resourceRequestJson) {
-        resourceRequestJson = prepareAccountAndOwner(resourceRequestJson, authenticatedUserService.getCbUser());
         PlatformResourceRequest convert = conversionService.convert(resourceRequestJson, PlatformResourceRequest.class);
 
         CloudAccessConfigs cloudAccessConfigs = cloudParameterService.getCloudAccessConfigs(convert.getCredential(), convert.getRegion(),
@@ -255,18 +259,11 @@ public class PlatformParameterV1Controller implements ConnectorV1Endpoint {
 
     @Override
     public PlatformEncryptionKeysResponse getEncryptionKeys(PlatformResourceRequestJson resourceRequestJson) {
-        resourceRequestJson = prepareAccountAndOwner(resourceRequestJson, authenticatedUserService.getCbUser());
         PlatformResourceRequest convert = conversionService.convert(resourceRequestJson, PlatformResourceRequest.class);
 
         CloudEncryptionKeys cloudEncryptionKeys = cloudParameterService.getCloudEncryptionKeys(convert.getCredential(), convert.getRegion(),
                 convert.getPlatformVariant(), convert.getFilters());
         return conversionService.convert(cloudEncryptionKeys, PlatformEncryptionKeysResponse.class);
-    }
-
-    private PlatformResourceRequestJson prepareAccountAndOwner(PlatformResourceRequestJson resourceRequestJson, IdentityUser user) {
-        resourceRequestJson.setAccount(user.getAccount());
-        resourceRequestJson.setOwner(user.getUserId());
-        return resourceRequestJson;
     }
 
     private void fieldIsNotEmpty(Object field, String fieldName) {

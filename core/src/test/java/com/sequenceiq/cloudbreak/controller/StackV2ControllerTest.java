@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.controller;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -17,14 +19,18 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.model.stack.StackImageChangeRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRepairRequest;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.OperationRetryService;
+import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StackV2ControllerTest {
@@ -52,6 +58,15 @@ public class StackV2ControllerTest {
     @Mock
     private StackCommonService stackCommonService;
 
+    @Mock
+    private RestRequestThreadLocalService restRequestThreadLocalService;
+
+    @Mock
+    private UserService userService;
+
+    @Mock
+    private IdentityUser identityUser;
+
     private Stack stack;
 
     @Before
@@ -65,8 +80,10 @@ public class StackV2ControllerTest {
         organization.setId(ORGANIZATION_ID);
         organization.setName("Top Sercet FBI");
 
-        when(stackService.getByNameInDefaultOrg(eq(stackName))).thenReturn(stack);
-        when(organizationService.getDefaultOrganizationForCurrentUser()).thenReturn(organization);
+        when(stackService.getByNameInOrg(eq(stackName), anyLong())).thenReturn(stack);
+        when(restRequestThreadLocalService.getIdentityUser()).thenReturn(identityUser);
+        when(userService.getOrCreate(any(IdentityUser.class))).thenReturn(new User());
+        when(organizationService.get(anyLong(), any(User.class))).thenReturn(organization);
     }
 
     @Test

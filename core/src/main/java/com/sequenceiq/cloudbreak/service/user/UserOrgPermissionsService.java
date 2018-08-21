@@ -21,16 +21,11 @@ public class UserOrgPermissionsService {
     @Inject
     private UserOrgPermissionsRepository userOrgPermissionsRepository;
 
-    @Inject
-    private UserService userService;
-
-    public Set<UserOrgPermissions> findForCurrentUser() {
-        User currentUser = userService.getCurrentUser();
+    public Set<UserOrgPermissions> findForCurrentUser(User currentUser) {
         return userOrgPermissionsRepository.findForUser(currentUser);
     }
 
-    public UserOrgPermissions findForCurrentUserByOrganizationId(Long orgId) {
-        User currentUser = userService.getCurrentUser();
+    public UserOrgPermissions findForUserByOrganizationId(Long orgId, User currentUser) {
         return userOrgPermissionsRepository.findForUserByOrganizationId(currentUser, orgId);
     }
 

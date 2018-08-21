@@ -14,10 +14,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.model.CustomInstanceType;
+import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.model.TemplateRequest;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
-import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.json.Json;
@@ -38,6 +38,7 @@ public class TemplateRequestToTemplateConverter extends AbstractConversionServic
     @Override
     public Template convert(TemplateRequest source) {
         Template template = new Template();
+
         if (Strings.isNullOrEmpty(source.getName())) {
             template.setName(missingResourceNameGenerator.generateName(APIResourceType.TEMPLATE));
         } else {

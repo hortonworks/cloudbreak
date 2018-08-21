@@ -12,12 +12,13 @@ import org.springframework.stereotype.Controller;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.FlexSubscriptionV3Endpoint;
 import com.sequenceiq.cloudbreak.api.model.FlexSubscriptionRequest;
 import com.sequenceiq.cloudbreak.api.model.FlexSubscriptionResponse;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.converter.FlexSubscriptionRequestToFlexSubscriptionConverter;
 import com.sequenceiq.cloudbreak.converter.FlexSubscriptionToJsonConverter;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
-import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Controller
 @Transactional(TxType.NEVER)
@@ -27,7 +28,10 @@ public class FlexSubscriptionV3Controller implements FlexSubscriptionV3Endpoint 
     private FlexSubscriptionService flexSubscriptionService;
 
     @Inject
-    private AuthenticatedUserService authenticatedUserService;
+    private UserService userService;
+
+    @Inject
+    private RestRequestThreadLocalService restRequestThreadLocalService;
 
     @Inject
     private FlexSubscriptionRequestToFlexSubscriptionConverter toFlexSubscriptionConverter;
@@ -37,21 +41,23 @@ public class FlexSubscriptionV3Controller implements FlexSubscriptionV3Endpoint 
 
     @Override
     public Set<FlexSubscriptionResponse> listByOrganization(Long organizationId) {
-        IdentityUser identityUser = authenticatedUserService.getCbUser();
-        Set<FlexSubscription> subscriptions = flexSubscriptionService.findAllForUserAndOrganization(identityUser, organizationId);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        Set<FlexSubscription> subscriptions = flexSubscriptionService.findAllForUserAndOrganization(user, organizationId);
         return new HashSet<>(toJsonConverter.convert(subscriptions));
     }
 
     @Override
     public FlexSubscriptionResponse getByNameInOrganization(Long organizationId, String name) {
-        FlexSubscription subscription = flexSubscriptionService.findOneByNameAndOrganization(name, organizationId);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        FlexSubscription subscription = flexSubscriptionService.findOneByNameAndOrganization(name, organizationId, user);
         return toJsonConverter.convert(subscription);
     }
 
     @Override
     public FlexSubscriptionResponse createInOrganization(Long organizationId, FlexSubscriptionRequest request) {
         FlexSubscription subscription = toFlexSubscriptionConverter.convert(request);
-        subscription = flexSubscriptionService.create(subscription, organizationId);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        subscription = flexSubscriptionService.create(subscription, organizationId, user);
         return toJsonConverter.convert(subscription);
     }
 

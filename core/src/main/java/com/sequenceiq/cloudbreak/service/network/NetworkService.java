@@ -24,7 +24,6 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.repository.NetworkRepository;
 import com.sequenceiq.cloudbreak.repository.organization.OrganizationResourceRepository;
 import com.sequenceiq.cloudbreak.service.AbstractOrganizationAwareResourceService;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.NameUtil;
 
@@ -38,15 +37,8 @@ public class NetworkService extends AbstractOrganizationAwareResourceService<Net
     @Inject
     private StackService stackService;
 
-    @Inject
-    private OrganizationService organizationService;
-
     public Network create(Network network, Organization organization) {
-        if (organization != null) {
-            network.setOrganization(organization);
-        } else {
-            network.setOrganization(organizationService.getDefaultOrganizationForCurrentUser());
-        }
+        network.setOrganization(organization);
         try {
             return networkRepository.save(network);
         } catch (DataIntegrityViolationException ex) {

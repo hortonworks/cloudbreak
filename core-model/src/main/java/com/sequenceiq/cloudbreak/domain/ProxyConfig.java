@@ -28,10 +28,8 @@ public class ProxyConfig implements ProvisionEntity, OrganizationAwareResource {
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String description;
 
-    @Column(nullable = false)
     private String owner;
 
-    @Column(nullable = false)
     private String account;
 
     @Column(nullable = false)
@@ -51,7 +49,7 @@ public class ProxyConfig implements ProvisionEntity, OrganizationAwareResource {
     private String password;
 
     @Column(nullable = false)
-    private boolean publicInAccount;
+    private boolean publicInAccount = true;
 
     @ManyToOne
     private Organization organization;

@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.repository.RdsConfigRepository;
 import com.sequenceiq.cloudbreak.service.TransactionService;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 
@@ -85,7 +86,6 @@ public class RdsConfigServiceTest {
         defaultOrg.setStatus(OrganizationStatus.ACTIVE);
         defaultOrg.setDescription("This is a real Horton defaultOrg!");
         defaultOrg.setTenant(new Tenant());
-        when(organizationService.getDefaultOrganizationForCurrentUser()).thenReturn(defaultOrg);
         testRdsConfig = new RDSConfig();
         testRdsConfig.setId(1L);
         testRdsConfig.setName(TEST_RDS_CONFIG_NAME);
@@ -96,9 +96,8 @@ public class RdsConfigServiceTest {
     public void testRetrieveRdsConfigsInDefaultOrg() {
         when(rdsConfigRepository.findAllByOrganizationId(eq(1L))).thenReturn(Collections.singleton(testRdsConfig));
 
-        Set<RDSConfig> rdsConfigs = underTest.retrieveRdsConfigsInDefaultOrg();
+        Set<RDSConfig> rdsConfigs = underTest.retrieveRdsConfigsInOrg(defaultOrg);
 
-        verify(organizationService, times(1)).getDefaultOrganizationForCurrentUser();
         verify(rdsConfigRepository, times(1)).findAllByOrganizationId(eq(1L));
         assertEquals(1, rdsConfigs.size());
     }
@@ -107,7 +106,7 @@ public class RdsConfigServiceTest {
     public void testGetExistingRdsConfigByNameAndDefaultOrg() {
         when(rdsConfigRepository.findByNameAndOrganizationId(eq(TEST_RDS_CONFIG_NAME), eq(1L))).thenReturn(testRdsConfig);
 
-        underTest.getByNameForDefaultOrg(TEST_RDS_CONFIG_NAME);
+        underTest.getByNameForOrg(TEST_RDS_CONFIG_NAME, defaultOrg);
 
         verify(rdsConfigRepository, times(1)).findByNameAndOrganizationId(anyString(), eq(1L));
     }
@@ -118,7 +117,7 @@ public class RdsConfigServiceTest {
 
         thrown.expect(NotFoundException.class);
 
-        underTest.getByNameForDefaultOrg(TEST_RDS_CONFIG_NAME + "X");
+        underTest.getByNameForOrg(TEST_RDS_CONFIG_NAME + "X", defaultOrg);
     }
 
     @Test
@@ -288,9 +287,9 @@ public class RdsConfigServiceTest {
     }
 
     @Test
-    public void testNewRdsConfigCreation() throws TransactionService.TransactionExecutionException {
+    public void testNewRdsConfigCreation() throws TransactionExecutionException {
         when(rdsConfigRepository.findByNameAndOrganizationId(eq(TEST_RDS_CONFIG_NAME), eq(1L))).thenReturn(null);
-        when(organizationService.get(any(), eq(1L))).thenReturn(defaultOrg);
+        when(organizationService.get(eq(1L), any(User.class))).thenReturn(defaultOrg);
         doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).required(any());
         when(organizationService.retrieveForUser(any())).thenReturn(Collections.singleton(defaultOrg));
         when(rdsConfigRepository.save(any())).thenReturn(testRdsConfig);
@@ -306,7 +305,7 @@ public class RdsConfigServiceTest {
 
         RDSConfig rdsConfig = underTest.createIfNotExists(new User(), testRdsConfig, 1L);
 
-        verify(organizationService, times(0)).get(any(), anyLong());
+        verify(organizationService, times(0)).get(anyLong(), any(User.class));
         verifyZeroInteractions(transactionService);
         assertEquals(testRdsConfig, rdsConfig);
     }

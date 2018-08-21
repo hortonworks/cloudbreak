@@ -7,28 +7,28 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 
-public class RestRequestThreadLocalFilter extends OncePerRequestFilter {
+public class IdentityUserConfiguratorFilter extends OncePerRequestFilter {
 
     private final RestRequestThreadLocalService restRequestThreadLocalService;
 
-    public RestRequestThreadLocalFilter(RestRequestThreadLocalService restRequestThreadLocalService) {
+    private final AuthenticatedUserService authenticatedUserService;
+
+    public IdentityUserConfiguratorFilter(RestRequestThreadLocalService restRequestThreadLocalService, AuthenticatedUserService authenticatedUserService) {
         this.restRequestThreadLocalService = restRequestThreadLocalService;
+        this.authenticatedUserService = authenticatedUserService;
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String requestURI = request.getRequestURI();
-        if (requestURI.contains("/v3/organization/")) {
-            Long orgId = Long.valueOf(StringUtils.substringBetween(requestURI, "/v3/organization/", "/"));
-            restRequestThreadLocalService.setRequestedOrgId(orgId);
-        } else {
-            restRequestThreadLocalService.setRequestedOrgId(null);
-        }
+        IdentityUser identityUser = authenticatedUserService.getCbUser();
+        restRequestThreadLocalService.setIdentityUser(identityUser);
         filterChain.doFilter(request, response);
+        restRequestThreadLocalService.removeIdentityUser();
     }
 }

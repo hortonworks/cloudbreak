@@ -71,7 +71,7 @@ public class OwnerBasedPermissionEvaluator implements PermissionEvaluator {
         String owner = getOwner(targetDomainObject);
         String account = getAccount(targetDomainObject);
         return owner == null && account == null
-                || owner.equals(user.getUserId())
+                || user.getUserId().equals(owner)
                 || account.equals(user.getAccount()) && (user.getRoles().contains(IdentityUserRole.ADMIN) || p == PermissionType.READ && isPublicInAccount(targetDomainObject));
     }
     //CHECKSTYLE:ON

@@ -5,6 +5,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -46,7 +48,6 @@ import com.sequenceiq.cloudbreak.blueprint.templates.BlueprintStackInfo;
 import com.sequenceiq.cloudbreak.blueprint.templates.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.blueprint.utils.StackInfoService;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
 import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Credential;
@@ -56,8 +57,10 @@ import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
-import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
@@ -67,13 +70,11 @@ import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.user.CachedUserDetailsService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 
 public class StackRequestToBlueprintPreparationObjectConverterTest {
 
     private static final Long BLUEPRINT_ID = 1L;
-
-    private static final String OWNER = "somebody";
 
     private static final String TEST_CREDENTIAL_NAME = "testCred";
 
@@ -102,9 +103,6 @@ public class StackRequestToBlueprintPreparationObjectConverterTest {
     private GeneralClusterConfigsProvider generalClusterConfigsProvider;
 
     @Mock
-    private CachedUserDetailsService cachedUserDetailsService;
-
-    @Mock
     private BlueprintService blueprintService;
 
     @Mock
@@ -126,7 +124,7 @@ public class StackRequestToBlueprintPreparationObjectConverterTest {
     private FileSystemConfigService fileSystemConfigService;
 
     @Mock
-    private AuthenticatedUserService authenticatedUserService;
+    private RestRequestThreadLocalService restRequestThreadLocalService;
 
     @Mock
     private FileSystemConfigurationsViewProvider fileSystemConfigurationsViewProvider;
@@ -144,7 +142,16 @@ public class StackRequestToBlueprintPreparationObjectConverterTest {
     private GeneralSettings generalSettings;
 
     @Mock
-    private IdentityUser user;
+    private UserService userService;
+
+    @Mock
+    private IdentityUser identityUser;
+
+    @Mock
+    private User user;
+
+    @Mock
+    private Organization organization;
 
     @Mock
     private ClusterV2Request cluster;
@@ -164,8 +171,7 @@ public class StackRequestToBlueprintPreparationObjectConverterTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        when(source.getOwner()).thenReturn(OWNER);
-        when(cachedUserDetailsService.getDetails(OWNER, UserFilterField.USERID)).thenReturn(user);
+        when(restRequestThreadLocalService.getIdentityUser()).thenReturn(identityUser);
         when(source.getGeneral()).thenReturn(generalSettings);
         when(generalSettings.getCredentialName()).thenReturn(TEST_CREDENTIAL_NAME);
         when(source.getCluster()).thenReturn(cluster);
@@ -174,6 +180,9 @@ public class StackRequestToBlueprintPreparationObjectConverterTest {
         when(blueprintService.get(BLUEPRINT_ID)).thenReturn(blueprint);
         when(blueprint.getBlueprintText()).thenReturn(TEST_BLUEPRINT_TEXT);
         when(stackInfoService.blueprintStackInfo(TEST_BLUEPRINT_TEXT)).thenReturn(blueprintStackInfo);
+        when(userService.getOrCreate(eq(identityUser))).thenReturn(user);
+        when(identityUser.getUsername()).thenReturn("test@hortonworks.com");
+        when(organizationService.get(anyLong(), eq(user))).thenReturn(organization);
     }
 
     @Test
@@ -285,7 +294,7 @@ public class StackRequestToBlueprintPreparationObjectConverterTest {
     public void testConvertWhenClusterHaveSomeRdsConfigNamesThenTheSameAmountOfRdsConfigShouldBeStored() {
         Set<String> rdsConfigNames = createRdsConfigNames();
         when(cluster.getRdsConfigNames()).thenReturn(rdsConfigNames);
-        rdsConfigNames.forEach(rdsConfigName -> when(rdsConfigService.getByNameForDefaultOrg(rdsConfigName)).
+        rdsConfigNames.forEach(rdsConfigName -> when(rdsConfigService.getByNameForOrg(rdsConfigName, organization)).
                 thenReturn(new RDSConfig()));
 
         BlueprintPreparationObject result = underTest.convert(source);
@@ -355,8 +364,8 @@ public class StackRequestToBlueprintPreparationObjectConverterTest {
         Credential credential = new Credential();
         String account = "testAccount";
         when(cloudStorageValidationUtil.isCloudStorageConfigured(cloudStorageRequest)).thenReturn(true);
-        when(user.getAccount()).thenReturn(account);
-        when(credentialService.getByNameFromUsersDefaultOrganization(TEST_CREDENTIAL_NAME)).thenReturn(credential);
+        when(identityUser.getAccount()).thenReturn(account);
+        when(credentialService.getByNameForOrganization(TEST_CREDENTIAL_NAME, organization)).thenReturn(credential);
         when(cluster.getCloudStorage()).thenReturn(cloudStorageRequest);
         when(conversionService.convert(cloudStorageRequest, FileSystem.class)).thenReturn(fileSystem);
         when(fileSystemConfigurationProvider.fileSystemConfiguration(fileSystem, source, credential)).thenReturn(expected);
@@ -370,7 +379,7 @@ public class StackRequestToBlueprintPreparationObjectConverterTest {
     @Test
     public void testConvertWhenObtainingGeneralClusterConfigsFromGeneralClusterConfigsProviderThenItsReturnValueShouldBeStored() {
         GeneralClusterConfigs expected = new GeneralClusterConfigs();
-        when(generalClusterConfigsProvider.generalClusterConfigs(source, user)).thenReturn(expected);
+        when(generalClusterConfigsProvider.generalClusterConfigs(eq(source), eq(user), anyString())).thenReturn(expected);
 
         BlueprintPreparationObject result = underTest.convert(source);
 
@@ -392,7 +401,7 @@ public class StackRequestToBlueprintPreparationObjectConverterTest {
         expected.setProtocol("");
         String ldapConfigName = "configName";
         when(cluster.getLdapConfigName()).thenReturn(ldapConfigName);
-        when(ldapConfigService.getByNameFromUsersDefaultOrganization(ldapConfigName)).thenReturn(expected);
+        when(ldapConfigService.getByNameForOrganization(eq(ldapConfigName), eq(organization))).thenReturn(expected);
 
         BlueprintPreparationObject result = underTest.convert(source);
 
