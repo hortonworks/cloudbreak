@@ -14,16 +14,15 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.users.UserNamePasswordJson;
 import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
@@ -79,7 +78,7 @@ public class ClusterCommonService {
         if (updateJson.getBlueprintId() != null && updateJson.getHostgroups() != null && stack.getCluster().isCreateFailed()) {
             LOGGER.info("Cluster rebuild request received. Stack id:  {}", stackId);
             try {
-                recreateCluster(stackId, updateJson);
+                recreateCluster(stack, updateJson);
             } catch (TransactionExecutionException e) {
                 throw new TransactionRuntimeExecutionException(e);
             }
@@ -111,12 +110,11 @@ public class ClusterCommonService {
         clusterService.updateHosts(stackId, updateJson.getHostGroupAdjustment());
     }
 
-    private void recreateCluster(Long stackId, UpdateClusterJson updateJson) throws TransactionExecutionException {
-        IdentityUser user = authenticatedUserService.getCbUser();
+    private void recreateCluster(Stack stack, UpdateClusterJson updateJson) throws TransactionExecutionException {
         Set<HostGroup> hostGroups = new HashSet<>();
         for (HostGroupRequest json : updateJson.getHostgroups()) {
             HostGroup hostGroup = conversionService.convert(json, HostGroup.class);
-            hostGroup = hostGroupDecorator.decorate(hostGroup, json, user, stackId, false, false);
+            hostGroup = hostGroupDecorator.decorate(hostGroup, json, stack, false, false);
             hostGroups.add(hostGroup);
         }
         AmbariStackDetailsJson stackDetails = updateJson.getAmbariStackDetails();
@@ -124,7 +122,7 @@ public class ClusterCommonService {
         if (stackDetails != null) {
             stackRepoDetails = conversionService.convert(stackDetails, StackRepoDetails.class);
         }
-        clusterService.recreate(stackId, updateJson.getBlueprintId(), hostGroups, updateJson.getValidateBlueprint(), stackRepoDetails,
+        clusterService.recreate(stack, updateJson.getBlueprintId(), hostGroups, updateJson.getValidateBlueprint(), stackRepoDetails,
                 updateJson.getKerberosPassword(), updateJson.getKerberosPrincipal());
     }
 

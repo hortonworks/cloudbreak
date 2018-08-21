@@ -19,6 +19,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
@@ -76,6 +77,7 @@ public class AmbariClusterServiceTest {
     private OrchestratorTypeResolver orchestratorTypeResolver;
 
     @Mock
+
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
     @Mock
@@ -114,11 +116,11 @@ public class AmbariClusterServiceTest {
         RDSConfig rdsConfig = new RDSConfig();
         rdsConfig.setDatabaseEngine(DatabaseVendor.POSTGRES);
         when(rdsConfigService.findByClusterIdAndType(any(Long.class), any(RdsType.class))).thenReturn(rdsConfig);
-        clusterService.recreate(1L, 1L, new HashSet<>(), false, new StackRepoDetails(), null, null);
+        clusterService.recreate(TestUtil.stack(), 1L, new HashSet<>(), false, new StackRepoDetails(), null, null);
     }
 
     @Test
     public void testRecreateSuccess() throws TransactionExecutionException {
-        clusterService.recreate(1L, 1L, new HashSet<>(), false, new StackRepoDetails(), null, null);
+        clusterService.recreate(TestUtil.stack(), 1L, new HashSet<>(), false, new StackRepoDetails(), null, null);
     }
 }
