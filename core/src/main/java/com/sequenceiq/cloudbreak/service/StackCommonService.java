@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -170,6 +171,14 @@ public class StackCommonService implements StackEndpoint {
     public void deleteInDefaultOrg(String name, Boolean forced, Boolean deleteDependencies) {
         Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
         stackService.delete(name, organization.getId(), forced, deleteDependencies);
+    }
+
+    public Set<StackResponse> retrieveStacksByOrganizationId(Long organizationId) {
+        return stackService.retrieveStacksByOrganizationId(organizationId);
+    }
+
+    public StackResponse findStackByNameAndOrganizationId(String name, Long organizationId, @QueryParam("entry") Set<String> entries) {
+        return stackService.getByNameInOrgWithEntries(name, organizationId, entries);
     }
 
     public Response putInDefaultOrg(Long id, UpdateStackJson updateRequest) {
@@ -357,13 +366,5 @@ public class StackCommonService implements StackEndpoint {
             throw new BadRequestException(String.format("Upscaling by more than %d nodes is not supported",
                     scalingHardLimitsService.getMaxUpscaleStepInNodeCount()));
         }
-    }
-
-    public Set<StackResponse> retrieveStacksByOrganizationId(Long organizationId) {
-        return stackService.retrieveStacksByOrganizationId(organizationId);
-    }
-
-    public StackResponse findStackByNameAndOrganizationId(String name, Long organizationId) {
-        return stackService.findStackByNameAndOrganizationId(name, organizationId);
     }
 }

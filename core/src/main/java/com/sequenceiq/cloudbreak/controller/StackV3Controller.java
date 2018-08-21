@@ -7,6 +7,7 @@ import javax.inject.Named;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 import javax.validation.Valid;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
 import org.springframework.core.convert.ConversionService;
@@ -51,8 +52,8 @@ public class StackV3Controller extends NotificationController implements StackV3
     }
 
     @Override
-    public StackResponse getByNameInOrganization(Long organizationId, String name) {
-        return stackCommonService.findStackByNameAndOrganizationId(name, organizationId);
+    public StackResponse getByNameInOrganization(Long organizationId, String name, @QueryParam("entry") Set<String> entries) {
+        return stackCommonService.findStackByNameAndOrganizationId(name, organizationId, entries);
     }
 
     @Override

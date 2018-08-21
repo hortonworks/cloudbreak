@@ -60,7 +60,7 @@ public class ImageStatusCheckerTask extends StackBasedStatusCheckerTask<ImageChe
         notification.setCloud(stack.cloudPlatform());
         notification.setRegion(stack.getRegion());
         notification.setStackId(stack.getId());
-        notification.setStackName(stack.getDisplayName());
+        notification.setStackName(stack.getName());
         notification.setStackStatus(stack.getStatus());
         return new Notification<>(notification);
     }

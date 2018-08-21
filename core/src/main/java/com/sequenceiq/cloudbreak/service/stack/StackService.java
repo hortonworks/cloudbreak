@@ -358,15 +358,11 @@ public class StackService {
         }
     }
 
-    public Stack getByNameInDefaultOrgWithLists(String name) {
-        Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
-        return stackRepository.findByNameAndOrganizationIdWithLists(name, organization.getId());
-    }
-
-    public StackResponse getStackByNameInOrganization(String name, Organization organization, Collection<String> entries) {
+    public StackResponse getByNameInOrgWithEntries(String name, Long organizationId, Set<String> entries) {
         try {
             return transactionService.required(() -> {
-                Stack stack = stackRepository.findByNameInOrganizationWithLists(name, organization);
+                Organization organization = organizationService.get(organizationId);
+                Stack stack = stackRepository.findByNameAndOrganizationIdWithLists(name, organization.getId());
                 StackResponse stackResponse = conversionService.convert(stack, StackResponse.class);
                 stackResponse = stackResponseDecorator.decorate(stackResponse, stack, entries);
                 return stackResponse;
