@@ -51,7 +51,7 @@ public class RdsConfigV3Controller extends AbstractRdsConfigController implement
 
     @Override
     public RdsTestResult testRdsConnection(Long organizationId, RDSTestRequest rdsTestRequest) {
-        Organization organization = getRdsConfigService().getOrganizationService().get(organizationId);
+        Organization organization = getOrganizationService().get(organizationId);
         return testRdsConnection(rdsTestRequest, organization);
     }
 

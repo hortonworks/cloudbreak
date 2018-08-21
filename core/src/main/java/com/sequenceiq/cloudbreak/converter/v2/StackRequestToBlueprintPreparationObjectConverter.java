@@ -47,11 +47,10 @@ import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
-import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
 import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
-import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
+import com.sequenceiq.cloudbreak.service.ldapconfig.LegacyLdapConfigService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
-import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
+import com.sequenceiq.cloudbreak.service.rdsconfig.LegacyRdsConfigService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.CachedUserDetailsService;
@@ -63,13 +62,13 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
     private FlexSubscriptionService flexSubscriptionService;
 
     @Inject
-    private LdapConfigService ldapConfigService;
+    private LegacyLdapConfigService ldapConfigService;
 
     @Inject
     private StackService stackService;
 
     @Inject
-    private RdsConfigService rdsConfigService;
+    private LegacyRdsConfigService rdsConfigService;
 
     @Inject
     private GeneralClusterConfigsProvider generalClusterConfigsProvider;
@@ -96,9 +95,6 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
     private SharedServiceConfigProvider sharedServiceConfigProvider;
 
     @Inject
-    private FileSystemConfigService fileSystemConfigService;
-
-    @Inject
     private AuthenticatedUserService authenticatedUserService;
 
     @Inject
@@ -115,7 +111,7 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
         try {
             IdentityUser identityUser = cachedUserDetailsService.getDetails(source.getOwner(), UserFilterField.USERID);
             Organization organization = organizationService.getDefaultOrganizationForCurrentUser();
-            Credential credential = credentialService.getByNameFromUsersDefaultOrganization(source.getGeneral().getCredentialName());
+            Credential credential = credentialService.getByNameForOrganization(source.getGeneral().getCredentialName(), organization);
             Optional<FlexSubscription> flexSubscription = getFlexSubscription(source);
             SmartSenseSubscription smartsenseSubscription = flexSubscription.isPresent() ? flexSubscription.get().getSmartSenseSubscription() : null;
             KerberosConfig kerberosConfig = getKerberosConfig(source);
@@ -161,14 +157,14 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
     private Blueprint getBlueprint(StackV2Request source, Organization organization) {
         Blueprint blueprint;
         blueprint = Strings.isNullOrEmpty(source.getCluster().getAmbari().getBlueprintName())
-                ? blueprintService.get(source.getCluster().getAmbari().getBlueprintId())
+                ? blueprintService.getByIdFromAnyAvailableOrganization(source.getCluster().getAmbari().getBlueprintId())
                 : blueprintService.getByNameForOrganization(source.getCluster().getAmbari().getBlueprintName(), organization);
         return blueprint;
     }
 
     private Optional<FlexSubscription> getFlexSubscription(StackV2Request source) {
         return source.getFlexId() != null
-                ? Optional.ofNullable(flexSubscriptionService.get(source.getFlexId()))
+                ? Optional.ofNullable(flexSubscriptionService.getByIdFromAnyAvailableOrganization(source.getFlexId()))
                 : Optional.empty();
     }
 
@@ -194,7 +190,7 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
     private Set<RDSConfig> getRdsConfigs(StackV2Request source) {
         Set<RDSConfig> rdsConfigs = new HashSet<>();
         for (String rdsConfigRequest : source.getCluster().getRdsConfigNames()) {
-            RDSConfig rdsConfig = rdsConfigService.getByNameForDefaultOrg(rdsConfigRequest);
+            RDSConfig rdsConfig = rdsConfigService.getByNameFromUsersDefaultOrganization(rdsConfigRequest);
             rdsConfigs.add(rdsConfig);
         }
         return rdsConfigs;

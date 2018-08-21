@@ -52,7 +52,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.blueprint.LegacyBlueprintService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
@@ -64,7 +64,7 @@ public class ServiceEndpointCollectorTest {
     private static final String GATEWAY_PATH = "gateway-path";
 
     @Mock
-    private BlueprintService blueprintService;
+    private LegacyBlueprintService blueprintService;
 
     @Mock
     private BlueprintProcessorFactory blueprintProcessorFactory;

@@ -45,7 +45,8 @@ public class ImageCatalogV3Controller extends NotificationController implements 
 
     @Override
     public ImageCatalogResponse getByNameInOrganization(Long organizationId, String name, boolean withImages) {
-        ImageCatalogResponse imageCatalogResponse = conversionService.convert(imageCatalogService.get(organizationId, name), ImageCatalogResponse.class);
+        ImageCatalogResponse imageCatalogResponse = conversionService.convert(
+                imageCatalogService.getByNameForOrganizationId(name, organizationId), ImageCatalogResponse.class);
         Images images = imageCatalogService.propagateImagesIfRequested(organizationId, name, withImages);
         if (images != null) {
             imageCatalogResponse.setImagesResponse(conversionService.convert(images, ImagesResponse.class));
@@ -63,7 +64,7 @@ public class ImageCatalogV3Controller extends NotificationController implements 
 
     @Override
     public ImageCatalogResponse deleteInOrganization(Long organizationId, String name) {
-        ImageCatalog deleted = imageCatalogService.delete(organizationId, name);
+        ImageCatalog deleted = imageCatalogService.deleteByNameFromOrganization(name, organizationId);
         notify(ResourceEvent.IMAGE_CATALOG_DELETED);
         return conversionService.convert(deleted, ImageCatalogResponse.class);
     }
@@ -94,7 +95,7 @@ public class ImageCatalogV3Controller extends NotificationController implements 
 
     @Override
     public ImageCatalogResponse putPublicInOrganization(Long organizationId, UpdateImageCatalogRequest request) {
-        ImageCatalog imageCatalog = imageCatalogService.update(organizationId, conversionService.convert(request, ImageCatalog.class));
+        ImageCatalog imageCatalog = imageCatalogService.updateInOrganization(organizationId, conversionService.convert(request, ImageCatalog.class));
         return conversionService.convert(imageCatalog, ImageCatalogResponse.class);
     }
 
@@ -105,7 +106,7 @@ public class ImageCatalogV3Controller extends NotificationController implements 
 
     @Override
     public ImageCatalogRequest getRequestFromName(Long organizationId, String name) {
-        ImageCatalog imageCatalog = imageCatalogService.get(organizationId, name);
+        ImageCatalog imageCatalog = imageCatalogService.getByNameForOrganizationId(name, organizationId);
         return conversionService.convert(imageCatalog, ImageCatalogRequest.class);
     }
 }

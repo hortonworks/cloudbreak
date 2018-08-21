@@ -12,11 +12,9 @@ import org.springframework.stereotype.Controller;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.FlexSubscriptionV3Endpoint;
 import com.sequenceiq.cloudbreak.api.model.FlexSubscriptionRequest;
 import com.sequenceiq.cloudbreak.api.model.FlexSubscriptionResponse;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.converter.FlexSubscriptionRequestToFlexSubscriptionConverter;
 import com.sequenceiq.cloudbreak.converter.FlexSubscriptionToJsonConverter;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
-import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
 
 @Controller
@@ -27,9 +25,6 @@ public class FlexSubscriptionV3Controller implements FlexSubscriptionV3Endpoint 
     private FlexSubscriptionService flexSubscriptionService;
 
     @Inject
-    private AuthenticatedUserService authenticatedUserService;
-
-    @Inject
     private FlexSubscriptionRequestToFlexSubscriptionConverter toFlexSubscriptionConverter;
 
     @Inject
@@ -37,14 +32,13 @@ public class FlexSubscriptionV3Controller implements FlexSubscriptionV3Endpoint 
 
     @Override
     public Set<FlexSubscriptionResponse> listByOrganization(Long organizationId) {
-        IdentityUser identityUser = authenticatedUserService.getCbUser();
-        Set<FlexSubscription> subscriptions = flexSubscriptionService.findAllForUserAndOrganization(identityUser, organizationId);
+        Set<FlexSubscription> subscriptions = flexSubscriptionService.findAllByOrganizationId(organizationId);
         return new HashSet<>(toJsonConverter.convert(subscriptions));
     }
 
     @Override
     public FlexSubscriptionResponse getByNameInOrganization(Long organizationId, String name) {
-        FlexSubscription subscription = flexSubscriptionService.findOneByNameAndOrganization(name, organizationId);
+        FlexSubscription subscription = flexSubscriptionService.getByNameForOrganizationId(name, organizationId);
         return toJsonConverter.convert(subscription);
     }
 

@@ -125,7 +125,7 @@ public class ImageCatalogServiceTest {
     private UserProfileHandler userProfileHandler;
 
     @InjectMocks
-    private ImageCatalogService underTest;
+    private DefaultImageCatalogService underTest;
 
     @Spy
     private final List<CloudConstant> constants = new ArrayList<>();
@@ -152,12 +152,12 @@ public class ImageCatalogServiceTest {
 
         constants.addAll(Collections.singletonList(new AwsCloudConstant()));
 
-        ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "defaultCatalogUrl", DEFAULT_CATALOG_URL, null);
+        ReflectionTestUtils.setField(underTest, DefaultImageCatalogService.class, "defaultCatalogUrl", DEFAULT_CATALOG_URL, null);
         setMockedCbVersion("cbVersion", "unspecified");
     }
 
     private void setMockedCbVersion(String cbVersion, String versionValue) {
-        ReflectionTestUtils.setField(underTest, ImageCatalogService.class, cbVersion, versionValue, String.class);
+        ReflectionTestUtils.setField(underTest, DefaultImageCatalogService.class, cbVersion, versionValue, String.class);
     }
 
     private IdentityUser getIdentityUser() {
@@ -180,7 +180,7 @@ public class ImageCatalogServiceTest {
     public void testGetLatestBaseImageDefaultPreferredWithNoDefaultsLatestNoVersionMatch() throws Exception {
         setupUserProfileService();
         setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CATALOG_FILE);
-        ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "cbVersion", "2.1.0-dev.200", null);
+        ReflectionTestUtils.setField(underTest, DefaultImageCatalogService.class, "cbVersion", "2.1.0-dev.200", null);
 
         StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS", null);
 
@@ -192,7 +192,7 @@ public class ImageCatalogServiceTest {
     public void testGetLatestBaseImageDefaultPreferredWithMultipleDefaults() throws Exception {
         setupUserProfileService();
         setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CATALOG_FILE);
-        ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "cbVersion", "2.1.0-dev.1", null);
+        ReflectionTestUtils.setField(underTest, DefaultImageCatalogService.class, "cbVersion", "2.1.0-dev.1", null);
 
         StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS", null);
 
@@ -204,7 +204,7 @@ public class ImageCatalogServiceTest {
     public void testGetLatestBaseImageDefaultPreferredWenNotLatestSelected() throws Exception {
         setupUserProfileService();
         setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CATALOG_FILE);
-        ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "cbVersion", "2.1.0-dev.2", null);
+        ReflectionTestUtils.setField(underTest, DefaultImageCatalogService.class, "cbVersion", "2.1.0-dev.2", null);
 
         StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS", null);
 

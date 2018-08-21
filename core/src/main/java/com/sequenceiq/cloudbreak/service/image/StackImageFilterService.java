@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.image;
 
-import static com.sequenceiq.cloudbreak.service.image.ImageCatalogService.CLOUDBREAK_DEFAULT_CATALOG_NAME;
+import static com.sequenceiq.cloudbreak.service.image.DefaultImageCatalogService.CLOUDBREAK_DEFAULT_CATALOG_NAME;
 
 import java.util.Collections;
 import java.util.List;

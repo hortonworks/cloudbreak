@@ -32,7 +32,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.credential.CredentialService;
+import com.sequenceiq.cloudbreak.service.credential.LegacyCredentialService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 
 @Component
@@ -52,7 +52,7 @@ public class StackRequestValidator implements Validator<StackRequest> {
     private PlatformParameterV1Controller parameterV1Controller;
 
     @Inject
-    private CredentialService credentialService;
+    private LegacyCredentialService credentialService;
 
     @Inject
     private OrganizationService organizationService;

@@ -32,7 +32,7 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
-import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
+import com.sequenceiq.cloudbreak.service.image.DefaultImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
@@ -45,7 +45,7 @@ public class StackImageUpdateServiceTest {
     private ComponentConfigProvider componentConfigProvider;
 
     @Mock
-    private ImageCatalogService imageCatalogService;
+    private DefaultImageCatalogService imageCatalogService;
 
     @Mock
     private ImageService imageService;

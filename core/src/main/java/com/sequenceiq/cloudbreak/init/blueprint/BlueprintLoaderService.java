@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.organization.User;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.blueprint.LegacyBlueprintService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
@@ -33,7 +33,7 @@ public class BlueprintLoaderService {
     private DefaultBlueprintCache defaultBlueprintCache;
 
     @Inject
-    private BlueprintService blueprintService;
+    private LegacyBlueprintService blueprintService;
 
     @Inject
     private UserService userService;
@@ -70,16 +70,16 @@ public class BlueprintLoaderService {
         return blueprints;
     }
 
-    private Iterable<Blueprint> getResultSetFromUpdateAndOriginalBlueprints(Iterable<Blueprint> blueprints, Iterable<Blueprint> blueprintsWhichAreMissing) {
-        LOGGER.info("Updating blueprints which should be modified.");
-        Iterable<Blueprint> savedBlueprints = blueprintService.saveAll(blueprintsWhichAreMissing);
-        LOGGER.info("Finished to update blueprints which should be modified.");
+    private Iterable<Blueprint> getResultSetFromUpdateAndOriginalBlueprints(Iterable<Blueprint> blueprints, Set<Blueprint> blueprintsWhichAreMissing) {
         Map<String, Blueprint> resultBlueprints = new HashMap<>();
+        LOGGER.info("Updating blueprints which should be modified.");
+        blueprintsWhichAreMissing.stream()
+                .map(blueprintService::createInDefaultOrganization)
+                .forEach(bp -> resultBlueprints.put(bp.getName(), bp));
+
+        LOGGER.info("Finished to update blueprints which should be modified.");
         for (Blueprint blueprint : blueprints) {
             resultBlueprints.put(blueprint.getName(), blueprint);
-        }
-        for (Blueprint savedBlueprint : savedBlueprints) {
-            resultBlueprints.put(savedBlueprint.getName(), savedBlueprint);
         }
         return resultBlueprints.values();
     }

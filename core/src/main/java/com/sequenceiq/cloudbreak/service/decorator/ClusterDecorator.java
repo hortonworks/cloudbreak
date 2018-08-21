@@ -24,7 +24,6 @@ import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupRequest;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.ldapconfig.LdapConfigValidator;
 import com.sequenceiq.cloudbreak.converter.mapper.AmbariDatabaseMapper;
@@ -38,6 +37,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.service.AmbariHaComponentFilter;
+import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
@@ -47,6 +47,9 @@ import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvid
 public class ClusterDecorator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterDecorator.class);
+
+    @Inject
+    private AuthenticatedUserService authenticatedUserService;
 
     @Inject
     private BlueprintService blueprintService;
@@ -81,10 +84,10 @@ public class ClusterDecorator {
     @Inject
     private AmbariHaComponentFilter ambariHaComponentFilter;
 
-    public Cluster decorate(@Nonnull Cluster cluster, @Nonnull ClusterRequest request, Blueprint blueprint, @Nonnull IdentityUser user,
+    public Cluster decorate(@Nonnull Cluster cluster, @Nonnull ClusterRequest request, Blueprint blueprint,
             Organization organization, @Nonnull Stack stack) {
         prepareBlueprint(cluster, request, organization, stack, Optional.ofNullable(blueprint));
-        prepareHostGroups(stack, user, cluster, request.getHostGroups());
+        prepareHostGroups(stack, cluster, request.getHostGroups(), organization.getId());
         validateBlueprintIfRequired(cluster, request, stack);
         prepareRds(cluster, request, stack);
         cluster = clusterProxyDecorator.prepareProxyConfig(cluster, request.getProxyName(), stack);
@@ -109,13 +112,12 @@ public class ClusterDecorator {
         }
     }
 
-    private void prepareBlueprint(Cluster subject, ClusterRequest request, Organization organization, Stack stack,
-            Optional<Blueprint> blueprint) {
+    private void prepareBlueprint(Cluster subject, ClusterRequest request, Organization organization, Stack stack, Optional<Blueprint> blueprint) {
         if (blueprint.isPresent()) {
             subject.setBlueprint(blueprint.get());
         } else {
             if (request.getBlueprintId() != null) {
-                subject.setBlueprint(blueprintService.get(request.getBlueprintId()));
+                subject.setBlueprint(blueprintService.getByIdFromAnyAvailableOrganization(request.getBlueprintId()));
             } else if (request.getBlueprint() != null) {
                 Blueprint newBlueprint = conversionService.convert(request.getBlueprint(), Blueprint.class);
                 newBlueprint.setPublicInAccount(stack.isPublicInAccount());
@@ -153,7 +155,7 @@ public class ClusterDecorator {
     }
 
     private void prepareLdap(Cluster cluster, @NotNull Long ldapConfigId) {
-        LdapConfig ldapConfig = ldapConfigService.get(ldapConfigId);
+        LdapConfig ldapConfig = ldapConfigService.getByIdFromAnyAvailableOrganization(ldapConfigId);
         cluster.setLdapConfig(ldapConfig);
     }
 
@@ -173,7 +175,7 @@ public class ClusterDecorator {
         subject.setRdsConfigs(new HashSet<>());
         if (request.getRdsConfigIds() != null) {
             for (Long rdsConfigId : request.getRdsConfigIds()) {
-                RDSConfig rdsConfig = rdsConfigService.get(rdsConfigId);
+                RDSConfig rdsConfig = rdsConfigService.getByIdFromAnyAvailableOrganization(rdsConfigId);
                 subject.getRdsConfigs().add(rdsConfig);
             }
         }
@@ -196,12 +198,12 @@ public class ClusterDecorator {
         }
     }
 
-    private void prepareHostGroups(Stack stack, IdentityUser user, Cluster cluster, Iterable<HostGroupRequest> hostGroupsJsons) {
+    private void prepareHostGroups(Stack stack, Cluster cluster, Iterable<HostGroupRequest> hostGroupsJsons, Long organizationId) {
         Set<HostGroup> hostGroups = new HashSet<>();
         for (HostGroupRequest json : hostGroupsJsons) {
             HostGroup hostGroup = conversionService.convert(json, HostGroup.class);
             hostGroup.setCluster(cluster);
-            hostGroup = hostGroupDecorator.decorate(hostGroup, json, user, stack.getId(), true, stack.isPublicInAccount());
+            hostGroup = hostGroupDecorator.decorate(hostGroup, json, stack.getId(), true, organizationId);
             hostGroups.add(hostGroup);
         }
         cluster.setHostGroups(hostGroups);

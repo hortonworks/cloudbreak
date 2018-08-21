@@ -71,7 +71,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariSecurityConfigProv
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigProvider;
-import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
+import com.sequenceiq.cloudbreak.service.rdsconfig.TrustedRdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
@@ -124,7 +124,7 @@ public class ClusterHostServiceRunner {
     private ProxyConfigProvider proxyConfigProvider;
 
     @Inject
-    private RdsConfigService rdsConfigService;
+    private TrustedRdsConfigService rdsConfigService;
 
     @Inject
     private StackUtil stackUtil;

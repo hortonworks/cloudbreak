@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.ambari.client.services.ServiceAndHostService;
 import com.sequenceiq.cloudbreak.converter.mapper.AmbariDatabaseMapper;
 import com.sequenceiq.cloudbreak.service.cluster.filter.ConfigParam;
-import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 
 @Service
 public class AmbariConfigurationService {
@@ -42,9 +41,6 @@ public class AmbariConfigurationService {
 
     @Value("${cb.ambari.database.username}")
     private String userName;
-
-    @Inject
-    private RdsConfigService rdsConfigService;
 
     @Inject
     private AmbariDatabaseMapper ambariDatabaseMapper;

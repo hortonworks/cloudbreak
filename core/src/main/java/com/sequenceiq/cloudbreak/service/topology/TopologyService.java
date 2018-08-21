@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.repository.TopologyRepository;
 import com.sequenceiq.cloudbreak.repository.organization.OrganizationResourceRepository;
 import com.sequenceiq.cloudbreak.service.AbstractOrganizationAwareResourceService;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
-import com.sequenceiq.cloudbreak.service.credential.CredentialService;
+import com.sequenceiq.cloudbreak.service.credential.LegacyCredentialService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
@@ -38,7 +38,7 @@ public class TopologyService extends AbstractOrganizationAwareResourceService<To
     private TopologyRepository topologyRepository;
 
     @Inject
-    private CredentialService credentialService;
+    private LegacyCredentialService credentialService;
 
     @Inject
     private TemplateService templateService;

@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
-import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
+import com.sequenceiq.cloudbreak.service.image.LegacyImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.StackImageFilterService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 
@@ -30,7 +30,7 @@ import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 public class ImageCatalogV1Controller implements ImageCatalogV1Endpoint {
 
     @Inject
-    private ImageCatalogService imageCatalogService;
+    private LegacyImageCatalogService imageCatalogService;
 
     @Inject
     private StackImageFilterService stackImageFilterService;
@@ -52,7 +52,7 @@ public class ImageCatalogV1Controller implements ImageCatalogV1Endpoint {
 
     @Override
     public ImageCatalogResponse getByName(String name, boolean withImages) {
-        ImageCatalogResponse imageCatalogResponse = convert(imageCatalogService.get(getDefOrgId(), name));
+        ImageCatalogResponse imageCatalogResponse = convert(imageCatalogService.getByNameFromUsersDefaultOrganization(name));
         Images images = imageCatalogService.propagateImagesIfRequested(getDefOrgId(), name, withImages);
         if (images != null) {
             imageCatalogResponse.setImagesResponse(conversionService.convert(images, ImagesResponse.class));
@@ -84,12 +84,12 @@ public class ImageCatalogV1Controller implements ImageCatalogV1Endpoint {
 
     @Override
     public void deletePublic(String name) {
-        imageCatalogService.delete(getDefOrgId(), name);
+        imageCatalogService.deleteByNameFromDefaultOrganization(name);
     }
 
     @Override
     public ImageCatalogResponse putPublic(UpdateImageCatalogRequest request) {
-        ImageCatalog imageCatalog = imageCatalogService.update(getDefOrgId(), conversionService.convert(request, ImageCatalog.class));
+        ImageCatalog imageCatalog = imageCatalogService.updateInOrganization(getDefOrgId(), conversionService.convert(request, ImageCatalog.class));
         return convert(imageCatalog);
     }
 
@@ -100,7 +100,7 @@ public class ImageCatalogV1Controller implements ImageCatalogV1Endpoint {
 
     @Override
     public ImageCatalogRequest getRequestfromName(String name) {
-        ImageCatalog imageCatalog = imageCatalogService.get(getDefOrgId(), name);
+        ImageCatalog imageCatalog = imageCatalogService.getByNameFromUsersDefaultOrganization(name);
         return conversionService.convert(imageCatalog, ImageCatalogRequest.class);
     }
 

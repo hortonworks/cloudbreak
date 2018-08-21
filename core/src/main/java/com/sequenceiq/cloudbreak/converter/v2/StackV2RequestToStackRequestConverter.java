@@ -27,7 +27,7 @@ import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
-import com.sequenceiq.cloudbreak.service.credential.CredentialService;
+import com.sequenceiq.cloudbreak.service.credential.LegacyCredentialService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -41,7 +41,7 @@ public class StackV2RequestToStackRequestConverter extends AbstractConversionSer
     private ConversionService conversionService;
 
     @Inject
-    private CredentialService credentialService;
+    private LegacyCredentialService credentialService;
 
     @Inject
     private StackService stackService;

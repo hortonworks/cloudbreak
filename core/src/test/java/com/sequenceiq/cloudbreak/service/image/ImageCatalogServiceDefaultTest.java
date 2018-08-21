@@ -71,7 +71,7 @@ public class ImageCatalogServiceDefaultTest {
     private AccountPreferencesService accountPreferencesService;
 
     @InjectMocks
-    private ImageCatalogService underTest;
+    private DefaultImageCatalogService underTest;
 
     public ImageCatalogServiceDefaultTest(String catalogFile, String provider, String clusterType,
             String clusterVersion, String expectedImageId, String cbVersion, String os) {
@@ -106,8 +106,8 @@ public class ImageCatalogServiceDefaultTest {
                 { "com/sequenceiq/cloudbreak/service/image/default-hdp-imagecatalog.json", "aws", "HDP", "2.6", "latest-hdp", "9.0.0", "" },
                 { "com/sequenceiq/cloudbreak/service/image/default-hdf-imagecatalog.json", "aws", "HDF", "2.4", "latest-hdf", "5.0.0", "" },
                 { "com/sequenceiq/cloudbreak/service/image/default-hdf-imagecatalog.json", "aws", "HDF", "missing", "latest-base", "5.0.0", "" },
-                { "com/sequenceiq/cloudbreak/service/image/default-base-imagecatalog.json", "aws", ImageCatalogService.UNDEFINED,
-                        ImageCatalogService.UNDEFINED, "latest-base", "5.0.0", "" }
+                { "com/sequenceiq/cloudbreak/service/image/default-base-imagecatalog.json", "aws", DefaultImageCatalogService.UNDEFINED,
+                        DefaultImageCatalogService.UNDEFINED, "latest-base", "5.0.0", "" }
         });
     }
 

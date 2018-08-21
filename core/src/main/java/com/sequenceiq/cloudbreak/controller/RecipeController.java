@@ -16,14 +16,14 @@ import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
 import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.Recipe;
-import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
+import com.sequenceiq.cloudbreak.service.recipe.LegacyRecipeService;
 
 @Component
 @Transactional(TxType.NEVER)
 public class RecipeController extends NotificationController implements RecipeEndpoint {
 
     @Inject
-    private RecipeService recipeService;
+    private LegacyRecipeService recipeService;
 
     @Inject
     @Named("conversionService")
@@ -31,12 +31,12 @@ public class RecipeController extends NotificationController implements RecipeEn
 
     @Override
     public RecipeResponse get(Long id) {
-        return conversionService.convert(recipeService.get(id), RecipeResponse.class);
+        return conversionService.convert(recipeService.getByIdFromAnyAvailableOrganization(id), RecipeResponse.class);
     }
 
     @Override
     public void delete(Long id) {
-        Recipe deleted = recipeService.delete(id);
+        Recipe deleted = recipeService.deleteByIdFromAnyAvailableOrganization(id);
         notify(ResourceEvent.RECIPE_DELETED);
         conversionService.convert(deleted, RecipeResponse.class);
     }

@@ -11,6 +11,7 @@ public enum OrganizationResource {
     LDAP("LDAP resource", "ldap"),
     RDS("RDS resource", "rds"),
     PROXY("Proxys", "proxy"),
+    FILESYSTEM("File system", "filesystem"),
     MPACK("MPACK resource", "mpack"),
     STRUCTURED_EVENT("Structured event resource", "structuredevent"),
     FLEXSUBSCRIPTION("Flex subscription", "flexsubscription"),

@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.service.blueprint;
 
 import static com.sequenceiq.cloudbreak.api.model.ResourceStatus.DEFAULT;
-import static org.mockito.Matchers.anySet;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -10,13 +12,13 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -58,7 +60,7 @@ public class BlueprintLoaderServiceTest {
     private DefaultBlueprintCache blueprintCache;
 
     @Mock
-    private BlueprintService blueprintService;
+    private DefaultBlueprintService blueprintService;
 
     @Mock
     private UserService userService;
@@ -79,7 +81,7 @@ public class BlueprintLoaderServiceTest {
         generateCacheData(2);
         Set<Blueprint> blueprints = generateDatabaseData(0);
         boolean addingDefaultBlueprintsAreNecessaryForTheUser = underTest.addingDefaultBlueprintsAreNecessaryForTheUser(blueprints);
-        Assert.assertTrue(addingDefaultBlueprintsAreNecessaryForTheUser);
+        assertTrue(addingDefaultBlueprintsAreNecessaryForTheUser);
     }
 
     @Test
@@ -87,7 +89,7 @@ public class BlueprintLoaderServiceTest {
         generateCacheData(2);
         Set<Blueprint> blueprints = generateDatabaseData(1);
         boolean addingDefaultBlueprintsAreNecessaryForTheUser = underTest.addingDefaultBlueprintsAreNecessaryForTheUser(blueprints);
-        Assert.assertTrue(addingDefaultBlueprintsAreNecessaryForTheUser);
+        assertTrue(addingDefaultBlueprintsAreNecessaryForTheUser);
     }
 
     @Test
@@ -95,25 +97,20 @@ public class BlueprintLoaderServiceTest {
         generateCacheData(3, 1);
         Set<Blueprint> blueprints = generateDatabaseData(3);
         boolean addingDefaultBlueprintsAreNecessaryForTheUser = underTest.addingDefaultBlueprintsAreNecessaryForTheUser(blueprints);
-        Assert.assertTrue(addingDefaultBlueprintsAreNecessaryForTheUser);
+        assertTrue(addingDefaultBlueprintsAreNecessaryForTheUser);
     }
 
     @Test
     public void testLoadBlueprintsForTheSpecifiedUserWhenOneNewDefaultExistThenRepositoryShouldUpdateOnlyOneBlueprint() {
         Map<String, Blueprint> stringBlueprintMap = generateCacheData(3, 1);
         Set<Blueprint> blueprints = generateDatabaseData(3);
-        ArgumentCaptor<Set<Blueprint>> argumentCaptor = ArgumentCaptor.forClass(Set.class);
 
         Blueprint blueprint = stringBlueprintMap.get("multi-node-hdfs-yarn3");
-        Set<Blueprint> resultList = new HashSet<>();
-        resultList.add(blueprint);
-
-        when(blueprintService.saveAll(resultList)).thenReturn(resultList);
+        when(blueprintService.createInDefaultOrganization(blueprint)).thenReturn(blueprint);
 
         Collection<Blueprint> resultSet = underTest.loadBlueprintsForTheSpecifiedUser(identityUser(), blueprints);
-        verify(blueprintService).saveAll(argumentCaptor.capture());
 
-        Assert.assertEquals(1L, argumentCaptor.getAllValues().size());
+        assertTrue(resultSet.contains(blueprint));
         Assert.assertEquals(4L, resultSet.size());
     }
 
@@ -121,14 +118,18 @@ public class BlueprintLoaderServiceTest {
     public void testLoadBlueprintsForTheSpecifiedUserIsNewOneAndNoDefaultBlueprintAddedThenAllDefaultShouldBeAdd() {
         Map<String, Blueprint> stringBlueprintMap = generateCacheData(3);
         Set<Blueprint> blueprints = generateDatabaseData(0);
-        ArgumentCaptor<Set<Blueprint>> argumentCaptor = ArgumentCaptor.forClass(Set.class);
-        when(blueprintService.saveAll(anySet())).thenReturn(stringBlueprintMap.values());
+        List<Blueprint> arrayList = new ArrayList<>(stringBlueprintMap.values());
+        when(blueprintService.createInDefaultOrganization(arrayList.get(0))).thenReturn(arrayList.get(0));
+        when(blueprintService.createInDefaultOrganization(arrayList.get(1))).thenReturn(arrayList.get(1));
+        when(blueprintService.createInDefaultOrganization(arrayList.get(2))).thenReturn(arrayList.get(2));
 
         Collection<Blueprint> resultSet = underTest.loadBlueprintsForTheSpecifiedUser(identityUser(), blueprints);
-        verify(blueprintService).saveAll(argumentCaptor.capture());
+        verify(blueprintService, times(3)).createInDefaultOrganization(any(Blueprint.class));
 
-        Assert.assertEquals(3L, argumentCaptor.getValue().size());
         Assert.assertEquals(3L, resultSet.size());
+        assertTrue(resultSet.contains(arrayList.get(0)));
+        assertTrue(resultSet.contains(arrayList.get(1)));
+        assertTrue(resultSet.contains(arrayList.get(2)));
     }
 
     @Test

@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.repository.UserProfileRepository;
-import com.sequenceiq.cloudbreak.service.credential.CredentialService;
+import com.sequenceiq.cloudbreak.service.credential.LegacyCredentialService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 
@@ -34,7 +34,7 @@ public class UserProfileService {
     private UserProfileRepository userProfileRepository;
 
     @Inject
-    private CredentialService credentialService;
+    private LegacyCredentialService credentialService;
 
     @Inject
     private ImageCatalogService imageCatalogService;
@@ -97,7 +97,7 @@ public class UserProfileService {
     public void put(UserProfileRequest request, IdentityUser user) {
         UserProfile userProfile = getOrCreate(user.getAccount(), user.getUserId(), user.getUsername());
         if (request.getCredentialId() != null) {
-            Credential credential = credentialService.get(request.getCredentialId());
+            Credential credential = credentialService.getByIdFromAnyAvailableOrganization(request.getCredentialId());
             userProfile.setCredential(credential);
         } else if (request.getCredentialName() != null) {
             Credential credential = credentialService.getByNameFromUsersDefaultOrganization(request.getCredentialName());
@@ -105,7 +105,7 @@ public class UserProfileService {
         }
         if (request.getImageCatalogName() != null) {
             Long organizationId = organizationService.getDefaultOrganizationForCurrentUser().getId();
-            ImageCatalog imageCatalog = imageCatalogService.get(organizationId, request.getImageCatalogName());
+            ImageCatalog imageCatalog = imageCatalogService.getByNameForOrganizationId(request.getImageCatalogName(), organizationId);
             userProfile.setImageCatalog(imageCatalog);
         }
         for (Entry<String, Object> uiStringObjectEntry : request.getUiProperties().entrySet()) {

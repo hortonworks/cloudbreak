@@ -23,7 +23,8 @@ import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
 public class RecipeV3Controller extends NotificationController implements RecipeV3Endpoint {
 
     @Inject
-    private RecipeService recipeService;
+    private
+    RecipeService recipeService;
 
     @Inject
     @Named("conversionService")

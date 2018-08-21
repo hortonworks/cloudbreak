@@ -31,7 +31,7 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.PlatformResourceRequest;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.blueprint.LegacyBlueprintService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 
 @Service
@@ -42,7 +42,7 @@ public class CloudResourceAdvisor {
     private CloudParameterService cloudParameterService;
 
     @Inject
-    private BlueprintService blueprintService;
+    private LegacyBlueprintService blueprintService;
 
     @Inject
     private BlueprintProcessorFactory blueprintProcessorFactory;
@@ -109,7 +109,7 @@ public class CloudResourceAdvisor {
         Blueprint bp;
         if (blueprintId != null) {
             LOGGER.debug("Try to get validation by id: {}.", blueprintId);
-            bp = blueprintService.get(blueprintId);
+            bp = blueprintService.getByIdFromAnyAvailableOrganization(blueprintId);
         } else {
             LOGGER.debug("Try to get validation by name: {}.", blueprintName);
             Organization org = organizationService.getDefaultOrganizationForCurrentUser();

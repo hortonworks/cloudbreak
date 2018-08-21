@@ -126,13 +126,13 @@ public class StackV3Controller extends NotificationController implements StackV3
     public Response putReinstall(Long organizationId, String name, ReinstallRequestV2 reinstallRequestV2) {
         Stack stack = stackService.getByNameInOrg(name, organizationId);
         UpdateClusterJson updateClusterJson = conversionService.convert(reinstallRequestV2, UpdateClusterJson.class);
-        return clusterCommonService.put(stack.getId(), updateClusterJson);
+        return clusterCommonService.put(stack.getId(), updateClusterJson, organizationId);
     }
 
     @Override
     public Response putPassword(Long organizationId, String name, @Valid UserNamePasswordJson userNamePasswordJson) {
         Stack stack = stackService.getByNameInOrg(name, organizationId);
         UpdateClusterJson updateClusterJson = conversionService.convert(userNamePasswordJson, UpdateClusterJson.class);
-        return clusterCommonService.put(stack.getId(), updateClusterJson);
+        return clusterCommonService.put(stack.getId(), updateClusterJson, organizationId);
     }
 }

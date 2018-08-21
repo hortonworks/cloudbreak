@@ -18,12 +18,12 @@ import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.repository.UserProfileRepository;
-import com.sequenceiq.cloudbreak.service.credential.CredentialService;
+import com.sequenceiq.cloudbreak.service.credential.DefaultCredentialService;
 
 public class UserProfileServiceTest {
 
     @Mock
-    private CredentialService credentialService;
+    private DefaultCredentialService credentialService;
 
     @Mock
     private UserProfileRepository userProfileRepository;

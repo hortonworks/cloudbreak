@@ -32,7 +32,7 @@ import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
-import com.sequenceiq.cloudbreak.service.credential.CredentialService;
+import com.sequenceiq.cloudbreak.service.credential.LegacyCredentialService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
@@ -47,7 +47,7 @@ public class StackValidationRequestToStackValidationConverter extends AbstractCo
     private NetworkService networkService;
 
     @Inject
-    private CredentialService credentialService;
+    private LegacyCredentialService credentialService;
 
     @Inject
     @Qualifier("conversionService")
@@ -96,7 +96,7 @@ public class StackValidationRequestToStackValidationConverter extends AbstractCo
 
     private void validateCredential(StackValidationRequest stackValidationRequest, StackValidation stackValidation) {
         if (stackValidationRequest.getCredentialId() != null) {
-            Credential credential = credentialService.get(stackValidationRequest.getCredentialId());
+            Credential credential = credentialService.getByIdFromAnyAvailableOrganization(stackValidationRequest.getCredentialId());
             stackValidation.setCredential(credential);
         } else if (stackValidationRequest.getCredentialName() != null) {
             Credential credential = credentialService.getByNameFromUsersDefaultOrganization(stackValidationRequest.getCredentialName());
@@ -111,7 +111,7 @@ public class StackValidationRequestToStackValidationConverter extends AbstractCo
 
     private void validateBlueprint(StackValidationRequest stackValidationRequest, StackValidation stackValidation) {
         if (stackValidationRequest.getBlueprintId() != null) {
-            Blueprint blueprint = blueprintService.get(stackValidationRequest.getBlueprintId());
+            Blueprint blueprint = blueprintService.getByIdFromAnyAvailableOrganization(stackValidationRequest.getBlueprintId());
             stackValidation.setBlueprint(blueprint);
         } else if (stackValidationRequest.getBlueprintName() != null) {
             Organization organization = organizationService.getDefaultOrganizationForCurrentUser();

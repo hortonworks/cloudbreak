@@ -56,15 +56,16 @@ import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
-import com.sequenceiq.cloudbreak.service.credential.CredentialService;
-import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
-import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
-import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
+import com.sequenceiq.cloudbreak.service.blueprint.LegacyBlueprintService;
+import com.sequenceiq.cloudbreak.service.credential.DefaultCredentialService;
+import com.sequenceiq.cloudbreak.service.filesystem.DefaultFileSystemService;
+import com.sequenceiq.cloudbreak.service.flex.DefaultFlexSubscriptionService;
+import com.sequenceiq.cloudbreak.service.ldapconfig.DefaultLdapConfigService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
-import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
+import com.sequenceiq.cloudbreak.service.rdsconfig.DefaultRdsConfigService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.CachedUserDetailsService;
@@ -87,16 +88,16 @@ public class StackRequestToBlueprintPreparationObjectConverterTest {
     private StackRequestToBlueprintPreparationObjectConverter underTest;
 
     @Mock
-    private FlexSubscriptionService flexSubscriptionService;
+    private DefaultFlexSubscriptionService flexSubscriptionService;
 
     @Mock
-    private LdapConfigService ldapConfigService;
+    private DefaultLdapConfigService ldapConfigService;
 
     @Mock
     private StackService stackService;
 
     @Mock
-    private RdsConfigService rdsConfigService;
+    private DefaultRdsConfigService rdsConfigService;
 
     @Mock
     private GeneralClusterConfigsProvider generalClusterConfigsProvider;
@@ -105,10 +106,10 @@ public class StackRequestToBlueprintPreparationObjectConverterTest {
     private CachedUserDetailsService cachedUserDetailsService;
 
     @Mock
-    private BlueprintService blueprintService;
+    private LegacyBlueprintService blueprintService;
 
     @Mock
-    private CredentialService credentialService;
+    private DefaultCredentialService credentialService;
 
     @Mock
     private FileSystemConfigurationProvider fileSystemConfigurationProvider;
@@ -123,7 +124,7 @@ public class StackRequestToBlueprintPreparationObjectConverterTest {
     private SharedServiceConfigProvider sharedServiceConfigProvider;
 
     @Mock
-    private FileSystemConfigService fileSystemConfigService;
+    private DefaultFileSystemService fileSystemConfigService;
 
     @Mock
     private AuthenticatedUserService authenticatedUserService;
@@ -161,6 +162,9 @@ public class StackRequestToBlueprintPreparationObjectConverterTest {
     @Mock
     private OrganizationService organizationService;
 
+    @Mock
+    private Organization organization;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -171,9 +175,10 @@ public class StackRequestToBlueprintPreparationObjectConverterTest {
         when(source.getCluster()).thenReturn(cluster);
         when(cluster.getAmbari()).thenReturn(ambari);
         when(ambari.getBlueprintId()).thenReturn(BLUEPRINT_ID);
-        when(blueprintService.get(BLUEPRINT_ID)).thenReturn(blueprint);
+        when(blueprintService.getByIdFromAnyAvailableOrganization(BLUEPRINT_ID)).thenReturn(blueprint);
         when(blueprint.getBlueprintText()).thenReturn(TEST_BLUEPRINT_TEXT);
         when(stackInfoService.blueprintStackInfo(TEST_BLUEPRINT_TEXT)).thenReturn(blueprintStackInfo);
+        when(organizationService.getDefaultOrganizationForCurrentUser()).thenReturn(organization);
     }
 
     @Test
@@ -181,7 +186,7 @@ public class StackRequestToBlueprintPreparationObjectConverterTest {
         Long flexId = 2L;
         FlexSubscription expected = new FlexSubscription();
         when(source.getFlexId()).thenReturn(flexId);
-        when(flexSubscriptionService.get(flexId)).thenReturn(expected);
+        when(flexSubscriptionService.getByIdFromAnyAvailableOrganization(flexId)).thenReturn(expected);
 
         BlueprintPreparationObject result = underTest.convert(source);
 
@@ -206,7 +211,7 @@ public class StackRequestToBlueprintPreparationObjectConverterTest {
         flexSubscription.setSmartSenseSubscription(expected);
         expected.setSubscriptionId(String.valueOf(flexId));
         when(source.getFlexId()).thenReturn(flexId);
-        when(flexSubscriptionService.get(flexId)).thenReturn(flexSubscription);
+        when(flexSubscriptionService.getByIdFromAnyAvailableOrganization(flexId)).thenReturn(flexSubscription);
 
         BlueprintPreparationObject result = underTest.convert(source);
 
@@ -285,7 +290,7 @@ public class StackRequestToBlueprintPreparationObjectConverterTest {
     public void testConvertWhenClusterHaveSomeRdsConfigNamesThenTheSameAmountOfRdsConfigShouldBeStored() {
         Set<String> rdsConfigNames = createRdsConfigNames();
         when(cluster.getRdsConfigNames()).thenReturn(rdsConfigNames);
-        rdsConfigNames.forEach(rdsConfigName -> when(rdsConfigService.getByNameForDefaultOrg(rdsConfigName)).
+        rdsConfigNames.forEach(rdsConfigName -> when(rdsConfigService.getByNameFromUsersDefaultOrganization(rdsConfigName)).
                 thenReturn(new RDSConfig()));
 
         BlueprintPreparationObject result = underTest.convert(source);
@@ -356,7 +361,7 @@ public class StackRequestToBlueprintPreparationObjectConverterTest {
         String account = "testAccount";
         when(cloudStorageValidationUtil.isCloudStorageConfigured(cloudStorageRequest)).thenReturn(true);
         when(user.getAccount()).thenReturn(account);
-        when(credentialService.getByNameFromUsersDefaultOrganization(TEST_CREDENTIAL_NAME)).thenReturn(credential);
+        when(credentialService.getByNameForOrganization(TEST_CREDENTIAL_NAME, organization)).thenReturn(credential);
         when(cluster.getCloudStorage()).thenReturn(cloudStorageRequest);
         when(conversionService.convert(cloudStorageRequest, FileSystem.class)).thenReturn(fileSystem);
         when(fileSystemConfigurationProvider.fileSystemConfiguration(fileSystem, source, credential)).thenReturn(expected);

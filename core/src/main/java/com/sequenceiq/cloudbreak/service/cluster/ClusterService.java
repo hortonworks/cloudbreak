@@ -100,7 +100,7 @@ import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeEx
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
-import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
+import com.sequenceiq.cloudbreak.service.filesystem.FileSystemService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
@@ -129,7 +129,7 @@ public class ClusterService {
     private ClusterRepository clusterRepository;
 
     @Inject
-    private FileSystemConfigService fileSystemConfigService;
+    private FileSystemService fileSystemService;
 
     @Inject
     private KerberosConfigRepository kerberosConfigRepository;
@@ -232,7 +232,7 @@ public class ClusterService {
 
             start = System.currentTimeMillis();
             if (cluster.getFileSystem() != null) {
-                cluster.setFileSystem(fileSystemConfigService.create(user, cluster.getFileSystem(), cluster.getOrganization()));
+                cluster.setFileSystem(fileSystemService.create(cluster.getFileSystem(), cluster.getOrganization().getId()));
             }
             LOGGER.info("Filesystem config saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
@@ -711,7 +711,7 @@ public class ClusterService {
             if (cluster != null && stack.getCluster().isSecure()) {
                 initKerberos(kerberosPassword, kerberosPrincipal, cluster);
             }
-            Blueprint blueprint = blueprintService.get(blueprintId);
+            Blueprint blueprint = blueprintService.getByIdFromAnyAvailableOrganization(blueprintId);
             if (!withEmbeddedAmbariDB(cluster)) {
                 throw new BadRequestException("Ambari doesn't support resetting external DB automatically. To reset Ambari Server schema you must first drop "
                         + "and then create it using DDL scripts from /var/lib/ambari-server/resources");

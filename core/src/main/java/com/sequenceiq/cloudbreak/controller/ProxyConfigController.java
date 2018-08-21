@@ -15,26 +15,26 @@ import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigResponse;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.converter.mapper.ProxyConfigMapper;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
-import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigService;
+import com.sequenceiq.cloudbreak.service.proxy.LegacyProxyConfigService;
 
 @Component
 @Transactional(TxType.NEVER)
 public class ProxyConfigController extends NotificationController implements ProxyConfigEndpoint {
 
     @Autowired
-    private ProxyConfigService proxyConfigService;
+    private LegacyProxyConfigService proxyConfigService;
 
     @Autowired
     private ProxyConfigMapper proxyConfigMapper;
 
     @Override
     public ProxyConfigResponse get(Long id) {
-        return proxyConfigMapper.mapEntityToResponse(proxyConfigService.get(id));
+        return proxyConfigMapper.mapEntityToResponse(proxyConfigService.getByIdFromAnyAvailableOrganization(id));
     }
 
     @Override
     public ProxyConfigResponse delete(Long id) {
-        ProxyConfig deleted = proxyConfigService.delete(id);
+        ProxyConfig deleted = proxyConfigService.deleteByIdFromAnyAvailableOrganization(id);
         notify(ResourceEvent.RECIPE_DELETED);
         return proxyConfigMapper.mapEntityToResponse(deleted);
     }

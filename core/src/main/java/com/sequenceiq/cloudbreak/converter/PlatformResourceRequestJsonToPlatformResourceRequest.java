@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.api.model.PlatformResourceRequestJson;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.PlatformResourceRequest;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.credential.CredentialService;
+import com.sequenceiq.cloudbreak.service.credential.LegacyCredentialService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 
 @Component
@@ -17,7 +17,7 @@ public class PlatformResourceRequestJsonToPlatformResourceRequest extends
         AbstractConversionServiceAwareConverter<PlatformResourceRequestJson, PlatformResourceRequest> {
 
     @Inject
-    private CredentialService credentialService;
+    private LegacyCredentialService credentialService;
 
     @Inject
     private OrganizationService organizationService;
@@ -35,7 +35,7 @@ public class PlatformResourceRequestJsonToPlatformResourceRequest extends
             }
             platformResourceRequest.setCredential(credentialService.getByNameForOrganizationId(source.getCredentialName(), orgId));
         } else if (source.getCredentialId() != null) {
-            platformResourceRequest.setCredential(credentialService.get(source.getCredentialId()));
+            platformResourceRequest.setCredential(credentialService.getByIdFromAnyAvailableOrganization(source.getCredentialId()));
         } else {
             throw new BadRequestException("The credentialId or the credentialName must be specified in the request");
         }

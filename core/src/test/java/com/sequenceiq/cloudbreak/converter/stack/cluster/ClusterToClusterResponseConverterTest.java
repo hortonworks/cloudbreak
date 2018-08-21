@@ -64,7 +64,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariViewProvider;
-import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
+import com.sequenceiq.cloudbreak.service.rdsconfig.DefaultRdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
@@ -119,7 +119,7 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
     private StackService stackService;
 
     @Mock
-    private RdsConfigService rdsConfigService;
+    private DefaultRdsConfigService rdsConfigService;
 
     @Mock
     private ClusterComponentConfigProvider componentConfigProvider;

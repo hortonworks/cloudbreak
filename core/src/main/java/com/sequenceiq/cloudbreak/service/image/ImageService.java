@@ -106,8 +106,8 @@ public class ImageService {
         if (imageId != null) {
             statedImage = imageCatalogService.getImageByCatalogName(organizationId, imageId, catalogName);
         } else {
-            String clusterType = ImageCatalogService.UNDEFINED;
-            String clusterVersion = ImageCatalogService.UNDEFINED;
+            String clusterType = DefaultImageCatalogService.UNDEFINED;
+            String clusterVersion = DefaultImageCatalogService.UNDEFINED;
             if (blueprint != null) {
                 try {
                     JsonNode root = JsonUtil.readTree(blueprint.getBlueprintText());
