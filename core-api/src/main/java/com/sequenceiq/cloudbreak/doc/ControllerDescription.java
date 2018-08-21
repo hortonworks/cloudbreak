@@ -46,6 +46,7 @@ public class ControllerDescription {
     public static final String IMAGE_CATALOG_V3_DESCRIPTION = "Operations on Image Catalog by O";
     public static final String RDSCONFIGS_V3_DESCRIPTION = "Operations on RDS configs by organization";
     public static final String AUDIT_V3_DESCRIPTION = "Operations on audit events by organization";
+    public static final String KNOX_SERVICES_V3_DESCRIPTION = "Operations on Knox services by organization and blueprint";
 
     private ControllerDescription() {
     }
