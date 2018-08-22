@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.blueprint;
 
 import static com.sequenceiq.cloudbreak.api.model.ResourceStatus.DEFAULT;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Matchers.anySet;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -108,10 +109,10 @@ public class BlueprintLoaderServiceTest {
         Set<Blueprint> resultList = new HashSet<>();
         resultList.add(blueprint);
 
-        when(blueprintService.saveAll(resultList)).thenReturn(resultList);
+        when(blueprintService.saveAll(resultList, organization)).thenReturn(resultList);
 
         Collection<Blueprint> resultSet = underTest.loadBlueprintsForTheSpecifiedUser(user, blueprints, organization);
-        verify(blueprintService).saveAll(argumentCaptor.capture());
+        verify(blueprintService).saveAll(argumentCaptor.capture(), any());
 
         Assert.assertEquals(1L, argumentCaptor.getAllValues().size());
         Assert.assertEquals(4L, resultSet.size());
@@ -122,10 +123,10 @@ public class BlueprintLoaderServiceTest {
         Map<String, Blueprint> stringBlueprintMap = generateCacheData(3);
         Set<Blueprint> blueprints = generateDatabaseData(0);
         ArgumentCaptor<Set<Blueprint>> argumentCaptor = ArgumentCaptor.forClass(Set.class);
-        when(blueprintService.saveAll(anySet())).thenReturn(stringBlueprintMap.values());
+        when(blueprintService.saveAll(anySet(), any())).thenReturn(stringBlueprintMap.values());
 
         Collection<Blueprint> resultSet = underTest.loadBlueprintsForTheSpecifiedUser(user, blueprints, organization);
-        verify(blueprintService).saveAll(argumentCaptor.capture());
+        verify(blueprintService).saveAll(argumentCaptor.capture(), any());
 
         Assert.assertEquals(3L, argumentCaptor.getValue().size());
         Assert.assertEquals(3L, resultSet.size());

@@ -40,14 +40,14 @@ public interface StackV3Endpoint {
     @GET
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = StackOpDescription.LIST_BY_ORGANIZATION, produces = ContentType.JSON, notes = Notes.PROXY_CONFIG_NOTES,
+    @ApiOperation(value = StackOpDescription.LIST_BY_ORGANIZATION, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
             nickname = "listStacksByOrganization")
     Set<StackResponse> listByOrganization(@PathParam("organizationId") Long organizationId);
 
     @GET
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = StackOpDescription.GET_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.PROXY_CONFIG_NOTES,
+    @ApiOperation(value = StackOpDescription.GET_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
             nickname = "getStackInOrganization")
     StackResponse getByNameInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name,
             @QueryParam("entry") Set<String> entries);
@@ -55,7 +55,7 @@ public interface StackV3Endpoint {
     @POST
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = StackOpDescription.CREATE_IN_ORG, produces = ContentType.JSON, notes = Notes.PROXY_CONFIG_NOTES,
+    @ApiOperation(value = StackOpDescription.CREATE_IN_ORG, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
             nickname = "createStackInOrganization")
     StackResponse createInOrganization(@PathParam("organizationId") Long organizationId, @Valid StackV2Request request);
 
@@ -63,7 +63,7 @@ public interface StackV3Endpoint {
     @DELETE
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = StackOpDescription.DELETE_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.PROXY_CONFIG_NOTES,
+    @ApiOperation(value = StackOpDescription.DELETE_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
             nickname = "deleteStackInOrganization")
     void deleteInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name,
             @QueryParam("forced") @DefaultValue("false") Boolean forced,

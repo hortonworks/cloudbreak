@@ -53,7 +53,7 @@ public class BlueprintLoaderService {
             LOGGER.info("Prepare Blueprint set for the user '{}' after the modifications.", user.getUserId());
             blueprintsWhichAreMissing.addAll(blueprintsWhichShouldBeUpdate);
             if (!blueprintsWhichAreMissing.isEmpty()) {
-                return Sets.newHashSet(getResultSetFromUpdateAndOriginalBlueprints(blueprints, blueprintsWhichAreMissing));
+                return Sets.newHashSet(getResultSetFromUpdateAndOriginalBlueprints(blueprints, blueprintsWhichAreMissing, organization));
             }
         } catch (Exception e) {
             LOGGER.error("Blueprints {} is not available for {} user.", collectNames(blueprintsWhichAreMissing), user.getUserId());
@@ -61,9 +61,10 @@ public class BlueprintLoaderService {
         return blueprints;
     }
 
-    private Iterable<Blueprint> getResultSetFromUpdateAndOriginalBlueprints(Iterable<Blueprint> blueprints, Iterable<Blueprint> blueprintsWhichAreMissing) {
+    private Iterable<Blueprint> getResultSetFromUpdateAndOriginalBlueprints(Iterable<Blueprint> blueprints, Iterable<Blueprint> blueprintsWhichAreMissing,
+            Organization organization) {
         LOGGER.info("Updating blueprints which should be modified.");
-        Iterable<Blueprint> savedBlueprints = blueprintService.saveAll(blueprintsWhichAreMissing);
+        Iterable<Blueprint> savedBlueprints = blueprintService.saveAll(blueprintsWhichAreMissing, organization);
         LOGGER.info("Finished to update blueprints which should be modified.");
         Map<String, Blueprint> resultBlueprints = new HashMap<>();
         for (Blueprint blueprint : blueprints) {
@@ -85,7 +86,7 @@ public class BlueprintLoaderService {
         for (Map.Entry<String, Blueprint> diffBlueprint : collectDeviationOfExistingBlueprintsAndDefaultBlueprints(blueprints).entrySet()) {
             LOGGER.info("Default Blueprint '{}' needs to add for the '{}' user because the default validation missing.",
                     diffBlueprint.getKey(), user.getUserId());
-            resultList.add(setupBlueprint(user, diffBlueprint.getValue(), organization));
+            resultList.add(setupBlueprint(diffBlueprint.getValue(), organization));
         }
         LOGGER.info("Finished to add default blueprints which are missing for the user.");
         return resultList;
@@ -102,15 +103,15 @@ public class BlueprintLoaderService {
                     || defaultBlueprintContainsNewDescription(blueprintFromDatabase, newBlueprint))) {
                 LOGGER.info("Default Blueprint '{}' needs to modify for the '{}' user because the validation text changed.",
                         blueprintFromDatabase.getName(), user.getUserId());
-                resultList.add(prepateBlueprint(user, blueprintFromDatabase, newBlueprint, organization));
+                resultList.add(prepateBlueprint(blueprintFromDatabase, newBlueprint, organization));
             }
         }
         LOGGER.info("Finished to Update default blueprints which are contains text modifications.");
         return resultList;
     }
 
-    private Blueprint prepateBlueprint(User user, Blueprint blueprintFromDatabase, Blueprint newBlueprint, Organization organization) {
-        setupBlueprint(user, blueprintFromDatabase, organization);
+    private Blueprint prepateBlueprint(Blueprint blueprintFromDatabase, Blueprint newBlueprint, Organization organization) {
+        setupBlueprint(blueprintFromDatabase, organization);
         blueprintFromDatabase.setBlueprintText(newBlueprint.getBlueprintText());
         blueprintFromDatabase.setDescription(newBlueprint.getDescription());
         blueprintFromDatabase.setHostGroupCount(newBlueprint.getHostGroupCount());
@@ -119,7 +120,7 @@ public class BlueprintLoaderService {
         return blueprintFromDatabase;
     }
 
-    private Blueprint setupBlueprint(User user, Blueprint blueprint, Organization organization) {
+    private Blueprint setupBlueprint(Blueprint blueprint, Organization organization) {
         blueprint.setOrganization(organization);
         blueprint.setStatus(DEFAULT);
         return blueprint;

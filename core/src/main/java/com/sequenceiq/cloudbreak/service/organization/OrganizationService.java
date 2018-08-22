@@ -29,13 +29,16 @@ import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.domain.organization.UserOrgPermissions;
+import com.sequenceiq.cloudbreak.init.blueprint.DefaultBlueprintCache;
 import com.sequenceiq.cloudbreak.repository.organization.OrganizationRepository;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.user.UserOrgPermissionsService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
@@ -58,6 +61,12 @@ public class OrganizationService {
     @Inject
     private OrganizationDeleteVerifierService organizationDeleteVerifierService;
 
+    @Inject
+    private DefaultBlueprintCache defaultBlueprintCache;
+
+    @Inject
+    private BlueprintService blueprintService;
+
     public Organization create(User user, Organization organization) {
         try {
             // TODO: check: does the user in this tenant have the right to create an org?
@@ -69,6 +78,8 @@ public class OrganizationService {
                     userOrgPermissions.setUser(user);
                     userOrgPermissions.setPermissionSet(Set.of(ALL_READ.value(), ALL_WRITE.value(), ORG_MANAGE.value()));
                     userOrgPermissionsService.save(userOrgPermissions);
+                    Map<String, Blueprint> defaultBlueprints = defaultBlueprintCache.defaultBlueprints();
+                    blueprintService.saveAll(defaultBlueprints.values(), created);
                     return created;
                 } catch (DataIntegrityViolationException ex) {
                     String msg = String.format("Error with resource [%s], %s", APIResourceType.ORGANIZATION, getProperSqlErrorMessage(ex));
