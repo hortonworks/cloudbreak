@@ -134,7 +134,6 @@ public class SmartSenseSubscriptionService {
             newSubscription.setSubscriptionId(defaultSmartsenseId);
             newSubscription.setAccount(cbUser.getAccount());
             newSubscription.setOwner(cbUser.getUserId());
-            newSubscription.setPublicInAccount(true);
             smartSenseSubscriptionRepository.save(newSubscription);
         }
         return newSubscription;

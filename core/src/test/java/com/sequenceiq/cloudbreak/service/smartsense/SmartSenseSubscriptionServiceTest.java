@@ -126,7 +126,6 @@ public class SmartSenseSubscriptionServiceTest {
         subscription.setSubscriptionId(OLD_SMARTSENSE_ID);
         subscription.setAccount(user.getAccount());
         subscription.setOwner(user.getUserId());
-        subscription.setPublicInAccount(true);
         return subscription;
     }
 

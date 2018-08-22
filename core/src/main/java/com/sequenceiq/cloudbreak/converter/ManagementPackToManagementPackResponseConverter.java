@@ -16,7 +16,6 @@ public class ManagementPackToManagementPackResponseConverter extends AbstractCon
         mpackResponse.setId(source.getId());
         mpackResponse.setName(source.getName());
         mpackResponse.setDescription(source.getDescription());
-        mpackResponse.setPublicInAccount(source.isPublicInAccount());
         mpackResponse.setMpackUrl(source.getMpackUrl());
         mpackResponse.setPurge(source.isPurge());
         if (StringUtils.hasLength(source.getPurgeList())) {

@@ -39,9 +39,6 @@ public class LdapConfig implements ProvisionEntity, OrganizationAwareResource {
     private String owner;
 
     @Column(nullable = false)
-    private boolean publicInAccount = true;
-
-    @Column(nullable = false)
     private String serverHost;
 
     @Column(nullable = false)
@@ -91,7 +88,6 @@ public class LdapConfig implements ProvisionEntity, OrganizationAwareResource {
         copy.setDescription(description);
         copy.setAccount(account);
         copy.setOwner(owner);
-        copy.setPublicInAccount(publicInAccount);
         copy.setServerHost(serverHost);
         copy.setServerPort(serverPort);
         copy.setProtocol(protocol);
@@ -149,14 +145,6 @@ public class LdapConfig implements ProvisionEntity, OrganizationAwareResource {
 
     public void setOwner(String owner) {
         this.owner = owner;
-    }
-
-    public boolean isPublicInAccount() {
-        return publicInAccount;
-    }
-
-    public void setPublicInAccount(boolean publicInAccount) {
-        this.publicInAccount = publicInAccount;
     }
 
     public String getServerHost() {

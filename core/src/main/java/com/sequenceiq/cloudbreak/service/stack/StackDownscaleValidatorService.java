@@ -23,8 +23,8 @@ public class StackDownscaleValidatorService {
         }
     }
 
-    public void checkUserHasRightToTerminateInstance(boolean publicInAccount, String owner, String userId, Long stackId) {
-        if (!publicInAccount && !Objects.equals(owner, userId)) {
+    public void checkUserHasRightToTerminateInstance(String owner, String userId, Long stackId) {
+        if (!Objects.equals(owner, userId)) {
             throw new AccessDeniedException(String.format("Private stack (%s) is only modifiable by the owner.", stackId));
         }
     }

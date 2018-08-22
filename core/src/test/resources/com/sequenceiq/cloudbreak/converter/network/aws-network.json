@@ -6,6 +6,5 @@
     "vpcId" : "vpcId",
     "internetGatewayId": "internetGatewayId"
   },
-  "description" : "default description",
-  "publicInAccount" : true
+  "description" : "default description"
 }

@@ -19,7 +19,7 @@ public class RDSConfigResponse extends RDSConfigJson {
     private Long creationDate;
 
     @ApiModelProperty(ModelDescriptions.PUBLIC_IN_ACCOUNT)
-    private boolean publicInAccount;
+    private boolean publicInAccount = true;
 
     @ApiModelProperty(RDSConfigModelDescription.CLUSTER_NAMES)
     private Set<String> clusterNames;

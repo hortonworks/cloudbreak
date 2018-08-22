@@ -16,7 +16,7 @@ public class ImageCatalogShortResponse extends ImageCatalogBase {
     private Long id;
 
     @ApiModelProperty(value = ModelDescriptions.PUBLIC_IN_ACCOUNT, required = true)
-    private boolean publicInAccount;
+    private boolean publicInAccount = true;
 
     @ApiModelProperty(value = ImageCatalogDescription.DEFAULT, required = true)
     private boolean usedAsDefault;

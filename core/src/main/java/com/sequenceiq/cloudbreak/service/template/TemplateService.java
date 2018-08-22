@@ -49,7 +49,7 @@ public class TemplateService {
 
     public Set<Template> retrieveAccountTemplates(IdentityUser user) {
         return user.getRoles().contains(IdentityUserRole.ADMIN) ? templateRepository.findAllInAccount(user.getAccount())
-                : templateRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
+                : templateRepository.findForUser(user.getUserId(), user.getAccount());
     }
 
     public Template get(Long id) {

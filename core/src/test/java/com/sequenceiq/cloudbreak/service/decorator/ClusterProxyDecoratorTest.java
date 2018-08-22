@@ -53,7 +53,6 @@ public class ClusterProxyDecoratorTest {
         when(service.getByNameForOrganization(anyString(), any(Organization.class))).thenReturn(new ProxyConfig());
         cluster = new Cluster();
         cluster.setOrganization(new Organization());
-        stack.setPublicInAccount(true);
     }
 
     @Test

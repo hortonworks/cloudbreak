@@ -14,7 +14,7 @@ import javax.annotation.Generated;
 public class AmbariDatabaseMapperImpl implements AmbariDatabaseMapper {
 
     @Override
-    public RDSConfig mapAmbariDatabaseDetailsJsonToRdsConfig(AmbariDatabaseDetailsJson ambariDatabaseDetailsJson, Cluster cluster, Stack stack, boolean publicInAccount) {
+    public RDSConfig mapAmbariDatabaseDetailsJsonToRdsConfig(AmbariDatabaseDetailsJson ambariDatabaseDetailsJson, Cluster cluster, Stack stack) {
         if ( ambariDatabaseDetailsJson == null && cluster == null ) {
             return null;
         }
@@ -32,7 +32,6 @@ public class AmbariDatabaseMapperImpl implements AmbariDatabaseMapper {
             rDSConfig.setAccount( cluster.getAccount() );
             rDSConfig.setOwner( cluster.getOwner() );
         }
-        rDSConfig.setPublicInAccount( publicInAccount );
         rDSConfig.setCreationDate( new java.util.Date().getTime() );
         rDSConfig.setType( com.sequenceiq.cloudbreak.api.model.rds.RdsType.AMBARI.name() );
         rDSConfig.setConnectionDriver( "org.postgresql.Driver" );

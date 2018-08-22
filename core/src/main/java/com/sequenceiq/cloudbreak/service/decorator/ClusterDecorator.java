@@ -118,7 +118,6 @@ public class ClusterDecorator {
                 subject.setBlueprint(blueprintService.get(request.getBlueprintId()));
             } else if (request.getBlueprint() != null) {
                 Blueprint newBlueprint = conversionService.convert(request.getBlueprint(), Blueprint.class);
-                newBlueprint.setPublicInAccount(stack.isPublicInAccount());
                 newBlueprint = blueprintService.create(organization, newBlueprint, new ArrayList<>(), user);
                 subject.setBlueprint(newBlueprint);
             } else if (!Strings.isNullOrEmpty(request.getBlueprintName())) {
@@ -180,7 +179,6 @@ public class ClusterDecorator {
         if (request.getRdsConfigJsons() != null) {
             for (RDSConfigRequest requestRdsConfig : request.getRdsConfigJsons()) {
                 RDSConfig rdsConfig = conversionService.convert(requestRdsConfig, RDSConfig.class);
-                rdsConfig.setPublicInAccount(stack.isPublicInAccount());
                 rdsConfig = rdsConfigService.createIfNotExists(stack.getCreator(), rdsConfig, stack.getOrganization().getId());
                 subject.getRdsConfigs().add(rdsConfig);
             }
@@ -190,8 +188,7 @@ public class ClusterDecorator {
                         rdsConfigService.getByNameForOrganization(confName, stack.getOrganization()))));
 
         if (request.getAmbariDatabaseDetails() != null) {
-            RDSConfig rdsConfig = ambariDatabaseMapper.mapAmbariDatabaseDetailsJsonToRdsConfig(request.getAmbariDatabaseDetails(), subject, stack,
-                    stack.isPublicInAccount());
+            RDSConfig rdsConfig = ambariDatabaseMapper.mapAmbariDatabaseDetailsJsonToRdsConfig(request.getAmbariDatabaseDetails(), subject, stack);
             subject.getRdsConfigs().add(rdsConfigService.createIfNotExists(stack.getCreator(), rdsConfig, stack.getOrganization().getId()));
         }
     }

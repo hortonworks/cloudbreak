@@ -36,9 +36,6 @@ public class Credential implements ProvisionEntity, OrganizationAwareResource {
 
     private String account;
 
-    @Column(nullable = false)
-    private boolean publicInAccount = true;
-
     @Column(columnDefinition = "boolean default false")
     private boolean archived;
 
@@ -93,14 +90,6 @@ public class Credential implements ProvisionEntity, OrganizationAwareResource {
 
     public void setAccount(String account) {
         this.account = account;
-    }
-
-    public boolean isPublicInAccount() {
-        return publicInAccount;
-    }
-
-    public void setPublicInAccount(boolean publicInAccount) {
-        this.publicInAccount = publicInAccount;
     }
 
     public boolean isArchived() {

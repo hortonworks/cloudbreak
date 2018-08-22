@@ -22,13 +22,13 @@ public interface ClusterTemplateRepository extends BaseRepository<ClusterTemplat
     @Query("SELECT b FROM ClusterTemplate b WHERE b.owner= :user ")
     Set<ClusterTemplate> findForUser(@Param("user") String user);
 
-    @Query("SELECT b FROM ClusterTemplate b WHERE ((b.account= :account AND b.publicInAccount= true) OR b.owner= :user)")
-    Set<ClusterTemplate> findPublicInAccountForUser(@Param("user") String user, @Param("account") String account);
+    @Query("SELECT b FROM ClusterTemplate b WHERE b.account= :account OR b.owner= :user")
+    Set<ClusterTemplate> findForUser(@Param("user") String user, @Param("account") String account);
 
     @Query("SELECT b FROM ClusterTemplate b WHERE b.account= :account")
     Set<ClusterTemplate> findAllInAccount(@Param("account") String account);
 
-    @Query("SELECT b FROM ClusterTemplate b WHERE  b.name= :name and ((b.publicInAccount=true and b.account= :account) or b.owner= :owner) ")
+    @Query("SELECT b FROM ClusterTemplate b WHERE  b.name= :name and (b.account= :account or b.owner= :owner)")
     ClusterTemplate findByNameInAccount(@Param("name") String name, @Param("account") String account, @Param("owner") String owner);
 
     @Query("SELECT b FROM ClusterTemplate b WHERE  b.id= :id and b.account= :account")

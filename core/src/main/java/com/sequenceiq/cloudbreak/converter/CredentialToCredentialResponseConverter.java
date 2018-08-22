@@ -39,7 +39,6 @@ public class CredentialToCredentialResponseConverter extends AbstractConversionS
         credentialValidator.validateCredentialCloudPlatform(source.cloudPlatform());
         credentialJson.setCloudPlatform(source.cloudPlatform());
         credentialJson.setName(source.getName());
-        credentialJson.setPublicInAccount(source.isPublicInAccount());
         if (source.getAttributes() != null) {
             Map<String, Object> parameters =
                     credentialDefinitionService.revertAndRemoveProperties(platform(source.cloudPlatform()), source.getAttributes().getMap());

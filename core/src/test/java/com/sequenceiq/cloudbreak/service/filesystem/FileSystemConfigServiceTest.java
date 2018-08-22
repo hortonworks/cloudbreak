@@ -106,7 +106,6 @@ public class FileSystemConfigServiceTest {
         FileSystem fileSystem = new FileSystem();
         fileSystem.setDescription("some description");
         fileSystem.setDefaultFs(true);
-        fileSystem.setPublicInAccount(true);
         return fileSystem;
     }
 

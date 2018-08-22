@@ -27,7 +27,6 @@ public class BlueprintToBlueprintResponseConverter extends AbstractConversionSer
         BlueprintResponse blueprintJson = new BlueprintResponse();
         blueprintJson.setId(entity.getId());
         blueprintJson.setName(entity.getName());
-        blueprintJson.setPublicInAccount(entity.isPublicInAccount());
         blueprintJson.setDescription(entity.getDescription() == null ? "" : entity.getDescription());
         blueprintJson.setHostGroupCount(entity.getHostGroupCount());
         blueprintJson.setStatus(entity.getStatus());

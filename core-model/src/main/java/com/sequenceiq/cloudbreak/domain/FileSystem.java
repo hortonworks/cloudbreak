@@ -43,9 +43,6 @@ public class FileSystem implements ProvisionEntity, OrganizationAwareResource {
     private String account;
 
     @Column(nullable = false)
-    private boolean publicInAccount = true;
-
-    @Column(nullable = false)
     private String description;
 
     @Convert(converter = JsonToString.class)
@@ -118,14 +115,6 @@ public class FileSystem implements ProvisionEntity, OrganizationAwareResource {
 
     public void setAccount(String account) {
         this.account = account;
-    }
-
-    public boolean isPublicInAccount() {
-        return publicInAccount;
-    }
-
-    public void setPublicInAccount(boolean publicInAccount) {
-        this.publicInAccount = publicInAccount;
     }
 
     public String getDescription() {

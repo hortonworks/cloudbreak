@@ -57,21 +57,16 @@ public class StackDownscaleValidatorServiceTest {
     }
 
     @Test
-    public void testCheckUserHasRightToTerminateInstanceMethodWhenPublicInAccountAndOwnerAndUserIdIsSameThenNoException() {
-        underTest.checkUserHasRightToTerminateInstance(true, "same", "same", STACK_ID);
+    public void testCheckUserHasRightToTerminateInstanceMethodWhenOwnerAndUserIdIsSameThenNoException() {
+        underTest.checkUserHasRightToTerminateInstance("same", "same", STACK_ID);
     }
 
     @Test
-    public void testCheckUserHasRightToTerminateInstanceMethodWhenPublicInAccountAndUserIdAndOwnerAreNotTheSameThenNoException() {
-        underTest.checkUserHasRightToTerminateInstance(true, "something here", "something else here", STACK_ID);
-    }
-
-    @Test
-    public void testCheckUserHasRightToTerminateInstanceMethodWhenNotPublicInAccountAndUserIdAndOwnerAreNotTheSameThenExceptionWouldInvoke() {
+    public void testCheckUserHasRightToTerminateInstanceMethodWhenUserIdAndOwnerAreNotTheSameThenExceptionWouldInvoke() {
         expectedException.expect(AccessDeniedException.class);
         expectedException.expectMessage(ACCESS_DENIED_EXCEPTION_MESSAGE);
 
-        underTest.checkUserHasRightToTerminateInstance(false, "something here", "something else here", STACK_ID);
+        underTest.checkUserHasRightToTerminateInstance("something here", "something else here", STACK_ID);
     }
 
     @Test

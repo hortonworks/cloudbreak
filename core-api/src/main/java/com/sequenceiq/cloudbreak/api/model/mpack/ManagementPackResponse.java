@@ -14,7 +14,7 @@ public class ManagementPackResponse extends ManagementPackBase {
     private Long id;
 
     @ApiModelProperty(ModelDescriptions.PUBLIC_IN_ACCOUNT)
-    private boolean publicInAccount;
+    private boolean publicInAccount = true;
 
     @ApiModelProperty(ModelDescriptions.ORGANIZATION_OF_THE_RESOURCE)
     private OrganizationResourceResponse organization;

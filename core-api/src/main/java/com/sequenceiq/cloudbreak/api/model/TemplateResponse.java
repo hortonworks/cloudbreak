@@ -22,7 +22,7 @@ public class TemplateResponse extends TemplateBase {
     private Long id;
 
     @ApiModelProperty(ModelDescriptions.PUBLIC_IN_ACCOUNT)
-    private boolean publicInAccount;
+    private boolean publicInAccount = true;
 
     @ApiModelProperty(value = TemplateModelDescription.VOLUME_COUNT, required = true)
     private Integer volumeCount;

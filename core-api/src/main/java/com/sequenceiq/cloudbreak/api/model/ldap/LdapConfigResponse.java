@@ -16,7 +16,7 @@ public class LdapConfigResponse extends LdapConfigBase {
     private Long id;
 
     @ApiModelProperty(ModelDescriptions.PUBLIC_IN_ACCOUNT)
-    private boolean publicInAccount;
+    private boolean publicInAccount = true;
 
     @JsonProperty("public")
     public boolean isPublicInAccount() {

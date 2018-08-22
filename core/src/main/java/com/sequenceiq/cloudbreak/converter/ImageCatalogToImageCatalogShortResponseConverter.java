@@ -28,7 +28,6 @@ public class ImageCatalogToImageCatalogShortResponseConverter extends AbstractCo
     public ImageCatalogShortResponse convert(ImageCatalog source) {
         ImageCatalogShortResponse imageCatalogResponse = new ImageCatalogShortResponse();
         imageCatalogResponse.setId(source.getId());
-        imageCatalogResponse.setPublicInAccount(source.isPublicInAccount());
         imageCatalogResponse.setUrl(source.getImageCatalogUrl());
 
         String imageCatalogName = source.getName();

@@ -47,9 +47,6 @@ public class Recipe implements ProvisionEntity, OrganizationAwareResource {
 
     private String owner;
 
-    @Column(nullable = false)
-    private boolean publicInAccount = true;
-
     @ManyToOne
     private Organization organization;
 
@@ -116,14 +113,6 @@ public class Recipe implements ProvisionEntity, OrganizationAwareResource {
 
     public void setOwner(String owner) {
         this.owner = owner;
-    }
-
-    public boolean isPublicInAccount() {
-        return publicInAccount;
-    }
-
-    public void setPublicInAccount(boolean publicInAccount) {
-        this.publicInAccount = publicInAccount;
     }
 
     @Override

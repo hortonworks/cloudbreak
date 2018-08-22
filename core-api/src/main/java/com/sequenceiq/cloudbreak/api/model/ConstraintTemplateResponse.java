@@ -14,7 +14,7 @@ public class ConstraintTemplateResponse extends ConstraintTemplateBase {
 
     @NotNull
     @ApiModelProperty(ModelDescriptions.PUBLIC_IN_ACCOUNT)
-    private boolean publicInAccount;
+    private boolean publicInAccount = true;
 
     public Long getId() {
         return id;

@@ -5,6 +5,5 @@
   "parameters" : {
     "addressPrefixCIDR" : "addressPrefixCIDR"
   },
-  "description" : "default description",
-  "publicInAccount" : true
+  "description" : "default description"
 }

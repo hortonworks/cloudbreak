@@ -28,7 +28,6 @@ public class ImageCatalogToImageCatalogResponseConverter extends AbstractConvers
     public ImageCatalogResponse convert(ImageCatalog source) {
         ImageCatalogResponse imageCatalogResponse = new ImageCatalogResponse();
         imageCatalogResponse.setId(source.getId());
-        imageCatalogResponse.setPublicInAccount(source.isPublicInAccount());
         imageCatalogResponse.setUrl(source.getImageCatalogUrl());
 
         String imageCatalogName = source.getName();

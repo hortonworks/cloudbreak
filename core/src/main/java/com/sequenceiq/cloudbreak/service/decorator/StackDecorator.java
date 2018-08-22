@@ -238,7 +238,6 @@ public class StackDecorator {
             if (instanceGroup.getTemplate() != null) {
                 Template template = instanceGroup.getTemplate();
                 if (template.getId() == null) {
-                    template.setPublicInAccount(subject.isPublicInAccount());
                     template.setCloudPlatform(getCloudPlatform(subject, request, template.cloudPlatform()));
                     templateValidator.validateTemplateRequest(credential, instanceGroup.getTemplate(), request.getRegion(),
                             request.getAvailabilityZone(), request.getPlatformVariant());
