@@ -97,4 +97,10 @@ public class LdapV3Controller extends NotificationController implements LdapConf
         }
         return ldapTestResult;
     }
+
+    @Override
+    public LdapConfigRequest getRequestFromName(Long organizationId, String name) {
+        LdapConfig ldapConfig = ldapConfigService.getByNameForOrganizationId(name, organizationId);
+        return conversionService.convert(ldapConfig, LdapConfigRequest.class);
+    }
 }
