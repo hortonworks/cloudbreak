@@ -164,8 +164,6 @@ public class StackServiceTest {
         organization.setId(ORGANIZATION_ID);
     }
 
-    // TODO: have to write new tests
-
     @Test
     public void testWhenStackCouldNotFindByItsIdThenExceptionWouldThrown() {
         when(stackRepository.findById(STACK_ID)).thenReturn(Optional.ofNullable(null));

@@ -93,8 +93,9 @@ public class BlueprintService extends AbstractOrganizationAwareResourceService<B
         return blueprintRepository.findAllByNotDeletedInOrganization(organizationId);
     }
 
-    public Iterable<Blueprint> saveAll(Iterable<Blueprint> entities) {
-        return blueprintRepository.saveAll(entities);
+    public Iterable<Blueprint> saveAll(Iterable<Blueprint> blueprints, Organization organization) {
+        blueprints.forEach(bp -> bp.setOrganization(organization));
+        return blueprintRepository.saveAll(blueprints);
     }
 
     public Blueprint delete(Long id) {
