@@ -107,7 +107,7 @@ public class CredentialTests extends CloudbreakTest {
         );
     }
 
-    @Test(expectedExceptions = ForbiddenException.class, priority = 1, groups = "credentials")
+    @Test(expectedExceptions = BadRequestException.class, priority = 1, groups = "credentials")
     public void testCreateAgainCredentialException() throws Exception {
         credentialName = AGAIN_CRED_NAME + cloudProvider.getPlatform().toLowerCase();
 
