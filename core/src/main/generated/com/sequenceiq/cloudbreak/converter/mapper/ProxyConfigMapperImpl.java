@@ -2,7 +2,9 @@ package com.sequenceiq.cloudbreak.converter.mapper;
 
 import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigResponse;
+import com.sequenceiq.cloudbreak.api.model.users.OrganizationResourceResponse;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import java.util.HashSet;
 import java.util.Set;
 import javax.annotation.Generated;
@@ -48,6 +50,7 @@ public class ProxyConfigMapperImpl implements ProxyConfigMapper {
         proxyConfigResponse.setUserName( proxyConfigRequest.getUserName() );
         proxyConfigResponse.setDescription( proxyConfigRequest.getDescription() );
         proxyConfigResponse.setId( proxyConfigRequest.getId() );
+        proxyConfigResponse.setOrganization( organizationToOrganizationResourceResponse( proxyConfigRequest.getOrganization() ) );
 
         return proxyConfigResponse;
     }
@@ -64,5 +67,18 @@ public class ProxyConfigMapperImpl implements ProxyConfigMapper {
         }
 
         return set;
+    }
+
+    protected OrganizationResourceResponse organizationToOrganizationResourceResponse(Organization organization) {
+        if ( organization == null ) {
+            return null;
+        }
+
+        OrganizationResourceResponse organizationResourceResponse = new OrganizationResourceResponse();
+
+        organizationResourceResponse.setId( organization.getId() );
+        organizationResourceResponse.setName( organization.getName() );
+
+        return organizationResourceResponse;
     }
 }
