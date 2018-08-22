@@ -53,12 +53,4 @@ public class FilterConfiguration {
         registrationBean.setOrder(Integer.MAX_VALUE);
         return registrationBean;
     }
-
-//    @Bean
-//    public FilterRegistrationBean securityFilterChain(@Qualifier(AbstractSecurityWebApplicationInitializer.DEFAULT_FILTER_NAME) Filter securityFilter) {
-//        FilterRegistrationBean registration = new FilterRegistrationBean<>(securityFilter);
-//        registration.setOrder(Integer.MAX_VALUE - 1);
-//        registration.setName(AbstractSecurityWebApplicationInitializer.DEFAULT_FILTER_NAME);
-//        return registration;
-//    }
 }

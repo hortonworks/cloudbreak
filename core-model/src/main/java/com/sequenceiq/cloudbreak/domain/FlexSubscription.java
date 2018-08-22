@@ -15,7 +15,10 @@ import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.organization.OrganizationAwareResource;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"subscriptionid", "organization_id"}))
+@Table(uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"subscriptionid", "organization_id"}),
+        @UniqueConstraint(columnNames = {"name", "organization_id"}),
+})
 public class FlexSubscription implements ProvisionEntity, OrganizationAwareResource {
 
     @Id
