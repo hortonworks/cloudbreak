@@ -194,6 +194,9 @@ public class OperationDescriptions {
     public static class EventOpDescription {
         public static final String GET_BY_TIMESTAMP = "retrieve events by timestamp (long)";
         public static final String GET_BY_ID = "retrieve events by stackid (long)";
+        public static final String GET_BY_NAME = "retrieve events by name";
+        public static final String GET_EVENTS_BY_NAME = "retrieve events by name";
+        public static final String GET_EVENTS_ZIP_BY_NAME = "retrieve events in zip by name";
     }
 
     public static class NetworkOpDescription {
