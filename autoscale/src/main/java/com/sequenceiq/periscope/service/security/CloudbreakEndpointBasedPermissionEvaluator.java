@@ -16,6 +16,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
 
+import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.PeriscopeUser;
 
@@ -24,6 +25,10 @@ import com.sequenceiq.periscope.domain.PeriscopeUser;
 public class CloudbreakEndpointBasedPermissionEvaluator implements PermissionEvaluator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakEndpointBasedPermissionEvaluator.class);
+
+    @Inject
+    @Lazy
+    private CachedUserDetailsService cachedUserDetailsService;
 
     @Inject
     @Lazy
@@ -41,7 +46,11 @@ public class CloudbreakEndpointBasedPermissionEvaluator implements PermissionEva
         return targets.stream().allMatch(t -> {
             try {
                 String owner = getUserId(t);
-                Long stackId = getStackIdFromCluster(t);
+                Long stackId = getStackIdFromTarget(t);
+                if (stackId == null) {
+                    PeriscopeUser user = cachedUserDetailsService.getDetails((String) authentication.getPrincipal(), UserFilterField.USERNAME);
+                    return owner.equals(user.getId());
+                }
                 return stackSecurityService.hasAccess(stackId, owner, permission.toString());
             } catch (IllegalAccessException e) {
                 LOGGER.error("Object doesn't have properties to check permission with class: " + t.getClass().getCanonicalName(), e);
@@ -67,18 +76,20 @@ public class CloudbreakEndpointBasedPermissionEvaluator implements PermissionEva
                 userIdField.setAccessible(true);
                 return (String) userIdField.get(targetDomainObject);
             }
-            return getUserIdFromCluster(targetDomainObject);
+            return getUserIdFromTarget(targetDomainObject);
         }
     }
 
-    private String getUserIdFromCluster(Object targetDomainObject) throws IllegalAccessException {
-        Field owner = ReflectionUtils.findField(targetDomainObject.getClass(), "user");
-        owner.setAccessible(true);
-        PeriscopeUser user = (PeriscopeUser) owner.get(targetDomainObject);
-        return user.getId();
+    private String getUserIdFromTarget(Object targetDomainObject) throws IllegalAccessException {
+        Field ownerField = ReflectionUtils.findField(targetDomainObject.getClass(), "user");
+        ownerField.setAccessible(true);
+        if (ownerField.getType().isAssignableFrom(PeriscopeUser.class)) {
+            return ((PeriscopeUser) ownerField.get(targetDomainObject)).getId();
+        }
+        return ownerField.get(targetDomainObject).toString();
     }
 
-    private Long getStackIdFromCluster(Object targetDomainObject) {
+    private Long getStackIdFromTarget(Object targetDomainObject) {
         if (targetDomainObject instanceof Cluster) {
             return ((Cluster) targetDomainObject).getStackId();
         }
