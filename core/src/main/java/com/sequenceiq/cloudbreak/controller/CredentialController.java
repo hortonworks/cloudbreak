@@ -128,7 +128,7 @@ public class CredentialController extends NotificationController implements Cred
     }
 
     private CredentialResponse createCredential(CredentialRequest credentialRequest, User user, Organization organization) {
-        Credential credential = credentialService.create(credentialService.convertToCredential(credentialRequest), organization, user);
+        Credential credential = credentialService.create(credentialService.convertToCredential(credentialRequest), organization.getId(), user);
         return credentialService.convertToResponse(credential);
     }
 
