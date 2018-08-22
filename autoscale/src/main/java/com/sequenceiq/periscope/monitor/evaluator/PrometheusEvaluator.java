@@ -29,14 +29,13 @@ import com.sequenceiq.periscope.monitor.context.ClusterIdEvaluatorContext;
 import com.sequenceiq.periscope.monitor.context.EvaluatorContext;
 import com.sequenceiq.periscope.monitor.event.ScalingEvent;
 import com.sequenceiq.periscope.monitor.event.UpdateFailedEvent;
-import com.sequenceiq.periscope.monitor.executor.ExecutorServiceWithRegistry;
 import com.sequenceiq.periscope.repository.PrometheusAlertRepository;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.security.TlsSecurityService;
 
 @Component("PrometheusEvaluator")
 @Scope("prototype")
-public class PrometheusEvaluator extends AbstractEventPublisher implements EvaluatorExecutor {
+public class PrometheusEvaluator extends EvaluatorExecutor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PrometheusEvaluator.class);
 
@@ -52,7 +51,7 @@ public class PrometheusEvaluator extends AbstractEventPublisher implements Evalu
     private TlsSecurityService tlsSecurityService;
 
     @Inject
-    private ExecutorServiceWithRegistry executorServiceWithRegistry;
+    private EventPublisher eventPublisher;
 
     private long clusterId;
 
@@ -73,7 +72,7 @@ public class PrometheusEvaluator extends AbstractEventPublisher implements Evalu
     }
 
     @Override
-    public void run() {
+    public void execute() {
         long start = System.currentTimeMillis();
         try {
             Cluster cluster = clusterService.find(clusterId);
@@ -125,14 +124,13 @@ public class PrometheusEvaluator extends AbstractEventPublisher implements Evalu
                 }
 
                 if (triggerScale && isPolicyAttached(alert)) {
-                    publishEvent(new ScalingEvent(alert));
+                    eventPublisher.publishEvent(new ScalingEvent(alert));
                 }
             }
         } catch (Exception e) {
             LOGGER.error("Failed to retrieve alerts from Prometheus", e);
-            publishEvent(new UpdateFailedEvent(clusterId));
+            eventPublisher.publishEvent(new UpdateFailedEvent(clusterId));
         } finally {
-            executorServiceWithRegistry.finished(this, clusterId);
             LOGGER.info("Finished prometheusEvaluator for cluster {} in {} ms", clusterId, System.currentTimeMillis() - start);
         }
     }

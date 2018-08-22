@@ -117,7 +117,7 @@ public class RejectedThreadServiceTest {
         return context;
     }
 
-    private static class TestEvaluatorExecutor implements EvaluatorExecutor {
+    private static class TestEvaluatorExecutor extends EvaluatorExecutor {
 
         private final EvaluatorContext context;
 
@@ -142,7 +142,7 @@ public class RejectedThreadServiceTest {
         }
 
         @Override
-        public void run() {
+        public void execute() {
 
         }
     }

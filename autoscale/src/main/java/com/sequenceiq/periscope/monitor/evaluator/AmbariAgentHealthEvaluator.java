@@ -22,13 +22,12 @@ import com.sequenceiq.periscope.monitor.context.ClusterIdEvaluatorContext;
 import com.sequenceiq.periscope.monitor.context.EvaluatorContext;
 import com.sequenceiq.periscope.monitor.event.UpdateFailedEvent;
 import com.sequenceiq.periscope.service.AmbariClientProvider;
-import com.sequenceiq.periscope.monitor.executor.ExecutorServiceWithRegistry;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.configuration.CloudbreakClientConfiguration;
 
 @Component("AmbariAgentHealthEvaluator")
 @Scope("prototype")
-public class AmbariAgentHealthEvaluator extends AbstractEventPublisher implements EvaluatorExecutor {
+public class AmbariAgentHealthEvaluator extends EvaluatorExecutor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariAgentHealthEvaluator.class);
 
@@ -59,7 +58,7 @@ public class AmbariAgentHealthEvaluator extends AbstractEventPublisher implement
     private AmbariRequestLogging ambariRequestLogging;
 
     @Inject
-    private ExecutorServiceWithRegistry executorServiceWithRegistry;
+    private EventPublisher eventPublisher;
 
     private long clusterId;
 
@@ -80,7 +79,7 @@ public class AmbariAgentHealthEvaluator extends AbstractEventPublisher implement
     }
 
     @Override
-    public void run() {
+    public void execute() {
         long start = System.currentTimeMillis();
         try {
             Cluster cluster = clusterService.find(clusterId);
@@ -108,12 +107,10 @@ public class AmbariAgentHealthEvaluator extends AbstractEventPublisher implement
             }
         } catch (Exception e) {
             LOGGER.warn(String.format("Failed to retrieve '%s' alerts. Original message: %s", AMBARI_AGENT_HEARTBEAT, e.getMessage()));
-            publishEvent(new UpdateFailedEvent(clusterId));
+            eventPublisher.publishEvent(new UpdateFailedEvent(clusterId));
         } finally {
-            executorServiceWithRegistry.finished(this, clusterId);
             LOGGER.info("Finished {} for cluster {} in {} ms", AMBARI_AGENT_HEARTBEAT, clusterId, System.currentTimeMillis() - start);
         }
-
     }
 
     private boolean isAlertStateMet(String currentState) {
