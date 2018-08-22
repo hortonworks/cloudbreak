@@ -62,4 +62,11 @@ public interface LdapConfigV3Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = LdapConfigOpDescription.POST_CONNECTION_TEST, produces = ContentType.JSON, nickname = "postLdapConnectionTestInOrganization")
     LdapTestResult testLdapConnection(@PathParam("organizationId") Long organizationId, @Valid LDAPTestRequest ldapValidationRequest);
+
+    @GET
+    @Path("{name}/request")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = LdapConfigOpDescription.GET_REQUEST, produces = ContentType.JSON, notes = Notes.LDAP_CONFIG_NOTES,
+            nickname = "getLdapRequestByNameAndOrganizationId")
+    LdapConfigRequest getRequestFromName(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
 }
