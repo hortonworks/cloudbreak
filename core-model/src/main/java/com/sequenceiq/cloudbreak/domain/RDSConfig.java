@@ -13,6 +13,8 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
@@ -23,6 +25,7 @@ import com.sequenceiq.cloudbreak.domain.organization.OrganizationAwareResource;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 
 @Entity
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"organization_id", "name"}))
 public class RDSConfig implements ProvisionEntity, OrganizationAwareResource {
 
     @Id
