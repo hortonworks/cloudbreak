@@ -89,6 +89,10 @@ public class BlueprintService extends AbstractOrganizationAwareResourceService<B
         return savedBlueprint;
     }
 
+    public Set<Blueprint> getAllAvailableInOrganization(long organizationId) {
+        return blueprintRepository.findAllByNotDeletedInOrganization(organizationId);
+    }
+
     public Iterable<Blueprint> saveAll(Iterable<Blueprint> entities) {
         return blueprintRepository.saveAll(entities);
     }

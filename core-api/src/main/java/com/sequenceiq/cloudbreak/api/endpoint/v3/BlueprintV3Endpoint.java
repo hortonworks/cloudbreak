@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v3;
 
+import static com.sequenceiq.cloudbreak.doc.ContentType.JSON;
+import static com.sequenceiq.cloudbreak.doc.Notes.BLUEPRINT_NOTES;
+
 import java.util.Set;
 
 import javax.validation.Valid;
@@ -14,9 +17,7 @@ import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
 import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
-import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
-import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.BlueprintOpDescription;
 
 import io.swagger.annotations.Api;
@@ -30,29 +31,36 @@ public interface BlueprintV3Endpoint {
     @GET
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = BlueprintOpDescription.LIST_BY_ORGANIZATION, produces = ContentType.JSON, notes = Notes.BLUEPRINT_NOTES,
+    @ApiOperation(value = BlueprintOpDescription.LIST_BY_ORGANIZATION, produces = JSON, notes = BLUEPRINT_NOTES,
             nickname = "listBlueprintsByOrganization")
     Set<BlueprintResponse> listByOrganization(@PathParam("organizationId") Long organizationId);
 
     @GET
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = BlueprintOpDescription.GET_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.BLUEPRINT_NOTES,
+    @ApiOperation(value = BlueprintOpDescription.GET_BY_NAME_IN_ORG, produces = JSON, notes = BLUEPRINT_NOTES,
             nickname = "getBlueprintInOrganization")
     BlueprintResponse getByNameInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
 
     @POST
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = BlueprintOpDescription.CREATE_IN_ORG, produces = ContentType.JSON, notes = Notes.BLUEPRINT_NOTES,
+    @ApiOperation(value = BlueprintOpDescription.CREATE_IN_ORG, produces = JSON, notes = BLUEPRINT_NOTES,
             nickname = "createBlueprintInOrganization")
     BlueprintResponse createInOrganization(@PathParam("organizationId") Long organizationId, @Valid BlueprintRequest request);
 
     @DELETE
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = BlueprintOpDescription.DELETE_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.BLUEPRINT_NOTES,
+    @ApiOperation(value = BlueprintOpDescription.DELETE_BY_NAME_IN_ORG, produces = JSON, notes = BLUEPRINT_NOTES,
             nickname = "deleteBlueprintInOrganization")
     BlueprintResponse deleteInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
+
+    @GET
+    @Path("{name}/request")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = BlueprintOpDescription.GET_BY_BLUEPRINT_NAME, produces = JSON, notes = BLUEPRINT_NOTES,
+            nickname = "getBlueprintRequestFromName")
+    BlueprintRequest getRequestFromName(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
 
 }

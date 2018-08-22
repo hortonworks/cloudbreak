@@ -12,7 +12,8 @@ public class OperationDescriptions {
         public static final String DELETE_PRIVATE_BY_NAME = "delete private blueprint by name";
         public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private blueprint by name";
         public static final String DELETE_BY_ID = "delete blueprint by id";
-        public static final String GET_BY_BLUEPRINT_ID = "retrieve validation request by blueprint name";
+        public static final String GET_BY_BLUEPRINT_NAME = "retrieve validation request by blueprint name";
+        public static final String GET_BY_BLUEPRINT_ID = "retrieve validation request by blueprint id";
         public static final String LIST_BY_ORGANIZATION = "list blueprints for the given organization";
         public static final String GET_BY_NAME_IN_ORG = "get blueprint by name in organization";
         public static final String CREATE_IN_ORG = "create blueprint in organization";

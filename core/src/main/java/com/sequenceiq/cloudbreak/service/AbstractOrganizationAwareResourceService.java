@@ -85,7 +85,7 @@ public abstract class AbstractOrganizationAwareResourceService<T extends Organiz
 
     @Override
     public T delete(T resource) {
-        LOGGER.info("Deleting resource with name: {}", resource.getName());
+        LOGGER.info("Deleting {} with name: {}", resource().getReadableName(), resource.getName());
         prepareDeletion(resource);
         repository().delete(resource);
         return resource;

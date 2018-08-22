@@ -122,7 +122,7 @@ public class BlueprintController extends NotificationController implements Bluep
     private Set<BlueprintResponse> listForUsersDefaultOrganization() {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
         Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        return getBlueprintResponses(user, blueprintService.findAllByOrganization(organization), organization);
+        return getBlueprintResponses(user, blueprintService.getAllAvailableInOrganization(organization.getId()), organization);
     }
 
     private Set<BlueprintResponse> getBlueprintResponses(User user, Set<Blueprint> blueprints, Organization organization) {

@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.aspect.DisableHasPermission;
-import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByOrganizationId;
+import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByReturnValue;
 import com.sequenceiq.cloudbreak.aspect.organization.OrganizationResourceType;
 import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -22,8 +22,7 @@ import com.sequenceiq.cloudbreak.service.EntityType;
 @OrganizationResourceType(resource = OrganizationResource.BLUEPRINT)
 public interface BlueprintRepository extends OrganizationResourceRepository<Blueprint, Long> {
 
-    @Override
-    @CheckPermissionsByOrganizationId
-    @Query("SELECT b FROM Blueprint b WHERE b.organization.id = :orgId")
-    Set<Blueprint> findAllByOrganizationId(@Param("orgId") Long orgId);
+    @Query("SELECT b FROM Blueprint b WHERE b.organization.id= :organizationId AND b.status <> 'DEFAULT_DELETED'")
+    @CheckPermissionsByReturnValue
+    Set<Blueprint> findAllByNotDeletedInOrganization(@Param("organizationId") long organizationId);
 }
