@@ -39,8 +39,6 @@ public class FlexSubscription implements ProvisionEntity, OrganizationAwareResou
 
     private String account;
 
-    private boolean publicInAccount = true;
-
     private boolean isDefault;
 
     private boolean usedForController;
@@ -109,14 +107,6 @@ public class FlexSubscription implements ProvisionEntity, OrganizationAwareResou
         this.account = account;
     }
 
-    public boolean isPublicInAccount() {
-        return publicInAccount;
-    }
-
-    public void setPublicInAccount(boolean publicInAccount) {
-        this.publicInAccount = publicInAccount;
-    }
-
     public boolean isDefault() {
         return isDefault;
     }
@@ -140,7 +130,6 @@ public class FlexSubscription implements ProvisionEntity, OrganizationAwareResou
                 + ", subscriptionId='" + subscriptionId + '\''
                 + ", smartSenseSubscription='" + smartSenseSubscription + '\''
                 + ", owner='" + owner + '\''
-                + ", account='" + account + '\''
-                + ", publicInAccount=" + publicInAccount + '}';
+                + ", account='" + account + '}';
     }
 }

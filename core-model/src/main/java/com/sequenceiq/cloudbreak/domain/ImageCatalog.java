@@ -33,9 +33,6 @@ public class ImageCatalog implements ProvisionEntity, OrganizationAwareResource 
     @Column(name = "url", nullable = false)
     private String imageCatalogUrl;
 
-    @Column(nullable = false)
-    private boolean publicInAccount = true;
-
     @Column(columnDefinition = "boolean default false")
     private boolean archived;
 
@@ -76,14 +73,6 @@ public class ImageCatalog implements ProvisionEntity, OrganizationAwareResource 
 
     public void setImageCatalogUrl(String imageCatalogUrl) {
         this.imageCatalogUrl = imageCatalogUrl;
-    }
-
-    public boolean isPublicInAccount() {
-        return publicInAccount;
-    }
-
-    public void setPublicInAccount(boolean publicInAccount) {
-        this.publicInAccount = publicInAccount;
     }
 
     public boolean isArchived() {

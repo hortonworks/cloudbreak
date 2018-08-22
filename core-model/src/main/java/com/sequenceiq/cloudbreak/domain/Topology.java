@@ -106,8 +106,4 @@ public class Topology implements ProvisionEntity, OrganizationAwareResource {
     public void setDeleted(boolean deleted) {
         this.deleted = deleted;
     }
-
-    public boolean isPublicInAccount() {
-        return true;
-    }
 }

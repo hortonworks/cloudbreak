@@ -36,8 +36,6 @@ public class ConstraintTemplate implements ProvisionEntity, OrganizationAwareRes
 
     private String account;
 
-    private boolean publicInAccount = true;
-
     @Column(nullable = false)
     private Double cpu;
 
@@ -113,14 +111,6 @@ public class ConstraintTemplate implements ProvisionEntity, OrganizationAwareRes
 
     public void setAccount(String account) {
         this.account = account;
-    }
-
-    public boolean isPublicInAccount() {
-        return publicInAccount;
-    }
-
-    public void setPublicInAccount(boolean publicInAccount) {
-        this.publicInAccount = publicInAccount;
     }
 
     public Double getCpu() {

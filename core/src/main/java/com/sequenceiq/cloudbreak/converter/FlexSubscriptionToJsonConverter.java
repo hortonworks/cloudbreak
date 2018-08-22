@@ -21,7 +21,6 @@ public class FlexSubscriptionToJsonConverter extends AbstractConversionServiceAw
         json.setName(source.getName());
         json.setOwner(source.getOwner());
         json.setAccount(source.getAccount());
-        json.setPublicInAccount(source.isPublicInAccount());
         json.setSubscriptionId(source.getSubscriptionId());
         json.setSmartSenseSubscriptionId(source.getSmartSenseSubscription().getId());
         SmartSenseSubscriptionJson smartSenseSubscriptionJson =

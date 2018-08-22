@@ -44,9 +44,6 @@ public class Template implements ProvisionEntity {
     private String account;
 
     @Column(nullable = false)
-    private boolean publicInAccount = true;
-
-    @Column(nullable = false)
     private Integer volumeCount;
 
     private Integer volumeSize;
@@ -129,14 +126,6 @@ public class Template implements ProvisionEntity {
 
     public void setAccount(String account) {
         this.account = account;
-    }
-
-    public boolean isPublicInAccount() {
-        return publicInAccount;
-    }
-
-    public void setPublicInAccount(boolean publicInAccount) {
-        this.publicInAccount = publicInAccount;
     }
 
     public Integer getVolumeCount() {

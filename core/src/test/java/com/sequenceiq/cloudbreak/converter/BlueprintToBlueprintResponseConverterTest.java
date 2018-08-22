@@ -103,7 +103,6 @@ public class BlueprintToBlueprintResponseConverterTest extends AbstractEntityCon
         Assert.assertNotNull(result);
         Assert.assertEquals(source.getId(), result.getId());
         Assert.assertEquals(source.getName(), result.getName());
-        Assert.assertEquals(source.isPublicInAccount(), result.isPublicInAccount());
         Assert.assertNotNull(result.getDescription());
         Assert.assertTrue(result.getDescription().isEmpty());
         Assert.assertEquals(Integer.valueOf(source.getHostGroupCount()), result.getHostGroupCount());
@@ -126,7 +125,6 @@ public class BlueprintToBlueprintResponseConverterTest extends AbstractEntityCon
         Assert.assertNotNull(result);
         Assert.assertEquals(source.getId(), result.getId());
         Assert.assertEquals(source.getName(), result.getName());
-        Assert.assertEquals(source.isPublicInAccount(), result.isPublicInAccount());
         Assert.assertEquals(source.getDescription(), result.getDescription());
         Assert.assertEquals(Integer.valueOf(source.getHostGroupCount()), result.getHostGroupCount());
         Assert.assertEquals(source.getStatus(), result.getStatus());

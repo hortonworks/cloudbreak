@@ -15,8 +15,6 @@ public class ExtendedCloudCredential extends CloudCredential {
 
     private final String cloudPlatform;
 
-    private final boolean publicInAccount;
-
     private final IdentityUser identityUser;
 
     private final String userId;
@@ -24,20 +22,19 @@ public class ExtendedCloudCredential extends CloudCredential {
     private final Long organziationId;
 
     public ExtendedCloudCredential(Long id, String cloudPlatform, String name, String description, String owner,
-            String account, boolean publicInAccount, IdentityUser identityUser, String userId, Long organziationId) {
+            String account, IdentityUser identityUser, String userId, Long organziationId) {
         super(id, name);
         this.cloudPlatform = cloudPlatform;
         this.description = description;
         this.owner = owner;
         this.account = account;
-        this.publicInAccount = publicInAccount;
         this.identityUser = identityUser;
         this.userId = userId;
         this.organziationId = organziationId;
     }
 
     public ExtendedCloudCredential(CloudCredential cloudCredential, String cloudPlatform, String description, String owner, String account,
-            boolean publicInAccount, IdentityUser identityUser, String userId, Long organziationId) {
+            IdentityUser identityUser, String userId, Long organziationId) {
         super(cloudCredential.getId(), cloudCredential.getName());
         Map<String, Object> parameters = cloudCredential.getParameters();
         for (Entry<String, Object> parameter : parameters.entrySet()) {
@@ -47,7 +44,6 @@ public class ExtendedCloudCredential extends CloudCredential {
         this.description = description;
         this.owner = owner;
         this.account = account;
-        this.publicInAccount = publicInAccount;
         this.identityUser = identityUser;
         this.userId = userId;
         this.organziationId = organziationId;
@@ -63,10 +59,6 @@ public class ExtendedCloudCredential extends CloudCredential {
 
     public String getAccount() {
         return account;
-    }
-
-    public boolean isPublicInAccount() {
-        return publicInAccount;
     }
 
     public String getCloudPlatform() {

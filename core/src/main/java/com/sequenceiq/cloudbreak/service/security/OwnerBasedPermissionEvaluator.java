@@ -72,7 +72,7 @@ public class OwnerBasedPermissionEvaluator implements PermissionEvaluator {
         String account = getAccount(targetDomainObject);
         return owner == null && account == null
                 || user.getUserId().equals(owner)
-                || account.equals(user.getAccount()) && (user.getRoles().contains(IdentityUserRole.ADMIN) || p == PermissionType.READ && isPublicInAccount(targetDomainObject));
+                || account.equals(user.getAccount()) && (user.getRoles().contains(IdentityUserRole.ADMIN) || p == PermissionType.READ);
     }
     //CHECKSTYLE:ON
 
@@ -84,15 +84,6 @@ public class OwnerBasedPermissionEvaluator implements PermissionEvaluator {
             result = (String) accountField.get(targetDomainObject);
         }
         return result;
-    }
-
-    private boolean isPublicInAccount(Object targetDomainObject) throws IllegalAccessException {
-        Field publicInAccountField = ReflectionUtils.findField(targetDomainObject.getClass(), "publicInAccount");
-        if (publicInAccountField != null) {
-            publicInAccountField.setAccessible(true);
-            return (Boolean) publicInAccountField.get(targetDomainObject);
-        }
-        return false;
     }
 
     private String getOwner(Object targetDomainObject) throws IllegalAccessException {

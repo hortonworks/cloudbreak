@@ -72,11 +72,10 @@ public class BlueprintRequestToBlueprintConverter extends AbstractConversionServ
         return blueprint;
     }
 
-    public Blueprint convert(String name, String blueprintText, boolean publicInAccount) {
+    public Blueprint convert(String name, String blueprintText) {
         Blueprint blueprint = new Blueprint();
         blueprint.setName(name);
         blueprint.setBlueprintText(blueprintText);
-        blueprint.setPublicInAccount(publicInAccount);
         validateBlueprint(blueprint.getBlueprintText());
         try {
             JsonNode root = JsonUtil.readTree(blueprint.getBlueprintText());

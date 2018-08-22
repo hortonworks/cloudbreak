@@ -21,7 +21,7 @@ public class FlexSubscriptionResponse extends FlexSubscriptionRequest {
     private String account;
 
     @ApiModelProperty(value = ModelDescriptions.PUBLIC_IN_ACCOUNT, readOnly = true)
-    private boolean publicInAccount;
+    private boolean publicInAccount = true;
 
     @ApiModelProperty(value = FlexSubscriptionModelDescription.SMARTSENSE_SUBSCRIPTION, readOnly = true)
     private SmartSenseSubscriptionJson smartSenseSubscription;

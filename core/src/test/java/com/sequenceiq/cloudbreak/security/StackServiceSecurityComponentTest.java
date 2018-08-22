@@ -96,7 +96,6 @@ public class StackServiceSecurityComponentTest extends SecurityComponentTestBase
         Stack stack = new Stack();
         stack.setOwner(USER_A_ID);
         stack.setAccount(ACCOUNT_A);
-        stack.setPublicInAccount(false);
         return stack;
     }
 
@@ -114,7 +113,6 @@ public class StackServiceSecurityComponentTest extends SecurityComponentTestBase
         StackResponse stackResponse = new StackResponse();
         stackResponse.setOwner(USER_A_ID);
         stackResponse.setAccount(ACCOUNT_A);
-        stackResponse.setPublicInAccount(false);
         return stackResponse;
     }
 

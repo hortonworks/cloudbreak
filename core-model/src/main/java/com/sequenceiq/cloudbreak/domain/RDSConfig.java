@@ -64,9 +64,6 @@ public class RDSConfig implements ProvisionEntity, OrganizationAwareResource {
     private String account;
 
     @Column(nullable = false)
-    private boolean publicInAccount = true;
-
-    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private ResourceStatus status;
 
@@ -160,14 +157,6 @@ public class RDSConfig implements ProvisionEntity, OrganizationAwareResource {
 
     public void setOwner(String owner) {
         this.owner = owner;
-    }
-
-    public void setPublicInAccount(boolean publicInAccount) {
-        this.publicInAccount = publicInAccount;
-    }
-
-    public boolean isPublicInAccount() {
-        return publicInAccount;
     }
 
     public ResourceStatus getStatus() {

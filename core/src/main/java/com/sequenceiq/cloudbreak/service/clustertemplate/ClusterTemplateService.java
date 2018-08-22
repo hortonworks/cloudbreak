@@ -35,7 +35,7 @@ public class ClusterTemplateService {
 
     public Set<ClusterTemplate> retrieveAccountClusterTemplates(IdentityUser user) {
         return user.getRoles().contains(IdentityUserRole.ADMIN) ? clusterTemplateRepository.findAllInAccount(user.getAccount())
-                : clusterTemplateRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
+                : clusterTemplateRepository.findForUser(user.getUserId(), user.getAccount());
     }
 
     public ClusterTemplate get(Long id) {

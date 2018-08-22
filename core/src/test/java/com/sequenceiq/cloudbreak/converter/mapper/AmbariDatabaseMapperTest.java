@@ -38,7 +38,7 @@ public class AmbariDatabaseMapperTest {
 
     @Test
     public void testMapAmbariDatabaseDetailsJsonToRdsConfig() {
-        RDSConfig rdsConfig = mapper.mapAmbariDatabaseDetailsJsonToRdsConfig(json, cluster, null, false);
+        RDSConfig rdsConfig = mapper.mapAmbariDatabaseDetailsJsonToRdsConfig(json, cluster, null);
         assertEquals(mapper.mapName(null, cluster), rdsConfig.getName());
         assertEquals(mapper.mapConnectionUrl(json), rdsConfig.getConnectionURL());
         assertEquals(ResourceStatus.USER_MANAGED, rdsConfig.getStatus());

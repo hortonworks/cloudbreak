@@ -47,7 +47,6 @@ public final class ServiceTestUtils {
         blueprint.setName("multi-node-hdfs-yarn");
         blueprint.setOwner(owner);
         blueprint.setAccount(account);
-        blueprint.setPublicInAccount(true);
         return blueprint;
     }
 
@@ -107,7 +106,6 @@ public final class ServiceTestUtils {
         stack.setStackStatus(new StackStatus(stack, Status.REQUESTED, "", DetailedStackStatus.PROVISION_REQUESTED));
         stack.setInstanceGroups(instanceGroups);
         stack.setCluster(cluster);
-        stack.setPublicInAccount(true);
         stack.setResources(resources);
         return stack;
     }
@@ -140,7 +138,6 @@ public final class ServiceTestUtils {
                 awsCredential.setOwner(owner);
                 awsCredential.setCloudPlatform(platform);
                 awsCredential.setAccount(account);
-                awsCredential.setPublicInAccount(true);
                 return awsCredential;
             case GCP:
                 Credential gcpCredential = new Credential();
@@ -148,7 +145,6 @@ public final class ServiceTestUtils {
                 gcpCredential.setOwner(owner);
                 gcpCredential.setCloudPlatform(platform);
                 gcpCredential.setAccount(account);
-                gcpCredential.setPublicInAccount(true);
                 return gcpCredential;
             default:
                 return null;
@@ -171,7 +167,6 @@ public final class ServiceTestUtils {
                 awsTemplate.setVolumeCount(1);
                 awsTemplate.setVolumeSize(100);
                 awsTemplate.setDescription("aws test template");
-                awsTemplate.setPublicInAccount(true);
                 awsTemplate.setCloudPlatform(AWS);
                 return awsTemplate;
             case GCP:
@@ -184,7 +179,6 @@ public final class ServiceTestUtils {
                 gcpTemplate.setAccount(account);
                 gcpTemplate.setVolumeCount(1);
                 gcpTemplate.setVolumeSize(100);
-                gcpTemplate.setPublicInAccount(true);
                 gcpTemplate.setCloudPlatform(GCP);
                 return gcpTemplate;
             default:

@@ -43,7 +43,7 @@ public class ClusterSecurityService {
             ambariAddressJson.setAmbariAddress(ambariAddress);
             stack = cloudbreakClient.stackV1Endpoint().getStackForAmbari(ambariAddressJson);
         }
-        return stack.getOwner().equals(userId) || (stack.isPublicInAccount() && stack.getAccount().equals(account));
+        return stack.getOwner().equals(userId) || stack.getAccount().equals(account);
     }
 
     public AmbariStack tryResolve(Ambari ambari) {

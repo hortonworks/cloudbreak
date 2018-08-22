@@ -21,9 +21,9 @@ public interface TemplateRepository extends BaseRepository<Template, Long> {
     @Query("SELECT t FROM Template t WHERE t.owner= :user AND deleted IS NOT TRUE AND t.status <> 'DEFAULT_DELETED'")
     Set<Template> findForUser(@Param("user") String user);
 
-    @Query("SELECT t FROM Template t WHERE ((t.account= :account AND t.publicInAccount= true) OR t.owner= :user) "
+    @Query("SELECT t FROM Template t WHERE t.account= :account OR t.owner= :user "
             + "AND deleted IS NOT TRUE AND t.status <> 'DEFAULT_DELETED'")
-    Set<Template> findPublicInAccountForUser(@Param("user") String user, @Param("account") String account);
+    Set<Template> findForUser(@Param("user") String user, @Param("account") String account);
 
     @Query("SELECT t FROM Template t WHERE t.account= :account AND deleted IS NOT TRUE AND t.status <> 'DEFAULT_DELETED'")
     Set<Template> findAllInAccount(@Param("account") String account);
@@ -31,7 +31,7 @@ public interface TemplateRepository extends BaseRepository<Template, Long> {
     @Query("SELECT t FROM Template t WHERE t.name= :name and t.account= :account AND deleted IS NOT TRUE AND t.status <> 'DEFAULT_DELETED'")
     Template findOneByName(@Param("name") String name, @Param("account") String account);
 
-    @Query("SELECT t FROM Template t WHERE t.name= :name and ((t.account= :account and t.publicInAccount=true) or t.owner= :owner) "
+    @Query("SELECT t FROM Template t WHERE t.name= :name and (t.account= :account or t.owner= :owner) "
             + "AND deleted IS NOT TRUE AND t.status <> 'DEFAULT_DELETED'")
     Template findByNameInAccount(@Param("name") String name, @Param("account") String account, @Param("owner") String owner);
 

@@ -28,9 +28,6 @@ public class SmartSenseSubscription implements ProvisionEntity {
 
     private String account;
 
-    @Column(nullable = false)
-    private boolean publicInAccount = true;
-
     @ManyToOne
     private Organization organization;
 
@@ -74,20 +71,11 @@ public class SmartSenseSubscription implements ProvisionEntity {
         this.account = account;
     }
 
-    public boolean isPublicInAccount() {
-        return publicInAccount;
-    }
-
-    public void setPublicInAccount(boolean publicInAccount) {
-        this.publicInAccount = publicInAccount;
-    }
-
     @Override
     public String toString() {
         return "SmartSenseSubscription{" + "id=" + id
                 + ", subscriptionId='" + subscriptionId + '\''
                 + ", owner='" + owner + '\''
-                + ", account='" + account + '\''
-                + ", publicInAccount=" + publicInAccount + '}';
+                + ", account='" + account + '}';
     }
 }

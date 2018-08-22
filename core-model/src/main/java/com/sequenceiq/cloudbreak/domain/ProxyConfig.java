@@ -51,9 +51,6 @@ public class ProxyConfig implements ProvisionEntity, OrganizationAwareResource {
     @Convert(converter = EncryptionConverter.class)
     private String password;
 
-    @Column(nullable = false)
-    private boolean publicInAccount = true;
-
     @ManyToOne
     private Organization organization;
 
@@ -127,14 +124,6 @@ public class ProxyConfig implements ProvisionEntity, OrganizationAwareResource {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public boolean isPublicInAccount() {
-        return publicInAccount;
-    }
-
-    public void setPublicInAccount(boolean publicInAccount) {
-        this.publicInAccount = publicInAccount;
     }
 
     public String getDescription() {

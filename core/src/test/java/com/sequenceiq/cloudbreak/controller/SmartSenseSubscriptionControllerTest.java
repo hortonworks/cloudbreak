@@ -91,7 +91,6 @@ public class SmartSenseSubscriptionControllerTest {
         subscription.setSubscriptionId("A-99900000-C-00000000");
         subscription.setAccount("account id");
         subscription.setOwner("user id");
-        subscription.setPublicInAccount(true);
         return subscription;
     }
 

@@ -20,7 +20,7 @@ public class BlueprintResponse extends BlueprintBase {
     private Integer hostGroupCount;
 
     @ApiModelProperty(ModelDescriptions.PUBLIC_IN_ACCOUNT)
-    private boolean publicInAccount;
+    private boolean publicInAccount = true;
 
     @ApiModelProperty(BlueprintModelDescription.STATUS)
     private ResourceStatus status;

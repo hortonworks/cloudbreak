@@ -173,7 +173,6 @@ public class BlueprintLoaderServiceTest {
         blueprint.setName("multi-node-hdfs-yarn" + index);
         blueprint.setOwner(LUCKY_MAN);
         blueprint.setAccount(LOTTERY_WINNERS);
-        blueprint.setPublicInAccount(true);
         return blueprint;
     }
 

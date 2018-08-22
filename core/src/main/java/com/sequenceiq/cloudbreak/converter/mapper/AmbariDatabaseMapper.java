@@ -34,8 +34,7 @@ public interface AmbariDatabaseMapper {
             @Mapping(target = "connectorJarUrl", ignore = true),
             @Mapping(target = "organization", ignore = true)
     })
-    RDSConfig mapAmbariDatabaseDetailsJsonToRdsConfig(AmbariDatabaseDetailsJson ambariDatabaseDetailsJson, Cluster cluster, @Context Stack stack,
-            boolean publicInAccount);
+    RDSConfig mapAmbariDatabaseDetailsJsonToRdsConfig(AmbariDatabaseDetailsJson ambariDatabaseDetailsJson, Cluster cluster, @Context Stack stack);
 
     @Named("connectionUrl")
     default String mapConnectionUrl(AmbariDatabaseDetailsJson ambariDatabaseDetailsJson) {

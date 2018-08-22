@@ -74,45 +74,31 @@ public class OwnerBasedPermissionEvaluatorTest {
     }
 
     @Test
-    public void testReadNotOwnerNotAdminButPublicInAccount() {
+    public void testReadNotOwnerNotAdmin() {
         when(oauth.getUserAuthentication()).thenReturn(new TestingAuthenticationToken("principal", "credential"));
         IdentityUser user = new IdentityUser("admin", "", "account", Collections.emptyList(), "", "", null);
         when(cachedUserDetailsService.getDetails(anyString(), any(UserFilterField.class))).thenReturn(user);
-        stack.setPublicInAccount(true);
         boolean result = underTest.hasPermission(oauth, stack, "read");
 
         Assert.assertTrue(result);
     }
 
     @Test
-    public void testReadNotOwnerNotAdminNotAccountButPublicInAccount() {
+    public void testReadNotOwnerNotAdminNotAccount() {
         when(oauth.getUserAuthentication()).thenReturn(new TestingAuthenticationToken("principal", "credential"));
         IdentityUser user = new IdentityUser("admin", "", "test-account", Collections.emptyList(), "", "", null);
         when(cachedUserDetailsService.getDetails(anyString(), any(UserFilterField.class))).thenReturn(user);
-        stack.setPublicInAccount(true);
         boolean result = underTest.hasPermission(oauth, stack, "read");
 
         Assert.assertFalse(result);
     }
 
     @Test
-    public void testWriteNotOwnerNotAdminButPublicInAccount() {
+    public void testWriteNotOwnerNotAdmin() {
         when(oauth.getUserAuthentication()).thenReturn(new TestingAuthenticationToken("principal", "credential"));
         IdentityUser user = new IdentityUser("admin", "", "account", Collections.emptyList(), "", "", null);
         when(cachedUserDetailsService.getDetails(anyString(), any(UserFilterField.class))).thenReturn(user);
-        stack.setPublicInAccount(true);
         boolean result = underTest.hasPermission(oauth, stack, "write");
-
-        Assert.assertFalse(result);
-    }
-
-    @Test
-    public void testReadNotOwnerNotAdminNotPublicInAccount() {
-        when(oauth.getUserAuthentication()).thenReturn(new TestingAuthenticationToken("principal", "credential"));
-        IdentityUser user = new IdentityUser("admin", "", "account", Collections.emptyList(), "", "", null);
-        when(cachedUserDetailsService.getDetails(anyString(), any(UserFilterField.class))).thenReturn(user);
-        stack.setPublicInAccount(false);
-        boolean result = underTest.hasPermission(oauth, stack, "read");
 
         Assert.assertFalse(result);
     }

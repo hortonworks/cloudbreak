@@ -42,7 +42,7 @@ public class StackResponse extends StackBase {
     private String account;
 
     @ApiModelProperty(ModelDescriptions.PUBLIC_IN_ACCOUNT)
-    private boolean publicInAccount;
+    private boolean publicInAccount = true;
 
     @ApiModelProperty(StackModelDescription.STACK_STATUS)
     private Status status;

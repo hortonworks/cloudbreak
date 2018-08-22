@@ -377,7 +377,6 @@ public class MetricTest {
         StackResponse stackResponse = new StackResponse();
         stackResponse.setOwner(USER_A_ID);
         stackResponse.setAccount(ACCOUNT_A);
-        stackResponse.setPublicInAccount(false);
         stackResponse.setStatus(stackStatus);
         stackResponse.setCluster(new ClusterResponse());
         stackResponse.getCluster().setStatus(clusterStatus);

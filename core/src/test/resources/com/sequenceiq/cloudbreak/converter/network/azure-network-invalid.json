@@ -4,6 +4,5 @@
   "subnetCIDR" : "10.0.0.0/16",
   "parameters" : {
   },
-  "description" : "default description",
-  "publicInAccount" : true
+  "description" : "default description"
 }

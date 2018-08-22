@@ -114,7 +114,6 @@ public class TestUtil {
 
     public static Credential awsCredential() {
         Credential awsCredential = new Credential();
-        awsCredential.setPublicInAccount(false);
         awsCredential.setArchived(false);
         awsCredential.setCloudPlatform(AWS);
         awsCredential.setDescription(DUMMY_DESCRIPTION);
@@ -128,7 +127,6 @@ public class TestUtil {
         credential.setId(1L);
         credential.setName(DUMMY_NAME);
         credential.setCloudPlatform(GCP);
-        credential.setPublicInAccount(true);
         credential.setDescription(DUMMY_DESCRIPTION);
         return credential;
     }
@@ -332,7 +330,6 @@ public class TestUtil {
         awsTemplate.setId(1L);
         awsTemplate.setName(DUMMY_NAME);
         awsTemplate.setDescription(DUMMY_DESCRIPTION);
-        awsTemplate.setPublicInAccount(true);
         return awsTemplate;
     }
 
@@ -344,7 +341,6 @@ public class TestUtil {
         openStackTemplate.setVolumeCount(1);
         openStackTemplate.setVolumeSize(100);
         openStackTemplate.setName(DUMMY_NAME);
-        openStackTemplate.setPublicInAccount(true);
         openStackTemplate.setStatus(ResourceStatus.DEFAULT);
         openStackTemplate.setDescription(DUMMY_DESCRIPTION);
         return openStackTemplate;
@@ -358,7 +354,6 @@ public class TestUtil {
         gcpTemplate.setVolumeCount(1);
         gcpTemplate.setVolumeSize(100);
         gcpTemplate.setDescription(DUMMY_DESCRIPTION);
-        gcpTemplate.setPublicInAccount(true);
         gcpTemplate.setStatus(ResourceStatus.DEFAULT);
         gcpTemplate.setName(DUMMY_NAME);
         return gcpTemplate;
@@ -505,7 +500,6 @@ public class TestUtil {
             recipe.setDescription("description");
             recipe.setId((long) (i + 1));
             recipe.setName("recipe-" + (i + 1));
-            recipe.setPublicInAccount(true);
             recipe.setUri("https://some/url");
             recipe.setContent("base64Content");
             recipe.setRecipeType(RecipeType.POST_AMBARI_START);
@@ -523,7 +517,6 @@ public class TestUtil {
         config.setId(1L);
         config.setName(DUMMY_NAME);
         config.setDescription(DUMMY_DESCRIPTION);
-        config.setPublicInAccount(true);
         config.setUserSearchBase("cn=users,dc=example,dc=org");
         config.setUserDnPattern("cn={0},cn=users,dc=example,dc=org");
         config.setGroupSearchBase("cn=groups,dc=example,dc=org");
@@ -548,7 +541,6 @@ public class TestUtil {
         config.setId(1L);
         config.setName(DUMMY_NAME);
         config.setDescription(DUMMY_DESCRIPTION);
-        config.setPublicInAccount(true);
         config.setUserSearchBase("cn=users,dc=example,dc=org");
         config.setUserDnPattern("cn={0},cn=users,dc=example,dc=org");
         config.setGroupSearchBase("cn=groups,dc=example,dc=org");
@@ -670,7 +662,6 @@ public class TestUtil {
         smartSenseSubscription.setSubscriptionId("1234-1234-1234-1244");
         smartSenseSubscription.setAccount("hortonworks");
         smartSenseSubscription.setOwner("hwx-user");
-        smartSenseSubscription.setPublicInAccount(false);
         smartSenseSubscription.setId(1L);
         return smartSenseSubscription;
     }

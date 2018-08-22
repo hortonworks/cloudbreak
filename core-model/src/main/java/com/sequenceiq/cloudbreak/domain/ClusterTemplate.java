@@ -37,9 +37,6 @@ public class ClusterTemplate implements ProvisionEntity {
     @Enumerated(EnumType.STRING)
     private ClusterTemplateType type;
 
-    @Column(nullable = false)
-    private boolean publicInAccount = true;
-
     private String owner;
 
     private String account;
@@ -85,14 +82,6 @@ public class ClusterTemplate implements ProvisionEntity {
 
     public void setType(ClusterTemplateType type) {
         this.type = type;
-    }
-
-    public boolean isPublicInAccount() {
-        return publicInAccount;
-    }
-
-    public void setPublicInAccount(boolean publicInAccount) {
-        this.publicInAccount = publicInAccount;
     }
 
     public String getOwner() {

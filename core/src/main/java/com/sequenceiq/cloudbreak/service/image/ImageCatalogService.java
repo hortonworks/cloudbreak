@@ -278,7 +278,6 @@ public class ImageCatalogService extends AbstractOrganizationAwareResourceServic
         ImageCatalog imageCatalog = new ImageCatalog();
         imageCatalog.setName(CLOUDBREAK_DEFAULT_CATALOG_NAME);
         imageCatalog.setImageCatalogUrl(defaultCatalogUrl);
-        imageCatalog.setPublicInAccount(true);
         return imageCatalog;
     }
 

@@ -19,7 +19,7 @@ import com.sequenceiq.cloudbreak.service.EntityType;
 @OrganizationResourceType(resource = OrganizationResource.CONSTRAINT_TEMPLATE)
 public interface ConstraintTemplateRepository extends OrganizationResourceRepository<ConstraintTemplate, Long> {
 
-    @Query("SELECT t FROM ConstraintTemplate t WHERE t.name= :name and ((t.account= :account and t.publicInAccount=true) or t.owner= :owner) "
+    @Query("SELECT t FROM ConstraintTemplate t WHERE t.name= :name and (t.account= :account or t.owner= :owner) "
             + "AND deleted IS NOT TRUE AND t.status <> 'DEFAULT_DELETED'")
     ConstraintTemplate findByNameInAccount(@Param("name") String name, @Param("account") String account, @Param("owner") String owner);
 }

@@ -32,8 +32,6 @@ public class ManagementPack implements ProvisionEntity, OrganizationAwareResourc
 
     private String account;
 
-    private boolean publicInAccount = true;
-
     @Column(nullable = false)
     private String mpackUrl;
 
@@ -84,14 +82,6 @@ public class ManagementPack implements ProvisionEntity, OrganizationAwareResourc
 
     public void setAccount(String account) {
         this.account = account;
-    }
-
-    public boolean isPublicInAccount() {
-        return publicInAccount;
-    }
-
-    public void setPublicInAccount(boolean publicInAccount) {
-        this.publicInAccount = publicInAccount;
     }
 
     public String getMpackUrl() {
