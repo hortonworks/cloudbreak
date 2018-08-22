@@ -6,7 +6,6 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Service;
@@ -21,8 +20,6 @@ import com.sequenceiq.cloudbreak.repository.organization.OrganizationResourceRep
 import com.sequenceiq.cloudbreak.service.AbstractOrganizationAwareResourceService;
 import com.sequenceiq.cloudbreak.structuredevent.db.StructuredEventRepository;
 
-import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
-
 @Service
 public class AuditEventService extends AbstractOrganizationAwareResourceService<StructuredEventEntity> {
 
@@ -32,22 +29,19 @@ public class AuditEventService extends AbstractOrganizationAwareResourceService<
     @Inject
     private StructuredEventRepository structuredEventRepository;
 
-    @Inject
-    private OrganizationService organizationService;
-
     public AuditEvent getAuditEvent(Long auditId) {
-        return getAuditEventByOrgId(organizationService.getDefaultOrganizationForCurrentUser().getId(), auditId);
+        Optional<StructuredEventEntity> event = structuredEventRepository.findById(auditId);
+        return event.isPresent() ? conversionService.convert(event, AuditEvent.class) : null;
     }
 
     public AuditEvent getAuditEventByOrgId(Long organizationId, Long auditId) {
-        StructuredEventEntity event = Optional.ofNullable(structuredEventRepository.findByOrgIdAndId(organizationId, auditId))
-                .orElseThrow(notFound("StructuredEvent", auditId));
-        return conversionService.convert(event, AuditEvent.class);
+        StructuredEventEntity event = structuredEventRepository.findByOrgIdAndId(organizationId, auditId);
+        return event != null ? conversionService.convert(event, AuditEvent.class) : null;
     }
 
     public List<AuditEvent> getAuditEventsForOrg(String resourceType, Long resourceId, Organization organization) {
         List<AuditEvent> auditEvents = getEventsForUserWithTypeAndResourceIdByOrg(organization, resourceType, resourceId);
-        auditEvents.sort(new AuditEventComparator().reversed());
+        Collections.sort(auditEvents, new AuditEventComparator().reversed());
         return auditEvents;
     }
 
