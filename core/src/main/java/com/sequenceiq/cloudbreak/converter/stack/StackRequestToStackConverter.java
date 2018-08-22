@@ -89,10 +89,10 @@ public class StackRequestToStackConverter extends AbstractConversionServiceAware
     public Stack convert(StackRequest source) {
         Stack stack = new Stack();
 
-        String account = Optional.ofNullable(source.getAccount()).orElse(restRequestThreadLocalService.getIdentityUser().getUserId());
-        stack.setAccount(account);
-        String owner = Optional.ofNullable(source.getOwner()).orElse(restRequestThreadLocalService.getIdentityUser().getAccount());
+        String owner = Optional.ofNullable(source.getOwner()).orElse(restRequestThreadLocalService.getIdentityUser().getUserId());
         stack.setOwner(owner);
+        String account = Optional.ofNullable(source.getAccount()).orElse(restRequestThreadLocalService.getIdentityUser().getAccount());
+        stack.setAccount(account);
 
         stack.setName(source.getName());
         stack.setDisplayName(source.getName());
