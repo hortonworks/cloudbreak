@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Maps;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
@@ -67,8 +67,9 @@ public class ControllerLogContextAspects {
         String controllerClassName = target.getClass().getSimpleName();
         String resourceType = controllerClassName.substring(0, controllerClassName.indexOf("Controller"));
         result.put(LoggerContextKey.RESOURCE_TYPE.toString(), resourceType);
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        result.put(LoggerContextKey.OWNER_ID.toString(), user != null ? user.getUserId() : "undefined");
+        IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
+        String owner = identityUser != null ? userService.getOrCreate(identityUser).getUserId() : "undefined";
+        result.put(LoggerContextKey.OWNER_ID.toString(), owner);
         return result;
     }
 }
