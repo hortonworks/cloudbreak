@@ -40,8 +40,8 @@ public class OrganizationConfiguratorFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String requestURI = request.getRequestURI();
-        if (requestURI.contains("/v3/organization/")) {
-            Long orgId = Long.valueOf(StringUtils.substringBetween(requestURI, "/v3/organization/", "/"));
+        if (requestURI.contains("/v3/")) {
+            Long orgId = Long.valueOf(StringUtils.substringBetween(requestURI, "/v3/", "/"));
             restRequestThreadLocalService.setRequestedOrgId(orgId);
         } else {
             IdentityUser identityUser = authenticatedUserService.getCbUser();
