@@ -229,12 +229,16 @@ public class StackCommonService implements StackEndpoint {
         permissionCheckingUtils.checkPermissionByOrgIdForCurrentUser(organizationId, OrganizationResource.STACK, Action.WRITE);
         Stack stack = stackService.getByNameInOrg(name, organizationId);
         MDCBuilder.buildMdcContext(stack);
-        if (!cloudParameterCache.isScalingSupported(stack.cloudPlatform())) {
-            throw new BadRequestException(String.format("Scaling is not supported on %s cloudplatform", stack.cloudPlatform()));
-        }
         updateRequest.setStackId(stack.getId());
         UpdateStackJson updateStackJson = conversionService.convert(updateRequest, UpdateStackJson.class);
-        if (updateStackJson.getInstanceGroupAdjustment().getScalingAdjustment() > 0) {
+        Integer scalingAdjustment = updateStackJson.getInstanceGroupAdjustment().getScalingAdjustment();
+        if (scalingAdjustment > 0 && !cloudParameterCache.isUpScalingSupported(stack.cloudPlatform())) {
+            throw new BadRequestException(String.format("Upscaling is not supported on %s cloudplatform", stack.cloudPlatform()));
+        }
+        if (scalingAdjustment < 0 && !cloudParameterCache.isDownScalingSupported(stack.cloudPlatform())) {
+            throw new BadRequestException(String.format("Downscaling is not supported on %s cloudplatform", stack.cloudPlatform()));
+        }
+        if (scalingAdjustment > 0) {
             return put(stack, updateStackJson);
         } else {
             UpdateClusterJson updateClusterJson = conversionService.convert(updateRequest, UpdateClusterJson.class);

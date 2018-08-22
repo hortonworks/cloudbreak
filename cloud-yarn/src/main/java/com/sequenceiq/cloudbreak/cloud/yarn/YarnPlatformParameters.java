@@ -88,7 +88,8 @@ public class YarnPlatformParameters implements PlatformParameters {
         Map<String, Boolean> specialParameters = Maps.newHashMap();
         specialParameters.put(PlatformParametersConsts.CUSTOM_INSTANCETYPE, Boolean.TRUE);
         specialParameters.put(PlatformParametersConsts.NETWORK_IS_MANDATORY, Boolean.FALSE);
-        specialParameters.put(PlatformParametersConsts.SCALING_SUPPORTED, Boolean.FALSE);
+        specialParameters.put(PlatformParametersConsts.UPSCALING_SUPPORTED, Boolean.FALSE);
+        specialParameters.put(PlatformParametersConsts.DOWNSCALING_SUPPORTED, Boolean.FALSE);
         specialParameters.put(PlatformParametersConsts.STARTSTOP_SUPPORTED, Boolean.FALSE);
         return new SpecialParameters(specialParameters);
     }
