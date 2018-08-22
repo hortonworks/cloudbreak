@@ -40,7 +40,7 @@ public class BlueprintV3Controller extends NotificationController implements Blu
 
     @Override
     public Set<BlueprintResponse> listByOrganization(Long organizationId) {
-        return blueprintService.findAllByOrganizationId(organizationId).stream()
+        return blueprintService.getAllAvailableInOrganization(organizationId).stream()
                 .map(blueprint -> conversionService.convert(blueprint, BlueprintResponse.class))
                 .collect(Collectors.toSet());
     }
@@ -65,5 +65,11 @@ public class BlueprintV3Controller extends NotificationController implements Blu
         Blueprint deleted = blueprintService.deleteByNameFromOrganization(name, organizationId);
         notify(ResourceEvent.BLUEPRINT_DELETED);
         return conversionService.convert(deleted, BlueprintResponse.class);
+    }
+
+    @Override
+    public BlueprintRequest getRequestFromName(Long organizationId, String name) {
+        Blueprint blueprint = blueprintService.getByNameForOrganizationId(name, organizationId);
+        return conversionService.convert(blueprint, BlueprintRequest.class);
     }
 }
