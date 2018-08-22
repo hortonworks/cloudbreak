@@ -12,7 +12,9 @@ public class PlatformParametersConsts {
 
     public static final String NETWORK_IS_MANDATORY = "networkIsMandatory";
 
-    public static final String SCALING_SUPPORTED = "scalingSupported";
+    public static final String UPSCALING_SUPPORTED = "upScalingSupported";
+
+    public static final String DOWNSCALING_SUPPORTED = "downScalingSupported";
 
     public static final String STARTSTOP_SUPPORTED = "startStopSupported";
 

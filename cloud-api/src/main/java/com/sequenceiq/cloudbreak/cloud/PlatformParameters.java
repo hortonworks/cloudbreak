@@ -88,7 +88,8 @@ public interface PlatformParameters {
         Map<String, Boolean> specialParameters = Maps.newHashMap();
         specialParameters.put(PlatformParametersConsts.CUSTOM_INSTANCETYPE, Boolean.FALSE);
         specialParameters.put(PlatformParametersConsts.NETWORK_IS_MANDATORY, Boolean.TRUE);
-        specialParameters.put(PlatformParametersConsts.SCALING_SUPPORTED, Boolean.TRUE);
+        specialParameters.put(PlatformParametersConsts.UPSCALING_SUPPORTED, Boolean.TRUE);
+        specialParameters.put(PlatformParametersConsts.DOWNSCALING_SUPPORTED, Boolean.TRUE);
         specialParameters.put(PlatformParametersConsts.STARTSTOP_SUPPORTED, Boolean.TRUE);
         return new SpecialParameters(specialParameters);
     }

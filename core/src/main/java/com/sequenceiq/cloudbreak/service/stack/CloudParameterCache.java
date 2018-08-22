@@ -23,12 +23,21 @@ public class CloudParameterCache {
         return platformParameters.get();
     }
 
-    public boolean isScalingSupported(String platform) {
-        return isScalingSupported(Platform.platform(platform));
+    public boolean isUpScalingSupported(String platform) {
+        return isUpScalingSupported(Platform.platform(platform));
     }
 
-    public boolean isScalingSupported(Platform platform) {
-        Boolean result = getSpecialParameters(platform).get(PlatformParametersConsts.SCALING_SUPPORTED);
+    public boolean isUpScalingSupported(Platform platform) {
+        Boolean result = getSpecialParameters(platform).get(PlatformParametersConsts.UPSCALING_SUPPORTED);
+        return result == null || result;
+    }
+
+    public boolean isDownScalingSupported(String platform) {
+        return isDownScalingSupported(Platform.platform(platform));
+    }
+
+    public boolean isDownScalingSupported(Platform platform) {
+        Boolean result = getSpecialParameters(platform).get(PlatformParametersConsts.DOWNSCALING_SUPPORTED);
         return result == null || result;
     }
 
