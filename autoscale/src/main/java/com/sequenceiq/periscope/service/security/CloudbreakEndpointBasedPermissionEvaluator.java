@@ -16,19 +16,18 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
 
-import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.PeriscopeUser;
 
 @Service
 @Lazy
-public class OwnerBasedPermissionEvaluator implements PermissionEvaluator {
+public class CloudbreakEndpointBasedPermissionEvaluator implements PermissionEvaluator {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(OwnerBasedPermissionEvaluator.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakEndpointBasedPermissionEvaluator.class);
 
     @Inject
     @Lazy
-    private CachedUserDetailsService cachedUserDetailsService;
+    private StackSecurityService stackSecurityService;
 
     @Override
     public boolean hasPermission(Authentication authentication, Object target, Object permission) {
@@ -38,11 +37,12 @@ public class OwnerBasedPermissionEvaluator implements PermissionEvaluator {
         if (target == null) {
             return false;
         }
-        PeriscopeUser user = cachedUserDetailsService.getDetails((String) authentication.getPrincipal(), UserFilterField.USERNAME);
         Collection<?> targets = target instanceof Collection ? (Collection<?>) target : Collections.singleton(target);
         return targets.stream().allMatch(t -> {
             try {
-                return getUserId(t).equals(user.getId());
+                String owner = getUserId(t);
+                Long stackId = getStackIdFromCluster(t);
+                return stackSecurityService.hasAccess(stackId, owner, permission.toString());
             } catch (IllegalAccessException e) {
                 LOGGER.error("Object doesn't have properties to check permission with class: " + t.getClass().getCanonicalName(), e);
                 return false;
@@ -76,5 +76,12 @@ public class OwnerBasedPermissionEvaluator implements PermissionEvaluator {
         owner.setAccessible(true);
         PeriscopeUser user = (PeriscopeUser) owner.get(targetDomainObject);
         return user.getId();
+    }
+
+    private Long getStackIdFromCluster(Object targetDomainObject) {
+        if (targetDomainObject instanceof Cluster) {
+            return ((Cluster) targetDomainObject).getStackId();
+        }
+        return null;
     }
 }

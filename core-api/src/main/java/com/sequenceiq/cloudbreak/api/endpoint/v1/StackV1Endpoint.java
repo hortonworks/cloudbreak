@@ -172,4 +172,8 @@ public interface StackV1Endpoint extends StackEndpoint {
     @ApiOperation(value = StackOpDescription.GET_ALL, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "getAllStack")
     Set<AutoscaleStackResponse> getAllForAutoscale();
 
+    @GET
+    @Path("authorize/{id}/{owner}/{permission}")
+    @Produces(MediaType.APPLICATION_JSON)
+    Boolean authorizeForAutoscale(@PathParam("id") Long id, @PathParam("owner") String owner, @PathParam("permission") String permission);
 }

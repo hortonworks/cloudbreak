@@ -22,7 +22,7 @@ import org.springframework.security.oauth2.provider.expression.OAuth2MethodSecur
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 
-import com.sequenceiq.periscope.service.security.OwnerBasedPermissionEvaluator;
+import com.sequenceiq.periscope.service.security.CloudbreakEndpointBasedPermissionEvaluator;
 import com.sequenceiq.periscope.service.security.ScimAccountGroupReaderFilter;
 
 @Configuration
@@ -52,12 +52,12 @@ public class SecurityConfig {
 
         @Inject
         @Lazy
-        private OwnerBasedPermissionEvaluator ownerBasedPermissionEvaluator;
+        private CloudbreakEndpointBasedPermissionEvaluator cloudbreakEndpointBasedPermissionEvaluator;
 
         @Override
         protected MethodSecurityExpressionHandler createExpressionHandler() {
             OAuth2MethodSecurityExpressionHandler expressionHandler = new OAuth2MethodSecurityExpressionHandler();
-            expressionHandler.setPermissionEvaluator(ownerBasedPermissionEvaluator);
+            expressionHandler.setPermissionEvaluator(cloudbreakEndpointBasedPermissionEvaluator);
             return expressionHandler;
         }
     }
