@@ -473,12 +473,17 @@ public class StackService {
     }
 
     public void delete(Long id, Boolean forced, Boolean deleteDependencies, User user) {
-        stackRepository.findById(id).ifPresent(stack -> delete(stack.getName(), stack.getOrganization().getId(), forced, deleteDependencies, user));
+        stackRepository.findById(id).map(stack -> {
+            delete(stack.getName(), stack.getOrganization().getId(), forced, deleteDependencies, user);
+            return stack;
+        }).orElseThrow(notFound("Stack", id));
     }
 
     public void delete(String name, Long organizationId, Boolean forced, Boolean deleteDependencies, User user) {
-        Stack stack = stackRepository.findByNameAndOrganizationId(name, organizationId);
-        delete(stack, forced, deleteDependencies, user);
+        Optional.ofNullable(stackRepository.findByNameAndOrganizationId(name, organizationId)).map(stack -> {
+            delete(stack, forced, deleteDependencies, user);
+            return stack;
+        }).orElseThrow(notFound("Stack", name));
     }
 
     public void removeInstance(Long stackId, Long organizationId, String instanceId, User user) {
