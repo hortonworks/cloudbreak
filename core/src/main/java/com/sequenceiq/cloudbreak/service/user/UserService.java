@@ -8,6 +8,8 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
@@ -36,6 +38,7 @@ public class UserService {
     @Inject
     private TransactionService transactionService;
 
+    @Cacheable("userCache")
     public User getOrCreate(IdentityUser identityUser) {
         if (identityUser == null) {
             throw new NullIdentityUserException();
@@ -66,6 +69,10 @@ public class UserService {
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }
+    }
+
+    @CacheEvict("userCache")
+    public void evictUser(IdentityUser identityUser) {
     }
 
     public Optional<User> getById(Long id) {

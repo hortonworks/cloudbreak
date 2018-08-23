@@ -22,7 +22,7 @@ public class CachedUserDetailsService {
     @Inject
     private UserDetailsService cachedUserDetailsService;
 
-    @Cacheable(cacheNames = "userCache", key = "#username")
+    @Cacheable(cacheNames = "identityUserCache", key = "#username")
     public PeriscopeUser getDetails(String username, UserFilterField filterField) {
         IdentityUser identityUser = cachedUserDetailsService.getDetails(username, filterField, clientSecret);
         return new PeriscopeUser(identityUser.getUserId(), identityUser.getUsername(), identityUser.getAccount());

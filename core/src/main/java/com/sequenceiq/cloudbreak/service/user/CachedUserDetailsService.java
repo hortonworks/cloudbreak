@@ -29,7 +29,7 @@ public class CachedUserDetailsService {
     @Inject
     private UserService userService;
 
-    @Cacheable(cacheNames = "userCache", key = "#username")
+    @Cacheable(cacheNames = "identityUserCache", key = "#username")
     public IdentityUser getDetails(String username, UserFilterField filterField) {
         IdentityUser identityUser = cachedUserDetailsService.getDetails(username, filterField, clientSecret);
         //ensure that the user is created into our database
@@ -37,7 +37,7 @@ public class CachedUserDetailsService {
         return identityUser;
     }
 
-    @CacheEvict(value = "userCache", key = "#username")
+    @CacheEvict(value = "identityUserCache", key = "#username")
     public void evictUserDetails(String updatedUserId, String username) {
         LOGGER.info("Remove userid: {} / username: {} from user cache", updatedUserId, username);
     }
