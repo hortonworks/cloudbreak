@@ -45,7 +45,10 @@ public class CloudbreakEndpointBasedPermissionEvaluator implements PermissionEva
         Collection<?> targets = target instanceof Collection ? (Collection<?>) target : Collections.singleton(target);
         return targets.stream().allMatch(t -> {
             try {
-                String owner = getUserId(t);
+                String owner = getOwner(t);
+                if (owner == null) {
+                    return true;
+                }
                 Long stackId = getStackIdFromTarget(t);
                 if (stackId == null) {
                     PeriscopeUser user = cachedUserDetailsService.getDetails((String) authentication.getPrincipal(), UserFilterField.USERNAME);
@@ -64,29 +67,26 @@ public class CloudbreakEndpointBasedPermissionEvaluator implements PermissionEva
         return false;
     }
 
-    private String getUserId(Object targetDomainObject) throws IllegalAccessException {
+    private String getOwner(Object targetDomainObject) throws IllegalAccessException {
         Field clusterField = ReflectionUtils.findField(targetDomainObject.getClass(), "cluster");
         if (clusterField != null) {
             clusterField.setAccessible(true);
-            Cluster cluster = (Cluster) clusterField.get(targetDomainObject);
-            return getUserId(cluster);
-        } else {
-            Field userIdField = ReflectionUtils.findField(targetDomainObject.getClass(), "userId");
-            if (userIdField != null) {
-                userIdField.setAccessible(true);
-                return (String) userIdField.get(targetDomainObject);
+            return getOwner(clusterField.get(targetDomainObject));
+        }
+        Field userIdField = ReflectionUtils.findField(targetDomainObject.getClass(), "userId");
+        if (userIdField != null) {
+            userIdField.setAccessible(true);
+            return userIdField.get(targetDomainObject).toString();
+        }
+        Field userField = ReflectionUtils.findField(targetDomainObject.getClass(), "user");
+        if (userField != null) {
+            userField.setAccessible(true);
+            if (userField.getType().isAssignableFrom(PeriscopeUser.class)) {
+                return ((PeriscopeUser) userField.get(targetDomainObject)).getId();
             }
-            return getUserIdFromTarget(targetDomainObject);
+            return userField.get(targetDomainObject).toString();
         }
-    }
-
-    private String getUserIdFromTarget(Object targetDomainObject) throws IllegalAccessException {
-        Field ownerField = ReflectionUtils.findField(targetDomainObject.getClass(), "user");
-        ownerField.setAccessible(true);
-        if (ownerField.getType().isAssignableFrom(PeriscopeUser.class)) {
-            return ((PeriscopeUser) ownerField.get(targetDomainObject)).getId();
-        }
-        return ownerField.get(targetDomainObject).toString();
+        return null;
     }
 
     private Long getStackIdFromTarget(Object targetDomainObject) {
