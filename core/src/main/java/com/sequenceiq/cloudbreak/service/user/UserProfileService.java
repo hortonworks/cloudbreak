@@ -93,7 +93,7 @@ public class UserProfileService {
     }
 
     public void put(UserProfileRequest request, IdentityUser identityUser, User user, Organization organization) {
-        UserProfile userProfile = getOrCreate(identityUser.getAccount(), user.getUserId(), identityUser.getUsername(), user);
+        UserProfile userProfile = getOrCreate(identityUser.getAccount(), identityUser.getUserId(), identityUser.getUsername(), user);
         if (request.getCredentialId() != null) {
             Credential credential = credentialService.get(request.getCredentialId(), organization);
             userProfile.setCredential(credential);
