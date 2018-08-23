@@ -198,6 +198,8 @@ public class StackCollectorServiceModulTest extends StackCollectorContext {
         List<RejectedThread> allRejectedCluster = rejectedThreadService.getAllRejectedCluster();
 
         Assert.assertTrue(allRejectedCluster.isEmpty());
+
+        waitForThreadPool();
     }
 
     private Cluster cluster(long stackId) {
@@ -217,6 +219,11 @@ public class StackCollectorServiceModulTest extends StackCollectorContext {
     }
 
     private void waitForThreadPool() {
-        while (executorService.getActiveCount() != 0) ;
+        while (executorService.getActiveCount() != 0) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException ignore) {
+            }
+        }
     }
 }
