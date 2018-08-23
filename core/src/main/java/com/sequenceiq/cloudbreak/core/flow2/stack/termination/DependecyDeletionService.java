@@ -57,7 +57,7 @@ public class DependecyDeletionService {
     private HostGroupService hostGroupService;
 
     public void deleteDependencies(StackView stackView) {
-        Stack stack = stackService.getByIdWithListsWithoutAuthorization(stackView.getId());
+        Stack stack = stackService.getByIdWithListsInTransaction(stackView.getId());
         deleteDependencies(stack);
     }
 

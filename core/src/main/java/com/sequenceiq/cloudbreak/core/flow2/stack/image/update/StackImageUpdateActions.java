@@ -169,7 +169,7 @@ public class StackImageUpdateActions {
                     Image originalImage = (Image) variables.get(AbstractStackImageUpdateAction.ORIGINAL_IMAGE);
                     LOGGER.info("Reset image to the original");
                     try {
-                        Stack stack = stackService.getByIdWithoutAuth(context.getStackView().getId());
+                        Stack stack = stackService.getByIdWithTransaction(context.getStackView().getId());
                         Component component = new Component(ComponentType.IMAGE, ComponentType.IMAGE.name(), new Json(originalImage), stack);
                         componentConfigProvider.replaceImageComponentWithNew(component);
                         LOGGER.info("Image restored");

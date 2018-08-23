@@ -128,7 +128,7 @@ public class StackToBlueprintPreparationObjectConverter extends AbstractConversi
     private Stack getDataLakeStack(Stack source) {
         Stack dataLakeStack = null;
         if (source.getDatalakeId() != null) {
-            dataLakeStack = stackService.getByIdWithoutAuth(source.getDatalakeId());
+            dataLakeStack = stackService.getByIdWithTransaction(source.getDatalakeId());
         }
         return dataLakeStack;
     }

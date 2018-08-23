@@ -84,7 +84,7 @@ public class ClusterContainerRunner {
     public Map<String, List<Container>> addClusterContainers(Long stackId, String hostGroupName, Integer scalingAdjustment)
             throws CloudbreakException {
         try {
-            Stack stack = stackService.getByIdWithListsWithoutAuthorization(stackId);
+            Stack stack = stackService.getByIdWithListsInTransaction(stackId);
             String cloudPlatform = StringUtils.isNotEmpty(stack.cloudPlatform()) ? stack.cloudPlatform() : NONE;
             return addClusterContainers(stack, cloudPlatform, hostGroupName, scalingAdjustment);
         } catch (CloudbreakOrchestratorCancelledException e) {

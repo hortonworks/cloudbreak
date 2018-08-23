@@ -62,8 +62,8 @@ import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
+import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.FlowStructuredEventHandler;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredEventClient;
@@ -288,27 +288,17 @@ public class OfflineStateGenerator {
         }
 
         @Override
-        public Stack findOneWithListsWithoutAuthorization(Long id) {
-            return new Stack();
-        }
-
-        @Override
         public Stack findOneWithLists(Long id) {
             return null;
         }
 
         @Override
-        public Optional<Stack> findByIdWithoutAuth(Long id) {
-            return Optional.empty();
-        }
-
-        @Override
-        public Set<Stack> findEphemeralClustersWithoutAuth(Long id) {
+        public Set<Stack> findEphemeralClusters(Long id) {
             return null;
         }
 
         @Override
-        public List<Stack> findAllStackForTemplateWithoutAuth(Long id) {
+        public List<Stack> findAllStackForTemplate(Long id) {
             return null;
         }
 
@@ -318,7 +308,7 @@ public class OfflineStateGenerator {
         }
 
         @Override
-        public Stack findStackForClusterWithoutAuth(Long id) {
+        public Stack findStackForCluster(Long id) {
             return null;
         }
 
@@ -328,12 +318,12 @@ public class OfflineStateGenerator {
         }
 
         @Override
-        public List<Stack> findAllAliveWithoutAuth() {
+        public List<Stack> findAllAlive() {
             return null;
         }
 
         @Override
-        public List<Stack> findAllAliveAndProvisionedWithoutAuth() {
+        public List<Stack> findAllAliveAndProvisioned() {
             return null;
         }
 
@@ -343,12 +333,12 @@ public class OfflineStateGenerator {
         }
 
         @Override
-        public List<Stack> findByStatusesWithoutAuth(List<Status> statuses) {
+        public List<Stack> findByStatuses(List<Status> statuses) {
             return null;
         }
 
         @Override
-        public Set<Stack> findAliveOnesWithoutAuthorization() {
+        public Set<Stack> findAliveOnes() {
             return null;
         }
 

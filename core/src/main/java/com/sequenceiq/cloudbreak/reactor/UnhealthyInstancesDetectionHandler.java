@@ -50,7 +50,7 @@ public class UnhealthyInstancesDetectionHandler implements ReactorEventHandler<U
         UnhealthyInstancesDetectionResult result;
 
         Long stackId = request.getStackId();
-        Stack stack = stackService.getByIdWithoutAuth(stackId);
+        Stack stack = stackService.getByIdWithTransaction(stackId);
         try {
             Set<InstanceMetaData> candidateUnhealthyInstances = unhealthyInstanceSelector.selectCandidateUnhealthyInstances(stack.getId());
             if (candidateUnhealthyInstances.isEmpty()) {

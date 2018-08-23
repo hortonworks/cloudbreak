@@ -298,7 +298,7 @@ public class ClusterService {
     }
 
     public Cluster retrieveClusterByStackIdWithoutAuth(Long stackId) {
-        return clusterRepository.findOneByStackIdWithoutAuth(stackId);
+        return clusterRepository.findOneByStackId(stackId);
     }
 
     public <R extends ClusterResponse> R retrieveClusterForCurrentUser(Long stackId, Class<R> clazz) {
@@ -376,7 +376,7 @@ public class ClusterService {
     }
 
     public void updateStatus(Long stackId, StatusRequest statusRequest) {
-        Stack stack = stackService.getByIdWithListsWithoutAuthorization(stackId);
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         updateStatus(stack, statusRequest);
     }
 
@@ -419,7 +419,7 @@ public class ClusterService {
     public void failureReport(Long stackId, List<String> failedNodes) {
         try {
             transactionService.required(() -> {
-                Stack stack = stackService.getByIdWithoutAuth(stackId);
+                Stack stack = stackService.getByIdWithTransaction(stackId);
                 Cluster cluster = stack.getCluster();
                 Map<String, List<String>> autoRecoveryNodesMap = new HashMap<>();
                 Map<String, HostMetadata> autoRecoveryHostMetadata = new HashMap<>();
@@ -698,7 +698,7 @@ public class ClusterService {
             String kerberosPassword, String kerberosPrincipal) throws TransactionExecutionException {
         return transactionService.required(() -> {
             checkBlueprintIdAndHostGroups(blueprintId, hostGroups);
-            Stack stackWithLists = stackService.getByIdWithListsWithoutAuthorization(stack.getId());
+            Stack stackWithLists = stackService.getByIdWithListsInTransaction(stack.getId());
             Cluster cluster = getCluster(stackWithLists);
             if (cluster != null && stackWithLists.getCluster().isSecure()) {
                 initKerberos(kerberosPassword, kerberosPrincipal, cluster);
@@ -776,7 +776,7 @@ public class ClusterService {
 
     public void upgrade(Long stackId, AmbariRepo ambariRepoUpgrade) throws TransactionExecutionException {
         if (ambariRepoUpgrade != null) {
-            Stack stack = stackService.getByIdWithListsWithoutAuthorization(stackId);
+            Stack stack = stackService.getByIdWithListsInTransaction(stackId);
             Cluster cluster = getCluster(stack);
             if (cluster == null) {
                 throw new BadRequestException(String.format("Cluster does not exist on stack with '%s' id.", stackId));
@@ -971,7 +971,7 @@ public class ClusterService {
     }
 
     private AmbariClient getAmbariClient(Long stackId) {
-        Stack stack = stackService.getByIdWithListsWithoutAuthorization(stackId);
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         return getAmbariClient(stack);
     }
 
@@ -989,7 +989,7 @@ public class ClusterService {
     }
 
     public List<Cluster> findByStatusesWithoutAuth(Collection<Status> statuses) {
-        return clusterRepository.findByStatusesWithoutAuth(statuses);
+        return clusterRepository.findByStatuses(statuses);
     }
 
     public Cluster findOneByStackId(Long stackId) {

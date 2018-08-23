@@ -34,7 +34,7 @@ public class AccountPreferencesValidator {
     }
 
     public void validate(Long stackId, Integer scalingAdjustment) throws AccountPreferencesValidationException {
-        Stack stack = stackService.getByIdWithListsWithoutAuthorization(stackId);
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         Integer newNodeCount = stack.getFullNodeCount() + scalingAdjustment;
         validate(stack.getInstanceGroups(), newNodeCount, stack.getAccount(), stack.getOwner());
     }

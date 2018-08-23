@@ -58,7 +58,7 @@ public class AmbariClusterUpgradeService {
     private StackUtil stackUtil;
 
     public void upgradeCluster(Long stackId) throws CloudbreakOrchestratorException {
-        Stack stack = stackService.getByIdWithListsWithoutAuthorization(stackId);
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         Cluster cluster = stack.getCluster();
         try {
             OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(stack.getOrchestrator().getType());
