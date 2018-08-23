@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.controller;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -11,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v1.BlueprintEndpoint;
@@ -122,22 +122,9 @@ public class BlueprintController extends NotificationController implements Bluep
     private Set<BlueprintResponse> listForUsersDefaultOrganization() {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
         Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        return getBlueprintResponses(user, blueprintService.getAllAvailableInOrganization(organization.getId()), organization);
-    }
-
-    private Set<BlueprintResponse> getBlueprintResponses(User user, Set<Blueprint> blueprints, Organization organization) {
-        if (blueprintLoaderService.addingDefaultBlueprintsAreNecessaryForTheUser(blueprints)) {
-            LOGGER.info("Blueprints should modify based on the defaults for the '{}' user.", user.getUserId());
-            blueprints = blueprintLoaderService.loadBlueprintsForTheSpecifiedUser(user, blueprints, organization);
-            LOGGER.info("Blueprints modification finished based on the defaults for '{}' user.", user.getUserId());
-        }
-        return toJsonList(blueprints);
-    }
-
-    private Set<BlueprintResponse> toJsonList(Set<Blueprint> blueprints) {
-        return (Set<BlueprintResponse>) conversionService.convert(blueprints,
-                TypeDescriptor.forObject(blueprints),
-                TypeDescriptor.collection(Set.class, TypeDescriptor.valueOf(BlueprintResponse.class)));
+        return blueprintService.getAllAvailableInOrganization(organization).stream()
+                .map(blueprint -> conversionService.convert(blueprint, BlueprintResponse.class))
+                .collect(Collectors.toSet());
     }
 
     private void deleteInDefaultOrganization(String name) {

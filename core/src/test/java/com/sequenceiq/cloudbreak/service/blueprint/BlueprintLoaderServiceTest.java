@@ -1,8 +1,6 @@
 package com.sequenceiq.cloudbreak.service.blueprint;
 
 import static com.sequenceiq.cloudbreak.api.model.ResourceStatus.DEFAULT;
-import static org.mockito.Matchers.anySet;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -16,7 +14,6 @@ import java.util.Set;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -25,7 +22,6 @@ import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.init.blueprint.BlueprintLoaderService;
 import com.sequenceiq.cloudbreak.init.blueprint.DefaultBlueprintCache;
 
@@ -58,86 +54,90 @@ public class BlueprintLoaderServiceTest {
     private DefaultBlueprintCache blueprintCache;
 
     @Mock
-    private BlueprintService blueprintService;
+    private DefaultBlueprintCache defaultBlueprintCache;
 
     @Mock
     private Organization organization;
 
-    @Mock
-    private User user;
-
     @Test
     public void testBlueprintLoaderWhenTheUserWhenUserHaveAllTheDefaultBlueprintThenItShouldReturnWithFalse() {
-        generateCacheData(3);
         Set<Blueprint> blueprints = generateDatabaseData(3);
+        Map<String, Blueprint> defaultBlueprints = generateCacheData(3);
+        when(defaultBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
+
         boolean addingDefaultBlueprintsAreNecessaryForTheUser = underTest.addingDefaultBlueprintsAreNecessaryForTheUser(blueprints);
+
         Assert.assertFalse(addingDefaultBlueprintsAreNecessaryForTheUser);
     }
 
     @Test
     public void testBlueprintLoaderWhenTheUserIsANewOneInTheNewOrganizationThenItShouldReturnWithTrue() {
-        generateCacheData(2);
         Set<Blueprint> blueprints = generateDatabaseData(0);
+        Map<String, Blueprint> defaultBlueprints = generateCacheData(2);
+        when(defaultBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
+
         boolean addingDefaultBlueprintsAreNecessaryForTheUser = underTest.addingDefaultBlueprintsAreNecessaryForTheUser(blueprints);
+
         Assert.assertTrue(addingDefaultBlueprintsAreNecessaryForTheUser);
     }
 
     @Test
     public void testBlueprintLoaderWhenTheUserIsANewOneInTheExistingOrganizationThenItShouldReturnWithTrue() {
-        generateCacheData(2);
         Set<Blueprint> blueprints = generateDatabaseData(1);
+        Map<String, Blueprint> defaultBlueprints = generateCacheData(2);
+        when(defaultBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
+
         boolean addingDefaultBlueprintsAreNecessaryForTheUser = underTest.addingDefaultBlueprintsAreNecessaryForTheUser(blueprints);
+
         Assert.assertTrue(addingDefaultBlueprintsAreNecessaryForTheUser);
     }
 
     @Test
     public void testBlueprintLoaderWhenTheUserHasAllDefaultBlueprintButOneOfItWasChangeThenItShouldReturnWithTrue() {
-        generateCacheData(3, 1);
         Set<Blueprint> blueprints = generateDatabaseData(3);
+        Map<String, Blueprint> defaultBlueprints = generateCacheData(3, 1);
+        when(defaultBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
+
         boolean addingDefaultBlueprintsAreNecessaryForTheUser = underTest.addingDefaultBlueprintsAreNecessaryForTheUser(blueprints);
+
         Assert.assertTrue(addingDefaultBlueprintsAreNecessaryForTheUser);
     }
 
     @Test
     public void testLoadBlueprintsForTheSpecifiedUserWhenOneNewDefaultExistThenRepositoryShouldUpdateOnlyOneBlueprint() {
-        Map<String, Blueprint> stringBlueprintMap = generateCacheData(3, 1);
         Set<Blueprint> blueprints = generateDatabaseData(3);
-        ArgumentCaptor<Set<Blueprint>> argumentCaptor = ArgumentCaptor.forClass(Set.class);
+        Map<String, Blueprint> defaultBlueprints = generateCacheData(3, 1);
+        when(defaultBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
 
-        Blueprint blueprint = stringBlueprintMap.get("multi-node-hdfs-yarn3");
-        Set<Blueprint> resultList = new HashSet<>();
-        resultList.add(blueprint);
+        Collection<Blueprint> resultSet = underTest.loadBlueprintsForTheOrganization(blueprints, organization, this::mockSave);
 
-        when(blueprintService.saveAll(resultList)).thenReturn(resultList);
-
-        Collection<Blueprint> resultSet = underTest.loadBlueprintsForTheSpecifiedUser(user, blueprints, organization);
-        verify(blueprintService).saveAll(argumentCaptor.capture());
-
-        Assert.assertEquals(1L, argumentCaptor.getAllValues().size());
         Assert.assertEquals(4L, resultSet.size());
     }
 
     @Test
     public void testLoadBlueprintsForTheSpecifiedUserIsNewOneAndNoDefaultBlueprintAddedThenAllDefaultShouldBeAdd() {
-        Map<String, Blueprint> stringBlueprintMap = generateCacheData(3);
         Set<Blueprint> blueprints = generateDatabaseData(0);
-        ArgumentCaptor<Set<Blueprint>> argumentCaptor = ArgumentCaptor.forClass(Set.class);
-        when(blueprintService.saveAll(anySet())).thenReturn(stringBlueprintMap.values());
+        Map<String, Blueprint> defaultBlueprints = generateCacheData(3);
+        when(defaultBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
 
-        Collection<Blueprint> resultSet = underTest.loadBlueprintsForTheSpecifiedUser(user, blueprints, organization);
-        verify(blueprintService).saveAll(argumentCaptor.capture());
+        Collection<Blueprint> resultSet = underTest.loadBlueprintsForTheOrganization(blueprints, organization, this::mockSave);
 
-        Assert.assertEquals(3L, argumentCaptor.getValue().size());
         Assert.assertEquals(3L, resultSet.size());
     }
 
     @Test
     public void testLoadBlueprintsForTheSpecifiedUserWhenEveryDefaultExistThenRepositoryShouldNotUpdateAnything() {
-        generateCacheData(3);
         Set<Blueprint> blueprints = generateDatabaseData(3);
+        Map<String, Blueprint> defaultBlueprints = generateCacheData(3);
+        when(defaultBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
 
-        Collection<Blueprint> resultSet = underTest.loadBlueprintsForTheSpecifiedUser(user, blueprints, organization);
+        Collection<Blueprint> resultSet = underTest.loadBlueprintsForTheOrganization(blueprints, organization, this::mockSave);
+
         Assert.assertEquals(3L, resultSet.size());
+    }
+
+    private Iterable<Blueprint> mockSave(Iterable<Blueprint> blueprints, Organization organization) {
+        return blueprints;
     }
 
     private Map<String, Blueprint> generateCacheData(int cacheSize) {
@@ -150,7 +150,6 @@ public class BlueprintLoaderServiceTest {
             Blueprint blueprint = createBlueprint(DEFAULT, i);
             cacheData.put(blueprint.getName(), blueprint);
         }
-        when(blueprintCache.defaultBlueprints()).thenReturn(cacheData);
         return cacheData;
     }
 
