@@ -49,7 +49,7 @@ public class DefaultBlueprintCache {
         List<String> blueprints = blueprints();
         for (String blueprintText : blueprints) {
             try {
-                String[] split = blueprintText.split("=");
+                String[] split = blueprintText.trim().split("=");
                 if (blueprintUtils.isBlueprintNamePreConfigured(blueprintText, split)) {
                     LOGGER.info("Load default validation '{}'.", blueprintText);
                     BlueprintRequest blueprintJson = new BlueprintRequest();
