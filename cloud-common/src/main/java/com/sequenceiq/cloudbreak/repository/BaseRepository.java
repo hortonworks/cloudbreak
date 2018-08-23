@@ -7,6 +7,8 @@ import static com.sequenceiq.cloudbreak.authorization.OrganizationPermissions.Ac
 import java.io.Serializable;
 import java.util.Optional;
 
+import javax.transaction.Transactional;
+
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.NoRepositoryBean;
 
@@ -18,6 +20,7 @@ import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByTarget;
 import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByTargetId;
 
 @NoRepositoryBean
+@Transactional(Transactional.TxType.REQUIRED)
 public interface BaseRepository<T, ID extends Serializable> extends CrudRepository<T, ID> {
 
     @Override

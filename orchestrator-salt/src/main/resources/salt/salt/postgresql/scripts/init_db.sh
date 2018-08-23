@@ -12,6 +12,7 @@ echo "Create {{ service }} database"
 echo "CREATE DATABASE {{ values['database'] }};" | psql -U postgres -v "ON_ERROR_STOP=1"
 echo "CREATE USER {{ values['user'] }} WITH PASSWORD '{{ values['password'] }}';" | psql -U postgres -v "ON_ERROR_STOP=1"
 echo "GRANT ALL PRIVILEGES ON DATABASE {{ values['user'] }} TO {{ values['database'] }};" | psql -U postgres -v "ON_ERROR_STOP=1"
+echo "ALTER SCHEMA public OWNER TO {{ values['user'] }};" | psql -U postgres -d {{ values['database'] }} -v "ON_ERROR_STOP=1"
 
 echo "Add access to pg_hba.conf"
 echo "host {{ values['database'] }} {{ values['user'] }} 0.0.0.0/0 md5" >> $CONFIG_DIR/pg_hba.conf

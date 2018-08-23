@@ -46,7 +46,7 @@ public class StackImageFilterService {
     }
 
     public Images getApplicableImages(Long organizationId, String imageCatalogName, String stackName) throws CloudbreakImageCatalogException {
-        Stack stack = stackService.getByNameInOrg(stackName, organizationId);
+        Stack stack = stackService.getByNameInOrgWithLists(stackName, organizationId);
         StatedImages statedImages = imageCatalogService.getImages(organizationId, imageCatalogName, stack.cloudPlatform());
         return getApplicableImages(imageCatalogName, statedImages, stack);
     }

@@ -41,16 +41,16 @@ public class UserService {
             throw new NullIdentityUserException();
         }
         try {
-            return transactionService.requiresNew(() -> {
-                User user = userRepository.findByUserId(identityUser.getUsername());
-                if (user == null) {
-                    user = new User();
-                    user.setUserId(identityUser.getUsername());
+            User user = userRepository.findByUserId(identityUser.getUsername());
+            if (user == null) {
+                user = transactionService.requiresNew(() -> {
+                    User newUser = new User();
+                    newUser.setUserId(identityUser.getUsername());
 
                     Tenant tenant = tenantRepository.findByName("DEFAULT");
-                    user.setTenant(tenant);
-                    user.setTenantPermissionSet(Collections.emptySet());
-                    user = userRepository.save(user);
+                    newUser.setTenant(tenant);
+                    newUser.setTenantPermissionSet(Collections.emptySet());
+                    newUser = userRepository.save(newUser);
 
                     //create organization
                     Organization organization = new Organization();
@@ -58,10 +58,11 @@ public class UserService {
                     organization.setName(identityUser.getUsername());
                     organization.setStatus(ACTIVE);
                     organization.setDescription("Default organization for the user.");
-                    organizationService.create(user, organization);
-                }
-                return user;
-            });
+                    organizationService.create(newUser, organization);
+                    return newUser;
+                });
+            }
+            return user;
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }
