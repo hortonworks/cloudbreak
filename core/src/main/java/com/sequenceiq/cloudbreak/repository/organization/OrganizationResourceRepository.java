@@ -5,6 +5,8 @@ import static com.sequenceiq.cloudbreak.authorization.OrganizationPermissions.Ac
 import java.io.Serializable;
 import java.util.Set;
 
+import javax.transaction.Transactional;
+
 import org.springframework.data.repository.NoRepositoryBean;
 
 import com.sequenceiq.cloudbreak.aspect.DisableHasPermission;
@@ -15,6 +17,7 @@ import com.sequenceiq.cloudbreak.domain.organization.OrganizationAwareResource;
 import com.sequenceiq.cloudbreak.repository.BaseRepository;
 
 @NoRepositoryBean
+@Transactional(Transactional.TxType.REQUIRED)
 @DisableHasPermission
 public interface OrganizationResourceRepository<T extends OrganizationAwareResource, ID extends Serializable> extends BaseRepository<T, ID> {
 
