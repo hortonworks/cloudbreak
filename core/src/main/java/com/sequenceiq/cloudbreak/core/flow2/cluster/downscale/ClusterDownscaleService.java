@@ -61,7 +61,7 @@ public class ClusterDownscaleService {
                     hostGroupName, scalingAdjustment, hostGroupName);
         } else if (!CollectionUtils.isEmpty(privateIds)) {
             LOGGER.info("Decommissioning {} hosts from host group '{}'", privateIds, hostGroupName);
-            Stack stack = stackService.getByIdWithListsWithoutAuthorization(stackId);
+            Stack stack = stackService.getByIdWithListsInTransaction(stackId);
             List<String> decomissionedHostNames = stackService.getHostNamesForPrivateIds(stack.getInstanceMetaDataAsList(), privateIds);
             Msg message = details.isForced() ? Msg.AMBARI_CLUSTER_FORCE_REMOVING_NODE_FROM_HOSTGROUP : Msg.AMBARI_CLUSTER_REMOVING_NODE_FROM_HOSTGROUP;
             flowMessageService.fireInstanceGroupEventAndLog(stackId, message, Status.UPDATE_IN_PROGRESS.name(),

@@ -36,18 +36,14 @@ public interface ClusterRepository extends OrganizationResourceRepository<Cluste
     @CheckPermissionsByReturnValue
     Cluster findOneByStackId(long stackId);
 
-    @DisableCheckPermissions
-    @Query("SELECT c FROM Cluster c WHERE c.stack.id= :stackId")
-    Cluster findOneByStackIdWithoutAuth(@Param("stackId") long stackId);
-
     @CheckPermissionsByReturnValue
     @Query("SELECT c FROM Cluster c LEFT JOIN FETCH c.hostGroups LEFT JOIN FETCH c.containers LEFT JOIN FETCH c.components "
             + "LEFT JOIN FETCH c.rdsConfigs WHERE c.id= :id")
     Cluster findOneWithLists(@Param("id") Long id);
 
-    @DisableCheckPermissions
+    @CheckPermissionsByReturnValue
     @Query("SELECT c FROM Cluster c WHERE c.status IN :statuses")
-    List<Cluster> findByStatusesWithoutAuth(@Param("statuses") Collection<Status> statuses);
+    List<Cluster> findByStatuses(@Param("statuses") Collection<Status> statuses);
 
     @CheckPermissionsByReturnValue
     @Query("SELECT c FROM Cluster c inner join c.hostGroups hg WHERE hg.constraint.constraintTemplate.id = :id")

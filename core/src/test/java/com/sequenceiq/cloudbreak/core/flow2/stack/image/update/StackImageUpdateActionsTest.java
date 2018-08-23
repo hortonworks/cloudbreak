@@ -184,7 +184,7 @@ public class StackImageUpdateActionsTest {
         stack.setId(1L);
         stack.setRegion("region");
         stack.setAvailabilityZone("az");
-        when(stackService.getByIdWithListsWithoutAuthorization(anyLong())).thenReturn(stack);
+        when(stackService.getByIdWithListsInTransaction(anyLong())).thenReturn(stack);
         when(stackService.getById(anyLong())).thenReturn(stack);
 
         variables.clear();

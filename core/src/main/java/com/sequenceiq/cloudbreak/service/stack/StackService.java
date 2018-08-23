@@ -252,14 +252,14 @@ public class StackService {
 
     @PreAuthorize("#oauth2.hasScope('cloudbreak.autoscale')")
     public Stack getForAutoscale(Long id) {
-        return getByIdWithoutAuth(id);
+        return getByIdWithTransaction(id);
     }
 
     @PreAuthorize("#oauth2.hasScope('cloudbreak.autoscale')")
     public Set<AutoscaleStackResponse> getAllForAutoscale() {
         try {
             return transactionService.required(() -> {
-                Set<Stack> aliveOnes = stackRepository.findAliveOnesWithoutAuthorization();
+                Set<Stack> aliveOnes = stackRepository.findAliveOnes();
                 return convertStacksForAutoscale(aliveOnes);
             });
         } catch (TransactionExecutionException e) {
@@ -268,7 +268,7 @@ public class StackService {
     }
 
     public Set<Stack> findClustersConnectedToDatalake(Long stackId) {
-        return stackRepository.findEphemeralClustersWithoutAuth(stackId);
+        return stackRepository.findEphemeralClusters(stackId);
     }
 
     public Stack getByIdWithLists(Long id) {
@@ -279,26 +279,26 @@ public class StackService {
         return retStack;
     }
 
-    public Stack getByIdWithListsWithoutAuthorization(Long id) {
-        Stack retStack;
+    public Stack getByIdWithListsInTransaction(Long id) {
+        Stack stack;
         try {
-            retStack = transactionService.required(() -> stackRepository.findOneWithListsWithoutAuthorization(id));
+            stack = transactionService.required(() -> stackRepository.findOneWithLists(id));
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }
-        if (retStack == null) {
+        if (stack == null) {
             throw new NotFoundException(String.format(STACK_NOT_FOUND_BY_ID_EXCEPTION_FORMAT_TEXT, id));
         }
-        return retStack;
+        return stack;
     }
 
     public Stack getById(Long id) {
         return stackRepository.findById(id).orElseThrow(notFound("Stack", id));
     }
 
-    public Stack getByIdWithoutAuth(Long id) {
+    public Stack getByIdWithTransaction(Long id) {
         try {
-            return transactionService.required(() -> stackRepository.findByIdWithoutAuth(id).orElseThrow(notFound("Stack", id)));
+            return transactionService.required(() -> stackRepository.findById(id).orElseThrow(notFound("Stack", id)));
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }
@@ -306,7 +306,7 @@ public class StackService {
 
     public StackView getViewByIdWithoutAuth(Long id) {
         try {
-            return transactionService.required(() -> stackViewRepository.findByIdWithoutAuthorization(id).orElseThrow(notFound("Stack", id)));
+            return transactionService.required(() -> stackViewRepository.findById(id).orElseThrow(notFound("Stack", id)));
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }
@@ -753,11 +753,11 @@ public class StackService {
     }
 
     public List<Stack> getAllAlive() {
-        return stackRepository.findAllAliveWithoutAuth();
+        return stackRepository.findAllAlive();
     }
 
     public List<Stack> getByStatuses(List<Status> statuses) {
-        return stackRepository.findByStatusesWithoutAuth(statuses);
+        return stackRepository.findByStatuses(statuses);
     }
 
     public long countByCredential(Credential credential) {
@@ -871,15 +871,15 @@ public class StackService {
     }
 
     public List<Stack> getAllForTemplate(Long id) {
-        return stackRepository.findAllStackForTemplateWithoutAuth(id);
+        return stackRepository.findAllStackForTemplate(id);
     }
 
     public List<Stack> getAllAliveAndProvisioned() {
-        return stackRepository.findAllAliveAndProvisionedWithoutAuth();
+        return stackRepository.findAllAliveAndProvisioned();
     }
 
     public Stack getForCluster(Long id) {
-        return stackRepository.findStackForClusterWithoutAuth(id);
+        return stackRepository.findStackForCluster(id);
     }
 
     public void updateImage(Long stackId, Long organizationId, String imageId, String imageCatalogName, String imageCatalogUrl, User user) {

@@ -36,7 +36,7 @@ public class ClusterStartHandler implements ReactorEventHandler<ClusterStartRequ
         ClusterStartRequest request = event.getData();
         ClusterStartResult result;
         try {
-            Stack stack = stackService.getByIdWithListsWithoutAuthorization(request.getStackId());
+            Stack stack = stackService.getByIdWithListsInTransaction(request.getStackId());
             int requestId = ambariClusterConnector.startCluster(stack);
             result = new ClusterStartResult(request, requestId);
         } catch (Exception e) {

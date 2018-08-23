@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.repository;
 import static com.sequenceiq.cloudbreak.authorization.OrganizationPermissions.Action.READ;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import javax.transaction.Transactional;
@@ -34,7 +33,7 @@ import com.sequenceiq.cloudbreak.service.EntityType;
 @OrganizationResourceType(resource = OrganizationResource.STACK)
 public interface StackRepository extends OrganizationResourceRepository<Stack, Long> {
 
-    @DisableCheckPermissions
+    @CheckPermissionsByReturnValue
     @Query("SELECT s from Stack s LEFT JOIN FETCH s.resources LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
             + "WHERE s.cluster.ambariIp= :ambariIp AND s.stackStatus.status <> 'DELETE_COMPLETED'")
     Stack findByAmbari(@Param("ambariIp") String ambariIp);
@@ -53,64 +52,56 @@ public interface StackRepository extends OrganizationResourceRepository<Stack, L
             + "WHERE s.name= :name AND s.organization.id= :orgId AND s.stackStatus.status <> 'DELETE_COMPLETED'")
     Stack findByNameAndOrganizationIdWithLists(@Param("name") String name, @Param("orgId") Long orgId);
 
-    @DisableCheckPermissions
-    @Query("SELECT c FROM Stack c LEFT JOIN FETCH c.resources LEFT JOIN FETCH c.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData WHERE c.id= :id")
-    Stack findOneWithListsWithoutAuthorization(@Param("id") Long id);
-
     @CheckPermissionsByReturnValue
     @Query("SELECT c FROM Stack c LEFT JOIN FETCH c.resources LEFT JOIN FETCH c.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData WHERE c.id= :id")
     Stack findOneWithLists(@Param("id") Long id);
 
-    @DisableCheckPermissions
-    @Query("SELECT s FROM Stack s WHERE s.id= :id")
-    Optional<Stack> findByIdWithoutAuth(@Param("id") Long id);
-
-    @DisableCheckPermissions
+    @CheckPermissionsByReturnValue
     @Query("SELECT s FROM Stack s "
             + "WHERE s.datalakeId= :id AND s.stackStatus.status <> 'DELETE_COMPLETED' AND s.stackStatus.status <> 'DELETE_IN_PROGRESS'"
             + "AND s.stackStatus.status <> 'REQUESTED'")
-    Set<Stack> findEphemeralClustersWithoutAuth(@Param("id") Long id);
+    Set<Stack> findEphemeralClusters(@Param("id") Long id);
 
-    @DisableCheckPermissions
+    @CheckPermissionsByReturnValue
     @Query("SELECT distinct c FROM Stack c LEFT JOIN FETCH c.instanceGroups ig WHERE ig.template.id= :templateId")
-    List<Stack> findAllStackForTemplateWithoutAuth(@Param("templateId") Long templateId);
+    List<Stack> findAllStackForTemplate(@Param("templateId") Long templateId);
 
     @DisableCheckPermissions
     @Query("SELECT s.id,s.stackStatus.status FROM Stack s WHERE s.id IN (:ids)")
     List<Object[]> findStackStatusesWithoutAuth(@Param("ids") Set<Long> ids);
 
-    @DisableCheckPermissions
+    @CheckPermissionsByReturnValue
     @Query("SELECT c FROM Stack c WHERE c.cluster.id= :clusterId")
-    Stack findStackForClusterWithoutAuth(@Param("clusterId") Long clusterId);
+    Stack findStackForCluster(@Param("clusterId") Long clusterId);
 
     @CheckPermissionsByOrganization(action = READ, organizationIndex = 1)
     @Query("SELECT t FROM Stack t LEFT JOIN FETCH t.resources LEFT JOIN FETCH t.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
             + "WHERE t.organization= :organization and t.name= :name")
     Stack findByNameInOrganizationWithLists(@Param("name") String name, @Param("organization") Organization organization);
 
-    @DisableCheckPermissions
+    @CheckPermissionsByReturnValue
     @Query("SELECT s FROM Stack s WHERE s.stackStatus.status <> 'DELETE_COMPLETED'")
-    List<Stack> findAllAliveWithoutAuth();
+    List<Stack> findAllAlive();
 
-    @DisableCheckPermissions
+    @CheckPermissionsByReturnValue
     @Query("SELECT s FROM Stack s WHERE s.stackStatus.status <> 'DELETE_COMPLETED' AND s.stackStatus.status <> 'REQUESTED' "
             + "AND s.stackStatus.status <> 'CREATE_IN_PROGRESS'")
-    List<Stack> findAllAliveAndProvisionedWithoutAuth();
+    List<Stack> findAllAliveAndProvisioned();
 
     @CheckPermissionsByOrganizationId(action = READ)
     @Query("SELECT s FROM Stack s WHERE s.stackStatus.status <> 'DELETE_COMPLETED' AND s.organization.id= :organizationId")
     Set<Stack> findAllForOrganization(@Param("organizationId") Long organizationId);
 
-    @DisableCheckPermissions
+    @CheckPermissionsByReturnValue
     @Query("SELECT s FROM Stack s WHERE s.stackStatus.status IN :statuses")
-    List<Stack> findByStatusesWithoutAuth(@Param("statuses") List<Status> statuses);
+    List<Stack> findByStatuses(@Param("statuses") List<Status> statuses);
 
-    @DisableCheckPermissions
+    @CheckPermissionsByReturnValue
     @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.cluster LEFT JOIN FETCH s.credential LEFT JOIN FETCH s.network LEFT JOIN FETCH s.orchestrator "
             + "LEFT JOIN FETCH s.stackStatus LEFT JOIN FETCH s.securityConfig LEFT JOIN FETCH s.failurePolicy LEFT JOIN FETCH"
             + " s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData WHERE s.stackStatus.status <> 'DELETE_COMPLETED' "
             + "AND s.stackStatus.status <> 'DELETE_IN_PROGRESS'")
-    Set<Stack> findAliveOnesWithoutAuthorization();
+    Set<Stack> findAliveOnes();
 
     @DisableCheckPermissions
     Long countByFlexSubscription(FlexSubscription flexSubscription);
@@ -124,7 +115,7 @@ public interface StackRepository extends OrganizationResourceRepository<Stack, L
     @DisableCheckPermissions
     Long countByNetwork(Network network);
 
-    @DisableCheckPermissions
+    @CheckPermissionsByReturnValue
     Set<Stack> findByNetwork(Network network);
 
     @DisableCheckPermissions

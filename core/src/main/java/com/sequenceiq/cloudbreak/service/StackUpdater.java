@@ -45,7 +45,7 @@ public class StackUpdater {
     }
 
     private Stack doUpdateStackStatus(Long stackId, DetailedStackStatus detailedStatus, String statusReason) {
-        Stack stack = stackService.getByIdWithoutAuth(stackId);
+        Stack stack = stackService.getByIdWithTransaction(stackId);
         Status status = detailedStatus.getStatus();
         if (!stack.isDeleteCompleted()) {
             stack.setStackStatus(new StackStatus(stack, status, statusReason, detailedStatus));

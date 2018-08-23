@@ -18,13 +18,13 @@ public class AmbariClusterCreationService {
     private AmbariClusterConnector ambariClusterConnector;
 
     public void startAmbari(Long stackId) throws CloudbreakException {
-        Stack stack = stackService.getByIdWithoutAuth(stackId);
+        Stack stack = stackService.getByIdWithTransaction(stackId);
         ambariClusterConnector.waitForServer(stack);
         ambariClusterConnector.changeOriginalAmbariCredentialsAndCreateCloudbreakUser(stack);
     }
 
     public void buildAmbariCluster(Long stackId) {
-        Stack stack = stackService.getByIdWithListsWithoutAuthorization(stackId);
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         ambariClusterConnector.buildCluster(stack);
     }
 }

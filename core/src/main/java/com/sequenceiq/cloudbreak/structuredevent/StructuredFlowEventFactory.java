@@ -65,7 +65,7 @@ public class StructuredFlowEventFactory {
     }
 
     public StructuredFlowEvent createStucturedFlowEvent(Long stackId, FlowDetails flowDetails, Boolean detailed, Exception exception) {
-        Stack stack = stackService.getByIdWithoutAuth(stackId);
+        Stack stack = stackService.getByIdWithTransaction(stackId);
         UserProfile userProfile = userProfileService.getOrCreate(stack.getAccount(), stack.getOwner(), stack.getCreator());
         OperationDetails operationDetails = new OperationDetails(FLOW, "stacks", stackId, stack.getName(),
                 stack.getCreator().getUserId(), stack.getCreator().getUserName(), cloudbreakNodeConfig.getId(), cbVersion,
@@ -98,7 +98,7 @@ public class StructuredFlowEventFactory {
         String userName = null;
         String stackName = null;
 
-        Stack stack = stackService.getByIdWithoutAuth(stackId);
+        Stack stack = stackService.getByIdWithTransaction(stackId);
         try {
             UserProfile userProfile = userProfileService.getOrCreate(stack.getAccount(), stack.getOwner(), stack.getCreator());
             account = stack.getAccount();
