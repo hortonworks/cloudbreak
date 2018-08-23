@@ -126,4 +126,12 @@ public interface StackRepository extends OrganizationResourceRepository<Stack, L
 
     @DisableCheckPermissions
     Set<Stack> findByNetwork(Network network);
+
+    @DisableCheckPermissions
+    @Query("SELECT COUNT(s) FROM Stack s WHERE s.account = :account AND s.stackStatus.status <> 'DELETE_COMPLETED'")
+    Long countActiveByAccount(@Param("account") String account);
+
+    @DisableCheckPermissions
+    @Query("SELECT COUNT(s) FROM Stack s WHERE s.owner = :owner AND s.stackStatus.status <> 'DELETE_COMPLETED'")
+    Long countActiveByOwner(@Param("owner") String owner);
 }

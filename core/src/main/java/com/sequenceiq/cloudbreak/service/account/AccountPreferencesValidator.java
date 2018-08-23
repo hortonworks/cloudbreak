@@ -11,8 +11,8 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
 import com.sequenceiq.cloudbreak.domain.AccountPreferences;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.CachedUserDetailsService;
 
@@ -43,9 +43,9 @@ public class AccountPreferencesValidator {
             throws AccountPreferencesValidationException {
         AccountPreferences preferences = accountPreferencesService.getByAccount(account);
         validateNumberOfNodesPerCluster(nodeCount, preferences);
-//        validateNumberOfClusters(account, preferences);
+        validateNumberOfClusters(account, preferences);
         validateAllowedInstanceTypes(instanceGroups, preferences);
-//        validateNumberOfClustersPerUser(owner, preferences);
+        validateNumberOfClustersPerUser(owner, preferences);
         validateUserTimeToLive(owner, preferences);
     }
 
@@ -57,16 +57,16 @@ public class AccountPreferencesValidator {
         }
     }
 
-//    private void validateNumberOfClusters(String account, AccountPreferences preferences) throws AccountPreferencesValidationException {
-//        Long maxNumberOfClusters = preferences.getMaxNumberOfClusters();
-//        if (needToValidateField(maxNumberOfClusters)) {
-//            Set<Stack> stacks = stackService.retrieveAccountStacks(account);
-//            if (stacks.size() >= maxNumberOfClusters) {
-//                throw new AccountPreferencesValidationException(
-//                        String.format("No more cluster could be created! The number of clusters exceeded the account's limit(%s)!", maxNumberOfClusters));
-//            }
-//        }
-//    }
+    private void validateNumberOfClusters(String account, AccountPreferences preferences) throws AccountPreferencesValidationException {
+        Long maxNumberOfClusters = preferences.getMaxNumberOfClusters();
+        if (needToValidateField(maxNumberOfClusters)) {
+            long stacks = stackService.countByAccount(account);
+            if (stacks >= maxNumberOfClusters) {
+                throw new AccountPreferencesValidationException(
+                        String.format("No more cluster could be created! The number of clusters exceeded the account's limit(%s)!", maxNumberOfClusters));
+            }
+        }
+    }
 
     private void validateAllowedInstanceTypes(Iterable<InstanceGroup> instanceGroups, AccountPreferences preferences)
             throws AccountPreferencesValidationException {
@@ -82,16 +82,16 @@ public class AccountPreferencesValidator {
         }
     }
 
-//    private void validateNumberOfClustersPerUser(String owner, AccountPreferences preferences) throws AccountPreferencesValidationException {
-//        Long maxClustersPerUser = preferences.getMaxNumberOfClustersPerUser();
-//        if (needToValidateField(maxClustersPerUser)) {
-//            Set<Stack> stacks = stackService.retrieveOwnerStacks(owner);
-//            if (stacks.size() >= maxClustersPerUser) {
-//                throw new AccountPreferencesValidationException(
-//                        String.format("No more cluster could be created! The number of clusters exceeded the user's limit(%s)!", maxClustersPerUser));
-//            }
-//        }
-//    }
+    private void validateNumberOfClustersPerUser(String owner, AccountPreferences preferences) throws AccountPreferencesValidationException {
+        Long maxClustersPerUser = preferences.getMaxNumberOfClustersPerUser();
+        if (needToValidateField(maxClustersPerUser)) {
+            long stacks = stackService.countByOwner(owner);
+            if (stacks >= maxClustersPerUser) {
+                throw new AccountPreferencesValidationException(
+                        String.format("No more cluster could be created! The number of clusters exceeded the user's limit(%s)!", maxClustersPerUser));
+            }
+        }
+    }
 
     public void validateUserTimeToLive(String owner, AccountPreferences preferences) throws AccountPreferencesValidationException {
         Long userTimeToLive = preferences.getUserTimeToLive();

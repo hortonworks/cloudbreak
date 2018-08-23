@@ -199,6 +199,14 @@ public class StackService {
     @Inject
     private PermissionCheckingUtils permissionCheckingUtils;
 
+    public Long countByAccount(String account) {
+        return stackRepository.countActiveByAccount(account);
+    }
+
+    public Long countByOwner(String owner) {
+        return stackRepository.countActiveByOwner(owner);
+    }
+
     public Set<StackResponse> retrieveStacksByOrganizationId(Long organizationId) {
         try {
             return transactionService.required(() ->
