@@ -32,7 +32,8 @@ public class BlueprintUtils {
     private final Pattern validHostGroupNamePattern = Pattern.compile("^\\w+$");
 
     public String readDefaultBlueprintFromFile(String[] split) throws IOException {
-        return FileReaderUtils.readFileFromClasspath(String.format("defaults/blueprints/%s.bp", split.length == 2 ? split[1] : split[0]));
+        return FileReaderUtils.readFileFromClasspath(String.format("defaults/blueprints/%s.bp", split.length == 2
+                ? split[1].trim() : split[0].trim()));
     }
 
     public int countHostGroups(JsonNode root) {
