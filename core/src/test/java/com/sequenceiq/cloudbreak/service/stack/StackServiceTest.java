@@ -1,9 +1,13 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -12,6 +16,9 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
+import com.sequenceiq.cloudbreak.authorization.OrganizationPermissions.Action;
+import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
+import com.sequenceiq.cloudbreak.authorization.PermissionCheckingUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -50,6 +57,7 @@ import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
 import com.sequenceiq.cloudbreak.service.user.UserService;
+import org.springframework.security.access.AccessDeniedException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StackServiceTest {
@@ -73,6 +81,14 @@ public class StackServiceTest {
     private static final String VARIANT_VALUE = "VARIANT_VALUE";
 
     private static final String IMAGE_CATALOG = "IMAGE_CATALOG";
+
+    private static final String STACK_NAME = "name";
+
+    private static final String STACK_DELETE_ACCESS_DENIED = "You cannot modify this Stack";
+
+    private static final String STACK_NOT_FOUND_BY_ID_MESSAGE = "Stack '%d' not found";
+
+    private static final String STACK_NOT_FOUND_BY_NAME_MESSAGE = "Stack '%s' not found";
 
     @Rule
     public final ExpectedException expectedException = ExpectedException.none();
@@ -158,20 +174,229 @@ public class StackServiceTest {
     @Mock
     private UserService userService;
 
+    @Mock
+    private PermissionCheckingUtils permissionCheckingUtils;
+
     @Before
     public void setup() {
-        organization.setName("Top Secret FBI");
-        organization.setId(ORGANIZATION_ID);
+        when(stack.getId()).thenReturn(STACK_ID);
+        when(stack.getName()).thenReturn(STACK_NAME);
+        when(stack.getOrganization()).thenReturn(organization);
+        when(organization.getId()).thenReturn(ORGANIZATION_ID);
     }
 
     // TODO: have to write new tests
 
     @Test
     public void testWhenStackCouldNotFindByItsIdThenExceptionWouldThrown() {
-        when(stackRepository.findById(STACK_ID)).thenReturn(Optional.ofNullable(null));
+        when(stackRepository.findById(STACK_ID)).thenReturn(Optional.empty());
         expectedException.expect(NotFoundException.class);
-        expectedException.expectMessage(String.format("Stack '%d' not found", STACK_ID));
+        expectedException.expectMessage(String.format(STACK_NOT_FOUND_BY_ID_MESSAGE, STACK_ID));
         underTest.getById(STACK_ID);
+    }
+
+    @Test
+    public void testDeleteWhenStackCouldNotFindByItsNameForOrganizationAndForcedAndDeleteDepsThenExceptionShouldCome() {
+        when(stackRepository.findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID)).thenReturn(null);
+
+        expectedException.expect(NotFoundException.class);
+        expectedException.expectMessage(String.format(STACK_NOT_FOUND_BY_NAME_MESSAGE, STACK_NAME));
+
+        underTest.delete(STACK_NAME, ORGANIZATION_ID, true, true, user);
+
+        verify(stackRepository, times(0)).findById(anyLong());
+        verify(stackRepository, times(0)).findById(STACK_ID);
+        verify(stackRepository, times(1)).findByNameAndOrganizationId(anyString(), anyLong());
+        verify(stackRepository, times(1)).findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID);
+    }
+
+    @Test
+    public void testDeleteWhenStackCouldNotFindByItsNameForOrganizationAndDeleteDepsButNotForcedThenExceptionShouldCome() {
+        when(stackRepository.findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID)).thenReturn(null);
+
+        expectedException.expect(NotFoundException.class);
+        expectedException.expectMessage(String.format(STACK_NOT_FOUND_BY_NAME_MESSAGE, STACK_NAME));
+
+        underTest.delete(STACK_NAME, ORGANIZATION_ID, false, true, user);
+
+        verify(stackRepository, times(0)).findById(anyLong());
+        verify(stackRepository, times(0)).findById(STACK_ID);
+        verify(stackRepository, times(1)).findByNameAndOrganizationId(anyString(), anyLong());
+        verify(stackRepository, times(1)).findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID);
+    }
+
+    @Test
+    public void testDeleteWhenStackCouldNotFindByItsNameForOrganizationAndForcedButNotDeleteDepsThenExceptionShouldCome() {
+        when(stackRepository.findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID)).thenReturn(null);
+
+        expectedException.expect(NotFoundException.class);
+        expectedException.expectMessage(String.format(STACK_NOT_FOUND_BY_NAME_MESSAGE, STACK_NAME));
+
+        underTest.delete(STACK_NAME, ORGANIZATION_ID, true, false, user);
+
+        verify(stackRepository, times(0)).findById(anyLong());
+        verify(stackRepository, times(0)).findById(STACK_ID);
+        verify(stackRepository, times(1)).findByNameAndOrganizationId(anyString(), anyLong());
+        verify(stackRepository, times(1)).findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID);
+    }
+
+    @Test
+    public void testDeleteWhenStackCouldNotFindByItsNameForOrganizationAndNotForcedAndNotDeleteDepsThenExceptionShouldCome() {
+        when(stackRepository.findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID)).thenReturn(null);
+
+        expectedException.expect(NotFoundException.class);
+        expectedException.expectMessage(String.format(STACK_NOT_FOUND_BY_NAME_MESSAGE, STACK_NAME));
+
+        underTest.delete(STACK_NAME, ORGANIZATION_ID, false, false, user);
+
+        verify(stackRepository, times(0)).findById(anyLong());
+        verify(stackRepository, times(0)).findById(STACK_ID);
+        verify(stackRepository, times(1)).findByNameAndOrganizationId(anyString(), anyLong());
+        verify(stackRepository, times(1)).findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID);
+    }
+
+    @Test
+    public void testDeleteWhenStackCouldNotFindByItsIdForOrganizationAndForcedAndDeleteDepsThenExceptionShouldCome() {
+        when(stackRepository.findById(STACK_ID)).thenReturn(Optional.empty());
+
+        expectedException.expect(NotFoundException.class);
+        expectedException.expectMessage(String.format(STACK_NOT_FOUND_BY_NAME_MESSAGE, STACK_ID));
+
+        underTest.delete(STACK_ID, true, true, user);
+
+        verify(stackRepository, times(1)).findById(anyLong());
+        verify(stackRepository, times(1)).findById(STACK_ID);
+        verify(stackRepository, times(1)).findByNameAndOrganizationId(anyString(), anyLong());
+        verify(stackRepository, times(1)).findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID);
+    }
+
+    @Test
+    public void testDeleteWhenStackCouldNotFindByItsIdForOrganizationAndDeleteDepsButNotForcedThenExceptionShouldCome() {
+        when(stackRepository.findById(STACK_ID)).thenReturn(Optional.empty());
+
+        expectedException.expect(NotFoundException.class);
+        expectedException.expectMessage(String.format(STACK_NOT_FOUND_BY_NAME_MESSAGE, STACK_ID));
+
+        underTest.delete(STACK_ID, true, true, user);
+        verify(stackRepository, times(1)).findById(anyLong());
+        verify(stackRepository, times(1)).findById(STACK_ID);
+        verify(stackRepository, times(1)).findByNameAndOrganizationId(anyString(), anyLong());
+        verify(stackRepository, times(1)).findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID);
+    }
+
+    @Test
+    public void testDeleteWhenStackCouldNotFindByItsIdForOrganizationAndForcedButNotDeleteDepsThenExceptionShouldCome() {
+        when(stackRepository.findById(STACK_ID)).thenReturn(Optional.empty());
+
+        expectedException.expect(NotFoundException.class);
+        expectedException.expectMessage(String.format(STACK_NOT_FOUND_BY_NAME_MESSAGE, STACK_ID));
+
+        underTest.delete(STACK_ID, true, true, user);
+        verify(stackRepository, times(1)).findById(anyLong());
+        verify(stackRepository, times(1)).findById(STACK_ID);
+        verify(stackRepository, times(1)).findByNameAndOrganizationId(anyString(), anyLong());
+        verify(stackRepository, times(1)).findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID);
+    }
+
+    @Test
+    public void testDeleteWhenStackCouldNotFindByItsIdForOrganizationAndNotForcedAndNotDeleteDepsThenExceptionShouldCome() {
+        when(stackRepository.findById(STACK_ID)).thenReturn(Optional.empty());
+
+        expectedException.expect(NotFoundException.class);
+        expectedException.expectMessage(String.format(STACK_NOT_FOUND_BY_NAME_MESSAGE, STACK_ID));
+
+        underTest.delete(STACK_ID, true, true, user);
+        verify(stackRepository, times(1)).findById(anyLong());
+        verify(stackRepository, times(1)).findById(STACK_ID);
+        verify(stackRepository, times(1)).findByNameAndOrganizationId(anyString(), anyLong());
+        verify(stackRepository, times(1)).findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID);
+    }
+
+    @Test
+    public void testDeleteByIdWhenStackIsAlreadyDeletedThenDeletionWillNotTrigger() {
+        when(stackRepository.findById(STACK_ID)).thenReturn(Optional.of(stack));
+        when(stackRepository.findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID)).thenReturn(stack);
+        doNothing().when(permissionCheckingUtils).checkPermissionByOrgIdForUser(ORGANIZATION_ID, OrganizationResource.STACK, Action.WRITE, user);
+        when(stack.isDeleteCompleted()).thenReturn(true);
+
+        underTest.delete(STACK_ID, true, true, user);
+
+        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
+        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(anyLong(), any(OrganizationResource.class), any(Action.class), any(User.class));
+        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(ORGANIZATION_ID, OrganizationResource.STACK, Action.WRITE, user);
+    }
+
+    @Test
+    public void testDeleteByNameAndOrgIdWhenStackIsAlreadyDeletedThenDeletionWillNotTrigger() {
+        when(stackRepository.findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID)).thenReturn(stack);
+        doNothing().when(permissionCheckingUtils).checkPermissionByOrgIdForUser(ORGANIZATION_ID, OrganizationResource.STACK, Action.WRITE, user);
+        when(stack.isDeleteCompleted()).thenReturn(true);
+
+        underTest.delete(STACK_NAME, ORGANIZATION_ID, true, true, user);
+
+        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
+        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(anyLong(), any(OrganizationResource.class), any(Action.class), any(User.class));
+        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(ORGANIZATION_ID, OrganizationResource.STACK, Action.WRITE, user);
+    }
+
+    @Test
+    public void testDeleteByIdWhenUserHasNoWriteRightOverStackThenExceptionShouldComeAndTerminationShouldNotBeCalled() {
+        when(stackRepository.findById(STACK_ID)).thenReturn(Optional.of(stack));
+        when(stackRepository.findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID)).thenReturn(stack);
+        doThrow(new AccessDeniedException(STACK_DELETE_ACCESS_DENIED)).when(permissionCheckingUtils).checkPermissionByOrgIdForUser(ORGANIZATION_ID,
+                OrganizationResource.STACK, Action.WRITE, user);
+
+        expectedException.expect(AccessDeniedException.class);
+        expectedException.expectMessage(STACK_DELETE_ACCESS_DENIED);
+
+        underTest.delete(STACK_ID, true, true, user);
+
+        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
+        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(anyLong(), any(OrganizationResource.class), any(Action.class), any(User.class));
+        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(ORGANIZATION_ID, OrganizationResource.STACK, Action.WRITE, user);
+    }
+
+    @Test
+    public void testDeleteByNameAndOrgIdWhenUserHasNoWriteRightOverStackThenExceptionShouldComeAndTerminationShouldNotBeCalled() {
+        when(stackRepository.findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID)).thenReturn(stack);
+        doThrow(new AccessDeniedException(STACK_DELETE_ACCESS_DENIED)).when(permissionCheckingUtils).checkPermissionByOrgIdForUser(ORGANIZATION_ID,
+                OrganizationResource.STACK, Action.WRITE, user);
+
+        expectedException.expect(AccessDeniedException.class);
+        expectedException.expectMessage(STACK_DELETE_ACCESS_DENIED);
+
+        underTest.delete(STACK_NAME, ORGANIZATION_ID, true, true, user);
+
+        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
+        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(anyLong(), any(OrganizationResource.class), any(Action.class), any(User.class));
+        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(ORGANIZATION_ID, OrganizationResource.STACK, Action.WRITE, user);
+    }
+
+    @Test
+    public void testDeleteByIdWhenUserHasWriteRightOverStackAndStackIsNotDeletedThenTerminationShouldBeCalled() {
+        when(stackRepository.findById(STACK_ID)).thenReturn(Optional.of(stack));
+        when(stackRepository.findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID)).thenReturn(stack);
+        doNothing().when(permissionCheckingUtils).checkPermissionByOrgIdForUser(ORGANIZATION_ID, OrganizationResource.STACK, Action.WRITE, user);
+
+        underTest.delete(STACK_ID, true, true, user);
+
+        verify(flowManager, times(1)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
+        verify(flowManager, times(1)).triggerTermination(STACK_ID, true, true);
+        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(anyLong(), any(OrganizationResource.class), any(Action.class), any(User.class));
+        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(ORGANIZATION_ID, OrganizationResource.STACK, Action.WRITE, user);
+    }
+
+    @Test
+    public void testDeleteByNameAndOrgIdWhenUserHasWriteRightOverStackAndStackIsNotDeletedThenTerminationShouldBeCalled() {
+        when(stackRepository.findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID)).thenReturn(stack);
+        doNothing().when(permissionCheckingUtils).checkPermissionByOrgIdForUser(ORGANIZATION_ID, OrganizationResource.STACK, Action.WRITE, user);
+
+        underTest.delete(STACK_NAME, ORGANIZATION_ID, true, true, user);
+
+        verify(flowManager, times(1)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
+        verify(flowManager, times(1)).triggerTermination(STACK_ID, true, true);
+        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(anyLong(), any(OrganizationResource.class), any(Action.class), any(User.class));
+        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(ORGANIZATION_ID, OrganizationResource.STACK, Action.WRITE, user);
     }
 
     @Test
