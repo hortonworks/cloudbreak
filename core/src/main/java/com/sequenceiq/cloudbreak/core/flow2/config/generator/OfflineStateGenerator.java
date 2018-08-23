@@ -378,6 +378,16 @@ public class OfflineStateGenerator {
         }
 
         @Override
+        public Long countActiveByAccount(String account) {
+            return null;
+        }
+
+        @Override
+        public Long countActiveByOwner(String owner) {
+            return null;
+        }
+
+        @Override
         public <S extends Stack> S save(S entity) {
             return entity;
         }
