@@ -16,7 +16,6 @@ import com.sequenceiq.periscope.monitor.executor.ExecutorServiceWithRegistry;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.RejectedThreadService;
 import com.sequenceiq.periscope.service.ha.PeriscopeNodeConfig;
-import com.sequenceiq.periscope.utils.LoggerUtils;
 
 public abstract class AbstractMonitor<M extends Monitored> implements Monitor<M> {
 
@@ -30,8 +29,6 @@ public abstract class AbstractMonitor<M extends Monitored> implements Monitor<M>
 
     private ExecutorServiceWithRegistry executorServiceWithRegistry;
 
-    private LoggerUtils loggerUtils;
-
     private RejectedThreadService rejectedThreadService;
 
     @Override
@@ -42,7 +39,6 @@ public abstract class AbstractMonitor<M extends Monitored> implements Monitor<M>
         LOGGER.info("Job started: {}, monitored: {}", context.getJobDetail().getKey(), monitoredData.size());
         for (M monitored : monitoredData) {
             try {
-                loggerUtils.logThreadPoolExecutorParameters(LOGGER, getEvaluatorType(monitored).getName(), executorServiceWithRegistry.getExecutorService());
                 EvaluatorExecutor evaluatorExecutor = getEvaluatorExecutorBean(monitored);
                 EvaluatorContext evaluatorContext = getContext(monitored);
                 evaluatorExecutor.setContext(evaluatorContext);
@@ -63,7 +59,6 @@ public abstract class AbstractMonitor<M extends Monitored> implements Monitor<M>
         executorServiceWithRegistry = applicationContext.getBean(ExecutorServiceWithRegistry.class);
         clusterService = applicationContext.getBean(ClusterService.class);
         periscopeNodeConfig = applicationContext.getBean(PeriscopeNodeConfig.class);
-        loggerUtils = applicationContext.getBean(LoggerUtils.class);
         rejectedThreadService = applicationContext.getBean(RejectedThreadService.class);
     }
 

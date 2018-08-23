@@ -22,6 +22,7 @@ import com.sequenceiq.periscope.aspects.AmbariRequestLogging;
 import com.sequenceiq.periscope.monitor.evaluator.ClusterCreationEvaluator;
 import com.sequenceiq.periscope.monitor.executor.EvaluatorExecutorRegistry;
 import com.sequenceiq.periscope.monitor.executor.ExecutorServiceWithRegistry;
+import com.sequenceiq.periscope.monitor.executor.LoggedExecutorService;
 import com.sequenceiq.periscope.monitor.handler.PersistRejectedThreadExecutionHandler;
 import com.sequenceiq.periscope.notification.HttpNotificationSender;
 import com.sequenceiq.periscope.service.AmbariClientProvider;
@@ -32,6 +33,8 @@ import com.sequenceiq.periscope.service.StackCollectorService;
 import com.sequenceiq.periscope.service.configuration.CloudbreakClientConfiguration;
 import com.sequenceiq.periscope.service.ha.PeriscopeNodeConfig;
 import com.sequenceiq.periscope.service.security.TlsSecurityService;
+import com.sequenceiq.periscope.utils.LoggerUtils;
+import com.sequenceiq.periscope.utils.MetricUtils;
 
 @TestPropertySource(properties = "profile=dev")
 public class StackCollectorContext {
@@ -49,11 +52,12 @@ public class StackCollectorContext {
                             StackCollectorService.class,
                             ExecutorServiceWithRegistry.class,
                             EvaluatorExecutorRegistry.class,
+                            LoggedExecutorService.class,
                             Clock.class
                     })
     )
     @MockBean({ClusterService.class, AmbariClientProvider.class, CloudbreakClientConfiguration.class, TlsSecurityService.class, HistoryService.class,
-            HttpNotificationSender.class})
+            HttpNotificationSender.class, MetricUtils.class, LoggerUtils.class})
     @EnableAsync
     public static class StackCollectorSpringConfig implements AsyncConfigurer {
 

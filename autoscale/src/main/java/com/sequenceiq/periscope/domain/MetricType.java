@@ -12,7 +12,12 @@ public enum MetricType {
     CLUSTER_UPSCALE_SUCCESSFUL("cluster.upscale.successful"),
     CLUSTER_UPSCALE_FAILED("cluster.upscale.failed"),
     CLUSTER_DOWNSCALE_SUCCESSFUL("cluster.downscale.successful"),
-    CLUSTER_DOWNSCALE_FAILED("cluster.downscale.failed");
+    CLUSTER_DOWNSCALE_FAILED("cluster.downscale.failed"),
+
+    THREADPOOL_QUEUE_SIZE("threadpool.queue.size"),
+    THREADPOOL_ACTIVE_THREADS("threadpool.threads.active"),
+    THREADPOOL_THREADS_TOTAL("threadpool.threads.coresize"),
+    THREADPOOL_TASKS_COMPLETED("threadpool.tasks.completed");
 
     private final String metricName;
 

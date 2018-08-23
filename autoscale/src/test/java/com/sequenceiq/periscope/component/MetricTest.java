@@ -1,6 +1,8 @@
 package com.sequenceiq.periscope.component;
 
+import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
 import static com.sequenceiq.periscope.component.MetricTest.PERISCOPE_NODE_ID;
+import static com.sequenceiq.periscope.component.MetricTest.THREADPOOL_MAX_SIZE;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -45,6 +47,7 @@ import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
@@ -75,6 +78,7 @@ import com.sequenceiq.periscope.domain.MetricType;
 import com.sequenceiq.periscope.domain.PeriscopeNode;
 import com.sequenceiq.periscope.domain.PeriscopeUser;
 import com.sequenceiq.periscope.monitor.event.UpdateFailedEvent;
+import com.sequenceiq.periscope.monitor.executor.LoggedExecutorService;
 import com.sequenceiq.periscope.monitor.handler.UpdateFailedHandler;
 import com.sequenceiq.periscope.repository.ClusterRepository;
 import com.sequenceiq.periscope.repository.HistoryRepository;
@@ -106,31 +110,43 @@ import springfox.documentation.swagger.web.SwaggerResourcesProvider;
         "periscope.cloudbreak.url=http://1.2.3.4:8080",
         "periscope.instance.node.id=" + PERISCOPE_NODE_ID,
         "server.port=8079",
-        "periscope.threadpool.core.size=50",
         "cb.jwt.signKey=signKey",
         "cb.etc.config.dir=/etcConfigDir",
+        "periscope.threadpool.core.size=" + THREADPOOL_MAX_SIZE,
+        "periscope.threadpool.max.size=" + THREADPOOL_MAX_SIZE,
+        "periscope.threadpool.queue.size=10"
 })
 public class MetricTest {
 
-    public static final String PERISCOPE_METRICS_CLUSTER_STATE_ACTIVE = "periscope.cluster.state.active";
+    static final String PERISCOPE_NODE_ID = "1";
 
-    public static final String PERISCOPE_METRICS_CLUSTER_STATE_SUSPENDED = "periscope.cluster.state.suspended";
+    static final int THREADPOOL_MAX_SIZE = 5;
 
-    public static final double DELTA = 0.0001;
+    private static final String PERISCOPE_METRICS_CLUSTER_STATE_ACTIVE = "periscope.cluster.state.active";
 
-    public static final String USER_A_ID = "userAId";
+    private static final String PERISCOPE_METRICS_CLUSTER_STATE_SUSPENDED = "periscope.cluster.state.suspended";
 
-    public static final String ACCOUNT_A = "ACCOUNT_A";
+    private static final String THREADPOOL_QUEUE_SIZE = "periscope.threadpool.queue.size";
 
-    public static final String USER_A_EMAIL = "userA@any.com";
+    private static final String THREADPOOL_ACTIVE_THREADS = "periscope.threadpool.threads.active";
 
-    public static final long STACK_ID = 2L;
+    private static final String THREADPOOL_THREADS_TOTAL = "periscope.threadpool.threads.coresize";
 
-    public static final long CLUSTER_ID = 1L;
+    private static final String THREADPOOL_TASKS_COMPLETED = "periscope.threadpool.tasks.completed";
 
-    public static final String PERISCOPE_NODE_ID = "1";
+    private static final double DELTA = 0.0001;
 
-    public static final String PERISCOPE_METRICS_LEADER = "periscope.node.leader";
+    private static final String USER_A_ID = "userAId";
+
+    private static final String ACCOUNT_A = "ACCOUNT_A";
+
+    private static final String USER_A_EMAIL = "userA@any.com";
+
+    private static final long STACK_ID = 2L;
+
+    private static final long CLUSTER_ID = 1L;
+
+    private static final String PERISCOPE_METRICS_LEADER = "periscope.node.leader";
 
     private final List<String> counterMetrics = Arrays.asList(
             "periscope.cluster.upscale.triggered",
@@ -144,7 +160,11 @@ public class MetricTest {
     private final List<String> expectedGaugeMetrics = Arrays.asList(
             PERISCOPE_METRICS_CLUSTER_STATE_ACTIVE,
             PERISCOPE_METRICS_CLUSTER_STATE_SUSPENDED,
-            PERISCOPE_METRICS_LEADER
+            PERISCOPE_METRICS_LEADER,
+            THREADPOOL_ACTIVE_THREADS,
+            THREADPOOL_QUEUE_SIZE,
+            THREADPOOL_TASKS_COMPLETED,
+            THREADPOOL_THREADS_TOTAL
     );
 
     @Inject
@@ -192,6 +212,9 @@ public class MetricTest {
     @Inject
     private UpdateFailedHandler updateFailedHandler;
 
+    @Inject
+    private LoggedExecutorService loggedExecutorService;
+
     @Test
     public void testCounterMetricsPresent() {
         MultiValueMap<String, String> metrics = responseToMap(readMetricsEndpoint());
@@ -213,7 +236,7 @@ public class MetricTest {
     @Test
     public void testMetricsWhenAddActiveCluster() {
         when(cloudbreakClient.stackV1Endpoint()).thenReturn(stackV1Endpoint);
-        when(stackV1Endpoint.get(eq(STACK_ID), anySet())).thenReturn(getStackResponse(Status.AVAILABLE, Status.AVAILABLE));
+        when(stackV1Endpoint.get(eq(STACK_ID), anySet())).thenReturn(getStackResponse(AVAILABLE, AVAILABLE));
         when(authenticatedUserService.getPeriscopeUser()).thenReturn(getOwnerUser());
         when(clusterRepository.save(any())).thenAnswer(this::saveCluster);
         when(historyRepository.save(any())).then(returnsFirstArg());
@@ -228,7 +251,7 @@ public class MetricTest {
         assertEquals(1.0, Double.parseDouble(metrics.get(toReportedMetricName(PERISCOPE_METRICS_CLUSTER_STATE_ACTIVE, false)).get(0)), DELTA);
         assertEquals(0.0, Double.parseDouble(metrics.get(toReportedMetricName(PERISCOPE_METRICS_CLUSTER_STATE_SUSPENDED, false)).get(0)), DELTA);
         InOrder inOrder = Mockito.inOrder(clusterRepository);
-        inOrder.verify(clusterRepository).save(argThat(x -> x.isRunning()));
+        inOrder.verify(clusterRepository).save(argThat(Cluster::isRunning));
         inOrder.verify(clusterRepository).countByStateAndAutoscalingEnabledAndPeriscopeNodeId(eq(ClusterState.RUNNING), eq(true), anyString());
         inOrder.verify(clusterRepository).countByStateAndAutoscalingEnabledAndPeriscopeNodeId(eq(ClusterState.SUSPENDED), eq(true), anyString());
     }
@@ -292,7 +315,7 @@ public class MetricTest {
         when(clusterRepository.countByStateAndAutoscalingEnabledAndPeriscopeNodeId(eq(ClusterState.SUSPENDED), eq(true), anyString()))
                 .thenReturn(1);
         when(cloudbreakClient.stackV1Endpoint()).thenReturn(stackV1Endpoint);
-        when(stackV1Endpoint.get(eq(STACK_ID), anySet())).thenReturn(getStackResponse(Status.AVAILABLE, Status.AVAILABLE));
+        when(stackV1Endpoint.get(eq(STACK_ID), anySet())).thenReturn(getStackResponse(AVAILABLE, AVAILABLE));
         ReflectionTestUtils.setField(updateFailedHandler, "updateFailures", getUpdateFailures(CLUSTER_ID));
 
         updateFailedHandler.onApplicationEvent(new UpdateFailedEvent(CLUSTER_ID));
@@ -346,6 +369,26 @@ public class MetricTest {
 
         MultiValueMap<String, String> metrics = responseToMap(readMetricsEndpoint());
         assertEquals(1.0, Double.parseDouble(metrics.get(toReportedMetricName(PERISCOPE_METRICS_LEADER, false)).get(0)), DELTA);
+    }
+
+    @Test
+    public void testThreadpoolMetricsWhenTaskIsSubmitted() {
+        BlockingTaskManager blockingTaskManager = new BlockingTaskManager();
+        loggedExecutorService.submit("fakeTaskDone", () -> {
+        });
+        for (int t = 0; t < THREADPOOL_MAX_SIZE; t++) {
+            loggedExecutorService.submit("fakeTaskActive" + t, blockingTaskManager.getNewTask());
+        }
+        loggedExecutorService.submit("fakeTaskInQueue", blockingTaskManager.getNewTask());
+
+        MultiValueMap<String, String> metrics = responseToMap(readMetricsEndpoint());
+
+        blockingTaskManager.releaseAll().waitAll();
+        String threadpoolSize = String.format("%.1f", (float) THREADPOOL_MAX_SIZE);
+        assertEquals(metrics.get(toReportedMetricName(THREADPOOL_ACTIVE_THREADS, false)).get(0), threadpoolSize);
+        assertEquals(metrics.get(toReportedMetricName(THREADPOOL_QUEUE_SIZE, false)).get(0), "1.0");
+        assertEquals(metrics.get(toReportedMetricName(THREADPOOL_TASKS_COMPLETED, false)).get(0), "1.0");
+        assertEquals(metrics.get(toReportedMetricName(THREADPOOL_THREADS_TOTAL, false)).get(0), threadpoolSize);
     }
 
     private Cluster saveCluster(InvocationOnMock i) {
@@ -417,7 +460,7 @@ public class MetricTest {
             })
     @ComponentScan(
             basePackages = {"com.sequenceiq.periscope", "com.sequenceiq.cloudbreak"},
-            excludeFilters = {@ComponentScan.Filter(
+            excludeFilters = {@Filter(
                     type = FilterType.ASSIGNABLE_TYPE,
                     value = {
                             DatabaseConfig.class,
@@ -426,7 +469,7 @@ public class MetricTest {
                             MetricService.class
                     }
             ),
-                    @ComponentScan.Filter(type = FilterType.REGEX, pattern = "com.sequenceiq.periscope.modul.rejected.*")}
+                    @Filter(type = FilterType.REGEX, pattern = "com.sequenceiq.periscope.modul.rejected.*")}
     )
     public static class TestConfig {
 
