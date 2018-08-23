@@ -11,7 +11,8 @@
       {
         "nifi-ambari-config": {
           "nifi.security.encrypt.configuration.password": "changethisplease",
-          "nifi.max_mem": "1g"
+          "nifi.max_mem": "1g",
+          "nifi.sensitive.props.key": "changethisplease"
         }
       },
       {
@@ -21,7 +22,6 @@
       },
       {
         "nifi-properties": {
-          "nifi.sensitive.props.key": "changethisplease",
           "nifi.security.identity.mapping.pattern.kerb": "^(.*?)@(.*?)$",
           "nifi.security.identity.mapping.value.kerb": "$1"
         }
@@ -41,7 +41,6 @@
       },
       {
         "nifi-registry-properties": {
-          "nifi.registry.sensitive.props.key": "changethisplease",
           "nifi.registry.security.identity.mapping.pattern.kerb": "^(.*?)@(.*?)$",
           "nifi.registry.security.identity.mapping.value.kerb": "$1"
         }
