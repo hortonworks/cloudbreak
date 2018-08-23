@@ -27,7 +27,6 @@ import com.sequenceiq.periscope.monitor.executor.ExecutorServiceWithRegistry;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.RejectedThreadService;
 import com.sequenceiq.periscope.service.ha.PeriscopeNodeConfig;
-import com.sequenceiq.periscope.utils.LoggerUtils;
 
 public class AbstractMonitorTest {
 
@@ -46,9 +45,6 @@ public class AbstractMonitorTest {
 
     @Mock
     private ExecutorServiceWithRegistry executorServiceWithRegistry;
-
-    @Mock
-    private LoggerUtils loggerUtils;
 
     @Mock
     private RejectedThreadService rejectedThreadService;
@@ -90,7 +86,6 @@ public class AbstractMonitorTest {
         when(applicationContext.getBean(ExecutorServiceWithRegistry.class)).thenReturn(executorServiceWithRegistry);
         when(applicationContext.getBean(ClusterService.class)).thenReturn(clusterService);
         when(applicationContext.getBean(PeriscopeNodeConfig.class)).thenReturn(periscopeNodeConfig);
-        when(applicationContext.getBean(LoggerUtils.class)).thenReturn(loggerUtils);
         when(applicationContext.getBean(testExecutor.getClass().getSimpleName(), EvaluatorExecutor.class)).thenReturn(testExecutor);
         when(applicationContext.getBean(RejectedThreadService.class)).thenReturn(rejectedThreadService);
 

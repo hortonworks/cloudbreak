@@ -55,8 +55,7 @@ public class StackCollectorService {
                                 ClusterCreationEvaluator clusterCreationEvaluator = applicationContext.getBean(ClusterCreationEvaluator.class);
                                 clusterCreationEvaluator.setContext(new ClusterCreationEvaluatorContext(stack));
                                 executorServiceWithRegistry.submitIfAbsent(clusterCreationEvaluator, stack.getStackId());
-                                LOGGER.info("Succesfully submitted, the stack id: {}. Executor: {}", stack.getStackId(),
-                                        executorServiceWithRegistry.getExecutorService());
+                                LOGGER.info("Succesfully submitted, the stack id: {}.", stack.getStackId());
                                 rejectedThreadService.remove(stack);
                             } catch (RejectedExecutionException ignore) {
 
