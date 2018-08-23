@@ -1,6 +1,7 @@
 package com.sequenceiq.periscope.monitor.executor;
 
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionException;
 
 import javax.inject.Inject;
 
@@ -25,8 +26,9 @@ public class ExecutorServiceWithRegistry {
         if (evaluatorExecutorRegistry.putIfAbsent(evaluatorExecutor, clusterId)) {
             try {
                 executorService.submit(evaluatorExecutor);
-            } finally {
+            } catch (RejectedExecutionException e) {
                 evaluatorExecutorRegistry.remove(evaluatorExecutor, clusterId);
+                throw e;
             }
         } else {
             LOGGER.info("Evaluator {} is not accepted for cluster {}", evaluatorExecutor.getName(), clusterId);

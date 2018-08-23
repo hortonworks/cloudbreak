@@ -21,7 +21,6 @@ import com.sequenceiq.periscope.monitor.context.ClusterIdEvaluatorContext;
 import com.sequenceiq.periscope.monitor.context.EvaluatorContext;
 import com.sequenceiq.periscope.monitor.event.ScalingEvent;
 import com.sequenceiq.periscope.monitor.event.UpdateFailedEvent;
-import com.sequenceiq.periscope.monitor.executor.ExecutorServiceWithRegistry;
 import com.sequenceiq.periscope.repository.MetricAlertRepository;
 import com.sequenceiq.periscope.service.AmbariClientProvider;
 import com.sequenceiq.periscope.service.ClusterService;
@@ -30,7 +29,7 @@ import com.sequenceiq.periscope.utils.TimeUtil;
 
 @Component("MetricEvaluator")
 @Scope("prototype")
-public class MetricEvaluator extends AbstractEventPublisher implements EvaluatorExecutor {
+public class MetricEvaluator extends EvaluatorExecutor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MetricEvaluator.class);
 
@@ -53,7 +52,7 @@ public class MetricEvaluator extends AbstractEventPublisher implements Evaluator
     private AmbariRequestLogging ambariRequestLogging;
 
     @Inject
-    private ExecutorServiceWithRegistry executorServiceWithRegistry;
+    private EventPublisher eventPublisher;
 
     private long clusterId;
 
@@ -74,7 +73,7 @@ public class MetricEvaluator extends AbstractEventPublisher implements Evaluator
     }
 
     @Override
-    public void run() {
+    public void execute() {
         long start = System.currentTimeMillis();
         try {
             Cluster cluster = clusterService.findById(clusterId);
@@ -98,7 +97,7 @@ public class MetricEvaluator extends AbstractEventPublisher implements Evaluator
                         LOGGER.info("Alert: {} is in '{}' state since {} min(s)", alertName, currentState,
                                 ClusterUtils.TIME_FORMAT.format((double) elapsedTime / TimeUtil.MIN_IN_MS));
                         if (isPeriodReached(alert, elapsedTime) && isPolicyAttached(alert)) {
-                            publishEvent(new ScalingEvent(alert));
+                            eventPublisher.publishEvent(new ScalingEvent(alert));
                             break;
                         }
                     }
@@ -106,9 +105,8 @@ public class MetricEvaluator extends AbstractEventPublisher implements Evaluator
             }
         } catch (Exception e) {
             LOGGER.error("Failed to retrieve alert history", e);
-            publishEvent(new UpdateFailedEvent(clusterId));
+            eventPublisher.publishEvent(new UpdateFailedEvent(clusterId));
         } finally {
-            executorServiceWithRegistry.finished(this, clusterId);
             LOGGER.info("Finished metricEvaluator for cluster {} in {} ms", clusterId, System.currentTimeMillis() - start);
         }
     }

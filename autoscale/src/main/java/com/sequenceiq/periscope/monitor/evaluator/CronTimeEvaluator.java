@@ -21,14 +21,13 @@ import com.sequenceiq.periscope.monitor.MonitorUpdateRate;
 import com.sequenceiq.periscope.monitor.context.ClusterIdEvaluatorContext;
 import com.sequenceiq.periscope.monitor.context.EvaluatorContext;
 import com.sequenceiq.periscope.monitor.event.ScalingEvent;
-import com.sequenceiq.periscope.monitor.executor.ExecutorServiceWithRegistry;
 import com.sequenceiq.periscope.repository.TimeAlertRepository;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.DateService;
 
 @Component("CronTimeEvaluator")
 @Scope("prototype")
-public class CronTimeEvaluator extends AbstractEventPublisher implements EvaluatorExecutor {
+public class CronTimeEvaluator extends EvaluatorExecutor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CronTimeEvaluator.class);
 
@@ -44,7 +43,7 @@ public class CronTimeEvaluator extends AbstractEventPublisher implements Evaluat
     private DateService dateService;
 
     @Inject
-    private ExecutorServiceWithRegistry executorServiceWithRegistry;
+    private EventPublisher eventPublisher;
 
     private long clusterId;
 
@@ -77,19 +76,15 @@ public class CronTimeEvaluator extends AbstractEventPublisher implements Evaluat
     }
 
     @Override
-    public void run() {
+    public void execute() {
         long start = System.currentTimeMillis();
-        try {
-            Cluster cluster = clusterService.findById(clusterId);
-            MDCBuilder.buildMdcContext(cluster);
-            publishIfNeeded(alertRepository.findAllByCluster(clusterId));
-            LOGGER.info("Finished cronTimeEvaluator for cluster {} in {} ms", clusterId, System.currentTimeMillis() - start);
-        } finally {
-            executorServiceWithRegistry.finished(this, clusterId);
-        }
+        Cluster cluster = clusterService.findById(clusterId);
+        MDCBuilder.buildMdcContext(cluster);
+        publishIfNeeded(alertRepository.findAllByCluster(clusterId));
+        LOGGER.info("Finished cronTimeEvaluator for cluster {} in {} ms", clusterId, System.currentTimeMillis() - start);
     }
 
-    public void publishIfNeeded(List<TimeAlert> alerts) {
+    private void publishIfNeeded(List<TimeAlert> alerts) {
         for (TimeAlert alert : alerts) {
             if (isPolicyAttached(alert) && isTrigger(alert)) {
                 publish(alert);
@@ -110,6 +105,6 @@ public class CronTimeEvaluator extends AbstractEventPublisher implements Evaluat
 
     private void publish(TimeAlert alert) {
         LOGGER.info("Time alert '{}' triggers the '{}' scaling policy", alert.getName(), alert.getScalingPolicy().getName());
-        publishEvent(new ScalingEvent(alert));
+        eventPublisher.publishEvent(new ScalingEvent(alert));
     }
 }

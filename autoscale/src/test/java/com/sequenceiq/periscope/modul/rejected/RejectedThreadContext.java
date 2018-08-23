@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.service.Clock;
 import com.sequenceiq.periscope.aspects.AmbariRequestLogging;
 import com.sequenceiq.periscope.monitor.AmbariAgentHealthMonitor;
 import com.sequenceiq.periscope.monitor.evaluator.AmbariAgentHealthEvaluator;
+import com.sequenceiq.periscope.monitor.evaluator.EventPublisher;
 import com.sequenceiq.periscope.monitor.executor.EvaluatorExecutorRegistry;
 import com.sequenceiq.periscope.monitor.executor.ExecutorServiceWithRegistry;
 import com.sequenceiq.periscope.monitor.handler.PersistRejectedThreadExecutionHandler;
@@ -45,10 +46,12 @@ public class RejectedThreadContext {
                             AmbariRequestLogging.class,
                             PeriscopeNodeConfig.class,
                             AmbariAgentHealthEvaluator.class,
+                            EventPublisher.class,
                             LoggerUtils.class,
                             ExecutorServiceWithRegistry.class,
                             EvaluatorExecutorRegistry.class,
-                            Clock.class
+                            Clock.class,
+
                     })
     )
     @MockBean({ClusterService.class, AmbariClientProvider.class, CloudbreakClientConfiguration.class})

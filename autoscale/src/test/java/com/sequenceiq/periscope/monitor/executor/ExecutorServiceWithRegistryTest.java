@@ -2,6 +2,7 @@ package com.sequenceiq.periscope.monitor.executor;
 
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -43,7 +44,8 @@ public class ExecutorServiceWithRegistryTest {
 
         executorServiceWithRegistry.submitIfAbsent(getEvaluatorExecutor(), CLUSTER_ID);
 
-        verify(executorService).submit((Runnable) any());
+        verify(executorService).submit((EvaluatorExecutor) any());
+        verify(evaluatorExecutorRegistry, never()).remove(any(), anyLong());
     }
 
     @Test
@@ -52,13 +54,14 @@ public class ExecutorServiceWithRegistryTest {
 
         executorServiceWithRegistry.submitIfAbsent(getEvaluatorExecutor(), CLUSTER_ID);
 
-        verify(executorService, never()).submit((Runnable) any());
+        verify(executorService, never()).submit((EvaluatorExecutor) any());
+        verify(evaluatorExecutorRegistry, never()).remove(any(), anyLong());
     }
 
     @Test
     public void testSubmitIfAbsentWhenExecutorServiceThrows() {
         when(evaluatorExecutorRegistry.putIfAbsent(any(), eq(CLUSTER_ID))).thenReturn(true);
-        when(executorService.submit((Runnable) any())).thenThrow(new RejectedExecutionException(""));
+        when(executorService.submit((Runnable) any())).thenThrow(new RejectedExecutionException());
 
         try {
             executorServiceWithRegistry.submitIfAbsent(getEvaluatorExecutor(), CLUSTER_ID);

@@ -144,7 +144,7 @@ public class AbstractMonitorTest {
         };
     }
 
-    private class TestExecutor implements EvaluatorExecutor {
+    private class TestExecutor extends EvaluatorExecutor {
 
         @Nonnull
         @Override
@@ -158,7 +158,7 @@ public class AbstractMonitorTest {
         }
 
         @Override
-        public void run() {
+        public void execute() {
         }
 
         @Override

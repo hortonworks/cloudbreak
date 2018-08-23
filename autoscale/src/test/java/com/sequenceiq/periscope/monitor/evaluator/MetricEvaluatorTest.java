@@ -10,7 +10,6 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.context.ApplicationEventPublisher;
 
 import com.sequenceiq.periscope.monitor.context.ClusterIdEvaluatorContext;
 import com.sequenceiq.periscope.monitor.event.UpdateFailedEvent;
@@ -36,7 +35,7 @@ public class MetricEvaluatorTest {
     private ExecutorServiceWithRegistry executorServiceWithRegistry;
 
     @Mock
-    private ApplicationEventPublisher eventPublisher;
+    private EventPublisher eventPublisher;
 
     @InjectMocks
     private MetricEvaluator underTest;
