@@ -170,7 +170,7 @@ public class StackSyncService {
 
     private void syncStoppedInstance(Stack stack, Map<InstanceSyncState, Integer> instanceStateCounts, InstanceMetaData instance) {
         instanceStateCounts.put(InstanceSyncState.STOPPED, instanceStateCounts.get(InstanceSyncState.STOPPED) + 1);
-        if (!instance.isTerminated() && !stack.isStopped()) {
+        if (!instance.isTerminated()) {
             LOGGER.info("Instance '{}' is reported as stopped on the cloud provider, setting its state to STOPPED.", instance.getInstanceId());
             instance.setInstanceStatus(InstanceStatus.STOPPED);
             instanceMetaDataRepository.save(instance);
