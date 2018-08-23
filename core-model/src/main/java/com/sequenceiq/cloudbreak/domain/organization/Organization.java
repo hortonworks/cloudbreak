@@ -35,7 +35,7 @@ public class Organization implements ProvisionEntity {
     @Enumerated(EnumType.STRING)
     private OrganizationStatus status;
 
-    private Long deletionTimestamp;
+    private Long deletionTimestamp = -1L;
 
     public Long getDeletionTimestamp() {
         return deletionTimestamp;

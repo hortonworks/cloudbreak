@@ -14,11 +14,14 @@ import org.springframework.stereotype.Controller;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.BlueprintV3Endpoint;
 import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
 import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Controller
@@ -38,9 +41,15 @@ public class BlueprintV3Controller extends NotificationController implements Blu
     @Inject
     private RestRequestThreadLocalService restRequestThreadLocalService;
 
+    @Inject
+    private OrganizationService organizationService;
+
     @Override
     public Set<BlueprintResponse> listByOrganization(Long organizationId) {
-        return blueprintService.getAllAvailableInOrganization(organizationId).stream()
+        IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
+        User user = userService.getOrCreate(identityUser);
+        Organization organization = organizationService.get(organizationId, user);
+        return blueprintService.getAllAvailableInOrganization(organization).stream()
                 .map(blueprint -> conversionService.convert(blueprint, BlueprintResponse.class))
                 .collect(Collectors.toSet());
     }

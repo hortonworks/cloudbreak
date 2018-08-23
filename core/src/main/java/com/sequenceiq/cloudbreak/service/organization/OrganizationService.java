@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.api.model.v2.OrganizationStatus.DELETED;
 import static com.sequenceiq.cloudbreak.authorization.OrganizationPermissions.ALL_READ;
 import static com.sequenceiq.cloudbreak.authorization.OrganizationPermissions.ALL_WRITE;
 import static com.sequenceiq.cloudbreak.authorization.OrganizationPermissions.ORG_MANAGE;
-import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
 import java.util.Calendar;
 import java.util.HashSet;
@@ -26,7 +25,6 @@ import com.sequenceiq.cloudbreak.api.model.users.ChangeOrganizationUsersJson;
 import com.sequenceiq.cloudbreak.authorization.OrganizationPermissions;
 import com.sequenceiq.cloudbreak.authorization.OrganizationPermissions.Action;
 import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
-import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
@@ -60,22 +58,20 @@ public class OrganizationService {
 
     public Organization create(User user, Organization organization) {
         try {
-            // TODO: check: does the user in this tenant have the right to create an org?
             return transactionService.required(() -> {
-                try {
-                    Organization created = organizationRepository.save(organization);
-                    UserOrgPermissions userOrgPermissions = new UserOrgPermissions();
-                    userOrgPermissions.setOrganization(created);
-                    userOrgPermissions.setUser(user);
-                    userOrgPermissions.setPermissionSet(Set.of(ALL_READ.value(), ALL_WRITE.value(), ORG_MANAGE.value()));
-                    userOrgPermissionsService.save(userOrgPermissions);
-                    return created;
-                } catch (DataIntegrityViolationException ex) {
-                    String msg = String.format("Error with resource [%s], %s", APIResourceType.ORGANIZATION, getProperSqlErrorMessage(ex));
-                    throw new BadRequestException(msg);
-                }
+                Organization createdOrg = organizationRepository.save(organization);
+                UserOrgPermissions userOrgPermissions = new UserOrgPermissions();
+                userOrgPermissions.setOrganization(createdOrg);
+                userOrgPermissions.setUser(user);
+                userOrgPermissions.setPermissionSet(Set.of(ALL_READ.value(), ALL_WRITE.value(), ORG_MANAGE.value()));
+                userOrgPermissionsService.save(userOrgPermissions);
+                return createdOrg;
             });
         } catch (TransactionExecutionException e) {
+            if (e.getCause() instanceof DataIntegrityViolationException) {
+                throw new BadRequestException(String.format("Organization with name '%s' in your tenant already exists.",
+                        organization.getName()), e.getCause());
+            }
             throw new TransactionRuntimeExecutionException(e);
         }
     }

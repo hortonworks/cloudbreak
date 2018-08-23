@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -19,8 +20,6 @@ import org.springframework.stereotype.Service;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 
 @Service
 public class BlueprintLoaderService {
@@ -28,9 +27,6 @@ public class BlueprintLoaderService {
 
     @Inject
     private DefaultBlueprintCache defaultBlueprintCache;
-
-    @Inject
-    private BlueprintService blueprintService;
 
     public boolean addingDefaultBlueprintsAreNecessaryForTheUser(Collection<Blueprint> blueprints) {
         Map<String, Blueprint> defaultBlueprints = defaultBlueprintCache.defaultBlueprints();
@@ -46,24 +42,25 @@ public class BlueprintLoaderService {
         return defaultBlueprintDoesNotExistInTheDatabase(blueprints);
     }
 
-    public Set<Blueprint> loadBlueprintsForTheSpecifiedUser(User user, Set<Blueprint> blueprints, Organization organization) {
-        Set<Blueprint> blueprintsWhichShouldBeUpdate = updateDefaultBlueprints(user, blueprints, organization);
-        Set<Blueprint> blueprintsWhichAreMissing = addMissingBlueprints(user, blueprints, organization);
+    public Set<Blueprint> loadBlueprintsForTheOrganization(Set<Blueprint> blueprints, Organization organization,
+            BiFunction<Iterable<Blueprint>, Organization, Iterable<Blueprint>> saveMethod) {
+        Set<Blueprint> blueprintsWhichShouldBeUpdate = updateDefaultBlueprints(blueprints, organization);
+        Set<Blueprint> blueprintsWhichAreMissing = addMissingBlueprints(blueprints, organization);
         try {
-            LOGGER.info("Prepare Blueprint set for the user '{}' after the modifications.", user.getUserId());
             blueprintsWhichAreMissing.addAll(blueprintsWhichShouldBeUpdate);
             if (!blueprintsWhichAreMissing.isEmpty()) {
-                return Sets.newHashSet(getResultSetFromUpdateAndOriginalBlueprints(blueprints, blueprintsWhichAreMissing));
+                return Sets.newHashSet(getResultSetFromUpdateAndOriginalBlueprints(blueprints, blueprintsWhichAreMissing, organization, saveMethod));
             }
         } catch (Exception e) {
-            LOGGER.error("Blueprints {} is not available for {} user.", collectNames(blueprintsWhichAreMissing), user.getUserId());
+            LOGGER.error("Blueprints {} is not available for {} organization.", collectNames(blueprintsWhichAreMissing), organization.getId());
         }
         return blueprints;
     }
 
-    private Iterable<Blueprint> getResultSetFromUpdateAndOriginalBlueprints(Iterable<Blueprint> blueprints, Iterable<Blueprint> blueprintsWhichAreMissing) {
+    private Iterable<Blueprint> getResultSetFromUpdateAndOriginalBlueprints(Iterable<Blueprint> blueprints, Iterable<Blueprint> blueprintsWhichAreMissing,
+            Organization organization, BiFunction<Iterable<Blueprint>, Organization, Iterable<Blueprint>> saveMethod) {
         LOGGER.info("Updating blueprints which should be modified.");
-        Iterable<Blueprint> savedBlueprints = blueprintService.saveAll(blueprintsWhichAreMissing);
+        Iterable<Blueprint> savedBlueprints = saveMethod.apply(blueprintsWhichAreMissing, organization);
         LOGGER.info("Finished to update blueprints which should be modified.");
         Map<String, Blueprint> resultBlueprints = new HashMap<>();
         for (Blueprint blueprint : blueprints) {
@@ -79,19 +76,19 @@ public class BlueprintLoaderService {
         return failedToUpdate.stream().map(Blueprint::getName).collect(Collectors.toSet());
     }
 
-    private Set<Blueprint> addMissingBlueprints(User user, Iterable<Blueprint> blueprints, Organization organization) {
+    private Set<Blueprint> addMissingBlueprints(Iterable<Blueprint> blueprints, Organization organization) {
         Set<Blueprint> resultList = new HashSet<>();
         LOGGER.info("Adding default blueprints which are missing for the user.");
-        for (Map.Entry<String, Blueprint> diffBlueprint : collectDeviationOfExistingBlueprintsAndDefaultBlueprints(blueprints).entrySet()) {
-            LOGGER.info("Default Blueprint '{}' needs to add for the '{}' user because the default validation missing.",
-                    diffBlueprint.getKey(), user.getUserId());
-            resultList.add(setupBlueprint(user, diffBlueprint.getValue(), organization));
+        for (Entry<String, Blueprint> diffBlueprint : collectDeviationOfExistingBlueprintsAndDefaultBlueprints(blueprints).entrySet()) {
+            LOGGER.info("Default Blueprint '{}' needs to be added for the '{}' organization because the default validation missing.",
+                    diffBlueprint.getKey(), organization.getId());
+            resultList.add(setupBlueprint(diffBlueprint.getValue(), organization));
         }
         LOGGER.info("Finished to add default blueprints which are missing for the user.");
         return resultList;
     }
 
-    private Set<Blueprint> updateDefaultBlueprints(User user, Iterable<Blueprint> blueprints, Organization organization) {
+    private Set<Blueprint> updateDefaultBlueprints(Iterable<Blueprint> blueprints, Organization organization) {
         Set<Blueprint> resultList = new HashSet<>();
         LOGGER.info("Updating default blueprints which are contains text modifications.");
         Map<String, Blueprint> defaultBlueprints = defaultBlueprintCache.defaultBlueprints();
@@ -100,17 +97,17 @@ public class BlueprintLoaderService {
             if (defaultBlueprintExistInTheCache(newBlueprint)
                     && (defaultBlueprintContainsNewTexts(blueprintFromDatabase, newBlueprint)
                     || defaultBlueprintContainsNewDescription(blueprintFromDatabase, newBlueprint))) {
-                LOGGER.info("Default Blueprint '{}' needs to modify for the '{}' user because the validation text changed.",
-                        blueprintFromDatabase.getName(), user.getUserId());
-                resultList.add(prepateBlueprint(user, blueprintFromDatabase, newBlueprint, organization));
+                LOGGER.info("Default Blueprint '{}' needs to modify for the '{}' organization because the validation text changed.",
+                        blueprintFromDatabase.getName(), organization.getId());
+                resultList.add(prepateBlueprint(blueprintFromDatabase, newBlueprint, organization));
             }
         }
         LOGGER.info("Finished to Update default blueprints which are contains text modifications.");
         return resultList;
     }
 
-    private Blueprint prepateBlueprint(User user, Blueprint blueprintFromDatabase, Blueprint newBlueprint, Organization organization) {
-        setupBlueprint(user, blueprintFromDatabase, organization);
+    private Blueprint prepateBlueprint(Blueprint blueprintFromDatabase, Blueprint newBlueprint, Organization organization) {
+        setupBlueprint(blueprintFromDatabase, organization);
         blueprintFromDatabase.setBlueprintText(newBlueprint.getBlueprintText());
         blueprintFromDatabase.setDescription(newBlueprint.getDescription());
         blueprintFromDatabase.setHostGroupCount(newBlueprint.getHostGroupCount());
@@ -119,7 +116,7 @@ public class BlueprintLoaderService {
         return blueprintFromDatabase;
     }
 
-    private Blueprint setupBlueprint(User user, Blueprint blueprint, Organization organization) {
+    private Blueprint setupBlueprint(Blueprint blueprint, Organization organization) {
         blueprint.setOrganization(organization);
         blueprint.setStatus(DEFAULT);
         return blueprint;

@@ -26,16 +26,20 @@ import com.sequenceiq.cloudbreak.blueprint.configuration.SiteConfigurations;
 import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemConfigQueryObject;
 import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemConfigQueryObject.Builder;
 import com.sequenceiq.cloudbreak.blueprint.filesystem.query.ConfigQueryEntry;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.init.blueprint.BlueprintLoaderService;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.repository.organization.OrganizationResourceRepository;
 import com.sequenceiq.cloudbreak.service.AbstractOrganizationAwareResourceService;
+import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.util.NameUtil;
 
 @Service
@@ -54,6 +58,15 @@ public class BlueprintService extends AbstractOrganizationAwareResourceService<B
 
     @Inject
     private CentralBlueprintParameterQueryService centralBlueprintParameterQueryService;
+
+    @Inject
+    private BlueprintLoaderService blueprintLoaderService;
+
+    @Inject
+    private UserService userService;
+
+    @Inject
+    private RestRequestThreadLocalService restRequestThreadLocalService;
 
     public Blueprint get(Long id) {
         return blueprintRepository.findById(id).orElseThrow(notFound("Blueprint", id));
@@ -89,12 +102,32 @@ public class BlueprintService extends AbstractOrganizationAwareResourceService<B
         return savedBlueprint;
     }
 
-    public Set<Blueprint> getAllAvailableInOrganization(long organizationId) {
-        return blueprintRepository.findAllByNotDeletedInOrganization(organizationId);
+    @Override
+    public Set<Blueprint> findAllByOrganization(Organization organization) {
+        return getAllAvailableInOrganization(organization);
     }
 
-    public Iterable<Blueprint> saveAll(Iterable<Blueprint> entities) {
-        return blueprintRepository.saveAll(entities);
+    @Override
+    public Set<Blueprint> findAllByOrganizationId(Long organizationId) {
+        IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
+        User user = userService.getOrCreate(identityUser);
+        Organization organization = getOrganizationService().get(organizationId, user);
+        return getAllAvailableInOrganization(organization);
+    }
+
+    public Set<Blueprint> getAllAvailableInOrganization(Organization organization) {
+        Set<Blueprint> blueprints = blueprintRepository.findAllByNotDeletedInOrganization(organization.getId());
+        if (blueprintLoaderService.addingDefaultBlueprintsAreNecessaryForTheUser(blueprints)) {
+            LOGGER.info("Modifying blueprints based on the defaults for the '{}' organization.", organization.getId());
+            blueprints = blueprintLoaderService.loadBlueprintsForTheOrganization(blueprints, organization, this::saveDefaultsWithReadRight);
+            LOGGER.info("Blueprint modifications finished based on the defaults for '{}' organization.", organization.getId());
+        }
+        return blueprints;
+    }
+
+    private Iterable<Blueprint> saveDefaultsWithReadRight(Iterable<Blueprint> blueprints, Organization organization) {
+        blueprints.forEach(bp -> bp.setOrganization(organization));
+        return blueprintRepository.saveAll(blueprints);
     }
 
     public Blueprint delete(Long id) {

@@ -83,7 +83,6 @@ public class StackServiceSecurityComponentTest extends SecurityComponentTestBase
     @Inject
     private ReactorFlowManager flowManager;
 
-    // TODO: full rewrite is necessary
     @Test
     public void dummy() {
 
@@ -129,11 +128,11 @@ public class StackServiceSecurityComponentTest extends SecurityComponentTestBase
     @Configuration
     @ComponentScan(basePackages = "com.sequenceiq.cloudbreak", useDefaultFilters = false,
             includeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = {
-            StackService.class,
-            TransactionService.class,
-            Clock.class,
-            StackDownscaleValidatorService.class,
-    }))
+                    StackService.class,
+                    TransactionService.class,
+                    Clock.class,
+                    StackDownscaleValidatorService.class,
+            }))
     @EnableAspectJAutoProxy(proxyTargetClass = true)
     public static class TestConfig extends SecurityComponentTestBaseConfig {
 
