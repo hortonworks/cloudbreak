@@ -11,7 +11,7 @@ public class UserCache implements CacheDefinition {
 
     private static final long MAX_ENTRIES = 1000L;
 
-    private static final long TTL_IN_SECONDS = 15L * 60;
+    private static final long TTL_IN_SECONDS = 5L * 60;
 
     @Override
     public CacheConfiguration cacheConfiguration() {

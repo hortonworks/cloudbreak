@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.common.model.user;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 public class IdentityUser {
 
@@ -56,5 +57,21 @@ public class IdentityUser {
 
     public Date getCreated() {
         return created;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        } else if (o == null || !getClass().equals(o.getClass())) {
+            return false;
+        }
+        IdentityUser iu = (IdentityUser) o;
+        return Objects.equals(userId, iu.userId) && Objects.equals(account, iu.account);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(userId, account);
     }
 }
