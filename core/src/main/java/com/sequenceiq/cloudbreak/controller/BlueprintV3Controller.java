@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.controller;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Controller;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.BlueprintV3Endpoint;
 import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
 import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
+import com.sequenceiq.cloudbreak.api.model.ParametersQueryResponse;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -46,9 +49,7 @@ public class BlueprintV3Controller extends NotificationController implements Blu
 
     @Override
     public Set<BlueprintResponse> listByOrganization(Long organizationId) {
-        IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
-        User user = userService.getOrCreate(identityUser);
-        Organization organization = organizationService.get(organizationId, user);
+        Organization organization = getOrganization(organizationId);
         return blueprintService.getAllAvailableInOrganization(organization).stream()
                 .map(blueprint -> conversionService.convert(blueprint, BlueprintResponse.class))
                 .collect(Collectors.toSet());
@@ -80,5 +81,23 @@ public class BlueprintV3Controller extends NotificationController implements Blu
     public BlueprintRequest getRequestFromName(Long organizationId, String name) {
         Blueprint blueprint = blueprintService.getByNameForOrganizationId(name, organizationId);
         return conversionService.convert(blueprint, BlueprintRequest.class);
+    }
+
+    @Override
+    public ParametersQueryResponse getCustomParameters(Long organizationId, String name) {
+        Set<String> customParameters = blueprintService.queryCustomParameters(name, getOrganization(organizationId));
+        Map<String, String> result = new HashMap<>();
+        for (String customParameter : customParameters) {
+            result.put(customParameter, "");
+        }
+        ParametersQueryResponse parametersQueryResponse = new ParametersQueryResponse();
+        parametersQueryResponse.setCustom(result);
+        return parametersQueryResponse;
+    }
+
+    private Organization getOrganization(Long organizationId) {
+        IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
+        User user = userService.getOrCreate(identityUser);
+        return organizationService.get(organizationId, user);
     }
 }
