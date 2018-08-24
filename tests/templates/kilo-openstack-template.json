@@ -45,7 +45,7 @@
         },
         "instanceType": "m1.large",
         "volumeType": "HDD",
-        "volumeCount": 1,
+        "volumeCount": 0,
         "volumeSize": 100
       },
       "nodeCount": 1,
@@ -85,7 +85,7 @@
         },
         "instanceType": "m1.large",
         "volumeType": "HDD",
-        "volumeCount": 1,
+        "volumeCount": 0,
         "volumeSize": 100
       },
       "nodeCount": 3,
@@ -110,7 +110,7 @@
         },
         "instanceType": "m1.large",
         "volumeType": "HDD",
-        "volumeCount": 1,
+        "volumeCount": 0,
         "volumeSize": 100
       },
       "nodeCount": 0,
