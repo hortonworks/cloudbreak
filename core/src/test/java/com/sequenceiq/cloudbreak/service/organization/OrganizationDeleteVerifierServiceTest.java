@@ -38,7 +38,7 @@ public class OrganizationDeleteVerifierServiceTest {
         Organization defaultOrganizationOfUserWhoRequestTheDeletion = TestUtil.organization(1L, "testuser@mycompany.com");
         User userWhoRequestTheDeletion = TestUtil.user(1L, "testuser@mycompany.com");
 
-        thrown.expectMessage("The following organization 'testuser@mycompany.com' could not deleted because this is your default organization.");
+        thrown.expectMessage("The following organization 'testuser@mycompany.com' could not be deleted because this is your default organization.");
         thrown.expect(BadRequestException.class);
 
         underTest.checkThatOrganizationIsDeletable(userWhoRequestTheDeletion, organizationForDelete, defaultOrganizationOfUserWhoRequestTheDeletion);
