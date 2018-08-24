@@ -30,7 +30,7 @@ import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
+import com.sequenceiq.cloudbreak.service.CloudPlarformService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
@@ -64,7 +64,7 @@ public class CredentialServiceTest {
     private NotificationSender notificationSender;
 
     @Mock
-    private AccountPreferencesService accountPreferencesService;
+    private CloudPlarformService cloudPlarformService;
 
     @Mock
     private CloudbreakMessagesService messagesService;

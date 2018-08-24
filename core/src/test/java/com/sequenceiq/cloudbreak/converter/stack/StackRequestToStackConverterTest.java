@@ -46,9 +46,9 @@ import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.service.CloudPlarformService;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
 import com.sequenceiq.cloudbreak.service.stack.StackParameterService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -75,7 +75,7 @@ public class StackRequestToStackConverterTest extends AbstractJsonConverterTest<
     private AuthenticatedUserService authenticatedUserService;
 
     @Mock
-    private AccountPreferencesService accountPreferencesService;
+    private CloudPlarformService cloudPlarformService;
 
     @Mock
     private DefaultCostTaggingService defaultCostTaggingService;

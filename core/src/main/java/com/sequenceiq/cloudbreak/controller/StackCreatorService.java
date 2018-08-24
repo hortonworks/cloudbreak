@@ -44,13 +44,12 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.service.CloudPlarformService;
 import com.sequenceiq.cloudbreak.service.ClusterCreationSetupService;
 import com.sequenceiq.cloudbreak.service.StackUnderOperationService;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
-import com.sequenceiq.cloudbreak.service.account.AccountPreferencesValidationException;
-import com.sequenceiq.cloudbreak.service.account.AccountPreferencesValidator;
 import com.sequenceiq.cloudbreak.service.decorator.StackDecorator;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
@@ -91,7 +90,7 @@ public class StackCreatorService {
     private ConversionService conversionService;
 
     @Inject
-    private AccountPreferencesValidator accountPreferencesValidator;
+    private CloudPlarformService cloudPlarformService;
 
     @Inject
     private TemplateValidator templateValidator;
@@ -138,7 +137,6 @@ public class StackCreatorService {
                 LOGGER.info("Stack object has been decorated in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
                 start = System.currentTimeMillis();
-                validateAccountPreferences(stack, identityUser);
                 LOGGER.info("Account preferences has been validated in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
                 if (stack.getOrchestrator() != null && stack.getOrchestrator().getApiEndpoint() != null) {
@@ -257,14 +255,6 @@ public class StackCreatorService {
             Cluster cluster = clusterCreationService.prepare(stackRequest.getClusterRequest(), stack, blueprint, user, organization);
             LOGGER.info("Cluster object and its dependencies has been created in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
             stack.setCluster(cluster);
-        }
-    }
-
-    private void validateAccountPreferences(Stack stack, IdentityUser user) {
-        try {
-            accountPreferencesValidator.validate(stack, user.getAccount(), user.getUserId());
-        } catch (AccountPreferencesValidationException e) {
-            throw new BadRequestException(e.getMessage(), e);
         }
     }
 }
