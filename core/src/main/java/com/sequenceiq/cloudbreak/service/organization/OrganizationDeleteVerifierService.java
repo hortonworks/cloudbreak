@@ -24,7 +24,7 @@ public class OrganizationDeleteVerifierService {
         if (defaultOrganizationOfUserWhoRequestTheDeletion.equals(organizationForDelete)) {
             LOGGER.info("The requested {} organization for delete is the same as the default organization of the user {}.",
                     organizationForDelete.getName(), userWhoRequestTheDeletion.getUserName());
-            throw new BadRequestException(String.format("The following organization '%s' could not deleted because this is your default organization.",
+            throw new BadRequestException(String.format("The following organization '%s' could not be deleted because this is your default organization.",
                     organizationForDelete.getName()));
         }
         if (!stackService.findAllForOrganization(organizationForDelete.getId()).isEmpty()) {
