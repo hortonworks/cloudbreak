@@ -17,8 +17,11 @@ import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
 import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
+import com.sequenceiq.cloudbreak.api.model.ParametersQueryResponse;
+import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.BlueprintOpDescription;
+import com.sequenceiq.cloudbreak.doc.OperationDescriptions.UtilityOpDescription;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -62,5 +65,11 @@ public interface BlueprintV3Endpoint {
     @ApiOperation(value = BlueprintOpDescription.GET_BY_BLUEPRINT_NAME, produces = JSON, notes = BLUEPRINT_NOTES,
             nickname = "getBlueprintRequestFromName")
     BlueprintRequest getRequestFromName(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
+
+    @GET
+    @Path("{name}/custom-parameters")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = UtilityOpDescription.CUSTOM_PARAMETERS, produces = ContentType.JSON, nickname = "getBlueprintCustomParameters")
+    ParametersQueryResponse getCustomParameters(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
 
 }
