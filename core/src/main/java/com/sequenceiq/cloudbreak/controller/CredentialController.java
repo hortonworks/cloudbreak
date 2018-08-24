@@ -133,7 +133,7 @@ public class CredentialController extends NotificationController implements Cred
     }
 
     private CredentialResponse modifyCredential(CredentialRequest credentialRequest, User user, Organization organization) {
-        Credential credential = credentialService.update(credentialService.convertToCredential(credentialRequest), organization, user);
+        Credential credential = credentialService.updateByOrganizationId(organization.getId(), credentialService.convertToCredential(credentialRequest), user);
         return credentialService.convertToResponse(credential);
     }
 }

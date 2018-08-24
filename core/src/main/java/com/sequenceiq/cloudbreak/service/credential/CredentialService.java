@@ -102,10 +102,6 @@ public class CredentialService extends AbstractOrganizationAwareResourceService<
         return credentialAdapter.interactiveLogin(credential, organizationId, user.getUserId());
     }
 
-    public Credential update(Credential credential, Organization organization, User user) {
-        return updateByOrganizationId(organization.getId(), credential, user);
-    }
-
     public Credential updateByOrganizationId(Long organizationId, Credential credential, User user) {
         credentialValidator.validateCredentialCloudPlatform(credential.cloudPlatform());
         Credential original = Optional.ofNullable(
@@ -140,24 +136,14 @@ public class CredentialService extends AbstractOrganizationAwareResourceService<
         Credential credential = Optional.ofNullable(
                 credentialRepository.findActiveByIdAndOrganizationFilterByPlatforms(id, organization.getId(), accountPreferencesService.enabledPlatforms()))
                 .orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_ID, id));
-        delete(credential);
+        delete(credential, organization);
     }
 
     public void delete(String name, Organization organization) {
         Credential credential = Optional.ofNullable(
                 credentialRepository.findActiveByNameAndOrgIdFilterByPlatforms(name, organization.getId(), accountPreferencesService.enabledPlatforms()))
                 .orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, name));
-        delete(credential);
-    }
-
-    public Credential delete(Credential credential, Organization organization) {
-        if (canDelete(credential)) {
-            LOGGER.info(String.format("Starting to delete credential [name: %s, organization: %s]", credential.getName(), organization.getName()));
-            userProfileHandler.destroyProfileCredentialPreparation(credential);
-            archiveCredential(credential);
-            sendCredentialNotification(credential, ResourceEvent.CREDENTIAL_DELETED);
-        }
-        return credential;
+        delete(credential, organization);
     }
 
     public Set<CredentialResponse> convertAllToResponse(@Nonnull Iterable<Credential> credentials) {
@@ -188,7 +174,15 @@ public class CredentialService extends AbstractOrganizationAwareResourceService<
         return credentialRepository.findByTopology(topology);
     }
 
-    protected boolean canDelete(Credential credential) {
+    private void delete(Credential credential, Organization organization) {
+        checkCredentialIsDeletable(credential);
+        LOGGER.info(String.format("Starting to delete credential [name: %s, organization: %s]", credential.getName(), organization.getName()));
+        userProfileHandler.destroyProfileCredentialPreparation(credential);
+        archiveCredential(credential);
+        sendCredentialNotification(credential, ResourceEvent.CREDENTIAL_DELETED);
+    }
+
+    private void checkCredentialIsDeletable(Credential credential) {
         LOGGER.info("Checking whether the desired credential is able to delete or not.");
         if (credential == null) {
             throw new NotFoundException("Credential not found.");
@@ -210,7 +204,6 @@ public class CredentialService extends AbstractOrganizationAwareResourceService<
             }
             throw new BadRequestException(String.format(message, credential.getName(), clusters));
         }
-        return true;
     }
 
     @Override
@@ -225,7 +218,7 @@ public class CredentialService extends AbstractOrganizationAwareResourceService<
 
     @Override
     protected void prepareDeletion(Credential resource) {
-
+        checkCredentialIsDeletable(resource);
     }
 
     @Override
