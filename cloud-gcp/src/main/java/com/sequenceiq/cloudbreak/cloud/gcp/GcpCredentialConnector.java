@@ -9,10 +9,13 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import com.google.api.client.auth.oauth2.TokenResponseException;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.gson.JsonParser;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -104,6 +107,7 @@ public class GcpCredentialConnector implements CredentialConnector {
      * @throws IOException if something happens while listing the regions,
      *                     this exception would thrown by the api.
      */
+    @Retryable(value = GoogleJsonResponseException.class, backoff = @Backoff(delay = 1000))
     private void preCheckOfGooglePermission(GcpContext gcpContext) throws IOException {
         gcpContext.getCompute().regions().list(gcpContext.getProjectId()).executeUsingHead();
     }
