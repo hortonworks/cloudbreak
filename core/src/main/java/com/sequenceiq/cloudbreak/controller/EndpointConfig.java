@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.controller;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -28,6 +29,51 @@ import io.swagger.jaxrs.config.SwaggerContextService;
 @ApplicationPath(CoreApi.API_ROOT_CONTEXT)
 @Component
 public class EndpointConfig extends ResourceConfig {
+
+    private static final List<Class<?>> CONTROLLERS  = Arrays.asList(
+        AccountPreferencesController.class,
+        AuditController.class,
+        AuditV3Controller.class,
+        BlueprintController.class,
+        BlueprintV3Controller.class,
+        CloudbreakEventController.class,
+        CloudbreakEventV3Controller.class,
+        CloudbreakUsageController.class,
+        ClusterV1Controller.class,
+        CredentialController.class,
+        CredentialV3Controller.class,
+        FlexSubscriptionController.class,
+        FlexSubscriptionV3Controller.class,
+        ImageCatalogV1Controller.class,
+        ImageCatalogV3Controller.class,
+        KnoxServicesV3Controller.class,
+        LdapController.class,
+        LdapV3Controller.class,
+        ManagementPackController.class,
+        ManagementPackV3Controller.class,
+        OrganizationV3Controller.class,
+        PlatformParameterV1Controller.class,
+        PlatformParameterV2Controller.class,
+        PlatformParameterV3Controller.class,
+        ProxyConfigController.class,
+        ProxyConfigV3Controller.class,
+        RdsConfigController.class,
+        RdsConfigV3Controller.class,
+        RecipeController.class,
+        RecipeV3Controller.class,
+        RepositoryConfigValidationController.class,
+        SecurityRuleController.class,
+        SettingsController.class,
+        SmartSenseSubscriptionController.class,
+        SmartSenseSubscriptionV3Controller.class,
+        StackV1Controller.class,
+        StackV2Controller.class,
+        StackV3Controller.class,
+        SubscriptionController.class,
+        UserController.class,
+        UtilController.class
+    );
+
     private static final String VERSION_UNAVAILABLE = "unspecified";
 
     @Value("${info.app.version:}")
@@ -77,46 +123,7 @@ public class EndpointConfig extends ResourceConfig {
     }
 
     private void registerEndpoints() {
-        register(AccountPreferencesController.class);
-        register(AuditController.class);
-        register(BlueprintController.class);
-        register(BlueprintV3Controller.class);
-        register(CloudbreakEventController.class);
-        register(CloudbreakUsageController.class);
-        register(ClusterV1Controller.class);
-        register(CredentialController.class);
-        register(CredentialV3Controller.class);
-        register(FlexSubscriptionController.class);
-        register(FlexSubscriptionV3Controller.class);
-        register(ImageCatalogV1Controller.class);
-        register(LdapController.class);
-        register(LdapV3Controller.class);
-        register(ManagementPackController.class);
-        register(OrganizationV3Controller.class);
-        register(PlatformParameterV1Controller.class);
-        register(PlatformParameterV2Controller.class);
-        register(ProxyConfigController.class);
-        register(ProxyConfigV3Controller.class);
-        register(RdsConfigController.class);
-        register(RecipeController.class);
-        register(RecipeV3Controller.class);
-        register(RepositoryConfigValidationController.class);
-        register(SecurityRuleController.class);
-        register(SettingsController.class);
-        register(SmartSenseSubscriptionController.class);
-        register(SmartSenseSubscriptionV3Controller.class);
-        register(StackV1Controller.class);
-        register(StackV2Controller.class);
-        register(StackV3Controller.class);
-        register(SubscriptionController.class);
-        register(UserController.class);
-        register(UtilController.class);
-        register(ManagementPackV3Controller.class);
-        register(ImageCatalogV3Controller.class);
-        register(RdsConfigV3Controller.class);
-        register(AuditV3Controller.class);
-        register(KnoxServicesV3Controller.class);
-        register(PlatformParameterV3Controller.class);
+        CONTROLLERS.forEach(this::register);
 
         register(io.swagger.jaxrs.listing.ApiListingResource.class);
         register(io.swagger.jaxrs.listing.SwaggerSerializers.class);
