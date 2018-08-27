@@ -14,6 +14,11 @@ RSpec.describe 'Audit test cases', :type => :aruba do
   include_context "shared command helpers"    
   include_context "mock shared vars"   
 
+  before(:all) do
+    result = cb.configure.server(ENV['BASE_URL']).username(ENV['USERNAME_CLI']).password(ENV['PASSWORD_CLI']).org(ENV['USERNAME_CLI']).build(false)
+    expect(result.exit_status).to eql 0
+  end
+
   after(:all) do
     MockResponse.reset(ENV['BASE_URL'] + @mock_endpoint_reset)
   end

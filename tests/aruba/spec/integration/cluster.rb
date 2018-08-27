@@ -1,5 +1,6 @@
 require_relative "../common/mock_vars"
 require_relative "../common/command_helpers"
+require_relative "../common/response_helpers"
 require_relative "spec_helper"
 
 define_method(:cb) do
@@ -12,6 +13,9 @@ RSpec.describe 'Cluster test cases', :type => :aruba do
   include_context "shared command helpers"    
   include_context "mock shared vars"
 
+  after(:all) do
+    MockResponse.reset(ENV['BASE_URL'] + @mock_endpoint_reset)
+  end
 
   it "Cluster - List" do
     result = cb.cluster.list.build(false) 
@@ -67,26 +71,11 @@ RSpec.describe 'Cluster test cases', :type => :aruba do
     expect(JSON.parse(result.stdout)["name"]).to eql "openstack-cluster"    
   end
 
-  it "Cluster - Describe Failure" do
-    result = cb.cluster.describe.name("az404").build(false)   
-    expect(result.exit_status).to eql 1
-    expect(result.stderr).to include("error")
-    expect(result.stderr).to include("az404")    
-  end
-
    it "Cluster - Stop - Success" do 
     with_environment 'DEBUG' => '1' do
       result = cb.cluster.stop.name("asdfg").build(false) 
       expect(result.exit_status).to eql 0
       expect(result.stderr).to include("stop stack")          
-    end
-  end
-
-   it "Cluster - Stop - Failure" do 
-    with_environment 'DEBUG' => '1' do
-      result = cb.cluster.stop.name("azstatus").build(false)
-      expect(result.exit_status).to eql 1
-      expect(result.stderr).to include("Stack 'azstatus' not found")          
     end
   end
 
@@ -98,15 +87,7 @@ RSpec.describe 'Cluster test cases', :type => :aruba do
     end
   end
 
-   it "Cluster - Start - Failure" do 
-    with_environment 'DEBUG' => '1' do
-      result = cb.cluster.start.name("azstatus").build(false)
-      expect(result.exit_status).to eql 1
-      expect(result.stderr).to include("Stack 'azstatus' not found")          
-    end   
-  end
-
-      it "Cluster - Sync - Success" do 
+    it "Cluster - Sync - Success" do 
     with_environment 'DEBUG' => '1' do
       result = cb.cluster.sync.name("asdfg").build(false)
       expect(result.exit_status).to eql 0
@@ -114,20 +95,79 @@ RSpec.describe 'Cluster test cases', :type => :aruba do
     end
   end
 
-   it "Cluster - Sync - Failure" do 
-    with_environment 'DEBUG' => '1' do
-      result = cb.cluster.sync.name("azstatus").build(false)
-      expect(result.exit_status).to eql 1
-      expect(result.stderr).to include("Stack 'azstatus' not found")          
-    end   
-  end
-
-    it "Cluster - Repair - Success" do 
+      it "Cluster - Repair - Success" do 
     with_environment 'DEBUG' => '1' do
       result = cb.cluster.repair.name("asdfg").host_groups("test").build(false)
       expect(result.exit_status).to eql 0
       expect(result.stderr).to include("stack repaired")          
     end
+  end
+
+      it "Cluster - Scale - Success" do 
+    with_environment 'DEBUG' => '1' do
+      result = cb.cluster.scale.name("climock").group_name("hgroup").desired_node_count(3).build(false)             
+      expect(result.exit_status).to eql 0
+      expect(result.stderr).to include("stack scaled")          
+    end
+  end
+
+    xit "Cluster - Reinstall - Success" do 
+      with_environment 'DEBUG' => '1' do    
+      result = cb.cluster.reinstall.name("asdfg").cli_input_json(@cli_input_json).blueprint_name("asdfg").build(false)
+      expect(result.exit_status).to eql 0
+      expect(result.stderr).to include("reinstall stack took")          
+    end
+  end
+
+    it "Cluster - Generate re-install template " do 
+    with_environment 'DEBUG' => '1' do
+      result = cb.cluster.generate_reinstall_template.name("test").blueprint_name("test").build(false)
+      expect(result.exit_status).to eql 0 
+      expect(result.stdout.empty?).to be_falsy      
+    end
+  end
+
+  it "Cluster - Describe Failure" do
+    requestBody = MockResponse.requestBodyCreate('getStackInOrganization', '{"message":"Stack \'az404\' not found"}', '404')
+    url = ENV['BASE_URL'] + @mock_endpoint_setup
+    MockResponse.post(requestBody, url)    
+    result = cb.cluster.describe.name("az404").build(false)   
+    expect(result.exit_status).to eql 1
+    expect(result.stderr).to include("error")
+    expect(result.stderr).to include("az404")    
+  end
+
+   it "Cluster - Stop - Failure" do 
+    with_environment 'DEBUG' => '1' do
+    requestBody = MockResponse.requestBodyCreate('putstopStackV3', '{"message":"Stack \'azstatus\' not found"}', '404')
+    url = ENV['BASE_URL'] + @mock_endpoint_setup
+    MockResponse.post(requestBody, url)         
+    result = cb.cluster.stop.name("azstatus").build(false)
+    expect(result.exit_status).to eql 1
+    expect(result.stderr).to include("Stack 'azstatus' not found")          
+    end
+  end
+
+   it "Cluster - Start - Failure" do 
+     with_environment 'DEBUG' => '1' do
+      requestBody = MockResponse.requestBodyCreate('putstartStackV3', '{"message":"Stack \'azstatus\' not found"}', '404')
+      url = ENV['BASE_URL'] + @mock_endpoint_setup
+      MockResponse.post(requestBody, url)          
+      result = cb.cluster.start.name("azstatus").build(false)
+      expect(result.exit_status).to eql 1
+      expect(result.stderr).to include("Stack 'azstatus' not found")          
+    end   
+  end
+
+   it "Cluster - Sync - Failure" do 
+    with_environment 'DEBUG' => '1' do
+      requestBody = MockResponse.requestBodyCreate('putsyncStackV3', '{"message":"Stack \'azstatus\' not found"}', '404')
+      url = ENV['BASE_URL'] + @mock_endpoint_setup
+      MockResponse.post(requestBody, url)           
+      result = cb.cluster.sync.name("azstatus").build(false)
+      expect(result.exit_status).to eql 1
+      expect(result.stderr).to include("Stack 'azstatus' not found")          
+    end   
   end
 
    xit "Cluster - Repair - Failure" do 
@@ -138,28 +178,15 @@ RSpec.describe 'Cluster test cases', :type => :aruba do
     end   
   end      
   
-    it "Cluster - Scale - Success" do 
-    with_environment 'DEBUG' => '1' do
-      result = cb.cluster.scale.name("climock").group_name("hgroup").desired_node_count(3).build(false)             
-      expect(result.exit_status).to eql 0
-      expect(result.stderr).to include("stack scaled")          
-    end
-  end
-
    it "Cluster - Scale - Failure" do 
     with_environment 'DEBUG' => '1' do
+      requestBody = MockResponse.requestBodyCreate('putscalingStackV3', '{"message":"Stack \'azstatus\' not found"}', '404')
+      url = ENV['BASE_URL'] + @mock_endpoint_setup
+      MockResponse.post(requestBody, url)        
       result = cb.cluster.scale.name("azstatus").group_name("hgroup").desired_node_count(3).build(false)   
       expect(result.exit_status).to eql 1
       expect(result.stderr).to include("Stack 'azstatus' not found")          
     end                   
-  end
-
-    it "Cluster - Reinstall - Success" do 
-    with_environment 'DEBUG' => '1' do
-      result = cb.cluster.reinstall.name("asdfg").cli_input_json(@cli_input_json).blueprint_name("asdfg").build(false)
-      expect(result.exit_status).to eql 0
-      expect(result.stderr).to include("reinstall stack took")          
-    end
   end
 
     it "Cluster - Generate template - AWS - New network" do 
@@ -251,16 +278,11 @@ RSpec.describe 'Cluster test cases', :type => :aruba do
     end
   end 
 
-    it "Cluster - Generate re-install template " do 
-    with_environment 'DEBUG' => '1' do
-      result = cb.cluster.generate_reinstall_template.name("test").blueprint_name("test").build(false)
-      expect(result.exit_status).to eql 0 
-      expect(result.stdout.empty?).to be_falsy      
-    end
-  end
-
-    it "Cluster - Generate attached cluster template " do 
-    with_environment 'DEBUG' => '1' do
+    xit "Cluster - Generate attached cluster template " do 
+    with_environment 'DEBUG' => '1' do   
+      requestBody = MockResponse.requestBodyCreate('getStackInOrganization', load_json(@dl_stack_json), '200')
+      url = ENV['BASE_URL'] + @mock_endpoint_setup
+      MockResponse.post(requestBody, url)          
       result = cb.cluster.generate_attached_cluster_template.source_cluster("dl-ok").blueprint_name("test").build(false)
       expect(result.exit_status).to eql 0
       expect(result.stdout.empty?).to be_falsy 
@@ -280,5 +302,5 @@ RSpec.describe 'Cluster test cases', :type => :aruba do
       result = cb.cluster.retry.name("test").build(false)
       expect(result.exit_status).to eql 0 
     end
-  end                 
+  end               
 end  

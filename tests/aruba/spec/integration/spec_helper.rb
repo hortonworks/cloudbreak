@@ -2,6 +2,7 @@ require 'aruba/rspec'
 require "rspec/json_expectations"
 require 'json'
 require 'allure-rspec'
+require 'rest-client'
 require_relative "../common/command_builder"
 
 RSpec.configure do |config|

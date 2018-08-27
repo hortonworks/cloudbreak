@@ -3,10 +3,10 @@
   "availabilityZone": "nova",
   "region": "RegionOne",
   "platformVariant": "HEAT",
-  "credentialId": 58,
+  "credentialId": 652,
   "onFailureAction": "DO_NOTHING",
-  "networkId": 330,
-  "ambariVersion": "2.6.2.0",
+  "networkId": 336,
+  "ambariVersion": "2.6.2.2",
   "hdpVersion": "2.6.5.0-292",
   "parameters": {},
   "customDomain": null,
@@ -16,19 +16,19 @@
   "applicationTags": {},
   "userDefinedTags": {},
   "defaultTags": {
-    "cb-creation-timestamp": "1530625603",
-    "cb-version": "2.8.0-dev.105",
+    "cb-creation-timestamp": "1535447460",
+    "cb-version": "2.8.0-dev.407",
     "Owner": "admin@example.com",
-    "cb-account-name": "seq1234567",
+    "cb-account-name": "unknown",
     "cb-user-name": "admin@example.com"
   },
   "customInputs": {},
-  "id": 325,
+  "id": 331,
   "owner": "50bb3a88-71d0-49db-8756-0ff75b9c7b86",
   "account": "seq1234567",
   "status": "AVAILABLE",
   "cluster": {
-    "id": 244,
+    "id": 250,
     "name": "hm-cl",
     "status": "AVAILABLE",
     "hoursUp": 0,
@@ -36,13 +36,13 @@
     "cluster": null,
     "blueprintId": 110,
     "blueprint": {
-      "ambariBlueprint": "eyJCbHVlcHJpbnRzIjp7ImJsdWVwcmludF9uYW1lIjoiaGRwMjYtc2hhcmVkLXNlcnZpY2VzIiwic3RhY2tfbmFtZSI6IkhEUCIsInN0YWNrX3ZlcnNpb24iOiIyLjYifSwic2V0dGluZ3MiOlt7InJlY292ZXJ5X3NldHRpbmdzIjpbXX0seyJzZXJ2aWNlX3NldHRpbmdzIjpbeyJuYW1lIjoiSElWRSIsImNyZWRlbnRpYWxfc3RvcmVfZW5hYmxlZCI6ImZhbHNlIn1dfSx7ImNvbXBvbmVudF9zZXR0aW5ncyI6W119XSwiY29uZmlndXJhdGlvbnMiOltdLCJob3N0X2dyb3VwcyI6W3sibmFtZSI6Im1hc3RlciIsImNvbmZpZ3VyYXRpb25zIjpbXSwiY29tcG9uZW50cyI6W3sibmFtZSI6Ik1FVFJJQ1NfQ09MTEVDVE9SIn0seyJuYW1lIjoiTUVUUklDU19NT05JVE9SIn0seyJuYW1lIjoiWk9PS0VFUEVSX0NMSUVOVCJ9LHsibmFtZSI6IlpPT0tFRVBFUl9TRVJWRVIifSx7Im5hbWUiOiJJTkZSQV9TT0xSX0NMSUVOVCJ9LHsibmFtZSI6IlJBTkdFUl9UQUdTWU5DIn0seyJuYW1lIjoiUkFOR0VSX1VTRVJTWU5DIn0seyJuYW1lIjoiUkFOR0VSX0FETUlOIn0seyJuYW1lIjoiSU5GUkFfU09MUiJ9LHsibmFtZSI6IkhJVkVfTUVUQVNUT1JFIn0seyJuYW1lIjoiSElWRV9DTElFTlQifV0sImNhcmRpbmFsaXR5IjoiMSJ9XX0=",
-      "description": "Data Lake: Apache Ranger, Apache Hive Metastore",
+      "ambariBlueprint": "eyJCbHVlcHJpbnRzIjp7ImJsdWVwcmludF9uYW1lIjoiaGRwMjYtc2hhcmVkLXNlcnZpY2VzIiwic3RhY2tfbmFtZSI6IkhEUCIsInN0YWNrX3ZlcnNpb24iOiIyLjYifSwic2V0dGluZ3MiOlt7InJlY292ZXJ5X3NldHRpbmdzIjpbXX0seyJzZXJ2aWNlX3NldHRpbmdzIjpbeyJuYW1lIjoiSElWRSIsImNyZWRlbnRpYWxfc3RvcmVfZW5hYmxlZCI6ImZhbHNlIn1dfSx7ImNvbXBvbmVudF9zZXR0aW5ncyI6W119XSwiY29uZmlndXJhdGlvbnMiOltdLCJob3N0X2dyb3VwcyI6W3sibmFtZSI6Im1hc3RlciIsImNvbmZpZ3VyYXRpb25zIjpbXSwiY29tcG9uZW50cyI6W3sibmFtZSI6Ik1FVFJJQ1NfQ09MTEVDVE9SIn0seyJuYW1lIjoiTUVUUklDU19NT05JVE9SIn0seyJuYW1lIjoiWk9PS0VFUEVSX0NMSUVOVCJ9LHsibmFtZSI6IkhJU1RPUllTRVJWRVIifSx7Im5hbWUiOiJaT09LRUVQRVJfU0VSVkVSIn0seyJuYW1lIjoiSU5GUkFfU09MUl9DTElFTlQifSx7Im5hbWUiOiJSQU5HRVJfVEFHU1lOQyJ9LHsibmFtZSI6IlJBTkdFUl9VU0VSU1lOQyJ9LHsibmFtZSI6IlJBTkdFUl9BRE1JTiJ9LHsibmFtZSI6IkFQUF9USU1FTElORV9TRVJWRVIifSx7Im5hbWUiOiJKT1VSTkFMTk9ERSJ9LHsibmFtZSI6IktBRktBX0JST0tFUiJ9LHsibmFtZSI6IlRFWl9DTElFTlQifSx7Im5hbWUiOiJZQVJOX0NMSUVOVCJ9LHsibmFtZSI6Ik5BTUVOT0RFIn0seyJuYW1lIjoiUkVTT1VSQ0VNQU5BR0VSIn0seyJuYW1lIjoiU0VDT05EQVJZX05BTUVOT0RFIn0seyJuYW1lIjoiSU5GUkFfU09MUiJ9LHsibmFtZSI6IkhJVkVfTUVUQVNUT1JFIn0seyJuYW1lIjoiSElWRV9DTElFTlQifSx7Im5hbWUiOiJBVExBU19TRVJWRVIifSx7Im5hbWUiOiJBVExBU19DTElFTlQifSx7Im5hbWUiOiJIQkFTRV9SRUdJT05TRVJWRVIifSx7Im5hbWUiOiJIQkFTRV9NQVNURVIifSx7Im5hbWUiOiJIQkFTRV9DTElFTlQifSx7Im5hbWUiOiJEQVRBTk9ERSJ9XSwiY2FyZGluYWxpdHkiOiIxIn1dfQ==",
+      "description": "Data Lake: Apache Ranger, Apache Atlas, Apache Hive Metastore",
       "inputs": [],
       "tags": {
         "shared_services_ready": true
       },
-      "name": "Data Lake: Apache Ranger, Apache Hive Metastore",
+      "name": "Data Lake: Apache Ranger, Apache Atlas, Apache Hive Metastore",
       "id": 110,
       "hostGroupCount": 1,
       "status": "DEFAULT",
@@ -50,8 +50,8 @@
     },
     "description": "",
     "statusReason": "",
-    "ambariServerIp": "172.21.250.80",
-    "ambariServerUrl": "https://172.21.250.80/ambari/",
+    "ambariServerIp": "172.21.250.172",
+    "ambariServerUrl": "https://172.21.250.172/ambari/",
     "userName": "admin",
     "secure": false,
     "hostGroups": [
@@ -64,24 +64,36 @@
         },
         "recipeIds": [],
         "recoveryMode": "MANUAL",
-        "id": 755,
+        "id": 767,
         "recipes": [],
-        "metadata": [
-          {
-            "name": "host-10-0-0-3.openstacklocal",
-            "groupName": "master",
-            "id": 675,
-            "state": "SERVICES_RUNNING"
-          }
-        ]
+        "metadata": []
       }
     ],
     "rdsConfigIds": [
       792,
-      793,
-      510
+      776
     ],
     "rdsConfigs": [
+      {
+        "name": "db-postgres",
+        "connectionURL": "jdbc:postgresql://e2etest.cdn4ilznrlxv.eu-west-1.rds.amazonaws.com:5432/e2etest",
+        "type": "Hive",
+        "connectorJarUrl": null,
+        "id": 776,
+        "creationDate": 1529317935719,
+        "publicInAccount": true,
+        "clusterNames": [
+          "hm-cl"
+        ],
+        "stackVersion": null,
+        "databaseEngine": "POSTGRES",
+        "connectionDriver": "org.postgresql.Driver",
+        "databaseEngineDisplayName": "PostgreSQL",
+        "organization": {
+          "id": 2,
+          "name": "admin@example.com"
+        }
+      },
       {
         "name": "ranger",
         "connectionURL": "jdbc:postgresql://e2etest.cdn4ilznrlxv.eu-west-1.rds.amazonaws.com:5432/e2etest",
@@ -89,30 +101,18 @@
         "connectorJarUrl": null,
         "id": 792,
         "creationDate": 1530625301303,
-        "publicInAccount": false,
+        "publicInAccount": true,
         "clusterNames": [
           "hm-cl"
         ],
         "stackVersion": null,
         "databaseEngine": "POSTGRES",
         "connectionDriver": "org.postgresql.Driver",
-        "databaseEngineDisplayName": "PostgreSQL"
-      },
-      {
-        "name": "valid-rds",
-        "connectionURL": "jdbc:postgresql://e2etest.cdn4ilznrlxv.eu-west-1.rds.amazonaws.com:5432/e2etest",
-        "type": "HIVE",
-        "connectorJarUrl": null,
-        "id": 510,
-        "creationDate": 1522321948958,
-        "publicInAccount": false,
-        "clusterNames": [
-          "hm-cl"
-        ],
-        "stackVersion": null,
-        "databaseEngine": "POSTGRES",
-        "connectionDriver": "org.postgresql.Driver",
-        "databaseEngineDisplayName": "PostgreSQL"
+        "databaseEngineDisplayName": "PostgreSQL",
+        "organization": {
+          "id": 2,
+          "name": "admin@example.com"
+        }
       }
     ],
     "proxyName": null,
@@ -138,7 +138,7 @@
       "adminGroup": "",
       "name": "ldap-test",
       "id": 1,
-      "public": false
+      "public": true
     },
     "attributes": {},
     "blueprintInputs": [],
@@ -165,27 +165,27 @@
       "hdpVersion": "2.6.5.0"
     },
     "ambariRepoDetailsJson": {
-      "version": "2.6.2.0",
-      "baseUrl": "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.2.0"
+      "version": "2.6.2.2",
+      "baseUrl": "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.2.2"
     },
     "ambariDatabaseDetails": null,
     "customQueue": "default",
     "creationFinished": null,
     "kerberosResponse": null,
     "uptime": 0,
-    "extendedBlueprintText": "eyJCbHVlcHJpbnRzIjp7ImJsdWVwcmludF9uYW1lIjoiaGRwMjYtc2hhcmVkLXNlcnZpY2VzIiwic3RhY2tfbmFtZSI6IkhEUCIsInN0YWNrX3ZlcnNpb24iOiIyLjYifSwic2V0dGluZ3MiOlt7InJlY292ZXJ5X3NldHRpbmdzIjpbeyJyZWNvdmVyeV9lbmFibGVkIjoidHJ1ZSJ9XX0seyJzZXJ2aWNlX3NldHRpbmdzIjpbeyJuYW1lIjoiSElWRSIsImNyZWRlbnRpYWxfc3RvcmVfZW5hYmxlZCI6ImZhbHNlIn1dfSx7ImNvbXBvbmVudF9zZXR0aW5ncyI6W119XSwiY29uZmlndXJhdGlvbnMiOlt7InJhbmdlci1lbnYiOnsicHJvcGVydGllcyI6eyJyYW5nZXJfYWRtaW5fcGFzc3dvcmQiOiIqKioqIiwiYWRtaW5fcGFzc3dvcmQiOiIqKioqIiwicmFuZ2VyX3ByaXZlbGVnZV91c2VyX2pkYmNfdXJsIjoiamRiYzpwb3N0Z3Jlc3FsOi8vZTJldGVzdC5jZG40aWx6bnJseHYuZXUtd2VzdC0xLnJkcy5hbWF6b25hd3MuY29tOjU0MzIiLCJjcmVhdGVfZGJfZGJ1c2VyIjoiZmFsc2UiLCJyYW5nZXIteWFybi1wbHVnaW4tZW5hYmxlZCI6Ik5vIiwiaXNfc29sckNsb3VkX2VuYWJsZWQiOiJ0cnVlIiwicmFuZ2VyLWhpdmUtcGx1Z2luLWVuYWJsZWQiOiJObyIsInhhc2VjdXJlLmF1ZGl0LmRlc3RpbmF0aW9uLmhkZnMiOiJ0cnVlIiwicmFuZ2VyLWhkZnMtcGx1Z2luLWVuYWJsZWQiOiJObyIsInhhc2VjdXJlLmF1ZGl0LmRlc3RpbmF0aW9uLnNvbHIiOiJ0cnVlIiwicmFuZ2VyLWF0bGFzLXBsdWdpbi1lbmFibGVkIjoiTm8ifX19LHsicmFuZ2VyLWFkbWluLXNpdGUiOnsicHJvcGVydGllcyI6eyJyYW5nZXIuYXV0aGVudGljYXRpb24ubWV0aG9kIjoiTERBUCIsInJhbmdlci5sZGFwLnVzZXIuZG5wYXR0ZXJuIjoiY249ezB9LENOPVVzZXJzLERDPWFkLERDPWh3eCxEQz1jb20iLCJyYW5nZXIubGRhcC5hZC5kb21haW4iOiIgIiwicmFuZ2VyLmxkYXAuYWQudXNlci5zZWFyY2hmaWx0ZXIiOiIoY249ezB9KSIsInJhbmdlci5sZGFwLmFkLmJpbmQuZG4iOiJDTj1BZG1pbmlzdHJhdG9yLENOPVVzZXJzLERDPWFkLERDPWh3eCxEQz1jb20iLCJyYW5nZXIubGRhcC5hZC5iaW5kLnBhc3N3b3JkIjoiKioqKiIsInJhbmdlci5sZGFwLmJpbmQuZG4iOiJDTj1BZG1pbmlzdHJhdG9yLENOPVVzZXJzLERDPWFkLERDPWh3eCxEQz1jb20iLCJyYW5nZXIubGRhcC5iaW5kLnBhc3N3b3JkIjoiKioqKiIsInJhbmdlci5sZGFwLnVzZXIuc2VhcmNoZmlsdGVyIjoiKGNuPXswfSkiLCJyYW5nZXIubGRhcC51cmwiOiJsZGFwOi8vaHd4YWQtN2Y5ZWNiNGQ3NTIwNmIwOS5lbGIuZXUtd2VzdC0xLmFtYXpvbmF3cy5jb206Mzg5IiwicmFuZ2VyLmxkYXAuYWQudXJsIjoibGRhcDovL2h3eGFkLTdmOWVjYjRkNzUyMDZiMDkuZWxiLmV1LXdlc3QtMS5hbWF6b25hd3MuY29tOjM4OSIsInJhbmdlci5sZGFwLmFkLmJhc2UuZG4iOiJDTj1Vc2VycyxEQz1hZCxEQz1od3gsREM9Y29tIiwicmFuZ2VyLmxkYXAuYmFzZS5kbiI6IkNOPVVzZXJzLERDPWFkLERDPWh3eCxEQz1jb20iLCJyYW5nZXIubGRhcC5ncm91cC5zZWFyY2hiYXNlIjoiQ049VXNlcnMsREM9YWQsREM9aHd4LERDPWNvbSIsInJhbmdlci5sZGFwLmdyb3VwLnJvbGVhdHRyaWJ1dGUiOiJjbiIsInJhbmdlci5qcGEuamRiYy5kcml2ZXIiOiJvcmcucG9zdGdyZXNxbC5Ecml2ZXIifX19LHsiYWRtaW4tcHJvcGVydGllcyI6eyJwcm9wZXJ0aWVzIjp7IkRCX0ZMQVZPUiI6IlBPU1RHUkVTIiwiZGJfbmFtZSI6ImUyZXRlc3QiLCJkYl91c2VyIjoiZTJldGVzdCIsImRiX2hvc3QiOiJlMmV0ZXN0LmNkbjRpbHpucmx4di5ldS13ZXN0LTEucmRzLmFtYXpvbmF3cy5jb206NTQzMiIsImRiX3Bhc3N3b3JkIjoiKioqKiJ9fX0seyJyYW5nZXItdWdzeW5jLXNpdGUiOnsicHJvcGVydGllcyI6eyJyYW5nZXIudXNlcnN5bmMubGRhcC5kZWx0YXN5bmMiOiJmYWxzZSIsInJhbmdlci51c2Vyc3luYy5lbmFibGVkIjoidHJ1ZSIsInJhbmdlci51c2Vyc3luYy5ncm91cC5zZWFyY2hiYXNlIjoiQ049VXNlcnMsREM9YWQsREM9aHd4LERDPWNvbSIsInJhbmdlci51c2Vyc3luYy5ncm91cC5uYW1lYXR0cmlidXRlIjoiY24iLCJyYW5nZXIudXNlcnN5bmMuZ3JvdXAuYmFzZWQucm9sZS5hc3NpZ25tZW50LnJ1bGVzIjoiJlJPTEVfU1lTX0FETUlOOmc6IiwicmFuZ2VyLnVzZXJzeW5jLmxkYXAuYmluZGRuIjoiQ049QWRtaW5pc3RyYXRvcixDTj1Vc2VycyxEQz1hZCxEQz1od3gsREM9Y29tIiwicmFuZ2VyLnVzZXJzeW5jLnNvdXJjZS5pbXBsLmNsYXNzIjoib3JnLmFwYWNoZS5yYW5nZXIubGRhcHVzZXJzeW5jLnByb2Nlc3MuTGRhcFVzZXJHcm91cEJ1aWxkZXIiLCJyYW5nZXIudXNlcnN5bmMubGRhcC51c2VyLm5hbWVhdHRyaWJ1dGUiOiJzQU1BY2NvdW50TmFtZSIsInJhbmdlci51c2Vyc3luYy5ncm91cC5zZWFyY2hmaWx0ZXIiOiIgIiwicmFuZ2VyLnVzZXJzeW5jLmdyb3VwLnNlYXJjaGVuYWJsZWQiOiJ0cnVlIiwicmFuZ2VyLnVzZXJzeW5jLmxkYXAudXNlci5zZWFyY2hiYXNlIjoiQ049VXNlcnMsREM9YWQsREM9aHd4LERDPWNvbSIsInJhbmdlci51c2Vyc3luYy5sZGFwLmxkYXBiaW5kcGFzc3dvcmQiOiIqKioqIiwicmFuZ2VyLnVzZXJzeW5jLmxkYXAudXNlci5vYmplY3RjbGFzcyI6InBlcnNvbiIsInJhbmdlci51c2Vyc3luYy5ncm91cC5vYmplY3RjbGFzcyI6Imdyb3VwIiwicmFuZ2VyLnVzZXJzeW5jLmdyb3VwLm1lbWJlcmF0dHJpYnV0ZW5hbWUiOiJtZW1iZXIiLCJyYW5nZXIudXNlcnN5bmMubGRhcC51cmwiOiJsZGFwOi8vaHd4YWQtN2Y5ZWNiNGQ3NTIwNmIwOS5lbGIuZXUtd2VzdC0xLmFtYXpvbmF3cy5jb206Mzg5In19fSx7ImNsdXN0ZXItZW52Ijp7InByb3BlcnRpZXMiOnsicmVjb3ZlcnlfZW5hYmxlZCI6InRydWUiLCJjb21tYW5kc190b19yZXRyeSI6IlNUQVJUIiwicmVjb3ZlcnlfdHlwZSI6IkFVVE9fU1RBUlQifX19LHsiaGJhc2Utc2l0ZSI6eyJwcm9wZXJ0aWVzIjp7Inpvb2tlZXBlci5yZWNvdmVyeS5yZXRyeSI6IjEwIn19fSx7ImNvcmUtc2l0ZSI6eyJwcm9wZXJ0aWVzIjp7InByb3h5dXNlcl9ncm91cCI6ImhhZG9vcCIsImhhZG9vcC5wcm94eXVzZXIuZmFsY29uLmdyb3VwcyI6IioiLCJoYWRvb3AucHJveHl1c2VyLnJvb3QuZ3JvdXBzIjoiKiIsImhhZG9vcC5wcm94eXVzZXIubGl2eS5ob3N0cyI6IioiLCJoYWRvb3AucHJveHl1c2VyLmZhbGNvbi5ob3N0cyI6IioiLCJoYWRvb3AucHJveHl1c2VyLm9vemllLmhvc3RzIjoiKiIsImhhZG9vcC5wcm94eXVzZXIuaGNhdC5ob3N0cyI6IioiLCJoYWRvb3AucHJveHl1c2VyLm9vemllLmdyb3VwcyI6IioiLCJoYWRvb3AucHJveHl1c2VyLmhpdmUuZ3JvdXBzIjoiKiIsImhhZG9vcC5wcm94eXVzZXIuaGNhdC5ncm91cHMiOiIqIiwiaGFkb29wLnByb3h5dXNlci5saXZ5Lmdyb3VwcyI6IioiLCJoYWRvb3AucHJveHl1c2VyLmhiYXNlLmdyb3VwcyI6IioiLCJoYWRvb3AucHJveHl1c2VyLmhiYXNlLmhvc3RzIjoiKiIsImhhZG9vcC5wcm94eXVzZXIucm9vdC5ob3N0cyI6IioiLCJoYWRvb3AucHJveHl1c2VyLmhpdmUuaG9zdHMiOiIqIiwiaGFkb29wLnNlY3VyaXR5Lmdyb3VwLm1hcHBpbmcubGRhcC5zZWFyY2guZmlsdGVyLnVzZXIiOiIoJihvYmplY3RDbGFzcz1wZXJzb24pKHNBTUFjY291bnROYW1lPXswfSkpIiwiaGFkb29wLnNlY3VyaXR5Lmdyb3VwLm1hcHBpbmcubGRhcC5zZWFyY2guYXR0ci5tZW1iZXIiOiJtZW1iZXIiLCJoYWRvb3Auc2VjdXJpdHkuZ3JvdXAubWFwcGluZy5sZGFwLnVzZXJiYXNlIjoiQ049VXNlcnMsREM9YWQsREM9aHd4LERDPWNvbSIsImhhZG9vcC5zZWN1cml0eS5ncm91cC5tYXBwaW5nLmxkYXAuc2VhcmNoLmF0dHIuZ3JvdXAubmFtZSI6ImNuIiwiaGFkb29wLnNlY3VyaXR5Lmdyb3VwLm1hcHBpbmciOiJvcmcuYXBhY2hlLmhhZG9vcC5zZWN1cml0eS5MZGFwR3JvdXBzTWFwcGluZyIsImhhZG9vcC5zZWN1cml0eS5ncm91cC5tYXBwaW5nLmxkYXAudXJsIjoibGRhcDovL2h3eGFkLTdmOWVjYjRkNzUyMDZiMDkuZWxiLmV1LXdlc3QtMS5hbWF6b25hd3MuY29tOjM4OSIsImhhZG9vcC5zZWN1cml0eS5ncm91cC5tYXBwaW5nLmxkYXAuZ3JvdXBiYXNlIjoiQ049VXNlcnMsREM9YWQsREM9aHd4LERDPWNvbSIsImhhZG9vcC5zZWN1cml0eS5ncm91cC5tYXBwaW5nLmxkYXAuYmluZC51c2VyIjoiQ049QWRtaW5pc3RyYXRvcixDTj1Vc2VycyxEQz1hZCxEQz1od3gsREM9Y29tIiwiaGFkb29wLnNlY3VyaXR5Lmdyb3VwLm1hcHBpbmcubGRhcC5iaW5kLnBhc3N3b3JkIjoiKioqKiIsImhhZG9vcC5zZWN1cml0eS5ncm91cC5tYXBwaW5nLmxkYXAuc2VhcmNoLmZpbHRlci5ncm91cCI6IihvYmplY3RDbGFzcz1ncm91cCkifX19LHsiaGl2ZS1zaXRlIjp7InByb3BlcnRpZXMiOnsiamF2YXguamRvLm9wdGlvbi5Db25uZWN0aW9uVXNlck5hbWUiOiJlMmV0ZXN0IiwiamF2YXguamRvLm9wdGlvbi5Db25uZWN0aW9uRHJpdmVyTmFtZSI6Im9yZy5wb3N0Z3Jlc3FsLkRyaXZlciIsImphdmF4Lmpkby5vcHRpb24uQ29ubmVjdGlvblBhc3N3b3JkIjoiKioqKiIsImphdmF4Lmpkby5vcHRpb24uQ29ubmVjdGlvblVSTCI6ImpkYmM6cG9zdGdyZXNxbDovL2UyZXRlc3QuY2RuNGlsem5ybHh2LmV1LXdlc3QtMS5yZHMuYW1hem9uYXdzLmNvbTo1NDMyL2UyZXRlc3QifX19LHsiaGl2ZS1lbnYiOnsicHJvcGVydGllcyI6eyJoaXZlX2RhdGFiYXNlIjoiRXhpc3RpbmcgUG9zdGdyZVNRTCBEYXRhYmFzZSIsImhpdmVfZGF0YWJhc2VfdHlwZSI6InBvc3RncmVzIn19fSx7InJhbmdlci1oaXZlLXBsdWdpbi1wcm9wZXJ0aWVzIjp7InByb3BlcnRpZXMiOnsicmFuZ2VyLnNlcnZpY2UuY29uZmlnLnBhcmFtLmVuYWJsZS5oaXZlLm1ldGFzdG9yZS5sb29rdXAiOiJ0cnVlIiwicmFuZ2VyLnNlcnZpY2UuY29uZmlnLnBhcmFtLmhpdmUuc2l0ZS5maWxlLnBhdGgiOiIvZXRjL2hpdmUvY29uZi9oaXZlLXNpdGUueG1sIn19fSx7Inpvby5jZmciOnsicHJvcGVydGllcyI6eyJkYXRhRGlyIjoiL2hhZG9vcGZzL2ZzMS96b29rZWVwZXIifX19LHsiYW1zLWhiYXNlLXNpdGUiOnsicHJvcGVydGllcyI6eyJoYmFzZS53YWwuZGlyIjoiZmlsZTovLy9oYWRvb3Bmcy9mczEvbWV0cmljcy9oYmFzZS93YWwiLCJoYmFzZS50bXAuZGlyIjoiL2hhZG9vcGZzL2ZzMS9tZXRyaWNzL2hiYXNlLXRtcCJ9fX0seyJhbXMtc2l0ZSI6eyJwcm9wZXJ0aWVzIjp7InRpbWVsaW5lLm1ldHJpY3MuYWdncmVnYXRvci5jaGVja3BvaW50LmRpciI6Ii9oYWRvb3Bmcy9mczEvbWV0cmljcy9jaGVja3BvaW50In19fSx7ImluZnJhLXNvbHItZW52Ijp7InByb3BlcnRpZXMiOnsiaW5mcmFfc29scl9kYXRhZGlyIjoiL2hhZG9vcGZzL2ZzMS9pbmZyYS9zb2xyIn19fV0sImhvc3RfZ3JvdXBzIjpbeyJuYW1lIjoibWFzdGVyIiwiY29uZmlndXJhdGlvbnMiOltdLCJjb21wb25lbnRzIjpbeyJuYW1lIjoiTUVUUklDU19DT0xMRUNUT1IifSx7Im5hbWUiOiJNRVRSSUNTX01PTklUT1IifSx7Im5hbWUiOiJaT09LRUVQRVJfQ0xJRU5UIn0seyJuYW1lIjoiWk9PS0VFUEVSX1NFUlZFUiJ9LHsibmFtZSI6IklORlJBX1NPTFJfQ0xJRU5UIn0seyJuYW1lIjoiUkFOR0VSX1RBR1NZTkMifSx7Im5hbWUiOiJSQU5HRVJfVVNFUlNZTkMifSx7Im5hbWUiOiJSQU5HRVJfQURNSU4ifSx7Im5hbWUiOiJJTkZSQV9TT0xSIn0seyJuYW1lIjoiSElWRV9NRVRBU1RPUkUifSx7Im5hbWUiOiJISVZFX0NMSUVOVCJ9XSwiY2FyZGluYWxpdHkiOiIxIn1dfQ==",
+    "extendedBlueprintText": null,
     "sharedServiceResponse": {
       "attachedClusters": []
     },
-    "fileSystemResponse": {
-      "id":1,
-      "name": "testfs",
-      "type": "S3"
+    "fileSystemResponse": null,
+    "organization": {
+      "id": 2,
+      "name": "admin@example.com"
     }
   },
   "statusReason": "Building the Ambari cluster. Ambari ip:172.21.250.80",
   "credential": {
-    "name": "newopens",
+    "name": "openstack",
     "cloudPlatform": "OPENSTACK",
     "parameters": {
       "facing": "public",
@@ -197,96 +197,109 @@
     },
     "description": "",
     "topologyId": null,
-    "id": 58,
-    "public": false
+    "organization": {
+      "id": 2,
+      "name": "admin@example.com"
+    },
+    "id": 652,
+    "public": true
   },
   "network": {
     "description": null,
     "subnetCIDR": "10.0.0.0/16",
     "cloudPlatform": "OPENSTACK",
     "parameters": {
-      "subnetId": "81339ec3-3c76-49c7-9f57-b2a343422f67",
-      "networkingOption": "self-service",
       "publicNetId": "999e09bc-cf75-4a19-98fb-c0b4ddee6d93",
+      "networkingOption": "self-service",
+      "subnetId": "39d34307-5784-4c25-ab23-b30aef04c692",
       "routerId": null,
       "internetGatewayId": null,
       "vpcId": null,
-      "networkId": "73dbb5f6-0ef3-4949-949f-cdfa000c1fe1"
+      "networkId": "5251c196-7fec-4bee-95d9-60a4741ccbef"
     },
     "topologyId": null,
-    "name": "n5d0f5f75-85b8-451a-b77b-bf576a44acfc",
-    "id": 330,
-    "publicInAccount": false
+    "name": "n259f32f9-502a-444e-aac6-233f41cdddbd",
+    "organization": {
+      "id": 2,
+      "name": "admin@example.com"
+    },
+    "id": 336
   },
   "instanceGroups": [
     {
-      "templateId": 884,
-      "securityGroupId": 812,
+      "templateId": 896,
+      "securityGroupId": 824,
       "nodeCount": 1,
       "group": "master",
       "type": "GATEWAY",
       "parameters": {},
       "template": {
         "cloudPlatform": "OPENSTACK",
-        "parameters": {
-          "encrypted": false
-        },
+        "parameters": {},
+        "secretParameters": {},
         "description": "",
         "volumeType": "HDD",
         "rootVolumeSize": 50,
         "instanceType": "m1.large",
         "customInstanceType": null,
         "topologyId": null,
-        "name": "ta826c2ee-7c58-4d51-8742-c7ad81cb34f9",
-        "id": 884,
+        "name": "t0b3b707f-1c6f-462c-8136-e2d5eb60b149",
+        "id": 896,
         "volumeCount": 0,
         "volumeSize": 100,
-        "public": false
+        "awsParameters": null,
+        "gcpParameters": null,
+        "azureParameters": null,
+        "openStackParameters": null,
+        "yarnParameters": null,
+        "public": true
       },
       "securityGroup": {
         "description": null,
         "securityGroupId": null,
+        "securityGroupIds": [],
         "cloudPlatform": "OPENSTACK",
-        "name": "sg19472905-66bb-4555-9b19-3564369aba4e",
-        "id": 812,
-        "owner": "50bb3a88-71d0-49db-8756-0ff75b9c7b86",
-        "account": "seq1234567",
+        "name": "sg16362017-044e-4bf4-bb4f-2a1b53286b5e",
+        "id": 824,
         "securityRules": [
           {
             "subnet": "0.0.0.0/0",
             "ports": "443",
             "protocol": "tcp",
             "modifiable": false,
-            "id": 1483
-          },
-          {
-            "subnet": "0.0.0.0/0",
-            "ports": "22",
-            "protocol": "tcp",
-            "modifiable": false,
-            "id": 1482
+            "id": 1508
           },
           {
             "subnet": "0.0.0.0/0",
             "ports": "9443",
             "protocol": "tcp",
             "modifiable": false,
-            "id": 1481
+            "id": 1506
+          },
+          {
+            "subnet": "0.0.0.0/0",
+            "ports": "22",
+            "protocol": "tcp",
+            "modifiable": false,
+            "id": 1507
           }
         ],
-        "publicInAccount": false
+        "organization": {
+          "id": 2,
+          "name": "admin@example.com"
+        }
       },
-      "id": 895,
+      "id": 907,
       "metadata": [
         {
           "privateIp": "10.0.0.3",
-          "publicIp": "172.21.250.80",
+          "publicIp": "172.21.250.172",
           "sshPort": 22,
-          "instanceId": "5118bb3e-cdd7-42b1-902f-880f76a81797",
+          "instanceId": "730defbc-c196-4132-86a1-e59037576548",
           "ambariServer": true,
-          "discoveryFQDN": "host-10-0-0-3.openstacklocal",
+          "discoveryFQDN": null,
           "instanceGroup": "master",
-          "instanceStatus": "REGISTERED",
+          "instanceStatus": "CREATED",
           "instanceType": "GATEWAY_PRIMARY"
         }
       ]
@@ -295,30 +308,34 @@
   "failurePolicy": null,
   "orchestrator": {
     "parameters": {},
-    "apiEndpoint": "172.21.250.80:9443",
+    "apiEndpoint": null,
     "type": "SALT"
   },
-  "created": 1530625603952,
+  "created": 1535447460792,
   "gatewayPort": 9443,
   "image": {
-    "imageName": "cb-hdp-26-1805171052",
+    "imageName": "cb-hdp-26-1808062221",
     "imageCatalogUrl": "https://cloudbreak-imagecatalog.s3.amazonaws.com/v2-dev-cb-image-catalog.json",
-    "imageId": "f2dfe452-dd49-4885-5058-7d198d3e3d5c",
+    "imageId": "095225dd-4e41-4a02-69db-0a8f21dc38ce",
     "imageCatalogName": "cloudbreak-default"
   },
   "cloudbreakDetails": {
-    "version": "2.8.0-dev.105"
+    "version": "2.8.0-dev.407"
   },
   "flexSubscription": null,
   "stackAuthentication": {
-    "publicKey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC9ppLjkjvAZAR2Bs38EACDJ0vbV89JRvRjBBQ+gDANf8vaF6sdhtXj/xyDKTvVojLdBudgrnCpMxHH5/rVkJL8/EhujO5IvwvUBz8Uf9Tid2odFVTRQ9R7pde/yIC27g7NV19z22W41fBfftNt3FFUVQp1aECDAKvsYveOobv1yymaCICskY557tvlJFbKec8dz0EsSlBZBhPnnqg5ld3Lx+NFXe5NOYtCxrzXPaH3hiaa8947X6tN6Vc3fCq5aJSczvYIYVYuNjNy+jmJM9p6s/myOmmSamwX0sA7Bs6TUPpgnMyuBXn/0FDgYfKtPTik5+1Qg7ifMy3Y6QdaEuaR mhalmy@HW13213.local",
+    "publicKey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCeFeKSV69/+Jmf3meAf5SMsTCXqO4v8iAR11HgrauD4Ky1HFRM51e/EiIzBMuI14Y43hWrYMqWcCbAYKme1yAuaaq1VPO6Le1KQQyEMTD5YmgFOrI8tAdBDBPMV8MkTIveWkV8voMkRst0YJ5MWS1sH9+YyRGysl3w4kungWrKw8rAYe0XwNYLWgo362Go7mSEQNvB4oDTcZaF9a/vesPGusTuyZicpf1jmMsH7S5MF8YH/TPbhoDB7KJ+9t278nrUvsyI6MZnpx7Uj5P/5WYfeF0M3v7ltyo2/e8GqbFw3FLixPlGuc+N3UZThcM03Hc2xLmxHbagrgWU8uauwT0z mhalmy@HW13213.local",
     "publicKeyId": null,
     "loginUserName": "cloudbreak"
   },
   "nodeCount": 1,
-  "hardwareInfos": [],
+  "hardwareInfoGroups": [],
   "cloudbreakEvents": [],
   "cloudbreakUsages": [],
+  "organization": {
+    "id": 2,
+    "name": "admin@example.com"
+  },
   "cloudPlatform": "OPENSTACK",
-  "public": false
+  "public": true
 }

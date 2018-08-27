@@ -36,6 +36,7 @@ var templates = require('./templates/qa-templates.json');
 var profile = require('./users/default-profile.json');
 var matrix = require('./utilsmatrix.json');
 var mpacks = require('./mpacks/mpacks.json');
+var getOrganizations = require('./organizations/organizations.json');
 
 const OK = 200;
 
@@ -116,7 +117,7 @@ responses.getProxyConfig= responseObject(proxy, OK);
 responses.listRdsConfigsByOrganization = responseObject(rds, OK);
 responses.createRdsConfigInOrganization = responseObject(rds, OK);
 responses.getRdsConfigInOrganization = responseObject(rds, OK);
-responses.testRdsConnection= responseObject({ "connectionResult":"Failed to connect to RDS: The connection attempt failed." }, OK);
+responses.testRdsConnectionInOrganization = responseObject({ "connectionResult":"Failed to connect to RDS: The connection attempt failed." }, OK);
 responses.getPrivatesRds= responseObject(rds, OK);
 responses.postPrivateRds= responseObject(rds, OK);
 responses.getPrivateRds= responseObject(rds, OK);
@@ -124,15 +125,18 @@ responses.listRecipesByOrganization= responseObject(recipes, OK);
 responses.getPublicRecipe= responseObject(recipes[0], OK);
 responses.postPublicRecipe= responseObject(recipes[0], OK);
 responses.postPrivateRecipe= responseObject(recipes[0], OK);
-responses.getRecipeRequestFromName= responseObject(recipes, OK);
-responses.getPublicsSecurityGroup= responseObject(secgr, OK);
+responses.getRecipeRequestFromName = responseObject(recipes, OK);
+responses.getPublicsSecurityGroup = responseObject(secgr, OK);
+responses.getRecipeInOrganization = responseObject(recipes[0], OK);
 responses.getDefaultSecurityRules= responseObject(secrules, OK);
 responses.getPublicsStack= responseObject([openstack,aws,azure,gcp], OK);
 responses.getPublicStack= stackResponses;
 responses.getPublicsTemplate= responseObject(templates, OK);
 responses.getUserProfile= responseObject(profile, OK);
 responses.getRegionsByCredentialId= responseObject(regions, OK);
-responses.listStacksByOrganization= responseObject([openstack, aws, azure, gcp], OK);
+responses.listStacksByOrganization = responseObject([openstack,aws,azure,gcp], OK);
+responses.createStackInOrganization = responseObject(openstack, OK);
+responses.getStackInOrganization = responseObject(openstack, OK);
 responses.getPublicStackV2= responseObject(stackResponses, OK);
 responses.postPrivateStackV2= responseObject(openstack, OK);
 responses.getPrivateStackV2= responseObject(openstack, OK);
@@ -140,6 +144,7 @@ responses.getStackV2= responseObject(openstack, OK);
 responses.getPlatformSecurityGroups= responseObject(securitygroups, OK);
 responses.createManagementPackInOrganization = responseObject(mpacks, OK);
 responses.postPrivateManagementPack = responseObject(mpacks, OK);
+responses.getOrganizations = responseObject(mpacks, OK);
 
 responses.postRepositoryConfigsValidation= responseObject({
   "utilsBaseURL" : true,
