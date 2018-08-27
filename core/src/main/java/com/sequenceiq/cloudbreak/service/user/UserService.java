@@ -40,9 +40,6 @@ public class UserService {
 
     @Cacheable("userCache")
     public User getOrCreate(IdentityUser identityUser) {
-        if (identityUser == null) {
-            throw new NullIdentityUserException();
-        }
         try {
             User user = userRepository.findByUserId(identityUser.getUsername());
             if (user == null) {

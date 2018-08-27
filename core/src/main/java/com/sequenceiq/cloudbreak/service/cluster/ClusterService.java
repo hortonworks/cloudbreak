@@ -988,7 +988,7 @@ public class ClusterService {
         return clusterRepository.findByBlueprint(blueprint);
     }
 
-    public List<Cluster> findByStatusesWithoutAuth(Collection<Status> statuses) {
+    public List<Cluster> findByStatuses(Collection<Status> statuses) {
         return clusterRepository.findByStatuses(statuses);
     }
 
