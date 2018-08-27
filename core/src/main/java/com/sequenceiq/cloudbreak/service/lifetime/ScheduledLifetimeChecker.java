@@ -15,8 +15,6 @@ import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.service.account.AccountPreferencesValidationException;
-import com.sequenceiq.cloudbreak.service.account.AccountPreferencesValidator;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Service
@@ -27,7 +25,7 @@ public class ScheduledLifetimeChecker {
     private StackService stackService;
 
     @Inject
-    private AccountPreferencesValidator preferencesValidator;
+    private TtlValidatorService ttlValidatorService;
 
     @Inject
     private ReactorFlowManager flowManager;
@@ -36,14 +34,12 @@ public class ScheduledLifetimeChecker {
     public void validate() {
         for (Stack stack : stackService.getAllAlive()) {
             getStackTimeToLive(stack).ifPresent(ttl -> {
-                    try {
-                        if (Status.DELETE_IN_PROGRESS != stack.getStatus() && stack.getCluster() != null && stack.getCluster().getCreationFinished() != null) {
-                            preferencesValidator.validateClusterTimeToLive(stack.getCluster().getCreationFinished(), ttl.toMillis());
-                        }
-                    } catch (AccountPreferencesValidationException ignored) {
+                if (Status.DELETE_IN_PROGRESS != stack.getStatus() && stack.getCluster() != null && stack.getCluster().getCreationFinished() != null) {
+                    if (ttlValidatorService.isClusterTtlExceeded(stack.getCluster().getCreationFinished(), ttl.toMillis())) {
                         terminateStack(stack);
                     }
-                });
+                }
+            });
         }
     }
 

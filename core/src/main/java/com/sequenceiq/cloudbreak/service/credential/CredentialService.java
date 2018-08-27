@@ -40,7 +40,7 @@ import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.organization.OrganizationResourceRepository;
 import com.sequenceiq.cloudbreak.service.AbstractOrganizationAwareResourceService;
-import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
+import com.sequenceiq.cloudbreak.service.CloudPlarformService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.notification.Notification;
 import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
@@ -74,9 +74,6 @@ public class CredentialService extends AbstractOrganizationAwareResourceService<
     private UserProfileHandler userProfileHandler;
 
     @Inject
-    private AccountPreferencesService accountPreferencesService;
-
-    @Inject
     private NotificationSender notificationSender;
 
     @Inject
@@ -88,13 +85,16 @@ public class CredentialService extends AbstractOrganizationAwareResourceService<
     @Inject
     private CredentialValidator credentialValidator;
 
+    @Inject
+    private CloudPlarformService cloudPlarformService;
+
     public Set<Credential> listAvailablesByOrganizationId(Long orgId) {
-        return credentialRepository.findActiveForOrganizationFilterByPlatforms(orgId, accountPreferencesService.enabledPlatforms());
+        return credentialRepository.findActiveForOrganizationFilterByPlatforms(orgId, cloudPlarformService.enabledPlatforms());
     }
 
     public Credential get(Long id, Organization organization) {
         return Optional.ofNullable(credentialRepository.findActiveByIdAndOrganizationFilterByPlatforms(id, organization.getId(),
-                accountPreferencesService.enabledPlatforms())).orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_ID, id));
+                cloudPlarformService.enabledPlatforms())).orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_ID, id));
     }
 
     public Map<String, String> interactiveLogin(Long organizationId, Credential credential, Organization organization, User user) {
@@ -106,7 +106,7 @@ public class CredentialService extends AbstractOrganizationAwareResourceService<
         credentialValidator.validateCredentialCloudPlatform(credential.cloudPlatform());
         Credential original = Optional.ofNullable(
                 credentialRepository.findActiveByNameAndOrgIdFilterByPlatforms(credential.getName(), organizationId,
-                        accountPreferencesService.enabledPlatforms()))
+                        cloudPlarformService.enabledPlatforms()))
                 .orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, credential.getName()));
         if (original.cloudPlatform() != null && !Objects.equals(credential.cloudPlatform(), original.cloudPlatform())) {
             throw new BadRequestException("Modifying credential platform is forbidden");
@@ -134,14 +134,14 @@ public class CredentialService extends AbstractOrganizationAwareResourceService<
 
     public void delete(Long id, Organization organization) {
         Credential credential = Optional.ofNullable(
-                credentialRepository.findActiveByIdAndOrganizationFilterByPlatforms(id, organization.getId(), accountPreferencesService.enabledPlatforms()))
+                credentialRepository.findActiveByIdAndOrganizationFilterByPlatforms(id, organization.getId(), cloudPlarformService.enabledPlatforms()))
                 .orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_ID, id));
         delete(credential, organization);
     }
 
     public void delete(String name, Organization organization) {
         Credential credential = Optional.ofNullable(
-                credentialRepository.findActiveByNameAndOrgIdFilterByPlatforms(name, organization.getId(), accountPreferencesService.enabledPlatforms()))
+                credentialRepository.findActiveByNameAndOrgIdFilterByPlatforms(name, organization.getId(), cloudPlarformService.enabledPlatforms()))
                 .orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, name));
         delete(credential, organization);
     }

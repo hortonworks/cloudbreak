@@ -50,8 +50,8 @@ import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
 import com.sequenceiq.cloudbreak.repository.organization.OrganizationResourceRepository;
 import com.sequenceiq.cloudbreak.service.AbstractOrganizationAwareResourceService;
+import com.sequenceiq.cloudbreak.service.CloudPlarformService;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
-import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserProfileHandler;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
@@ -87,7 +87,7 @@ public class ImageCatalogService extends AbstractOrganizationAwareResourceServic
     private UserProfileHandler userProfileHandler;
 
     @Inject
-    private AccountPreferencesService accountPreferencesService;
+    private CloudPlarformService cloudPlarformService;
 
     @Inject
     private StackService stackService;
@@ -348,7 +348,7 @@ public class ImageCatalogService extends AbstractOrganizationAwareResourceServic
 
     private void validateRequestPlatforms(Set<String> platforms) throws CloudbreakImageCatalogException {
         Set<String> collect = platforms.stream()
-                .filter(requestedPlatform -> accountPreferencesService.enabledPlatforms().stream()
+                .filter(requestedPlatform -> cloudPlarformService.enabledPlatforms().stream()
                         .filter(enabledPlatform -> enabledPlatform.equalsIgnoreCase(requestedPlatform))
                         .collect(Collectors.toSet()).isEmpty())
                 .collect(Collectors.toSet());
@@ -360,7 +360,7 @@ public class ImageCatalogService extends AbstractOrganizationAwareResourceServic
 
     public Images propagateImagesIfRequested(Long organizationId, String name, boolean withImages) {
         if (withImages) {
-            Set<String> platforms = accountPreferencesService.enabledPlatforms();
+            Set<String> platforms = cloudPlarformService.enabledPlatforms();
             try {
                 return getImages(organizationId, name, platforms).getImages();
             } catch (CloudbreakImageCatalogException e) {

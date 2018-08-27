@@ -51,8 +51,6 @@ import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.service.account.AccountPreferencesValidationException;
-import com.sequenceiq.cloudbreak.service.account.AccountPreferencesValidator;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.decorator.StackDecorator;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
@@ -77,7 +75,7 @@ public class StackCommonService implements StackEndpoint {
     private StackDecorator stackDecorator;
 
     @Inject
-    private AccountPreferencesValidator accountPreferencesValidator;
+    private CloudPlarformService cloudPlarformService;
 
     @Inject
     private CloudParameterService parameterService;
@@ -285,7 +283,6 @@ public class StackCommonService implements StackEndpoint {
         } else {
             Integer scalingAdjustment = updateRequest.getInstanceGroupAdjustment().getScalingAdjustment();
             validateHardLimits(scalingAdjustment);
-            validateAccountPreferences(stack.getId(), scalingAdjustment);
             stackService.updateNodeCount(stack, updateRequest.getInstanceGroupAdjustment(), updateRequest.getWithClusterEvent(), user);
         }
         return Response.status(Status.NO_CONTENT).build();
@@ -370,14 +367,6 @@ public class StackCommonService implements StackEndpoint {
             stackService.updateImage(stack.getId(), organziationId, stackImageChangeRequest.getImageId(), null, null, user);
         }
         return Response.status(Status.NO_CONTENT).build();
-    }
-
-    private void validateAccountPreferences(Long stackId, Integer scalingAdjustment) {
-        try {
-            accountPreferencesValidator.validate(stackId, scalingAdjustment);
-        } catch (AccountPreferencesValidationException e) {
-            throw new BadRequestException(e.getMessage(), e);
-        }
     }
 
     private void validateHardLimits(Integer scalingAdjustment) {

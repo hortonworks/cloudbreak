@@ -19,16 +19,17 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.cloud.CloudConstant;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
+import com.sequenceiq.cloudbreak.service.CloudPlarformService;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SimpleAccountPreferencesServiceTest {
+public class CloudPlarformServiceTest {
 
     public static final String AWS = "AWS";
 
     private static final String OPENSTACK = "OPENSTACK";
 
     @InjectMocks
-    private final AccountPreferencesService underTest = new AccountPreferencesService();
+    private final CloudPlarformService underTest = new CloudPlarformService();
 
     @Spy
     private final List<CloudConstant> cloudConstants = new ArrayList<>();
@@ -44,7 +45,7 @@ public class SimpleAccountPreferencesServiceTest {
 
     @Test
     public void testEnabledPlatformsWhenEnabledPlatformsIsEmpty() {
-        ReflectionTestUtils.setField(underTest, AccountPreferencesService.class, "enabledPlatforms", "", null);
+        ReflectionTestUtils.setField(underTest, CloudPlarformService.class, "enabledPlatforms", "", null);
         Set<String> actual = underTest.enabledPlatforms();
 
         assertThat(actual, containsInAnyOrder(AWS, OPENSTACK));
@@ -52,7 +53,7 @@ public class SimpleAccountPreferencesServiceTest {
 
     @Test
     public void testEnabledPlatformsWhenEnabledPlatformsIsNotEmpty() {
-        ReflectionTestUtils.setField(underTest, AccountPreferencesService.class, "enabledPlatforms", "AWS,PL1,PL2", null);
+        ReflectionTestUtils.setField(underTest, CloudPlarformService.class, "enabledPlatforms", "AWS,PL1,PL2", null);
         Set<String> actual = underTest.enabledPlatforms();
 
         assertThat(actual, containsInAnyOrder(AWS, "PL1", "PL2"));
