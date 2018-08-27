@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
 
 import com.sequenceiq.cloudbreak.aspect.PermissionType;
+import com.sequenceiq.cloudbreak.authorization.SpecialScopes;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
@@ -28,8 +29,6 @@ import com.sequenceiq.cloudbreak.service.user.CachedUserDetailsService;
 public class OwnerBasedPermissionEvaluator implements PermissionEvaluator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OwnerBasedPermissionEvaluator.class);
-
-    private static final String AUTO_SCALE_SCOPE = "cloudbreak.autoscale";
 
     @Inject
     @Lazy
@@ -46,7 +45,7 @@ public class OwnerBasedPermissionEvaluator implements PermissionEvaluator {
         }
         OAuth2Authentication oauth = (OAuth2Authentication) authentication;
         if (oauth.getUserAuthentication() == null) {
-            return oauth.getOAuth2Request().getScope().contains(AUTO_SCALE_SCOPE);
+            return oauth.getOAuth2Request().getScope().contains(SpecialScopes.AUTO_SCALE.getScope());
         }
 
         IdentityUser user = cachedUserDetailsService.getDetails((String) authentication.getPrincipal(), UserFilterField.USERNAME);
