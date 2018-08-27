@@ -56,16 +56,8 @@
           "value": "*"
         }
       ]
-    },
-    {
-      "name": "hbase-site",
-      "configurations": [
-        {
-          "key": "zookeeper.recovery.retry",
-          "value": "10"
-        }
-      ]
     }
+
 
   ]
 }

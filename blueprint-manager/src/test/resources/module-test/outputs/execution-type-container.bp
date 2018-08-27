@@ -34,13 +34,6 @@
       }
     },
     {
-      "hbase-site": {
-        "properties": {
-          "zookeeper.recovery.retry": "10"
-        }
-      }
-    },
-    {
       "core-site": {
         "properties": {
           "proxyuser_group": "hadoop",

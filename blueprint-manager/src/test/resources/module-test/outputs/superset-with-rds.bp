@@ -134,13 +134,6 @@
       }
     },
     {
-      "hbase-site": {
-        "properties": {
-          "zookeeper.recovery.retry": "10"
-        }
-      }
-    },
-    {
       "zoo.cfg": {
         "properties": {
           "dataDir": "/hadoopfs/fs1/zookeeper"
