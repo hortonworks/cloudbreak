@@ -5,6 +5,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -26,20 +27,23 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.api.CoreApi;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.AccountPreferencesEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.AuditEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.BlueprintEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ClusterV1Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ConnectorV1Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.CredentialEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.EventEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.EventV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.FlexSubscriptionEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ImageCatalogV1Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.LdapConfigEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v3.OrganizationV3Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.ManagementPackEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ProxyConfigEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.RdsConfigEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.RecipeEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.RepositoryConfigValidationEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.SecurityRuleEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.SettingsEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.SmartSenseSubscriptionEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.StackV1Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.SubscriptionEndpoint;
@@ -48,14 +52,70 @@ import com.sequenceiq.cloudbreak.api.endpoint.v1.UserEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.UtilEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v2.ConnectorV2Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v2.StackV2Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v3.AuditV3Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v3.BlueprintV3Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v3.ConnectorV3Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v3.CredentialV3Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v3.FlexSubscriptionV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.ImageCatalogV3Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v3.KnoxServicesV3Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v3.LdapConfigV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.ManagementPackV3Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v3.OrganizationV3Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v3.ProxyConfigV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.RdsConfigV3Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v3.RecipeV3Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v3.SmartSenseSubscriptionV3Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v3.StackV3Endpoint;
 
 import net.jodah.expiringmap.ExpirationPolicy;
 import net.jodah.expiringmap.ExpiringMap;
 
 public class CloudbreakClient {
+
+    private static final List<Class<?>> ENDPOINTS  = Arrays.asList(
+            AccountPreferencesEndpoint.class,
+            AuditEndpoint.class,
+            AuditV3Endpoint.class,
+            BlueprintEndpoint.class,
+            BlueprintV3Endpoint.class,
+            EventEndpoint.class,
+            EventV3Endpoint.class,
+            UsageEndpoint.class,
+            ClusterV1Endpoint.class,
+            CredentialEndpoint.class,
+            CredentialV3Endpoint.class,
+            FlexSubscriptionEndpoint.class,
+            FlexSubscriptionV3Endpoint.class,
+            ImageCatalogV1Endpoint.class,
+            ImageCatalogV3Endpoint.class,
+            KnoxServicesV3Endpoint.class,
+            LdapConfigEndpoint.class,
+            LdapConfigV3Endpoint.class,
+            ManagementPackEndpoint.class,
+            ManagementPackV3Endpoint.class,
+            OrganizationV3Endpoint.class,
+            ConnectorV1Endpoint.class,
+            ConnectorV2Endpoint.class,
+            ConnectorV3Endpoint.class,
+            ProxyConfigEndpoint.class,
+            ProxyConfigV3Endpoint.class,
+            RdsConfigEndpoint.class,
+            RdsConfigV3Endpoint.class,
+            RecipeEndpoint.class,
+            RecipeV3Endpoint.class,
+            RepositoryConfigValidationEndpoint.class,
+            SecurityRuleEndpoint.class,
+            SettingsEndpoint.class,
+            SmartSenseSubscriptionEndpoint.class,
+            SmartSenseSubscriptionV3Endpoint.class,
+            StackV1Endpoint.class,
+            StackV2Endpoint.class,
+            StackV3Endpoint.class,
+            SubscriptionEndpoint.class,
+            UserEndpoint.class,
+            UtilEndpoint.class
+    );
 
     private static final Form EMPTY_FORM = new Form();
 
@@ -104,108 +164,172 @@ public class CloudbreakClient {
                 identityServerAddress, clientId, configKey);
     }
 
-    public CredentialEndpoint credentialEndpoint() {
-        return refreshIfNeededAndGet(CredentialEndpoint.class);
-    }
-
-    public UsageEndpoint usageEndpoint() {
-        return refreshIfNeededAndGet(UsageEndpoint.class);
-    }
-
-    public UserEndpoint userEndpoint() {
-        return refreshIfNeededAndGet(UserEndpoint.class);
-    }
-
-    public EventEndpoint eventEndpoint() {
-        return refreshIfNeededAndGet(EventEndpoint.class);
-    }
-
-    public SecurityRuleEndpoint securityRuleEndpoint() {
-        return refreshIfNeededAndGet(SecurityRuleEndpoint.class);
-    }
-
-    public StackV1Endpoint stackV1Endpoint() {
-        return refreshIfNeededAndGet(StackV1Endpoint.class);
-    }
-
-    public StackV2Endpoint stackV2Endpoint() {
-        return refreshIfNeededAndGet(StackV2Endpoint.class);
-    }
-
-    public SubscriptionEndpoint subscriptionEndpoint() {
-        return refreshIfNeededAndGet(SubscriptionEndpoint.class);
-    }
-
-    public RecipeEndpoint recipeEndpoint() {
-        return refreshIfNeededAndGet(RecipeEndpoint.class);
-    }
-
-    public OrganizationV3Endpoint organizationEndpoint() {
-        return refreshIfNeededAndGet(OrganizationV3Endpoint.class);
-    }
-
-    public RdsConfigEndpoint rdsConfigEndpoint() {
-        return refreshIfNeededAndGet(RdsConfigEndpoint.class);
-    }
-
-    public ProxyConfigEndpoint proxyConfigEndpoint() {
-        return refreshIfNeededAndGet(ProxyConfigEndpoint.class);
-    }
-
     public AccountPreferencesEndpoint accountPreferencesEndpoint() {
-        return refreshIfNeededAndGet(AccountPreferencesEndpoint.class);
+        return getEndpoint(AccountPreferencesEndpoint.class);
+    }
+
+    public AuditEndpoint auditEndpoint() {
+        return getEndpoint(AuditEndpoint.class);
+    }
+
+    public AuditV3Endpoint auditV3Endpoint() {
+        return getEndpoint(AuditV3Endpoint.class);
     }
 
     public BlueprintEndpoint blueprintEndpoint() {
-        return refreshIfNeededAndGet(BlueprintEndpoint.class);
+        return getEndpoint(BlueprintEndpoint.class);
+    }
+
+    public BlueprintV3Endpoint blueprintV3Endpoint() {
+        return getEndpoint(BlueprintV3Endpoint.class);
+    }
+
+    public EventEndpoint eventEndpoint() {
+        return getEndpoint(EventEndpoint.class);
+    }
+
+    public EventV3Endpoint eventV3Endpoint() {
+        return getEndpoint(EventV3Endpoint.class);
+    }
+
+    public UsageEndpoint usageEndpoint() {
+        return getEndpoint(UsageEndpoint.class);
     }
 
     public ClusterV1Endpoint clusterEndpoint() {
-        return refreshIfNeededAndGet(ClusterV1Endpoint.class);
+        return getEndpoint(ClusterV1Endpoint.class);
     }
 
-    public ConnectorV1Endpoint connectorV1Endpoint() {
-        return refreshIfNeededAndGet(ConnectorV1Endpoint.class);
+    public CredentialEndpoint credentialEndpoint() {
+        return getEndpoint(CredentialEndpoint.class);
     }
 
-    public ConnectorV2Endpoint connectorV2Endpoint() {
-        return refreshIfNeededAndGet(ConnectorV2Endpoint.class);
-    }
-
-    public LdapConfigEndpoint ldapConfigEndpoint() {
-        return refreshIfNeededAndGet(LdapConfigEndpoint.class);
-    }
-
-    public SmartSenseSubscriptionEndpoint smartSenseSubscriptionEndpoint() {
-        return refreshIfNeededAndGet(SmartSenseSubscriptionEndpoint.class);
+    public CredentialV3Endpoint credentialV3Endpoint() {
+        return getEndpoint(CredentialV3Endpoint.class);
     }
 
     public FlexSubscriptionEndpoint flexSubscriptionEndpoint() {
-        return refreshIfNeededAndGet(FlexSubscriptionEndpoint.class);
+        return getEndpoint(FlexSubscriptionEndpoint.class);
+    }
+
+    public FlexSubscriptionV3Endpoint flexSubscriptionV3Endpoint() {
+        return getEndpoint(FlexSubscriptionV3Endpoint.class);
     }
 
     public ImageCatalogV1Endpoint imageCatalogEndpoint() {
-        return refreshIfNeededAndGet(ImageCatalogV1Endpoint.class);
-    }
-
-    public UtilEndpoint utilEndpoint() {
-        return refreshIfNeededAndGet(UtilEndpoint.class);
-    }
-
-    public ManagementPackV3Endpoint managementPackV3Endpoint() {
-        return refreshIfNeededAndGet(ManagementPackV3Endpoint.class);
+        return getEndpoint(ImageCatalogV1Endpoint.class);
     }
 
     public ImageCatalogV3Endpoint imageCatalogV3Endpoint() {
-        return refreshIfNeededAndGet(ImageCatalogV3Endpoint.class);
+        return getEndpoint(ImageCatalogV3Endpoint.class);
+    }
+
+    public KnoxServicesV3Endpoint knoxServicesV3Endpoint() {
+        return getEndpoint(KnoxServicesV3Endpoint.class);
+    }
+
+    public LdapConfigEndpoint ldapConfigEndpoint() {
+        return getEndpoint(LdapConfigEndpoint.class);
+    }
+
+    public LdapConfigV3Endpoint ldapConfigV3Endpoint() {
+        return getEndpoint(LdapConfigV3Endpoint.class);
+    }
+
+    public ManagementPackEndpoint managementPackEndpoint() {
+        return getEndpoint(ManagementPackEndpoint.class);
+    }
+
+    public ManagementPackV3Endpoint managementPackV3Endpoint() {
+        return getEndpoint(ManagementPackV3Endpoint.class);
+    }
+
+    public OrganizationV3Endpoint organizationV3Endpoint() {
+        return getEndpoint(OrganizationV3Endpoint.class);
+    }
+
+    public ConnectorV1Endpoint connectorV1Endpoint() {
+        return getEndpoint(ConnectorV1Endpoint.class);
+    }
+
+    public ConnectorV2Endpoint connectorV2Endpoint() {
+        return getEndpoint(ConnectorV2Endpoint.class);
+    }
+
+    public ConnectorV3Endpoint connectorV3Endpoint() {
+        return getEndpoint(ConnectorV3Endpoint.class);
+    }
+
+    public ProxyConfigEndpoint proxyConfigEndpoint() {
+        return getEndpoint(ProxyConfigEndpoint.class);
+    }
+
+    public ProxyConfigV3Endpoint proxyConfigV3Endpoint() {
+        return getEndpoint(ProxyConfigV3Endpoint.class);
+    }
+
+    public RdsConfigEndpoint rdsConfigEndpoint() {
+        return getEndpoint(RdsConfigEndpoint.class);
     }
 
     public RdsConfigV3Endpoint rdsConfigV3Endpoint() {
-        return refreshIfNeededAndGet(RdsConfigV3Endpoint.class);
+        return getEndpoint(RdsConfigV3Endpoint.class);
+    }
+
+    public RecipeEndpoint recipeEndpoint() {
+        return getEndpoint(RecipeEndpoint.class);
+    }
+
+    public RecipeV3Endpoint recipeV3Endpoint() {
+        return getEndpoint(RecipeV3Endpoint.class);
     }
 
     public RepositoryConfigValidationEndpoint repositoryConfigValidationEndpoint() {
-        return refreshIfNeededAndGet(RepositoryConfigValidationEndpoint.class);
+        return getEndpoint(RepositoryConfigValidationEndpoint.class);
+    }
+
+    public SecurityRuleEndpoint securityRuleEndpoint() {
+        return getEndpoint(SecurityRuleEndpoint.class);
+    }
+
+    public SettingsEndpoint settingsEndpoint() {
+        return getEndpoint(SettingsEndpoint.class);
+    }
+
+    public SmartSenseSubscriptionEndpoint smartSenseSubscriptionEndpoint() {
+        return getEndpoint(SmartSenseSubscriptionEndpoint.class);
+    }
+
+    public SmartSenseSubscriptionV3Endpoint smartSenseSubscriptionV3Endpoint() {
+        return getEndpoint(SmartSenseSubscriptionV3Endpoint.class);
+    }
+
+    public StackV1Endpoint stackV1Endpoint() {
+        return getEndpoint(StackV1Endpoint.class);
+    }
+
+    public StackV2Endpoint stackV2Endpoint() {
+        return getEndpoint(StackV2Endpoint.class);
+    }
+
+    public StackV3Endpoint stackV3Endpoint() {
+        return getEndpoint(StackV3Endpoint.class);
+    }
+
+    public SubscriptionEndpoint subscriptionEndpoint() {
+        return getEndpoint(SubscriptionEndpoint.class);
+    }
+
+    public UserEndpoint userEndpoint() {
+        return getEndpoint(UserEndpoint.class);
+    }
+
+    public UtilEndpoint utilEndpoint() {
+        return getEndpoint(UtilEndpoint.class);
+    }
+
+    protected <E> E getEndpoint(Class<E> clazz) {
+        return refreshIfNeededAndGet(clazz);
     }
 
     private ExpiringMap<String, String> configTokenCache() {
@@ -243,31 +367,7 @@ public class CloudbreakClient {
         headers.add("Authorization", "Bearer " + token);
         webTarget = client.target(cloudbreakAddress).path(CoreApi.API_ROOT_CONTEXT);
         endpointWrapperHolder = Optional.ofNullable(endpointWrapperHolder).orElse(new EndpointWrapperHolder());
-        endpointWrapperHolder.setEndpoint(newEndpoint(CredentialEndpoint.class, headers));
-        endpointWrapperHolder.setEndpoint(newEndpoint(UsageEndpoint.class, headers));
-        endpointWrapperHolder.setEndpoint(newEndpoint(EventEndpoint.class, headers));
-        endpointWrapperHolder.setEndpoint(newEndpoint(SecurityRuleEndpoint.class, headers));
-        endpointWrapperHolder.setEndpoint(newEndpoint(StackV1Endpoint.class, headers));
-        endpointWrapperHolder.setEndpoint(newEndpoint(StackV2Endpoint.class, headers));
-        endpointWrapperHolder.setEndpoint(newEndpoint(SubscriptionEndpoint.class, headers));
-        endpointWrapperHolder.setEndpoint(newEndpoint(RecipeEndpoint.class, headers));
-        endpointWrapperHolder.setEndpoint(newEndpoint(RdsConfigEndpoint.class, headers));
-        endpointWrapperHolder.setEndpoint(newEndpoint(ProxyConfigEndpoint.class, headers));
-        endpointWrapperHolder.setEndpoint(newEndpoint(AccountPreferencesEndpoint.class, headers));
-        endpointWrapperHolder.setEndpoint(newEndpoint(BlueprintEndpoint.class, headers));
-        endpointWrapperHolder.setEndpoint(newEndpoint(ClusterV1Endpoint.class, headers));
-        endpointWrapperHolder.setEndpoint(newEndpoint(ConnectorV1Endpoint.class, headers));
-        endpointWrapperHolder.setEndpoint(newEndpoint(ConnectorV2Endpoint.class, headers));
-        endpointWrapperHolder.setEndpoint(newEndpoint(UserEndpoint.class, headers));
-        endpointWrapperHolder.setEndpoint(newEndpoint(UtilEndpoint.class, headers));
-        endpointWrapperHolder.setEndpoint(newEndpoint(LdapConfigEndpoint.class, headers));
-        endpointWrapperHolder.setEndpoint(newEndpoint(SmartSenseSubscriptionEndpoint.class, headers));
-        endpointWrapperHolder.setEndpoint(newEndpoint(FlexSubscriptionEndpoint.class, headers));
-        endpointWrapperHolder.setEndpoint(newEndpoint(ImageCatalogV1Endpoint.class, headers));
-        endpointWrapperHolder.setEndpoint(newEndpoint(RepositoryConfigValidationEndpoint.class, headers));
-        endpointWrapperHolder.setEndpoint(newEndpoint(ManagementPackV3Endpoint.class, headers));
-        endpointWrapperHolder.setEndpoint(newEndpoint(ImageCatalogV3Endpoint.class, headers));
-        endpointWrapperHolder.setEndpoint(newEndpoint(RdsConfigV3Endpoint.class, headers));
+        ENDPOINTS.forEach(e -> endpointWrapperHolder.setEndpoint(newEndpoint(e, headers)));
         logger.info("Endpoints have been renewed for CloudbreakClient");
     }
 
