@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"strconv"
 	"time"
 
 	"encoding/base64"
@@ -25,8 +26,17 @@ type blueprintOut struct {
 	Tags           string `json:"Tags" yaml:"Tags"`
 }
 
+type blueprintOutDescribe struct {
+	*blueprintOut
+	ID string `json:"ID" yaml:"ID"`
+}
+
 func (b *blueprintOut) DataAsStringArray() []string {
 	return []string{b.Name, b.Description, b.HDPVersion, b.HostgroupCount, b.Tags}
+}
+
+func (b *blueprintOutDescribe) DataAsStringArray() []string {
+	return append(b.blueprintOut.DataAsStringArray(), b.ID)
 }
 
 func CreateBlueprintFromUrl(c *cli.Context) {
@@ -88,7 +98,7 @@ func DescribeBlueprint(c *cli.Context) {
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
 	bp := fetchBlueprint(c.Int64(FlOrganizationOptional.Name), c.String(FlName.Name), cbClient.Cloudbreak.V3OrganizationIDBlueprints)
-	output.Write(blueprintHeader, convertResponseToBlueprint(bp))
+	output.Write(append(blueprintHeader, "ID"), convertResponseWithIDToBlueprint(bp))
 }
 
 type getBlueprintInOrganization interface {
@@ -159,6 +169,21 @@ func convertResponseToBlueprint(bp *models_cloudbreak.BlueprintResponse) *bluepr
 		HDPVersion:     fmt.Sprintf("%v", blueprintsNode["stack_version"]),
 		HostgroupCount: fmt.Sprint(bp.HostGroupCount),
 		Tags:           bp.Status,
+	}
+}
+
+func convertResponseWithIDToBlueprint(bp *models_cloudbreak.BlueprintResponse) *blueprintOutDescribe {
+	jsonRoot := decodeAndParseToJson(bp.AmbariBlueprint)
+	blueprintsNode := jsonRoot["Blueprints"].(map[string]interface{})
+	return &blueprintOutDescribe{
+		blueprintOut: &blueprintOut{
+			Name:           *bp.Name,
+			Description:    *bp.Description,
+			HDPVersion:     fmt.Sprintf("%v", blueprintsNode["stack_version"]),
+			HostgroupCount: fmt.Sprint(bp.HostGroupCount),
+			Tags:           bp.Status,
+		},
+		ID: strconv.FormatInt(bp.ID, 10),
 	}
 }
 

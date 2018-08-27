@@ -1164,6 +1164,18 @@ func main() {
 					},
 				},
 				{
+					Name:   "describe",
+					Usage:  "describes an LDAP",
+					Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName).AddOutputFlag().AddAuthenticationFlags().Build(),
+					Before: ConfigRead,
+					Action: cb.DescribeLdap,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName).AddOutputFlag().AddAuthenticationFlags().Build() {
+							printFlagCompletion(f)
+						}
+					},
+				},
+				{
 					Name:   "list",
 					Usage:  "list the available ldaps",
 					Flags:  cb.NewFlagBuilder().AddOutputFlag().AddAuthenticationFlags().Build(),
@@ -1295,6 +1307,18 @@ func main() {
 					Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName).AddOutputFlag().AddAuthenticationFlags().Build(),
 					Before: ConfigRead,
 					Action: cb.DeleteImagecatalog,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName).AddOutputFlag().AddAuthenticationFlags().Build() {
+							printFlagCompletion(f)
+						}
+					},
+				},
+				{
+					Name:   "describe",
+					Usage:  "describes an imagecatalog",
+					Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName).AddOutputFlag().AddAuthenticationFlags().Build(),
+					Before: ConfigRead,
+					Action: cb.DescribeImagecatalog,
 					BashComplete: func(c *cli.Context) {
 						for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName).AddOutputFlag().AddAuthenticationFlags().Build() {
 							printFlagCompletion(f)
@@ -1557,6 +1581,18 @@ func main() {
 					Action: cb.DeleteRds,
 					BashComplete: func(c *cli.Context) {
 						for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().Build() {
+							printFlagCompletion(f)
+						}
+					},
+				},
+				{
+					Name:   "describe",
+					Usage:  "describes a database configuration",
+					Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().AddOutputFlag().Build(),
+					Before: ConfigRead,
+					Action: cb.DescribeRds,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().AddOutputFlag().Build() {
 							printFlagCompletion(f)
 						}
 					},

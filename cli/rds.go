@@ -2,6 +2,7 @@ package cli
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
@@ -22,8 +23,17 @@ type rds struct {
 	Driver         string `json:"Driver" yaml:"Driver"`
 }
 
+type rdsOutDescribe struct {
+	*rds
+	ID string `json:"ID" yaml:"ID"`
+}
+
 func (r *rds) DataAsStringArray() []string {
 	return []string{r.Name, r.URL, r.DatabaseEngine, r.Type, r.Driver}
+}
+
+func (r *rdsOutDescribe) DataAsStringArray() []string {
+	return append(r.rds.DataAsStringArray(), r.ID)
 }
 
 type rdsClient interface {
@@ -181,6 +191,33 @@ func DeleteRds(c *cli.Context) error {
 	}
 	log.Infof("[DeleteRds] database configuration deleted: %s", rdsName)
 	return nil
+}
+
+func DescribeRds(c *cli.Context) {
+	checkRequiredFlagsAndArguments(c)
+	defer utils.TimeTrack(time.Now(), "describe a database configuration")
+	log.Infof("[DescribeRds] Describes a database configuration")
+	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
+
+	orgID := c.Int64(FlOrganizationOptional.Name)
+	rdsName := c.String(FlName.Name)
+	cbClient := NewCloudbreakHTTPClientFromContext(c)
+
+	resp, err := cbClient.Cloudbreak.V3OrganizationIDRdsconfigs.GetRdsConfigInOrganization(v3_organization_id_rdsconfigs.NewGetRdsConfigInOrganizationParams().WithOrganizationID(orgID).WithName(rdsName))
+	if err != nil {
+		utils.LogErrorAndExit(err)
+	}
+	r := resp.Payload
+
+	output.Write(append(rdsHeader, "ID"), &rdsOutDescribe{
+		&rds{
+			Name:           *r.Name,
+			URL:            *r.ConnectionURL,
+			DatabaseEngine: *r.DatabaseEngine,
+			Type:           getEmptyIfNil(r.Type),
+			Driver:         getEmptyIfNil(r.ConnectionDriver),
+		}, strconv.FormatInt(r.ID, 10)})
+
 }
 
 func ListAllRds(c *cli.Context) error {

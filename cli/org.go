@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"strconv"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
@@ -17,6 +18,11 @@ type orgListOut struct {
 	Organization *models_cloudbreak.OrganizationResponse `json:"Organization" yaml:"Organization"`
 }
 
+type orgListOutDescribe struct {
+	*orgListOut
+	ID string `json:"ID" yaml:"ID"`
+}
+
 func (o *orgListOut) DataAsStringArray() []string {
 	permissionYAML, err := yaml.Marshal(o.Organization.Users)
 	var permissionString string
@@ -26,6 +32,10 @@ func (o *orgListOut) DataAsStringArray() []string {
 		permissionString = string(permissionYAML)
 	}
 	return []string{o.Organization.Name, utils.SafeStringConvert(o.Organization.Description), permissionString}
+}
+
+func (o *orgListOutDescribe) DataAsStringArray() []string {
+	return append(o.orgListOut.DataAsStringArray(), o.ID)
 }
 
 func CreateOrg(c *cli.Context) {
@@ -81,8 +91,8 @@ func DescribeOrg(c *cli.Context) {
 	}
 
 	tableRows := []utils.Row{}
-	tableRows = append(tableRows, &orgListOut{resp.Payload})
-	output.WriteList(orgListHeader, tableRows)
+	tableRows = append(tableRows, &orgListOutDescribe{&orgListOut{resp.Payload}, strconv.FormatInt(resp.Payload.ID, 10)})
+	output.WriteList(append(orgListHeader, "ID"), tableRows)
 }
 
 func ListOrgs(c *cli.Context) {

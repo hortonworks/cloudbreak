@@ -68,7 +68,7 @@ RSpec.describe 'Cluster test cases', :type => :aruba do
   it "Cluster - Describe Success" do
     result = cb.cluster.describe.name("openstack-cluster").build(false) 
     expect(result.exit_status).to eql 0
-    expect(JSON.parse(result.stdout)["name"]).to eql "openstack-cluster"    
+    expect(JSON.parse(result.stdout)["Name"]).to eql "openstack-cluster"    
   end
 
    it "Cluster - Stop - Success" do 

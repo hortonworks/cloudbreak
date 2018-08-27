@@ -40,9 +40,18 @@ type ldap struct {
 	AdminGroup           string `json:"AdminGroup,omitempty" yaml:"AdminGroup,omitempty"`
 }
 
+type ldapOutDescribe struct {
+	*ldap
+	ID string `json:"ID" yaml:"ID"`
+}
+
 func (l *ldap) DataAsStringArray() []string {
 	return []string{l.Name, l.Server, l.Domain, l.BindDn, l.DirectoryType, l.UserSearchBase, l.UserDnPattern, l.UserNameAttribute,
 		l.UserObjectClass, l.GroupMemberAttribute, l.GroupNameAttribute, l.GroupObjectClass, l.GroupSearchBase}
+}
+
+func (l *ldapOutDescribe) DataAsStringArray() []string {
+	return append(l.ldap.DataAsStringArray(), l.ID)
 }
 
 var LdapUsers = []string{"Distinguished Names", "Email", "Member of Group"}
@@ -205,6 +214,42 @@ func DeleteLdap(c *cli.Context) error {
 	}
 	log.Infof("[DeleteLdap] ldap config deleted: %s", ldapName)
 	return nil
+}
+
+func DescribeLdap(c *cli.Context) {
+	checkRequiredFlagsAndArguments(c)
+	defer utils.TimeTrack(time.Now(), "describe an ldap")
+
+	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
+	orgID := c.Int64(FlOrganizationOptional.Name)
+	ldapName := c.String(FlName.Name)
+	log.Infof("[DescribeLdap] describe ldap config by name: %s", ldapName)
+	cbClient := NewCloudbreakHTTPClientFromContext(c)
+
+	resp, err := cbClient.Cloudbreak.V3OrganizationIDLdapconfigs.GetLdapConfigInOrganization(v3_organization_id_ldapconfigs.NewGetLdapConfigInOrganizationParams().WithOrganizationID(orgID).WithName(ldapName))
+	if err != nil {
+		utils.LogErrorAndExit(err)
+	}
+	l := resp.Payload
+	server := fmt.Sprintf("%s://%s:%d", l.Protocol, utils.SafeStringConvert(l.ServerHost), utils.SafeInt32Convert(l.ServerPort))
+	output.Write(append(LdapHeader, "ID"), &ldapOutDescribe{
+		&ldap{
+			Name:                 *l.Name,
+			Server:               server,
+			Domain:               l.Domain,
+			BindDn:               utils.SafeStringConvert(l.BindDn),
+			DirectoryType:        l.DirectoryType,
+			UserSearchBase:       utils.SafeStringConvert(l.UserSearchBase),
+			UserDnPattern:        utils.SafeStringConvert(l.UserDnPattern),
+			UserNameAttribute:    l.UserNameAttribute,
+			UserObjectClass:      l.UserObjectClass,
+			GroupMemberAttribute: l.GroupMemberAttribute,
+			GroupNameAttribute:   l.GroupNameAttribute,
+			GroupObjectClass:     l.GroupObjectClass,
+			GroupSearchBase:      l.GroupSearchBase,
+			AdminGroup:           l.AdminGroup,
+		},
+		strconv.FormatInt(l.ID, 10)})
 }
 
 func CreateLdapUser(c *cli.Context) error {

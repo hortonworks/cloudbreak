@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"strconv"
 	"strings"
 	"time"
 
@@ -23,8 +24,17 @@ type recipeOut struct {
 	ExecutionType string `json:"ExecutionType" yaml:"ExecutionType"`
 }
 
+type recipeOutDescribe struct {
+	*recipeOut
+	ID string `json:"ID" yaml:"ID"`
+}
+
 func (r *recipeOut) DataAsStringArray() []string {
 	return []string{r.Name, r.Description, r.ExecutionType}
+}
+
+func (r *recipeOutDescribe) DataAsStringArray() []string {
+	return append(r.recipeOut.DataAsStringArray(), r.ID)
 }
 
 func CreateRecipeFromUrl(c *cli.Context) {
@@ -109,7 +119,7 @@ func DescribeRecipe(c *cli.Context) {
 		utils.LogErrorAndExit(err)
 	}
 	recipe := resp.Payload
-	output.Write(recipeHeader, &recipeOut{recipe.Name, *recipe.Description, *recipe.RecipeType})
+	output.Write(append(recipeHeader, "ID"), &recipeOutDescribe{&recipeOut{recipe.Name, *recipe.Description, *recipe.RecipeType}, strconv.FormatInt(recipe.ID, 10)})
 }
 
 func DeleteRecipe(c *cli.Context) {

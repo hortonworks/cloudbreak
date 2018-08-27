@@ -21,8 +21,17 @@ type imagecatalogOut struct {
 	URL     string `json:"URL" yaml:"URL"`
 }
 
+type imagecatalogOutDescribe struct {
+	*imagecatalogOut
+	ID string `json:"ID" yaml:"ID"`
+}
+
 func (r *imagecatalogOut) DataAsStringArray() []string {
 	return []string{r.Name, strconv.FormatBool(r.Default), r.URL}
+}
+
+func (b *imagecatalogOutDescribe) DataAsStringArray() []string {
+	return append(b.imagecatalogOut.DataAsStringArray(), b.ID)
 }
 
 var imageHeader = []string{"Date", "Description", "Version", "ImageID"}
@@ -157,6 +166,26 @@ func SetDefaultImagecatalog(c *cli.Context) {
 	}
 
 	log.Infof("[SetDefaultImagecatalog] imagecatalog is set as default, name: %s", name)
+}
+
+func DescribeImagecatalog(c *cli.Context) {
+	checkRequiredFlagsAndArguments(c)
+	defer utils.TimeTrack(time.Now(), "describe imagecatalog")
+
+	cbClient := NewCloudbreakHTTPClientFromContext(c)
+	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
+	orgID := c.Int64(FlOrganizationOptional.Name)
+	resp, err := cbClient.Cloudbreak.V3OrganizationIDImagecatalogs.GetImageCatalogInOrganization(v3_organization_id_imagecatalogs.NewGetImageCatalogInOrganizationParams().WithOrganizationID(orgID).WithName(c.String(FlName.Name)))
+	if err != nil {
+		utils.LogErrorAndExit(err)
+	}
+
+	imgc := resp.Payload
+	if imgc.ID == nil {
+		output.Write(imagecatalogHeader, &imagecatalogOut{*imgc.Name, imgc.UsedAsDefault, *imgc.URL})
+	} else {
+		output.Write(append(imagecatalogHeader, "ID"), &imagecatalogOutDescribe{&imagecatalogOut{*imgc.Name, imgc.UsedAsDefault, *imgc.URL}, strconv.FormatInt(*imgc.ID, 10)})
+	}
 }
 
 func ListAwsImages(c *cli.Context) {

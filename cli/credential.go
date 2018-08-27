@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_organization_id_credentials"
@@ -246,6 +247,15 @@ func postCredential(client createCredentialClient, orgID int64, credReq *models_
 	return credential
 }
 
+type credentialOutDescribe struct {
+	*cloudResourceOut
+	ID string `json:"ID" yaml:"ID"`
+}
+
+func (c *credentialOutDescribe) DataAsStringArray() []string {
+	return append(c.cloudResourceOut.DataAsStringArray(), c.ID)
+}
+
 func DescribeCredential(c *cli.Context) {
 	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "describe credential")
@@ -259,7 +269,7 @@ func DescribeCredential(c *cli.Context) {
 	}
 
 	cred := resp.Payload
-	output.Write(cloudResourceHeader, &cloudResourceOut{*cred.Name, *cred.Description, *cred.CloudPlatform})
+	output.Write(append(cloudResourceHeader, "ID"), &credentialOutDescribe{&cloudResourceOut{*cred.Name, *cred.Description, *cred.CloudPlatform}, strconv.FormatInt(cred.ID, 10)})
 }
 
 func DeleteCredential(c *cli.Context) {

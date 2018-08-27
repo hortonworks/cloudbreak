@@ -26,6 +26,11 @@ type stackOut struct {
 	ClusterStatus string `json:"ClusterStatus" yaml:"ClusterStatus"`
 }
 
+type stackOutDescribe struct {
+	*stackOut
+	ID string `json:"ID" yaml:"ID"`
+}
+
 func (s *stackOut) DataAsStringArray() []string {
 	arr := s.cloudResourceOut.DataAsStringArray()
 	arr = append(arr, s.StackStatus)
@@ -33,13 +38,8 @@ func (s *stackOut) DataAsStringArray() []string {
 	return arr
 }
 
-type stackDetailsOut struct {
-	*models_cloudbreak.StackResponse
-	resp *models_cloudbreak.StackResponse
-}
-
-func (s *stackDetailsOut) DataAsStringArray() []string {
-	return convertResponseToStack(s.resp).DataAsStringArray()
+func (s *stackOutDescribe) DataAsStringArray() []string {
+	return append(s.stackOut.DataAsStringArray(), s.ID)
 }
 
 func CreateStack(c *cli.Context) {
@@ -140,8 +140,12 @@ func DescribeStack(c *cli.Context) {
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
-
-	output.Write(stackHeader, &stackDetailsOut{resp.Payload, resp.Payload})
+	s := resp.Payload
+	output.Write(append(stackHeader, "ID"), &stackOutDescribe{
+		&stackOut{cloudResourceOut{*s.Name, s.Cluster.Description, GetPlatformName(s.Credential)},
+			s.Status,
+			s.Cluster.Status},
+		strconv.FormatInt(s.ID, 10)})
 }
 
 type getStackInOrganization interface {
