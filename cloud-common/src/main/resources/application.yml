@@ -104,7 +104,8 @@ cb:
                 Messaging Management: Apache Kafka=hdf32-messaging-kafka;
                 Data Lake: Apache Ranger, Apache Atlas, Apache Hive Metastore=hdp26-shared-services;
                 HDP 3.0 - Data Science: Apache Spark 2, Apache Zeppelin=hdp30-data-science-spark2;
-                HDP 3.0 - EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin=hdp30-edw-analytics
+                HDP 3.0 - EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin=hdp30-edw-analytics;
+                Data Lake: Apache Ranger, Apache Hive Metastore HA=hdp26-shared-services-ha
      internal: "HDP 3.0 - Data Lake: Apache Ranger, Apache Hive Metastore=hdp30-shared-services"
   template.defaults: minviable-gcp,minviable-azure-managed-disks,minviable-aws
   custom.user.data: |
