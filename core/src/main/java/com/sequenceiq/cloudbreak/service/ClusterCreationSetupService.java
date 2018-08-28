@@ -143,7 +143,7 @@ public class ClusterCreationSetupService {
         return prepare(request, stack, null, user, organization);
     }
 
-    public Cluster prepare(ClusterRequest request, Stack stack, Blueprint blueprint, User user, Organization organization)throws IOException,
+    public Cluster prepare(ClusterRequest request, Stack stack, Blueprint blueprint, User user, Organization organization) throws IOException,
             CloudbreakImageNotFoundException, TransactionExecutionException {
         String stackName = stack.getName();
 
@@ -158,6 +158,7 @@ public class ClusterCreationSetupService {
 
         Cluster cluster = conversionService.convert(request, Cluster.class);
         cluster.setStack(stack);
+        cluster.setOrganization(stack.getOrganization());
         LOGGER.info("Cluster conversion took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
         start = System.currentTimeMillis();

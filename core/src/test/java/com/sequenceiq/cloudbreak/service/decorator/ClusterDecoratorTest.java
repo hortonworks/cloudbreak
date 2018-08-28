@@ -106,7 +106,7 @@ public class ClusterDecoratorTest {
         when(request.getConnectedCluster()).thenReturn(mock(ConnectedClusterRequest.class));
         when(sharedServiceConfigProvider.configureCluster(any(Cluster.class), any(ConnectedClusterRequest.class), any(User.class), any(Organization.class)))
                 .thenReturn(expectedClusterInstance);
-        when(clusterProxyDecorator.prepareProxyConfig(any(Cluster.class), any(), any(Stack.class))).thenReturn(expectedClusterInstance);
+        when(clusterProxyDecorator.prepareProxyConfig(any(Cluster.class), any())).thenReturn(expectedClusterInstance);
         when(ambariHaComponentFilter.getHaComponents(any())).thenReturn(Collections.emptySet());
 
         Cluster result = underTest.decorate(expectedClusterInstance, request, blueprint, user, new Organization(), stack);
