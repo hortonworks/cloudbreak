@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 
@@ -24,6 +25,7 @@ import org.mockito.junit.MockitoJUnitRunner.Silent;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.TestContextManager;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.ambari.client.AmbariClient;
@@ -38,6 +40,7 @@ import com.sequenceiq.periscope.domain.History;
 import com.sequenceiq.periscope.domain.PeriscopeUser;
 import com.sequenceiq.periscope.model.RejectedThread;
 import com.sequenceiq.periscope.modul.rejected.StackCollectorContext.StackCollectorSpringConfig;
+import com.sequenceiq.periscope.monitor.executor.ExecutorServiceWithRegistry;
 import com.sequenceiq.periscope.notification.HttpNotificationSender;
 import com.sequenceiq.periscope.service.AmbariClientProvider;
 import com.sequenceiq.periscope.service.ClusterService;
@@ -92,6 +95,8 @@ public class StackCollectorServiceModulTest extends StackCollectorContext {
         when(ambariClientProvider.createAmbariClient(any())).thenReturn(ambariClient);
         when(cloudbreakClientConfiguration.cloudbreakClient()).thenReturn(cloudbreakClient);
         when(cloudbreakClient.stackV1Endpoint()).thenReturn(stackV1Endpoint);
+
+        ReflectionTestUtils.setField(rejectedThreadService, "rejectedThreads", new ConcurrentHashMap<>());
     }
 
     @Test
@@ -110,7 +115,7 @@ public class StackCollectorServiceModulTest extends StackCollectorContext {
 
         underTest.collectStackDetails();
 
-        waitForThreadPool();
+        waitForTasksToFinish();
 
         verify(ambariClient, times(1)).healthCheck();
         verify(httpNotificationSender, times(0)).send(any(History.class));
@@ -131,7 +136,7 @@ public class StackCollectorServiceModulTest extends StackCollectorContext {
 
         underTest.collectStackDetails();
 
-        waitForThreadPool();
+        waitForTasksToFinish();
 
         verify(ambariClient, times(1)).healthCheck();
     }
@@ -154,7 +159,7 @@ public class StackCollectorServiceModulTest extends StackCollectorContext {
 
         underTest.collectStackDetails();
 
-        waitForThreadPool();
+        waitForTasksToFinish();
 
         List<RejectedThread> allRejectedCluster = rejectedThreadService.getAllRejectedCluster();
 
@@ -179,7 +184,7 @@ public class StackCollectorServiceModulTest extends StackCollectorContext {
 
         underTest.collectStackDetails();
 
-        waitForThreadPool();
+        waitForTasksToFinish();
 
         Set<AutoscaleStackResponse> stacks = rejectedThreadService.getAllRejectedCluster()
                 .stream()
@@ -191,6 +196,7 @@ public class StackCollectorServiceModulTest extends StackCollectorContext {
 
         underTest.collectStackDetails();
 
+        waitForTasksToFinish();
         List<RejectedThread> allRejectedCluster = rejectedThreadService.getAllRejectedCluster();
 
         Assert.assertTrue(allRejectedCluster.isEmpty());
@@ -212,7 +218,13 @@ public class StackCollectorServiceModulTest extends StackCollectorContext {
         return stack;
     }
 
-    private void waitForThreadPool() {
-        while (executorService.getActiveCount() != 0) ;
+    private void waitForTasksToFinish() {
+        ExecutorServiceWithRegistry executorServiceWithRegistry = applicationContext.getBean(ExecutorServiceWithRegistry.class);
+        while (executorServiceWithRegistry.activeCount() > 0) {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException ignore) {
+            }
+        }
     }
 }

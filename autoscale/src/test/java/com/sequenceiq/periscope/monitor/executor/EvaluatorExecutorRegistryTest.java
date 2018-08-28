@@ -5,8 +5,8 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.IntStream;
 
 import org.junit.Before;
@@ -97,20 +97,20 @@ public class EvaluatorExecutorRegistryTest {
 
     @Test
     public void testPutIfAbsentThreadSafe() {
-        final int numberOfElements = 100;
-        final int firstHalf = numberOfElements / 2;
+        int numberOfElements = 100;
+        int firstHalf = numberOfElements / 2;
         for (int i = 0; i < firstHalf; i++) {
             underTest.putIfAbsent(getEvaluatorExecutor("name" + i), i);
         }
 
-        Map<Integer, Boolean> results = new HashMap<>();
+        Map<Integer, Boolean> results = new ConcurrentHashMap<>();
         new ThreadSafetyTester(numberOfElements)
                 .withBlockToTest((i) -> results.put(i, underTest.putIfAbsent(getEvaluatorExecutor("name" + i), i)))
                 .run()
                 .waitUntilFinished();
 
-        assertTrue(IntStream.range(0, firstHalf).allMatch(i -> !results.get(i)));
-        assertTrue(IntStream.range(firstHalf, numberOfElements).allMatch(i -> results.get(i)));
+        assertTrue(IntStream.range(0, firstHalf).noneMatch(results::get));
+        assertTrue(IntStream.range(firstHalf, numberOfElements).allMatch(results::get));
     }
 
     private EvaluatorExecutor getEvaluatorExecutor(String name) {
