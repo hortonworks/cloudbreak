@@ -18,7 +18,9 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByOrganization;
@@ -30,7 +32,6 @@ import com.sequenceiq.cloudbreak.aspect.organization.DisableCheckPermissions;
 import com.sequenceiq.cloudbreak.aspect.organization.OrganizationResourceType;
 import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.user.NullIdentityUserException;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Service
@@ -63,7 +64,13 @@ public class PermissionCheckerService {
 
     public Object hasPermission(ProceedingJoinPoint proceedingJoinPoint) {
         MethodSignature methodSignature = (MethodSignature) proceedingJoinPoint.getSignature();
-        if (SecurityContextHolder.getContext().getAuthentication() == null) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null) {
+            return permissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature);
+        }
+
+        OAuth2Authentication oAuth = auth instanceof OAuth2Authentication ? (OAuth2Authentication) auth : null;
+        if (oAuth != null && oAuth.getUserAuthentication() == null && oAuth.getOAuth2Request().getScope().contains(SpecialScopes.AUTO_SCALE.getScope())) {
             return permissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature);
         }
 
@@ -95,14 +102,10 @@ public class PermissionCheckerService {
             return permissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature);
         }
 
-        try {
-            User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-            PermissionChecker<? extends Annotation> permissionChecker = permissionCheckerMap.get(methodAnnotation.annotationType());
-            OrganizationResource resource = classOrgResourceType.resource();
-            return permissionChecker.checkPermissions(methodAnnotation, resource, user, proceedingJoinPoint, methodSignature);
-        } catch (NullIdentityUserException e) {
-            throw new AccessDeniedException("You have no access to this resource.", e);
-        }
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        PermissionChecker<? extends Annotation> permissionChecker = permissionCheckerMap.get(methodAnnotation.annotationType());
+        OrganizationResource resource = classOrgResourceType.resource();
+        return permissionChecker.checkPermissions(methodAnnotation, resource, user, proceedingJoinPoint, methodSignature);
     }
 
     private Annotation validateNumberOfAnnotations(MethodSignature methodSignature, List<? extends Annotation> annotations) {
