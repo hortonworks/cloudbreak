@@ -5,6 +5,7 @@ import java.util.function.Function;
 import com.sequenceiq.cloudbreak.api.model.PlatformAccessConfigsResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformResourceRequestJson;
 import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.cloudbreak.newway.v3.AccessConfigV3Action;
 
 public class AccessConfig extends AbstractCloudbreakEntity<PlatformResourceRequestJson, PlatformAccessConfigsResponse> {
 
@@ -33,7 +34,7 @@ public class AccessConfig extends AbstractCloudbreakEntity<PlatformResourceReque
 
     public static AccessConfig isGot() {
         AccessConfig accessConfig = new AccessConfig();
-        accessConfig.setCreationStrategy(AccessConfigAction::createInGiven);
+        accessConfig.setCreationStrategy(AccessConfigV3Action::createInGiven);
         return accessConfig;
     }
 }

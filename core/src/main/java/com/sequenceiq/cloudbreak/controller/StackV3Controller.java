@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.controller;
 
+import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -156,5 +157,10 @@ public class StackV3Controller extends NotificationController implements StackV3
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
         Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
         return clusterCommonService.put(stack.getId(), updateClusterJson, user, organization);
+    }
+
+    @Override
+    public Map<String, Object> getStatusByNameInOrganization(Long organizationId, String name) {
+        return stackService.getStatusByNameInOrg(name, organizationId);
     }
 }

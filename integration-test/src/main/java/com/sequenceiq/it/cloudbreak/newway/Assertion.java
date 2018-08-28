@@ -11,7 +11,7 @@ public class Assertion<T> {
 
     private final BiConsumer<T, IntegrationTestContext> check;
 
-    Assertion(Function<IntegrationTestContext, T> entitySupplier, BiConsumer<T, IntegrationTestContext> check) {
+    public Assertion(Function<IntegrationTestContext, T> entitySupplier, BiConsumer<T, IntegrationTestContext> check) {
         this.entitySupplier = Objects.requireNonNull(entitySupplier);
         this.check = Objects.requireNonNull(check);
     }

@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.api.model.PlatformNetworkResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformNetworksResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformResourceRequestJson;
 import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.cloudbreak.newway.v3.NetworksV3Action;
 
 public class Networks extends Entity {
     private static final String NETWORKS = "NETWORKS";
@@ -84,7 +85,7 @@ public class Networks extends Entity {
     }
 
     public static Action<Networks> post() {
-        return new Action<>(getTestContext(NETWORKS), NetworksAction::getNetworks);
+        return new Action<>(getTestContext(NETWORKS), NetworksV3Action::getNetworks);
     }
 
     private static Assertion<Networks> assertThis(BiConsumer<Networks, IntegrationTestContext> check) {

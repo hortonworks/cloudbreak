@@ -1,11 +1,12 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
+import java.util.function.BiConsumer;
+import java.util.function.Function;
+
 import com.sequenceiq.cloudbreak.api.model.PlatformResourceRequestJson;
 import com.sequenceiq.cloudbreak.api.model.RegionResponse;
 import com.sequenceiq.it.IntegrationTestContext;
-
-import java.util.function.BiConsumer;
-import java.util.function.Function;
+import com.sequenceiq.it.cloudbreak.newway.v3.RegionV3Action;
 
 public class Region extends Entity {
     public static final String REGION = "REGION";
@@ -53,7 +54,7 @@ public class Region extends Entity {
     }
 
     public static Action<Region> getPlatformRegions(String key) {
-        return new Action<>(getTestContextRegion(key), RegionAction::getRegionsByCredentialId);
+        return new Action<>(getTestContextRegion(key), RegionV3Action::getRegionsByCredentialId);
     }
 
     public static Action<Region> getPlatformRegions() {

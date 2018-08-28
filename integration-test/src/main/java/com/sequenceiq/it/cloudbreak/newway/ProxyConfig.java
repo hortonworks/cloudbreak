@@ -5,6 +5,7 @@ import java.util.function.Function;
 
 import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigRequest;
 import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.cloudbreak.newway.v3.ProxyConfigV3Action;
 
 public class ProxyConfig extends ProxyConfigEntity {
     private static final String PROXYCONFIG = "PROXYCONFIG";
@@ -33,18 +34,18 @@ public class ProxyConfig extends ProxyConfigEntity {
 
     public static ProxyConfig isCreated() {
         ProxyConfig proxyConfig = new ProxyConfig();
-        proxyConfig.setCreationStrategy(ProxyConfigAction::createInGiven);
+        proxyConfig.setCreationStrategy(ProxyConfigV3Action::createInGiven);
         return proxyConfig;
     }
 
     public static ProxyConfig isCreatedDeleted() {
         ProxyConfig proxyConfig = new ProxyConfig();
-        proxyConfig.setCreationStrategy(ProxyConfigAction::createDeleteInGiven);
+        proxyConfig.setCreationStrategy(ProxyConfigV3Action::createDeleteInGiven);
         return proxyConfig;
     }
 
     public static Action<ProxyConfig> post(String key) {
-        return new Action<>(getTestContext(key), ProxyConfigAction::post);
+        return new Action<>(getTestContext(key), ProxyConfigV3Action::post);
     }
 
     public static Action<ProxyConfig> post() {
@@ -52,7 +53,7 @@ public class ProxyConfig extends ProxyConfigEntity {
     }
 
     public static Action<ProxyConfig> get(String key) {
-        return new Action<>(getTestContext(key), ProxyConfigAction::get);
+        return new Action<>(getTestContext(key), ProxyConfigV3Action::get);
     }
 
     public static Action<ProxyConfig> get() {
@@ -60,11 +61,11 @@ public class ProxyConfig extends ProxyConfigEntity {
     }
 
     public static Action<ProxyConfig> getAll() {
-        return new Action<>(getNew(), ProxyConfigAction::getAll);
+        return new Action<>(getNew(), ProxyConfigV3Action::getAll);
     }
 
     public static Action<ProxyConfig> delete(String key) {
-        return new Action<>(getTestContext(key), ProxyConfigAction::delete);
+        return new Action<>(getTestContext(key), ProxyConfigV3Action::delete);
     }
 
     public static Action<ProxyConfig> delete() {

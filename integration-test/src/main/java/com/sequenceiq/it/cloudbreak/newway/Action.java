@@ -10,7 +10,7 @@ public class Action<T> {
 
     private final Strategy strategy;
 
-    Action(Function<IntegrationTestContext, T> entitySupplier, Strategy strategy) {
+    public Action(Function<IntegrationTestContext, T> entitySupplier, Strategy strategy) {
         this.entitySupplier = Objects.requireNonNull(entitySupplier);
         this.strategy = Objects.requireNonNull(strategy);
     }

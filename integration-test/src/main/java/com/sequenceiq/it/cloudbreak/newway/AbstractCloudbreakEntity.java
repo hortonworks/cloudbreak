@@ -2,7 +2,7 @@ package com.sequenceiq.it.cloudbreak.newway;
 
 import java.util.Set;
 
-abstract class AbstractCloudbreakEntity<R, S> extends Entity {
+public abstract class AbstractCloudbreakEntity<R, S> extends Entity {
     private String name;
 
     private R request;

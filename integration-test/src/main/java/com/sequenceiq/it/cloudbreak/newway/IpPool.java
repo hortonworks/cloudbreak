@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.api.model.IpPoolJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformIpPoolsResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformResourceRequestJson;
 import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.cloudbreak.newway.v3.IpPoolV3Action;
 
 public class IpPool extends Entity {
     private static final Logger LOGGER = LoggerFactory.getLogger(IpPool.class);
@@ -100,7 +101,7 @@ public class IpPool extends Entity {
     }
 
     private static Action<IpPool> get(String key) {
-        return new Action<>(getTestContext(key), IpPoolAction::get);
+        return new Action<>(getTestContext(key), IpPoolV3Action::get);
     }
 
     public static Action<IpPool> get() {

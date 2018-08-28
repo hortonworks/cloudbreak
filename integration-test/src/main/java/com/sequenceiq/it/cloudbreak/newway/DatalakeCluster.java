@@ -5,6 +5,7 @@ import java.util.function.Function;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.cloudbreak.newway.v3.DatalakeClusterV3Action;
 
 public class DatalakeCluster extends AbstractCloudbreakEntity<StackV2Request, StackResponse> {
 
@@ -20,7 +21,7 @@ public class DatalakeCluster extends AbstractCloudbreakEntity<StackV2Request, St
 
     public static DatalakeCluster isCreatedWithName(String name) {
         var datalake = new DatalakeCluster();
-        datalake.setCreationStrategy((testContext, entity) -> DatalakeClusterAction.get(testContext, entity, name));
+        datalake.setCreationStrategy((testContext, entity) -> DatalakeClusterV3Action.get(testContext, entity, name));
         return datalake;
     }
 
@@ -28,7 +29,7 @@ public class DatalakeCluster extends AbstractCloudbreakEntity<StackV2Request, St
         return testContext -> testContext.getContextParam(key, DatalakeCluster.class);
     }
 
-    static Function<IntegrationTestContext, DatalakeCluster> getTestContextDatalakeCluster() {
+    public static Function<IntegrationTestContext, DatalakeCluster> getTestContextDatalakeCluster() {
         return getTestContextDatalakeCluster(DATALAKE_CLUSTER_ID);
     }
 

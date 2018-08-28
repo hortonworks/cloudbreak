@@ -4,6 +4,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.cloudbreak.newway.v3.RecipeV3Action;
 
 public class Recipe extends RecipeEntity {
 
@@ -21,18 +22,18 @@ public class Recipe extends RecipeEntity {
 
     public static Recipe isCreated() {
         Recipe recipe = new Recipe();
-        recipe.setCreationStrategy(RecipeAction::createInGiven);
+        recipe.setCreationStrategy(RecipeV3Action::createInGiven);
         return recipe;
     }
 
     public static Recipe isCreatedDeleted() {
         Recipe recipe = new Recipe();
-        recipe.setCreationStrategy(RecipeAction::createDeleteInGiven);
+        recipe.setCreationStrategy(RecipeV3Action::createDeleteInGiven);
         return recipe;
     }
 
     public static Action<Recipe> post(String key) {
-        return new Action<>(getTestContext(key), RecipeAction::post);
+        return new Action<>(getTestContext(key), RecipeV3Action::post);
     }
 
     public static Action<Recipe> post() {
@@ -40,7 +41,7 @@ public class Recipe extends RecipeEntity {
     }
 
     public static Action<Recipe> get(String key) {
-        return new Action<>(getTestContext(key), RecipeAction::get);
+        return new Action<>(getTestContext(key), RecipeV3Action::get);
     }
 
     public static Action<Recipe> get() {
@@ -48,11 +49,11 @@ public class Recipe extends RecipeEntity {
     }
 
     public static Action<Recipe> getAll() {
-        return new Action<>(getNew(), RecipeAction::getAll);
+        return new Action<>(getNew(), RecipeV3Action::getAll);
     }
 
     public static Action<Recipe> delete(String key) {
-        return new Action<>(getTestContext(key), RecipeAction::delete);
+        return new Action<>(getTestContext(key), RecipeV3Action::delete);
     }
 
     public static Action<Recipe> delete() {
