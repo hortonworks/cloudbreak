@@ -1,6 +1,10 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
-import com.sequenceiq.it.IntegrationTestContext;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,9 +16,7 @@ import org.springframework.util.StringUtils;
 import org.testng.ITestContext;
 import org.testng.annotations.BeforeTest;
 
-import javax.inject.Inject;
-import java.util.HashMap;
-import java.util.Map;
+import com.sequenceiq.it.IntegrationTestContext;
 
 public class CloudbreakTest extends GherkinTest {
     public static final String CLOUDBREAK_SERVER_ROOT = "CLOUDBREAK_SERVER_ROOT";
@@ -24,6 +26,8 @@ public class CloudbreakTest extends GherkinTest {
     public static final String USER = "USER";
 
     public static final String PASSWORD = "PASSWORD";
+
+    public static final String ORGANIZATION_ID = "ORGANIZTION_ID";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakTest.class);
 
@@ -62,6 +66,14 @@ public class CloudbreakTest extends GherkinTest {
         testContext.putContextParam(IDENTITY_URL, uaaServer);
         testContext.putContextParam(USER, defaultUaaUser);
         testContext.putContextParam(PASSWORD, defaultUaaPassword);
+
+        try {
+            CloudbreakClient client = CloudbreakClient.isCreated();
+            client.create(testContext);
+            testContext.putContextParam(ORGANIZATION_ID,
+                    client.getCloudbreakClient().organizationV3Endpoint().getByName(defaultUaaUser).getId());
+        } catch (Exception ignored) {
+        }
     }
 
     public TestParameter getTestParameter() {

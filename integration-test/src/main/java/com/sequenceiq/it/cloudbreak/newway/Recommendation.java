@@ -1,9 +1,10 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
-import com.sequenceiq.it.IntegrationTestContext;
-
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+
+import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.cloudbreak.newway.v3.RecommendationV3Action;
 
 public class Recommendation extends RecommendationEntity {
 
@@ -26,7 +27,7 @@ public class Recommendation extends RecommendationEntity {
     }
 
     public static Action<Recommendation> post(String key) {
-        return new Action<>(getTestContext(key), RecommendationAction::post);
+        return new Action<>(getTestContext(key), RecommendationV3Action::post);
     }
 
     public static Action<Recommendation> post() {

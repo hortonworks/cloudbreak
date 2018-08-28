@@ -4,6 +4,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.cloudbreak.newway.v3.RdsConfigV3Action;
 
 public class RdsConfig extends RdsConfigEntity {
     private static final String RDSCONFIG = "RDSCONFIG";
@@ -30,24 +31,24 @@ public class RdsConfig extends RdsConfigEntity {
 
     public static RdsConfig isCreated() {
         RdsConfig rdsConfig = new RdsConfig();
-        rdsConfig.setCreationStrategy(RdsConfigAction::createInGiven);
+        rdsConfig.setCreationStrategy(RdsConfigV3Action::createInGiven);
         return rdsConfig;
     }
 
     public static RdsConfig isCreated(String id) {
         var rdsConfig = new RdsConfig();
-        rdsConfig.setCreationStrategy(RdsConfigAction::createInGiven);
+        rdsConfig.setCreationStrategy(RdsConfigV3Action::createInGiven);
         return rdsConfig;
     }
 
     public static RdsConfig isCreatedDeleted() {
         RdsConfig rdsConfig = new RdsConfig();
-        rdsConfig.setCreationStrategy(RdsConfigAction::createDeleteInGiven);
+        rdsConfig.setCreationStrategy(RdsConfigV3Action::createDeleteInGiven);
         return rdsConfig;
     }
 
     public static Action<RdsConfig> post(String key) {
-        return new Action<>(getTestContext(key), RdsConfigAction::post);
+        return new Action<>(getTestContext(key), RdsConfigV3Action::post);
     }
 
     public static Action<RdsConfig> post() {
@@ -55,7 +56,7 @@ public class RdsConfig extends RdsConfigEntity {
     }
 
     public static Action<RdsConfig> get(String key) {
-        return new Action<>(getTestContext(key), RdsConfigAction::get);
+        return new Action<>(getTestContext(key), RdsConfigV3Action::get);
     }
 
     public static Action<RdsConfig> get() {
@@ -63,11 +64,11 @@ public class RdsConfig extends RdsConfigEntity {
     }
 
     public static Action<RdsConfig> getAll() {
-        return new Action<>(getNew(), RdsConfigAction::getAll);
+        return new Action<>(getNew(), RdsConfigV3Action::getAll);
     }
 
     public static Action<RdsConfig> delete(String key) {
-        return new Action<>(getTestContext(key), RdsConfigAction::delete);
+        return new Action<>(getTestContext(key), RdsConfigV3Action::delete);
     }
 
     public static Action<RdsConfig> delete() {
@@ -75,7 +76,7 @@ public class RdsConfig extends RdsConfigEntity {
     }
 
     public static Action<RdsConfig> testConnect(String key) {
-        return new Action<>(getTestContext(key), RdsConfigAction::testConnect);
+        return new Action<>(getTestContext(key), RdsConfigV3Action::testConnect);
     }
 
     public static Action<RdsConfig> testConnect() {

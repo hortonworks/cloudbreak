@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.api.model.PlatformResourceRequestJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformSshKeyResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformSshKeysResponse;
 import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.cloudbreak.newway.v3.SshKeyV3Action;
 
 public class SshKey extends Entity {
     private static final Logger LOGGER = LoggerFactory.getLogger(SshKey.class);
@@ -95,7 +96,7 @@ public class SshKey extends Entity {
     }
 
     public static Action<SshKey> get(String key) {
-        return new Action<>(getTestContext(key), SshKeyAction::post);
+        return new Action<>(getTestContext(key), SshKeyV3Action::post);
     }
 
     public static Action<SshKey> get() {

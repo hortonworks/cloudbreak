@@ -4,6 +4,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.cloudbreak.newway.v3.LdapConfigV3Action;
 
 public class LdapConfig extends LdapConfigEntity {
     private static final String LDAPCONFIG = "LdapCONFIG";
@@ -26,18 +27,18 @@ public class LdapConfig extends LdapConfigEntity {
 
     public static LdapConfig isCreated() {
         var ldapConfig = new LdapConfig();
-        ldapConfig.setCreationStrategy(LdapConfigAction::createInGiven);
+        ldapConfig.setCreationStrategy(LdapConfigV3Action::createInGiven);
         return ldapConfig;
     }
 
     public static LdapConfig isCreatedDeleted() {
         var ldapConfig = new LdapConfig();
-        ldapConfig.setCreationStrategy(LdapConfigAction::createDeleteInGiven);
+        ldapConfig.setCreationStrategy(LdapConfigV3Action::createDeleteInGiven);
         return ldapConfig;
     }
 
     public static Action<LdapConfig> post(String key) {
-        return new Action<>(getTestContext(key), LdapConfigAction::post);
+        return new Action<>(getTestContext(key), LdapConfigV3Action::post);
     }
 
     public static Action<LdapConfig> post() {
@@ -45,7 +46,7 @@ public class LdapConfig extends LdapConfigEntity {
     }
 
     public static Action<LdapConfig> get(String key) {
-        return new Action<>(getTestContext(key), LdapConfigAction::get);
+        return new Action<>(getTestContext(key), LdapConfigV3Action::get);
     }
 
     public static Action<LdapConfig> get() {
@@ -53,11 +54,11 @@ public class LdapConfig extends LdapConfigEntity {
     }
 
     public static Action<LdapConfig> getAll() {
-        return new Action<>(getNew(), LdapConfigAction::getAll);
+        return new Action<>(getNew(), LdapConfigV3Action::getAll);
     }
 
     public static Action<LdapConfig> delete(String key) {
-        return new Action<>(getTestContext(key), LdapConfigAction::delete);
+        return new Action<>(getTestContext(key), LdapConfigV3Action::delete);
     }
 
     public static Action<LdapConfig> delete() {
@@ -71,15 +72,14 @@ public class LdapConfig extends LdapConfigEntity {
     public static LdapConfig isCreatedWithParameters(TestParameter testParameter) {
         var ldapConfig = new LdapConfig();
         ldapConfig.setRequest(LdapConfigRequestDataCollector.createLdapRequestWithProperties(testParameter));
-        ldapConfig.setCreationStrategy(LdapConfigAction::createInGiven);
+        ldapConfig.setCreationStrategy(LdapConfigV3Action::createInGiven);
         return ldapConfig;
     }
 
     public static LdapConfig isCreatedWithParametersAndName(TestParameter testParameter, String name) {
         var ldapConfig = new LdapConfig();
         ldapConfig.setRequest(LdapConfigRequestDataCollector.createLdapRequestWithPropertiesAndName(testParameter, name));
-        ldapConfig.setCreationStrategy(LdapConfigAction::createInGiven);
+        ldapConfig.setCreationStrategy(LdapConfigV3Action::createInGiven);
         return ldapConfig;
     }
-
 }

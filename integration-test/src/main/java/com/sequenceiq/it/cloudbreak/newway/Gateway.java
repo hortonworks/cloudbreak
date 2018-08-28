@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.api.model.CloudGatewayJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformGatewaysResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformResourceRequestJson;
 import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.cloudbreak.newway.v3.GatewayV3Action;
 
 public class Gateway extends Entity {
     private static final String IPPOOL = "IPPOOL";
@@ -95,7 +96,7 @@ public class Gateway extends Entity {
     }
 
     public static Action<Gateway> get(String key) {
-        return new Action<>(getTestContext(key), GatewayAction::get);
+        return new Action<>(getTestContext(key), GatewayV3Action::get);
     }
 
     public static Action<Gateway> get() {

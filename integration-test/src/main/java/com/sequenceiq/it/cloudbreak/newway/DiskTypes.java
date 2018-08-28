@@ -1,9 +1,10 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
-import com.sequenceiq.it.IntegrationTestContext;
-
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+
+import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.cloudbreak.newway.v3.DiskTypesV3Action;
 
 public class DiskTypes extends DiskTypesEntity {
 
@@ -26,7 +27,7 @@ public class DiskTypes extends DiskTypesEntity {
     }
 
     public static Action<DiskTypes> get(String key) {
-        return new Action<>(getTestContext(key), DiskTypesAction::get);
+        return new Action<>(getTestContext(key), DiskTypesV3Action::get);
     }
 
     public static Action<DiskTypes> get() {
@@ -34,7 +35,7 @@ public class DiskTypes extends DiskTypesEntity {
     }
 
     public static Action<DiskTypes> getByType(String key) {
-        return new Action<>(getTestContext(key), DiskTypesAction::getByType);
+        return new Action<>(getTestContext(key), DiskTypesV3Action::getByType);
     }
 
     public static Action<DiskTypes> getByType() {

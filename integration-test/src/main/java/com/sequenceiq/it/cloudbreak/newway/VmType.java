@@ -1,9 +1,10 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
-import com.sequenceiq.it.IntegrationTestContext;
-
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+
+import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.cloudbreak.newway.v3.VmTypeV3Action;
 
 public class VmType extends VmTypeEntity {
     static Function<IntegrationTestContext, VmType> getTestContext(String key) {
@@ -19,7 +20,7 @@ public class VmType extends VmTypeEntity {
     }
 
     public static Action<VmType> getPlatformVmTypes(String key) {
-        return new Action<>(getTestContext(key), VmTypeAction::getVmTypesByCredentialId);
+        return new Action<>(getTestContext(key), VmTypeV3Action::getVmTypesByCredentialId);
     }
 
     public static Action<VmType> getPlatformVmTypes() {

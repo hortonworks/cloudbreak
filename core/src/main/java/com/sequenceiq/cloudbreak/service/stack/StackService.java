@@ -394,6 +394,10 @@ public class StackService {
         return stackRepository.findByNameAndOrganizationIdWithLists(name, organizationId);
     }
 
+    public Map<String, Object> getStatusByNameInOrg(String name, Long organizationId) {
+        return conversionService.convert(getByNameInOrg(name, organizationId), Map.class);
+    }
+
     public Stack create(Stack stack, String platformString, StatedImage imgFromCatalog, User user, Organization organization) {
         stack.setGatewayPort(nginxPort);
         stack.setCreator(user);

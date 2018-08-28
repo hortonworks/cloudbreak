@@ -91,6 +91,7 @@ public class OperationDescriptions {
         public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private stack by name";
         public static final String DELETE_BY_ID = "delete stack by id";
         public static final String GET_STATUS_BY_ID = "retrieve stack status by stack id";
+        public static final String GET_STATUS_BY_NAME = "retrieve stack status by stack name";
         public static final String PUT_BY_ID = "update stack by id";
         public static final String PUT_BY_NAME = "update stack by name";
         public static final String GET_METADATA = "retrieve stack metadata";

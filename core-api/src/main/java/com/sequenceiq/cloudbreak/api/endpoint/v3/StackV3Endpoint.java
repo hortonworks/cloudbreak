@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v3;
 
+import java.util.Map;
 import java.util.Set;
 
 import javax.validation.Valid;
@@ -181,4 +182,11 @@ public interface StackV3Endpoint {
     @ApiOperation(value = StackOpDescription.PUT_BY_NAME, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
             nickname = "putpasswordStackV3")
     Response putPassword(@PathParam("organizationId") Long organizationId, @PathParam("name") String name, @Valid UserNamePasswordJson userNamePasswordJson);
+
+    @GET
+    @Path("{name}/status")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = StackOpDescription.GET_STATUS_BY_NAME, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
+            nickname = "statusStackV3")
+    Map<String, Object> getStatusByNameInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
 }
