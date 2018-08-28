@@ -87,7 +87,7 @@ public class ClusterDecorator {
         prepareHostGroups(stack, cluster, request.getHostGroups(), organization, user);
         validateBlueprintIfRequired(cluster, request, stack);
         prepareRds(cluster, request, stack);
-        cluster = clusterProxyDecorator.prepareProxyConfig(cluster, request.getProxyName(), stack);
+        cluster = clusterProxyDecorator.prepareProxyConfig(cluster, request.getProxyName());
         prepareLdap(cluster, request, user, organization);
         cluster = sharedServiceConfigProvider.configureCluster(cluster, request.getConnectedCluster(), user, organization);
         return cluster;

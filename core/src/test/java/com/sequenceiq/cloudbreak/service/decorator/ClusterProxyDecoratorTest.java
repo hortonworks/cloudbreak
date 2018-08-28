@@ -23,7 +23,6 @@ import com.sequenceiq.cloudbreak.converter.mapper.ProxyConfigMapper;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.organization.User;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigService;
 
@@ -44,8 +43,6 @@ public class ClusterProxyDecoratorTest {
 
     private final IdentityUser identityUser = new IdentityUser("test", "test", "test", null, "test", "test", new Date());
 
-    private final Stack stack = new Stack();
-
     private Cluster cluster;
 
     @Before
@@ -57,7 +54,7 @@ public class ClusterProxyDecoratorTest {
 
     @Test
     public void testProxyNameProvided() {
-        Cluster result = clusterProxyDecorator.prepareProxyConfig(cluster, "test", stack);
+        Cluster result = clusterProxyDecorator.prepareProxyConfig(cluster, "test");
         assertNotNull(result.getProxyConfig());
         Mockito.verify(service, Mockito.times(1)).getByNameForOrganization(anyString(), any(Organization.class));
         Mockito.verify(service, Mockito.times(0)).create(any(ProxyConfig.class), anyLong(), eq(user));
@@ -65,7 +62,7 @@ public class ClusterProxyDecoratorTest {
 
     @Test
     public void testNothingProvided() {
-        Cluster result = clusterProxyDecorator.prepareProxyConfig(cluster, null, stack);
+        Cluster result = clusterProxyDecorator.prepareProxyConfig(cluster, null);
         assertNull(result.getProxyConfig());
         Mockito.verify(service, Mockito.times(0)).create(any(ProxyConfig.class), anyLong(), eq(user));
         Mockito.verify(service, Mockito.times(0)).getByNameForOrganization(anyString(), any(Organization.class));
