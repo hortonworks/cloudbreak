@@ -15,6 +15,8 @@ public class SharedServiceConfigsView {
 
     private String datalakeAmbariIp;
 
+    private String datalakeAmbariFqdn;
+
     private Set<String> datalakeComponents = new HashSet<>();
 
     public String getRangerAdminPassword() {
@@ -55,6 +57,14 @@ public class SharedServiceConfigsView {
 
     public void setDatalakeAmbariIp(String datalakeAmbariIp) {
         this.datalakeAmbariIp = datalakeAmbariIp;
+    }
+
+    public String getDatalakeAmbariFqdn() {
+        return datalakeAmbariFqdn;
+    }
+
+    public void setDatalakeAmbariFqdn(String datalakeAmbariFqdn) {
+        this.datalakeAmbariFqdn = datalakeAmbariFqdn;
     }
 
     public Set<String> getDatalakeComponents() {
