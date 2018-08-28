@@ -1646,15 +1646,93 @@ func main() {
 			Usage: "audit related operations",
 			Subcommands: []cli.Command{
 				{
-					Name:   "list",
-					Usage:  "list audit for a resource",
-					Flags:  cb.NewFlagBuilder().AddFlags(cb.FlResourceType, cb.FlResourceID).AddOutputFlag().AddAuthenticationFlags().Build(),
-					Before: ConfigRead,
-					Action: cb.ListAudits,
-					BashComplete: func(c *cli.Context) {
-						for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlResourceType, cb.FlResourceID).AddOutputFlag().AddAuthenticationFlags().Build() {
-							printFlagCompletion(f)
-						}
+					Name:  "list",
+					Usage: "list audit for a resource",
+					Subcommands: []cli.Command{
+						{
+							Name:   "blueprint",
+							Usage:  "list audit for blueprints",
+							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlResourceID).AddOutputFlag().AddAuthenticationFlags().Build(),
+							Before: ConfigRead,
+							Action: cb.ListBlueprintAudits,
+							BashComplete: func(c *cli.Context) {
+								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlResourceID).AddOutputFlag().AddAuthenticationFlags().Build() {
+									printFlagCompletion(f)
+								}
+							},
+						},
+						{
+							Name:   "cluster",
+							Usage:  "list audit for clusters",
+							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlResourceID).AddOutputFlag().AddAuthenticationFlags().Build(),
+							Before: ConfigRead,
+							Action: cb.ListClusterAudits,
+							BashComplete: func(c *cli.Context) {
+								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlResourceID).AddOutputFlag().AddAuthenticationFlags().Build() {
+									printFlagCompletion(f)
+								}
+							},
+						},
+						{
+							Name:   "credential",
+							Usage:  "list audit for credentials",
+							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlResourceID).AddOutputFlag().AddAuthenticationFlags().Build(),
+							Before: ConfigRead,
+							Action: cb.ListCredentialAudits,
+							BashComplete: func(c *cli.Context) {
+								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlResourceID).AddOutputFlag().AddAuthenticationFlags().Build() {
+									printFlagCompletion(f)
+								}
+							},
+						},
+						{
+							Name:   "database",
+							Usage:  "list audit for database configurations",
+							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlResourceID).AddOutputFlag().AddAuthenticationFlags().Build(),
+							Before: ConfigRead,
+							Action: cb.ListDatabaseAudits,
+							BashComplete: func(c *cli.Context) {
+								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlResourceID).AddOutputFlag().AddAuthenticationFlags().Build() {
+									printFlagCompletion(f)
+								}
+							},
+						},
+						{
+							Name:   "imagecatalog",
+							Usage:  "list audit for imagecatalogs",
+							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlResourceID).AddOutputFlag().AddAuthenticationFlags().Build(),
+							Before: ConfigRead,
+							Action: cb.ListImagecatalogAudits,
+							BashComplete: func(c *cli.Context) {
+								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlResourceID).AddOutputFlag().AddAuthenticationFlags().Build() {
+									printFlagCompletion(f)
+								}
+							},
+						},
+						{
+							Name:   "ldap",
+							Usage:  "list audit for ldap configurations",
+							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlResourceID).AddOutputFlag().AddAuthenticationFlags().Build(),
+							Before: ConfigRead,
+							Action: cb.ListLdapAudits,
+							BashComplete: func(c *cli.Context) {
+								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlResourceID).AddOutputFlag().AddAuthenticationFlags().Build() {
+									printFlagCompletion(f)
+								}
+							},
+						},
+						{
+							Name:   "recipe",
+							Usage:  "list audit for recipes",
+							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlResourceID).AddOutputFlag().AddAuthenticationFlags().Build(),
+							Before: ConfigRead,
+							Action: cb.ListRecipeAudits,
+							BashComplete: func(c *cli.Context) {
+								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlResourceID).AddOutputFlag().AddAuthenticationFlags().Build() {
+									printFlagCompletion(f)
+								}
+							},
+						},
 					},
 				},
 				{

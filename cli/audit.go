@@ -39,7 +39,35 @@ func (a *auditOut) DataAsStringArray() []string {
 	return []string{string(auditYAML)}
 }
 
-func ListAudits(c *cli.Context) {
+func ListBlueprintAudits(c *cli.Context) {
+	listAudits("blueprints", c)
+}
+
+func ListClusterAudits(c *cli.Context) {
+	listAudits("stacks", c)
+}
+
+func ListCredentialAudits(c *cli.Context) {
+	listAudits("credentials", c)
+}
+
+func ListDatabaseAudits(c *cli.Context) {
+	listAudits("rdsconfigs", c)
+}
+
+func ListImagecatalogAudits(c *cli.Context) {
+	listAudits("imagecatalogs", c)
+}
+
+func ListLdapAudits(c *cli.Context) {
+	listAudits("ldapconfigs", c)
+}
+
+func ListRecipeAudits(c *cli.Context) {
+	listAudits("recipes", c)
+}
+
+func listAudits(resourceType string, c *cli.Context) {
 	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "list audits")
 	log.Infof("[ListAudits] List all audits for a resource identified by Resource ID")
@@ -49,7 +77,6 @@ func ListAudits(c *cli.Context) {
 	if err != nil {
 		utils.LogErrorMessageAndExit("Unable to parse as number: " + c.String(FlResourceID.Name))
 	}
-	resourceType := c.String(FlResourceType.Name)
 
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 
@@ -63,11 +90,6 @@ func ListAudits(c *cli.Context) {
 		tableRows = append(tableRows, &auditListOut{audit})
 	}
 	output.WriteList(auditListHeader, tableRows)
-
-	// tableRows = append(tableRows, &auditListOut{strconv.FormatInt(audit.AuditID, 10),
-	// 	audit.Operation.EventType, audit.Operation.ZonedDateTime.String(),
-	// 	strconv.FormatInt(audit.Operation.ResourceID, 10), audit.Operation.ResourceName,
-	// 	audit.Operation.ResourceType, audit.Operation.UserName, audit.Status, strconv.FormatInt(audit.Duration, 10)})
 }
 
 func DescribeAudit(c *cli.Context) {

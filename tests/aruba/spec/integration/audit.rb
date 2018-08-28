@@ -14,10 +14,10 @@ RSpec.describe 'Audit test cases', :type => :aruba do
   include_context "shared command helpers"    
   include_context "mock shared vars"   
 
-  before(:all) do
-    result = cb.configure.server(ENV['BASE_URL']).username(ENV['USERNAME_CLI']).password(ENV['PASSWORD_CLI']).org(ENV['USERNAME_CLI']).build(false)
-    expect(result.exit_status).to eql 0
-  end
+  # before(:all) do
+  #   result = cb.configure.server(ENV['BASE_URL']).username(ENV['USERNAME_CLI']).password(ENV['PASSWORD_CLI']).org(ENV['USERNAME_CLI']).build(false)
+  #   expect(result.exit_status).to eql 0
+  # end
 
   after(:all) do
     MockResponse.reset(ENV['BASE_URL'] + @mock_endpoint_reset)
@@ -29,7 +29,7 @@ RSpec.describe 'Audit test cases', :type => :aruba do
       url = ENV['BASE_URL'] + @mock_endpoint_setup
       MockResponse.post(requestBody, url)
 
-      result = cb.audit.list.resource_type('stacks').resource_id('328').build(false)
+      result = cb.audit.list.cluster.resource_id('328').build(false)
       expect(result.exit_status).to eql 0
       expect(result.stdout.empty?).to be_falsy  
     end
@@ -57,7 +57,7 @@ RSpec.describe 'Audit test cases', :type => :aruba do
 
   it "Audit - List events - Invalid format of Resource ID" do
     with_environment 'DEBUG' => '1' do
-      result = cb.audit.list.resource_type('stacks').resource_id('test').build(false)
+      result = cb.audit.list.cluster.resource_id('test').build(false)
       expect(result.exit_status).to eql 1
       expect(result.stdout.empty?).to be_truthy  
     end
