@@ -348,9 +348,6 @@ cb:
             ubuntu16: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/ubuntu16
             sles12: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/sles12
           mpacks:
-            redhat6:
-              - mpackUrl: http://public-repo-1.hortonworks.com/HDF/centos6/3.x/updates/3.2.0.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.2.0.0-520.tar.gz
-                stackDefault: true
             redhat7:
               - mpackUrl: http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.2.0.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.2.0.0-520.tar.gz
                 stackDefault: true

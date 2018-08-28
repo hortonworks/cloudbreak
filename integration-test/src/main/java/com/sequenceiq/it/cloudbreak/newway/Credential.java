@@ -4,6 +4,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.cloudbreak.newway.v3.CredentialV3Action;
 
 public class Credential extends CredentialEntity {
 
@@ -25,18 +26,18 @@ public class Credential extends CredentialEntity {
 
     public static Credential isCreated() {
         Credential credential = new Credential();
-        credential.setCreationStrategy(CredentialAction::createInGiven);
+        credential.setCreationStrategy(CredentialV3Action::createInGiven);
         return credential;
     }
 
     public static Credential isDeleted(Credential credential) {
-        credential.setCreationStrategy(CredentialAction::createDeleteInGiven);
+        credential.setCreationStrategy(CredentialV3Action::createDeleteInGiven);
 
         return credential;
     }
 
     public static Action<Credential> post(String key) {
-        return new Action<>(getTestContextCredential(key), CredentialAction::post);
+        return new Action<>(getTestContextCredential(key), CredentialV3Action::post);
     }
 
     public static Action<Credential> post() {
@@ -44,7 +45,7 @@ public class Credential extends CredentialEntity {
     }
 
     public static Action<Credential> get(String key) {
-        return new Action<>(getTestContextCredential(key), CredentialAction::get);
+        return new Action<>(getTestContextCredential(key), CredentialV3Action::get);
     }
 
     public static Action<Credential> get() {
@@ -52,11 +53,11 @@ public class Credential extends CredentialEntity {
     }
 
     public static Action<Credential> getAll() {
-        return new Action<>(getNew(), CredentialAction::getAll);
+        return new Action<>(getNew(), CredentialV3Action::getAll);
     }
 
     public static Action<Credential> delete(String key) {
-        return new Action<>(getTestContextCredential(key), CredentialAction::delete);
+        return new Action<>(getTestContextCredential(key), CredentialV3Action::delete);
     }
 
     public static Action<Credential> delete() {

@@ -21,6 +21,7 @@ public class RepairNodeStrategy implements Strategy {
         Long id = Objects.requireNonNull(response.getId());
 
         CloudbreakClient client = CloudbreakClient.getTestContextCloudbreakClient().apply(integrationTestContext);
+
         ClusterRepairRequest repairRequest = new ClusterRepairRequest();
         repairRequest.setHostGroups(List.of(hostgroup));
         client.getCloudbreakClient().clusterEndpoint().repairCluster(id, repairRequest);

@@ -1,8 +1,8 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
-import static com.sequenceiq.it.cloudbreak.CloudbreakUtil.waitAndCheckClusterStatus;
-import static com.sequenceiq.it.cloudbreak.CloudbreakUtil.waitAndCheckStackStatus;
-import static com.sequenceiq.it.cloudbreak.CloudbreakUtil.waitAndExpectClusterFailure;
+import static com.sequenceiq.it.cloudbreak.newway.v3.CloudbreakV3Util.waitAndCheckClusterStatus;
+import static com.sequenceiq.it.cloudbreak.newway.v3.CloudbreakV3Util.waitAndCheckStackStatus;
+import static com.sequenceiq.it.cloudbreak.newway.v3.CloudbreakV3Util.waitAndExpectClusterFailure;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -22,13 +22,16 @@ import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 
 import com.sequenceiq.cloudbreak.api.model.ImageJson;
+import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.hardware.HardwareInfoGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.hardware.HardwareInfoResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetaDataJson;
 import com.sequenceiq.it.IntegrationTestContext;
-import com.sequenceiq.it.cloudbreak.CloudbreakUtil;
 import com.sequenceiq.it.cloudbreak.SshService;
+import com.sequenceiq.it.cloudbreak.newway.v3.CloudbreakV3Util;
+import com.sequenceiq.it.cloudbreak.newway.v3.StackPostV3Strategy;
+import com.sequenceiq.it.cloudbreak.newway.v3.StackV3Action;
 
 public class Stack extends StackEntity {
     private static final Logger LOGGER = LoggerFactory.getLogger(Stack.class);
@@ -37,7 +40,7 @@ public class Stack extends StackEntity {
         return testContext -> testContext.getContextParam(key, Stack.class);
     }
 
-    static Function<IntegrationTestContext, Stack> getTestContextStack() {
+    public static Function<IntegrationTestContext, Stack> getTestContextStack() {
         return getTestContextStack(StackEntity.STACK);
     }
 
@@ -51,12 +54,12 @@ public class Stack extends StackEntity {
 
     public static Stack isCreated() {
         Stack stack = new Stack();
-        stack.setCreationStrategy(StackAction::createInGiven);
+        stack.setCreationStrategy(StackV3Action::createInGiven);
         return stack;
     }
 
     public static Action<Stack> post(String key) {
-        return new Action<>(getTestContextStack(key), new StackPostStrategy());
+        return new Action<>(getTestContextStack(key), new StackPostV3Strategy());
     }
 
     public static Action<Stack> post(Strategy strategy) {
@@ -68,7 +71,7 @@ public class Stack extends StackEntity {
     }
 
     public static Action<Stack> get(String key) {
-        return new Action<>(getTestContextStack(key), StackAction::get);
+        return new Action<>(getTestContextStack(key), StackV3Action::get);
     }
 
     public static Action<Stack> get(Strategy strategy) {
@@ -80,7 +83,7 @@ public class Stack extends StackEntity {
     }
 
     public static Action<Stack> getAll() {
-        return new Action<>(getNewStack(), StackAction::getAll);
+        return new Action<>(getNewStack(), StackV3Action::getAll);
     }
 
     public static Action<Stack> delete(String key, Strategy strategy) {
@@ -88,7 +91,7 @@ public class Stack extends StackEntity {
     }
 
     public static Action<Stack> delete(String key) {
-        return delete(key, StackAction::delete);
+        return delete(key, StackV3Action::delete);
     }
 
     public static Action<Stack> delete() {
@@ -110,62 +113,81 @@ public class Stack extends StackEntity {
     public static Assertion<Stack> waitAndCheckClusterAndStackAvailabilityStatus() {
         return assertThis((stack, t) -> {
             CloudbreakClient client = CloudbreakClient.getTestContextCloudbreakClient().apply(t);
-            Assert.assertNotNull(stack.getResponse().getId());
-            waitAndCheckStackStatus(client.getCloudbreakClient(), stack.getResponse().getId().toString(), "AVAILABLE");
-            waitAndCheckClusterStatus(client.getCloudbreakClient(), stack.getResponse().getId().toString(), "AVAILABLE");
-            waitAndCheckStackStatus(client.getCloudbreakClient(), stack.getResponse().getId().toString(), "AVAILABLE");
+            StackResponse stackResponse = stack.getResponse();
+            String stackName = stackResponse.getName();
+            Long orgId = stackResponse.getOrganization().getId();
+            Assert.assertNotNull(stackResponse.getName());
+            waitAndCheckStackStatus(client.getCloudbreakClient(), orgId, stackName, "AVAILABLE");
+            waitAndCheckClusterStatus(client.getCloudbreakClient(), orgId, stackName, "AVAILABLE");
+            waitAndCheckStackStatus(client.getCloudbreakClient(), orgId, stackName, "AVAILABLE");
         });
     }
 
     public static Assertion<Stack> waitAndCheckClusterIsAvailable() {
         return assertThis((stack, t) -> {
             CloudbreakClient client = CloudbreakClient.getTestContextCloudbreakClient().apply(t);
-            Assert.assertNotNull(stack.getResponse().getId());
-            waitAndCheckClusterStatus(client.getCloudbreakClient(), stack.getResponse().getId().toString(), "AVAILABLE");
+            StackResponse stackResponse = stack.getResponse();
+            String stackName = stackResponse.getName();
+            Long orgId = stackResponse.getOrganization().getId();
+            Assert.assertNotNull(stackResponse.getName());
+            waitAndCheckClusterStatus(client.getCloudbreakClient(), orgId, stackName, "AVAILABLE");
         });
     }
 
     public static Assertion<Stack> waitAndCheckStackIsAvailable() {
         return assertThis((stack, t) -> {
             CloudbreakClient client = CloudbreakClient.getTestContextCloudbreakClient().apply(t);
-            Assert.assertNotNull(stack.getResponse().getId());
-            waitAndCheckStackStatus(client.getCloudbreakClient(), stack.getResponse().getId().toString(), "AVAILABLE");
+            StackResponse stackResponse = stack.getResponse();
+            String stackName = stackResponse.getName();
+            Long orgId = stackResponse.getOrganization().getId();
+            Assert.assertNotNull(stackResponse.getName());
+            waitAndCheckStackStatus(client.getCloudbreakClient(), orgId, stackName, "AVAILABLE");
         });
     }
 
     public static Assertion<Stack> waitAndCheckClusterFailure(String keyword) {
         return assertThis((stack, t) -> {
             CloudbreakClient client = CloudbreakClient.getTestContextCloudbreakClient().apply(t);
-            Assert.assertNotNull(stack.getResponse().getId());
-            waitAndCheckStackStatus(client.getCloudbreakClient(), stack.getResponse().getId().toString(), "AVAILABLE");
-            waitAndExpectClusterFailure(client.getCloudbreakClient(), stack.getResponse().getId().toString(), "CREATE_FAILED", keyword);
+            StackResponse stackResponse = stack.getResponse();
+            String stackName = stackResponse.getName();
+            Long orgId = stackResponse.getOrganization().getId();
+            Assert.assertNotNull(stackResponse.getName());
+            waitAndCheckStackStatus(client.getCloudbreakClient(), orgId, stackName, "AVAILABLE");
+            waitAndExpectClusterFailure(client.getCloudbreakClient(), orgId, stackName, "CREATE_FAILED", keyword);
         });
     }
 
     public static Assertion<Stack> waitAndCheckClusterAndStackStoppedStatus() {
         return assertThis((stack, t) -> {
             CloudbreakClient client = CloudbreakClient.getTestContextCloudbreakClient().apply(t);
-            Assert.assertNotNull(stack.getResponse().getId());
-            waitAndCheckStackStatus(client.getCloudbreakClient(), stack.getResponse().getId().toString(), "STOPPED");
-            waitAndCheckClusterStatus(client.getCloudbreakClient(), stack.getResponse().getId().toString(), "STOPPED");
-            waitAndCheckStackStatus(client.getCloudbreakClient(), stack.getResponse().getId().toString(), "STOPPED");
+            StackResponse stackResponse = stack.getResponse();
+            String stackName = stackResponse.getName();
+            Long orgId = stackResponse.getOrganization().getId();
+            Assert.assertNotNull(stackResponse.getName());
+            waitAndCheckStackStatus(client.getCloudbreakClient(), orgId, stackName, "STOPPED");
+            waitAndCheckClusterStatus(client.getCloudbreakClient(), orgId, stackName, "STOPPED");
+            waitAndCheckStackStatus(client.getCloudbreakClient(), orgId, stackName, "STOPPED");
         });
     }
 
     public static Assertion<Stack> waitAndCheckClusterDeleted() {
         return assertThis((stack, t) -> {
             CloudbreakClient client = CloudbreakClient.getTestContextCloudbreakClient().apply(t);
-            Assert.assertNotNull(stack.getResponse().getId());
-            waitAndCheckStackStatus(client.getCloudbreakClient(), stack.getResponse().getId().toString(), "DELETE_COMPLETED");
+            StackResponse stackResponse = stack.getResponse();
+            String stackName = stackResponse.getName();
+            Long orgId = stackResponse.getOrganization().getId();
+            Assert.assertNotNull(stackResponse.getName());
+            waitAndCheckStackStatus(client.getCloudbreakClient(), orgId, stackName, "DELETE_COMPLETED");
         });
     }
 
     public static Assertion<?> checkClusterHasAmbariRunning(String ambariPort, String ambariUser, String ambariPassword) {
         return assertThis((stack, t) -> {
             CloudbreakClient client = CloudbreakClient.getTestContextCloudbreakClient().apply(t);
-            CloudbreakUtil.checkClusterAvailability(client.getCloudbreakClient().stackV2Endpoint(),
+            CloudbreakV3Util.checkClusterAvailability(client.getCloudbreakClient().stackV3Endpoint(),
                     ambariPort,
-                    stack.getResponse().getId().toString(),
+                    stack.getResponse().getOrganization().getId(),
+                    stack.getResponse().getName(),
                     ambariUser,
                     ambariPassword,
                     true);
@@ -175,8 +197,9 @@ public class Stack extends StackEntity {
     public static Assertion<Stack> checkClusterHasAmbariRunningThroughKnox(String ambariUser, String ambariPassword) {
         return assertThis((stack, context) -> {
             CloudbreakClient client = CloudbreakClient.getTestContextCloudbreakClient().apply(context);
-            CloudbreakUtil.checkClusterAvailabilityThroughGateway(client.getCloudbreakClient().stackV2Endpoint(),
-                    stack.getResponse().getId().toString(),
+            CloudbreakV3Util.checkClusterAvailabilityThroughGateway(client.getCloudbreakClient().stackV3Endpoint(),
+                    stack.getResponse().getOrganization().getId(),
+                    stack.getResponse().getName(),
                     ambariUser,
                     ambariPassword);
         });

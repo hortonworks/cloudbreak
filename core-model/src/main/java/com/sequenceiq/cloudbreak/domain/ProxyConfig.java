@@ -134,10 +134,12 @@ public class ProxyConfig implements ProvisionEntity, OrganizationAwareResource {
         this.description = description;
     }
 
+    @Override
     public Organization getOrganization() {
         return organization;
     }
 
+    @Override
     public void setOrganization(Organization organization) {
         this.organization = organization;
     }

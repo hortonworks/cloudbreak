@@ -4,6 +4,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.cloudbreak.newway.v3.BlueprintV3Action;
 
 public class Blueprint extends BlueprintEntity {
 
@@ -21,12 +22,12 @@ public class Blueprint extends BlueprintEntity {
 
     public static Blueprint isCreated() {
         Blueprint blueprint = new Blueprint();
-        blueprint.setCreationStrategy(BlueprintAction::createInGiven);
+        blueprint.setCreationStrategy(BlueprintV3Action::createInGiven);
         return blueprint;
     }
 
     public static Action<Blueprint> post(String key) {
-        return new Action<>(getTestContext(key), BlueprintAction::post);
+        return new Action<>(getTestContext(key), BlueprintV3Action::post);
     }
 
     public static Action<Blueprint> post() {
@@ -34,7 +35,7 @@ public class Blueprint extends BlueprintEntity {
     }
 
     public static Action<Blueprint> get(String key) {
-        return new Action<>(getTestContext(key), BlueprintAction::get);
+        return new Action<>(getTestContext(key), BlueprintV3Action::get);
     }
 
     public static Action<Blueprint> get() {
@@ -42,11 +43,11 @@ public class Blueprint extends BlueprintEntity {
     }
 
     public static Action<Blueprint> getAll() {
-        return new Action<>(getNew(), BlueprintAction::getAll);
+        return new Action<>(getNew(), BlueprintV3Action::getAll);
     }
 
     public static Action<Blueprint> delete(String key) {
-        return new Action<>(getTestContext(key), BlueprintAction::delete);
+        return new Action<>(getTestContext(key), BlueprintV3Action::delete);
     }
 
     public static Action<Blueprint> delete() {
