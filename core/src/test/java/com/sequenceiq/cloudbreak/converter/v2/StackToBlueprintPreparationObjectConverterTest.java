@@ -1,5 +1,33 @@
 package com.sequenceiq.cloudbreak.converter.v2;
 
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
 import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintViewProvider;
 import com.sequenceiq.cloudbreak.blueprint.GeneralClusterConfigsProvider;
@@ -36,33 +64,6 @@ import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.CachedUserDetailsService;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
-import java.io.IOException;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 public class StackToBlueprintPreparationObjectConverterTest {
 
@@ -349,7 +350,7 @@ public class StackToBlueprintPreparationObjectConverterTest {
         Stack dataLakeStack = new Stack();
         SharedServiceConfigsView expected = new SharedServiceConfigsView();
         when(source.getDatalakeId()).thenReturn(testDataLakeId);
-        when(stackService.getByIdWithTransaction(testDataLakeId)).thenReturn(dataLakeStack);
+        when(stackService.getByIdWithListsInTransaction(testDataLakeId)).thenReturn(dataLakeStack);
         when(sharedServiceConfigProvider.createSharedServiceConfigs(source, dataLakeStack)).thenReturn(expected);
 
         BlueprintPreparationObject result = underTest.convert(source);

@@ -1,5 +1,15 @@
 package com.sequenceiq.cloudbreak.converter.v2;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject.Builder;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessingException;
@@ -31,14 +41,6 @@ import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.CachedUserDetailsService;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 @Component
 public class StackToBlueprintPreparationObjectConverter extends AbstractConversionServiceAwareConverter<Stack, BlueprintPreparationObject> {
@@ -128,7 +130,7 @@ public class StackToBlueprintPreparationObjectConverter extends AbstractConversi
     private Stack getDataLakeStack(Stack source) {
         Stack dataLakeStack = null;
         if (source.getDatalakeId() != null) {
-            dataLakeStack = stackService.getByIdWithTransaction(source.getDatalakeId());
+            dataLakeStack = stackService.getByIdWithListsInTransaction(source.getDatalakeId());
         }
         return dataLakeStack;
     }

@@ -89,7 +89,7 @@ public class BlueprintUtils {
         return map;
     }
 
-    public boolean isSharedServiceReqdyBlueprint(Blueprint blueprint) {
+    public boolean isSharedServiceReadyBlueprint(Blueprint blueprint) {
         return blueprint.getTags() != null && blueprint.getTags().getMap().containsKey("shared_services_ready");
     }
 }

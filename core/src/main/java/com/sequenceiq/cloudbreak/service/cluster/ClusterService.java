@@ -887,7 +887,7 @@ public class ClusterService {
             AmbariClient ambariClient = getAmbariClient(stack);
             Map<String, String> categories = ambariClient.getComponentsCategory(blueprintName, hostGroup);
             for (Entry<String, String> entry : categories.entrySet()) {
-                if (entry.getValue().equalsIgnoreCase(MASTER_CATEGORY) && !blueprintUtils.isSharedServiceReqdyBlueprint(blueprint)) {
+                if (entry.getValue().equalsIgnoreCase(MASTER_CATEGORY) && !blueprintUtils.isSharedServiceReadyBlueprint(blueprint)) {
                     throw new BadRequestException(
                             String.format("Cannot downscale the '%s' hostGroupAdjustment group, because it contains a '%s' component", hostGroup,
                                     entry.getKey()));
