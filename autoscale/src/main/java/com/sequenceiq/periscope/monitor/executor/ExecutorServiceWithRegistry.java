@@ -42,4 +42,8 @@ public class ExecutorServiceWithRegistry {
     public ExecutorService getExecutorService() {
         return executorService;
     }
+
+    public int activeCount() {
+        return evaluatorExecutorRegistry.activeCount();
+    }
 }
