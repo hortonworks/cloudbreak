@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
+import java.util.Set;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -17,6 +18,7 @@ import com.google.common.collect.ImmutableSet;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.Tenant;
 import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -27,10 +29,20 @@ public class OrganizationDeleteVerifierServiceTest {
     public final ExpectedException thrown = ExpectedException.none();
 
     @InjectMocks
-    private OrganizationDeleteVerifierService underTest;
+    private OrganizationModificationVerifierService underTest;
 
     @Mock
     private StackService stackService;
+
+    private final User initiator = new User();
+
+    public OrganizationDeleteVerifierServiceTest() {
+        Tenant tenant = new Tenant();
+        tenant.setName("1");
+        tenant.setId(1L);
+        initiator.setUserId("initiator");
+        initiator.setTenant(tenant);
+    }
 
     @Test
     public void testWhenTheDefultOrganizationIsSameAsOrganizationForDeleteThenShouldThrowBadRequestException() {
@@ -66,5 +78,65 @@ public class OrganizationDeleteVerifierServiceTest {
         when(stackService.findAllForOrganization(anyLong())).thenReturn(new HashSet<>());
 
         underTest.checkThatOrganizationIsDeletable(userWhoRequestTheDeletion, organizationForDelete, defaultOrganizationOfUserWhoRequestTheDeletion);
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testVerifyRemovalFromDefaultOrgWithInitiatorsDefaultOrg() {
+        Organization organization = new Organization();
+        organization.setName("initiator");
+        Set<User> usersToBeRemoved = Set.of(initiator);
+        underTest.verifyRemovalFromDefaultOrg(initiator, organization, usersToBeRemoved);
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testVerifyRemovalFromDefaultOrgWithDefaultOrgOfAUser() {
+        Organization organization = new Organization();
+        organization.setName("user1");
+        User user1 = new User();
+        user1.setUserId("user1");
+        Set<User> usersToBeRemoved = Set.of(user1);
+        underTest.verifyRemovalFromDefaultOrg(initiator, organization, usersToBeRemoved);
+    }
+
+    @Test
+    public void testVerifyRemovalFromDefaultOrgWithEverythingIsFine() {
+        Organization organization = new Organization();
+        organization.setName("randomOrg");
+        User user1 = new User();
+        user1.setUserId("user1");
+        User user2 = new User();
+        user2.setUserId("user2");
+        Set<User> usersToBeRemoved = Set.of(user1, user2, initiator);
+        underTest.verifyRemovalFromDefaultOrg(initiator, organization, usersToBeRemoved);
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testVerifyUserUpdatesWithInitiatorsDefaultOrg() {
+        Organization organization = new Organization();
+        organization.setName("initiator");
+        Set<User> usersToBeRemoved = Set.of(initiator);
+        underTest.verifyUserUpdates(initiator, organization, usersToBeRemoved);
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testVerifyUserUpdatesWithDefaultOrgOfAUser() {
+        Organization organization = new Organization();
+        organization.setName("user1");
+        User user1 = new User();
+        user1.setUserId("user1");
+        Set<User> usersToBeRemoved = Set.of(user1);
+        underTest.verifyUserUpdates(initiator, organization, usersToBeRemoved);
+    }
+
+    @Test
+    public void testVerifyUserUpdatesWithEverythingIsFine() {
+        Organization organization = new Organization();
+        organization.setName("randomOrg");
+        User user1 = new User();
+        user1.setUserId("user1");
+        User user2 = new User();
+        user2.setUserId("user2");
+        Set<User> usersToBeRemoved = Set.of(user1, user2, initiator);
+        underTest.verifyUserUpdates(initiator, organization, usersToBeRemoved);
     }
 }

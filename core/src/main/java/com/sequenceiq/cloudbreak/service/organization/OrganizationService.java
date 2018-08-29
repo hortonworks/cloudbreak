@@ -54,7 +54,7 @@ public class OrganizationService {
     private UserService userService;
 
     @Inject
-    private OrganizationDeleteVerifierService organizationDeleteVerifierService;
+    private OrganizationModificationVerifierService organizationModificationVerifierService;
 
     public Organization create(User user, Organization organization) {
         try {
@@ -116,9 +116,12 @@ public class OrganizationService {
                 authorizeOrgManipulation(user, organization, Action.MANAGE);
 
                 Set<User> users = userService.getByUsersIds(userIds);
-                Set<UserOrgPermissions> toBeDeleted = validateAllUsersAreInTheOrganization(organization, users);
-                userOrgPermissionsService.deleteAll(toBeDeleted);
-                return toBeDeleted.stream()
+                Set<UserOrgPermissions> toBeRemoved = validateAllUsersAreAlreadyInTheOrganization(organization, users);
+                Set<User> usersToBeRemoved = toBeRemoved.stream().map(UserOrgPermissions::getUser).collect(Collectors.toSet());
+                organizationModificationVerifierService.verifyRemovalFromDefaultOrg(user, organization, usersToBeRemoved);
+
+                userOrgPermissionsService.deleteAll(toBeRemoved);
+                return toBeRemoved.stream()
                         .map(UserOrgPermissions::getUser)
                         .collect(Collectors.toSet());
             });
@@ -134,7 +137,7 @@ public class OrganizationService {
                 authorizeOrgManipulation(currentUser, organization, Action.INVITE);
 
                 Map<User, Set<String>> usersToAddWithPermissions = orgUserPermissionJsonSetToMap(changeOrganizationUsersJsons);
-                validateNoUserIsInTheOrganization(organization, usersToAddWithPermissions.keySet());
+                validateUsersAreNotInTheOrganizationYet(organization, usersToAddWithPermissions.keySet());
 
                 Set<UserOrgPermissions> userOrgPermsToAdd = usersToAddWithPermissions.entrySet().stream()
                         .map(userWithPermissions -> {
@@ -162,8 +165,8 @@ public class OrganizationService {
                 authorizeOrgManipulation(currentUser, organization, Action.MANAGE);
 
                 Map<User, Set<String>> usersToUpdateWithPermissions = orgUserPermissionJsonSetToMap(updateOrganizationUsersJsons);
-                Map<User, UserOrgPermissions> toBeUpdated = validateAllUsersAreInTheOrganization(organization, usersToUpdateWithPermissions.keySet())
-                        .stream()
+                Map<User, UserOrgPermissions> toBeUpdated = validateAllUsersAreAlreadyInTheOrganization(
+                        organization, usersToUpdateWithPermissions.keySet()).stream()
                         .collect(Collectors.toMap(UserOrgPermissions::getUser, uop -> uop));
 
                 Set<UserOrgPermissions> userOrgPermissions = toBeUpdated.entrySet().stream()
@@ -172,6 +175,9 @@ public class OrganizationService {
                             return userPermission.getValue();
                         })
                         .collect(Collectors.toSet());
+
+                Set<User> usersToBeUpdated = userOrgPermissions.stream().map(UserOrgPermissions::getUser).collect(Collectors.toSet());
+                organizationModificationVerifierService.verifyUserUpdates(currentUser, organization, usersToBeUpdated);
 
                 userOrgPermissionsService.saveAll(userOrgPermissions);
                 return toBeUpdated.keySet();
@@ -191,8 +197,13 @@ public class OrganizationService {
             return transactionService.required(() -> {
                 Organization organization = getByNameForUserOrThrowNotFound(orgName, currentUser);
                 authorizeOrgManipulation(currentUser, organization, Action.MANAGE);
+
                 Set<UserOrgPermissions> oldPermissions = userOrgPermissionsService.findForOrganization(organization);
+                Set<User> oldUsers = oldPermissions.stream().map(UserOrgPermissions::getUser).collect(Collectors.toSet());
+
+                organizationModificationVerifierService.verifyUserUpdates(currentUser, organization, oldUsers);
                 userOrgPermissionsService.deleteAll(oldPermissions);
+
                 Map<String, User> usersToAdd = userService.getByUsersIds(userPermissions.keySet()).stream()
                         .collect(Collectors.toMap(User::getUserId, user -> user));
 
@@ -220,7 +231,7 @@ public class OrganizationService {
                 Organization organizationForDelete = getByNameForUserOrThrowNotFound(orgName, currentUser);
                 authorizeOrgManipulation(currentUser, organizationForDelete, Action.MANAGE);
 
-                organizationDeleteVerifierService.checkThatOrganizationIsDeletable(currentUser, organizationForDelete, defaultOrg);
+                organizationModificationVerifierService.checkThatOrganizationIsDeletable(currentUser, organizationForDelete, defaultOrg);
                 Long deleted = userOrgPermissionsService.deleteByOrganization(organizationForDelete);
                 setupDeletionDateAndFlag(organizationForDelete);
                 organizationRepository.save(organizationForDelete);
@@ -237,7 +248,7 @@ public class OrganizationService {
                 .collect(Collectors.toMap(json -> userService.getByUserId(json.getUserId()), json -> json.getPermissions()));
     }
 
-    private Set<UserOrgPermissions> validateAllUsersAreInTheOrganization(Organization organization, Set<User> users) {
+    private Set<UserOrgPermissions> validateAllUsersAreAlreadyInTheOrganization(Organization organization, Set<User> users) {
         validateAllUsersAreInTheTenant(organization, users);
         Set<String> usersNotInTheOrganization = new TreeSet<>();
 
@@ -259,7 +270,7 @@ public class OrganizationService {
         return userOrgPermissionsSet;
     }
 
-    private void validateNoUserIsInTheOrganization(Organization organization, Set<User> users) {
+    private void validateUsersAreNotInTheOrganizationYet(Organization organization, Set<User> users) {
         validateAllUsersAreInTheTenant(organization, users);
 
         Set<String> usersInOrganization = users.stream()
