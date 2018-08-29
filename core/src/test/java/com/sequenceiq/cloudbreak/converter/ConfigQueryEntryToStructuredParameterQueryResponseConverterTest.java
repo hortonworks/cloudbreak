@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.converter;
 
 import com.sequenceiq.cloudbreak.api.model.StructuredParameterQueryResponse;
-import com.sequenceiq.cloudbreak.blueprint.filesystem.query.ConfigQueryEntry;
+import com.sequenceiq.cloudbreak.template.filesystem.query.ConfigQueryEntry;
 import org.junit.Before;
 import org.junit.Test;
 

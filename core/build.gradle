@@ -196,7 +196,8 @@ dependencies {
   compile project(':cloud-reactor-api')
   compile project(':cloud-reactor')
   compile project(':structuredevent-model')
-  compile project(':blueprint-manager')
+  compile project(':template-manager-blueprint')
+  compile project(':template-manager-recipe')
 
   runtime project(':orchestrator-salt')
   runtime project(':orchestrator-salt')

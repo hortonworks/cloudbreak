@@ -22,9 +22,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType;
-import com.sequenceiq.cloudbreak.blueprint.filesystem.BaseFileSystemConfigurationsView;
-import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemConfigurationsViewProvider;
-import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemConfigurator;
+import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
+import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationsViewProvider;
+import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;

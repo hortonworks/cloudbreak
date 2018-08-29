@@ -383,6 +383,7 @@ public class ModelDescriptions {
         public static final String RECIPE_IDS = "referenced recipe ids";
         public static final String RECIPE_NAMES = "referenced recipe names";
         public static final String RECIPES = "referenced recipes";
+        public static final String EXTENDED_RECIPES = "referenced extended recipes";
         public static final String HOST_GROUP_NAME = "name of the host group";
         public static final String CONSTRAINT = "instance group or resource constraint for a hostgroup";
         public static final String INSTANCE_GROUP = "name of an instance group where the hostgroup will be deployed";

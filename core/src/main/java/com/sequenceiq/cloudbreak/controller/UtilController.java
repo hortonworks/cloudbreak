@@ -30,7 +30,7 @@ import com.sequenceiq.cloudbreak.api.model.filesystem.CloudStorageSupportedRespo
 import com.sequenceiq.cloudbreak.api.model.rds.RDSBuildRequest;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsBuildResult;
 import com.sequenceiq.cloudbreak.api.model.stack.StackMatrix;
-import com.sequenceiq.cloudbreak.blueprint.filesystem.query.ConfigQueryEntry;
+import com.sequenceiq.cloudbreak.template.filesystem.query.ConfigQueryEntry;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionBuilder;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
