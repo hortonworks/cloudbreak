@@ -136,7 +136,7 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
         StateMachineTransitionBuilder<S, E> transitionBuilder =
                 new StateMachineTransitionBuilder<>(ObjectPostProcessor.QUIESCENT_POSTPROCESSOR, true);
         StateMachineListener<S, E> listener =
-                new StateMachineListenerAdapter<S, E>() {
+                new StateMachineListenerAdapter<>() {
                     @Override
                     public void stateChanged(State<S, E> from, State<S, E> to) {
                         LOGGER.debug("state changed from {} to {}", from, to);

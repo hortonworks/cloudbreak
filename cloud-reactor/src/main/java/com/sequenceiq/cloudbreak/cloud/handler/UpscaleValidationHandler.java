@@ -19,7 +19,7 @@ import reactor.bus.EventBus;
 
 @Component
 public class UpscaleValidationHandler implements CloudPlatformEventHandler<UpscaleStackValidationRequest> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(UpscaleStackValidationRequest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(UpscaleValidationHandler.class);
 
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
@@ -43,13 +43,13 @@ public class UpscaleValidationHandler implements CloudPlatformEventHandler<Upsca
             connector.setup().scalingPrerequisites(ac, request.getCloudStack(), true);
             UpscaleStackValidationResult result = new UpscaleStackValidationResult(request);
             request.getResult().onNext(result);
-            eventBus.notify(result.selector(), new Event(upscaleStackValidationRequestEvent.getHeaders(), result));
+            eventBus.notify(result.selector(), new Event<>(upscaleStackValidationRequestEvent.getHeaders(), result));
             LOGGER.info("Upscale validation successfully finished for {}", cloudContext);
         } catch (Exception e) {
             UpscaleStackValidationResult result = new UpscaleStackValidationResult(e.getMessage(), e, request);
             request.getResult().onNext(result);
             eventBus.notify(CloudPlatformResult.failureSelector(UpscaleStackValidationResult.class),
-                    new Event(upscaleStackValidationRequestEvent.getHeaders(), result));
+                    new Event<>(upscaleStackValidationRequestEvent.getHeaders(), result));
         }
     }
 }
