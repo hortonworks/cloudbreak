@@ -837,12 +837,22 @@ public class StackService {
 
     private void delete(Stack stack, Boolean forced, Boolean deleteDependencies, User user) {
         permissionCheckingUtils.checkPermissionByOrgIdForUser(stack.getOrganization().getId(), OrganizationResource.STACK, Action.WRITE, user);
+        checkStackHasNoAttachedClusters(stack);
         MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Stack delete requested.");
         if (!stack.isDeleteCompleted()) {
             flowManager.triggerTermination(stack.getId(), forced, deleteDependencies);
         } else {
             LOGGER.info("Stack is already deleted.");
+        }
+    }
+
+    private void checkStackHasNoAttachedClusters(Stack stack) {
+        Set<Stack> attachedOnes = findClustersConnectedToDatalake(stack.getId());
+        if (!attachedOnes.isEmpty()) {
+            throw new BadRequestException(String.format("Stack has attached clusters! Please remove them before try to delete this one. %nThe following clusters"
+                            + " has to be deleted before terminating the datalake cluster: %s",
+                    String.join(", ", attachedOnes.stream().map(Stack::getName).collect(Collectors.toSet()))));
         }
     }
 
