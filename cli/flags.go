@@ -862,6 +862,13 @@ var (
 			Usage: "name of the organization",
 		},
 	}
+	FlUserID = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "user-id",
+			Usage: "id of the user",
+		},
+	}
 )
 
 type RequiredFlag struct {

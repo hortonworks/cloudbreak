@@ -1888,6 +1888,36 @@ func main() {
 			Usage: "organization related operations",
 			Subcommands: []cli.Command{
 				{
+					Name:  "add-user",
+					Usage: "add user to the organization",
+					Subcommands: []cli.Command{
+						{
+							Name:   "read",
+							Usage:  "add user to the organization with read permission",
+							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlUserID).AddAuthenticationFlags().Build(),
+							Before: ConfigRead,
+							Action: cb.AddReadUser,
+							BashComplete: func(c *cli.Context) {
+								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlUserID).AddAuthenticationFlags().Build() {
+									printFlagCompletion(f)
+								}
+							},
+						},
+						{
+							Name:   "read-write",
+							Usage:  "add user to the organization with read and write permission",
+							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlUserID).AddAuthenticationFlags().Build(),
+							Before: ConfigRead,
+							Action: cb.AddReadWriteUser,
+							BashComplete: func(c *cli.Context) {
+								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlUserID).AddAuthenticationFlags().Build() {
+									printFlagCompletion(f)
+								}
+							},
+						},
+					},
+				},
+				{
 					Name:   "create",
 					Usage:  "create a new organization",
 					Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddAuthenticationFlags().Build(),
@@ -1931,6 +1961,18 @@ func main() {
 					Action: cb.DescribeOrg,
 					BashComplete: func(c *cli.Context) {
 						for _, f := range cb.NewFlagBuilder().AddOutputFlag().AddFlags(cb.FlName).AddAuthenticationFlags().Build() {
+							printFlagCompletion(f)
+						}
+					},
+				},
+				{
+					Name:   "remove-user",
+					Usage:  "remove user from the organization",
+					Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlUserID).AddAuthenticationFlags().Build(),
+					Before: ConfigRead,
+					Action: cb.RemoveUser,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlUserID).AddAuthenticationFlags().Build() {
 							printFlagCompletion(f)
 						}
 					},
