@@ -84,7 +84,7 @@ public class StackUpscaleActions {
 
     @Bean(name = "UPSCALE_PREVALIDATION_STATE")
     public Action<?, ?> prevalidate() {
-        return new AbstractStackUpscaleAction<StackScaleTriggerEvent>(StackScaleTriggerEvent.class) {
+        return new AbstractStackUpscaleAction<>(StackScaleTriggerEvent.class) {
             @Override
             protected void prepareExecution(StackScaleTriggerEvent payload, Map<Object, Object> variables) {
                 variables.put(INSTANCEGROUPNAME, payload.getInstanceGroup());
@@ -123,7 +123,7 @@ public class StackUpscaleActions {
 
     @Bean(name = "ADD_INSTANCES_STATE")
     public Action<?, ?> addInstances() {
-        return new AbstractStackUpscaleAction<UpscaleStackValidationResult>(UpscaleStackValidationResult.class) {
+        return new AbstractStackUpscaleAction<>(UpscaleStackValidationResult.class) {
             @Override
             protected void doExecute(StackScalingFlowContext context, UpscaleStackValidationResult payload, Map<Object, Object> variables) throws Exception {
                 sendEvent(context);
@@ -149,7 +149,7 @@ public class StackUpscaleActions {
 
     @Bean(name = "ADD_INSTANCES_FINISHED_STATE")
     public Action<?, ?> finishAddInstances() {
-        return new AbstractStackUpscaleAction<UpscaleStackResult>(UpscaleStackResult.class) {
+        return new AbstractStackUpscaleAction<>(UpscaleStackResult.class) {
             @Override
             protected void doExecute(StackScalingFlowContext context, UpscaleStackResult payload, Map<Object, Object> variables) {
                 stackUpscaleService.finishAddInstances(context, payload);
@@ -165,7 +165,7 @@ public class StackUpscaleActions {
 
     @Bean(name = "EXTEND_METADATA_STATE")
     public Action<?, ?> extendMetadata() {
-        return new AbstractStackUpscaleAction<StackEvent>(StackEvent.class) {
+        return new AbstractStackUpscaleAction<>(StackEvent.class) {
             @Override
             protected void doExecute(StackScalingFlowContext context, StackEvent payload, Map<Object, Object> variables) {
                 stackUpscaleService.extendingMetadata(context.getStack());
@@ -191,7 +191,7 @@ public class StackUpscaleActions {
 
     @Bean(name = "EXTEND_METADATA_FINISHED_STATE")
     public Action<?, ?> finishExtendMetadata() {
-        return new AbstractStackUpscaleAction<CollectMetadataResult>(CollectMetadataResult.class) {
+        return new AbstractStackUpscaleAction<>(CollectMetadataResult.class) {
             @Override
             protected void doExecute(StackScalingFlowContext context, CollectMetadataResult payload, Map<Object, Object> variables)
                     throws TransactionExecutionException {
@@ -214,7 +214,7 @@ public class StackUpscaleActions {
 
     @Bean(name = "GATEWAY_TLS_SETUP_STATE")
     public Action<?, ?> tlsSetupAction() {
-        return new AbstractStackUpscaleAction<GetSSHFingerprintsResult>(GetSSHFingerprintsResult.class) {
+        return new AbstractStackUpscaleAction<>(GetSSHFingerprintsResult.class) {
             @Override
             protected void doExecute(StackScalingFlowContext context, GetSSHFingerprintsResult payload, Map<Object, Object> variables) throws Exception {
                 stackUpscaleService.setupTls(context);
@@ -227,7 +227,7 @@ public class StackUpscaleActions {
 
     @Bean(name = "BOOTSTRAP_NEW_NODES_STATE")
     public Action<?, ?> bootstrapNewNodes() {
-        return new AbstractStackUpscaleAction<BootstrapNewNodesEvent>(BootstrapNewNodesEvent.class) {
+        return new AbstractStackUpscaleAction<>(BootstrapNewNodesEvent.class) {
             @Override
             protected void doExecute(StackScalingFlowContext context, BootstrapNewNodesEvent payload, Map<Object, Object> variables) {
                 stackUpscaleService.bootstrappingNewNodes(context.getStack());
@@ -240,7 +240,7 @@ public class StackUpscaleActions {
 
     @Bean(name = "EXTEND_HOST_METADATA_STATE")
     public Action<?, ?> extendHostMetadata() {
-        return new AbstractStackUpscaleAction<BootstrapNewNodesResult>(BootstrapNewNodesResult.class) {
+        return new AbstractStackUpscaleAction<>(BootstrapNewNodesResult.class) {
             @Override
             protected void doExecute(StackScalingFlowContext context, BootstrapNewNodesResult payload, Map<Object, Object> variables) {
                 stackUpscaleService.extendingHostMetadata(context.getStack());
@@ -253,7 +253,7 @@ public class StackUpscaleActions {
 
     @Bean(name = "EXTEND_HOST_METADATA_FINISHED_STATE")
     public Action<?, ?> finishExtendHostMetadata() {
-        return new AbstractStackUpscaleAction<ExtendHostMetadataResult>(ExtendHostMetadataResult.class) {
+        return new AbstractStackUpscaleAction<>(ExtendHostMetadataResult.class) {
             @Override
             protected void doExecute(StackScalingFlowContext context, ExtendHostMetadataResult payload, Map<Object, Object> variables) {
                 stackUpscaleService.finishExtendHostMetadata(context.getStack());
