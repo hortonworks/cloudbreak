@@ -28,7 +28,8 @@ type stackOut struct {
 
 type stackOutDescribe struct {
 	*stackOut
-	ID string `json:"ID" yaml:"ID"`
+	Response *models_cloudbreak.StackResponse `json:"Response" yaml:"Response"`
+	ID       string                           `json:"ID" yaml:"ID"`
 }
 
 func (s *stackOut) DataAsStringArray() []string {
@@ -145,6 +146,7 @@ func DescribeStack(c *cli.Context) {
 		&stackOut{cloudResourceOut{*s.Name, s.Cluster.Description, GetPlatformName(s.Credential)},
 			s.Status,
 			s.Cluster.Status},
+		s,
 		strconv.FormatInt(s.ID, 10)})
 }
 
