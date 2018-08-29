@@ -15,10 +15,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
+import java.util.Set;
 
 import com.sequenceiq.cloudbreak.authorization.OrganizationPermissions.Action;
 import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
 import com.sequenceiq.cloudbreak.authorization.PermissionCheckingUtils;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -89,6 +91,9 @@ public class StackServiceTest {
     private static final String STACK_NOT_FOUND_BY_ID_MESSAGE = "Stack '%d' not found";
 
     private static final String STACK_NOT_FOUND_BY_NAME_MESSAGE = "Stack '%s' not found";
+
+    private static final String HAS_ATTACHED_CLUSTERS_MESSAGE = "Stack has attached clusters! Please remove them before try to delete this one. %nThe following"
+            + " clusters has to be deleted before terminating the datalake cluster: %s";
 
     @Rule
     public final ExpectedException expectedException = ExpectedException.none();
@@ -393,6 +398,318 @@ public class StackServiceTest {
 
         verify(flowManager, times(1)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
         verify(flowManager, times(1)).triggerTermination(STACK_ID, true, true);
+        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(anyLong(), any(OrganizationResource.class), any(Action.class), any(User.class));
+        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(ORGANIZATION_ID, OrganizationResource.STACK, Action.WRITE, user);
+    }
+
+    @Test
+    public void testDeleteWithForceAndDeleteDepsByNameWhenStachHasMultipleAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
+        Stack stack1 = mock(Stack.class);
+        Stack stack2 = mock(Stack.class);
+        when(stack1.getName()).thenReturn("stack1");
+        when(stack2.getName()).thenReturn("stack2");
+        when(stackRepository.findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID)).thenReturn(stack);
+        when(stackRepository.findEphemeralClusters(STACK_ID)).thenReturn(Set.of(stack1, stack2));
+
+
+        expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, String.format("%s, %s", "stack1", "stack2")));
+        expectedException.expect(BadRequestException.class);
+
+        underTest.delete(STACK_NAME, ORGANIZATION_ID, true, true, user);
+
+        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
+        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(anyLong(), any(OrganizationResource.class), any(Action.class), any(User.class));
+        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(ORGANIZATION_ID, OrganizationResource.STACK, Action.WRITE, user);
+    }
+
+    @Test
+    public void testDeleteWithForceButWithoutDeleteDepsByNameWhenStachHasMultipleAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
+        Stack stack1 = mock(Stack.class);
+        Stack stack2 = mock(Stack.class);
+        when(stack1.getName()).thenReturn("stack1");
+        when(stack2.getName()).thenReturn("stack2");
+        when(stackRepository.findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID)).thenReturn(stack);
+        when(stackRepository.findEphemeralClusters(STACK_ID)).thenReturn(Set.of(stack1, stack2));
+
+
+        expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, String.format("%s, %s", "stack1", "stack2")));
+        expectedException.expect(BadRequestException.class);
+
+        underTest.delete(STACK_NAME, ORGANIZATION_ID, true, false, user);
+
+        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
+        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(anyLong(), any(OrganizationResource.class), any(Action.class), any(User.class));
+        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(ORGANIZATION_ID, OrganizationResource.STACK, Action.WRITE, user);
+    }
+
+    @Test
+    public void testDeleteWithOutForceButWithDeleteDepsByNameWhenStachHasMultipleAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
+        Stack stack1 = mock(Stack.class);
+        Stack stack2 = mock(Stack.class);
+        when(stack1.getName()).thenReturn("stack1");
+        when(stack2.getName()).thenReturn("stack2");
+        when(stackRepository.findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID)).thenReturn(stack);
+        when(stackRepository.findEphemeralClusters(STACK_ID)).thenReturn(Set.of(stack1, stack2));
+
+
+        expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, String.format("%s, %s", "stack1", "stack2")));
+        expectedException.expect(BadRequestException.class);
+
+        underTest.delete(STACK_NAME, ORGANIZATION_ID, false, true, user);
+
+        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
+        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(anyLong(), any(OrganizationResource.class), any(Action.class), any(User.class));
+        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(ORGANIZATION_ID, OrganizationResource.STACK, Action.WRITE, user);
+    }
+
+    @Test
+    public void testDeleteWithOutForceAndDeleteDepsByNameWhenStachHasMultipleAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
+        Stack stack1 = mock(Stack.class);
+        Stack stack2 = mock(Stack.class);
+        when(stack1.getName()).thenReturn("stack1");
+        when(stack2.getName()).thenReturn("stack2");
+        when(stackRepository.findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID)).thenReturn(stack);
+        when(stackRepository.findEphemeralClusters(STACK_ID)).thenReturn(Set.of(stack1, stack2));
+
+
+        expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, String.format("%s, %s", "stack1", "stack2")));
+        expectedException.expect(BadRequestException.class);
+
+        underTest.delete(STACK_NAME, ORGANIZATION_ID, false, false, user);
+
+        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
+        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(anyLong(), any(OrganizationResource.class), any(Action.class), any(User.class));
+        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(ORGANIZATION_ID, OrganizationResource.STACK, Action.WRITE, user);
+    }
+
+    @Test
+    public void testDeleteWithForceAndDeleteDepsByNameWhenStachHasOneAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
+        Stack stack = mock(Stack.class);
+        when(stack.getName()).thenReturn("stack");
+        when(stackRepository.findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID)).thenReturn(this.stack);
+        when(stackRepository.findEphemeralClusters(STACK_ID)).thenReturn(Set.of(stack));
+
+
+        expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, "stack"));
+        expectedException.expect(BadRequestException.class);
+
+        underTest.delete(STACK_NAME, ORGANIZATION_ID, true, true, user);
+
+        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
+        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(anyLong(), any(OrganizationResource.class), any(Action.class), any(User.class));
+        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(ORGANIZATION_ID, OrganizationResource.STACK, Action.WRITE, user);
+    }
+
+    @Test
+    public void testDeleteWithForceButWithoutDeleteDepsByNameWhenStachHasOneAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
+        Stack stack = mock(Stack.class);
+        when(stack.getName()).thenReturn("stack");
+        when(stackRepository.findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID)).thenReturn(this.stack);
+        when(stackRepository.findEphemeralClusters(STACK_ID)).thenReturn(Set.of(stack));
+
+
+        expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, "stack"));
+        expectedException.expect(BadRequestException.class);
+
+        underTest.delete(STACK_NAME, ORGANIZATION_ID, true, false, user);
+
+        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
+        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(anyLong(), any(OrganizationResource.class), any(Action.class), any(User.class));
+        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(ORGANIZATION_ID, OrganizationResource.STACK, Action.WRITE, user);
+    }
+
+    @Test
+    public void testDeleteWithOutForceButWithDeleteDepsByNameWhenStachHasOneAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
+        Stack stack = mock(Stack.class);
+        when(stack.getName()).thenReturn("stack");
+        when(stackRepository.findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID)).thenReturn(this.stack);
+        when(stackRepository.findEphemeralClusters(STACK_ID)).thenReturn(Set.of(stack));
+
+
+        expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, "stack"));
+        expectedException.expect(BadRequestException.class);
+
+        underTest.delete(STACK_NAME, ORGANIZATION_ID, false, true, user);
+
+        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
+        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(anyLong(), any(OrganizationResource.class), any(Action.class), any(User.class));
+        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(ORGANIZATION_ID, OrganizationResource.STACK, Action.WRITE, user);
+    }
+
+    @Test
+    public void testDeleteWithOutForceAndDeleteDepsByNameWhenStachHasOneAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
+        Stack stack = mock(Stack.class);
+        when(stack.getName()).thenReturn("stack");
+        when(stackRepository.findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID)).thenReturn(this.stack);
+        when(stackRepository.findEphemeralClusters(STACK_ID)).thenReturn(Set.of(stack));
+
+
+        expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, "stack"));
+        expectedException.expect(BadRequestException.class);
+
+        underTest.delete(STACK_NAME, ORGANIZATION_ID, false, false, user);
+
+        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
+        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(anyLong(), any(OrganizationResource.class), any(Action.class), any(User.class));
+        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(ORGANIZATION_ID, OrganizationResource.STACK, Action.WRITE, user);
+    }
+
+    @Test
+    public void testDeleteWithForceAndDeleteDepsByIdWhenStachHasMultipleAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
+        Stack stack1 = mock(Stack.class);
+        Stack stack2 = mock(Stack.class);
+        when(stack1.getName()).thenReturn("stack1");
+        when(stack2.getName()).thenReturn("stack2");
+        when(stackRepository.findById(STACK_ID)).thenReturn(Optional.of(stack));
+        when(stackRepository.findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID)).thenReturn(stack);
+        when(stackRepository.findEphemeralClusters(STACK_ID)).thenReturn(Set.of(stack1, stack2));
+
+
+        expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, String.format("%s, %s", "stack1", "stack2")));
+        expectedException.expect(BadRequestException.class);
+
+        underTest.delete(STACK_ID, true, true, user);
+
+        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
+        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(anyLong(), any(OrganizationResource.class), any(Action.class), any(User.class));
+        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(ORGANIZATION_ID, OrganizationResource.STACK, Action.WRITE, user);
+    }
+
+    @Test
+    public void testDeleteWithForceButWithoutDeleteDepsByIdWhenStachHasMultipleAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
+        Stack stack1 = mock(Stack.class);
+        Stack stack2 = mock(Stack.class);
+        when(stack1.getName()).thenReturn("stack1");
+        when(stack2.getName()).thenReturn("stack2");
+        when(stackRepository.findById(STACK_ID)).thenReturn(Optional.of(stack));
+        when(stackRepository.findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID)).thenReturn(stack);
+        when(stackRepository.findEphemeralClusters(STACK_ID)).thenReturn(Set.of(stack1, stack2));
+
+
+        expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, String.format("%s, %s", "stack1", "stack2")));
+        expectedException.expect(BadRequestException.class);
+
+        underTest.delete(STACK_ID, true, true, user);
+
+        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
+        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(anyLong(), any(OrganizationResource.class), any(Action.class), any(User.class));
+        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(ORGANIZATION_ID, OrganizationResource.STACK, Action.WRITE, user);
+    }
+
+    @Test
+    public void testDeleteWithOutForceButWithDeleteDepsByIdWhenStachHasMultipleAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
+        Stack stack1 = mock(Stack.class);
+        Stack stack2 = mock(Stack.class);
+        when(stack1.getName()).thenReturn("stack1");
+        when(stack2.getName()).thenReturn("stack2");
+        when(stackRepository.findById(STACK_ID)).thenReturn(Optional.of(stack));
+        when(stackRepository.findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID)).thenReturn(stack);
+        when(stackRepository.findEphemeralClusters(STACK_ID)).thenReturn(Set.of(stack1, stack2));
+
+
+        expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, String.format("%s, %s", "stack1", "stack2")));
+        expectedException.expect(BadRequestException.class);
+
+        underTest.delete(STACK_ID, true, true, user);
+
+        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
+        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(anyLong(), any(OrganizationResource.class), any(Action.class), any(User.class));
+        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(ORGANIZATION_ID, OrganizationResource.STACK, Action.WRITE, user);
+    }
+
+    @Test
+    public void testDeleteWithOutForceAndDeleteDepsByIdWhenStachHasMultipleAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
+        Stack stack1 = mock(Stack.class);
+        Stack stack2 = mock(Stack.class);
+        when(stack1.getName()).thenReturn("stack1");
+        when(stack2.getName()).thenReturn("stack2");
+        when(stackRepository.findById(STACK_ID)).thenReturn(Optional.of(stack));
+        when(stackRepository.findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID)).thenReturn(stack);
+        when(stackRepository.findEphemeralClusters(STACK_ID)).thenReturn(Set.of(stack1, stack2));
+
+
+        expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, String.format("%s, %s", "stack1", "stack2")));
+        expectedException.expect(BadRequestException.class);
+
+        underTest.delete(STACK_ID, true, true, user);
+
+        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
+        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(anyLong(), any(OrganizationResource.class), any(Action.class), any(User.class));
+        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(ORGANIZATION_ID, OrganizationResource.STACK, Action.WRITE, user);
+    }
+
+    @Test
+    public void testDeleteWithForceAndDeleteDepsByIdWhenStachHasOneAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
+        Stack stack = mock(Stack.class);
+        when(stack.getName()).thenReturn("stack");
+        when(stackRepository.findById(STACK_ID)).thenReturn(Optional.of(this.stack));
+        when(stackRepository.findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID)).thenReturn(this.stack);
+        when(stackRepository.findEphemeralClusters(STACK_ID)).thenReturn(Set.of(stack));
+
+
+        expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, "stack"));
+        expectedException.expect(BadRequestException.class);
+
+        underTest.delete(STACK_ID, true, true, user);
+
+        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
+        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(anyLong(), any(OrganizationResource.class), any(Action.class), any(User.class));
+        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(ORGANIZATION_ID, OrganizationResource.STACK, Action.WRITE, user);
+    }
+
+    @Test
+    public void testDeleteWithForceButWithoutDeleteDepsByIdWhenStachHasOneAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
+        Stack stack = mock(Stack.class);
+        when(stack.getName()).thenReturn("stack");
+        when(stackRepository.findById(STACK_ID)).thenReturn(Optional.of(this.stack));
+        when(stackRepository.findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID)).thenReturn(this.stack);
+        when(stackRepository.findEphemeralClusters(STACK_ID)).thenReturn(Set.of(stack));
+
+
+        expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, "stack"));
+        expectedException.expect(BadRequestException.class);
+
+        underTest.delete(STACK_ID, true, true, user);
+
+        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
+        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(anyLong(), any(OrganizationResource.class), any(Action.class), any(User.class));
+        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(ORGANIZATION_ID, OrganizationResource.STACK, Action.WRITE, user);
+    }
+
+    @Test
+    public void testDeleteWithOutForceButWithDeleteDepsByIdWhenStachHasOneAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
+        Stack stack = mock(Stack.class);
+        when(stack.getName()).thenReturn("stack");
+        when(stackRepository.findById(STACK_ID)).thenReturn(Optional.of(this.stack));
+        when(stackRepository.findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID)).thenReturn(this.stack);
+        when(stackRepository.findEphemeralClusters(STACK_ID)).thenReturn(Set.of(stack));
+
+
+        expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, "stack"));
+        expectedException.expect(BadRequestException.class);
+
+        underTest.delete(STACK_ID, true, true, user);
+
+        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
+        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(anyLong(), any(OrganizationResource.class), any(Action.class), any(User.class));
+        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(ORGANIZATION_ID, OrganizationResource.STACK, Action.WRITE, user);
+    }
+
+    @Test
+    public void testDeleteWithOutForceAndDeleteDepsByIdWhenStachHasOneAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
+        Stack stack = mock(Stack.class);
+        when(stack.getName()).thenReturn("stack");
+        when(stackRepository.findById(STACK_ID)).thenReturn(Optional.of(this.stack));
+        when(stackRepository.findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID)).thenReturn(this.stack);
+        when(stackRepository.findEphemeralClusters(STACK_ID)).thenReturn(Set.of(stack));
+
+
+        expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, "stack"));
+        expectedException.expect(BadRequestException.class);
+
+        underTest.delete(STACK_ID, true, true, user);
+
+        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
         verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(anyLong(), any(OrganizationResource.class), any(Action.class), any(User.class));
         verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(ORGANIZATION_ID, OrganizationResource.STACK, Action.WRITE, user);
     }
