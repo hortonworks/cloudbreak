@@ -20,5 +20,5 @@ RSpec.shared_context "shared vars", :a => :b do
 
   before (:all) { @image_catalog_name = "cli-cat" }
   before (:all) { @image_catalog_name_default = "cloudbreak-default" }
-  before (:all) { @image_catalog_url = "https://s3-eu-west-1.amazonaws.com/cloudbreak-info/v2-dev-cb-image-catalog.json" }
+  before (:all) { @image_catalog_url = "https://cloudbreak-imagecatalog.s3.amazonaws.com/v2-dev-cb-image-catalog.json" }
 end

@@ -10,7 +10,10 @@
 export TEST_CONTAINER_NAME=aruba-test-runner
 
 echo "Refresh the Test Runner Docker image"
-docker pull hortonworks/cloud-cli-e2e
+
+export container_version=":"$(git describe --tag --abbrev=0)
+
+docker pull hortonworks/cloud-cli-e2e$container_version
 
 echo "Checking stopped containers"
 if [[ -n "$(docker ps -a -f status=exited -f status=dead -q)" ]]; then
@@ -26,9 +29,10 @@ if [[ "$(docker inspect -f {{.State.Running}} $TEST_CONTAINER_NAME 2> /dev/null)
   docker rm -f $TEST_CONTAINER_NAME
 fi
 
+
 if [[ -z "$(echo $TARGET_CBD_VERSION)" ]]; then
 	export TARGET_CBD_VERSION=$(curl -sk $BASE_URL/cb/info | grep -oP "(?<=\"version\":\")[^\"]*")
-	if [[ -z "$(echo $TARGET_CBD_VERSION)" ]]; then
+  if [[ -z "$(echo $TARGET_CBD_VERSION)" ]]; then
 	    export TARGET_CBD_VERSION=MOCK
 	fi
 fi
@@ -70,7 +74,7 @@ docker run -i \
        -e "INTEGRATIONTEST_PROXYCONFIG_PROXYUSER=$INTEGRATIONTEST_PROXYCONFIG_PROXYUSER" \
        -e "INTEGRATIONTEST_PROXYCONFIG_PROXYPASSWORD=$INTEGRATIONTEST_PROXYCONFIG_PROXYPASSWORD" \
        -e "CLI_TEST_FILES=$CLI_TEST_FILES" \
-       hortonworks/cloud-cli-e2e
+       hortonworks/cloud-cli-e2e$container_version
 RESULT=$?
 
 exit $RESULT
