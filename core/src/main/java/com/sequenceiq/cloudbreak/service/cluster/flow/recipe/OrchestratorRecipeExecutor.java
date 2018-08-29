@@ -16,6 +16,8 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.codec.binary.Base64;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
 import com.google.api.client.util.Joiner;
@@ -24,6 +26,7 @@ import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.GeneratedRecipe;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -33,13 +36,16 @@ import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.RecipeModel;
+import com.sequenceiq.cloudbreak.recipe.CentralRecipeUpdater;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeExecutionFailureCollector.RecipeExecutionFailure;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
+import com.sequenceiq.cloudbreak.service.recipe.GeneratedRecipeService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
+import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Component
@@ -67,11 +73,21 @@ class OrchestratorRecipeExecutor {
     private InstanceGroupService instanceGroupService;
 
     @Inject
+    private GeneratedRecipeService generatedRecipeService;
+
+    @Inject
     private RecipeExecutionFailureCollector recipeExecutionFailureCollector;
+
+    @Inject
+    private CentralRecipeUpdater centralRecipeUpdater;
+
+    @Inject
+    @Qualifier("conversionService")
+    private ConversionService conversionService;
 
     public void uploadRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
         HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
-        Map<HostGroup, List<RecipeModel>> recipeMap = getHostgroupToRecipeMap(hostGroups);
+        Map<HostGroup, List<RecipeModel>> recipeMap = getHostgroupToRecipeMap(stack, hostGroups);
         Map<String, List<RecipeModel>> hostnameToRecipeMap = recipeMap.entrySet().stream()
                 .collect(Collectors.toMap(e -> e.getKey().getName(), Entry::getValue));
         List<GatewayConfig> allGatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
@@ -145,7 +161,7 @@ class OrchestratorRecipeExecutor {
         if (!recipeExecutionFailureCollector.canProcessExecutionFailure(exception)) {
             return exception.getMessage();
         }
-        Map<HostGroup, List<RecipeModel>> recipeMap = getHostgroupToRecipeMap(hostGroupService.getByCluster(stack.getCluster().getId()));
+        Map<HostGroup, List<RecipeModel>> recipeMap = getHostgroupToRecipeMap(stack, hostGroupService.getByCluster(stack.getCluster().getId()));
         Set<RecipeExecutionFailure> failures = recipeExecutionFailureCollector.collectErrors(exception, recipeMap,
                 instanceGroupService.findByStackId(stack.getId()));
         String message = failures.stream().map(failure -> new StringBuilder("[Recipe: '")
@@ -162,16 +178,32 @@ class OrchestratorRecipeExecutor {
         return new StringBuilder("Failed to execute recipe(s): \n").append(message).toString();
     }
 
-    private Map<HostGroup, List<RecipeModel>> getHostgroupToRecipeMap(Set<HostGroup> hostGroups) {
-        return hostGroups.stream().filter(hg -> !hg.getRecipes().isEmpty())
-                .collect(Collectors.toMap(h -> h, h -> convert(h.getRecipes())));
+    private Map<HostGroup, List<RecipeModel>> getHostgroupToRecipeMap(Stack stack, Set<HostGroup> hostGroups) {
+        Map<HostGroup, List<RecipeModel>> recipeModels = hostGroups.stream().filter(hg -> !hg.getRecipes().isEmpty())
+                .collect(Collectors.toMap(h -> h, h -> convert(stack, h.getRecipes())));
+        prepareGeneratedRecipes(recipeModels);
+        return recipeModels;
     }
 
-    private List<RecipeModel> convert(Set<Recipe> recipes) {
+    private void prepareGeneratedRecipes(Map<HostGroup, List<RecipeModel>> recipeModels) {
+        for (Entry<HostGroup, List<RecipeModel>> hostGroupListEntry : recipeModels.entrySet()) {
+            for (RecipeModel recipeModel : hostGroupListEntry.getValue()) {
+                GeneratedRecipe generatedRecipe = new GeneratedRecipe();
+                generatedRecipe.setHostGroup(hostGroupListEntry.getKey());
+                generatedRecipe.setExtendedRecipe(recipeModel.getGeneratedScript());
+                generatedRecipe.setOriginalRecipe(recipeModel.getScript());
+                generatedRecipeService.save(generatedRecipe);
+            }
+        }
+    }
+
+    private List<RecipeModel> convert(Stack stack, Set<Recipe> recipes) {
         List<RecipeModel> result = new ArrayList<>();
         for (Recipe recipe : recipes) {
             String decodedContent = new String(Base64.decodeBase64(recipe.getContent()));
-            RecipeModel recipeModel = new RecipeModel(recipe.getName(), recipe.getRecipeType(), decodedContent);
+            TemplatePreparationObject templatePreparationObject = conversionService.convert(stack, TemplatePreparationObject.class);
+            String generatedRecipeText = centralRecipeUpdater.getRecipeText(templatePreparationObject, decodedContent);
+            RecipeModel recipeModel = new RecipeModel(recipe.getName(), recipe.getRecipeType(), generatedRecipeText, recipe.getContent(), generatedRecipeText);
             result.add(recipeModel);
         }
         return result;

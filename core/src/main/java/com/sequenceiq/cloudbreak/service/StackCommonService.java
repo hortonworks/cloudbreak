@@ -34,7 +34,6 @@ import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.authorization.OrganizationPermissions.Action;
 import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
 import com.sequenceiq.cloudbreak.authorization.PermissionCheckingUtils;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
 import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintUpdater;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
@@ -61,6 +60,7 @@ import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 
 @Service
 public class StackCommonService implements StackEndpoint {
@@ -294,8 +294,8 @@ public class StackCommonService implements StackEndpoint {
     public GeneratedBlueprintResponse postStackForBlueprint(StackV2Request stackRequest) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
         stackRequest.setOwner(user.getUserId());
-        BlueprintPreparationObject blueprintPreparationObject = conversionService.convert(stackRequest, BlueprintPreparationObject.class);
-        String blueprintText = centralBlueprintUpdater.getBlueprintText(blueprintPreparationObject);
+        TemplatePreparationObject templatePreparationObject = conversionService.convert(stackRequest, TemplatePreparationObject.class);
+        String blueprintText = centralBlueprintUpdater.getBlueprintText(templatePreparationObject);
         return new GeneratedBlueprintResponse(blueprintText);
     }
 

@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.converter;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.StructuredParameterQueryResponse;
-import com.sequenceiq.cloudbreak.blueprint.filesystem.query.ConfigQueryEntry;
+import com.sequenceiq.cloudbreak.template.filesystem.query.ConfigQueryEntry;
 
 @Component
 public class ConfigQueryEntryToStructuredParameterQueryResponseConverter

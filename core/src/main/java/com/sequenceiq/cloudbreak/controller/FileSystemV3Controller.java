@@ -14,7 +14,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v3.FileSystemV3Endpoint;
 import com.sequenceiq.cloudbreak.api.model.StructuredParameterQueriesResponse;
 import com.sequenceiq.cloudbreak.api.model.StructuredParameterQueryResponse;
 import com.sequenceiq.cloudbreak.api.model.StructuredParametersQueryRequest;
-import com.sequenceiq.cloudbreak.blueprint.filesystem.query.ConfigQueryEntry;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.organization.User;
@@ -22,6 +21,7 @@ import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.template.filesystem.query.ConfigQueryEntry;
 
 @Component
 public class FileSystemV3Controller implements FileSystemV3Endpoint {

@@ -26,7 +26,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.blueprint.VolumeUtils;
-import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemConfigurationsViewProvider;
+import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationsViewProvider;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;

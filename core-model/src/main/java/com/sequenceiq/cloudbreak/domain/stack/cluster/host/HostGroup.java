@@ -58,6 +58,9 @@ public class HostGroup implements ProvisionEntity {
     @OneToMany(mappedBy = "hostGroup", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<HostMetadata> hostMetadata = new HashSet<>();
 
+    @OneToMany(mappedBy = "hostGroup", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<GeneratedRecipe> generatedRecipes = new HashSet<>();
+
     @ManyToMany
     private Set<Recipe> recipes = new HashSet<>();
 
@@ -123,6 +126,14 @@ public class HostGroup implements ProvisionEntity {
 
     public void setRecoveryMode(RecoveryMode recoveryMode) {
         this.recoveryMode = recoveryMode;
+    }
+
+    public Set<GeneratedRecipe> getGeneratedRecipes() {
+        return generatedRecipes;
+    }
+
+    public void setGeneratedRecipes(Set<GeneratedRecipe> generatedRecipes) {
+        this.generatedRecipes = generatedRecipes;
     }
 
     public Set<String> getHostNames() {
