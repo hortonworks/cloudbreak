@@ -8,13 +8,12 @@ define_method(:cb) do
   return cb
 end
 
-RSpec.describe 'Cloud test cases', :type => :aruba do
+RSpec.describe 'Audit test cases', :type => :aruba do
   include_context "shared command helpers"    
   include_context "e2e shared vars"
   class_variable_set(:@@audit_event, "")
 
   before(:all) do
-  	with_environment 'DEBUG' => '1' do
     result = list_with_name_exists("recipe-audit") do
       cb.recipe.list.build
     end
@@ -25,8 +24,8 @@ RSpec.describe 'Cloud test cases', :type => :aruba do
       result = cb.recipe.describe.name("recipe-audit").build(false)
       expect(result.exit_status).to eql 0
       expect(result.stdout.empty?).to be_falsy     
-      @recipe_id = JSON.parse(parse_debug_json(result.stderr))["id"]
-  end
+      @recipe_id = JSON.parse(result.stdout)["ID"]
+      print @recipe_id 
   end
 
   after(:all) do 
@@ -35,7 +34,7 @@ RSpec.describe 'Cloud test cases', :type => :aruba do
   end 
 
   it "Audit - List Recipe events" do
-      result = cb.audit.list.resource_type('recipes').resource_id(@recipe_id).build()
+      result = cb.audit.list.recipe.resource_id(@recipe_id).build()
       expect(result.exit_status).to eql 0
       expect(result.stdout.empty?).to be_falsy
 
