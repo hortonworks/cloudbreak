@@ -15,14 +15,16 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
+import com.google.common.base.Objects;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonStringSetUtils;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users", uniqueConstraints = @UniqueConstraint(columnNames = "userid"))
 public class User implements ProvisionEntity {
 
     @Id
@@ -121,5 +123,21 @@ public class User implements ProvisionEntity {
 
     public void setUserOrgPermissions(Set<UserOrgPermissions> userOrgPermissions) {
         this.userOrgPermissions = userOrgPermissions;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        } else if (o == null || !java.util.Objects.equals(getClass(), o.getClass())) {
+            return false;
+        }
+        User user = (User) o;
+        return Objects.equal(userId, user.userId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(userId);
     }
 }

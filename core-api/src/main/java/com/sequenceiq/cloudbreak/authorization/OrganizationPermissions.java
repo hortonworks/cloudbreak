@@ -117,6 +117,10 @@ public enum OrganizationPermissions {
         return false;
     }
 
+    public static boolean isNotValid(String value) {
+        return !isValid(value);
+    }
+
     public enum Action {
         READ,
         WRITE,
