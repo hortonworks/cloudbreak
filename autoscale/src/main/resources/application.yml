@@ -16,6 +16,8 @@ management:
           enabled: true
     prometheus:
       enabled: true
+    health:
+      show-details: always
 
 periscope:
   db.env:

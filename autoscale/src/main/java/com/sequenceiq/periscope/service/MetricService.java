@@ -32,7 +32,7 @@ public class MetricService {
     }
 
     private boolean gaugeMetric(MetricType x) {
-        return x.getMetricName().contains("state") || x.getMetricName().contains("leader");
+        return x.getMetricName().contains("state") || x.getMetricName().contains("leader") || x.getMetricName().contains("threadpool");
     }
 
     public void incrementCounter(MetricType metric) {

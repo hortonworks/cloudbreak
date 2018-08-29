@@ -24,6 +24,7 @@ import com.sequenceiq.periscope.monitor.evaluator.AmbariAgentHealthEvaluator;
 import com.sequenceiq.periscope.monitor.evaluator.EventPublisher;
 import com.sequenceiq.periscope.monitor.executor.EvaluatorExecutorRegistry;
 import com.sequenceiq.periscope.monitor.executor.ExecutorServiceWithRegistry;
+import com.sequenceiq.periscope.monitor.executor.LoggedExecutorService;
 import com.sequenceiq.periscope.monitor.handler.PersistRejectedThreadExecutionHandler;
 import com.sequenceiq.periscope.service.AmbariClientProvider;
 import com.sequenceiq.periscope.service.ClusterService;
@@ -31,6 +32,7 @@ import com.sequenceiq.periscope.service.RejectedThreadService;
 import com.sequenceiq.periscope.service.configuration.CloudbreakClientConfiguration;
 import com.sequenceiq.periscope.service.ha.PeriscopeNodeConfig;
 import com.sequenceiq.periscope.utils.LoggerUtils;
+import com.sequenceiq.periscope.utils.MetricUtils;
 
 @TestPropertySource(properties = "profile=dev")
 public class RejectedThreadContext {
@@ -47,14 +49,13 @@ public class RejectedThreadContext {
                             PeriscopeNodeConfig.class,
                             AmbariAgentHealthEvaluator.class,
                             EventPublisher.class,
-                            LoggerUtils.class,
                             ExecutorServiceWithRegistry.class,
                             EvaluatorExecutorRegistry.class,
-                            Clock.class,
-
+                            LoggedExecutorService.class,
+                            Clock.class
                     })
     )
-    @MockBean({ClusterService.class, AmbariClientProvider.class, CloudbreakClientConfiguration.class})
+    @MockBean({ClusterService.class, AmbariClientProvider.class, CloudbreakClientConfiguration.class, MetricUtils.class, LoggerUtils.class})
     @EnableAsync
     public static class SpringConfig implements AsyncConfigurer {
 

@@ -1,6 +1,7 @@
 package com.sequenceiq.periscope.service;
 
 import static com.sequenceiq.periscope.api.model.ClusterState.RUNNING;
+import static com.sequenceiq.periscope.api.model.ClusterState.SUSPENDED;
 import static com.sequenceiq.periscope.service.NotFoundException.notFound;
 import static org.springframework.util.StringUtils.isEmpty;
 
@@ -209,9 +210,9 @@ public class ClusterService {
 
     private void calculateClusterStateMetrics() {
         metricService.submitGauge(MetricType.CLUSTER_STATE_ACTIVE,
-                clusterRepository.countByStateAndAutoscalingEnabledAndPeriscopeNodeId(ClusterState.RUNNING, true, periscopeNodeConfig.getId()));
+                clusterRepository.countByStateAndAutoscalingEnabledAndPeriscopeNodeId(RUNNING, true, periscopeNodeConfig.getId()));
         metricService.submitGauge(MetricType.CLUSTER_STATE_SUSPENDED,
-                clusterRepository.countByStateAndAutoscalingEnabledAndPeriscopeNodeId(ClusterState.SUSPENDED, true, periscopeNodeConfig.getId()));
+                clusterRepository.countByStateAndAutoscalingEnabledAndPeriscopeNodeId(SUSPENDED, true, periscopeNodeConfig.getId()));
     }
 }
 

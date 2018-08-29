@@ -40,9 +40,11 @@ public class SharedServiceConfigsViewProvider {
             sharedServiceConfigsView.setAttachedCluster(true);
             sharedServiceConfigsView.setDatalakeCluster(false);
             sharedServiceConfigsView.setDatalakeAmbariIp(dataLakeStack.getAmbariIp());
+            sharedServiceConfigsView.setDatalakeAmbariFqdn(dataLakeStack.getGatewayInstanceMetadata().isEmpty()
+                    ? dataLakeStack.getAmbariIp() : dataLakeStack.getGatewayInstanceMetadata().iterator().next().getDiscoveryFQDN());
             sharedServiceConfigsView.setDatalakeComponents(prepareComponents(dataLakeStack.getCluster().getBlueprint().getBlueprintText()));
             sharedServiceConfigsView.setRangerAdminPort(rangerPort);
-        } else if (blueprintUtils.isSharedServiceReqdyBlueprint(blueprint)) {
+        } else if (blueprintUtils.isSharedServiceReadyBlueprint(blueprint)) {
             sharedServiceConfigsView.setRangerAdminPassword(ambariPassword);
             sharedServiceConfigsView.setAttachedCluster(false);
             sharedServiceConfigsView.setDatalakeCluster(true);

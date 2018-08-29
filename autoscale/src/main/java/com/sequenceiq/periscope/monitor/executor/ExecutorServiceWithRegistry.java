@@ -1,6 +1,5 @@
 package com.sequenceiq.periscope.monitor.executor;
 
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
 
 import javax.inject.Inject;
@@ -20,12 +19,12 @@ public class ExecutorServiceWithRegistry {
     private EvaluatorExecutorRegistry evaluatorExecutorRegistry;
 
     @Inject
-    private ExecutorService executorService;
+    private LoggedExecutorService loggedExecutorService;
 
     public void submitIfAbsent(EvaluatorExecutor evaluatorExecutor, long clusterId) {
         if (evaluatorExecutorRegistry.putIfAbsent(evaluatorExecutor, clusterId)) {
             try {
-                executorService.submit(evaluatorExecutor);
+                loggedExecutorService.submit(evaluatorExecutor.getName(), evaluatorExecutor);
             } catch (RejectedExecutionException e) {
                 evaluatorExecutorRegistry.remove(evaluatorExecutor, clusterId);
                 throw e;
@@ -39,7 +38,4 @@ public class ExecutorServiceWithRegistry {
         evaluatorExecutorRegistry.remove(evaluator, clusterId);
     }
 
-    public ExecutorService getExecutorService() {
-        return executorService;
-    }
 }

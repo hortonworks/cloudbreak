@@ -2,8 +2,6 @@ package com.sequenceiq.periscope.monitor.handler;
 
 import static java.lang.Math.ceil;
 
-import java.util.concurrent.ExecutorService;
-
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -19,11 +17,11 @@ import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
 import com.sequenceiq.periscope.log.MDCBuilder;
 import com.sequenceiq.periscope.monitor.event.ScalingEvent;
+import com.sequenceiq.periscope.monitor.executor.LoggedExecutorService;
 import com.sequenceiq.periscope.service.AmbariClientProvider;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.RejectedThreadService;
 import com.sequenceiq.periscope.utils.ClusterUtils;
-import com.sequenceiq.periscope.utils.LoggerUtils;
 import com.sequenceiq.periscope.utils.TimeUtil;
 
 @Component
@@ -32,7 +30,7 @@ public class ScalingHandler implements ApplicationListener<ScalingEvent> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ScalingHandler.class);
 
     @Inject
-    private ExecutorService executorService;
+    private LoggedExecutorService loggedExecutorService;
 
     @Inject
     private ClusterService clusterService;
@@ -42,9 +40,6 @@ public class ScalingHandler implements ApplicationListener<ScalingEvent> {
 
     @Inject
     private AmbariClientProvider ambariClientProvider;
-
-    @Inject
-    private LoggerUtils loggerUtils;
 
     @Inject
     private RejectedThreadService rejectedThreadService;
@@ -68,8 +63,7 @@ public class ScalingHandler implements ApplicationListener<ScalingEvent> {
             int desiredNodeCount = getDesiredNodeCount(cluster, policy, totalNodes);
             if (totalNodes != desiredNodeCount) {
                 Runnable scalingRequest = (Runnable) applicationContext.getBean("ScalingRequest", cluster, policy, totalNodes, desiredNodeCount);
-                loggerUtils.logThreadPoolExecutorParameters(LOGGER, "ScalingHandler", executorService);
-                executorService.execute(scalingRequest);
+                loggedExecutorService.submit("ScalingHandler", scalingRequest);
                 rejectedThreadService.remove(cluster.getId());
                 cluster.setLastScalingActivityCurrent();
                 clusterService.save(cluster);
