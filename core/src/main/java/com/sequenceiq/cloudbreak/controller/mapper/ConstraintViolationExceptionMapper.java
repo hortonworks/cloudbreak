@@ -9,8 +9,6 @@ import javax.ws.rs.core.Response.Status;
 
 import org.springframework.stereotype.Component;
 
-import ch.qos.logback.classic.Level;
-
 @Component
 public class ConstraintViolationExceptionMapper extends SendNotificationExceptionMapper<ConstraintViolationException> {
 
@@ -46,8 +44,4 @@ public class ConstraintViolationExceptionMapper extends SendNotificationExceptio
         return ConstraintViolationException.class;
     }
 
-    @Override
-    protected Level getLogLevel() {
-        return Level.INFO;
-    }
 }
