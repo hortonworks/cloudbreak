@@ -71,7 +71,9 @@ public class EndpointConfig extends ResourceConfig {
         StackV3Controller.class,
         SubscriptionController.class,
         UserController.class,
-        UtilController.class
+        UtilController.class,
+        UtilV3Controller.class,
+        FileSystemV3Controller.class
     );
 
     private static final String VERSION_UNAVAILABLE = "unspecified";
