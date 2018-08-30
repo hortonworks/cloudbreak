@@ -127,7 +127,7 @@
 
     {% if ('HIVE_SERVER' in salt['pillar.get']('gateway:location')) and not ('HIVE_SERVER_INTERACTIVE' in salt['pillar.get']('gateway:location')) -%}
     {% if 'HIVE' in exposed -%}
-    <!-- beeline -u "jdbc:hive2://{{ salt['grains.get']('gateway-address')[0] }}:8443/;ssl=true;sslTrustStore=/usr/hdp/current/knox-server/data/security/keystores/gateway.jks;trustStorePassword={{ salt['pillar.get']('gateway:password') }};transportMode=http;httpPath=gateway/hdc/hive" -d org.apache.hive.jdbc.HiveDriver -n {{ salt['pillar.get']('gateway:username') }} -p {{ salt['pillar.get']('gateway:password') }} -e "show databases;" -->
+    <!-- beeline -u "jdbc:hive2://{{ salt['grains.get']('gateway-address')[0] }}:8443/;ssl=true;sslTrustStore=/usr/{{ stack_type }}/current/knox-server/data/security/keystores/gateway.jks;trustStorePassword={{ salt['pillar.get']('gateway:password') }};transportMode=http;httpPath=gateway/hdc/hive" -d org.apache.hive.jdbc.HiveDriver -n {{ salt['pillar.get']('gateway:username') }} -p {{ salt['pillar.get']('gateway:password') }} -e "show databases;" -->
     <!-- beeline -u "jdbc:hive2://localhost:10001/;transportMode=http;httpPath=cliservice" -d org.apache.hive.jdbc.HiveDriver -n hive -p {{ salt['pillar.get']('gateway:password') }} -e "show databases;" -->
     <!-- docker run -ti -v $(pwd):/cert akanto/beeline -u "jdbc:hive2://{{ salt['grains.get']('gateway-address')[0] }}:8443/;ssl=true;sslTrustStore=/cert/gateway.jks;trustStorePassword={{ salt['pillar.get']('gateway:password') }};transportMode=http;httpPath=gateway/hdc/hive" -d org.apache.hive.jdbc.HiveDriver -n {{ salt['pillar.get']('gateway:username') }} -p {{ salt['pillar.get']('gateway:password') }} -e "show databases;" -->
 
@@ -142,7 +142,7 @@
 
     {% if 'HIVE_SERVER_INTERACTIVE' in salt['pillar.get']('gateway:location') -%}
     {% if 'HIVE_INTERACTIVE' in exposed -%}
-    <!-- beeline -u "jdbc:hive2://{{ salt['grains.get']('gateway-address')[0] }}:8443/;ssl=true;sslTrustStore=/usr/hdp/current/knox-server/data/security/keystores/gateway.jks;trustStorePassword={{ salt['pillar.get']('gateway:password') }};transportMode=http;httpPath=gateway/hdc/hive" -d org.apache.hive.jdbc.HiveDriver -n {{ salt['pillar.get']('gateway:username') }} -p {{ salt['pillar.get']('gateway:password') }} -e "show databases;" -->
+    <!-- beeline -u "jdbc:hive2://{{ salt['grains.get']('gateway-address')[0] }}:8443/;ssl=true;sslTrustStore=/usr/{{ stack_type }}/current/knox-server/data/security/keystores/gateway.jks;trustStorePassword={{ salt['pillar.get']('gateway:password') }};transportMode=http;httpPath=gateway/hdc/hive" -d org.apache.hive.jdbc.HiveDriver -n {{ salt['pillar.get']('gateway:username') }} -p {{ salt['pillar.get']('gateway:password') }} -e "show databases;" -->
     <!-- beeline -u "jdbc:hive2://localhost:10001/;transportMode=http;httpPath=cliservice" -d org.apache.hive.jdbc.HiveDriver -n hive -p {{ salt['pillar.get']('gateway:password') }} -e "show databases;" -->
     <!-- docker run -ti -v $(pwd):/cert akanto/beeline -u "jdbc:hive2://{{ salt['grains.get']('gateway-address')[0] }}:8443/;ssl=true;sslTrustStore=/cert/gateway.jks;trustStorePassword={{ salt['pillar.get']('gateway:password') }};transportMode=http;httpPath=gateway/hdc/hive" -d org.apache.hive.jdbc.HiveDriver -n {{ salt['pillar.get']('gateway:username') }} -p {{ salt['pillar.get']('gateway:password') }} -e "show databases;" -->
 
