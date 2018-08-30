@@ -54,6 +54,10 @@ public class EvaluatorExecutorRegistry {
         submittedEvaluators.remove(element);
     }
 
+    public int activeCount() {
+        return submittedEvaluators.size();
+    }
+
     private static class Element {
 
         private final EvaluatorExecutor evaluatorExecutor;
@@ -72,15 +76,15 @@ public class EvaluatorExecutorRegistry {
             this.timestampMillis = timestampMillis;
         }
 
-        public EvaluatorExecutor getEvaluatorExecutor() {
+        EvaluatorExecutor getEvaluatorExecutor() {
             return evaluatorExecutor;
         }
 
-        public long getResourceId() {
+        long getResourceId() {
             return resourceId;
         }
 
-        public long getTimestampMillis() {
+        long getTimestampMillis() {
             return timestampMillis;
         }
 

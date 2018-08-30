@@ -5,7 +5,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.IntStream;
@@ -105,7 +104,7 @@ public class EvaluatorExecutorRegistryTest {
             underTest.putIfAbsent(getEvaluatorExecutor("name" + i), i);
         }
 
-        Map<Integer, Boolean> results = new HashMap<>();
+        Map<Integer, Boolean> results = new ConcurrentHashMap<>();
         new ThreadSafetyTester(numberOfElements)
                 .withBlockToTest(i -> results.put(i, underTest.putIfAbsent(getEvaluatorExecutor("name" + i), i)))
                 .run()

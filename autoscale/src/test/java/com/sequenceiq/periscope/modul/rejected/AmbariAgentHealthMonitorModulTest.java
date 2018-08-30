@@ -50,6 +50,7 @@ import com.sequenceiq.periscope.model.RejectedThread;
 import com.sequenceiq.periscope.modul.rejected.RejectedThreadContext.SpringConfig;
 import com.sequenceiq.periscope.monitor.AmbariAgentHealthMonitor;
 import com.sequenceiq.periscope.monitor.MonitorContext;
+import com.sequenceiq.periscope.monitor.executor.ExecutorServiceWithRegistry;
 import com.sequenceiq.periscope.service.AmbariClientProvider;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.RejectedThreadService;
@@ -132,7 +133,7 @@ public class AmbariAgentHealthMonitorModulTest extends RejectedThreadContext {
         when(clusterService.findAllByStateAndNode(ClusterState.RUNNING, null)).thenReturn(clusters);
         underTest.execute(context);
 
-        waitForThreadPool();
+        waitForTasksToFinish();
 
         verify(clusterV1Endpoint, times(1)).failureReport(eq(stackId), any(FailureReport.class));
     }
@@ -145,7 +146,7 @@ public class AmbariAgentHealthMonitorModulTest extends RejectedThreadContext {
         Cluster cluster4 = cluster(4L);
         Cluster cluster5 = cluster(5L);
 
-        when(jobDetail.getKey()).thenReturn(JobKey.jobKey("test-rejected"));
+        when(jobDetail.getKey()).thenReturn(JobKey.jobKey("test-rejected-testWhenThreadPoolRejected"));
         when(clusterService.findById(1L)).thenReturn(cluster1);
         when(clusterService.findById(2L)).thenReturn(cluster2);
         when(clusterService.findById(3L)).thenReturn(cluster3);
@@ -159,7 +160,7 @@ public class AmbariAgentHealthMonitorModulTest extends RejectedThreadContext {
 
         underTest.execute(context);
 
-        waitForThreadPool();
+        waitForTasksToFinish();
 
         List<RejectedThread> allRejectedCluster = rejectedThreadService.getAllRejectedCluster();
 
@@ -172,7 +173,7 @@ public class AmbariAgentHealthMonitorModulTest extends RejectedThreadContext {
         long stackId = 1L;
         Cluster cluster = cluster(stackId);
 
-        when(jobDetail.getKey()).thenReturn(JobKey.jobKey("test-rejected"));
+        when(jobDetail.getKey()).thenReturn(JobKey.jobKey("test-rejected-testWhenThreadPoolRejectedAndSubmitAgain"));
         when(clusterService.findById(stackId)).thenReturn(cluster);
 
         when(ambariClient.getAlert("ambari_server_agent_heartbeat")).thenAnswer(delayed(Collections.emptyList()));
@@ -180,6 +181,7 @@ public class AmbariAgentHealthMonitorModulTest extends RejectedThreadContext {
         List<Cluster> clusters = Arrays.asList(cluster, cluster(2L), cluster(3L), cluster(4L), cluster(5L));
         when(clusterService.findAllByStateAndNode(ClusterState.RUNNING, null)).thenReturn(clusters);
         underTest.execute(context);
+        waitForTasksToFinish();
 
         List<Cluster> clusters1 = rejectedThreadService.getAllRejectedCluster()
                 .stream()
@@ -190,7 +192,7 @@ public class AmbariAgentHealthMonitorModulTest extends RejectedThreadContext {
         when(ambariClient.getAlert("ambari_server_agent_heartbeat")).thenReturn(Collections.emptyList());
         underTest.execute(context);
 
-        waitForThreadPool();
+        waitForTasksToFinish();
 
         List<RejectedThread> allRejectedCluster = rejectedThreadService.getAllRejectedCluster();
 
@@ -206,7 +208,7 @@ public class AmbariAgentHealthMonitorModulTest extends RejectedThreadContext {
         Cluster cluster4 = cluster(4L);
         Cluster cluster5 = cluster(5L);
 
-        when(jobDetail.getKey()).thenReturn(JobKey.jobKey("test-rejected"));
+        when(jobDetail.getKey()).thenReturn(JobKey.jobKey("test-rejected-testWhenThreadPoolRejectedAndCountMoreThanOne"));
         when(clusterService.findById(1L)).thenReturn(cluster1);
         when(clusterService.findById(2L)).thenReturn(cluster2);
         when(clusterService.findById(3L)).thenReturn(cluster3);
@@ -218,13 +220,13 @@ public class AmbariAgentHealthMonitorModulTest extends RejectedThreadContext {
         List<Cluster> clusters = Arrays.asList(cluster1, cluster2, cluster3, cluster4, cluster5);
         when(clusterService.findAllByStateAndNode(ClusterState.RUNNING, null)).thenReturn(clusters);
         underTest.execute(context);
-        waitForThreadPool();
+        waitForTasksToFinish();
 
         when(clusterService.findAllByStateAndNode(ClusterState.RUNNING, null)).thenReturn(clusters);
         when(ambariClient.getAlert("ambari_server_agent_heartbeat")).thenAnswer(delayed(Collections.emptyList()));
         underTest.execute(context);
 
-        waitForThreadPool();
+        waitForTasksToFinish();
 
         List<RejectedThread> allRejectedCluster = rejectedThreadService.getAllRejectedCluster();
 
@@ -243,10 +245,11 @@ public class AmbariAgentHealthMonitorModulTest extends RejectedThreadContext {
         return cluster;
     }
 
-    private void waitForThreadPool() {
-        while (executorService.getActiveCount() != 0) {
+    private void waitForTasksToFinish() {
+        ExecutorServiceWithRegistry executorServiceWithRegistry = applicationContext.getBean(ExecutorServiceWithRegistry.class);
+        while (executorServiceWithRegistry.activeCount() > 0) {
             try {
-                Thread.sleep(100);
+                Thread.sleep(10);
             } catch (InterruptedException ignore) {
             }
         }
