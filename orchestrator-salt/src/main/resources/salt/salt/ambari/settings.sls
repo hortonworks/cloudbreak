@@ -31,6 +31,7 @@
 {% else %}
   {% set secure_ldap = 'false' %}
 {% endif %}
+{% set stack_type = salt['pillar.get']('hdp:stack:repoid').split("-")[0].lower() %}
 
 {% set ambari = {} %}
 {% do ambari.update({
@@ -48,5 +49,6 @@
     'username': username,
     'password': password,
     'security_master_key': security_master_key,
+    'stack_type': stack_type,
     'setup_ldap_and_sso_on_api': setup_ldap_and_sso_on_api
 }) %}

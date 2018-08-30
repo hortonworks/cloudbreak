@@ -18,9 +18,9 @@ description     "knox-ldap"
 start on runlevel [2345]
 stop on runlevel [06]
 
-env DAEMON=/usr/hdp/current/knox-server/bin/ldap.sh
+env DAEMON=/usr/{{ stack_type }}/current/knox-server/bin/ldap.sh
 env SERVICE_NAME=knox-ldap
-env SERVICE_JAR=/usr/hdp/current/knox-server/bin/ldap.jar
+env SERVICE_JAR=/usr/{{ stack_type }}/current/knox-server/bin/ldap.jar
 env SERVICE_PID_FILE=/var/run/knox/ldap.pid
 
 # respawn the job up to 10 times within a 5 second period.
