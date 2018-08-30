@@ -22,5 +22,4 @@ public class ChangeOrganizationUsersJsonValidator implements ConstraintValidator
     private boolean isPermissionsValid(Set<String> permissions) {
         return permissions.stream().allMatch(OrganizationPermissions::isValid);
     }
-
 }

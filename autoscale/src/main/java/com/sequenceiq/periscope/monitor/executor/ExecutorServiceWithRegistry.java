@@ -38,4 +38,7 @@ public class ExecutorServiceWithRegistry {
         evaluatorExecutorRegistry.remove(evaluator, clusterId);
     }
 
+    public int activeCount() {
+        return evaluatorExecutorRegistry.activeCount();
+    }
 }
