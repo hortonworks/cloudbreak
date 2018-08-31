@@ -119,7 +119,7 @@
                  "dependsOn": [
                     <#list igs as group>
                         <#if ! securityGroups[group.name]?? || ! securityGroups[group.name]?has_content>
-                        "[concat('Microsoft.Network/networkSecurityGroups/', variables('${group.compressedName}secGroupName'))]"<#if (group_index + 1) != igs?size>,</#if>
+                        "[concat('Microsoft.Network/networkSecurityGroups/', variables('${group.compressedName}secGroupName'))]"<#if (group_index + 1) != igs?size -securityGroups?size>,</#if>
                         </#if>
                     </#list>
                  ],
