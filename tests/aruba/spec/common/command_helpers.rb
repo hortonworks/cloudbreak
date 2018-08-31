@@ -118,8 +118,8 @@ RSpec.shared_context "shared command helpers", :a => :b do
     expect(json.empty?).to be_falsy
       html_print do 
         puts "\nCLUSTER INFORMATION:"
-        puts "Cluster Name:    " + json["name"].to_s
-        puts "Stack Id:        " + json["id"].to_s + "\n"     
+        puts "Cluster Name:    " + json["Response"]["name"].to_s
+        puts "Stack Id:        " + json["Response"]["id"].to_s + "\n"     
       end   
   end
 
