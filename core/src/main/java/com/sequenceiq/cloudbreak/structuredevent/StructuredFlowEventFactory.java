@@ -81,10 +81,9 @@ public class StructuredFlowEventFactory {
                 blueprintDetails = conversionService.convert(cluster.getBlueprint(), BlueprintDetails.class);
             }
         }
-        return exception != null ? new StructuredFlowEvent(operationDetails, flowDetails, stackDetails, clusterDetails, blueprintDetails,
-                stack.getOrganization().getId(), stack.getCreator().getUserId(), ExceptionUtils.getStackTrace(exception))
-                : new StructuredFlowEvent(operationDetails, flowDetails, stackDetails, clusterDetails,
-                blueprintDetails, stack.getOrganization().getId(), stack.getCreator().getUserId());
+        return exception != null
+            ? new StructuredFlowEvent(operationDetails, flowDetails, stackDetails, clusterDetails, blueprintDetails, ExceptionUtils.getStackTrace(exception))
+            : new StructuredFlowEvent(operationDetails, flowDetails, stackDetails, clusterDetails, blueprintDetails);
     }
 
     public StructuredNotificationEvent createStructuredNotificationEvent(Long stackId, String notificationType, String message, String instanceGroupName) {
@@ -138,6 +137,6 @@ public class StructuredFlowEventFactory {
         OperationDetails operationDetails = new OperationDetails(NOTIFICATION, "stacks", stackId, stackName,
                 stack.getCreator().getUserId(), stack.getCreator().getUserName(), cloudbreakNodeConfig.getInstanceUUID(), cbVersion,
                 stack.getOrganization().getId(), account, userId, userName);
-        return new StructuredNotificationEvent(operationDetails, notificationDetails, stack.getOrganization().getId(), stack.getCreator().getUserId());
+        return new StructuredNotificationEvent(operationDetails, notificationDetails);
     }
 }

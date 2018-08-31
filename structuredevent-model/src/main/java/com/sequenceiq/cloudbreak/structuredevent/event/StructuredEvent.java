@@ -13,18 +13,12 @@ public abstract class StructuredEvent implements Serializable {
 
     private OperationDetails operation;
 
-    private Long orgId;
-
-    private String userId;
-
     public StructuredEvent() {
     }
 
-    public StructuredEvent(String type, OperationDetails operation, Long orgId, String userId) {
+    public StructuredEvent(String type, OperationDetails operation) {
         this.type = type;
         this.operation = operation;
-        this.orgId = orgId;
-        this.userId = userId;
     }
 
     public void setType(String type) {
@@ -46,20 +40,4 @@ public abstract class StructuredEvent implements Serializable {
     public abstract String getStatus();
 
     public abstract Long getDuration();
-
-    public void setOrgId(Long orgId) {
-        this.orgId = orgId;
-    }
-
-    public Long getOrgId() {
-        return orgId;
-    }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
 }

@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.structuredevent.db.converter;
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
@@ -25,17 +26,22 @@ public class StructuredEventToStructuredEventEntityConverter extends AbstractCon
     @Override
     public StructuredEventEntity convert(StructuredEvent source) {
         try {
-            OperationDetails operationDetails = source.getOperation();
             StructuredEventEntity structuredEventEntity = new StructuredEventEntity();
+            structuredEventEntity.setStructuredEventJson(new Json(source));
+            OperationDetails operationDetails = source.getOperation();
             structuredEventEntity.setEventType(operationDetails.getEventType());
             structuredEventEntity.setResourceType(operationDetails.getResourceType());
             structuredEventEntity.setResourceId(operationDetails.getResourceId());
             structuredEventEntity.setTimestamp(operationDetails.getTimestamp());
             structuredEventEntity.setAccount(operationDetails.getAccount());
             structuredEventEntity.setOwner(operationDetails.getUserId());
-            structuredEventEntity.setOrganization(organizationService.getByIdWithoutPermissionCheck(source.getOrgId()));
-            structuredEventEntity.setStructuredEventJson(new Json(source));
-            structuredEventEntity.setUser(userService.getByUserId(source.getUserId()));
+            if (operationDetails.getOrganizationId() != null) {
+                structuredEventEntity.setOrganization(organizationService.getById(operationDetails.getOrganizationId()));
+            }
+            if (StringUtils.hasLength(operationDetails.getUserIdV3())) {
+                structuredEventEntity.setUser(userService.getByUserId(operationDetails.getUserIdV3()));
+            }
+
             return structuredEventEntity;
         } catch (JsonProcessingException e) {
             // TODO What should we do in case of json processing error

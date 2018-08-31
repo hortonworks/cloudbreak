@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.structuredevent.db;
 import java.util.List;
 
 import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -21,7 +22,7 @@ import com.sequenceiq.cloudbreak.service.EntityType;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType;
 
 @EntityType(entityClass = StructuredEventEntity.class)
-@Transactional(Transactional.TxType.REQUIRED)
+@Transactional(TxType.REQUIRED)
 @DisableHasPermission
 @OrganizationResourceType(resource = OrganizationResource.STRUCTURED_EVENT)
 public interface StructuredEventRepository extends OrganizationResourceRepository<StructuredEventEntity, Long> {
