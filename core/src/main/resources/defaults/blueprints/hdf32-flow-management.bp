@@ -42,7 +42,8 @@
       {
         "nifi-registry-properties": {
           "nifi.registry.security.identity.mapping.pattern.kerb": "^(.*?)@(.*?)$",
-          "nifi.registry.security.identity.mapping.value.kerb": "$1"
+          "nifi.registry.security.identity.mapping.value.kerb": "$1",
+          "nifi.registry.db.password":"changethisplease"
         }
       },
       {
