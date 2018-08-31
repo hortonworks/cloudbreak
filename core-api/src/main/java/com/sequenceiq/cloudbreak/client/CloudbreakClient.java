@@ -56,6 +56,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v3.AuditV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.BlueprintV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.ConnectorV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.CredentialV3Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v3.FileSystemV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.FlexSubscriptionV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.ImageCatalogV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.KnoxServicesV3Endpoint;
@@ -67,13 +68,14 @@ import com.sequenceiq.cloudbreak.api.endpoint.v3.RdsConfigV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.RecipeV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.SmartSenseSubscriptionV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.StackV3Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v3.UtilV3Endpoint;
 
 import net.jodah.expiringmap.ExpirationPolicy;
 import net.jodah.expiringmap.ExpiringMap;
 
 public class CloudbreakClient {
 
-    private static final List<Class<?>> ENDPOINTS  = Arrays.asList(
+    private static final List<Class<?>> ENDPOINTS = Arrays.asList(
             AccountPreferencesEndpoint.class,
             AuditEndpoint.class,
             AuditV3Endpoint.class,
@@ -326,6 +328,14 @@ public class CloudbreakClient {
 
     public UtilEndpoint utilEndpoint() {
         return getEndpoint(UtilEndpoint.class);
+    }
+
+    public FileSystemV3Endpoint filesystemV3Endpoint() {
+        return getEndpoint(FileSystemV3Endpoint.class);
+    }
+
+    public UtilV3Endpoint utilV3Endpoint() {
+        return getEndpoint(UtilV3Endpoint.class);
     }
 
     protected <E> E getEndpoint(Class<E> clazz) {
