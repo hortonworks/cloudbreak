@@ -62,6 +62,6 @@ public class StructuredNotificationEventToCloudbreakEventJsonConverterTest exten
         notification.setClusterStatus(AVAILABLE.name());
         notification.setClusterId(1L);
         notification.setClusterName("test");
-        return new StructuredNotificationEvent(operation, notification, ORG_ID, USER_ID);
+        return new StructuredNotificationEvent(operation, notification);
     }
 }

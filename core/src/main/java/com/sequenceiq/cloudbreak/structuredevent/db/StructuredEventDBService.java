@@ -36,12 +36,12 @@ public class StructuredEventDBService extends AbstractOrganizationAwareResourceS
     @Override
     public void storeStructuredEvent(StructuredEvent structuredEvent) {
         StructuredEventEntity structuredEventEntityEntity = conversionService.convert(structuredEvent, StructuredEventEntity.class);
-        create(structuredEventEntityEntity, structuredEvent.getOrgId(), null);
+        create(structuredEventEntityEntity, structuredEventEntityEntity.getOrganization(), null);
     }
 
     @Override
     public StructuredEventEntity create(StructuredEventEntity resource, @Nonnull Long organizationId, User user) {
-        Organization organization = getOrganizationService().getByIdWithoutPermissionCheck(organizationId);
+        Organization organization = getOrganizationService().getById(organizationId);
         return create(resource, organization, user);
     }
 

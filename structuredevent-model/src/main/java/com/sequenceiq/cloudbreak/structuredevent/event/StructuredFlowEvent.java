@@ -24,8 +24,8 @@ public class StructuredFlowEvent extends StructuredEvent {
     }
 
     public StructuredFlowEvent(String type, OperationDetails operation, FlowDetails flow, StackDetails stack,
-            ClusterDetails cluster, BlueprintDetails blueprint, Long orgId, String userId) {
-        super(type, operation, orgId, userId);
+            ClusterDetails cluster, BlueprintDetails blueprint) {
+        super(type, operation);
         this.flow = flow;
         this.stack = stack;
         this.cluster = cluster;
@@ -33,13 +33,13 @@ public class StructuredFlowEvent extends StructuredEvent {
     }
 
     public StructuredFlowEvent(OperationDetails operation, FlowDetails flow, StackDetails stack, ClusterDetails cluster,
-            BlueprintDetails blueprint, Long orgId, String userId) {
-        this(StructuredFlowEvent.class.getSimpleName(), operation, flow, stack, cluster, blueprint, orgId, userId);
+            BlueprintDetails blueprint) {
+        this(StructuredFlowEvent.class.getSimpleName(), operation, flow, stack, cluster, blueprint);
     }
 
     public StructuredFlowEvent(OperationDetails operation, FlowDetails flow, StackDetails stack,
-            ClusterDetails cluster, BlueprintDetails blueprint, Long orgId, String userId, String exception) {
-        this(StructuredFlowEvent.class.getSimpleName(), operation, flow, stack, cluster, blueprint, orgId, userId);
+            ClusterDetails cluster, BlueprintDetails blueprint, String exception) {
+        this(StructuredFlowEvent.class.getSimpleName(), operation, flow, stack, cluster, blueprint);
         this.exception = exception;
     }
 
