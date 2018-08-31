@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.blueprint.template.views;
 
 import javax.annotation.Nonnull;
 
+import com.google.common.xml.XmlEscapers;
 import com.sequenceiq.cloudbreak.api.model.DirectoryType;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 
@@ -90,6 +91,10 @@ public class LdapView {
 
     public String getBindPassword() {
         return bindPassword;
+    }
+
+    public String getBindPasswordEscaped() {
+        return XmlEscapers.xmlAttributeEscaper().escape(bindPassword);
     }
 
     public DirectoryType getDirectoryType() {

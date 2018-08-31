@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.blueprint.template;
 
 import static com.sequenceiq.cloudbreak.TestUtil.adConfig;
 import static com.sequenceiq.cloudbreak.TestUtil.ldapConfig;
+import static com.sequenceiq.cloudbreak.TestUtil.ldapConfigWithSpecialChars;
 import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.adlsFileSystemConfiguration;
 import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.emptyStorageLocationViews;
 import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.gcsFileSystemConfiguration;
@@ -107,6 +108,10 @@ public class HandlebarTemplateTest {
                         nifiConfigWhenHdfAndLdapPresentedThenShouldReturnWithNifiAndLdapConfig(false)},
                 {"blueprints/configurations/nifi/ldap.handlebars", "configurations/nifi/without-ldap.json",
                         nifiConfigWhenHdfPresentedThenShouldReturnWithNifiConfig(true)},
+                {"blueprints/basics/nifi/authorizers.handlebars", "configurations/nifi/authorizers.xml",
+                        nifiWithLdap()},
+                {"blueprints/basics/nifi/identity_providers.handlebars", "configurations/nifi/identity_providers.xml",
+                        nifiWithLdap()},
 
                 // NIFI_REGISTRY
                 {"blueprints/configurations/nifi_registry/global.handlebars", "configurations/nifi_registry/global-with-hdf-nifitargets.json",
@@ -117,6 +122,10 @@ public class HandlebarTemplateTest {
                         nifiConfigWhenHdfAndLdapPresentedThenShouldReturnWithNifiAndLdapConfig(false)},
                 {"blueprints/configurations/nifi_registry/ldap.handlebars", "configurations/nifi_registry/without-ldap.json",
                         nifiConfigWhenHdfPresentedThenShouldReturnWithNifiConfig(true)},
+                {"blueprints/basics/nifi_registry/authorizers.handlebars", "configurations/nifi_registry/authorizers.xml",
+                        nifiWithLdap()},
+                {"blueprints/basics/nifi_registry/identity_providers.handlebars", "configurations/nifi_registry/identity_providers.xml",
+                        nifiWithLdap()},
 
                 // YARN
                 {"blueprints/configurations/yarn/global.handlebars", "configurations/yarn/global-without-container.json",
@@ -540,6 +549,16 @@ public class HandlebarTemplateTest {
                 .withHdfConfigs(new HdfConfigs("nifigtargets", "nifigtargets", "nifigtargets",
                         withProxyHost ? Optional.of("nifiproxyhost") : Optional.empty()))
                 .withBlueprintView(blueprintView)
+                .build();
+    }
+
+    public static Map<String, Object> nifiWithLdap() {
+        return new BlueprintTemplateModelContextBuilder()
+                .withLdap(new LdapView(ldapConfigWithSpecialChars()))
+                .withHdfConfigs(new HdfConfigs("<property>nodeEntities</property>",
+                        "<property>registryNodeEntities</property>",
+                        "<property>nodeUserEntities</property>",
+                        Optional.empty()))
                 .build();
     }
 

@@ -6,7 +6,7 @@
     {{{#eq ldap.protocol 'ldap'}}}<property name="Authentication Strategy">SIMPLE</property>{{{/eq}}}
     {{{#neq ldap.protocol 'ldap'}}}<property name="Authentication Strategy">LDAPS</property>{{{/neq}}}
     <property name="Manager DN">{{{ ldap.bindDn }}}</property>
-    <property name="Manager Password">{{{ ldap.bindPassword }}}</property>
+    <property name="Manager Password">{{{ ldap.bindPasswordEscaped }}}</property>
 
     <property name="Referral Strategy">FOLLOW</property>
     <property name="Connect Timeout">10 secs</property>
