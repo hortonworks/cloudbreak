@@ -112,6 +112,7 @@ public class CredentialServiceTest {
         testCredential = mock(Credential.class);
         when(testCredential.getName()).thenReturn(TEST_CREDENTIAL_NAME);
         when(accountPreferencesService.enabledPlatforms()).thenReturn(CLOUD_PLATFORMS);
+        when(testCredential.getOrganization()).thenReturn(organization);
         when(organization.getId()).thenReturn(ORG_ID);
         when(organization.getName()).thenReturn(TEST_ORGANIZATION_NAME);
         when(user.getUserId()).thenReturn(USER_ID);
@@ -355,6 +356,7 @@ public class CredentialServiceTest {
         credential.setName(TEST_CREDENTIAL_NAME);
         credential.setArchived(false);
         credential.setTopology(new Topology());
+        credential.setOrganization(organization);
         when(credentialRepository.findActiveByNameAndOrgIdFilterByPlatforms(TEST_CREDENTIAL_NAME, ORG_ID, CLOUD_PLATFORMS)).thenReturn(credential);
         when(stackRepository.findByCredential(credential)).thenReturn(Collections.emptySet());
 
