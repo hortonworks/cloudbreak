@@ -48,6 +48,7 @@ public class ControllerDescription {
     public static final String AUDIT_V3_DESCRIPTION = "Operations on audit events by organization";
     public static final String KNOX_SERVICES_V3_DESCRIPTION = "Operations on Knox services by organization and blueprint";
     public static final String CONNECTOR_V3_DESCRIPTION = "Returns cloud provider specific resource types by organization";
+    public static final String USER_V3_DESCRIPTION = "Operations on users in organization";
 
     private ControllerDescription() {
     }

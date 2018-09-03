@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.user;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.never;
@@ -16,7 +17,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import com.sequenceiq.cloudbreak.api.model.users.UserProfileRequest;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.repository.UserProfileRepository;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
@@ -157,5 +162,52 @@ public class UserProfileServiceTest {
         assertEquals(account, returnedUserProfile.getAccount());
         assertEquals(owner, returnedUserProfile.getOwner());
         assertEquals(savedUserName, returnedUserProfile.getUserName());
+    }
+
+    @Test
+    public void testAddDefaultCredentials() {
+        IdentityUser identityUser = new IdentityUser(null, null, null, null, null, null, null);
+        UserProfile userProfile = new UserProfile();
+        userProfile.setUser(new User());
+        Organization organization = createOrganization(1L);
+        UserProfileRequest userProfileRequest = createUserProfileRequest(null, 1L);
+
+        when(userProfileRepository.save(any(UserProfile.class))).thenReturn(userProfile);
+        when(credentialService.get(anyLong(), any())).thenReturn(createCredential(1L, null, organization));
+
+        userProfileService.put(userProfileRequest, identityUser, null, organization);
+        assertEquals(1, userProfile.getDefaultCredentials().size());
+
+        userProfileService.put(userProfileRequest, identityUser, null, organization);
+        assertEquals(1, userProfile.getDefaultCredentials().size());
+
+        organization = createOrganization(2L);
+        userProfileRequest = createUserProfileRequest("cred", null);
+
+        when(credentialService.getByNameForOrganization(anyString(), any())).thenReturn(createCredential(2L, "cred", organization));
+
+        userProfileService.put(userProfileRequest, identityUser, null, organization);
+        assertEquals(2, userProfile.getDefaultCredentials().size());
+    }
+
+    private UserProfileRequest createUserProfileRequest(String credentialName, Long credentialId) {
+        UserProfileRequest request = new UserProfileRequest();
+        request.setCredentialId(credentialId);
+        request.setCredentialName(credentialName);
+        return request;
+    }
+
+    private Credential createCredential(Long id, String name, Organization organization) {
+        Credential credential = new Credential();
+        credential.setId(id);
+        credential.setName(name);
+        credential.setOrganization(organization);
+        return credential;
+    }
+
+    private Organization createOrganization(Long id) {
+        Organization organization = new Organization();
+        organization.setId(id);
+        return organization;
     }
 }
