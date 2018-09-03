@@ -239,6 +239,7 @@ public class CredentialService extends AbstractOrganizationAwareResourceService<
         notification.setEventTimestamp(new Date().getTime());
         notification.setEventMessage(messagesService.getMessage(resourceEvent.getMessage()));
         notification.setCloud(credential.cloudPlatform());
+        notification.setOrganizationId(credential.getOrganization().getId());
         notificationSender.send(new Notification<>(notification));
     }
 }
