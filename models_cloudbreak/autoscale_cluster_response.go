@@ -110,6 +110,9 @@ type AutoscaleClusterResponse struct {
 	// name of the resource
 	Name string `json:"name,omitempty"`
 
+	// organization of the resource
+	Organization *OrganizationResourceResponse `json:"organization,omitempty"`
+
 	// ambari password
 	Password string `json:"password,omitempty"`
 
@@ -201,6 +204,8 @@ type AutoscaleClusterResponse struct {
 
 /* polymorph AutoscaleClusterResponse name false */
 
+/* polymorph AutoscaleClusterResponse organization false */
+
 /* polymorph AutoscaleClusterResponse password false */
 
 /* polymorph AutoscaleClusterResponse proxyName false */
@@ -291,6 +296,11 @@ func (m *AutoscaleClusterResponse) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateLdapConfig(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateOrganization(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -645,6 +655,25 @@ func (m *AutoscaleClusterResponse) validateLdapConfig(formats strfmt.Registry) e
 		if err := m.LdapConfig.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("ldapConfig")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *AutoscaleClusterResponse) validateOrganization(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Organization) { // not required
+		return nil
+	}
+
+	if m.Organization != nil {
+
+		if err := m.Organization.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("organization")
 			}
 			return err
 		}

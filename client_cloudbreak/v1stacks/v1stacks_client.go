@@ -25,6 +25,34 @@ type Client struct {
 }
 
 /*
+AuthorizeForAutoscale authorize for autoscale API
+*/
+func (a *Client) AuthorizeForAutoscale(params *AuthorizeForAutoscaleParams) (*AuthorizeForAutoscaleOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewAuthorizeForAutoscaleParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "authorizeForAutoscale",
+		Method:             "GET",
+		PathPattern:        "/v1/stacks/authorize/{id}/{owner}/{permission}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &AuthorizeForAutoscaleReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*AuthorizeForAutoscaleOK), nil
+
+}
+
+/*
 DeleteCluster deletes cluster on a specific stack
 
 Clusters are materialised Hadoop services on a given infrastructure. They are built based on a Blueprint (running the components and services specified) and on a configured infrastructure Stack. Once a cluster is created and launched, it can be used the usual way as any Hadoop cluster. We suggest to start with the Cluster's Ambari UI for an overview of your cluster.

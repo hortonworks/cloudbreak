@@ -110,6 +110,9 @@ type ClusterResponse struct {
 	// name of the resource
 	Name string `json:"name,omitempty"`
 
+	// organization of the resource
+	Organization *OrganizationResourceResponse `json:"organization,omitempty"`
+
 	// proxy configuration name for the cluster
 	ProxyName string `json:"proxyName,omitempty"`
 
@@ -197,6 +200,8 @@ type ClusterResponse struct {
 /* polymorph ClusterResponse minutesUp false */
 
 /* polymorph ClusterResponse name false */
+
+/* polymorph ClusterResponse organization false */
 
 /* polymorph ClusterResponse proxyName false */
 
@@ -286,6 +291,11 @@ func (m *ClusterResponse) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateLdapConfig(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateOrganization(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -640,6 +650,25 @@ func (m *ClusterResponse) validateLdapConfig(formats strfmt.Registry) error {
 		if err := m.LdapConfig.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("ldapConfig")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *ClusterResponse) validateOrganization(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Organization) { // not required
+		return nil
+	}
+
+	if m.Organization != nil {
+
+		if err := m.Organization.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("organization")
 			}
 			return err
 		}

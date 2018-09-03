@@ -57,7 +57,7 @@ func (a *Client) ChangeImageV3(params *ChangeImageV3Params) error {
 /*
 CreateStackInOrganization creates stack in organization
 
-An proxy Configuration describe a connection to an external proxy server which provides internet access cluster members. It's applied for package manager and Ambari too
+Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
 */
 func (a *Client) CreateStackInOrganization(params *CreateStackInOrganizationParams) (*CreateStackInOrganizationOK, error) {
 	// TODO: Validate the params before sending
@@ -147,7 +147,7 @@ func (a *Client) DeleteInstanceStackV3(params *DeleteInstanceStackV3Params) erro
 /*
 DeleteStackInOrganization deletes stack by name in organization
 
-An proxy Configuration describe a connection to an external proxy server which provides internet access cluster members. It's applied for package manager and Ambari too
+Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
 */
 func (a *Client) DeleteStackInOrganization(params *DeleteStackInOrganizationParams) error {
 	// TODO: Validate the params before sending
@@ -177,7 +177,7 @@ func (a *Client) DeleteStackInOrganization(params *DeleteStackInOrganizationPara
 /*
 GetStackInOrganization gets stack by name in organization
 
-An proxy Configuration describe a connection to an external proxy server which provides internet access cluster members. It's applied for package manager and Ambari too
+Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
 */
 func (a *Client) GetStackInOrganization(params *GetStackInOrganizationParams) (*GetStackInOrganizationOK, error) {
 	// TODO: Validate the params before sending
@@ -237,7 +237,7 @@ func (a *Client) GetStackRequestFromNameV3(params *GetStackRequestFromNameV3Para
 /*
 ListStacksByOrganization lists stacks for the given organization
 
-An proxy Configuration describe a connection to an external proxy server which provides internet access cluster members. It's applied for package manager and Ambari too
+Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
 */
 func (a *Client) ListStacksByOrganization(params *ListStacksByOrganizationParams) (*ListStacksByOrganizationOK, error) {
 	// TODO: Validate the params before sending
@@ -531,6 +531,36 @@ func (a *Client) RetryStackV3(params *RetryStackV3Params) error {
 		return err
 	}
 	return nil
+
+}
+
+/*
+StatusStackV3 retrieves stack status by stack name
+
+Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
+*/
+func (a *Client) StatusStackV3(params *StatusStackV3Params) (*StatusStackV3OK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewStatusStackV3Params()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "statusStackV3",
+		Method:             "GET",
+		PathPattern:        "/v3/{organizationId}/stack/{name}/status",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &StatusStackV3Reader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*StatusStackV3OK), nil
 
 }
 

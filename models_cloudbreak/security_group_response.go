@@ -20,9 +20,6 @@ import (
 
 type SecurityGroupResponse struct {
 
-	// account id of the resource owner that is provided by OAuth provider
-	Account string `json:"account,omitempty"`
-
 	// type of cloud provider
 	// Required: true
 	CloudPlatform *string `json:"cloudPlatform"`
@@ -38,12 +35,8 @@ type SecurityGroupResponse struct {
 	// name of the resource
 	Name string `json:"name,omitempty"`
 
-	// id of the resource owner that is provided by OAuth provider
-	Owner string `json:"owner,omitempty"`
-
-	// resource is visible in account
-	// Required: true
-	PublicInAccount bool `json:"publicInAccount"`
+	// organization of the resource
+	Organization *OrganizationResourceResponse `json:"organization,omitempty"`
 
 	// Exisiting security group id
 	SecurityGroupID string `json:"securityGroupId,omitempty"`
@@ -56,8 +49,6 @@ type SecurityGroupResponse struct {
 	SecurityRules []*SecurityRuleResponse `json:"securityRules"`
 }
 
-/* polymorph SecurityGroupResponse account false */
-
 /* polymorph SecurityGroupResponse cloudPlatform false */
 
 /* polymorph SecurityGroupResponse description false */
@@ -66,9 +57,7 @@ type SecurityGroupResponse struct {
 
 /* polymorph SecurityGroupResponse name false */
 
-/* polymorph SecurityGroupResponse owner false */
-
-/* polymorph SecurityGroupResponse publicInAccount false */
+/* polymorph SecurityGroupResponse organization false */
 
 /* polymorph SecurityGroupResponse securityGroupId false */
 
@@ -90,7 +79,7 @@ func (m *SecurityGroupResponse) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validatePublicInAccount(formats); err != nil {
+	if err := m.validateOrganization(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -137,10 +126,20 @@ func (m *SecurityGroupResponse) validateDescription(formats strfmt.Registry) err
 	return nil
 }
 
-func (m *SecurityGroupResponse) validatePublicInAccount(formats strfmt.Registry) error {
+func (m *SecurityGroupResponse) validateOrganization(formats strfmt.Registry) error {
 
-	if err := validate.Required("publicInAccount", "body", bool(m.PublicInAccount)); err != nil {
-		return err
+	if swag.IsZero(m.Organization) { // not required
+		return nil
+	}
+
+	if m.Organization != nil {
+
+		if err := m.Organization.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("organization")
+			}
+			return err
+		}
 	}
 
 	return nil

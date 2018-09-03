@@ -7,10 +7,13 @@ package v1flexsubscriptions
 
 import (
 	"fmt"
+	"io"
 
 	"github.com/go-openapi/runtime"
 
 	strfmt "github.com/go-openapi/strfmt"
+
+	"github.com/hortonworks/cb-cli/models_cloudbreak"
 )
 
 // DeletePrivateFlexSubscriptionByNameReader is a Reader for the DeletePrivateFlexSubscriptionByName structure.
@@ -20,43 +23,45 @@ type DeletePrivateFlexSubscriptionByNameReader struct {
 
 // ReadResponse reads a server response into the received o.
 func (o *DeletePrivateFlexSubscriptionByNameReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
+	switch response.Code() {
 
-	result := NewDeletePrivateFlexSubscriptionByNameDefault(response.Code())
-	if err := result.readResponse(response, consumer, o.formats); err != nil {
-		return nil, err
-	}
-	if response.Code()/100 == 2 {
+	case 200:
+		result := NewDeletePrivateFlexSubscriptionByNameOK()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
 		return result, nil
-	}
-	return nil, result
 
-}
-
-// NewDeletePrivateFlexSubscriptionByNameDefault creates a DeletePrivateFlexSubscriptionByNameDefault with default headers values
-func NewDeletePrivateFlexSubscriptionByNameDefault(code int) *DeletePrivateFlexSubscriptionByNameDefault {
-	return &DeletePrivateFlexSubscriptionByNameDefault{
-		_statusCode: code,
+	default:
+		return nil, runtime.NewAPIError("unknown error", response, response.Code())
 	}
 }
 
-/*DeletePrivateFlexSubscriptionByNameDefault handles this case with default header values.
+// NewDeletePrivateFlexSubscriptionByNameOK creates a DeletePrivateFlexSubscriptionByNameOK with default headers values
+func NewDeletePrivateFlexSubscriptionByNameOK() *DeletePrivateFlexSubscriptionByNameOK {
+	return &DeletePrivateFlexSubscriptionByNameOK{}
+}
+
+/*DeletePrivateFlexSubscriptionByNameOK handles this case with default header values.
 
 successful operation
 */
-type DeletePrivateFlexSubscriptionByNameDefault struct {
-	_statusCode int
+type DeletePrivateFlexSubscriptionByNameOK struct {
+	Payload *models_cloudbreak.FlexSubscriptionResponse
 }
 
-// Code gets the status code for the delete private flex subscription by name default response
-func (o *DeletePrivateFlexSubscriptionByNameDefault) Code() int {
-	return o._statusCode
+func (o *DeletePrivateFlexSubscriptionByNameOK) Error() string {
+	return fmt.Sprintf("[DELETE /v1/flexsubscriptions/user/{name}][%d] deletePrivateFlexSubscriptionByNameOK  %+v", 200, o.Payload)
 }
 
-func (o *DeletePrivateFlexSubscriptionByNameDefault) Error() string {
-	return fmt.Sprintf("[DELETE /v1/flexsubscriptions/user/{name}][%d] deletePrivateFlexSubscriptionByName default ", o._statusCode)
-}
+func (o *DeletePrivateFlexSubscriptionByNameOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-func (o *DeletePrivateFlexSubscriptionByNameDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+	o.Payload = new(models_cloudbreak.FlexSubscriptionResponse)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
 
 	return nil
 }

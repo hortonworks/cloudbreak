@@ -145,7 +145,7 @@ func (a *Client) GetBlueprint(params *GetBlueprintParams) (*GetBlueprintOK, erro
 }
 
 /*
-GetBlueprintRequestFromID retrieves validation request by blueprint name
+GetBlueprintRequestFromID retrieves validation request by blueprint id
 
 Ambari Blueprints are a declarative definition of a Hadoop cluster. With a Blueprint, you specify a stack, the component layout and the configurations to materialize a Hadoop cluster instance. Hostgroups defined in blueprints can be associated to different templates, thus you can spin up a highly available cluster running on different instance types. This will give you the option to group your Hadoop services based on resource needs (e.g. high I/O, CPU or memory) and create an infrastructure which fits your workload best.
 */

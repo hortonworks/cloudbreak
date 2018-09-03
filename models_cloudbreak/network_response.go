@@ -35,12 +35,11 @@ type NetworkResponse struct {
 	// Required: true
 	Name *string `json:"name"`
 
+	// organization of the resource
+	Organization *OrganizationResourceResponse `json:"organization,omitempty"`
+
 	// provider specific parameters of the specified network
 	Parameters map[string]interface{} `json:"parameters,omitempty"`
-
-	// resource is visible in account
-	// Read Only: true
-	PublicInAccount *bool `json:"publicInAccount,omitempty"`
 
 	// the subnet definition of the network in CIDR format
 	SubnetCIDR string `json:"subnetCIDR,omitempty"`
@@ -57,9 +56,9 @@ type NetworkResponse struct {
 
 /* polymorph NetworkResponse name false */
 
-/* polymorph NetworkResponse parameters false */
+/* polymorph NetworkResponse organization false */
 
-/* polymorph NetworkResponse publicInAccount false */
+/* polymorph NetworkResponse parameters false */
 
 /* polymorph NetworkResponse subnetCIDR false */
 
@@ -80,6 +79,11 @@ func (m *NetworkResponse) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateName(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateOrganization(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -120,6 +124,25 @@ func (m *NetworkResponse) validateName(formats strfmt.Registry) error {
 
 	if err := validate.Required("name", "body", m.Name); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *NetworkResponse) validateOrganization(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Organization) { // not required
+		return nil
+	}
+
+	if m.Organization != nil {
+
+		if err := m.Organization.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("organization")
+			}
+			return err
+		}
 	}
 
 	return nil
