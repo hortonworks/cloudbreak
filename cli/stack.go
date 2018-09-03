@@ -297,7 +297,7 @@ func ReinstallStack(c *cli.Context) {
 	orgID := c.Int64(FlOrganizationOptional.Name)
 	name := c.String(FlName.Name)
 	log.Infof("[RepairStack] reinstalling stack, name: %s", name)
-	err := cbClient.Cloudbreak.V3OrganizationIDStack.PutreinstallStackV3(v3_organization_id_stack.NewPutreinstallStackV3Params().WithName(name).WithBody(req))
+	err := cbClient.Cloudbreak.V3OrganizationIDStack.PutreinstallStackV3(v3_organization_id_stack.NewPutreinstallStackV3Params().WithOrganizationID(orgID).WithName(name).WithBody(req))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
