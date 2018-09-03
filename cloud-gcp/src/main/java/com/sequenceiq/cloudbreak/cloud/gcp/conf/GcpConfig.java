@@ -3,10 +3,12 @@ package com.sequenceiq.cloudbreak.cloud.gcp.conf;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.retry.annotation.EnableRetry;
 
 import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
 
 @Configuration
+@EnableRetry
 public class GcpConfig {
 
     @Value("${cb.gcp.tag.amount:64}")

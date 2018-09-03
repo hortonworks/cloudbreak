@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.gcp;
 
-import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContextBuilder;
+import com.sequenceiq.cloudbreak.cloud.gcp.context.InvalidGcpContextException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
@@ -60,6 +61,9 @@ public class GcpCredentialConnectorTest {
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private GcpContext context;
 
+    @Mock
+    private GcpCredentialVerifier gcpCredentialVerifier;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -78,9 +82,7 @@ public class GcpCredentialConnectorTest {
         AuthenticatedContext authContext = createAuthContext();
         String expectionReasonMessage = "exception message";
         when(contextBuilder.contextInit(authContext.getCloudContext(), authContext, null, null, false)).thenReturn(context);
-        when(context.getProjectId()).thenReturn("some id");
-        when(context.getServiceAccountId()).thenReturn("some service id");
-        when(context.getCompute().regions().list(anyString()).executeUsingHead()).thenThrow(new BadRequestException(expectionReasonMessage));
+        doThrow(new BadRequestException(expectionReasonMessage)).when(gcpCredentialVerifier).preCheckOfGooglePermission(context);
 
         CloudCredentialStatus status = underTest.verify(authContext);
 
@@ -98,8 +100,6 @@ public class GcpCredentialConnectorTest {
     public void testPassingVerifyPermissionCheck() {
         AuthenticatedContext authContext = createAuthContext();
         when(contextBuilder.contextInit(authContext.getCloudContext(), authContext, null, null, false)).thenReturn(context);
-        when(context.getProjectId()).thenReturn("some id");
-        when(context.getServiceAccountId()).thenReturn("some service id");
 
         CloudCredentialStatus status = underTest.verify(authContext);
 
@@ -113,10 +113,10 @@ public class GcpCredentialConnectorTest {
      * status should come back.
      */
     @Test
-    public void testForFailedStatusBecauseMissingPrjId() {
-        AuthenticatedContext authContext = createAuthContext();
+    public void testForFailedStatusBecauseMissingPrjId() throws InvalidGcpContextException {
+        final AuthenticatedContext authContext = createAuthContext();
         when(contextBuilder.contextInit(authContext.getCloudContext(), authContext, null, null, false)).thenReturn(context);
-        when(context.getProjectId()).thenReturn(null);
+        doThrow(new NullPointerException()).when(gcpCredentialVerifier).checkGcpContextValidity(context);
 
         CloudCredentialStatus status = underTest.verify(authContext);
 
@@ -130,11 +130,10 @@ public class GcpCredentialConnectorTest {
      * status should come back.
      */
     @Test
-    public void testForFailedStatusBecauseMissingServiceAccId() {
-        AuthenticatedContext authContext = createAuthContext();
+    public void testForFailedStatusBecauseMissingServiceAccId() throws InvalidGcpContextException {
+        final AuthenticatedContext authContext = createAuthContext();
         when(contextBuilder.contextInit(authContext.getCloudContext(), authContext, null, null, false)).thenReturn(context);
-        when(context.getProjectId()).thenReturn("some id");
-        when(context.getServiceAccountId()).thenReturn(null);
+        doThrow(new NullPointerException()).when(gcpCredentialVerifier).checkGcpContextValidity(context);
 
         CloudCredentialStatus status = underTest.verify(authContext);
 
@@ -148,12 +147,10 @@ public class GcpCredentialConnectorTest {
      * status should come back.
      */
     @Test
-    public void testForFailedStatusBecauseMissingCompute() {
-        AuthenticatedContext authContext = createAuthContext();
+    public void testForFailedStatusBecauseMissingCompute() throws IOException {
+        final AuthenticatedContext authContext = createAuthContext();
         when(contextBuilder.contextInit(authContext.getCloudContext(), authContext, null, null, false)).thenReturn(context);
-        when(context.getProjectId()).thenReturn("some id");
-        when(context.getServiceAccountId()).thenReturn("some service id");
-        when(context.getCompute()).thenReturn(null);
+        doThrow(new NullPointerException()).when(gcpCredentialVerifier).preCheckOfGooglePermission(context);
 
         CloudCredentialStatus status = underTest.verify(authContext);
 

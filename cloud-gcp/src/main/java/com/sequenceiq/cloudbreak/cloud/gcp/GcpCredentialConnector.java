@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.gcp;
 
+import java.util.Map;
 import java.io.IOException;
 import java.util.Optional;
 
@@ -8,19 +9,14 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import com.google.api.client.auth.oauth2.TokenResponseException;
-import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.gson.JsonParser;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContextBuilder;
-import com.sequenceiq.cloudbreak.cloud.gcp.context.InvalidGcpContextException;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
@@ -36,14 +32,17 @@ public class GcpCredentialConnector implements CredentialConnector {
     @Inject
     private GcpPlatformParameters gcpPlatformParameters;
 
+    @Inject
+    private GcpCredentialVerifier gcpCredentialVerifier;
+
     @Override
     public CloudCredentialStatus verify(@Nonnull AuthenticatedContext authenticatedContext) {
         LOGGER.info("Verify credential: {}", authenticatedContext.getCloudCredential());
         GcpStackUtil.prepareCredential(authenticatedContext.getCloudCredential());
         GcpContext gcpContext = gcpContextBuilder.contextInit(authenticatedContext.getCloudContext(), authenticatedContext, null, null, false);
         try {
-            checkGcpContextValidity(gcpContext);
-            preCheckOfGooglePermission(gcpContext);
+            gcpCredentialVerifier.checkGcpContextValidity(gcpContext);
+            gcpCredentialVerifier.preCheckOfGooglePermission(gcpContext);
         } catch (TokenResponseException te) {
             return createFailedCloudCredentialStatusWithExc(te, authenticatedContext, getErrDescriptionFromTokenResponse(te));
         } catch (Exception e) {
@@ -88,22 +87,6 @@ public class GcpCredentialConnector implements CredentialConnector {
     }
 
     /**
-     * Checks the validity of the provided GcpContext's credential. It sends
-     * a http request through the google's http api which validates the data
-     * set provided from the given GcpContext.
-     *
-     * @param gcpContext the GcpContext instance which credential would be
-     *                   checked.
-     *
-     * @throws IOException if something happens while listing the regions,
-     *                     this exception would thrown by the api.
-     */
-    @Retryable(value = GoogleJsonResponseException.class, backoff = @Backoff(delay = 1000))
-    private void preCheckOfGooglePermission(GcpContext gcpContext) throws IOException {
-        gcpContext.getCompute().regions().list(gcpContext.getProjectId()).executeUsingHead();
-    }
-
-    /**
      * Attempts to get the "error_description" parameter's value from the given
      * TokenResponseException's content. If there is no "error_description"
      * parameter, or it has no value or something occurs during the process, an
@@ -121,26 +104,6 @@ public class GcpCredentialConnector implements CredentialConnector {
         } catch (RuntimeException re) {
             LOGGER.debug("Could not parse TokenResponseException", re);
             return Optional.empty();
-        }
-    }
-
-    /**
-     * Checks both the provided GcpContexts's project id, service account id
-     * and compute, to be sure the given context is valid for further
-     * operations.
-     *
-     * @param context the GcpContext which should contain a valid project
-     *                id, service account id and compute instance
-     */
-    private void checkGcpContextValidity(GcpContext context) throws InvalidGcpContextException {
-        if (context == null) {
-            throw new InvalidGcpContextException("GcpContext has not created properly, it was null");
-        } else if (!StringUtils.hasLength(context.getProjectId())) {
-            throw new InvalidGcpContextException("Project id is missing.");
-        } else if (!StringUtils.hasLength(context.getServiceAccountId())) {
-            throw new InvalidGcpContextException("Service account id is missing.");
-        } else if (context.getCompute() == null) {
-            throw new InvalidGcpContextException("Problem with your credential key please use the correct format.");
         }
     }
 
