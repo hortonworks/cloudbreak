@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.gcp;
 
-import java.util.Map;
-import java.io.IOException;
 import java.util.Optional;
 
 import javax.annotation.Nonnull;
