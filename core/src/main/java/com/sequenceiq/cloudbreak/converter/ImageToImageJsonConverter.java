@@ -33,15 +33,24 @@ public class ImageToImageJsonConverter extends AbstractConversionServiceAwareCon
     public ImageJson convert(Image source) {
         ImageJson imageJson = new ImageJson();
         imageJson.setImageName(source.getImageName());
-        IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
-        User user = userService.getOrCreate(identityUser);
-        imageJson.setImageCatalogUrl(Strings.isNullOrEmpty(source.getImageCatalogUrl())
-                ? imageCatalogService.getImageDefaultCatalogUrl(identityUser, user) : source.getImageCatalogUrl());
+
+        decorateWithImageCatalogUrl(source, imageJson);
+
         imageJson.setImageCatalogName(Strings.isNullOrEmpty(source.getImageCatalogName())
                 ? "cloudbreak-default" : source.getImageCatalogName());
         imageJson.setImageId(Strings.isNullOrEmpty(source.getImageId())
                 ? null : source.getImageId());
         return imageJson;
+    }
+
+    private void decorateWithImageCatalogUrl(Image source, ImageJson imageJson) {
+        if (Strings.isNullOrEmpty(source.getImageCatalogUrl())) {
+            IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
+            User user = userService.getOrCreate(identityUser);
+            imageJson.setImageCatalogUrl(imageCatalogService.getImageDefaultCatalogUrl(identityUser, user));
+        } else {
+            imageJson.setImageCatalogUrl(source.getImageCatalogUrl());
+        }
     }
 
 }
