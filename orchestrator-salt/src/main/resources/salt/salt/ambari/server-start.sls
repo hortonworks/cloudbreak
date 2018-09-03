@@ -54,8 +54,3 @@ start-ambari-server:
     - name: ambari-server
 
 {% endif %}
-
-start-service-registration:
-  service.running:
-    - enable: True
-    - name: service-registration

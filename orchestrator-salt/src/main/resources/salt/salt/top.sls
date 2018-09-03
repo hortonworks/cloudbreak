@@ -1,7 +1,6 @@
 base:
   '*':
     - pkg-mgr-proxy
-    - consul
     - unbound
     - java
     - metadata
@@ -46,7 +45,6 @@ base:
 
   'roles:ambari_server_install':
     - match: grain
-    - prometheus.server
     - ambari.server
     - jdbc.connectors
 
