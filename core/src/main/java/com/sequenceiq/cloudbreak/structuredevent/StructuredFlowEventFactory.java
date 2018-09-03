@@ -18,8 +18,6 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
-import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.event.BlueprintDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.ClusterDetails;
@@ -44,12 +42,6 @@ public class StructuredFlowEventFactory {
 
     @Inject
     private CloudbreakNodeConfig cloudbreakNodeConfig;
-
-    @Inject
-    private TransactionService transactionService;
-
-    @Inject
-    private RestRequestThreadLocalService restRequestThreadLocalService;
 
     @Value("${info.app.version:}")
     private String cbVersion;
