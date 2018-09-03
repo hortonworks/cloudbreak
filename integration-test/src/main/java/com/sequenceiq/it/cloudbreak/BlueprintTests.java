@@ -31,6 +31,8 @@ public class BlueprintTests extends CloudbreakTest {
 
     private static final String SPECIAL_BP_NAME = "@#$|:&* ABC";
 
+    private static final String ILLEGAL_BP_NAME = "Illegal blueprint name ;%";
+
     private static final String INVALID_SHORT_BP_NAME = "";
 
     private static final String EMPTY_BP_NAME = "temp-empty-blueprint";
@@ -73,6 +75,16 @@ public class BlueprintTests extends CloudbreakTest {
                 (blueprint, t) -> Assert.assertEquals(blueprint.getResponse().getName(), SPECIAL_BP_NAME)),
                 SPECIAL_BP_NAME + " should be the name of the new blueprint."
         );
+    }
+
+    @Test(expectedExceptions = BadRequestException.class, priority = 3, groups = "blueprints")
+    public void testCreateBlueprintWithIllegalCharactersInNameShouldThrowBadRequestException() throws Exception {
+        given(CloudbreakClient.isCreated());
+        given(Blueprint.request()
+                .withName(ILLEGAL_BP_NAME)
+                .withDescription(BP_DESCRIPTION)
+                .withAmbariBlueprint(getBlueprintFile()), ILLEGAL_BP_NAME + " blueprint name request.");
+        when(Blueprint.post(), ILLEGAL_BP_NAME + " blueprint name request has been posted.");
     }
 
     @Test(expectedExceptions = BadRequestException.class, priority = 3, groups = "blueprints")
