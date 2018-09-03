@@ -14,16 +14,13 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.user.UserProfileService;
 import com.sequenceiq.cloudbreak.structuredevent.event.BlueprintDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.ClusterDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
@@ -49,9 +46,6 @@ public class StructuredFlowEventFactory {
     private CloudbreakNodeConfig cloudbreakNodeConfig;
 
     @Inject
-    private UserProfileService userProfileService;
-
-    @Inject
     private TransactionService transactionService;
 
     @Inject
@@ -66,10 +60,9 @@ public class StructuredFlowEventFactory {
 
     public StructuredFlowEvent createStucturedFlowEvent(Long stackId, FlowDetails flowDetails, Boolean detailed, Exception exception) {
         Stack stack = stackService.getByIdWithTransaction(stackId);
-        UserProfile userProfile = userProfileService.getOrCreate(stack.getAccount(), stack.getOwner(), stack.getCreator());
         OperationDetails operationDetails = new OperationDetails(FLOW, "stacks", stackId, stack.getName(),
                 stack.getCreator().getUserId(), stack.getCreator().getUserName(), cloudbreakNodeConfig.getId(), cbVersion,
-                stack.getOrganization().getId(), stack.getAccount(), stack.getOwner(), userProfile.getUserName());
+                stack.getOrganization().getId(), stack.getAccount(), stack.getOwner(), stack.getCreator().getUserId());
         StackDetails stackDetails = null;
         ClusterDetails clusterDetails = null;
         BlueprintDetails blueprintDetails = null;
@@ -81,10 +74,9 @@ public class StructuredFlowEventFactory {
                 blueprintDetails = conversionService.convert(cluster.getBlueprint(), BlueprintDetails.class);
             }
         }
-        return exception != null ? new StructuredFlowEvent(operationDetails, flowDetails, stackDetails, clusterDetails, blueprintDetails,
-                stack.getOrganization().getId(), stack.getCreator().getUserId(), ExceptionUtils.getStackTrace(exception))
-                : new StructuredFlowEvent(operationDetails, flowDetails, stackDetails, clusterDetails,
-                blueprintDetails, stack.getOrganization().getId(), stack.getCreator().getUserId());
+        return exception != null
+            ? new StructuredFlowEvent(operationDetails, flowDetails, stackDetails, clusterDetails, blueprintDetails, ExceptionUtils.getStackTrace(exception))
+            : new StructuredFlowEvent(operationDetails, flowDetails, stackDetails, clusterDetails, blueprintDetails);
     }
 
     public StructuredNotificationEvent createStructuredNotificationEvent(Long stackId, String notificationType, String message, String instanceGroupName) {
@@ -93,19 +85,13 @@ public class StructuredFlowEventFactory {
         notificationDetails.setNotification(message);
         notificationDetails.setStackId(stackId);
 
-        String account = null;
-        String userId = null;
-        String userName = null;
-        String stackName = null;
-
         Stack stack = stackService.getByIdWithTransaction(stackId);
-        try {
-            UserProfile userProfile = userProfileService.getOrCreate(stack.getAccount(), stack.getOwner(), stack.getCreator());
-            account = stack.getAccount();
-            userId = stack.getOwner();
-            userName = userProfile.getUserName();
-            stackName = stack.getName();
+        String account = stack.getAccount();
+        String stackName = stack.getName();
+        String userId = stack.getOwner();
+        String userName = stack.getCreator().getUserId();
 
+        try {
             notificationDetails.setCloud(stack.cloudPlatform());
             notificationDetails.setRegion(stack.getRegion());
             notificationDetails.setAvailabiltyZone(stack.getAvailabilityZone());
@@ -125,19 +111,12 @@ public class StructuredFlowEventFactory {
                 }
             }
         } catch (AccessDeniedException e) {
-            IdentityUser cbUser = restRequestThreadLocalService.getIdentityUser();
-            LOGGER.info("Access denied in structured notification event creation, user: {}, stack: {}",
-                    cbUser != null ? cbUser.getUsername() : "Unknown", stackId, e);
-            if (cbUser != null) {
-                account = cbUser.getAccount();
-                userId = cbUser.getUserId();
-                userName = cbUser.getUsername();
-            }
+            LOGGER.info("Access denied in structured notification event creation, user: {}, stack: {}", userName, stackId, e);
         }
 
         OperationDetails operationDetails = new OperationDetails(NOTIFICATION, "stacks", stackId, stackName,
                 stack.getCreator().getUserId(), stack.getCreator().getUserName(), cloudbreakNodeConfig.getInstanceUUID(), cbVersion,
                 stack.getOrganization().getId(), account, userId, userName);
-        return new StructuredNotificationEvent(operationDetails, notificationDetails, stack.getOrganization().getId(), stack.getCreator().getUserId());
+        return new StructuredNotificationEvent(operationDetails, notificationDetails);
     }
 }

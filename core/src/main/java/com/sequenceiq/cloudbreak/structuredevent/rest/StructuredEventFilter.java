@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -41,6 +42,7 @@ import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
+import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
@@ -109,6 +111,9 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
     @Named("structuredEventClient")
     private StructuredEventClient structuredEventClient;
 
+    @Inject
+    private AuthenticatedUserService authenticatedUserService;
+
     @Value("${cb.structuredevent.rest.contentlogging:false}")
     private Boolean contentLogging;
 
@@ -168,10 +173,21 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
         restCall.setRestRequest(restRequest);
         restCall.setRestResponse(restResponse);
         restCall.setDuration(System.currentTimeMillis() - requestTime);
+        IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
+        User user = null;
+        if (identityUser == null) {
+            String serviceId = authenticatedUserService.getServiceAccountId();
+            identityUser = new IdentityUser(serviceId, serviceId, serviceId, Collections.emptyList(), "", "", null);
+        } else {
+            try {
+                user = userService.getOrCreate(identityUser);
+            } catch (RuntimeException ex) {
+                LOGGER.error("Unable to find user", ex);
+            }
+        }
         Long orgId = restRequestThreadLocalService.getRequestedOrgId();
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        structuredEventClient.sendStructuredEvent(new StructuredRestCallEvent(createOperationDetails(restParams, requestTime, orgId),
-                restCall, orgId, user.getUserId()));
+        structuredEventClient.sendStructuredEvent(new StructuredRestCallEvent(createOperationDetails(restParams, requestTime, orgId, user, identityUser),
+                restCall));
     }
 
     private Map<String, String> getRequestUrlParameters(String method, CharSequence url) {
@@ -239,9 +255,7 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
         return !"GET".equals(requestContext.getMethod()) && urlBlackList.stream().noneMatch(path::contains);
     }
 
-    private OperationDetails createOperationDetails(Map<String, String> restParams, Long requestTime, Long orgId) {
-        IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
-        User currentUser = userService.getOrCreate(identityUser);
+    private OperationDetails createOperationDetails(Map<String, String> restParams, Long requestTime, Long orgId, User currentUser, IdentityUser identityUser) {
         String resoureceType = restParams.get(RESOURCE_TYPE);
         String resoureceId = restParams.get(RESOURCE_ID);
         String resoureceName = restParams.get(RESOURCE_NAME);

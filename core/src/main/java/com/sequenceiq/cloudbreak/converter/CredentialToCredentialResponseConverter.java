@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.converter;
 
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 
 import java.util.Arrays;
 import java.util.List;
@@ -42,6 +44,7 @@ public class CredentialToCredentialResponseConverter extends AbstractConversionS
         if (source.getAttributes() != null) {
             Map<String, Object> parameters =
                     credentialDefinitionService.revertAndRemoveProperties(platform(source.cloudPlatform()), source.getAttributes().getMap());
+            convertValuesToBooleanIfNecessary(parameters);
             credentialJson.setParameters(parameters);
         }
         credentialJson.setDescription(source.getDescription() == null ? "" : source.getDescription());
@@ -59,5 +62,17 @@ public class CredentialToCredentialResponseConverter extends AbstractConversionS
                 response.getParameters().put(field, PLACEHOLDER);
             }
         }
+    }
+
+    private void convertValuesToBooleanIfNecessary(Map<String, Object> parameters) {
+        parameters.keySet().forEach(s -> {
+            if (isStringAndBoolean(parameters.get(s))) {
+                parameters.put(s, Boolean.parseBoolean((String) parameters.get(s)));
+            }
+        });
+    }
+
+    private boolean isStringAndBoolean(Object o) {
+        return o instanceof String && (TRUE.toString().equalsIgnoreCase((String) o) || FALSE.toString().equalsIgnoreCase((String) o));
     }
 }

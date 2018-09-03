@@ -8,8 +8,8 @@ public class StructuredRestCallEvent extends StructuredEvent {
     public StructuredRestCallEvent() {
     }
 
-    public StructuredRestCallEvent(OperationDetails operation, RestCallDetails restCall, Long orgId, String userId) {
-        super(StructuredRestCallEvent.class.getSimpleName(), operation, orgId, userId);
+    public StructuredRestCallEvent(OperationDetails operation, RestCallDetails restCall) {
+        super(StructuredRestCallEvent.class.getSimpleName(), operation);
         this.restCall = restCall;
     }
 

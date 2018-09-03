@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.api.model;
 import java.util.List;
 import java.util.Map;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -19,8 +21,11 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonInclude(Include.NON_NULL)
 public class BlueprintRequest extends BlueprintBase {
 
-    @Size(max = 100, min = 1, message = "The length of the blueprint's name has to be in range of 1 to 100")
     @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
+    @NotNull
+    @Size(max = 100, min = 1, message = "The length of the blueprint's name has to be in range of 1 to 100 and should not contain semicolon "
+            + "and percentage character.")
+    @Pattern(regexp = "^[^;%]*$")
     private String name;
 
     @ApiModelProperty(BlueprintModelDescription.URL)

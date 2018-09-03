@@ -93,7 +93,7 @@ public class OrganizationService {
         return Optional.ofNullable(organizationRepository.getByName(name, user.getTenant()));
     }
 
-    public Organization getByIdWithoutPermissionCheck(Long id) {
+    public Organization getById(Long id) {
         Optional<Organization> organization = organizationRepository.findById(id);
         if (organization.isPresent()) {
             return organization.get();

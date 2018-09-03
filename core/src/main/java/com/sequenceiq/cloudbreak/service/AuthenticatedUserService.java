@@ -28,4 +28,13 @@ public class AuthenticatedUserService {
         }
         return null;
     }
+
+    public String getServiceAccountId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication instanceof OAuth2Authentication) {
+            OAuth2Authentication oauth = (OAuth2Authentication) authentication;
+            return oauth.getName();
+        }
+        return "";
+    }
 }
