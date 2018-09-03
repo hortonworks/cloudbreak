@@ -18,9 +18,9 @@ description     "knox-gateway"
 start on runlevel [2345]
 stop on runlevel [06]
 
-env DAEMON=/usr/hdp/current/knox-server/bin/gateway.sh
+env DAEMON=/usr/{{ stack_type }}/current/knox-server/bin/gateway.sh
 env SERVICE_NAME=knox-gateway
-env SERVICE_JAR=/usr/hdp/current/knox-server/bin/gateway.jar
+env SERVICE_JAR=/usr/{{ stack_type }}/current/knox-server/bin/gateway.jar
 env SERVICE_PID_FILE=/var/run/knox/gateway.pid
 
 # respawn the job up to 10 times within a 5 second period.

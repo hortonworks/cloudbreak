@@ -14,5 +14,5 @@ TimeoutSec=5min
 IgnoreSIGPIPE=no
 KillMode=process
 GuessMainPID=no
-ExecStart=/usr/hdp/current/knox-server/bin/gateway.sh start
-ExecStop=/usr/hdp/current/knox-server/bin/gateway.sh stop
+ExecStart=/usr/{{ stack_type }}/current/knox-server/bin/gateway.sh start
+ExecStop=/usr/{{ stack_type }}/current/knox-server/bin/gateway.sh stop
