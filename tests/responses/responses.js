@@ -36,7 +36,7 @@ var templates = require('./templates/qa-templates.json');
 var profile = require('./users/default-profile.json');
 var matrix = require('./utilsmatrix.json');
 var mpacks = require('./mpacks/mpacks.json');
-var getOrganizations = require('./organizations/organizations.json');
+var organizations = require('./organizations/organizations.json');
 
 const OK = 200;
 
@@ -144,7 +144,7 @@ responses.getStackV2= responseObject(openstack, OK);
 responses.getPlatformSecurityGroups= responseObject(securitygroups, OK);
 responses.createManagementPackInOrganization = responseObject(mpacks, OK);
 responses.postPrivateManagementPack = responseObject(mpacks, OK);
-responses.getOrganizations = responseObject(mpacks, OK);
+responses.getOrganizations = responseObject(organizations, OK);
 
 responses.postRepositoryConfigsValidation= responseObject({
   "utilsBaseURL" : true,
