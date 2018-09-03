@@ -71,6 +71,7 @@ public class EndpointConfig extends ResourceConfig {
         StackV3Controller.class,
         SubscriptionController.class,
         UserController.class,
+        UserV3Controller.class,
         UtilController.class,
         UtilV3Controller.class,
         FileSystemV3Controller.class

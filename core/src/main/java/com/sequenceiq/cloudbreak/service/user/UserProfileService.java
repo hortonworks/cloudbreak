@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.service.user;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -96,10 +98,10 @@ public class UserProfileService {
         UserProfile userProfile = getOrCreate(identityUser.getAccount(), identityUser.getUserId(), identityUser.getUsername(), user);
         if (request.getCredentialId() != null) {
             Credential credential = credentialService.get(request.getCredentialId(), organization);
-            userProfile.setCredential(credential);
+            storeDefaultCredential(userProfile, credential, organization);
         } else if (request.getCredentialName() != null) {
             Credential credential = credentialService.getByNameForOrganization(request.getCredentialName(), organization);
-            userProfile.setCredential(credential);
+            storeDefaultCredential(userProfile, credential, organization);
         }
         if (request.getImageCatalogName() != null) {
             Long organizationId = organization.getId();
@@ -119,5 +121,16 @@ public class UserProfileService {
             }
         }
         userProfileRepository.save(userProfile);
+    }
+
+    private void storeDefaultCredential(UserProfile userProfile, Credential credential, Organization organization) {
+        if (userProfile.getDefaultCredentials() == null) {
+            userProfile.setDefaultCredentials(new HashSet<>());
+        }
+        Set<Credential> removableCredentials = userProfile.getDefaultCredentials().stream()
+                .filter(defaultCredential -> defaultCredential.getOrganization().getId().equals(organization.getId()))
+                .collect(Collectors.toSet());
+        userProfile.getDefaultCredentials().removeAll(removableCredentials);
+        userProfile.getDefaultCredentials().add(credential);
     }
 }

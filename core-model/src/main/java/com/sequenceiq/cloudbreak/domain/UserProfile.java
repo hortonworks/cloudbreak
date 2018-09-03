@@ -1,11 +1,15 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import java.util.Set;
+
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -45,6 +49,9 @@ public class UserProfile {
 
     @OneToOne
     private User user;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    private Set<Credential> defaultCredentials;
 
     public Long getId() {
         return id;
@@ -108,5 +115,13 @@ public class UserProfile {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public Set<Credential> getDefaultCredentials() {
+        return defaultCredentials;
+    }
+
+    public void setDefaultCredentials(Set<Credential> defaultCredentials) {
+        this.defaultCredentials = defaultCredentials;
     }
 }
