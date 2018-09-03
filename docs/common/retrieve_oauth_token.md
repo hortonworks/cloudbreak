@@ -36,5 +36,6 @@ resp = requests.post(
     ]
 )
 resp.raise_for_status()
-token = parse.parse_qs(resp.next.url)['access_token'][0]
+token = parse.parse_qs(resp.headers["Location"])['access_token'][0]
+print str(token)
 ```
