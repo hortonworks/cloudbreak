@@ -109,11 +109,6 @@ run_amazon-osfamily_sh_server:
     - require:
       - file: add_amazon-osfamily_patch_script_server
 
-stop-service-registration:
-  service.dead:
-    - enable: False
-    - name: service-registration
-
 {% if salt['pillar.get']('hdp:mpacks') %}
 {% for mpack in salt['pillar.get']('hdp:mpacks') %}
 
