@@ -115,10 +115,12 @@ public class FlexSubscriptionService extends AbstractOrganizationAwareResourceSe
     }
 
     public void setDefaultFlexSubscription(String name, User user, Organization organization) {
+        LOGGER.info("Set Flex subscription '{}' as default in organization '{}'", name, organization.getName());
         setFlexSubscriptionFlag(name, user, organization, FlexSubscription::setDefault);
     }
 
     public void setUsedForControllerFlexSubscription(String name, User user, Organization organization) {
+        LOGGER.info("Set Flex subscription '{}' as used for controller in organization '{}'", name, organization.getName());
         setFlexSubscriptionFlag(name, user, organization, FlexSubscription::setUsedForController);
     }
 
