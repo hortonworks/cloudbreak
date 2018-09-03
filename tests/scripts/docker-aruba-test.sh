@@ -10,6 +10,16 @@
 
 readonly TEST_CONTAINER_NAME=aruba-test-runner
 
+image-tag() {
+    declare desc="Set Aruba Docker Image Tag based for CBD version [for Jenkins E2E]"
+
+    if [[ $TARGET_CBD_VERSION ]]; then
+	    export DOCKER_TAG=$TARGET_CBD_VERSION
+    elif [[ $(git rev-parse --abbrev-ref HEAD) == "master" ]]; then
+	    export DOCKER_TAG=latest
+	fi
+}
+
 image-update() {
     declare desc="Refresh the Test Runner Docker image"
 
@@ -100,6 +110,7 @@ test-regression() {
 }
 
 main() {
+    image-tag
     image-cleanup
     image-update
     cbd-version
