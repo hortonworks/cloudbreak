@@ -37,6 +37,9 @@ type CredentialResponse struct {
 	// Pattern: (^[a-z][-a-z0-9]*[a-z0-9]$)
 	Name *string `json:"name"`
 
+	// organization
+	Organization *OrganizationResourceResponse `json:"organization,omitempty"`
+
 	// cloud specific parameters for credential
 	Parameters map[string]interface{} `json:"parameters,omitempty"`
 
@@ -54,6 +57,8 @@ type CredentialResponse struct {
 /* polymorph CredentialResponse id false */
 
 /* polymorph CredentialResponse name false */
+
+/* polymorph CredentialResponse organization false */
 
 /* polymorph CredentialResponse parameters false */
 
@@ -76,6 +81,11 @@ func (m *CredentialResponse) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateName(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateOrganization(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -128,6 +138,25 @@ func (m *CredentialResponse) validateName(formats strfmt.Registry) error {
 
 	if err := validate.Pattern("name", "body", string(*m.Name), `(^[a-z][-a-z0-9]*[a-z0-9]$)`); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *CredentialResponse) validateOrganization(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Organization) { // not required
+		return nil
+	}
+
+	if m.Organization != nil {
+
+		if err := m.Organization.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("organization")
+			}
+			return err
+		}
 	}
 
 	return nil

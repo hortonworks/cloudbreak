@@ -29,13 +29,13 @@ DeleteFlexSubscriptionByID deletes flex subscription by id
 
 Flex subscriptions could be configured.
 */
-func (a *Client) DeleteFlexSubscriptionByID(params *DeleteFlexSubscriptionByIDParams) error {
+func (a *Client) DeleteFlexSubscriptionByID(params *DeleteFlexSubscriptionByIDParams) (*DeleteFlexSubscriptionByIDOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewDeleteFlexSubscriptionByIDParams()
 	}
 
-	_, err := a.transport.Submit(&runtime.ClientOperation{
+	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "deleteFlexSubscriptionById",
 		Method:             "DELETE",
 		PathPattern:        "/v1/flexsubscriptions/{id}",
@@ -48,9 +48,9 @@ func (a *Client) DeleteFlexSubscriptionByID(params *DeleteFlexSubscriptionByIDPa
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return result.(*DeleteFlexSubscriptionByIDOK), nil
 
 }
 
@@ -59,13 +59,13 @@ DeletePrivateFlexSubscriptionByName deletes private flex subscription by name
 
 Flex subscriptions could be configured.
 */
-func (a *Client) DeletePrivateFlexSubscriptionByName(params *DeletePrivateFlexSubscriptionByNameParams) error {
+func (a *Client) DeletePrivateFlexSubscriptionByName(params *DeletePrivateFlexSubscriptionByNameParams) (*DeletePrivateFlexSubscriptionByNameOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewDeletePrivateFlexSubscriptionByNameParams()
 	}
 
-	_, err := a.transport.Submit(&runtime.ClientOperation{
+	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "deletePrivateFlexSubscriptionByName",
 		Method:             "DELETE",
 		PathPattern:        "/v1/flexsubscriptions/user/{name}",
@@ -78,9 +78,9 @@ func (a *Client) DeletePrivateFlexSubscriptionByName(params *DeletePrivateFlexSu
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return result.(*DeletePrivateFlexSubscriptionByNameOK), nil
 
 }
 
@@ -89,13 +89,13 @@ DeletePublicFlexSubscriptionByName deletes public owned or private flex subscrip
 
 Flex subscriptions could be configured.
 */
-func (a *Client) DeletePublicFlexSubscriptionByName(params *DeletePublicFlexSubscriptionByNameParams) error {
+func (a *Client) DeletePublicFlexSubscriptionByName(params *DeletePublicFlexSubscriptionByNameParams) (*DeletePublicFlexSubscriptionByNameOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewDeletePublicFlexSubscriptionByNameParams()
 	}
 
-	_, err := a.transport.Submit(&runtime.ClientOperation{
+	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "deletePublicFlexSubscriptionByName",
 		Method:             "DELETE",
 		PathPattern:        "/v1/flexsubscriptions/account/{name}",
@@ -108,9 +108,9 @@ func (a *Client) DeletePublicFlexSubscriptionByName(params *DeletePublicFlexSubs
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return result.(*DeletePublicFlexSubscriptionByNameOK), nil
 
 }
 

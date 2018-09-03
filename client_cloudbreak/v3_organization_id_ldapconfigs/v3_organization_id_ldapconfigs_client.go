@@ -115,6 +115,36 @@ func (a *Client) GetLdapConfigInOrganization(params *GetLdapConfigInOrganization
 }
 
 /*
+GetLdapRequestByNameAndOrganizationID gets request
+
+LDAP server integration enables the user to provide a central place to store usernames and passwords for the users of his/her clusters.
+*/
+func (a *Client) GetLdapRequestByNameAndOrganizationID(params *GetLdapRequestByNameAndOrganizationIDParams) (*GetLdapRequestByNameAndOrganizationIDOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetLdapRequestByNameAndOrganizationIDParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getLdapRequestByNameAndOrganizationId",
+		Method:             "GET",
+		PathPattern:        "/v3/{organizationId}/ldapconfigs/{name}/request",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetLdapRequestByNameAndOrganizationIDReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetLdapRequestByNameAndOrganizationIDOK), nil
+
+}
+
+/*
 ListLdapsByOrganization lists l d a p configs for the given organization
 
 LDAP server integration enables the user to provide a central place to store usernames and passwords for the users of his/her clusters.

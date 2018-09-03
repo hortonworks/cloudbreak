@@ -123,6 +123,9 @@ type StackResponse struct {
 	// the details of the container orchestrator api to use
 	Orchestrator *OrchestratorResponse `json:"orchestrator,omitempty"`
 
+	// organization of the resource
+	Organization *OrganizationResourceResponse `json:"organization,omitempty"`
+
 	// id of the resource owner that is provided by OAuth provider
 	Owner string `json:"owner,omitempty"`
 
@@ -215,6 +218,8 @@ type StackResponse struct {
 
 /* polymorph StackResponse orchestrator false */
 
+/* polymorph StackResponse organization false */
+
 /* polymorph StackResponse owner false */
 
 /* polymorph StackResponse parameters false */
@@ -303,6 +308,11 @@ func (m *StackResponse) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateOrchestrator(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateOrganization(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -641,6 +651,25 @@ func (m *StackResponse) validateOrchestrator(formats strfmt.Registry) error {
 		if err := m.Orchestrator.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("orchestrator")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *StackResponse) validateOrganization(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Organization) { // not required
+		return nil
+	}
+
+	if m.Organization != nil {
+
+		if err := m.Organization.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("organization")
 			}
 			return err
 		}

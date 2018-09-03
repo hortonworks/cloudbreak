@@ -33,6 +33,9 @@ type ProxyConfigResponse struct {
 	// Pattern: (^[a-z][-a-z0-9]*[a-z0-9]$)
 	Name *string `json:"name"`
 
+	// organization of the resource
+	Organization *OrganizationResourceResponse `json:"organization,omitempty"`
+
 	// determines the protocol (http or https)
 	// Required: true
 	// Pattern: ^http(s)?$
@@ -61,6 +64,8 @@ type ProxyConfigResponse struct {
 
 /* polymorph ProxyConfigResponse name false */
 
+/* polymorph ProxyConfigResponse organization false */
+
 /* polymorph ProxyConfigResponse protocol false */
 
 /* polymorph ProxyConfigResponse serverHost false */
@@ -79,6 +84,11 @@ func (m *ProxyConfigResponse) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateName(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateOrganization(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -137,6 +147,25 @@ func (m *ProxyConfigResponse) validateName(formats strfmt.Registry) error {
 
 	if err := validate.Pattern("name", "body", string(*m.Name), `(^[a-z][-a-z0-9]*[a-z0-9]$)`); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *ProxyConfigResponse) validateOrganization(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Organization) { // not required
+		return nil
+	}
+
+	if m.Organization != nil {
+
+		if err := m.Organization.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("organization")
+			}
+			return err
+		}
 	}
 
 	return nil

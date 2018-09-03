@@ -59,6 +59,9 @@ type CloudbreakEvent struct {
 	// number of nodes
 	NodeCount int32 `json:"nodeCount,omitempty"`
 
+	// Organization ID of the resource
+	OrganizationID int64 `json:"organizationId,omitempty"`
+
 	// id of the resource owner that is provided by OAuth provider
 	Owner string `json:"owner,omitempty"`
 
@@ -73,6 +76,9 @@ type CloudbreakEvent struct {
 
 	// status of the stack
 	StackStatus string `json:"stackStatus,omitempty"`
+
+	// User ID in the new authorization model
+	UserIDV3 string `json:"userIdV3,omitempty"`
 }
 
 /* polymorph CloudbreakEvent account false */
@@ -101,6 +107,8 @@ type CloudbreakEvent struct {
 
 /* polymorph CloudbreakEvent nodeCount false */
 
+/* polymorph CloudbreakEvent organizationId false */
+
 /* polymorph CloudbreakEvent owner false */
 
 /* polymorph CloudbreakEvent region false */
@@ -110,6 +118,8 @@ type CloudbreakEvent struct {
 /* polymorph CloudbreakEvent stackName false */
 
 /* polymorph CloudbreakEvent stackStatus false */
+
+/* polymorph CloudbreakEvent userIdV3 false */
 
 // Validate validates this cloudbreak event
 func (m *CloudbreakEvent) Validate(formats strfmt.Registry) error {

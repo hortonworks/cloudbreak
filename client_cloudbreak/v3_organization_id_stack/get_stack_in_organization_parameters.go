@@ -63,6 +63,8 @@ for the get stack in organization operation typically these are written to a htt
 */
 type GetStackInOrganizationParams struct {
 
+	/*Entry*/
+	Entry []string
 	/*Name*/
 	Name string
 	/*OrganizationID*/
@@ -106,6 +108,17 @@ func (o *GetStackInOrganizationParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithEntry adds the entry to the get stack in organization params
+func (o *GetStackInOrganizationParams) WithEntry(entry []string) *GetStackInOrganizationParams {
+	o.SetEntry(entry)
+	return o
+}
+
+// SetEntry adds the entry to the get stack in organization params
+func (o *GetStackInOrganizationParams) SetEntry(entry []string) {
+	o.Entry = entry
+}
+
 // WithName adds the name to the get stack in organization params
 func (o *GetStackInOrganizationParams) WithName(name string) *GetStackInOrganizationParams {
 	o.SetName(name)
@@ -135,6 +148,14 @@ func (o *GetStackInOrganizationParams) WriteToRequest(r runtime.ClientRequest, r
 		return err
 	}
 	var res []error
+
+	valuesEntry := o.Entry
+
+	joinedEntry := swag.JoinByFormat(valuesEntry, "multi")
+	// query array param entry
+	if err := r.SetQueryParam("entry", joinedEntry...); err != nil {
+		return err
+	}
 
 	// path param name
 	if err := r.SetPathParam("name", o.Name); err != nil {
