@@ -15,9 +15,11 @@ import com.sequenceiq.cloudbreak.api.model.FlexSubscriptionResponse;
 import com.sequenceiq.cloudbreak.converter.FlexSubscriptionRequestToFlexSubscriptionConverter;
 import com.sequenceiq.cloudbreak.converter.FlexSubscriptionToJsonConverter;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.organization.User;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Controller
@@ -38,6 +40,9 @@ public class FlexSubscriptionV3Controller implements FlexSubscriptionV3Endpoint 
 
     @Inject
     private FlexSubscriptionToJsonConverter toJsonConverter;
+
+    @Inject
+    private OrganizationService organizationService;
 
     @Override
     public Set<FlexSubscriptionResponse> listByOrganization(Long organizationId) {
@@ -69,11 +74,15 @@ public class FlexSubscriptionV3Controller implements FlexSubscriptionV3Endpoint 
 
     @Override
     public void setUsedForControllerInOrganization(Long organizationId, String name) {
-
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        Organization organization = organizationService.get(organizationId, user);
+        flexSubscriptionService.setUsedForControllerFlexSubscription(name, user, organization);
     }
 
     @Override
     public void setDefaultInOrganization(Long organizationId, String name) {
-
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        Organization organization = organizationService.get(organizationId, user);
+        flexSubscriptionService.setDefaultFlexSubscription(name, user, organization);
     }
 }
