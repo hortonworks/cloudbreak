@@ -26,6 +26,8 @@ public class FileSystemResolver {
             cloudStorageParameters = source.getWasb();
         } else if (source.getS3() != null) {
             cloudStorageParameters = source.getS3();
+        } else if (source.getAbfs() != null) {
+            cloudStorageParameters = source.getAbfs();
         } else {
             throw new BadRequestException(NOT_SUPPORTED_FS_PROVIDED);
         }

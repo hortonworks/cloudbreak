@@ -1,7 +1,14 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import static com.sequenceiq.cloudbreak.common.type.APIResourceType.FILESYSTEM;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Component;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
+import com.sequenceiq.cloudbreak.api.model.filesystem.AbfsFileSystem;
 import com.sequenceiq.cloudbreak.api.model.filesystem.AdlsFileSystem;
 import com.sequenceiq.cloudbreak.api.model.filesystem.BaseFileSystem;
 import com.sequenceiq.cloudbreak.api.model.filesystem.GcsFileSystem;
@@ -14,11 +21,6 @@ import com.sequenceiq.cloudbreak.domain.StorageLocation;
 import com.sequenceiq.cloudbreak.domain.StorageLocations;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.service.MissingResourceNameGenerator;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-
-import static com.sequenceiq.cloudbreak.common.type.APIResourceType.FILESYSTEM;
 
 @Component
 public class FileSystemRequestToFileSystemConverter extends AbstractConversionServiceAwareConverter<FileSystemRequest, FileSystem> {
@@ -30,20 +32,7 @@ public class FileSystemRequestToFileSystemConverter extends AbstractConversionSe
     public FileSystem convert(FileSystemRequest source) {
         FileSystem fs = new FileSystem();
         fs.setName(nameGenerator.generateName(FILESYSTEM));
-        BaseFileSystem baseFileSystem = null;
-        if (source.getAdls() != null) {
-            baseFileSystem = getConversionService().convert(source.getAdls(), AdlsFileSystem.class);
-            fs.setType(source.getAdls().getType());
-        } else if (source.getGcs() != null) {
-            baseFileSystem = getConversionService().convert(source.getGcs(), GcsFileSystem.class);
-            fs.setType(source.getGcs().getType());
-        } else if (source.getS3() != null) {
-            baseFileSystem = getConversionService().convert(source.getS3(), S3FileSystem.class);
-            fs.setType(source.getS3().getType());
-        } else if (source.getWasb() != null) {
-            baseFileSystem = getConversionService().convert(source.getWasb(), WasbFileSystem.class);
-            fs.setType(source.getWasb().getType());
-        }
+        BaseFileSystem baseFileSystem = getBaseFileSystem(source, fs);
         try {
             fs.setConfigurations(new Json(baseFileSystem));
         } catch (JsonProcessingException e) {
@@ -61,5 +50,26 @@ public class FileSystemRequestToFileSystemConverter extends AbstractConversionSe
             throw new BadRequestException("Storage locations could not be parsed: " + source, e);
         }
         return fs;
+    }
+
+    private BaseFileSystem getBaseFileSystem(FileSystemRequest source, FileSystem fs) {
+        BaseFileSystem baseFileSystem = null;
+        if (source.getAdls() != null) {
+            baseFileSystem = getConversionService().convert(source.getAdls(), AdlsFileSystem.class);
+            fs.setType(source.getAdls().getType());
+        } else if (source.getGcs() != null) {
+            baseFileSystem = getConversionService().convert(source.getGcs(), GcsFileSystem.class);
+            fs.setType(source.getGcs().getType());
+        } else if (source.getS3() != null) {
+            baseFileSystem = getConversionService().convert(source.getS3(), S3FileSystem.class);
+            fs.setType(source.getS3().getType());
+        } else if (source.getWasb() != null) {
+            baseFileSystem = getConversionService().convert(source.getWasb(), WasbFileSystem.class);
+            fs.setType(source.getWasb().getType());
+        } else if (source.getAbfs() != null) {
+            baseFileSystem = getConversionService().convert(source.getAbfs(), AbfsFileSystem.class);
+            fs.setType(source.getAbfs().getType());
+        }
+        return baseFileSystem;
     }
 }

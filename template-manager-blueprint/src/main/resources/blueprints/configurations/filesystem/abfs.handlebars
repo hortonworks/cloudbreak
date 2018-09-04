@@ -1,0 +1,19 @@
+{
+{{{#if fileSystemConfigs.abfs}}}
+{{{#each fileSystemConfigs.abfs.locations}}}
+  "{{{ this.configFile }}}": {
+    "{{{ this.property }}}": "{{{ this.value }}}"
+  },
+{{{/each}}}
+  "core-site": {
+    "fs.abfs.impl": "org.apache.hadoop.fs.azurebfs.AzureBlobFileSystem",
+    "fs.abfss.impl": "org.apache.hadoop.fs.azurebfs.SecureAzureBlobFileSystem",
+    "fs.AbstractFileSystem.abfs.impl": "org.apache.hadoop.fs.azurebfs.Abfs",
+    "fs.AbstractFileSystem.abfss.impl": "org.apache.hadoop.fs.azurebfs.Abfss",
+    "fs.azure.check.block.md5": "false",
+    "fs.azure.store.blob.md5": "false",
+    "fs.azure.account.key.{{{ fileSystemConfigs.abfs.accountName }}}.dfs.core.windows.net": "{{{ fileSystemConfigs.abfs.accountKey }}}",
+    "fs.azure.createRemoteFileSystemDuringInitialization": "true"
+  }
+{{{/if}}}
+}

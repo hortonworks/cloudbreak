@@ -8,7 +8,7 @@
       "propertyDisplayName": "Hive Warehouse Directory",
       "relatedService": "HIVE_METASTORE",
       "requiredForAttachedCluster": false,
-      "supportedStorages": ["ADLS", "WASB", "S3", "GCS"]
+      "supportedStorages": ["ADLS", "WASB", "S3", "GCS", "ABFS"]
     },
     {
       "propertyName": "xasecure.audit.destination.hdfs.dir",
@@ -18,7 +18,7 @@
       "propertyDisplayName": "Ranger Audit Logs",
       "relatedService": "RANGER_ADMIN",
       "requiredForAttachedCluster": false,
-      "supportedStorages": ["ADLS", "WASB", "S3", "GCS"]
+      "supportedStorages": ["ADLS", "WASB", "S3", "GCS", "ABFS"]
     },
     {
       "propertyName": "xasecure.audit.destination.hdfs.dir",
@@ -28,7 +28,7 @@
       "propertyDisplayName": "Ranger Audit Logs For Hive",
       "relatedService": "HIVE_SERVER",
       "requiredForAttachedCluster": true,
-      "supportedStorages": ["ADLS", "WASB", "S3", "GCS"]
+      "supportedStorages": ["ADLS", "WASB", "S3", "GCS", "ABFS"]
     },
     {
       "propertyName": "hbase.rootdir",
@@ -38,7 +38,7 @@
       "propertyDisplayName": "HBase Root Directory",
       "relatedService": "HBASE_MASTER",
       "requiredForAttachedCluster": false,
-      "supportedStorages": ["ADLS", "WASB", "S3", "GCS"]
+      "supportedStorages": ["ADLS", "WASB", "S3", "GCS", "ABFS"]
     }
   ]
 }

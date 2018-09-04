@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAbfsView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudWasbView;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
@@ -150,6 +151,8 @@ public class AzureSetup implements Setup {
         FileSystemType fileSystemType = spiFileSystem.getType();
         if (FileSystemType.ADLS.equals(fileSystemType)) {
             validateAdlsFileSystem(credential, spiFileSystem);
+        } else if (FileSystemType.ABFS.equals(fileSystemType)) {
+            validateAbfsFileSystem(spiFileSystem);
         } else {
             validateWasbFileSystem(spiFileSystem);
         }
@@ -158,6 +161,24 @@ public class AzureSetup implements Setup {
     @Override
     public void scalingPrerequisites(AuthenticatedContext authenticatedContext, CloudStack stack, boolean upscale) {
 
+    }
+
+    private void validateAbfsFileSystem(SpiFileSystem fileSystem) throws URISyntaxException, InvalidKeyException, StorageException {
+        CloudAbfsView cloudFileSystem = (CloudAbfsView) fileSystem.getCloudFileSystem();
+        String accountName = cloudFileSystem.getAccountName();
+        String accountKey = cloudFileSystem.getAccountKey();
+        String connectionString = "DefaultEndpointsProtocol=https;AccountName=" + accountName + ";AccountKey=" + accountKey + ";EndpointSuffix=core.windows.net";
+        CloudStorageAccount storageAccount = CloudStorageAccount.parse(connectionString);
+        CloudBlobClient blobClient = storageAccount.createCloudBlobClient();
+        CloudBlobContainer containerReference = blobClient.getContainerReference(TEST_CONTAINER + System.nanoTime());
+        try {
+            containerReference.createIfNotExists();
+            containerReference.delete();
+        } catch (StorageException e) {
+            if (e.getCause() instanceof UnknownHostException) {
+                throw new CloudConnectorException("The provided account does not belong to a valid storage account");
+            }
+        }
     }
 
     private void validateWasbFileSystem(SpiFileSystem fileSystem) throws URISyntaxException, InvalidKeyException, StorageException {
