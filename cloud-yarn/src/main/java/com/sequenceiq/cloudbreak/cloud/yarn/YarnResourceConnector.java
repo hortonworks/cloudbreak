@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudOperationNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.exception.TemplatingDoesNotSupportedException;
@@ -60,6 +61,8 @@ public class YarnResourceConnector implements ResourceConnector<Object> {
     private static final Logger LOGGER = LoggerFactory.getLogger(YarnResourceConnector.class);
 
     private static final String ARTIFACT_TYPE_DOCKER = "DOCKER";
+
+    private static final int APPNAME_HYPHEN_NUM = 2;
 
     @Inject
     private YarnClientUtil yarnClientUtil;
@@ -249,7 +252,15 @@ public class YarnResourceConnector implements ResourceConnector<Object> {
     }
 
     private String createApplicationName(AuthenticatedContext ac) {
-        return String.format("%s-%s", Splitter.fixedLength(maxResourceNameLength - (ac.getCloudContext().getId().toString().length() + 1))
-                .splitToList(ac.getCloudContext().getName()).get(0), ac.getCloudContext().getId());
+        CloudContext context = ac.getCloudContext();
+        String name = context.getName();
+        String id = context.getId().toString();
+        String user = context.getUserId().split("@")[0].replaceAll("[^a-z0-9-_]", "");
+        int nameLength = Math.max(maxResourceNameLength - (id.length() + user.length() + APPNAME_HYPHEN_NUM), 1);
+        String appName = String.format("%s-%s-%s", Splitter.fixedLength(nameLength).splitToList(name).get(0), id, user);
+        if (appName.length() > maxResourceNameLength) {
+            appName = appName.substring(0, maxResourceNameLength);
+        }
+        return appName;
     }
 }
