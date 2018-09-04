@@ -45,7 +45,7 @@ public class StackCollectorService {
         if (LOCK.tryLock()) {
             try {
                 CloudbreakClient cloudbreakClient = cloudbreakClientConfiguration.cloudbreakClient();
-                Set<AutoscaleStackResponse> allStacks = cloudbreakClient.stackV1Endpoint().getAllForAutoscale();
+                Set<AutoscaleStackResponse> allStacks = cloudbreakClient.autoscaleEndpoint().getAllForAutoscale();
                 for (AutoscaleStackResponse stack : allStacks) {
                     Status clusterStatus = stack.getClusterStatus();
                     if (AVAILABLE.equals(clusterStatus)) {

@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import static com.sequenceiq.cloudbreak.authorization.OrganizationResource.STACK;
-
 import java.util.Map;
 import java.util.Set;
 
@@ -16,21 +14,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v1.StackV1Endpoint;
-import com.sequenceiq.cloudbreak.api.model.AmbariAddressJson;
-import com.sequenceiq.cloudbreak.api.model.AutoscaleStackResponse;
-import com.sequenceiq.cloudbreak.api.model.CertificateResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformVariantsJson;
 import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
 import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.StackValidationRequest;
-import com.sequenceiq.cloudbreak.authorization.OrganizationPermissions.Action;
 import com.sequenceiq.cloudbreak.authorization.PermissionCheckerService;
 import com.sequenceiq.cloudbreak.authorization.PermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.organization.User;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
 import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
@@ -154,37 +147,7 @@ public class StackV1Controller extends NotificationController implements StackV1
     }
 
     @Override
-    public CertificateResponse getCertificate(Long stackId) {
-        return stackCommonService.getCertificate(stackId);
-    }
-
-    @Override
     public Response validate(StackValidationRequest stackValidationRequest) {
         return stackCommonService.validate(stackValidationRequest);
-    }
-
-    @Override
-    public StackResponse getStackForAmbari(AmbariAddressJson json) {
-        return stackCommonService.getStackForAmbari(json);
-    }
-
-    @Override
-    public Set<AutoscaleStackResponse> getAllForAutoscale() {
-        return stackCommonService.getAllForAutoscale();
-    }
-
-    @Override
-    public Boolean authorizeForAutoscale(Long id, String owner, String permission) {
-        try {
-            restRequestThreadLocalService.setIdentityUserByOwner(owner);
-            Stack stack = stackService.get(id);
-            if (Action.WRITE.name().equalsIgnoreCase(permission)) {
-                User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-                permissionCheckingUtils.checkPermissionByOrgIdForUser(stack.getOrganization().getId(), STACK, Action.WRITE, user);
-            }
-            return true;
-        } catch (RuntimeException ignore) {
-            return false;
-        }
     }
 }

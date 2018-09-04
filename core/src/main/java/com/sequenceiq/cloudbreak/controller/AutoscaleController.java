@@ -1,0 +1,127 @@
+package com.sequenceiq.cloudbreak.controller;
+
+import static com.sequenceiq.cloudbreak.authorization.OrganizationResource.STACK;
+
+import java.util.Collections;
+import java.util.Set;
+
+import javax.inject.Inject;
+import javax.validation.Valid;
+import javax.ws.rs.core.Response;
+
+import com.sequenceiq.cloudbreak.api.endpoint.autoscale.AutoscaleEndpoint;
+import com.sequenceiq.cloudbreak.api.model.AmbariAddressJson;
+import com.sequenceiq.cloudbreak.api.model.AutoscaleClusterResponse;
+import com.sequenceiq.cloudbreak.api.model.AutoscaleStackResponse;
+import com.sequenceiq.cloudbreak.api.model.CertificateResponse;
+import com.sequenceiq.cloudbreak.api.model.FailureReport;
+import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
+import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
+import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
+import com.sequenceiq.cloudbreak.authorization.OrganizationPermissions;
+import com.sequenceiq.cloudbreak.authorization.PermissionCheckingUtils;
+import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.service.ClusterCommonService;
+import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.service.StackCommonService;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
+
+public class AutoscaleController implements AutoscaleEndpoint {
+
+    @Inject
+    private StackService stackService;
+
+    @Inject
+    private UserService userService;
+
+    @Inject
+    private RestRequestThreadLocalService restRequestThreadLocalService;
+
+    @Inject
+    private PermissionCheckingUtils permissionCheckingUtils;
+
+    @Inject
+    private StackCommonService stackCommonService;
+
+    @Inject
+    private ClusterService clusterService;
+
+    @Inject
+    private OrganizationService organizationService;
+
+    @Inject
+    private ClusterCommonService clusterCommonService;
+
+    @Override
+    public Response putStack(Long id, String owner, @Valid UpdateStackJson updateRequest) {
+        setupIdentityForAutoscale(id, owner);
+        return stackCommonService.putInDefaultOrg(id, updateRequest);
+    }
+
+    private void setupIdentityForAutoscale(Long id, String owner) {
+        restRequestThreadLocalService.setIdentityUserByOwner(owner);
+        restRequestThreadLocalService.setRequestedOrgId(stackService.getOrganizationId(id));
+    }
+
+    @Override
+    public Response putCluster(Long stackId, String owner, @Valid UpdateClusterJson updateRequest) {
+        setupIdentityForAutoscale(stackId, owner);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
+        return clusterCommonService.put(stackId, updateRequest, user, organization);
+    }
+
+    @Override
+    public StackResponse getStackForAmbari(@Valid AmbariAddressJson json) {
+        return stackCommonService.getStackForAmbari(json);
+    }
+
+    @Override
+    public Set<AutoscaleStackResponse> getAllForAutoscale() {
+        return stackCommonService.getAllForAutoscale();
+    }
+
+    @Override
+    public Response failureReport(Long stackId, FailureReport failureReport) {
+        clusterService.failureReport(stackId, failureReport.getFailedNodes());
+        return Response.accepted().build();
+    }
+
+    @Override
+    public StackResponse get(Long id) {
+        return stackCommonService.get(id, Collections.emptySet());
+    }
+
+    @Override
+    public AutoscaleClusterResponse getForAutoscale(Long stackId) {
+        Stack stack = stackService.getForAutoscale(stackId);
+        AutoscaleClusterResponse cluster = clusterService.retrieveClusterForCurrentUser(stackId, AutoscaleClusterResponse.class);
+        String clusterJson = clusterService.getClusterJson(stack.getAmbariIp(), stackId);
+        return clusterService.getClusterResponse(cluster, clusterJson);
+    }
+
+    @Override
+    public Boolean authorizeForAutoscale(Long id, String owner, String permission) {
+        try {
+            restRequestThreadLocalService.setIdentityUserByOwner(owner);
+            Stack stack = stackService.get(id);
+            if (OrganizationPermissions.Action.WRITE.name().equalsIgnoreCase(permission)) {
+                User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+                permissionCheckingUtils.checkPermissionByOrgIdForUser(stack.getOrganization().getId(), STACK, OrganizationPermissions.Action.WRITE, user);
+            }
+            return true;
+        } catch (RuntimeException ignore) {
+            return false;
+        }
+    }
+
+    @Override
+    public CertificateResponse getCertificate(Long stackId) {
+        return stackCommonService.getCertificate(stackId);
+    }
+}

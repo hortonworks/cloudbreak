@@ -74,7 +74,8 @@ public class EndpointConfig extends ResourceConfig {
         UserV3Controller.class,
         UtilController.class,
         UtilV3Controller.class,
-        FileSystemV3Controller.class
+        FileSystemV3Controller.class,
+        AutoscaleController.class
     );
 
     private static final String VERSION_UNAVAILABLE = "unspecified";

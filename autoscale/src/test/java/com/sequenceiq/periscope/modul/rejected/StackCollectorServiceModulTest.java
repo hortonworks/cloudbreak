@@ -29,7 +29,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.StackV1Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.autoscale.AutoscaleEndpoint;
 import com.sequenceiq.cloudbreak.api.model.AutoscaleStackResponse;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
@@ -83,7 +83,7 @@ public class StackCollectorServiceModulTest extends StackCollectorContext {
     private AmbariClient ambariClient;
 
     @Mock
-    private StackV1Endpoint stackV1Endpoint;
+    private AutoscaleEndpoint autoscaleEndpoint;
 
     private TestContextManager testContextManager;
 
@@ -94,7 +94,7 @@ public class StackCollectorServiceModulTest extends StackCollectorContext {
 
         when(ambariClientProvider.createAmbariClient(any())).thenReturn(ambariClient);
         when(cloudbreakClientConfiguration.cloudbreakClient()).thenReturn(cloudbreakClient);
-        when(cloudbreakClient.stackV1Endpoint()).thenReturn(stackV1Endpoint);
+        when(cloudbreakClient.autoscaleEndpoint()).thenReturn(autoscaleEndpoint);
 
         ReflectionTestUtils.setField(rejectedThreadService, "rejectedThreads", new ConcurrentHashMap<>());
     }
@@ -109,7 +109,7 @@ public class StackCollectorServiceModulTest extends StackCollectorContext {
         Cluster cluster = new Cluster();
         cluster.setState(ClusterState.RUNNING);
 
-        when(stackV1Endpoint.getAllForAutoscale()).thenReturn(Collections.singleton(stack));
+        when(autoscaleEndpoint.getAllForAutoscale()).thenReturn(Collections.singleton(stack));
         when(clusterService.findOneByStackId(1L)).thenReturn(cluster);
         when(ambariClient.healthCheck()).thenReturn("RUNNING");
 
@@ -130,7 +130,7 @@ public class StackCollectorServiceModulTest extends StackCollectorContext {
 
         Cluster cluster = cluster(2L);
 
-        when(stackV1Endpoint.getAllForAutoscale()).thenReturn(Collections.singleton(stack));
+        when(autoscaleEndpoint.getAllForAutoscale()).thenReturn(Collections.singleton(stack));
         when(clusterService.findOneByStackId(1L)).thenReturn(cluster);
         when(ambariClient.healthCheck()).thenReturn("NOT_RUNNING");
 
@@ -148,7 +148,7 @@ public class StackCollectorServiceModulTest extends StackCollectorContext {
         Cluster cluster = new Cluster();
         cluster.setState(ClusterState.RUNNING);
 
-        when(stackV1Endpoint.getAllForAutoscale()).thenReturn(Sets.newHashSet(stack, autoscaleStackResponse(2L), autoscaleStackResponse(3L),
+        when(autoscaleEndpoint.getAllForAutoscale()).thenReturn(Sets.newHashSet(stack, autoscaleStackResponse(2L), autoscaleStackResponse(3L),
                 autoscaleStackResponse(4L), autoscaleStackResponse(5L)));
         when(clusterService.findOneByStackId(1L)).thenReturn(cluster);
         when(clusterService.findOneByStackId(2L)).thenReturn(cluster);
@@ -173,7 +173,7 @@ public class StackCollectorServiceModulTest extends StackCollectorContext {
         Cluster cluster = new Cluster();
         cluster.setState(ClusterState.RUNNING);
 
-        when(stackV1Endpoint.getAllForAutoscale()).thenReturn(Sets.newHashSet(stack, autoscaleStackResponse(2L), autoscaleStackResponse(3L),
+        when(autoscaleEndpoint.getAllForAutoscale()).thenReturn(Sets.newHashSet(stack, autoscaleStackResponse(2L), autoscaleStackResponse(3L),
                 autoscaleStackResponse(4L), autoscaleStackResponse(5L)));
         when(clusterService.findOneByStackId(1L)).thenReturn(cluster);
         when(clusterService.findOneByStackId(2L)).thenReturn(cluster);
@@ -192,7 +192,7 @@ public class StackCollectorServiceModulTest extends StackCollectorContext {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
 
-        when(stackV1Endpoint.getAllForAutoscale()).thenReturn(stacks);
+        when(autoscaleEndpoint.getAllForAutoscale()).thenReturn(stacks);
 
         underTest.collectStackDetails();
 

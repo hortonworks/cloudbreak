@@ -1,7 +1,5 @@
 package com.sequenceiq.periscope.service.security;
 
-import java.util.HashSet;
-
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
@@ -37,11 +35,11 @@ public class ClusterSecurityService {
     private boolean hasAccess(String userId, String account, String ambariAddress, Long stackId) {
         StackResponse stack;
         if (stackId != null) {
-            stack = cloudbreakClient.stackV1Endpoint().get(stackId, new HashSet<>());
+            stack = cloudbreakClient.autoscaleEndpoint().get(stackId);
         } else {
             AmbariAddressJson ambariAddressJson = new AmbariAddressJson();
             ambariAddressJson.setAmbariAddress(ambariAddress);
-            stack = cloudbreakClient.stackV1Endpoint().getStackForAmbari(ambariAddressJson);
+            stack = cloudbreakClient.autoscaleEndpoint().getStackForAmbari(ambariAddressJson);
         }
         return stack.getOwner().equals(userId) || stack.getAccount().equals(account);
     }
@@ -53,11 +51,11 @@ public class ClusterSecurityService {
             String pass = ambari.getPass();
             AmbariAddressJson ambariAddressJson = new AmbariAddressJson();
             ambariAddressJson.setAmbariAddress(host);
-            StackResponse stack = cloudbreakClient.stackV1Endpoint().getStackForAmbari(ambariAddressJson);
+            StackResponse stack = cloudbreakClient.autoscaleEndpoint().getStackForAmbari(ambariAddressJson);
             Long id = stack.getId();
             SecurityConfig securityConfig = tlsSecurityService.prepareSecurityConfig(id);
             if (user == null || pass == null) {
-                AutoscaleClusterResponse clusterResponse = cloudbreakClient.clusterEndpoint().getForAutoscale(id);
+                AutoscaleClusterResponse clusterResponse = cloudbreakClient.autoscaleEndpoint().getForAutoscale(id);
                 return new AmbariStack(new Ambari(host, ambari.getPort(), clusterResponse.getUserName(), clusterResponse.getPassword()), id, securityConfig);
             } else {
                 return new AmbariStack(ambari, id, securityConfig);
