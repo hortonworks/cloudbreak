@@ -33,9 +33,9 @@ import com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Path("/v3/{organizationId}/stack")
+@Path("/v3/{organizationId}/stacks")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v3/{organizationId}/stack", description = ControllerDescription.STACK_V3_DESCRIPTION, protocols = "http,https")
+@Api(value = "/v3/{organizationId}/stacks", description = ControllerDescription.STACK_V3_DESCRIPTION, protocols = "http,https")
 public interface StackV3Endpoint {
 
     @GET
