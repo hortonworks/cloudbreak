@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -102,16 +101,12 @@ public class YarnResourceConnectorTest {
     @Mock
     private InstanceTemplate instanceTemplateMock;
 
-    @Before
-    public void setUp() {
-        ReflectionTestUtils.setField(underTest, "maxResourceNameLength", 3);
-    }
-
     @Test
-    public void testLanuchWithStackDefaultParameters() throws Exception {
+    public void testLaunchWithStackDefaultParameters() throws Exception {
         String defaultQueue = "QUEUE";
         int defaultLifeTime = 1;
 
+        ReflectionTestUtils.setField(underTest, "maxResourceNameLength", 20);
         ReflectionTestUtils.setField(underTest, "defaultQueue", defaultQueue);
         ReflectionTestUtils.setField(underTest, "defaultLifeTime", defaultLifeTime);
 
@@ -124,12 +119,15 @@ public class YarnResourceConnectorTest {
                 stackMock, persistenceNotifierMock, AdjustmentType.EXACT, Long.MAX_VALUE);
 
         CreateApplicationRequest caputeredCreateRequest = createRequestCaptor.getValue();
+        assertEquals("name-1-horton", caputeredCreateRequest.getName());
         assertEquals(defaultQueue, caputeredCreateRequest.getQueue());
         assertEquals(defaultLifeTime, caputeredCreateRequest.getLifetime());
     }
 
     @Test
     public void testLaunch() throws Exception {
+        ReflectionTestUtils.setField(underTest, "maxResourceNameLength", 3);
+
         ArgumentCaptor<CreateApplicationRequest> createRequestCaptor = ArgumentCaptor.forClass(CreateApplicationRequest.class);
         ArgumentCaptor<ApplicationDetailRequest> requestCaptor = ArgumentCaptor.forClass(ApplicationDetailRequest.class);
 
@@ -150,17 +148,18 @@ public class YarnResourceConnectorTest {
 
         verify(persistenceNotifierMock, times(1)).notifyAllocation(any(), any());
 
-        assertCreateRequest(createRequestCaptor, groupList);
+        String expectedAppName = "n-1";
+        assertCreateRequest(createRequestCaptor, groupList, expectedAppName);
         ApplicationDetailRequest capturedRequest = requestCaptor.getValue();
-        assertEquals("n-1", capturedRequest.getName());
-        assertCloudResourceStatusList(cloudResourceStatusList);
+        assertEquals(expectedAppName, capturedRequest.getName());
+        assertCloudResourceStatusList(cloudResourceStatusList, expectedAppName);
     }
 
-    private void assertCloudResourceStatusList(List<CloudResourceStatus> cloudResourceStatusList) {
+    private void assertCloudResourceStatusList(List<CloudResourceStatus> cloudResourceStatusList, String expectedAppName) {
         assertEquals(1L, cloudResourceStatusList.size());
         assertEquals(YARN_APPLICATION, cloudResourceStatusList.get(0).getCloudResource().getType());
         assertEquals(CommonStatus.CREATED, cloudResourceStatusList.get(0).getCloudResource().getStatus());
-        assertEquals("n-1", cloudResourceStatusList.get(0).getCloudResource().getName());
+        assertEquals(expectedAppName, cloudResourceStatusList.get(0).getCloudResource().getName());
         assertEquals(ResourceStatus.CREATED, cloudResourceStatusList.get(0).getStatus());
     }
 
@@ -179,9 +178,9 @@ public class YarnResourceConnectorTest {
         when(stackMock.getParameters()).thenReturn(parameters);
     }
 
-    private void assertCreateRequest(ArgumentCaptor<CreateApplicationRequest> createRequestCaptor, List<Group> groupList) {
+    private void assertCreateRequest(ArgumentCaptor<CreateApplicationRequest> createRequestCaptor, List<Group> groupList, String expectedAppName) {
         CreateApplicationRequest caputeredCreateRequest = createRequestCaptor.getValue();
-        assertEquals("n-1", caputeredCreateRequest.getName());
+        assertEquals(expectedAppName, caputeredCreateRequest.getName());
         assertEquals(YARN_QUEUE, caputeredCreateRequest.getQueue());
         assertEquals(groupList.size(), caputeredCreateRequest.getComponents().size());
         for (int i = 0; i < groupList.size(); i++) {
@@ -269,6 +268,8 @@ public class YarnResourceConnectorTest {
 
     @Test
     public void testLaunchApplicationAlreadyCreated() throws Exception {
+        ReflectionTestUtils.setField(underTest, "maxResourceNameLength", 8);
+
         when(authenticatedContextMock.getCloudContext()).thenReturn(new CloudContext(1L, "name", "platform",
                 "owner", USER_ID, ORGANIZATION_ID));
 
@@ -281,7 +282,8 @@ public class YarnResourceConnectorTest {
                 stackMock, persistenceNotifierMock, AdjustmentType.EXACT, Long.MAX_VALUE);
 
         ApplicationDetailRequest capturedRequest = requestCaptor.getValue();
-        assertEquals("n-1", capturedRequest.getName());
-        assertCloudResourceStatusList(cloudResourceStatusList);
+        String expectedAppName = "n-1-hort";
+        assertEquals(expectedAppName, capturedRequest.getName());
+        assertCloudResourceStatusList(cloudResourceStatusList, "n-1-hort");
     }
 }
