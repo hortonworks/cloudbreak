@@ -20,6 +20,9 @@ import (
 
 type CloudStorageRequest struct {
 
+	// abfs
+	Abfs *AbfsCloudStorageParameters `json:"abfs,omitempty"`
+
 	// adls
 	Adls *AdlsCloudStorageParameters `json:"adls,omitempty"`
 
@@ -37,6 +40,8 @@ type CloudStorageRequest struct {
 	Wasb *WasbCloudStorageParameters `json:"wasb,omitempty"`
 }
 
+/* polymorph CloudStorageRequest abfs false */
+
 /* polymorph CloudStorageRequest adls false */
 
 /* polymorph CloudStorageRequest gcs false */
@@ -50,6 +55,11 @@ type CloudStorageRequest struct {
 // Validate validates this cloud storage request
 func (m *CloudStorageRequest) Validate(formats strfmt.Registry) error {
 	var res []error
+
+	if err := m.validateAbfs(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
 
 	if err := m.validateAdls(formats); err != nil {
 		// prop
@@ -79,6 +89,25 @@ func (m *CloudStorageRequest) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *CloudStorageRequest) validateAbfs(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Abfs) { // not required
+		return nil
+	}
+
+	if m.Abfs != nil {
+
+		if err := m.Abfs.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("abfs")
+			}
+			return err
+		}
+	}
+
 	return nil
 }
 

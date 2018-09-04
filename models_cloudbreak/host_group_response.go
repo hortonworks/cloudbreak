@@ -25,6 +25,10 @@ type HostGroupResponse struct {
 	// Required: true
 	Constraint *Constraint `json:"constraint"`
 
+	// referenced extended recipes
+	// Unique: true
+	ExtendedRecipes []string `json:"extendedRecipes"`
+
 	// id of the resource
 	ID int64 `json:"id,omitempty"`
 
@@ -50,6 +54,8 @@ type HostGroupResponse struct {
 
 /* polymorph HostGroupResponse constraint false */
 
+/* polymorph HostGroupResponse extendedRecipes false */
+
 /* polymorph HostGroupResponse id false */
 
 /* polymorph HostGroupResponse metadata false */
@@ -67,6 +73,11 @@ func (m *HostGroupResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateConstraint(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateExtendedRecipes(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -116,6 +127,19 @@ func (m *HostGroupResponse) validateConstraint(formats strfmt.Registry) error {
 			}
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (m *HostGroupResponse) validateExtendedRecipes(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ExtendedRecipes) { // not required
+		return nil
+	}
+
+	if err := validate.UniqueItems("extendedRecipes", "body", m.ExtendedRecipes); err != nil {
+		return err
 	}
 
 	return nil

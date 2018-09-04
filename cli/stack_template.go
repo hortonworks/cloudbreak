@@ -95,6 +95,8 @@ func getCloudStorageType(stringFinder func(string) string) cloud.CloudStorageTyp
 		return cloud.GCS
 	case "s3":
 		return cloud.S3
+	case "abfs":
+		return cloud.ABFS
 	default:
 		return cloud.NO_CLOUD_STORAGE
 	}
@@ -201,6 +203,7 @@ func generateCloudStorage(fileSystem *models_cloudbreak.FileSystemResponse) *mod
 			Adls:      fileSystem.Adls,
 			Gcs:       fileSystem.Gcs,
 			Wasb:      fileSystem.Wasb,
+			Abfs:      fileSystem.Abfs,
 			Locations: generateLocations(fileSystem.Locations),
 		}
 	}
@@ -420,6 +423,14 @@ func extendTemplateWithStorageType(template *models_cloudbreak.StackV2Request, s
 		template.Cluster.CloudStorage = &models_cloudbreak.CloudStorageRequest{
 			Gcs: &models_cloudbreak.GcsCloudStorageParameters{
 				ServiceAccountEmail: &(&types.S{S: "____"}).S,
+			},
+			Locations: []*models_cloudbreak.StorageLocationRequest{},
+		}
+	} else if storageType == cloud.ABFS {
+		template.Cluster.CloudStorage = &models_cloudbreak.CloudStorageRequest{
+			Abfs: &models_cloudbreak.AbfsCloudStorageParameters{
+				AccountKey:  &(&types.S{S: "____"}).S,
+				AccountName: &(&types.S{S: "____"}).S,
 			},
 			Locations: []*models_cloudbreak.StorageLocationRequest{},
 		}

@@ -20,6 +20,9 @@ import (
 
 type FileSystem struct {
 
+	// abfs
+	Abfs *AbfsCloudStorageParameters `json:"abfs,omitempty"`
+
 	// adls
 	Adls *AdlsCloudStorageParameters `json:"adls,omitempty"`
 
@@ -48,6 +51,8 @@ type FileSystem struct {
 	Wasb *WasbCloudStorageParameters `json:"wasb,omitempty"`
 }
 
+/* polymorph FileSystem abfs false */
+
 /* polymorph FileSystem adls false */
 
 /* polymorph FileSystem defaultFs false */
@@ -67,6 +72,11 @@ type FileSystem struct {
 // Validate validates this file system
 func (m *FileSystem) Validate(formats strfmt.Registry) error {
 	var res []error
+
+	if err := m.validateAbfs(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
 
 	if err := m.validateAdls(formats); err != nil {
 		// prop
@@ -106,6 +116,25 @@ func (m *FileSystem) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *FileSystem) validateAbfs(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Abfs) { // not required
+		return nil
+	}
+
+	if m.Abfs != nil {
+
+		if err := m.Abfs.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("abfs")
+			}
+			return err
+		}
+	}
+
 	return nil
 }
 
