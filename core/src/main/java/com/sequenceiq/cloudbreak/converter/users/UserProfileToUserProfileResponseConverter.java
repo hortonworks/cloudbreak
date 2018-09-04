@@ -10,10 +10,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
+import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImageCatalogShortResponse;
 import com.sequenceiq.cloudbreak.api.model.users.UserProfileResponse;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImageCatalogShortResponse;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
+import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 
 @Component
@@ -23,14 +24,24 @@ public class UserProfileToUserProfileResponseConverter extends AbstractConversio
     @Inject
     private ImageCatalogService imageCatalogService;
 
+    @Inject
+    private RestRequestThreadLocalService restRequestThreadLocalService;
+
     @Override
     public UserProfileResponse convert(UserProfile entity) {
         UserProfileResponse userProfileResponse = new UserProfileResponse();
         userProfileResponse.setAccount(entity.getAccount());
         userProfileResponse.setOwner(entity.getOwner());
-        if (entity.getCredential() != null) {
-            CredentialResponse credentialResponse = getConversionService().convert(entity.getCredential(), CredentialResponse.class);
-            userProfileResponse.setCredential(credentialResponse);
+        if (!entity.getDefaultCredentials().isEmpty()) {
+            entity.getDefaultCredentials()
+                    .stream()
+                    .filter(defaultCredential -> defaultCredential.getOrganization().getId().
+                            equals(restRequestThreadLocalService.getRequestedOrgId()))
+                    .limit(1)
+                    .forEach(credential -> {
+                        CredentialResponse credentialResponse = getConversionService().convert(credential, CredentialResponse.class);
+                        userProfileResponse.setCredential(credentialResponse);
+                    });
         }
         if (entity.getImageCatalog() != null) {
             userProfileResponse.setImageCatalog(getConversionService()

@@ -219,6 +219,8 @@ public class OperationDescriptions {
         public static final String USER_GET_PROFILE = "user related profile";
         public static final String USER_PUT_PROFILE = "modify user related profile";
         public static final String GET_TENANT_USERS = "retrieve all users in the tenant";
+        public static final String USER_GET_PROFILE_IN_ORG = "user related profile in organization";
+        public static final String USER_PUT_PROFILE_IN_ORG = "modify user related profile in organization";
     }
 
     public static class SecurityGroupOpDescription {

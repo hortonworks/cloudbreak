@@ -68,6 +68,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v3.RdsConfigV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.RecipeV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.SmartSenseSubscriptionV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.StackV3Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v3.UserV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.UtilV3Endpoint;
 
 import net.jodah.expiringmap.ExpirationPolicy;
@@ -116,6 +117,7 @@ public class CloudbreakClient {
             StackV3Endpoint.class,
             SubscriptionEndpoint.class,
             UserEndpoint.class,
+            UserV3Endpoint.class,
             UtilEndpoint.class
     );
 
@@ -324,6 +326,10 @@ public class CloudbreakClient {
 
     public UserEndpoint userEndpoint() {
         return getEndpoint(UserEndpoint.class);
+    }
+
+    public UserV3Endpoint userV3Endpoint() {
+        return getEndpoint(UserV3Endpoint.class);
     }
 
     public UtilEndpoint utilEndpoint() {
