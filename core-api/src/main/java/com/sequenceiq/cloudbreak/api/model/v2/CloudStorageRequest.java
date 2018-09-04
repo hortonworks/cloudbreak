@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
+import com.sequenceiq.cloudbreak.api.model.v2.filesystem.AbfsCloudStorageParameters;
 import com.sequenceiq.cloudbreak.api.model.v2.filesystem.AdlsCloudStorageParameters;
 import com.sequenceiq.cloudbreak.api.model.v2.filesystem.GcsCloudStorageParameters;
 import com.sequenceiq.cloudbreak.api.model.v2.filesystem.S3CloudStorageParameters;
@@ -38,6 +39,10 @@ public class CloudStorageRequest implements JsonEntity {
     @Valid
     @ApiModelProperty
     private S3CloudStorageParameters s3;
+
+    @Valid
+    @ApiModelProperty
+    private AbfsCloudStorageParameters abfs;
 
     @Valid
     @ApiModelProperty(value = ModelDescriptions.ClusterModelDescription.LOCATIONS)
@@ -83,4 +88,11 @@ public class CloudStorageRequest implements JsonEntity {
         this.locations = locations;
     }
 
+    public AbfsCloudStorageParameters getAbfs() {
+        return abfs;
+    }
+
+    public void setAbfs(AbfsCloudStorageParameters abfs) {
+        this.abfs = abfs;
+    }
 }

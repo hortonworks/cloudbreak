@@ -3,14 +3,9 @@ package com.sequenceiq.cloudbreak.validation;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import javax.validation.ConstraintValidatorContext;
-import javax.validation.ConstraintValidatorContext.ConstraintViolationBuilder;
-import javax.validation.ConstraintValidatorContext.ConstraintViolationBuilder.NodeBuilderCustomizableContext;
 
 import org.junit.Test;
 
@@ -45,7 +40,7 @@ public class CredentialRequestValidatorTest {
 
     private final CredentialRequestValidator underTest = new CredentialRequestValidator();
 
-    private final ConstraintValidatorContext context = createContextMock();
+    private final ConstraintValidatorContext context = ContextMockUtil.createContextMock();
 
     @Test
     public void testCloudProvidersThatAreValid() {
@@ -85,20 +80,6 @@ public class CredentialRequestValidatorTest {
         if (!result) {
             failingConditions.append(testCondition).append(", ");
         }
-    }
-
-    private ConstraintValidatorContext createContextMock() {
-        ConstraintValidatorContext contextMock = mock(ConstraintValidatorContext.class);
-        ConstraintViolationBuilder constraintViolationBuilderMock = mock(ConstraintViolationBuilder.class);
-        NodeBuilderCustomizableContext nodeBuilderContextMock
-                = mock(NodeBuilderCustomizableContext.class);
-
-        when(contextMock.buildConstraintViolationWithTemplate(anyString()))
-                .thenReturn(constraintViolationBuilderMock);
-        when(constraintViolationBuilderMock.addPropertyNode(anyString()))
-                .thenReturn(nodeBuilderContextMock);
-        when(nodeBuilderContextMock.addConstraintViolation()).thenReturn(contextMock);
-        return contextMock;
     }
 
     private static class CredentialRequestBuilder {

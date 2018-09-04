@@ -1,23 +1,5 @@
 package com.sequenceiq.cloudbreak.converter.v2.filesystem;
 
-import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
-import com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType;
-import com.sequenceiq.cloudbreak.api.model.v2.CloudStorageRequest;
-import com.sequenceiq.cloudbreak.api.model.v2.StorageLocationRequest;
-import com.sequenceiq.cloudbreak.api.model.v2.filesystem.AdlsCloudStorageParameters;
-import com.sequenceiq.cloudbreak.api.model.v2.filesystem.CloudStorageParameters;
-import com.sequenceiq.cloudbreak.common.type.APIResourceType;
-import com.sequenceiq.cloudbreak.service.MissingResourceNameGenerator;
-import com.sequenceiq.cloudbreak.service.filesystem.FileSystemResolver;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
-import java.util.LinkedHashSet;
-import java.util.Set;
-
 import static com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType.WASB;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -25,6 +7,26 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.util.LinkedHashSet;
+import java.util.Set;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
+import com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType;
+import com.sequenceiq.cloudbreak.api.model.v2.CloudStorageRequest;
+import com.sequenceiq.cloudbreak.api.model.v2.StorageLocationRequest;
+import com.sequenceiq.cloudbreak.api.model.v2.filesystem.AbfsCloudStorageParameters;
+import com.sequenceiq.cloudbreak.api.model.v2.filesystem.AdlsCloudStorageParameters;
+import com.sequenceiq.cloudbreak.api.model.v2.filesystem.CloudStorageParameters;
+import com.sequenceiq.cloudbreak.common.type.APIResourceType;
+import com.sequenceiq.cloudbreak.service.MissingResourceNameGenerator;
+import com.sequenceiq.cloudbreak.service.filesystem.FileSystemResolver;
 
 public class CloudStorageRequestToFileSystemRequestConverterTest {
 
@@ -61,6 +63,7 @@ public class CloudStorageRequestToFileSystemRequestConverterTest {
         when(request.getWasb()).thenReturn(null);
         when(request.getGcs()).thenReturn(null);
         when(request.getS3()).thenReturn(null);
+        when(request.getAbfs()).thenReturn(null);
         when(fileSystemResolver.propagateConfiguration(request)).thenReturn(cloudStorageParameters);
         when(cloudStorageParameters.getType()).thenReturn(TEST_FILE_SYSTEM);
 
@@ -72,6 +75,34 @@ public class CloudStorageRequestToFileSystemRequestConverterTest {
         assertNull(result.getGcs());
         assertNull(result.getS3());
         assertNull(result.getWasb());
+        assertNull(result.getAbfs());
+        assertEquals(storageLocations, result.getLocations());
+        assertEquals(TEST_FILE_SYSTEM.name(), result.getType());
+        verify(nameGenerator, times(1)).generateName(APIResourceType.FILESYSTEM);
+        verify(fileSystemResolver, times(1)).propagateConfiguration(request);
+    }
+
+    @Test
+    public void testConvertCheckAllParamsHasPassedProperlyWhenAbfsIsNotNull() {
+        AbfsCloudStorageParameters abfs = new AbfsCloudStorageParameters();
+        Set<StorageLocationRequest> storageLocations = new LinkedHashSet<>();
+        when(request.getAbfs()).thenReturn(abfs);
+        when(request.getAdls()).thenReturn(null);
+        when(request.getWasb()).thenReturn(null);
+        when(request.getGcs()).thenReturn(null);
+        when(request.getS3()).thenReturn(null);
+        when(fileSystemResolver.propagateConfiguration(request)).thenReturn(cloudStorageParameters);
+        when(cloudStorageParameters.getType()).thenReturn(TEST_FILE_SYSTEM);
+
+        FileSystemRequest result = underTest.convert(request);
+
+        assertEquals(TEST_FILE_SYSTEM_NAME, result.getName());
+        assertFalse(result.isDefaultFs());
+        assertEquals(abfs, result.getAbfs());
+        assertNull(result.getGcs());
+        assertNull(result.getS3());
+        assertNull(result.getWasb());
+        assertNull(result.getAdls());
         assertEquals(storageLocations, result.getLocations());
         assertEquals(TEST_FILE_SYSTEM.name(), result.getType());
         verify(nameGenerator, times(1)).generateName(APIResourceType.FILESYSTEM);

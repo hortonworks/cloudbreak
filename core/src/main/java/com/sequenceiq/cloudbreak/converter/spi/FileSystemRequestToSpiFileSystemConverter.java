@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
 import com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
+import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAbfsView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudGcsView;
@@ -26,6 +27,8 @@ public class FileSystemRequestToSpiFileSystemConverter extends AbstractConversio
             baseFileSystem = getConversionService().convert(source.getS3(), CloudS3View.class);
         } else if (source.getWasb() != null) {
             baseFileSystem = getConversionService().convert(source.getWasb(), CloudWasbView.class);
+        } else if (source.getAbfs() != null) {
+            baseFileSystem = getConversionService().convert(source.getAbfs(), CloudAbfsView.class);
         }
         return new SpiFileSystem(source.getName(), FileSystemType.valueOf(source.getType()), source.isDefaultFs(), baseFileSystem);
     }
