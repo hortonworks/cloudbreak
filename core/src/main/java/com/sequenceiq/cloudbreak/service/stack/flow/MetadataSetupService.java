@@ -39,7 +39,6 @@ public class MetadataSetupService {
     public int saveInstanceMetaData(Stack stack, Iterable<CloudVmMetaDataStatus> cloudVmMetaDataStatusList, InstanceStatus status) {
         try {
             int newInstances = 0;
-            boolean ambariServerFound = false;
             Set<InstanceMetaData> allInstanceMetadata = instanceMetaDataRepository.findNotTerminatedForStack(stack.getId());
             boolean primaryIgSelected = allInstanceMetadata.stream().anyMatch(imd -> imd.getInstanceMetadataType() == InstanceMetadataType.GATEWAY_PRIMARY);
             Json imageJson = new Json(imageService.getImage(stack.getId()));
@@ -67,12 +66,14 @@ public class MetadataSetupService {
                 instanceMetaDataEntry.setStartDate(timeInMillis);
                 instanceMetaDataEntry.setSubnetId(cloudInstance.getStringParameter(CloudInstance.SUBNET_ID));
                 instanceMetaDataEntry.setInstanceName(cloudInstance.getStringParameter(CloudInstance.INSTANCE_NAME));
+                instanceMetaDataEntry.setAmbariServer(Boolean.FALSE);
                 if (instanceMetaDataEntry.getInstanceMetadataType() == null) {
                     if (ig != null) {
                         if (InstanceGroupType.GATEWAY.equals(ig.getInstanceGroupType())) {
                             if (!primaryIgSelected) {
                                 primaryIgSelected = true;
                                 instanceMetaDataEntry.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
+                                instanceMetaDataEntry.setAmbariServer(Boolean.TRUE);
                             } else {
                                 instanceMetaDataEntry.setInstanceMetadataType(InstanceMetadataType.GATEWAY);
                             }
@@ -82,12 +83,6 @@ public class MetadataSetupService {
                     } else {
                         instanceMetaDataEntry.setInstanceMetadataType(InstanceMetadataType.CORE);
                     }
-                }
-                if (!ambariServerFound && InstanceGroupType.GATEWAY.equals(instanceGroup.getInstanceGroupType())) {
-                    instanceMetaDataEntry.setAmbariServer(Boolean.TRUE);
-                    ambariServerFound = true;
-                } else {
-                    instanceMetaDataEntry.setAmbariServer(Boolean.FALSE);
                 }
                 if (status != null) {
                     instanceMetaDataEntry.setInstanceStatus(status);
