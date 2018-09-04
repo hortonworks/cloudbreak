@@ -11,7 +11,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/cb-cli/cli/types"
 	"github.com/hortonworks/cb-cli/cli/utils"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_organization_id_stack"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_organization_id_stacks"
 	"github.com/hortonworks/cb-cli/models_cloudbreak"
 	"github.com/urfave/cli"
 )
@@ -68,7 +68,7 @@ func ChangeImage(c *cli.Context) {
 	clusterName := c.String(FlName.Name)
 	log.Infof("[ChangeImage] changing image for stack stack, name: %s, imageid: %s, imageCatalog: %s", clusterName, imageId, imageCatalogName)
 	req := models_cloudbreak.StackImageChangeRequest{ImageCatalogName: imageCatalogName, ImageID: &imageId}
-	err := cbClient.Cloudbreak.V3OrganizationIDStack.ChangeImageV3(v3_organization_id_stack.NewChangeImageV3Params().WithOrganizationID(orgID).WithName(clusterName).WithBody(&req))
+	err := cbClient.Cloudbreak.V3OrganizationIDStacks.ChangeImageV3(v3_organization_id_stacks.NewChangeImageV3Params().WithOrganizationID(orgID).WithName(clusterName).WithBody(&req))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -137,7 +137,7 @@ func DescribeStack(c *cli.Context) {
 	orgID := c.Int64(FlOrganizationOptional.Name)
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
-	resp, err := cbClient.Cloudbreak.V3OrganizationIDStack.GetStackInOrganization(v3_organization_id_stack.NewGetStackInOrganizationParams().WithOrganizationID(orgID).WithName(c.String(FlName.Name)))
+	resp, err := cbClient.Cloudbreak.V3OrganizationIDStacks.GetStackInOrganization(v3_organization_id_stacks.NewGetStackInOrganizationParams().WithOrganizationID(orgID).WithName(c.String(FlName.Name)))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -151,11 +151,11 @@ func DescribeStack(c *cli.Context) {
 }
 
 type getStackInOrganization interface {
-	GetStackInOrganization(client *v3_organization_id_stack.GetStackInOrganizationParams) (*v3_organization_id_stack.GetStackInOrganizationOK, error)
+	GetStackInOrganization(client *v3_organization_id_stacks.GetStackInOrganizationParams) (*v3_organization_id_stacks.GetStackInOrganizationOK, error)
 }
 
 func fetchStack(orgID int64, name string, client getStackInOrganization) *models_cloudbreak.StackResponse {
-	resp, err := client.GetStackInOrganization(v3_organization_id_stack.NewGetStackInOrganizationParams().WithOrganizationID(orgID).WithName(name))
+	resp, err := client.GetStackInOrganization(v3_organization_id_stacks.NewGetStackInOrganizationParams().WithOrganizationID(orgID).WithName(name))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -178,7 +178,7 @@ func ScaleStack(c *cli.Context) {
 	orgID := c.Int64(FlOrganizationOptional.Name)
 	name := c.String(FlName.Name)
 	log.Infof("[ScaleStack] scaling stack, name: %s", name)
-	err = cbClient.Cloudbreak.V3OrganizationIDStack.PutscalingStackV3(v3_organization_id_stack.NewPutscalingStackV3Params().WithOrganizationID(orgID).WithName(name).WithBody(req))
+	err = cbClient.Cloudbreak.V3OrganizationIDStacks.PutscalingStackV3(v3_organization_id_stacks.NewPutscalingStackV3Params().WithOrganizationID(orgID).WithName(name).WithBody(req))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -197,7 +197,7 @@ func StartStack(c *cli.Context) {
 	orgID := c.Int64(FlOrganizationOptional.Name)
 	name := c.String(FlName.Name)
 	log.Infof("[StartStack] starting stack, name: %s", name)
-	err := cbClient.Cloudbreak.V3OrganizationIDStack.PutstartStackV3(v3_organization_id_stack.NewPutstartStackV3Params().WithOrganizationID(orgID).WithName(name))
+	err := cbClient.Cloudbreak.V3OrganizationIDStacks.PutstartStackV3(v3_organization_id_stacks.NewPutstartStackV3Params().WithOrganizationID(orgID).WithName(name))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -216,7 +216,7 @@ func StopStack(c *cli.Context) {
 	orgID := c.Int64(FlOrganizationOptional.Name)
 	name := c.String(FlName.Name)
 	log.Infof("[StopStack] stopping stack, name: %s", name)
-	err := cbClient.Cloudbreak.V3OrganizationIDStack.PutstopStackV3(v3_organization_id_stack.NewPutstopStackV3Params().WithOrganizationID(orgID).WithName(name))
+	err := cbClient.Cloudbreak.V3OrganizationIDStacks.PutstopStackV3(v3_organization_id_stacks.NewPutstopStackV3Params().WithOrganizationID(orgID).WithName(name))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -235,7 +235,7 @@ func SyncStack(c *cli.Context) {
 	orgID := c.Int64(FlOrganizationOptional.Name)
 	name := c.String(FlName.Name)
 	log.Infof("[SyncStack] syncing stack, name: %s", name)
-	err := cbClient.Cloudbreak.V3OrganizationIDStack.PutsyncStackV3(v3_organization_id_stack.NewPutsyncStackV3Params().WithOrganizationID(orgID).WithName(name))
+	err := cbClient.Cloudbreak.V3OrganizationIDStacks.PutsyncStackV3(v3_organization_id_stacks.NewPutsyncStackV3Params().WithOrganizationID(orgID).WithName(name))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -258,7 +258,7 @@ func RepairStack(c *cli.Context) {
 	request.HostGroups = hostGroups
 	request.RemoveOnly = &removeOnly
 
-	err := cbClient.Cloudbreak.V3OrganizationIDStack.RepairClusterV3(v3_organization_id_stack.NewRepairClusterV3Params().WithOrganizationID(orgID).WithName(name).WithBody(&request))
+	err := cbClient.Cloudbreak.V3OrganizationIDStacks.RepairClusterV3(v3_organization_id_stacks.NewRepairClusterV3Params().WithOrganizationID(orgID).WithName(name).WithBody(&request))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -277,7 +277,7 @@ func RetryCluster(c *cli.Context) {
 	orgID := c.Int64(FlOrganizationOptional.Name)
 	name := c.String(FlName.Name)
 	log.Infof("[RetryCluster] retrying cluster creation, name: %s", name)
-	err := cbClient.Cloudbreak.V3OrganizationIDStack.RetryStackV3(v3_organization_id_stack.NewRetryStackV3Params().WithOrganizationID(orgID).WithName(name))
+	err := cbClient.Cloudbreak.V3OrganizationIDStacks.RetryStackV3(v3_organization_id_stacks.NewRetryStackV3Params().WithOrganizationID(orgID).WithName(name))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -297,7 +297,7 @@ func ReinstallStack(c *cli.Context) {
 	orgID := c.Int64(FlOrganizationOptional.Name)
 	name := c.String(FlName.Name)
 	log.Infof("[RepairStack] reinstalling stack, name: %s", name)
-	err := cbClient.Cloudbreak.V3OrganizationIDStack.PutreinstallStackV3(v3_organization_id_stack.NewPutreinstallStackV3Params().WithOrganizationID(orgID).WithName(name).WithBody(req))
+	err := cbClient.Cloudbreak.V3OrganizationIDStacks.PutreinstallStackV3(v3_organization_id_stacks.NewPutreinstallStackV3Params().WithOrganizationID(orgID).WithName(name).WithBody(req))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -360,16 +360,16 @@ func ListStacks(c *cli.Context) {
 	orgID := c.Int64(FlOrganizationOptional.Name)
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
-	listStacksImpl(cbClient.Cloudbreak.V3OrganizationIDStack, output.WriteList, orgID)
+	listStacksImpl(cbClient.Cloudbreak.V3OrganizationIDStacks, output.WriteList, orgID)
 }
 
 type listStacksByOrganizationClient interface {
-	ListStacksByOrganization(*v3_organization_id_stack.ListStacksByOrganizationParams) (*v3_organization_id_stack.ListStacksByOrganizationOK, error)
+	ListStacksByOrganization(*v3_organization_id_stacks.ListStacksByOrganizationParams) (*v3_organization_id_stacks.ListStacksByOrganizationOK, error)
 }
 
 func listStacksImpl(client listStacksByOrganizationClient, writer func([]string, []utils.Row), orgID int64) {
 	log.Infof("[listStacksImpl] sending stack list request")
-	stacksResp, err := client.ListStacksByOrganization(v3_organization_id_stack.NewListStacksByOrganizationParams().WithOrganizationID(orgID))
+	stacksResp, err := client.ListStacksByOrganization(v3_organization_id_stacks.NewListStacksByOrganizationParams().WithOrganizationID(orgID))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}

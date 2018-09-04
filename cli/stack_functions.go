@@ -6,7 +6,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/cb-cli/cli/utils"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_organization_id_stack"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_organization_id_stacks"
 	"github.com/hortonworks/cb-cli/models_cloudbreak"
 )
 
@@ -27,16 +27,16 @@ func (c *Cloudbreak) waitForOperationToFinish(orgID int64, name string, stackSta
 	defer utils.TimeTrack(time.Now(), "wait for operation to finish")
 
 	log.Infof("[waitForOperationToFinish] start waiting")
-	waitForOperationToFinishImpl(orgID, name, stackStatus, clusterStatus, c.Cloudbreak.V3OrganizationIDStack)
+	waitForOperationToFinishImpl(orgID, name, stackStatus, clusterStatus, c.Cloudbreak.V3OrganizationIDStacks)
 }
 
 type getStackClient interface {
-	GetStackInOrganization(*v3_organization_id_stack.GetStackInOrganizationParams) (*v3_organization_id_stack.GetStackInOrganizationOK, error)
+	GetStackInOrganization(*v3_organization_id_stacks.GetStackInOrganizationParams) (*v3_organization_id_stacks.GetStackInOrganizationOK, error)
 }
 
 func waitForOperationToFinishImpl(orgID int64, name string, desiredStackStatus, desiredClusterStatus status, client getStackClient) {
 	for {
-		resp, err := client.GetStackInOrganization(v3_organization_id_stack.NewGetStackInOrganizationParams().WithOrganizationID(orgID).WithName(name))
+		resp, err := client.GetStackInOrganization(v3_organization_id_stacks.NewGetStackInOrganizationParams().WithOrganizationID(orgID).WithName(name))
 		if err != nil {
 			utils.LogErrorAndExit(err)
 		}
@@ -62,7 +62,7 @@ func (c *Cloudbreak) getStackByName(orgID int64, name string) *models_cloudbreak
 	defer utils.TimeTrack(time.Now(), "get stack by name")
 
 	log.Infof("[getStackByName] fetch stack, name: %s", name)
-	stack, err := c.Cloudbreak.V3OrganizationIDStack.GetStackInOrganization(v3_organization_id_stack.NewGetStackInOrganizationParams().WithOrganizationID(orgID).WithName(name))
+	stack, err := c.Cloudbreak.V3OrganizationIDStacks.GetStackInOrganization(v3_organization_id_stacks.NewGetStackInOrganizationParams().WithOrganizationID(orgID).WithName(name))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -72,7 +72,7 @@ func (c *Cloudbreak) getStackByName(orgID int64, name string) *models_cloudbreak
 func (c *Cloudbreak) createStack(orgID int64, req *models_cloudbreak.StackV2Request) *models_cloudbreak.StackResponse {
 	var stack *models_cloudbreak.StackResponse
 	log.Infof("[createStack] sending create stack request")
-	resp, err := c.Cloudbreak.V3OrganizationIDStack.CreateStackInOrganization(v3_organization_id_stack.NewCreateStackInOrganizationParams().WithOrganizationID(orgID).WithBody(req))
+	resp, err := c.Cloudbreak.V3OrganizationIDStacks.CreateStackInOrganization(v3_organization_id_stacks.NewCreateStackInOrganizationParams().WithOrganizationID(orgID).WithBody(req))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -86,7 +86,7 @@ func (c *Cloudbreak) deleteStack(orgID int64, name string, forced bool) {
 	defer utils.TimeTrack(time.Now(), "delete stack by name")
 
 	log.Infof("[deleteStack] deleting stack, name: %s", name)
-	err := c.Cloudbreak.V3OrganizationIDStack.DeleteStackInOrganization(v3_organization_id_stack.NewDeleteStackInOrganizationParams().WithOrganizationID(orgID).WithName(name).WithForced(&forced))
+	err := c.Cloudbreak.V3OrganizationIDStacks.DeleteStackInOrganization(v3_organization_id_stacks.NewDeleteStackInOrganizationParams().WithOrganizationID(orgID).WithName(name).WithForced(&forced))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}

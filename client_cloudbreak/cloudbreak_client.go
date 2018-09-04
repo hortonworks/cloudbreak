@@ -50,9 +50,9 @@ import (
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_organization_id_rdsconfigs"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_organization_id_recipes"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_organization_id_smartsensesubscriptions"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_organization_id_stack"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_organization_id_util"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_organization_id_stacks"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v3organizations"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v3utils"
 )
 
 // Default cloudbreak HTTP client.
@@ -174,11 +174,11 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *Cloudbreak
 
 	cli.V3OrganizationIDSmartsensesubscriptions = v3_organization_id_smartsensesubscriptions.New(transport, formats)
 
-	cli.V3OrganizationIDStack = v3_organization_id_stack.New(transport, formats)
-
-	cli.V3OrganizationIDUtil = v3_organization_id_util.New(transport, formats)
+	cli.V3OrganizationIDStacks = v3_organization_id_stacks.New(transport, formats)
 
 	cli.V3organizations = v3organizations.New(transport, formats)
+
+	cli.V3utils = v3utils.New(transport, formats)
 
 	return cli
 }
@@ -302,11 +302,11 @@ type Cloudbreak struct {
 
 	V3OrganizationIDSmartsensesubscriptions *v3_organization_id_smartsensesubscriptions.Client
 
-	V3OrganizationIDStack *v3_organization_id_stack.Client
-
-	V3OrganizationIDUtil *v3_organization_id_util.Client
+	V3OrganizationIDStacks *v3_organization_id_stacks.Client
 
 	V3organizations *v3organizations.Client
+
+	V3utils *v3utils.Client
 
 	Transport runtime.ClientTransport
 }
@@ -393,10 +393,10 @@ func (c *Cloudbreak) SetTransport(transport runtime.ClientTransport) {
 
 	c.V3OrganizationIDSmartsensesubscriptions.SetTransport(transport)
 
-	c.V3OrganizationIDStack.SetTransport(transport)
-
-	c.V3OrganizationIDUtil.SetTransport(transport)
+	c.V3OrganizationIDStacks.SetTransport(transport)
 
 	c.V3organizations.SetTransport(transport)
+
+	c.V3utils.SetTransport(transport)
 
 }

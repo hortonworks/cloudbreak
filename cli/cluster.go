@@ -6,7 +6,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/cb-cli/cli/types"
 	"github.com/hortonworks/cb-cli/cli/utils"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_organization_id_stack"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_organization_id_stacks"
 	"github.com/hortonworks/cb-cli/models_cloudbreak"
 	"github.com/urfave/cli"
 )
@@ -24,7 +24,7 @@ func ChangeAmbariPassword(c *cli.Context) {
 		Password:    &(&types.S{S: c.String(FlNewPassword.Name)}).S,
 		UserName:    &(&types.S{S: c.String(FlAmbariUser.Name)}).S,
 	}
-	err := cbClient.Cloudbreak.V3OrganizationIDStack.PutpasswordStackV3(v3_organization_id_stack.NewPutpasswordStackV3Params().WithOrganizationID(orgID).WithName(name).WithBody(req))
+	err := cbClient.Cloudbreak.V3OrganizationIDStacks.PutpasswordStackV3(v3_organization_id_stacks.NewPutpasswordStackV3Params().WithOrganizationID(orgID).WithName(name).WithBody(req))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
