@@ -19,9 +19,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import com.sequenceiq.cloudbreak.api.endpoint.common.StackEndpoint;
-import com.sequenceiq.cloudbreak.api.model.AmbariAddressJson;
-import com.sequenceiq.cloudbreak.api.model.AutoscaleStackResponse;
-import com.sequenceiq.cloudbreak.api.model.CertificateResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformVariantsJson;
 import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
 import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
@@ -144,36 +141,10 @@ public interface StackV1Endpoint extends StackEndpoint {
     @ApiOperation(value = StackOpDescription.DELETE_INSTANCE_BY_ID, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "deleteInstancesStack")
     Response deleteInstances(@PathParam("stackId") Long stackId, @QueryParam("instanceIds") Set<String> instanceIds);
 
-    @GET
-    @Path("{id}/certificate")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Override
-    @ApiOperation(value = StackOpDescription.GET_STACK_CERT, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "getCertificateStack")
-    CertificateResponse getCertificate(@PathParam("id") Long stackId);
-
     @POST
     @Path("validate")
     @Produces(MediaType.APPLICATION_JSON)
     @Override
     @ApiOperation(value = StackOpDescription.VALIDATE, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "validateStack")
     Response validate(@Valid StackValidationRequest stackValidationRequest);
-
-    @POST
-    @Path("ambari")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Override
-    @ApiOperation(value = StackOpDescription.GET_BY_AMBARI_ADDRESS, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "getStackForAmbari")
-    StackResponse getStackForAmbari(@Valid AmbariAddressJson json);
-
-    @GET
-    @Path("all")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Override
-    @ApiOperation(value = StackOpDescription.GET_ALL, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "getAllStack")
-    Set<AutoscaleStackResponse> getAllForAutoscale();
-
-    @GET
-    @Path("authorize/{id}/{owner}/{permission}")
-    @Produces(MediaType.APPLICATION_JSON)
-    Boolean authorizeForAutoscale(@PathParam("id") Long id, @PathParam("owner") String owner, @PathParam("permission") String permission);
 }

@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.api.CoreApi;
+import com.sequenceiq.cloudbreak.api.endpoint.autoscale.AutoscaleEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.AccountPreferencesEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.AuditEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.BlueprintEndpoint;
@@ -79,6 +80,7 @@ public class CloudbreakClient {
             AccountPreferencesEndpoint.class,
             AuditEndpoint.class,
             AuditV3Endpoint.class,
+            AutoscaleEndpoint.class,
             BlueprintEndpoint.class,
             BlueprintV3Endpoint.class,
             EventEndpoint.class,
@@ -176,6 +178,10 @@ public class CloudbreakClient {
 
     public AuditV3Endpoint auditV3Endpoint() {
         return getEndpoint(AuditV3Endpoint.class);
+    }
+
+    public AutoscaleEndpoint autoscaleEndpoint() {
+        return getEndpoint(AutoscaleEndpoint.class);
     }
 
     public BlueprintEndpoint blueprintEndpoint() {

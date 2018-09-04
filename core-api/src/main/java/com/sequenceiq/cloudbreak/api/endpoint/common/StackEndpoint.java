@@ -10,9 +10,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
-import com.sequenceiq.cloudbreak.api.model.AmbariAddressJson;
-import com.sequenceiq.cloudbreak.api.model.AutoscaleStackResponse;
-import com.sequenceiq.cloudbreak.api.model.CertificateResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformVariantsJson;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.StackValidationRequest;
@@ -43,11 +40,5 @@ public interface StackEndpoint {
 
     Response deleteInstances(@PathParam("stackId") Long stackId, @QueryParam("instanceIds") Set<String> instanceIds);
 
-    CertificateResponse getCertificate(@PathParam("id") Long stackId);
-
     Response validate(@Valid StackValidationRequest stackValidationRequest);
-
-    StackResponse getStackForAmbari(@Valid AmbariAddressJson json);
-
-    Set<AutoscaleStackResponse> getAllForAutoscale();
 }

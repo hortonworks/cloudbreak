@@ -1,7 +1,5 @@
 package com.sequenceiq.periscope.monitor.handler;
 
-import java.util.HashSet;
-
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
@@ -19,11 +17,11 @@ public class CloudbreakCommunicator {
 
     public StackResponse getById(long stackId) {
         CloudbreakClient cloudbreakClient = cloudbreakClientConfiguration.cloudbreakClient();
-        return cloudbreakClient.stackV1Endpoint().get(stackId, new HashSet<>());
+        return cloudbreakClient.autoscaleEndpoint().get(stackId);
     }
 
     public void failureReport(long stackId, FailureReport failureReport) {
         CloudbreakClient cloudbreakClient = cloudbreakClientConfiguration.cloudbreakClient();
-        cloudbreakClient.clusterEndpoint().failureReport(stackId, failureReport);
+        cloudbreakClient.autoscaleEndpoint().failureReport(stackId, failureReport);
     }
 }

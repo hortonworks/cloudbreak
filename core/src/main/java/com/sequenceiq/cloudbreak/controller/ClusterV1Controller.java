@@ -16,10 +16,8 @@ import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ClusterV1Endpoint;
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
-import com.sequenceiq.cloudbreak.api.model.AutoscaleClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.ConfigsRequest;
 import com.sequenceiq.cloudbreak.api.model.ConfigsResponse;
-import com.sequenceiq.cloudbreak.api.model.FailureReport;
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRepairRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
@@ -108,14 +106,6 @@ public class ClusterV1Controller implements ClusterV1Endpoint {
     }
 
     @Override
-    public AutoscaleClusterResponse getForAutoscale(Long stackId) {
-        Stack stack = stackService.getForAutoscale(stackId);
-        AutoscaleClusterResponse cluster = clusterService.retrieveClusterForCurrentUser(stackId, AutoscaleClusterResponse.class);
-        String clusterJson = clusterService.getClusterJson(stack.getAmbariIp(), stackId);
-        return clusterService.getClusterResponse(cluster, clusterJson);
-    }
-
-    @Override
     public ClusterResponse getPrivate(String name) {
         Stack stack = stackService.getByNameInOrg(name, restRequestThreadLocalService.getRequestedOrgId());
         ClusterResponse cluster = clusterService.retrieveClusterForCurrentUser(stack.getId(), ClusterResponse.class);
@@ -160,12 +150,6 @@ public class ClusterV1Controller implements ClusterV1Endpoint {
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }
-        return Response.accepted().build();
-    }
-
-    @Override
-    public Response failureReport(Long stackId, FailureReport failureReport) {
-        clusterService.failureReport(stackId, failureReport.getFailedNodes());
         return Response.accepted().build();
     }
 

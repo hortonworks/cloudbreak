@@ -378,6 +378,11 @@ public class OfflineStateGenerator {
         }
 
         @Override
+        public Long findOrganizationIdById(Long id) {
+            return null;
+        }
+
+        @Override
         public <S extends Stack> S save(S entity) {
             return entity;
         }

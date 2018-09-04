@@ -125,4 +125,8 @@ public interface StackRepository extends OrganizationResourceRepository<Stack, L
     @DisableCheckPermissions
     @Query("SELECT COUNT(s) FROM Stack s WHERE s.owner = :owner AND s.stackStatus.status <> 'DELETE_COMPLETED'")
     Long countActiveByOwner(@Param("owner") String owner);
+
+    @DisableCheckPermissions
+    @Query("SELECT s.organization.id FROM Stack s where s.id = :id")
+    Long findOrganizationIdById(@Param("id") Long id);
 }
