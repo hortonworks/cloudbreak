@@ -112,6 +112,10 @@
         <role>AMBARIUI</role>
         <url>http://{{ salt['grains.get']('fqdn') }}:{{ ports['AMBARI'] }}</url>
     </service>
+    <service>
+        <role>AMBARIWS</role>
+        <url>http://{{ salt['grains.get']('fqdn') }}:{{ ports['AMBARI'] }}</url>
+    </service>
     {%- endif %}
 
     {% if 'RANGER_ADMIN' in salt['pillar.get']('gateway:location') -%}
