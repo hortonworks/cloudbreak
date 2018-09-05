@@ -284,6 +284,10 @@ public class ClusterService {
         return gatewayCount > 1;
     }
 
+    public Iterable<Cluster> saveAll(Iterable<Cluster> clusters) {
+        return clusterRepository.saveAll(clusters);
+    }
+
     public Cluster save(Cluster cluster) {
         return clusterRepository.save(cluster);
     }
@@ -984,7 +988,7 @@ public class ClusterService {
         return ambariClient;
     }
 
-    public List<Cluster> getByBlueprint(Blueprint blueprint) {
+    public Set<Cluster> findByBlueprint(Blueprint blueprint) {
         return clusterRepository.findByBlueprint(blueprint);
     }
 
