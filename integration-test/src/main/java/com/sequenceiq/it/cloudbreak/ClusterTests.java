@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -326,6 +327,9 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
                 .filter(ImageResponse::isDefaultImage)
                 .filter(image -> {
                     ImageResponse imageResponse = (ImageResponse) image;
+                    if (!StringUtils.isEmpty(imageResponse.getVersion())) {
+                        return imageResponse.getVersion().startsWith(stackVersion);
+                    }
                     if (imageResponse.getStackDetails() == null) {
                         return true;
                     }
