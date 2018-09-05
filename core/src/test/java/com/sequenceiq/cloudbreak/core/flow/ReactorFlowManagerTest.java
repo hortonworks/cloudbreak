@@ -172,7 +172,6 @@ public class ReactorFlowManagerTest {
         verify(reactor).notify(eq(FlowChainTriggers.STACK_IMAGE_UPDATE_TRIGGER_EVENT), any(Event.class));
     }
 
-    @Test
     public void tesTriggerClusterDownscaleWhenUnableToDefineScaleAmount() {
         HostGroupAdjustmentJson hostGroupAdjustment = new HostGroupAdjustmentJson();
         hostGroupAdjustment.setScalingAdjustment(null);
