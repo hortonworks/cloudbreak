@@ -89,6 +89,10 @@ public class UserProfileService {
         return userProfileRepository.findOneByImageCatalogName(catalogId);
     }
 
+    public UserProfile findByUser(Long userId) {
+        return userProfileRepository.findOneByUser(userId);
+    }
+
     private void addUiProperties(UserProfile userProfile) {
         try {
             userProfile.setUiProperties(new Json(new HashMap<>()));

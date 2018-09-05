@@ -1,8 +1,7 @@
 package com.sequenceiq.cloudbreak.service.user;
 
-import java.util.Collections;
-import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -21,7 +20,7 @@ public class UserProfileHandler {
     private UserProfileService userProfileService;
 
     public void createProfilePreparation(Credential credential, User user) {
-        UserProfile userProfile = userProfileService.getOrCreate(credential.getAccount(), credential.getOwner(), user);
+        UserProfile userProfile = userProfileService.findByUser(user.getId());
         if (userProfile != null && userProfile.getDefaultCredentials().isEmpty()) {
             userProfile.setDefaultCredentials(Sets.newHashSet(credential));
             userProfileService.save(userProfile);
@@ -31,14 +30,14 @@ public class UserProfileHandler {
     public void destroyProfileCredentialPreparation(Credential credential) {
         Set<UserProfile> userProfiles = userProfileService.findOneByCredentialId(credential.getId());
         for (UserProfile userProfile : userProfiles) {
-            Optional<Credential> foundCredential = Optional.ofNullable(userProfile.getDefaultCredentials()).orElse(Collections.emptySet())
-                    .stream()
-                    .filter(defaultCredential -> defaultCredential.getId().equals(credential.getId()))
-                    .findFirst();
-            if (foundCredential.isPresent()) {
-                userProfile.getDefaultCredentials().remove(foundCredential.get());
+            if (userProfile.getDefaultCredentials() != null && !userProfile.getDefaultCredentials().isEmpty()) {
+                Set<Credential> foundCredentials = userProfile.getDefaultCredentials()
+                        .stream()
+                        .filter(defaultCredential -> defaultCredential.getId().equals(credential.getId()))
+                        .collect(Collectors.toSet());
+                userProfile.getDefaultCredentials().removeAll(foundCredentials);
+                userProfileService.save(userProfile);
             }
-            userProfileService.save(userProfile);
         }
     }
 
