@@ -26,7 +26,13 @@ type blueprintOut struct {
 	Tags           string `json:"Tags" yaml:"Tags"`
 }
 
-type blueprintOutDescribe struct {
+type blueprintOutJsonDescribe struct {
+	*blueprintOut
+	Content string `json:"BlueprintTextAsBase64" yaml:"BlueprintTextAsBase64"`
+	ID      string `json:"ID" yaml:"ID"`
+}
+
+type blueprintOutTableDescribe struct {
 	*blueprintOut
 	ID string `json:"ID" yaml:"ID"`
 }
@@ -35,7 +41,11 @@ func (b *blueprintOut) DataAsStringArray() []string {
 	return []string{b.Name, b.Description, b.HDPVersion, b.HostgroupCount, b.Tags}
 }
 
-func (b *blueprintOutDescribe) DataAsStringArray() []string {
+func (b *blueprintOutJsonDescribe) DataAsStringArray() []string {
+	return append(b.blueprintOut.DataAsStringArray(), b.ID)
+}
+
+func (b *blueprintOutTableDescribe) DataAsStringArray() []string {
 	return append(b.blueprintOut.DataAsStringArray(), b.ID)
 }
 
@@ -98,7 +108,11 @@ func DescribeBlueprint(c *cli.Context) {
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
 	bp := fetchBlueprint(c.Int64(FlOrganizationOptional.Name), c.String(FlName.Name), cbClient.Cloudbreak.V3OrganizationIDBlueprints)
-	output.Write(append(blueprintHeader, "ID"), convertResponseWithIDToBlueprint(bp))
+	if output.Format != "table" {
+		output.Write(append(blueprintHeader, "Content", "ID"), convertResponseWithContentAndIDToBlueprint(bp))
+	} else {
+		output.Write(append(blueprintHeader, "ID"), convertResponseWithIDToBlueprint(bp))
+	}
 }
 
 type getBlueprintInOrganization interface {
@@ -172,10 +186,26 @@ func convertResponseToBlueprint(bp *models_cloudbreak.BlueprintResponse) *bluepr
 	}
 }
 
-func convertResponseWithIDToBlueprint(bp *models_cloudbreak.BlueprintResponse) *blueprintOutDescribe {
+func convertResponseWithContentAndIDToBlueprint(bp *models_cloudbreak.BlueprintResponse) *blueprintOutJsonDescribe {
 	jsonRoot := decodeAndParseToJson(bp.AmbariBlueprint)
 	blueprintsNode := jsonRoot["Blueprints"].(map[string]interface{})
-	return &blueprintOutDescribe{
+	return &blueprintOutJsonDescribe{
+		blueprintOut: &blueprintOut{
+			Name:           *bp.Name,
+			Description:    *bp.Description,
+			HDPVersion:     fmt.Sprintf("%v", blueprintsNode["stack_version"]),
+			HostgroupCount: fmt.Sprint(bp.HostGroupCount),
+			Tags:           bp.Status,
+		},
+		Content: bp.AmbariBlueprint,
+		ID:      strconv.FormatInt(bp.ID, 10),
+	}
+}
+
+func convertResponseWithIDToBlueprint(bp *models_cloudbreak.BlueprintResponse) *blueprintOutTableDescribe {
+	jsonRoot := decodeAndParseToJson(bp.AmbariBlueprint)
+	blueprintsNode := jsonRoot["Blueprints"].(map[string]interface{})
+	return &blueprintOutTableDescribe{
 		blueprintOut: &blueprintOut{
 			Name:           *bp.Name,
 			Description:    *bp.Description,

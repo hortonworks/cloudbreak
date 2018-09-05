@@ -602,6 +602,7 @@ func main() {
 				},
 				{
 					Name:   "generate-reinstall-template",
+					Hidden: true,
 					Usage:  "generates reinstall template",
 					Before: ConfigRead,
 					Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlBlueprintName).AddAuthenticationFlags().AddOutputFlag().Build(),
@@ -638,6 +639,7 @@ func main() {
 				},
 				{
 					Name:   "reinstall",
+					Hidden: true,
 					Usage:  "reinstalls a cluster",
 					Before: ConfigRead,
 					Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlBlueprintNameOptional, cb.FlKerberosPasswordOptional, cb.FlKerberosPrincipalOptional, cb.FlInputJson, cb.FlWaitOptional).AddAuthenticationFlags().AddOutputFlag().Build(),

@@ -35,7 +35,7 @@ var getBlueprintClient = func(server, userName, password, authType string) getBl
 
 var stackClient = func(server, userName, password, authType string) getStackInOrganization {
 	cbClient := NewCloudbreakHTTPClient(server, userName, password, authType)
-	return cbClient.Cloudbreak.V3OrganizationIDStack
+	return cbClient.Cloudbreak.V3OrganizationIDStacks
 }
 
 func GenerateAwsStackTemplate(c *cli.Context) error {

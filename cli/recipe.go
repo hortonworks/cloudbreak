@@ -24,7 +24,13 @@ type recipeOut struct {
 	ExecutionType string `json:"ExecutionType" yaml:"ExecutionType"`
 }
 
-type recipeOutDescribe struct {
+type recipeOutJsonDescribe struct {
+	*recipeOut
+	Content string `json:"RecipeTextAsBase64" yaml:"RecipeTextAsBase64"`
+	ID      string `json:"ID" yaml:"ID"`
+}
+
+type recipeOutTableDescribe struct {
 	*recipeOut
 	ID string `json:"ID" yaml:"ID"`
 }
@@ -33,7 +39,11 @@ func (r *recipeOut) DataAsStringArray() []string {
 	return []string{r.Name, r.Description, r.ExecutionType}
 }
 
-func (r *recipeOutDescribe) DataAsStringArray() []string {
+func (r *recipeOutJsonDescribe) DataAsStringArray() []string {
+	return append(r.recipeOut.DataAsStringArray(), r.ID)
+}
+
+func (r *recipeOutTableDescribe) DataAsStringArray() []string {
 	return append(r.recipeOut.DataAsStringArray(), r.ID)
 }
 
@@ -119,7 +129,11 @@ func DescribeRecipe(c *cli.Context) {
 		utils.LogErrorAndExit(err)
 	}
 	recipe := resp.Payload
-	output.Write(append(recipeHeader, "ID"), &recipeOutDescribe{&recipeOut{recipe.Name, *recipe.Description, *recipe.RecipeType}, strconv.FormatInt(recipe.ID, 10)})
+	if output.Format != "table" {
+		output.Write(append(recipeHeader, "ContentAsBase64", "ID"), &recipeOutJsonDescribe{&recipeOut{recipe.Name, *recipe.Description, *recipe.RecipeType}, recipe.Content, strconv.FormatInt(recipe.ID, 10)})
+	} else {
+		output.Write(append(recipeHeader, "ID"), &recipeOutTableDescribe{&recipeOut{recipe.Name, *recipe.Description, *recipe.RecipeType}, strconv.FormatInt(recipe.ID, 10)})
+	}
 }
 
 func DeleteRecipe(c *cli.Context) {

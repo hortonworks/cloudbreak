@@ -85,6 +85,36 @@ func (a *Client) DeleteSmartSenseSubscriptionInOrganization(params *DeleteSmartS
 }
 
 /*
+GetDefaultSmartSenseSubscriptionInOrganization gets default smart sense subscription by name in organization
+
+SmartSense subscriptions could be configured.
+*/
+func (a *Client) GetDefaultSmartSenseSubscriptionInOrganization(params *GetDefaultSmartSenseSubscriptionInOrganizationParams) (*GetDefaultSmartSenseSubscriptionInOrganizationOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetDefaultSmartSenseSubscriptionInOrganizationParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getDefaultSmartSenseSubscriptionInOrganization",
+		Method:             "GET",
+		PathPattern:        "/v3/{organizationId}/smartsensesubscriptions",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetDefaultSmartSenseSubscriptionInOrganizationReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetDefaultSmartSenseSubscriptionInOrganizationOK), nil
+
+}
+
+/*
 GetSmartSenseSubscriptionInOrganization gets smart sense subscription by name in organization
 
 SmartSense subscriptions could be configured.
@@ -111,36 +141,6 @@ func (a *Client) GetSmartSenseSubscriptionInOrganization(params *GetSmartSenseSu
 		return nil, err
 	}
 	return result.(*GetSmartSenseSubscriptionInOrganizationOK), nil
-
-}
-
-/*
-ListSmartSenseSubscriptionsByOrganization lists smart sense subscriptions for the given organization
-
-SmartSense subscriptions could be configured.
-*/
-func (a *Client) ListSmartSenseSubscriptionsByOrganization(params *ListSmartSenseSubscriptionsByOrganizationParams) (*ListSmartSenseSubscriptionsByOrganizationOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewListSmartSenseSubscriptionsByOrganizationParams()
-	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "listSmartSenseSubscriptionsByOrganization",
-		Method:             "GET",
-		PathPattern:        "/v3/{organizationId}/smartsensesubscriptions",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &ListSmartSenseSubscriptionsByOrganizationReader{formats: a.formats},
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*ListSmartSenseSubscriptionsByOrganizationOK), nil
 
 }
 

@@ -46,11 +46,11 @@ RSpec.describe 'Blueprint test cases', :type => :aruba do
     expect(result.stdout.empty?).to be_falsy
     expect(JSON.parse(result.stdout)).to include_json(
       Name: /.*/,
-      Description: /.*/,  
+      Description: /.*/,
       HDPVersion: /.*/,
       HostgroupCount: /.*/,
-      Tags: /.*/     
-    )       
+      Tags: /.*/
+    )
   end
 
   it "Blueprint - List - All existing" do

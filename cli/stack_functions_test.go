@@ -3,15 +3,15 @@ package cli
 import (
 	"testing"
 
-	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_organization_id_stack"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_organization_id_stacks"
 	"github.com/hortonworks/cb-cli/models_cloudbreak"
 )
 
 type getStackAvailableClient struct {
 }
 
-func (c getStackAvailableClient) GetStackInOrganization(*v3_organization_id_stack.GetStackInOrganizationParams) (*v3_organization_id_stack.GetStackInOrganizationOK, error) {
-	return &v3_organization_id_stack.GetStackInOrganizationOK{
+func (c getStackAvailableClient) GetStackInOrganization(*v3_organization_id_stacks.GetStackInOrganizationParams) (*v3_organization_id_stacks.GetStackInOrganizationOK, error) {
+	return &v3_organization_id_stacks.GetStackInOrganizationOK{
 		Payload: &models_cloudbreak.StackResponse{
 			Status: "AVAILABLE",
 			Cluster: &models_cloudbreak.ClusterResponse{
@@ -39,8 +39,8 @@ func TestWaitForOperationToFinishImplSkip(t *testing.T) {
 type getStackFailedClient struct {
 }
 
-func (c getStackFailedClient) GetStackInOrganization(*v3_organization_id_stack.GetStackInOrganizationParams) (*v3_organization_id_stack.GetStackInOrganizationOK, error) {
-	return &v3_organization_id_stack.GetStackInOrganizationOK{
+func (c getStackFailedClient) GetStackInOrganization(*v3_organization_id_stacks.GetStackInOrganizationParams) (*v3_organization_id_stacks.GetStackInOrganizationOK, error) {
+	return &v3_organization_id_stacks.GetStackInOrganizationOK{
 		Payload: &models_cloudbreak.StackResponse{
 			Status: "STOP_FAILED",
 			Cluster: &models_cloudbreak.ClusterResponse{
