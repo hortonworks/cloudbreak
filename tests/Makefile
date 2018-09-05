@@ -28,7 +28,7 @@ stop-mock:
 
 # Restart Cloudbreak Mock (only Containers are restarted) with same Swagger JSON and Mock IP as was set previously
 restart-mock:
-	GIT_VERSION=$(GIT_FIRST_PARENT) docker-compose -f integration-tests/docker-compose.yml -p cbreak down
+	GIT_VERSION=$(GIT_FIRST_PARENT) docker-compose -f docker-compose.yml -p cbreak down
 	GIT_VERSION=$(GIT_FIRST_PARENT) GIT_TAG=$(GIT_LATEST_TAG) BASE_URL=https://$(DOCKER_IP) ./scripts/cbm.sh
 
 # For custom version apply as: 'GIT_FIRST_PARENT=2.8.0-dev.374 make download-s3'
