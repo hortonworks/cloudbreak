@@ -29,9 +29,6 @@ public class UserProfile {
     private Long id;
 
     @OneToOne
-    private Credential credential;
-
-    @OneToOne
     private ImageCatalog imageCatalog;
 
     @Column(nullable = false)
@@ -59,14 +56,6 @@ public class UserProfile {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public Credential getCredential() {
-        return credential;
-    }
-
-    public void setCredential(Credential credential) {
-        this.credential = credential;
     }
 
     public String getOwner() {

@@ -132,18 +132,18 @@ public class CredentialService extends AbstractOrganizationAwareResourceService<
         return created;
     }
 
-    public void delete(Long id, Organization organization) {
+    public Credential delete(Long id, Organization organization) {
         Credential credential = Optional.ofNullable(
                 credentialRepository.findActiveByIdAndOrganizationFilterByPlatforms(id, organization.getId(), accountPreferencesService.enabledPlatforms()))
                 .orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_ID, id));
-        delete(credential, organization);
+        return delete(credential, organization);
     }
 
-    public void delete(String name, Organization organization) {
+    public Credential delete(String name, Organization organization) {
         Credential credential = Optional.ofNullable(
                 credentialRepository.findActiveByNameAndOrgIdFilterByPlatforms(name, organization.getId(), accountPreferencesService.enabledPlatforms()))
                 .orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, name));
-        delete(credential, organization);
+        return delete(credential, organization);
     }
 
     public Set<CredentialResponse> convertAllToResponse(@Nonnull Iterable<Credential> credentials) {
@@ -174,12 +174,13 @@ public class CredentialService extends AbstractOrganizationAwareResourceService<
         return credentialRepository.findByTopology(topology);
     }
 
-    private void delete(Credential credential, Organization organization) {
+    private Credential delete(Credential credential, Organization organization) {
         checkCredentialIsDeletable(credential);
         LOGGER.info(String.format("Starting to delete credential [name: %s, organization: %s]", credential.getName(), organization.getName()));
         userProfileHandler.destroyProfileCredentialPreparation(credential);
-        archiveCredential(credential);
+        Credential archived = archiveCredential(credential);
         sendCredentialNotification(credential, ResourceEvent.CREDENTIAL_DELETED);
+        return archived;
     }
 
     private void checkCredentialIsDeletable(Credential credential) {
@@ -207,6 +208,19 @@ public class CredentialService extends AbstractOrganizationAwareResourceService<
     }
 
     @Override
+    public Credential deleteByNameFromOrganization(String name, Long organizationId) {
+        Organization organization = getOrganizationService().getById(organizationId);
+        return delete(name, organization);
+    }
+
+    @Override
+    public Credential create(Credential resource, Organization organization, User user) {
+        Credential created = super.create(resource, organization, user);
+        userProfileHandler.createProfilePreparation(created, user);
+        return created;
+    }
+
+    @Override
     public OrganizationResourceRepository<Credential, Long> repository() {
         return credentialRepository;
     }
@@ -218,7 +232,7 @@ public class CredentialService extends AbstractOrganizationAwareResourceService<
 
     @Override
     protected void prepareDeletion(Credential resource) {
-        checkCredentialIsDeletable(resource);
+        throw new UnsupportedOperationException("Credential deletion from database is not allowed, thus default deletion process is not supported!");
     }
 
     @Override
@@ -226,11 +240,11 @@ public class CredentialService extends AbstractOrganizationAwareResourceService<
 
     }
 
-    public void archiveCredential(Credential credential) {
+    public Credential archiveCredential(Credential credential) {
         credential.setName(generateArchiveName(credential.getName()));
         credential.setArchived(true);
         credential.setTopology(null);
-        credentialRepository.save(credential);
+        return credentialRepository.save(credential);
     }
 
     private void sendCredentialNotification(Credential credential, ResourceEvent resourceEvent) {
