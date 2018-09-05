@@ -33,12 +33,12 @@ public class ManagementPackService extends AbstractOrganizationAwareResourceServ
     }
 
     @Override
-    protected OrganizationResourceRepository<ManagementPack, Long> repository() {
+    public OrganizationResourceRepository<ManagementPack, Long> repository() {
         return mpackRepository;
     }
 
     @Override
-    protected OrganizationResource resource() {
+    public OrganizationResource resource() {
         return OrganizationResource.MPACK;
     }
 

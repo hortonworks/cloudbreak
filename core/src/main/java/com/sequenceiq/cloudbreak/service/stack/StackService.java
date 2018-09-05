@@ -861,6 +861,16 @@ public class StackService {
         }
     }
 
+    public void delete(Stack stack, Boolean forced, Boolean deleteDependencies) {
+        MDCBuilder.buildMdcContext(stack);
+        LOGGER.info("Stack delete requested.");
+        if (!stack.isDeleteCompleted()) {
+            flowManager.triggerTermination(stack.getId(), forced, deleteDependencies);
+        } else {
+            LOGGER.info("Stack is already deleted.");
+        }
+    }
+
     private void addTemplateForStack(Stack stack, String template) {
         StackTemplate stackTemplate = new StackTemplate(template, cbVersion);
         try {

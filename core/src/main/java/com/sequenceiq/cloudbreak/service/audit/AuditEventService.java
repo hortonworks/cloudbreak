@@ -75,12 +75,12 @@ public class AuditEventService extends AbstractOrganizationAwareResourceService<
     }
 
     @Override
-    protected OrganizationResourceRepository<StructuredEventEntity, Long> repository() {
+    public OrganizationResourceRepository<StructuredEventEntity, Long> repository() {
         return structuredEventRepository;
     }
 
     @Override
-    protected OrganizationResource resource() {
+    public OrganizationResource resource() {
         return OrganizationResource.STRUCTURED_EVENT;
     }
 

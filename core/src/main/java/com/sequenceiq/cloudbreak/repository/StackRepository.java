@@ -84,6 +84,11 @@ public interface StackRepository extends OrganizationResourceRepository<Stack, L
     List<Stack> findAllAlive();
 
     @CheckPermissionsByReturnValue
+    @Query("SELECT s FROM Stack s WHERE s.stackStatus.status <> 'DELETE_COMPLETED' AND "
+            + "(s.organization = null OR s.creator = null)")
+    Set<Stack> findAllAliveWithNoOrganizationOrUser();
+
+    @CheckPermissionsByReturnValue
     @Query("SELECT s FROM Stack s WHERE s.stackStatus.status <> 'DELETE_COMPLETED' AND s.stackStatus.status <> 'REQUESTED' "
             + "AND s.stackStatus.status <> 'CREATE_IN_PROGRESS'")
     List<Stack> findAllAliveAndProvisioned();
@@ -117,6 +122,11 @@ public interface StackRepository extends OrganizationResourceRepository<Stack, L
 
     @CheckPermissionsByReturnValue
     Set<Stack> findByNetwork(Network network);
+
+    @DisableCheckPermissions
+    @Query("SELECT COUNT(s) FROM Stack s WHERE (s.organization = null OR s.creator = null) "
+            + "AND s.stackStatus.status <> 'DELETE_COMPLETED'")
+    Long countStacksWithNoOrganizationOrCreator();
 
     @DisableCheckPermissions
     @Query("SELECT COUNT(s) FROM Stack s WHERE s.account = :account AND s.stackStatus.status <> 'DELETE_COMPLETED'")

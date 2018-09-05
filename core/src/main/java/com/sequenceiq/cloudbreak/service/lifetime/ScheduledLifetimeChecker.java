@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesValidationException;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesValidator;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.startup.OrganizationMigrationRunner;
 
 @Service
 public class ScheduledLifetimeChecker {
@@ -32,10 +33,14 @@ public class ScheduledLifetimeChecker {
     @Inject
     private ReactorFlowManager flowManager;
 
+    @Inject
+    private OrganizationMigrationRunner organizationMigrationRunner;
+
     @Scheduled(fixedRate = 60 * 1000, initialDelay = 60 * 1000)
     public void validate() {
-        for (Stack stack : stackService.getAllAlive()) {
-            getStackTimeToLive(stack).ifPresent(ttl -> {
+        if (organizationMigrationRunner.isFinished()) {
+            for (Stack stack : stackService.getAllAlive()) {
+                getStackTimeToLive(stack).ifPresent(ttl -> {
                     try {
                         if (Status.DELETE_IN_PROGRESS != stack.getStatus() && stack.getCluster() != null && stack.getCluster().getCreationFinished() != null) {
                             preferencesValidator.validateClusterTimeToLive(stack.getCluster().getCreationFinished(), ttl.toMillis());
@@ -44,6 +49,7 @@ public class ScheduledLifetimeChecker {
                         terminateStack(stack);
                     }
                 });
+            }
         }
     }
 

@@ -42,6 +42,7 @@ public class ConstraintTemplateService extends AbstractOrganizationAwareResource
         return delete(constraintTemplate);
     }
 
+    @Override
     public ConstraintTemplate delete(ConstraintTemplate constraintTemplate) {
         LOGGER.info("Deleting constraint-template. {} - {}", new Object[]{constraintTemplate.getId(), constraintTemplate.getName()});
         List<Cluster> clusters = clusterService.findAllClustersForConstraintTemplate(constraintTemplate.getId());
@@ -68,12 +69,12 @@ public class ConstraintTemplateService extends AbstractOrganizationAwareResource
     }
 
     @Override
-    protected OrganizationResourceRepository<ConstraintTemplate, Long> repository() {
+    public OrganizationResourceRepository<ConstraintTemplate, Long> repository() {
         return constraintTemplateRepository;
     }
 
     @Override
-    protected OrganizationResource resource() {
+    public OrganizationResource resource() {
         return OrganizationResource.CONSTRAINT_TEMPLATE;
     }
 

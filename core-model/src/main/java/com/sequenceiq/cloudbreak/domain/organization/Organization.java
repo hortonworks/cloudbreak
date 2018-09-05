@@ -33,7 +33,7 @@ public class Organization implements ProvisionEntity {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private OrganizationStatus status;
+    private OrganizationStatus status = OrganizationStatus.ACTIVE;
 
     private Long deletionTimestamp = -1L;
 

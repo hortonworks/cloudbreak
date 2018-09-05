@@ -43,6 +43,7 @@ import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.metrics.MetricService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.startup.OrganizationMigrationRunner;
 
 @Service
 public class HeartbeatService {
@@ -94,9 +95,12 @@ public class HeartbeatService {
     @Inject
     private TransactionService transactionService;
 
+    @Inject
+    private OrganizationMigrationRunner organizationMigrationRunner;
+
     @Scheduled(cron = "${cb.ha.heartbeat.rate:0/30 * * * * *}")
     public void heartbeat() {
-        if (cloudbreakNodeConfig.isNodeIdSpecified()) {
+        if (shouldRun()) {
             String nodeId = cloudbreakNodeConfig.getId();
             try {
                 retryService.testWith2SecDelayMax5Times(() -> {
@@ -122,7 +126,7 @@ public class HeartbeatService {
 
     @Scheduled(initialDelay = 35000L, fixedDelay = 30000L)
     public void scheduledFlowDistribution() {
-        if (cloudbreakNodeConfig.isNodeIdSpecified()) {
+        if (shouldRun()) {
             List<CloudbreakNode> failedNodes = new ArrayList<>();
             try {
                 failedNodes.addAll(distributeFlows());
@@ -136,7 +140,8 @@ public class HeartbeatService {
             }
 
             String nodeId = cloudbreakNodeConfig.getId();
-            Set<String> allMyFlows = flowLogRepository.findAllByCloudbreakNodeId(nodeId).stream().map(FlowLog::getFlowId).distinct().collect(Collectors.toSet());
+            Set<String> allMyFlows = flowLogRepository.findAllByCloudbreakNodeId(nodeId).stream()
+                    .map(FlowLog::getFlowId).distinct().collect(Collectors.toSet());
             Set<String> newFlows = allMyFlows.stream().filter(f -> runningFlows.get(f) == null).collect(Collectors.toSet());
             for (String flow : newFlows) {
                 try {
@@ -146,6 +151,10 @@ public class HeartbeatService {
                 }
             }
         }
+    }
+
+    private boolean shouldRun() {
+        return organizationMigrationRunner.isFinished() && cloudbreakNodeConfig.isNodeIdSpecified();
     }
 
     public List<CloudbreakNode> distributeFlows() throws TransactionExecutionException {

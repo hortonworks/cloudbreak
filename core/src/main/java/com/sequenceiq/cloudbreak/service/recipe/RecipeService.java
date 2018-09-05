@@ -58,12 +58,12 @@ public class RecipeService extends AbstractOrganizationAwareResourceService<Reci
     }
 
     @Override
-    protected OrganizationResourceRepository<Recipe, Long> repository() {
+    public OrganizationResourceRepository<Recipe, Long> repository() {
         return recipeRepository;
     }
 
     @Override
-    protected OrganizationResource resource() {
+    public OrganizationResource resource() {
         return OrganizationResource.RECIPE;
     }
 
