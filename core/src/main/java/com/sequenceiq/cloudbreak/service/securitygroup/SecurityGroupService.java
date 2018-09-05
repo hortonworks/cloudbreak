@@ -93,12 +93,12 @@ public class SecurityGroupService extends AbstractOrganizationAwareResourceServi
     }
 
     @Override
-    protected OrganizationResourceRepository<SecurityGroup, Long> repository() {
+    public OrganizationResourceRepository<SecurityGroup, Long> repository() {
         return groupRepository;
     }
 
     @Override
-    protected OrganizationResource resource() {
+    public OrganizationResource resource() {
         return OrganizationResource.SECURITY_GROUP;
     }
 

@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.repository.CloudbreakUsageRepository;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.startup.OrganizationMigrationRunner;
 
 @Service
 public class UsageService {
@@ -45,6 +46,9 @@ public class UsageService {
 
     @Inject
     private StackService stackService;
+
+    @Inject
+    private OrganizationMigrationRunner organizationMigrationRunner;
 
     public void openUsagesForStack(Stack stack) {
         LocalDateTime ldt = LocalDateTime.now();
@@ -105,11 +109,13 @@ public class UsageService {
 
     @Scheduled(cron = "0 01 0 * * *")
     public void fixUsages() {
-        try {
-            reopenOldUsages();
-            openNewIfNotFound();
-        } catch (DataIntegrityViolationException e) {
-            LOGGER.warn("Constraint violation during usage generation (maybe another node is generating..): {}", e.getMessage());
+        if (organizationMigrationRunner.isFinished()) {
+            try {
+                reopenOldUsages();
+                openNewIfNotFound();
+            } catch (DataIntegrityViolationException e) {
+                LOGGER.warn("Constraint violation during usage generation (maybe another node is generating..): {}", e.getMessage());
+            }
         }
     }
 

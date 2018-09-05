@@ -12,4 +12,6 @@ public interface OrganizationAwareResource {
     void setOrganization(Organization organization);
 
     OrganizationResource getResource();
+
+    String getOwner();
 }

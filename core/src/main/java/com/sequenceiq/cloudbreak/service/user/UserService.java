@@ -8,6 +8,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -64,6 +65,13 @@ public class UserService {
             }
             return user;
         } catch (TransactionExecutionException e) {
+            if (e.getCause() instanceof ConstraintViolationException) {
+                try {
+                    return transactionService.requiresNew(() -> userRepository.findByUserId(identityUser.getUsername()));
+                } catch (TransactionExecutionException e2) {
+                    throw new TransactionRuntimeExecutionException(e2);
+                }
+            }
             throw new TransactionRuntimeExecutionException(e);
         }
     }

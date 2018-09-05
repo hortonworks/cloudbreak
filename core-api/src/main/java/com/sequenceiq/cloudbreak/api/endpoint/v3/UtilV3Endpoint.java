@@ -25,9 +25,9 @@ import com.sequenceiq.cloudbreak.doc.OperationDescriptions.UtilityOpDescription;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Path("/v3/util")
+@Path("/v3/utils")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v3/{organizationId}/util", description = ControllerDescription.UTIL_DESCRIPTION, protocols = "http,https")
+@Api(value = "/v3/utils", description = ControllerDescription.UTIL_DESCRIPTION, protocols = "http,https")
 public interface UtilV3Endpoint {
 
     @GET

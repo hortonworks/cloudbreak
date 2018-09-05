@@ -323,6 +323,11 @@ public class OfflineStateGenerator {
         }
 
         @Override
+        public Set<Stack> findAllAliveWithNoOrganizationOrUser() {
+            return null;
+        }
+
+        @Override
         public List<Stack> findAllAliveAndProvisioned() {
             return null;
         }
@@ -364,6 +369,11 @@ public class OfflineStateGenerator {
 
         @Override
         public Set<Stack> findByNetwork(Network network) {
+            return null;
+        }
+
+        @Override
+        public Long countStacksWithNoOrganizationOrCreator() {
             return null;
         }
 

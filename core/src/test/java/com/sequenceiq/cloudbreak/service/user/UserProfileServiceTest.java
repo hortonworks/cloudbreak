@@ -40,8 +40,7 @@ public class UserProfileServiceTest {
     @InjectMocks
     private UserProfileService userProfileService;
 
-    @Mock
-    private User user;
+    private final User user = new User();
 
     @Before
     public void before() {
@@ -126,6 +125,7 @@ public class UserProfileServiceTest {
         String account = "account1";
         String owner = "123-123-123";
         UserProfile foundProfile = new UserProfile();
+        foundProfile.setUser(user);
         foundProfile.setOwner(owner);
         foundProfile.setAccount(account);
 
@@ -148,6 +148,7 @@ public class UserProfileServiceTest {
         String savedUserName = "test@hortonworks.com";
 
         UserProfile foundProfile = new UserProfile();
+        foundProfile.setUser(user);
         foundProfile.setOwner(owner);
         foundProfile.setAccount(account);
         foundProfile.setUserName(savedUserName);

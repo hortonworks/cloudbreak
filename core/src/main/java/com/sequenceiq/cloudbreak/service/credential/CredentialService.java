@@ -207,12 +207,12 @@ public class CredentialService extends AbstractOrganizationAwareResourceService<
     }
 
     @Override
-    protected OrganizationResourceRepository<Credential, Long> repository() {
+    public OrganizationResourceRepository<Credential, Long> repository() {
         return credentialRepository;
     }
 
     @Override
-    protected OrganizationResource resource() {
+    public OrganizationResource resource() {
         return OrganizationResource.CREDENTIAL;
     }
 

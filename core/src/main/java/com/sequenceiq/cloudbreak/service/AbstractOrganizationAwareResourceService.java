@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 
-import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
@@ -105,6 +104,21 @@ public abstract class AbstractOrganizationAwareResourceService<T extends Organiz
         resource.setOrganization(organization);
     }
 
+    @Override
+    public Iterable<T> findAll() {
+        return repository().findAll();
+    }
+
+    @Override
+    public T pureSave(T resource) {
+        return repository().save(resource);
+    }
+
+    @Override
+    public Iterable<T> pureSaveAll(Iterable<T> resources) {
+        return repository().saveAll(resources);
+    }
+
     public TransactionService getTransactionService() {
         return transactionService;
     }
@@ -114,8 +128,6 @@ public abstract class AbstractOrganizationAwareResourceService<T extends Organiz
     }
 
     protected abstract OrganizationResourceRepository<T, Long> repository();
-
-    protected abstract OrganizationResource resource();
 
     protected abstract void prepareDeletion(T resource);
 

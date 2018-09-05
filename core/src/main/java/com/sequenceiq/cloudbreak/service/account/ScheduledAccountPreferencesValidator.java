@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.AccountPreferences;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.startup.OrganizationMigrationRunner;
 
 @Service
 public class ScheduledAccountPreferencesValidator {
@@ -34,19 +35,24 @@ public class ScheduledAccountPreferencesValidator {
     @Inject
     private ReactorFlowManager flowManager;
 
+    @Inject
+    private OrganizationMigrationRunner organizationMigrationRunner;
+
     @Scheduled(cron = EVERY_HOUR_0MIN_0SEC)
     public void validate() {
-        LOGGER.info("Validate account preferences for all 'running' stack.");
-        Map<String, AccountPreferences> accountPreferences = new HashMap<>();
-        List<Stack> allAlive = stackService.getAllAlive();
+        if (organizationMigrationRunner.isFinished()) {
+            LOGGER.info("Validate account preferences for all 'running' stack.");
+            Map<String, AccountPreferences> accountPreferences = new HashMap<>();
+            List<Stack> allAlive = stackService.getAllAlive();
 
-        for (Stack stack : allAlive) {
-            AccountPreferences preferences = getAccountPreferences(stack.getAccount(), accountPreferences);
-            try {
-                preferencesValidator.validateClusterTimeToLive(stack.getCreated(), preferences.getClusterTimeToLive());
-                preferencesValidator.validateUserTimeToLive(stack.getOwner(), preferences);
-            } catch (AccountPreferencesValidationException ignored) {
-                terminateStack(stack);
+            for (Stack stack : allAlive) {
+                AccountPreferences preferences = getAccountPreferences(stack.getAccount(), accountPreferences);
+                try {
+                    preferencesValidator.validateClusterTimeToLive(stack.getCreated(), preferences.getClusterTimeToLive());
+                    preferencesValidator.validateUserTimeToLive(stack.getOwner(), preferences);
+                } catch (AccountPreferencesValidationException ignored) {
+                    terminateStack(stack);
+                }
             }
         }
     }

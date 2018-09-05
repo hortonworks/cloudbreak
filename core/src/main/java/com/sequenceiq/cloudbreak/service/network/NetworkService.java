@@ -92,12 +92,12 @@ public class NetworkService extends AbstractOrganizationAwareResourceService<Net
     }
 
     @Override
-    protected OrganizationResourceRepository<Network, Long> repository() {
+    public OrganizationResourceRepository<Network, Long> repository() {
         return networkRepository;
     }
 
     @Override
-    protected OrganizationResource resource() {
+    public OrganizationResource resource() {
         return OrganizationResource.NETWORK;
     }
 

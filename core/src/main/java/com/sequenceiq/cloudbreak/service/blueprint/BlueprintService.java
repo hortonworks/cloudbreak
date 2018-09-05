@@ -137,6 +137,7 @@ public class BlueprintService extends AbstractOrganizationAwareResourceService<B
     @Override
     public Blueprint delete(Blueprint blueprint) {
         LOGGER.info("Deleting blueprint with name: {}", blueprint.getName());
+        prepareDeletion(blueprint);
         if (ResourceStatus.USER_MANAGED.equals(blueprint.getStatus())) {
             blueprintRepository.delete(blueprint);
         } else {
@@ -148,12 +149,12 @@ public class BlueprintService extends AbstractOrganizationAwareResourceService<B
     }
 
     @Override
-    protected OrganizationResourceRepository<Blueprint, Long> repository() {
+    public OrganizationResourceRepository<Blueprint, Long> repository() {
         return blueprintRepository;
     }
 
     @Override
-    protected OrganizationResource resource() {
+    public OrganizationResource resource() {
         return OrganizationResource.BLUEPRINT;
     }
 
