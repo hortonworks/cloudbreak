@@ -15,9 +15,6 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v2.StackV2Endpoint;
-import com.sequenceiq.cloudbreak.api.model.AmbariAddressJson;
-import com.sequenceiq.cloudbreak.api.model.AutoscaleStackResponse;
-import com.sequenceiq.cloudbreak.api.model.CertificateResponse;
 import com.sequenceiq.cloudbreak.api.model.GeneratedBlueprintResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformVariantsJson;
 import com.sequenceiq.cloudbreak.api.model.ReinstallRequestV2;
@@ -189,23 +186,8 @@ public class StackV2Controller extends NotificationController implements StackV2
     }
 
     @Override
-    public CertificateResponse getCertificate(Long stackId) {
-        return stackCommonService.getCertificate(stackId);
-    }
-
-    @Override
     public Response validate(StackValidationRequest stackValidationRequest) {
         return stackCommonService.validate(stackValidationRequest);
-    }
-
-    @Override
-    public StackResponse getStackForAmbari(AmbariAddressJson json) {
-        return stackCommonService.getStackForAmbari(json);
-    }
-
-    @Override
-    public Set<AutoscaleStackResponse> getAllForAutoscale() {
-        return stackCommonService.getAllForAutoscale();
     }
 
     @Override

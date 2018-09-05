@@ -256,6 +256,11 @@ public class StackService {
     }
 
     @PreAuthorize("#oauth2.hasScope('cloudbreak.autoscale')")
+    public Long getOrganizationId(Long stackId) {
+        return stackRepository.findOrganizationIdById(stackId);
+    }
+
+    @PreAuthorize("#oauth2.hasScope('cloudbreak.autoscale')")
     public Set<AutoscaleStackResponse> getAllForAutoscale() {
         try {
             return transactionService.required(() -> {

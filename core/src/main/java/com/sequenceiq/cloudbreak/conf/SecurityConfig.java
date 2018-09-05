@@ -92,6 +92,8 @@ public class SecurityConfig {
 
         private static final String V3_API = API_ROOT_CONTEXT + "/v3/**";
 
+        private static final String AUTOSCALE_API = API_ROOT_CONTEXT + "/autoscale/**";
+
         @Inject
         private ResourceServerTokenServices resourceServerTokenServices;
 
@@ -136,6 +138,8 @@ public class SecurityConfig {
                     .permitAll()
                     .antMatchers(V3_API)
                     .permitAll()
+                    .antMatchers(AUTOSCALE_API)
+                    .access("#oauth2.hasScope('cloudbreak.autoscale')")
 
                     .antMatchers(API_ROOT_CONTEXT + "/v1/users/**").access("#oauth2.hasScope('openid')")
                     .antMatchers(BLUEPRINT_URL_PATTERNS).access("#oauth2.hasScope('cloudbreak.blueprints')")
@@ -151,10 +155,6 @@ public class SecurityConfig {
                     .antMatchers(ACCOUNT_PREFERENCES)
                     .access("#oauth2.hasScope('cloudbreak.templates') and #oauth2.hasScope('cloudbreak.stacks')")
                     .antMatchers(IMAGE_CATALOG_PATTERN).access("#oauth2.hasScope('cloudbreak.templates')")
-                    .antMatchers(API_ROOT_CONTEXT + "/v1/stacks/ambari", API_ROOT_CONTEXT + "/v1/stacks/*/certificate", API_ROOT_CONTEXT + "/v1/stacks/all")
-                    .access("#oauth2.hasScope('cloudbreak.autoscale')")
-                    .antMatchers(API_ROOT_CONTEXT + "/v2/stacks/ambari", API_ROOT_CONTEXT + "/v2/stacks/*/certificate", API_ROOT_CONTEXT + "/v2/stacks/all")
-                    .access("#oauth2.hasScope('cloudbreak.autoscale')")
                     .antMatchers(API_ROOT_CONTEXT + "/v1/events/**").access("#oauth2.hasScope('cloudbreak.events')")
                     .antMatchers(API_ROOT_CONTEXT + "/v1/audits/**").access("#oauth2.hasScope('cloudbreak.events')")
                     .antMatchers(API_ROOT_CONTEXT + "/v1/usages/account/**").access("#oauth2.hasScope('cloudbreak.usages.account')")

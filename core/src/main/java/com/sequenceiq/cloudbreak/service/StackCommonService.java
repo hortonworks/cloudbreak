@@ -299,17 +299,14 @@ public class StackCommonService implements StackEndpoint {
         return new GeneratedBlueprintResponse(blueprintText);
     }
 
-    @Override
     public CertificateResponse getCertificate(Long stackId) {
         return tlsSecurityService.getCertificates(stackId);
     }
 
-    @Override
     public StackResponse getStackForAmbari(AmbariAddressJson json) {
         return stackService.getByAmbariAddress(json.getAmbariAddress());
     }
 
-    @Override
     public Set<AutoscaleStackResponse> getAllForAutoscale() {
         LOGGER.info("Get all stack, autoscale authorized only.");
         return stackService.getAllForAutoscale();

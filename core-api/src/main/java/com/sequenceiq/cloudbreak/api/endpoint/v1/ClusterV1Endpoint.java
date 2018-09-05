@@ -16,14 +16,12 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
-import com.sequenceiq.cloudbreak.api.model.AutoscaleClusterResponse;
+import com.sequenceiq.cloudbreak.api.model.ConfigsRequest;
+import com.sequenceiq.cloudbreak.api.model.ConfigsResponse;
+import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRepairRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterResponse;
-import com.sequenceiq.cloudbreak.api.model.ConfigsRequest;
-import com.sequenceiq.cloudbreak.api.model.ConfigsResponse;
-import com.sequenceiq.cloudbreak.api.model.FailureReport;
-import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.UpdateGatewayTopologiesJson;
 import com.sequenceiq.cloudbreak.doc.ContentType;
@@ -53,13 +51,6 @@ public interface ClusterV1Endpoint {
     @ApiOperation(value = ClusterOpDescription.GET_BY_STACK_ID, produces = ContentType.JSON, notes = Notes.CLUSTER_NOTES,
             nickname = "getCluster")
     ClusterResponse get(@PathParam("id") Long id);
-
-    @GET
-    @Path("{id}/cluster/full")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ClusterOpDescription.GET_BY_STACK_ID, produces = ContentType.JSON, notes = Notes.CLUSTER_NOTES,
-            nickname = "getFullCluster")
-    AutoscaleClusterResponse getForAutoscale(@PathParam("id") Long id);
 
     @GET
     @Path("account/{name}/cluster")
@@ -104,13 +95,6 @@ public interface ClusterV1Endpoint {
     @ApiOperation(value = ClusterOpDescription.UPGRADE_AMBARI, produces = ContentType.JSON, notes = Notes.AMBARI_NOTES,
             nickname = "upgradeCluster")
     Response upgradeCluster(@PathParam("id") Long stackId, @NotNull AmbariRepoDetailsJson ambariRepoDetails);
-
-    @POST
-    @Path("{id}/cluster/failurereport")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ClusterOpDescription.FAILURE_REPORT, produces = ContentType.JSON, notes = Notes.FAILURE_REPORT_NOTES,
-            nickname = "failureReportCluster")
-    Response failureReport(@PathParam("id") Long stackId, FailureReport failureReport);
 
     @POST
     @Path("{id}/cluster/manualrepair")

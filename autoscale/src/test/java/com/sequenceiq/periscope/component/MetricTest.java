@@ -8,7 +8,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -58,7 +57,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v1.StackV1Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.autoscale.AutoscaleEndpoint;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterResponse;
@@ -189,7 +188,7 @@ public class MetricTest {
     private CloudbreakClient cloudbreakClient;
 
     @MockBean
-    private StackV1Endpoint stackV1Endpoint;
+    private AutoscaleEndpoint autoscaleEndpoint;
 
     @Inject
     private ClusterRepository clusterRepository;
@@ -235,8 +234,8 @@ public class MetricTest {
 
     @Test
     public void testMetricsWhenAddActiveCluster() {
-        when(cloudbreakClient.stackV1Endpoint()).thenReturn(stackV1Endpoint);
-        when(stackV1Endpoint.get(eq(STACK_ID), anySet())).thenReturn(getStackResponse(AVAILABLE, AVAILABLE));
+        when(cloudbreakClient.autoscaleEndpoint()).thenReturn(autoscaleEndpoint);
+        when(autoscaleEndpoint.get(eq(STACK_ID))).thenReturn(getStackResponse(AVAILABLE, AVAILABLE));
         when(authenticatedUserService.getPeriscopeUser()).thenReturn(getOwnerUser());
         when(clusterRepository.save(any())).thenAnswer(this::saveCluster);
         when(historyRepository.save(any())).then(returnsFirstArg());
@@ -314,8 +313,8 @@ public class MetricTest {
                 .thenReturn(0);
         when(clusterRepository.countByStateAndAutoscalingEnabledAndPeriscopeNodeId(eq(ClusterState.SUSPENDED), eq(true), anyString()))
                 .thenReturn(1);
-        when(cloudbreakClient.stackV1Endpoint()).thenReturn(stackV1Endpoint);
-        when(stackV1Endpoint.get(eq(STACK_ID), anySet())).thenReturn(getStackResponse(AVAILABLE, AVAILABLE));
+        when(cloudbreakClient.autoscaleEndpoint()).thenReturn(autoscaleEndpoint);
+        when(autoscaleEndpoint.get(eq(STACK_ID))).thenReturn(getStackResponse(AVAILABLE, AVAILABLE));
         ReflectionTestUtils.setField(updateFailedHandler, "updateFailures", getUpdateFailures(CLUSTER_ID));
 
         updateFailedHandler.onApplicationEvent(new UpdateFailedEvent(CLUSTER_ID));

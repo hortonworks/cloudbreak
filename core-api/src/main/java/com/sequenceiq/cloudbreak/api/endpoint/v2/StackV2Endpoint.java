@@ -19,9 +19,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import com.sequenceiq.cloudbreak.api.endpoint.common.StackEndpoint;
-import com.sequenceiq.cloudbreak.api.model.AmbariAddressJson;
-import com.sequenceiq.cloudbreak.api.model.AutoscaleStackResponse;
-import com.sequenceiq.cloudbreak.api.model.CertificateResponse;
 import com.sequenceiq.cloudbreak.api.model.GeneratedBlueprintResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformVariantsJson;
 import com.sequenceiq.cloudbreak.api.model.ReinstallRequestV2;
@@ -207,14 +204,6 @@ public interface StackV2Endpoint extends StackEndpoint {
             nickname = "deleteInstancesStackV2")
     Response deleteInstances(@PathParam("stackId") Long stackId, @QueryParam("instanceIds") Set<String> instanceIds);
 
-    @GET
-    @Path("{id}/certificate")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Override
-    @ApiOperation(value = StackOpDescription.GET_STACK_CERT, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
-            nickname = "getCertificateStackV2")
-    CertificateResponse getCertificate(@PathParam("id") Long stackId);
-
     @POST
     @Path("validate")
     @Produces(MediaType.APPLICATION_JSON)
@@ -222,22 +211,6 @@ public interface StackV2Endpoint extends StackEndpoint {
     @ApiOperation(value = StackOpDescription.VALIDATE, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
             nickname = "validateStackV2")
     Response validate(@Valid StackValidationRequest stackValidationRequest);
-
-    @POST
-    @Path("ambari")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Override
-    @ApiOperation(value = StackOpDescription.GET_BY_AMBARI_ADDRESS, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
-            nickname = "getStackForAmbariV2")
-    StackResponse getStackForAmbari(@Valid AmbariAddressJson json);
-
-    @GET
-    @Path("all")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Override
-    @ApiOperation(value = StackOpDescription.GET_ALL, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
-            nickname = "getAllStackV2")
-    Set<AutoscaleStackResponse> getAllForAutoscale();
 
     @GET
     @Path("{name}/request")
