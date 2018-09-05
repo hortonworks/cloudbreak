@@ -31,6 +31,7 @@ cert:
   ignorePreValidation: false
 
 cb:
+  uaa.startup.timeout.sec: 300
   enabledplatforms: AZURE,AWS,GCP,OPENSTACK
   platform.default.rootVolumeSize:
     AWS: 50

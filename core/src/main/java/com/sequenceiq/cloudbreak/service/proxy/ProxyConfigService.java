@@ -41,12 +41,12 @@ public class ProxyConfigService extends AbstractOrganizationAwareResourceService
     }
 
     @Override
-    protected OrganizationResourceRepository<ProxyConfig, Long> repository() {
+    public OrganizationResourceRepository<ProxyConfig, Long> repository() {
         return proxyConfigRepository;
     }
 
     @Override
-    protected OrganizationResource resource() {
+    public OrganizationResource resource() {
         return OrganizationResource.PROXY;
     }
 

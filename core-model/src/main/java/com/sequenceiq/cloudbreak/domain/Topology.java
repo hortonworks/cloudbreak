@@ -46,6 +46,12 @@ public class Topology implements ProvisionEntity, OrganizationAwareResource {
     @ManyToOne
     private Organization organization;
 
+    @Column
+    private String account;
+
+    @Column
+    private String owner;
+
     public Organization getOrganization() {
         return organization;
     }
@@ -105,5 +111,22 @@ public class Topology implements ProvisionEntity, OrganizationAwareResource {
 
     public void setDeleted(boolean deleted) {
         this.deleted = deleted;
+    }
+
+    public String getAccount() {
+        return account;
+    }
+
+    @Override
+    public String getOwner() {
+        return owner;
+    }
+
+    public void setAccount(String account) {
+        this.account = account;
+    }
+
+    public void setOwner(String owner) {
+        this.owner = owner;
     }
 }

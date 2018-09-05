@@ -514,12 +514,12 @@ public class ImageCatalogService extends AbstractOrganizationAwareResourceServic
     }
 
     @Override
-    protected OrganizationResourceRepository<ImageCatalog, Long> repository() {
+    public OrganizationResourceRepository<ImageCatalog, Long> repository() {
         return imageCatalogRepository;
     }
 
     @Override
-    protected OrganizationResource resource() {
+    public OrganizationResource resource() {
         return OrganizationResource.IMAGECATALOG;
     }
 

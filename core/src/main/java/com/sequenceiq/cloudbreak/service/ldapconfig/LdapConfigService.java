@@ -40,12 +40,12 @@ public class LdapConfigService extends AbstractOrganizationAwareResourceService<
     }
 
     @Override
-    protected OrganizationResourceRepository<LdapConfig, Long> repository() {
+    public OrganizationResourceRepository<LdapConfig, Long> repository() {
         return ldapConfigRepository;
     }
 
     @Override
-    protected OrganizationResource resource() {
+    public OrganizationResource resource() {
         return OrganizationResource.LDAP;
     }
 

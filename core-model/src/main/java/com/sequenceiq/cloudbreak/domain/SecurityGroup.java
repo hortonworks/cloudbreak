@@ -55,6 +55,10 @@ public class SecurityGroup implements ProvisionEntity, OrganizationAwareResource
     @ManyToOne
     private Organization organization;
 
+    private String owner;
+
+    private String account;
+
     public Organization getOrganization() {
         return organization;
     }
@@ -126,5 +130,22 @@ public class SecurityGroup implements ProvisionEntity, OrganizationAwareResource
 
     public void setCloudPlatform(String cloudPlatform) {
         this.cloudPlatform = cloudPlatform;
+    }
+
+    public void setOwner(String owner) {
+        this.owner = owner;
+    }
+
+    public void setAccount(String account) {
+        this.account = account;
+    }
+
+    @Override
+    public String getOwner() {
+        return owner;
+    }
+
+    public String getAccount() {
+        return account;
     }
 }

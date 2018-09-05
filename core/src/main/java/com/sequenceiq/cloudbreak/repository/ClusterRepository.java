@@ -54,6 +54,10 @@ public interface ClusterRepository extends OrganizationResourceRepository<Cluste
     Set<Cluster> findAllClustersByRDSConfig(@Param("id") Long rdsConfigId);
 
     @CheckPermissionsByReturnValue
+    @Query("SELECT c FROM Cluster c LEFT JOIN FETCH c.stack WHERE c.organization = null")
+    Set<Cluster> findAllWithNoOrganization();
+
+    @CheckPermissionsByReturnValue
     List<Cluster> findByLdapConfig(LdapConfig ldapConfig);
 
     @CheckPermissionsByReturnValue

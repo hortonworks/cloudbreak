@@ -23,12 +23,12 @@ public class FileSystemConfigService extends AbstractOrganizationAwareResourceSe
     private AuthorizationService authService;
 
     @Override
-    protected OrganizationResourceRepository<FileSystem, Long> repository() {
+    public OrganizationResourceRepository<FileSystem, Long> repository() {
         return fileSystemRepository;
     }
 
     @Override
-    protected OrganizationResource resource() {
+    public OrganizationResource resource() {
         return OrganizationResource.FILESYSTEM;
     }
 

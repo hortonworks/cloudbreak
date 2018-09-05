@@ -49,6 +49,10 @@ public interface StructuredEventRepository extends OrganizationResourceRepositor
     @CheckPermissionsByReturnValue
     List<StructuredEventEntity> findByEventTypeAndResourceTypeAndResourceId(StructuredEventType eventType, String resourceType, Long resourceId);
 
+    @DisableCheckPermissions
+    @Query("SELECT se from StructuredEventEntity se WHERE se.organization = null OR se.user = null")
+    List<StructuredEventEntity> findAllWithoutOrganizationOrUser();
+
     @Override
     default StructuredEventEntity findByNameAndOrganization(String name, Organization organization) {
         throw new UnsupportedOperationException();

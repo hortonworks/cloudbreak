@@ -60,12 +60,12 @@ public class FlexSubscriptionService extends AbstractOrganizationAwareResourceSe
     }
 
     @Override
-    protected OrganizationResourceRepository<FlexSubscription, Long> repository() {
+    public OrganizationResourceRepository<FlexSubscription, Long> repository() {
         return flexSubscriptionRepository;
     }
 
     @Override
-    protected OrganizationResource resource() {
+    public OrganizationResource resource() {
         return OrganizationResource.FLEXSUBSCRIPTION;
     }
 

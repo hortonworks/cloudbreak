@@ -43,6 +43,8 @@ public class UserDetailsService {
 
     private static final String EMAIL_SEPARATOR = "@";
 
+    private static final long ITEMS_PER_PAGE = 1000L;
+
     @Inject
     @Named("identityServerUrl")
     private String identityServerUrl;
@@ -86,14 +88,51 @@ public class UserDetailsService {
         }
     }
 
+    public List<IdentityUser> getAllUsers(String clientSecret) {
+        try {
+            AccessToken accessToken = identityClient.getToken(clientSecret);
+            List<IdentityUser> identityUsers = new ArrayList<>();
+            long totalResults = getTotalResults(accessToken);
+            for (long startIndex = 1L; startIndex <= totalResults; startIndex += ITEMS_PER_PAGE) {
+                WebTarget target = identityWebTarget.queryParam("startIndex", startIndex)
+                        .queryParam("count", ITEMS_PER_PAGE)
+                        .queryParam("sortBy", "id");
+                String result = target.request(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + accessToken.getToken()).get(String.class);
+
+                JsonNode root = JsonUtil.readTree(result);
+                root.get("resources").forEach(resource -> {
+                    IdentityUser identityUser = getIdentityUserFromJson(resource);
+                    identityUsers.add(identityUser);
+                });
+            }
+
+            return identityUsers;
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    private long getTotalResults(AccessToken accessToken) {
+        try {
+            WebTarget target = identityWebTarget.queryParam("startIndex", 1)
+                    .queryParam("count", 1)
+                    .queryParam("sortBy", "id");
+            String result = target.request(MediaType.APPLICATION_JSON)
+                    .header("Authorization", "Bearer " + accessToken.getToken()).get(String.class);
+            JsonNode root = JsonUtil.readTree(result);
+            return root.get("totalResults").asLong();
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
     private IdentityUser getIdentityUser(String username, UserFilterField filterField, String clientSecret) {
         WebTarget target = getWebTarget(username, filterField);
         AccessToken accessToken = identityClient.getToken(clientSecret);
         String scimResponse = target.request(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + accessToken.getToken()).get(String.class);
         try {
             JsonNode root = JsonUtil.readTree(scimResponse);
-            List<IdentityUserRole> roles = new ArrayList<>();
-            String account = null;
             JsonNode userNode = root;
             if (UserFilterField.USERNAME.equals(filterField)) {
                 userNode = root.get("resources").get(0);
@@ -101,23 +140,29 @@ public class UserDetailsService {
             if (userNode == null) {
                 throw new UserDetailsUnavailableException("User details cannot be retrieved from identity server.");
             }
-            for (JsonNode node : userNode.get("groups")) {
-                String group = node.get("display").asText();
-                if (group.startsWith("sequenceiq.account")) {
-                    String[] parts = group.split("\\.");
-                    if (account != null && !account.equals(parts[ACCOUNT_PART])) {
-                        throw new IllegalStateException("A user can belong to only one account.");
-                    }
-                    account = parts[ACCOUNT_PART];
-                } else if (group.startsWith("sequenceiq.cloudbreak")) {
-                    String[] parts = group.split("\\.");
-                    roles.add(IdentityUserRole.fromString(parts[ROLE_PART]));
-                }
-            }
-            return createIdentityUser(roles, account, userNode);
+            return getIdentityUserFromJson(userNode);
         } catch (IOException e) {
             throw new UserDetailsUnavailableException("User details cannot be retrieved from identity server.", e);
         }
+    }
+
+    private IdentityUser getIdentityUserFromJson(JsonNode userNode) {
+        String account = null;
+        List<IdentityUserRole> roles = new ArrayList<>();
+        for (JsonNode node : userNode.get("groups")) {
+            String group = node.get("display").asText();
+            if (group.startsWith("sequenceiq.account")) {
+                String[] parts = group.split("\\.");
+                if (account != null && !account.equals(parts[ACCOUNT_PART])) {
+                    throw new IllegalStateException("A user can belong to only one account.");
+                }
+                account = parts[ACCOUNT_PART];
+            } else if (group.startsWith("sequenceiq.cloudbreak")) {
+                String[] parts = group.split("\\.");
+                roles.add(IdentityUserRole.fromString(parts[ROLE_PART]));
+            }
+        }
+        return createIdentityUser(roles, account, userNode);
     }
 
     private WebTarget getWebTarget(String username, UserFilterField filterField) {

@@ -62,12 +62,12 @@ public class TopologyService extends AbstractOrganizationAwareResourceService<To
     }
 
     @Override
-    protected OrganizationResourceRepository<Topology, Long> repository() {
+    public OrganizationResourceRepository<Topology, Long> repository() {
         return topologyRepository;
     }
 
     @Override
-    protected OrganizationResource resource() {
+    public OrganizationResource resource() {
         return OrganizationResource.TOPOLOGY;
     }
 

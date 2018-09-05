@@ -126,12 +126,12 @@ public class RdsConfigService extends AbstractOrganizationAwareResourceService<R
     }
 
     @Override
-    protected OrganizationResourceRepository<RDSConfig, Long> repository() {
+    public OrganizationResourceRepository<RDSConfig, Long> repository() {
         return rdsConfigRepository;
     }
 
     @Override
-    protected OrganizationResource resource() {
+    public OrganizationResource resource() {
         return OrganizationResource.RDS;
     }
 
