@@ -13,7 +13,8 @@ public interface AmbariRepoDetailsMapper {
     @Mappings({
             @Mapping(source = "baseurl", target = "baseUrl"),
             @Mapping(source = "gpgkey", target = "gpgKeyUrl"),
-            @Mapping(target = "version", ignore = true)
+            @Mapping(target = "version",
+                    expression = "java(ambariRepoDetails.getBaseurl().split(\"/\")[ambariRepoDetails.getBaseurl().split(\"/\").length - 1])")
     })
     AmbariRepoDetailsJson mapAmbariRepoDetailsToAmbariRepoDetailsJson(AmbariRepoDetails ambariRepoDetails);
 }
