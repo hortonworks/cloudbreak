@@ -9,10 +9,6 @@ public class ExtendedCloudCredential extends CloudCredential {
 
     private final String description;
 
-    private final String owner;
-
-    private final String account;
-
     private final String cloudPlatform;
 
     private final IdentityUser identityUser;
@@ -21,19 +17,17 @@ public class ExtendedCloudCredential extends CloudCredential {
 
     private final Long organziationId;
 
-    public ExtendedCloudCredential(Long id, String cloudPlatform, String name, String description, String owner,
-            String account, IdentityUser identityUser, String userId, Long organziationId) {
+    public ExtendedCloudCredential(Long id, String cloudPlatform, String name, String description,
+            IdentityUser identityUser, String userId, Long organziationId) {
         super(id, name);
         this.cloudPlatform = cloudPlatform;
         this.description = description;
-        this.owner = owner;
-        this.account = account;
         this.identityUser = identityUser;
         this.userId = userId;
         this.organziationId = organziationId;
     }
 
-    public ExtendedCloudCredential(CloudCredential cloudCredential, String cloudPlatform, String description, String owner, String account,
+    public ExtendedCloudCredential(CloudCredential cloudCredential, String cloudPlatform, String description,
             IdentityUser identityUser, String userId, Long organziationId) {
         super(cloudCredential.getId(), cloudCredential.getName());
         Map<String, Object> parameters = cloudCredential.getParameters();
@@ -42,8 +36,6 @@ public class ExtendedCloudCredential extends CloudCredential {
         }
         this.cloudPlatform = cloudPlatform;
         this.description = description;
-        this.owner = owner;
-        this.account = account;
         this.identityUser = identityUser;
         this.userId = userId;
         this.organziationId = organziationId;
@@ -51,14 +43,6 @@ public class ExtendedCloudCredential extends CloudCredential {
 
     public String getDescription() {
         return description;
-    }
-
-    public String getOwner() {
-        return owner;
-    }
-
-    public String getAccount() {
-        return account;
     }
 
     public String getCloudPlatform() {

@@ -236,8 +236,6 @@ public class StackCreationService {
         notification.setEventMessage(String.valueOf(result.getStatusProgressValue()));
         notification.setUserIdV3(stack.getCreator().getUserId());
         notification.setOrganizationId(stack.getOrganization().getId());
-        notification.setOwner(stack.getOwner());
-        notification.setAccount(stack.getAccount());
         notification.setCloud(stack.cloudPlatform());
         notification.setRegion(stack.getRegion());
         notification.setStackId(stack.getId());
