@@ -9,6 +9,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscal
 import static com.sequenceiq.cloudbreak.core.flow2.stack.repair.ManualStackRepairTriggerEvent.MANUAL_STACK_REPAIR_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.stop.StackStopEvent.STACK_STOP_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncEvent.STACK_SYNC_EVENT;
+import static java.lang.Math.abs;
 
 import java.util.Collections;
 import java.util.List;
@@ -181,7 +182,7 @@ public class ReactorFlowManager {
         int adjustment = Optional.ofNullable(hostGroupAdjustment.getScalingAdjustment())
                 .orElseThrow(() -> new BadRequestException("Unable to define hostgroup scaling adjustment amount"));
         Acceptable event = new ClusterAndStackDownscaleTriggerEvent(selector, stackId,
-                hostGroupAdjustment.getHostGroup(), adjustment < 0 ? adjustment * -1 : adjustment, scalingType);
+                hostGroupAdjustment.getHostGroup(), adjustment, scalingType);
         notify(selector, event);
     }
 
