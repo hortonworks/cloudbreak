@@ -13,12 +13,14 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncEvent.STA
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupAdjustmentJson;
@@ -176,8 +178,10 @@ public class ReactorFlowManager {
     public void triggerClusterDownscale(Long stackId, HostGroupAdjustmentJson hostGroupAdjustment) {
         String selector = FlowChainTriggers.FULL_DOWNSCALE_TRIGGER_EVENT;
         ScalingType scalingType = hostGroupAdjustment.getWithStackUpdate() ? ScalingType.DOWNSCALE_TOGETHER : ScalingType.DOWNSCALE_ONLY_CLUSTER;
+        int adjustment = Optional.ofNullable(hostGroupAdjustment.getScalingAdjustment())
+                .orElseThrow(() -> new BadRequestException("Unable to define hostgroup scaling adjustment amount"));
         Acceptable event = new ClusterAndStackDownscaleTriggerEvent(selector, stackId,
-                hostGroupAdjustment.getHostGroup(), hostGroupAdjustment.getScalingAdjustment(), scalingType);
+                hostGroupAdjustment.getHostGroup(), adjustment < 0 ? adjustment * -1 : adjustment, scalingType);
         notify(selector, event);
     }
 
