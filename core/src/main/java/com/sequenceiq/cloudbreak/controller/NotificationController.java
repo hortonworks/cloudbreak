@@ -45,8 +45,6 @@ public abstract class NotificationController {
         notification.setEventTimestamp(new Date().getTime());
         notification.setUserIdV3(userService.getOrCreate(identityUser).getUserId());
         notification.setOrganizationId(orgId);
-        notification.setOwner(identityUser.getUserId());
-        notification.setAccount(identityUser.getAccount());
         notification.setEventType(resourceEvent.name());
         notification.setEventMessage(messagesService.getMessage(resourceEvent.getMessage()));
         notificationSender.send(new Notification<>(notification));

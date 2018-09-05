@@ -39,7 +39,7 @@ public class StructuredNotificationEventToCloudbreakEventJsonConverterTest exten
         CloudbreakEventsJson result = underTest.convert(getSource());
         // THEN
         assertEquals("message", result.getEventMessage());
-        assertAllFieldsNotNull(result, Lists.newArrayList("availabilityZone"));
+        assertAllFieldsNotNull(result, Lists.newArrayList("availabilityZone", "owner", "account"));
     }
 
     @Override

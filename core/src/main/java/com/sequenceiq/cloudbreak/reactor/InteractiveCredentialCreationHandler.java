@@ -66,9 +66,6 @@ public class InteractiveCredentialCreationHandler implements ReactorEventHandler
         notification.setEventTimestamp(new Date().getTime());
         notification.setEventMessage(errorMessage);
         notification.setUserIdV3(extendedCloudCredential.getUserId());
-        notification.setOrganizationId(extendedCloudCredential.getOrganziationId());
-        notification.setOwner(extendedCloudCredential.getOwner());
-        notification.setAccount(extendedCloudCredential.getAccount());
         notification.setCloud(extendedCloudCredential.getCloudPlatform());
         notificationSender.send(new Notification<>(notification));
     }

@@ -28,7 +28,7 @@ public class CredentialToExtendedCloudCredentialConverter {
         CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(credential);
         IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
         User user = userService.getOrCreate(identityUser);
-        return new ExtendedCloudCredential(cloudCredential, credential.cloudPlatform(), credential.getDescription(), credential.getOwner(),
-                credential.getAccount(), identityUser, user.getUserId(), credential.getOrganization().getId());
+        return new ExtendedCloudCredential(cloudCredential, credential.cloudPlatform(), credential.getDescription(),
+                identityUser, user.getUserId(), credential.getOrganization().getId());
     }
 }
