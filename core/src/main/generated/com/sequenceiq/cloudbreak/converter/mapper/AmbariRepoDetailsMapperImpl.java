@@ -22,6 +22,8 @@ public class AmbariRepoDetailsMapperImpl implements AmbariRepoDetailsMapper {
         ambariRepoDetailsJson.setBaseUrl( ambariRepoDetails.getBaseurl() );
         ambariRepoDetailsJson.setGpgKeyUrl( ambariRepoDetails.getGpgkey() );
 
+        ambariRepoDetailsJson.setVersion( ambariRepoDetails.getBaseurl().split("/")[ambariRepoDetails.getBaseurl().split("/").length - 1] );
+
         return ambariRepoDetailsJson;
     }
 }
