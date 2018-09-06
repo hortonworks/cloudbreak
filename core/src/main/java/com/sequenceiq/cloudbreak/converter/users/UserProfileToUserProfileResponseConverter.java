@@ -32,6 +32,7 @@ public class UserProfileToUserProfileResponseConverter extends AbstractConversio
         UserProfileResponse userProfileResponse = new UserProfileResponse();
         userProfileResponse.setAccount(entity.getAccount());
         userProfileResponse.setOwner(entity.getOwner());
+        userProfileResponse.setUsername(entity.getUserName());
         if (!entity.getDefaultCredentials().isEmpty()) {
             entity.getDefaultCredentials()
                     .stream()
