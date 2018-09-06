@@ -107,9 +107,9 @@ public class StackService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackService.class);
 
-    private static final String STACK_NOT_FOUND_EXCEPTION_FORMAT_TEXT = "Stack '%s' has not found";
+    private static final String STACK_NOT_FOUND_EXCEPTION_TXT = "Stack not found by name '%s'";
 
-    private static final String STACK_NOT_FOUND_BY_ID_EXCEPTION_FORMAT_TEXT = "Stack not found by id '%d'";
+    private static final String STACK_NOT_FOUND_EXCEPTION_ID_TXT = "Stack not found by id '%d'";
 
     @Inject
     private UserService userService;
@@ -279,7 +279,7 @@ public class StackService {
     public Stack getByIdWithLists(Long id) {
         Stack retStack = stackRepository.findOneWithLists(id);
         if (retStack == null) {
-            throw new NotFoundException(String.format(STACK_NOT_FOUND_BY_ID_EXCEPTION_FORMAT_TEXT, id));
+            throw new NotFoundException(String.format(STACK_NOT_FOUND_EXCEPTION_ID_TXT, id));
         }
         return retStack;
     }
@@ -292,7 +292,7 @@ public class StackService {
             throw new TransactionRuntimeExecutionException(e);
         }
         if (stack == null) {
-            throw new NotFoundException(String.format(STACK_NOT_FOUND_BY_ID_EXCEPTION_FORMAT_TEXT, id));
+            throw new NotFoundException(String.format(STACK_NOT_FOUND_EXCEPTION_ID_TXT, id));
         }
         return stack;
     }
@@ -360,6 +360,9 @@ public class StackService {
             return transactionService.required(() -> {
                 Organization organization = organizationService.get(organizationId, user);
                 Stack stack = stackRepository.findByNameAndOrganizationIdWithLists(name, organization.getId());
+                if (stack == null) {
+                    throw new NotFoundException(String.format(STACK_NOT_FOUND_EXCEPTION_TXT, name));
+                }
                 StackResponse stackResponse = conversionService.convert(stack, StackResponse.class);
                 stackResponse = stackResponseDecorator.decorate(stackResponse, stack, entries);
                 return stackResponse;
