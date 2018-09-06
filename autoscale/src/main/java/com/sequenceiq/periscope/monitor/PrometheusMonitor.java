@@ -1,11 +1,8 @@
 package com.sequenceiq.periscope.monitor;
 
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.monitor.evaluator.PrometheusEvaluator;
 
-@Component
 public class PrometheusMonitor extends ClusterMonitor {
 
     @Override

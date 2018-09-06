@@ -46,29 +46,29 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
 
     @Override
     public void onApplicationEvent(UpdateFailedEvent event) {
-        long id = event.getClusterId();
-        LOGGER.info("Cluster {} failed", id);
-        Cluster cluster = clusterService.findById(id);
+        long autoscaleClusterId = event.getClusterId();
+        LOGGER.info("Cluster {} failed", autoscaleClusterId);
+        Cluster cluster = clusterService.findById(autoscaleClusterId);
         if (cluster == null) {
             return;
         }
         MDCBuilder.buildMdcContext(cluster);
-        StackResponse stackResponse = getStackById(id);
+        StackResponse stackResponse = getStackById(cluster.getStackId());
         if (stackResponse == null) {
-            LOGGER.info("Suspending cluster {}", id);
+            LOGGER.info("Suspending cluster {}", autoscaleClusterId);
             suspendCluster(cluster);
             return;
         }
         String stackStatus = getStackStatus(stackResponse);
         if (stackStatus.startsWith(DELETE_STATUSES_PREFIX)) {
-            clusterService.removeById(id);
-            LOGGER.info("Delete cluster {} due to failing update attempts and Cloudbreak stack status", id);
+            clusterService.removeById(autoscaleClusterId);
+            LOGGER.info("Delete cluster {} due to failing update attempts and Cloudbreak stack status", autoscaleClusterId);
             return;
         }
-        Integer failed = updateFailures.get(id);
+        Integer failed = updateFailures.get(autoscaleClusterId);
         if (failed == null) {
-            LOGGER.info("New failed cluster id: [{}]", id);
-            updateFailures.put(id, 1);
+            LOGGER.info("New failed cluster id: [{}]", autoscaleClusterId);
+            updateFailures.put(autoscaleClusterId, 1);
         } else if (RETRY_THRESHOLD - 1 == failed) {
             try {
                 String clusterStatus = stackResponse.getCluster().getStatus().name();
@@ -76,21 +76,22 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
                     // Ambari server is unreacheable but the stack and cluster statuses are "AVAILABLE"
                     reportAmbariServerFailure(cluster, stackResponse);
                     suspendCluster(cluster);
-                    LOGGER.info("Suspend cluster monitoring for cluster {} due to failing update attempts and Cloudbreak stack status {}", id, stackStatus);
+                    LOGGER.info("Suspend cluster monitoring for cluster {} due to failing update attempts and Cloudbreak stack status {}",
+                            autoscaleClusterId, stackStatus);
                 } else {
                     suspendCluster(cluster);
-                    LOGGER.info("Suspend cluster monitoring for cluster {}", id);
+                    LOGGER.info("Suspend cluster monitoring for cluster {}", autoscaleClusterId);
                 }
             } catch (Exception ex) {
                 LOGGER.warn("Problem when verifying cluster status. Original message: {}",
                         ex.getMessage());
                 suspendCluster(cluster);
             }
-            updateFailures.remove(id);
+            updateFailures.remove(autoscaleClusterId);
         } else {
             int value = failed + 1;
-            LOGGER.info("Increase failed count[{}] for cluster id: [{}]", value, id);
-            updateFailures.put(id, value);
+            LOGGER.info("Increase failed count[{}] for cluster id: [{}]", value, autoscaleClusterId);
+            updateFailures.put(autoscaleClusterId, value);
         }
     }
 
@@ -98,9 +99,9 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
         return stackResponse.getStatus() != null ? stackResponse.getStatus().name() : "";
     }
 
-    private StackResponse getStackById(long stackId) {
+    private StackResponse getStackById(long cloudbreakStackId) {
         try {
-            return cloudbreakCommunicator.getById(stackId);
+            return cloudbreakCommunicator.getById(cloudbreakStackId);
         } catch (Exception e) {
             LOGGER.warn("Cluster status could not be verified by Cloudbreak. Original message: {}",
                     e.getMessage());
