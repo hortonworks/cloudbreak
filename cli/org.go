@@ -38,26 +38,33 @@ func (o *orgListOutDescribe) DataAsStringArray() []string {
 	return append(o.orgListOut.DataAsStringArray(), o.ID)
 }
 
+type orgClient interface {
+	CreateOrganization(params *v3organizations.CreateOrganizationParams) (*v3organizations.CreateOrganizationOK, error)
+	GetOrganizations(params *v3organizations.GetOrganizationsParams) (*v3organizations.GetOrganizationsOK, error)
+	GetOrganizationByName(params *v3organizations.GetOrganizationByNameParams) (*v3organizations.GetOrganizationByNameOK, error)
+}
+
 func CreateOrg(c *cli.Context) {
 	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "create organization")
-	log.Infof("[CreateOrgs] Create an organization into a tenant")
-
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
-
 	orgName := c.String(FlName.Name)
 	orgDesc := c.String(FlDescriptionOptional.Name)
-	req := models_cloudbreak.OrganizationRequest{
-		Name:        orgName,
-		Description: &orgDesc,
-	}
+	createOrgImpl(cbClient.Cloudbreak.V3organizations, orgName, orgDesc)
+}
 
-	_, err := cbClient.Cloudbreak.V3organizations.CreateOrganization(v3organizations.NewCreateOrganizationParams().WithBody(&req))
+func createOrgImpl(client orgClient, name string, description string) *models_cloudbreak.OrganizationResponse {
+	log.Infof("[CreateOrgs] Create an organization into a tenant")
+	req := models_cloudbreak.OrganizationRequest{
+		Name:        name,
+		Description: &description,
+	}
+	resp, err := client.CreateOrganization(v3organizations.NewCreateOrganizationParams().WithBody(&req))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
-
-	log.Infof("[CreateOrg] organization created: %s", orgName)
+	log.Infof("[CreateOrg] organization created: %s", name)
+	return resp.Payload
 }
 
 func DeleteOrg(c *cli.Context) {
@@ -81,18 +88,19 @@ func DescribeOrg(c *cli.Context) {
 	defer utils.TimeTrack(time.Now(), "describe organization")
 	log.Infof("[DescribeOrg] Describes an organizations in a tenant")
 	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
-
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
-
 	orgName := c.String(FlName.Name)
-	resp, err := cbClient.Cloudbreak.V3organizations.GetOrganizationByName(v3organizations.NewGetOrganizationByNameParams().WithName(orgName))
+	describeOrgImpl(cbClient.Cloudbreak.V3organizations, output.WriteList, orgName)
+}
+
+func describeOrgImpl(client orgClient, writer func([]string, []utils.Row), orgName string) {
+	resp, err := client.GetOrganizationByName(v3organizations.NewGetOrganizationByNameParams().WithName(orgName))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
-
 	tableRows := []utils.Row{}
 	tableRows = append(tableRows, &orgListOutDescribe{&orgListOut{resp.Payload}, strconv.FormatInt(resp.Payload.ID, 10)})
-	output.WriteList(append(orgListHeader, "ID"), tableRows)
+	writer(append(orgListHeader, "ID"), tableRows)
 }
 
 func ListOrgs(c *cli.Context) {
@@ -100,11 +108,16 @@ func ListOrgs(c *cli.Context) {
 	defer utils.TimeTrack(time.Now(), "list organizations")
 	log.Infof("[ListOrgs] List all organizations in a tenant")
 	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
+	cbClient := NewCloudbreakHTTPClientFromContext(c)
+	listOrgsImpl(cbClient.Cloudbreak.V3organizations, output.WriteList)
+}
+
+func listOrgsImpl(client orgClient, writer func([]string, []utils.Row)) {
 	tableRows := []utils.Row{}
-	for _, org := range GetOrgList(c) {
+	for _, org := range getOrgListImpl(client) {
 		tableRows = append(tableRows, &orgListOut{org})
 	}
-	output.WriteList(orgListHeader, tableRows)
+	writer(orgListHeader, tableRows)
 }
 
 func GetOrgIdByName(c *cli.Context, orgName string) int64 {
@@ -120,12 +133,14 @@ func GetOrgIdByName(c *cli.Context, orgName string) int64 {
 
 func GetOrgList(c *cli.Context) []*models_cloudbreak.OrganizationResponse {
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
+	return getOrgListImpl(cbClient.Cloudbreak.V3organizations)
+}
 
-	resp, err := cbClient.Cloudbreak.V3organizations.GetOrganizations(v3organizations.NewGetOrganizationsParams())
+func getOrgListImpl(client orgClient) []*models_cloudbreak.OrganizationResponse {
+	resp, err := client.GetOrganizations(v3organizations.NewGetOrganizationsParams())
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
-
 	return resp.Payload
 }
 

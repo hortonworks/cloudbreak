@@ -28,8 +28,13 @@ type auditOut struct {
 	Audit *models_cloudbreak.AuditEvent `json:"Audit" yaml:"Audit"`
 }
 
+type auditClient interface {
+	GetAuditEventsInOrganization(params *v3_organization_id_audits.GetAuditEventsInOrganizationParams) (*v3_organization_id_audits.GetAuditEventsInOrganizationOK, error)
+	GetAuditEventByOrganization(params *v3_organization_id_audits.GetAuditEventByOrganizationParams) (*v3_organization_id_audits.GetAuditEventByOrganizationOK, error)
+}
+
 func (a *auditOut) DataAsStringArray() []string {
-	if a.Audit.RawFlowEvent.Blueprint != nil {
+	if a.Audit.RawFlowEvent != nil && a.Audit.RawFlowEvent.Blueprint != nil {
 		a.Audit.RawFlowEvent.Blueprint.BlueprintJSON = "---TRUNCATED---"
 	}
 	auditYAML, err := yaml.Marshal(a.Audit)
@@ -73,23 +78,25 @@ func listAudits(resourceType string, c *cli.Context) {
 	log.Infof("[ListAudits] List all audits for a resource identified by Resource ID")
 	orgID := c.Int64(FlOrganizationOptional.Name)
 	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
-	resourceID, err := strconv.ParseInt(c.String(FlResourceID.Name), 10, 64)
-	if err != nil {
-		utils.LogErrorMessageAndExit("Unable to parse as number: " + c.String(FlResourceID.Name))
-	}
-
+	resourceID := c.String(FlResourceID.Name)
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
+	listAuditsImpl(cbClient.Cloudbreak.V3OrganizationIDAudits, orgID, resourceType, resourceID, output.WriteList)
+}
 
-	resp, err := cbClient.Cloudbreak.V3OrganizationIDAudits.GetAuditEventsInOrganization(v3_organization_id_audits.NewGetAuditEventsInOrganizationParams().WithOrganizationID(orgID).WithResourceType(resourceType).WithResourceID(resourceID))
+func listAuditsImpl(client auditClient, orgID int64, resourceType string, resourceIDString string, writer func([]string, []utils.Row)) {
+	resourceID, err := strconv.ParseInt(resourceIDString, 10, 64)
+	if err != nil {
+		utils.LogErrorMessageAndExit("Unable to parse as number: " + resourceIDString)
+	}
+	resp, err := client.GetAuditEventsInOrganization(v3_organization_id_audits.NewGetAuditEventsInOrganizationParams().WithOrganizationID(orgID).WithResourceType(resourceType).WithResourceID(resourceID))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
-
 	tableRows := []utils.Row{}
 	for _, audit := range resp.Payload {
 		tableRows = append(tableRows, &auditListOut{audit})
 	}
-	output.WriteList(auditListHeader, tableRows)
+	writer(auditListHeader, tableRows)
 }
 
 func DescribeAudit(c *cli.Context) {
@@ -98,20 +105,21 @@ func DescribeAudit(c *cli.Context) {
 	log.Infof("[DescribeAudit] Show audit entry identified by Audit ID")
 	orgID := c.Int64(FlOrganizationOptional.Name)
 	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
-	auditID, err := strconv.ParseInt(c.String(FlAuditID.Name), 10, 64)
-	if err != nil {
-		utils.LogErrorMessageAndExit("Unable to parse as number: " + c.String(FlAuditID.Name))
-	}
-
+	auditID := c.String(FlAuditID.Name)
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
+	describeAuditImpl(cbClient.Cloudbreak.V3OrganizationIDAudits, orgID, auditID, output.WriteList)
+}
 
-	resp, err := cbClient.Cloudbreak.V3OrganizationIDAudits.GetAuditEventByOrganization(v3_organization_id_audits.NewGetAuditEventByOrganizationParams().WithOrganizationID(orgID).WithAuditID(auditID))
+func describeAuditImpl(client auditClient, orgID int64, auditIDString string, writer func([]string, []utils.Row)) {
+	auditID, err := strconv.ParseInt(auditIDString, 10, 64)
+	if err != nil {
+		utils.LogErrorMessageAndExit("Unable to parse as number: " + auditIDString)
+	}
+	resp, err := client.GetAuditEventByOrganization(v3_organization_id_audits.NewGetAuditEventByOrganizationParams().WithOrganizationID(orgID).WithAuditID(auditID))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
-
 	tableRows := []utils.Row{}
 	tableRows = append(tableRows, &auditOut{resp.Payload})
-
-	output.Write(auditHeader, &auditOut{resp.Payload})
+	writer(auditHeader, tableRows)
 }
