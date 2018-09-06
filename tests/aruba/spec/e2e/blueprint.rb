@@ -67,7 +67,7 @@ RSpec.describe 'Blueprint test cases', :type => :aruba do
       HDPVersion: /.*/,
       HostgroupCount: /.*/,
       Tags: /.*/,
-      Content: /.*/,
+      BlueprintTextAsBase64: /.*/,
       ID: /.*/
     )       
   end
