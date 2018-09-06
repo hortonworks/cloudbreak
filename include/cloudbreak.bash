@@ -625,7 +625,7 @@ generate-ldap-mapping() {
         _exit 1
     fi
 
-  local scopes=$(docker exec $container psql -U postgres -d uaadb -c "select displayname from groups where displayname like 'cloudbreak%' or displayname='sequenceiq.cloudbreak.user';" | tail -n +3 | grep -v rows)
+  local scopes=$(docker exec $container psql -U postgres -d uaadb -c "select displayname from groups where displayname like 'cloudbreak%' or displayname like 'periscope%' or displayname='sequenceiq.cloudbreak.user';" | tail -n +3 | grep -v rows)
   rm -f ${mapping_file}
   for scope in ${scopes}; do
     local line="INSERT INTO external_group_mapping (group_id, external_group, added, origin) VALUES ((select id from groups where displayname='$scope'), '$group', '2016-09-30 19:28:24.255', 'ldap');"
