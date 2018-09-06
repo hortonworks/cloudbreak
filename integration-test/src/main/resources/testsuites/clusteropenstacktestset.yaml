@@ -67,11 +67,11 @@ tests:
       blueprintName: "Flow Management: Apache NiFi, Apache NiFi Registry"
       image: base
       instancegroupName: NiFi
+      enableKerberos: true
     classes:
       - name: com.sequenceiq.it.cloudbreak.ClusterTests
         includedMethods:
           - testCreateNewHdfCluster
-          - testScaleCluster
           - testStopCluster
           - testStartCluster
           - testTerminateCluster
@@ -132,11 +132,11 @@ tests:
       blueprintName: "Flow Management: Apache NiFi, Apache NiFi Registry"
       image: hdf
       instancegroupName: NiFi
+      enableKerberos: true
     classes:
       - name: com.sequenceiq.it.cloudbreak.ClusterTests
         includedMethods:
           - testCreateNewHdfCluster
-          - testScaleCluster
           - testStopCluster
           - testStartCluster
           - testTerminateCluster

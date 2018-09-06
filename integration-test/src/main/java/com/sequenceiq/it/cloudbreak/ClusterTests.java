@@ -32,6 +32,7 @@ import com.sequenceiq.it.cloudbreak.newway.StackOperation;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
 import com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType;
+import com.sequenceiq.it.cloudbreak.newway.v3.StackV3Action;
 
 public class ClusterTests extends CloudbreakClusterTestConfiguration {
 
@@ -61,10 +62,18 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
                 "check ambari is running and components available");
     }
 
-    @Test(dataProvider = "providernameblueprintimage", priority = 10)
-    public void testCreateNewHdfCluster(CloudProvider cloudProvider, String clusterName, String blueprintName, String imageId) throws Exception {
+    @Test(dataProvider = "providernameblueprintimagekerberos", priority = 10)
+    public void testCreateNewHdfCluster(CloudProvider cloudProvider, String clusterName, String blueprintName, String imageId, boolean enableKerberos)
+            throws Exception {
         given(CloudbreakClient.isCreated());
         given(cloudProvider.aValidCredential());
+        if (enableKerberos) {
+            Kerberos kerberos = Kerberos.request()
+                    .withMasterKey(Kerberos.DEFAULT_MASTERKEY)
+                    .withAdmin(Kerberos.DEFAULT_ADMIN_USER)
+                    .withPassword(Kerberos.DEFAULT_ADMIN_PASSWORD);
+            given(kerberos);
+        }
         given(Cluster.request()
                         .withAmbariRequest(cloudProvider.ambariRequestWithBlueprintName(blueprintName)),
                 "a cluster request");
@@ -221,13 +230,17 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
                 "ambari check");
     }
 
-    @Test(alwaysRun = true, dataProvider = "providername", priority = 50)
-    public void testTerminateCluster(CloudProvider cloudProvider, String clusterName) throws Exception {
+    @Test(alwaysRun = true, dataProvider = "providernamekerberos", priority = 50)
+    public void testTerminateCluster(CloudProvider cloudProvider, String clusterName, boolean enableKerberos) throws Exception {
         given(CloudbreakClient.isCreated());
         given(cloudProvider.aValidCredential());
         given(cloudProvider.aValidStackIsCreated()
                 .withName(clusterName), "a stack is created");
-        when(Stack.delete());
+        if (enableKerberos) {
+            when(Stack.delete(StackV3Action::deleteWithKerberos));
+        } else {
+            when(Stack.delete());
+        }
         then(Stack.waitAndCheckClusterDeleted(), "stack has been deleted");
     }
 
@@ -242,6 +255,21 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
         String image = getImageId(provider, imageDescription, blueprint);
         return new Object[][]{
                 {cloudProvider, clusterName, blueprint, image}
+        };
+    }
+
+    @DataProvider(name = "providernameblueprintimagekerberos")
+    public Object[][] providerAndImageAndKerberos() throws Exception {
+        String blueprint = getTestParameter().get("blueprintName");
+        String provider = getTestParameter().get("provider").toLowerCase();
+        String imageDescription = getTestParameter().get("image");
+        CloudProvider cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter());
+        //String imageCatalog = getTestParameter().get("imageCatalog");
+        String clusterName = getTestParameter().get("clusterName");
+        String image = getImageId(provider, imageDescription, blueprint);
+        Boolean enableKerberos = Boolean.valueOf(getTestParameter().get("enableKerberos"));
+        return new Object[][]{
+                {cloudProvider, clusterName, blueprint, image, enableKerberos}
         };
     }
 
@@ -279,6 +307,17 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
         String clusterName = getTestParameter().get("clusterName");
         return new Object[][]{
                 {cloudProvider, clusterName}
+        };
+    }
+
+    @DataProvider(name = "providernamekerberos")
+    public Object[][] providerClusterNameWithKerberos() throws Exception {
+        String provider = getTestParameter().get("provider").toLowerCase();
+        CloudProvider cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter());
+        String clusterName = getTestParameter().get("clusterName");
+        Boolean enableKerberos = Boolean.valueOf(getTestParameter().get("enableKerberos"));
+        return new Object[][]{
+                {cloudProvider, clusterName, enableKerberos}
         };
     }
 
