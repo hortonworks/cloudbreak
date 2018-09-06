@@ -19,6 +19,8 @@ public class UserProfileResponse {
 
     private String account;
 
+    private String username;
+
     private Map<String, Object> uiProperties = new HashMap<>();
 
     public CredentialResponse getCredential() {
@@ -59,5 +61,13 @@ public class UserProfileResponse {
 
     public void setImageCatalog(ImageCatalogShortResponse imageCatalog) {
         this.imageCatalog = imageCatalog;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 }
