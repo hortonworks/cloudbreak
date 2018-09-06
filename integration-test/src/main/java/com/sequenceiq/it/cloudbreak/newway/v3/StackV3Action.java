@@ -75,6 +75,16 @@ public class StackV3Action {
                 .deleteInOrganization(orgId, stackEntity.getName(), forced, false);
     }
 
+    public static void deleteWithKerberos(IntegrationTestContext integrationTestContext, Entity entity) {
+        StackEntity stackEntity = (StackEntity) entity;
+        CloudbreakClient client;
+        client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
+        Long orgId = integrationTestContext.getContextParam(CloudbreakTest.ORGANIZATION_ID, Long.class);
+        Log.log(" delete: " + stackEntity.getName());
+        client.getCloudbreakClient().stackV3Endpoint()
+                .deleteWithKerberosInOrg(orgId, stackEntity.getName(), true, false);
+    }
+
     public static void createInGiven(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {
         try {
             get(integrationTestContext, entity);
