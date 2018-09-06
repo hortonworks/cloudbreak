@@ -16,12 +16,13 @@ import (
 	"github.com/urfave/cli"
 )
 
-var blueprintHeader = []string{"Name", "Description", "HDP Version", "Hostgroup Count", "Tags"}
+var blueprintHeader = []string{"Name", "Description", "StackName", "StackVersion", "Hostgroup Count", "Tags"}
 
 type blueprintOut struct {
 	Name           string `json:"Name" yaml:"Name"`
 	Description    string `json:"Description" yaml:"Description"`
-	HDPVersion     string `json:"HDPVersion" yaml:"HDPVersion"`
+	StackName      string `json:"StackName" yaml:"StackName"`
+	StackVersion   string `json:"StackVersion" yaml:"StackVersion"`
 	HostgroupCount string `json:"HostgroupCount" yaml:"HostgroupCount"`
 	Tags           string `json:"Tags" yaml:"Tags"`
 }
@@ -38,7 +39,7 @@ type blueprintOutTableDescribe struct {
 }
 
 func (b *blueprintOut) DataAsStringArray() []string {
-	return []string{b.Name, b.Description, b.HDPVersion, b.HostgroupCount, b.Tags}
+	return []string{b.Name, b.Description, b.StackName, b.StackVersion, b.HostgroupCount, b.Tags}
 }
 
 func (b *blueprintOutJsonDescribe) DataAsStringArray() []string {
@@ -180,7 +181,8 @@ func convertResponseToBlueprint(bp *models_cloudbreak.BlueprintResponse) *bluepr
 	return &blueprintOut{
 		Name:           *bp.Name,
 		Description:    *bp.Description,
-		HDPVersion:     fmt.Sprintf("%v", blueprintsNode["stack_version"]),
+		StackName:      fmt.Sprintf("%v", blueprintsNode["stack_name"]),
+		StackVersion:   fmt.Sprintf("%v", blueprintsNode["stack_version"]),
 		HostgroupCount: fmt.Sprint(bp.HostGroupCount),
 		Tags:           bp.Status,
 	}
@@ -193,7 +195,8 @@ func convertResponseWithContentAndIDToBlueprint(bp *models_cloudbreak.BlueprintR
 		blueprintOut: &blueprintOut{
 			Name:           *bp.Name,
 			Description:    *bp.Description,
-			HDPVersion:     fmt.Sprintf("%v", blueprintsNode["stack_version"]),
+			StackName:      fmt.Sprintf("%v", blueprintsNode["stack_name"]),
+			StackVersion:   fmt.Sprintf("%v", blueprintsNode["stack_version"]),
 			HostgroupCount: fmt.Sprint(bp.HostGroupCount),
 			Tags:           bp.Status,
 		},
@@ -209,7 +212,8 @@ func convertResponseWithIDToBlueprint(bp *models_cloudbreak.BlueprintResponse) *
 		blueprintOut: &blueprintOut{
 			Name:           *bp.Name,
 			Description:    *bp.Description,
-			HDPVersion:     fmt.Sprintf("%v", blueprintsNode["stack_version"]),
+			StackName:      fmt.Sprintf("%v", blueprintsNode["stack_name"]),
+			StackVersion:   fmt.Sprintf("%v", blueprintsNode["stack_version"]),
 			HostgroupCount: fmt.Sprint(bp.HostGroupCount),
 			Tags:           bp.Status,
 		},

@@ -51,7 +51,7 @@ func TestListBlueprintsImpl(t *testing.T) {
 	}
 
 	for i, r := range rows {
-		expected := []string{"name" + strconv.Itoa(i), "desc" + strconv.Itoa(i), "2.6", "3", "USER_MANAGED"}
+		expected := []string{"name" + strconv.Itoa(i), "desc" + strconv.Itoa(i), "HDP", "2.6", "3", "USER_MANAGED"}
 		if strings.Join(r.DataAsStringArray(), "") != strings.Join(expected, "") {
 			t.Errorf("row data not match %s == %s", expected, r.DataAsStringArray())
 		}

@@ -47,7 +47,8 @@ RSpec.describe 'Blueprint test cases', :type => :aruba do
     expect(JSON.parse(result.stdout)).to include_json(
       Name: /.*/,
       Description: /.*/,
-      HDPVersion: /.*/,
+      StackName: /.*/,
+      StackVersion: /.*/,
       HostgroupCount: /.*/,
       Tags: /.*/
     )
@@ -61,7 +62,8 @@ RSpec.describe 'Blueprint test cases', :type => :aruba do
       expect(s).to include_json(
         Name: /.*/,
         Description: /.*/,  
-        HDPVersion: /.*/,
+        StackName: /.*/,
+        StackVersion: /.*/,
         HostgroupCount: /.*/,
         Tags: /.*/     
     )
