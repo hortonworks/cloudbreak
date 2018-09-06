@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/hortonworks/cb-cli/cli/cloud"
 	"github.com/hortonworks/cb-cli/cli/types"
@@ -85,22 +86,14 @@ func getNetworkMode(c *cli.Context) cloud.NetworkMode {
 
 func getCloudStorageType(stringFinder func(string) string) cloud.CloudStorageType {
 	storageType := stringFinder(FlCloudStorageTypeOptional.Name)
-	switch storageType {
+	switch strings.ToLower(storageType) {
 	case "adls":
-		return cloud.ADLS
-	case "ADLS":
 		return cloud.ADLS
 	case "wasb":
 		return cloud.WASB
-	case "WASB":
-		return cloud.WASB
 	case "gcs":
 		return cloud.GCS
-	case "GCS":
-		return cloud.GCS
 	case "s3":
-		return cloud.S3
-	case "S3":
 		return cloud.S3
 	default:
 		return cloud.NO_CLOUD_STORAGE
