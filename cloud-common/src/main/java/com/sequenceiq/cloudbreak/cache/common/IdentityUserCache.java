@@ -2,25 +2,36 @@ package com.sequenceiq.cloudbreak.cache.common;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.cache.CacheDefinition;
-
-import net.sf.ehcache.config.CacheConfiguration;
-
 @Service
-public class IdentityUserCache implements CacheDefinition {
+public class IdentityUserCache extends AbstractCacheDefinition {
 
     private static final long MAX_ENTRIES = 1000L;
 
     private static final long TTL_IN_SECONDS = 15L * 60;
 
     @Override
-    public CacheConfiguration cacheConfiguration() {
-        CacheConfiguration cacheConfiguration = new CacheConfiguration();
-        cacheConfiguration.setName("identityUserCache");
-        cacheConfiguration.setMemoryStoreEvictionPolicy("LRU");
-        cacheConfiguration.setMaxEntriesLocalHeap(MAX_ENTRIES);
-        cacheConfiguration.setTimeToLiveSeconds(TTL_IN_SECONDS);
-        return cacheConfiguration;
+    protected String getName() {
+        return "identityUserCache";
+    }
+
+    @Override
+    protected String getMemoryStoreEvictionPolicy() {
+        return "LRU";
+    }
+
+    @Override
+    protected long getMaxEntriesLocalHeap() {
+        return MAX_ENTRIES;
+    }
+
+    @Override
+    protected long getMaxBytesLocalHeap() {
+        return 0L;
+    }
+
+    @Override
+    protected long getTimeToLiveSeconds() {
+        return TTL_IN_SECONDS;
     }
 
 }
