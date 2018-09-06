@@ -1,11 +1,15 @@
 package com.sequenceiq.cloudbreak.service.blueprint;
 
+import static com.sequenceiq.cloudbreak.api.model.Status.DELETE_COMPLETED;
+import static com.sequenceiq.cloudbreak.api.model.Status.DELETE_FAILED;
+import static com.sequenceiq.cloudbreak.api.model.Status.DELETE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.model.Status.PRE_DELETE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -19,6 +23,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintParameterQueryService;
@@ -46,6 +51,9 @@ import com.sequenceiq.cloudbreak.util.NameUtil;
 public class BlueprintService extends AbstractOrganizationAwareResourceService<Blueprint> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintService.class);
+
+    private static final Set<Status> DELETED_CLUSTER_STATUSES
+            = Set.of(PRE_DELETE_IN_PROGRESS, DELETE_IN_PROGRESS, DELETE_FAILED, DELETE_COMPLETED);
 
     @Inject
     private BlueprintRepository blueprintRepository;
@@ -160,10 +168,10 @@ public class BlueprintService extends AbstractOrganizationAwareResourceService<B
 
     @Override
     protected void prepareDeletion(Blueprint blueprint) {
-        List<Cluster> clustersWithThisBlueprint = clusterService.getByBlueprint(blueprint);
-        if (!clustersWithThisBlueprint.isEmpty()) {
-            if (clustersWithThisBlueprint.size() > 1) {
-                String clusters = clustersWithThisBlueprint
+        Set<Cluster> notDeletedClustersWithThisBp = getNotDeletedClustersWithBlueprint(blueprint);
+        if (!notDeletedClustersWithThisBp.isEmpty()) {
+            if (notDeletedClustersWithThisBp.size() > 1) {
+                String clusters = notDeletedClustersWithThisBp
                         .stream()
                         .map(Cluster::getName)
                         .collect(Collectors.joining(", "));
@@ -172,13 +180,24 @@ public class BlueprintService extends AbstractOrganizationAwareResourceService<B
                                 + "The following clusters are using this blueprint: [%s]", blueprint.getName(), clusters));
             }
             throw new BadRequestException(String.format("There is a cluster ['%s'] which uses blueprint '%s'. Please remove this "
-                    + "cluster before deleting the blueprint", clustersWithThisBlueprint.get(0).getName(), blueprint.getName()));
+                    + "cluster before deleting the blueprint", notDeletedClustersWithThisBp.iterator().next().getName(), blueprint.getName()));
         }
+    }
+
+    private Set<Cluster> getNotDeletedClustersWithBlueprint(Blueprint blueprint) {
+        Set<Cluster> clustersWithThisBlueprint = clusterService.findByBlueprint(blueprint);
+        Set<Cluster> deletedClustersWithThisBp = clustersWithThisBlueprint.stream()
+                .filter(cluster -> DELETED_CLUSTER_STATUSES.contains(cluster.getStatus()))
+                .collect(Collectors.toSet());
+        deletedClustersWithThisBp.forEach(cluster -> cluster.setBlueprint(null));
+        clusterService.saveAll(deletedClustersWithThisBp);
+        Set<Cluster> notDeletedClustersWithThisBp = new HashSet<>(clustersWithThisBlueprint);
+        notDeletedClustersWithThisBp.removeAll(deletedClustersWithThisBp);
+        return notDeletedClustersWithThisBp;
     }
 
     @Override
     protected void prepareCreation(Blueprint resource) {
-
     }
 
     public Set<String> queryCustomParameters(String name, Organization organization) {

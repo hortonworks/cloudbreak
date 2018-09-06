@@ -15,9 +15,9 @@ public class CloudbreakCommunicator {
     @Inject
     private CloudbreakClientConfiguration cloudbreakClientConfiguration;
 
-    public StackResponse getById(long stackId) {
+    public StackResponse getById(long cloudbreakStackId) {
         CloudbreakClient cloudbreakClient = cloudbreakClientConfiguration.cloudbreakClient();
-        return cloudbreakClient.autoscaleEndpoint().get(stackId);
+        return cloudbreakClient.autoscaleEndpoint().get(cloudbreakStackId);
     }
 
     public void failureReport(long stackId, FailureReport failureReport) {

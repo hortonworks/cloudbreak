@@ -61,7 +61,7 @@ public interface ClusterRepository extends OrganizationResourceRepository<Cluste
     List<Cluster> findByLdapConfig(LdapConfig ldapConfig);
 
     @CheckPermissionsByReturnValue
-    List<Cluster> findByBlueprint(Blueprint blueprint);
+    Set<Cluster> findByBlueprint(Blueprint blueprint);
 
     @CheckPermissionsByReturnValue
     Set<Cluster> findByProxyConfig(ProxyConfig proxyConfig);

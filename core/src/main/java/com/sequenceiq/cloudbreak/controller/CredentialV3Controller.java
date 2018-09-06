@@ -12,6 +12,7 @@ import javax.transaction.Transactional.TxType;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.organization.Organization;
 import com.sequenceiq.cloudbreak.domain.organization.User;
@@ -59,12 +60,14 @@ public class CredentialV3Controller extends NotificationController implements Cr
     public CredentialResponse createInOrganization(Long organizationId, CredentialRequest request) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
         Credential credential = credentialService.create(conversionService.convert(request, Credential.class), organizationId, user);
+        notify(ResourceEvent.CREDENTIAL_CREATED);
         return conversionService.convert(credential, CredentialResponse.class);
     }
 
     @Override
     public CredentialResponse deleteInOrganization(Long organizationId, String name) {
         Credential deleted = credentialService.deleteByNameFromOrganization(name, organizationId);
+        notify(ResourceEvent.CREDENTIAL_DELETED);
         return conversionService.convert(deleted, CredentialResponse.class);
     }
 
