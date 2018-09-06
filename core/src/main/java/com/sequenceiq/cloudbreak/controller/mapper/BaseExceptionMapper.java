@@ -50,6 +50,14 @@ abstract class BaseExceptionMapper<E extends Throwable> implements ExceptionMapp
         return exception.getMessage();
     }
 
+    protected String getErrorMessageFromThrowable(Throwable e) {
+        if (getExceptionType().equals(e.getClass())) {
+            return getErrorMessage((E) e);
+        }
+        LOGGER.error("Invalid exception type was used, {} != {}", e.getClass(), getExceptionType());
+        return e.getMessage();
+    }
+
     protected Object getEntity(E exception) {
         return new ExceptionResult(getErrorMessage(exception));
     }
