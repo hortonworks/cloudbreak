@@ -15,8 +15,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -43,6 +46,9 @@ import reactor.rx.Promise;
 public class ReactorFlowManagerTest {
 
     private static final Long STACK_ID = 1L;
+
+    @Rule
+    public final ExpectedException expectedException = ExpectedException.none();
 
     @Mock
     private EventBus reactor;
@@ -72,6 +78,7 @@ public class ReactorFlowManagerTest {
     public void shouldReturnTheNextFailureTransition() {
         InstanceGroupAdjustmentJson instanceGroupAdjustment = new InstanceGroupAdjustmentJson();
         HostGroupAdjustmentJson hostGroupAdjustment = new HostGroupAdjustmentJson();
+        hostGroupAdjustment.setScalingAdjustment(1);
         Map<String, Set<Long>> instanceIdsByHostgroup = new HashMap<>();
         instanceIdsByHostgroup.put("hostrgroup", Collections.singleton(1L));
 
@@ -163,6 +170,18 @@ public class ReactorFlowManagerTest {
         String imageCatalogUrl = "imageCatalogUrl";
         underTest.triggerStackImageUpdate(stackId, imageID, imageCatalogName, imageCatalogUrl);
         verify(reactor).notify(eq(FlowChainTriggers.STACK_IMAGE_UPDATE_TRIGGER_EVENT), any(Event.class));
+    }
+
+    public void tesTriggerClusterDownscaleWhenUnableToDefineScaleAmount() {
+        HostGroupAdjustmentJson hostGroupAdjustment = new HostGroupAdjustmentJson();
+        hostGroupAdjustment.setScalingAdjustment(null);
+
+        expectedException.expect(BadRequestException.class);
+        expectedException.expectMessage("Unable to define hostgroup scaling adjustment amount");
+
+        underTest.triggerClusterDownscale(STACK_ID, hostGroupAdjustment);
+
+        verify(eventFactory, times(0)).createEventWithErrHandler(any(Acceptable.class));
     }
 
     private static class TestAcceptable implements Acceptable {
