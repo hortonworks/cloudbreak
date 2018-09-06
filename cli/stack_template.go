@@ -40,32 +40,32 @@ var stackClient = func(server, userName, password, authType string) getStackInOr
 
 func GenerateAwsStackTemplate(c *cli.Context) error {
 	cloud.SetProviderType(cloud.AWS)
-	return printTemplate(*generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, c.Int64, getBlueprintClient, getCloudStorageType(c, c.String)))
+	return printTemplate(*generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, c.Int64, getBlueprintClient, getCloudStorageType(c.String)))
 }
 
 func GenerateAzureStackTemplate(c *cli.Context) error {
 	cloud.SetProviderType(cloud.AZURE)
-	return printTemplate(*generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, c.Int64, getBlueprintClient, getCloudStorageType(c, c.String)))
+	return printTemplate(*generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, c.Int64, getBlueprintClient, getCloudStorageType(c.String)))
 }
 
 func GenerateGcpStackTemplate(c *cli.Context) error {
 	cloud.SetProviderType(cloud.GCP)
-	return printTemplate(*generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, c.Int64, getBlueprintClient, getCloudStorageType(c, c.String)))
+	return printTemplate(*generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, c.Int64, getBlueprintClient, getCloudStorageType(c.String)))
 }
 
 func GenerateOpenstackStackTemplate(c *cli.Context) error {
 	cloud.SetProviderType(cloud.OPENSTACK)
-	return printTemplate(*generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, c.Int64, getBlueprintClient, getCloudStorageType(c, c.String)))
+	return printTemplate(*generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, c.Int64, getBlueprintClient, getCloudStorageType(c.String)))
 }
 
 func GenerateYarnStackTemplate(c *cli.Context) error {
 	cloud.SetProviderType(cloud.YARN)
-	return printTemplate(*generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, c.Int64, getBlueprintClient, getCloudStorageType(c, c.String)))
+	return printTemplate(*generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, c.Int64, getBlueprintClient, getCloudStorageType(c.String)))
 }
 
 func GenerateAtachedStackTemplate(c *cli.Context) error {
 	checkRequiredFlagsAndArguments(c)
-	return generateAttachedtackTemplateImpl(c.String, c.Bool, c.Int64, stackClient, getCloudStorageType(c, c.String))
+	return generateAttachedTemplateImpl(c.String, c.Bool, c.Int64, getCloudStorageType(c.String))
 }
 
 func getNetworkMode(c *cli.Context) cloud.NetworkMode {
@@ -83,7 +83,7 @@ func getNetworkMode(c *cli.Context) cloud.NetworkMode {
 	}
 }
 
-func getCloudStorageType(c *cli.Context, stringFinder func(string) string) cloud.CloudStorageType {
+func getCloudStorageType(stringFinder func(string) string) cloud.CloudStorageType {
 	storageType := stringFinder(FlCloudStorageTypeOptional.Name)
 	switch storageType {
 	case "adls":
@@ -167,18 +167,17 @@ func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string)
 	if params := provider.GetParamatersTemplate(); params != nil {
 		template.Parameters = params
 	}
-	postExtendTemplateWithOptionalBlocks(&template, boolFinder, storageType)
+	postExtendTemplateWithOptionalBlocks(&template, boolFinder)
 	return &template
 }
 
-func generateAttachedtackTemplateImpl(stringFinder func(string) string, boolFinder func(string) bool, int64Finder func(string) int64, getStackClient func(string, string, string, string) getStackInOrganization, storageType cloud.CloudStorageType) error {
-
+func generateAttachedTemplateImpl(stringFinder func(string) string, boolFinder func(string) bool, int64Finder func(string) int64, storageType cloud.CloudStorageType) error {
 	datalake := fetchStack(int64Finder(FlOrganizationOptional.Name), stringFinder(FlWithSourceCluster.Name), stackClient(stringFinder(FlServerOptional.Name), stringFinder(FlUsername.Name), stringFinder(FlPassword.Name), stringFinder(FlAuthTypeOptional.Name)))
 	isSharedServiceReady, _ := datalake.Cluster.Blueprint.Tags["shared_services_ready"].(bool)
 	if !isSharedServiceReady {
 		utils.LogErrorMessageAndExit("The source cluster must be a datalake")
-	} else if datalake.Status != "AVAILABLE" {
-		utils.LogErrorMessageAndExit("Datalake must be available state")
+	} else if datalake.Status != "AVAILABLE" || datalake.Cluster.Status != "AVAILABLE" {
+		utils.LogErrorMessageAndExit("Datalake must be in available state")
 	} else {
 		cloud.SetProviderType(cloud.CloudType(datalake.CloudPlatform))
 		attachedClusterTemplate := generateStackTemplateImpl(cloud.EXISTING_NETWORK_EXISTING_SUBNET, stringFinder, boolFinder, int64Finder, getBlueprintClient, storageType)
@@ -202,14 +201,17 @@ func generateAttachedtackTemplateImpl(stringFinder func(string) string, boolFind
 	return nil
 }
 
-func generateCloudStorage(datalake *models_cloudbreak.FileSystemResponse) *models_cloudbreak.CloudStorageRequest {
-	return &models_cloudbreak.CloudStorageRequest{
-		S3:        datalake.S3,
-		Adls:      datalake.Adls,
-		Gcs:       datalake.Gcs,
-		Wasb:      datalake.Wasb,
-		Locations: generateLocations(datalake.Locations),
+func generateCloudStorage(fileSystem *models_cloudbreak.FileSystemResponse) *models_cloudbreak.CloudStorageRequest {
+	if fileSystem != nil {
+		return &models_cloudbreak.CloudStorageRequest{
+			S3:        fileSystem.S3,
+			Adls:      fileSystem.Adls,
+			Gcs:       fileSystem.Gcs,
+			Wasb:      fileSystem.Wasb,
+			Locations: generateLocations(fileSystem.Locations),
+		}
 	}
+	return nil
 }
 
 func generateLocations(datalake []*models_cloudbreak.StorageLocationResponse) []*models_cloudbreak.StorageLocationRequest {
@@ -238,14 +240,14 @@ func getNodesByBlueprint(bp []byte) []cloud.Node {
 	if err := json.Unmarshal(bp, &bpJson); err != nil {
 		utils.LogErrorAndExit(err)
 	}
-	nodes := []*cloud.Node{}
+	var nodes []*cloud.Node
 	if bpJson["host_groups"] == nil {
 		utils.LogErrorMessageAndExit("host_groups not found in blueprint")
 	}
 	var gateway *cloud.Node
 	for _, e := range bpJson["host_groups"].([]interface{}) {
-		var hg map[string]interface{} = e.(map[string]interface{})
-		var count int = 1
+		var hg = e.(map[string]interface{})
+		var count = 1
 		if hg["cardinality"] != nil {
 			cardinality := hg["cardinality"].(string)
 			count = maxCardinality[cardinality]
@@ -267,7 +269,7 @@ func getNodesByBlueprint(bp []byte) []cloud.Node {
 		}
 	}
 	gateway.GroupType = models_cloudbreak.InstanceGroupResponseTypeGATEWAY
-	resp := []cloud.Node{}
+	var resp []cloud.Node
 	for _, n := range nodes {
 		resp = append(resp, *n)
 	}
@@ -338,7 +340,7 @@ func preExtendTemplateWithOptionalBlocks(template *models_cloudbreak.StackV2Requ
 	extendTemplateWithStorageType(template, storageType)
 }
 
-func postExtendTemplateWithOptionalBlocks(template *models_cloudbreak.StackV2Request, boolFinder func(string) bool, storageType cloud.CloudStorageType) {
+func postExtendTemplateWithOptionalBlocks(template *models_cloudbreak.StackV2Request, boolFinder func(string) bool) {
 	extendTemplateWithEncryptionType(template, boolFinder)
 }
 
@@ -428,17 +430,6 @@ func extendTemplateWithStorageType(template *models_cloudbreak.StackV2Request, s
 			},
 			Locations: []*models_cloudbreak.StorageLocationRequest{},
 		}
-	}
-}
-
-func convertNodeToHostGroup(node cloud.Node) *models_cloudbreak.HostGroupRequest {
-	return &models_cloudbreak.HostGroupRequest{
-		Name:         &node.Name,
-		RecoveryMode: "AUTO",
-		Constraint: &models_cloudbreak.Constraint{
-			InstanceGroupName: node.Name,
-			HostCount:         &node.Count,
-		},
 	}
 }
 
