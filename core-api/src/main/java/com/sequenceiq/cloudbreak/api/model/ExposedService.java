@@ -25,7 +25,8 @@ public enum ExposedService {
     ZEPPELIN("Zeppelin", "ZEPPELIN_MASTER", "ZEPPELIN", "/zeppelin/", false, 9995),
     RANGER("Ranger", "RANGER_ADMIN", "RANGERUI", "/ranger/", true, 6080),
     DP_PROFILER_AGENT("DP Profiler Agent", "DP_PROFILER_AGENT", "PROFILER-AGENT", "", true, 21900),
-    BEACON_SERVER("Beacon", "BEACON_SERVER", "BEACON", "", true, 25968);
+    BEACON_SERVER("Beacon", "BEACON_SERVER", "BEACON", "", true, 25968),
+    LIVY_SERVER("Livy Server", "LIVY2_SERVER", "LIVYSERVER", "/livy/v1/sessions/", true, 8999);
 
     private final String serviceName;
     private final String portName;

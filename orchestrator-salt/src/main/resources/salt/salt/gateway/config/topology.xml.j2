@@ -291,4 +291,15 @@
     {%- endif %}
     {%- endif %}
 
+   {% if 'LIVY2_SERVER' in salt['pillar.get']('gateway:location') -%}
+    {% if 'LIVYSERVER' in exposed -%}
+    <service>
+        <role>LIVYSERVER</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['LIVY2_SERVER'] -%}
+        <url>http://{{ hostloc }}:{{ ports['LIVYSERVER'] }}</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
+    {%- endif %}
+
 </topology>
