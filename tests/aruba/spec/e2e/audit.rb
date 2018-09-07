@@ -49,7 +49,11 @@ RSpec.describe 'Audit test cases', :type => :aruba do
       result = cb.audit.describe.audit_id(@@audit_event["auditId"]).build()
       expect(result.exit_status).to eql 0
       expect(result.stdout.empty?).to be_falsy
-      expect(JSON.parse(result.stdout)["Audit"]["operation"]["resourceType"]).to eql "recipes"
-      expect(JSON.parse(result.stdout)["Audit"]["operation"]["resourceId"]).to eql @@audit_event["operation"]["resourceId"]       
+      json = JSON.parse(result.stdout)
+      json.each do |s|
+        expect(s["Audit"]["operation"]["resourceType"]).to eql "recipes"
+        expect(s["Audit"]["operation"]["resourceId"]).to eql @@audit_event["operation"]["resourceId"] 
+        break
+      end      
   end 
 end  

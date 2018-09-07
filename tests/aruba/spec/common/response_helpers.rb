@@ -19,16 +19,13 @@ class MockResponse
     )  
   end
 
-
   def self.requestBodyCreate(operation_id, response, status_code)
-    return JSON.parse('{
-        "operationid": "' + operation_id + '",
-        "responses": [
-          {
-            "response": ' + response + ',
-            "statusCode":' + status_code + 
-          '}
-        ]
-      }')
-  end
+    if response.is_a? String
+      response = JSON.parse(response)
+    end
+    requestBody = {
+      :operationid => operation_id,
+      :responses => [{:response => response, :statusCode => status_code}]
+        }
+  end  
 end
