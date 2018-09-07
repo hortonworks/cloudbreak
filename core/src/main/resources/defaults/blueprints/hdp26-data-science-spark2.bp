@@ -106,22 +106,13 @@
             "name": "SECONDARY_NAMENODE"
           },
           {
-            "name": "LIVY_SERVER"
+            "name": "LIVY2_SERVER"
           },
           {
             "name": "SPARK2_CLIENT"
           },
           {
             "name": "SPARK2_JOBHISTORYSERVER"
-          },
-          {
-            "name": "SPARK_CLIENT"
-          },
-          {
-            "name": "SPARK_JOBHISTORYSERVER"
-          },
-          {
-            "name": "SQOOP"
           },
           {
             "name": "TEZ_CLIENT"
@@ -158,9 +149,6 @@
             "name": "SPARK2_CLIENT"
           },
           {
-            "name": "SPARK_CLIENT"
-          },
-          {
             "name": "DATANODE"
           },
           {
@@ -184,9 +172,6 @@
           },
           {
             "name": "SPARK2_CLIENT"
-          },
-          {
-            "name": "SPARK_CLIENT"
           },
           {
             "name": "METRICS_MONITOR"
