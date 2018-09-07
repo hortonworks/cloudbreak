@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -32,6 +33,7 @@ public class GatewayJson implements JsonEntity {
     @ApiModelProperty(GatewayModelDescription.ENABLE_KNOX_GATEWAY)
     private Boolean enableGateway;
 
+    @JsonIgnore
     @ApiModelProperty(GatewayModelDescription.KNOX_PATH)
     private String path;
 
@@ -56,6 +58,7 @@ public class GatewayJson implements JsonEntity {
     @ApiModelProperty(GatewayModelDescription.DEPRECATED_EXPOSED_KNOX_SERVICES)
     private List<String> exposedServices;
 
+    @JsonIgnore
     @ApiModelProperty(GatewayModelDescription.KNOX_SSO_PROVIDER)
     private String ssoProvider;
 
