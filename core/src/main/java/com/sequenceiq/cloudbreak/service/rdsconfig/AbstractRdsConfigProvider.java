@@ -44,11 +44,13 @@ public abstract class AbstractRdsConfigProvider {
         if (isRdsConfigNeeded(cluster.getBlueprint())) {
             Set<RDSConfig> rdsConfigs = createPostgresRdsConfigIfNeeded(stack, cluster);
             RDSConfig rdsConfig = rdsConfigs.stream().filter(rdsConfig1 -> rdsConfig1.getType().equalsIgnoreCase(getRdsType().name())).findFirst().get();
-            if (rdsConfig.getStatus() == ResourceStatus.DEFAULT) {
+            if (rdsConfig.getStatus() == ResourceStatus.DEFAULT && rdsConfig.getDatabaseEngine() != DatabaseVendor.EMBEDDED) {
                 Map<String, Object> postgres = new HashMap<>();
-                postgres.put("database", getDb());
+                String db = getDb();
+                postgres.put("database", db);
                 postgres.put("user", getDbUser());
                 postgres.put("password", rdsConfig.getConnectionPassword());
+                LOGGER.info("Rds config added: {}, databaseEngine: {}", db, rdsConfig.getDatabaseEngine());
                 return Collections.singletonMap(getPillarKey(), postgres);
             }
         }
@@ -97,7 +99,7 @@ public abstract class AbstractRdsConfigProvider {
         Arrays.stream(configurations).forEach(configuration -> {
             List<String> pathWithConfig = Lists.newArrayList(path);
             pathWithConfig.add(configuration);
-            pathList.add(pathWithConfig.toArray(new String [pathWithConfig.size()]));
+            pathList.add(pathWithConfig.toArray(new String[pathWithConfig.size()]));
         });
         return pathList;
     }
