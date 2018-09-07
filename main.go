@@ -49,7 +49,7 @@ func ConfigRead(c *cli.Context) error {
 	}
 
 	set := func(name, value string) {
-		if err := c.Set(name, value); err != nil {
+		if err = c.Set(name, value); err != nil {
 			log.Debug(err)
 		}
 	}
@@ -79,10 +79,10 @@ func ConfigRead(c *cli.Context) error {
 	if len(password) == 0 {
 		if len(config.Password) == 0 {
 			fmt.Print("Enter Password: ")
-			bytePassword, err := terminal.ReadPassword(int(syscall.Stdin))
+			bytePassword, ioErr := terminal.ReadPassword(int(syscall.Stdin))
 			fmt.Println()
-			if err != nil {
-				utils.LogErrorAndExit(err)
+			if ioErr != nil {
+				utils.LogErrorAndExit(ioErr)
 			}
 			set(cb.FlPassword.Name, string(bytePassword))
 		} else {

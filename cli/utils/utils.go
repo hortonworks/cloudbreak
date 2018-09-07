@@ -79,7 +79,7 @@ func ReadContentFromURL(urlLocation string, client *http.Client) []byte {
 		LogErrorAndExit(err)
 	}
 	defer func() {
-		if err := resp.Body.Close(); err != nil {
+		if err = resp.Body.Close(); err != nil {
 			LogErrorAndExit(err)
 		}
 	}()
