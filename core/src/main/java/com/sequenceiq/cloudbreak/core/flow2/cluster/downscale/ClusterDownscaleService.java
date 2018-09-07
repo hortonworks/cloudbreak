@@ -56,9 +56,9 @@ public class ClusterDownscaleService {
         flowMessageService.fireEventAndLog(stackId, Msg.AMBARI_CLUSTER_SCALING_DOWN, Status.UPDATE_IN_PROGRESS.name());
         clusterService.updateClusterStatusByStackId(stackId, Status.UPDATE_IN_PROGRESS);
         if (scalingAdjustment != null) {
-            LOGGER.info("Decommissioning {} hosts from host group '{}'", scalingAdjustment, hostGroupName);
+            LOGGER.info("Decommissioning {} hosts from host group '{}'", Math.abs(scalingAdjustment), hostGroupName);
             flowMessageService.fireInstanceGroupEventAndLog(stackId, Msg.AMBARI_CLUSTER_REMOVING_NODE_FROM_HOSTGROUP, Status.UPDATE_IN_PROGRESS.name(),
-                    hostGroupName, scalingAdjustment, hostGroupName);
+                    hostGroupName, Math.abs(scalingAdjustment), hostGroupName);
         } else if (!CollectionUtils.isEmpty(privateIds)) {
             LOGGER.info("Decommissioning {} hosts from host group '{}'", privateIds, hostGroupName);
             Stack stack = stackService.getByIdWithListsInTransaction(stackId);
