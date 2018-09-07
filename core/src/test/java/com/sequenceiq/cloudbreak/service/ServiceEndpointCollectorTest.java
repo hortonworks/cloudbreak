@@ -179,7 +179,7 @@ public class ServiceEndpointCollectorTest {
         if (sparkHistoryUI.isPresent()) {
             assertEquals("https://10.0.0.1:8443/gateway-path/topology2/sparkhistory/", sparkHistoryUI.get().getServiceUrl());
             assertEquals("SPARKHISTORYUI", sparkHistoryUI.get().getKnoxService());
-            assertEquals("Spark History Server", sparkHistoryUI.get().getDisplayName());
+            assertEquals("Spark 1.x History Server", sparkHistoryUI.get().getDisplayName());
             assertEquals("SPARK_JOBHISTORYSERVER", sparkHistoryUI.get().getServiceName());
             assertFalse(sparkHistoryUI.get().isOpen());
         } else {
