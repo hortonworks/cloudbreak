@@ -111,14 +111,6 @@ RSpec.describe 'Cluster test cases', :type => :aruba do
     end
   end
 
-    xit "Cluster - Reinstall - Success" do 
-      with_environment 'DEBUG' => '1' do    
-      result = cb.cluster.reinstall.name("asdfg").cli_input_json(@cli_input_json).blueprint_name("asdfg").build(false)
-      expect(result.exit_status).to eql 0
-      expect(result.stderr).to include("reinstall stack took")          
-    end
-  end
-
     it "Cluster - Generate re-install template " do 
     with_environment 'DEBUG' => '1' do
       result = cb.cluster.generate_reinstall_template.name("test").blueprint_name("test").build(false)
@@ -161,7 +153,7 @@ RSpec.describe 'Cluster test cases', :type => :aruba do
 
    it "Cluster - Sync - Failure" do 
     with_environment 'DEBUG' => '1' do
-      requestBody = MockResponse.requestBodyCreate('putsyncStackV3', '{"message":"Stack \'azstatus\' not found"}', '404')
+      requestBody = MockResponse.requestBodyCreate('putsyncStackV3','{"message":"Stack \'azstatus\' not found"}', '404')
       url = ENV['BASE_URL'] + @mock_endpoint_setup
       MockResponse.post(requestBody, url)           
       result = cb.cluster.sync.name("azstatus").build(false)
@@ -170,11 +162,14 @@ RSpec.describe 'Cluster test cases', :type => :aruba do
     end   
   end
 
-   xit "Cluster - Repair - Failure" do 
+   it "Cluster - Repair - Failure" do 
     with_environment 'DEBUG' => '1' do
-      result = cb.cluster.repair.name("azstatus").host_groups("test").build(false)
+      requestBody = MockResponse.requestBodyCreate('repairClusterV3', '{"message":"Stack \'azstatus\' not found"}', '404')
+      url = ENV['BASE_URL'] + @mock_endpoint_setup
+      MockResponse.post(requestBody, url)          
+      result = cb.cluster.start.name("azstatus").build(false)
       expect(result.exit_status).to eql 1
-      expect(result.stderr).to include("Stack 'azstatus' not found")          
+      expect(result.stderr).to include("Stack 'azstatus' not found")           
     end   
   end      
   
@@ -278,9 +273,17 @@ RSpec.describe 'Cluster test cases', :type => :aruba do
     end
   end 
 
-    xit "Cluster - Generate attached cluster template " do 
+    it "Cluster - Generate attached cluster template - Not datalake cluster" do 
+    with_environment 'DEBUG' => '1' do
+      result = cb.cluster.generate_attached_cluster_template.source_cluster("test").blueprint_name("test").build(false)
+      expect(result.exit_status).to eql 1
+      expect(result.stderr).to include("error")        
+    end
+  end  
+
+    it "Cluster - Generate attached cluster template " do 
     with_environment 'DEBUG' => '1' do   
-      requestBody = MockResponse.requestBodyCreate('getStackInOrganization', load_json(@dl_stack_json), '200')
+      requestBody = MockResponse.requestBodyCreate('getStackInOrganization', JSON.parse(load_json(@dl_stack_json)), '200')
       url = ENV['BASE_URL'] + @mock_endpoint_setup
       MockResponse.post(requestBody, url)          
       result = cb.cluster.generate_attached_cluster_template.source_cluster("dl-ok").blueprint_name("test").build(false)
@@ -289,13 +292,33 @@ RSpec.describe 'Cluster test cases', :type => :aruba do
     end
   end
 
-    it "Cluster - Generate attached cluster template - Not datalake cluster" do 
-    with_environment 'DEBUG' => '1' do
-      result = cb.cluster.generate_attached_cluster_template.source_cluster("test").blueprint_name("test").build(false)
+    it "Cluster - Generate attached cluster template - Cluster is not available" do 
+    with_environment 'DEBUG' => '1' do     
+      temp_json = JSON.parse(load_json(@dl_stack_json))
+      temp_json["status"] = "UPDATE_IN_PROGRESS"
+      temp_json["cluster"]["status"] = "UPDATE_IN_PROGRESS"
+      requestBody = MockResponse.requestBodyCreate('getStackInOrganization', temp_json, '200')
+      url = ENV['BASE_URL'] + @mock_endpoint_setup
+      MockResponse.post(requestBody, url)          
+      result = cb.cluster.generate_attached_cluster_template.source_cluster("dl-ok").blueprint_name("test").build(false)
       expect(result.exit_status).to eql 1
-      expect(result.stderr).to include("error")        
+      expect(result.stderr).to include("error")     
     end
-  end  
+  end
+
+    it "Cluster - Generate attached cluster template - Cluster is failed" do 
+    with_environment 'DEBUG' => '1' do     
+      temp_json = JSON.parse(load_json(@dl_stack_json))
+      temp_json["status"] = "FAILED"
+      temp_json["cluster"]["status"] = "FAILED"
+      requestBody = MockResponse.requestBodyCreate('getStackInOrganization', temp_json, '200')
+      url = ENV['BASE_URL'] + @mock_endpoint_setup
+      MockResponse.post(requestBody, url)          
+      result = cb.cluster.generate_attached_cluster_template.source_cluster("dl-ok").blueprint_name("test").build(false)
+      expect(result.exit_status).to eql 1
+      expect(result.stderr).to include("error")     
+    end
+  end    
 
     it "Cluster - Re-try " do 
     with_environment 'DEBUG' => '1' do
