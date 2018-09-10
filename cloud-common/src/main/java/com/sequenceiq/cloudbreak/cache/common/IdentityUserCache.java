@@ -33,5 +33,4 @@ public class IdentityUserCache extends AbstractCacheDefinition {
     protected long getTimeToLiveSeconds() {
         return TTL_IN_SECONDS;
     }
-
 }
