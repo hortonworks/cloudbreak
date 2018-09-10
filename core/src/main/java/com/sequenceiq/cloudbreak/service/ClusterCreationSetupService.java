@@ -7,9 +7,12 @@ import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariRepositoryV
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -26,8 +29,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
+import com.sequenceiq.cloudbreak.api.model.stack.StackDescriptor;
+import com.sequenceiq.cloudbreak.api.model.stack.StackMatrix;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
+import com.sequenceiq.cloudbreak.cloud.VersionComparator;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -69,6 +75,8 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 public class ClusterCreationSetupService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterCreationSetupService.class);
+
+    private static final Pattern MAJOR_VERSION_REGEX_PATTERN = Pattern.compile("(^[0-9]+\\.[0-9]+).*");
 
     @Inject
     private FileSystemValidator fileSystemValidator;
@@ -112,6 +120,9 @@ public class ClusterCreationSetupService {
 
     @Inject
     private DefaultAmbariRepoService defaultAmbariRepoService;
+
+    @Inject
+    private StackMatrixService stackMatrixService;
 
     @Inject
     private ManagementPackValidator mpackValidator;
@@ -182,6 +193,7 @@ public class ClusterCreationSetupService {
                 stackImageComponent);
         components.add(hdpRepoConfig);
 
+        checkRepositories(ambariRepoConfig, hdpRepoConfig, stackImageComponent.get(), request.getValidateRepositories());
         checkVDFFile(ambariRepoConfig, hdpRepoConfig, stackName);
 
         LOGGER.info("Cluster components saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
@@ -191,6 +203,53 @@ public class ClusterCreationSetupService {
         LOGGER.info("Cluster object creation took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
         return savedCluster;
+    }
+
+    private void checkRepositories(ClusterComponent ambariRepoComponent, ClusterComponent stackRepoComponent, Component imageComponent, boolean strictCheck)
+            throws IOException {
+        AmbariRepo ambariRepo = ambariRepoComponent.getAttributes().get(AmbariRepo.class);
+        StackRepoDetails stackRepoDetails = stackRepoComponent.getAttributes().get(StackRepoDetails.class);
+        Image image = imageComponent.getAttributes().get(Image.class);
+        StackMatrix stackMatrix = stackMatrixService.getStackMatrix();
+        String stackMajorVersion = stackRepoDetails.getHdpVersion();
+        Matcher majorVersionRegex = MAJOR_VERSION_REGEX_PATTERN.matcher(stackMajorVersion);
+        if (majorVersionRegex.matches()) {
+            stackMajorVersion = majorVersionRegex.group(1);
+        }
+        Map<String, StackDescriptor> stackDescriptorMap;
+        String stackType = stackRepoDetails.getStack().get(StackRepoDetails.REPO_ID_TAG);
+        if (stackType.contains("-")) {
+            stackType = stackType.substring(0, stackType.indexOf("-"));
+        }
+        switch (stackType) {
+            case "HDP":
+                stackDescriptorMap = stackMatrix.getHdp();
+                break;
+            case "HDF":
+                stackDescriptorMap = stackMatrix.getHdf();
+                break;
+            default:
+                LOGGER.warn("No stack descriptor map found for stacktype {}, using 'HDP'", stackType);
+                stackDescriptorMap = stackMatrix.getHdp();
+        }
+        StackDescriptor stackDescriptor = stackDescriptorMap.get(stackMajorVersion);
+        if (stackDescriptor != null) {
+            boolean hasDefaultStackRepoUrlForOsType = stackDescriptor.getRepo().getStack().containsKey(image.getOsType());
+            boolean hasDefaultAmbariRepoUrlForOsType = stackDescriptor.getAmbari().getRepo().containsKey(image.getOsType());
+            boolean compatibleAmbari = new VersionComparator().compare(() -> ambariRepo.getVersion().substring(0, stackDescriptor.getMinAmbari().length()),
+                    () -> stackDescriptor.getMinAmbari()) >= 0;
+            if (!hasDefaultAmbariRepoUrlForOsType || !hasDefaultStackRepoUrlForOsType || !compatibleAmbari) {
+                String message = String.format("The given repository information seems to be incompatible."
+                        + " Ambari version: %s, Stack type: %s, Stack version: %s, Image Id: %s, Os type: %s.", ambariRepo.getVersion(),
+                        stackType, stackRepoDetails.getHdpVersion(), image.getImageId(), image.getOsType());
+                if (strictCheck) {
+                    LOGGER.error(message);
+                    throw new BadRequestException(message);
+                } else {
+                    LOGGER.warn(message);
+                }
+            }
+        }
     }
 
     private void checkVDFFile(ClusterComponent ambariRepoConfig, ClusterComponent hdpRepoConfig, String stackName) throws IOException {

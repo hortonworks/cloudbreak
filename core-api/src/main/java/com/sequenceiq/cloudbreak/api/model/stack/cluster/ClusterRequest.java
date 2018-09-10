@@ -100,6 +100,9 @@ public class ClusterRequest implements JsonEntity {
     @ApiModelProperty(ClusterModelDescription.VALIDATE_BLUEPRINT)
     private Boolean validateBlueprint = Boolean.TRUE;
 
+    @ApiModelProperty(ClusterModelDescription.VALIDATE_REPOSITORIES)
+    private Boolean validateRepositories = Boolean.FALSE;
+
     @Valid
     @ApiModelProperty(ClusterModelDescription.AMBARI_STACK_DETAILS)
     private AmbariStackDetailsJson ambariStackDetails;
@@ -220,6 +223,14 @@ public class ClusterRequest implements JsonEntity {
 
     public void setValidateBlueprint(Boolean validateBlueprint) {
         this.validateBlueprint = validateBlueprint;
+    }
+
+    public Boolean getValidateRepositories() {
+        return validateRepositories;
+    }
+
+    public void setValidateRepositories(Boolean validateRepositories) {
+        this.validateRepositories = validateRepositories;
     }
 
     public AmbariStackDetailsJson getAmbariStackDetails() {
