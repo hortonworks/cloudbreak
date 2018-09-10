@@ -41,8 +41,8 @@ import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
@@ -105,9 +105,9 @@ public class StackDecorator {
     @Inject
     private List<ParameterValidator> parameterValidators;
 
-    public Stack decorate(@Nonnull Stack subject, @Nonnull StackRequest request, User user, Organization organization) {
-        prepareCredential(subject, request, user, organization);
-        prepareDomainIfDefined(subject, request, user, organization);
+    public Stack decorate(@Nonnull Stack subject, @Nonnull StackRequest request, User user, Workspace workspace) {
+        prepareCredential(subject, request, user, workspace);
+        prepareDomainIfDefined(subject, request, user, workspace);
         Long credentialId = request.getCredentialId();
         String credentialName = request.getCredentialName();
         if (credentialId != null || subject.getCredential() != null || credentialName != null) {
@@ -128,26 +128,26 @@ public class StackDecorator {
             prepareInstanceGroups(subject, request, subject.getCredential(), user);
             prepareFlexSubscription(subject, request.getFlexId());
             validate(subject);
-            checkSharedServiceStackRequirements(request, user, organization);
+            checkSharedServiceStackRequirements(request, user, workspace);
         }
         return subject;
     }
 
-    private void checkSharedServiceStackRequirements(StackRequest request, User user, Organization organization) {
-        if (request.getClusterToAttach() != null && !isSharedServiceRequirementsMeets(request, user, organization)) {
+    private void checkSharedServiceStackRequirements(StackRequest request, User user, Workspace workspace) {
+        if (request.getClusterToAttach() != null && !isSharedServiceRequirementsMeets(request, user, workspace)) {
             throw new BadRequestException("Shared service stack should contains both Hive RDS and Ranger RDS and a properly configured LDAP also. "
                     + "One of them may be missing");
         }
     }
 
-    private boolean isSharedServiceRequirementsMeets(StackRequest request, User user, Organization organization) {
+    private boolean isSharedServiceRequirementsMeets(StackRequest request, User user, Workspace workspace) {
         boolean hasConfiguredLdap = hasConfiguredLdap(request);
-        boolean hasConfiguredHiveRds = hasConfiguredRdsByType(request, user, organization, RdsType.HIVE);
-        boolean hasConfiguredRangerRds = hasConfiguredRdsByType(request, user, organization, RdsType.RANGER);
+        boolean hasConfiguredHiveRds = hasConfiguredRdsByType(request, user, workspace, RdsType.HIVE);
+        boolean hasConfiguredRangerRds = hasConfiguredRdsByType(request, user, workspace, RdsType.RANGER);
         return hasConfiguredHiveRds && hasConfiguredRangerRds && hasConfiguredLdap;
     }
 
-    private boolean hasConfiguredRdsByType(StackRequest request, User user, Organization organization, RdsType rdsType) {
+    private boolean hasConfiguredRdsByType(StackRequest request, User user, Workspace workspace, RdsType rdsType) {
         boolean hasConfiguredRds = false;
         if (!request.getClusterRequest().getRdsConfigJsons().isEmpty()) {
             hasConfiguredRds = request.getClusterRequest().getRdsConfigJsons().stream()
@@ -155,7 +155,7 @@ public class StackDecorator {
         }
         if (!hasConfiguredRds && !request.getClusterRequest().getRdsConfigNames().isEmpty()) {
             for (String rds : request.getClusterRequest().getRdsConfigNames()) {
-                if (rdsType.name().equalsIgnoreCase(rdsConfigService.getByNameForOrg(rds, organization).getType())) {
+                if (rdsType.name().equalsIgnoreCase(rdsConfigService.getByNameForWorkspace(rds, workspace).getType())) {
                     hasConfiguredRds = true;
                     break;
                 }
@@ -182,14 +182,14 @@ public class StackDecorator {
         return hasConfiguredLdap;
     }
 
-    private void prepareCredential(Stack subject, StackRequest request, User user, Organization organization) {
+    private void prepareCredential(Stack subject, StackRequest request, User user, Workspace workspace) {
         if (subject.getCredential() == null) {
             if (request.getCredentialId() != null) {
-                Credential credential = credentialService.get(request.getCredentialId(), organization);
+                Credential credential = credentialService.get(request.getCredentialId(), workspace);
                 subject.setCredential(credential);
             }
             if (request.getCredentialName() != null) {
-                Credential credential = credentialService.getByNameForOrganization(request.getCredentialName(), organization);
+                Credential credential = credentialService.getByNameForWorkspace(request.getCredentialName(), workspace);
                 subject.setCredential(credential);
             }
         }
@@ -243,7 +243,7 @@ public class StackDecorator {
                             request.getAvailabilityZone(), request.getPlatformVariant());
                     template = templateDecorator.decorate(credential, template, request.getRegion(),
                             request.getAvailabilityZone(), request.getPlatformVariant());
-                    template = templateService.create(subject.getOwner(), subject.getAccount(), user, template, subject.getOrganization());
+                    template = templateService.create(subject.getOwner(), subject.getAccount(), user, template, subject.getWorkspace());
                 }
                 instanceGroup.setTemplate(template);
             }
@@ -251,7 +251,7 @@ public class StackDecorator {
                 SecurityGroup securityGroup = instanceGroup.getSecurityGroup();
                 if (securityGroup.getId() == null) {
                     securityGroup.setCloudPlatform(getCloudPlatform(subject, request, securityGroup.getCloudPlatform()));
-                    securityGroup = securityGroupService.create(user, securityGroup, subject.getOrganization());
+                    securityGroup = securityGroupService.create(user, securityGroup, subject.getWorkspace());
                     instanceGroup.setSecurityGroup(securityGroup);
                 }
             }
@@ -280,12 +280,12 @@ public class StackDecorator {
         }
     }
 
-    private void prepareDomainIfDefined(Stack subject, StackRequest request, User user, Organization organization) {
+    private void prepareDomainIfDefined(Stack subject, StackRequest request, User user, Workspace workspace) {
         if (subject.getNetwork() != null) {
             Network network = subject.getNetwork();
             if (network.getId() == null) {
                 network.setCloudPlatform(getCloudPlatform(subject, request, network.cloudPlatform()));
-                network = networkService.create(network, subject.getOrganization());
+                network = networkService.create(network, subject.getWorkspace());
             }
             subject.setNetwork(network);
         }
@@ -293,7 +293,7 @@ public class StackDecorator {
             Credential credentialForStack = subject.getCredential();
             if (credentialForStack.getId() == null) {
                 credentialForStack.setCloudPlatform(getCloudPlatform(subject, request, credentialForStack.cloudPlatform()));
-                credentialForStack = credentialService.create(credentialForStack, organization, user);
+                credentialForStack = credentialService.create(credentialForStack, workspace, user);
             }
             subject.setCredential(credentialForStack);
         }

@@ -83,7 +83,7 @@ public abstract class AbstractRdsConfigProvider {
         rdsConfig.setOwner(stack.getOwner());
         rdsConfig.setAccount(stack.getAccount());
         rdsConfig.setClusters(Collections.singleton(cluster));
-        rdsConfig = rdsConfigService.createIfNotExists(stack.getCreator(), rdsConfig, stack.getOrganization().getId());
+        rdsConfig = rdsConfigService.createIfNotExists(stack.getCreator(), rdsConfig, stack.getWorkspace().getId());
 
         if (rdsConfigs == null) {
             rdsConfigs = new HashSet<>();

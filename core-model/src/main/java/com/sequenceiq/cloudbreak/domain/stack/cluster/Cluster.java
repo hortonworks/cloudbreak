@@ -39,7 +39,7 @@ import javax.persistence.UniqueConstraint;
 import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.Status;
-import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
+import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Container;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
@@ -52,15 +52,15 @@ import com.sequenceiq.cloudbreak.domain.converter.EncryptionConverter;
 import com.sequenceiq.cloudbreak.domain.json.EncryptedJsonToString;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.OrganizationAwareResource;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"organization_id", "name"}))
-public class Cluster implements ProvisionEntity, OrganizationAwareResource {
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name"}))
+public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "cluster_generator")
@@ -174,7 +174,7 @@ public class Cluster implements ProvisionEntity, OrganizationAwareResource {
     private ProxyConfig proxyConfig;
 
     @ManyToOne
-    private Organization organization;
+    private Workspace workspace;
 
     public boolean hasGateway() {
         return gateway != null && gateway.isGatewayEnabled();
@@ -537,18 +537,18 @@ public class Cluster implements ProvisionEntity, OrganizationAwareResource {
     }
 
     @Override
-    public Organization getOrganization() {
-        return organization;
+    public Workspace getWorkspace() {
+        return workspace;
     }
 
     @Override
-    public void setOrganization(Organization organization) {
-        this.organization = organization;
+    public void setWorkspace(Workspace workspace) {
+        this.workspace = workspace;
     }
 
     @Override
-    public OrganizationResource getResource() {
-        return OrganizationResource.STACK;
+    public WorkspaceResource getResource() {
+        return WorkspaceResource.STACK;
     }
 
     @Override

@@ -3,11 +3,11 @@ package com.sequenceiq.cloudbreak.facade;
 import java.util.List;
 
 import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 
 public interface CloudbreakEventsFacade {
 
-    List<CloudbreakEventsJson> retrieveEventsForOrganiztion(Organization organization, Long since);
+    List<CloudbreakEventsJson> retrieveEventsForWorkspace(Workspace workspace, Long since);
 
     List<CloudbreakEventsJson> retrieveEventsByStack(Long stackId);
 

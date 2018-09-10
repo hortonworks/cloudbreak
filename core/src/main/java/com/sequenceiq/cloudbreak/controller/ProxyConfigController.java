@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigResponse;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.converter.mapper.ProxyConfigMapper;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
@@ -51,22 +51,22 @@ public class ProxyConfigController extends NotificationController implements Pro
 
     @Override
     public ProxyConfigResponse postPublic(ProxyConfigRequest request) {
-        return createInDefaultOrganization(request);
+        return createInDefaultWorkspace(request);
     }
 
     @Override
     public ProxyConfigResponse postPrivate(ProxyConfigRequest request) {
-        return createInDefaultOrganization(request);
+        return createInDefaultWorkspace(request);
     }
 
     @Override
     public Set<ProxyConfigResponse> getPrivates() {
-        return listForUsersDefaultOrganization();
+        return listForUsersDefaultWorkspace();
     }
 
     @Override
     public Set<ProxyConfigResponse> getPublics() {
-        return listForUsersDefaultOrganization();
+        return listForUsersDefaultWorkspace();
     }
 
     @Override
@@ -81,33 +81,33 @@ public class ProxyConfigController extends NotificationController implements Pro
 
     @Override
     public ProxyConfigResponse deletePublic(String name) {
-        return deleteInDefaultOrganization(name);
+        return deleteInDefaultWorkspace(name);
     }
 
     @Override
     public ProxyConfigResponse deletePrivate(String name) {
-        return deleteInDefaultOrganization(name);
+        return deleteInDefaultWorkspace(name);
     }
 
     private ProxyConfigResponse getProxyConfigResponse(String name) {
-        return proxyConfigMapper.mapEntityToResponse(proxyConfigService.getByNameForOrganizationId(name, restRequestThreadLocalService.getRequestedOrgId()));
+        return proxyConfigMapper.mapEntityToResponse(proxyConfigService.getByNameForWorkspaceId(name, restRequestThreadLocalService.getRequestedWorkspaceId()));
     }
 
-    private Set<ProxyConfigResponse> listForUsersDefaultOrganization() {
-        return proxyConfigService.findAllByOrganizationId(restRequestThreadLocalService.getRequestedOrgId()).stream()
+    private Set<ProxyConfigResponse> listForUsersDefaultWorkspace() {
+        return proxyConfigService.findAllByWorkspaceId(restRequestThreadLocalService.getRequestedWorkspaceId()).stream()
                 .map(config -> proxyConfigMapper.mapEntityToResponse(config))
                 .collect(Collectors.toSet());
     }
 
-    private ProxyConfigResponse deleteInDefaultOrganization(String name) {
-        ProxyConfig config = proxyConfigService.deleteByNameFromOrganization(name, restRequestThreadLocalService.getRequestedOrgId());
+    private ProxyConfigResponse deleteInDefaultWorkspace(String name) {
+        ProxyConfig config = proxyConfigService.deleteByNameFromWorkspace(name, restRequestThreadLocalService.getRequestedWorkspaceId());
         return notifyAndReturn(config, ResourceEvent.PROXY_CONFIG_DELETED);
     }
 
-    private ProxyConfigResponse createInDefaultOrganization(ProxyConfigRequest request) {
+    private ProxyConfigResponse createInDefaultWorkspace(ProxyConfigRequest request) {
         ProxyConfig proxyConfig = proxyConfigMapper.mapRequestToEntity(request);
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        proxyConfig = proxyConfigService.create(proxyConfig, restRequestThreadLocalService.getRequestedOrgId(), user);
+        proxyConfig = proxyConfigService.create(proxyConfig, restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         return notifyAndReturn(proxyConfig, ResourceEvent.PROXY_CONFIG_CREATED);
     }
 

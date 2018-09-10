@@ -10,7 +10,7 @@ import com.sequenceiq.cloudbreak.api.model.rds.RDSTestRequest;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsTestResult;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 
 public abstract class AbstractRdsConfigController extends NotificationController {
@@ -22,11 +22,11 @@ public abstract class AbstractRdsConfigController extends NotificationController
     @Named("conversionService")
     private ConversionService conversionService;
 
-    public RdsTestResult testRdsConnection(RDSTestRequest rdsTestRequest, Organization organization) {
+    public RdsTestResult testRdsConnection(RDSTestRequest rdsTestRequest, Workspace workspace) {
         String existingRDSConfigName = rdsTestRequest.getName();
         RDSConfigRequest configRequest = rdsTestRequest.getRdsConfig();
         if (existingRDSConfigName != null) {
-            return new RdsTestResult(rdsConfigService.testRdsConnection(existingRDSConfigName, organization));
+            return new RdsTestResult(rdsConfigService.testRdsConnection(existingRDSConfigName, workspace));
         } else if (configRequest != null) {
             RDSConfig rdsConfig = conversionService.convert(configRequest, RDSConfig.class);
             return new RdsTestResult(rdsConfigService.testRdsConnection(rdsConfig));

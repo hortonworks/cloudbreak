@@ -41,7 +41,7 @@ import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigJson;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
-import com.sequenceiq.cloudbreak.api.model.users.OrganizationResourceResponse;
+import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
 import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptor;
 import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptors;
@@ -53,7 +53,7 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
@@ -139,8 +139,8 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
         given(orchestratorTypeResolver.resolveType(any(Orchestrator.class))).willReturn(OrchestratorType.HOST);
         given(rdsConfigService.findByClusterId(anyLong())).willReturn(new HashSet<>());
         given(stackService.findClustersConnectedToDatalake(anyLong())).willReturn(new HashSet<>());
-        given(conversionService.convert(any(Organization.class), eq(OrganizationResourceResponse.class)))
-                .willReturn(new OrganizationResourceResponse());
+        given(conversionService.convert(any(Workspace.class), eq(WorkspaceResourceResponse.class)))
+                .willReturn(new WorkspaceResourceResponse());
         stackServiceComponentDescriptor = createStackServiceComponentDescriptor();
     }
 

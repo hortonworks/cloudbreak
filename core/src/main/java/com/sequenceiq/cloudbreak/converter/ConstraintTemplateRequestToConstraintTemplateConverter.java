@@ -7,10 +7,10 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.model.ConstraintTemplateRequest;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.domain.ConstraintTemplate;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Component
@@ -18,7 +18,7 @@ public class ConstraintTemplateRequestToConstraintTemplateConverter
         extends AbstractConversionServiceAwareConverter<ConstraintTemplateRequest, ConstraintTemplate> {
 
     @Inject
-    private OrganizationService organizationService;
+    private WorkspaceService workspaceService;
 
     @Inject
     private UserService userService;
@@ -36,10 +36,10 @@ public class ConstraintTemplateRequestToConstraintTemplateConverter
         constraintTemplate.setName(source.getName());
         constraintTemplate.setDescription(source.getDescription());
         constraintTemplate.setStatus(ResourceStatus.USER_MANAGED);
-        Long orgId = restRequestThreadLocalService.getRequestedOrgId();
+        Long workspaceId = restRequestThreadLocalService.getRequestedWorkspaceId();
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Organization organization = organizationService.get(orgId, user);
-        constraintTemplate.setOrganization(organization);
+        Workspace workspace = workspaceService.get(workspaceId, user);
+        constraintTemplate.setWorkspace(workspace);
         return constraintTemplate;
     }
 

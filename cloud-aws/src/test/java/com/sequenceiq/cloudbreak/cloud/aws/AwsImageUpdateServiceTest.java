@@ -38,7 +38,7 @@ public class AwsImageUpdateServiceTest {
 
     private static final String USER_ID = "horton@hortonworks.com";
 
-    private static final Long ORGANIZATION_ID = 1L;
+    private static final Long WORKSPACE_ID = 1L;
 
     @Mock
     private AwsClient awsClient;
@@ -77,7 +77,7 @@ public class AwsImageUpdateServiceTest {
         MockitoAnnotations.initMocks(this);
         Location location = Location.location(Region.region("region"));
         CloudContext cloudContext = new CloudContext(1L, "cloudContext", "AWS", "owner", "variant",
-                location, USER_ID, ORGANIZATION_ID);
+                location, USER_ID, WORKSPACE_ID);
         CloudCredential cc = new CloudCredential(1L, "cc");
         ac = new AuthenticatedContext(cloudContext, cc);
         when(stack.getImage()).thenReturn(image);

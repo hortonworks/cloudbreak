@@ -40,11 +40,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredEventClient;
 import com.sequenceiq.cloudbreak.structuredevent.event.OperationDetails;
@@ -99,7 +99,7 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
     private String cbVersion;
 
     @Inject
-    private OrganizationService organizationService;
+    private WorkspaceService workspaceService;
 
     @Inject
     private UserService userService;
@@ -185,8 +185,8 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
                 LOGGER.error("Unable to find user", ex);
             }
         }
-        Long orgId = restRequestThreadLocalService.getRequestedOrgId();
-        structuredEventClient.sendStructuredEvent(new StructuredRestCallEvent(createOperationDetails(restParams, requestTime, orgId, user, identityUser),
+        Long workspaceId = restRequestThreadLocalService.getRequestedWorkspaceId();
+        structuredEventClient.sendStructuredEvent(new StructuredRestCallEvent(createOperationDetails(restParams, requestTime, workspaceId, user, identityUser),
                 restCall));
     }
 
@@ -255,13 +255,14 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
         return !"GET".equals(requestContext.getMethod()) && urlBlackList.stream().noneMatch(path::contains);
     }
 
-    private OperationDetails createOperationDetails(Map<String, String> restParams, Long requestTime, Long orgId, User currentUser, IdentityUser identityUser) {
+    private OperationDetails createOperationDetails(Map<String, String> restParams, Long requestTime,
+            Long workspaceId, User currentUser, IdentityUser identityUser) {
         String resoureceType = restParams.get(RESOURCE_TYPE);
         String resoureceId = restParams.get(RESOURCE_ID);
         String resoureceName = restParams.get(RESOURCE_NAME);
         return new OperationDetails(requestTime, REST, resoureceType, StringUtils.isNotEmpty(resoureceId) ? Long.valueOf(resoureceId) : null, resoureceName,
                 currentUser != null ? currentUser.getUserId() : "", currentUser != null ? currentUser.getUserName() : "",
-                cloudbreakNodeConfig.getId(), cbVersion, orgId, identityUser != null ? identityUser.getAccount() : "",
+                cloudbreakNodeConfig.getId(), cbVersion, workspaceId, identityUser != null ? identityUser.getAccount() : "",
                 identityUser != null ? identityUser.getUserId() : "", identityUser != null ? identityUser.getUsername() : "");
     }
 

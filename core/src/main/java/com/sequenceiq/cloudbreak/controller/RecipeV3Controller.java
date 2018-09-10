@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
 import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.Recipe;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
@@ -39,37 +39,37 @@ public class RecipeV3Controller extends NotificationController implements Recipe
     private RestRequestThreadLocalService restRequestThreadLocalService;
 
     @Override
-    public Set<RecipeResponse> listByOrganization(Long organizationId) {
-        return recipeService.findAllByOrganizationId(organizationId).stream()
+    public Set<RecipeResponse> listByWorkspace(Long workspaceId) {
+        return recipeService.findAllByWorkspaceId(workspaceId).stream()
                 .map(recipe -> conversionService.convert(recipe, RecipeResponse.class))
                 .collect(Collectors.toSet());
     }
 
     @Override
-    public RecipeResponse getByNameInOrganization(Long organizationId, String name) {
-        Recipe recipe = recipeService.getByNameForOrganizationId(name, organizationId);
+    public RecipeResponse getByNameInWorkspace(Long workspaceId, String name) {
+        Recipe recipe = recipeService.getByNameForWorkspaceId(name, workspaceId);
         return conversionService.convert(recipe, RecipeResponse.class);
     }
 
     @Override
-    public RecipeResponse createInOrganization(Long organizationId, RecipeRequest request) {
+    public RecipeResponse createInWorkspace(Long workspaceId, RecipeRequest request) {
         Recipe recipe = conversionService.convert(request, Recipe.class);
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        recipe = recipeService.create(recipe, organizationId, user);
+        recipe = recipeService.create(recipe, workspaceId, user);
         notify(ResourceEvent.RECIPE_CREATED);
         return conversionService.convert(recipe, RecipeResponse.class);
     }
 
     @Override
-    public RecipeResponse deleteInOrganization(Long organizationId, String name) {
-        Recipe deleted = recipeService.deleteByNameFromOrganization(name, organizationId);
+    public RecipeResponse deleteInWorkspace(Long workspaceId, String name) {
+        Recipe deleted = recipeService.deleteByNameFromWorkspace(name, workspaceId);
         notify(ResourceEvent.RECIPE_DELETED);
         return conversionService.convert(deleted, RecipeResponse.class);
     }
 
     @Override
-    public RecipeRequest getRequestFromName(Long organizationId, String name) {
-        Recipe recipe = recipeService.getByNameForOrganizationId(name, organizationId);
+    public RecipeRequest getRequestFromName(Long workspaceId, String name) {
+        Recipe recipe = recipeService.getByNameForWorkspaceId(name, workspaceId);
         return conversionService.convert(recipe, RecipeRequest.class);
     }
 }

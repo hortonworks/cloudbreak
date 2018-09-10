@@ -21,8 +21,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.converter.mapper.ProxyConfigMapper;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigService;
 
@@ -47,16 +47,16 @@ public class ClusterProxyDecoratorTest {
 
     @Before
     public void setUp() {
-        when(service.getByNameForOrganization(anyString(), any(Organization.class))).thenReturn(new ProxyConfig());
+        when(service.getByNameForWorkspace(anyString(), any(Workspace.class))).thenReturn(new ProxyConfig());
         cluster = new Cluster();
-        cluster.setOrganization(new Organization());
+        cluster.setWorkspace(new Workspace());
     }
 
     @Test
     public void testProxyNameProvided() {
         Cluster result = clusterProxyDecorator.prepareProxyConfig(cluster, "test");
         assertNotNull(result.getProxyConfig());
-        Mockito.verify(service, Mockito.times(1)).getByNameForOrganization(anyString(), any(Organization.class));
+        Mockito.verify(service, Mockito.times(1)).getByNameForWorkspace(anyString(), any(Workspace.class));
         Mockito.verify(service, Mockito.times(0)).create(any(ProxyConfig.class), anyLong(), eq(user));
     }
 
@@ -65,6 +65,6 @@ public class ClusterProxyDecoratorTest {
         Cluster result = clusterProxyDecorator.prepareProxyConfig(cluster, null);
         assertNull(result.getProxyConfig());
         Mockito.verify(service, Mockito.times(0)).create(any(ProxyConfig.class), anyLong(), eq(user));
-        Mockito.verify(service, Mockito.times(0)).getByNameForOrganization(anyString(), any(Organization.class));
+        Mockito.verify(service, Mockito.times(0)).getByNameForWorkspace(anyString(), any(Workspace.class));
     }
 }

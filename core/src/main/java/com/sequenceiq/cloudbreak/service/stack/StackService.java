@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.service.stack;
 import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOP_REQUESTED;
-import static com.sequenceiq.cloudbreak.authorization.OrganizationPermissions.Action;
+import static com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action;
 import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
 
 import java.util.Collection;
@@ -37,7 +37,7 @@ import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
-import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
+import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.authorization.PermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
@@ -59,8 +59,8 @@ import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
@@ -95,7 +95,7 @@ import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
@@ -194,7 +194,7 @@ public class StackService {
     private TransactionService transactionService;
 
     @Inject
-    private OrganizationService organizationService;
+    private WorkspaceService workspaceService;
 
     @Inject
     private PermissionCheckingUtils permissionCheckingUtils;
@@ -207,20 +207,20 @@ public class StackService {
         return stackRepository.countActiveByOwner(owner);
     }
 
-    public Set<StackResponse> retrieveStacksByOrganizationId(Long organizationId) {
+    public Set<StackResponse> retrieveStacksByWorkspaceId(Long workspaceId) {
         try {
             return transactionService.required(() ->
-                    convertStacks(stackRepository.findForOrganizationIdWithLists(organizationId)));
+                    convertStacks(stackRepository.findForWorkspaceIdWithLists(workspaceId)));
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }
     }
 
-    public StackResponse findStackByNameAndOrganizationId(String name, Long organizationId) {
+    public StackResponse findStackByNameAndWorkspaceId(String name, Long workspaceId) {
         try {
             return transactionService.required(() ->
                     conversionService.convert(stackRepository
-                            .findByNameAndOrganizationIdWithLists(name, organizationId), StackResponse.class));
+                            .findByNameAndWorkspaceIdWithLists(name, workspaceId), StackResponse.class));
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }
@@ -256,8 +256,8 @@ public class StackService {
     }
 
     @PreAuthorize("#oauth2.hasScope('cloudbreak.autoscale')")
-    public Long getOrganizationId(Long stackId) {
-        return stackRepository.findOrganizationIdById(stackId);
+    public Long getWorkspaceId(Long stackId) {
+        return stackRepository.findWorkspaceIdById(stackId);
     }
 
     @PreAuthorize("#oauth2.hasScope('cloudbreak.autoscale')")
@@ -321,9 +321,9 @@ public class StackService {
         return stackViewRepository.findById(id).orElseThrow(notFound("Stack", id));
     }
 
-    public StackView getViewByNameInOrgForUser(String name, Long organizationId, User user) {
-        Organization organization = organizationService.get(organizationId, user);
-        StackView stackView = stackViewRepository.findByNameAndOrganization(name, organization);
+    public StackView getViewByNameInWorkspaceForUser(String name, Long workspaceId, User user) {
+        Workspace workspace = workspaceService.get(workspaceId, user);
+        StackView stackView = stackViewRepository.findByNameAndWorkspace(name, workspace);
         if (stackView == null) {
             throw new NotFoundException(String.format("Stack not found with name '%s'", name));
         }
@@ -342,10 +342,10 @@ public class StackService {
         }
     }
 
-    public StackResponse getStackByNameInOrg(String name, Collection<String> entries, User user, Organization organization) {
+    public StackResponse getStackByNameInWorkspace(String name, Collection<String> entries, User user, Workspace workspace) {
         try {
             return transactionService.required(() -> {
-                Stack stack = stackRepository.findByNameAndOrganizationIdWithLists(name, organization.getId());
+                Stack stack = stackRepository.findByNameAndWorkspaceIdWithLists(name, workspace.getId());
                 StackResponse stackResponse = conversionService.convert(stack, StackResponse.class);
                 stackResponse = stackResponseDecorator.decorate(stackResponse, stack, entries);
                 return stackResponse;
@@ -355,11 +355,11 @@ public class StackService {
         }
     }
 
-    public StackResponse getByNameInOrgWithEntries(String name, Long organizationId, Set<String> entries, User user) {
+    public StackResponse getByNameInWorkspaceWithEntries(String name, Long workspaceId, Set<String> entries, User user) {
         try {
             return transactionService.required(() -> {
-                Organization organization = organizationService.get(organizationId, user);
-                Stack stack = stackRepository.findByNameAndOrganizationIdWithLists(name, organization.getId());
+                Workspace workspace = workspaceService.get(workspaceId, user);
+                Stack stack = stackRepository.findByNameAndWorkspaceIdWithLists(name, workspace.getId());
                 if (stack == null) {
                     throw new NotFoundException(String.format(STACK_NOT_FOUND_EXCEPTION_TXT, name));
                 }
@@ -372,10 +372,10 @@ public class StackService {
         }
     }
 
-    public StackV2Request getStackRequestByNameInDefaultOrgForUser(String name, User user, Organization organization) {
+    public StackV2Request getStackRequestByNameInDefaultWorkspaceForUser(String name, User user, Workspace workspace) {
         try {
             return transactionService.required(() -> {
-                Stack stack = stackRepository.findByNameAndOrganizationIdWithLists(name, organization.getId());
+                Stack stack = stackRepository.findByNameAndWorkspaceIdWithLists(name, workspace.getId());
                 return conversionService.convert(stack, StackV2Request.class);
             });
         } catch (TransactionExecutionException e) {
@@ -383,10 +383,10 @@ public class StackService {
         }
     }
 
-    public StackV2Request getStackRequestByNameInOrg(String name, Long organizationId) {
+    public StackV2Request getStackRequestByNameInWorkspace(String name, Long workspaceId) {
         try {
             return transactionService.required(() -> {
-                Stack stack = stackRepository.findByNameAndOrganizationIdWithLists(name, organizationId);
+                Stack stack = stackRepository.findByNameAndWorkspaceIdWithLists(name, workspaceId);
                 return conversionService.convert(stack, StackV2Request.class);
             });
         } catch (TransactionExecutionException e) {
@@ -394,23 +394,23 @@ public class StackService {
         }
     }
 
-    public Stack getByNameInOrg(String name, Long organizationId) {
-        return stackRepository.findByNameAndOrganizationId(name, organizationId);
+    public Stack getByNameInWorkspace(String name, Long workspaceId) {
+        return stackRepository.findByNameAndWorkspaceId(name, workspaceId);
     }
 
-    public Stack getByNameInOrgWithLists(String name, Long organizationId) {
-        return stackRepository.findByNameAndOrganizationIdWithLists(name, organizationId);
+    public Stack getByNameInWorkspaceWithLists(String name, Long workspaceId) {
+        return stackRepository.findByNameAndWorkspaceIdWithLists(name, workspaceId);
     }
 
-    public Map<String, Object> getStatusByNameInOrg(String name, Long organizationId) {
-        return conversionService.convert(getByNameInOrg(name, organizationId), Map.class);
+    public Map<String, Object> getStatusByNameInWorkspace(String name, Long workspaceId) {
+        return conversionService.convert(getByNameInWorkspace(name, workspaceId), Map.class);
     }
 
-    public Stack create(Stack stack, String platformString, StatedImage imgFromCatalog, User user, Organization organization) {
+    public Stack create(Stack stack, String platformString, StatedImage imgFromCatalog, User user, Workspace workspace) {
         stack.setGatewayPort(nginxPort);
         stack.setCreator(user);
 
-        stack.setOrganization(organization);
+        stack.setWorkspace(workspace);
 
         setPlatformVariant(stack);
         String stackName = stack.getName();
@@ -490,39 +490,39 @@ public class StackService {
 
     public void delete(Long id, Boolean forced, Boolean deleteDependencies, User user) {
         stackRepository.findById(id).map(stack -> {
-            delete(stack.getName(), stack.getOrganization().getId(), forced, deleteDependencies, user);
+            delete(stack.getName(), stack.getWorkspace().getId(), forced, deleteDependencies, user);
             return stack;
         }).orElseThrow(notFound("Stack", id));
     }
 
-    public void delete(String name, Long organizationId, Boolean forced, Boolean deleteDependencies, User user) {
-        Optional.ofNullable(stackRepository.findByNameAndOrganizationId(name, organizationId)).map(stack -> {
+    public void delete(String name, Long workspaceId, Boolean forced, Boolean deleteDependencies, User user) {
+        Optional.ofNullable(stackRepository.findByNameAndWorkspaceId(name, workspaceId)).map(stack -> {
             delete(stack, forced, deleteDependencies, user);
             return stack;
         }).orElseThrow(notFound("Stack", name));
     }
 
-    public void removeInstance(Long stackId, Long organizationId, String instanceId, User user) {
-        removeInstance(stackId, organizationId, instanceId, false, user);
+    public void removeInstance(Long stackId, Long workspaceId, String instanceId, User user) {
+        removeInstance(stackId, workspaceId, instanceId, false, user);
     }
 
-    public void removeInstance(Long stackId, Long organizationId, String instanceId, boolean forced, User user) {
+    public void removeInstance(Long stackId, Long workspaceId, String instanceId, boolean forced, User user) {
         Stack stack = getById(stackId);
-        InstanceMetaData metaData = validateInstanceForDownscale(instanceId, stack, organizationId, user);
+        InstanceMetaData metaData = validateInstanceForDownscale(instanceId, stack, workspaceId, user);
         flowManager.triggerStackRemoveInstance(stackId, metaData.getInstanceGroupName(), metaData.getPrivateId(), forced);
     }
 
-    public void removeInstance(Stack stack, Long organizationId, String instanceId, boolean forced, User user) {
-        InstanceMetaData metaData = validateInstanceForDownscale(instanceId, stack, organizationId, user);
+    public void removeInstance(Stack stack, Long workspaceId, String instanceId, boolean forced, User user) {
+        InstanceMetaData metaData = validateInstanceForDownscale(instanceId, stack, workspaceId, user);
         flowManager.triggerStackRemoveInstance(stack.getId(), metaData.getInstanceGroupName(), metaData.getPrivateId(), forced);
     }
 
-    public void removeInstances(Long stackId, Long organizationId, Set<String> instanceIds, User user) {
+    public void removeInstances(Long stackId, Long workspaceId, Set<String> instanceIds, User user) {
         Stack stack = getById(stackId);
-        permissionCheckingUtils.checkPermissionByOrgIdForUser(stack.getOrganization().getId(), OrganizationResource.STACK, Action.WRITE, user);
+        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(stack.getWorkspace().getId(), WorkspaceResource.STACK, Action.WRITE, user);
         Map<String, Set<Long>> instanceIdsByHostgroupMap = new HashMap<>();
         for (String instanceId : instanceIds) {
-            InstanceMetaData metaData = validateInstanceForDownscale(instanceId, stack, organizationId, user);
+            InstanceMetaData metaData = validateInstanceForDownscale(instanceId, stack, workspaceId, user);
             instanceIdsByHostgroupMap.computeIfAbsent(metaData.getInstanceGroupName(), s -> new LinkedHashSet<>()).add(metaData.getPrivateId());
         }
         flowManager.triggerStackRemoveInstances(stackId, instanceIdsByHostgroupMap);
@@ -555,8 +555,8 @@ public class StackService {
         }
     }
 
-    private InstanceMetaData validateInstanceForDownscale(String instanceId, Stack stack, Long organizationId, User user) {
-        permissionCheckingUtils.checkPermissionByOrgIdForUser(organizationId, OrganizationResource.STACK, Action.WRITE, user);
+    private InstanceMetaData validateInstanceForDownscale(String instanceId, Stack stack, Long workspaceId, User user) {
+        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(workspaceId, WorkspaceResource.STACK, Action.WRITE, user);
         InstanceMetaData metaData = instanceMetaDataRepository.findByInstanceId(stack.getId(), instanceId);
         if (metaData == null) {
             throw new NotFoundException(String.format("Metadata for instance %s has not found.", instanceId));
@@ -577,13 +577,13 @@ public class StackService {
     }
 
     private void repairFailedNodes(Stack stack, User user) {
-        permissionCheckingUtils.checkPermissionByOrgIdForUser(stack.getOrganization().getId(), OrganizationResource.STACK, Action.WRITE, user);
+        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(stack.getWorkspace().getId(), WorkspaceResource.STACK, Action.WRITE, user);
         LOGGER.warn("Received request to replace failed nodes: " + stack.getId());
         flowManager.triggerManualRepairFlow(stack.getId());
     }
 
     private void sync(Stack stack, boolean full, User user) {
-        permissionCheckingUtils.checkPermissionByOrgIdForUser(stack.getOrganization().getId(), OrganizationResource.STACK, Action.WRITE, user);
+        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(stack.getWorkspace().getId(), WorkspaceResource.STACK, Action.WRITE, user);
         if (!stack.isDeleteInProgress() && !stack.isStackInDeletionPhase() && !stack.isModificationInProgress()) {
             if (full) {
                 flowManager.triggerFullSync(stack.getId());
@@ -604,7 +604,7 @@ public class StackService {
     }
 
     private void triggerStackStopIfNeeded(Stack stack, Cluster cluster, boolean updateCluster, User user) {
-        permissionCheckingUtils.checkPermissionByOrgIdForUser(stack.getOrganization().getId(), OrganizationResource.STACK, Action.WRITE, user);
+        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(stack.getWorkspace().getId(), WorkspaceResource.STACK, Action.WRITE, user);
         if (!isStopNeeded(stack)) {
             return;
         }
@@ -650,7 +650,7 @@ public class StackService {
     }
 
     private void start(Stack stack, Cluster cluster, boolean updateCluster, User user) {
-        permissionCheckingUtils.checkPermissionByOrgIdForUser(stack.getOrganization().getId(), OrganizationResource.STACK, Action.WRITE, user);
+        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(stack.getWorkspace().getId(), WorkspaceResource.STACK, Action.WRITE, user);
         if (stack.isAvailable()) {
             String statusDesc = cloudbreakMessagesService.getMessage(Msg.STACK_START_IGNORED.code());
             LOGGER.info(statusDesc);
@@ -668,7 +668,7 @@ public class StackService {
     }
 
     public void updateNodeCount(Stack stack1, InstanceGroupAdjustmentJson instanceGroupAdjustmentJson, boolean withClusterEvent, User user) {
-        permissionCheckingUtils.checkPermissionByOrgIdForUser(stack1.getOrganization().getId(), OrganizationResource.STACK, Action.WRITE, user);
+        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(stack1.getWorkspace().getId(), WorkspaceResource.STACK, Action.WRITE, user);
         try {
             transactionService.required(() -> {
                 Stack stackWithLists = getByIdWithLists(stack1.getId());
@@ -835,16 +835,16 @@ public class StackService {
         }
     }
 
-    public Set<Stack> findAllForOrganization(Long organizationId) {
+    public Set<Stack> findAllForWorkspace(Long workspaceId) {
         try {
-            return transactionService.required(() -> stackRepository.findAllForOrganization(organizationId));
+            return transactionService.required(() -> stackRepository.findAllForWorkspace(workspaceId));
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }
     }
 
     private void delete(Stack stack, Boolean forced, Boolean deleteDependencies, User user) {
-        permissionCheckingUtils.checkPermissionByOrgIdForUser(stack.getOrganization().getId(), OrganizationResource.STACK, Action.WRITE, user);
+        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(stack.getWorkspace().getId(), WorkspaceResource.STACK, Action.WRITE, user);
         checkStackHasNoAttachedClusters(stack);
         MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Stack delete requested.");
@@ -914,8 +914,8 @@ public class StackService {
         return stackRepository.findStackForCluster(id);
     }
 
-    public void updateImage(Long stackId, Long organizationId, String imageId, String imageCatalogName, String imageCatalogUrl, User user) {
-        permissionCheckingUtils.checkPermissionByOrgIdForUser(organizationId, OrganizationResource.STACK, Action.WRITE, user);
+    public void updateImage(Long stackId, Long workspaceId, String imageId, String imageCatalogName, String imageCatalogUrl, User user) {
+        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(workspaceId, WorkspaceResource.STACK, Action.WRITE, user);
         flowManager.triggerStackImageUpdate(stackId, imageId, imageCatalogName, imageCatalogUrl);
     }
 

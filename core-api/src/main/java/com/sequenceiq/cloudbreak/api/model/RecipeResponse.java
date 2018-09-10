@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.api.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.sequenceiq.cloudbreak.api.model.users.OrganizationResourceResponse;
+import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
 import io.swagger.annotations.ApiModel;
@@ -13,8 +13,8 @@ public class RecipeResponse extends RecipeBase {
     @ApiModelProperty(ModelDescriptions.ID)
     private Long id;
 
-    @ApiModelProperty(ModelDescriptions.ORGANIZATION_OF_THE_RESOURCE)
-    private OrganizationResourceResponse organization;
+    @ApiModelProperty(ModelDescriptions.WORKSPACE_OF_THE_RESOURCE)
+    private WorkspaceResourceResponse workspace;
 
     @JsonProperty("id")
     public Long getId() {
@@ -25,11 +25,11 @@ public class RecipeResponse extends RecipeBase {
         this.id = id;
     }
 
-    public OrganizationResourceResponse getOrganization() {
-        return organization;
+    public WorkspaceResourceResponse getWorkspace() {
+        return workspace;
     }
 
-    public void setOrganization(OrganizationResourceResponse organization) {
-        this.organization = organization;
+    public void setWorkspace(WorkspaceResourceResponse workspace) {
+        this.workspace = workspace;
     }
 }

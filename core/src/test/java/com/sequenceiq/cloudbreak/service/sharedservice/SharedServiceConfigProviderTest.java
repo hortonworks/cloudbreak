@@ -39,8 +39,8 @@ import com.sequenceiq.cloudbreak.domain.BlueprintParameter;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -63,7 +63,7 @@ public class SharedServiceConfigProviderTest {
     private User user;
 
     @Mock
-    private Organization organization;
+    private Workspace workspace;
 
     @Mock
     private ConnectedClusterRequest connectedClusterRequest;
@@ -140,7 +140,7 @@ public class SharedServiceConfigProviderTest {
     public void testConfigureClusterWhenConnectedClusterRequestIsNullThenOriginalClusterInstanceShouldReturn() {
         Cluster cluster = new Cluster();
 
-        Cluster result = underTest.configureCluster(cluster, null, user, organization);
+        Cluster result = underTest.configureCluster(cluster, null, user, workspace);
 
         Assert.assertEquals(cluster, result);
     }
@@ -162,12 +162,12 @@ public class SharedServiceConfigProviderTest {
         when(configsResponse.getInputs()).thenReturn(Collections.emptySet());
         when(newInputs.get(Map.class)).thenReturn(Collections.emptyMap());
 
-        Cluster result = underTest.configureCluster(requestedCluster, connectedClusterRequest, user, organization);
+        Cluster result = underTest.configureCluster(requestedCluster, connectedClusterRequest, user, workspace);
 
         Assert.assertEquals(ldapConfig, result.getLdapConfig());
         Assert.assertTrue(result.getRdsConfigs().isEmpty());
         verify(stackService, times(1)).getById(TEST_LONG_VALUE);
-        verify(stackService, times(0)).getByNameInOrg(anyString(), anyLong());
+        verify(stackService, times(0)).getByNameInWorkspace(anyString(), anyLong());
     }
 
     @Test
@@ -177,7 +177,7 @@ public class SharedServiceConfigProviderTest {
         String clusterName = "some value representing a cluster name";
         when(connectedClusterRequest.getSourceClusterName()).thenReturn(clusterName);
         when(connectedClusterRequest.getSourceClusterId()).thenReturn(TEST_LONG_VALUE);
-        when(stackService.getByNameInOrg(eq(clusterName), anyLong())).thenReturn(publicStack);
+        when(stackService.getByNameInWorkspace(eq(clusterName), anyLong())).thenReturn(publicStack);
         when(publicStack.getId()).thenReturn(TEST_LONG_VALUE);
         when(publicStackCluster.getId()).thenReturn(TEST_LONG_VALUE);
         when(publicStack.getCluster()).thenReturn(publicStackCluster);
@@ -188,12 +188,12 @@ public class SharedServiceConfigProviderTest {
         when(configsResponse.getInputs()).thenReturn(Collections.emptySet());
         when(newInputs.get(Map.class)).thenReturn(Collections.emptyMap());
 
-        Cluster result = underTest.configureCluster(requestedCluster, connectedClusterRequest, user, organization);
+        Cluster result = underTest.configureCluster(requestedCluster, connectedClusterRequest, user, workspace);
 
         Assert.assertEquals(ldapConfig, result.getLdapConfig());
         Assert.assertTrue(result.getRdsConfigs().isEmpty());
         verify(stackService, times(0)).getById(TEST_LONG_VALUE);
-        verify(stackService, times(1)).getByNameInOrg(anyString(), anyLong());
+        verify(stackService, times(1)).getByNameInWorkspace(anyString(), anyLong());
     }
 
     @Test
@@ -216,7 +216,7 @@ public class SharedServiceConfigProviderTest {
         when(configsResponse.getInputs()).thenReturn(Collections.emptySet());
         when(newInputs.get(Map.class)).thenReturn(Collections.emptyMap());
 
-        Cluster result = underTest.configureCluster(requestedCluster, connectedClusterRequest, user, organization);
+        Cluster result = underTest.configureCluster(requestedCluster, connectedClusterRequest, user, workspace);
 
         Assert.assertEquals(2L, result.getRdsConfigs().size());
         result.getRdsConfigs().forEach(rdsConfig -> Assert.assertNotEquals(DEFAULT, rdsConfig.getStatus()));
@@ -239,7 +239,7 @@ public class SharedServiceConfigProviderTest {
         when(configsResponse.getInputs()).thenReturn(Collections.emptySet());
         when(newInputs.get(Map.class)).thenReturn(Collections.emptyMap());
 
-        underTest.configureCluster(requestedCluster, connectedClusterRequest, user, organization);
+        underTest.configureCluster(requestedCluster, connectedClusterRequest, user, workspace);
 
         verify(clusterService, times(1)).getById(TEST_LONG_VALUE);
         verify(stackService, times(1)).getById(TEST_LONG_VALUE);    }
@@ -263,7 +263,7 @@ public class SharedServiceConfigProviderTest {
         when(configsResponse.getInputs()).thenReturn(Collections.emptySet());
         when(newInputs.get(Map.class)).thenReturn(Collections.emptyMap());
 
-        underTest.configureCluster(requestedCluster, connectedClusterRequest, user, organization);
+        underTest.configureCluster(requestedCluster, connectedClusterRequest, user, workspace);
 
         verify(clusterService, times(1)).getById(TEST_LONG_VALUE);
         verify(stackService, times(1)).getById(TEST_LONG_VALUE);
@@ -288,7 +288,7 @@ public class SharedServiceConfigProviderTest {
         when(configsResponse.getInputs()).thenReturn(Collections.emptySet());
         when(newInputs.get(Map.class)).thenReturn(Collections.emptyMap());
 
-        underTest.configureCluster(requestedCluster, connectedClusterRequest, user, organization);
+        underTest.configureCluster(requestedCluster, connectedClusterRequest, user, workspace);
 
         verify(clusterService, times(1)).getById(TEST_LONG_VALUE);
         verify(stackService, times(1)).getById(TEST_LONG_VALUE);    }
@@ -315,7 +315,7 @@ public class SharedServiceConfigProviderTest {
         when(configsResponse.getInputs()).thenReturn(Collections.emptySet());
         when(newInputs.get(Map.class)).thenReturn(Collections.emptyMap());
 
-        underTest.configureCluster(requestedCluster, connectedClusterRequest, user, organization);
+        underTest.configureCluster(requestedCluster, connectedClusterRequest, user, workspace);
 
         verify(clusterService, times(0)).retrieveOutputs(TEST_LONG_VALUE, new HashSet<>());
     }

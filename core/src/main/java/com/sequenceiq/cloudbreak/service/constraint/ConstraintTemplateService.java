@@ -11,18 +11,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
+import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.ConstraintTemplate;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.repository.ConstraintTemplateRepository;
-import com.sequenceiq.cloudbreak.repository.organization.OrganizationResourceRepository;
-import com.sequenceiq.cloudbreak.service.AbstractOrganizationAwareResourceService;
+import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
+import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.util.NameUtil;
 
 @Service
-public class ConstraintTemplateService extends AbstractOrganizationAwareResourceService<ConstraintTemplate> {
+public class ConstraintTemplateService extends AbstractWorkspaceAwareResourceService<ConstraintTemplate> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConstraintTemplateService.class);
 
@@ -37,8 +37,8 @@ public class ConstraintTemplateService extends AbstractOrganizationAwareResource
     private ClusterService clusterService;
 
     @Override
-    public ConstraintTemplate deleteByNameFromOrganization(String name, Long organizationId) {
-        ConstraintTemplate constraintTemplate = constraintTemplateRepository.findByNameAndOrganizationId(name, organizationId);
+    public ConstraintTemplate deleteByNameFromWorkspace(String name, Long workspaceId) {
+        ConstraintTemplate constraintTemplate = constraintTemplateRepository.findByNameAndWorkspaceId(name, workspaceId);
         return delete(constraintTemplate);
     }
 
@@ -69,13 +69,13 @@ public class ConstraintTemplateService extends AbstractOrganizationAwareResource
     }
 
     @Override
-    public OrganizationResourceRepository<ConstraintTemplate, Long> repository() {
+    public WorkspaceResourceRepository<ConstraintTemplate, Long> repository() {
         return constraintTemplateRepository;
     }
 
     @Override
-    public OrganizationResource resource() {
-        return OrganizationResource.CONSTRAINT_TEMPLATE;
+    public WorkspaceResource resource() {
+        return WorkspaceResource.CONSTRAINT_TEMPLATE;
     }
 
     @Override

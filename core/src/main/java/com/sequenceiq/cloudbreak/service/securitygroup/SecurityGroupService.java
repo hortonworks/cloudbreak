@@ -16,21 +16,21 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
+import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.SecurityGroupRepository;
-import com.sequenceiq.cloudbreak.repository.organization.OrganizationResourceRepository;
-import com.sequenceiq.cloudbreak.service.AbstractOrganizationAwareResourceService;
+import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
+import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.util.NameUtil;
 
 @Service
-public class SecurityGroupService extends AbstractOrganizationAwareResourceService<SecurityGroup> {
+public class SecurityGroupService extends AbstractWorkspaceAwareResourceService<SecurityGroup> {
     private static final Logger LOGGER = LoggerFactory.getLogger(SecurityGroupService.class);
 
     @Inject
@@ -39,9 +39,9 @@ public class SecurityGroupService extends AbstractOrganizationAwareResourceServi
     @Inject
     private InstanceGroupRepository instanceGroupRepository;
 
-    public SecurityGroup create(User user, SecurityGroup securityGroup, Organization organization) {
+    public SecurityGroup create(User user, SecurityGroup securityGroup, Workspace workspace) {
         LOGGER.info("Creating SecurityGroup: [User: '{}']", user.getUserId());
-        securityGroup.setOrganization(organization);
+        securityGroup.setWorkspace(workspace);
         try {
             return groupRepository.save(securityGroup);
         } catch (DataIntegrityViolationException ex) {
@@ -58,8 +58,8 @@ public class SecurityGroupService extends AbstractOrganizationAwareResourceServi
         delete(get(id));
     }
 
-    public void delete(String name, Organization organization) {
-        SecurityGroup securityGroup = Optional.ofNullable(groupRepository.findByNameAndOrganization(name, organization))
+    public void delete(String name, Workspace workspace) {
+        SecurityGroup securityGroup = Optional.ofNullable(groupRepository.findByNameAndWorkspace(name, workspace))
                 .orElseThrow(notFound("SecurityGroup", name));
         deleteImpl(securityGroup);
     }
@@ -93,13 +93,13 @@ public class SecurityGroupService extends AbstractOrganizationAwareResourceServi
     }
 
     @Override
-    public OrganizationResourceRepository<SecurityGroup, Long> repository() {
+    public WorkspaceResourceRepository<SecurityGroup, Long> repository() {
         return groupRepository;
     }
 
     @Override
-    public OrganizationResource resource() {
-        return OrganizationResource.SECURITY_GROUP;
+    public WorkspaceResource resource() {
+        return WorkspaceResource.SECURITY_GROUP;
     }
 
     @Override

@@ -31,7 +31,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import com.google.common.collect.ImmutableSet;
-import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
+import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.cloud.VersionComparator;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV2;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakVersion;
@@ -45,11 +45,11 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateService;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
-import com.sequenceiq.cloudbreak.repository.organization.OrganizationResourceRepository;
-import com.sequenceiq.cloudbreak.service.AbstractOrganizationAwareResourceService;
+import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
+import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -57,7 +57,7 @@ import com.sequenceiq.cloudbreak.service.user.UserProfileHandler;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
 
 @Component
-public class ImageCatalogService extends AbstractOrganizationAwareResourceService<ImageCatalog> {
+public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<ImageCatalog> {
 
     public static final String UNDEFINED = "";
 
@@ -99,15 +99,15 @@ public class ImageCatalogService extends AbstractOrganizationAwareResourceServic
     private ComponentConfigProvider componentConfigProvider;
 
     @Override
-    public Set<ImageCatalog> findAllByOrganizationId(Long organizationId) {
-        Set<ImageCatalog> imageCatalogs = imageCatalogRepository.findAllByOrganizationIdAndArchived(organizationId, false);
+    public Set<ImageCatalog> findAllByWorkspaceId(Long workspaceId) {
+        Set<ImageCatalog> imageCatalogs = imageCatalogRepository.findAllByWorkspaceIdAndArchived(workspaceId, false);
         imageCatalogs.add(getCloudbreakDefaultImageCatalog());
         return imageCatalogs;
     }
 
     @Override
-    public Set<ImageCatalog> findAllByOrganization(Organization organization) {
-        Set<ImageCatalog> imageCatalogs = repository().findAllByOrganization(organization);
+    public Set<ImageCatalog> findAllByWorkspace(Workspace workspace) {
+        Set<ImageCatalog> imageCatalogs = repository().findAllByWorkspace(workspace);
         imageCatalogs.add(getCloudbreakDefaultImageCatalog());
         return imageCatalogs;
     }
@@ -170,13 +170,13 @@ public class ImageCatalogService extends AbstractOrganizationAwareResourceServic
         return String.format("Could not find any image for platform '%s' and Cloudbreak version '%s'.", platform, cbVersion);
     }
 
-    public StatedImages getImages(Long organizationId, String name, String provider) throws CloudbreakImageCatalogException {
-        return getImages(organizationId, name, ImmutableSet.of(provider));
+    public StatedImages getImages(Long workspaceId, String name, String provider) throws CloudbreakImageCatalogException {
+        return getImages(workspaceId, name, ImmutableSet.of(provider));
     }
 
-    public StatedImages getImages(Long organizationId, String name, Set<String> providers) throws CloudbreakImageCatalogException {
+    public StatedImages getImages(Long workspaceId, String name, Set<String> providers) throws CloudbreakImageCatalogException {
         try {
-            ImageCatalog imageCatalog = get(organizationId, name);
+            ImageCatalog imageCatalog = get(workspaceId, name);
             return getImages(imageCatalog, providers, cbVersion);
         } catch (AccessDeniedException | NotFoundException ignore) {
             throw new CloudbreakImageCatalogException(String.format("The %s catalog does not exist or does not belongs to your account.", name));
@@ -201,23 +201,23 @@ public class ImageCatalogService extends AbstractOrganizationAwareResourceServic
         return statedImage(image.get(), catalogUrl, catalogName);
     }
 
-    public StatedImage getImageByCatalogName(Long organizationId, String imageId, String catalogName) throws
+    public StatedImage getImageByCatalogName(Long workspaceId, String imageId, String catalogName) throws
             CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         StatedImage image;
         if (StringUtils.isEmpty(catalogName)) {
             image = getImage(imageId);
         } else {
-            ImageCatalog imageCatalog = get(organizationId, catalogName);
+            ImageCatalog imageCatalog = get(workspaceId, catalogName);
             image = getImage(imageCatalog.getImageCatalogUrl(), imageCatalog.getName(), imageId);
         }
         return image;
     }
 
-    public ImageCatalog delete(Long organizationId, String name, IdentityUser identityUser, User user) {
+    public ImageCatalog delete(Long workspaceId, String name, IdentityUser identityUser, User user) {
         if (isEnvDefault(name)) {
             throw new BadRequestException(String.format("%s cannot be deleted because it is an environment default image catalog.", name));
         }
-        ImageCatalog imageCatalog = get(organizationId, name);
+        ImageCatalog imageCatalog = get(workspaceId, name);
         imageCatalog.setArchived(true);
         setImageCatalogAsDefault(null, identityUser, user);
         imageCatalog.setName(generateArchiveName(name));
@@ -227,16 +227,16 @@ public class ImageCatalogService extends AbstractOrganizationAwareResourceServic
         return imageCatalog;
     }
 
-    public ImageCatalog get(Long organizationId, String name) {
-        return isEnvDefault(name) ? getCloudbreakDefaultImageCatalog() : getByNameForOrganizationId(name, organizationId);
+    public ImageCatalog get(Long workspaceId, String name) {
+        return isEnvDefault(name) ? getCloudbreakDefaultImageCatalog() : getByNameForWorkspaceId(name, workspaceId);
     }
 
-    public ImageCatalog setAsDefault(Long organizationId, String name, IdentityUser identityUser, User user) {
+    public ImageCatalog setAsDefault(Long workspaceId, String name, IdentityUser identityUser, User user) {
 
         removeDefaultFlag(identityUser, user);
 
         if (!isEnvDefault(name)) {
-            ImageCatalog imageCatalog = get(organizationId, name);
+            ImageCatalog imageCatalog = get(workspaceId, name);
             checkImageCatalog(imageCatalog, name);
 
             setImageCatalogAsDefault(imageCatalog, identityUser, user);
@@ -256,16 +256,16 @@ public class ImageCatalogService extends AbstractOrganizationAwareResourceServic
         userProfileService.save(userProfile);
     }
 
-    public ImageCatalog update(Long organizationId, ImageCatalog source, User user) {
-        ImageCatalog imageCatalog = findImageCatalog(organizationId, source.getName());
+    public ImageCatalog update(Long workspaceId, ImageCatalog source, User user) {
+        ImageCatalog imageCatalog = findImageCatalog(workspaceId, source.getName());
         checkImageCatalog(imageCatalog, source.getId());
         imageCatalog.setName(source.getName());
         imageCatalog.setImageCatalogUrl(source.getImageCatalogUrl());
-        return create(imageCatalog, organizationId, user);
+        return create(imageCatalog, workspaceId, user);
     }
 
-    private ImageCatalog findImageCatalog(Long organizationId, String name) {
-        return Optional.ofNullable(get(organizationId, name)).orElseThrow(notFound("Image catalog", name));
+    private ImageCatalog findImageCatalog(Long workspaceId, String name) {
+        return Optional.ofNullable(get(workspaceId, name)).orElseThrow(notFound("Image catalog", name));
     }
 
     private void checkImageCatalog(ImageCatalog imageCatalog, Object filter) {
@@ -358,11 +358,11 @@ public class ImageCatalogService extends AbstractOrganizationAwareResourceServic
         }
     }
 
-    public Images propagateImagesIfRequested(Long organizationId, String name, boolean withImages) {
+    public Images propagateImagesIfRequested(Long workspaceId, String name, boolean withImages) {
         if (withImages) {
             Set<String> platforms = accountPreferencesService.enabledPlatforms();
             try {
-                return getImages(organizationId, name, platforms).getImages();
+                return getImages(workspaceId, name, platforms).getImages();
             } catch (CloudbreakImageCatalogException e) {
                 LOGGER.error("No images was found: ", e);
             }
@@ -514,13 +514,13 @@ public class ImageCatalogService extends AbstractOrganizationAwareResourceServic
     }
 
     @Override
-    public OrganizationResourceRepository<ImageCatalog, Long> repository() {
+    public WorkspaceResourceRepository<ImageCatalog, Long> repository() {
         return imageCatalogRepository;
     }
 
     @Override
-    public OrganizationResource resource() {
-        return OrganizationResource.IMAGECATALOG;
+    public WorkspaceResource resource() {
+        return WorkspaceResource.IMAGECATALOG;
     }
 
     @Override

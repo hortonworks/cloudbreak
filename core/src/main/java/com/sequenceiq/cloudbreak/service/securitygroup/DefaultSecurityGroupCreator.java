@@ -14,8 +14,8 @@ import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 
 @Service
 public class DefaultSecurityGroupCreator {
@@ -31,11 +31,11 @@ public class DefaultSecurityGroupCreator {
     private int nginxPort;
 
     private void addSecurityGroup(User user, String platform, String name, Iterable<Port> securityGroupPorts,
-            String securityGroupDesc, Organization organization) {
+            String securityGroupDesc, Workspace workspace) {
         SecurityGroup onlySshAndSsl = createSecurityGroup(user, platform, name, securityGroupDesc);
         SecurityRule sshAndSslRule = createSecurityRule(concatenatePorts(securityGroupPorts), onlySshAndSsl);
         onlySshAndSsl.setSecurityRules(new HashSet<>(Collections.singletonList(sshAndSslRule)));
-        securityGroupService.create(user, onlySshAndSsl, organization);
+        securityGroupService.create(user, onlySshAndSsl, workspace);
     }
 
     private String getPortsOpenDesc(Iterable<Port> portsWithoutAclRules) {

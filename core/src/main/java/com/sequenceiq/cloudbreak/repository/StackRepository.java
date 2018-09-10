@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.repository;
 
-import static com.sequenceiq.cloudbreak.authorization.OrganizationPermissions.Action.READ;
+import static com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action.READ;
 
 import java.util.List;
 import java.util.Set;
@@ -13,44 +13,44 @@ import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.aspect.DisableHasPermission;
-import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByOrganization;
-import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByOrganizationId;
-import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByReturnValue;
-import com.sequenceiq.cloudbreak.aspect.organization.DisableCheckPermissions;
-import com.sequenceiq.cloudbreak.aspect.organization.OrganizationResourceType;
-import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
+import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByWorkspace;
+import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByWorkspaceId;
+import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByReturnValue;
+import com.sequenceiq.cloudbreak.aspect.workspace.DisableCheckPermissions;
+import com.sequenceiq.cloudbreak.aspect.workspace.WorkspaceResourceType;
+import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.domain.Network;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.repository.organization.OrganizationResourceRepository;
+import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.EntityType;
 
 @DisableHasPermission
 @EntityType(entityClass = Stack.class)
 @Transactional(TxType.REQUIRED)
-@OrganizationResourceType(resource = OrganizationResource.STACK)
-public interface StackRepository extends OrganizationResourceRepository<Stack, Long> {
+@WorkspaceResourceType(resource = WorkspaceResource.STACK)
+public interface StackRepository extends WorkspaceResourceRepository<Stack, Long> {
 
     @CheckPermissionsByReturnValue
     @Query("SELECT s from Stack s LEFT JOIN FETCH s.resources LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
             + "WHERE s.cluster.ambariIp= :ambariIp AND s.stackStatus.status <> 'DELETE_COMPLETED'")
     Stack findByAmbari(@Param("ambariIp") String ambariIp);
 
-    @CheckPermissionsByOrganizationId(action = READ)
+    @CheckPermissionsByWorkspaceId(action = READ)
     @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.resources LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
-            + "WHERE s.organization.id= :orgId AND s.stackStatus.status <> 'DELETE_COMPLETED'")
-    Set<Stack> findForOrganizationIdWithLists(@Param("orgId") Long orgId);
+            + "WHERE s.workspace.id= :workspaceId AND s.stackStatus.status <> 'DELETE_COMPLETED'")
+    Set<Stack> findForWorkspaceIdWithLists(@Param("workspaceId") Long workspaceId);
 
     @CheckPermissionsByReturnValue
-    @Query("SELECT s FROM Stack s WHERE s.name= :name AND s.organization.id= :orgId AND s.stackStatus.status <> 'DELETE_COMPLETED'")
-    Stack findByNameAndOrganizationId(@Param("name") String name, @Param("orgId") Long orgId);
+    @Query("SELECT s FROM Stack s WHERE s.name= :name AND s.workspace.id= :workspaceId AND s.stackStatus.status <> 'DELETE_COMPLETED'")
+    Stack findByNameAndWorkspaceId(@Param("name") String name, @Param("workspaceId") Long workspaceId);
 
     @CheckPermissionsByReturnValue
     @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.resources LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
-            + "WHERE s.name= :name AND s.organization.id= :orgId AND s.stackStatus.status <> 'DELETE_COMPLETED'")
-    Stack findByNameAndOrganizationIdWithLists(@Param("name") String name, @Param("orgId") Long orgId);
+            + "WHERE s.name= :name AND s.workspace.id= :workspaceId AND s.stackStatus.status <> 'DELETE_COMPLETED'")
+    Stack findByNameAndWorkspaceIdWithLists(@Param("name") String name, @Param("workspaceId") Long workspaceId);
 
     @CheckPermissionsByReturnValue
     @Query("SELECT c FROM Stack c LEFT JOIN FETCH c.resources LEFT JOIN FETCH c.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData WHERE c.id= :id")
@@ -74,10 +74,10 @@ public interface StackRepository extends OrganizationResourceRepository<Stack, L
     @Query("SELECT c FROM Stack c WHERE c.cluster.id= :clusterId")
     Stack findStackForCluster(@Param("clusterId") Long clusterId);
 
-    @CheckPermissionsByOrganization(action = READ, organizationIndex = 1)
+    @CheckPermissionsByWorkspace(action = READ, workspaceIndex = 1)
     @Query("SELECT t FROM Stack t LEFT JOIN FETCH t.resources LEFT JOIN FETCH t.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
-            + "WHERE t.organization= :organization and t.name= :name")
-    Stack findByNameInOrganizationWithLists(@Param("name") String name, @Param("organization") Organization organization);
+            + "WHERE t.workspace= :workspace and t.name= :name")
+    Stack findByNameInWorkspaceWithLists(@Param("name") String name, @Param("workspace") Workspace workspace);
 
     @CheckPermissionsByReturnValue
     @Query("SELECT s FROM Stack s WHERE s.stackStatus.status <> 'DELETE_COMPLETED'")
@@ -85,17 +85,17 @@ public interface StackRepository extends OrganizationResourceRepository<Stack, L
 
     @CheckPermissionsByReturnValue
     @Query("SELECT s FROM Stack s WHERE s.stackStatus.status <> 'DELETE_COMPLETED' AND "
-            + "(s.organization = null OR s.creator = null)")
-    Set<Stack> findAllAliveWithNoOrganizationOrUser();
+            + "(s.workspace = null OR s.creator = null)")
+    Set<Stack> findAllAliveWithNoWorkspaceOrUser();
 
     @CheckPermissionsByReturnValue
     @Query("SELECT s FROM Stack s WHERE s.stackStatus.status <> 'DELETE_COMPLETED' AND s.stackStatus.status <> 'REQUESTED' "
             + "AND s.stackStatus.status <> 'CREATE_IN_PROGRESS'")
     List<Stack> findAllAliveAndProvisioned();
 
-    @CheckPermissionsByOrganizationId(action = READ)
-    @Query("SELECT s FROM Stack s WHERE s.stackStatus.status <> 'DELETE_COMPLETED' AND s.organization.id= :organizationId")
-    Set<Stack> findAllForOrganization(@Param("organizationId") Long organizationId);
+    @CheckPermissionsByWorkspaceId(action = READ)
+    @Query("SELECT s FROM Stack s WHERE s.stackStatus.status <> 'DELETE_COMPLETED' AND s.workspace.id= :workspaceId")
+    Set<Stack> findAllForWorkspace(@Param("workspaceId") Long workspaceId);
 
     @CheckPermissionsByReturnValue
     @Query("SELECT s FROM Stack s WHERE s.stackStatus.status IN :statuses")
@@ -124,9 +124,9 @@ public interface StackRepository extends OrganizationResourceRepository<Stack, L
     Set<Stack> findByNetwork(Network network);
 
     @DisableCheckPermissions
-    @Query("SELECT COUNT(s) FROM Stack s WHERE (s.organization = null OR s.creator = null) "
+    @Query("SELECT COUNT(s) FROM Stack s WHERE (s.workspace = null OR s.creator = null) "
             + "AND s.stackStatus.status <> 'DELETE_COMPLETED'")
-    Long countStacksWithNoOrganizationOrCreator();
+    Long countStacksWithNoWorkspaceOrCreator();
 
     @DisableCheckPermissions
     @Query("SELECT COUNT(s) FROM Stack s WHERE s.account = :account AND s.stackStatus.status <> 'DELETE_COMPLETED'")
@@ -137,6 +137,6 @@ public interface StackRepository extends OrganizationResourceRepository<Stack, L
     Long countActiveByOwner(@Param("owner") String owner);
 
     @DisableCheckPermissions
-    @Query("SELECT s.organization.id FROM Stack s where s.id = :id")
-    Long findOrganizationIdById(@Param("id") Long id);
+    @Query("SELECT s.workspace.id FROM Stack s where s.id = :id")
+    Long findWorkspaceIdById(@Param("id") Long id);
 }

@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.mapper.DuplicatedKeyValueExceptionMapper;
 import com.sequenceiq.cloudbreak.converter.spi.ExtendedCloudCredentialToCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
@@ -52,7 +52,7 @@ public class InteractiveCredentialCreationHandler implements ReactorEventHandler
         Credential credential = extendedCloudCredentialToCredentialConverter.convert(extendedCloudCredential);
         User user = userService.getOrCreate(extendedCloudCredential.getIdentityUser());
         try {
-            credentialService.createWithRetry(credential, extendedCloudCredential.getOrganziationId(), user);
+            credentialService.createWithRetry(credential, extendedCloudCredential.getWorkspaceId(), user);
         } catch (DuplicateKeyValueException e) {
             sendErrorNotification(extendedCloudCredential, DuplicatedKeyValueExceptionMapper.errorMessage(e));
         } catch (BadRequestException e) {

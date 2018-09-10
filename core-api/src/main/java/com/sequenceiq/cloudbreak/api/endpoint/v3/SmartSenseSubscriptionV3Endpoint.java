@@ -23,44 +23,44 @@ import com.sequenceiq.cloudbreak.doc.OperationDescriptions.SmartSenseSubOpDescri
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Path("/v3/{organizationId}/smartsensesubscriptions")
+@Path("/v3/{workspaceId}/smartsensesubscriptions")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v3/{organizationId}/smartsensesubscriptions", description = ControllerDescription.SMARTSENSE_SUBSCRIPTION_V3_DESCRIPTION,
+@Api(value = "/v3/{workspaceId}/smartsensesubscriptions", description = ControllerDescription.SMARTSENSE_SUBSCRIPTION_V3_DESCRIPTION,
         protocols = "http,https")
 public interface SmartSenseSubscriptionV3Endpoint {
 
     @GET
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = SmartSenseSubOpDescription.LIST_BY_ORGANIZATION, produces = ContentType.JSON, notes = Notes.SMARTSENSE_SUBSCRIPTION_NOTES,
-            nickname = "listSmartSenseSubscriptionsByOrganization")
-    Set<SmartSenseSubscriptionJson> listByOrganization(@PathParam("organizationId") Long organizationId);
+    @ApiOperation(value = SmartSenseSubOpDescription.LIST_BY_WORKSPACE, produces = ContentType.JSON, notes = Notes.SMARTSENSE_SUBSCRIPTION_NOTES,
+            nickname = "listSmartSenseSubscriptionsByWorkspace")
+    Set<SmartSenseSubscriptionJson> listByWorkspace(@PathParam("workspaceId") Long workspaceId);
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = SmartSenseSubOpDescription.GET_DEFAULT_IN_ORG, produces = ContentType.JSON, notes = SMARTSENSE_SUBSCRIPTION_NOTES,
-            nickname = "getDefaultSmartSenseSubscriptionInOrganization")
-    SmartSenseSubscriptionJson getDefaultInOrganization(@PathParam("organizationId") Long organizationId);
+            nickname = "getDefaultSmartSenseSubscriptionInWorkspace")
+    SmartSenseSubscriptionJson getDefaultInWorkspace(@PathParam("workspaceId") Long workspaceId);
 
     @GET
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = SmartSenseSubOpDescription.GET_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.SMARTSENSE_SUBSCRIPTION_NOTES,
-            nickname = "getSmartSenseSubscriptionInOrganization")
-    SmartSenseSubscriptionJson getByNameInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
+            nickname = "getSmartSenseSubscriptionInWorkspace")
+    SmartSenseSubscriptionJson getByNameInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @POST
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = SmartSenseSubOpDescription.CREATE_IN_ORG, produces = ContentType.JSON, notes = Notes.SMARTSENSE_SUBSCRIPTION_NOTES,
-            nickname = "createSmartSenseSubscriptionInOrganization")
-    SmartSenseSubscriptionJson createInOrganization(@PathParam("organizationId") Long organizationId, @Valid SmartSenseSubscriptionJson request);
+            nickname = "createSmartSenseSubscriptionInWorkspace")
+    SmartSenseSubscriptionJson createInWorkspace(@PathParam("workspaceId") Long workspaceId, @Valid SmartSenseSubscriptionJson request);
 
     @DELETE
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = SmartSenseSubOpDescription.DELETE_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.SMARTSENSE_SUBSCRIPTION_NOTES,
-            nickname = "deleteSmartSenseSubscriptionInOrganization")
-    SmartSenseSubscriptionJson deleteInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
+            nickname = "deleteSmartSenseSubscriptionInWorkspace")
+    SmartSenseSubscriptionJson deleteInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
 }

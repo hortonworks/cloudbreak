@@ -17,22 +17,22 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
-import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
+import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionValidator;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.repository.organization.OrganizationResourceRepository;
+import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.repository.RdsConfigRepository;
-import com.sequenceiq.cloudbreak.service.AbstractOrganizationAwareResourceService;
+import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.util.NameUtil;
 
 @Service
-public class RdsConfigService extends AbstractOrganizationAwareResourceService<RDSConfig> {
+public class RdsConfigService extends AbstractWorkspaceAwareResourceService<RDSConfig> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RdsConfigService.class);
 
@@ -45,12 +45,12 @@ public class RdsConfigService extends AbstractOrganizationAwareResourceService<R
     @Inject
     private RdsConnectionValidator rdsConnectionValidator;
 
-    public Set<RDSConfig> retrieveRdsConfigsInOrg(Organization organization) {
-        return rdsConfigRepository.findAllByOrganizationId(organization.getId());
+    public Set<RDSConfig> retrieveRdsConfigsInWorkspace(Workspace workspace) {
+        return rdsConfigRepository.findAllByWorkspaceId(workspace.getId());
     }
 
-    public RDSConfig getByNameForOrg(String name, Organization organization) {
-        return getByNameForOrganizationId(name, organization.getId());
+    public RDSConfig getByNameForWorkspace(String name, Workspace workspace) {
+        return getByNameForWorkspaceId(name, workspace.getId());
     }
 
     public RDSConfig get(Long id) {
@@ -70,11 +70,11 @@ public class RdsConfigService extends AbstractOrganizationAwareResourceService<R
         return rdsConfig;
     }
 
-    public RDSConfig createIfNotExists(User user, RDSConfig rdsConfig, Long organizationId) {
-        RDSConfig configByName = rdsConfigRepository.findByNameAndOrganizationId(rdsConfig.getName(), organizationId);
+    public RDSConfig createIfNotExists(User user, RDSConfig rdsConfig, Long workspaceId) {
+        RDSConfig configByName = rdsConfigRepository.findByNameAndWorkspaceId(rdsConfig.getName(), workspaceId);
         if (configByName == null) {
-            Organization organization = getOrganizationService().get(organizationId, user);
-            return create(rdsConfig, organization, user);
+            Workspace workspace = getWorkspaceService().get(workspaceId, user);
+            return create(rdsConfig, workspace, user);
         }
         return rdsConfig;
 
@@ -121,18 +121,18 @@ public class RdsConfigService extends AbstractOrganizationAwareResourceService<R
         rdsConfigRepository.save(rdsConfig);
     }
 
-    public Set<RDSConfig> findAllByOrganizationId(Long organizationId) {
-        return rdsConfigRepository.findAllByOrganizationId(organizationId);
+    public Set<RDSConfig> findAllByWorkspaceId(Long workspaceId) {
+        return rdsConfigRepository.findAllByWorkspaceId(workspaceId);
     }
 
     @Override
-    public OrganizationResourceRepository<RDSConfig, Long> repository() {
+    public WorkspaceResourceRepository<RDSConfig, Long> repository() {
         return rdsConfigRepository;
     }
 
     @Override
-    public OrganizationResource resource() {
-        return OrganizationResource.RDS;
+    public WorkspaceResource resource() {
+        return WorkspaceResource.RDS;
     }
 
     @Override
@@ -148,9 +148,9 @@ public class RdsConfigService extends AbstractOrganizationAwareResourceService<R
     protected void prepareCreation(RDSConfig resource) {
     }
 
-    public String testRdsConnection(String existingRDSConfigName, Organization organization) {
+    public String testRdsConnection(String existingRDSConfigName, Workspace workspace) {
         try {
-            RDSConfig config = getByNameForOrganization(existingRDSConfigName, organization);
+            RDSConfig config = getByNameForWorkspace(existingRDSConfigName, workspace);
             return testRdsConnection(config);
         } catch (AccessDeniedException | NotFoundException e) {
             return "access is denied";

@@ -29,7 +29,7 @@ import com.sequenceiq.cloudbreak.api.model.stack.StackAuthenticationResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupResponse;
-import com.sequenceiq.cloudbreak.api.model.users.OrganizationResourceResponse;
+import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -122,7 +122,7 @@ public class StackToStackResponseConverter extends AbstractConversionServiceAwar
         stackJson.setCustomHostname(source.getCustomHostname());
         stackJson.setClusterNameAsSubdomain(source.isClusterNameAsSubdomain());
         stackJson.setHostgroupNameAsHostname(source.isHostgroupNameAsHostname());
-        stackJson.setOrganization(conversionService.convert(source.getOrganization(), OrganizationResourceResponse.class));
+        stackJson.setWorkspace(conversionService.convert(source.getWorkspace(), WorkspaceResourceResponse.class));
         addNodeCount(source, stackJson);
         putSubnetIdIntoResponse(source, stackJson);
         putVpcIdIntoResponse(source, stackJson);

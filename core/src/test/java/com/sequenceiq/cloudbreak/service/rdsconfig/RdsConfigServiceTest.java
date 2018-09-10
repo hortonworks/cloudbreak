@@ -30,20 +30,20 @@ import org.mockito.Mock;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.api.model.v2.OrganizationStatus;
+import com.sequenceiq.cloudbreak.api.model.v2.WorkspaceStatus;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionValidator;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.Tenant;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.Tenant;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.repository.RdsConfigRepository;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
 public class RdsConfigServiceTest {
 
@@ -62,7 +62,7 @@ public class RdsConfigServiceTest {
     private RdsConnectionValidator rdsConnectionValidator;
 
     @Mock
-    private OrganizationService organizationService;
+    private WorkspaceService workspaceService;
 
     @Mock
     private ClusterService clusterService;
@@ -73,19 +73,19 @@ public class RdsConfigServiceTest {
     @Captor
     private ArgumentCaptor<RDSConfig> rdsConfigCaptor;
 
-    private Organization defaultOrg;
+    private Workspace defaultWorkspace;
 
     private RDSConfig testRdsConfig;
 
     @Before
     public void setUp() {
         initMocks(this);
-        defaultOrg = new Organization();
-        defaultOrg.setName("HortonOrg");
-        defaultOrg.setId(1L);
-        defaultOrg.setStatus(OrganizationStatus.ACTIVE);
-        defaultOrg.setDescription("This is a real Horton defaultOrg!");
-        defaultOrg.setTenant(new Tenant());
+        defaultWorkspace = new Workspace();
+        defaultWorkspace.setName("HortonWorkspace");
+        defaultWorkspace.setId(1L);
+        defaultWorkspace.setStatus(WorkspaceStatus.ACTIVE);
+        defaultWorkspace.setDescription("This is a real Horton defaultWorkspace!");
+        defaultWorkspace.setTenant(new Tenant());
         testRdsConfig = new RDSConfig();
         testRdsConfig.setId(1L);
         testRdsConfig.setName(TEST_RDS_CONFIG_NAME);
@@ -93,31 +93,31 @@ public class RdsConfigServiceTest {
     }
 
     @Test
-    public void testRetrieveRdsConfigsInDefaultOrg() {
-        when(rdsConfigRepository.findAllByOrganizationId(eq(1L))).thenReturn(Collections.singleton(testRdsConfig));
+    public void testRetrieveRdsConfigsInDefaultWorkspace() {
+        when(rdsConfigRepository.findAllByWorkspaceId(eq(1L))).thenReturn(Collections.singleton(testRdsConfig));
 
-        Set<RDSConfig> rdsConfigs = underTest.retrieveRdsConfigsInOrg(defaultOrg);
+        Set<RDSConfig> rdsConfigs = underTest.retrieveRdsConfigsInWorkspace(defaultWorkspace);
 
-        verify(rdsConfigRepository, times(1)).findAllByOrganizationId(eq(1L));
+        verify(rdsConfigRepository, times(1)).findAllByWorkspaceId(eq(1L));
         assertEquals(1, rdsConfigs.size());
     }
 
     @Test
-    public void testGetExistingRdsConfigByNameAndDefaultOrg() {
-        when(rdsConfigRepository.findByNameAndOrganizationId(eq(TEST_RDS_CONFIG_NAME), eq(1L))).thenReturn(testRdsConfig);
+    public void testGetExistingRdsConfigByNameAndDefaultWorkspace() {
+        when(rdsConfigRepository.findByNameAndWorkspaceId(eq(TEST_RDS_CONFIG_NAME), eq(1L))).thenReturn(testRdsConfig);
 
-        underTest.getByNameForOrg(TEST_RDS_CONFIG_NAME, defaultOrg);
+        underTest.getByNameForWorkspace(TEST_RDS_CONFIG_NAME, defaultWorkspace);
 
-        verify(rdsConfigRepository, times(1)).findByNameAndOrganizationId(anyString(), eq(1L));
+        verify(rdsConfigRepository, times(1)).findByNameAndWorkspaceId(anyString(), eq(1L));
     }
 
     @Test
-    public void testGetNonExistingRdsConfigByNameAndDefaultOrg() {
-        when(rdsConfigRepository.findByNameAndOrganizationId(anyString(), eq(1L))).thenReturn(null);
+    public void testGetNonExistingRdsConfigByNameAndDefaultWorkspace() {
+        when(rdsConfigRepository.findByNameAndWorkspaceId(anyString(), eq(1L))).thenReturn(null);
 
         thrown.expect(NotFoundException.class);
 
-        underTest.getByNameForOrg(TEST_RDS_CONFIG_NAME + "X", defaultOrg);
+        underTest.getByNameForWorkspace(TEST_RDS_CONFIG_NAME + "X", defaultWorkspace);
     }
 
     @Test
@@ -269,29 +269,29 @@ public class RdsConfigServiceTest {
 
     @Test
     public void testRdsConnectionTestByName() {
-        when(rdsConfigRepository.findByNameAndOrganization(eq(TEST_RDS_CONFIG_NAME), eq(defaultOrg))).thenReturn(testRdsConfig);
+        when(rdsConfigRepository.findByNameAndWorkspaceId(any(), any())).thenReturn(testRdsConfig);
         doNothing().when(rdsConnectionValidator).validateRdsConnection(any());
 
-        String result = underTest.testRdsConnection(TEST_RDS_CONFIG_NAME, defaultOrg);
+        String result = underTest.testRdsConnection(TEST_RDS_CONFIG_NAME, defaultWorkspace);
 
         assertEquals("connected", result);
     }
 
     @Test
     public void testRdsConnectionTestByNameWithException() {
-        when(rdsConfigRepository.findByNameAndOrganization(eq(TEST_RDS_CONFIG_NAME), eq(defaultOrg))).thenReturn(null);
+        when(rdsConfigRepository.findByNameAndWorkspace(eq(TEST_RDS_CONFIG_NAME), eq(defaultWorkspace))).thenReturn(null);
 
-        String result = underTest.testRdsConnection(TEST_RDS_CONFIG_NAME, defaultOrg);
+        String result = underTest.testRdsConnection(TEST_RDS_CONFIG_NAME, defaultWorkspace);
 
         assertEquals("access is denied", result);
     }
 
     @Test
     public void testNewRdsConfigCreation() throws TransactionExecutionException {
-        when(rdsConfigRepository.findByNameAndOrganizationId(eq(TEST_RDS_CONFIG_NAME), eq(1L))).thenReturn(null);
-        when(organizationService.get(eq(1L), any(User.class))).thenReturn(defaultOrg);
+        when(rdsConfigRepository.findByNameAndWorkspaceId(eq(TEST_RDS_CONFIG_NAME), eq(1L))).thenReturn(null);
+        when(workspaceService.get(eq(1L), any(User.class))).thenReturn(defaultWorkspace);
         doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).required(any());
-        when(organizationService.retrieveForUser(any())).thenReturn(Collections.singleton(defaultOrg));
+        when(workspaceService.retrieveForUser(any())).thenReturn(Collections.singleton(defaultWorkspace));
         when(rdsConfigRepository.save(any())).thenReturn(testRdsConfig);
 
         RDSConfig rdsConfig = underTest.createIfNotExists(new User(), testRdsConfig, 1L);
@@ -301,11 +301,11 @@ public class RdsConfigServiceTest {
 
     @Test
     public void testExistingRdsConfigCreation() {
-        when(rdsConfigRepository.findByNameAndOrganizationId(eq(TEST_RDS_CONFIG_NAME), eq(1L))).thenReturn(testRdsConfig);
+        when(rdsConfigRepository.findByNameAndWorkspaceId(eq(TEST_RDS_CONFIG_NAME), eq(1L))).thenReturn(testRdsConfig);
 
         RDSConfig rdsConfig = underTest.createIfNotExists(new User(), testRdsConfig, 1L);
 
-        verify(organizationService, times(0)).get(anyLong(), any(User.class));
+        verify(workspaceService, times(0)).get(anyLong(), any(User.class));
         verifyZeroInteractions(transactionService);
         assertEquals(testRdsConfig, rdsConfig);
     }

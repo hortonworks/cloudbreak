@@ -47,7 +47,7 @@ import com.sequenceiq.cloudbreak.api.model.OnFailureAction;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetadataType;
-import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
+import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
@@ -61,16 +61,16 @@ import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.OrganizationAwareResource;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"organization_id", "name"}))
-public class Stack implements ProvisionEntity, OrganizationAwareResource {
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name"}))
+public class Stack implements ProvisionEntity, WorkspaceAwareResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "stack_generator")
@@ -175,7 +175,7 @@ public class Stack implements ProvisionEntity, OrganizationAwareResource {
     private Long datalakeId;
 
     @ManyToOne
-    private Organization organization;
+    private Workspace workspace;
 
     @ManyToOne
     @JoinColumn(name = "createdBy")
@@ -660,16 +660,16 @@ public class Stack implements ProvisionEntity, OrganizationAwareResource {
         this.inputs = inputs;
     }
 
-    public Organization getOrganization() {
-        return organization;
+    public Workspace getWorkspace() {
+        return workspace;
     }
 
-    public void setOrganization(Organization organization) {
-        this.organization = organization;
+    public void setWorkspace(Workspace workspace) {
+        this.workspace = workspace;
     }
 
     @Override
-    public OrganizationResource getResource() {
-        return OrganizationResource.STACK;
+    public WorkspaceResource getResource() {
+        return WorkspaceResource.STACK;
     }
 }

@@ -22,8 +22,8 @@ import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.repository.UserProfileRepository;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
@@ -101,18 +101,18 @@ public class UserProfileService {
         }
     }
 
-    public void put(UserProfileRequest request, IdentityUser identityUser, User user, Organization organization) {
+    public void put(UserProfileRequest request, IdentityUser identityUser, User user, Workspace workspace) {
         UserProfile userProfile = getOrCreate(identityUser.getAccount(), identityUser.getUserId(), identityUser.getUsername(), user);
         if (request.getCredentialId() != null) {
-            Credential credential = credentialService.get(request.getCredentialId(), organization);
-            storeDefaultCredential(userProfile, credential, organization);
+            Credential credential = credentialService.get(request.getCredentialId(), workspace);
+            storeDefaultCredential(userProfile, credential, workspace);
         } else if (request.getCredentialName() != null) {
-            Credential credential = credentialService.getByNameForOrganization(request.getCredentialName(), organization);
-            storeDefaultCredential(userProfile, credential, organization);
+            Credential credential = credentialService.getByNameForWorkspace(request.getCredentialName(), workspace);
+            storeDefaultCredential(userProfile, credential, workspace);
         }
         if (request.getImageCatalogName() != null) {
-            Long organizationId = organization.getId();
-            ImageCatalog imageCatalog = imageCatalogService.get(organizationId, request.getImageCatalogName());
+            Long workspaceId = workspace.getId();
+            ImageCatalog imageCatalog = imageCatalogService.get(workspaceId, request.getImageCatalogName());
             userProfile.setImageCatalog(imageCatalog);
         }
         for (Entry<String, Object> uiStringObjectEntry : request.getUiProperties().entrySet()) {
@@ -130,12 +130,12 @@ public class UserProfileService {
         userProfileRepository.save(userProfile);
     }
 
-    private void storeDefaultCredential(UserProfile userProfile, Credential credential, Organization organization) {
+    private void storeDefaultCredential(UserProfile userProfile, Credential credential, Workspace workspace) {
         if (userProfile.getDefaultCredentials() == null) {
             userProfile.setDefaultCredentials(new HashSet<>());
         }
         Set<Credential> removableCredentials = userProfile.getDefaultCredentials().stream()
-                .filter(defaultCredential -> defaultCredential.getOrganization().getId().equals(organization.getId()))
+                .filter(defaultCredential -> defaultCredential.getWorkspace().getId().equals(workspace.getId()))
                 .collect(Collectors.toSet());
         userProfile.getDefaultCredentials().removeAll(removableCredentials);
         userProfile.getDefaultCredentials().add(credential);

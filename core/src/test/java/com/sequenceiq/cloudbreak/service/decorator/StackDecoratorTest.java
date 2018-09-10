@@ -36,8 +36,8 @@ import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.stack.StackRequestValidator;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
@@ -114,7 +114,7 @@ public class StackDecoratorTest {
     private User user;
 
     @Mock
-    private Organization organization;
+    private Workspace workspace;
 
     @Mock
     private Map<Platform, PlatformParameters> platformParametersMap;
@@ -163,7 +163,7 @@ public class StackDecoratorTest {
         when(subject.getInstanceGroups()).thenReturn(createInstanceGroups(GATEWAY));
         when(request.getClusterToAttach()).thenReturn(null);
 
-        Stack result = underTest.decorate(subject, request, user, organization);
+        Stack result = underTest.decorate(subject, request, user, workspace);
 
         Assert.assertEquals(expected, result);
     }
@@ -189,7 +189,7 @@ public class StackDecoratorTest {
         when(clusterRequest.getLdapConfig()).thenReturn(new LdapConfigRequest());
         when(clusterRequest.getRdsConfigJsons()).thenReturn(rdsConfigRequests);
 
-        underTest.decorate(subject, request, user, organization);
+        underTest.decorate(subject, request, user, workspace);
     }
 
     @Test
@@ -213,7 +213,7 @@ public class StackDecoratorTest {
         when(clusterRequest.getLdapConfig()).thenReturn(null);
         when(clusterRequest.getRdsConfigJsons()).thenReturn(rdsConfigRequests);
 
-        underTest.decorate(subject, request, user, organization);
+        underTest.decorate(subject, request, user, workspace);
     }
 
     @Test
@@ -240,7 +240,7 @@ public class StackDecoratorTest {
         thrown.expect(BadRequestException.class);
         thrown.expectMessage(MISCONFIGURED_STACK_FOR_SHARED_SERVICE);
 
-        underTest.decorate(subject, request, user, organization);
+        underTest.decorate(subject, request, user, workspace);
     }
 
     @Test
@@ -267,7 +267,7 @@ public class StackDecoratorTest {
         thrown.expect(BadRequestException.class);
         thrown.expectMessage(MISCONFIGURED_STACK_FOR_SHARED_SERVICE);
 
-        underTest.decorate(subject, request, user, organization);
+        underTest.decorate(subject, request, user, workspace);
     }
 
     @Test
@@ -294,7 +294,7 @@ public class StackDecoratorTest {
         thrown.expect(BadRequestException.class);
         thrown.expectMessage(MISCONFIGURED_STACK_FOR_SHARED_SERVICE);
 
-        underTest.decorate(subject, request, user, organization);
+        underTest.decorate(subject, request, user, workspace);
     }
 
     private Set<RDSConfigRequest> createRdsConfigRequests(String... types) {

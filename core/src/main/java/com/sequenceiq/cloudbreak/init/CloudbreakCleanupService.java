@@ -47,7 +47,7 @@ import com.sequenceiq.cloudbreak.service.ha.HeartbeatService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.AmbariDatabaseToRdsConfigMigrationService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.usages.UsageService;
-import com.sequenceiq.cloudbreak.startup.OrganizationMigrationRunner;
+import com.sequenceiq.cloudbreak.startup.WorkspaceMigrationRunner;
 
 @Component
 public class CloudbreakCleanupService implements ApplicationListener<ContextRefreshedEvent> {
@@ -100,11 +100,11 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
     private TransactionService transactionService;
 
     @Inject
-    private OrganizationMigrationRunner organizationMigrationRunner;
+    private WorkspaceMigrationRunner workspaceMigrationRunner;
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
-        organizationMigrationRunner.run();
+        workspaceMigrationRunner.run();
         heartbeatService.heartbeat();
         try {
             List<Long> stackIdsUnderOperation = restartOrUpdateUnassignedDisruptedFlows();

@@ -33,7 +33,7 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Component
@@ -56,7 +56,7 @@ public class StackRequestValidator implements Validator<StackRequest> {
     private CredentialService credentialService;
 
     @Inject
-    private OrganizationService organizationService;
+    private WorkspaceService workspaceService;
 
     @Inject
     private RestRequestThreadLocalService restRequestThreadLocalService;
@@ -149,8 +149,8 @@ public class StackRequestValidator implements Validator<StackRequest> {
 
     private void checkEncryptionKeyValidityForInstanceGroupWhenKeysAreListable(InstanceGroupRequest instanceGroupRequest, String credentialName,
             String region, ValidationResultBuilder validationBuilder) {
-        Long orgId = restRequestThreadLocalService.getRequestedOrgId();
-        Credential cred = credentialService.getByNameForOrganizationId(credentialName, orgId);
+        Long workspaceId = restRequestThreadLocalService.getRequestedWorkspaceId();
+        Credential cred = credentialService.getByNameForWorkspaceId(credentialName, workspaceId);
         Optional<PlatformEncryptionKeysResponse> keys = getEncryptionKeysWithExceptionHandling(cred.getId(), region, cred.getOwner(), cred.getOwner());
         if (keys.isPresent() && !keys.get().getEncryptionKeyConfigs().isEmpty()) {
             if (!instanceGroupRequest.getTemplate().getParameters().containsKey(KEY)) {

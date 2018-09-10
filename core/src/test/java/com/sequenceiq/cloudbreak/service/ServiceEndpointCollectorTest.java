@@ -46,7 +46,7 @@ import com.sequenceiq.cloudbreak.converter.stack.cluster.gateway.GatewayTopology
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
@@ -87,7 +87,7 @@ public class ServiceEndpointCollectorTest {
     private final GatewayTopologyJsonToExposedServicesConverter exposedServicesConverter = new GatewayTopologyJsonToExposedServicesConverter();
 
     @Mock
-    private Organization organization;
+    private Workspace workspace;
 
     @Before
     public void setup() {
@@ -202,23 +202,23 @@ public class ServiceEndpointCollectorTest {
 
     @Test
     public void testGetKnoxServices() {
-        when(blueprintService.getByNameForOrganization(any(), any(Organization.class))).thenReturn(new Blueprint());
+        when(blueprintService.getByNameForWorkspace(any(), any(Workspace.class))).thenReturn(new Blueprint());
         BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
         when(blueprintProcessorFactory.get(any())).thenReturn(blueprintTextProcessor);
         when(blueprintTextProcessor.getAllComponents()).thenReturn(new HashSet<>(Arrays.asList("HIVE", "PIG")));
         when(blueprintTextProcessor.getStackName()).thenReturn("HDF");
         when(blueprintTextProcessor.getStackVersion()).thenReturn("3.1");
-        Collection<ExposedServiceResponse> exposedServiceResponses = underTest.getKnoxServices("blueprint", organization);
+        Collection<ExposedServiceResponse> exposedServiceResponses = underTest.getKnoxServices("blueprint", workspace);
         assertEquals(0L, exposedServiceResponses.size());
 
         when(blueprintTextProcessor.getStackName()).thenReturn("HDF");
         when(blueprintTextProcessor.getStackVersion()).thenReturn("3.2");
-        exposedServiceResponses = underTest.getKnoxServices("blueprint", organization);
+        exposedServiceResponses = underTest.getKnoxServices("blueprint", workspace);
         assertEquals(1L, exposedServiceResponses.size());
 
         when(blueprintTextProcessor.getStackName()).thenReturn("HDP");
         when(blueprintTextProcessor.getStackVersion()).thenReturn("2.6");
-        exposedServiceResponses = underTest.getKnoxServices("blueprint", organization);
+        exposedServiceResponses = underTest.getKnoxServices("blueprint", workspace);
         assertEquals(1L, exposedServiceResponses.size());
     }
 

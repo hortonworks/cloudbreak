@@ -19,12 +19,12 @@ import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
 import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.init.blueprint.BlueprintLoaderService;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Component
@@ -43,7 +43,7 @@ public class BlueprintController extends NotificationController implements Bluep
     private BlueprintLoaderService blueprintLoaderService;
 
     @Inject
-    private OrganizationService organizationService;
+    private WorkspaceService workspaceService;
 
     @Inject
     private UserService userService;
@@ -66,25 +66,25 @@ public class BlueprintController extends NotificationController implements Bluep
     @Override
     public BlueprintResponse postPublic(BlueprintRequest request) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        return createInOrganization(request, user, organization);
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        return createInWorkspace(request, user, workspace);
     }
 
     @Override
     public BlueprintResponse postPrivate(BlueprintRequest request) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        return createInOrganization(request, user, organization);
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        return createInWorkspace(request, user, workspace);
     }
 
     @Override
     public Set<BlueprintResponse> getPrivates() {
-        return listForUsersDefaultOrganization();
+        return listForUsersDefaultWorkspace();
     }
 
     @Override
     public Set<BlueprintResponse> getPublics() {
-        return listForUsersDefaultOrganization();
+        return listForUsersDefaultWorkspace();
     }
 
     @Override
@@ -99,7 +99,7 @@ public class BlueprintController extends NotificationController implements Bluep
 
     @Override
     public void deletePublic(String name) {
-        deleteInDefaultOrganization(name);
+        deleteInDefaultWorkspace(name);
     }
 
     @Override
@@ -110,31 +110,31 @@ public class BlueprintController extends NotificationController implements Bluep
 
     @Override
     public void deletePrivate(String name) {
-        deleteInDefaultOrganization(name);
+        deleteInDefaultWorkspace(name);
     }
 
     private BlueprintResponse getBlueprintResponse(String name) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        return conversionService.convert(blueprintService.getByNameForOrganization(name, organization), BlueprintResponse.class);
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        return conversionService.convert(blueprintService.getByNameForWorkspace(name, workspace), BlueprintResponse.class);
     }
 
-    private Set<BlueprintResponse> listForUsersDefaultOrganization() {
+    private Set<BlueprintResponse> listForUsersDefaultWorkspace() {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        return blueprintService.getAllAvailableInOrganization(organization).stream()
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        return blueprintService.getAllAvailableInWorkspace(workspace).stream()
                 .map(blueprint -> conversionService.convert(blueprint, BlueprintResponse.class))
                 .collect(Collectors.toSet());
     }
 
-    private void deleteInDefaultOrganization(String name) {
-        executeAndNotify(identityUser -> blueprintService.deleteByNameFromOrganization(name, restRequestThreadLocalService.getRequestedOrgId()),
+    private void deleteInDefaultWorkspace(String name) {
+        executeAndNotify(identityUser -> blueprintService.deleteByNameFromWorkspace(name, restRequestThreadLocalService.getRequestedWorkspaceId()),
                 ResourceEvent.BLUEPRINT_DELETED);
     }
 
-    private BlueprintResponse createInOrganization(BlueprintRequest request, User user, Organization organization) {
+    private BlueprintResponse createInWorkspace(BlueprintRequest request, User user, Workspace workspace) {
         Blueprint blueprint = conversionService.convert(request, Blueprint.class);
-        blueprint = blueprintService.create(blueprint, organization, user);
+        blueprint = blueprintService.create(blueprint, workspace, user);
         return notifyAndReturn(blueprint, ResourceEvent.BLUEPRINT_CREATED);
     }
 

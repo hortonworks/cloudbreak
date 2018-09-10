@@ -45,14 +45,14 @@ public class ParameterGenerator {
 
     private static final String USER_ID = "horton@hortonworks.com";
 
-    private static final Long ORGANIZATION_ID = 1L;
+    private static final Long WORKSPACE_ID = 1L;
 
     private static final long STACK_ID = 5L;
 
     public CloudContext createCloudContext() {
         Location location = location(region("region"), availabilityZone("availabilityZone"));
         return new CloudContext(STACK_ID, "teststack", "TESTCONNECTOR", "owner", "TESTVARIANT",
-                location, USER_ID, ORGANIZATION_ID);
+                location, USER_ID, WORKSPACE_ID);
     }
 
     public CloudCredential createCloudCredential() {

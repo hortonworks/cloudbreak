@@ -17,7 +17,7 @@ public class ClusterProxyDecorator {
 
     public Cluster prepareProxyConfig(Cluster subject, String proxyName) {
         if (StringUtils.isNotBlank(proxyName)) {
-            ProxyConfig proxyConfig = proxyConfigService.getByNameForOrganization(proxyName, subject.getOrganization());
+            ProxyConfig proxyConfig = proxyConfigService.getByNameForWorkspace(proxyName, subject.getWorkspace());
             subject.setProxyConfig(proxyConfig);
         }
         return subject;

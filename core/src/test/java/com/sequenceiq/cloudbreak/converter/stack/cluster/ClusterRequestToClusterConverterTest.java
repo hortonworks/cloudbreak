@@ -43,7 +43,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
     public void setUp() {
         underTest = new ClusterRequestToClusterConverter();
         MockitoAnnotations.initMocks(this);
-        when(restRequestThreadLocalService.getRequestedOrgId()).thenReturn(100L);
+        when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(100L);
     }
 
     @Test
@@ -64,7 +64,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         Gateway gateway = new Gateway();
         given(conversionService.convert(any(ClusterRequest.class), eq(Gateway.class))).willReturn(gateway);
         given(conversionService.convert(any(KerberosRequest.class), eq(KerberosConfig.class))).willReturn(new KerberosConfig());
-        given(fileSystemConfigService.getByNameForOrganizationId("teszt", 100L)).willReturn(new FileSystem());
+        given(fileSystemConfigService.getByNameForWorkspaceId("teszt", 100L)).willReturn(new FileSystem());
         // WHEN
         Cluster result = underTest.convert(getRequest("cluster-with-file-system.json"));
         // THEN

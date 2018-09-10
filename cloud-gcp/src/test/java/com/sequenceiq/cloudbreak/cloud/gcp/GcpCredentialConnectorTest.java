@@ -38,7 +38,7 @@ public class GcpCredentialConnectorTest {
 
     private static final String USER_ID = "horton@hortonworks.com";
 
-    private static final Long ORGANIZATION_ID = 1L;
+    private static final Long WORKSPACE_ID = 1L;
 
     private static final Map<String, Object> CREDENTIAL_PARAMETERS = new HashMap<>();
 
@@ -201,7 +201,7 @@ public class GcpCredentialConnectorTest {
     }
 
     private CloudContext createCloudContext() {
-        return new CloudContext(1L, "name", "platform", "owner", USER_ID, ORGANIZATION_ID);
+        return new CloudContext(1L, "name", "platform", "owner", USER_ID, WORKSPACE_ID);
     }
 
     private CloudCredential createCloudCredential() {

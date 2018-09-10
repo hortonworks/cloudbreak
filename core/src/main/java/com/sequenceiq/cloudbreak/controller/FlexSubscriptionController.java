@@ -15,11 +15,11 @@ import com.sequenceiq.cloudbreak.api.model.FlexSubscriptionResponse;
 import com.sequenceiq.cloudbreak.converter.FlexSubscriptionRequestToFlexSubscriptionConverter;
 import com.sequenceiq.cloudbreak.converter.FlexSubscriptionToJsonConverter;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Controller
@@ -36,7 +36,7 @@ public class FlexSubscriptionController implements FlexSubscriptionEndpoint {
     private FlexSubscriptionToJsonConverter toJsonConverter;
 
     @Inject
-    private OrganizationService organizationService;
+    private WorkspaceService workspaceService;
 
     @Inject
     private UserService userService;
@@ -59,16 +59,16 @@ public class FlexSubscriptionController implements FlexSubscriptionEndpoint {
     @Override
     public FlexSubscriptionResponse deletePublic(String name) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        FlexSubscription flexSubscription = flexSubscriptionService.deleteByNameFromOrganization(name, organization.getId());
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        FlexSubscription flexSubscription = flexSubscriptionService.deleteByNameFromWorkspace(name, workspace.getId());
         return toJsonConverter.convert(flexSubscription);
     }
 
     @Override
     public FlexSubscriptionResponse deletePrivate(String name) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        FlexSubscription flexSubscription = flexSubscriptionService.deleteByNameFromOrganization(name, organization.getId());
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        FlexSubscription flexSubscription = flexSubscriptionService.deleteByNameFromWorkspace(name, workspace.getId());
         return toJsonConverter.convert(flexSubscription);
     }
 
@@ -80,31 +80,31 @@ public class FlexSubscriptionController implements FlexSubscriptionEndpoint {
     @Override
     public List<FlexSubscriptionResponse> getPublics() {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        Set<FlexSubscription> subscriptions = flexSubscriptionService.findAllForUserAndOrganization(user, organization.getId());
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        Set<FlexSubscription> subscriptions = flexSubscriptionService.findAllForUserAndWorkspace(user, workspace.getId());
         return toJsonConverter.convert(subscriptions);
     }
 
     @Override
     public FlexSubscriptionResponse getPublic(String name) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        FlexSubscription subscription = flexSubscriptionService.getByNameForOrganization(name, organization);
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        FlexSubscription subscription = flexSubscriptionService.getByNameForWorkspace(name, workspace);
         return toJsonConverter.convert(subscription);
     }
 
     @Override
     public void setDefaultInAccount(String name) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        flexSubscriptionService.setDefaultFlexSubscription(name, user, organization);
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        flexSubscriptionService.setDefaultFlexSubscription(name, user, workspace);
     }
 
     @Override
     public void setUsedForControllerInAccount(String name) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        flexSubscriptionService.setUsedForControllerFlexSubscription(name, user, organization);
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        flexSubscriptionService.setUsedForControllerFlexSubscription(name, user, workspace);
     }
 
     @Override
@@ -115,40 +115,40 @@ public class FlexSubscriptionController implements FlexSubscriptionEndpoint {
     @Override
     public List<FlexSubscriptionResponse> getPrivates() {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        Set<FlexSubscription> subscriptions = flexSubscriptionService.findAllForUserAndOrganization(user, organization.getId());
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        Set<FlexSubscription> subscriptions = flexSubscriptionService.findAllForUserAndWorkspace(user, workspace.getId());
         return toJsonConverter.convert(subscriptions);
     }
 
     @Override
     public FlexSubscriptionResponse getPrivate(String name) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        FlexSubscription subscription = flexSubscriptionService.getByNameForOrganization(name, organization);
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        FlexSubscription subscription = flexSubscriptionService.getByNameForWorkspace(name, workspace);
         return toJsonConverter.convert(subscription);
     }
 
     @Override
     public void setDefaultInAccount(Long id) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         FlexSubscription flexSubscription = flexSubscriptionService.get(id);
-        flexSubscriptionService.setDefaultFlexSubscription(flexSubscription.getName(), user, organization);
+        flexSubscriptionService.setDefaultFlexSubscription(flexSubscription.getName(), user, workspace);
     }
 
     @Override
     public void setUsedForControllerInAccount(Long id) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         FlexSubscription flexSubscription = flexSubscriptionService.get(id);
-        flexSubscriptionService.setUsedForControllerFlexSubscription(flexSubscription.getName(), user, organization);
+        flexSubscriptionService.setUsedForControllerFlexSubscription(flexSubscription.getName(), user, workspace);
     }
 
     private FlexSubscriptionResponse createFlexSubscription(FlexSubscriptionRequest json) {
         FlexSubscription subscription = toFlexSubscriptionConverter.convert(json);
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        subscription = flexSubscriptionService.create(subscription, organization, user);
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        subscription = flexSubscriptionService.create(subscription, workspace, user);
         return toJsonConverter.convert(subscription);
     }
 }

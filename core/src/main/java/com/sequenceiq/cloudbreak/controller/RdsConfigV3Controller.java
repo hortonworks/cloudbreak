@@ -16,8 +16,8 @@ import com.sequenceiq.cloudbreak.api.model.rds.RDSTestRequest;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsTestResult;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
@@ -32,44 +32,44 @@ public class RdsConfigV3Controller extends AbstractRdsConfigController implement
     private RestRequestThreadLocalService restRequestThreadLocalService;
 
     @Override
-    public Set<RDSConfigResponse> listByOrganization(Long organizationId) {
-        return getRdsConfigService().findAllByOrganizationId(organizationId).stream()
+    public Set<RDSConfigResponse> listByWorkspace(Long workspaceId) {
+        return getRdsConfigService().findAllByWorkspaceId(workspaceId).stream()
                 .map(rdsConfig -> getConversionService().convert(rdsConfig, RDSConfigResponse.class))
                 .collect(Collectors.toSet());
     }
 
     @Override
-    public RDSConfigResponse getByNameInOrganization(Long organizationId, String name) {
-        RDSConfig rdsConfig = getRdsConfigService().getByNameForOrganizationId(name, organizationId);
+    public RDSConfigResponse getByNameInWorkspace(Long workspaceId, String name) {
+        RDSConfig rdsConfig = getRdsConfigService().getByNameForWorkspaceId(name, workspaceId);
         return getConversionService().convert(rdsConfig, RDSConfigResponse.class);
     }
 
     @Override
-    public RDSConfigResponse createInOrganization(Long organizationId, RDSConfigRequest request) {
+    public RDSConfigResponse createInWorkspace(Long workspaceId, RDSConfigRequest request) {
         RDSConfig rdsConfig = getConversionService().convert(request, RDSConfig.class);
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        rdsConfig = getRdsConfigService().create(rdsConfig, organizationId, user);
+        rdsConfig = getRdsConfigService().create(rdsConfig, workspaceId, user);
         notify(ResourceEvent.RDS_CONFIG_CREATED);
         return getConversionService().convert(rdsConfig, RDSConfigResponse.class);
     }
 
     @Override
-    public RDSConfigResponse deleteInOrganization(Long organizationId, String name) {
-        RDSConfig deleted = getRdsConfigService().deleteByNameFromOrganization(name, organizationId);
+    public RDSConfigResponse deleteInWorkspace(Long workspaceId, String name) {
+        RDSConfig deleted = getRdsConfigService().deleteByNameFromWorkspace(name, workspaceId);
         notify(ResourceEvent.RDS_CONFIG_DELETED);
         return getConversionService().convert(deleted, RDSConfigResponse.class);
     }
 
     @Override
-    public RdsTestResult testRdsConnection(Long organizationId, RDSTestRequest rdsTestRequest) {
+    public RdsTestResult testRdsConnection(Long workspaceId, RDSTestRequest rdsTestRequest) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Organization organization = getRdsConfigService().getOrganizationService().get(organizationId, user);
-        return testRdsConnection(rdsTestRequest, organization);
+        Workspace workspace = getRdsConfigService().getWorkspaceService().get(workspaceId, user);
+        return testRdsConnection(rdsTestRequest, workspace);
     }
 
     @Override
-    public RDSConfigRequest getRequestFromName(Long organizationId, String name) {
-        RDSConfig rdsConfig = getRdsConfigService().getByNameForOrganizationId(name, organizationId);
+    public RDSConfigRequest getRequestFromName(Long workspaceId, String name) {
+        RDSConfig rdsConfig = getRdsConfigService().getByNameForWorkspaceId(name, workspaceId);
         return getConversionService().convert(rdsConfig, RDSConfigRequest.class);
     }
 }

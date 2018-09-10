@@ -13,13 +13,13 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.OrganizationAwareResource;
+import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"organization_id", "name"}))
-public class ConstraintTemplate implements ProvisionEntity, OrganizationAwareResource {
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name"}))
+public class ConstraintTemplate implements ProvisionEntity, WorkspaceAwareResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "constraint_template_generator")
@@ -56,21 +56,21 @@ public class ConstraintTemplate implements ProvisionEntity, OrganizationAwareRes
     private ResourceStatus status;
 
     @ManyToOne
-    private Organization organization;
+    private Workspace workspace;
 
     @Override
-    public Organization getOrganization() {
-        return organization;
+    public Workspace getWorkspace() {
+        return workspace;
     }
 
     @Override
-    public void setOrganization(Organization organization) {
-        this.organization = organization;
+    public void setWorkspace(Workspace workspace) {
+        this.workspace = workspace;
     }
 
     @Override
-    public OrganizationResource getResource() {
-        return OrganizationResource.CONSTRAINT_TEMPLATE;
+    public WorkspaceResource getResource() {
+        return WorkspaceResource.CONSTRAINT_TEMPLATE;
     }
 
     public Long getId() {

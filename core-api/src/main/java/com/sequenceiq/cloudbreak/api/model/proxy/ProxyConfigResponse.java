@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.api.model.proxy;
 
-import com.sequenceiq.cloudbreak.api.model.users.OrganizationResourceResponse;
+import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 
@@ -13,8 +13,8 @@ public class ProxyConfigResponse extends ProxyConfigBase {
     @ApiModelProperty(ClusterModelDescription.PROXY_CONFIG_ID)
     private Long id;
 
-    @ApiModelProperty(ModelDescriptions.ORGANIZATION_OF_THE_RESOURCE)
-    private OrganizationResourceResponse organization;
+    @ApiModelProperty(ModelDescriptions.WORKSPACE_OF_THE_RESOURCE)
+    private WorkspaceResourceResponse workspace;
 
     public Long getId() {
         return id;
@@ -24,11 +24,11 @@ public class ProxyConfigResponse extends ProxyConfigBase {
         this.id = id;
     }
 
-    public OrganizationResourceResponse getOrganization() {
-        return organization;
+    public WorkspaceResourceResponse getWorkspace() {
+        return workspace;
     }
 
-    public void setOrganization(OrganizationResourceResponse organization) {
-        this.organization = organization;
+    public void setWorkspace(WorkspaceResourceResponse workspace) {
+        this.workspace = workspace;
     }
 }

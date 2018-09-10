@@ -32,25 +32,25 @@ public class ControllerDescription {
     public static final String FLEX_SUBSCRIPTION_DESCRIPTION = "Operations on Flex subscriptions";
     public static final String IMAGE_CATALOG_DESCRIPTION = "Operations on Image catalogs";
     public static final String REPOSITORY_CONFIGS_VALIDATION_DESCRIPTION = "Operations to validate repository configs";
-    public static final String ORGANIZATION_DESCRIPTION = "Operations on organiztions";
+    public static final String WORKSPACE_DESCRIPTION = "Operations on organiztions";
 
     public static final String AUTOSCALE_DESCRIPTION = "Operations by Autoscale";
 
-    public static final String LDAP_V3_CONFIG_DESCRIPTION = "Operations on LDAP server configurations by organization";
-    public static final String BLUEPRINT_V3_DESCRIPTION = "Operations on blueprints by organization";
-    public static final String CREDENTIAL_V3_DESCRIPTION = "Operations on credentials by organization";
-    public static final String FLEX_SUBSCRIPTION_V3_DESCRIPTION = "Operations on Flex subscriptions by organization";
-    public static final String MANAGEMENT_PACK_V3_DESCRIPTION = "Operations on Management pack by Organization";
-    public static final String PROXY_CONFIG_V3_DESCRIPTION = "Operations on proxy config by organization";
-    public static final String RECIPE_V3_DESCRIPTION = "Operations on recipes by organization";
-    public static final String SMARTSENSE_SUBSCRIPTION_V3_DESCRIPTION = "Operations on SmartSense subscriptions by organization";
-    public static final String STACK_V3_DESCRIPTION = "Operations on stack by organization";
+    public static final String LDAP_V3_CONFIG_DESCRIPTION = "Operations on LDAP server configurations by workspace";
+    public static final String BLUEPRINT_V3_DESCRIPTION = "Operations on blueprints by workspace";
+    public static final String CREDENTIAL_V3_DESCRIPTION = "Operations on credentials by workspace";
+    public static final String FLEX_SUBSCRIPTION_V3_DESCRIPTION = "Operations on Flex subscriptions by workspace";
+    public static final String MANAGEMENT_PACK_V3_DESCRIPTION = "Operations on Management pack by Workspace";
+    public static final String PROXY_CONFIG_V3_DESCRIPTION = "Operations on proxy config by workspace";
+    public static final String RECIPE_V3_DESCRIPTION = "Operations on recipes by workspace";
+    public static final String SMARTSENSE_SUBSCRIPTION_V3_DESCRIPTION = "Operations on SmartSense subscriptions by workspace";
+    public static final String STACK_V3_DESCRIPTION = "Operations on stack by workspace";
     public static final String IMAGE_CATALOG_V3_DESCRIPTION = "Operations on Image Catalog by O";
-    public static final String RDSCONFIGS_V3_DESCRIPTION = "Operations on RDS configs by organization";
-    public static final String AUDIT_V3_DESCRIPTION = "Operations on audit events by organization";
-    public static final String KNOX_SERVICES_V3_DESCRIPTION = "Operations on Knox services by organization and blueprint";
-    public static final String CONNECTOR_V3_DESCRIPTION = "Returns cloud provider specific resource types by organization";
-    public static final String USER_V3_DESCRIPTION = "Operations on users in organization";
+    public static final String RDSCONFIGS_V3_DESCRIPTION = "Operations on RDS configs by workspace";
+    public static final String AUDIT_V3_DESCRIPTION = "Operations on audit events by workspace";
+    public static final String KNOX_SERVICES_V3_DESCRIPTION = "Operations on Knox services by workspace and blueprint";
+    public static final String CONNECTOR_V3_DESCRIPTION = "Returns cloud provider specific resource types by workspace";
+    public static final String USER_V3_DESCRIPTION = "Operations on users in workspace";
 
     private ControllerDescription() {
     }

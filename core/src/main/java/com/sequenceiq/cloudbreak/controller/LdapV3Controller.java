@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.ldapconfig.LdapConfigValidator;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
@@ -47,36 +47,36 @@ public class LdapV3Controller extends NotificationController implements LdapConf
     private RestRequestThreadLocalService restRequestThreadLocalService;
 
     @Override
-    public Set<LdapConfigResponse> listConfigsByOrganization(Long organizationId) {
-        return ldapConfigService.findAllByOrganizationId(organizationId).stream()
+    public Set<LdapConfigResponse> listConfigsByWorkspace(Long workspaceId) {
+        return ldapConfigService.findAllByWorkspaceId(workspaceId).stream()
                 .map(ldapConfig -> conversionService.convert(ldapConfig, LdapConfigResponse.class))
                 .collect(Collectors.toSet());
     }
 
     @Override
-    public LdapConfigResponse getByNameInOrganization(Long organizationId, String name) {
-        LdapConfig ldapConfig = ldapConfigService.getByNameForOrganizationId(name, organizationId);
+    public LdapConfigResponse getByNameInWorkspace(Long workspaceId, String name) {
+        LdapConfig ldapConfig = ldapConfigService.getByNameForWorkspaceId(name, workspaceId);
         return conversionService.convert(ldapConfig, LdapConfigResponse.class);
     }
 
     @Override
-    public LdapConfigResponse createInOrganization(Long organizationId, LdapConfigRequest request) {
+    public LdapConfigResponse createInWorkspace(Long workspaceId, LdapConfigRequest request) {
         LdapConfig ldapConfig = conversionService.convert(request, LdapConfig.class);
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        ldapConfig = ldapConfigService.create(ldapConfig, organizationId, user);
+        ldapConfig = ldapConfigService.create(ldapConfig, workspaceId, user);
         notify(ResourceEvent.LDAP_CREATED);
         return conversionService.convert(ldapConfig, LdapConfigResponse.class);
     }
 
     @Override
-    public LdapConfigResponse deleteInOrganization(Long organizationId, String name) {
-        LdapConfig config = ldapConfigService.deleteByNameFromOrganization(name, organizationId);
+    public LdapConfigResponse deleteInWorkspace(Long workspaceId, String name) {
+        LdapConfig config = ldapConfigService.deleteByNameFromWorkspace(name, workspaceId);
         notify(ResourceEvent.LDAP_DELETED);
         return conversionService.convert(config, LdapConfigResponse.class);
     }
 
     @Override
-    public LdapTestResult testLdapConnection(Long organizationId, LDAPTestRequest ldapValidationRequest) {
+    public LdapTestResult testLdapConnection(Long workspaceId, LDAPTestRequest ldapValidationRequest) {
         String existingLDAPConfigName = ldapValidationRequest.getName();
         LdapValidationRequest validationRequest = ldapValidationRequest.getValidationRequest();
         if (existingLDAPConfigName == null && validationRequest == null) {
@@ -86,7 +86,7 @@ public class LdapV3Controller extends NotificationController implements LdapConf
         LdapTestResult ldapTestResult = new LdapTestResult();
         try {
             if (existingLDAPConfigName != null) {
-                LdapConfig ldapConfig = ldapConfigService.getByNameForOrganizationId(existingLDAPConfigName, organizationId);
+                LdapConfig ldapConfig = ldapConfigService.getByNameForWorkspaceId(existingLDAPConfigName, workspaceId);
                 ldapConfigValidator.validateLdapConnection(ldapConfig);
             } else {
                 ldapConfigValidator.validateLdapConnection(validationRequest);
@@ -99,8 +99,8 @@ public class LdapV3Controller extends NotificationController implements LdapConf
     }
 
     @Override
-    public LdapConfigRequest getRequestFromName(Long organizationId, String name) {
-        LdapConfig ldapConfig = ldapConfigService.getByNameForOrganizationId(name, organizationId);
+    public LdapConfigRequest getRequestFromName(Long workspaceId, String name) {
+        LdapConfig ldapConfig = ldapConfigService.getByNameForWorkspaceId(name, workspaceId);
         return conversionService.convert(ldapConfig, LdapConfigRequest.class);
     }
 }

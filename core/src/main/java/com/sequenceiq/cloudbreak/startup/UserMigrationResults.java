@@ -2,16 +2,16 @@ package com.sequenceiq.cloudbreak.startup;
 
 import java.util.Map;
 
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 
 public class UserMigrationResults {
 
     private final Map<String, User> ownerIdToUser;
 
-    private final Organization orgForOrphanedResources;
+    private final Workspace orgForOrphanedResources;
 
-    public UserMigrationResults(Map<String, User> ownerIdToUser, Organization orgForOrphanedResources) {
+    public UserMigrationResults(Map<String, User> ownerIdToUser, Workspace orgForOrphanedResources) {
         this.ownerIdToUser = ownerIdToUser;
         this.orgForOrphanedResources = orgForOrphanedResources;
     }
@@ -20,7 +20,7 @@ public class UserMigrationResults {
         return ownerIdToUser;
     }
 
-    public Organization getOrgForOrphanedResources() {
+    public Workspace getWorkspaceForOrphanedResources() {
         return orgForOrphanedResources;
     }
 }

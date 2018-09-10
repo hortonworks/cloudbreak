@@ -33,40 +33,40 @@ import com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Path("/v3/{organizationId}/stacks")
+@Path("/v3/{workspaceId}/stacks")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v3/{organizationId}/stacks", description = ControllerDescription.STACK_V3_DESCRIPTION, protocols = "http,https")
+@Api(value = "/v3/{workspaceId}/stacks", description = ControllerDescription.STACK_V3_DESCRIPTION, protocols = "http,https")
 public interface StackV3Endpoint {
 
     @GET
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = StackOpDescription.LIST_BY_ORGANIZATION, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
-            nickname = "listStacksByOrganization")
-    Set<StackResponse> listByOrganization(@PathParam("organizationId") Long organizationId);
+    @ApiOperation(value = StackOpDescription.LIST_BY_WORKSPACE, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
+            nickname = "listStacksByWorkspace")
+    Set<StackResponse> listByWorkspace(@PathParam("workspaceId") Long workspaceId);
 
     @GET
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.GET_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
-            nickname = "getStackInOrganization")
-    StackResponse getByNameInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name,
+            nickname = "getStackInWorkspace")
+    StackResponse getByNameInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("entry") Set<String> entries);
 
     @POST
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.CREATE_IN_ORG, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
-            nickname = "createStackInOrganization")
-    StackResponse createInOrganization(@PathParam("organizationId") Long organizationId, @Valid StackV2Request request);
+            nickname = "createStackInWorkspace")
+    StackResponse createInWorkspace(@PathParam("workspaceId") Long workspaceId, @Valid StackV2Request request);
 
     // deleteStackV2
     @DELETE
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.DELETE_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
-            nickname = "deleteStackInOrganization")
-    void deleteInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name,
+            nickname = "deleteStackInWorkspace")
+    void deleteInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("forced") @DefaultValue("false") Boolean forced,
             @QueryParam("deleteDependencies") @DefaultValue("false") Boolean deleteDependencies);
 
@@ -76,7 +76,7 @@ public interface StackV3Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.SYNC_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
             nickname = "putsyncStackV3")
-    Response putSyncInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
+    Response putSyncInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     // retryStack
     @POST
@@ -84,7 +84,7 @@ public interface StackV3Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.RETRY_BY_NAME_IN_ORG,
             produces = ContentType.JSON, notes = Notes.RETRY_STACK_NOTES, nickname = "retryStackV3")
-    void retryInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
+    void retryInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     // putstopStackV2
     @PUT
@@ -92,7 +92,7 @@ public interface StackV3Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.STOP_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
             nickname = "putstopStackV3")
-    Response putStopInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
+    Response putStopInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     // putstartStackV2
     @PUT
@@ -100,7 +100,7 @@ public interface StackV3Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.START_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
             nickname = "putstartStackV3")
-    Response putStartInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
+    Response putStartInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     // putscalingStackV2
     @PUT
@@ -108,7 +108,7 @@ public interface StackV3Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.SCALE_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
             nickname = "putscalingStackV3")
-    Response putScalingInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name,
+    Response putScalingInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @Valid StackScaleRequestV2 updateRequest);
 
     // repairCluster // v1
@@ -117,7 +117,7 @@ public interface StackV3Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.REPAIR_CLUSTER_IN_ORG, produces = ContentType.JSON, notes = Notes.CLUSTER_REPAIR_NOTES,
             nickname = "repairClusterV3")
-    Response repairClusterInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name,
+    Response repairClusterInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             ClusterRepairRequest clusterRepairRequest);
 
     // deleteCluster // v1
@@ -126,7 +126,7 @@ public interface StackV3Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.DELETE_WITH_KERBEROS_IN_ORG, produces = ContentType.JSON, notes = Notes.CLUSTER_NOTES,
             nickname = "deleteClusterWithKerberosV3")
-    void deleteWithKerberosInOrg(@PathParam("organizationId") Long organizationId, @PathParam("name") String name,
+    void deleteWithKerberosInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("withStackDelete") @DefaultValue("false") Boolean withStackDelete,
             @QueryParam("deleteDependencies") @DefaultValue("false") Boolean deleteDependencies);
 
@@ -136,7 +136,7 @@ public interface StackV3Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.GET_STACK_REQUEST_IN_ORG, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
             nickname = "getStackRequestFromNameV3")
-    StackV2Request getRequestfromName(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
+    StackV2Request getRequestfromName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     // postPublicStackV2ForBlueprint
     @POST
@@ -144,7 +144,7 @@ public interface StackV3Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.POST_STACK_FOR_BLUEPRINT_IN_ORG, produces = ContentType.JSON,
             notes = Notes.STACK_NOTES, nickname = "postStackForBlueprintV3")
-    GeneratedBlueprintResponse postStackForBlueprint(@PathParam("organizationId") Long organizationId, @PathParam("name") String name,
+    GeneratedBlueprintResponse postStackForBlueprint(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @Valid StackV2Request stackRequest) throws Exception;
 
     // deleteInstanceStackV2
@@ -153,7 +153,7 @@ public interface StackV3Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.DELETE_INSTANCE_BY_ID_IN_ORG, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
             nickname = "deleteInstanceStackV3")
-    Response deleteInstance(@PathParam("organizationId") Long organizationId, @PathParam("name") String name,
+    Response deleteInstance(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @PathParam("instanceId") String instanceId,
             @QueryParam("forced") @DefaultValue("false") boolean forced);
 
@@ -163,7 +163,7 @@ public interface StackV3Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.CHECK_IMAGE_IN_ORG, produces = ContentType.JSON,
             notes = Notes.STACK_NOTES, nickname = "changeImageV3")
-    Response changeImage(@PathParam("organizationId") Long organizationId, @PathParam("name") String name,
+    Response changeImage(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @Valid StackImageChangeRequest stackImageChangeRequest);
 
     // PutreinstallStackV2
@@ -172,7 +172,7 @@ public interface StackV3Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.PUT_BY_NAME, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
             nickname = "putreinstallStackV3")
-    Response putReinstall(@PathParam("organizationId") Long organizationId, @PathParam("name") String name,
+    Response putReinstall(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @Valid ReinstallRequestV2 reinstallRequestV2);
 
     // putpasswordStackV2
@@ -181,12 +181,12 @@ public interface StackV3Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.PUT_BY_NAME, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
             nickname = "putpasswordStackV3")
-    Response putPassword(@PathParam("organizationId") Long organizationId, @PathParam("name") String name, @Valid UserNamePasswordJson userNamePasswordJson);
+    Response putPassword(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name, @Valid UserNamePasswordJson userNamePasswordJson);
 
     @GET
     @Path("{name}/status")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.GET_STATUS_BY_NAME, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
             nickname = "statusStackV3")
-    Map<String, Object> getStatusByNameInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
+    Map<String, Object> getStatusByNameInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 }

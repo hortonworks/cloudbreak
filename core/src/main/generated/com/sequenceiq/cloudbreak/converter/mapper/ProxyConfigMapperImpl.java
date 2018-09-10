@@ -2,9 +2,9 @@ package com.sequenceiq.cloudbreak.converter.mapper;
 
 import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigResponse;
-import com.sequenceiq.cloudbreak.api.model.users.OrganizationResourceResponse;
+import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import java.util.HashSet;
 import java.util.Set;
 import javax.annotation.Generated;
@@ -50,7 +50,7 @@ public class ProxyConfigMapperImpl implements ProxyConfigMapper {
         proxyConfigResponse.setUserName( proxyConfigRequest.getUserName() );
         proxyConfigResponse.setDescription( proxyConfigRequest.getDescription() );
         proxyConfigResponse.setId( proxyConfigRequest.getId() );
-        proxyConfigResponse.setOrganization( organizationToOrganizationResourceResponse( proxyConfigRequest.getOrganization() ) );
+        proxyConfigResponse.setWorkspace( workspaceToWorkspaceResourceResponse( proxyConfigRequest.getWorkspace() ) );
 
         return proxyConfigResponse;
     }
@@ -69,16 +69,16 @@ public class ProxyConfigMapperImpl implements ProxyConfigMapper {
         return set;
     }
 
-    protected OrganizationResourceResponse organizationToOrganizationResourceResponse(Organization organization) {
-        if ( organization == null ) {
+    protected WorkspaceResourceResponse workspaceToWorkspaceResourceResponse(Workspace workspace) {
+        if ( workspace == null ) {
             return null;
         }
 
-        OrganizationResourceResponse organizationResourceResponse = new OrganizationResourceResponse();
+        WorkspaceResourceResponse workspaceResourceResponse = new WorkspaceResourceResponse();
 
-        organizationResourceResponse.setId( organization.getId() );
-        organizationResourceResponse.setName( organization.getName() );
+        workspaceResourceResponse.setId( workspace.getId() );
+        workspaceResourceResponse.setName( workspace.getName() );
 
-        return organizationResourceResponse;
+        return workspaceResourceResponse;
     }
 }

@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.api.model.mpack.ManagementPackRequest;
 import com.sequenceiq.cloudbreak.api.model.mpack.ManagementPackResponse;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.ManagementPack;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.mpack.ManagementPackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
@@ -37,30 +37,30 @@ public class ManagementPackV3Controller extends NotificationController implement
     private RestRequestThreadLocalService restRequestThreadLocalService;
 
     @Override
-    public Set<ManagementPackResponse> listByOrganization(Long organizationId) {
-        return mpackService.findAllByOrganizationId(organizationId).stream()
+    public Set<ManagementPackResponse> listByWorkspace(Long workspaceId) {
+        return mpackService.findAllByWorkspaceId(workspaceId).stream()
                 .map(mpack -> conversionService.convert(mpack, ManagementPackResponse.class))
                 .collect(Collectors.toSet());
     }
 
     @Override
-    public ManagementPackResponse getByNameInOrganization(Long organizationId, String name) {
-        ManagementPack managementPack = mpackService.getByNameForOrganizationId(name, organizationId);
+    public ManagementPackResponse getByNameInWorkspace(Long workspaceId, String name) {
+        ManagementPack managementPack = mpackService.getByNameForWorkspaceId(name, workspaceId);
         return conversionService.convert(managementPack, ManagementPackResponse.class);
     }
 
     @Override
-    public ManagementPackResponse createInOrganization(Long organizationId, @Valid ManagementPackRequest request) {
+    public ManagementPackResponse createInWorkspace(Long workspaceId, @Valid ManagementPackRequest request) {
         ManagementPack managementPack = conversionService.convert(request, ManagementPack.class);
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        managementPack = mpackService.create(managementPack, organizationId, user);
+        managementPack = mpackService.create(managementPack, workspaceId, user);
         notify(ResourceEvent.MANAGEMENT_PACK_CREATED);
         return conversionService.convert(managementPack, ManagementPackResponse.class);
     }
 
     @Override
-    public ManagementPackResponse deleteInOrganization(Long organizationId, String name) {
-        ManagementPack deleted = mpackService.deleteByNameFromOrganization(name, organizationId);
+    public ManagementPackResponse deleteInWorkspace(Long workspaceId, String name) {
+        ManagementPack deleted = mpackService.deleteByNameFromWorkspace(name, workspaceId);
         notify(ResourceEvent.MANAGEMENT_PACK_DELETED);
         return conversionService.convert(deleted, ManagementPackResponse.class);
     }

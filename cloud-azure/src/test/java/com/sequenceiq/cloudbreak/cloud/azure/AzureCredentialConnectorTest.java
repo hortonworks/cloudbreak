@@ -21,7 +21,7 @@ public class AzureCredentialConnectorTest {
 
     private static final String USER_ID = "horton@hortonworks.com";
 
-    private static final Long ORGANIZATION_ID = 1L;
+    private static final Long WORKSPACE_ID = 1L;
 
     @InjectMocks
     private AzureCredentialConnector underTest;
@@ -41,9 +41,9 @@ public class AzureCredentialConnectorTest {
     public void testInteractiveLoginIsEnabled() {
         when(azureInteractiveLogin.login(any(CloudContext.class), any(ExtendedCloudCredential.class),
                 any(CredentialNotifier.class))).thenReturn(Maps.newHashMap());
-        CloudContext cloudContext = new CloudContext(1L, "test", "test", "test", USER_ID, ORGANIZATION_ID);
+        CloudContext cloudContext = new CloudContext(1L, "test", "test", "test", USER_ID, WORKSPACE_ID);
         ExtendedCloudCredential extendedCloudCredential = new ExtendedCloudCredential(null, null, null,
-                null, null, USER_ID, ORGANIZATION_ID);
+                null, null, USER_ID, WORKSPACE_ID);
         underTest.interactiveLogin(cloudContext, extendedCloudCredential, credentialSender);
         verify(azureInteractiveLogin, times(1)).login(any(CloudContext.class), any(ExtendedCloudCredential.class),
                 any(CredentialNotifier.class));

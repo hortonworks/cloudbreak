@@ -13,10 +13,10 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import com.sequenceiq.cloudbreak.api.model.Status;
-import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
+import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.OrganizationAwareResource;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -24,7 +24,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 @Table(name = "Stack")
 // It's only here, because of findbugs does not know the fields will be set by JPA with Reflection
 @SuppressFBWarnings("UWF_UNWRITTEN_FIELD")
-public class StackView implements ProvisionEntity, OrganizationAwareResource {
+public class StackView implements ProvisionEntity, WorkspaceAwareResource {
 
     @Id
     private Long id;
@@ -53,7 +53,7 @@ public class StackView implements ProvisionEntity, OrganizationAwareResource {
     private Long created;
 
     @ManyToOne
-    private Organization organization;
+    private Workspace workspace;
 
     public StackView() {
     }
@@ -71,8 +71,8 @@ public class StackView implements ProvisionEntity, OrganizationAwareResource {
     }
 
     @Override
-    public Organization getOrganization() {
-        return organization;
+    public Workspace getWorkspace() {
+        return workspace;
     }
 
     public String getName() {
@@ -80,13 +80,13 @@ public class StackView implements ProvisionEntity, OrganizationAwareResource {
     }
 
     @Override
-    public void setOrganization(Organization organization) {
-        this.organization = organization;
+    public void setWorkspace(Workspace workspace) {
+        this.workspace = workspace;
     }
 
     @Override
-    public OrganizationResource getResource() {
-        return OrganizationResource.STACK;
+    public WorkspaceResource getResource() {
+        return WorkspaceResource.STACK;
     }
 
     public String getOwner() {

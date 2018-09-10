@@ -15,11 +15,11 @@ import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
 import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Component
@@ -30,7 +30,7 @@ public class CredentialController extends NotificationController implements Cred
     private CredentialService credentialService;
 
     @Inject
-    private OrganizationService organizationService;
+    private WorkspaceService workspaceService;
 
     @Inject
     private UserService userService;
@@ -46,8 +46,8 @@ public class CredentialController extends NotificationController implements Cred
     @Override
     public CredentialResponse postPublic(CredentialRequest credentialRequest) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        return createCredential(credentialRequest, user, organization);
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        return createCredential(credentialRequest, user, workspace);
     }
 
     @Override
@@ -58,8 +58,8 @@ public class CredentialController extends NotificationController implements Cred
     @Override
     public CredentialResponse putPublic(CredentialRequest credentialRequest) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        return modifyCredential(credentialRequest, user, organization);
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        return modifyCredential(credentialRequest, user, workspace);
     }
 
     @Override
@@ -69,7 +69,7 @@ public class CredentialController extends NotificationController implements Cred
 
     @Override
     public Set<CredentialResponse> getPublics() {
-        return credentialService.convertAllToResponse(credentialService.listAvailablesByOrganizationId(restRequestThreadLocalService.getRequestedOrgId()));
+        return credentialService.convertAllToResponse(credentialService.listAvailablesByWorkspaceId(restRequestThreadLocalService.getRequestedWorkspaceId()));
     }
 
     @Override
@@ -80,22 +80,22 @@ public class CredentialController extends NotificationController implements Cred
     @Override
     public CredentialResponse getPublic(String name) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        return credentialService.convertToResponse(credentialService.getByNameForOrganization(name, organization));
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        return credentialService.convertToResponse(credentialService.getByNameForWorkspace(name, workspace));
     }
 
     @Override
     public CredentialResponse get(Long id) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        return credentialService.convertToResponse(credentialService.get(id, organization));
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        return credentialService.convertToResponse(credentialService.get(id, workspace));
     }
 
     @Override
     public void delete(Long id) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        executeAndNotify(identityUser -> credentialService.delete(id, organization), ResourceEvent.CREDENTIAL_DELETED);
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        executeAndNotify(identityUser -> credentialService.delete(id, workspace), ResourceEvent.CREDENTIAL_DELETED);
     }
 
     @Override
@@ -106,8 +106,8 @@ public class CredentialController extends NotificationController implements Cred
     @Override
     public void deletePrivate(String name) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        executeAndNotify(identityUser -> credentialService.delete(name, organization), ResourceEvent.CREDENTIAL_DELETED);
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        executeAndNotify(identityUser -> credentialService.delete(name, workspace), ResourceEvent.CREDENTIAL_DELETED);
     }
 
     @Override
@@ -118,22 +118,22 @@ public class CredentialController extends NotificationController implements Cred
     @Override
     public Map<String, String> publicInteractiveLogin(CredentialRequest credentialRequest) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        return interactiveLogin(credentialRequest, organization, user);
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        return interactiveLogin(credentialRequest, workspace, user);
     }
 
-    private Map<String, String> interactiveLogin(CredentialRequest credentialRequest, Organization organization, User user) {
+    private Map<String, String> interactiveLogin(CredentialRequest credentialRequest, Workspace workspace, User user) {
         Credential credential = credentialService.convertToCredential(credentialRequest);
-        return credentialService.interactiveLogin(organization.getId(), credential, organization, user);
+        return credentialService.interactiveLogin(workspace.getId(), credential, workspace, user);
     }
 
-    private CredentialResponse createCredential(CredentialRequest credentialRequest, User user, Organization organization) {
-        Credential credential = credentialService.create(credentialService.convertToCredential(credentialRequest), organization.getId(), user);
+    private CredentialResponse createCredential(CredentialRequest credentialRequest, User user, Workspace workspace) {
+        Credential credential = credentialService.create(credentialService.convertToCredential(credentialRequest), workspace.getId(), user);
         return credentialService.convertToResponse(credential);
     }
 
-    private CredentialResponse modifyCredential(CredentialRequest credentialRequest, User user, Organization organization) {
-        Credential credential = credentialService.updateByOrganizationId(organization.getId(), credentialService.convertToCredential(credentialRequest), user);
+    private CredentialResponse modifyCredential(CredentialRequest credentialRequest, User user, Workspace workspace) {
+        Credential credential = credentialService.updateByWorkspaceId(workspace.getId(), credentialService.convertToCredential(credentialRequest), user);
         return credentialService.convertToResponse(credential);
     }
 }

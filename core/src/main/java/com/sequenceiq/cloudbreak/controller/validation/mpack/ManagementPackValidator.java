@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.api.model.mpack.ManagementPackDetails;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.ManagementPack;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.mpack.ManagementPackService;
 
 @Component
@@ -22,7 +22,7 @@ public class ManagementPackValidator {
     @Inject
     private ManagementPackService mpackService;
 
-    public void validateMpacks(ClusterRequest clusterRequest, Organization organization) {
+    public void validateMpacks(ClusterRequest clusterRequest, Workspace workspace) {
         AmbariStackDetailsJson stackDetails = clusterRequest.getAmbariStackDetails();
         if (stackDetails == null) {
             return;
@@ -35,7 +35,7 @@ public class ManagementPackValidator {
             throw new BadRequestException("Mpack list contains entries with the same name");
         }
         Map<String, ManagementPack> mpackMap = mpackDetailsMap.values().stream()
-                .map(mpd -> mpackService.getByNameForOrganization(mpd.getName(), organization))
+                .map(mpd -> mpackService.getByNameForWorkspace(mpd.getName(), workspace))
                 .collect(Collectors.toMap(ManagementPack::getMpackUrl, mp -> mp, (mp1, mp2) -> mp1));
         if (mpackMap.size() != mpackList.size()) {
             throw new BadRequestException("Mpack list contains entries with the same mpackUrl");

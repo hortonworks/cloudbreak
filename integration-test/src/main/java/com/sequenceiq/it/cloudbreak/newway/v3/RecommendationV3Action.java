@@ -26,7 +26,7 @@ public class RecommendationV3Action {
     public static void post(IntegrationTestContext integrationTestContext, Entity entity) throws IOException {
         RecommendationEntity recommendationEntity = (RecommendationEntity) entity;
         CloudbreakClient client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
-        Long orgId = integrationTestContext.getContextParam(CloudbreakTest.ORGANIZATION_ID, Long.class);
+        Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
 
         Blueprint blueprint = integrationTestContext.getContextParam(BlueprintEntity.BLUEPRINT, Blueprint.class);
         if (blueprint != null && blueprint.getResponse() != null) {
@@ -60,7 +60,7 @@ public class RecommendationV3Action {
         recommendationEntity.setResponse(
                 client.getCloudbreakClient()
                         .connectorV3Endpoint()
-                        .createRecommendation(orgId, recommendationEntity.getRequest()));
+                        .createRecommendation(workspaceId, recommendationEntity.getRequest()));
         Log.logJSON(" post Recommendations response: ", recommendationEntity.getResponse());
     }
 

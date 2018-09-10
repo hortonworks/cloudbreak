@@ -8,11 +8,11 @@ import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.PlatformResourceRequestJson;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.PlatformResourceRequest;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Component
@@ -23,7 +23,7 @@ public class PlatformResourceRequestJsonToPlatformResourceRequest extends
     private CredentialService credentialService;
 
     @Inject
-    private OrganizationService organizationService;
+    private WorkspaceService workspaceService;
 
     @Inject
     private UserService userService;
@@ -36,11 +36,11 @@ public class PlatformResourceRequestJsonToPlatformResourceRequest extends
         PlatformResourceRequest platformResourceRequest = new PlatformResourceRequest();
 
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         if (!Strings.isNullOrEmpty(source.getCredentialName())) {
-            platformResourceRequest.setCredential(credentialService.getByNameForOrganizationId(source.getCredentialName(), organization.getId()));
+            platformResourceRequest.setCredential(credentialService.getByNameForWorkspaceId(source.getCredentialName(), workspace.getId()));
         } else if (source.getCredentialId() != null) {
-            platformResourceRequest.setCredential(credentialService.get(source.getCredentialId(), organization));
+            platformResourceRequest.setCredential(credentialService.get(source.getCredentialId(), workspace));
         } else {
             throw new BadRequestException("The credentialId or the credentialName must be specified in the request");
         }
