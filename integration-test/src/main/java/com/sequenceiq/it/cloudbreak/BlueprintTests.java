@@ -5,6 +5,7 @@ import java.io.IOException;
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ForbiddenException;
+import javax.ws.rs.core.Response;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +32,7 @@ public class BlueprintTests extends CloudbreakTest {
 
     private static final String SPECIAL_BP_NAME = "@#$|:&* ABC";
 
-    private static final String ILLEGAL_BP_NAME = "Illegal blueprint name ;%";
+    private static final String ILLEGAL_BP_NAME = "Illegal blueprint name %s";
 
     private static final String INVALID_SHORT_BP_NAME = "";
 
@@ -78,16 +79,39 @@ public class BlueprintTests extends CloudbreakTest {
     }
 
     @Test(expectedExceptions = BadRequestException.class, priority = 3, groups = "blueprints")
-    public void testCreateBlueprintWithIllegalCharactersInNameShouldThrowBadRequestException() throws Exception {
+    public void testCreateBlueprintWithIllegalSemicolonCharacterInNameShouldThrowBadRequestException() throws Exception {
         given(CloudbreakClient.isCreated());
+        String blueprintName = String.format(ILLEGAL_BP_NAME, ";");
         given(Blueprint.request()
-                .withName(ILLEGAL_BP_NAME)
+                .withName(blueprintName)
                 .withDescription(BP_DESCRIPTION)
-                .withAmbariBlueprint(getBlueprintFile()), ILLEGAL_BP_NAME + " blueprint name request.");
-        when(Blueprint.post(), ILLEGAL_BP_NAME + " blueprint name request has been posted.");
+                .withAmbariBlueprint(getBlueprintFile()), blueprintName + " blueprint name request.");
+        when(Blueprint.post(), blueprintName + " blueprint name request has been posted.");
     }
 
-    @Test(expectedExceptions = BadRequestException.class, priority = 3, groups = "blueprints")
+    @Test(expectedExceptions = BadRequestException.class, priority = 4, groups = "blueprints")
+    public void testCreateBlueprintWithIllegalPercentageCharacterInNameShouldThrowBadRequestException() throws Exception {
+        given(CloudbreakClient.isCreated());
+        String blueprintName = String.format(ILLEGAL_BP_NAME, "%");
+        given(Blueprint.request()
+                .withName(blueprintName)
+                .withDescription(BP_DESCRIPTION)
+                .withAmbariBlueprint(getBlueprintFile()), blueprintName + " blueprint name request.");
+        when(Blueprint.post(), blueprintName + " blueprint name request has been posted.");
+    }
+
+    @Test(expectedExceptions = BadRequestException.class, priority = 5, groups = "blueprints")
+    public void testCreateBlueprintWithIllegalSlashCharacterInNameShouldThrowBadRequestException() throws Exception {
+        given(CloudbreakClient.isCreated());
+        String blueprintName = String.format(ILLEGAL_BP_NAME, "/");
+        given(Blueprint.request()
+                .withName(blueprintName)
+                .withDescription(BP_DESCRIPTION)
+                .withAmbariBlueprint(getBlueprintFile()), blueprintName + " blueprint name request.");
+        when(Blueprint.post(), blueprintName + " blueprint name request has been posted.");
+    }
+
+    @Test(expectedExceptions = BadRequestException.class, priority = 6, groups = "blueprints")
     public void testCreateAgainBlueprint() throws Exception {
         given(CloudbreakClient.isCreated());
         given(Blueprint.isCreated()
@@ -100,7 +124,7 @@ public class BlueprintTests extends CloudbreakTest {
     }
 
     //"The length of the blueprint's name has to be in range of 1 to 100"
-    @Test(expectedExceptions = BadRequestException.class, priority = 4, groups = "blueprints")
+    @Test(expectedExceptions = BadRequestException.class, priority = 7, groups = "blueprints")
     public void testCreateInvalidShortBlueprint() throws Exception {
         given(CloudbreakClient.isCreated());
         given(Blueprint.request()
@@ -111,7 +135,7 @@ public class BlueprintTests extends CloudbreakTest {
     }
 
     //"The length of the blueprint's name has to be in range of 1 to 100"
-    @Test(expectedExceptions = BadRequestException.class, priority = 5, groups = "blueprints")
+    @Test(expectedExceptions = BadRequestException.class, priority = 8, groups = "blueprints")
     public void testCreateInvalidLongBlueprint() throws Exception {
         String invalidLongName = longStringGeneratorUtil.stringGenerator(101);
 
@@ -125,7 +149,7 @@ public class BlueprintTests extends CloudbreakTest {
 
     //BUG-95609 - Won't fix issue
     //"The length of the blueprint's description has to be in range of 1 to 1000"
-    @Test(expectedExceptions = BadRequestException.class, priority = 6, groups = "blueprints")
+    @Test(expectedExceptions = BadRequestException.class, priority = 9, groups = "blueprints")
     public void testCreateLongDescriptionBlueprint() throws Exception {
         String invalidLongDescripton = longStringGeneratorUtil.stringGenerator(1001);
 
@@ -137,7 +161,7 @@ public class BlueprintTests extends CloudbreakTest {
         when(Blueprint.post(), LONG_DC_BP_NAME + " blueprint description request has been posted.");
     }
 
-    @Test(expectedExceptions = BadRequestException.class, priority = 7, groups = "blueprints")
+    @Test(expectedExceptions = BadRequestException.class, priority = 10, groups = "blueprints")
     public void testCreateEmptyJSONBlueprintException() throws Exception {
         given(CloudbreakClient.isCreated());
         given(Blueprint.request()
@@ -147,7 +171,7 @@ public class BlueprintTests extends CloudbreakTest {
         when(Blueprint.post(), EMPTY_BP_NAME + " blueprint  with no content request has been posted.");
     }
 
-    @Test(expectedExceptions = BadRequestException.class, priority = 8, groups = "blueprints")
+    @Test(expectedExceptions = BadRequestException.class, priority = 11, groups = "blueprints")
     public void testCreateEmptyFileBlueprintException() throws Exception {
         given(CloudbreakClient.isCreated());
         given(Blueprint.request()
@@ -157,7 +181,7 @@ public class BlueprintTests extends CloudbreakTest {
         when(Blueprint.post(), EMPTY_BP_NAME + " blueprint file with no content on URL request has been posted.");
     }
 
-    @Test(priority = 9, groups = "blueprints")
+    @Test(priority = 12, groups = "blueprints")
     public void testCreateEmptyFilelueprintMessage() throws Exception {
         given(CloudbreakClient.isCreated());
         given(Blueprint.request()
@@ -167,9 +191,11 @@ public class BlueprintTests extends CloudbreakTest {
         try {
             when(Blueprint.post(), EMPTY_BP_NAME + " blueprint file with no content on URL request has been posted.");
         } catch (BadRequestException e) {
-            String exceptionMessage = e.getResponse().readEntity(String.class);
-            errorMessage = exceptionMessage.substring(exceptionMessage.lastIndexOf(':') + 1);
-            LOGGER.info("BadRequestException message ::: " + errorMessage);
+            try (Response response = e.getResponse()) {
+                String exceptionMessage = response.readEntity(String.class);
+                errorMessage = exceptionMessage.substring(exceptionMessage.lastIndexOf(':') + 1);
+                LOGGER.info("BadRequestException message ::: " + errorMessage);
+            }
         }
         then(Blueprint.assertThis(
                 (blueprint, t) -> Assert.assertEquals(errorMessage, " Failed to parse JSON.\"}")),
@@ -177,7 +203,7 @@ public class BlueprintTests extends CloudbreakTest {
         );
     }
 
-    @Test(expectedExceptions = BadRequestException.class, priority = 10, groups = "blueprints")
+    @Test(expectedExceptions = BadRequestException.class, priority = 13, groups = "blueprints")
     public void testCreateInvalidURLBlueprintException() throws Exception {
         given(CloudbreakClient.isCreated());
         given(Blueprint.request()
@@ -187,7 +213,7 @@ public class BlueprintTests extends CloudbreakTest {
         when(Blueprint.post(), INVALIDURL_BP_NAME + " blueprint with invalid URL request has been posted.");
     }
 
-    @Test(priority = 11, groups = "blueprints")
+    @Test(priority = 14, groups = "blueprints")
     public void testCreateInvalidURLBlueprintMessage() throws Exception {
         given(CloudbreakClient.isCreated());
         given(Blueprint.request()
@@ -197,9 +223,11 @@ public class BlueprintTests extends CloudbreakTest {
         try {
             when(Blueprint.post(), INVALIDURL_BP_NAME + " blueprint with invalid URL request has been posted.");
         } catch (BadRequestException e) {
-            String exceptionMessage = e.getResponse().readEntity(String.class);
-            errorMessage = exceptionMessage.substring(exceptionMessage.lastIndexOf(':') + 1);
-            LOGGER.info("BadRequestException message ::: " + errorMessage);
+            try (Response response = e.getResponse()) {
+                String exceptionMessage = response.readEntity(String.class);
+                errorMessage = exceptionMessage.substring(exceptionMessage.lastIndexOf(':') + 1);
+                LOGGER.info("BadRequestException message ::: " + errorMessage);
+            }
         }
         then(Blueprint.assertThis(
                 (blueprint, t) -> Assert.assertEquals(errorMessage, " Failed to parse JSON.\"}")),
@@ -207,7 +235,7 @@ public class BlueprintTests extends CloudbreakTest {
         );
     }
 
-    @Test(priority = 12, groups = "blueprints")
+    @Test(priority = 15, groups = "blueprints")
     public void testDeleteValidBlueprint() throws Exception {
         given(CloudbreakClient.isCreated());
         given(Blueprint.request()
@@ -241,9 +269,11 @@ public class BlueprintTests extends CloudbreakTest {
                         .withName(aNameArray));
                 when(Blueprint.delete());
             } catch (ForbiddenException | BadRequestException e) {
-                String exceptionMessage = e.getResponse().readEntity(String.class);
-                errorMessage = exceptionMessage.substring(exceptionMessage.lastIndexOf(':') + 1);
-                LOGGER.info("Clean Up Exception message ::: " + errorMessage);
+                try (Response response = e.getResponse()) {
+                    String exceptionMessage = response.readEntity(String.class);
+                    errorMessage = exceptionMessage.substring(exceptionMessage.lastIndexOf(':') + 1);
+                    LOGGER.info("Clean Up Exception message ::: " + errorMessage);
+                }
             }
         }
     }

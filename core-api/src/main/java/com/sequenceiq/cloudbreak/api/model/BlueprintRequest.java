@@ -25,7 +25,7 @@ public class BlueprintRequest extends BlueprintBase {
     @NotNull
     @Size(max = 100, min = 1, message = "The length of the blueprint's name has to be in range of 1 to 100 and should not contain semicolon "
             + "and percentage character.")
-    @Pattern(regexp = "^[^;%]*$")
+    @Pattern(regexp = "^[^;\\/%]*$")
     private String name;
 
     @ApiModelProperty(BlueprintModelDescription.URL)
