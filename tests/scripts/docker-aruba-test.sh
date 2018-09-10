@@ -15,9 +15,10 @@ image-tag() {
 
     if [[ $TARGET_CBD_VERSION ]]; then
 	    export DOCKER_TAG=$TARGET_CBD_VERSION
-    elif [[ $(git rev-parse --abbrev-ref HEAD) == "master" ]]; then
+    fi
+    if [[ $BRANCH || $(git rev-parse --abbrev-ref HEAD) == *"master"* ]]; then
 	    export DOCKER_TAG=latest
-	fi
+    fi
 }
 
 image-update() {
@@ -78,6 +79,7 @@ test-regression() {
        -v $(pwd)/responses:/responses \
        -v $(pwd)/requests:/requests \
        -v $(pwd)/../build/Linux:/usr/local/bin \
+       -v /var/run/docker.sock:/var/run/docker.sock \
        -e "BASE_URL=$BASE_URL" \
        -e "USERNAME_CLI=$USERNAME_CLI" \
        -e "PASSWORD_CLI=$PASSWORD_CLI" \

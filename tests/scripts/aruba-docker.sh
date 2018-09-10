@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 echo "CBD Version: "$TARGET_CBD_VERSION
 echo "CBD URL: "$BASE_URL
@@ -9,7 +9,7 @@ echo "HOME path: "$HOME
 
 if [[ "${TARGET_CBD_VERSION}" != "MOCK" ]]; then
     echo "Get CB CLI for "$TARGET_CBD_VERSION
-    curl -Ls https://s3-us-west-2.amazonaws.com/cb-cli/cb-cli_"${TARGET_CBD_VERSION}"_$(uname)_x86_64.tgz | tar -xvz --directory /usr/local/bin
+    curl -vvv -Ls https://s3-us-west-2.amazonaws.com/cb-cli/cb-cli_"${TARGET_CBD_VERSION}"_$(uname)_x86_64.tgz | tar -xvz --directory /usr/local/bin
     echo "CB CLI version is: "$(cb -v)
 fi
 
