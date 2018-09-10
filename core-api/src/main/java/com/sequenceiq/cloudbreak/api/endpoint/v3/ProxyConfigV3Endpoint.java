@@ -22,37 +22,37 @@ import com.sequenceiq.cloudbreak.doc.OperationDescriptions.ProxyConfigOpDescript
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Path("/v3/{organizationId}/proxyconfigs")
+@Path("/v3/{workspaceId}/proxyconfigs")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v3/{organizationId}/proxyconfigs", description = ControllerDescription.RECIPE_V3_DESCRIPTION, protocols = "http,https")
+@Api(value = "/v3/{workspaceId}/proxyconfigs", description = ControllerDescription.RECIPE_V3_DESCRIPTION, protocols = "http,https")
 public interface ProxyConfigV3Endpoint {
 
     @GET
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ProxyConfigOpDescription.LIST_BY_ORGANIZATION, produces = ContentType.JSON, notes = Notes.PROXY_CONFIG_NOTES,
-            nickname = "listProxyconfigsByOrganization")
-    Set<ProxyConfigResponse> listByOrganization(@PathParam("organizationId") Long organizationId);
+    @ApiOperation(value = ProxyConfigOpDescription.LIST_BY_WORKSPACE, produces = ContentType.JSON, notes = Notes.PROXY_CONFIG_NOTES,
+            nickname = "listProxyconfigsByWorkspace")
+    Set<ProxyConfigResponse> listByWorkspace(@PathParam("workspaceId") Long workspaceId);
 
     @GET
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ProxyConfigOpDescription.GET_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.PROXY_CONFIG_NOTES,
-            nickname = "getProxyconfigInOrganization")
-    ProxyConfigResponse getByNameInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
+            nickname = "getProxyconfigInWorkspace")
+    ProxyConfigResponse getByNameInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @POST
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ProxyConfigOpDescription.CREATE_IN_ORG, produces = ContentType.JSON, notes = Notes.PROXY_CONFIG_NOTES,
-            nickname = "createProxyconfigInOrganization")
-    ProxyConfigResponse createInOrganization(@PathParam("organizationId") Long organizationId, @Valid ProxyConfigRequest request);
+            nickname = "createProxyconfigInWorkspace")
+    ProxyConfigResponse createInWorkspace(@PathParam("workspaceId") Long workspaceId, @Valid ProxyConfigRequest request);
 
     @DELETE
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ProxyConfigOpDescription.DELETE_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.PROXY_CONFIG_NOTES,
-            nickname = "deleteProxyconfigInOrganization")
-    ProxyConfigResponse deleteInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
+            nickname = "deleteProxyconfigInWorkspace")
+    ProxyConfigResponse deleteInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
 }

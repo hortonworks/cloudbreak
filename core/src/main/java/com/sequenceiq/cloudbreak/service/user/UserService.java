@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.user;
 
-import static com.sequenceiq.cloudbreak.api.model.v2.OrganizationStatus.ACTIVE;
+import static com.sequenceiq.cloudbreak.api.model.v2.WorkspaceStatus.ACTIVE;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -14,15 +14,15 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.Tenant;
-import com.sequenceiq.cloudbreak.domain.organization.User;
-import com.sequenceiq.cloudbreak.repository.organization.TenantRepository;
-import com.sequenceiq.cloudbreak.repository.organization.UserRepository;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.Tenant;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.repository.workspace.TenantRepository;
+import com.sequenceiq.cloudbreak.repository.workspace.UserRepository;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
 @Service
 public class UserService {
@@ -34,7 +34,7 @@ public class UserService {
     private TenantRepository tenantRepository;
 
     @Inject
-    private OrganizationService organizationService;
+    private WorkspaceService workspaceService;
 
     @Inject
     private TransactionService transactionService;
@@ -53,13 +53,13 @@ public class UserService {
                     newUser.setTenantPermissionSet(Collections.emptySet());
                     newUser = userRepository.save(newUser);
 
-                    //create organization
-                    Organization organization = new Organization();
-                    organization.setTenant(tenant);
-                    organization.setName(identityUser.getUsername());
-                    organization.setStatus(ACTIVE);
-                    organization.setDescription("Default organization for the user.");
-                    organizationService.create(newUser, organization);
+                    //create workspace
+                    Workspace workspace = new Workspace();
+                    workspace.setTenant(tenant);
+                    workspace.setName(identityUser.getUsername());
+                    workspace.setStatus(ACTIVE);
+                    workspace.setDescription("Default workspace for the user.");
+                    workspaceService.create(newUser, workspace);
                     return newUser;
                 });
             }

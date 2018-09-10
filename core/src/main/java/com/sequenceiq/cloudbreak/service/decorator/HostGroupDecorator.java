@@ -20,8 +20,8 @@ import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.ConstraintTemplate;
 import com.sequenceiq.cloudbreak.domain.Recipe;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -58,7 +58,7 @@ public class HostGroupDecorator {
     @Inject
     private ClusterService clusterService;
 
-    public HostGroup decorate(HostGroup subject, HostGroupRequest hostGroupRequest, Stack stack, boolean postRequest, Organization organization, User user) {
+    public HostGroup decorate(HostGroup subject, HostGroupRequest hostGroupRequest, Stack stack, boolean postRequest, Workspace workspace, User user) {
         ConstraintJson constraintJson = hostGroupRequest.getConstraint();
         Set<Long> recipeIds = hostGroupRequest.getRecipeIds();
         Set<RecipeRequest> recipes = hostGroupRequest.getRecipes();
@@ -77,24 +77,24 @@ public class HostGroupDecorator {
             prepareRecipesByIds(subject, recipeIds);
         }
         if (recipeNames != null && !recipeNames.isEmpty()) {
-            prepareRecipesByName(subject, stack.getOrganization(), recipeNames);
+            prepareRecipesByName(subject, stack.getWorkspace(), recipeNames);
         }
         if (recipes != null && !recipes.isEmpty()) {
-            prepareRecipesByRequests(subject, recipes, organization, user);
+            prepareRecipesByRequests(subject, recipes, workspace, user);
         }
 
         return subject;
     }
 
-    private void prepareRecipesByName(HostGroup subject, Organization organization, Collection<String> recipeNames) {
-        Set<Recipe> recipes = recipeService.getRecipesByNamesForOrg(organization, recipeNames);
+    private void prepareRecipesByName(HostGroup subject, Workspace workspace, Collection<String> recipeNames) {
+        Set<Recipe> recipes = recipeService.getRecipesByNamesForWorkspace(workspace, recipeNames);
         subject.getRecipes().addAll(recipes);
     }
 
-    private void prepareRecipesByRequests(HostGroup subject, Iterable<RecipeRequest> recipes, Organization organization, User user) {
+    private void prepareRecipesByRequests(HostGroup subject, Iterable<RecipeRequest> recipes, Workspace workspace, User user) {
         for (RecipeRequest recipe : recipes) {
             Recipe convertedRecipe = conversionService.convert(recipe, Recipe.class);
-            convertedRecipe = recipeService.create(convertedRecipe, organization, user);
+            convertedRecipe = recipeService.create(convertedRecipe, workspace, user);
             subject.getRecipes().add(convertedRecipe);
         }
     }
@@ -116,7 +116,7 @@ public class HostGroupDecorator {
             constraint.setInstanceGroup(instanceGroup);
         }
         if (constraintTemplateName != null) {
-            ConstraintTemplate constraintTemplate = constraintTemplateService.getByNameForOrganization(constraintTemplateName, stack.getOrganization());
+            ConstraintTemplate constraintTemplate = constraintTemplateService.getByNameForWorkspace(constraintTemplateName, stack.getWorkspace());
             constraint.setConstraintTemplate(constraintTemplate);
         }
         return constraint;

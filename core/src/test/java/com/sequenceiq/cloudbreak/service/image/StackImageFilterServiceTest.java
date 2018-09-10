@@ -95,7 +95,7 @@ public class StackImageFilterServiceTest {
         Stack stack = getStack(Status.AVAILABLE, Status.AVAILABLE);
         setupLoggedInUser();
         when(imageCatalogService.getImages(anyLong(), anyString(), anyString())).thenReturn(getStatedImages());
-        when(stackService.getByNameInOrgWithLists(eq(STACK_NAME), eq(ORG_ID))).thenReturn(stack);
+        when(stackService.getByNameInWorkspaceWithLists(eq(STACK_NAME), eq(ORG_ID))).thenReturn(stack);
         when(stackImageUpdateService.isValidImage(any(), anyString(), anyString(), anyString())).thenReturn(true);
         when(stackImageUpdateService.getStackType(any())).thenReturn(StackType.HDP);
         when(componentConfigProvider.getImage(anyLong())).thenReturn(getImage(""));
@@ -117,7 +117,7 @@ public class StackImageFilterServiceTest {
         Stack stack = getStack(Status.AVAILABLE, Status.AVAILABLE);
         setupLoggedInUser();
         when(imageCatalogService.getImages(anyLong(), anyString(), anyString())).thenReturn(getStatedImages());
-        when(stackService.getByNameInOrgWithLists(eq(STACK_NAME), eq(ORG_ID))).thenReturn(stack);
+        when(stackService.getByNameInWorkspaceWithLists(eq(STACK_NAME), eq(ORG_ID))).thenReturn(stack);
         when(stackImageUpdateService.isValidImage(any(), anyString(), anyString(), anyString())).thenReturn(true);
         when(stackImageUpdateService.getStackType(any())).thenReturn(StackType.HDF);
         when(componentConfigProvider.getImage(anyLong())).thenReturn(getImage(""));
@@ -139,7 +139,7 @@ public class StackImageFilterServiceTest {
         Stack stack = getStack(Status.AVAILABLE, Status.AVAILABLE);
         setupLoggedInUser();
         when(imageCatalogService.getImages(anyLong(), anyString(), anyString())).thenReturn(getStatedImages());
-        when(stackService.getByNameInOrgWithLists(eq(STACK_NAME), eq(ORG_ID))).thenReturn(stack);
+        when(stackService.getByNameInWorkspaceWithLists(eq(STACK_NAME), eq(ORG_ID))).thenReturn(stack);
         when(stackImageUpdateService.isValidImage(any(), anyString(), anyString(), anyString())).thenReturn(true);
         when(stackImageUpdateService.getStackType(any())).thenReturn(StackType.HDP);
         when(componentConfigProvider.getImage(anyLong())).thenReturn(getImage(IMAGE_HDP_ID));
@@ -161,7 +161,7 @@ public class StackImageFilterServiceTest {
         Stack stack = getStack(Status.AVAILABLE, Status.AVAILABLE);
         setupLoggedInUser();
         when(imageCatalogService.getImages(anyLong(), anyString(), anyString())).thenReturn(getStatedImages());
-        when(stackService.getByNameInOrgWithLists(eq(STACK_NAME), eq(ORG_ID))).thenReturn(stack);
+        when(stackService.getByNameInWorkspaceWithLists(eq(STACK_NAME), eq(ORG_ID))).thenReturn(stack);
         when(stackImageUpdateService.isValidImage(any(), anyString(), anyString(), anyString())).thenReturn(false);
         when(stackImageUpdateService.getStackType(any())).thenReturn(StackType.HDP);
         when(componentConfigProvider.getImage(anyLong())).thenReturn(getImage(""));
@@ -181,7 +181,7 @@ public class StackImageFilterServiceTest {
     @Test
     public void testGetApplicableImagesWhenStackNotInAvailableState() throws CloudbreakImageCatalogException, IOException {
         Stack stack = getStack(Status.CREATE_IN_PROGRESS, Status.AVAILABLE);
-        when(stackService.getByNameInOrgWithLists(eq(STACK_NAME), eq(ORG_ID))).thenReturn(stack);
+        when(stackService.getByNameInWorkspaceWithLists(eq(STACK_NAME), eq(ORG_ID))).thenReturn(stack);
         setupLoggedInUser();
         thrown.expectMessage("To retrieve list of images for upgrade both stack and cluster have to be in AVAILABLE state");
         thrown.expect(BadRequestException.class);
@@ -192,7 +192,7 @@ public class StackImageFilterServiceTest {
     @Test
     public void testGetApplicableImagesWhenClusterNotInAvailableState() throws CloudbreakImageCatalogException, IOException {
         Stack stack = getStack(Status.AVAILABLE, Status.UPDATE_FAILED);
-        when(stackService.getByNameInOrgWithLists(eq(STACK_NAME), eq(ORG_ID))).thenReturn(stack);
+        when(stackService.getByNameInWorkspaceWithLists(eq(STACK_NAME), eq(ORG_ID))).thenReturn(stack);
         setupLoggedInUser();
         thrown.expectMessage("To retrieve list of images for upgrade both stack and cluster have to be in AVAILABLE state");
         thrown.expect(BadRequestException.class);

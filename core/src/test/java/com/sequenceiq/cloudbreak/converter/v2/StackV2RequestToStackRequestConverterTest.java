@@ -41,12 +41,12 @@ import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.Tags;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
@@ -83,7 +83,7 @@ public class StackV2RequestToStackRequestConverterTest {
     private UserService userService;
 
     @Mock
-    private OrganizationService organizationService;
+    private WorkspaceService workspaceService;
 
     @Mock
     private Credential credential;
@@ -95,7 +95,7 @@ public class StackV2RequestToStackRequestConverterTest {
     private User user;
 
     @Mock
-    private Organization organization;
+    private Workspace workspace;
 
     @Before
     public void setUp() {
@@ -103,8 +103,8 @@ public class StackV2RequestToStackRequestConverterTest {
         MockitoAnnotations.initMocks(this);
         when(restRequestThreadLocalService.getIdentityUser()).thenReturn(cbUser);
         when(userService.getOrCreate(eq(cbUser))).thenReturn(user);
-        when(organizationService.get(anyLong(), eq(user))).thenReturn(organization);
-        when(credentialService.getByNameForOrganization(any(), any(Organization.class))).thenReturn(credential);
+        when(workspaceService.get(anyLong(), eq(user))).thenReturn(workspace);
+        when(credentialService.getByNameForWorkspace(any(), any(Workspace.class))).thenReturn(credential);
         when(credential.cloudPlatform()).thenReturn(CLOUD_PLATFORM);
         when(conversionService.convert(any(NetworkV2Request.class), any())).thenReturn(NETWORK_REQUEST);
     }
@@ -461,7 +461,7 @@ public class StackV2RequestToStackRequestConverterTest {
         when(conversionService.convert(source.getCluster(), ClusterRequest.class)).thenReturn(convertedRequest);
         when(sharedServiceConfigProvider.isConfigured(source.getCluster())).thenReturn(true);
         Stack mockStack = mock(Stack.class);
-        when(stackService.getByNameInOrg(eq(source.getCluster().getSharedService().getSharedCluster()), anyLong())).thenReturn(mockStack);
+        when(stackService.getByNameInWorkspace(eq(source.getCluster().getSharedService().getSharedCluster()), anyLong())).thenReturn(mockStack);
         Long id = 1L;
         when(mockStack.getId()).thenReturn(id);
 
@@ -472,7 +472,7 @@ public class StackV2RequestToStackRequestConverterTest {
         Assert.assertEquals(id, result.getClusterToAttach());
         verify(conversionService, times(2)).convert(any(), any());
         verify(sharedServiceConfigProvider, times(1)).isConfigured(source.getCluster());
-        verify(stackService, times(1)).getByNameInOrg(eq(source.getCluster().getSharedService().getSharedCluster()), anyLong());
+        verify(stackService, times(1)).getByNameInWorkspace(eq(source.getCluster().getSharedService().getSharedCluster()), anyLong());
         verify(mockStack, times(1)).getId();
         verify(restRequestThreadLocalService, times(1)).getIdentityUser();
     }

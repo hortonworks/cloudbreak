@@ -11,11 +11,11 @@ import com.sequenceiq.cloudbreak.api.model.mpack.ManagementPackDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.ManagementPackComponent;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.ManagementPack;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.mpack.ManagementPackService;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Component
@@ -25,7 +25,7 @@ public class ManagementPackDetailsToManagementPackComponentConverter
     private ManagementPackService managementPackService;
 
     @Inject
-    private OrganizationService organizationService;
+    private WorkspaceService workspaceService;
 
     @Inject
     private UserService userService;
@@ -38,8 +38,8 @@ public class ManagementPackDetailsToManagementPackComponentConverter
         ManagementPackComponent mpack = new ManagementPackComponent();
         if (StringUtils.isNoneEmpty(source.getName())) {
             User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-            Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
-            ManagementPack dmpack = managementPackService.getByNameForOrganization(source.getName(), organization);
+            Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+            ManagementPack dmpack = managementPackService.getByNameForWorkspace(source.getName(), workspace);
             mpack.setName(source.getName());
             mpack.setMpackUrl(dmpack.getMpackUrl());
             mpack.setStackDefault(false);

@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.notification.Notification;
 import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.startup.OrganizationMigrationRunner;
+import com.sequenceiq.cloudbreak.startup.WorkspaceMigrationRunner;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Component
@@ -36,11 +36,11 @@ public class UptimeNotifier {
     private StackUtil stackUtil;
 
     @Inject
-    private OrganizationMigrationRunner organizationMigrationRunner;
+    private WorkspaceMigrationRunner workspaceMigrationRunner;
 
     @Scheduled(fixedDelay = 60000)
     public void sendUptime() {
-        if (organizationMigrationRunner.isFinished()) {
+        if (workspaceMigrationRunner.isFinished()) {
             EnumSet<Status> statuses = EnumSet.complementOf(EnumSet.of(Status.DELETE_COMPLETED));
             List<Cluster> clusters = clusterService.findByStatuses(statuses);
             for (Cluster cluster : clusters) {
@@ -57,7 +57,7 @@ public class UptimeNotifier {
     private Notification<CloudbreakEventsJson> createUptimeNotification(Stack stack, Long uptime) {
         CloudbreakEventsJson notification = new CloudbreakEventsJson();
         notification.setUserIdV3(stack.getCreator().getUserId());
-        notification.setOrganizationId(stack.getOrganization().getId());
+        notification.setWorkspaceId(stack.getWorkspace().getId());
         notification.setStackId(stack.getId());
         notification.setStackName(stack.getName());
         notification.setEventType(UPTIME_NOTIFICATION);

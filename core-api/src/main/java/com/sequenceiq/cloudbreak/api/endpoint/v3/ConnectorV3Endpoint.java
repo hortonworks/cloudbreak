@@ -28,85 +28,85 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-@Path("/v3/{organizationId}/connectors")
+@Path("/v3/{workspaceId}/connectors")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v3/{organizationId}/connectors", description = ControllerDescription.CONNECTOR_V3_DESCRIPTION, protocols = "http,https")
+@Api(value = "/v3/{workspaceId}/connectors", description = ControllerDescription.CONNECTOR_V3_DESCRIPTION, protocols = "http,https")
 public interface ConnectorV3Endpoint {
 
     @POST
     @Path("vmtypes")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ConnectorOpDescription.GET_VMTYPES_BY_CREDENTIAL, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
-            nickname = "getVmTypesByCredentialAndOrganization")
-    PlatformVmtypesResponse getVmTypesByCredential(@PathParam("organizationId") Long organizationId, PlatformResourceRequestJson resourceRequestJson);
+            nickname = "getVmTypesByCredentialAndWorkspace")
+    PlatformVmtypesResponse getVmTypesByCredential(@PathParam("workspaceId") Long workspaceId, PlatformResourceRequestJson resourceRequestJson);
 
     @POST
     @Path("regions")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ConnectorOpDescription.GET_REGION_R_BY_TYPE, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
-            nickname = "getRegionsByCredentialAndOrganization")
-    RegionResponse getRegionsByCredential(@PathParam("organizationId") Long organizationId, PlatformResourceRequestJson resourceRequestJson);
+            nickname = "getRegionsByCredentialAndWorkspace")
+    RegionResponse getRegionsByCredential(@PathParam("workspaceId") Long workspaceId, PlatformResourceRequestJson resourceRequestJson);
 
     @GET
     @Path("disktypes")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ConnectorOpDescription.GET_DISK_TYPES, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
-            nickname = "getDisktypesForOrganization")
-    PlatformDisksJson getDisktypes(@PathParam("organizationId") Long organizationId);
+            nickname = "getDisktypesForWorkspace")
+    PlatformDisksJson getDisktypes(@PathParam("workspaceId") Long workspaceId);
 
     @POST
     @Path("networks")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ConnectorOpDescription.GET_NETWORKS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
-            nickname = "getPlatformNetworksForOrganization")
-    PlatformNetworksResponse getCloudNetworks(@PathParam("organizationId") Long organizationId, PlatformResourceRequestJson resourceRequestJson);
+            nickname = "getPlatformNetworksForWorkspace")
+    PlatformNetworksResponse getCloudNetworks(@PathParam("workspaceId") Long workspaceId, PlatformResourceRequestJson resourceRequestJson);
 
     @POST
     @Path("ippools")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ConnectorOpDescription.GET_IPPOOLS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
-            nickname = "getIpPoolsCredentialIdForOrganization")
-    PlatformIpPoolsResponse getIpPoolsCredentialId(@PathParam("organizationId") Long organizationId, PlatformResourceRequestJson resourceRequestJson);
+            nickname = "getIpPoolsCredentialIdForWorkspace")
+    PlatformIpPoolsResponse getIpPoolsCredentialId(@PathParam("workspaceId") Long workspaceId, PlatformResourceRequestJson resourceRequestJson);
 
     @POST
     @Path("gateways")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ConnectorOpDescription.GET_GATEWAYS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
-            nickname = "getGatewaysCredentialIdForOrganization")
-    PlatformGatewaysResponse getGatewaysCredentialId(@PathParam("organizationId") Long organizationId, PlatformResourceRequestJson resourceRequestJson);
+            nickname = "getGatewaysCredentialIdForWorkspace")
+    PlatformGatewaysResponse getGatewaysCredentialId(@PathParam("workspaceId") Long workspaceId, PlatformResourceRequestJson resourceRequestJson);
 
     @POST
     @Path("encryptionkeys")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ConnectorOpDescription.GET_ENCRYPTIONKEYS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
-            nickname = "getEncryptionKeysForOrganization")
-    PlatformEncryptionKeysResponse getEncryptionKeys(@PathParam("organizationId") Long organizationId, PlatformResourceRequestJson resourceRequestJson);
+            nickname = "getEncryptionKeysForWorkspace")
+    PlatformEncryptionKeysResponse getEncryptionKeys(@PathParam("workspaceId") Long workspaceId, PlatformResourceRequestJson resourceRequestJson);
 
     @POST
     @Path("recommendation")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ConnectorOpDescription.GET_RECOMMENDATION, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
-            nickname = "createRecommendationForOrganization")
-    RecommendationResponse createRecommendation(@PathParam("organizationId") Long organizationId, RecommendationRequestJson recommendationRequestJson);
+            nickname = "createRecommendationForWorkspace")
+    RecommendationResponse createRecommendation(@PathParam("workspaceId") Long workspaceId, RecommendationRequestJson recommendationRequestJson);
 
     @POST
     @Path("securitygroups")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ConnectorOpDescription.GET_SECURITYGROUPS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
-            nickname = "getPlatformSecurityGroupsForOrganization")
-    PlatformSecurityGroupsResponse getSecurityGroups(@PathParam("organizationId") Long organizationId, PlatformResourceRequestJson resourceRequestJson);
+            nickname = "getPlatformSecurityGroupsForWorkspace")
+    PlatformSecurityGroupsResponse getSecurityGroups(@PathParam("workspaceId") Long workspaceId, PlatformResourceRequestJson resourceRequestJson);
 
     @POST
     @Path("sshkeys")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ConnectorOpDescription.GET_SSHKEYS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
-            nickname = "getPlatformSShKeysForOrganization")
-    PlatformSshKeysResponse getCloudSshKeys(@PathParam("organizationId") Long organizationId, PlatformResourceRequestJson resourceRequestJson);
+            nickname = "getPlatformSShKeysForWorkspace")
+    PlatformSshKeysResponse getCloudSshKeys(@PathParam("workspaceId") Long workspaceId, PlatformResourceRequestJson resourceRequestJson);
 
     @POST
     @Path("accessconfigs")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ConnectorOpDescription.GET_ACCESSCONFIGS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
-            nickname = "getAccessConfigsForOrganization")
-    PlatformAccessConfigsResponse getAccessConfigs(@PathParam("organizationId") Long organizationId, PlatformResourceRequestJson resourceRequestJson);
+            nickname = "getAccessConfigsForWorkspace")
+    PlatformAccessConfigsResponse getAccessConfigs(@PathParam("workspaceId") Long workspaceId, PlatformResourceRequestJson resourceRequestJson);
 }

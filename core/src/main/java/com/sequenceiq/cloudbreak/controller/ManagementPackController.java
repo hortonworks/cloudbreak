@@ -21,11 +21,11 @@ import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.ManagementPack;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.mpack.ManagementPackService;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Component
@@ -46,7 +46,7 @@ public class ManagementPackController extends NotificationController implements 
     private RestRequestThreadLocalService restRequestThreadLocalService;
 
     @Inject
-    private OrganizationService organizationService;
+    private WorkspaceService workspaceService;
 
     @Override
     public ManagementPackResponse get(Long id) {
@@ -82,8 +82,8 @@ public class ManagementPackController extends NotificationController implements 
     @Override
     public void deletePrivate(String name) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        executeAndNotify(identityUser -> mpackService.deleteByNameFromOrganization(name, organization.getId()), ResourceEvent.MANAGEMENT_PACK_DELETED);
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        executeAndNotify(identityUser -> mpackService.deleteByNameFromWorkspace(name, workspace.getId()), ResourceEvent.MANAGEMENT_PACK_DELETED);
     }
 
     @Override
@@ -104,15 +104,15 @@ public class ManagementPackController extends NotificationController implements 
     @Override
     public void deletePublic(String name) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        executeAndNotify(identityUser -> mpackService.deleteByNameFromOrganization(name, organization.getId()), ResourceEvent.MANAGEMENT_PACK_DELETED);
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        executeAndNotify(identityUser -> mpackService.deleteByNameFromWorkspace(name, workspace.getId()), ResourceEvent.MANAGEMENT_PACK_DELETED);
     }
 
     private ManagementPackResponse createMpack(User user, ManagementPackRequest mpackRequest) {
         ManagementPack mpack = conversionService.convert(mpackRequest, ManagementPack.class);
-        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         try {
-            mpack = mpackService.create(mpack, organization, user);
+            mpack = mpackService.create(mpack, workspace, user);
             notify(ResourceEvent.MANAGEMENT_PACK_CREATED);
         } catch (DataIntegrityViolationException ex) {
             String msg = String.format("Error with resource [%s], %s", APIResourceType.MANAGEMENT_PACK, getProperSqlErrorMessage(ex));
@@ -134,13 +134,13 @@ public class ManagementPackController extends NotificationController implements 
 
     private Set<ManagementPackResponse> getAll() {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        return toJsonList(mpackService.findAllByOrganization(organization));
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        return toJsonList(mpackService.findAllByWorkspace(workspace));
     }
 
     private ManagementPackResponse getByName(String name) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        return conversionService.convert(mpackService.getByNameForOrganization(name, organization), ManagementPackResponse.class);
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        return conversionService.convert(mpackService.getByNameForWorkspace(name, workspace), ManagementPackResponse.class);
     }
 }

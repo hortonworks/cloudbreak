@@ -25,7 +25,7 @@ public class AccessConfigV3Action {
     public static void post(IntegrationTestContext integrationTestContext, Entity entity) throws IOException {
         AccessConfig accessConfig = (AccessConfig) entity;
         CloudbreakClient client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
-        Long orgId = integrationTestContext.getContextParam(CloudbreakTest.ORGANIZATION_ID, Long.class);
+        Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
 
         PlatformResourceRequestJson request = new PlatformResourceRequestJson();
 
@@ -56,7 +56,7 @@ public class AccessConfigV3Action {
         Log.log(String.join(" ", " post AccessConfig"));
         accessConfig.setResponse(
                 client.getCloudbreakClient()
-                        .connectorV3Endpoint().getAccessConfigs(orgId, accessConfig.getRequest()));
+                        .connectorV3Endpoint().getAccessConfigs(workspaceId, accessConfig.getRequest()));
         Log.logJSON(" post AccessConfig response: ", accessConfig.getResponse());
     }
 

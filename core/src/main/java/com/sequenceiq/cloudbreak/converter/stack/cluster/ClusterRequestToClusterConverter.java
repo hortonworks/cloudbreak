@@ -64,7 +64,8 @@ public class ClusterRequestToClusterConverter extends AbstractConversionServiceA
         FileSystemBase fileSystem = source.getFileSystem();
         convertAttributes(source, cluster);
         if (fileSystem != null) {
-            cluster.setFileSystem(fileSystemConfigService.getByNameForOrganizationId(fileSystem.getName(), restRequestThreadLocalService.getRequestedOrgId()));
+            cluster.setFileSystem(fileSystemConfigService.getByNameForWorkspaceId(fileSystem.getName(),
+                    restRequestThreadLocalService.getRequestedWorkspaceId()));
         }
         try {
             Json json = new Json(convertContainerConfigs(source.getCustomContainer()));

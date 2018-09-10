@@ -26,21 +26,21 @@ public class CloudContext {
 
     private final String userId;
 
-    private final Long organizationId;
+    private final Long workspaceId;
 
-    public CloudContext(Long id, String name, String platform, String owner, String userId, Long organizationId) {
+    public CloudContext(Long id, String name, String platform, String owner, String userId, Long workspaceId) {
         this.id = id;
         this.name = name;
         this.platform = Platform.platform(platform);
         this.owner = owner;
         this.userId = userId;
-        this.organizationId = organizationId;
+        this.workspaceId = workspaceId;
         variant = null;
         location = null;
     }
 
     public CloudContext(Long id, String name, String platform, String owner, String variant,
-            Location location, String userId, Long organizationId) {
+            Location location, String userId, Long workspaceId) {
         this.id = id;
         this.name = name;
         this.platform = Platform.platform(platform);
@@ -48,7 +48,7 @@ public class CloudContext {
         this.variant = Variant.variant(variant);
         this.location = location;
         this.userId = userId;
-        this.organizationId = organizationId;
+        this.workspaceId = workspaceId;
     }
 
     public Long getId() {
@@ -83,8 +83,8 @@ public class CloudContext {
         return userId;
     }
 
-    public Long getOrganizationId() {
-        return organizationId;
+    public Long getWorkspaceId() {
+        return workspaceId;
     }
 
     @Override
@@ -95,7 +95,7 @@ public class CloudContext {
         .append(", platform='").append(platform).append('\'')
         .append(", owner='").append(owner).append('\'')
         .append(", userId='").append(userId).append('\'')
-        .append(", organizationId='").append(organizationId).append('\'')
+        .append(", workspaceId='").append(workspaceId).append('\'')
         .append('}');
         return sb.toString();
     }

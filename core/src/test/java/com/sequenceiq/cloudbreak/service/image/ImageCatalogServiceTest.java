@@ -44,12 +44,12 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateService;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserProfileHandler;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
@@ -132,7 +132,7 @@ public class ImageCatalogServiceTest {
     private ComponentConfigProvider componentConfigProvider;
 
     @Mock
-    private OrganizationService organizationService;
+    private WorkspaceService workspaceService;
 
     @Mock
     private IdentityUser identityUser;
@@ -364,7 +364,7 @@ public class ImageCatalogServiceTest {
     public void testGetImagesWhenCustomImageCatalogExists() throws Exception {
         ImageCatalog ret = new ImageCatalog();
         ret.setImageCatalogUrl("");
-        when(imageCatalogRepository.findByNameAndOrganizationId("name", ORG_ID)).thenReturn(ret);
+        when(imageCatalogRepository.findByNameAndWorkspaceId("name", ORG_ID)).thenReturn(ret);
         when(imageCatalogProvider.getImageCatalogV2("")).thenReturn(null);
         underTest.getImages(ORG_ID, "name", "aws");
 
@@ -374,7 +374,7 @@ public class ImageCatalogServiceTest {
 
     @Test
     public void testGetImagesWhenCustomImageCatalogDoesNotExists() throws Exception {
-        when(imageCatalogRepository.findByNameAndOrganizationId(anyString(), anyLong())).thenThrow(new AccessDeniedException("denied"));
+        when(imageCatalogRepository.findByNameAndWorkspaceId(anyString(), anyLong())).thenThrow(new AccessDeniedException("denied"));
 
         thrown.expectMessage("The verycool catalog does not exist or does not belongs to your account.");
         thrown.expect(CloudbreakImageCatalogException.class);
@@ -391,7 +391,7 @@ public class ImageCatalogServiceTest {
         imageCatalog.setName(name);
         imageCatalog.setArchived(false);
         doNothing().when(userProfileHandler).destroyProfileImageCatalogPreparation(any(ImageCatalog.class));
-        when(imageCatalogRepository.findByNameAndOrganizationId(name, ORG_ID)).thenReturn(imageCatalog);
+        when(imageCatalogRepository.findByNameAndWorkspaceId(name, ORG_ID)).thenReturn(imageCatalog);
         setupUserProfileService();
 
         underTest.delete(ORG_ID, name, identityUser, user);
@@ -416,7 +416,7 @@ public class ImageCatalogServiceTest {
     public void testGet() {
         String name = "img-name";
         ImageCatalog imageCatalog = new ImageCatalog();
-        when(imageCatalogRepository.findByNameAndOrganizationId(name, ORG_ID)).thenReturn(imageCatalog);
+        when(imageCatalogRepository.findByNameAndWorkspaceId(name, ORG_ID)).thenReturn(imageCatalog);
         ImageCatalog actual = underTest.get(ORG_ID, name);
 
         assertEquals(actual, imageCatalog);
@@ -427,7 +427,7 @@ public class ImageCatalogServiceTest {
         String name = "cloudbreak-default";
         ImageCatalog actual = underTest.get(ORG_ID, name);
 
-        verify(imageCatalogRepository, times(0)).findByNameAndOrganization(eq(name), any(Organization.class));
+        verify(imageCatalogRepository, times(0)).findByNameAndWorkspace(eq(name), any(Workspace.class));
 
         assertEquals(actual.getName(), name);
         assertNull(actual.getId());

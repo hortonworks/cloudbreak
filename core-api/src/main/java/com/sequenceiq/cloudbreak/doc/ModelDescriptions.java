@@ -16,9 +16,9 @@ public class ModelDescriptions {
     public static final String DATALAKEINPUTS = "datalakeinputs object";
     public static final String CREATED = "creation time of the resource in long";
     public static final String AMBARI_SERVER = "ambari server address";
-    public static final String ORGANIZATION_OF_THE_RESOURCE = "organization of the resource";
+    public static final String WORKSPACE_OF_THE_RESOURCE = "workspace of the resource";
     public static final String USER_ID_V3 = "User ID in the new authorization model";
-    public static final String ORGANIZATION_ID = "Organization ID of the resource";
+    public static final String WORKSPACE_ID = "Workspace ID of the resource";
 
     private ModelDescriptions() {
     }
@@ -346,8 +346,8 @@ public class ModelDescriptions {
         public static final String CONTENT = "content of recipe";
         public static final String TYPE = "type of recipe";
         public static final String RECIPE_URI = "recipe uri";
-        public static final String ORGANIZATION_ID = "id of the organization";
-        public static final String ORGANIZATION_NAME = "name of the organization";
+        public static final String WORKSPACE_ID = "id of the workspace";
+        public static final String WORKSPACE_NAME = "name of the workspace";
     }
 
     public static class InstanceGroupModelDescription {

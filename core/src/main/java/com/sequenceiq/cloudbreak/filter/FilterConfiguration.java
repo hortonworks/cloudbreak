@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Configuration
@@ -21,15 +21,15 @@ public class FilterConfiguration {
     private RestRequestThreadLocalService restRequestThreadLocalService;
 
     @Inject
-    private OrganizationService organizationService;
+    private WorkspaceService workspaceService;
 
     @Inject
     private UserService userService;
 
     @Bean
-    public FilterRegistrationBean<OrganizationConfiguratorFilter> organizationConfiguratorFilterRegistrationBean() {
-        FilterRegistrationBean<OrganizationConfiguratorFilter> registrationBean = new FilterRegistrationBean<>();
-        OrganizationConfiguratorFilter filter = new OrganizationConfiguratorFilter(restRequestThreadLocalService, organizationService, userService,
+    public FilterRegistrationBean<WorkspaceConfiguratorFilter> workspaceConfiguratorFilterRegistrationBean() {
+        FilterRegistrationBean<WorkspaceConfiguratorFilter> registrationBean = new FilterRegistrationBean<>();
+        WorkspaceConfiguratorFilter filter = new WorkspaceConfiguratorFilter(restRequestThreadLocalService, workspaceService, userService,
                 authenticatedUserService);
         registrationBean.setFilter(filter);
         registrationBean.setOrder(Integer.MAX_VALUE);

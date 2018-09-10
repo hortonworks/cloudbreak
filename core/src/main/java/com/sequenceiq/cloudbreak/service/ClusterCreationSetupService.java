@@ -50,8 +50,8 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -119,11 +119,11 @@ public class ClusterCreationSetupService {
     @Inject
     private RdsConfigValidator rdsConfigValidator;
 
-    public void validate(ClusterRequest request, Stack stack, User user, Organization organization) {
-        validate(request, null, stack, user, organization);
+    public void validate(ClusterRequest request, Stack stack, User user, Workspace workspace) {
+        validate(request, null, stack, user, workspace);
     }
 
-    public void validate(ClusterRequest request, CloudCredential cloudCredential, Stack stack, User user, Organization organization) {
+    public void validate(ClusterRequest request, CloudCredential cloudCredential, Stack stack, User user, Workspace workspace) {
         if (request.getEnableSecurity() && request.getKerberos() == null) {
             throw new BadRequestException("If the security is enabled the kerberos parameters cannot be empty");
         }
@@ -133,24 +133,24 @@ public class ClusterCreationSetupService {
             credential = credentialToCloudCredentialConverter.convert(stack.getCredential());
         }
         fileSystemValidator.validateFileSystem(stack.cloudPlatform(), credential, request.getFileSystem(),
-                stack.getCreator().getUserId(), stack.getOrganization().getId());
-        mpackValidator.validateMpacks(request, organization);
-        rdsConfigValidator.validateRdsConfigs(request, user, organization);
+                stack.getCreator().getUserId(), stack.getWorkspace().getId());
+        mpackValidator.validateMpacks(request, workspace);
+        rdsConfigValidator.validateRdsConfigs(request, user, workspace);
     }
 
-    public Cluster prepare(ClusterRequest request, Stack stack, User user, Organization organization) throws CloudbreakImageNotFoundException,
+    public Cluster prepare(ClusterRequest request, Stack stack, User user, Workspace workspace) throws CloudbreakImageNotFoundException,
             IOException, TransactionExecutionException {
-        return prepare(request, stack, null, user, organization);
+        return prepare(request, stack, null, user, workspace);
     }
 
-    public Cluster prepare(ClusterRequest request, Stack stack, Blueprint blueprint, User user, Organization organization) throws IOException,
+    public Cluster prepare(ClusterRequest request, Stack stack, Blueprint blueprint, User user, Workspace workspace) throws IOException,
             CloudbreakImageNotFoundException, TransactionExecutionException {
         String stackName = stack.getName();
 
         long start = System.currentTimeMillis();
 
         if (request.getFileSystem() != null) {
-            FileSystem fs = fileSystemConfigService.create(conversionService.convert(request.getFileSystem(), FileSystem.class), stack.getOrganization(),
+            FileSystem fs = fileSystemConfigService.create(conversionService.convert(request.getFileSystem(), FileSystem.class), stack.getWorkspace(),
                     stack.getCreator());
             request.getFileSystem().setName(fs.getName());
             LOGGER.info("File system saving took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
@@ -158,12 +158,12 @@ public class ClusterCreationSetupService {
 
         Cluster cluster = conversionService.convert(request, Cluster.class);
         cluster.setStack(stack);
-        cluster.setOrganization(stack.getOrganization());
+        cluster.setWorkspace(stack.getWorkspace());
         LOGGER.info("Cluster conversion took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
         start = System.currentTimeMillis();
 
-        cluster = clusterDecorator.decorate(cluster, request, blueprint, user, stack.getOrganization(), stack);
+        cluster = clusterDecorator.decorate(cluster, request, blueprint, user, stack.getWorkspace(), stack);
         LOGGER.info("Cluster object decorated in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
         start = System.currentTimeMillis();
@@ -178,7 +178,7 @@ public class ClusterCreationSetupService {
                 && c.getName().equalsIgnoreCase(ComponentType.IMAGE.name())).findAny();
         ClusterComponent ambariRepoConfig = determineAmbariRepoConfig(stackAmbariRepoConfig, request.getAmbariRepoDetailsJson(), stackImageComponent, cluster);
         components.add(ambariRepoConfig);
-        ClusterComponent hdpRepoConfig = determineHDPRepoConfig(blueprint, stack.getId(), stackHdpRepoConfig, request, cluster, stack.getOrganization(),
+        ClusterComponent hdpRepoConfig = determineHDPRepoConfig(blueprint, stack.getId(), stackHdpRepoConfig, request, cluster, stack.getWorkspace(),
                 stackImageComponent);
         components.add(hdpRepoConfig);
 
@@ -223,7 +223,7 @@ public class ClusterCreationSetupService {
     }
 
     private ClusterComponent determineHDPRepoConfig(Blueprint blueprint, long stackId, Optional<Component> stackHdpRepoConfig,
-            ClusterRequest request, Cluster cluster, Organization organization, Optional<Component> stackImageComponent)
+            ClusterRequest request, Cluster cluster, Workspace workspace, Optional<Component> stackImageComponent)
             throws IOException, CloudbreakImageNotFoundException {
         Json stackRepoDetailsJson;
         AmbariStackDetailsJson ambariStackDetails = request.getAmbariStackDetails();
@@ -234,7 +234,7 @@ public class ClusterCreationSetupService {
                 StackRepoDetails stackRepoDetails = stackRepoDetailsConverter.convert(ambariStackDetails);
                 stackRepoDetailsJson = new Json(stackRepoDetails);
             } else {
-                DefaultStackRepoDetails stackRepoDetails = SerializationUtils.clone(defaultHDPInfo(blueprint, request, organization).getRepo());
+                DefaultStackRepoDetails stackRepoDetails = SerializationUtils.clone(defaultHDPInfo(blueprint, request, workspace).getRepo());
                 String osType = getOsType(stackId);
                 StackRepoDetails repo = createStackRepoDetails(stackRepoDetails, osType);
                 Optional<String> vdfUrl = getVDFUrlByOsType(osType, stackRepoDetails);
@@ -299,9 +299,9 @@ public class ClusterCreationSetupService {
         return false;
     }
 
-    private StackInfo defaultHDPInfo(Blueprint blueprint, ClusterRequest request, Organization organization) {
+    private StackInfo defaultHDPInfo(Blueprint blueprint, ClusterRequest request, Workspace workspace) {
         try {
-            JsonNode root = getBlueprintJsonNode(blueprint, request, organization);
+            JsonNode root = getBlueprintJsonNode(blueprint, request, workspace);
             if (root != null) {
                 String stackVersion = blueprintUtils.getBlueprintStackVersion(root);
                 String stackName = blueprintUtils.getBlueprintStackName(root);
@@ -327,7 +327,7 @@ public class ClusterCreationSetupService {
         return defaultHDPEntries.getEntries().values().iterator().next();
     }
 
-    private JsonNode getBlueprintJsonNode(Blueprint blueprint, ClusterRequest request, Organization organization) throws IOException {
+    private JsonNode getBlueprintJsonNode(Blueprint blueprint, ClusterRequest request, Workspace workspace) throws IOException {
         JsonNode root;
         if (blueprint != null) {
             root = JsonUtil.readTree(blueprint.getBlueprintText());
@@ -336,7 +336,7 @@ public class ClusterCreationSetupService {
             if (request.getBlueprintId() != null) {
                 root = JsonUtil.readTree(blueprintService.get(request.getBlueprintId()).getBlueprintText());
             } else if (request.getBlueprintName() != null) {
-                root = JsonUtil.readTree(blueprintService.getByNameForOrganization(request.getBlueprintName(), organization).getBlueprintText());
+                root = JsonUtil.readTree(blueprintService.getByNameForWorkspace(request.getBlueprintName(), workspace).getBlueprintText());
             } else {
                 root = JsonUtil.readTree(request.getBlueprint().getAmbariBlueprint());
             }

@@ -57,7 +57,7 @@ public class EncryptedImageCopyServiceTest {
 
     private static final String USER_ID = "horton@hortonworks.com";
 
-    private static final Long ORGANIZATION_ID = 1L;
+    private static final Long WORKSPACE_ID = 1L;
 
     private static final String DEFAULT_REGION = "DefaultRegion";
 
@@ -473,7 +473,7 @@ public class EncryptedImageCopyServiceTest {
     protected static AuthenticatedContext authenticatedContext() {
         Location location = Location.location(Region.region("region"), AvailabilityZone.availabilityZone("az"));
         CloudContext cloudContext = new CloudContext(5L, "name", "platform", "owner", "variant",
-                location, USER_ID, ORGANIZATION_ID);
+                location, USER_ID, WORKSPACE_ID);
         CloudCredential credential = new CloudCredential(1L, null);
         return new AuthenticatedContext(cloudContext, credential);
     }

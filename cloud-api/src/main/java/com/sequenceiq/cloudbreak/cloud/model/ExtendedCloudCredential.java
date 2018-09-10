@@ -15,20 +15,20 @@ public class ExtendedCloudCredential extends CloudCredential {
 
     private final String userId;
 
-    private final Long organziationId;
+    private final Long workspaceId;
 
     public ExtendedCloudCredential(Long id, String cloudPlatform, String name, String description,
-            IdentityUser identityUser, String userId, Long organziationId) {
+            IdentityUser identityUser, String userId, Long workspaceId) {
         super(id, name);
         this.cloudPlatform = cloudPlatform;
         this.description = description;
         this.identityUser = identityUser;
         this.userId = userId;
-        this.organziationId = organziationId;
+        this.workspaceId = workspaceId;
     }
 
     public ExtendedCloudCredential(CloudCredential cloudCredential, String cloudPlatform, String description,
-            IdentityUser identityUser, String userId, Long organziationId) {
+            IdentityUser identityUser, String userId, Long workspaceId) {
         super(cloudCredential.getId(), cloudCredential.getName());
         Map<String, Object> parameters = cloudCredential.getParameters();
         for (Entry<String, Object> parameter : parameters.entrySet()) {
@@ -38,7 +38,7 @@ public class ExtendedCloudCredential extends CloudCredential {
         this.description = description;
         this.identityUser = identityUser;
         this.userId = userId;
-        this.organziationId = organziationId;
+        this.workspaceId = workspaceId;
     }
 
     public String getDescription() {
@@ -57,7 +57,7 @@ public class ExtendedCloudCredential extends CloudCredential {
         return userId;
     }
 
-    public Long getOrganziationId() {
-        return organziationId;
+    public Long getWorkspaceId() {
+        return workspaceId;
     }
 }

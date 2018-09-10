@@ -17,9 +17,9 @@ import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Path("/v3/{organizationId}/knoxservices")
+@Path("/v3/{workspaceId}/knoxservices")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v3/{organizationId}/knoxservices", description = ControllerDescription.KNOX_SERVICES_V3_DESCRIPTION, protocols = "http,https")
+@Api(value = "/v3/{workspaceId}/knoxservices", description = ControllerDescription.KNOX_SERVICES_V3_DESCRIPTION, protocols = "http,https")
 public interface KnoxServicesV3Endpoint {
 
     @GET
@@ -27,7 +27,7 @@ public interface KnoxServicesV3Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.KnoxServicesOpDescription.LIST_IN_ORG_FOR_BLUEPRINT,
             produces = ContentType.JSON,
-            nickname = "listByOrganizationAndBlueprint")
-    Collection<ExposedServiceResponse> listByOrganizationAndBlueprint(@PathParam("organizationId") Long organizationId,
+            nickname = "listByWorkspaceAndBlueprint")
+    Collection<ExposedServiceResponse> listByWorkspaceAndBlueprint(@PathParam("workspaceId") Long workspaceId,
             @PathParam("blueprintName") String blueprintName);
 }

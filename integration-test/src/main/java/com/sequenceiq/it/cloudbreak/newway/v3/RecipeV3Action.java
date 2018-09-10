@@ -15,30 +15,30 @@ public class RecipeV3Action {
         RecipeEntity recipeEntity = (RecipeEntity) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
-        Long orgId = integrationTestContext.getContextParam(CloudbreakTest.ORGANIZATION_ID, Long.class);
+        Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         recipeEntity.setResponse(
                 client.getCloudbreakClient()
-                        .recipeV3Endpoint().createInOrganization(orgId, recipeEntity.getRequest()));
+                        .recipeV3Endpoint().createInWorkspace(workspaceId, recipeEntity.getRequest()));
     }
 
     public static void get(IntegrationTestContext integrationTestContext, Entity entity) {
         RecipeEntity recipeEntity = (RecipeEntity) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
-        Long orgId = integrationTestContext.getContextParam(CloudbreakTest.ORGANIZATION_ID, Long.class);
+        Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         recipeEntity.setResponse(
                 client.getCloudbreakClient()
                         .recipeV3Endpoint()
-                        .getByNameInOrganization(orgId, recipeEntity.getName()));
+                        .getByNameInWorkspace(workspaceId, recipeEntity.getName()));
     }
 
     public static void getAll(IntegrationTestContext integrationTestContext, Entity entity) {
         RecipeEntity recipeEntity = (RecipeEntity) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
-        Long orgId = integrationTestContext.getContextParam(CloudbreakTest.ORGANIZATION_ID, Long.class);
+        Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         recipeEntity.setResponses(
-                client.getCloudbreakClient().recipeV3Endpoint().listByOrganization(orgId));
+                client.getCloudbreakClient().recipeV3Endpoint().listByWorkspace(workspaceId));
 
     }
 
@@ -46,9 +46,9 @@ public class RecipeV3Action {
         RecipeEntity recipeEntity = (RecipeEntity) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
-        Long orgId = integrationTestContext.getContextParam(CloudbreakTest.ORGANIZATION_ID, Long.class);
+        Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         client.getCloudbreakClient().recipeV3Endpoint()
-                .deleteInOrganization(orgId, recipeEntity.getName());
+                .deleteInWorkspace(workspaceId, recipeEntity.getName());
     }
 
     public static void createInGiven(IntegrationTestContext integrationTestContext, Entity entity) {

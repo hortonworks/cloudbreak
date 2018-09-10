@@ -70,7 +70,7 @@ public interface StackV2Endpoint extends StackEndpoint {
     @Override
     @ApiOperation(value = StackOpDescription.GET_PRIVATE, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
             nickname = "getPrivatesStackV2")
-    Set<StackResponse> getStacksInDefaultOrg();
+    Set<StackResponse> getStacksInDefaultWorkspace();
 
     @GET
     @Path("account")
@@ -85,7 +85,7 @@ public interface StackV2Endpoint extends StackEndpoint {
     @Override
     @ApiOperation(value = StackOpDescription.GET_PRIVATE_BY_NAME, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
             nickname = "getPrivateStackV2")
-    StackResponse getStackFromDefaultOrg(@PathParam("name") String name, @QueryParam("entry") Set<String> entries);
+    StackResponse getStackFromDefaultWorkspace(@PathParam("name") String name, @QueryParam("entry") Set<String> entries);
 
     @GET
     @Path("account/{name}")
@@ -108,7 +108,7 @@ public interface StackV2Endpoint extends StackEndpoint {
     @Override
     @ApiOperation(value = StackOpDescription.DELETE_PUBLIC_BY_NAME, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
             nickname = "deletePublicStackV2")
-    void deleteInDefaultOrg(@PathParam("name") String name, @QueryParam("forced") @DefaultValue("false") Boolean forced,
+    void deleteInDefaultWorkspace(@PathParam("name") String name, @QueryParam("forced") @DefaultValue("false") Boolean forced,
             @QueryParam("deleteDependencies") @DefaultValue("false") Boolean deleteDependencies);
 
     @DELETE

@@ -19,7 +19,7 @@ public enum APIResourceType {
     IMAGE_CATALOG("ic"),
     FLEX_SUBSCRIPTION("fs"),
     MANAGEMENT_PACK("mpack"),
-    ORGANIZATION("org");
+    WORKSPACE("org");
 
     private final String namePrefix;
 

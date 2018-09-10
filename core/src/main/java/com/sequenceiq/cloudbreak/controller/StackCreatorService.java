@@ -36,8 +36,8 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -108,7 +108,7 @@ public class StackCreatorService {
     @Inject
     private StackUnderOperationService stackUnderOperationService;
 
-    public StackResponse createStack(IdentityUser identityUser, User user, Organization organization, StackRequest stackRequest) {
+    public StackResponse createStack(IdentityUser identityUser, User user, Workspace workspace, StackRequest stackRequest) {
         ValidationResult validationResult = stackRequestValidator.validate(stackRequest);
         if (validationResult.getState() == State.ERROR) {
             LOGGER.info("Stack request has validation error(s): {}.", validationResult.getFormattedErrors());
@@ -121,7 +121,7 @@ public class StackCreatorService {
                 long start = System.currentTimeMillis();
                 Stack stack = conversionService.convert(stackRequest, Stack.class);
 
-                stack.setOrganization(organization);
+                stack.setWorkspace(workspace);
                 stack.setCreator(user);
 
                 String stackName = stack.getName();
@@ -130,11 +130,11 @@ public class StackCreatorService {
                 MDCBuilder.buildMdcContext(stack);
 
                 start = System.currentTimeMillis();
-                stack = stackSensitiveDataPropagator.propagate(stackRequest.getCredentialSource(), stack, organization);
+                stack = stackSensitiveDataPropagator.propagate(stackRequest.getCredentialSource(), stack, workspace);
                 LOGGER.info("Stack propagated with sensitive data in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
                 start = System.currentTimeMillis();
-                stack = stackDecorator.decorate(stack, stackRequest, user, organization);
+                stack = stackDecorator.decorate(stack, stackRequest, user, workspace);
                 LOGGER.info("Stack object has been decorated in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
                 start = System.currentTimeMillis();
@@ -170,18 +170,18 @@ public class StackCreatorService {
 
                     start = System.currentTimeMillis();
                     fileSystemValidator.validateFileSystem(stackValidationRequest.getPlatform(), cloudCredential, stackValidationRequest.getFileSystem(),
-                            stack.getCreator().getUserId(), stack.getOrganization().getId());
+                            stack.getCreator().getUserId(), stack.getWorkspace().getId());
                     LOGGER.info("Filesystem has been validated in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
                     start = System.currentTimeMillis();
-                    clusterCreationService.validate(stackRequest.getClusterRequest(), cloudCredential, stack, user, organization);
+                    clusterCreationService.validate(stackRequest.getClusterRequest(), cloudCredential, stack, user, workspace);
                     LOGGER.info("Cluster has been validated in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
                 }
 
                 String platformString = platform(stack.cloudPlatform()).value().toLowerCase();
                 StatedImage imgFromCatalog;
                 try {
-                    imgFromCatalog = imageService.determineImageFromCatalog(organization.getId(),
+                    imgFromCatalog = imageService.determineImageFromCatalog(workspace.getId(),
                             stackRequest.getImageId(), platformString, stackRequest.getImageCatalog(), blueprint,
                             shouldUseBaseImage(stackRequest.getClusterRequest()), stackRequest.getOs(), identityUser, user);
                 } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
@@ -191,11 +191,11 @@ public class StackCreatorService {
                 fillInstanceMetadata(stack);
                 start = System.currentTimeMillis();
 
-                stack = stackService.create(stack, platformString, imgFromCatalog, user, organization);
+                stack = stackService.create(stack, platformString, imgFromCatalog, user, workspace);
                 LOGGER.info("Stack object and its dependencies has been created in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
                 try {
-                    createClusterIfNeed(user, organization, stackRequest, stack, stackName, blueprint);
+                    createClusterIfNeed(user, workspace, stackRequest, stack, stackName, blueprint);
                 } catch (CloudbreakImageNotFoundException | IOException | TransactionExecutionException e) {
                     throw new RuntimeException(e.getMessage(), e);
                 }
@@ -250,11 +250,11 @@ public class StackCreatorService {
         return stack;
     }
 
-    private void createClusterIfNeed(User user, Organization organization, StackRequest stackRequest, Stack stack, String stackName, Blueprint blueprint)
+    private void createClusterIfNeed(User user, Workspace workspace, StackRequest stackRequest, Stack stack, String stackName, Blueprint blueprint)
             throws CloudbreakImageNotFoundException, IOException, TransactionExecutionException {
         if (stackRequest.getClusterRequest() != null) {
             long start = System.currentTimeMillis();
-            Cluster cluster = clusterCreationService.prepare(stackRequest.getClusterRequest(), stack, blueprint, user, organization);
+            Cluster cluster = clusterCreationService.prepare(stackRequest.getClusterRequest(), stack, blueprint, user, workspace);
             LOGGER.info("Cluster object and its dependencies has been created in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
             stack.setCluster(cluster);
         }

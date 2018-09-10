@@ -68,43 +68,43 @@ public class CloudbreakV3Util {
         }
     }
 
-    public static void waitAndCheckStackStatus(CloudbreakClient cloudbreakClient, Long orgId, String stackName, String desiredStatus) {
-        waitAndCheckStatuses(cloudbreakClient, orgId, stackName, Collections.singletonMap("status", desiredStatus));
+    public static void waitAndCheckStackStatus(CloudbreakClient cloudbreakClient, Long workspaceId, String stackName, String desiredStatus) {
+        waitAndCheckStatuses(cloudbreakClient, workspaceId, stackName, Collections.singletonMap("status", desiredStatus));
     }
 
-    public static void waitAndCheckClusterStatus(CloudbreakClient cloudbreakClient, Long orgId, String stackName, String desiredStatus) {
-        waitAndCheckStatuses(cloudbreakClient, orgId, stackName, Collections.singletonMap("clusterStatus", desiredStatus));
+    public static void waitAndCheckClusterStatus(CloudbreakClient cloudbreakClient, Long workspaceId, String stackName, String desiredStatus) {
+        waitAndCheckStatuses(cloudbreakClient, workspaceId, stackName, Collections.singletonMap("clusterStatus", desiredStatus));
     }
 
-    public static void waitAndExpectClusterFailure(CloudbreakClient cloudbreakClient, Long orgId, String stackName, String desiredStatus, String keyword) {
-        waitAndExpectClusterFailure(cloudbreakClient, orgId, stackName, Collections.singletonMap("clusterStatus", desiredStatus), keyword);
+    public static void waitAndExpectClusterFailure(CloudbreakClient cloudbreakClient, Long workspaceId, String stackName, String desiredStatus, String keyword) {
+        waitAndExpectClusterFailure(cloudbreakClient, workspaceId, stackName, Collections.singletonMap("clusterStatus", desiredStatus), keyword);
     }
 
-    public static WaitResult waitForStackStatus(CloudbreakClient cloudbreakClient, Long orgId, String stackName, String desiredStatus) {
-        return waitForStatuses(cloudbreakClient, orgId, stackName, Collections.singletonMap("status", desiredStatus));
+    public static WaitResult waitForStackStatus(CloudbreakClient cloudbreakClient, Long workspaceId, String stackName, String desiredStatus) {
+        return waitForStatuses(cloudbreakClient, workspaceId, stackName, Collections.singletonMap("status", desiredStatus));
     }
 
-    public static WaitResult waitForClusterStatus(CloudbreakClient cloudbreakClient, Long orgId, String stackName, String desiredStatus) {
-        return waitForStatuses(cloudbreakClient, orgId, stackName, Collections.singletonMap("clusterStatus", desiredStatus));
+    public static WaitResult waitForClusterStatus(CloudbreakClient cloudbreakClient, Long workspaceId, String stackName, String desiredStatus) {
+        return waitForStatuses(cloudbreakClient, workspaceId, stackName, Collections.singletonMap("clusterStatus", desiredStatus));
     }
 
-    public static String getFailedStatusReason(CloudbreakClient cloudbreakClient, Long orgId, String stackName, Map<String, String> desiredStatuses,
+    public static String getFailedStatusReason(CloudbreakClient cloudbreakClient, Long workspaceId, String stackName, Map<String, String> desiredStatuses,
             Collection<WaitResult> desiredWaitResult) {
         for (int i = 0; i < 3; i++) {
-            WaitResult waitResult = waitForStatuses(cloudbreakClient, orgId, stackName, desiredStatuses);
+            WaitResult waitResult = waitForStatuses(cloudbreakClient, workspaceId, stackName, desiredStatuses);
             if (!desiredWaitResult.contains(waitResult)) {
                 Assert.fail("Expected status is failed, actual: " + waitResult);
             } else {
                 StackV3Endpoint stackV3Endpoint = cloudbreakClient.stackV3Endpoint();
-                return stackV3Endpoint.getStatusByNameInOrganization(orgId, stackName).get("statusReason").toString();
+                return stackV3Endpoint.getStatusByNameInWorkspace(workspaceId, stackName).get("statusReason").toString();
             }
         }
         return "";
     }
 
-    public static void waitAndCheckStatuses(CloudbreakClient cloudbreakClient, Long orgId, String stackName, Map<String, String> desiredStatuses) {
+    public static void waitAndCheckStatuses(CloudbreakClient cloudbreakClient, Long workspaceId, String stackName, Map<String, String> desiredStatuses) {
         for (int i = 0; i < 3; i++) {
-            WaitResult waitResult = waitForStatuses(cloudbreakClient, orgId, stackName, desiredStatuses);
+            WaitResult waitResult = waitForStatuses(cloudbreakClient, workspaceId, stackName, desiredStatuses);
             if (waitResult == WaitResult.FAILED) {
                 Assert.fail("The stack has failed");
             }
@@ -114,19 +114,20 @@ public class CloudbreakV3Util {
         }
     }
 
-    public static void waitAndExpectClusterFailure(CloudbreakClient cloudbreakClient, Long orgId, String stackName, Map<String, String> desiredStatuses,
+    public static void waitAndExpectClusterFailure(CloudbreakClient cloudbreakClient, Long workspaceId, String stackName, Map<String, String> desiredStatuses,
             String keyword) {
         for (int i = 0; i < 3; i++) {
-            WaitResult waitResult = waitForStatuses(cloudbreakClient, orgId, stackName, desiredStatuses);
+            WaitResult waitResult = waitForStatuses(cloudbreakClient, workspaceId, stackName, desiredStatuses);
             if (waitResult == WaitResult.TIMEOUT) {
                 Assert.fail("Timeout happened");
             }
             StackV3Endpoint stackV3Endpoint = cloudbreakClient.stackV3Endpoint();
-            Assert.assertTrue(stackV3Endpoint.getStatusByNameInOrganization(orgId, stackName).get("clusterStatusReason").toString().contains(keyword));
+            Assert.assertTrue(stackV3Endpoint.getStatusByNameInWorkspace(workspaceId, stackName).get("clusterStatusReason").toString().contains(keyword));
         }
     }
 
-    public static WaitResult waitForHostStatusStack(StackV3Endpoint stackV3Endpoint, Long orgId, String stackName, String hostGroup, String desiredStatus) {
+    public static WaitResult waitForHostStatusStack(StackV3Endpoint stackV3Endpoint, Long workspaceId,
+            String stackName, String hostGroup, String desiredStatus) {
         WaitResult waitResult = WaitResult.SUCCESSFUL;
         Boolean found = FALSE;
 
@@ -134,7 +135,7 @@ public class CloudbreakV3Util {
         do {
             LOGGER.info("Waiting for host status {} in hostgroup {} ...", desiredStatus, hostGroup);
             sleep();
-            StackResponse stackResponse = stackV3Endpoint.getByNameInOrganization(orgId, stackName, new HashSet<>());
+            StackResponse stackResponse = stackV3Endpoint.getByNameInWorkspace(workspaceId, stackName, new HashSet<>());
             Set<HostGroupResponse> hostGroupResponse = stackResponse.getCluster().getHostGroups();
             for (HostGroupResponse hr : hostGroupResponse) {
                 if (hr.getName().equals(hostGroup)) {
@@ -157,21 +158,21 @@ public class CloudbreakV3Util {
         return waitResult;
     }
 
-    public static void checkClusterFailed(StackV3Endpoint stackV3Endpoint, Long orgId, String stackName, CharSequence failMessage) {
-        StackResponse stackResponse = stackV3Endpoint.getByNameInOrganization(orgId, stackName, new HashSet<>());
+    public static void checkClusterFailed(StackV3Endpoint stackV3Endpoint, Long workspaceId, String stackName, CharSequence failMessage) {
+        StackResponse stackResponse = stackV3Endpoint.getByNameInWorkspace(workspaceId, stackName, new HashSet<>());
         Assert.assertNotEquals(stackResponse.getCluster().getStatus(), Status.AVAILABLE);
         Assert.assertTrue(stackResponse.getCluster().getStatusReason().contains(failMessage));
     }
 
-    public static void checkClusterAvailability(StackV3Endpoint stackV3Endpoint, String port, Long orgId, String stackName, String ambariUser,
+    public static void checkClusterAvailability(StackV3Endpoint stackV3Endpoint, String port, Long workspaceId, String stackName, String ambariUser,
             String ambariPassowrd, boolean checkAmbari) {
-        StackResponse stackResponse = stackV3Endpoint.getByNameInOrganization(orgId, stackName, new HashSet<>());
+        StackResponse stackResponse = stackV3Endpoint.getByNameInWorkspace(workspaceId, stackName, new HashSet<>());
         checkClusterAvailability(stackResponse, port, ambariUser, ambariPassowrd, checkAmbari);
     }
 
-    public static void checkClusterAvailabilityThroughGateway(StackV3Endpoint stackV3Endpoint, Long orgId, String stackName, String ambariUser,
+    public static void checkClusterAvailabilityThroughGateway(StackV3Endpoint stackV3Endpoint, Long workspaceId, String stackName, String ambariUser,
             String ambariPassowrd) {
-        StackResponse stackResponse = stackV3Endpoint.getByNameInOrganization(orgId, stackName, new HashSet<>());
+        StackResponse stackResponse = stackV3Endpoint.getByNameInWorkspace(workspaceId, stackName, new HashSet<>());
         checkStackStatusForClusterAvailability(stackResponse);
 
         String ambariServerUrl = stackResponse.getCluster().getAmbariServerUrl();
@@ -200,9 +201,9 @@ public class CloudbreakV3Util {
         Assert.assertEquals(stackResponse.getStatus(), Status.AVAILABLE, "The stack hasn't been started!");
     }
 
-    public static void checkClusterStopped(StackV3Endpoint stackV3Endpoint, String port, Long orgId, String stackName, String ambariUser,
+    public static void checkClusterStopped(StackV3Endpoint stackV3Endpoint, String port, Long workspaceId, String stackName, String ambariUser,
             String ambariPassword) {
-        StackResponse stackResponse = stackV3Endpoint.getByNameInOrganization(orgId, stackName, new HashSet<>());
+        StackResponse stackResponse = stackV3Endpoint.getByNameInWorkspace(workspaceId, stackName, new HashSet<>());
         checkClusterStopped(port, ambariUser, ambariPassword, stackResponse);
     }
 
@@ -224,10 +225,10 @@ public class CloudbreakV3Util {
         }
     }
 
-    public static String getAmbariIp(StackV3Endpoint stackV3Endpoint, Long orgId, String stackName, IntegrationTestContext itContext) {
+    public static String getAmbariIp(StackV3Endpoint stackV3Endpoint, Long workspaceId, String stackName, IntegrationTestContext itContext) {
         String ambariIp = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_IP_ID);
         if (StringUtils.isEmpty(ambariIp)) {
-            StackResponse stackResponse = stackV3Endpoint.getByNameInOrganization(orgId, stackName, new HashSet<>());
+            StackResponse stackResponse = stackV3Endpoint.getByNameInWorkspace(workspaceId, stackName, new HashSet<>());
             ambariIp = stackResponse.getCluster().getAmbariServerIp();
             Assert.assertNotNull(ambariIp, "The Ambari IP is not available!");
             itContext.putContextParam(CloudbreakITContextConstants.AMBARI_IP_ID, ambariIp);
@@ -245,7 +246,7 @@ public class CloudbreakV3Util {
         return ambariIp;
     }
 
-    private static WaitResult waitForStatuses(CloudbreakClient cloudbreakClient, Long orgId, String stackName, Map<String, String> desiredStatuses) {
+    private static WaitResult waitForStatuses(CloudbreakClient cloudbreakClient, Long workspaceId, String stackName, Map<String, String> desiredStatuses) {
         WaitResult waitResult = WaitResult.SUCCESSFUL;
         Map<String, String> currentStatuses = new HashMap<>();
 
@@ -256,7 +257,7 @@ public class CloudbreakV3Util {
             sleep();
             StackV3Endpoint stackV3Endpoint = cloudbreakClient.stackV3Endpoint();
             try {
-                Map<String, Object> statusResult = stackV3Endpoint.getStatusByNameInOrganization(orgId, stackName);
+                Map<String, Object> statusResult = stackV3Endpoint.getStatusByNameInWorkspace(workspaceId, stackName);
                 for (String statusPath : desiredStatuses.keySet()) {
                     String currStatus = "DELETE_COMPLETED";
                     if (!CollectionUtils.isEmpty(statusResult)) {
@@ -282,7 +283,7 @@ public class CloudbreakV3Util {
         return waitResult;
     }
 
-    public static WaitResult waitForEvent(CloudbreakClient cloudbreakClient, Long orgId, String stackName, String eventType,
+    public static WaitResult waitForEvent(CloudbreakClient cloudbreakClient, Long workspaceId, String stackName, String eventType,
             String eventMessage, long sinceTimeStamp) {
         WaitResult waitResult = WaitResult.SUCCESSFUL;
         Boolean exitCriteria = FALSE;
@@ -292,7 +293,7 @@ public class CloudbreakV3Util {
             LOGGER.info("Waiting for event type {} and event message contains {} ...", eventType, eventMessage);
             sleep();
             EventV3Endpoint eventEndpoint = cloudbreakClient.eventV3Endpoint();
-            List<CloudbreakEventsJson> list = eventEndpoint.getCloudbreakEventsSince(orgId, sinceTimeStamp);
+            List<CloudbreakEventsJson> list = eventEndpoint.getCloudbreakEventsSince(workspaceId, sinceTimeStamp);
             for (CloudbreakEventsJson event : list) {
                 if (event.getStackName().equals(stackName) && event.getEventMessage().contains(eventMessage) && event.getEventType().equals(eventType)) {
                     exitCriteria = Boolean.TRUE;

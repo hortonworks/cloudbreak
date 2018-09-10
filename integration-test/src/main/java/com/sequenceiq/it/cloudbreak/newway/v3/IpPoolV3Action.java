@@ -17,8 +17,8 @@ public class IpPoolV3Action {
         IpPool ipPool = (IpPool) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
-        Long orgId = integrationTestContext.getContextParam(CloudbreakTest.ORGANIZATION_ID, Long.class);
-        ipPool.setResponse(client.getCloudbreakClient().connectorV3Endpoint().getIpPoolsCredentialId(orgId, ipPool.getRequest()));
+        Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
+        ipPool.setResponse(client.getCloudbreakClient().connectorV3Endpoint().getIpPoolsCredentialId(workspaceId, ipPool.getRequest()));
         logJSON("V3 Connectors ipPools get request: ", ipPool.getRequest());
     }
 }

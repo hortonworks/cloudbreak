@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.validation.network.NetworkConfigurationValidator;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
@@ -33,7 +33,7 @@ import com.sequenceiq.cloudbreak.repository.SecurityConfigRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.StackStatusRepository;
 import com.sequenceiq.cloudbreak.repository.StackViewRepository;
-import com.sequenceiq.cloudbreak.repository.organization.UserRepository;
+import com.sequenceiq.cloudbreak.repository.workspace.UserRepository;
 import com.sequenceiq.cloudbreak.security.StackServiceSecurityComponentTest.TestConfig;
 import com.sequenceiq.cloudbreak.service.Clock;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
@@ -47,7 +47,7 @@ import com.sequenceiq.cloudbreak.service.decorator.StackResponseDecorator;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.security.OwnerBasedPermissionEvaluator;
 import com.sequenceiq.cloudbreak.service.stack.StackDownscaleValidatorService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -116,11 +116,11 @@ public class StackServiceSecurityComponentTest extends SecurityComponentTestBase
         return stackResponse;
     }
 
-    private Organization defaultOrganization() {
-        Organization organization = new Organization();
-        organization.setName("Hello");
-        organization.setId(1L);
-        return organization;
+    private Workspace defaultWorkspace() {
+        Workspace workspace = new Workspace();
+        workspace.setName("Hello");
+        workspace.setId(1L);
+        return workspace;
     }
 
     @Configuration
@@ -201,7 +201,7 @@ public class StackServiceSecurityComponentTest extends SecurityComponentTestBase
         private UserService userService;
 
         @MockBean
-        private OrganizationService organizationService;
+        private WorkspaceService workspaceService;
 
         @Bean
         public StackRepository stackRepository() {

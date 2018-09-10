@@ -17,10 +17,11 @@ import static org.mockito.Mockito.when;
 import java.util.Optional;
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.authorization.OrganizationPermissions.Action;
-import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
+import com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action;
+import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.authorization.PermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -39,8 +40,8 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
@@ -56,9 +57,10 @@ import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
 import com.sequenceiq.cloudbreak.service.user.UserService;
+
 import org.springframework.security.access.AccessDeniedException;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -66,7 +68,7 @@ public class StackServiceTest {
 
     private static final Long STACK_ID = 1L;
 
-    private static final Long ORGANIZATION_ID = 1L;
+    private static final Long WORKSPACE_ID = 1L;
 
     private static final String INSTANCE_ID = "instanceId";
 
@@ -126,7 +128,7 @@ public class StackServiceTest {
     private User user;
 
     @Mock
-    private Organization organization;
+    private Workspace workspace;
 
     @Mock
     private ServiceProviderConnectorAdapter connector;
@@ -174,7 +176,7 @@ public class StackServiceTest {
     private CloudbreakMessagesService cloudbreakMessagesService;
 
     @Mock
-    private OrganizationService organizationService;
+    private WorkspaceService workspaceService;
 
     @Mock
     private UserService userService;
@@ -186,8 +188,8 @@ public class StackServiceTest {
     public void setup() {
         when(stack.getId()).thenReturn(STACK_ID);
         when(stack.getName()).thenReturn(STACK_NAME);
-        when(stack.getOrganization()).thenReturn(organization);
-        when(organization.getId()).thenReturn(ORGANIZATION_ID);
+        when(stack.getWorkspace()).thenReturn(workspace);
+        when(workspace.getId()).thenReturn(WORKSPACE_ID);
     }
 
     @Test
@@ -199,67 +201,67 @@ public class StackServiceTest {
     }
 
     @Test
-    public void testDeleteWhenStackCouldNotFindByItsNameForOrganizationAndForcedAndDeleteDepsThenExceptionShouldCome() {
-        when(stackRepository.findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID)).thenReturn(null);
+    public void testDeleteWhenStackCouldNotFindByItsNameForWorkspaceAndForcedAndDeleteDepsThenExceptionShouldCome() {
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(null);
 
         expectedException.expect(NotFoundException.class);
         expectedException.expectMessage(String.format(STACK_NOT_FOUND_BY_NAME_MESSAGE, STACK_NAME));
 
-        underTest.delete(STACK_NAME, ORGANIZATION_ID, true, true, user);
+        underTest.delete(STACK_NAME, WORKSPACE_ID, true, true, user);
 
         verify(stackRepository, times(0)).findById(anyLong());
         verify(stackRepository, times(0)).findById(STACK_ID);
-        verify(stackRepository, times(1)).findByNameAndOrganizationId(anyString(), anyLong());
-        verify(stackRepository, times(1)).findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID);
+        verify(stackRepository, times(1)).findByNameAndWorkspaceId(anyString(), anyLong());
+        verify(stackRepository, times(1)).findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID);
     }
 
     @Test
-    public void testDeleteWhenStackCouldNotFindByItsNameForOrganizationAndDeleteDepsButNotForcedThenExceptionShouldCome() {
-        when(stackRepository.findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID)).thenReturn(null);
+    public void testDeleteWhenStackCouldNotFindByItsNameForWorkspaceAndDeleteDepsButNotForcedThenExceptionShouldCome() {
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(null);
 
         expectedException.expect(NotFoundException.class);
         expectedException.expectMessage(String.format(STACK_NOT_FOUND_BY_NAME_MESSAGE, STACK_NAME));
 
-        underTest.delete(STACK_NAME, ORGANIZATION_ID, false, true, user);
+        underTest.delete(STACK_NAME, WORKSPACE_ID, false, true, user);
 
         verify(stackRepository, times(0)).findById(anyLong());
         verify(stackRepository, times(0)).findById(STACK_ID);
-        verify(stackRepository, times(1)).findByNameAndOrganizationId(anyString(), anyLong());
-        verify(stackRepository, times(1)).findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID);
+        verify(stackRepository, times(1)).findByNameAndWorkspaceId(anyString(), anyLong());
+        verify(stackRepository, times(1)).findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID);
     }
 
     @Test
-    public void testDeleteWhenStackCouldNotFindByItsNameForOrganizationAndForcedButNotDeleteDepsThenExceptionShouldCome() {
-        when(stackRepository.findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID)).thenReturn(null);
+    public void testDeleteWhenStackCouldNotFindByItsNameForWorkspaceAndForcedButNotDeleteDepsThenExceptionShouldCome() {
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(null);
 
         expectedException.expect(NotFoundException.class);
         expectedException.expectMessage(String.format(STACK_NOT_FOUND_BY_NAME_MESSAGE, STACK_NAME));
 
-        underTest.delete(STACK_NAME, ORGANIZATION_ID, true, false, user);
+        underTest.delete(STACK_NAME, WORKSPACE_ID, true, false, user);
 
         verify(stackRepository, times(0)).findById(anyLong());
         verify(stackRepository, times(0)).findById(STACK_ID);
-        verify(stackRepository, times(1)).findByNameAndOrganizationId(anyString(), anyLong());
-        verify(stackRepository, times(1)).findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID);
+        verify(stackRepository, times(1)).findByNameAndWorkspaceId(anyString(), anyLong());
+        verify(stackRepository, times(1)).findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID);
     }
 
     @Test
-    public void testDeleteWhenStackCouldNotFindByItsNameForOrganizationAndNotForcedAndNotDeleteDepsThenExceptionShouldCome() {
-        when(stackRepository.findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID)).thenReturn(null);
+    public void testDeleteWhenStackCouldNotFindByItsNameForWorkspaceAndNotForcedAndNotDeleteDepsThenExceptionShouldCome() {
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(null);
 
         expectedException.expect(NotFoundException.class);
         expectedException.expectMessage(String.format(STACK_NOT_FOUND_BY_NAME_MESSAGE, STACK_NAME));
 
-        underTest.delete(STACK_NAME, ORGANIZATION_ID, false, false, user);
+        underTest.delete(STACK_NAME, WORKSPACE_ID, false, false, user);
 
         verify(stackRepository, times(0)).findById(anyLong());
         verify(stackRepository, times(0)).findById(STACK_ID);
-        verify(stackRepository, times(1)).findByNameAndOrganizationId(anyString(), anyLong());
-        verify(stackRepository, times(1)).findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID);
+        verify(stackRepository, times(1)).findByNameAndWorkspaceId(anyString(), anyLong());
+        verify(stackRepository, times(1)).findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID);
     }
 
     @Test
-    public void testDeleteWhenStackCouldNotFindByItsIdForOrganizationAndForcedAndDeleteDepsThenExceptionShouldCome() {
+    public void testDeleteWhenStackCouldNotFindByItsIdForWorkspaceAndForcedAndDeleteDepsThenExceptionShouldCome() {
         when(stackRepository.findById(STACK_ID)).thenReturn(Optional.empty());
 
         expectedException.expect(NotFoundException.class);
@@ -269,12 +271,12 @@ public class StackServiceTest {
 
         verify(stackRepository, times(1)).findById(anyLong());
         verify(stackRepository, times(1)).findById(STACK_ID);
-        verify(stackRepository, times(1)).findByNameAndOrganizationId(anyString(), anyLong());
-        verify(stackRepository, times(1)).findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID);
+        verify(stackRepository, times(1)).findByNameAndWorkspaceId(anyString(), anyLong());
+        verify(stackRepository, times(1)).findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID);
     }
 
     @Test
-    public void testDeleteWhenStackCouldNotFindByItsIdForOrganizationAndDeleteDepsButNotForcedThenExceptionShouldCome() {
+    public void testDeleteWhenStackCouldNotFindByItsIdForWorkspaceAndDeleteDepsButNotForcedThenExceptionShouldCome() {
         when(stackRepository.findById(STACK_ID)).thenReturn(Optional.empty());
 
         expectedException.expect(NotFoundException.class);
@@ -283,12 +285,12 @@ public class StackServiceTest {
         underTest.delete(STACK_ID, true, true, user);
         verify(stackRepository, times(1)).findById(anyLong());
         verify(stackRepository, times(1)).findById(STACK_ID);
-        verify(stackRepository, times(1)).findByNameAndOrganizationId(anyString(), anyLong());
-        verify(stackRepository, times(1)).findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID);
+        verify(stackRepository, times(1)).findByNameAndWorkspaceId(anyString(), anyLong());
+        verify(stackRepository, times(1)).findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID);
     }
 
     @Test
-    public void testDeleteWhenStackCouldNotFindByItsIdForOrganizationAndForcedButNotDeleteDepsThenExceptionShouldCome() {
+    public void testDeleteWhenStackCouldNotFindByItsIdForWorkspaceAndForcedButNotDeleteDepsThenExceptionShouldCome() {
         when(stackRepository.findById(STACK_ID)).thenReturn(Optional.empty());
 
         expectedException.expect(NotFoundException.class);
@@ -297,12 +299,12 @@ public class StackServiceTest {
         underTest.delete(STACK_ID, true, true, user);
         verify(stackRepository, times(1)).findById(anyLong());
         verify(stackRepository, times(1)).findById(STACK_ID);
-        verify(stackRepository, times(1)).findByNameAndOrganizationId(anyString(), anyLong());
-        verify(stackRepository, times(1)).findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID);
+        verify(stackRepository, times(1)).findByNameAndWorkspaceId(anyString(), anyLong());
+        verify(stackRepository, times(1)).findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID);
     }
 
     @Test
-    public void testDeleteWhenStackCouldNotFindByItsIdForOrganizationAndNotForcedAndNotDeleteDepsThenExceptionShouldCome() {
+    public void testDeleteWhenStackCouldNotFindByItsIdForWorkspaceAndNotForcedAndNotDeleteDepsThenExceptionShouldCome() {
         when(stackRepository.findById(STACK_ID)).thenReturn(Optional.empty());
 
         expectedException.expect(NotFoundException.class);
@@ -311,43 +313,47 @@ public class StackServiceTest {
         underTest.delete(STACK_ID, true, true, user);
         verify(stackRepository, times(1)).findById(anyLong());
         verify(stackRepository, times(1)).findById(STACK_ID);
-        verify(stackRepository, times(1)).findByNameAndOrganizationId(anyString(), anyLong());
-        verify(stackRepository, times(1)).findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID);
+        verify(stackRepository, times(1)).findByNameAndWorkspaceId(anyString(), anyLong());
+        verify(stackRepository, times(1)).findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID);
     }
 
     @Test
     public void testDeleteByIdWhenStackIsAlreadyDeletedThenDeletionWillNotTrigger() {
         when(stackRepository.findById(STACK_ID)).thenReturn(Optional.of(stack));
-        when(stackRepository.findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID)).thenReturn(stack);
-        doNothing().when(permissionCheckingUtils).checkPermissionByOrgIdForUser(ORGANIZATION_ID, OrganizationResource.STACK, Action.WRITE, user);
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(stack);
+        doNothing().when(permissionCheckingUtils).checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, Action.WRITE, user);
         when(stack.isDeleteCompleted()).thenReturn(true);
 
         underTest.delete(STACK_ID, true, true, user);
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
-        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(anyLong(), any(OrganizationResource.class), any(Action.class), any(User.class));
-        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(ORGANIZATION_ID, OrganizationResource.STACK, Action.WRITE, user);
+        verify(permissionCheckingUtils, times(1))
+                .checkPermissionByWorkspaceIdForUser(anyLong(), any(WorkspaceResource.class), any(Action.class), any(User.class));
+        verify(permissionCheckingUtils, times(1))
+                .checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, Action.WRITE, user);
     }
 
     @Test
-    public void testDeleteByNameAndOrgIdWhenStackIsAlreadyDeletedThenDeletionWillNotTrigger() {
-        when(stackRepository.findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID)).thenReturn(stack);
-        doNothing().when(permissionCheckingUtils).checkPermissionByOrgIdForUser(ORGANIZATION_ID, OrganizationResource.STACK, Action.WRITE, user);
+    public void testDeleteByNameAndWorkspaceIdWhenStackIsAlreadyDeletedThenDeletionWillNotTrigger() {
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(stack);
+        doNothing().when(permissionCheckingUtils).checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, Action.WRITE, user);
         when(stack.isDeleteCompleted()).thenReturn(true);
 
-        underTest.delete(STACK_NAME, ORGANIZATION_ID, true, true, user);
+        underTest.delete(STACK_NAME, WORKSPACE_ID, true, true, user);
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
-        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(anyLong(), any(OrganizationResource.class), any(Action.class), any(User.class));
-        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(ORGANIZATION_ID, OrganizationResource.STACK, Action.WRITE, user);
+        verify(permissionCheckingUtils, times(1))
+                .checkPermissionByWorkspaceIdForUser(anyLong(), any(WorkspaceResource.class), any(Action.class), any(User.class));
+        verify(permissionCheckingUtils, times(1))
+                .checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, Action.WRITE, user);
     }
 
     @Test
     public void testDeleteByIdWhenUserHasNoWriteRightOverStackThenExceptionShouldComeAndTerminationShouldNotBeCalled() {
         when(stackRepository.findById(STACK_ID)).thenReturn(Optional.of(stack));
-        when(stackRepository.findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID)).thenReturn(stack);
-        doThrow(new AccessDeniedException(STACK_DELETE_ACCESS_DENIED)).when(permissionCheckingUtils).checkPermissionByOrgIdForUser(ORGANIZATION_ID,
-                OrganizationResource.STACK, Action.WRITE, user);
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(stack);
+        doThrow(new AccessDeniedException(STACK_DELETE_ACCESS_DENIED)).when(permissionCheckingUtils).checkPermissionByWorkspaceIdForUser(WORKSPACE_ID,
+                WorkspaceResource.STACK, Action.WRITE, user);
 
         expectedException.expect(AccessDeniedException.class);
         expectedException.expectMessage(STACK_DELETE_ACCESS_DENIED);
@@ -355,51 +361,59 @@ public class StackServiceTest {
         underTest.delete(STACK_ID, true, true, user);
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
-        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(anyLong(), any(OrganizationResource.class), any(Action.class), any(User.class));
-        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(ORGANIZATION_ID, OrganizationResource.STACK, Action.WRITE, user);
+        verify(permissionCheckingUtils, times(1))
+                .checkPermissionByWorkspaceIdForUser(anyLong(), any(WorkspaceResource.class), any(Action.class), any(User.class));
+        verify(permissionCheckingUtils, times(1))
+                .checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, Action.WRITE, user);
     }
 
     @Test
-    public void testDeleteByNameAndOrgIdWhenUserHasNoWriteRightOverStackThenExceptionShouldComeAndTerminationShouldNotBeCalled() {
-        when(stackRepository.findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID)).thenReturn(stack);
-        doThrow(new AccessDeniedException(STACK_DELETE_ACCESS_DENIED)).when(permissionCheckingUtils).checkPermissionByOrgIdForUser(ORGANIZATION_ID,
-                OrganizationResource.STACK, Action.WRITE, user);
+    public void testDeleteByNameAndWorkspaceIdWhenUserHasNoWriteRightOverStackThenExceptionShouldComeAndTerminationShouldNotBeCalled() {
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(stack);
+        doThrow(new AccessDeniedException(STACK_DELETE_ACCESS_DENIED)).when(permissionCheckingUtils)
+                .checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, Action.WRITE, user);
 
         expectedException.expect(AccessDeniedException.class);
         expectedException.expectMessage(STACK_DELETE_ACCESS_DENIED);
 
-        underTest.delete(STACK_NAME, ORGANIZATION_ID, true, true, user);
+        underTest.delete(STACK_NAME, WORKSPACE_ID, true, true, user);
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
-        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(anyLong(), any(OrganizationResource.class), any(Action.class), any(User.class));
-        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(ORGANIZATION_ID, OrganizationResource.STACK, Action.WRITE, user);
+        verify(permissionCheckingUtils, times(1))
+                .checkPermissionByWorkspaceIdForUser(anyLong(), any(WorkspaceResource.class), any(Action.class), any(User.class));
+        verify(permissionCheckingUtils, times(1))
+                .checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, Action.WRITE, user);
     }
 
     @Test
     public void testDeleteByIdWhenUserHasWriteRightOverStackAndStackIsNotDeletedThenTerminationShouldBeCalled() {
         when(stackRepository.findById(STACK_ID)).thenReturn(Optional.of(stack));
-        when(stackRepository.findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID)).thenReturn(stack);
-        doNothing().when(permissionCheckingUtils).checkPermissionByOrgIdForUser(ORGANIZATION_ID, OrganizationResource.STACK, Action.WRITE, user);
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(stack);
+        doNothing().when(permissionCheckingUtils).checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, Action.WRITE, user);
 
         underTest.delete(STACK_ID, true, true, user);
 
         verify(flowManager, times(1)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
         verify(flowManager, times(1)).triggerTermination(STACK_ID, true, true);
-        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(anyLong(), any(OrganizationResource.class), any(Action.class), any(User.class));
-        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(ORGANIZATION_ID, OrganizationResource.STACK, Action.WRITE, user);
+        verify(permissionCheckingUtils, times(1))
+                .checkPermissionByWorkspaceIdForUser(anyLong(), any(WorkspaceResource.class), any(Action.class), any(User.class));
+        verify(permissionCheckingUtils, times(1))
+                .checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, Action.WRITE, user);
     }
 
     @Test
-    public void testDeleteByNameAndOrgIdWhenUserHasWriteRightOverStackAndStackIsNotDeletedThenTerminationShouldBeCalled() {
-        when(stackRepository.findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID)).thenReturn(stack);
-        doNothing().when(permissionCheckingUtils).checkPermissionByOrgIdForUser(ORGANIZATION_ID, OrganizationResource.STACK, Action.WRITE, user);
+    public void testDeleteByNameAndWorkspaceIdWhenUserHasWriteRightOverStackAndStackIsNotDeletedThenTerminationShouldBeCalled() {
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(stack);
+        doNothing().when(permissionCheckingUtils).checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, Action.WRITE, user);
 
-        underTest.delete(STACK_NAME, ORGANIZATION_ID, true, true, user);
+        underTest.delete(STACK_NAME, WORKSPACE_ID, true, true, user);
 
         verify(flowManager, times(1)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
         verify(flowManager, times(1)).triggerTermination(STACK_ID, true, true);
-        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(anyLong(), any(OrganizationResource.class), any(Action.class), any(User.class));
-        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(ORGANIZATION_ID, OrganizationResource.STACK, Action.WRITE, user);
+        verify(permissionCheckingUtils, times(1))
+                .checkPermissionByWorkspaceIdForUser(anyLong(), any(WorkspaceResource.class), any(Action.class), any(User.class));
+        verify(permissionCheckingUtils, times(1))
+                .checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, Action.WRITE, user);
     }
 
     @Test
@@ -408,18 +422,20 @@ public class StackServiceTest {
         Stack stack2 = mock(Stack.class);
         when(stack1.getName()).thenReturn("stack1");
         when(stack2.getName()).thenReturn("stack2");
-        when(stackRepository.findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID)).thenReturn(stack);
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(stack);
         when(stackRepository.findEphemeralClusters(STACK_ID)).thenReturn(Set.of(stack1, stack2));
 
 
         expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, String.format("%s, %s", "stack1", "stack2")));
         expectedException.expect(BadRequestException.class);
 
-        underTest.delete(STACK_NAME, ORGANIZATION_ID, true, true, user);
+        underTest.delete(STACK_NAME, WORKSPACE_ID, true, true, user);
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
-        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(anyLong(), any(OrganizationResource.class), any(Action.class), any(User.class));
-        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(ORGANIZATION_ID, OrganizationResource.STACK, Action.WRITE, user);
+        verify(permissionCheckingUtils, times(1))
+                .checkPermissionByWorkspaceIdForUser(anyLong(), any(WorkspaceResource.class), any(Action.class), any(User.class));
+        verify(permissionCheckingUtils, times(1))
+                .checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, Action.WRITE, user);
     }
 
     @Test
@@ -428,18 +444,20 @@ public class StackServiceTest {
         Stack stack2 = mock(Stack.class);
         when(stack1.getName()).thenReturn("stack1");
         when(stack2.getName()).thenReturn("stack2");
-        when(stackRepository.findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID)).thenReturn(stack);
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(stack);
         when(stackRepository.findEphemeralClusters(STACK_ID)).thenReturn(Set.of(stack1, stack2));
 
 
         expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, String.format("%s, %s", "stack1", "stack2")));
         expectedException.expect(BadRequestException.class);
 
-        underTest.delete(STACK_NAME, ORGANIZATION_ID, true, false, user);
+        underTest.delete(STACK_NAME, WORKSPACE_ID, true, false, user);
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
-        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(anyLong(), any(OrganizationResource.class), any(Action.class), any(User.class));
-        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(ORGANIZATION_ID, OrganizationResource.STACK, Action.WRITE, user);
+        verify(permissionCheckingUtils, times(1))
+                .checkPermissionByWorkspaceIdForUser(anyLong(), any(WorkspaceResource.class), any(Action.class), any(User.class));
+        verify(permissionCheckingUtils, times(1))
+                .checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, Action.WRITE, user);
     }
 
     @Test
@@ -448,18 +466,20 @@ public class StackServiceTest {
         Stack stack2 = mock(Stack.class);
         when(stack1.getName()).thenReturn("stack1");
         when(stack2.getName()).thenReturn("stack2");
-        when(stackRepository.findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID)).thenReturn(stack);
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(stack);
         when(stackRepository.findEphemeralClusters(STACK_ID)).thenReturn(Set.of(stack1, stack2));
 
 
         expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, String.format("%s, %s", "stack1", "stack2")));
         expectedException.expect(BadRequestException.class);
 
-        underTest.delete(STACK_NAME, ORGANIZATION_ID, false, true, user);
+        underTest.delete(STACK_NAME, WORKSPACE_ID, false, true, user);
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
-        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(anyLong(), any(OrganizationResource.class), any(Action.class), any(User.class));
-        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(ORGANIZATION_ID, OrganizationResource.STACK, Action.WRITE, user);
+        verify(permissionCheckingUtils, times(1))
+                .checkPermissionByWorkspaceIdForUser(anyLong(), any(WorkspaceResource.class), any(Action.class), any(User.class));
+        verify(permissionCheckingUtils, times(1))
+                .checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, Action.WRITE, user);
     }
 
     @Test
@@ -468,90 +488,100 @@ public class StackServiceTest {
         Stack stack2 = mock(Stack.class);
         when(stack1.getName()).thenReturn("stack1");
         when(stack2.getName()).thenReturn("stack2");
-        when(stackRepository.findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID)).thenReturn(stack);
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(stack);
         when(stackRepository.findEphemeralClusters(STACK_ID)).thenReturn(Set.of(stack1, stack2));
 
 
         expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, String.format("%s, %s", "stack1", "stack2")));
         expectedException.expect(BadRequestException.class);
 
-        underTest.delete(STACK_NAME, ORGANIZATION_ID, false, false, user);
+        underTest.delete(STACK_NAME, WORKSPACE_ID, false, false, user);
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
-        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(anyLong(), any(OrganizationResource.class), any(Action.class), any(User.class));
-        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(ORGANIZATION_ID, OrganizationResource.STACK, Action.WRITE, user);
+        verify(permissionCheckingUtils, times(1))
+                .checkPermissionByWorkspaceIdForUser(anyLong(), any(WorkspaceResource.class), any(Action.class), any(User.class));
+        verify(permissionCheckingUtils, times(1))
+                .checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, Action.WRITE, user);
     }
 
     @Test
     public void testDeleteWithForceAndDeleteDepsByNameWhenStachHasOneAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
         Stack stack = mock(Stack.class);
         when(stack.getName()).thenReturn("stack");
-        when(stackRepository.findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID)).thenReturn(this.stack);
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(this.stack);
         when(stackRepository.findEphemeralClusters(STACK_ID)).thenReturn(Set.of(stack));
 
 
         expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, "stack"));
         expectedException.expect(BadRequestException.class);
 
-        underTest.delete(STACK_NAME, ORGANIZATION_ID, true, true, user);
+        underTest.delete(STACK_NAME, WORKSPACE_ID, true, true, user);
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
-        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(anyLong(), any(OrganizationResource.class), any(Action.class), any(User.class));
-        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(ORGANIZATION_ID, OrganizationResource.STACK, Action.WRITE, user);
+        verify(permissionCheckingUtils, times(1))
+                .checkPermissionByWorkspaceIdForUser(anyLong(), any(WorkspaceResource.class), any(Action.class), any(User.class));
+        verify(permissionCheckingUtils, times(1))
+                .checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, Action.WRITE, user);
     }
 
     @Test
     public void testDeleteWithForceButWithoutDeleteDepsByNameWhenStachHasOneAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
         Stack stack = mock(Stack.class);
         when(stack.getName()).thenReturn("stack");
-        when(stackRepository.findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID)).thenReturn(this.stack);
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(this.stack);
         when(stackRepository.findEphemeralClusters(STACK_ID)).thenReturn(Set.of(stack));
 
 
         expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, "stack"));
         expectedException.expect(BadRequestException.class);
 
-        underTest.delete(STACK_NAME, ORGANIZATION_ID, true, false, user);
+        underTest.delete(STACK_NAME, WORKSPACE_ID, true, false, user);
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
-        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(anyLong(), any(OrganizationResource.class), any(Action.class), any(User.class));
-        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(ORGANIZATION_ID, OrganizationResource.STACK, Action.WRITE, user);
+        verify(permissionCheckingUtils, times(1))
+                .checkPermissionByWorkspaceIdForUser(anyLong(), any(WorkspaceResource.class), any(Action.class), any(User.class));
+        verify(permissionCheckingUtils, times(1))
+                .checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, Action.WRITE, user);
     }
 
     @Test
     public void testDeleteWithOutForceButWithDeleteDepsByNameWhenStachHasOneAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
         Stack stack = mock(Stack.class);
         when(stack.getName()).thenReturn("stack");
-        when(stackRepository.findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID)).thenReturn(this.stack);
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(this.stack);
         when(stackRepository.findEphemeralClusters(STACK_ID)).thenReturn(Set.of(stack));
 
 
         expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, "stack"));
         expectedException.expect(BadRequestException.class);
 
-        underTest.delete(STACK_NAME, ORGANIZATION_ID, false, true, user);
+        underTest.delete(STACK_NAME, WORKSPACE_ID, false, true, user);
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
-        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(anyLong(), any(OrganizationResource.class), any(Action.class), any(User.class));
-        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(ORGANIZATION_ID, OrganizationResource.STACK, Action.WRITE, user);
+        verify(permissionCheckingUtils, times(1))
+                .checkPermissionByWorkspaceIdForUser(anyLong(), any(WorkspaceResource.class), any(Action.class), any(User.class));
+        verify(permissionCheckingUtils, times(1))
+                .checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, Action.WRITE, user);
     }
 
     @Test
     public void testDeleteWithOutForceAndDeleteDepsByNameWhenStachHasOneAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
         Stack stack = mock(Stack.class);
         when(stack.getName()).thenReturn("stack");
-        when(stackRepository.findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID)).thenReturn(this.stack);
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(this.stack);
         when(stackRepository.findEphemeralClusters(STACK_ID)).thenReturn(Set.of(stack));
 
 
         expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, "stack"));
         expectedException.expect(BadRequestException.class);
 
-        underTest.delete(STACK_NAME, ORGANIZATION_ID, false, false, user);
+        underTest.delete(STACK_NAME, WORKSPACE_ID, false, false, user);
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
-        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(anyLong(), any(OrganizationResource.class), any(Action.class), any(User.class));
-        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(ORGANIZATION_ID, OrganizationResource.STACK, Action.WRITE, user);
+        verify(permissionCheckingUtils, times(1))
+                .checkPermissionByWorkspaceIdForUser(anyLong(), any(WorkspaceResource.class), any(Action.class), any(User.class));
+        verify(permissionCheckingUtils, times(1))
+                .checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, Action.WRITE, user);
     }
 
     @Test
@@ -561,7 +591,7 @@ public class StackServiceTest {
         when(stack1.getName()).thenReturn("stack1");
         when(stack2.getName()).thenReturn("stack2");
         when(stackRepository.findById(STACK_ID)).thenReturn(Optional.of(stack));
-        when(stackRepository.findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID)).thenReturn(stack);
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(stack);
         when(stackRepository.findEphemeralClusters(STACK_ID)).thenReturn(Set.of(stack1, stack2));
 
 
@@ -571,8 +601,10 @@ public class StackServiceTest {
         underTest.delete(STACK_ID, true, true, user);
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
-        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(anyLong(), any(OrganizationResource.class), any(Action.class), any(User.class));
-        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(ORGANIZATION_ID, OrganizationResource.STACK, Action.WRITE, user);
+        verify(permissionCheckingUtils, times(1))
+                .checkPermissionByWorkspaceIdForUser(anyLong(), any(WorkspaceResource.class), any(Action.class), any(User.class));
+        verify(permissionCheckingUtils, times(1))
+                .checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, Action.WRITE, user);
     }
 
     @Test
@@ -582,7 +614,7 @@ public class StackServiceTest {
         when(stack1.getName()).thenReturn("stack1");
         when(stack2.getName()).thenReturn("stack2");
         when(stackRepository.findById(STACK_ID)).thenReturn(Optional.of(stack));
-        when(stackRepository.findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID)).thenReturn(stack);
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(stack);
         when(stackRepository.findEphemeralClusters(STACK_ID)).thenReturn(Set.of(stack1, stack2));
 
 
@@ -592,8 +624,10 @@ public class StackServiceTest {
         underTest.delete(STACK_ID, true, true, user);
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
-        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(anyLong(), any(OrganizationResource.class), any(Action.class), any(User.class));
-        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(ORGANIZATION_ID, OrganizationResource.STACK, Action.WRITE, user);
+        verify(permissionCheckingUtils, times(1))
+                .checkPermissionByWorkspaceIdForUser(anyLong(), any(WorkspaceResource.class), any(Action.class), any(User.class));
+        verify(permissionCheckingUtils, times(1))
+                .checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, Action.WRITE, user);
     }
 
     @Test
@@ -603,7 +637,7 @@ public class StackServiceTest {
         when(stack1.getName()).thenReturn("stack1");
         when(stack2.getName()).thenReturn("stack2");
         when(stackRepository.findById(STACK_ID)).thenReturn(Optional.of(stack));
-        when(stackRepository.findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID)).thenReturn(stack);
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(stack);
         when(stackRepository.findEphemeralClusters(STACK_ID)).thenReturn(Set.of(stack1, stack2));
 
 
@@ -613,8 +647,10 @@ public class StackServiceTest {
         underTest.delete(STACK_ID, true, true, user);
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
-        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(anyLong(), any(OrganizationResource.class), any(Action.class), any(User.class));
-        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(ORGANIZATION_ID, OrganizationResource.STACK, Action.WRITE, user);
+        verify(permissionCheckingUtils, times(1))
+                .checkPermissionByWorkspaceIdForUser(anyLong(), any(WorkspaceResource.class), any(Action.class), any(User.class));
+        verify(permissionCheckingUtils, times(1))
+                .checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, Action.WRITE, user);
     }
 
     @Test
@@ -624,7 +660,7 @@ public class StackServiceTest {
         when(stack1.getName()).thenReturn("stack1");
         when(stack2.getName()).thenReturn("stack2");
         when(stackRepository.findById(STACK_ID)).thenReturn(Optional.of(stack));
-        when(stackRepository.findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID)).thenReturn(stack);
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(stack);
         when(stackRepository.findEphemeralClusters(STACK_ID)).thenReturn(Set.of(stack1, stack2));
 
 
@@ -634,8 +670,10 @@ public class StackServiceTest {
         underTest.delete(STACK_ID, true, true, user);
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
-        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(anyLong(), any(OrganizationResource.class), any(Action.class), any(User.class));
-        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(ORGANIZATION_ID, OrganizationResource.STACK, Action.WRITE, user);
+        verify(permissionCheckingUtils, times(1))
+                .checkPermissionByWorkspaceIdForUser(anyLong(), any(WorkspaceResource.class), any(Action.class), any(User.class));
+        verify(permissionCheckingUtils, times(1))
+                .checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, Action.WRITE, user);
     }
 
     @Test
@@ -643,7 +681,7 @@ public class StackServiceTest {
         Stack stack = mock(Stack.class);
         when(stack.getName()).thenReturn("stack");
         when(stackRepository.findById(STACK_ID)).thenReturn(Optional.of(this.stack));
-        when(stackRepository.findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID)).thenReturn(this.stack);
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(this.stack);
         when(stackRepository.findEphemeralClusters(STACK_ID)).thenReturn(Set.of(stack));
 
 
@@ -653,8 +691,10 @@ public class StackServiceTest {
         underTest.delete(STACK_ID, true, true, user);
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
-        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(anyLong(), any(OrganizationResource.class), any(Action.class), any(User.class));
-        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(ORGANIZATION_ID, OrganizationResource.STACK, Action.WRITE, user);
+        verify(permissionCheckingUtils, times(1))
+                .checkPermissionByWorkspaceIdForUser(anyLong(), any(WorkspaceResource.class), any(Action.class), any(User.class));
+        verify(permissionCheckingUtils, times(1))
+                .checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, Action.WRITE, user);
     }
 
     @Test
@@ -662,7 +702,7 @@ public class StackServiceTest {
         Stack stack = mock(Stack.class);
         when(stack.getName()).thenReturn("stack");
         when(stackRepository.findById(STACK_ID)).thenReturn(Optional.of(this.stack));
-        when(stackRepository.findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID)).thenReturn(this.stack);
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(this.stack);
         when(stackRepository.findEphemeralClusters(STACK_ID)).thenReturn(Set.of(stack));
 
 
@@ -672,8 +712,10 @@ public class StackServiceTest {
         underTest.delete(STACK_ID, true, true, user);
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
-        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(anyLong(), any(OrganizationResource.class), any(Action.class), any(User.class));
-        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(ORGANIZATION_ID, OrganizationResource.STACK, Action.WRITE, user);
+        verify(permissionCheckingUtils, times(1))
+                .checkPermissionByWorkspaceIdForUser(anyLong(), any(WorkspaceResource.class), any(Action.class), any(User.class));
+        verify(permissionCheckingUtils, times(1))
+                .checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, Action.WRITE, user);
     }
 
     @Test
@@ -681,7 +723,7 @@ public class StackServiceTest {
         Stack stack = mock(Stack.class);
         when(stack.getName()).thenReturn("stack");
         when(stackRepository.findById(STACK_ID)).thenReturn(Optional.of(this.stack));
-        when(stackRepository.findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID)).thenReturn(this.stack);
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(this.stack);
         when(stackRepository.findEphemeralClusters(STACK_ID)).thenReturn(Set.of(stack));
 
 
@@ -691,8 +733,10 @@ public class StackServiceTest {
         underTest.delete(STACK_ID, true, true, user);
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
-        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(anyLong(), any(OrganizationResource.class), any(Action.class), any(User.class));
-        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(ORGANIZATION_ID, OrganizationResource.STACK, Action.WRITE, user);
+        verify(permissionCheckingUtils, times(1))
+                .checkPermissionByWorkspaceIdForUser(anyLong(), any(WorkspaceResource.class), any(Action.class), any(User.class));
+        verify(permissionCheckingUtils, times(1))
+                .checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, Action.WRITE, user);
     }
 
     @Test
@@ -700,7 +744,7 @@ public class StackServiceTest {
         Stack stack = mock(Stack.class);
         when(stack.getName()).thenReturn("stack");
         when(stackRepository.findById(STACK_ID)).thenReturn(Optional.of(this.stack));
-        when(stackRepository.findByNameAndOrganizationId(STACK_NAME, ORGANIZATION_ID)).thenReturn(this.stack);
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(this.stack);
         when(stackRepository.findEphemeralClusters(STACK_ID)).thenReturn(Set.of(stack));
 
 
@@ -710,8 +754,10 @@ public class StackServiceTest {
         underTest.delete(STACK_ID, true, true, user);
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
-        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(anyLong(), any(OrganizationResource.class), any(Action.class), any(User.class));
-        verify(permissionCheckingUtils, times(1)).checkPermissionByOrgIdForUser(ORGANIZATION_ID, OrganizationResource.STACK, Action.WRITE, user);
+        verify(permissionCheckingUtils, times(1))
+                .checkPermissionByWorkspaceIdForUser(anyLong(), any(WorkspaceResource.class), any(Action.class), any(User.class));
+        verify(permissionCheckingUtils, times(1))
+                .checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, Action.WRITE, user);
     }
 
     @Test
@@ -735,7 +781,7 @@ public class StackServiceTest {
                 .create(eq(stack), eq(platformString), eq(parameters), nullable(StatedImage.class));
 
         try {
-            stack = underTest.create(stack, platformString, mock(StatedImage.class), user, organization);
+            stack = underTest.create(stack, platformString, mock(StatedImage.class), user, workspace);
         } finally {
             verify(stack, times(1)).setPlatformVariant(eq(VARIANT_VALUE));
             verify(securityConfig, times(1)).setSaltPassword(anyObject());
@@ -760,7 +806,7 @@ public class StackServiceTest {
         when(connector.getPlatformParameters(stack)).thenReturn(parameters);
 
         try {
-            stack = underTest.create(stack, "AWS", mock(StatedImage.class), user, organization);
+            stack = underTest.create(stack, "AWS", mock(StatedImage.class), user, workspace);
         } finally {
             verify(stack, times(1)).setPlatformVariant(eq(VARIANT_VALUE));
             verify(securityConfig, times(1)).setSaltPassword(anyObject());

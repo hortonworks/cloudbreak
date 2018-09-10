@@ -7,26 +7,26 @@ import java.util.Optional;
 import javax.inject.Inject;
 
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.audit.AuditEvent;
-import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
+import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.comparator.audit.AuditEventComparator;
 import com.sequenceiq.cloudbreak.domain.StructuredEventEntity;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
-import com.sequenceiq.cloudbreak.repository.organization.OrganizationResourceRepository;
-import com.sequenceiq.cloudbreak.service.AbstractOrganizationAwareResourceService;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
+import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.structuredevent.db.StructuredEventRepository;
 
 import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
 
 @Service
-public class AuditEventService extends AbstractOrganizationAwareResourceService<StructuredEventEntity> {
+public class AuditEventService extends AbstractWorkspaceAwareResourceService<StructuredEventEntity> {
 
     @Inject
     private ConversionService conversionService;
@@ -35,7 +35,7 @@ public class AuditEventService extends AbstractOrganizationAwareResourceService<
     private StructuredEventRepository structuredEventRepository;
 
     @Inject
-    private OrganizationService organizationService;
+    private WorkspaceService workspaceService;
 
     @Inject
     private UserService userService;
@@ -45,43 +45,43 @@ public class AuditEventService extends AbstractOrganizationAwareResourceService<
 
     public AuditEvent getAuditEvent(Long auditId) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        return getAuditEventByOrgId(organizationService.getDefaultOrganizationForUser(user).getId(), auditId);
+        return getAuditEventByWorkspaceId(workspaceService.getDefaultWorkspaceForUser(user).getId(), auditId);
     }
 
-    public AuditEvent getAuditEventByOrgId(Long organizationId, Long auditId) {
-        StructuredEventEntity event = Optional.ofNullable(structuredEventRepository.findByOrgIdAndId(organizationId, auditId))
+    public AuditEvent getAuditEventByWorkspaceId(Long workspaceId, Long auditId) {
+        StructuredEventEntity event = Optional.ofNullable(structuredEventRepository.findByWorkspaceIdAndId(workspaceId, auditId))
                 .orElseThrow(notFound("StructuredEvent", auditId));
         return conversionService.convert(event, AuditEvent.class);
     }
 
-    public List<AuditEvent> getAuditEventsForOrg(String resourceType, Long resourceId, Organization organization) {
-        List<AuditEvent> auditEvents = getEventsForUserWithTypeAndResourceIdByOrg(organization, resourceType, resourceId);
+    public List<AuditEvent> getAuditEventsForWorkspace(String resourceType, Long resourceId, Workspace workspace) {
+        List<AuditEvent> auditEvents = getEventsForUserWithTypeAndResourceIdByWorkspace(workspace, resourceType, resourceId);
         auditEvents.sort(new AuditEventComparator().reversed());
         return auditEvents;
     }
 
-    public List<AuditEvent> getAuditEventsByOrgId(Long organizationId, String resourceType, Long resourceId, User user) {
-        Organization organization = getOrganizationService().get(organizationId, user);
-        List<AuditEvent> auditEvents = getEventsForUserWithTypeAndResourceIdByOrg(organization, resourceType, resourceId);
+    public List<AuditEvent> getAuditEventsByWorkspaceId(Long workspaceId, String resourceType, Long resourceId, User user) {
+        Workspace workspace = getWorkspaceService().get(workspaceId, user);
+        List<AuditEvent> auditEvents = getEventsForUserWithTypeAndResourceIdByWorkspace(workspace, resourceType, resourceId);
         auditEvents.sort(new AuditEventComparator().reversed());
         return auditEvents;
     }
 
-    private List<AuditEvent> getEventsForUserWithTypeAndResourceIdByOrg(Organization organization, String resourceType, Long resourceId) {
-        List<StructuredEventEntity> events = structuredEventRepository.findByOrganizationAndResourceTypeAndResourceId(organization, resourceType, resourceId);
+    private List<AuditEvent> getEventsForUserWithTypeAndResourceIdByWorkspace(Workspace workspace, String resourceType, Long resourceId) {
+        List<StructuredEventEntity> events = structuredEventRepository.findByWorkspaceAndResourceTypeAndResourceId(workspace, resourceType, resourceId);
         return events != null ? (List<AuditEvent>) conversionService.convert(events,
                 TypeDescriptor.forObject(events),
                 TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(AuditEvent.class))) : Collections.emptyList();
     }
 
     @Override
-    public OrganizationResourceRepository<StructuredEventEntity, Long> repository() {
+    public WorkspaceResourceRepository<StructuredEventEntity, Long> repository() {
         return structuredEventRepository;
     }
 
     @Override
-    public OrganizationResource resource() {
-        return OrganizationResource.STRUCTURED_EVENT;
+    public WorkspaceResource resource() {
+        return WorkspaceResource.STRUCTURED_EVENT;
     }
 
     @Override

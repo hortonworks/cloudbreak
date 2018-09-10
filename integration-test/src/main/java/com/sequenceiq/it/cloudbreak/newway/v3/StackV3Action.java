@@ -37,11 +37,11 @@ public class StackV3Action {
         StackEntity stackEntity = (StackEntity) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
-        Long orgId = integrationTestContext.getContextParam(CloudbreakTest.ORGANIZATION_ID, Long.class);
+        Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         Log.log(" get stack " + stackEntity.getName());
         stackEntity.setResponse(
                 client.getCloudbreakClient().stackV3Endpoint()
-                        .getByNameInOrganization(orgId, stackEntity.getName(), null));
+                        .getByNameInWorkspace(workspaceId, stackEntity.getName(), null));
         Log.logJSON(" stack get response: ", stackEntity.getResponse());
     }
 
@@ -49,12 +49,12 @@ public class StackV3Action {
         StackEntity stackEntity = (StackEntity) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
-        Long orgId = integrationTestContext.getContextParam(CloudbreakTest.ORGANIZATION_ID, Long.class);
+        Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         Log.log(" get all stack");
         stackEntity.setResponses(
                 client.getCloudbreakClient()
                         .stackV3Endpoint()
-                        .listByOrganization(orgId));
+                        .listByWorkspace(workspaceId));
     }
 
     public static void delete(IntegrationTestContext integrationTestContext, Entity entity) {
@@ -69,20 +69,20 @@ public class StackV3Action {
         StackEntity stackEntity = entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
-        Long orgId = integrationTestContext.getContextParam(CloudbreakTest.ORGANIZATION_ID, Long.class);
+        Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         Log.log(" delete: " + stackEntity.getName());
         client.getCloudbreakClient().stackV3Endpoint()
-                .deleteInOrganization(orgId, stackEntity.getName(), forced, false);
+                .deleteInWorkspace(workspaceId, stackEntity.getName(), forced, false);
     }
 
     public static void deleteWithKerberos(IntegrationTestContext integrationTestContext, Entity entity) {
         StackEntity stackEntity = (StackEntity) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
-        Long orgId = integrationTestContext.getContextParam(CloudbreakTest.ORGANIZATION_ID, Long.class);
+        Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         Log.log(" delete: " + stackEntity.getName());
         client.getCloudbreakClient().stackV3Endpoint()
-                .deleteWithKerberosInOrg(orgId, stackEntity.getName(), true, false);
+                .deleteWithKerberosInWorkspace(workspaceId, stackEntity.getName(), true, false);
     }
 
     public static void createInGiven(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {

@@ -32,11 +32,11 @@ public abstract class StackPostV3StrategyRoot implements Strategy {
             throws Exception {
         log(" Name:\n" + stackEntity.getRequest().getGeneral().getName());
         logJSON(" Stack post request:\n", stackEntity.getRequest());
-        Long orgId = integrationTestContext.getContextParam(CloudbreakTest.ORGANIZATION_ID, Long.class);
+        Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         stackEntity.setResponse(
                 client.getCloudbreakClient()
                         .stackV3Endpoint()
-                        .createInOrganization(orgId, stackEntity.getRequest()));
+                        .createInWorkspace(workspaceId, stackEntity.getRequest()));
         logJSON(" Stack post response:\n", stackEntity.getResponse());
         log(" ID:\n" + stackEntity.getResponse().getId());
     }

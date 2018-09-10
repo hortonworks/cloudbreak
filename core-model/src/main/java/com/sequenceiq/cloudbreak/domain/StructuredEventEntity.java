@@ -13,17 +13,17 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
-import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
+import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.OrganizationAwareResource;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType;
 
 @Entity
 @Table(name = "structuredevent")
-public class StructuredEventEntity implements OrganizationAwareResource {
+public class StructuredEventEntity implements WorkspaceAwareResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "structuredevent_generator")
@@ -54,7 +54,7 @@ public class StructuredEventEntity implements OrganizationAwareResource {
     private Json structuredEventJson;
 
     @ManyToOne
-    private Organization organization;
+    private Workspace workspace;
 
     @ManyToOne
     @JoinColumn(name = "users_user_id")
@@ -125,8 +125,8 @@ public class StructuredEventEntity implements OrganizationAwareResource {
     }
 
     @Override
-    public Organization getOrganization() {
-        return organization;
+    public Workspace getWorkspace() {
+        return workspace;
     }
 
     @Override
@@ -135,13 +135,13 @@ public class StructuredEventEntity implements OrganizationAwareResource {
     }
 
     @Override
-    public void setOrganization(Organization organization) {
-        this.organization = organization;
+    public void setWorkspace(Workspace workspace) {
+        this.workspace = workspace;
     }
 
     @Override
-    public OrganizationResource getResource() {
-        return OrganizationResource.STRUCTURED_EVENT;
+    public WorkspaceResource getResource() {
+        return WorkspaceResource.STRUCTURED_EVENT;
     }
 
     public User getUser() {

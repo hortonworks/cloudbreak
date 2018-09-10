@@ -21,8 +21,8 @@ import com.sequenceiq.cloudbreak.api.model.users.UserProfileRequest;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.repository.UserProfileRepository;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 
@@ -170,24 +170,24 @@ public class UserProfileServiceTest {
         IdentityUser identityUser = new IdentityUser(null, null, null, null, null, null, null);
         UserProfile userProfile = new UserProfile();
         userProfile.setUser(new User());
-        Organization organization = createOrganization(1L);
+        Workspace workspace = createWorkspace(1L);
         UserProfileRequest userProfileRequest = createUserProfileRequest(null, 1L);
 
         when(userProfileRepository.save(any(UserProfile.class))).thenReturn(userProfile);
-        when(credentialService.get(anyLong(), any())).thenReturn(createCredential(1L, null, organization));
+        when(credentialService.get(anyLong(), any())).thenReturn(createCredential(1L, null, workspace));
 
-        userProfileService.put(userProfileRequest, identityUser, null, organization);
+        userProfileService.put(userProfileRequest, identityUser, null, workspace);
         assertEquals(1, userProfile.getDefaultCredentials().size());
 
-        userProfileService.put(userProfileRequest, identityUser, null, organization);
+        userProfileService.put(userProfileRequest, identityUser, null, workspace);
         assertEquals(1, userProfile.getDefaultCredentials().size());
 
-        organization = createOrganization(2L);
+        workspace = createWorkspace(2L);
         userProfileRequest = createUserProfileRequest("cred", null);
 
-        when(credentialService.getByNameForOrganization(anyString(), any())).thenReturn(createCredential(2L, "cred", organization));
+        when(credentialService.getByNameForWorkspace(anyString(), any())).thenReturn(createCredential(2L, "cred", workspace));
 
-        userProfileService.put(userProfileRequest, identityUser, null, organization);
+        userProfileService.put(userProfileRequest, identityUser, null, workspace);
         assertEquals(2, userProfile.getDefaultCredentials().size());
     }
 
@@ -198,17 +198,17 @@ public class UserProfileServiceTest {
         return request;
     }
 
-    private Credential createCredential(Long id, String name, Organization organization) {
+    private Credential createCredential(Long id, String name, Workspace workspace) {
         Credential credential = new Credential();
         credential.setId(id);
         credential.setName(name);
-        credential.setOrganization(organization);
+        credential.setWorkspace(workspace);
         return credential;
     }
 
-    private Organization createOrganization(Long id) {
-        Organization organization = new Organization();
-        organization.setId(id);
-        return organization;
+    private Workspace createWorkspace(Long id) {
+        Workspace workspace = new Workspace();
+        workspace.setId(id);
+        return workspace;
     }
 }

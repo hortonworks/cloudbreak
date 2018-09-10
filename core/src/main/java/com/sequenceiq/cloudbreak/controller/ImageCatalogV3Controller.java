@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.StackImageFilterService;
@@ -47,16 +47,16 @@ public class ImageCatalogV3Controller extends NotificationController implements 
     private RestRequestThreadLocalService restRequestThreadLocalService;
 
     @Override
-    public Set<ImageCatalogResponse> listByOrganization(Long organizationId) {
-        return imageCatalogService.findAllByOrganizationId(organizationId).stream()
+    public Set<ImageCatalogResponse> listByWorkspace(Long workspaceId) {
+        return imageCatalogService.findAllByWorkspaceId(workspaceId).stream()
                 .map(imageCatalog -> conversionService.convert(imageCatalog, ImageCatalogResponse.class))
                 .collect(Collectors.toSet());
     }
 
     @Override
-    public ImageCatalogResponse getByNameInOrganization(Long organizationId, String name, boolean withImages) {
-        ImageCatalogResponse imageCatalogResponse = conversionService.convert(imageCatalogService.get(organizationId, name), ImageCatalogResponse.class);
-        Images images = imageCatalogService.propagateImagesIfRequested(organizationId, name, withImages);
+    public ImageCatalogResponse getByNameInWorkspace(Long workspaceId, String name, boolean withImages) {
+        ImageCatalogResponse imageCatalogResponse = conversionService.convert(imageCatalogService.get(workspaceId, name), ImageCatalogResponse.class);
+        Images images = imageCatalogService.propagateImagesIfRequested(workspaceId, name, withImages);
         if (images != null) {
             imageCatalogResponse.setImagesResponse(conversionService.convert(images, ImagesResponse.class));
         }
@@ -64,31 +64,31 @@ public class ImageCatalogV3Controller extends NotificationController implements 
     }
 
     @Override
-    public ImageCatalogResponse createInOrganization(Long organizationId, ImageCatalogRequest request) {
+    public ImageCatalogResponse createInWorkspace(Long workspaceId, ImageCatalogRequest request) {
         ImageCatalog imageCatalog = conversionService.convert(request, ImageCatalog.class);
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        imageCatalog = imageCatalogService.create(imageCatalog, organizationId, user);
+        imageCatalog = imageCatalogService.create(imageCatalog, workspaceId, user);
         notify(ResourceEvent.IMAGE_CATALOG_CREATED);
         return conversionService.convert(imageCatalog, ImageCatalogResponse.class);
     }
 
     @Override
-    public ImageCatalogResponse deleteInOrganization(Long organizationId, String name) {
+    public ImageCatalogResponse deleteInWorkspace(Long workspaceId, String name) {
         IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
         User user = userService.getOrCreate(identityUser);
-        ImageCatalog deleted = imageCatalogService.delete(organizationId, name, identityUser, user);
+        ImageCatalog deleted = imageCatalogService.delete(workspaceId, name, identityUser, user);
         notify(ResourceEvent.IMAGE_CATALOG_DELETED);
         return conversionService.convert(deleted, ImageCatalogResponse.class);
     }
 
     @Override
-    public ImagesResponse getImagesByProviderFromImageCatalogInOrganization(Long organizationId, String name, String platform) throws Exception {
-        Images images = imageCatalogService.getImages(organizationId, name, platform).getImages();
+    public ImagesResponse getImagesByProviderFromImageCatalogInWorkspace(Long workspaceId, String name, String platform) throws Exception {
+        Images images = imageCatalogService.getImages(workspaceId, name, platform).getImages();
         return conversionService.convert(images, ImagesResponse.class);
     }
 
     @Override
-    public ImagesResponse getImagesByProvider(Long organizationId, String platform) throws Exception {
+    public ImagesResponse getImagesByProvider(Long workspaceId, String platform) throws Exception {
         IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
         User user = userService.getOrCreate(identityUser);
         Images images = imageCatalogService.getImagesOsFiltered(platform, null, identityUser, user).getImages();
@@ -96,34 +96,34 @@ public class ImageCatalogV3Controller extends NotificationController implements 
     }
 
     @Override
-    public ImagesResponse getImagesFromCustomImageCatalogByStackInOrganization(Long organizationId, String name, String stackName) throws Exception {
-        Images images = stackImageFilterService.getApplicableImages(organizationId, name, stackName);
+    public ImagesResponse getImagesFromCustomImageCatalogByStackInWorkspace(Long workspaceId, String name, String stackName) throws Exception {
+        Images images = stackImageFilterService.getApplicableImages(workspaceId, name, stackName);
         return conversionService.convert(images, ImagesResponse.class);
     }
 
     @Override
-    public ImagesResponse getImagesFromDefaultImageCatalogByStackInOrganization(Long organizationId, String stackName) throws Exception {
-        Images images = stackImageFilterService.getApplicableImages(organizationId, stackName);
+    public ImagesResponse getImagesFromDefaultImageCatalogByStackInWorkspace(Long workspaceId, String stackName) throws Exception {
+        Images images = stackImageFilterService.getApplicableImages(workspaceId, stackName);
         return conversionService.convert(images, ImagesResponse.class);
     }
 
     @Override
-    public ImageCatalogResponse putPublicInOrganization(Long organizationId, UpdateImageCatalogRequest request) {
+    public ImageCatalogResponse putPublicInWorkspace(Long workspaceId, UpdateImageCatalogRequest request) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        ImageCatalog imageCatalog = imageCatalogService.update(organizationId, conversionService.convert(request, ImageCatalog.class), user);
+        ImageCatalog imageCatalog = imageCatalogService.update(workspaceId, conversionService.convert(request, ImageCatalog.class), user);
         return conversionService.convert(imageCatalog, ImageCatalogResponse.class);
     }
 
     @Override
-    public ImageCatalogResponse putSetDefaultByNameInOrganization(Long organizationId, String name) {
+    public ImageCatalogResponse putSetDefaultByNameInWorkspace(Long workspaceId, String name) {
         IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
         User user = userService.getOrCreate(identityUser);
-        return conversionService.convert(imageCatalogService.setAsDefault(organizationId, name, identityUser, user), ImageCatalogResponse.class);
+        return conversionService.convert(imageCatalogService.setAsDefault(workspaceId, name, identityUser, user), ImageCatalogResponse.class);
     }
 
     @Override
-    public ImageCatalogRequest getRequestFromName(Long organizationId, String name) {
-        ImageCatalog imageCatalog = imageCatalogService.get(organizationId, name);
+    public ImageCatalogRequest getRequestFromName(Long workspaceId, String name) {
+        ImageCatalog imageCatalog = imageCatalogService.get(workspaceId, name);
         return conversionService.convert(imageCatalog, ImageCatalogRequest.class);
     }
 }

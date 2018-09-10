@@ -24,7 +24,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
-import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
+import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintParameterQueryService;
 import com.sequenceiq.cloudbreak.blueprint.configuration.SiteConfigurations;
@@ -35,20 +35,20 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.init.blueprint.BlueprintLoaderService;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
-import com.sequenceiq.cloudbreak.repository.organization.OrganizationResourceRepository;
-import com.sequenceiq.cloudbreak.service.AbstractOrganizationAwareResourceService;
+import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
+import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.util.NameUtil;
 
 @Service
-public class BlueprintService extends AbstractOrganizationAwareResourceService<Blueprint> {
+public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blueprint> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintService.class);
 
@@ -80,8 +80,8 @@ public class BlueprintService extends AbstractOrganizationAwareResourceService<B
         return blueprintRepository.findById(id).orElseThrow(notFound("Blueprint", id));
     }
 
-    public Blueprint create(Organization organization, Blueprint blueprint, Collection<Map<String, Map<String, String>>> properties, User user) {
-        LOGGER.debug("Creating blueprint: Organization: {} ({})", organization.getId(), organization.getName());
+    public Blueprint create(Workspace workspace, Blueprint blueprint, Collection<Map<String, Map<String, String>>> properties, User user) {
+        LOGGER.debug("Creating blueprint: Workspace: {} ({})", workspace.getId(), workspace.getName());
         Blueprint savedBlueprint;
         if (properties != null && !properties.isEmpty()) {
             LOGGER.info("Extend blueprint with the following properties: {}", properties);
@@ -102,7 +102,7 @@ public class BlueprintService extends AbstractOrganizationAwareResourceService<B
             blueprint.setBlueprintText(extendedBlueprint);
         }
         try {
-            savedBlueprint = create(blueprint, organization.getId(), user);
+            savedBlueprint = create(blueprint, workspace.getId(), user);
         } catch (DataIntegrityViolationException ex) {
             String msg = String.format("Error with resource [%s], %s", APIResourceType.BLUEPRINT, getProperSqlErrorMessage(ex));
             throw new BadRequestException(msg, ex);
@@ -111,30 +111,30 @@ public class BlueprintService extends AbstractOrganizationAwareResourceService<B
     }
 
     @Override
-    public Set<Blueprint> findAllByOrganization(Organization organization) {
-        return getAllAvailableInOrganization(organization);
+    public Set<Blueprint> findAllByWorkspace(Workspace workspace) {
+        return getAllAvailableInWorkspace(workspace);
     }
 
     @Override
-    public Set<Blueprint> findAllByOrganizationId(Long organizationId) {
+    public Set<Blueprint> findAllByWorkspaceId(Long workspaceId) {
         IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
         User user = userService.getOrCreate(identityUser);
-        Organization organization = getOrganizationService().get(organizationId, user);
-        return getAllAvailableInOrganization(organization);
+        Workspace workspace = getWorkspaceService().get(workspaceId, user);
+        return getAllAvailableInWorkspace(workspace);
     }
 
-    public Set<Blueprint> getAllAvailableInOrganization(Organization organization) {
-        Set<Blueprint> blueprints = blueprintRepository.findAllByNotDeletedInOrganization(organization.getId());
+    public Set<Blueprint> getAllAvailableInWorkspace(Workspace workspace) {
+        Set<Blueprint> blueprints = blueprintRepository.findAllByNotDeletedInWorkspace(workspace.getId());
         if (blueprintLoaderService.addingDefaultBlueprintsAreNecessaryForTheUser(blueprints)) {
-            LOGGER.info("Modifying blueprints based on the defaults for the '{}' organization.", organization.getId());
-            blueprints = blueprintLoaderService.loadBlueprintsForTheOrganization(blueprints, organization, this::saveDefaultsWithReadRight);
-            LOGGER.info("Blueprint modifications finished based on the defaults for '{}' organization.", organization.getId());
+            LOGGER.info("Modifying blueprints based on the defaults for the '{}' workspace.", workspace.getId());
+            blueprints = blueprintLoaderService.loadBlueprintsForTheWorkspace(blueprints, workspace, this::saveDefaultsWithReadRight);
+            LOGGER.info("Blueprint modifications finished based on the defaults for '{}' workspace.", workspace.getId());
         }
         return blueprints;
     }
 
-    private Iterable<Blueprint> saveDefaultsWithReadRight(Iterable<Blueprint> blueprints, Organization organization) {
-        blueprints.forEach(bp -> bp.setOrganization(organization));
+    private Iterable<Blueprint> saveDefaultsWithReadRight(Iterable<Blueprint> blueprints, Workspace workspace) {
+        blueprints.forEach(bp -> bp.setWorkspace(workspace));
         return blueprintRepository.saveAll(blueprints);
     }
 
@@ -157,13 +157,13 @@ public class BlueprintService extends AbstractOrganizationAwareResourceService<B
     }
 
     @Override
-    public OrganizationResourceRepository<Blueprint, Long> repository() {
+    public WorkspaceResourceRepository<Blueprint, Long> repository() {
         return blueprintRepository;
     }
 
     @Override
-    public OrganizationResource resource() {
-        return OrganizationResource.BLUEPRINT;
+    public WorkspaceResource resource() {
+        return WorkspaceResource.BLUEPRINT;
     }
 
     @Override
@@ -200,14 +200,14 @@ public class BlueprintService extends AbstractOrganizationAwareResourceService<B
     protected void prepareCreation(Blueprint resource) {
     }
 
-    public Set<String> queryCustomParameters(String name, Organization organization) {
-        Blueprint blueprint = getByNameForOrganization(name, organization);
+    public Set<String> queryCustomParameters(String name, Workspace workspace) {
+        Blueprint blueprint = getByNameForWorkspace(name, workspace);
         return centralBlueprintParameterQueryService.queryCustomParameters(blueprint.getBlueprintText());
     }
 
     public Set<ConfigQueryEntry> queryFileSystemParameters(String blueprintName, String clusterName,
-            String storageName, String fileSystemType, String accountName, boolean attachedCluster, Organization organization) {
-        Blueprint blueprint = getByNameForOrganization(blueprintName, organization);
+            String storageName, String fileSystemType, String accountName, boolean attachedCluster, Workspace workspace) {
+        Blueprint blueprint = getByNameForWorkspace(blueprintName, workspace);
 
         FileSystemConfigQueryObject fileSystemConfigQueryObject = Builder.builder()
                 .withClusterName(clusterName)

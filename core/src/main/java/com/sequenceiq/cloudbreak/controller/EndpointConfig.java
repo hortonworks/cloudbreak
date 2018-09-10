@@ -51,7 +51,7 @@ public class EndpointConfig extends ResourceConfig {
         LdapV3Controller.class,
         ManagementPackController.class,
         ManagementPackV3Controller.class,
-        OrganizationV3Controller.class,
+        WorkspaceV3Controller.class,
         PlatformParameterV1Controller.class,
         PlatformParameterV2Controller.class,
         PlatformParameterV3Controller.class,

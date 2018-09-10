@@ -115,11 +115,11 @@ public class Stack extends StackEntity {
             CloudbreakClient client = CloudbreakClient.getTestContextCloudbreakClient().apply(t);
             StackResponse stackResponse = stack.getResponse();
             String stackName = stackResponse.getName();
-            Long orgId = stackResponse.getOrganization().getId();
+            Long workspaceId = stackResponse.getWorkspace().getId();
             Assert.assertNotNull(stackResponse.getName());
-            waitAndCheckStackStatus(client.getCloudbreakClient(), orgId, stackName, "AVAILABLE");
-            waitAndCheckClusterStatus(client.getCloudbreakClient(), orgId, stackName, "AVAILABLE");
-            waitAndCheckStackStatus(client.getCloudbreakClient(), orgId, stackName, "AVAILABLE");
+            waitAndCheckStackStatus(client.getCloudbreakClient(), workspaceId, stackName, "AVAILABLE");
+            waitAndCheckClusterStatus(client.getCloudbreakClient(), workspaceId, stackName, "AVAILABLE");
+            waitAndCheckStackStatus(client.getCloudbreakClient(), workspaceId, stackName, "AVAILABLE");
         });
     }
 
@@ -128,9 +128,9 @@ public class Stack extends StackEntity {
             CloudbreakClient client = CloudbreakClient.getTestContextCloudbreakClient().apply(t);
             StackResponse stackResponse = stack.getResponse();
             String stackName = stackResponse.getName();
-            Long orgId = stackResponse.getOrganization().getId();
+            Long workspaceId = stackResponse.getWorkspace().getId();
             Assert.assertNotNull(stackResponse.getName());
-            waitAndCheckClusterStatus(client.getCloudbreakClient(), orgId, stackName, "AVAILABLE");
+            waitAndCheckClusterStatus(client.getCloudbreakClient(), workspaceId, stackName, "AVAILABLE");
         });
     }
 
@@ -139,9 +139,9 @@ public class Stack extends StackEntity {
             CloudbreakClient client = CloudbreakClient.getTestContextCloudbreakClient().apply(t);
             StackResponse stackResponse = stack.getResponse();
             String stackName = stackResponse.getName();
-            Long orgId = stackResponse.getOrganization().getId();
+            Long workspaceId = stackResponse.getWorkspace().getId();
             Assert.assertNotNull(stackResponse.getName());
-            waitAndCheckStackStatus(client.getCloudbreakClient(), orgId, stackName, "AVAILABLE");
+            waitAndCheckStackStatus(client.getCloudbreakClient(), workspaceId, stackName, "AVAILABLE");
         });
     }
 
@@ -150,10 +150,10 @@ public class Stack extends StackEntity {
             CloudbreakClient client = CloudbreakClient.getTestContextCloudbreakClient().apply(t);
             StackResponse stackResponse = stack.getResponse();
             String stackName = stackResponse.getName();
-            Long orgId = stackResponse.getOrganization().getId();
+            Long workspaceId = stackResponse.getWorkspace().getId();
             Assert.assertNotNull(stackResponse.getName());
-            waitAndCheckStackStatus(client.getCloudbreakClient(), orgId, stackName, "AVAILABLE");
-            waitAndExpectClusterFailure(client.getCloudbreakClient(), orgId, stackName, "CREATE_FAILED", keyword);
+            waitAndCheckStackStatus(client.getCloudbreakClient(), workspaceId, stackName, "AVAILABLE");
+            waitAndExpectClusterFailure(client.getCloudbreakClient(), workspaceId, stackName, "CREATE_FAILED", keyword);
         });
     }
 
@@ -162,11 +162,11 @@ public class Stack extends StackEntity {
             CloudbreakClient client = CloudbreakClient.getTestContextCloudbreakClient().apply(t);
             StackResponse stackResponse = stack.getResponse();
             String stackName = stackResponse.getName();
-            Long orgId = stackResponse.getOrganization().getId();
+            Long workspaceId = stackResponse.getWorkspace().getId();
             Assert.assertNotNull(stackResponse.getName());
-            waitAndCheckStackStatus(client.getCloudbreakClient(), orgId, stackName, "STOPPED");
-            waitAndCheckClusterStatus(client.getCloudbreakClient(), orgId, stackName, "STOPPED");
-            waitAndCheckStackStatus(client.getCloudbreakClient(), orgId, stackName, "STOPPED");
+            waitAndCheckStackStatus(client.getCloudbreakClient(), workspaceId, stackName, "STOPPED");
+            waitAndCheckClusterStatus(client.getCloudbreakClient(), workspaceId, stackName, "STOPPED");
+            waitAndCheckStackStatus(client.getCloudbreakClient(), workspaceId, stackName, "STOPPED");
         });
     }
 
@@ -175,9 +175,9 @@ public class Stack extends StackEntity {
             CloudbreakClient client = CloudbreakClient.getTestContextCloudbreakClient().apply(t);
             StackResponse stackResponse = stack.getResponse();
             String stackName = stackResponse.getName();
-            Long orgId = stackResponse.getOrganization().getId();
+            Long workspaceId = stackResponse.getWorkspace().getId();
             Assert.assertNotNull(stackResponse.getName());
-            waitAndCheckStackStatus(client.getCloudbreakClient(), orgId, stackName, "DELETE_COMPLETED");
+            waitAndCheckStackStatus(client.getCloudbreakClient(), workspaceId, stackName, "DELETE_COMPLETED");
         });
     }
 
@@ -186,7 +186,7 @@ public class Stack extends StackEntity {
             CloudbreakClient client = CloudbreakClient.getTestContextCloudbreakClient().apply(t);
             CloudbreakV3Util.checkClusterAvailability(client.getCloudbreakClient().stackV3Endpoint(),
                     ambariPort,
-                    stack.getResponse().getOrganization().getId(),
+                    stack.getResponse().getWorkspace().getId(),
                     stack.getResponse().getName(),
                     ambariUser,
                     ambariPassword,
@@ -198,7 +198,7 @@ public class Stack extends StackEntity {
         return assertThis((stack, context) -> {
             CloudbreakClient client = CloudbreakClient.getTestContextCloudbreakClient().apply(context);
             CloudbreakV3Util.checkClusterAvailabilityThroughGateway(client.getCloudbreakClient().stackV3Endpoint(),
-                    stack.getResponse().getOrganization().getId(),
+                    stack.getResponse().getWorkspace().getId(),
                     stack.getResponse().getName(),
                     ambariUser,
                     ambariPassword);

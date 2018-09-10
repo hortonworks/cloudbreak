@@ -19,11 +19,11 @@ public class DiskTypesV3Action {
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
-        Long orgId = integrationTestContext.getContextParam(CloudbreakTest.ORGANIZATION_ID, Long.class);
+        Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         Log.log(" get Disk Types to");
         recommendationEntity.setResponse(
                 client.getCloudbreakClient()
-                        .connectorV3Endpoint().getDisktypes(orgId));
+                        .connectorV3Endpoint().getDisktypes(workspaceId));
         Log.logJSON(" get Disk Types response: ", recommendationEntity.getResponse());
     }
 

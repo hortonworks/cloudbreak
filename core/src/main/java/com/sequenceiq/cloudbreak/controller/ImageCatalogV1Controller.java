@@ -20,12 +20,12 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.StackImageFilterService;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Component
@@ -43,7 +43,7 @@ public class ImageCatalogV1Controller implements ImageCatalogV1Endpoint {
     private ConversionService conversionService;
 
     @Inject
-    private OrganizationService organizationService;
+    private WorkspaceService workspaceService;
 
     @Inject
     private RestRequestThreadLocalService restRequestThreadLocalService;
@@ -58,8 +58,8 @@ public class ImageCatalogV1Controller implements ImageCatalogV1Endpoint {
 
     @Override
     public ImageCatalogResponse getByName(String name, boolean withImages) {
-        ImageCatalogResponse imageCatalogResponse = convert(imageCatalogService.get(restRequestThreadLocalService.getRequestedOrgId(), name));
-        Images images = imageCatalogService.propagateImagesIfRequested(restRequestThreadLocalService.getRequestedOrgId(), name, withImages);
+        ImageCatalogResponse imageCatalogResponse = convert(imageCatalogService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), name));
+        Images images = imageCatalogService.propagateImagesIfRequested(restRequestThreadLocalService.getRequestedWorkspaceId(), name, withImages);
         if (images != null) {
             imageCatalogResponse.setImagesResponse(conversionService.convert(images, ImagesResponse.class));
         }
@@ -88,7 +88,7 @@ public class ImageCatalogV1Controller implements ImageCatalogV1Endpoint {
 
     @Override
     public ImagesResponse getImagesByProviderFromImageCatalog(String name, String platform) throws Exception {
-        Images images = imageCatalogService.getImages(restRequestThreadLocalService.getRequestedOrgId(), name, platform).getImages();
+        Images images = imageCatalogService.getImages(restRequestThreadLocalService.getRequestedWorkspaceId(), name, platform).getImages();
         return conversionService.convert(images, ImagesResponse.class);
     }
 
@@ -96,14 +96,14 @@ public class ImageCatalogV1Controller implements ImageCatalogV1Endpoint {
     public void deletePublic(String name) {
         IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
         User user = userService.getOrCreate(identityUser);
-        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        imageCatalogService.delete(organization.getId(), name, identityUser, user);
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        imageCatalogService.delete(workspace.getId(), name, identityUser, user);
     }
 
     @Override
     public ImageCatalogResponse putPublic(UpdateImageCatalogRequest request) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        ImageCatalog imageCatalog = imageCatalogService.update(restRequestThreadLocalService.getRequestedOrgId(),
+        ImageCatalog imageCatalog = imageCatalogService.update(restRequestThreadLocalService.getRequestedWorkspaceId(),
                 conversionService.convert(request, ImageCatalog.class), user);
         return convert(imageCatalog);
     }
@@ -112,25 +112,25 @@ public class ImageCatalogV1Controller implements ImageCatalogV1Endpoint {
     public ImageCatalogResponse putSetDefaultByName(String name) {
         IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
         User user = userService.getOrCreate(identityUser);
-        return conversionService.convert(imageCatalogService.setAsDefault(restRequestThreadLocalService.getRequestedOrgId(), name, identityUser, user),
+        return conversionService.convert(imageCatalogService.setAsDefault(restRequestThreadLocalService.getRequestedWorkspaceId(), name, identityUser, user),
                 ImageCatalogResponse.class);
     }
 
     @Override
     public ImageCatalogRequest getRequestfromName(String name) {
-        ImageCatalog imageCatalog = imageCatalogService.get(restRequestThreadLocalService.getRequestedOrgId(), name);
+        ImageCatalog imageCatalog = imageCatalogService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), name);
         return conversionService.convert(imageCatalog, ImageCatalogRequest.class);
     }
 
     @Override
     public ImagesResponse getImagesFromCustomImageCatalogByStack(String imageCatalogName, String stackName) throws CloudbreakImageCatalogException {
-        Images images = stackImageFilterService.getApplicableImages(restRequestThreadLocalService.getRequestedOrgId(), imageCatalogName, stackName);
+        Images images = stackImageFilterService.getApplicableImages(restRequestThreadLocalService.getRequestedWorkspaceId(), imageCatalogName, stackName);
         return conversionService.convert(images, ImagesResponse.class);
     }
 
     @Override
     public ImagesResponse getImagesFromDefaultImageCatalogByStack(String stackName) throws Exception {
-        Images images = stackImageFilterService.getApplicableImages(restRequestThreadLocalService.getRequestedOrgId(), stackName);
+        Images images = stackImageFilterService.getApplicableImages(restRequestThreadLocalService.getRequestedWorkspaceId(), stackName);
         return conversionService.convert(images, ImagesResponse.class);
     }
 
@@ -145,13 +145,13 @@ public class ImageCatalogV1Controller implements ImageCatalogV1Endpoint {
     }
 
     private List<ImageCatalogResponse> getAll() {
-        return toJsonList(imageCatalogService.findAllByOrganizationId(restRequestThreadLocalService.getRequestedOrgId()), ImageCatalogResponse.class);
+        return toJsonList(imageCatalogService.findAllByWorkspaceId(restRequestThreadLocalService.getRequestedWorkspaceId()), ImageCatalogResponse.class);
     }
 
     private ImageCatalogResponse post(ImageCatalogRequest imageCatalogRequest, User user) {
         ImageCatalog imageCatalog = conversionService.convert(imageCatalogRequest, ImageCatalog.class);
-        Long orgId = restRequestThreadLocalService.getRequestedOrgId();
-        imageCatalog = imageCatalogService.create(imageCatalog, orgId, user);
+        Long workspaceId = restRequestThreadLocalService.getRequestedWorkspaceId();
+        imageCatalog = imageCatalogService.create(imageCatalog, workspaceId, user);
         return convert(imageCatalog);
     }
 }

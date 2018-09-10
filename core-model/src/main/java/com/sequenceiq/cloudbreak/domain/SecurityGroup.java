@@ -20,13 +20,13 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.OrganizationAwareResource;
+import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"organization_id", "name"}))
-public class SecurityGroup implements ProvisionEntity, OrganizationAwareResource {
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name"}))
+public class SecurityGroup implements ProvisionEntity, WorkspaceAwareResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "securitygroup_generator")
@@ -53,23 +53,23 @@ public class SecurityGroup implements ProvisionEntity, OrganizationAwareResource
     private String cloudPlatform;
 
     @ManyToOne
-    private Organization organization;
+    private Workspace workspace;
 
     private String owner;
 
     private String account;
 
-    public Organization getOrganization() {
-        return organization;
+    public Workspace getWorkspace() {
+        return workspace;
     }
 
-    public void setOrganization(Organization organization) {
-        this.organization = organization;
+    public void setWorkspace(Workspace workspace) {
+        this.workspace = workspace;
     }
 
     @Override
-    public OrganizationResource getResource() {
-        return OrganizationResource.SECURITY_GROUP;
+    public WorkspaceResource getResource() {
+        return WorkspaceResource.SECURITY_GROUP;
     }
 
     public Long getId() {

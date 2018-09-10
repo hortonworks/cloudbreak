@@ -37,7 +37,7 @@ import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.SSOType;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
-import com.sequenceiq.cloudbreak.api.model.v2.OrganizationStatus;
+import com.sequenceiq.cloudbreak.api.model.v2.WorkspaceStatus;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
@@ -62,8 +62,8 @@ import com.sequenceiq.cloudbreak.domain.StorageLocations;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -148,11 +148,11 @@ public class TestUtil {
         User user = new User();
         user.setUserId("horton@hortonworks.com");
         user.setUserName("Alma ur");
-        Organization organization = new Organization();
-        organization.setId(1L);
+        Workspace workspace = new Workspace();
+        workspace.setId(1L);
         Stack stack = new Stack();
         stack.setCreator(user);
-        stack.setOrganization(organization);
+        stack.setWorkspace(workspace);
         stack.setStackStatus(new StackStatus(stack, stackStatus, "statusReason", DetailedStackStatus.UNKNOWN));
         stack.setCredential(credential);
         stack.setName("simplestack");
@@ -195,12 +195,12 @@ public class TestUtil {
         return orchestrator;
     }
 
-    public static Organization organization(Long id, String name) {
-        Organization organization = new Organization();
-        organization.setStatus(OrganizationStatus.ACTIVE);
-        organization.setName(name);
-        organization.setId(id);
-        return organization;
+    public static Workspace workspace(Long id, String name) {
+        Workspace workspace = new Workspace();
+        workspace.setStatus(WorkspaceStatus.ACTIVE);
+        workspace.setName(name);
+        workspace.setId(id);
+        return workspace;
     }
 
     public static User user(Long id, String name) {
@@ -424,10 +424,10 @@ public class TestUtil {
             cluster.setSecure(true);
             cluster.setKerberosConfig(kerberosConfig);
         }
-        Organization organization = new Organization();
-        organization.setName("org 1");
-        organization.setId(1L);
-        cluster.setOrganization(organization);
+        Workspace workspace = new Workspace();
+        workspace.setName("org 1");
+        workspace.setId(1L);
+        cluster.setWorkspace(workspace);
         return cluster;
     }
 
@@ -503,10 +503,10 @@ public class TestUtil {
             recipe.setUri("https://some/url");
             recipe.setContent("base64Content");
             recipe.setRecipeType(RecipeType.POST_AMBARI_START);
-            Organization organization = new Organization();
-            organization.setId(1L);
-            organization.setName("Top Secret FBI");
-            recipe.setOrganization(organization);
+            Workspace workspace = new Workspace();
+            workspace.setId(1L);
+            workspace.setName("Top Secret FBI");
+            recipe.setWorkspace(workspace);
             recipes.add(recipe);
         }
         return recipes;

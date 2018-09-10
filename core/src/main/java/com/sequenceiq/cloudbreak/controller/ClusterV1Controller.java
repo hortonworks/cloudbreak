@@ -26,8 +26,8 @@ import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.UpdateGatewayTopologiesJson;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -39,7 +39,7 @@ import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecution
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.gateway.GatewayService;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
@@ -75,7 +75,7 @@ public class ClusterV1Controller implements ClusterV1Endpoint {
     private StackCommonService stackCommonService;
 
     @Autowired
-    private OrganizationService organizationService;
+    private WorkspaceService workspaceService;
 
     @Inject
     private UserService userService;
@@ -86,10 +86,10 @@ public class ClusterV1Controller implements ClusterV1Endpoint {
     @Override
     public ClusterResponse post(Long stackId, ClusterRequest request) throws Exception {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         Stack stack = stackService.getByIdWithLists(stackId);
-        clusterCreationSetupService.validate(request, stack, user, organization);
-        Cluster cluster = clusterCreationSetupService.prepare(request, stack, user, organization);
+        clusterCreationSetupService.validate(request, stack, user, workspace);
+        Cluster cluster = clusterCreationSetupService.prepare(request, stack, user, workspace);
         Optional<StackInputs> stackInputs = sharedServiceConfigProvider.prepareDatalakeConfigs(cluster.getBlueprint(), stack);
         if (stackInputs.isPresent()) {
             sharedServiceConfigProvider.updateStackinputs(stackInputs.get(), stack);
@@ -107,7 +107,7 @@ public class ClusterV1Controller implements ClusterV1Endpoint {
 
     @Override
     public ClusterResponse getPrivate(String name) {
-        Stack stack = stackService.getByNameInOrg(name, restRequestThreadLocalService.getRequestedOrgId());
+        Stack stack = stackService.getByNameInWorkspace(name, restRequestThreadLocalService.getRequestedWorkspaceId());
         ClusterResponse cluster = clusterService.retrieveClusterForCurrentUser(stack.getId(), ClusterResponse.class);
         String clusterJson = clusterService.getClusterJson(stack.getAmbariIp(), stack.getId());
         return clusterService.getClusterResponse(cluster, clusterJson);
@@ -115,7 +115,7 @@ public class ClusterV1Controller implements ClusterV1Endpoint {
 
     @Override
     public ClusterResponse getPublic(String name) {
-        Stack stack = stackService.getByNameInOrg(name, restRequestThreadLocalService.getRequestedOrgId());
+        Stack stack = stackService.getByNameInWorkspace(name, restRequestThreadLocalService.getRequestedWorkspaceId());
         ClusterResponse cluster = clusterService.retrieveClusterForCurrentUser(stack.getId(), ClusterResponse.class);
         String clusterJson = clusterService.getClusterJson(stack.getAmbariIp(), stack.getId());
         return clusterService.getClusterResponse(cluster, clusterJson);
@@ -131,8 +131,8 @@ public class ClusterV1Controller implements ClusterV1Endpoint {
     @Override
     public Response put(Long stackId, UpdateClusterJson updateJson) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        return clusterCommonService.put(stackId, updateJson, user, organization);
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        return clusterCommonService.put(stackId, updateJson, user, workspace);
     }
 
     @Override

@@ -43,7 +43,7 @@ public class StackPostV3Strategy implements Strategy {
     public void doAction(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {
         StackEntity stackEntity = (StackEntity) entity;
         CloudbreakClient client = getTestContextCloudbreakClient().apply(integrationTestContext);
-        Long orgId = integrationTestContext.getContextParam(CloudbreakTest.ORGANIZATION_ID, Long.class);
+        Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
 
         Credential credential = Credential.getTestContextCredential().apply(integrationTestContext);
 
@@ -141,7 +141,7 @@ public class StackPostV3Strategy implements Strategy {
         stackEntity.setResponse(
                 client.getCloudbreakClient()
                         .stackV3Endpoint()
-                        .createInOrganization(orgId, stackEntity.getRequest()));
+                        .createInWorkspace(workspaceId, stackEntity.getRequest()));
         logJSON(" Stack post response:\n", stackEntity.getResponse());
         log(" ID:\n" + stackEntity.getResponse().getId());
     }

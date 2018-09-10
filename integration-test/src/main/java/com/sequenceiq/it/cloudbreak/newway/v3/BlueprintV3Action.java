@@ -18,14 +18,14 @@ public class BlueprintV3Action {
         BlueprintEntity blueprintEntity = (BlueprintEntity) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
-        Long orgId = integrationTestContext.getContextParam(CloudbreakTest.ORGANIZATION_ID, Long.class);
+        Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         Log.log(" post "
                 .concat(blueprintEntity.getName())
                 .concat(" private blueprint. "));
         blueprintEntity.setResponse(
                 client.getCloudbreakClient()
                         .blueprintV3Endpoint()
-                        .createInOrganization(orgId, blueprintEntity.getRequest()));
+                        .createInWorkspace(workspaceId, blueprintEntity.getRequest()));
 
         integrationTestContext.putCleanUpParam(blueprintEntity.getName(), blueprintEntity.getResponse().getId());
     }
@@ -35,14 +35,14 @@ public class BlueprintV3Action {
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
-        Long orgId = integrationTestContext.getContextParam(CloudbreakTest.ORGANIZATION_ID, Long.class);
+        Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         Log.log(" get "
                 .concat(blueprintEntity.getName())
                 .concat(" private blueprint by Name. "));
         blueprintEntity.setResponse(
                 client.getCloudbreakClient()
                         .blueprintV3Endpoint()
-                        .getByNameInOrganization(orgId, blueprintEntity.getName()));
+                        .getByNameInWorkspace(workspaceId, blueprintEntity.getName()));
         Log.logJSON(" get "
                 .concat(blueprintEntity.getName())
                 .concat(" blueprint response: "),
@@ -54,12 +54,12 @@ public class BlueprintV3Action {
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
-        Long orgId = integrationTestContext.getContextParam(CloudbreakTest.ORGANIZATION_ID, Long.class);
+        Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         Log.log(" get all private blueprints. ");
         blueprintEntity.setResponses(
                 client.getCloudbreakClient()
                         .blueprintV3Endpoint()
-                        .listByOrganization(orgId));
+                        .listByWorkspace(workspaceId));
     }
 
     public static void delete(IntegrationTestContext integrationTestContext, Entity entity) {
@@ -67,11 +67,11 @@ public class BlueprintV3Action {
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
-        Long orgId = integrationTestContext.getContextParam(CloudbreakTest.ORGANIZATION_ID, Long.class);
+        Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         Log.log(" delete "
                 .concat(blueprintEntity.getName())
                 .concat(" private blueprint with Name. "));
-        client.getCloudbreakClient().blueprintV3Endpoint().deleteInOrganization(orgId, blueprintEntity.getName());
+        client.getCloudbreakClient().blueprintV3Endpoint().deleteInWorkspace(workspaceId, blueprintEntity.getName());
     }
 
     public static void createInGiven(IntegrationTestContext integrationTestContext, Entity entity) {

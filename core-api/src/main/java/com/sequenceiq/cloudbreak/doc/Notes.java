@@ -75,7 +75,7 @@ public class Notes {
     public static final String REPOSITORY_CONFIGS_VALIDATION_NOTES = "Repository configs validation related operations";
     public static final String RETRY_STACK_NOTES = "Failed or interrupted stack and cluster operations can be retried, after the cause of the failure "
             + "was eliminated. The operations will continue at the state, where the previous process failed.";
-    public static final String ORGANIZATION_NOTES = "Organizations are a way of grouping resources, organization owners can add users to their organizations"
+    public static final String WORKSPACE_NOTES = "Workspaces are a way of grouping resources, workspace owners can add users to their workspaces"
             + " with different permission sets";
     public static final String AUDIT_EVENTS_NOTES = "Audit event operations";
 

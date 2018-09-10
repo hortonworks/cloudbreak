@@ -36,8 +36,8 @@ public class UserProfileToUserProfileResponseConverter extends AbstractConversio
         if (!entity.getDefaultCredentials().isEmpty()) {
             entity.getDefaultCredentials()
                     .stream()
-                    .filter(defaultCredential -> defaultCredential.getOrganization().getId().
-                            equals(restRequestThreadLocalService.getRequestedOrgId()))
+                    .filter(defaultCredential -> defaultCredential.getWorkspace().getId().
+                            equals(restRequestThreadLocalService.getRequestedWorkspaceId()))
                     .limit(1)
                     .forEach(credential -> {
                         CredentialResponse credentialResponse = getConversionService().convert(credential, CredentialResponse.class);

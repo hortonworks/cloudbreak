@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.api.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.sequenceiq.cloudbreak.api.model.users.OrganizationResourceResponse;
+import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
 import io.swagger.annotations.ApiModel;
@@ -18,15 +18,15 @@ public class NetworkResponse extends NetworkBase {
     @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
     private String name;
 
-    @ApiModelProperty(ModelDescriptions.ORGANIZATION_OF_THE_RESOURCE)
-    private OrganizationResourceResponse organization;
+    @ApiModelProperty(ModelDescriptions.WORKSPACE_OF_THE_RESOURCE)
+    private WorkspaceResourceResponse workspace;
 
-    public OrganizationResourceResponse getOrganization() {
-        return organization;
+    public WorkspaceResourceResponse getWorkspace() {
+        return workspace;
     }
 
-    public void setOrganization(OrganizationResourceResponse organization) {
-        this.organization = organization;
+    public void setWorkspace(WorkspaceResourceResponse workspace) {
+        this.workspace = workspace;
     }
 
     @JsonProperty("id")

@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.repository;
 
-import static com.sequenceiq.cloudbreak.authorization.OrganizationPermissions.Action.READ;
+import static com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action.READ;
 
 import java.util.Set;
 
@@ -11,23 +11,23 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.aspect.DisableHasPermission;
-import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByReturnValue;
-import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByTarget;
-import com.sequenceiq.cloudbreak.aspect.organization.OrganizationResourceType;
-import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
+import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByReturnValue;
+import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByTarget;
+import com.sequenceiq.cloudbreak.aspect.workspace.WorkspaceResourceType;
+import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.repository.organization.OrganizationResourceRepository;
+import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.EntityType;
 
 @EntityType(entityClass = Blueprint.class)
 @Transactional(TxType.REQUIRED)
 @DisableHasPermission
-@OrganizationResourceType(resource = OrganizationResource.BLUEPRINT)
-public interface BlueprintRepository extends OrganizationResourceRepository<Blueprint, Long> {
+@WorkspaceResourceType(resource = WorkspaceResource.BLUEPRINT)
+public interface BlueprintRepository extends WorkspaceResourceRepository<Blueprint, Long> {
 
-    @Query("SELECT b FROM Blueprint b WHERE b.organization.id= :organizationId AND b.status <> 'DEFAULT_DELETED'")
+    @Query("SELECT b FROM Blueprint b WHERE b.workspace.id= :workspaceId AND b.status <> 'DEFAULT_DELETED'")
     @CheckPermissionsByReturnValue
-    Set<Blueprint> findAllByNotDeletedInOrganization(@Param("organizationId") Long organizationId);
+    Set<Blueprint> findAllByNotDeletedInWorkspace(@Param("workspaceId") Long workspaceId);
 
     @Override
     @DisableHasPermission

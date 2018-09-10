@@ -24,7 +24,7 @@ public class AzureUtilsTest {
 
     private static final String USER_ID = "horton@hortonworks.com";
 
-    private static final Long ORGANIZATION_ID = 1L;
+    private static final Long WORKSPACE_ID = 1L;
 
     private static final String MAX_RESOURCE_NAME_LENGTH = "50";
 
@@ -46,7 +46,7 @@ public class AzureUtilsTest {
     public void shouldAdjustResourceNameLengthIfItsTooLong() {
         //GIVEN
         CloudContext context = new CloudContext(7899L, "thisisaverylongazureresourcenamewhichneedstobeshortened", "dummy1",
-                "dummy2", USER_ID, ORGANIZATION_ID);
+                "dummy2", USER_ID, WORKSPACE_ID);
 
         //WHEN
         String testResult = underTest.getStackName(context);

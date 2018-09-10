@@ -9,7 +9,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.StructuredEventEntity;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.structuredevent.event.OperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
 public class StructuredEventToStructuredEventEntityConverter extends AbstractConversionServiceAwareConverter<StructuredEvent, StructuredEventEntity> {
 
     @Inject
-    private OrganizationService organizationService;
+    private WorkspaceService workspaceService;
 
     @Inject
     private UserService userService;
@@ -35,8 +35,8 @@ public class StructuredEventToStructuredEventEntityConverter extends AbstractCon
             structuredEventEntity.setTimestamp(operationDetails.getTimestamp());
             structuredEventEntity.setAccount(operationDetails.getAccount());
             structuredEventEntity.setOwner(operationDetails.getUserId());
-            if (operationDetails.getOrganizationId() != null) {
-                structuredEventEntity.setOrganization(organizationService.getById(operationDetails.getOrganizationId()));
+            if (operationDetails.getWorkspaceId() != null) {
+                structuredEventEntity.setWorkspace(workspaceService.getById(operationDetails.getWorkspaceId()));
             }
             if (StringUtils.hasLength(operationDetails.getUserIdV3())) {
                 structuredEventEntity.setUser(userService.getByUserId(operationDetails.getUserIdV3()));

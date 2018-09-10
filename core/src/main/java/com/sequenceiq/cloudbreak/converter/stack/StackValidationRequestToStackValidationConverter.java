@@ -27,8 +27,8 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Network;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
@@ -36,7 +36,7 @@ import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
@@ -60,7 +60,7 @@ public class StackValidationRequestToStackValidationConverter extends AbstractCo
     private CloudParameterCache cloudParameterCache;
 
     @Inject
-    private OrganizationService organizationService;
+    private WorkspaceService workspaceService;
 
     @Inject
     private UserService userService;
@@ -76,14 +76,14 @@ public class StackValidationRequestToStackValidationConverter extends AbstractCo
         stackValidation.setHostGroups(convertHostGroupsFromJson(instanceGroups, stackValidationRequest.getHostGroups()));
 
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
 
         formatAccessDeniedMessage(
-                () -> validateBlueprint(stackValidationRequest, stackValidation, organization), "blueprint", stackValidationRequest.getBlueprintId()
+                () -> validateBlueprint(stackValidationRequest, stackValidation, workspace), "blueprint", stackValidationRequest.getBlueprintId()
         );
         formatAccessDeniedMessage(
                 () -> {
-                    validateCredential(stackValidationRequest, stackValidation, organization);
+                    validateCredential(stackValidationRequest, stackValidation, workspace);
                 }, "credential", stackValidationRequest.getCredentialId()
         );
         formatAccessDeniedMessage(
@@ -108,12 +108,12 @@ public class StackValidationRequestToStackValidationConverter extends AbstractCo
         }
     }
 
-    private void validateCredential(StackValidationRequest stackValidationRequest, StackValidation stackValidation, Organization organization) {
+    private void validateCredential(StackValidationRequest stackValidationRequest, StackValidation stackValidation, Workspace workspace) {
         if (stackValidationRequest.getCredentialId() != null) {
-            Credential credential = credentialService.get(stackValidationRequest.getCredentialId(), organization);
+            Credential credential = credentialService.get(stackValidationRequest.getCredentialId(), workspace);
             stackValidation.setCredential(credential);
         } else if (stackValidationRequest.getCredentialName() != null) {
-            Credential credential = credentialService.getByNameForOrganization(stackValidationRequest.getCredentialName(), organization);
+            Credential credential = credentialService.getByNameForWorkspace(stackValidationRequest.getCredentialName(), workspace);
             stackValidation.setCredential(credential);
         } else if (stackValidationRequest.getCredential() != null) {
             Credential credential = conversionService.convert(stackValidationRequest.getCredential(), Credential.class);
@@ -123,12 +123,12 @@ public class StackValidationRequestToStackValidationConverter extends AbstractCo
         }
     }
 
-    private void validateBlueprint(StackValidationRequest stackValidationRequest, StackValidation stackValidation, Organization organization) {
+    private void validateBlueprint(StackValidationRequest stackValidationRequest, StackValidation stackValidation, Workspace workspace) {
         if (stackValidationRequest.getBlueprintId() != null) {
             Blueprint blueprint = blueprintService.get(stackValidationRequest.getBlueprintId());
             stackValidation.setBlueprint(blueprint);
         } else if (stackValidationRequest.getBlueprintName() != null) {
-            Blueprint blueprint = blueprintService.getByNameForOrganization(stackValidationRequest.getBlueprintName(), organization);
+            Blueprint blueprint = blueprintService.getByNameForWorkspace(stackValidationRequest.getBlueprintName(), workspace);
             stackValidation.setBlueprint(blueprint);
         } else if (stackValidationRequest.getBlueprint() != null) {
             Blueprint blueprint = conversionService.convert(stackValidationRequest.getBlueprint(), Blueprint.class);

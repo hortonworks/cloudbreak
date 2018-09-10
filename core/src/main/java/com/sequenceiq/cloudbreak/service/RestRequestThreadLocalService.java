@@ -19,15 +19,15 @@ public class RestRequestThreadLocalService {
     @Inject
     private CachedUserDetailsService cachedUserDetailsService;
 
-    public void setRequestedOrgId(Long orgId) {
-        REQUESTED_ORG_ID.set(orgId);
+    public void setRequestedWorkspaceId(Long workspaceId) {
+        REQUESTED_ORG_ID.set(workspaceId);
     }
 
-    public Long getRequestedOrgId() {
+    public Long getRequestedWorkspaceId() {
         return REQUESTED_ORG_ID.get();
     }
 
-    public void removeRequestedOrgId() {
+    public void removeRequestedWorkspaceId() {
         REQUESTED_ORG_ID.remove();
     }
 

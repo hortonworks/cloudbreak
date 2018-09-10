@@ -21,10 +21,10 @@ public class ImageCatalogV3Action {
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
-        Long orgId = integrationTestContext.getContextParam(CloudbreakTest.ORGANIZATION_ID, Long.class);
+        Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         imageCatalogEntity.setResponse(
                 client.getCloudbreakClient()
-                        .imageCatalogV3Endpoint().createInOrganization(orgId, imageCatalogEntity.getRequest()));
+                        .imageCatalogV3Endpoint().createInWorkspace(workspaceId, imageCatalogEntity.getRequest()));
         logJSON("Imagecatalog post request: ", imageCatalogEntity.getRequest());
     }
 
@@ -33,10 +33,10 @@ public class ImageCatalogV3Action {
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
-        Long orgId = integrationTestContext.getContextParam(CloudbreakTest.ORGANIZATION_ID, Long.class);
+        Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         imageCatalogEntity.setResponse(
                 client.getCloudbreakClient()
-                        .imageCatalogV3Endpoint().getByNameInOrganization(orgId, imageCatalogEntity.getName(), false));
+                        .imageCatalogV3Endpoint().getByNameInWorkspace(workspaceId, imageCatalogEntity.getName(), false));
         logJSON("Imagecatalog get response: ", imageCatalogEntity.getResponse());
     }
 
@@ -45,10 +45,10 @@ public class ImageCatalogV3Action {
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
-        Long orgId = integrationTestContext.getContextParam(CloudbreakTest.ORGANIZATION_ID, Long.class);
+        Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         imageCatalogEntity.setResponseByProvider(
                 client.getCloudbreakClient()
-                        .imageCatalogV3Endpoint().getImagesByProviderFromImageCatalogInOrganization(orgId, imageCatalogEntity.getName(),
+                        .imageCatalogV3Endpoint().getImagesByProviderFromImageCatalogInWorkspace(workspaceId, imageCatalogEntity.getName(),
                         integrationTestContext.getContextParam(CLOUDPROVIDER, String.class)));
         logJSON("get response by provider from image catalog: ", imageCatalogEntity.getResponseByProvider());
     }
@@ -58,10 +58,10 @@ public class ImageCatalogV3Action {
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
-        Long orgId = integrationTestContext.getContextParam(CloudbreakTest.ORGANIZATION_ID, Long.class);
+        Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         imageCatalogEntity.setResponseByProvider(
                 client.getCloudbreakClient()
-                        .imageCatalogV3Endpoint().getImagesByProvider(orgId, integrationTestContext.getContextParam(CLOUDPROVIDER, String.class)));
+                        .imageCatalogV3Endpoint().getImagesByProvider(workspaceId, integrationTestContext.getContextParam(CLOUDPROVIDER, String.class)));
         logJSON("Imagecatalog get response by provider: ", imageCatalogEntity.getResponseByProvider());
     }
 
@@ -70,10 +70,10 @@ public class ImageCatalogV3Action {
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
-        Long orgId = integrationTestContext.getContextParam(CloudbreakTest.ORGANIZATION_ID, Long.class);
+        Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         imageCatalogEntity.setRequestByName(
                 client.getCloudbreakClient()
-                        .imageCatalogV3Endpoint().getRequestFromName(orgId, imageCatalogEntity.getRequest().getName()));
+                        .imageCatalogV3Endpoint().getRequestFromName(workspaceId, imageCatalogEntity.getRequest().getName()));
 
         logJSON("Imagecatalog get response by provider: ", imageCatalogEntity.getRequestByName());
     }
@@ -83,9 +83,9 @@ public class ImageCatalogV3Action {
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
-        Long orgId = integrationTestContext.getContextParam(CloudbreakTest.ORGANIZATION_ID, Long.class);
+        Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         imageCatalogEntity.setResponses(new HashSet<>(
-                client.getCloudbreakClient().imageCatalogV3Endpoint().listByOrganization(orgId)));
+                client.getCloudbreakClient().imageCatalogV3Endpoint().listByWorkspace(workspaceId)));
         logJSON("Imagecatalog get response: ", imageCatalogEntity.getResponse());
 
     }
@@ -95,9 +95,9 @@ public class ImageCatalogV3Action {
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
-        Long orgId = integrationTestContext.getContextParam(CloudbreakTest.ORGANIZATION_ID, Long.class);
+        Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         client.getCloudbreakClient().imageCatalogV3Endpoint()
-                .deleteInOrganization(orgId, recipeEntity.getName());
+                .deleteInWorkspace(workspaceId, recipeEntity.getName());
     }
 
     public static void putSetDefaultByName(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {
@@ -105,10 +105,10 @@ public class ImageCatalogV3Action {
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
-        Long orgId = integrationTestContext.getContextParam(CloudbreakTest.ORGANIZATION_ID, Long.class);
+        Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         imageCatalogEntity.setResponse(
                 client.getCloudbreakClient()
-                        .imageCatalogV3Endpoint().putSetDefaultByNameInOrganization(orgId, imageCatalogEntity.getName()));
+                        .imageCatalogV3Endpoint().putSetDefaultByNameInWorkspace(workspaceId, imageCatalogEntity.getName()));
         logJSON("Imagecatalog get response: ", imageCatalogEntity.getResponse());
     }
 

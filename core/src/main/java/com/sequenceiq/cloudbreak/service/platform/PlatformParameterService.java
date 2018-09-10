@@ -15,10 +15,10 @@ import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformRecommendation;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.PlatformResourceRequest;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 import com.sequenceiq.cloudbreak.service.stack.CloudResourceAdvisor;
 import com.sequenceiq.cloudbreak.service.user.UserService;
@@ -46,7 +46,7 @@ public class PlatformParameterService {
     private RestRequestThreadLocalService restRequestThreadLocalService;
 
     @Inject
-    private OrganizationService organizationService;
+    private WorkspaceService workspaceService;
 
     @Inject
     private CloudResourceAdvisor cloudResourceAdvisor;
@@ -86,7 +86,7 @@ public class PlatformParameterService {
                 request.getPlatformVariant(), request.getFilters());
     }
 
-    public PlatformRecommendation getRecommendation(Long organizationId, RecommendationRequestJson request) {
+    public PlatformRecommendation getRecommendation(Long workspaceId, RecommendationRequestJson request) {
         PlatformResourceRequest resourceRequest = conversionService.convert(request, PlatformResourceRequest.class);
         if (request.getBlueprintId() == null && Strings.isNullOrEmpty(request.getBlueprintName())) {
             checkFieldIsNotEmpty(request.getBlueprintId(), "blueprintId");
@@ -94,9 +94,9 @@ public class PlatformParameterService {
         checkFieldIsNotEmpty(request.getRegion(), "region");
         checkFieldIsNotEmpty(request.getAvailabilityZone(), "availabilityZone");
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Organization organization = organizationService.get(organizationId, user);
+        Workspace workspace = workspaceService.get(workspaceId, user);
         return cloudResourceAdvisor.createForBlueprint(request.getBlueprintName(), request.getBlueprintId(),
-                        resourceRequest, user, organization);
+                        resourceRequest, user, workspace);
     }
 
     public CloudSecurityGroups getSecurityGroups(PlatformResourceRequest request) {

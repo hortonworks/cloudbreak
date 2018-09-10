@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.api.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.sequenceiq.cloudbreak.api.model.users.OrganizationResourceResponse;
+import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
 import io.swagger.annotations.ApiModel;
@@ -17,7 +17,7 @@ public class CredentialResponse extends CredentialBase {
     private boolean publicInAccount = true;
 
     @ApiModelProperty
-    private OrganizationResourceResponse organization;
+    private WorkspaceResourceResponse workspace;
 
     @JsonProperty("public")
     public boolean isPublicInAccount() {
@@ -37,11 +37,11 @@ public class CredentialResponse extends CredentialBase {
         this.id = id;
     }
 
-    public OrganizationResourceResponse getOrganization() {
-        return organization;
+    public WorkspaceResourceResponse getWorkspace() {
+        return workspace;
     }
 
-    public void setOrganization(OrganizationResourceResponse organization) {
-        this.organization = organization;
+    public void setWorkspace(WorkspaceResourceResponse workspace) {
+        this.workspace = workspace;
     }
 }

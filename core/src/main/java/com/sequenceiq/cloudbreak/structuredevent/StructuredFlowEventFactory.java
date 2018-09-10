@@ -54,7 +54,7 @@ public class StructuredFlowEventFactory {
         Stack stack = stackService.getByIdWithTransaction(stackId);
         OperationDetails operationDetails = new OperationDetails(FLOW, "stacks", stackId, stack.getName(),
                 stack.getCreator().getUserId(), stack.getCreator().getUserName(), cloudbreakNodeConfig.getId(), cbVersion,
-                stack.getOrganization().getId(), stack.getAccount(), stack.getOwner(), stack.getCreator().getUserId());
+                stack.getWorkspace().getId(), stack.getAccount(), stack.getOwner(), stack.getCreator().getUserId());
         StackDetails stackDetails = null;
         ClusterDetails clusterDetails = null;
         BlueprintDetails blueprintDetails = null;
@@ -108,7 +108,7 @@ public class StructuredFlowEventFactory {
 
         OperationDetails operationDetails = new OperationDetails(NOTIFICATION, "stacks", stackId, stackName,
                 stack.getCreator().getUserId(), stack.getCreator().getUserName(), cloudbreakNodeConfig.getInstanceUUID(), cbVersion,
-                stack.getOrganization().getId(), account, userId, userName);
+                stack.getWorkspace().getId(), account, userId, userName);
         return new StructuredNotificationEvent(operationDetails, notificationDetails);
     }
 }

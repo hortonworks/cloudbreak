@@ -21,8 +21,8 @@ import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -59,7 +59,7 @@ public class ClusterCommonService {
     @Autowired
     private ClusterCreationSetupService clusterCreationSetupService;
 
-    public Response put(Long stackId, UpdateClusterJson updateJson, User user, Organization organization) {
+    public Response put(Long stackId, UpdateClusterJson updateJson, User user, Workspace workspace) {
         Stack stack = stackService.getById(stackId);
         MDCBuilder.buildMdcContext(stack);
         UserNamePasswordJson userNamePasswordJson = updateJson.getUserNamePasswordJson();
@@ -77,7 +77,7 @@ public class ClusterCommonService {
         if (updateJson.getBlueprintId() != null && updateJson.getHostgroups() != null && stack.getCluster().isCreateFailed()) {
             LOGGER.info("Cluster rebuild request received. Stack id:  {}", stackId);
             try {
-                recreateCluster(stack, updateJson, user, organization);
+                recreateCluster(stack, updateJson, user, workspace);
             } catch (TransactionExecutionException e) {
                 throw new TransactionRuntimeExecutionException(e);
             }
@@ -109,11 +109,11 @@ public class ClusterCommonService {
         clusterService.updateHosts(stackId, updateJson.getHostGroupAdjustment());
     }
 
-    private void recreateCluster(Stack stack, UpdateClusterJson updateJson, User user, Organization organization) throws TransactionExecutionException {
+    private void recreateCluster(Stack stack, UpdateClusterJson updateJson, User user, Workspace workspace) throws TransactionExecutionException {
         Set<HostGroup> hostGroups = new HashSet<>();
         for (HostGroupRequest json : updateJson.getHostgroups()) {
             HostGroup hostGroup = conversionService.convert(json, HostGroup.class);
-            hostGroup = hostGroupDecorator.decorate(hostGroup, json, stack, false, organization, user);
+            hostGroup = hostGroupDecorator.decorate(hostGroup, json, stack, false, workspace, user);
             hostGroups.add(hostGroup);
         }
         AmbariStackDetailsJson stackDetails = updateJson.getAmbariStackDetails();

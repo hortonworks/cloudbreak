@@ -27,7 +27,7 @@ public class CloudbreakTest extends GherkinTest {
 
     public static final String PASSWORD = "PASSWORD";
 
-    public static final String ORGANIZATION_ID = "ORGANIZTION_ID";
+    public static final String WORKSPACE_ID = "ORGANIZTION_ID";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakTest.class);
 
@@ -70,8 +70,8 @@ public class CloudbreakTest extends GherkinTest {
         try {
             CloudbreakClient client = CloudbreakClient.isCreated();
             client.create(testContext);
-            testContext.putContextParam(ORGANIZATION_ID,
-                    client.getCloudbreakClient().organizationV3Endpoint().getByName(defaultUaaUser).getId());
+            testContext.putContextParam(WORKSPACE_ID,
+                    client.getCloudbreakClient().workspaceV3Endpoint().getByName(defaultUaaUser).getId());
         } catch (Exception ignored) {
         }
     }

@@ -22,8 +22,8 @@ import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.Topology;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -56,12 +56,12 @@ public class TemplateService {
         return templateRepository.findById(id).orElseThrow(notFound("Template", id));
     }
 
-    public Template create(String owner, String account, User user, Template template, Organization organization) {
+    public Template create(String owner, String account, User user, Template template, Workspace workspace) {
         LOGGER.debug("Creating template: [User: '{}']", user.getUserId());
 
         template.setOwner(owner);
         template.setAccount(account);
-        template.setOrganization(organization);
+        template.setWorkspace(workspace);
 
         Template savedTemplate;
         try {

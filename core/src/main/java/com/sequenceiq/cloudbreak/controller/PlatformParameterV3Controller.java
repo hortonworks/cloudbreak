@@ -46,73 +46,73 @@ public class PlatformParameterV3Controller implements ConnectorV3Endpoint {
     private PlatformParameterService platformParameterService;
 
     @Override
-    public PlatformVmtypesResponse getVmTypesByCredential(Long organizationId, PlatformResourceRequestJson resourceRequestJson) {
+    public PlatformVmtypesResponse getVmTypesByCredential(Long workspaceId, PlatformResourceRequestJson resourceRequestJson) {
         CloudVmTypes cloudVmTypes = platformParameterService.getVmTypesByCredential(conversionService.convert(resourceRequestJson,
                 PlatformResourceRequest.class));
         return conversionService.convert(cloudVmTypes, PlatformVmtypesResponse.class);
     }
 
     @Override
-    public RegionResponse getRegionsByCredential(Long organizationId, PlatformResourceRequestJson resourceRequestJson) {
+    public RegionResponse getRegionsByCredential(Long workspaceId, PlatformResourceRequestJson resourceRequestJson) {
         CloudRegions regions = platformParameterService.getRegionsByCredential(conversionService.convert(resourceRequestJson,
                 PlatformResourceRequest.class));
         return conversionService.convert(regions, RegionResponse.class);
     }
 
     @Override
-    public PlatformDisksJson getDisktypes(Long organizationId) {
+    public PlatformDisksJson getDisktypes(Long workspaceId) {
         PlatformDisks disks = platformParameterService.getDiskTypes();
         return conversionService.convert(disks, PlatformDisksJson.class);
     }
 
     @Override
-    public PlatformNetworksResponse getCloudNetworks(Long organizationId, PlatformResourceRequestJson resourceRequestJson) {
+    public PlatformNetworksResponse getCloudNetworks(Long workspaceId, PlatformResourceRequestJson resourceRequestJson) {
         CloudNetworks networks = platformParameterService.getCloudNetworks(conversionService.convert(resourceRequestJson,
                 PlatformResourceRequest.class));
         return conversionService.convert(networks, PlatformNetworksResponse.class);
     }
 
     @Override
-    public PlatformIpPoolsResponse getIpPoolsCredentialId(Long organizationId, PlatformResourceRequestJson resourceRequestJson) {
+    public PlatformIpPoolsResponse getIpPoolsCredentialId(Long workspaceId, PlatformResourceRequestJson resourceRequestJson) {
         CloudIpPools ipPools = platformParameterService.getIpPoolsCredentialId(conversionService.convert(resourceRequestJson,
                 PlatformResourceRequest.class));
         return conversionService.convert(ipPools, PlatformIpPoolsResponse.class);
     }
 
     @Override
-    public PlatformGatewaysResponse getGatewaysCredentialId(Long organizationId, PlatformResourceRequestJson resourceRequestJson) {
+    public PlatformGatewaysResponse getGatewaysCredentialId(Long workspaceId, PlatformResourceRequestJson resourceRequestJson) {
         CloudGateWays gateWays = platformParameterService.getGatewaysCredentialId(conversionService.convert(resourceRequestJson,
                 PlatformResourceRequest.class));
         return conversionService.convert(gateWays, PlatformGatewaysResponse.class);
     }
 
     @Override
-    public PlatformEncryptionKeysResponse getEncryptionKeys(Long organizationId, PlatformResourceRequestJson resourceRequestJson) {
+    public PlatformEncryptionKeysResponse getEncryptionKeys(Long workspaceId, PlatformResourceRequestJson resourceRequestJson) {
         CloudEncryptionKeys encryptionKeys = platformParameterService.getEncryptionKeys(conversionService.convert(resourceRequestJson,
                 PlatformResourceRequest.class));
         return conversionService.convert(encryptionKeys, PlatformEncryptionKeysResponse.class);
     }
 
     @Override
-    public RecommendationResponse createRecommendation(Long organizationId, RecommendationRequestJson recommendationRequestJson) {
-        return conversionService.convert(platformParameterService.getRecommendation(organizationId, recommendationRequestJson), RecommendationResponse.class);
+    public RecommendationResponse createRecommendation(Long workspaceId, RecommendationRequestJson recommendationRequestJson) {
+        return conversionService.convert(platformParameterService.getRecommendation(workspaceId, recommendationRequestJson), RecommendationResponse.class);
     }
 
     @Override
-    public PlatformSecurityGroupsResponse getSecurityGroups(Long organizationId, PlatformResourceRequestJson resourceRequestJson) {
+    public PlatformSecurityGroupsResponse getSecurityGroups(Long workspaceId, PlatformResourceRequestJson resourceRequestJson) {
         CloudSecurityGroups securityGroups = platformParameterService.getSecurityGroups(conversionService.convert(resourceRequestJson,
                 PlatformResourceRequest.class));
         return conversionService.convert(securityGroups, PlatformSecurityGroupsResponse.class);
     }
 
     @Override
-    public PlatformSshKeysResponse getCloudSshKeys(Long organizationId, PlatformResourceRequestJson resourceRequestJson) {
+    public PlatformSshKeysResponse getCloudSshKeys(Long workspaceId, PlatformResourceRequestJson resourceRequestJson) {
         CloudSshKeys sshKeys = platformParameterService.getCloudSshKeys(conversionService.convert(resourceRequestJson, PlatformResourceRequest.class));
         return conversionService.convert(sshKeys, PlatformSshKeysResponse.class);
     }
 
     @Override
-    public PlatformAccessConfigsResponse getAccessConfigs(Long organizationId, PlatformResourceRequestJson resourceRequestJson) {
+    public PlatformAccessConfigsResponse getAccessConfigs(Long workspaceId, PlatformResourceRequestJson resourceRequestJson) {
         CloudAccessConfigs accessConfigs = platformParameterService.getAccessConfigs(conversionService.convert(resourceRequestJson,
                 PlatformResourceRequest.class));
         return conversionService.convert(accessConfigs, PlatformAccessConfigsResponse.class);

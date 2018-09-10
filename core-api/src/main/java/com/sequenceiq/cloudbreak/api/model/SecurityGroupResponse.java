@@ -6,7 +6,7 @@ import java.util.List;
 import javax.validation.Valid;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.cloudbreak.api.model.users.OrganizationResourceResponse;
+import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.SecurityGroupModelDescription;
 
@@ -27,15 +27,15 @@ public class SecurityGroupResponse extends SecurityGroupBase {
     @ApiModelProperty(SecurityGroupModelDescription.SECURITY_RULES)
     private List<SecurityRuleResponse> securityRules = new LinkedList<>();
 
-    @ApiModelProperty(ModelDescriptions.ORGANIZATION_OF_THE_RESOURCE)
-    private OrganizationResourceResponse organization;
+    @ApiModelProperty(ModelDescriptions.WORKSPACE_OF_THE_RESOURCE)
+    private WorkspaceResourceResponse workspace;
 
-    public OrganizationResourceResponse getOrganization() {
-        return organization;
+    public WorkspaceResourceResponse getWorkspace() {
+        return workspace;
     }
 
-    public void setOrganization(OrganizationResourceResponse organization) {
-        this.organization = organization;
+    public void setWorkspace(WorkspaceResourceResponse workspace) {
+        this.workspace = workspace;
     }
 
     public String getName() {

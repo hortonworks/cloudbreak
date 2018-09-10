@@ -18,14 +18,14 @@ public class CredentialV3Action {
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
-        Long orgId = integrationTestContext.getContextParam(CloudbreakTest.ORGANIZATION_ID, Long.class);
+        Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         Log.log(" post "
                 .concat(credentialEntity.getName())
                 .concat(" private credential. "));
         credentialEntity.setResponse(
                 client.getCloudbreakClient()
                         .credentialV3Endpoint()
-                        .createInOrganization(orgId, credentialEntity.getRequest()));
+                        .createInWorkspace(workspaceId, credentialEntity.getRequest()));
     }
 
     public static void get(IntegrationTestContext integrationTestContext, Entity entity) throws IOException {
@@ -33,14 +33,14 @@ public class CredentialV3Action {
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
-        Long orgId = integrationTestContext.getContextParam(CloudbreakTest.ORGANIZATION_ID, Long.class);
+        Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         Log.log(" get "
                 .concat(credentialEntity.getName())
                 .concat(" private credential. "));
         credentialEntity.setResponse(
                 client.getCloudbreakClient()
                         .credentialV3Endpoint()
-                        .getByNameInOrganization(orgId, credentialEntity.getName()));
+                        .getByNameInWorkspace(workspaceId, credentialEntity.getName()));
         Log.logJSON(" get credential response: ", credentialEntity.getResponse());
     }
 
@@ -49,10 +49,10 @@ public class CredentialV3Action {
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
-        Long orgId = integrationTestContext.getContextParam(CloudbreakTest.ORGANIZATION_ID, Long.class);
+        Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         Log.log(" get all private credential. ");
         credentialEntity.setResponses(
-                client.getCloudbreakClient().credentialV3Endpoint().listByOrganization(orgId));
+                client.getCloudbreakClient().credentialV3Endpoint().listByWorkspace(workspaceId));
     }
 
     public static void delete(IntegrationTestContext integrationTestContext, Entity entity) {
@@ -60,12 +60,12 @@ public class CredentialV3Action {
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
-        Long orgId = integrationTestContext.getContextParam(CloudbreakTest.ORGANIZATION_ID, Long.class);
+        Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         Log.log(" delete "
                 .concat(credentialEntity.getName())
                 .concat(" private credential. "));
         client.getCloudbreakClient().credentialV3Endpoint()
-                .deleteInOrganization(orgId, credentialEntity.getName());
+                .deleteInWorkspace(workspaceId, credentialEntity.getName());
     }
 
     public static void createInGiven(IntegrationTestContext integrationTestContext, Entity entity) {

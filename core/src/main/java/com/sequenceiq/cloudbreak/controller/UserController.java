@@ -22,10 +22,10 @@ import com.sequenceiq.cloudbreak.api.model.users.UserResponseJson;
 import com.sequenceiq.cloudbreak.api.model.users.UserResponseJson.UserIdComparator;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.user.CachedUserDetailsService;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
@@ -44,7 +44,7 @@ public class UserController implements UserEndpoint {
     private UserService userService;
 
     @Inject
-    private OrganizationService organizationService;
+    private WorkspaceService workspaceService;
 
     @Autowired
     @Qualifier("conversionService")
@@ -80,8 +80,8 @@ public class UserController implements UserEndpoint {
     public void modifyProfile(UserProfileRequest userProfileRequest) {
         IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
         User user = userService.getOrCreate(identityUser);
-        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        userProfileService.put(userProfileRequest, identityUser, user, organization);
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        userProfileService.put(userProfileRequest, identityUser, user, workspace);
     }
 
     @Override

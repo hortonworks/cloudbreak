@@ -16,12 +16,12 @@ public class SshKeyV3Action {
         SshKey sshKey = (SshKey) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
-        Long orgId = integrationTestContext.getContextParam(CloudbreakTest.ORGANIZATION_ID, Long.class);
+        Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
 
         sshKey.setResponse(
                 client.getCloudbreakClient()
                         .connectorV3Endpoint()
-                        .getCloudSshKeys(orgId, sshKey.getRequest()));
+                        .getCloudSshKeys(workspaceId, sshKey.getRequest()));
         logJSON("V3 Connectors networks post request: ", sshKey.getRequest());
     }
 }

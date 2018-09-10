@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.converter;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
-import com.sequenceiq.cloudbreak.api.model.users.OrganizationResourceResponse;
+import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 
 @Component
@@ -18,8 +18,8 @@ public class RecipeToRecipeResponseConverter extends AbstractConversionServiceAw
         json.setContent(recipe.getContent());
         json.setId(recipe.getId());
         json.setUri(recipe.getUri());
-        OrganizationResourceResponse organization = getConversionService().convert(recipe.getOrganization(), OrganizationResourceResponse.class);
-        json.setOrganization(organization);
+        WorkspaceResourceResponse workspace = getConversionService().convert(recipe.getWorkspace(), WorkspaceResourceResponse.class);
+        json.setWorkspace(workspace);
         return json;
     }
 }

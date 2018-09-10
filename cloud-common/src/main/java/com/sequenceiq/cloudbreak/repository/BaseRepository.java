@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.repository;
 
 import static com.sequenceiq.cloudbreak.aspect.ConditionType.PRE;
-import static com.sequenceiq.cloudbreak.authorization.OrganizationPermissions.Action.READ;
-import static com.sequenceiq.cloudbreak.authorization.OrganizationPermissions.Action.WRITE;
+import static com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action.READ;
+import static com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action.WRITE;
 
 import java.io.Serializable;
 import java.util.Optional;
@@ -15,9 +15,9 @@ import org.springframework.data.repository.NoRepositoryBean;
 import com.sequenceiq.cloudbreak.aspect.DisableHasPermission;
 import com.sequenceiq.cloudbreak.aspect.HasPermission;
 import com.sequenceiq.cloudbreak.aspect.PermissionType;
-import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByReturnValue;
-import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByTarget;
-import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByTargetId;
+import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByReturnValue;
+import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByTarget;
+import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByTargetId;
 
 @NoRepositoryBean
 @Transactional(Transactional.TxType.REQUIRED)
