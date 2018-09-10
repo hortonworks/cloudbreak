@@ -20,7 +20,7 @@ RSpec.describe 'Audit test cases', :type => :aruba do
 
   it "Audit - List events" do
     with_environment 'DEBUG' => '1' do
-      requestBody = MockResponse.requestBodyCreate('getAuditEvents', load_json(@audit_json), '200')
+      requestBody = MockResponse.requestBodyCreate('getAuditEventsInWorkspace', load_json(@audit_json), '200')
       url = ENV['BASE_URL'] + @mock_endpoint_setup
       MockResponse.post(requestBody, url)
 
@@ -32,7 +32,7 @@ RSpec.describe 'Audit test cases', :type => :aruba do
 
   it "Audit - Describe audit entry identified by Audit ID " do
     with_environment 'DEBUG' => '1' do
-      requestBody = MockResponse.requestBodyCreate('getAuditEvent', load_json(@audit_json_single), '200')
+      requestBody = MockResponse.requestBodyCreate('getAuditEventByWorkspace', load_json(@audit_json_single), '200')
       url = ENV['BASE_URL'] + @mock_endpoint_setup
       MockResponse.post(requestBody, url)
 
