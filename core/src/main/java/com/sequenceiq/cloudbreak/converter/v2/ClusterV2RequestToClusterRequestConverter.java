@@ -54,6 +54,7 @@ public class ClusterV2RequestToClusterRequestConverter extends AbstractConversio
             cluster.setPassword(ambariRequest.getPassword());
             cluster.setUserName(ambariRequest.getUserName());
             cluster.setValidateBlueprint(ambariRequest.getValidateBlueprint());
+            cluster.setValidateRepositories(ambariRequest.getValidateRepositories());
             cluster.setAmbariSecurityMasterKey(ambariRequest.getAmbariSecurityMasterKey());
             if (sharedServiceConfigProvider.isConfigured(source)) {
                 ConnectedClusterRequest connectedClusterRequest = new ConnectedClusterRequest();
