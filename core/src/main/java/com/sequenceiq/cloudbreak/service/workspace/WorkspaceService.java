@@ -27,15 +27,15 @@ import com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.UserWorkspacePermissions;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceRepository;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
-import com.sequenceiq.cloudbreak.service.user.UserWorkspacePermissionsService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.service.user.UserWorkspacePermissionsService;
 
 @Service
 public class WorkspaceService {
@@ -113,7 +113,7 @@ public class WorkspaceService {
         try {
             return transactionService.required(() -> {
                 Workspace workspace = getByNameForUserOrThrowNotFound(orgName, user);
-                authorizeWorkspaceManipulation(user, workspace, Action.MANAGE);
+                authorizeWorkspaceManipulation(user, workspace, Action.MANAGE, "You cannot remove users from this workspace.");
 
                 Set<User> users = userService.getByUsersIds(userIds);
                 Set<UserWorkspacePermissions> toBeRemoved = validateAllUsersAreAlreadyInTheWorkspace(workspace, users);
@@ -134,7 +134,7 @@ public class WorkspaceService {
         try {
             return transactionService.required(() -> {
                 Workspace workspace = getByNameForUserOrThrowNotFound(orgName, currentUser);
-                authorizeWorkspaceManipulation(currentUser, workspace, Action.INVITE);
+                authorizeWorkspaceManipulation(currentUser, workspace, Action.INVITE, "You cannot add users to this workspace.");
 
                 Map<User, Set<String>> usersToAddWithPermissions = orgUserPermissionJsonSetToMap(changeWorkspaceUsersJsons);
                 validateUsersAreNotInTheWorkspaceYet(workspace, usersToAddWithPermissions.keySet());
@@ -162,7 +162,7 @@ public class WorkspaceService {
         try {
             return transactionService.required(() -> {
                 Workspace workspace = getByNameForUserOrThrowNotFound(orgName, currentUser);
-                authorizeWorkspaceManipulation(currentUser, workspace, Action.MANAGE);
+                authorizeWorkspaceManipulation(currentUser, workspace, Action.MANAGE, "You cannot modify the users in this workspace.");
 
                 Map<User, Set<String>> usersToUpdateWithPermissions = orgUserPermissionJsonSetToMap(updateWorkspaceUsersJsons);
                 Map<User, UserWorkspacePermissions> toBeUpdated = validateAllUsersAreAlreadyInTheWorkspace(
@@ -196,7 +196,7 @@ public class WorkspaceService {
         try {
             return transactionService.required(() -> {
                 Workspace workspace = getByNameForUserOrThrowNotFound(orgName, currentUser);
-                authorizeWorkspaceManipulation(currentUser, workspace, Action.MANAGE);
+                authorizeWorkspaceManipulation(currentUser, workspace, Action.MANAGE, "You cannot modify the users in this workspace.");
 
                 Set<UserWorkspacePermissions> oldPermissions = userWorkspacePermissionsService.findForWorkspace(workspace);
                 Set<User> oldUsers = oldPermissions.stream().map(UserWorkspacePermissions::getUser).collect(Collectors.toSet());
@@ -229,7 +229,7 @@ public class WorkspaceService {
         try {
             return transactionService.required(() -> {
                 Workspace workspaceForDelete = getByNameForUserOrThrowNotFound(orgName, currentUser);
-                authorizeWorkspaceManipulation(currentUser, workspaceForDelete, Action.MANAGE);
+                authorizeWorkspaceManipulation(currentUser, workspaceForDelete, Action.MANAGE, "You cannot delete this workspace.");
 
                 workspaceModificationVerifierService.checkThatWorkspaceIsDeletable(currentUser, workspaceForDelete, defaultWorkspace);
                 Long deleted = userWorkspacePermissionsService.deleteByWorkspace(workspaceForDelete);
@@ -293,14 +293,14 @@ public class WorkspaceService {
         }
     }
 
-    private void authorizeWorkspaceManipulation(User currentUser, Workspace workspaceToManipulate, Action action) {
+    private void authorizeWorkspaceManipulation(User currentUser, Workspace workspaceToManipulate, Action action, String message) {
         UserWorkspacePermissions userWorkspacePermissions = userWorkspacePermissionsService.findForUserAndWorkspace(currentUser, workspaceToManipulate);
         if (userWorkspacePermissions == null) {
-            throw new AccessDeniedException("You have no access for this resource.");
+            throw new AccessDeniedException("You have no access for this workspace.");
         }
         boolean hasPermission = WorkspacePermissions.hasPermission(userWorkspacePermissions.getPermissionSet(), WorkspaceResource.WORKSPACE, action);
         if (!hasPermission) {
-            throw new AccessDeniedException("You cannot delete this workspace.");
+            throw new AccessDeniedException(message);
         }
     }
 
