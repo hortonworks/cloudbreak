@@ -41,9 +41,6 @@ type ManagementPackResponse struct {
 	// Pattern: (^[a-z][-a-z0-9]*[a-z0-9]$)
 	Name *string `json:"name"`
 
-	// organization of the resource
-	Organization *OrganizationResourceResponse `json:"organization,omitempty"`
-
 	// resource is visible in account
 	Public *bool `json:"public,omitempty"`
 
@@ -52,6 +49,9 @@ type ManagementPackResponse struct {
 
 	// if provided, management pack will be installed with '--purgeList' option with this values
 	PurgeList []string `json:"purgeList"`
+
+	// workspace of the resource
+	Workspace *WorkspaceResourceResponse `json:"workspace,omitempty"`
 }
 
 /* polymorph ManagementPackResponse description false */
@@ -64,13 +64,13 @@ type ManagementPackResponse struct {
 
 /* polymorph ManagementPackResponse name false */
 
-/* polymorph ManagementPackResponse organization false */
-
 /* polymorph ManagementPackResponse public false */
 
 /* polymorph ManagementPackResponse purge false */
 
 /* polymorph ManagementPackResponse purgeList false */
+
+/* polymorph ManagementPackResponse workspace false */
 
 // Validate validates this management pack response
 func (m *ManagementPackResponse) Validate(formats strfmt.Registry) error {
@@ -91,12 +91,12 @@ func (m *ManagementPackResponse) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateOrganization(formats); err != nil {
+	if err := m.validatePurgeList(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
 
-	if err := m.validatePurgeList(formats); err != nil {
+	if err := m.validateWorkspace(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -158,29 +158,29 @@ func (m *ManagementPackResponse) validateName(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *ManagementPackResponse) validateOrganization(formats strfmt.Registry) error {
+func (m *ManagementPackResponse) validatePurgeList(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.Organization) { // not required
+	if swag.IsZero(m.PurgeList) { // not required
 		return nil
-	}
-
-	if m.Organization != nil {
-
-		if err := m.Organization.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("organization")
-			}
-			return err
-		}
 	}
 
 	return nil
 }
 
-func (m *ManagementPackResponse) validatePurgeList(formats strfmt.Registry) error {
+func (m *ManagementPackResponse) validateWorkspace(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.PurgeList) { // not required
+	if swag.IsZero(m.Workspace) { // not required
 		return nil
+	}
+
+	if m.Workspace != nil {
+
+		if err := m.Workspace.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("workspace")
+			}
+			return err
+		}
 	}
 
 	return nil

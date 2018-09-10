@@ -12,7 +12,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/cb-cli/cli/utils"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_organization_id_ldapconfigs"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_workspace_id_ldapconfigs"
 	"github.com/hortonworks/cb-cli/models_cloudbreak"
 	"github.com/urfave/cli"
 	"golang.org/x/text/encoding/unicode"
@@ -77,8 +77,8 @@ func (l *ldapGroupSearchResult) DataAsStringArray() []string {
 }
 
 type ldapClient interface {
-	CreateLdapConfigsInOrganization(params *v3_organization_id_ldapconfigs.CreateLdapConfigsInOrganizationParams) (*v3_organization_id_ldapconfigs.CreateLdapConfigsInOrganizationOK, error)
-	ListLdapsByOrganization(params *v3_organization_id_ldapconfigs.ListLdapsByOrganizationParams) (*v3_organization_id_ldapconfigs.ListLdapsByOrganizationOK, error)
+	CreateLdapConfigsInWorkspace(params *v3_workspace_id_ldapconfigs.CreateLdapConfigsInWorkspaceParams) (*v3_workspace_id_ldapconfigs.CreateLdapConfigsInWorkspaceOK, error)
+	ListLdapsByWorkspace(params *v3_workspace_id_ldapconfigs.ListLdapsByWorkspaceParams) (*v3_workspace_id_ldapconfigs.ListLdapsByWorkspaceOK, error)
 }
 
 func CreateLDAP(c *cli.Context) error {
@@ -111,15 +111,15 @@ func CreateLDAP(c *cli.Context) error {
 	portSeparatorIndex := strings.LastIndex(server, ":")
 	serverPort, _ := strconv.Atoi(server[portSeparatorIndex+1:])
 	protocol := server[0:strings.Index(server, ":")]
-	orgID := c.Int64(FlOrganizationOptional.Name)
+	workspaceID := c.Int64(FlWorkspaceOptional.Name)
 
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 
-	return createLDAPImpl(cbClient.Cloudbreak.V3OrganizationIDLdapconfigs, int32(serverPort), orgID, name, server, protocol, domain, bindDn, bindPassword, directoryType,
+	return createLDAPImpl(cbClient.Cloudbreak.V3WorkspaceIDLdapconfigs, int32(serverPort), workspaceID, name, server, protocol, domain, bindDn, bindPassword, directoryType,
 		userSearchBase, userDnPattern, userNameAttribute, userObjectClass, groupSearchBase, groupMemberAttribute, groupNameAttribute, groupObjectClass, adminGroup)
 }
 
-func createLDAPImpl(ldapClient ldapClient, port int32, orgID int64, name, server, protocol, domain, bindDn, bindPassword, directoryType,
+func createLDAPImpl(ldapClient ldapClient, port int32, workspaceID int64, name, server, protocol, domain, bindDn, bindPassword, directoryType,
 	userSearchBase, userDnPattern, userNameAttribute, userObjectClass, groupSearchBase, groupMemberAttribute, groupNameAttribute,
 	groupObjectClass, adminGroup string) error {
 	defer utils.TimeTrack(time.Now(), "create ldap")
@@ -147,7 +147,7 @@ func createLDAPImpl(ldapClient ldapClient, port int32, orgID int64, name, server
 
 	log.Infof("[createLDAPImpl] create ldap with name: %s", name)
 	var ldap *models_cloudbreak.LdapConfigResponse
-	resp, err := ldapClient.CreateLdapConfigsInOrganization(v3_organization_id_ldapconfigs.NewCreateLdapConfigsInOrganizationParams().WithOrganizationID(orgID).WithBody(ldapConfigRequest))
+	resp, err := ldapClient.CreateLdapConfigsInWorkspace(v3_workspace_id_ldapconfigs.NewCreateLdapConfigsInWorkspaceParams().WithWorkspaceID(workspaceID).WithBody(ldapConfigRequest))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -164,12 +164,12 @@ func ListLdaps(c *cli.Context) error {
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 
 	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
-	orgID := c.Int64(FlOrganizationOptional.Name)
-	return listLdapsImpl(cbClient.Cloudbreak.V3OrganizationIDLdapconfigs, output.WriteList, orgID)
+	workspaceID := c.Int64(FlWorkspaceOptional.Name)
+	return listLdapsImpl(cbClient.Cloudbreak.V3WorkspaceIDLdapconfigs, output.WriteList, workspaceID)
 }
 
-func listLdapsImpl(ldapClient ldapClient, writer func([]string, []utils.Row), orgID int64) error {
-	resp, err := ldapClient.ListLdapsByOrganization(v3_organization_id_ldapconfigs.NewListLdapsByOrganizationParams().WithOrganizationID(orgID))
+func listLdapsImpl(ldapClient ldapClient, writer func([]string, []utils.Row), workspaceID int64) error {
+	resp, err := ldapClient.ListLdapsByWorkspace(v3_workspace_id_ldapconfigs.NewListLdapsByWorkspaceParams().WithWorkspaceID(workspaceID))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -204,12 +204,12 @@ func DeleteLdap(c *cli.Context) error {
 	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "delete an ldap")
 
-	orgID := c.Int64(FlOrganizationOptional.Name)
+	workspaceID := c.Int64(FlWorkspaceOptional.Name)
 	ldapName := c.String(FlName.Name)
 	log.Infof("[DeleteLdap] delete ldap config by name: %s", ldapName)
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 
-	if _, err := cbClient.Cloudbreak.V3OrganizationIDLdapconfigs.DeleteLdapConfigsInOrganization(v3_organization_id_ldapconfigs.NewDeleteLdapConfigsInOrganizationParams().WithOrganizationID(orgID).WithName(ldapName)); err != nil {
+	if _, err := cbClient.Cloudbreak.V3WorkspaceIDLdapconfigs.DeleteLdapConfigsInWorkspace(v3_workspace_id_ldapconfigs.NewDeleteLdapConfigsInWorkspaceParams().WithWorkspaceID(workspaceID).WithName(ldapName)); err != nil {
 		utils.LogErrorAndExit(err)
 	}
 	log.Infof("[DeleteLdap] ldap config deleted: %s", ldapName)
@@ -221,12 +221,12 @@ func DescribeLdap(c *cli.Context) {
 	defer utils.TimeTrack(time.Now(), "describe an ldap")
 
 	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
-	orgID := c.Int64(FlOrganizationOptional.Name)
+	workspaceID := c.Int64(FlWorkspaceOptional.Name)
 	ldapName := c.String(FlName.Name)
 	log.Infof("[DescribeLdap] describe ldap config by name: %s", ldapName)
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 
-	resp, err := cbClient.Cloudbreak.V3OrganizationIDLdapconfigs.GetLdapConfigInOrganization(v3_organization_id_ldapconfigs.NewGetLdapConfigInOrganizationParams().WithOrganizationID(orgID).WithName(ldapName))
+	resp, err := cbClient.Cloudbreak.V3WorkspaceIDLdapconfigs.GetLdapConfigInWorkspace(v3_workspace_id_ldapconfigs.NewGetLdapConfigInWorkspaceParams().WithWorkspaceID(workspaceID).WithName(ldapName))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}

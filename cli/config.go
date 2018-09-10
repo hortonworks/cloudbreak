@@ -22,12 +22,12 @@ const (
 )
 
 type Config struct {
-	Username     string `json:"username" yaml:"username"`
-	Password     string `json:"password,omitempty" yaml:"password,omitempty"`
-	Server       string `json:"server" yaml:"server"`
-	AuthType     string `json:"authType,omitempty" yaml:"authType,omitempty"`
-	Organization string `json:"organization,omitempty" yaml:"organization,omitempty"`
-	Output       string `json:"output,omitempty" yaml:"output,omitempty"`
+	Username  string `json:"username" yaml:"username"`
+	Password  string `json:"password,omitempty" yaml:"password,omitempty"`
+	Server    string `json:"server" yaml:"server"`
+	AuthType  string `json:"authType,omitempty" yaml:"authType,omitempty"`
+	Workspace string `json:"workspace,omitempty" yaml:"workspace,omitempty"`
+	Output    string `json:"output,omitempty" yaml:"output,omitempty"`
 }
 
 type ConfigList map[string]Config
@@ -53,7 +53,7 @@ func Configure(c *cli.Context) {
 	err := WriteConfigToFile(GetHomeDirectory(), c.String(FlServerOptional.Name),
 		c.String(FlUsername.Name), c.String(FlPassword.Name),
 		c.String(FlOutputOptional.Name), c.String(FlProfileOptional.Name),
-		c.String(FlAuthTypeOptional.Name), c.String(FlOrganizationOptional.Name))
+		c.String(FlAuthTypeOptional.Name), c.String(FlWorkspaceOptional.Name))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -90,7 +90,7 @@ func ReadConfig(baseDir string, profile string) (*Config, error) {
 	}
 }
 
-func WriteConfigToFile(baseDir, server, username, password, output, profile, authType, organization string) error {
+func WriteConfigToFile(baseDir, server, username, password, output, profile, authType, workspace string) error {
 	configDir := baseDir + "/" + Config_dir
 	configFile := configDir + "/" + Config_file
 	if len(profile) == 0 {
@@ -118,11 +118,11 @@ func WriteConfigToFile(baseDir, server, username, password, output, profile, aut
 	}
 
 	configList[profile] = Config{Server: server,
-		Organization: organization,
-		Username:     username,
-		Password:     password,
-		Output:       output,
-		AuthType:     authType,
+		Workspace: workspace,
+		Username:  username,
+		Password:  password,
+		Output:    output,
+		AuthType:  authType,
 	}
 
 	err := ioutil.WriteFile(configFile, []byte(configList.Yaml()), 0600)

@@ -7,14 +7,14 @@ import (
 
 	"github.com/go-openapi/strfmt"
 	"github.com/hortonworks/cb-cli/cli/utils"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_organization_id_audits"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_workspace_id_audits"
 	"github.com/hortonworks/cb-cli/models_cloudbreak"
 )
 
 type mockAuditClient struct {
 }
 
-func (*mockAuditClient) GetAuditEventsInOrganization(params *v3_organization_id_audits.GetAuditEventsInOrganizationParams) (*v3_organization_id_audits.GetAuditEventsInOrganizationOK, error) {
+func (*mockAuditClient) GetAuditEventsInWorkspace(params *v3_workspace_id_audits.GetAuditEventsInWorkspaceParams) (*v3_workspace_id_audits.GetAuditEventsInWorkspaceOK, error) {
 	zdt, _ := strfmt.ParseDateTime("2018-08-28T12:51:23.694Z")
 	resp := []*models_cloudbreak.AuditEvent{
 		{
@@ -34,10 +34,10 @@ func (*mockAuditClient) GetAuditEventsInOrganization(params *v3_organization_id_
 			Status: "OK - 200",
 		},
 	}
-	return &v3_organization_id_audits.GetAuditEventsInOrganizationOK{Payload: resp}, nil
+	return &v3_workspace_id_audits.GetAuditEventsInWorkspaceOK{Payload: resp}, nil
 }
 
-func (*mockAuditClient) GetAuditEventByOrganization(params *v3_organization_id_audits.GetAuditEventByOrganizationParams) (*v3_organization_id_audits.GetAuditEventByOrganizationOK, error) {
+func (*mockAuditClient) GetAuditEventByWorkspace(params *v3_workspace_id_audits.GetAuditEventByWorkspaceParams) (*v3_workspace_id_audits.GetAuditEventByWorkspaceOK, error) {
 	zdt, _ := strfmt.ParseDateTime("2018-08-28T12:51:23.694Z")
 	resp := &models_cloudbreak.AuditEvent{
 		AuditID:  1,
@@ -60,7 +60,7 @@ func (*mockAuditClient) GetAuditEventByOrganization(params *v3_organization_id_a
 		},
 		Status: "OK - 200",
 	}
-	return &v3_organization_id_audits.GetAuditEventByOrganizationOK{Payload: resp}, nil
+	return &v3_workspace_id_audits.GetAuditEventByWorkspaceOK{Payload: resp}, nil
 }
 
 func TestListAuditsImpl(t *testing.T) {

@@ -51,9 +51,6 @@ type RDSConfigResponse struct {
 	// Required: true
 	Name *string `json:"name"`
 
-	// organization of the resource
-	Organization *OrganizationResourceResponse `json:"organization,omitempty"`
-
 	// resource is visible in account
 	PublicInAccount *bool `json:"publicInAccount,omitempty"`
 
@@ -63,6 +60,9 @@ type RDSConfigResponse struct {
 	// Type of RDS, aka the service name that will use the RDS like HIVE, DRUID, SUPERSET, RANGER, etc.
 	// Required: true
 	Type *string `json:"type"`
+
+	// workspace of the resource
+	Workspace *WorkspaceResourceResponse `json:"workspace,omitempty"`
 }
 
 /* polymorph RDSConfigResponse clusterNames false */
@@ -83,13 +83,13 @@ type RDSConfigResponse struct {
 
 /* polymorph RDSConfigResponse name false */
 
-/* polymorph RDSConfigResponse organization false */
-
 /* polymorph RDSConfigResponse publicInAccount false */
 
 /* polymorph RDSConfigResponse stackVersion false */
 
 /* polymorph RDSConfigResponse type false */
+
+/* polymorph RDSConfigResponse workspace false */
 
 // Validate validates this r d s config response
 func (m *RDSConfigResponse) Validate(formats strfmt.Registry) error {
@@ -125,12 +125,12 @@ func (m *RDSConfigResponse) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateOrganization(formats); err != nil {
+	if err := m.validateType(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
 
-	if err := m.validateType(formats); err != nil {
+	if err := m.validateWorkspace(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -199,29 +199,29 @@ func (m *RDSConfigResponse) validateName(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *RDSConfigResponse) validateOrganization(formats strfmt.Registry) error {
+func (m *RDSConfigResponse) validateType(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.Organization) { // not required
-		return nil
-	}
-
-	if m.Organization != nil {
-
-		if err := m.Organization.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("organization")
-			}
-			return err
-		}
+	if err := validate.Required("type", "body", m.Type); err != nil {
+		return err
 	}
 
 	return nil
 }
 
-func (m *RDSConfigResponse) validateType(formats strfmt.Registry) error {
+func (m *RDSConfigResponse) validateWorkspace(formats strfmt.Registry) error {
 
-	if err := validate.Required("type", "body", m.Type); err != nil {
-		return err
+	if swag.IsZero(m.Workspace) { // not required
+		return nil
+	}
+
+	if m.Workspace != nil {
+
+		if err := m.Workspace.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("workspace")
+			}
+			return err
+		}
 	}
 
 	return nil

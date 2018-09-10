@@ -37,15 +37,15 @@ type RecipeResponse struct {
 	// Pattern: (^[a-z][-a-z0-9]*[a-z0-9]$)
 	Name string `json:"name,omitempty"`
 
-	// organization of the resource
-	Organization *OrganizationResourceResponse `json:"organization,omitempty"`
-
 	// type of recipe
 	// Required: true
 	RecipeType *string `json:"recipeType"`
 
 	// recipe uri
 	URI string `json:"uri,omitempty"`
+
+	// workspace of the resource
+	Workspace *WorkspaceResourceResponse `json:"workspace,omitempty"`
 }
 
 /* polymorph RecipeResponse content false */
@@ -56,11 +56,11 @@ type RecipeResponse struct {
 
 /* polymorph RecipeResponse name false */
 
-/* polymorph RecipeResponse organization false */
-
 /* polymorph RecipeResponse recipeType false */
 
 /* polymorph RecipeResponse uri false */
+
+/* polymorph RecipeResponse workspace false */
 
 // Validate validates this recipe response
 func (m *RecipeResponse) Validate(formats strfmt.Registry) error {
@@ -76,12 +76,12 @@ func (m *RecipeResponse) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateOrganization(formats); err != nil {
+	if err := m.validateRecipeType(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
 
-	if err := m.validateRecipeType(formats); err != nil {
+	if err := m.validateWorkspace(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -130,25 +130,6 @@ func (m *RecipeResponse) validateName(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *RecipeResponse) validateOrganization(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Organization) { // not required
-		return nil
-	}
-
-	if m.Organization != nil {
-
-		if err := m.Organization.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("organization")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
 var recipeResponseTypeRecipeTypePropEnum []interface{}
 
 func init() {
@@ -189,6 +170,25 @@ func (m *RecipeResponse) validateRecipeType(formats strfmt.Registry) error {
 	// value enum
 	if err := m.validateRecipeTypeEnum("recipeType", "body", *m.RecipeType); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *RecipeResponse) validateWorkspace(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Workspace) { // not required
+		return nil
+	}
+
+	if m.Workspace != nil {
+
+		if err := m.Workspace.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("workspace")
+			}
+			return err
+		}
 	}
 
 	return nil

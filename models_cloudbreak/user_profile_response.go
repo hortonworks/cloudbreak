@@ -31,6 +31,9 @@ type UserProfileResponse struct {
 
 	// ui properties
 	UIProperties map[string]interface{} `json:"uiProperties,omitempty"`
+
+	// username
+	Username string `json:"username,omitempty"`
 }
 
 /* polymorph UserProfileResponse account false */
@@ -42,6 +45,8 @@ type UserProfileResponse struct {
 /* polymorph UserProfileResponse owner false */
 
 /* polymorph UserProfileResponse uiProperties false */
+
+/* polymorph UserProfileResponse username false */
 
 // Validate validates this user profile response
 func (m *UserProfileResponse) Validate(formats strfmt.Registry) error {

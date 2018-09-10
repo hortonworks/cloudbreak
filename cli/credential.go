@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_organization_id_credentials"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_workspace_id_credentials"
 
 	"errors"
 
@@ -85,8 +85,8 @@ func CreateCredentialFromFile(c *cli.Context) {
 
 	req := assembleCredentialRequest(c.String(FlInputJson.Name), c.String(FlNameOptional.Name))
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
-	orgID := c.Int64(FlOrganizationOptional.Name)
-	postCredential(cbClient.Cloudbreak.V3OrganizationIDCredentials, orgID, req)
+	workspaceID := c.Int64(FlWorkspaceOptional.Name)
+	postCredential(cbClient.Cloudbreak.V3WorkspaceIDCredentials, workspaceID, req)
 }
 
 func ModifyCredentialFromFile(c *cli.Context) {
@@ -96,8 +96,8 @@ func ModifyCredentialFromFile(c *cli.Context) {
 	credReq := assembleCredentialRequest(c.String(FlInputJson.Name), c.String(FlNameOptional.Name))
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 
-	orgID := c.Int64(FlOrganizationOptional.Name)
-	putCredential(cbClient.Cloudbreak.V3OrganizationIDCredentials, orgID, credReq)
+	workspaceID := c.Int64(FlWorkspaceOptional.Name)
+	putCredential(cbClient.Cloudbreak.V3WorkspaceIDCredentials, workspaceID, credReq)
 }
 
 func assembleCredentialRequest(path, credName string) *models_cloudbreak.CredentialRequest {
@@ -130,7 +130,7 @@ func createCredential(c *cli.Context, credentialParameters map[string]interface{
 	defer utils.TimeTrack(time.Now(), "create credential")
 
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
-	createCredentialImpl(c.String, c.Int64, cbClient.Cloudbreak.V3OrganizationIDCredentials, credentialParameters)
+	createCredentialImpl(c.String, c.Int64, cbClient.Cloudbreak.V3WorkspaceIDCredentials, credentialParameters)
 }
 
 func modifyCredential(c *cli.Context, credentialParameters map[string]interface{}) {
@@ -138,21 +138,21 @@ func modifyCredential(c *cli.Context, credentialParameters map[string]interface{
 	defer utils.TimeTrack(time.Now(), "modify credential")
 
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
-	modifyCredentialImpl(c.String, c.Int64, cbClient.Cloudbreak.V3OrganizationIDCredentials, credentialParameters)
+	modifyCredentialImpl(c.String, c.Int64, cbClient.Cloudbreak.V3WorkspaceIDCredentials, credentialParameters)
 }
 
 type modifyCredentialClient interface {
-	GetCredentialInOrganization(params *v3_organization_id_credentials.GetCredentialInOrganizationParams) (*v3_organization_id_credentials.GetCredentialInOrganizationOK, error)
-	PutCredentialInOrganization(params *v3_organization_id_credentials.PutCredentialInOrganizationParams) (*v3_organization_id_credentials.PutCredentialInOrganizationOK, error)
+	GetCredentialInWorkspace(params *v3_workspace_id_credentials.GetCredentialInWorkspaceParams) (*v3_workspace_id_credentials.GetCredentialInWorkspaceOK, error)
+	PutCredentialInWorkspace(params *v3_workspace_id_credentials.PutCredentialInWorkspaceParams) (*v3_workspace_id_credentials.PutCredentialInWorkspaceOK, error)
 }
 
 func modifyCredentialImpl(stringFinder func(string) string, int64Finder func(string) int64, client modifyCredentialClient, credentialParameters map[string]interface{}) *models_cloudbreak.CredentialResponse {
-	orgID := int64Finder(FlOrganizationOptional.Name)
+	workspaceID := int64Finder(FlWorkspaceOptional.Name)
 	name := stringFinder(FlName.Name)
 	description := stringFinder(FlDescriptionOptional.Name)
 	provider := cloud.GetProvider()
 
-	credential := getCredential(orgID, name, client)
+	credential := getCredential(workspaceID, name, client)
 	if *credential.CloudPlatform != *provider.GetName() {
 		utils.LogErrorAndExit(errors.New("cloud provider cannot be modified"))
 	}
@@ -180,25 +180,25 @@ func modifyCredentialImpl(stringFinder func(string) string, int64Finder func(str
 		Parameters:    credentialMap,
 	}
 
-	return putCredential(client, orgID, credReq)
+	return putCredential(client, workspaceID, credReq)
 }
 
-func getCredential(orgID int64, name string, client modifyCredentialClient) *models_cloudbreak.CredentialResponse {
+func getCredential(workspaceID int64, name string, client modifyCredentialClient) *models_cloudbreak.CredentialResponse {
 	defer utils.TimeTrack(time.Now(), "get credential")
 
 	log.Infof("[getCredential] get credential by name: %s", name)
-	response, err := client.GetCredentialInOrganization(v3_organization_id_credentials.NewGetCredentialInOrganizationParams().WithOrganizationID(orgID).WithName(name))
+	response, err := client.GetCredentialInWorkspace(v3_workspace_id_credentials.NewGetCredentialInWorkspaceParams().WithWorkspaceID(workspaceID).WithName(name))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
 	return response.Payload
 }
 
-func putCredential(client modifyCredentialClient, orgID int64, credReq *models_cloudbreak.CredentialRequest) *models_cloudbreak.CredentialResponse {
+func putCredential(client modifyCredentialClient, workspaceID int64, credReq *models_cloudbreak.CredentialRequest) *models_cloudbreak.CredentialResponse {
 	var credential *models_cloudbreak.CredentialResponse
 	log.Infof("[putCredential] modify public credential: %s", *credReq.Name)
 
-	resp, err := client.PutCredentialInOrganization(v3_organization_id_credentials.NewPutCredentialInOrganizationParams().WithOrganizationID(orgID).WithBody(credReq))
+	resp, err := client.PutCredentialInWorkspace(v3_workspace_id_credentials.NewPutCredentialInWorkspaceParams().WithWorkspaceID(workspaceID).WithBody(credReq))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -209,7 +209,7 @@ func putCredential(client modifyCredentialClient, orgID int64, credReq *models_c
 }
 
 type createCredentialClient interface {
-	CreateCredentialInOrganization(*v3_organization_id_credentials.CreateCredentialInOrganizationParams) (*v3_organization_id_credentials.CreateCredentialInOrganizationOK, error)
+	CreateCredentialInWorkspace(*v3_workspace_id_credentials.CreateCredentialInWorkspaceParams) (*v3_workspace_id_credentials.CreateCredentialInWorkspaceOK, error)
 }
 
 func createCredentialImpl(stringFinder func(string) string, int64Finder func(string) int64, client createCredentialClient, credentialParameters map[string]interface{}) *models_cloudbreak.CredentialResponse {
@@ -223,21 +223,21 @@ func createCredentialImpl(stringFinder func(string) string, int64Finder func(str
 	}
 
 	name := stringFinder(FlName.Name)
-	orgID := int64Finder(FlOrganizationOptional.Name)
+	workspaceID := int64Finder(FlWorkspaceOptional.Name)
 	credReq := &models_cloudbreak.CredentialRequest{
 		Name:          &name,
 		Description:   &(&types.S{S: stringFinder(FlDescriptionOptional.Name)}).S,
 		CloudPlatform: provider.GetName(),
 		Parameters:    credentialMap,
 	}
-	return postCredential(client, orgID, credReq)
+	return postCredential(client, workspaceID, credReq)
 }
 
-func postCredential(client createCredentialClient, orgID int64, credReq *models_cloudbreak.CredentialRequest) *models_cloudbreak.CredentialResponse {
+func postCredential(client createCredentialClient, workspaceID int64, credReq *models_cloudbreak.CredentialRequest) *models_cloudbreak.CredentialResponse {
 	var credential *models_cloudbreak.CredentialResponse
 
 	log.Infof("[postCredential] sending create public credential request")
-	resp, err := client.CreateCredentialInOrganization(v3_organization_id_credentials.NewCreateCredentialInOrganizationParams().WithOrganizationID(orgID).WithBody(credReq))
+	resp, err := client.CreateCredentialInWorkspace(v3_workspace_id_credentials.NewCreateCredentialInWorkspaceParams().WithWorkspaceID(workspaceID).WithBody(credReq))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -262,8 +262,8 @@ func DescribeCredential(c *cli.Context) {
 
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
-	orgID := c.Int64(FlOrganizationOptional.Name)
-	resp, err := cbClient.Cloudbreak.V3OrganizationIDCredentials.GetCredentialInOrganization(v3_organization_id_credentials.NewGetCredentialInOrganizationParams().WithOrganizationID(orgID).WithName(c.String(FlName.Name)))
+	workspaceID := c.Int64(FlWorkspaceOptional.Name)
+	resp, err := cbClient.Cloudbreak.V3WorkspaceIDCredentials.GetCredentialInWorkspace(v3_workspace_id_credentials.NewGetCredentialInWorkspaceParams().WithWorkspaceID(workspaceID).WithName(c.String(FlName.Name)))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -277,10 +277,10 @@ func DeleteCredential(c *cli.Context) {
 	defer utils.TimeTrack(time.Now(), "delete credential")
 
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
-	orgID := c.Int64(FlOrganizationOptional.Name)
+	workspaceID := c.Int64(FlWorkspaceOptional.Name)
 	name := c.String(FlName.Name)
 	log.Infof("[DeleteCredential] sending delete credential request with name: %s", name)
-	if _, err := cbClient.Cloudbreak.V3OrganizationIDCredentials.DeleteCredentialInOrganization(v3_organization_id_credentials.NewDeleteCredentialInOrganizationParams().WithOrganizationID(orgID).WithName(name)); err != nil {
+	if _, err := cbClient.Cloudbreak.V3WorkspaceIDCredentials.DeleteCredentialInWorkspace(v3_workspace_id_credentials.NewDeleteCredentialInWorkspaceParams().WithWorkspaceID(workspaceID).WithName(name)); err != nil {
 		utils.LogErrorAndExit(err)
 	}
 	log.Infof("[DeleteCredential] credential deleted, name: %s", name)
@@ -292,17 +292,17 @@ func ListCredentials(c *cli.Context) {
 
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
-	orgID := c.Int64(FlOrganizationOptional.Name)
-	listCredentialsImpl(cbClient.Cloudbreak.V3OrganizationIDCredentials, orgID, output.WriteList)
+	workspaceID := c.Int64(FlWorkspaceOptional.Name)
+	listCredentialsImpl(cbClient.Cloudbreak.V3WorkspaceIDCredentials, workspaceID, output.WriteList)
 }
 
-type listCredentialsByOrganizationClient interface {
-	ListCredentialsByOrganization(*v3_organization_id_credentials.ListCredentialsByOrganizationParams) (*v3_organization_id_credentials.ListCredentialsByOrganizationOK, error)
+type listCredentialsByWorkspaceClient interface {
+	ListCredentialsByWorkspace(*v3_workspace_id_credentials.ListCredentialsByWorkspaceParams) (*v3_workspace_id_credentials.ListCredentialsByWorkspaceOK, error)
 }
 
-func listCredentialsImpl(client listCredentialsByOrganizationClient, orgID int64, writer func([]string, []utils.Row)) {
+func listCredentialsImpl(client listCredentialsByWorkspaceClient, workspaceID int64, writer func([]string, []utils.Row)) {
 	log.Infof("[listCredentialsImpl] sending credential list request")
-	credResp, err := client.ListCredentialsByOrganization(v3_organization_id_credentials.NewListCredentialsByOrganizationParams().WithOrganizationID(orgID))
+	credResp, err := client.ListCredentialsByWorkspace(v3_workspace_id_credentials.NewListCredentialsByWorkspaceParams().WithWorkspaceID(workspaceID))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}

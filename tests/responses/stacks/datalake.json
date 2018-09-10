@@ -89,7 +89,7 @@
         "databaseEngine": "POSTGRES",
         "connectionDriver": "org.postgresql.Driver",
         "databaseEngineDisplayName": "PostgreSQL",
-        "organization": {
+        "workspace": {
           "id": 2,
           "name": "admin@example.com"
         }
@@ -109,7 +109,7 @@
         "databaseEngine": "POSTGRES",
         "connectionDriver": "org.postgresql.Driver",
         "databaseEngineDisplayName": "PostgreSQL",
-        "organization": {
+        "workspace": {
           "id": 2,
           "name": "admin@example.com"
         }
@@ -178,7 +178,7 @@
       "attachedClusters": []
     },
     "fileSystemResponse": null,
-    "organization": {
+    "workspace": {
       "id": 2,
       "name": "admin@example.com"
     }
@@ -197,7 +197,7 @@
     },
     "description": "",
     "topologyId": null,
-    "organization": {
+    "workspace": {
       "id": 2,
       "name": "admin@example.com"
     },
@@ -219,7 +219,7 @@
     },
     "topologyId": null,
     "name": "n259f32f9-502a-444e-aac6-233f41cdddbd",
-    "organization": {
+    "workspace": {
       "id": 2,
       "name": "admin@example.com"
     },
@@ -284,7 +284,7 @@
             "id": 1507
           }
         ],
-        "organization": {
+        "workspace": {
           "id": 2,
           "name": "admin@example.com"
         }
@@ -332,7 +332,7 @@
   "hardwareInfoGroups": [],
   "cloudbreakEvents": [],
   "cloudbreakUsages": [],
-  "organization": {
+  "workspace": {
     "id": 2,
     "name": "admin@example.com"
   },

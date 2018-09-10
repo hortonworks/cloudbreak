@@ -25,34 +25,6 @@ type Client struct {
 }
 
 /*
-AuthorizeForAutoscale authorize for autoscale API
-*/
-func (a *Client) AuthorizeForAutoscale(params *AuthorizeForAutoscaleParams) (*AuthorizeForAutoscaleOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewAuthorizeForAutoscaleParams()
-	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "authorizeForAutoscale",
-		Method:             "GET",
-		PathPattern:        "/v1/stacks/authorize/{id}/{owner}/{permission}",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &AuthorizeForAutoscaleReader{formats: a.formats},
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*AuthorizeForAutoscaleOK), nil
-
-}
-
-/*
 DeleteCluster deletes cluster on a specific stack
 
 Clusters are materialised Hadoop services on a given infrastructure. They are built based on a Blueprint (running the components and services specified) and on a configured infrastructure Stack. Once a cluster is created and launched, it can be used the usual way as any Hadoop cluster. We suggest to start with the Cluster's Ambari UI for an overview of your cluster.
@@ -233,96 +205,6 @@ func (a *Client) DeleteStack(params *DeleteStackParams) error {
 }
 
 /*
-FailureReportCluster failures report
-
-Endpoint to report the failed nodes in the given cluster. If recovery mode for the node's hostgroup is AUTO then autorecovery would be started. If recovery mode for the node's hostgroup is MANUAL, the nodes will be marked as unhealthy.
-*/
-func (a *Client) FailureReportCluster(params *FailureReportClusterParams) error {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewFailureReportClusterParams()
-	}
-
-	_, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "failureReportCluster",
-		Method:             "POST",
-		PathPattern:        "/v1/stacks/{id}/cluster/failurereport",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &FailureReportClusterReader{formats: a.formats},
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	})
-	if err != nil {
-		return err
-	}
-	return nil
-
-}
-
-/*
-GetAllStack retrieves all stacks
-
-Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
-*/
-func (a *Client) GetAllStack(params *GetAllStackParams) (*GetAllStackOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewGetAllStackParams()
-	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "getAllStack",
-		Method:             "GET",
-		PathPattern:        "/v1/stacks/all",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &GetAllStackReader{formats: a.formats},
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*GetAllStackOK), nil
-
-}
-
-/*
-GetCertificateStack retrieves the TLS certificate used by the gateway
-
-Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
-*/
-func (a *Client) GetCertificateStack(params *GetCertificateStackParams) (*GetCertificateStackOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewGetCertificateStackParams()
-	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "getCertificateStack",
-		Method:             "GET",
-		PathPattern:        "/v1/stacks/{id}/certificate",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &GetCertificateStackReader{formats: a.formats},
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*GetCertificateStackOK), nil
-
-}
-
-/*
 GetCluster retrieves cluster by stack id
 
 Clusters are materialised Hadoop services on a given infrastructure. They are built based on a Blueprint (running the components and services specified) and on a configured infrastructure Stack. Once a cluster is created and launched, it can be used the usual way as any Hadoop cluster. We suggest to start with the Cluster's Ambari UI for an overview of your cluster.
@@ -379,36 +261,6 @@ func (a *Client) GetConfigsCluster(params *GetConfigsClusterParams) (*GetConfigs
 		return nil, err
 	}
 	return result.(*GetConfigsClusterOK), nil
-
-}
-
-/*
-GetFullCluster retrieves cluster by stack id
-
-Clusters are materialised Hadoop services on a given infrastructure. They are built based on a Blueprint (running the components and services specified) and on a configured infrastructure Stack. Once a cluster is created and launched, it can be used the usual way as any Hadoop cluster. We suggest to start with the Cluster's Ambari UI for an overview of your cluster.
-*/
-func (a *Client) GetFullCluster(params *GetFullClusterParams) (*GetFullClusterOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewGetFullClusterParams()
-	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "getFullCluster",
-		Method:             "GET",
-		PathPattern:        "/v1/stacks/{id}/cluster/full",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &GetFullClusterReader{formats: a.formats},
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*GetFullClusterOK), nil
 
 }
 
@@ -619,36 +471,6 @@ func (a *Client) GetStack(params *GetStackParams) (*GetStackOK, error) {
 		return nil, err
 	}
 	return result.(*GetStackOK), nil
-
-}
-
-/*
-GetStackForAmbari retrieves stack by ambari address
-
-Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
-*/
-func (a *Client) GetStackForAmbari(params *GetStackForAmbariParams) (*GetStackForAmbariOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewGetStackForAmbariParams()
-	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "getStackForAmbari",
-		Method:             "POST",
-		PathPattern:        "/v1/stacks/ambari",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &GetStackForAmbariReader{formats: a.formats},
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*GetStackForAmbariOK), nil
 
 }
 

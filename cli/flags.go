@@ -855,11 +855,11 @@ var (
 			Usage: "id of audit",
 		},
 	}
-	FlOrganizationOptional = StringFlag{
+	FlWorkspaceOptional = StringFlag{
 		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{
-			Name:  "org",
-			Usage: "name of the organization",
+			Name:  "workspace",
+			Usage: "name of the workspace",
 		},
 	}
 	FlUserID = StringFlag{
@@ -981,7 +981,7 @@ func (fb *FlagBuilder) AddFlags(flags ...cli.Flag) *FlagBuilder {
 }
 
 func (fb *FlagBuilder) AddAuthenticationFlags() *FlagBuilder {
-	for _, f := range []cli.Flag{FlServerOptional, FlUsername, FlPassword, FlOrganizationOptional, FlProfileOptional, FlAuthTypeOptional} {
+	for _, f := range []cli.Flag{FlServerOptional, FlUsername, FlPassword, FlWorkspaceOptional, FlProfileOptional, FlAuthTypeOptional} {
 		fb.flags = append(fb.flags, f)
 	}
 	return fb

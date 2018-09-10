@@ -8,7 +8,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/cb-cli/cli/cloud"
 	"github.com/hortonworks/cb-cli/cli/utils"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_organization_id_imagecatalogs"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_workspace_id_imagecatalogs"
 	"github.com/hortonworks/cb-cli/models_cloudbreak"
 	"github.com/urfave/cli"
 )
@@ -83,17 +83,17 @@ func CreateImagecatalogFromUrl(c *cli.Context) {
 	log.Infof("[CreateImagecatalogFromUrl] creating imagecatalog from a URL")
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	createImagecatalogImpl(
-		cbClient.Cloudbreak.V3OrganizationIDImagecatalogs,
-		c.Int64(FlOrganizationOptional.Name),
+		cbClient.Cloudbreak.V3WorkspaceIDImagecatalogs,
+		c.Int64(FlWorkspaceOptional.Name),
 		c.String(FlName.Name),
 		c.String(FlURL.Name))
 }
 
 type imagecatalogClient interface {
-	CreateImageCatalogInOrganization(params *v3_organization_id_imagecatalogs.CreateImageCatalogInOrganizationParams) (*v3_organization_id_imagecatalogs.CreateImageCatalogInOrganizationOK, error)
+	CreateImageCatalogInWorkspace(params *v3_workspace_id_imagecatalogs.CreateImageCatalogInWorkspaceParams) (*v3_workspace_id_imagecatalogs.CreateImageCatalogInWorkspaceOK, error)
 }
 
-func createImagecatalogImpl(client imagecatalogClient, orgID int64, name string, imagecatalogURL string) {
+func createImagecatalogImpl(client imagecatalogClient, workspaceID int64, name string, imagecatalogURL string) {
 	defer utils.TimeTrack(time.Now(), "create imagecatalog")
 	imagecatalogRequest := &models_cloudbreak.ImageCatalogRequest{
 		Name: &name,
@@ -101,7 +101,7 @@ func createImagecatalogImpl(client imagecatalogClient, orgID int64, name string,
 	}
 	var ic *models_cloudbreak.ImageCatalogResponse
 	log.Infof("[createImagecatalogImpl] sending create imagecatalog request")
-	resp, err := client.CreateImageCatalogInOrganization(v3_organization_id_imagecatalogs.NewCreateImageCatalogInOrganizationParams().WithOrganizationID(orgID).WithBody(imagecatalogRequest))
+	resp, err := client.CreateImageCatalogInWorkspace(v3_workspace_id_imagecatalogs.NewCreateImageCatalogInWorkspaceParams().WithWorkspaceID(workspaceID).WithBody(imagecatalogRequest))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -115,17 +115,17 @@ func ListImagecatalogs(c *cli.Context) {
 
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
-	orgID := c.Int64(FlOrganizationOptional.Name)
-	listImagecatalogsImpl(cbClient.Cloudbreak.V3OrganizationIDImagecatalogs, orgID, output.WriteList)
+	workspaceID := c.Int64(FlWorkspaceOptional.Name)
+	listImagecatalogsImpl(cbClient.Cloudbreak.V3WorkspaceIDImagecatalogs, workspaceID, output.WriteList)
 }
 
-type listImageCatalogsByOrganizationClient interface {
-	ListImageCatalogsByOrganization(*v3_organization_id_imagecatalogs.ListImageCatalogsByOrganizationParams) (*v3_organization_id_imagecatalogs.ListImageCatalogsByOrganizationOK, error)
+type listImageCatalogsByWorkspaceClient interface {
+	ListImageCatalogsByWorkspace(*v3_workspace_id_imagecatalogs.ListImageCatalogsByWorkspaceParams) (*v3_workspace_id_imagecatalogs.ListImageCatalogsByWorkspaceOK, error)
 }
 
-func listImagecatalogsImpl(client listImageCatalogsByOrganizationClient, orgID int64, writer func([]string, []utils.Row)) {
+func listImagecatalogsImpl(client listImageCatalogsByWorkspaceClient, workspaceID int64, writer func([]string, []utils.Row)) {
 	log.Infof("[listImagecatalogsImpl] sending imagecatalog list request")
-	imagecatalogResp, err := client.ListImageCatalogsByOrganization(v3_organization_id_imagecatalogs.NewListImageCatalogsByOrganizationParams().WithOrganizationID(orgID))
+	imagecatalogResp, err := client.ListImageCatalogsByWorkspace(v3_workspace_id_imagecatalogs.NewListImageCatalogsByWorkspaceParams().WithWorkspaceID(workspaceID))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -143,10 +143,10 @@ func DeleteImagecatalog(c *cli.Context) {
 	defer utils.TimeTrack(time.Now(), "delete imagecatalog")
 
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
-	orgID := c.Int64(FlOrganizationOptional.Name)
+	workspaceID := c.Int64(FlWorkspaceOptional.Name)
 	name := c.String(FlName.Name)
 	log.Infof("[DeleteImagecatalog] sending delete imagecatalog request with name: %s", name)
-	if _, err := cbClient.Cloudbreak.V3OrganizationIDImagecatalogs.DeleteImageCatalogInOrganization(v3_organization_id_imagecatalogs.NewDeleteImageCatalogInOrganizationParams().WithOrganizationID(orgID).WithName(name)); err != nil {
+	if _, err := cbClient.Cloudbreak.V3WorkspaceIDImagecatalogs.DeleteImageCatalogInWorkspace(v3_workspace_id_imagecatalogs.NewDeleteImageCatalogInWorkspaceParams().WithWorkspaceID(workspaceID).WithName(name)); err != nil {
 		utils.LogErrorAndExit(err)
 	}
 	log.Infof("[DeleteImagecatalog] imagecatalog deleted, name: %s", name)
@@ -157,11 +157,11 @@ func SetDefaultImagecatalog(c *cli.Context) {
 	defer utils.TimeTrack(time.Now(), "set default imagecatalog")
 
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
-	orgID := c.Int64(FlOrganizationOptional.Name)
+	workspaceID := c.Int64(FlWorkspaceOptional.Name)
 	name := c.String(FlName.Name)
 	log.Infof("[SetDefautlImagecatalog] sending set default imagecatalog request with name: %s", name)
 
-	if _, err := cbClient.Cloudbreak.V3OrganizationIDImagecatalogs.PutSetDefaultImageCatalogByNameInOrganization(v3_organization_id_imagecatalogs.NewPutSetDefaultImageCatalogByNameInOrganizationParams().WithOrganizationID(orgID).WithName(name)); err != nil {
+	if _, err := cbClient.Cloudbreak.V3WorkspaceIDImagecatalogs.PutSetDefaultImageCatalogByNameInWorkspace(v3_workspace_id_imagecatalogs.NewPutSetDefaultImageCatalogByNameInWorkspaceParams().WithWorkspaceID(workspaceID).WithName(name)); err != nil {
 		utils.LogErrorAndExit(err)
 	}
 
@@ -174,8 +174,8 @@ func DescribeImagecatalog(c *cli.Context) {
 
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
-	orgID := c.Int64(FlOrganizationOptional.Name)
-	resp, err := cbClient.Cloudbreak.V3OrganizationIDImagecatalogs.GetImageCatalogInOrganization(v3_organization_id_imagecatalogs.NewGetImageCatalogInOrganizationParams().WithOrganizationID(orgID).WithName(c.String(FlName.Name)))
+	workspaceID := c.Int64(FlWorkspaceOptional.Name)
+	resp, err := cbClient.Cloudbreak.V3WorkspaceIDImagecatalogs.GetImageCatalogInWorkspace(v3_workspace_id_imagecatalogs.NewGetImageCatalogInWorkspaceParams().WithWorkspaceID(workspaceID).WithName(c.String(FlName.Name)))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -214,7 +214,7 @@ func listImages(c *cli.Context) {
 
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
-	listImagesImpl(cbClient.Cloudbreak.V3OrganizationIDImagecatalogs, output.WriteList, c.Int64(FlOrganizationOptional.Name), c.String(FlImageCatalog.Name))
+	listImagesImpl(cbClient.Cloudbreak.V3WorkspaceIDImagecatalogs, output.WriteList, c.Int64(FlWorkspaceOptional.Name), c.String(FlImageCatalog.Name))
 }
 
 func ListImagesValidForUpgrade(c *cli.Context) {
@@ -226,17 +226,17 @@ func ListImagesValidForUpgrade(c *cli.Context) {
 	clusterName := c.String(FlClusterToUpgrade.Name)
 	imageCatalogName := c.String(FlImageCatalogOptional.Name)
 	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
-	orgID := c.Int64(FlOrganizationOptional.Name)
+	workspaceID := c.Int64(FlWorkspaceOptional.Name)
 	if imageCatalogName != "" {
 		log.Infof("[ListImagesValidForUpgrade] sending list images request, stack: %s, catalog: %s", clusterName, imageCatalogName)
-		imageResp, err := cbClient.Cloudbreak.V3OrganizationIDImagecatalogs.GetImagesByStackNameAndCustomImageCatalogInOrganization(v3_organization_id_imagecatalogs.NewGetImagesByStackNameAndCustomImageCatalogInOrganizationParams().WithOrganizationID(orgID).WithName(imageCatalogName).WithStackName(clusterName))
+		imageResp, err := cbClient.Cloudbreak.V3WorkspaceIDImagecatalogs.GetImagesByStackNameAndCustomImageCatalogInWorkspace(v3_workspace_id_imagecatalogs.NewGetImagesByStackNameAndCustomImageCatalogInWorkspaceParams().WithWorkspaceID(workspaceID).WithName(imageCatalogName).WithStackName(clusterName))
 		if err != nil {
 			utils.LogErrorAndExit(err)
 		}
 		writeImageListInformation(output.WriteList, toImageResponseList(imageResp.Payload))
 	} else {
 		log.Infof("[ListImagesValidForUpgrade] sending list images request using the default catalog, stack: %s", clusterName)
-		imageResp, err := cbClient.Cloudbreak.V3OrganizationIDImagecatalogs.GetImagesByStackNameAndDefaultImageCatalogInOrganization(v3_organization_id_imagecatalogs.NewGetImagesByStackNameAndDefaultImageCatalogInOrganizationParams().WithOrganizationID(orgID).WithStackName(clusterName))
+		imageResp, err := cbClient.Cloudbreak.V3WorkspaceIDImagecatalogs.GetImagesByStackNameAndDefaultImageCatalogInWorkspace(v3_workspace_id_imagecatalogs.NewGetImagesByStackNameAndDefaultImageCatalogInWorkspaceParams().WithWorkspaceID(workspaceID).WithStackName(clusterName))
 		if err != nil {
 			utils.LogErrorAndExit(err)
 		}
@@ -285,13 +285,13 @@ func describeImage(c *cli.Context) {
 
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
-	describeImageImpl(cbClient.Cloudbreak.V3OrganizationIDImagecatalogs, output.WriteList, c.Int64(FlOrganizationOptional.Name), c.String(FlImageCatalog.Name), c.String(FlImageId.Name))
+	describeImageImpl(cbClient.Cloudbreak.V3WorkspaceIDImagecatalogs, output.WriteList, c.Int64(FlWorkspaceOptional.Name), c.String(FlImageCatalog.Name), c.String(FlImageId.Name))
 }
 
-func describeImageImpl(client getPublicImagesClient, writer func([]string, []utils.Row), orgID int64, imagecatalog string, imageid string) {
+func describeImageImpl(client getPublicImagesClient, writer func([]string, []utils.Row), workspaceID int64, imagecatalog string, imageid string) {
 	log.Infof("[listImagesImpl] sending list images request")
 	provider := cloud.GetProvider().GetName()
-	imageResp, err := client.GetImagesByProviderAndCustomImageCatalogInOrganization(v3_organization_id_imagecatalogs.NewGetImagesByProviderAndCustomImageCatalogInOrganizationParams().WithOrganizationID(orgID).WithName(imagecatalog).WithPlatform(*provider))
+	imageResp, err := client.GetImagesByProviderAndCustomImageCatalogInWorkspace(v3_workspace_id_imagecatalogs.NewGetImagesByProviderAndCustomImageCatalogInWorkspaceParams().WithWorkspaceID(workspaceID).WithName(imagecatalog).WithPlatform(*provider))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -363,13 +363,13 @@ func writeImageListInformation(writer func([]string, []utils.Row), payload []*mo
 }
 
 type getPublicImagesClient interface {
-	GetImagesByProviderAndCustomImageCatalogInOrganization(*v3_organization_id_imagecatalogs.GetImagesByProviderAndCustomImageCatalogInOrganizationParams) (*v3_organization_id_imagecatalogs.GetImagesByProviderAndCustomImageCatalogInOrganizationOK, error)
+	GetImagesByProviderAndCustomImageCatalogInWorkspace(*v3_workspace_id_imagecatalogs.GetImagesByProviderAndCustomImageCatalogInWorkspaceParams) (*v3_workspace_id_imagecatalogs.GetImagesByProviderAndCustomImageCatalogInWorkspaceOK, error)
 }
 
-func listImagesImpl(client getPublicImagesClient, writer func([]string, []utils.Row), orgID int64, imagecatalog string) {
+func listImagesImpl(client getPublicImagesClient, writer func([]string, []utils.Row), workspaceID int64, imagecatalog string) {
 	log.Infof("[listImagesImpl] sending list images request")
 	provider := cloud.GetProvider().GetName()
-	imageResp, err := client.GetImagesByProviderAndCustomImageCatalogInOrganization(v3_organization_id_imagecatalogs.NewGetImagesByProviderAndCustomImageCatalogInOrganizationParams().WithOrganizationID(orgID).WithName(imagecatalog).WithPlatform(*provider))
+	imageResp, err := client.GetImagesByProviderAndCustomImageCatalogInWorkspace(v3_workspace_id_imagecatalogs.NewGetImagesByProviderAndCustomImageCatalogInWorkspaceParams().WithWorkspaceID(workspaceID).WithName(imagecatalog).WithPlatform(*provider))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}

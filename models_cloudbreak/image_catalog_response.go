@@ -32,9 +32,6 @@ type ImageCatalogResponse struct {
 	// Pattern: (^[a-z][-a-z0-9]*[a-z0-9]$)
 	Name *string `json:"name"`
 
-	// organization of the resource
-	Organization *OrganizationResourceResponse `json:"organization,omitempty"`
-
 	// resource is visible in account
 	// Required: true
 	PublicInAccount bool `json:"publicInAccount"`
@@ -47,6 +44,9 @@ type ImageCatalogResponse struct {
 	// true if image catalog is the default one
 	// Required: true
 	UsedAsDefault bool `json:"usedAsDefault"`
+
+	// workspace of the resource
+	Workspace *WorkspaceResourceResponse `json:"workspace,omitempty"`
 }
 
 /* polymorph ImageCatalogResponse id false */
@@ -55,13 +55,13 @@ type ImageCatalogResponse struct {
 
 /* polymorph ImageCatalogResponse name false */
 
-/* polymorph ImageCatalogResponse organization false */
-
 /* polymorph ImageCatalogResponse publicInAccount false */
 
 /* polymorph ImageCatalogResponse url false */
 
 /* polymorph ImageCatalogResponse usedAsDefault false */
+
+/* polymorph ImageCatalogResponse workspace false */
 
 // Validate validates this image catalog response
 func (m *ImageCatalogResponse) Validate(formats strfmt.Registry) error {
@@ -82,11 +82,6 @@ func (m *ImageCatalogResponse) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateOrganization(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
 	if err := m.validatePublicInAccount(formats); err != nil {
 		// prop
 		res = append(res, err)
@@ -98,6 +93,11 @@ func (m *ImageCatalogResponse) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateUsedAsDefault(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateWorkspace(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -157,25 +157,6 @@ func (m *ImageCatalogResponse) validateName(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *ImageCatalogResponse) validateOrganization(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Organization) { // not required
-		return nil
-	}
-
-	if m.Organization != nil {
-
-		if err := m.Organization.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("organization")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
 func (m *ImageCatalogResponse) validatePublicInAccount(formats strfmt.Registry) error {
 
 	if err := validate.Required("publicInAccount", "body", bool(m.PublicInAccount)); err != nil {
@@ -202,6 +183,25 @@ func (m *ImageCatalogResponse) validateUsedAsDefault(formats strfmt.Registry) er
 
 	if err := validate.Required("usedAsDefault", "body", bool(m.UsedAsDefault)); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *ImageCatalogResponse) validateWorkspace(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Workspace) { // not required
+		return nil
+	}
+
+	if m.Workspace != nil {
+
+		if err := m.Workspace.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("workspace")
+			}
+			return err
+		}
 	}
 
 	return nil

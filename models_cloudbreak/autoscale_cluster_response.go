@@ -110,9 +110,6 @@ type AutoscaleClusterResponse struct {
 	// name of the resource
 	Name string `json:"name,omitempty"`
 
-	// organization of the resource
-	Organization *OrganizationResourceResponse `json:"organization,omitempty"`
-
 	// ambari password
 	Password string `json:"password,omitempty"`
 
@@ -144,6 +141,9 @@ type AutoscaleClusterResponse struct {
 
 	// ambari username
 	UserName string `json:"userName,omitempty"`
+
+	// workspace of the resource
+	Workspace *WorkspaceResourceResponse `json:"workspace,omitempty"`
 }
 
 /* polymorph AutoscaleClusterResponse ambariDatabaseDetails false */
@@ -204,8 +204,6 @@ type AutoscaleClusterResponse struct {
 
 /* polymorph AutoscaleClusterResponse name false */
 
-/* polymorph AutoscaleClusterResponse organization false */
-
 /* polymorph AutoscaleClusterResponse password false */
 
 /* polymorph AutoscaleClusterResponse proxyName false */
@@ -225,6 +223,8 @@ type AutoscaleClusterResponse struct {
 /* polymorph AutoscaleClusterResponse uptime false */
 
 /* polymorph AutoscaleClusterResponse userName false */
+
+/* polymorph AutoscaleClusterResponse workspace false */
 
 // Validate validates this autoscale cluster response
 func (m *AutoscaleClusterResponse) Validate(formats strfmt.Registry) error {
@@ -300,11 +300,6 @@ func (m *AutoscaleClusterResponse) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateOrganization(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
 	if err := m.validateRdsConfigIds(formats); err != nil {
 		// prop
 		res = append(res, err)
@@ -321,6 +316,11 @@ func (m *AutoscaleClusterResponse) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateStatus(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateWorkspace(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -663,25 +663,6 @@ func (m *AutoscaleClusterResponse) validateLdapConfig(formats strfmt.Registry) e
 	return nil
 }
 
-func (m *AutoscaleClusterResponse) validateOrganization(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Organization) { // not required
-		return nil
-	}
-
-	if m.Organization != nil {
-
-		if err := m.Organization.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("organization")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
 func (m *AutoscaleClusterResponse) validateRdsConfigIds(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.RdsConfigIds) { // not required
@@ -817,6 +798,25 @@ func (m *AutoscaleClusterResponse) validateStatus(formats strfmt.Registry) error
 	// value enum
 	if err := m.validateStatusEnum("status", "body", m.Status); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *AutoscaleClusterResponse) validateWorkspace(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Workspace) { // not required
+		return nil
+	}
+
+	if m.Workspace != nil {
+
+		if err := m.Workspace.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("workspace")
+			}
+			return err
+		}
 	}
 
 	return nil

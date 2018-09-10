@@ -86,7 +86,7 @@ RSpec.describe 'Database test cases', :type => :aruba do
 
   it "Database - Test - By parameters - Success" do
     with_environment 'DEBUG' => '1' do
-      requestBody = MockResponse.requestBodyCreate('testRdsConnectionInOrganization', '{"connectionResult": "connected"}', '200')
+      requestBody = MockResponse.requestBodyCreate('testRdsConnectionInWorkspace', '{"connectionResult": "connected"}', '200')
       url = ENV['BASE_URL'] + @mock_endpoint_setup
       MockResponse.post(requestBody, url)
       result = cb.database.test.by_params.url(@db_url).db_username(@db_user).db_password(@mock_password).type("Hive").build(false)
@@ -97,7 +97,7 @@ RSpec.describe 'Database test cases', :type => :aruba do
 
   it "Database - Test - By Name - Success" do
     with_environment 'DEBUG' => '1' do
-      requestBody = MockResponse.requestBodyCreate('testRdsConnectionInOrganization', '{"connectionResult": "connected"}', '200')
+      requestBody = MockResponse.requestBodyCreate('testRdsConnectionInWorkspace', '{"connectionResult": "connected"}', '200')
       url = ENV['BASE_URL'] + @mock_endpoint_setup
       MockResponse.post(requestBody, url)
       result = cb.database.test.by_name.name("aaaaa").build(false)

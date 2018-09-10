@@ -37,9 +37,6 @@ type CredentialResponse struct {
 	// Pattern: (^[a-z][-a-z0-9]*[a-z0-9]$)
 	Name *string `json:"name"`
 
-	// organization
-	Organization *OrganizationResourceResponse `json:"organization,omitempty"`
-
 	// cloud specific parameters for credential
 	Parameters map[string]interface{} `json:"parameters,omitempty"`
 
@@ -48,6 +45,9 @@ type CredentialResponse struct {
 
 	// id of the topology the resource belongs to
 	TopologyID int64 `json:"topologyId,omitempty"`
+
+	// workspace
+	Workspace *WorkspaceResourceResponse `json:"workspace,omitempty"`
 }
 
 /* polymorph CredentialResponse cloudPlatform false */
@@ -58,13 +58,13 @@ type CredentialResponse struct {
 
 /* polymorph CredentialResponse name false */
 
-/* polymorph CredentialResponse organization false */
-
 /* polymorph CredentialResponse parameters false */
 
 /* polymorph CredentialResponse public false */
 
 /* polymorph CredentialResponse topologyId false */
+
+/* polymorph CredentialResponse workspace false */
 
 // Validate validates this credential response
 func (m *CredentialResponse) Validate(formats strfmt.Registry) error {
@@ -85,7 +85,7 @@ func (m *CredentialResponse) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateOrganization(formats); err != nil {
+	if err := m.validateWorkspace(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -143,17 +143,17 @@ func (m *CredentialResponse) validateName(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *CredentialResponse) validateOrganization(formats strfmt.Registry) error {
+func (m *CredentialResponse) validateWorkspace(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.Organization) { // not required
+	if swag.IsZero(m.Workspace) { // not required
 		return nil
 	}
 
-	if m.Organization != nil {
+	if m.Workspace != nil {
 
-		if err := m.Organization.Validate(formats); err != nil {
+		if err := m.Workspace.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("organization")
+				return ve.ValidateName("workspace")
 			}
 			return err
 		}

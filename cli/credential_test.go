@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_organization_id_credentials"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_workspace_id_credentials"
 
 	"errors"
 
@@ -24,10 +24,10 @@ type mockCredentialCreate struct {
 	request chan *models_cloudbreak.CredentialRequest
 }
 
-func (m *mockCredentialCreate) CreateCredentialInOrganization(params *v3_organization_id_credentials.CreateCredentialInOrganizationParams) (*v3_organization_id_credentials.CreateCredentialInOrganizationOK, error) {
+func (m *mockCredentialCreate) CreateCredentialInWorkspace(params *v3_workspace_id_credentials.CreateCredentialInWorkspaceParams) (*v3_workspace_id_credentials.CreateCredentialInWorkspaceOK, error) {
 	m.request <- params.Body
 	defer close(m.request)
-	return &v3_organization_id_credentials.CreateCredentialInOrganizationOK{Payload: &models_cloudbreak.CredentialResponse{ID: int64(1), Name: &(&types.S{S: ""}).S, Public: &(&types.B{B: true}).B}}, nil
+	return &v3_workspace_id_credentials.CreateCredentialInWorkspaceOK{Payload: &models_cloudbreak.CredentialResponse{ID: int64(1), Name: &(&types.S{S: ""}).S, Public: &(&types.B{B: true}).B}}, nil
 }
 
 func TestCreateCredentialPublic(t *testing.T) {
@@ -35,10 +35,10 @@ func TestCreateCredentialPublic(t *testing.T) {
 
 	mockInt64Finder := func(in string) int64 {
 		switch in {
-		case FlOrganizationOptional.Name:
+		case FlWorkspaceOptional.Name:
 			return int64(2)
 		default:
-			t.Error("organization option expected")
+			t.Error("workspace option expected")
 			return int64(-1)
 		}
 	}
@@ -62,10 +62,10 @@ func TestCreateCredentialPublic(t *testing.T) {
 	}
 }
 
-type mockListCredentialsByOrganization struct {
+type mockListCredentialsByWorkspace struct {
 }
 
-func (m *mockListCredentialsByOrganization) ListCredentialsByOrganization(params *v3_organization_id_credentials.ListCredentialsByOrganizationParams) (*v3_organization_id_credentials.ListCredentialsByOrganizationOK, error) {
+func (m *mockListCredentialsByWorkspace) ListCredentialsByWorkspace(params *v3_workspace_id_credentials.ListCredentialsByWorkspaceParams) (*v3_workspace_id_credentials.ListCredentialsByWorkspaceOK, error) {
 	resp := make([]*models_cloudbreak.CredentialResponse, 0)
 	for i := 0; i < 3; i++ {
 		resp = append(resp, &models_cloudbreak.CredentialResponse{
@@ -75,7 +75,7 @@ func (m *mockListCredentialsByOrganization) ListCredentialsByOrganization(params
 		})
 	}
 
-	return &v3_organization_id_credentials.ListCredentialsByOrganizationOK{Payload: resp}, nil
+	return &v3_workspace_id_credentials.ListCredentialsByWorkspaceOK{Payload: resp}, nil
 }
 
 func TestListCredentialsImpl(t *testing.T) {
@@ -83,7 +83,7 @@ func TestListCredentialsImpl(t *testing.T) {
 
 	var rows []utils.Row
 
-	listCredentialsImpl(new(mockListCredentialsByOrganization), int64(2), func(h []string, r []utils.Row) { rows = r })
+	listCredentialsImpl(new(mockListCredentialsByWorkspace), int64(2), func(h []string, r []utils.Row) { rows = r })
 
 	if len(rows) != 3 {
 		t.Fatalf("row number not match 3 == %d", len(rows))
@@ -100,8 +100,8 @@ func TestListCredentialsImpl(t *testing.T) {
 type mockCredentialModifyClient struct {
 }
 
-func (m *mockCredentialModifyClient) PutCredentialInOrganization(params *v3_organization_id_credentials.PutCredentialInOrganizationParams) (*v3_organization_id_credentials.PutCredentialInOrganizationOK, error) {
-	return &v3_organization_id_credentials.PutCredentialInOrganizationOK{Payload: &models_cloudbreak.CredentialResponse{
+func (m *mockCredentialModifyClient) PutCredentialInWorkspace(params *v3_workspace_id_credentials.PutCredentialInWorkspaceParams) (*v3_workspace_id_credentials.PutCredentialInWorkspaceOK, error) {
+	return &v3_workspace_id_credentials.PutCredentialInWorkspaceOK{Payload: &models_cloudbreak.CredentialResponse{
 		ID:            int64(1),
 		Name:          params.Body.Name,
 		Description:   params.Body.Description,
@@ -112,7 +112,7 @@ func (m *mockCredentialModifyClient) PutCredentialInOrganization(params *v3_orga
 	}, nil
 }
 
-func (m *mockCredentialModifyClient) GetCredentialInOrganization(params *v3_organization_id_credentials.GetCredentialInOrganizationParams) (*v3_organization_id_credentials.GetCredentialInOrganizationOK, error) {
+func (m *mockCredentialModifyClient) GetCredentialInWorkspace(params *v3_workspace_id_credentials.GetCredentialInWorkspaceParams) (*v3_workspace_id_credentials.GetCredentialInWorkspaceOK, error) {
 	var credentialMap = make(map[string]interface{})
 	credentialMap["selector"] = "role-based"
 	credentialMap["roleArn"] = "default-role-arn"
@@ -125,7 +125,7 @@ func (m *mockCredentialModifyClient) GetCredentialInOrganization(params *v3_orga
 		return nil, errors.New("credential does not exist")
 	}
 
-	return &v3_organization_id_credentials.GetCredentialInOrganizationOK{Payload: &models_cloudbreak.CredentialResponse{
+	return &v3_workspace_id_credentials.GetCredentialInWorkspaceOK{Payload: &models_cloudbreak.CredentialResponse{
 		ID:            int64(1),
 		Name:          &(&types.S{S: "name"}).S,
 		Description:   &(&types.S{S: "default description"}).S,
@@ -157,10 +157,10 @@ func TestModifyCredentialImplForValidChange(t *testing.T) {
 
 	mockInt64Finder := func(in string) int64 {
 		switch in {
-		case FlOrganizationOptional.Name:
+		case FlWorkspaceOptional.Name:
 			return int64(2)
 		default:
-			t.Error("organization option expected")
+			t.Error("workspace option expected")
 			return int64(-1)
 		}
 	}
@@ -198,10 +198,10 @@ func TestModifyCredentialImplForDescriptionChange(t *testing.T) {
 
 	mockInt64Finder := func(in string) int64 {
 		switch in {
-		case FlOrganizationOptional.Name:
+		case FlWorkspaceOptional.Name:
 			return int64(2)
 		default:
-			t.Error("organization option expected")
+			t.Error("workspace option expected")
 			return int64(-1)
 		}
 	}
@@ -239,10 +239,10 @@ func TestModifyCredentialImplForDescriptionPublicChange(t *testing.T) {
 
 	mockInt64Finder := func(in string) int64 {
 		switch in {
-		case FlOrganizationOptional.Name:
+		case FlWorkspaceOptional.Name:
 			return int64(2)
 		default:
-			t.Error("organization option expected")
+			t.Error("workspace option expected")
 			return int64(-1)
 		}
 	}
@@ -287,10 +287,10 @@ func TestModifyCredentialImplForInvalidCredential(t *testing.T) {
 
 	mockInt64Finder := func(in string) int64 {
 		switch in {
-		case FlOrganizationOptional.Name:
+		case FlWorkspaceOptional.Name:
 			return int64(2)
 		default:
-			t.Error("organization option expected")
+			t.Error("workspace option expected")
 			return int64(-1)
 		}
 	}

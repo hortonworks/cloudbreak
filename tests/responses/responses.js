@@ -36,7 +36,7 @@ var templates = require('./templates/qa-templates.json');
 var profile = require('./users/default-profile.json');
 var matrix = require('./utilsmatrix.json');
 var mpacks = require('./mpacks/mpacks.json');
-var organizations = require('./organizations/organizations.json');
+var workspaces = require('./workspaces/workspaces.json');
 
 const OK = 200;
 
@@ -69,12 +69,12 @@ responses.getCloudbreakHealth= responseObject({ "status":"UP" }, OK);
 responses.getAccountPreferencesEndpoint= responseObject(acc, OK);
 responses.isPlatformSelectionDisabled= responseObject(platforms, OK);
 responses.platformEnablement= responseObject(platforms, OK);
-responses.listBlueprintsByOrganization = responseObject(qablueprint, OK);
-responses.getBlueprintInOrganization = responseObject(defaultblueprint, OK);
+responses.listBlueprintsByWorkspace = responseObject(qablueprint, OK);
+responses.getBlueprintInWorkspace = responseObject(defaultblueprint, OK);
 responses.getPrivatesBlueprint= responseObject(qablueprint, OK);
 responses.getPrivateBlueprint= responseObject(defaultblueprint, OK);
 responses.getBlueprint= responseObject(defaultblueprint, OK);
-responses.createBlueprintInOrganization= responseObject(defaultblueprint, OK);
+responses.createBlueprintInWorkspace= responseObject(defaultblueprint, OK);
 responses.postPrivateBlueprint= responseObject(defaultblueprint, OK);
 responses.getBlueprintRequestFromId= responseObject(defaultblueprint, OK);
 responses.getDisktypes= responseObject(disktypes, OK);
@@ -85,66 +85,66 @@ responses.getPublicsNetwork= responseObject(networks, OK);
 responses.createRecommendation= responseObject(recommendations, OK);
 responses.getRegions= responseObject(regions, OK);
 responses.getPlatformSShKeys= responseObject(sshkeys, OK);
-responses.getCredentialInOrganization = responseObject(credentialopenstack, OK);
-responses.createCredentialInOrganization = responseObject(credentialopenstack, OK);
-responses.listCredentialsByOrganization = responseObject([credentialopenstack, credentialgcp, credentialazure, credentialaws], OK);
+responses.getCredentialInWorkspace = responseObject(credentialopenstack, OK);
+responses.createCredentialInWorkspace = responseObject(credentialopenstack, OK);
+responses.listCredentialsByWorkspace = responseObject([credentialopenstack, credentialgcp, credentialazure, credentialaws], OK);
 responses.getPublicCredential= responseObject(credentialopenstack, OK);
 responses.getPrivatesCredential= responseObject([credentialopenstack,credentialgcp,credentialazure,credentialaws], OK);
 responses.getPrivateCredential= responseObject(credentialopenstack, OK);
-responses.listImageCatalogsByOrganization = responseObject(defimagec, OK);
-responses.getImageCatalogInOrganization = responseObject(defimagec, OK);
-responses.createImageCatalogInOrganization = responseObject(defimagec, OK);
+responses.listImageCatalogsByWorkspace = responseObject(defimagec, OK);
+responses.getImageCatalogInWorkspace = responseObject(defimagec, OK);
+responses.createImageCatalogInWorkspace = responseObject(defimagec, OK);
 responses.getPublicImageCatalogsByName= responseObject(defimagec, OK);
-responses.getImagesByProviderAndCustomImageCatalogInOrganization= responseObject(qaimages, OK);
+responses.getImagesByProviderAndCustomImageCatalogInWorkspace= responseObject(qaimages, OK);
 responses.putSetDefaultImageCatalogByName= responseObject(defimagec, OK);
 responses.postPrivateImageCatalog= responseObject(defimagec, OK);
 responses.getImageCatalogRequestFromName= responseObject(defimagec, OK);
-responses.listLdapsByOrganization = responseObject(ldap, OK);
-responses.getLdapConfigInOrganization = responseObject(ldap, OK);
-responses.createLdapConfigsInOrganization = responseObject(ldap, OK);
-responses.postLdapConnectionTestInOrganization = responseObject({ "connectionResult":"Failed to connect to LDAP server: hwxad-1a2bcd3e45678f90.elb.eu-west-1.amazonaws.com:123" }, OK);
+responses.listLdapsByWorkspace = responseObject(ldap, OK);
+responses.getLdapConfigInWorkspace = responseObject(ldap, OK);
+responses.createLdapConfigsInWorkspace = responseObject(ldap, OK);
+responses.postLdapConnectionTestInWorkspace = responseObject({ "connectionResult":"Failed to connect to LDAP server: hwxad-1a2bcd3e45678f90.elb.eu-west-1.amazonaws.com:123" }, OK);
 responses.getPrivatesLdap= responseObject(ldap, OK);
 responses.postPrivateLdap= responseObject(ldap, OK);
 responses.getPrivateLdap= responseObject(ldap, OK);
 responses.getLdap= responseObject(ldap, OK);
-responses.listProxyconfigsByOrganization = responseObject(proxy, OK);
-responses.getProxyconfigInOrganization = responseObject(proxy, OK);
-responses.createProxyconfigInOrganization = responseObject(proxy, OK);
+responses.listProxyconfigsByWorkspace = responseObject(proxy, OK);
+responses.getProxyconfigInWorkspace = responseObject(proxy, OK);
+responses.createProxyconfigInWorkspace = responseObject(proxy, OK);
 responses.getPrivatesProxyConfig= responseObject(proxy, OK);
 responses.postPrivateProxyConfig= responseObject(proxy, OK);
 responses.getPrivateProxyConfig= responseObject(proxy, OK);
 responses.getProxyConfig= responseObject(proxy, OK);
-responses.listRdsConfigsByOrganization = responseObject(rds, OK);
-responses.createRdsConfigInOrganization = responseObject(rds, OK);
-responses.getRdsConfigInOrganization = responseObject(rds, OK);
-responses.testRdsConnectionInOrganization = responseObject({ "connectionResult":"Failed to connect to RDS: The connection attempt failed." }, OK);
+responses.listRdsConfigsByWorkspace = responseObject(rds, OK);
+responses.createRdsConfigInWorkspace = responseObject(rds, OK);
+responses.getRdsConfigInWorkspace = responseObject(rds, OK);
+responses.testRdsConnectionInWorkspace = responseObject({ "connectionResult":"Failed to connect to RDS: The connection attempt failed." }, OK);
 responses.getPrivatesRds= responseObject(rds, OK);
 responses.postPrivateRds= responseObject(rds, OK);
 responses.getPrivateRds= responseObject(rds, OK);
-responses.listRecipesByOrganization= responseObject(recipes, OK);
+responses.listRecipesByWorkspace= responseObject(recipes, OK);
 responses.getPublicRecipe= responseObject(recipes[0], OK);
 responses.postPublicRecipe= responseObject(recipes[0], OK);
 responses.postPrivateRecipe= responseObject(recipes[0], OK);
 responses.getRecipeRequestFromName = responseObject(recipes, OK);
 responses.getPublicsSecurityGroup = responseObject(secgr, OK);
-responses.getRecipeInOrganization = responseObject(recipes[0], OK);
+responses.getRecipeInWorkspace = responseObject(recipes[0], OK);
 responses.getDefaultSecurityRules= responseObject(secrules, OK);
 responses.getPublicsStack= responseObject([openstack,aws,azure,gcp], OK);
 responses.getPublicStack= stackResponses;
 responses.getPublicsTemplate= responseObject(templates, OK);
 responses.getUserProfile= responseObject(profile, OK);
 responses.getRegionsByCredentialId= responseObject(regions, OK);
-responses.listStacksByOrganization = responseObject([openstack,aws,azure,gcp], OK);
-responses.createStackInOrganization = responseObject(openstack, OK);
-responses.getStackInOrganization = responseObject(openstack, OK);
+responses.listStacksByWorkspace = responseObject([openstack,aws,azure,gcp], OK);
+responses.createStackInWorkspace = responseObject(openstack, OK);
+responses.getStackInWorkspace = responseObject(openstack, OK);
 responses.getPublicStackV2= responseObject(stackResponses, OK);
 responses.postPrivateStackV2= responseObject(openstack, OK);
 responses.getPrivateStackV2= responseObject(openstack, OK);
 responses.getStackV2= responseObject(openstack, OK);
 responses.getPlatformSecurityGroups= responseObject(securitygroups, OK);
-responses.createManagementPackInOrganization = responseObject(mpacks, OK);
+responses.createManagementPackInWorkspace = responseObject(mpacks, OK);
 responses.postPrivateManagementPack = responseObject(mpacks, OK);
-responses.getOrganizations = responseObject(organizations, OK);
+responses.getWorkspaces = responseObject(workspaces, OK);
 
 responses.postRepositoryConfigsValidation= responseObject({
   "utilsBaseURL" : true,
@@ -155,7 +155,7 @@ responses.postRepositoryConfigsValidation= responseObject({
   "ambariBaseUrl" : true
 }, OK);
 responses.getStackMatrixUtil= responseObject(matrix , OK);
-responses.getDefaultSmartSenseSubscriptionInOrganization= responseObject({
+responses.getDefaultSmartSenseSubscriptionInWorkspace= responseObject({
   "owner" : "owner",
   "publicInAccount" : false,
   "id" : 1,
@@ -164,7 +164,7 @@ responses.getDefaultSmartSenseSubscriptionInOrganization= responseObject({
   "account" : "account"
 }, OK);
 responses.getTagSpecifications = responseObject({ "specifications" : { "key" : { "key" : "{}" } } }, OK);
-responses.listManagementPacksByOrganization = responseObject([ {
+responses.listManagementPacksByWorkspace = responseObject([ {
   "public" : false,
   "name" : "name",
   "description" : "description",
@@ -183,7 +183,7 @@ responses.listManagementPacksByOrganization = responseObject([ {
   "mpackUrl" : "mpackUrl",
   "purgeList" : [ "purgeList", "purgeList" ]
 } ],OK);
-responses.listFlexSubscriptionsByOrganization = responseObject([ {
+responses.listFlexSubscriptionsByWorkspace = responseObject([ {
   "owner" : "owner",
   "publicInAccount" : false,
   "smartSenseSubscriptionId" : 0,

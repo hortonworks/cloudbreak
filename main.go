@@ -37,7 +37,7 @@ func ConfigRead(c *cli.Context) error {
 	output := c.String(cb.FlOutputOptional.Name)
 	profile := c.String(cb.FlProfileOptional.Name)
 	authType := c.String(cb.FlAuthTypeOptional.Name)
-	organization := c.String(cb.FlOrganizationOptional.Name)
+	workspace := c.String(cb.FlWorkspaceOptional.Name)
 
 	if len(profile) == 0 {
 		profile = "default"
@@ -89,13 +89,13 @@ func ConfigRead(c *cli.Context) error {
 			set(cb.FlPassword.Name, config.Password)
 		}
 	}
-	if len(organization) == 0 {
-		if len(config.Organization) == 0 {
-			orgList := cb.GetOrgList(c)
-			var orgID string
-			for _, org := range orgList {
-				if org.Name == c.String(cb.FlUsername.Name) {
-					orgID = strconv.FormatInt(org.ID, 10)
+	if len(workspace) == 0 {
+		if len(config.Workspace) == 0 {
+			workspaceList := cb.GetWorkspaceList(c)
+			var workspaceID string
+			for _, workspace := range workspaceList {
+				if workspace.Name == c.String(cb.FlUsername.Name) {
+					workspaceID = strconv.FormatInt(workspace.ID, 10)
 				}
 			}
 
@@ -103,23 +103,23 @@ func ConfigRead(c *cli.Context) error {
 			if err != nil {
 				utils.LogErrorAndExit(err)
 			}
-			set(cb.FlOrganizationOptional.Name, orgID)
+			set(cb.FlWorkspaceOptional.Name, workspaceID)
 		} else {
-			orgID := cb.GetOrgIdByName(c, config.Organization)
-			set(cb.FlOrganizationOptional.Name, strconv.FormatInt(orgID, 10))
+			workspaceID := cb.GetWorkspaceIdByName(c, config.Workspace)
+			set(cb.FlWorkspaceOptional.Name, strconv.FormatInt(workspaceID, 10))
 		}
 	} else {
-		orgID := cb.GetOrgIdByName(c, organization)
-		set(cb.FlOrganizationOptional.Name, strconv.FormatInt(orgID, 10))
+		workspaceID := cb.GetWorkspaceIdByName(c, workspace)
+		set(cb.FlWorkspaceOptional.Name, strconv.FormatInt(workspaceID, 10))
 	}
 
 	server = c.String(cb.FlServerOptional.Name)
 	username = c.String(cb.FlUsername.Name)
 	password = c.String(cb.FlPassword.Name)
-	organization = c.String(cb.FlOrganizationOptional.Name)
-	if len(server) == 0 || len(username) == 0 || len(password) == 0 || len(organization) == 0 {
+	workspace = c.String(cb.FlWorkspaceOptional.Name)
+	if len(server) == 0 || len(username) == 0 || len(password) == 0 || len(workspace) == 0 {
 		log.Error(fmt.Sprintf("configuration is not set, see: cb configure --help or provide the following flags: %v",
-			[]string{"--" + cb.FlServerOptional.Name, "--" + cb.FlUsername.Name, "--" + cb.FlPassword.Name, "--" + cb.FlOrganizationOptional.Name}))
+			[]string{"--" + cb.FlServerOptional.Name, "--" + cb.FlUsername.Name, "--" + cb.FlPassword.Name, "--" + cb.FlWorkspaceOptional.Name}))
 		os.Exit(1)
 	}
 	return nil
@@ -184,10 +184,10 @@ func main() {
 			Description: fmt.Sprintf("it will save the provided server address and credential "+
 				"to %s/%s/%s", cb.GetHomeDirectory(), cb.Config_dir, cb.Config_file),
 			Usage:  "configure the server address and credentials used to communicate with this server",
-			Flags:  cb.NewFlagBuilder().AddFlags(cb.FlServerRequired, cb.FlUsernameRequired, cb.FlPassword, cb.FlProfileOptional, cb.FlAuthTypeOptional, cb.FlOrganizationOptional).AddOutputFlag().Build(),
+			Flags:  cb.NewFlagBuilder().AddFlags(cb.FlServerRequired, cb.FlUsernameRequired, cb.FlPassword, cb.FlProfileOptional, cb.FlAuthTypeOptional, cb.FlWorkspaceOptional).AddOutputFlag().Build(),
 			Action: cb.Configure,
 			BashComplete: func(c *cli.Context) {
-				for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlServerRequired, cb.FlUsernameRequired, cb.FlPassword, cb.FlProfileOptional, cb.FlAuthTypeOptional, cb.FlOrganizationOptional).AddOutputFlag().Build() {
+				for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlServerRequired, cb.FlUsernameRequired, cb.FlPassword, cb.FlProfileOptional, cb.FlAuthTypeOptional, cb.FlWorkspaceOptional).AddOutputFlag().Build() {
 					printFlagCompletion(f)
 				}
 			},
@@ -1886,16 +1886,16 @@ func main() {
 			},
 		},
 		{
-			Name:  "org",
-			Usage: "organization related operations",
+			Name:  "workspace",
+			Usage: "workspace related operations",
 			Subcommands: []cli.Command{
 				{
 					Name:  "add-user",
-					Usage: "add user to the organization",
+					Usage: "add user to the workspace",
 					Subcommands: []cli.Command{
 						{
 							Name:   "read",
-							Usage:  "add user to the organization with read permission",
+							Usage:  "add user to the workspace with read permission",
 							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlUserID).AddAuthenticationFlags().Build(),
 							Before: ConfigRead,
 							Action: cb.AddReadUser,
@@ -1907,7 +1907,7 @@ func main() {
 						},
 						{
 							Name:   "read-write",
-							Usage:  "add user to the organization with read and write permission",
+							Usage:  "add user to the workspace with read and write permission",
 							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlUserID).AddAuthenticationFlags().Build(),
 							Before: ConfigRead,
 							Action: cb.AddReadWriteUser,
@@ -1921,10 +1921,10 @@ func main() {
 				},
 				{
 					Name:   "create",
-					Usage:  "create a new organization",
+					Usage:  "create a new workspace",
 					Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddAuthenticationFlags().Build(),
 					Before: ConfigRead,
-					Action: cb.CreateOrg,
+					Action: cb.CreateWorkspace,
 					BashComplete: func(c *cli.Context) {
 						for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddAuthenticationFlags().Build() {
 							printFlagCompletion(f)
@@ -1933,10 +1933,10 @@ func main() {
 				},
 				{
 					Name:   "delete",
-					Usage:  "deletes an organization",
+					Usage:  "deletes a workspace",
 					Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().Build(),
 					Before: ConfigRead,
-					Action: cb.DeleteOrg,
+					Action: cb.DeleteWorkspace,
 					BashComplete: func(c *cli.Context) {
 						for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().Build() {
 							printFlagCompletion(f)
@@ -1945,10 +1945,10 @@ func main() {
 				},
 				{
 					Name:   "list",
-					Usage:  "list organizations",
+					Usage:  "list workspaces",
 					Flags:  cb.NewFlagBuilder().AddOutputFlag().AddAuthenticationFlags().Build(),
 					Before: ConfigRead,
-					Action: cb.ListOrgs,
+					Action: cb.ListWorkspaces,
 					BashComplete: func(c *cli.Context) {
 						for _, f := range cb.NewFlagBuilder().AddOutputFlag().AddAuthenticationFlags().Build() {
 							printFlagCompletion(f)
@@ -1957,10 +1957,10 @@ func main() {
 				},
 				{
 					Name:   "describe",
-					Usage:  "describes an organization",
+					Usage:  "describes a workspace",
 					Flags:  cb.NewFlagBuilder().AddOutputFlag().AddFlags(cb.FlName).AddAuthenticationFlags().Build(),
 					Before: ConfigRead,
-					Action: cb.DescribeOrg,
+					Action: cb.DescribeWorkspace,
 					BashComplete: func(c *cli.Context) {
 						for _, f := range cb.NewFlagBuilder().AddOutputFlag().AddFlags(cb.FlName).AddAuthenticationFlags().Build() {
 							printFlagCompletion(f)
@@ -1969,7 +1969,7 @@ func main() {
 				},
 				{
 					Name:   "remove-user",
-					Usage:  "remove user from the organization",
+					Usage:  "remove user from the workspace",
 					Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlUserID).AddAuthenticationFlags().Build(),
 					Before: ConfigRead,
 					Action: cb.RemoveUser,
