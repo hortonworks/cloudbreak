@@ -62,7 +62,7 @@ class GcpDiskResourceBuilderTest {
 
     private static final String USER_ID = "horton@hortonworks.com";
 
-    private static final Long ORGANIZATION_ID = 1L;
+    private static final Long WORKSPACE_ID = 1L;
 
     @InjectMocks
     private GcpDiskResourceBuilder underTest;
@@ -110,7 +110,7 @@ class GcpDiskResourceBuilderTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        CloudContext cloudContext = new CloudContext(privateId, "testname", "GCP", "owner", USER_ID, ORGANIZATION_ID);
+        CloudContext cloudContext = new CloudContext(privateId, "testname", "GCP", "owner", USER_ID, WORKSPACE_ID);
         CloudCredential cloudCredential = new CloudCredential(privateId, "credentialname");
         cloudCredential.putParameter("projectId", "projectId");
 

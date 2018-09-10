@@ -14,7 +14,7 @@ public class KnoxServicesV3Controller implements KnoxServicesV3Endpoint {
     private ServiceEndpointCollector serviceEndpointCollector;
 
     @Override
-    public Collection<ExposedServiceResponse> listByOrganizationAndBlueprint(Long organizationId, String blueprintName) {
-        return serviceEndpointCollector.getKnoxServices(organizationId, blueprintName);
+    public Collection<ExposedServiceResponse> listByWorkspaceAndBlueprint(Long workspaceId, String blueprintName) {
+        return serviceEndpointCollector.getKnoxServices(workspaceId, blueprintName);
     }
 }

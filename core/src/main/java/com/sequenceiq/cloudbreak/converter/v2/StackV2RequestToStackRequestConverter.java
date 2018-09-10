@@ -27,11 +27,11 @@ import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
@@ -64,7 +64,7 @@ public class StackV2RequestToStackRequestConverter extends AbstractConversionSer
     private RestRequestThreadLocalService restRequestThreadLocalService;
 
     @Inject
-    private OrganizationService organizationService;
+    private WorkspaceService workspaceService;
 
     @Override
     public StackRequest convert(StackV2Request source) {
@@ -113,10 +113,10 @@ public class StackV2RequestToStackRequestConverter extends AbstractConversionSer
         stackRequest.setCredentialName(source.getGeneral().getCredentialName());
         IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
         User user = userService.getOrCreate(identityUser);
-        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        convertClusterRequest(source, stackRequest, organization);
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        convertClusterRequest(source, stackRequest, workspace);
         stackRequest.setOwnerEmail(Strings.isNullOrEmpty(source.getOwnerEmail()) ? identityUser.getUsername() : source.getOwnerEmail());
-        stackRequest.setCloudPlatform(credentialService.getByNameForOrganization(stackRequest.getCredentialName(), organization).cloudPlatform());
+        stackRequest.setCloudPlatform(credentialService.getByNameForWorkspace(stackRequest.getCredentialName(), workspace).cloudPlatform());
         convertCustomInputs(source, stackRequest);
         return stackRequest;
     }
@@ -140,7 +140,7 @@ public class StackV2RequestToStackRequestConverter extends AbstractConversionSer
         return result;
     }
 
-    private void convertClusterRequest(StackV2Request source, StackRequest stackRequest, Organization organization) {
+    private void convertClusterRequest(StackV2Request source, StackRequest stackRequest, Workspace workspace) {
         if (source.getCluster() != null) {
             stackRequest.setClusterRequest(conversionService.convert(source.getCluster(), ClusterRequest.class));
             for (InstanceGroupV2Request instanceGroupV2Request : source.getInstanceGroups()) {
@@ -150,7 +150,7 @@ public class StackV2RequestToStackRequestConverter extends AbstractConversionSer
             stackRequest.getClusterRequest().setName(source.getGeneral().getName());
             if (sharedServiceConfigProvider.isConfigured(source.getCluster())) {
                 SharedServiceRequest sharedService = source.getCluster().getSharedService();
-                stackRequest.setClusterToAttach(stackService.getByNameInOrg(sharedService.getSharedCluster(), organization.getId()).getId());
+                stackRequest.setClusterToAttach(stackService.getByNameInWorkspace(sharedService.getSharedCluster(), workspace.getId()).getId());
             }
         }
     }

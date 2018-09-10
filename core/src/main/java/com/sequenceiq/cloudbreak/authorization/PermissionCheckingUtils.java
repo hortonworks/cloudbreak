@@ -20,14 +20,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.aspect.organization.OrganizationResourceType;
-import com.sequenceiq.cloudbreak.authorization.OrganizationPermissions.Action;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.OrganizationAwareResource;
-import com.sequenceiq.cloudbreak.domain.organization.User;
-import com.sequenceiq.cloudbreak.domain.organization.UserOrgPermissions;
-import com.sequenceiq.cloudbreak.repository.organization.OrganizationResourceRepository;
-import com.sequenceiq.cloudbreak.service.user.UserOrgPermissionsService;
+import com.sequenceiq.cloudbreak.aspect.workspace.WorkspaceResourceType;
+import com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.UserWorkspacePermissions;
+import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
+import com.sequenceiq.cloudbreak.service.user.UserWorkspacePermissionsService;
 
 @Component
 public class PermissionCheckingUtils {
@@ -35,13 +35,13 @@ public class PermissionCheckingUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(PermissionCheckingUtils.class);
 
     @Inject
-    private UserOrgPermissionsService userOrgPermissionsService;
+    private UserWorkspacePermissionsService userWorkspacePermissionsService;
 
-    public void checkPermissionByOrgIdForUser(Long organizationId, OrganizationResource resource, Action action, User user) {
-        UserOrgPermissions userOrgPermissions = userOrgPermissionsService.findForUserByOrganizationId(organizationId, user);
-        if (userOrgPermissions != null) {
-            Set<String> permissionSet = userOrgPermissions.getPermissionSet();
-            boolean hasPermission = OrganizationPermissions.hasPermission(permissionSet, resource, action);
+    public void checkPermissionByWorkspaceIdForUser(Long workspaceId, WorkspaceResource resource, Action action, User user) {
+        UserWorkspacePermissions userWorkspacePermissions = userWorkspacePermissionsService.findForUserByWorkspaceId(workspaceId, user);
+        if (userWorkspacePermissions != null) {
+            Set<String> permissionSet = userWorkspacePermissions.getPermissionSet();
+            boolean hasPermission = WorkspacePermissions.hasPermission(permissionSet, resource, action);
             if (!hasPermission) {
                 throw new AccessDeniedException(format("You cannot modify this %s", resource));
             }
@@ -50,18 +50,18 @@ public class PermissionCheckingUtils {
         }
     }
 
-    public void checkPermissionsByTarget(Object target, User user, OrganizationResource resource, Action action) {
+    public void checkPermissionsByTarget(Object target, User user, WorkspaceResource resource, Action action) {
         Iterable<?> iterableTarget = targetToIterable(target);
-        Set<Long> organizationIds = collectOrganizationIds(iterableTarget);
-        if (organizationIds.isEmpty()) {
+        Set<Long> workspaceIds = collectWorkspaceIds(iterableTarget);
+        if (workspaceIds.isEmpty()) {
             return;
         }
-        Set<UserOrgPermissions> userOrgPermissionSet = userOrgPermissionsService.findForUserByOrganizationIds(user, organizationIds);
-        if (userOrgPermissionSet.size() != organizationIds.size()) {
+        Set<UserWorkspacePermissions> userWorkspacePermissionSet = userWorkspacePermissionsService.findForUserByWorkspaceIds(user, workspaceIds);
+        if (userWorkspacePermissionSet.size() != workspaceIds.size()) {
             throw new AccessDeniedException(format("You have no access to %s.", resource.getReadableName()));
         }
-        userOrgPermissionSet.stream()
-                .map(UserOrgPermissions::getPermissionSet)
+        userWorkspacePermissionSet.stream()
+                .map(UserWorkspacePermissions::getPermissionSet)
                 .forEach(permissions -> checkPermissionByPermissionSet(action, resource, permissions));
     }
 
@@ -69,50 +69,50 @@ public class PermissionCheckingUtils {
         return target instanceof Iterable<?> ? (Iterable<?>) target : Collections.singletonList(target);
     }
 
-    private Set<Long> collectOrganizationIds(Iterable<?> target) {
+    private Set<Long> collectWorkspaceIds(Iterable<?> target) {
         return StreamSupport.stream(target.spliterator(), false)
                 .map(resource -> {
                     if (resource instanceof Optional && ((Optional<?>) resource).isPresent()) {
-                        return (OrganizationAwareResource) ((Optional<?>) resource).get();
-                    } else if (resource instanceof OrganizationAwareResource) {
-                        return (OrganizationAwareResource) resource;
+                        return (WorkspaceAwareResource) ((Optional<?>) resource).get();
+                    } else if (resource instanceof WorkspaceAwareResource) {
+                        return (WorkspaceAwareResource) resource;
                     }
                     return null;
                 })
                 .filter(Objects::nonNull)
-                .map(this::getOrganizationId)
+                .map(this::getWorkspaceId)
                 .collect(Collectors.toSet());
     }
 
-    private Long getOrganizationId(OrganizationAwareResource organizationResource) {
-        Organization organization = organizationResource.getOrganization();
-        if (organization == null) {
-            throw new IllegalArgumentException("Organization cannot be null!");
+    private Long getWorkspaceId(WorkspaceAwareResource workspaceResource) {
+        Workspace workspace = workspaceResource.getWorkspace();
+        if (workspace == null) {
+            throw new IllegalArgumentException("Workspace cannot be null!");
         }
-        Long organizationId = organization.getId();
-        if (organizationId == null) {
-            throw new IllegalArgumentException("OrganizationId cannot be null!");
+        Long workspaceId = workspace.getId();
+        if (workspaceId == null) {
+            throw new IllegalArgumentException("WorkspaceId cannot be null!");
         }
-        return organizationId;
+        return workspaceId;
     }
 
-    public Object checkPermissionsByPermissionSetAndProceed(OrganizationResource resource, User user, Long orgId, Action action,
+    public Object checkPermissionsByPermissionSetAndProceed(WorkspaceResource resource, User user, Long workspaceId, Action action,
             ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature) {
-        if (orgId == null) {
-            throw new IllegalArgumentException("organizationId cannot be null!");
+        if (workspaceId == null) {
+            throw new IllegalArgumentException("workspaceId cannot be null!");
         }
-        UserOrgPermissions userOrgPermissions = userOrgPermissionsService.findForUserByOrganizationId(user, orgId);
-        if (userOrgPermissions == null) {
+        UserWorkspacePermissions userWorkspacePermissions = userWorkspacePermissionsService.findForUserByWorkspaceId(user, workspaceId);
+        if (userWorkspacePermissions == null) {
             throw new AccessDeniedException(format("You have no access to %s.", resource.getReadableName()));
         }
-        Set<String> permissionSet = userOrgPermissions.getPermissionSet();
+        Set<String> permissionSet = userWorkspacePermissions.getPermissionSet();
         LOGGER.info("Checking {} permission for: {}", action, resource);
         checkPermissionByPermissionSet(action, resource, permissionSet);
         return proceed(proceedingJoinPoint, methodSignature);
     }
 
-    public void checkPermissionByPermissionSet(Action action, OrganizationResource resource, Set<String> permissionSet) {
-        boolean hasPermission = OrganizationPermissions.hasPermission(permissionSet, resource, action);
+    public void checkPermissionByPermissionSet(Action action, WorkspaceResource resource, Set<String> permissionSet) {
+        boolean hasPermission = WorkspacePermissions.hasPermission(permissionSet, resource, action);
         if (!hasPermission) {
             throw new AccessDeniedException(format("You have no access to %s.", resource.getReadableName()));
         }
@@ -141,15 +141,15 @@ public class PermissionCheckingUtils {
         }
     }
 
-    public Optional<Class<?>> getOrgAwareRepositoryClass(ProceedingJoinPoint proceedingJoinPoint) {
+    public Optional<Class<?>> getWorkspaceAwareRepositoryClass(ProceedingJoinPoint proceedingJoinPoint) {
         return Arrays.stream(proceedingJoinPoint.getTarget().getClass().getInterfaces())
-                .filter(i -> Arrays.asList(i.getInterfaces()).contains(OrganizationResourceRepository.class))
+                .filter(i -> Arrays.asList(i.getInterfaces()).contains(WorkspaceResourceRepository.class))
                 .findFirst();
     }
 
     public Optional<Annotation> getClassAnnotation(Class<?> repositoryClass) {
         return Arrays.stream(repositoryClass.getAnnotations())
-                .filter(a -> a.annotationType().equals(OrganizationResourceType.class))
+                .filter(a -> a.annotationType().equals(WorkspaceResourceType.class))
                 .findFirst();
     }
 }

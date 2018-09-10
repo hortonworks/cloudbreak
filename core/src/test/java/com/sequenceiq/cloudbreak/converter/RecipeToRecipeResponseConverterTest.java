@@ -12,7 +12,7 @@ import org.springframework.core.convert.ConversionService;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
-import com.sequenceiq.cloudbreak.api.model.users.OrganizationResourceResponse;
+import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -29,8 +29,8 @@ public class RecipeToRecipeResponseConverterTest extends AbstractEntityConverter
         // GIVEN
         // WHEN
         Recipe recipe = getSource();
-        when(conversionService.convert(recipe.getOrganization(), OrganizationResourceResponse.class))
-                .thenReturn(new OrganizationResourceResponse());
+        when(conversionService.convert(recipe.getWorkspace(), WorkspaceResourceResponse.class))
+                .thenReturn(new WorkspaceResourceResponse());
         RecipeResponse result = underTest.convert(recipe);
         // THEN
         assertAllFieldsNotNull(result, Lists.newArrayList("id", "plugins"));

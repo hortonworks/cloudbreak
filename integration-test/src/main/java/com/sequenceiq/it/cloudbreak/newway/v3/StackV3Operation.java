@@ -57,52 +57,52 @@ public class StackV3Operation extends AbstractCloudbreakEntity<StackScaleRequest
         StackV3Operation stackOperation = (StackV3Operation) entity;
         CloudbreakClient client;
         client = CloudbreakClient.getTestContextCloudbreakClient().apply(integrationTestContext);
-        Long orgId = integrationTestContext.getContextParam(CloudbreakTest.ORGANIZATION_ID, Long.class);
+        Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         StackEntity stack;
         stack = Stack.getTestContextStack().apply(integrationTestContext);
         Log.log(" scale " + stack.getRequest().getGeneral().getName());
         stackOperation.setResponse(
                 client.getCloudbreakClient().stackV3Endpoint()
-                        .putScalingInOrganization(orgId, stack.getRequest().getGeneral().getName(), stackOperation.getRequest()));
+                        .putScalingInWorkspace(workspaceId, stack.getRequest().getGeneral().getName(), stackOperation.getRequest()));
     }
 
     public static void start(IntegrationTestContext integrationTestContext, Entity entity) {
         StackV3Operation stackOperation = (StackV3Operation) entity;
         CloudbreakClient client;
         client = CloudbreakClient.getTestContextCloudbreakClient().apply(integrationTestContext);
-        Long orgId = integrationTestContext.getContextParam(CloudbreakTest.ORGANIZATION_ID, Long.class);
+        Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         StackEntity stack;
         stack = Stack.getTestContextStack().apply(integrationTestContext);
         Log.log(" start " + stack.getRequest().getGeneral().getName());
         stackOperation.setResponse(
                 client.getCloudbreakClient().stackV3Endpoint()
-                        .putStartInOrganization(orgId, stack.getRequest().getGeneral().getName()));
+                        .putStartInWorkspace(workspaceId, stack.getRequest().getGeneral().getName()));
     }
 
     public static void stop(IntegrationTestContext integrationTestContext, Entity entity) {
         StackV3Operation stackOperation = (StackV3Operation) entity;
         CloudbreakClient client;
         client = CloudbreakClient.getTestContextCloudbreakClient().apply(integrationTestContext);
-        Long orgId = integrationTestContext.getContextParam(CloudbreakTest.ORGANIZATION_ID, Long.class);
+        Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         StackEntity stack;
         stack = Stack.getTestContextStack().apply(integrationTestContext);
         Log.log(" stop " + stack.getRequest().getGeneral().getName());
         stackOperation.setResponse(
                 client.getCloudbreakClient().stackV3Endpoint()
-                        .putStopInOrganization(orgId, stack.getRequest().getGeneral().getName()));
+                        .putStopInWorkspace(workspaceId, stack.getRequest().getGeneral().getName()));
     }
 
     public static void sync(IntegrationTestContext integrationTestContext, Entity entity) {
         StackV3Operation stackOperation = (StackV3Operation) entity;
         CloudbreakClient client;
         client = CloudbreakClient.getTestContextCloudbreakClient().apply(integrationTestContext);
-        Long orgId = integrationTestContext.getContextParam(CloudbreakTest.ORGANIZATION_ID, Long.class);
+        Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         StackEntity stack;
         stack = Stack.getTestContextStack().apply(integrationTestContext);
         Log.log(" sync " + stack.getRequest().getGeneral().getName());
         stackOperation.setResponse(
                 client.getCloudbreakClient().stackV3Endpoint()
-                        .putSyncInOrganization(orgId, stack.getRequest().getGeneral().getName()));
+                        .putSyncInWorkspace(workspaceId, stack.getRequest().getGeneral().getName()));
     }
 
     public static StackV3Operation request() {

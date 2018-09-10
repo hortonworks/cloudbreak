@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.repository.CloudbreakUsageRepository;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.startup.OrganizationMigrationRunner;
+import com.sequenceiq.cloudbreak.startup.WorkspaceMigrationRunner;
 
 @Service
 public class UsageService {
@@ -48,7 +48,7 @@ public class UsageService {
     private StackService stackService;
 
     @Inject
-    private OrganizationMigrationRunner organizationMigrationRunner;
+    private WorkspaceMigrationRunner workspaceMigrationRunner;
 
     public void openUsagesForStack(Stack stack) {
         LocalDateTime ldt = LocalDateTime.now();
@@ -109,7 +109,7 @@ public class UsageService {
 
     @Scheduled(cron = "0 01 0 * * *")
     public void fixUsages() {
-        if (organizationMigrationRunner.isFinished()) {
+        if (workspaceMigrationRunner.isFinished()) {
             try {
                 reopenOldUsages();
                 openNewIfNotFound();

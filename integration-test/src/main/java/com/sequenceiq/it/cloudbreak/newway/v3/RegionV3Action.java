@@ -19,7 +19,7 @@ public class RegionV3Action {
         Region regionEntity = (Region) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
-        Long orgId = integrationTestContext.getContextParam(CloudbreakTest.ORGANIZATION_ID, Long.class);
+        Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
 
         Credential credential = Credential.getTestContextCredential().apply(integrationTestContext);
 
@@ -30,7 +30,7 @@ public class RegionV3Action {
         Log.log(" get region to " + regionEntity.getPlatformResourceRequest().getCredentialName() + " credential. ");
         regionEntity.setRegionResponse(client.getCloudbreakClient()
                 .connectorV3Endpoint()
-                .getRegionsByCredential(orgId, regionEntity.getPlatformResourceRequest())
+                .getRegionsByCredential(workspaceId, regionEntity.getPlatformResourceRequest())
         );
         Log.logJSON(" get region response: ", regionEntity.getRegionResponse());
     }

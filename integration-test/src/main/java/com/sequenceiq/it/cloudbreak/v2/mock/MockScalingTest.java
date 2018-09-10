@@ -34,7 +34,7 @@ public class MockScalingTest extends StackScalingV2Test {
     public void configMockServer(@Optional("9443") int mockPort, @Optional("2020") int sshPort, int desiredCount, String hostGroup) {
         IntegrationTestContext itContext = getItContext();
         String clusterName = itContext.getContextParam(CloudbreakV2Constants.STACK_NAME);
-        StackResponse response = getCloudbreakClient().stackV2Endpoint().getStackFromDefaultOrg(clusterName, null);
+        StackResponse response = getCloudbreakClient().stackV2Endpoint().getStackFromDefaultWorkspace(clusterName, null);
         java.util.Optional<InstanceGroupResponse> igg = response.getInstanceGroups().stream().filter(ig -> ig.getGroup().equals(hostGroup)).findFirst();
         Map<String, CloudVmInstanceStatus> instanceMap = itContext.getContextParam(CloudbreakITContextConstants.MOCK_INSTANCE_MAP, Map.class);
         ScalingMock scalingMock = (ScalingMock) applicationContext.getBean(ScalingMock.NAME, mockPort, sshPort, instanceMap);

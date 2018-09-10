@@ -70,8 +70,8 @@ public class CloudbreakEventsJson implements JsonEntity {
     @ApiModelProperty(StackModelDescription.CLUSTER_STATUS)
     private Status clusterStatus;
 
-    @ApiModelProperty(ModelDescriptions.ORGANIZATION_ID)
-    private Long organizationId;
+    @ApiModelProperty(ModelDescriptions.WORKSPACE_ID)
+    private Long workspaceId;
 
     public Integer getNodeCount() {
         return nodeCount;
@@ -209,12 +209,12 @@ public class CloudbreakEventsJson implements JsonEntity {
         this.availabilityZone = availabilityZone;
     }
 
-    public Long getOrganizationId() {
-        return organizationId;
+    public Long getWorkspaceId() {
+        return workspaceId;
     }
 
-    public void setOrganizationId(Long organizationId) {
-        this.organizationId = organizationId;
+    public void setWorkspaceId(Long workspaceId) {
+        this.workspaceId = workspaceId;
     }
 
     public String getOwner() {

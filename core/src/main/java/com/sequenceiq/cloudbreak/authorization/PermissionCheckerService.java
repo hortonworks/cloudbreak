@@ -23,14 +23,14 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByOrganization;
-import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByOrganizationId;
-import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByReturnValue;
-import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByTarget;
-import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByTargetId;
-import com.sequenceiq.cloudbreak.aspect.organization.DisableCheckPermissions;
-import com.sequenceiq.cloudbreak.aspect.organization.OrganizationResourceType;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByWorkspace;
+import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByWorkspaceId;
+import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByReturnValue;
+import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByTarget;
+import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByTargetId;
+import com.sequenceiq.cloudbreak.aspect.workspace.DisableCheckPermissions;
+import com.sequenceiq.cloudbreak.aspect.workspace.WorkspaceResourceType;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
@@ -39,8 +39,8 @@ public class PermissionCheckerService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PermissionCheckerService.class);
 
-    private static final List<Class<? extends Annotation>> POSSIBLE_METHOD_ANNOTATIONS = List.of(CheckPermissionsByOrganization.class,
-            CheckPermissionsByOrganizationId.class, CheckPermissionsByTarget.class, CheckPermissionsByTargetId.class,
+    private static final List<Class<? extends Annotation>> POSSIBLE_METHOD_ANNOTATIONS = List.of(CheckPermissionsByWorkspace.class,
+            CheckPermissionsByWorkspaceId.class, CheckPermissionsByTarget.class, CheckPermissionsByTargetId.class,
             CheckPermissionsByReturnValue.class, DisableCheckPermissions.class);
 
     @Inject
@@ -74,7 +74,7 @@ public class PermissionCheckerService {
             return permissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature);
         }
 
-        Optional<Class<?>> repositoryClass = permissionCheckingUtils.getOrgAwareRepositoryClass(proceedingJoinPoint);
+        Optional<Class<?>> repositoryClass = permissionCheckingUtils.getWorkspaceAwareRepositoryClass(proceedingJoinPoint);
         if (!repositoryClass.isPresent()) {
             return permissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature);
         }
@@ -88,8 +88,8 @@ public class PermissionCheckerService {
             throw getAccessDeniedAndLogMissingAnnotation(repositoryClass);
         }
 
-        OrganizationResourceType classOrgResourceType = (OrganizationResourceType) classAnnotation.get();
-        if (classOrgResourceType.resource() == OrganizationResource.ALL) {
+        WorkspaceResourceType classWorkspaceResourceType = (WorkspaceResourceType) classAnnotation.get();
+        if (classWorkspaceResourceType.resource() == WorkspaceResource.ALL) {
             throw getAccessDeniedAndLogMissingAnnotation(repositoryClass);
         }
 
@@ -104,7 +104,7 @@ public class PermissionCheckerService {
 
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
         PermissionChecker<? extends Annotation> permissionChecker = permissionCheckerMap.get(methodAnnotation.annotationType());
-        OrganizationResource resource = classOrgResourceType.resource();
+        WorkspaceResource resource = classWorkspaceResourceType.resource();
         return permissionChecker.checkPermissions(methodAnnotation, resource, user, proceedingJoinPoint, methodSignature);
     }
 
@@ -124,7 +124,7 @@ public class PermissionCheckerService {
 
     private AccessDeniedException getAccessDeniedAndLogMissingAnnotation(Class<?> repositoryClass) {
         LOGGER.error("Class '{}' should be annotated with @{} and specify the resource!", repositoryClass.getCanonicalName(),
-                OrganizationResourceType.class.getName());
+                WorkspaceResourceType.class.getName());
         return new AccessDeniedException("You have no access to this resource.");
     }
 }

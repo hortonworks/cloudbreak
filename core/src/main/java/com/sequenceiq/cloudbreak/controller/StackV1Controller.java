@@ -22,11 +22,11 @@ import com.sequenceiq.cloudbreak.api.model.stack.StackValidationRequest;
 import com.sequenceiq.cloudbreak.authorization.PermissionCheckerService;
 import com.sequenceiq.cloudbreak.authorization.PermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
@@ -49,7 +49,7 @@ public class StackV1Controller extends NotificationController implements StackV1
     private UserService userService;
 
     @Inject
-    private OrganizationService organizationService;
+    private WorkspaceService workspaceService;
 
     @Inject
     private RestRequestThreadLocalService restRequestThreadLocalService;
@@ -64,36 +64,36 @@ public class StackV1Controller extends NotificationController implements StackV1
     public StackResponse postPrivate(StackRequest stackRequest) {
         IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
         User user = userService.getOrCreate(identityUser);
-        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        return stackCommonService.createInOrganization(stackRequest, identityUser, user, organization);
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        return stackCommonService.createInWorkspace(stackRequest, identityUser, user, workspace);
     }
 
     @Override
     public StackResponse postPublic(StackRequest stackRequest) {
         IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
         User user = userService.getOrCreate(identityUser);
-        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        return stackCommonService.createInOrganization(stackRequest, identityUser, user, organization);
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        return stackCommonService.createInWorkspace(stackRequest, identityUser, user, workspace);
     }
 
     @Override
-    public Set<StackResponse> getStacksInDefaultOrg() {
-        return stackCommonService.getStacksInDefaultOrg();
+    public Set<StackResponse> getStacksInDefaultWorkspace() {
+        return stackCommonService.getStacksInDefaultWorkspace();
     }
 
     @Override
     public Set<StackResponse> getPublics() {
-        return stackCommonService.getStacksInDefaultOrg();
+        return stackCommonService.getStacksInDefaultWorkspace();
     }
 
     @Override
-    public StackResponse getStackFromDefaultOrg(String name, Set<String> entries) {
-        return stackCommonService.getStackFromDefaultOrg(name, entries);
+    public StackResponse getStackFromDefaultWorkspace(String name, Set<String> entries) {
+        return stackCommonService.getStackFromDefaultWorkspace(name, entries);
     }
 
     @Override
     public StackResponse getPublic(String name, Set<String> entries) {
-        return stackCommonService.getStackFromDefaultOrg(name, entries);
+        return stackCommonService.getStackFromDefaultWorkspace(name, entries);
     }
 
     @Override
@@ -102,13 +102,13 @@ public class StackV1Controller extends NotificationController implements StackV1
     }
 
     @Override
-    public void deleteInDefaultOrg(String name, Boolean forced, Boolean deleteDependencies) {
-        stackCommonService.deleteInDefaultOrg(name, forced, deleteDependencies);
+    public void deleteInDefaultWorkspace(String name, Boolean forced, Boolean deleteDependencies) {
+        stackCommonService.deleteInDefaultWorkspace(name, forced, deleteDependencies);
     }
 
     @Override
     public void deletePrivate(String name, Boolean forced, Boolean deleteDependencies) {
-        stackCommonService.deleteInDefaultOrg(name, forced, deleteDependencies);
+        stackCommonService.deleteInDefaultWorkspace(name, forced, deleteDependencies);
     }
 
     @Override
@@ -118,7 +118,7 @@ public class StackV1Controller extends NotificationController implements StackV1
 
     @Override
     public Response put(Long id, UpdateStackJson updateRequest) {
-        return stackCommonService.putInDefaultOrg(id, updateRequest);
+        return stackCommonService.putInDefaultWorkspace(id, updateRequest);
     }
 
     @Override

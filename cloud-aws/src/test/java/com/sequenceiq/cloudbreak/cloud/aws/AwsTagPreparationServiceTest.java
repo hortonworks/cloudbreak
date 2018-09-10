@@ -23,7 +23,7 @@ public class AwsTagPreparationServiceTest {
 
     private static final String USER_ID = "horton@hortonworks.com";
 
-    private static final Long ORGANIZATION_ID = 1L;
+    private static final Long WORKSPACE_ID = 1L;
 
     @InjectMocks
     private AwsTagPreparationService awsTagPreparationService;
@@ -67,7 +67,7 @@ public class AwsTagPreparationServiceTest {
     }
 
     private AuthenticatedContext authenticatedContext() {
-        CloudContext cloudContext = new CloudContext(1L, "testname", "AWS", "owner", USER_ID, ORGANIZATION_ID);
+        CloudContext cloudContext = new CloudContext(1L, "testname", "AWS", "owner", USER_ID, WORKSPACE_ID);
         CloudCredential cloudCredential = new CloudCredential(1L, "credentialname");
         return new AuthenticatedContext(cloudContext, cloudCredential);
     }

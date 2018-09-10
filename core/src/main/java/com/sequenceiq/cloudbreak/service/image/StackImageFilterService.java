@@ -41,13 +41,13 @@ public class StackImageFilterService {
     @Inject
     private ComponentConfigProvider componentConfigProvider;
 
-    public Images getApplicableImages(Long organizationId, String stackName) throws CloudbreakImageCatalogException {
-        return getApplicableImages(organizationId, CLOUDBREAK_DEFAULT_CATALOG_NAME, stackName);
+    public Images getApplicableImages(Long workspaceId, String stackName) throws CloudbreakImageCatalogException {
+        return getApplicableImages(workspaceId, CLOUDBREAK_DEFAULT_CATALOG_NAME, stackName);
     }
 
-    public Images getApplicableImages(Long organizationId, String imageCatalogName, String stackName) throws CloudbreakImageCatalogException {
-        Stack stack = stackService.getByNameInOrgWithLists(stackName, organizationId);
-        StatedImages statedImages = imageCatalogService.getImages(organizationId, imageCatalogName, stack.cloudPlatform());
+    public Images getApplicableImages(Long workspaceId, String imageCatalogName, String stackName) throws CloudbreakImageCatalogException {
+        Stack stack = stackService.getByNameInWorkspaceWithLists(stackName, workspaceId);
+        StatedImages statedImages = imageCatalogService.getImages(workspaceId, imageCatalogName, stack.cloudPlatform());
         return getApplicableImages(imageCatalogName, statedImages, stack);
     }
 

@@ -12,22 +12,22 @@ import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.aspect.DisableHasPermission;
-import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByReturnValue;
-import com.sequenceiq.cloudbreak.aspect.organization.DisableCheckPermissions;
-import com.sequenceiq.cloudbreak.aspect.organization.OrganizationResourceType;
-import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
+import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByReturnValue;
+import com.sequenceiq.cloudbreak.aspect.workspace.DisableCheckPermissions;
+import com.sequenceiq.cloudbreak.aspect.workspace.WorkspaceResourceType;
+import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.repository.organization.OrganizationResourceRepository;
+import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.EntityType;
 
 @DisableHasPermission
 @Transactional(TxType.REQUIRED)
 @EntityType(entityClass = Cluster.class)
-@OrganizationResourceType(resource = OrganizationResource.STACK)
-public interface ClusterRepository extends OrganizationResourceRepository<Cluster, Long> {
+@WorkspaceResourceType(resource = WorkspaceResource.STACK)
+public interface ClusterRepository extends WorkspaceResourceRepository<Cluster, Long> {
 
     @Override
     @DisableCheckPermissions
@@ -54,8 +54,8 @@ public interface ClusterRepository extends OrganizationResourceRepository<Cluste
     Set<Cluster> findAllClustersByRDSConfig(@Param("id") Long rdsConfigId);
 
     @CheckPermissionsByReturnValue
-    @Query("SELECT c FROM Cluster c LEFT JOIN FETCH c.stack WHERE c.organization = null")
-    Set<Cluster> findAllWithNoOrganization();
+    @Query("SELECT c FROM Cluster c LEFT JOIN FETCH c.stack WHERE c.workspace = null")
+    Set<Cluster> findAllWithNoWorkspace();
 
     @CheckPermissionsByReturnValue
     List<Cluster> findByLdapConfig(LdapConfig ldapConfig);

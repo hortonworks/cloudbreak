@@ -14,10 +14,10 @@ public class OperationDescriptions {
         public static final String DELETE_BY_ID = "delete blueprint by id";
         public static final String GET_BY_BLUEPRINT_NAME = "retrieve validation request by blueprint name";
         public static final String GET_BY_BLUEPRINT_ID = "retrieve validation request by blueprint id";
-        public static final String LIST_BY_ORGANIZATION = "list blueprints for the given organization";
-        public static final String GET_BY_NAME_IN_ORG = "get blueprint by name in organization";
-        public static final String CREATE_IN_ORG = "create blueprint in organization";
-        public static final String DELETE_BY_NAME_IN_ORG = "delete blueprint by name in organization";
+        public static final String LIST_BY_WORKSPACE = "list blueprints for the given workspace";
+        public static final String GET_BY_NAME_IN_ORG = "get blueprint by name in workspace";
+        public static final String CREATE_IN_ORG = "create blueprint in workspace";
+        public static final String DELETE_BY_NAME_IN_ORG = "delete blueprint by name in workspace";
     }
 
     public static class TemplateOpDescription {
@@ -58,7 +58,7 @@ public class OperationDescriptions {
         public static final String PUT_PRIVATE = "modify private credential resource";
         public static final String POST_PUBLIC = "create credential as public resource";
         public static final String PUT_PUBLIC = "modify public credential resource";
-        public static final String PUT_IN_ORG = "modify public credential resource in organization";
+        public static final String PUT_IN_ORG = "modify public credential resource in workspace";
         public static final String GET_PRIVATE = "retrieve private credentials";
         public static final String GET_PUBLIC = "retrieve public and private (owned) credentials";
         public static final String GET_PRIVATE_BY_NAME = "retrieve a private credential by name";
@@ -72,10 +72,10 @@ public class OperationDescriptions {
         public static final String PUT_CERTIFICATE_BY_ID = "update azure credential by credential id";
         public static final String GET_SSH_FILE = "retrieve azure ssh key file for credential by credential id";
         public static final String GET_BY_CREDENTIAL_NAME = "retrieve credential request by credential name";
-        public static final String LIST_BY_ORGANIZATION = "list credentials for the given organization";
-        public static final String GET_BY_NAME_IN_ORG = "get credential by name in organization";
-        public static final String CREATE_IN_ORG = "create credential in organization";
-        public static final String DELETE_BY_NAME_IN_ORG = "delete credential by name in organization";
+        public static final String LIST_BY_WORKSPACE = "list credentials for the given workspace";
+        public static final String GET_BY_NAME_IN_ORG = "get credential by name in workspace";
+        public static final String CREATE_IN_ORG = "create credential in workspace";
+        public static final String DELETE_BY_NAME_IN_ORG = "delete credential by name in workspace";
     }
 
     public static class StackOpDescription {
@@ -103,22 +103,22 @@ public class OperationDescriptions {
         public static final String GET_ALL = "retrieve all stacks";
         public static final String GET_BY_STACK_NAME = "retrieve stack request by stack name";
         public static final String RETRY_BY_ID = "retry stack and cluster provisioning of failed stack";
-        public static final String LIST_BY_ORGANIZATION = "list stacks for the given organization";
-        public static final String GET_BY_NAME_IN_ORG = "get stack by name in organization";
-        public static final String CREATE_IN_ORG = "create stack in organization";
-        public static final String DELETE_BY_NAME_IN_ORG = "delete stack by name in organization";
-        public static final String SYNC_BY_NAME_IN_ORG = "syncs the stack by name in organization";
-        public static final String RETRY_BY_NAME_IN_ORG = "retries the stack by name in organization";
-        public static final String STOP_BY_NAME_IN_ORG = "stops the stack by name in organization";
-        public static final String START_BY_NAME_IN_ORG = "starts the stack by name in organization";
-        public static final String SCALE_BY_NAME_IN_ORG = "scales the stack by name in organization";
-        public static final String REPAIR_CLUSTER_IN_ORG = "repairs the stack by name in organization";
+        public static final String LIST_BY_WORKSPACE = "list stacks for the given workspace";
+        public static final String GET_BY_NAME_IN_ORG = "get stack by name in workspace";
+        public static final String CREATE_IN_ORG = "create stack in workspace";
+        public static final String DELETE_BY_NAME_IN_ORG = "delete stack by name in workspace";
+        public static final String SYNC_BY_NAME_IN_ORG = "syncs the stack by name in workspace";
+        public static final String RETRY_BY_NAME_IN_ORG = "retries the stack by name in workspace";
+        public static final String STOP_BY_NAME_IN_ORG = "stops the stack by name in workspace";
+        public static final String START_BY_NAME_IN_ORG = "starts the stack by name in workspace";
+        public static final String SCALE_BY_NAME_IN_ORG = "scales the stack by name in workspace";
+        public static final String REPAIR_CLUSTER_IN_ORG = "repairs the stack by name in workspace";
         public static final String DELETE_WITH_KERBEROS_IN_ORG = "deletes the stack (with kerberos cluster) "
-                + "by name in organization";
-        public static final String GET_STACK_REQUEST_IN_ORG = "gets StackRequest by name in organization";
-        public static final String POST_STACK_FOR_BLUEPRINT_IN_ORG = "posts stack for blueprint in organization";
-        public static final String DELETE_INSTANCE_BY_ID_IN_ORG = "deletes instance from the stack's cluster in organization";
-        public static final String CHECK_IMAGE_IN_ORG = "checks image in stack by name in organization";
+                + "by name in workspace";
+        public static final String GET_STACK_REQUEST_IN_ORG = "gets StackRequest by name in workspace";
+        public static final String POST_STACK_FOR_BLUEPRINT_IN_ORG = "posts stack for blueprint in workspace";
+        public static final String DELETE_INSTANCE_BY_ID_IN_ORG = "deletes instance from the stack's cluster in workspace";
+        public static final String CHECK_IMAGE_IN_ORG = "checks image in stack by name in workspace";
     }
 
     public static class ClusterOpDescription {
@@ -164,24 +164,24 @@ public class OperationDescriptions {
         public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private recipe by name";
         public static final String DELETE_BY_ID = "delete recipe by id";
         public static final String GET_REQUEST_BY_NAME = "retrieve recipe request by recipe name";
-        public static final String LIST_BY_ORGANIZATION = "list recipes for the given organization";
-        public static final String GET_BY_NAME_IN_ORG = "get recipe by name in organization";
-        public static final String CREATE_IN_ORG = "create recipe in organization";
-        public static final String DELETE_BY_NAME_IN_ORG = "delete recipe by name in organization";
+        public static final String LIST_BY_WORKSPACE = "list recipes for the given workspace";
+        public static final String GET_BY_NAME_IN_ORG = "get recipe by name in workspace";
+        public static final String CREATE_IN_ORG = "create recipe in workspace";
+        public static final String DELETE_BY_NAME_IN_ORG = "delete recipe by name in workspace";
     }
 
-    public static class OrganizationOpDescription {
-        public static final String POST = "create an organization";
-        public static final String GET = "retrieve organizations";
-        public static final String GET_BY_NAME = "retrieve an organization by name";
-        public static final String GET_BY_ID = "retrieve an organization by id";
-        public static final String DELETE_BY_ID = "delete an organization by id";
-        public static final String DELETE_BY_NAME = "delete an organization by name";
-        public static final String GET_REQUEST_BY_NAME = "retrieve organization request by organization name";
-        public static final String CHANGE_USERS = "change users and their permissions in the organization";
-        public static final String REMOVE_USERS = "removes users from the given organization by their userIds";
-        public static final String ADD_USERS = "adds users to the given organization";
-        public static final String UPDATE_USERS = "updates the users' permissions in the given organization";
+    public static class WorkspaceOpDescription {
+        public static final String POST = "create an workspace";
+        public static final String GET = "retrieve workspaces";
+        public static final String GET_BY_NAME = "retrieve an workspace by name";
+        public static final String GET_BY_ID = "retrieve an workspace by id";
+        public static final String DELETE_BY_ID = "delete an workspace by id";
+        public static final String DELETE_BY_NAME = "delete an workspace by name";
+        public static final String GET_REQUEST_BY_NAME = "retrieve workspace request by workspace name";
+        public static final String CHANGE_USERS = "change users and their permissions in the workspace";
+        public static final String REMOVE_USERS = "removes users from the given workspace by their userIds";
+        public static final String ADD_USERS = "adds users to the given workspace";
+        public static final String UPDATE_USERS = "updates the users' permissions in the given workspace";
     }
 
     public static class UsagesOpDescription {
@@ -219,8 +219,8 @@ public class OperationDescriptions {
         public static final String USER_GET_PROFILE = "user related profile";
         public static final String USER_PUT_PROFILE = "modify user related profile";
         public static final String GET_TENANT_USERS = "retrieve all users in the tenant";
-        public static final String USER_GET_PROFILE_IN_ORG = "user related profile in organization";
-        public static final String USER_PUT_PROFILE_IN_ORG = "modify user related profile in organization";
+        public static final String USER_GET_PROFILE_IN_ORG = "user related profile in workspace";
+        public static final String USER_PUT_PROFILE_IN_ORG = "modify user related profile in workspace";
     }
 
     public static class SecurityGroupOpDescription {
@@ -258,10 +258,10 @@ public class OperationDescriptions {
         public static final String DELETE_BY_ID = "delete LDAP config by id";
         public static final String POST_CONNECTION_TEST = "test that the connection could be established of an existing or new LDAP config";
         public static final String GET_REQUEST = "get request";
-        public static final String LIST_BY_ORGANIZATION = "list LDAP configs for the given organization";
-        public static final String GET_BY_NAME_IN_ORG = "get LDAP config by name in organization";
-        public static final String CREATE_IN_ORG = "create LDAP config in organization";
-        public static final String DELETE_BY_NAME_IN_ORG = "delete LDAP config by name in organization";
+        public static final String LIST_BY_WORKSPACE = "list LDAP configs for the given workspace";
+        public static final String GET_BY_NAME_IN_ORG = "get LDAP config by name in workspace";
+        public static final String CREATE_IN_ORG = "create LDAP config in workspace";
+        public static final String DELETE_BY_NAME_IN_ORG = "delete LDAP config by name in workspace";
     }
 
     public static class UtilityOpDescription {
@@ -288,11 +288,11 @@ public class OperationDescriptions {
         public static final String DELETE_BY_ID = "delete RDS configuration by id";
         public static final String POST_CONNECTION_TEST = "test RDS connectivity";
         public static final String GET_REQUEST = "get request";
-        public static final String LIST_BY_ORGANIZATION = "list RDS configs for the given organization";
-        public static final String GET_BY_NAME_IN_ORG = "get RDS config by name in organization";
-        public static final String CREATE_IN_ORG = "create RDS config in organization";
-        public static final String DELETE_BY_NAME_IN_ORG = "delete RDS config by name in organization";
-        public static final String GET_REQUEST_IN_ORG = "get request in organization";
+        public static final String LIST_BY_WORKSPACE = "list RDS configs for the given workspace";
+        public static final String GET_BY_NAME_IN_ORG = "get RDS config by name in workspace";
+        public static final String CREATE_IN_ORG = "create RDS config in workspace";
+        public static final String DELETE_BY_NAME_IN_ORG = "delete RDS config by name in workspace";
+        public static final String GET_REQUEST_IN_ORG = "get request in workspace";
     }
 
     public static class ProxyConfigOpDescription {
@@ -306,10 +306,10 @@ public class OperationDescriptions {
         public static final String DELETE_PRIVATE_BY_NAME = "delete private proxy configuration by name";
         public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private proxy configuration by name";
         public static final String DELETE_BY_ID = "delete proxy configuration by id";
-        public static final String LIST_BY_ORGANIZATION = "list proxy configurations for the given organization";
-        public static final String GET_BY_NAME_IN_ORG = "get proxy configuration by name in organization";
-        public static final String CREATE_IN_ORG = "create proxy configuration in organization";
-        public static final String DELETE_BY_NAME_IN_ORG = "delete proxy configuration by name in organization";
+        public static final String LIST_BY_WORKSPACE = "list proxy configurations for the given workspace";
+        public static final String GET_BY_NAME_IN_ORG = "get proxy configuration by name in workspace";
+        public static final String CREATE_IN_ORG = "create proxy configuration in workspace";
+        public static final String DELETE_BY_NAME_IN_ORG = "delete proxy configuration by name in workspace";
     }
 
     public static class ManagementPackOpDescription {
@@ -323,10 +323,10 @@ public class OperationDescriptions {
         public static final String DELETE_PRIVATE_BY_NAME = "delete private management pack by name";
         public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private management pack by name";
         public static final String DELETE_BY_ID = "delete management pack by id";
-        public static final String LIST_BY_ORGANIZATION = "list management packs for the given organization";
-        public static final String GET_BY_NAME_IN_ORG = "get management pack by name in organization";
-        public static final String CREATE_IN_ORG = "create management pack in organization";
-        public static final String DELETE_BY_NAME_IN_ORG = "delete management pack by name in organization";
+        public static final String LIST_BY_WORKSPACE = "list management packs for the given workspace";
+        public static final String GET_BY_NAME_IN_ORG = "get management pack by name in workspace";
+        public static final String CREATE_IN_ORG = "create management pack in workspace";
+        public static final String DELETE_BY_NAME_IN_ORG = "delete management pack by name in workspace";
     }
 
     public static class ConnectorOpDescription {
@@ -377,11 +377,11 @@ public class OperationDescriptions {
         public static final String GET = "retrieve default SmartSense subscription";
         public static final String GET_BY_ID = "retrieve SmartSense subscription by id";
         public static final String DELETE_BY_ID = "delete SmartSense subscription by id";
-        public static final String LIST_BY_ORGANIZATION = "list SmartSense subscriptions for the given organization";
-        public static final String GET_BY_NAME_IN_ORG = "get SmartSense subscription by name in organization";
-        public static final String GET_DEFAULT_IN_ORG = "get default SmartSense subscription by name in organization";
-        public static final String CREATE_IN_ORG = "create SmartSense subscription in organization";
-        public static final String DELETE_BY_NAME_IN_ORG = "delete SmartSense subscription by name in organization";
+        public static final String LIST_BY_WORKSPACE = "list SmartSense subscriptions for the given workspace";
+        public static final String GET_BY_NAME_IN_ORG = "get SmartSense subscription by name in workspace";
+        public static final String GET_DEFAULT_IN_ORG = "get default SmartSense subscription by name in workspace";
+        public static final String CREATE_IN_ORG = "create SmartSense subscription in workspace";
+        public static final String DELETE_BY_NAME_IN_ORG = "delete SmartSense subscription by name in workspace";
     }
 
     public static class FlexSubOpDescription {
@@ -396,13 +396,13 @@ public class OperationDescriptions {
         public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private Flex subscription by name";
         public static final String DELETE_BY_ID = "delete Flex subscription by id";
         public static final String SET_DEFAULT_IN_ACCOUNT = "sets the account default flag on the Flex subscription";
-        public static final String SET_DEFAULT_IN_ORG = "sets the organization default flag on the Flex subscription";
+        public static final String SET_DEFAULT_IN_ORG = "sets the workspace default flag on the Flex subscription";
         public static final String SET_USED_FOR_CONTROLLER_IN_ACCOUNT = "sets the account 'used for controller' flag on the Flex subscription";
-        public static final String SET_USED_FOR_CONTROLLER_IN_ORG = "sets the organization 'used for controller' flag on the Flex subscription";
-        public static final String LIST_BY_ORGANIZATION = "list Flex subscriptions for the given organization";
-        public static final String GET_BY_NAME_IN_ORG = "get Flex subscription by name in organization";
-        public static final String CREATE_IN_ORG = "create Flex subscription in organization";
-        public static final String DELETE_BY_NAME_IN_ORG = "delete Flex subscription by name in organization";
+        public static final String SET_USED_FOR_CONTROLLER_IN_ORG = "sets the workspace 'used for controller' flag on the Flex subscription";
+        public static final String LIST_BY_WORKSPACE = "list Flex subscriptions for the given workspace";
+        public static final String GET_BY_NAME_IN_ORG = "get Flex subscription by name in workspace";
+        public static final String CREATE_IN_ORG = "create Flex subscription in workspace";
+        public static final String DELETE_BY_NAME_IN_ORG = "delete Flex subscription by name in workspace";
     }
 
     public static class ImageCatalogOpDescription {
@@ -422,10 +422,10 @@ public class OperationDescriptions {
                 + "from the given imagecatalog name";
         public static final String GET_IMAGES_BY_STACK_NAME = "determines available images for the given stack"
                 + "from the default image catalog";
-        public static final String LIST_BY_ORGANIZATION = "list image catalogs for the given organization";
-        public static final String GET_BY_NAME_IN_ORG = "get image catalog by name in organization";
-        public static final String CREATE_IN_ORG = "create image catalog in organization";
-        public static final String DELETE_BY_NAME_IN_ORG = "delete image catalog by name in organization";
+        public static final String LIST_BY_WORKSPACE = "list image catalogs for the given workspace";
+        public static final String GET_BY_NAME_IN_ORG = "get image catalog by name in workspace";
+        public static final String CREATE_IN_ORG = "create image catalog in workspace";
+        public static final String DELETE_BY_NAME_IN_ORG = "delete image catalog by name in workspace";
     }
 
     public static class SecurityRuleOpDescription {
@@ -437,9 +437,9 @@ public class OperationDescriptions {
     }
 
     public static class AuditOpDescription {
-        public static final String LIST_IN_ORG = "list audit events for the given organization";
-        public static final String GET_BY_ORG = "Get audit event in organization";
-        public static final String LIST_IN_ORG_ZIP = "list audit events for the given organization in zip file";
+        public static final String LIST_IN_ORG = "list audit events for the given workspace";
+        public static final String GET_BY_ORG = "Get audit event in workspace";
+        public static final String LIST_IN_ORG_ZIP = "list audit events for the given workspace in zip file";
     }
 
     public static class KnoxServicesOpDescription {

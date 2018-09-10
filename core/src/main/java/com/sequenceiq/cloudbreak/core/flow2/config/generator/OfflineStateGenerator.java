@@ -60,7 +60,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleConfig;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.domain.Network;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
@@ -273,17 +273,17 @@ public class OfflineStateGenerator {
         }
 
         @Override
-        public Set<Stack> findForOrganizationIdWithLists(Long orgId) {
+        public Set<Stack> findForWorkspaceIdWithLists(Long workspaceId) {
             return null;
         }
 
         @Override
-        public Stack findByNameAndOrganizationId(String name, Long orgId) {
+        public Stack findByNameAndWorkspaceId(String name, Long workspaceId) {
             return null;
         }
 
         @Override
-        public Stack findByNameAndOrganizationIdWithLists(String name, Long orgId) {
+        public Stack findByNameAndWorkspaceIdWithLists(String name, Long workspaceId) {
             return null;
         }
 
@@ -313,7 +313,7 @@ public class OfflineStateGenerator {
         }
 
         @Override
-        public Stack findByNameInOrganizationWithLists(String name, Organization organization) {
+        public Stack findByNameInWorkspaceWithLists(String name, Workspace workspace) {
             return null;
         }
 
@@ -323,7 +323,7 @@ public class OfflineStateGenerator {
         }
 
         @Override
-        public Set<Stack> findAllAliveWithNoOrganizationOrUser() {
+        public Set<Stack> findAllAliveWithNoWorkspaceOrUser() {
             return null;
         }
 
@@ -333,7 +333,7 @@ public class OfflineStateGenerator {
         }
 
         @Override
-        public Set<Stack> findAllForOrganization(Long organizationId) {
+        public Set<Stack> findAllForWorkspace(Long workspaceId) {
             return null;
         }
 
@@ -373,7 +373,7 @@ public class OfflineStateGenerator {
         }
 
         @Override
-        public Long countStacksWithNoOrganizationOrCreator() {
+        public Long countStacksWithNoWorkspaceOrCreator() {
             return null;
         }
 
@@ -388,7 +388,7 @@ public class OfflineStateGenerator {
         }
 
         @Override
-        public Long findOrganizationIdById(Long id) {
+        public Long findWorkspaceIdById(Long id) {
             return null;
         }
 
@@ -448,17 +448,17 @@ public class OfflineStateGenerator {
         }
 
         @Override
-        public Set<Stack> findAllByOrganization(Organization organization) {
+        public Set<Stack> findAllByWorkspace(Workspace workspace) {
             return null;
         }
 
         @Override
-        public Stack findByNameAndOrganization(String name, Organization organization) {
+        public Stack findByNameAndWorkspace(String name, Workspace workspace) {
             return null;
         }
 
         @Override
-        public Set<Stack> findAllByOrganizationId(Long organizationId) {
+        public Set<Stack> findAllByWorkspaceId(Long workspaceId) {
             return null;
         }
     }

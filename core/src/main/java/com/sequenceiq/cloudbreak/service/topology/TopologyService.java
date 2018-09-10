@@ -10,21 +10,21 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
+import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Topology;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.repository.TopologyRepository;
-import com.sequenceiq.cloudbreak.repository.organization.OrganizationResourceRepository;
-import com.sequenceiq.cloudbreak.service.AbstractOrganizationAwareResourceService;
+import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
+import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
 
 @Service
-public class TopologyService extends AbstractOrganizationAwareResourceService<Topology> {
+public class TopologyService extends AbstractWorkspaceAwareResourceService<Topology> {
 
     private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
@@ -48,10 +48,10 @@ public class TopologyService extends AbstractOrganizationAwareResourceService<To
         return topologyRepository.findById(id).orElseThrow(notFound("Topology", id));
     }
 
-    public Topology create(User user, Topology topology, Organization organization) {
+    public Topology create(User user, Topology topology, Workspace workspace) {
         LOGGER.debug("Creating topology: [User: '{}']", user.getUserId());
         Topology savedTopology;
-        topology.setOrganization(organization);
+        topology.setWorkspace(workspace);
         try {
             savedTopology = topologyRepository.save(topology);
         } catch (DataIntegrityViolationException ex) {
@@ -62,13 +62,13 @@ public class TopologyService extends AbstractOrganizationAwareResourceService<To
     }
 
     @Override
-    public OrganizationResourceRepository<Topology, Long> repository() {
+    public WorkspaceResourceRepository<Topology, Long> repository() {
         return topologyRepository;
     }
 
     @Override
-    public OrganizationResource resource() {
-        return OrganizationResource.TOPOLOGY;
+    public WorkspaceResource resource() {
+        return WorkspaceResource.TOPOLOGY;
     }
 
     @Override

@@ -30,7 +30,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.notification.Notification;
 import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.startup.OrganizationMigrationRunner;
+import com.sequenceiq.cloudbreak.startup.WorkspaceMigrationRunner;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -52,11 +52,11 @@ public class UptimeNotifierTest {
     private StackUtil stackUtil;
 
     @Mock
-    private OrganizationMigrationRunner organizationMigrationRunner;
+    private WorkspaceMigrationRunner workspaceMigrationRunner;
 
     @Before
     public void init() {
-        when(organizationMigrationRunner.isFinished()).thenReturn(true);
+        when(workspaceMigrationRunner.isFinished()).thenReturn(true);
         when(stackUtil.getUptimeForCluster(any(Cluster.class), anyBoolean())).thenReturn(1L);
     }
 

@@ -39,7 +39,7 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
@@ -103,12 +103,12 @@ public class ImageService {
     }
 
     //CHECKSTYLE:OFF
-    public StatedImage determineImageFromCatalog(Long organizationId, String imageId, String platformString, String catalogName,
+    public StatedImage determineImageFromCatalog(Long workspaceId, String imageId, String platformString, String catalogName,
         Blueprint blueprint, boolean useBaseImage, String os, IdentityUser identityUser, User user) throws CloudbreakImageNotFoundException,
             CloudbreakImageCatalogException {
         StatedImage statedImage;
         if (imageId != null) {
-            statedImage = imageCatalogService.getImageByCatalogName(organizationId, imageId, catalogName);
+            statedImage = imageCatalogService.getImageByCatalogName(workspaceId, imageId, catalogName);
         } else {
             String clusterType = ImageCatalogService.UNDEFINED;
             String clusterVersion = ImageCatalogService.UNDEFINED;

@@ -240,7 +240,7 @@ public class ClusterHostServiceRunner {
         decoratePillarWithAmbariDatabase(cluster, servicePillar);
 
         if (cluster.getLdapConfig() != null) {
-            saveLdapPillar(cluster.getLdapConfig().copyWithoutOrganization(), servicePillar);
+            saveLdapPillar(cluster.getLdapConfig().copyWithoutWorkspace(), servicePillar);
         }
         saveDockerPillar(cluster.getExecutorType(), servicePillar);
         saveHDPPillar(cluster.getId(), servicePillar);

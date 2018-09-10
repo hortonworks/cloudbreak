@@ -73,7 +73,7 @@ import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -206,10 +206,10 @@ public class ClusterService {
             throw new BadRequestException(String.format("A cluster is already created on this stack! [cluster: '%s']", stack.getCluster().getName()));
         }
         return transactionService.required(() -> {
-            cluster.setOrganization(stack.getOrganization());
+            cluster.setWorkspace(stack.getWorkspace());
 
             long start = System.currentTimeMillis();
-            if (clusterRepository.findByNameAndOrganization(cluster.getName(), stack.getOrganization()) != null) {
+            if (clusterRepository.findByNameAndWorkspace(cluster.getName(), stack.getWorkspace()) != null) {
                 throw new DuplicateKeyValueException(APIResourceType.CLUSTER, cluster.getName());
             }
             LOGGER.info("Cluster name collision check took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
@@ -224,7 +224,7 @@ public class ClusterService {
 
             start = System.currentTimeMillis();
             if (cluster.getFileSystem() != null) {
-                cluster.setFileSystem(fileSystemConfigService.create(cluster.getFileSystem(), cluster.getOrganization(), user));
+                cluster.setFileSystem(fileSystemConfigService.create(cluster.getFileSystem(), cluster.getWorkspace(), user));
             }
             LOGGER.info("Filesystem config saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 

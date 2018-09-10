@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.api.model.imagecatalog;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.sequenceiq.cloudbreak.api.model.users.OrganizationResourceResponse;
+import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ImageCatalogDescription;
 
@@ -25,8 +25,8 @@ public class ImageCatalogResponse extends ImageCatalogBase {
     @ApiModelProperty(ImageCatalogDescription.IMAGE_RESPONSES)
     private ImagesResponse imagesResponse;
 
-    @ApiModelProperty(ModelDescriptions.ORGANIZATION_OF_THE_RESOURCE)
-    private OrganizationResourceResponse organization;
+    @ApiModelProperty(ModelDescriptions.WORKSPACE_OF_THE_RESOURCE)
+    private WorkspaceResourceResponse workspace;
 
     public Long getId() {
         return id;
@@ -60,11 +60,11 @@ public class ImageCatalogResponse extends ImageCatalogBase {
         this.imagesResponse = imagesResponse;
     }
 
-    public OrganizationResourceResponse getOrganization() {
-        return organization;
+    public WorkspaceResourceResponse getWorkspace() {
+        return workspace;
     }
 
-    public void setOrganization(OrganizationResourceResponse organization) {
-        this.organization = organization;
+    public void setWorkspace(WorkspaceResourceResponse workspace) {
+        this.workspace = workspace;
     }
 }

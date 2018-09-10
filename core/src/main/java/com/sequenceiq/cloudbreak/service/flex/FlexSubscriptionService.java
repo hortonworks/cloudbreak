@@ -13,21 +13,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
+import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.repository.FlexSubscriptionRepository;
-import com.sequenceiq.cloudbreak.repository.organization.OrganizationResourceRepository;
-import com.sequenceiq.cloudbreak.service.AbstractOrganizationAwareResourceService;
+import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
+import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Service
-public class FlexSubscriptionService extends AbstractOrganizationAwareResourceService<FlexSubscription> {
+public class FlexSubscriptionService extends AbstractWorkspaceAwareResourceService<FlexSubscription> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FlexSubscriptionService.class);
 
@@ -41,14 +41,14 @@ public class FlexSubscriptionService extends AbstractOrganizationAwareResourceSe
     private TransactionService transactionService;
 
     @Override
-    public FlexSubscription create(FlexSubscription subscription, @Nonnull Organization organization, User user) {
-        prepareCreation(subscription, organization);
+    public FlexSubscription create(FlexSubscription subscription, @Nonnull Workspace workspace, User user) {
+        prepareCreation(subscription, workspace);
 
         try {
             return transactionService.required(() -> {
-                setOrganization(subscription, user, organization);
+                setWorkspace(subscription, user, workspace);
                 FlexSubscription updated = flexSubscriptionRepository.save(subscription);
-                Set<FlexSubscription> allInAccount = flexSubscriptionRepository.findAllByOrganization(organization);
+                Set<FlexSubscription> allInAccount = flexSubscriptionRepository.findAllByWorkspace(workspace);
                 setSubscriptionAsDefaultIfNeeded(updated, allInAccount);
                 updateSubscriptionsDefaultFlagsIfNeeded(updated, allInAccount);
                 LOGGER.info("Flex subscription has been created: {}", updated);
@@ -60,13 +60,13 @@ public class FlexSubscriptionService extends AbstractOrganizationAwareResourceSe
     }
 
     @Override
-    public OrganizationResourceRepository<FlexSubscription, Long> repository() {
+    public WorkspaceResourceRepository<FlexSubscription, Long> repository() {
         return flexSubscriptionRepository;
     }
 
     @Override
-    public OrganizationResource resource() {
-        return OrganizationResource.FLEXSUBSCRIPTION;
+    public WorkspaceResource resource() {
+        return WorkspaceResource.FLEXSUBSCRIPTION;
     }
 
     @Override
@@ -76,10 +76,10 @@ public class FlexSubscriptionService extends AbstractOrganizationAwareResourceSe
         }
     }
 
-    private void prepareCreation(FlexSubscription subscription, Organization organization) {
-        if (!flexSubscriptionRepository.countByNameAndOrganization(subscription.getName(), organization).equals(0L)) {
+    private void prepareCreation(FlexSubscription subscription, Workspace workspace) {
+        if (!flexSubscriptionRepository.countByNameAndWorkspace(subscription.getName(), workspace).equals(0L)) {
             throw new BadRequestException(String.format("The name: '%s' has already taken by an other FlexSubscription.", subscription.getName()));
-        } else if (!flexSubscriptionRepository.countBySubscriptionIdAndOrganization(subscription.getSubscriptionId(), organization).equals(0L)) {
+        } else if (!flexSubscriptionRepository.countBySubscriptionIdAndWorkspace(subscription.getSubscriptionId(), workspace).equals(0L)) {
             throw new BadRequestException(String.format("The subscriptionId: '%s' has already taken by an other FlexSubscription.",
                     subscription.getSubscriptionId()));
         }
@@ -95,33 +95,33 @@ public class FlexSubscriptionService extends AbstractOrganizationAwareResourceSe
         return delete(subscription);
     }
 
-    public FlexSubscription findOneByName(String name, User user, Organization organization) {
-        return getFlexSubscription(name, organization);
+    public FlexSubscription findOneByName(String name, User user, Workspace workspace) {
+        return getFlexSubscription(name, workspace);
     }
 
-    public FlexSubscription findOneByNameAndOrganization(String name, Long organizationId, User user) {
-        Organization organization = getOrganizationService().get(organizationId, user);
-        return getFlexSubscription(name, organization);
+    public FlexSubscription findOneByNameAndWorkspace(String name, Long workspaceId, User user) {
+        Workspace workspace = getWorkspaceService().get(workspaceId, user);
+        return getFlexSubscription(name, workspace);
     }
 
-    private FlexSubscription getFlexSubscription(String name, Organization organization) {
+    private FlexSubscription getFlexSubscription(String name, Workspace workspace) {
         LOGGER.info("Looking for Flex subscription name: {}", name);
-        return flexSubscriptionRepository.findByNameAndOrganization(name, organization);
+        return flexSubscriptionRepository.findByNameAndWorkspace(name, workspace);
     }
 
-    public Set<FlexSubscription> findAllForUserAndOrganization(User user, Long organizationId) {
+    public Set<FlexSubscription> findAllForUserAndWorkspace(User user, Long workspaceId) {
         LOGGER.info("Looking for public Flex subscriptions for user: {}", user.getUserId());
-        return flexSubscriptionRepository.findAllByOrganizationId(organizationId);
+        return flexSubscriptionRepository.findAllByWorkspaceId(workspaceId);
     }
 
-    public void setDefaultFlexSubscription(String name, User user, Organization organization) {
-        LOGGER.info("Set Flex subscription '{}' as default in organization '{}'", name, organization.getName());
-        setFlexSubscriptionFlag(name, user, organization, FlexSubscription::setDefault);
+    public void setDefaultFlexSubscription(String name, User user, Workspace workspace) {
+        LOGGER.info("Set Flex subscription '{}' as default in workspace '{}'", name, workspace.getName());
+        setFlexSubscriptionFlag(name, user, workspace, FlexSubscription::setDefault);
     }
 
-    public void setUsedForControllerFlexSubscription(String name, User user, Organization organization) {
-        LOGGER.info("Set Flex subscription '{}' as used for controller in organization '{}'", name, organization.getName());
-        setFlexSubscriptionFlag(name, user, organization, FlexSubscription::setUsedForController);
+    public void setUsedForControllerFlexSubscription(String name, User user, Workspace workspace) {
+        LOGGER.info("Set Flex subscription '{}' as used for controller in workspace '{}'", name, workspace.getName());
+        setFlexSubscriptionFlag(name, user, workspace, FlexSubscription::setUsedForController);
     }
 
     public FlexSubscription get(Long id) {
@@ -148,8 +148,8 @@ public class FlexSubscriptionService extends AbstractOrganizationAwareResourceSe
         }
     }
 
-    private void setFlexSubscriptionFlag(String name, User user, Organization organization, BiConsumer<FlexSubscription, Boolean> setter) {
-        Set<FlexSubscription> allInAccount = flexSubscriptionRepository.findAllByOrganization(organization);
+    private void setFlexSubscriptionFlag(String name, User user, Workspace workspace, BiConsumer<FlexSubscription, Boolean> setter) {
+        Set<FlexSubscription> allInAccount = flexSubscriptionRepository.findAllByWorkspace(workspace);
         setFlagOnFlexSubscriptionCollection(name, setter, allInAccount);
         flexSubscriptionRepository.saveAll(allInAccount);
     }

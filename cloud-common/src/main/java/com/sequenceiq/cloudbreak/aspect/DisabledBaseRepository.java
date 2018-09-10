@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.aspect;
 
-import static com.sequenceiq.cloudbreak.authorization.OrganizationPermissions.Action.READ;
-import static com.sequenceiq.cloudbreak.authorization.OrganizationPermissions.Action.WRITE;
+import static com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action.READ;
+import static com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action.WRITE;
 
 import java.io.Serializable;
 import java.util.Optional;
@@ -9,10 +9,10 @@ import java.util.Optional;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.NoRepositoryBean;
 
-import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByReturnValue;
-import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByTarget;
-import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByTargetId;
-import com.sequenceiq.cloudbreak.aspect.organization.DisableCheckPermissions;
+import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByReturnValue;
+import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByTarget;
+import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByTargetId;
+import com.sequenceiq.cloudbreak.aspect.workspace.DisableCheckPermissions;
 
 @NoRepositoryBean
 @DisableHasPermission

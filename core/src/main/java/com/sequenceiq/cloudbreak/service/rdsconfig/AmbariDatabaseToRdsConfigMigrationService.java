@@ -89,7 +89,7 @@ public class AmbariDatabaseToRdsConfigMigrationService {
             rdsConfig.setStatus(ResourceStatus.DEFAULT);
         }
 
-        return rdsConfigService.create(rdsConfig, cluster.getStack().getOrganization(), cluster.getStack().getCreator());
+        return rdsConfigService.create(rdsConfig, cluster.getStack().getWorkspace(), cluster.getStack().getCreator());
     }
 
 }

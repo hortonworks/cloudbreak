@@ -31,7 +31,7 @@ import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.cloud.VersionComparator;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
@@ -54,13 +54,13 @@ public class ServiceEndpointCollector {
     @Inject
     private AmbariHaComponentFilter ambariHaComponentFilter;
 
-    public Collection<ExposedServiceResponse> getKnoxServices(String blueprintName, Organization organization) {
-        Blueprint blueprint = blueprintService.getByNameForOrganization(blueprintName, organization);
+    public Collection<ExposedServiceResponse> getKnoxServices(String blueprintName, Workspace workspace) {
+        Blueprint blueprint = blueprintService.getByNameForWorkspace(blueprintName, workspace);
         return getKnoxServices(blueprint);
     }
 
-    public Collection<ExposedServiceResponse> getKnoxServices(Long organizationId, String blueprintName) {
-        Blueprint blueprint = blueprintService.getByNameForOrganizationId(blueprintName, organizationId);
+    public Collection<ExposedServiceResponse> getKnoxServices(Long workspaceId, String blueprintName) {
+        Blueprint blueprint = blueprintService.getByNameForWorkspaceId(blueprintName, workspaceId);
         return getKnoxServices(blueprint);
     }
 

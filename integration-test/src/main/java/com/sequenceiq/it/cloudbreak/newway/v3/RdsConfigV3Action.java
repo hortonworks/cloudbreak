@@ -19,11 +19,11 @@ public class RdsConfigV3Action {
         RdsConfigEntity rdsconfigEntity = (RdsConfigEntity) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
-        Long orgId = integrationTestContext.getContextParam(CloudbreakTest.ORGANIZATION_ID, Long.class);
+        Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         rdsconfigEntity.setResponse(
                 client.getCloudbreakClient()
                         .rdsConfigV3Endpoint()
-                        .createInOrganization(orgId, rdsconfigEntity.getRequest()));
+                        .createInWorkspace(workspaceId, rdsconfigEntity.getRequest()));
         logJSON("Rds config post request: ", rdsconfigEntity.getRequest());
     }
 
@@ -31,11 +31,11 @@ public class RdsConfigV3Action {
         RdsConfigEntity rdsconfigEntity = (RdsConfigEntity) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
-        Long orgId = integrationTestContext.getContextParam(CloudbreakTest.ORGANIZATION_ID, Long.class);
+        Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         rdsconfigEntity.setResponse(
                 client.getCloudbreakClient()
                         .rdsConfigV3Endpoint()
-                        .getByNameInOrganization(orgId, rdsconfigEntity.getRequest().getName()));
+                        .getByNameInWorkspace(workspaceId, rdsconfigEntity.getRequest().getName()));
         logJSON(" get rds config response: ", rdsconfigEntity.getResponse());
     }
 
@@ -43,11 +43,11 @@ public class RdsConfigV3Action {
         RdsConfigEntity rdsconfigEntity = (RdsConfigEntity) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
-        Long orgId = integrationTestContext.getContextParam(CloudbreakTest.ORGANIZATION_ID, Long.class);
+        Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         rdsconfigEntity.setResponses(
                 client.getCloudbreakClient()
                         .rdsConfigV3Endpoint()
-                        .listByOrganization(orgId));
+                        .listByWorkspace(workspaceId));
         logJSON(" get all rds config response: ", rdsconfigEntity.getResponse());
     }
 
@@ -55,10 +55,10 @@ public class RdsConfigV3Action {
         RdsConfigEntity rdsconfigEntity = (RdsConfigEntity) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
-        Long orgId = integrationTestContext.getContextParam(CloudbreakTest.ORGANIZATION_ID, Long.class);
+        Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         client.getCloudbreakClient()
                 .rdsConfigV3Endpoint()
-                .deleteInOrganization(orgId, rdsconfigEntity.getName());
+                .deleteInWorkspace(workspaceId, rdsconfigEntity.getName());
     }
 
     public static void testConnect(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {
@@ -70,11 +70,11 @@ public class RdsConfigV3Action {
 
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
-        Long orgId = integrationTestContext.getContextParam(CloudbreakTest.ORGANIZATION_ID, Long.class);
+        Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         rdsConfigEntity.setResponseTestResult(
                 client.getCloudbreakClient()
                         .rdsConfigV3Endpoint()
-                        .testRdsConnection(orgId, rdsTestRequest));
+                        .testRdsConnection(workspaceId, rdsTestRequest));
         logJSON("Rds test post request: ", rdsConfigEntity.getRequest());
     }
 

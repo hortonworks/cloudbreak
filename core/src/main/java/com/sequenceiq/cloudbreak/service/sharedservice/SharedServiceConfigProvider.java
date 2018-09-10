@@ -34,8 +34,8 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.BlueprintInputParameters;
 import com.sequenceiq.cloudbreak.domain.BlueprintParameter;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -58,11 +58,11 @@ public class SharedServiceConfigProvider {
     @Inject
     private CentralBlueprintParameterQueryService centralBlueprintParameterQueryService;
 
-    public Cluster configureCluster(@Nonnull Cluster requestedCluster, ConnectedClusterRequest connectedClusterRequest, User user, Organization organization) {
+    public Cluster configureCluster(@Nonnull Cluster requestedCluster, ConnectedClusterRequest connectedClusterRequest, User user, Workspace workspace) {
         Objects.requireNonNull(requestedCluster);
         if (connectedClusterRequest != null) {
             Stack publicStack = queryStack(connectedClusterRequest.getSourceClusterId(),
-                    Optional.ofNullable(connectedClusterRequest.getSourceClusterName()), user, organization);
+                    Optional.ofNullable(connectedClusterRequest.getSourceClusterName()), user, workspace);
             Cluster sourceCluster = queryCluster(publicStack);
             if (sourceCluster != null) {
                 setupLdap(requestedCluster, publicStack);
@@ -172,9 +172,9 @@ public class SharedServiceConfigProvider {
         return clusterService.getById(publicStack.getCluster().getId());
     }
 
-    private Stack queryStack(Long sourceClusterId, Optional<String> sourceClusterName, User user, Organization organization) {
+    private Stack queryStack(Long sourceClusterId, Optional<String> sourceClusterName, User user, Workspace workspace) {
         return sourceClusterName.isPresent()
-                ? stackService.getByNameInOrg(sourceClusterName.get(), organization.getId())
+                ? stackService.getByNameInWorkspace(sourceClusterName.get(), workspace.getId())
                 : stackService.getById(sourceClusterId);
     }
 

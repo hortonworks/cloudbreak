@@ -12,11 +12,11 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByTargetId;
+import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByTargetId;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.domain.organization.OrganizationAwareResource;
-import com.sequenceiq.cloudbreak.domain.organization.User;
-import com.sequenceiq.cloudbreak.repository.organization.OrganizationResourceRepository;
+import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 
 @Component
 public class TargetIdPermissionChecker implements PermissionChecker<CheckPermissionsByTargetId> {
@@ -27,22 +27,22 @@ public class TargetIdPermissionChecker implements PermissionChecker<CheckPermiss
     @Inject
     private PermissionCheckingUtils permissionCheckingUtils;
 
-    public <T extends Annotation> Object checkPermissions(T rawMethodAnnotation, OrganizationResource resource, User user,
+    public <T extends Annotation> Object checkPermissions(T rawMethodAnnotation, WorkspaceResource resource, User user,
             ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature) {
         CheckPermissionsByTargetId methodAnnotation = (CheckPermissionsByTargetId) rawMethodAnnotation;
         int targetIdIndex = methodAnnotation.targetIdIndex();
         int length = proceedingJoinPoint.getArgs().length;
         permissionCheckingUtils.validateIndex(targetIdIndex, length, "targetIdIndex");
-        Optional<Class<?>> repositoryClass = permissionCheckingUtils.getOrgAwareRepositoryClass(proceedingJoinPoint);
+        Optional<Class<?>> repositoryClass = permissionCheckingUtils.getWorkspaceAwareRepositoryClass(proceedingJoinPoint);
         if (!repositoryClass.isPresent()) {
             throw new IllegalArgumentException("Unable to determine entity class!");
         }
         CrudRepository<?, ?> targetRepository = (CrudRepository<?, ?>) applicationContext.getBean(repositoryClass.get());
-        if (!(targetRepository instanceof OrganizationResourceRepository)) {
-            throw new IllegalArgumentException("Type of target repository should be OrganizationResourceRepository!");
+        if (!(targetRepository instanceof WorkspaceResourceRepository)) {
+            throw new IllegalArgumentException("Type of target repository should be WorkspaceResourceRepository!");
         }
         Object targetId = proceedingJoinPoint.getArgs()[targetIdIndex];
-        Optional<OrganizationAwareResource> targetOptional = ((OrganizationResourceRepository) targetRepository).findById((Serializable) targetId);
+        Optional<WorkspaceAwareResource> targetOptional = ((WorkspaceResourceRepository) targetRepository).findById((Serializable) targetId);
         if (!targetOptional.isPresent()) {
             throw new NotFoundException("Target not found");
         }

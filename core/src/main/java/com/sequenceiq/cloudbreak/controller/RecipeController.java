@@ -16,10 +16,10 @@ import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
 import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.Recipe;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
@@ -35,7 +35,7 @@ public class RecipeController extends NotificationController implements RecipeEn
     private ConversionService conversionService;
 
     @Inject
-    private OrganizationService organizationService;
+    private WorkspaceService workspaceService;
 
     @Inject
     private UserService userService;
@@ -58,33 +58,33 @@ public class RecipeController extends NotificationController implements RecipeEn
     @Override
     public RecipeRequest getRequestfromName(String name) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        Recipe recipe = recipeService.getByNameForOrganization(name, organization);
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        Recipe recipe = recipeService.getByNameForWorkspace(name, workspace);
         return conversionService.convert(recipe, RecipeRequest.class);
     }
 
     @Override
     public RecipeResponse postPublic(RecipeRequest recipeRequest) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        return createInDefaultOrganization(recipeRequest, user);
+        return createInDefaultWorkspace(recipeRequest, user);
     }
 
     @Override
     public RecipeResponse postPrivate(RecipeRequest recipeRequest) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        return createInDefaultOrganization(recipeRequest, user);
+        return createInDefaultWorkspace(recipeRequest, user);
     }
 
     @Override
     public Set<RecipeResponse> getPrivates() {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        return listForUsersDefaultOrganization(user);
+        return listForUsersDefaultWorkspace(user);
     }
 
     @Override
     public Set<RecipeResponse> getPublics() {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        return listForUsersDefaultOrganization(user);
+        return listForUsersDefaultWorkspace(user);
     }
 
     @Override
@@ -102,36 +102,36 @@ public class RecipeController extends NotificationController implements RecipeEn
     @Override
     public void deletePublic(String name) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        deleteInDefaultOrganization(name, user);
+        deleteInDefaultWorkspace(name, user);
     }
 
     @Override
     public void deletePrivate(String name) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        deleteInDefaultOrganization(name, user);
+        deleteInDefaultWorkspace(name, user);
     }
 
     private RecipeResponse getRecipeResponse(String name, User user) {
-        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        return conversionService.convert(recipeService.getByNameForOrganization(name, organization), RecipeResponse.class);
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        return conversionService.convert(recipeService.getByNameForWorkspace(name, workspace), RecipeResponse.class);
     }
 
-    private Set<RecipeResponse> listForUsersDefaultOrganization(User user) {
-        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        return recipeService.findAllByOrganization(organization).stream()
+    private Set<RecipeResponse> listForUsersDefaultWorkspace(User user) {
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        return recipeService.findAllByWorkspace(workspace).stream()
                 .map(recipe -> conversionService.convert(recipe, RecipeResponse.class))
                 .collect(Collectors.toSet());
     }
 
-    private void deleteInDefaultOrganization(String name, User user) {
-        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        executeAndNotify(identityUser -> recipeService.deleteByNameFromOrganization(name, organization.getId()), ResourceEvent.RECIPE_DELETED);
+    private void deleteInDefaultWorkspace(String name, User user) {
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        executeAndNotify(identityUser -> recipeService.deleteByNameFromWorkspace(name, workspace.getId()), ResourceEvent.RECIPE_DELETED);
     }
 
-    private RecipeResponse createInDefaultOrganization(RecipeRequest request, User user) {
+    private RecipeResponse createInDefaultWorkspace(RecipeRequest request, User user) {
         Recipe recipe = conversionService.convert(request, Recipe.class);
-        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        recipe = recipeService.create(recipe, organization, user);
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        recipe = recipeService.create(recipe, workspace, user);
         return notifyAndReturn(recipe, ResourceEvent.RECIPE_CREATED);
     }
 

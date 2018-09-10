@@ -14,14 +14,14 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import com.sequenceiq.cloudbreak.api.model.DirectoryType;
-import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
+import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.converter.EncryptionConverter;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.OrganizationAwareResource;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"organization_id", "name"}))
-public class LdapConfig implements ProvisionEntity, OrganizationAwareResource {
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name"}))
+public class LdapConfig implements ProvisionEntity, WorkspaceAwareResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "ldapconfig_generator")
@@ -79,9 +79,9 @@ public class LdapConfig implements ProvisionEntity, OrganizationAwareResource {
     private String adminGroup;
 
     @ManyToOne
-    private Organization organization;
+    private Workspace workspace;
 
-    public LdapConfig copyWithoutOrganization() {
+    public LdapConfig copyWithoutWorkspace() {
         LdapConfig copy = new LdapConfig();
         copy.setId(id);
         copy.setName(name);
@@ -276,17 +276,17 @@ public class LdapConfig implements ProvisionEntity, OrganizationAwareResource {
     }
 
     @Override
-    public Organization getOrganization() {
-        return organization;
+    public Workspace getWorkspace() {
+        return workspace;
     }
 
     @Override
-    public void setOrganization(Organization organization) {
-        this.organization = organization;
+    public void setWorkspace(Workspace workspace) {
+        this.workspace = workspace;
     }
 
     @Override
-    public OrganizationResource getResource() {
-        return OrganizationResource.LDAP;
+    public WorkspaceResource getResource() {
+        return WorkspaceResource.LDAP;
     }
 }

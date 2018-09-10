@@ -35,20 +35,20 @@ public class OperationDetails implements Serializable {
 
     private String cloudbreakVersion;
 
-    private Long organizationId;
+    private Long workspaceId;
 
     public OperationDetails() {
     }
 
     public OperationDetails(StructuredEventType eventType, String resourceType, Long resourceId, String resourceName, String userIdV3,
-            String userNameV3, String cloudbreakId, String cloudbreakVersion, Long organizationId, String account, String userId, String userName) {
+            String userNameV3, String cloudbreakId, String cloudbreakVersion, Long workspaceId, String account, String userId, String userName) {
         this(Calendar.getInstance().getTimeInMillis(), eventType, resourceType, resourceId, resourceName, userIdV3,
-                userNameV3, cloudbreakId, cloudbreakVersion, organizationId, account, userId, userName);
+                userNameV3, cloudbreakId, cloudbreakVersion, workspaceId, account, userId, userName);
     }
 
     public OperationDetails(Long timestamp, StructuredEventType eventType, String resourceType, Long resourceId,
             String resourceName, String userIdV3, String userNameV3, String cloudbreakId,
-            String cloudbreakVersion, Long organizationId, String account, String userId, String userName) {
+            String cloudbreakVersion, Long workspaceId, String account, String userId, String userName) {
         this.timestamp = timestamp;
         this.eventType = eventType;
         this.resourceId = resourceId;
@@ -58,7 +58,7 @@ public class OperationDetails implements Serializable {
         this.userNameV3 = userNameV3;
         this.cloudbreakId = cloudbreakId;
         this.cloudbreakVersion = cloudbreakVersion;
-        this.organizationId = organizationId;
+        this.workspaceId = workspaceId;
         this.account = account;
         this.userId = userId;
         this.userName = userName;
@@ -140,12 +140,12 @@ public class OperationDetails implements Serializable {
         this.userNameV3 = userNameV3;
     }
 
-    public Long getOrganizationId() {
-        return organizationId;
+    public Long getWorkspaceId() {
+        return workspaceId;
     }
 
-    public void setOrganizationId(Long organizationId) {
-        this.organizationId = organizationId;
+    public void setWorkspaceId(Long workspaceId) {
+        this.workspaceId = workspaceId;
     }
 
     public String getAccount() {

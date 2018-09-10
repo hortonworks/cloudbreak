@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.model.NetworkResponse;
-import com.sequenceiq.cloudbreak.api.model.users.OrganizationResourceResponse;
+import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 
@@ -19,8 +19,8 @@ public class NetworkToNetworkResponseConverter extends AbstractConversionService
         json.setName(source.getName());
         json.setDescription(source.getDescription());
         json.setSubnetCIDR(source.getSubnetCIDR());
-        OrganizationResourceResponse organization = getConversionService().convert(source.getOrganization(), OrganizationResourceResponse.class);
-        json.setOrganization(organization);
+        WorkspaceResourceResponse workspace = getConversionService().convert(source.getWorkspace(), WorkspaceResourceResponse.class);
+        json.setWorkspace(workspace);
         Json attributes = source.getAttributes();
         if (attributes != null) {
             json.setParameters(Maps.newHashMap(attributes.getMap()));

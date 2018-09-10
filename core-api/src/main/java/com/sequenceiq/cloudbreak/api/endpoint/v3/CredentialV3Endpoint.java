@@ -24,51 +24,51 @@ import com.sequenceiq.cloudbreak.doc.OperationDescriptions.CredentialOpDescripti
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Path("/v3/{organizationId}/credentials")
+@Path("/v3/{workspaceId}/credentials")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v3/{organizationId}/credentials", description = ControllerDescription.CREDENTIAL_V3_DESCRIPTION, protocols = "http,https")
+@Api(value = "/v3/{workspaceId}/credentials", description = ControllerDescription.CREDENTIAL_V3_DESCRIPTION, protocols = "http,https")
 public interface CredentialV3Endpoint {
 
     @GET
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = CredentialOpDescription.LIST_BY_ORGANIZATION, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES,
-            nickname = "listCredentialsByOrganization")
-    Set<CredentialResponse> listByOrganization(@PathParam("organizationId") Long organizationId);
+    @ApiOperation(value = CredentialOpDescription.LIST_BY_WORKSPACE, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES,
+            nickname = "listCredentialsByWorkspace")
+    Set<CredentialResponse> listByWorkspace(@PathParam("workspaceId") Long workspaceId);
 
     @GET
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = CredentialOpDescription.GET_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES,
-            nickname = "getCredentialInOrganization")
-    CredentialResponse getByNameInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
+            nickname = "getCredentialInWorkspace")
+    CredentialResponse getByNameInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @POST
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = CredentialOpDescription.CREATE_IN_ORG, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES,
-            nickname = "createCredentialInOrganization")
-    CredentialResponse createInOrganization(@PathParam("organizationId") Long organizationId, @Valid CredentialRequest request);
+            nickname = "createCredentialInWorkspace")
+    CredentialResponse createInWorkspace(@PathParam("workspaceId") Long workspaceId, @Valid CredentialRequest request);
 
     @DELETE
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = CredentialOpDescription.DELETE_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES,
-            nickname = "deleteCredentialInOrganization")
-    CredentialResponse deleteInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
+            nickname = "deleteCredentialInWorkspace")
+    CredentialResponse deleteInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @PUT
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = CredentialOpDescription.PUT_IN_ORG, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES,
-            nickname = "putCredentialInOrganization")
-    CredentialResponse putInOrganization(@PathParam("organizationId") Long organizationId, @Valid CredentialRequest credentialRequest);
+            nickname = "putCredentialInWorkspace")
+    CredentialResponse putInWorkspace(@PathParam("workspaceId") Long workspaceId, @Valid CredentialRequest credentialRequest);
 
     @POST
     @Path("interactivelogin")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = CredentialOpDescription.INTERACTIVE_LOGIN, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES,
-            nickname = "interactiveLoginCredentialInOrganization")
-    Map<String, String> interactiveLogin(@PathParam("organizationId") Long organizationId, @Valid CredentialRequest credentialRequest);
+            nickname = "interactiveLoginCredentialInWorkspace")
+    Map<String, String> interactiveLogin(@PathParam("workspaceId") Long workspaceId, @Valid CredentialRequest credentialRequest);
 
 }

@@ -15,20 +15,20 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
+import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Network;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.repository.NetworkRepository;
-import com.sequenceiq.cloudbreak.repository.organization.OrganizationResourceRepository;
-import com.sequenceiq.cloudbreak.service.AbstractOrganizationAwareResourceService;
+import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
+import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.NameUtil;
 
 @Service
-public class NetworkService extends AbstractOrganizationAwareResourceService<Network> {
+public class NetworkService extends AbstractWorkspaceAwareResourceService<Network> {
     private static final Logger LOGGER = LoggerFactory.getLogger(NetworkService.class);
 
     @Inject
@@ -37,8 +37,8 @@ public class NetworkService extends AbstractOrganizationAwareResourceService<Net
     @Inject
     private StackService stackService;
 
-    public Network create(Network network, Organization organization) {
-        network.setOrganization(organization);
+    public Network create(Network network, Workspace workspace) {
+        network.setWorkspace(workspace);
         try {
             return networkRepository.save(network);
         } catch (DataIntegrityViolationException ex) {
@@ -92,13 +92,13 @@ public class NetworkService extends AbstractOrganizationAwareResourceService<Net
     }
 
     @Override
-    public OrganizationResourceRepository<Network, Long> repository() {
+    public WorkspaceResourceRepository<Network, Long> repository() {
         return networkRepository;
     }
 
     @Override
-    public OrganizationResource resource() {
-        return OrganizationResource.NETWORK;
+    public WorkspaceResource resource() {
+        return WorkspaceResource.NETWORK;
     }
 
 }

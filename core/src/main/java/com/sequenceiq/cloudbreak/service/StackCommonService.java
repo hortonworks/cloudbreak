@@ -31,8 +31,8 @@ import com.sequenceiq.cloudbreak.api.model.stack.StackScaleRequestV2;
 import com.sequenceiq.cloudbreak.api.model.stack.StackValidationRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRepairRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
-import com.sequenceiq.cloudbreak.authorization.OrganizationPermissions.Action;
-import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
+import com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action;
+import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.authorization.PermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintUpdater;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -45,8 +45,8 @@ import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemVali
 import com.sequenceiq.cloudbreak.controller.validation.stack.StackRequestValidator;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -55,7 +55,7 @@ import com.sequenceiq.cloudbreak.service.account.AccountPreferencesValidator;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.decorator.StackDecorator;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -101,7 +101,7 @@ public class StackCommonService implements StackEndpoint {
     private ScalingHardLimitsService scalingHardLimitsService;
 
     @Inject
-    private OrganizationService organizationService;
+    private WorkspaceService workspaceService;
 
     @Inject
     private PermissionCheckingUtils permissionCheckingUtils;
@@ -134,17 +134,17 @@ public class StackCommonService implements StackEndpoint {
     @Inject
     private RestRequestThreadLocalService restRequestThreadLocalService;
 
-    public StackResponse createInOrganization(StackRequest stackRequest, IdentityUser identityUser, User user, Organization organization) {
-        return stackCreatorService.createStack(identityUser, user, organization, stackRequest);
+    public StackResponse createInWorkspace(StackRequest stackRequest, IdentityUser identityUser, User user, Workspace workspace) {
+        return stackCreatorService.createStack(identityUser, user, workspace, stackRequest);
     }
 
-    public void deleteInOrganization(String name, Long organizationId, Boolean forced, Boolean deleteDependencies, User user) {
-        stackService.delete(name, organizationId, forced, deleteDependencies, user);
+    public void deleteInWorkspace(String name, Long workspaceId, Boolean forced, Boolean deleteDependencies, User user) {
+        stackService.delete(name, workspaceId, forced, deleteDependencies, user);
     }
 
     @Override
-    public Set<StackResponse> getStacksInDefaultOrg() {
-        return stackService.retrieveStacksByOrganizationId(restRequestThreadLocalService.getRequestedOrgId());
+    public Set<StackResponse> getStacksInDefaultWorkspace() {
+        return stackService.retrieveStacksByWorkspaceId(restRequestThreadLocalService.getRequestedWorkspaceId());
     }
 
     @Override
@@ -153,10 +153,10 @@ public class StackCommonService implements StackEndpoint {
     }
 
     @Override
-    public StackResponse getStackFromDefaultOrg(String name, Set<String> entries) {
+    public StackResponse getStackFromDefaultWorkspace(String name, Set<String> entries) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        return stackService.getStackByNameInOrg(name, entries, user, organization);
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        return stackService.getStackByNameInWorkspace(name, entries, user, workspace);
     }
 
     @Override
@@ -171,32 +171,33 @@ public class StackCommonService implements StackEndpoint {
     }
 
     @Override
-    public void deleteInDefaultOrg(String name, Boolean forced, Boolean deleteDependencies) {
+    public void deleteInDefaultWorkspace(String name, Boolean forced, Boolean deleteDependencies) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        stackService.delete(name, restRequestThreadLocalService.getRequestedOrgId(), forced, deleteDependencies, user);
+        stackService.delete(name, restRequestThreadLocalService.getRequestedWorkspaceId(), forced, deleteDependencies, user);
     }
 
-    public Set<StackResponse> retrieveStacksByOrganizationId(Long organizationId) {
-        return stackService.retrieveStacksByOrganizationId(organizationId);
+    public Set<StackResponse> retrieveStacksByWorkspaceId(Long workspaceId) {
+        return stackService.retrieveStacksByWorkspaceId(workspaceId);
     }
 
-    public StackResponse findStackByNameAndOrganizationId(String name, Long organizationId, @QueryParam("entry") Set<String> entries) {
+    public StackResponse findStackByNameAndWorkspaceId(String name, Long workspaceId, @QueryParam("entry") Set<String> entries) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        return stackService.getByNameInOrgWithEntries(name, organizationId, entries, user);
+        return stackService.getByNameInWorkspaceWithEntries(name, workspaceId, entries, user);
     }
 
-    public Response putInDefaultOrg(Long id, UpdateStackJson updateRequest) {
+    public Response putInDefaultWorkspace(Long id, UpdateStackJson updateRequest) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        permissionCheckingUtils.checkPermissionByOrgIdForUser(restRequestThreadLocalService.getRequestedOrgId(), OrganizationResource.STACK, Action.WRITE, user);
+        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(restRequestThreadLocalService.getRequestedWorkspaceId(),
+                WorkspaceResource.STACK, Action.WRITE, user);
         Stack stack = stackService.getById(id);
         MDCBuilder.buildMdcContext(stack);
         return put(stack, updateRequest);
     }
 
-    public Response putStopInOrganization(String name, Long organizationId) {
+    public Response putStopInWorkspace(String name, Long workspaceId) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        permissionCheckingUtils.checkPermissionByOrgIdForUser(organizationId, OrganizationResource.STACK, Action.WRITE, user);
-        Stack stack = stackService.getByNameInOrg(name, organizationId);
+        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(workspaceId, WorkspaceResource.STACK, Action.WRITE, user);
+        Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
         MDCBuilder.buildMdcContext(stack);
         if (!cloudParameterCache.isStartStopSupported(stack.cloudPlatform())) {
             throw new BadRequestException(String.format("Stop is not supported on %s cloudplatform", stack.cloudPlatform()));
@@ -207,10 +208,10 @@ public class StackCommonService implements StackEndpoint {
         return put(stack, updateStackJson);
     }
 
-    public Response putSyncInOrganization(String name, Long organizationId) {
+    public Response putSyncInWorkspace(String name, Long workspaceId) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        permissionCheckingUtils.checkPermissionByOrgIdForUser(organizationId, OrganizationResource.STACK, Action.WRITE, user);
-        Stack stack = stackService.getByNameInOrg(name, organizationId);
+        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(workspaceId, WorkspaceResource.STACK, Action.WRITE, user);
+        Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
         MDCBuilder.buildMdcContext(stack);
         UpdateStackJson updateStackJson = new UpdateStackJson();
         updateStackJson.setStatus(StatusRequest.FULL_SYNC);
@@ -218,10 +219,10 @@ public class StackCommonService implements StackEndpoint {
         return put(stack, updateStackJson);
     }
 
-    public Response putStartInOrganization(String name, Long organizationId) {
+    public Response putStartInWorkspace(String name, Long workspaceId) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        permissionCheckingUtils.checkPermissionByOrgIdForUser(organizationId, OrganizationResource.STACK, Action.WRITE, user);
-        Stack stack = stackService.getByNameInOrg(name, organizationId);
+        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(workspaceId, WorkspaceResource.STACK, Action.WRITE, user);
+        Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
         MDCBuilder.buildMdcContext(stack);
         if (!cloudParameterCache.isStartStopSupported(stack.cloudPlatform())) {
             throw new BadRequestException(String.format("Start is not supported on %s cloudplatform", stack.cloudPlatform()));
@@ -232,10 +233,10 @@ public class StackCommonService implements StackEndpoint {
         return put(stack, updateStackJson);
     }
 
-    public Response putScalingInOrganization(String name, Long organizationId, StackScaleRequestV2 updateRequest) {
+    public Response putScalingInWorkspace(String name, Long workspaceId, StackScaleRequestV2 updateRequest) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        permissionCheckingUtils.checkPermissionByOrgIdForUser(organizationId, OrganizationResource.STACK, Action.WRITE, user);
-        Stack stack = stackService.getByNameInOrg(name, organizationId);
+        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(workspaceId, WorkspaceResource.STACK, Action.WRITE, user);
+        Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
         MDCBuilder.buildMdcContext(stack);
         updateRequest.setStackId(stack.getId());
         UpdateStackJson updateStackJson = conversionService.convert(updateRequest, UpdateStackJson.class);
@@ -250,30 +251,30 @@ public class StackCommonService implements StackEndpoint {
             return put(stack, updateStackJson);
         } else {
             UpdateClusterJson updateClusterJson = conversionService.convert(updateRequest, UpdateClusterJson.class);
-            Organization organization = organizationService.get(organizationId, user);
-            return clusterCommonService.put(stack.getId(), updateClusterJson, user, organization);
+            Workspace workspace = workspaceService.get(workspaceId, user);
+            return clusterCommonService.put(stack.getId(), updateClusterJson, user, workspace);
         }
     }
 
-    public void deleteWithKerbereosInOrg(String name, Long organizationId, Boolean withStackDelete, Boolean deleteDependencies) {
+    public void deleteWithKerbereosInWorkspace(String name, Long workspaceId, Boolean withStackDelete, Boolean deleteDependencies) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        permissionCheckingUtils.checkPermissionByOrgIdForUser(organizationId, OrganizationResource.STACK, Action.WRITE, user);
-        Stack stack = stackService.getByNameInOrg(name, organizationId);
+        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(workspaceId, WorkspaceResource.STACK, Action.WRITE, user);
+        Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
         MDCBuilder.buildMdcContext(stack);
         clusterService.delete(stack.getId(), withStackDelete, deleteDependencies);
     }
 
-    public void repairCluster(Long organizationId, String name, ClusterRepairRequest clusterRepairRequest) {
+    public void repairCluster(Long workspaceId, String name, ClusterRepairRequest clusterRepairRequest) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        permissionCheckingUtils.checkPermissionByOrgIdForUser(organizationId, OrganizationResource.STACK, Action.WRITE, user);
-        Stack stack = stackService.getByNameInOrg(name, organizationId);
+        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(workspaceId, WorkspaceResource.STACK, Action.WRITE, user);
+        Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
         clusterService.repairCluster(stack.getId(), clusterRepairRequest.getHostGroups(), clusterRepairRequest.isRemoveOnly());
     }
 
-    public void retryInOrganization(String name, Long organizationId) {
+    public void retryInWorkspace(String name, Long workspaceId) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        permissionCheckingUtils.checkPermissionByOrgIdForUser(organizationId, OrganizationResource.STACK, Action.WRITE, user);
-        Stack stack = stackService.getByNameInOrg(name, organizationId);
+        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(workspaceId, WorkspaceResource.STACK, Action.WRITE, user);
+        Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
         operationRetryService.retry(stack);
     }
 
@@ -329,24 +330,24 @@ public class StackCommonService implements StackEndpoint {
     @Override
     public Response deleteInstance(Long stackId, String instanceId, boolean forced) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        permissionCheckingUtils.checkPermissionByOrgIdForUser(restRequestThreadLocalService.getRequestedOrgId(), OrganizationResource.STACK,
+        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(restRequestThreadLocalService.getRequestedWorkspaceId(), WorkspaceResource.STACK,
                 Action.WRITE, user);
-        stackService.removeInstance(stackId, restRequestThreadLocalService.getRequestedOrgId(), instanceId, forced, user);
+        stackService.removeInstance(stackId, restRequestThreadLocalService.getRequestedWorkspaceId(), instanceId, forced, user);
         return Response.status(Status.NO_CONTENT).build();
     }
 
-    public Response deleteInstanceByNameInOrg(String name, Long organizationId, String instanceId, boolean forced) {
+    public Response deleteInstanceByNameInWorkspace(String name, Long workspaceId, String instanceId, boolean forced) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        permissionCheckingUtils.checkPermissionByOrgIdForUser(organizationId, OrganizationResource.STACK, Action.WRITE, user);
-        Stack stack = stackService.getByNameInOrg(name, organizationId);
-        stackService.removeInstance(stack, organizationId, instanceId, forced, user);
+        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(workspaceId, WorkspaceResource.STACK, Action.WRITE, user);
+        Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
+        stackService.removeInstance(stack, workspaceId, instanceId, forced, user);
         return Response.status(Status.NO_CONTENT).build();
     }
 
     @Override
     public Response deleteInstances(Long stackId, Set<String> instanceIds) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        stackService.removeInstances(stackId, restRequestThreadLocalService.getRequestedOrgId(), instanceIds, user);
+        stackService.removeInstances(stackId, restRequestThreadLocalService.getRequestedWorkspaceId(), instanceIds, user);
         return Response.status(Status.NO_CONTENT).build();
     }
 
@@ -356,8 +357,8 @@ public class StackCommonService implements StackEndpoint {
         return conversionService.convert(pv, PlatformVariantsJson.class);
     }
 
-    public Response changeImageByNameInOrg(String name, Long organziationId, StackImageChangeRequest stackImageChangeRequest) {
-        Stack stack = stackService.getByNameInOrg(name, organziationId);
+    public Response changeImageByNameInWorkspace(String name, Long organziationId, StackImageChangeRequest stackImageChangeRequest) {
+        Stack stack = stackService.getByNameInWorkspace(name, organziationId);
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
         if (StringUtils.isNotBlank(stackImageChangeRequest.getImageCatalogName())) {
             ImageCatalog imageCatalog = imageCatalogService.get(organziationId, stackImageChangeRequest.getImageCatalogName());

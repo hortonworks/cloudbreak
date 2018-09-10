@@ -20,22 +20,22 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.sequenceiq.cloudbreak.api.model.stack.StackImageChangeRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRepairRequest;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.OperationRetryService;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StackV2ControllerTest {
 
-    private static final Long ORGANIZATION_ID = 1L;
+    private static final Long WORKSPACE_ID = 1L;
 
     @InjectMocks
     private StackV2Controller underTest;
@@ -53,7 +53,7 @@ public class StackV2ControllerTest {
     private ImageCatalogService imageCatalogService;
 
     @Mock
-    private OrganizationService organizationService;
+    private WorkspaceService workspaceService;
 
     @Mock
     private StackCommonService stackCommonService;
@@ -76,21 +76,21 @@ public class StackV2ControllerTest {
         stack = new Stack();
         stack.setId(1L);
         stack.setName(stackName);
-        Organization organization = new Organization();
-        organization.setId(ORGANIZATION_ID);
-        organization.setName("Top Sercet FBI");
+        Workspace workspace = new Workspace();
+        workspace.setId(WORKSPACE_ID);
+        workspace.setName("Top Sercet FBI");
 
-        when(stackService.getByNameInOrg(eq(stackName), anyLong())).thenReturn(stack);
+        when(stackService.getByNameInWorkspace(eq(stackName), anyLong())).thenReturn(stack);
         when(restRequestThreadLocalService.getIdentityUser()).thenReturn(identityUser);
         when(userService.getOrCreate(any(IdentityUser.class))).thenReturn(new User());
-        when(organizationService.get(anyLong(), any(User.class))).thenReturn(organization);
+        when(workspaceService.get(anyLong(), any(User.class))).thenReturn(workspace);
     }
 
     @Test
     public void retry() {
         underTest.retry(stack.getName());
 
-        verify(stackCommonService, times(1)).retryInOrganization(stack.getName(), ORGANIZATION_ID);
+        verify(stackCommonService, times(1)).retryInWorkspace(stack.getName(), WORKSPACE_ID);
     }
 
     @Test
@@ -110,6 +110,6 @@ public class StackV2ControllerTest {
         StackImageChangeRequest stackImageChangeRequest = new StackImageChangeRequest();
         stackImageChangeRequest.setImageId("asdf");
         underTest.changeImage(stack.getName(), stackImageChangeRequest);
-        verify(stackCommonService).changeImageByNameInOrg(eq(stack.getName()), eq(ORGANIZATION_ID), eq(stackImageChangeRequest));
+        verify(stackCommonService).changeImageByNameInWorkspace(eq(stack.getName()), eq(WORKSPACE_ID), eq(stackImageChangeRequest));
     }
 }

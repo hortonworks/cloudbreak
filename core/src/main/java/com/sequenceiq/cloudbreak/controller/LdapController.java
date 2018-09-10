@@ -21,11 +21,11 @@ import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.ldapconfig.LdapConfigValidator;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Component
@@ -43,7 +43,7 @@ public class LdapController extends NotificationController implements LdapConfig
     private LdapConfigService ldapConfigService;
 
     @Inject
-    private OrganizationService organizationService;
+    private WorkspaceService workspaceService;
 
     @Inject
     private UserService userService;
@@ -63,12 +63,12 @@ public class LdapController extends NotificationController implements LdapConfig
 
     @Override
     public Set<LdapConfigResponse> getPrivates() {
-        return listForUsersDefaultOrganization();
+        return listForUsersDefaultWorkspace();
     }
 
     @Override
     public Set<LdapConfigResponse> getPublics() {
-        return listForUsersDefaultOrganization();
+        return listForUsersDefaultWorkspace();
     }
 
     @Override
@@ -94,12 +94,12 @@ public class LdapController extends NotificationController implements LdapConfig
 
     @Override
     public void deletePublic(String name) {
-        deleteInDefaultOrganization(name);
+        deleteInDefaultWorkspace(name);
     }
 
     @Override
     public void deletePrivate(String name) {
-        deleteInDefaultOrganization(name);
+        deleteInDefaultWorkspace(name);
     }
 
     @Override
@@ -114,8 +114,8 @@ public class LdapController extends NotificationController implements LdapConfig
         try {
             if (existingLDAPConfigName != null) {
                 User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-                Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
-                LdapConfig ldapConfig = ldapConfigService.getByNameForOrganizationId(existingLDAPConfigName, organization.getId());
+                Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+                LdapConfig ldapConfig = ldapConfigService.getByNameForWorkspaceId(existingLDAPConfigName, workspace.getId());
                 ldapConfigValidator.validateLdapConnection(ldapConfig);
             } else {
                 ldapConfigValidator.validateLdapConnection(validationRequest);
@@ -130,37 +130,37 @@ public class LdapController extends NotificationController implements LdapConfig
     @Override
     public LdapConfigRequest getRequestFromName(String name) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        LdapConfig ldapConfig = ldapConfigService.getByNameForOrganizationId(name, organization.getId());
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        LdapConfig ldapConfig = ldapConfigService.getByNameForWorkspaceId(name, workspace.getId());
         return conversionService.convert(ldapConfig, LdapConfigRequest.class);
     }
 
     private LdapConfigResponse createConfig(LdapConfigRequest request) {
         LdapConfig ldapConfig = conversionService.convert(request, LdapConfig.class);
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        LdapConfig response = ldapConfigService.create(ldapConfig, organization, user);
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        LdapConfig response = ldapConfigService.create(ldapConfig, workspace, user);
         notify(ResourceEvent.LDAP_CREATED);
         return conversionService.convert(response, LdapConfigResponse.class);
     }
 
     private LdapConfigResponse getLdapConfigResponse(String name) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        return conversionService.convert(ldapConfigService.getByNameForOrganization(name, organization), LdapConfigResponse.class);
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        return conversionService.convert(ldapConfigService.getByNameForWorkspace(name, workspace), LdapConfigResponse.class);
     }
 
-    private Set<LdapConfigResponse> listForUsersDefaultOrganization() {
+    private Set<LdapConfigResponse> listForUsersDefaultWorkspace() {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        return ldapConfigService.findAllByOrganization(organization).stream()
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        return ldapConfigService.findAllByWorkspace(workspace).stream()
                 .map(ldapConfig -> conversionService.convert(ldapConfig, LdapConfigResponse.class))
                 .collect(Collectors.toSet());
     }
 
-    private void deleteInDefaultOrganization(String name) {
+    private void deleteInDefaultWorkspace(String name) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        executeAndNotify(identityUser -> ldapConfigService.deleteByNameFromOrganization(name, organization.getId()), ResourceEvent.LDAP_DELETED);
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        executeAndNotify(identityUser -> ldapConfigService.deleteByNameFromWorkspace(name, workspace.getId()), ResourceEvent.LDAP_DELETED);
     }
 }

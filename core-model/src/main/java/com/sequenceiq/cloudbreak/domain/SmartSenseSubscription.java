@@ -10,7 +10,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"account", "subscriptionId"}))
@@ -29,14 +29,14 @@ public class SmartSenseSubscription implements ProvisionEntity {
     private String account;
 
     @ManyToOne
-    private Organization organization;
+    private Workspace workspace;
 
-    public Organization getOrganization() {
-        return organization;
+    public Workspace getWorkspace() {
+        return workspace;
     }
 
-    public void setOrganization(Organization organization) {
-        this.organization = organization;
+    public void setWorkspace(Workspace workspace) {
+        this.workspace = workspace;
     }
 
     public Long getId() {

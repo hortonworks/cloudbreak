@@ -18,22 +18,22 @@ import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Path("/v3/{organizationId}/users")
+@Path("/v3/{workspaceId}/users")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v3/{organizationId}/users", description = ControllerDescription.USER_V3_DESCRIPTION, protocols = "http,https")
+@Api(value = "/v3/{workspaceId}/users", description = ControllerDescription.USER_V3_DESCRIPTION, protocols = "http,https")
 public interface UserV3Endpoint {
 
     @GET
     @Path("profile")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.UserOpDescription.USER_GET_PROFILE_IN_ORG, produces = ContentType.JSON, notes = Notes.USER_NOTES,
-            nickname = "getUserProfileInOrganization")
-    UserProfileResponse getProfileInOrganization(@PathParam("organizationId") Long organizationId);
+            nickname = "getUserProfileInWorkspace")
+    UserProfileResponse getProfileInWorkspace(@PathParam("workspaceId") Long workspaceId);
 
     @PUT
     @Path("profile")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.UserOpDescription.USER_PUT_PROFILE_IN_ORG, produces = ContentType.JSON, notes = Notes.USER_NOTES,
-            nickname = "modifyUserProfileInOrganization")
-    void modifyProfileInOrganization(@PathParam("organizationId") Long organizationId, UserProfileRequest userProfileRequest);
+            nickname = "modifyUserProfileInWorkspace")
+    void modifyProfileInWorkspace(@PathParam("workspaceId") Long workspaceId, UserProfileRequest userProfileRequest);
 }

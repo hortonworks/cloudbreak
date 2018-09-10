@@ -21,7 +21,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.init.blueprint.BlueprintLoaderService;
 import com.sequenceiq.cloudbreak.init.blueprint.DefaultBlueprintCache;
 
@@ -57,7 +57,7 @@ public class BlueprintLoaderServiceTest {
     private DefaultBlueprintCache defaultBlueprintCache;
 
     @Mock
-    private Organization organization;
+    private Workspace workspace;
 
     @Test
     public void testBlueprintLoaderWhenTheUserWhenUserHaveAllTheDefaultBlueprintThenItShouldReturnWithFalse() {
@@ -71,7 +71,7 @@ public class BlueprintLoaderServiceTest {
     }
 
     @Test
-    public void testBlueprintLoaderWhenTheUserIsANewOneInTheNewOrganizationThenItShouldReturnWithTrue() {
+    public void testBlueprintLoaderWhenTheUserIsANewOneInTheNewWorkspaceThenItShouldReturnWithTrue() {
         Set<Blueprint> blueprints = generateDatabaseData(0);
         Map<String, Blueprint> defaultBlueprints = generateCacheData(2);
         when(defaultBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
@@ -82,7 +82,7 @@ public class BlueprintLoaderServiceTest {
     }
 
     @Test
-    public void testBlueprintLoaderWhenTheUserIsANewOneInTheExistingOrganizationThenItShouldReturnWithTrue() {
+    public void testBlueprintLoaderWhenTheUserIsANewOneInTheExistingWorkspaceThenItShouldReturnWithTrue() {
         Set<Blueprint> blueprints = generateDatabaseData(1);
         Map<String, Blueprint> defaultBlueprints = generateCacheData(2);
         when(defaultBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
@@ -109,7 +109,7 @@ public class BlueprintLoaderServiceTest {
         Map<String, Blueprint> defaultBlueprints = generateCacheData(3, 1);
         when(defaultBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
 
-        Collection<Blueprint> resultSet = underTest.loadBlueprintsForTheOrganization(blueprints, organization, this::mockSave);
+        Collection<Blueprint> resultSet = underTest.loadBlueprintsForTheWorkspace(blueprints, workspace, this::mockSave);
 
         Assert.assertEquals(4L, resultSet.size());
     }
@@ -120,7 +120,7 @@ public class BlueprintLoaderServiceTest {
         Map<String, Blueprint> defaultBlueprints = generateCacheData(3);
         when(defaultBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
 
-        Collection<Blueprint> resultSet = underTest.loadBlueprintsForTheOrganization(blueprints, organization, this::mockSave);
+        Collection<Blueprint> resultSet = underTest.loadBlueprintsForTheWorkspace(blueprints, workspace, this::mockSave);
 
         Assert.assertEquals(3L, resultSet.size());
     }
@@ -131,12 +131,12 @@ public class BlueprintLoaderServiceTest {
         Map<String, Blueprint> defaultBlueprints = generateCacheData(3);
         when(defaultBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
 
-        Collection<Blueprint> resultSet = underTest.loadBlueprintsForTheOrganization(blueprints, organization, this::mockSave);
+        Collection<Blueprint> resultSet = underTest.loadBlueprintsForTheWorkspace(blueprints, workspace, this::mockSave);
 
         Assert.assertEquals(3L, resultSet.size());
     }
 
-    private Iterable<Blueprint> mockSave(Iterable<Blueprint> blueprints, Organization organization) {
+    private Iterable<Blueprint> mockSave(Iterable<Blueprint> blueprints, Workspace workspace) {
         return blueprints;
     }
 

@@ -1,25 +1,25 @@
 package com.sequenceiq.cloudbreak.repository;
 
-import static com.sequenceiq.cloudbreak.authorization.OrganizationPermissions.Action.READ;
+import static com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action.READ;
 
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
 import com.sequenceiq.cloudbreak.aspect.DisableHasPermission;
-import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByOrganization;
-import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByReturnValue;
-import com.sequenceiq.cloudbreak.aspect.organization.OrganizationResourceType;
-import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
+import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByWorkspace;
+import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByReturnValue;
+import com.sequenceiq.cloudbreak.aspect.workspace.WorkspaceResourceType;
+import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.repository.organization.OrganizationResourceRepository;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.EntityType;
 
 @DisableHasPermission
 @EntityType(entityClass = FlexSubscription.class)
 @Transactional(TxType.REQUIRED)
-@OrganizationResourceType(resource = OrganizationResource.FLEXSUBSCRIPTION)
-public interface FlexSubscriptionRepository extends OrganizationResourceRepository<FlexSubscription, Long> {
+@WorkspaceResourceType(resource = WorkspaceResource.FLEXSUBSCRIPTION)
+public interface FlexSubscriptionRepository extends WorkspaceResourceRepository<FlexSubscription, Long> {
 
     @CheckPermissionsByReturnValue
     FlexSubscription findFirstByUsedForController(boolean usedForController);
@@ -27,9 +27,9 @@ public interface FlexSubscriptionRepository extends OrganizationResourceReposito
     @CheckPermissionsByReturnValue
     FlexSubscription findFirstByIsDefault(boolean defaultFlag);
 
-    @CheckPermissionsByOrganization(action = READ, organizationIndex = 1)
-    Long countByNameAndOrganization(String name, Organization organization);
+    @CheckPermissionsByWorkspace(action = READ, workspaceIndex = 1)
+    Long countByNameAndWorkspace(String name, Workspace workspace);
 
-    @CheckPermissionsByOrganization(action = READ, organizationIndex = 1)
-    Long countBySubscriptionIdAndOrganization(String subscriptionId, Organization organization);
+    @CheckPermissionsByWorkspace(action = READ, workspaceIndex = 1)
+    Long countBySubscriptionIdAndWorkspace(String subscriptionId, Workspace workspace);
 }

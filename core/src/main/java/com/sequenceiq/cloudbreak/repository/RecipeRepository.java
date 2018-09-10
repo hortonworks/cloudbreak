@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.repository;
 
-import static com.sequenceiq.cloudbreak.authorization.OrganizationPermissions.Action.READ;
+import static com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action.READ;
 
 import java.util.Collection;
 import java.util.Set;
@@ -12,25 +12,25 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.aspect.DisableHasPermission;
-import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByOrganizationId;
-import com.sequenceiq.cloudbreak.aspect.organization.OrganizationResourceType;
+import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByWorkspaceId;
+import com.sequenceiq.cloudbreak.aspect.workspace.WorkspaceResourceType;
 import com.sequenceiq.cloudbreak.domain.Recipe;
-import com.sequenceiq.cloudbreak.repository.organization.OrganizationResourceRepository;
+import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.EntityType;
-import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
+import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 
 @DisableHasPermission
 @EntityType(entityClass = Recipe.class)
 @Transactional(TxType.REQUIRED)
-@OrganizationResourceType(resource = OrganizationResource.RECIPE)
-public interface RecipeRepository extends OrganizationResourceRepository<Recipe, Long> {
+@WorkspaceResourceType(resource = WorkspaceResource.RECIPE)
+public interface RecipeRepository extends WorkspaceResourceRepository<Recipe, Long> {
 
-    @CheckPermissionsByOrganizationId(action = READ, organizationIdIndex = 1)
-    @Query("SELECT r FROM Recipe r WHERE r. name in :names AND r.organization.id = :orgId")
-    Set<Recipe> findByNamesInOrganization(@Param("names") Collection<String> names, @Param("orgId") Long orgId);
+    @CheckPermissionsByWorkspaceId(action = READ, workspaceIdIndex = 1)
+    @Query("SELECT r FROM Recipe r WHERE r. name in :names AND r.workspace.id = :workspaceId")
+    Set<Recipe> findByNamesInWorkspace(@Param("names") Collection<String> names, @Param("workspaceId") Long workspaceId);
 
     @Override
-    @CheckPermissionsByOrganizationId(action = READ)
-    @Query("SELECT r FROM Recipe r WHERE r.organization.id = :orgId")
-    Set<Recipe> findAllByOrganizationId(@Param("orgId") Long orgId);
+    @CheckPermissionsByWorkspaceId(action = READ)
+    @Query("SELECT r FROM Recipe r WHERE r.workspace.id = :workspaceId")
+    Set<Recipe> findAllByWorkspaceId(@Param("workspaceId") Long workspaceId);
 }

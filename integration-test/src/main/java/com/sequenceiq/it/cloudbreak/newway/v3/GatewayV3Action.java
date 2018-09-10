@@ -17,8 +17,8 @@ public class GatewayV3Action {
         Gateway gateway = (Gateway) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
-        Long orgId = integrationTestContext.getContextParam(CloudbreakTest.ORGANIZATION_ID, Long.class);
-        gateway.setResponse(client.getCloudbreakClient().connectorV3Endpoint().getGatewaysCredentialId(orgId, gateway.getRequest()));
+        Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
+        gateway.setResponse(client.getCloudbreakClient().connectorV3Endpoint().getGatewaysCredentialId(workspaceId, gateway.getRequest()));
         logJSON("V3 Connectors Gateways post request: ", gateway.getRequest());
     }
 }

@@ -15,11 +15,11 @@ import com.sequenceiq.cloudbreak.api.model.StructuredParameterQueriesResponse;
 import com.sequenceiq.cloudbreak.api.model.StructuredParameterQueryResponse;
 import com.sequenceiq.cloudbreak.api.model.StructuredParametersQueryRequest;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.template.filesystem.query.ConfigQueryEntry;
 
@@ -30,7 +30,7 @@ public class FileSystemV3Controller implements FileSystemV3Endpoint {
     private UserService userService;
 
     @Inject
-    private OrganizationService organizationService;
+    private WorkspaceService workspaceService;
 
     @Inject
     private BlueprintService blueprintService;
@@ -43,8 +43,8 @@ public class FileSystemV3Controller implements FileSystemV3Endpoint {
     private ConversionService conversionService;
 
     @Override
-    public StructuredParameterQueriesResponse getFileSystemParameters(Long organizationId, StructuredParametersQueryRequest structuredParametersQueryRequest) {
-        Organization organization = getOrganization(organizationId);
+    public StructuredParameterQueriesResponse getFileSystemParameters(Long workspaceId, StructuredParametersQueryRequest structuredParametersQueryRequest) {
+        Workspace workspace = getWorkspace(workspaceId);
         Set<ConfigQueryEntry> entries = blueprintService.queryFileSystemParameters(
                 structuredParametersQueryRequest.getBlueprintName(),
                 structuredParametersQueryRequest.getClusterName(),
@@ -52,7 +52,7 @@ public class FileSystemV3Controller implements FileSystemV3Endpoint {
                 structuredParametersQueryRequest.getFileSystemType(),
                 structuredParametersQueryRequest.getAccountName(),
                 structuredParametersQueryRequest.isAttachedCluster(),
-                organization);
+                workspace);
         List<StructuredParameterQueryResponse> result = new ArrayList<>();
         for (ConfigQueryEntry configQueryEntry : entries) {
             result.add(conversionService.convert(configQueryEntry, StructuredParameterQueryResponse.class));
@@ -62,9 +62,9 @@ public class FileSystemV3Controller implements FileSystemV3Endpoint {
         return parametersQueryResponse;
     }
 
-    private Organization getOrganization(Long organizationId) {
+    private Workspace getWorkspace(Long workspaceId) {
         IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
         User user = userService.getOrCreate(identityUser);
-        return organizationService.get(organizationId, user);
+        return workspaceService.get(workspaceId, user);
     }
 }

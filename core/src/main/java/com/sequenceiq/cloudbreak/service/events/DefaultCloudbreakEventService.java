@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredEventService;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredFlowEventFactory;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEvent;
@@ -61,10 +61,10 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     }
 
     @Override
-    public List<StructuredNotificationEvent> cloudbreakEvents(Organization organization, Long since) {
+    public List<StructuredNotificationEvent> cloudbreakEvents(Workspace workspace, Long since) {
         List<StructuredNotificationEvent> events;
-        events = null == since ? structuredEventService.getEventsForOrgWithType(organization, StructuredNotificationEvent.class)
-                : structuredEventService.getEventsForOrgWithTypeSince(organization, StructuredNotificationEvent.class, since);
+        events = null == since ? structuredEventService.getEventsForWorkspaceWithType(workspace, StructuredNotificationEvent.class)
+                : structuredEventService.getEventsForWorkspaceWithTypeSince(workspace, StructuredNotificationEvent.class, since);
         return events;
     }
 

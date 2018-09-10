@@ -25,51 +25,51 @@ import com.sequenceiq.cloudbreak.doc.OperationDescriptions.FlexSubOpDescription;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Path("/v3/{organizationId}/flexsubscriptions")
+@Path("/v3/{workspaceId}/flexsubscriptions")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v3/{organizationId}/flexsubscriptions", description = ControllerDescription.FLEX_SUBSCRIPTION_V3_DESCRIPTION, protocols = "http,https")
+@Api(value = "/v3/{workspaceId}/flexsubscriptions", description = ControllerDescription.FLEX_SUBSCRIPTION_V3_DESCRIPTION, protocols = "http,https")
 public interface FlexSubscriptionV3Endpoint {
 
     @GET
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = FlexSubOpDescription.LIST_BY_ORGANIZATION, produces = ContentType.JSON, notes = Notes.FLEX_SUBSCRIPTION_NOTES,
-            nickname = "listFlexSubscriptionsByOrganization")
-    Set<FlexSubscriptionResponse> listByOrganization(@PathParam("organizationId") Long organizationId);
+    @ApiOperation(value = FlexSubOpDescription.LIST_BY_WORKSPACE, produces = ContentType.JSON, notes = Notes.FLEX_SUBSCRIPTION_NOTES,
+            nickname = "listFlexSubscriptionsByWorkspace")
+    Set<FlexSubscriptionResponse> listByWorkspace(@PathParam("workspaceId") Long workspaceId);
 
     @GET
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = FlexSubOpDescription.GET_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.FLEX_SUBSCRIPTION_NOTES,
-            nickname = "getFlexSubscriptionInOrganization")
-    FlexSubscriptionResponse getByNameInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
+            nickname = "getFlexSubscriptionInWorkspace")
+    FlexSubscriptionResponse getByNameInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @POST
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = FlexSubOpDescription.CREATE_IN_ORG, produces = ContentType.JSON, notes = Notes.FLEX_SUBSCRIPTION_NOTES,
-            nickname = "createFlexSubscriptionInOrganization")
-    FlexSubscriptionResponse createInOrganization(@PathParam("organizationId") Long organizationId, @Valid FlexSubscriptionRequest request);
+            nickname = "createFlexSubscriptionInWorkspace")
+    FlexSubscriptionResponse createInWorkspace(@PathParam("workspaceId") Long workspaceId, @Valid FlexSubscriptionRequest request);
 
     @DELETE
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = FlexSubOpDescription.DELETE_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.FLEX_SUBSCRIPTION_NOTES,
-            nickname = "deleteFlexSubscriptionInOrganization")
-    FlexSubscriptionResponse deleteInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
+            nickname = "deleteFlexSubscriptionInWorkspace")
+    FlexSubscriptionResponse deleteInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @PUT
     @Path("setusedforcontroller/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = FlexSubOpDescription.SET_USED_FOR_CONTROLLER_IN_ORG, produces = ContentType.JSON, notes = FLEX_SUBSCRIPTION_NOTES,
-            nickname = "putUsedForControllerFlexSubscriptionByNameInOrganization")
-    void setUsedForControllerInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
+            nickname = "putUsedForControllerFlexSubscriptionByNameInWorkspace")
+    void setUsedForControllerInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @PUT
     @Path("setdefault/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = FlexSubOpDescription.SET_DEFAULT_IN_ORG, produces = ContentType.JSON, notes = FLEX_SUBSCRIPTION_NOTES,
-            nickname = "putDefaultFlexSubscriptionByNameInOrganization")
-    void setDefaultInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
+            nickname = "putDefaultFlexSubscriptionByNameInWorkspace")
+    void setDefaultInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
 }

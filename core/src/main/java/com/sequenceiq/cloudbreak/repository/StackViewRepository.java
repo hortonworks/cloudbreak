@@ -9,18 +9,18 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.aspect.DisableHasPermission;
-import com.sequenceiq.cloudbreak.aspect.organization.CheckPermissionsByReturnValue;
-import com.sequenceiq.cloudbreak.aspect.organization.OrganizationResourceType;
-import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
+import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByReturnValue;
+import com.sequenceiq.cloudbreak.aspect.workspace.WorkspaceResourceType;
+import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
-import com.sequenceiq.cloudbreak.repository.organization.OrganizationResourceRepository;
+import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.EntityType;
 
 @DisableHasPermission
 @EntityType(entityClass = StackView.class)
 @Transactional(TxType.REQUIRED)
-@OrganizationResourceType(resource = OrganizationResource.STACK)
-public interface StackViewRepository extends OrganizationResourceRepository<StackView, Long> {
+@WorkspaceResourceType(resource = WorkspaceResource.STACK)
+public interface StackViewRepository extends WorkspaceResourceRepository<StackView, Long> {
 
     @CheckPermissionsByReturnValue
     @Query("SELECT s FROM StackView s WHERE s.id= :id")

@@ -27,8 +27,8 @@ import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
@@ -38,7 +38,7 @@ import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
 import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -106,21 +106,21 @@ public class StackRequestToTemplatePreparationObjectConverter extends AbstractCo
     private RestRequestThreadLocalService restRequestThreadLocalService;
 
     @Inject
-    private OrganizationService organizationService;
+    private WorkspaceService workspaceService;
 
     @Override
     public TemplatePreparationObject convert(StackV2Request source) {
         try {
             User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-            Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
-            Credential credential = credentialService.getByNameForOrganization(source.getGeneral().getCredentialName(), organization);
+            Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+            Credential credential = credentialService.getByNameForWorkspace(source.getGeneral().getCredentialName(), workspace);
             Optional<FlexSubscription> flexSubscription = getFlexSubscription(source);
             SmartSenseSubscription smartsenseSubscription = flexSubscription.isPresent() ? flexSubscription.get().getSmartSenseSubscription() : null;
             KerberosConfig kerberosConfig = getKerberosConfig(source);
-            LdapConfig ldapConfig = getLdapConfig(source, organization);
+            LdapConfig ldapConfig = getLdapConfig(source, workspace);
             BaseFileSystemConfigurationsView fileSystemConfigurationView = getFileSystemConfigurationView(source, credential);
-            Set<RDSConfig> rdsConfigs = getRdsConfigs(source, organization);
-            Blueprint blueprint = getBlueprint(source, organization);
+            Set<RDSConfig> rdsConfigs = getRdsConfigs(source, workspace);
+            Blueprint blueprint = getBlueprint(source, workspace);
             BlueprintStackInfo blueprintStackInfo = stackInfoService.blueprintStackInfo(blueprint.getBlueprintText());
             Set<HostgroupView> hostgroupViews = getHostgroupViews(source);
             Gateway gateway = source.getCluster().getAmbari().getGateway() == null ? null : getConversionService().convert(source, Gateway.class);
@@ -142,7 +142,7 @@ public class StackRequestToTemplatePreparationObjectConverter extends AbstractCo
 
             SharedServiceRequest sharedService = source.getCluster().getSharedService();
             if (sharedService != null && !Strings.isNullOrEmpty(sharedService.getSharedCluster())) {
-                Stack dataLakeStack = stackService.getByNameInOrg(sharedService.getSharedCluster(), organization.getId());
+                Stack dataLakeStack = stackService.getByNameInWorkspace(sharedService.getSharedCluster(), workspace.getId());
                 SharedServiceConfigsView sharedServiceConfigsView = sharedServiceConfigsViewProvider
                         .createSharedServiceConfigs(blueprint, source.getCluster().getAmbari().getPassword(), dataLakeStack);
                 ConfigsResponse configsResponse = sharedServiceConfigProvider.retrieveOutputs(dataLakeStack, blueprint, source.getGeneral().getName());
@@ -157,11 +157,11 @@ public class StackRequestToTemplatePreparationObjectConverter extends AbstractCo
         }
     }
 
-    private Blueprint getBlueprint(StackV2Request source, Organization organization) {
+    private Blueprint getBlueprint(StackV2Request source, Workspace workspace) {
         Blueprint blueprint;
         blueprint = Strings.isNullOrEmpty(source.getCluster().getAmbari().getBlueprintName())
                 ? blueprintService.get(source.getCluster().getAmbari().getBlueprintId())
-                : blueprintService.getByNameForOrganization(source.getCluster().getAmbari().getBlueprintName(), organization);
+                : blueprintService.getByNameForWorkspace(source.getCluster().getAmbari().getBlueprintName(), workspace);
         return blueprint;
     }
 
@@ -190,10 +190,10 @@ public class StackRequestToTemplatePreparationObjectConverter extends AbstractCo
         return hostgroupViews;
     }
 
-    private Set<RDSConfig> getRdsConfigs(StackV2Request source, Organization organization) {
+    private Set<RDSConfig> getRdsConfigs(StackV2Request source, Workspace workspace) {
         Set<RDSConfig> rdsConfigs = new HashSet<>();
         for (String rdsConfigRequest : source.getCluster().getRdsConfigNames()) {
-            RDSConfig rdsConfig = rdsConfigService.getByNameForOrg(rdsConfigRequest, organization);
+            RDSConfig rdsConfig = rdsConfigService.getByNameForWorkspace(rdsConfigRequest, workspace);
             rdsConfigs.add(rdsConfig);
         }
         return rdsConfigs;
@@ -208,10 +208,10 @@ public class StackRequestToTemplatePreparationObjectConverter extends AbstractCo
         return fileSystemConfigurationView;
     }
 
-    private LdapConfig getLdapConfig(StackV2Request source, Organization organization) {
+    private LdapConfig getLdapConfig(StackV2Request source, Workspace workspace) {
         LdapConfig ldapConfig = null;
         if (source.getCluster().getLdapConfigName() != null) {
-            ldapConfig = ldapConfigService.getByNameForOrganization(source.getCluster().getLdapConfigName(), organization);
+            ldapConfig = ldapConfigService.getByNameForWorkspace(source.getCluster().getLdapConfigName(), workspace);
         }
         return ldapConfig;
     }

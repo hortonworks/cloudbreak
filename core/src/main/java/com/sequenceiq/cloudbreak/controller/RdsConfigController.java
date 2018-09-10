@@ -22,8 +22,8 @@ import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
@@ -50,32 +50,32 @@ public class RdsConfigController extends AbstractRdsConfigController implements 
     @Override
     public Set<RDSConfigResponse> getPrivates() {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Organization organization = getRdsConfigService().getOrganizationService().get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        Set<RDSConfig> rdsConfigs = getRdsConfigService().retrieveRdsConfigsInOrg(organization);
+        Workspace workspace = getRdsConfigService().getWorkspaceService().get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        Set<RDSConfig> rdsConfigs = getRdsConfigService().retrieveRdsConfigsInWorkspace(workspace);
         return toJsonList(rdsConfigs);
     }
 
     @Override
     public RDSConfigResponse getPrivate(String name) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Organization organization = getRdsConfigService().getOrganizationService().get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        RDSConfig rdsConfig = getRdsConfigService().getByNameForOrg(name, organization);
+        Workspace workspace = getRdsConfigService().getWorkspaceService().get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        RDSConfig rdsConfig = getRdsConfigService().getByNameForWorkspace(name, workspace);
         return getConversionService().convert(rdsConfig, RDSConfigResponse.class);
     }
 
     @Override
     public RDSConfigResponse getPublic(String name) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Organization organization = getRdsConfigService().getOrganizationService().get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        RDSConfig rdsConfig = getRdsConfigService().getByNameForOrg(name, organization);
+        Workspace workspace = getRdsConfigService().getWorkspaceService().get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        RDSConfig rdsConfig = getRdsConfigService().getByNameForWorkspace(name, workspace);
         return getConversionService().convert(rdsConfig, RDSConfigResponse.class);
     }
 
     @Override
     public Set<RDSConfigResponse> getPublics() {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Organization organization = getRdsConfigService().getOrganizationService().get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        Set<RDSConfig> rdsConfigs = getRdsConfigService().retrieveRdsConfigsInOrg(organization);
+        Workspace workspace = getRdsConfigService().getWorkspaceService().get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        Set<RDSConfig> rdsConfigs = getRdsConfigService().retrieveRdsConfigsInWorkspace(workspace);
         return toJsonList(rdsConfigs);
     }
 
@@ -103,15 +103,15 @@ public class RdsConfigController extends AbstractRdsConfigController implements 
     @Override
     public RdsTestResult testRdsConnection(RDSTestRequest rdsTestRequest) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Organization organization = getRdsConfigService().getOrganizationService().get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        return testRdsConnection(rdsTestRequest, organization);
+        Workspace workspace = getRdsConfigService().getWorkspaceService().get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        return testRdsConnection(rdsTestRequest, workspace);
     }
 
     @Override
     public RDSConfigRequest getRequestFromName(String name) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Organization organization = getRdsConfigService().getOrganizationService().get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        RDSConfig rdsConfig = getRdsConfigService().getByNameForOrg(name, organization);
+        Workspace workspace = getRdsConfigService().getWorkspaceService().get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        RDSConfig rdsConfig = getRdsConfigService().getByNameForWorkspace(name, workspace);
         return getConversionService().convert(rdsConfig, RDSConfigRequest.class);
     }
 
@@ -119,8 +119,8 @@ public class RdsConfigController extends AbstractRdsConfigController implements 
         RDSConfig rdsConfig = getConversionService().convert(rdsConfigJson, RDSConfig.class);
         try {
             User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-            Organization organization = getRdsConfigService().getOrganizationService().get(restRequestThreadLocalService.getRequestedOrgId(), user);
-            rdsConfig = getRdsConfigService().create(rdsConfig, organization, user);
+            Workspace workspace = getRdsConfigService().getWorkspaceService().get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+            rdsConfig = getRdsConfigService().create(rdsConfig, workspace, user);
             notify(ResourceEvent.RDS_CONFIG_CREATED);
         } catch (DataIntegrityViolationException ex) {
             String msg = String.format("Error with resource [%s], %s", APIResourceType.RDS_CONFIG, getProperSqlErrorMessage(ex));

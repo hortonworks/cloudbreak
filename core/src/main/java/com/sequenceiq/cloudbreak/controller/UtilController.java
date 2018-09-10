@@ -33,14 +33,14 @@ import com.sequenceiq.cloudbreak.api.model.stack.StackMatrix;
 import com.sequenceiq.cloudbreak.template.filesystem.query.ConfigQueryEntry;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionBuilder;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.StackMatrixService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemSupportMatrixService;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.util.ClientVersionUtil;
 
@@ -67,7 +67,7 @@ public class UtilController implements UtilEndpoint {
     private ConversionService conversionService;
 
     @Inject
-    private OrganizationService organizationService;
+    private WorkspaceService workspaceService;
 
     @Inject
     private UserService userService;
@@ -120,8 +120,8 @@ public class UtilController implements UtilEndpoint {
     @Override
     public Collection<ExposedServiceResponse> getKnoxServices(String blueprintName) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        return serviceEndpointCollector.getKnoxServices(blueprintName, organization);
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        return serviceEndpointCollector.getKnoxServices(blueprintName, workspace);
     }
 
     @Override
@@ -132,8 +132,8 @@ public class UtilController implements UtilEndpoint {
     @Override
     public ParametersQueryResponse getCustomParameters(ParametersQueryRequest parametersQueryRequest) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        Set<String> strings = blueprintService.queryCustomParameters(parametersQueryRequest.getBlueprintName(), organization);
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        Set<String> strings = blueprintService.queryCustomParameters(parametersQueryRequest.getBlueprintName(), workspace);
         Map<String, String> result = new HashMap<>();
         for (String customParameter : strings) {
             result.put(customParameter, "");
@@ -146,7 +146,7 @@ public class UtilController implements UtilEndpoint {
     @Override
     public StructuredParameterQueriesResponse getFileSystemParameters(StructuredParametersQueryRequest structuredParametersQueryRequest) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         Set<ConfigQueryEntry> entries = blueprintService.queryFileSystemParameters(
                 structuredParametersQueryRequest.getBlueprintName(),
                 structuredParametersQueryRequest.getClusterName(),
@@ -154,7 +154,7 @@ public class UtilController implements UtilEndpoint {
                 structuredParametersQueryRequest.getFileSystemType(),
                 structuredParametersQueryRequest.getAccountName(),
                 structuredParametersQueryRequest.isAttachedCluster(),
-                organization);
+                workspace);
         List<StructuredParameterQueryResponse> result = new ArrayList<>();
         for (ConfigQueryEntry configQueryEntry : entries) {
             result.add(conversionService.convert(configQueryEntry, StructuredParameterQueryResponse.class));

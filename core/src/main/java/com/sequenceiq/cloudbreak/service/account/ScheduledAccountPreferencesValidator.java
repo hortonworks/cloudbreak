@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.AccountPreferences;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.startup.OrganizationMigrationRunner;
+import com.sequenceiq.cloudbreak.startup.WorkspaceMigrationRunner;
 
 @Service
 public class ScheduledAccountPreferencesValidator {
@@ -36,11 +36,11 @@ public class ScheduledAccountPreferencesValidator {
     private ReactorFlowManager flowManager;
 
     @Inject
-    private OrganizationMigrationRunner organizationMigrationRunner;
+    private WorkspaceMigrationRunner workspaceMigrationRunner;
 
     @Scheduled(cron = EVERY_HOUR_0MIN_0SEC)
     public void validate() {
-        if (organizationMigrationRunner.isFinished()) {
+        if (workspaceMigrationRunner.isFinished()) {
             LOGGER.info("Validate account preferences for all 'running' stack.");
             Map<String, AccountPreferences> accountPreferences = new HashMap<>();
             List<Stack> allAlive = stackService.getAllAlive();

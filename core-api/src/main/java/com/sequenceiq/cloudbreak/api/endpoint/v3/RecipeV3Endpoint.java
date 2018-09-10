@@ -22,43 +22,43 @@ import com.sequenceiq.cloudbreak.doc.OperationDescriptions.RecipeOpDescription;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Path("/v3/{organizationId}/recipes")
+@Path("/v3/{workspaceId}/recipes")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v3/{organizationId}/recipes", description = ControllerDescription.RECIPE_V3_DESCRIPTION, protocols = "http,https")
+@Api(value = "/v3/{workspaceId}/recipes", description = ControllerDescription.RECIPE_V3_DESCRIPTION, protocols = "http,https")
 public interface RecipeV3Endpoint {
 
     @GET
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = RecipeOpDescription.LIST_BY_ORGANIZATION, produces = ContentType.JSON, notes = Notes.RECIPE_NOTES,
-            nickname = "listRecipesByOrganization")
-    Set<RecipeResponse> listByOrganization(@PathParam("organizationId") Long organizationId);
+    @ApiOperation(value = RecipeOpDescription.LIST_BY_WORKSPACE, produces = ContentType.JSON, notes = Notes.RECIPE_NOTES,
+            nickname = "listRecipesByWorkspace")
+    Set<RecipeResponse> listByWorkspace(@PathParam("workspaceId") Long workspaceId);
 
     @GET
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = RecipeOpDescription.GET_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.RECIPE_NOTES,
-            nickname = "getRecipeInOrganization")
-    RecipeResponse getByNameInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
+            nickname = "getRecipeInWorkspace")
+    RecipeResponse getByNameInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @POST
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = RecipeOpDescription.CREATE_IN_ORG, produces = ContentType.JSON, notes = Notes.RECIPE_NOTES,
-            nickname = "createRecipeInOrganization")
-    RecipeResponse createInOrganization(@PathParam("organizationId") Long organizationId, @Valid RecipeRequest request);
+            nickname = "createRecipeInWorkspace")
+    RecipeResponse createInWorkspace(@PathParam("workspaceId") Long workspaceId, @Valid RecipeRequest request);
 
     @DELETE
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = RecipeOpDescription.DELETE_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.RECIPE_NOTES,
-            nickname = "deleteRecipeInOrganization")
-    RecipeResponse deleteInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
+            nickname = "deleteRecipeInWorkspace")
+    RecipeResponse deleteInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @GET
     @Path("{name}/request")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = RecipeOpDescription.GET_REQUEST_BY_NAME, produces = ContentType.JSON, notes = Notes.RECIPE_NOTES,
-            nickname = "getRecipeRequestFromNameInOrganization")
-    RecipeRequest getRequestFromName(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
+            nickname = "getRecipeRequestFromNameInWorkspace")
+    RecipeRequest getRequestFromName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 }

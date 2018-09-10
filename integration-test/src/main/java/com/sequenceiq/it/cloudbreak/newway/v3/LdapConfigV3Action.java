@@ -20,11 +20,11 @@ public class LdapConfigV3Action {
         LdapConfigEntity ldapconfigEntity = (LdapConfigEntity) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
-        Long orgId = integrationTestContext.getContextParam(CloudbreakTest.ORGANIZATION_ID, Long.class);
+        Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         ldapconfigEntity.setResponse(
                 client.getCloudbreakClient()
                         .ldapConfigV3Endpoint()
-                        .createInOrganization(orgId, ldapconfigEntity.getRequest()));
+                        .createInWorkspace(workspaceId, ldapconfigEntity.getRequest()));
         logJSON("Ldap config post request: ", ldapconfigEntity.getRequest());
     }
 
@@ -32,11 +32,11 @@ public class LdapConfigV3Action {
         LdapConfigEntity ldapconfigEntity = (LdapConfigEntity) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
-        Long orgId = integrationTestContext.getContextParam(CloudbreakTest.ORGANIZATION_ID, Long.class);
+        Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         ldapconfigEntity.setResponse(
                 client.getCloudbreakClient()
                         .ldapConfigV3Endpoint()
-                        .getByNameInOrganization(orgId, ldapconfigEntity.getRequest().getName()));
+                        .getByNameInWorkspace(workspaceId, ldapconfigEntity.getRequest().getName()));
         logJSON(" get ldap config response: ", ldapconfigEntity.getResponse());
     }
 
@@ -44,11 +44,11 @@ public class LdapConfigV3Action {
         LdapConfigEntity ldapconfigEntity = (LdapConfigEntity) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
-        Long orgId = integrationTestContext.getContextParam(CloudbreakTest.ORGANIZATION_ID, Long.class);
+        Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         ldapconfigEntity.setResponses(
                 client.getCloudbreakClient()
                         .ldapConfigV3Endpoint()
-                        .listConfigsByOrganization(orgId));
+                        .listConfigsByWorkspace(workspaceId));
         logJSON(" get all ldap config response: ", ldapconfigEntity.getResponse());
     }
 
@@ -56,10 +56,10 @@ public class LdapConfigV3Action {
         LdapConfigEntity ldapconfigEntity = (LdapConfigEntity) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
-        Long orgId = integrationTestContext.getContextParam(CloudbreakTest.ORGANIZATION_ID, Long.class);
+        Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         client.getCloudbreakClient()
                 .ldapConfigV3Endpoint()
-                .deleteInOrganization(orgId, ldapconfigEntity.getName());
+                .deleteInWorkspace(workspaceId, ldapconfigEntity.getName());
     }
 
     public static void testConnect(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {
@@ -71,11 +71,11 @@ public class LdapConfigV3Action {
 
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
-        Long orgId = integrationTestContext.getContextParam(CloudbreakTest.ORGANIZATION_ID, Long.class);
+        Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         ldapTestEntity.setResponse(
                 client.getCloudbreakClient()
                         .ldapConfigV3Endpoint()
-                        .testLdapConnection(orgId, ldapTestRequest));
+                        .testLdapConnection(workspaceId, ldapTestRequest));
         logJSON("Ldap test post request: ", ldapTestEntity.getRequest());
     }
 

@@ -13,10 +13,10 @@ import com.sequenceiq.cloudbreak.api.model.users.UserProfileRequest;
 import com.sequenceiq.cloudbreak.api.model.users.UserProfileResponse;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
@@ -34,14 +34,14 @@ public class UserV3Controller implements UserV3Endpoint {
     private UserService userService;
 
     @Inject
-    private OrganizationService organizationService;
+    private WorkspaceService workspaceService;
 
     @Autowired
     @Qualifier("conversionService")
     private ConversionService conversionService;
 
     @Override
-    public UserProfileResponse getProfileInOrganization(Long organizationId) {
+    public UserProfileResponse getProfileInWorkspace(Long workspaceId) {
         IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
         User user = userService.getOrCreate(identityUser);
         UserProfile userProfile = userProfileService.getOrCreate(identityUser.getAccount(), identityUser.getUserId(), identityUser.getUsername(), user);
@@ -49,10 +49,10 @@ public class UserV3Controller implements UserV3Endpoint {
     }
 
     @Override
-    public void modifyProfileInOrganization(Long organizationId, UserProfileRequest userProfileRequest) {
+    public void modifyProfileInWorkspace(Long workspaceId, UserProfileRequest userProfileRequest) {
         IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
         User user = userService.getOrCreate(identityUser);
-        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        userProfileService.put(userProfileRequest, identityUser, user, organization);
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        userProfileService.put(userProfileRequest, identityUser, user, workspace);
     }
 }

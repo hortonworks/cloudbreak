@@ -24,49 +24,49 @@ import com.sequenceiq.cloudbreak.doc.OperationDescriptions.LdapConfigOpDescripti
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Path("/v3/{organizationId}/ldapconfigs")
+@Path("/v3/{workspaceId}/ldapconfigs")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v3/{organizationId}/ldapconfigs", description = ControllerDescription.LDAP_V3_CONFIG_DESCRIPTION, protocols = "http,https")
+@Api(value = "/v3/{workspaceId}/ldapconfigs", description = ControllerDescription.LDAP_V3_CONFIG_DESCRIPTION, protocols = "http,https")
 public interface LdapConfigV3Endpoint {
 
     @GET
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = LdapConfigOpDescription.LIST_BY_ORGANIZATION, produces = ContentType.JSON, notes = Notes.LDAP_CONFIG_NOTES,
-            nickname = "listLdapsByOrganization")
-    Set<LdapConfigResponse> listConfigsByOrganization(@PathParam("organizationId") Long organizationId);
+    @ApiOperation(value = LdapConfigOpDescription.LIST_BY_WORKSPACE, produces = ContentType.JSON, notes = Notes.LDAP_CONFIG_NOTES,
+            nickname = "listLdapsByWorkspace")
+    Set<LdapConfigResponse> listConfigsByWorkspace(@PathParam("workspaceId") Long workspaceId);
 
     @GET
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = LdapConfigOpDescription.GET_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.LDAP_CONFIG_NOTES,
-            nickname = "getLdapConfigInOrganization")
-    LdapConfigResponse getByNameInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String ldapConfigName);
+            nickname = "getLdapConfigInWorkspace")
+    LdapConfigResponse getByNameInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String ldapConfigName);
 
     @POST
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = LdapConfigOpDescription.CREATE_IN_ORG, produces = ContentType.JSON, notes = Notes.LDAP_CONFIG_NOTES,
-            nickname = "createLdapConfigsInOrganization")
-    LdapConfigResponse createInOrganization(@PathParam("organizationId") Long organizationId, @Valid LdapConfigRequest request);
+            nickname = "createLdapConfigsInWorkspace")
+    LdapConfigResponse createInWorkspace(@PathParam("workspaceId") Long workspaceId, @Valid LdapConfigRequest request);
 
     @DELETE
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = LdapConfigOpDescription.DELETE_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.LDAP_CONFIG_NOTES,
-            nickname = "deleteLdapConfigsInOrganization")
-    LdapConfigResponse deleteInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String ldapConfigName);
+            nickname = "deleteLdapConfigsInWorkspace")
+    LdapConfigResponse deleteInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String ldapConfigName);
 
     @POST
     @Path("testconnect")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = LdapConfigOpDescription.POST_CONNECTION_TEST, produces = ContentType.JSON, nickname = "postLdapConnectionTestInOrganization")
-    LdapTestResult testLdapConnection(@PathParam("organizationId") Long organizationId, @Valid LDAPTestRequest ldapValidationRequest);
+    @ApiOperation(value = LdapConfigOpDescription.POST_CONNECTION_TEST, produces = ContentType.JSON, nickname = "postLdapConnectionTestInWorkspace")
+    LdapTestResult testLdapConnection(@PathParam("workspaceId") Long workspaceId, @Valid LDAPTestRequest ldapValidationRequest);
 
     @GET
     @Path("{name}/request")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = LdapConfigOpDescription.GET_REQUEST, produces = ContentType.JSON, notes = Notes.LDAP_CONFIG_NOTES,
-            nickname = "getLdapRequestByNameAndOrganizationId")
-    LdapConfigRequest getRequestFromName(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
+            nickname = "getLdapRequestByNameAndWorkspaceId")
+    LdapConfigRequest getRequestFromName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 }

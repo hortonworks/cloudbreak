@@ -48,8 +48,8 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.action.StackCreationService;
 import com.sequenceiq.cloudbreak.domain.Resource;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
@@ -70,7 +70,7 @@ public class StackImageUpdateActionsTest {
 
     private static final String USER_ID = "horton@hortonworks.com";
 
-    private static final Long ORGANIZATION_ID = 1L;
+    private static final Long WORKSPACE_ID = 1L;
 
     @Mock
     private FlowMessageService flowMessageService;
@@ -176,11 +176,11 @@ public class StackImageUpdateActionsTest {
         User user = new User();
         user.setUserId("horton@hortonworks.com");
         user.setUserName("Alma ur");
-        Organization organization = new Organization();
-        organization.setId(1L);
+        Workspace workspace = new Workspace();
+        workspace.setId(1L);
         Stack stack = new Stack();
         stack.setCreator(user);
-        stack.setOrganization(organization);
+        stack.setWorkspace(workspace);
         stack.setId(1L);
         stack.setRegion("region");
         stack.setAvailabilityZone("az");
@@ -294,7 +294,7 @@ public class StackImageUpdateActionsTest {
     @Test
     public void finishAction() {
         CloudPlatformResult payload = new CloudPlatformResult(new CloudPlatformRequest(
-                new CloudContext(1L, "asdf", "Asdf", "Asdf", USER_ID, ORGANIZATION_ID), null));
+                new CloudContext(1L, "asdf", "Asdf", "Asdf", USER_ID, WORKSPACE_ID), null));
         when(stateContext.getMessageHeader(HEADERS.DATA.name())).thenReturn(payload);
         when(state.getId()).thenReturn(StackImageUpdateState.STACK_IMAGE_UPDATE_FINISHED);
 

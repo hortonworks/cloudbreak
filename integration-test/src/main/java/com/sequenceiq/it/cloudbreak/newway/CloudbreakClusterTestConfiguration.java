@@ -29,8 +29,8 @@ public class CloudbreakClusterTestConfiguration extends CloudbreakTest {
             });
         }));
         int retryCount = 0;
-        Long orgId = getItContext().getContextParam(CloudbreakTest.ORGANIZATION_ID, Long.class);
-        while (!CloudbreakClient.getTestContextCloudbreakClient().apply(getItContext()).getCloudbreakClient().stackV3Endpoint().listByOrganization(orgId)
+        Long workspaceId = getItContext().getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
+        while (!CloudbreakClient.getTestContextCloudbreakClient().apply(getItContext()).getCloudbreakClient().stackV3Endpoint().listByWorkspace(workspaceId)
                 .isEmpty() && retryCount++ < MAX_RETRY) {
             TimeUnit.SECONDS.sleep(SLEEP_TIME);
         }

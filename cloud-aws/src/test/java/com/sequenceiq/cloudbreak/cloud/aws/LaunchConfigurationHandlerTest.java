@@ -34,7 +34,7 @@ public class LaunchConfigurationHandlerTest {
 
     private static final String USER_ID = "horton@hortonworks.com";
 
-    private static final Long ORGANIZATION_ID = 1L;
+    private static final Long WORKSPACE_ID = 1L;
 
     @Mock
     private LaunchConfigurationMapper launchConfigurationMapper;
@@ -72,7 +72,7 @@ public class LaunchConfigurationHandlerTest {
         when(launchConfigurationMapper.mapExistingLaunchConfigToRequest(any(LaunchConfiguration.class)))
                 .thenReturn(new CreateLaunchConfigurationRequest().withLaunchConfigurationName(lName));
 
-        CloudContext cloudContext = new CloudContext(1L, "cloudContext", "AWS", "owner", USER_ID, ORGANIZATION_ID);
+        CloudContext cloudContext = new CloudContext(1L, "cloudContext", "AWS", "owner", USER_ID, WORKSPACE_ID);
         String imageName = "imageName";
         String launchConfigurationName = underTest.createNewLaunchConfiguration(imageName, autoScalingClient,
                 new LaunchConfiguration().withLaunchConfigurationName(lName), cloudContext, null);
@@ -86,7 +86,7 @@ public class LaunchConfigurationHandlerTest {
 
     @Test
     public void removeOldLaunchConfiguration() {
-        CloudContext cloudContext = new CloudContext(1L, "cloudContext", "AWS", "owner", USER_ID, ORGANIZATION_ID);
+        CloudContext cloudContext = new CloudContext(1L, "cloudContext", "AWS", "owner", USER_ID, WORKSPACE_ID);
         String launchConfigurationName = "old";
         underTest.removeOldLaunchConfiguration(new LaunchConfiguration().withLaunchConfigurationName(launchConfigurationName), autoScalingClient, cloudContext);
         ArgumentCaptor<DeleteLaunchConfigurationRequest> captor = ArgumentCaptor.forClass(DeleteLaunchConfigurationRequest.class);

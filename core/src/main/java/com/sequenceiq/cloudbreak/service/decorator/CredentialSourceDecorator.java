@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 
@@ -27,11 +27,11 @@ public class CredentialSourceDecorator {
     @Inject
     private MissingResourceNameGenerator missingResourceNameGenerator;
 
-    public Credential decorate(Credential credential, CredentialSourceRequest credentialSourceRequest, Organization organization) {
+    public Credential decorate(Credential credential, CredentialSourceRequest credentialSourceRequest, Workspace workspace) {
         if (credential == null) {
             credential = Strings.isNullOrEmpty(credentialSourceRequest.getSourceName())
-                    ? credentialService.get(credentialSourceRequest.getSourceId(), organization)
-                    : credentialService.getByNameForOrganization(credentialSourceRequest.getSourceName(), organization);
+                    ? credentialService.get(credentialSourceRequest.getSourceId(), workspace)
+                    : credentialService.getByNameForWorkspace(credentialSourceRequest.getSourceName(), workspace);
 
             if (credential == null) {
                 throw new BadRequestException("Source credential does not exist!");

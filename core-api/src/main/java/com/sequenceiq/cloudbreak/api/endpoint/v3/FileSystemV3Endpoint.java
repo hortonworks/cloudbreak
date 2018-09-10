@@ -16,15 +16,15 @@ import com.sequenceiq.cloudbreak.doc.OperationDescriptions.UtilityOpDescription;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Path("/v3/{organizationId}/filesystems")
+@Path("/v3/{workspaceId}/filesystems")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v3/{organizationId}/filesystems", description = ControllerDescription.UTIL_DESCRIPTION, protocols = "http,https")
+@Api(value = "/v3/{workspaceId}/filesystems", description = ControllerDescription.UTIL_DESCRIPTION, protocols = "http,https")
 public interface FileSystemV3Endpoint {
 
     @POST
     @Path("parameters")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = UtilityOpDescription.FILE_SYSTEM_PARAMETERS, produces = ContentType.JSON, nickname = "getFileSystemParametersV3")
-    StructuredParameterQueriesResponse getFileSystemParameters(@PathParam("organizationId") Long organizationId,
+    StructuredParameterQueriesResponse getFileSystemParameters(@PathParam("workspaceId") Long workspaceId,
             StructuredParametersQueryRequest structuredParametersQueryRequest);
 }

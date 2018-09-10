@@ -19,32 +19,32 @@ import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Path("/v3/{organizationId}/audits")
+@Path("/v3/{workspaceId}/audits")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v3/{organizationId}/audits", description = ControllerDescription.AUDIT_V3_DESCRIPTION, protocols = "http,https")
+@Api(value = "/v3/{workspaceId}/audits", description = ControllerDescription.AUDIT_V3_DESCRIPTION, protocols = "http,https")
 public interface AuditV3Endpoint {
 
     @GET
     @Path("event/{auditId}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.AuditOpDescription.GET_BY_ORG, produces = ContentType.JSON, notes = Notes.AUDIT_EVENTS_NOTES,
-            nickname = "getAuditEventByOrganization")
-    AuditEvent getAuditEventByOrganization(@PathParam("organizationId") Long organizationId, @PathParam("auditId") Long auditId);
+            nickname = "getAuditEventByWorkspace")
+    AuditEvent getAuditEventByWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("auditId") Long auditId);
 
     @GET
     @Path("events/{resourceType}/{resourceId}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.AuditOpDescription.LIST_IN_ORG, produces = ContentType.JSON, notes = Notes.AUDIT_EVENTS_NOTES,
-            nickname = "getAuditEventsInOrganization")
-    List<AuditEvent> getAuditEventsInOrganization(@PathParam("organizationId") Long organizationId,
+            nickname = "getAuditEventsInWorkspace")
+    List<AuditEvent> getAuditEventsInWorkspace(@PathParam("workspaceId") Long workspaceId,
             @PathParam("resourceType") String resourceType, @PathParam("resourceId") Long resourceId);
 
     @GET
     @Path("events/zip/{resourceType}/{resourceId}")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @ApiOperation(value = OperationDescriptions.AuditOpDescription.LIST_IN_ORG_ZIP, produces = ContentType.JSON, notes = Notes.AUDIT_EVENTS_NOTES,
-            nickname = "getAuditEventsZipInOrganization")
-    Response getAuditEventsZipInOrganization(@PathParam("organizationId") Long organizationId,
+            nickname = "getAuditEventsZipInWorkspace")
+    Response getAuditEventsZipInWorkspace(@PathParam("workspaceId") Long workspaceId,
             @PathParam("resourceType") String resourceType, @PathParam("resourceId") Long resourceId);
 
 }

@@ -25,13 +25,13 @@ import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRepairRequest;
 import com.sequenceiq.cloudbreak.api.model.users.UserNamePasswordJson;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
@@ -59,108 +59,108 @@ public class StackV3Controller extends NotificationController implements StackV3
     private RestRequestThreadLocalService restRequestThreadLocalService;
 
     @Inject
-    private OrganizationService organizationService;
+    private WorkspaceService workspaceService;
 
     @Override
-    public Set<StackResponse> listByOrganization(Long organizationId) {
-        return stackCommonService.retrieveStacksByOrganizationId(organizationId);
+    public Set<StackResponse> listByWorkspace(Long workspaceId) {
+        return stackCommonService.retrieveStacksByWorkspaceId(workspaceId);
     }
 
     @Override
-    public StackResponse getByNameInOrganization(Long organizationId, String name, Set<String> entries) {
-        return stackCommonService.findStackByNameAndOrganizationId(name, organizationId, entries);
+    public StackResponse getByNameInWorkspace(Long workspaceId, String name, Set<String> entries) {
+        return stackCommonService.findStackByNameAndWorkspaceId(name, workspaceId, entries);
     }
 
     @Override
-    public StackResponse createInOrganization(Long organizationId, StackV2Request request) {
+    public StackResponse createInWorkspace(Long workspaceId, StackV2Request request) {
         IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
         User user = userService.getOrCreate(identityUser);
-        Organization organization = organizationService.get(organizationId, user);
-        return stackCommonService.createInOrganization(conversionService.convert(request, StackRequest.class), identityUser, user, organization);
+        Workspace workspace = workspaceService.get(workspaceId, user);
+        return stackCommonService.createInWorkspace(conversionService.convert(request, StackRequest.class), identityUser, user, workspace);
     }
 
     @Override
-    public void deleteInOrganization(Long organizationId, String name, Boolean forced, Boolean deleteDependencies) {
+    public void deleteInWorkspace(Long workspaceId, String name, Boolean forced, Boolean deleteDependencies) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        stackCommonService.deleteInOrganization(name, organizationId, forced, deleteDependencies, user);
+        stackCommonService.deleteInWorkspace(name, workspaceId, forced, deleteDependencies, user);
     }
 
     @Override
-    public Response putSyncInOrganization(Long organizationId, String name) {
-        return stackCommonService.putSyncInOrganization(name, organizationId);
+    public Response putSyncInWorkspace(Long workspaceId, String name) {
+        return stackCommonService.putSyncInWorkspace(name, workspaceId);
     }
 
     @Override
-    public void retryInOrganization(Long organizationId, String name) {
-        stackCommonService.retryInOrganization(name, organizationId);
+    public void retryInWorkspace(Long workspaceId, String name) {
+        stackCommonService.retryInWorkspace(name, workspaceId);
     }
 
     @Override
-    public Response putStopInOrganization(Long organizationId, String name) {
-        return stackCommonService.putStopInOrganization(name, organizationId);
+    public Response putStopInWorkspace(Long workspaceId, String name) {
+        return stackCommonService.putStopInWorkspace(name, workspaceId);
     }
 
     @Override
-    public Response putStartInOrganization(Long organizationId, String name) {
-        return stackCommonService.putStartInOrganization(name, organizationId);
+    public Response putStartInWorkspace(Long workspaceId, String name) {
+        return stackCommonService.putStartInWorkspace(name, workspaceId);
     }
 
     @Override
-    public Response putScalingInOrganization(Long organizationId, String name, StackScaleRequestV2 updateRequest) {
-        return stackCommonService.putScalingInOrganization(name, organizationId, updateRequest);
+    public Response putScalingInWorkspace(Long workspaceId, String name, StackScaleRequestV2 updateRequest) {
+        return stackCommonService.putScalingInWorkspace(name, workspaceId, updateRequest);
     }
 
     @Override
-    public Response repairClusterInOrganization(Long organizationId, String name, ClusterRepairRequest clusterRepairRequest) {
-        stackCommonService.repairCluster(organizationId, name, clusterRepairRequest);
+    public Response repairClusterInWorkspace(Long workspaceId, String name, ClusterRepairRequest clusterRepairRequest) {
+        stackCommonService.repairCluster(workspaceId, name, clusterRepairRequest);
         return Response.accepted().build();
     }
 
     @Override
-    public void deleteWithKerberosInOrg(Long organizationId, String name, Boolean withStackDelete, Boolean deleteDependencies) {
-        stackCommonService.deleteWithKerbereosInOrg(name, organizationId, withStackDelete, deleteDependencies);
+    public void deleteWithKerberosInWorkspace(Long workspaceId, String name, Boolean withStackDelete, Boolean deleteDependencies) {
+        stackCommonService.deleteWithKerbereosInWorkspace(name, workspaceId, withStackDelete, deleteDependencies);
     }
 
     @Override
-    public StackV2Request getRequestfromName(Long organizationId, String name) {
-        return stackService.getStackRequestByNameInOrg(name, organizationId);
+    public StackV2Request getRequestfromName(Long workspaceId, String name) {
+        return stackService.getStackRequestByNameInWorkspace(name, workspaceId);
     }
 
     @Override
-    public GeneratedBlueprintResponse postStackForBlueprint(Long organizationId, String name, StackV2Request stackRequest) {
+    public GeneratedBlueprintResponse postStackForBlueprint(Long workspaceId, String name, StackV2Request stackRequest) {
         return stackCommonService.postStackForBlueprint(stackRequest);
     }
 
     @Override
-    public Response deleteInstance(Long organizationId, String name, String instanceId, boolean forced) {
-        return stackCommonService.deleteInstanceByNameInOrg(name, organizationId, instanceId, forced);
+    public Response deleteInstance(Long workspaceId, String name, String instanceId, boolean forced) {
+        return stackCommonService.deleteInstanceByNameInWorkspace(name, workspaceId, instanceId, forced);
     }
 
     @Override
-    public Response changeImage(Long organizationId, String name, StackImageChangeRequest stackImageChangeRequest) {
-        return stackCommonService.changeImageByNameInOrg(name, organizationId, stackImageChangeRequest);
+    public Response changeImage(Long workspaceId, String name, StackImageChangeRequest stackImageChangeRequest) {
+        return stackCommonService.changeImageByNameInWorkspace(name, workspaceId, stackImageChangeRequest);
     }
 
     @Override
-    public Response putReinstall(Long organizationId, String name, ReinstallRequestV2 reinstallRequestV2) {
-        Stack stack = stackService.getByNameInOrg(name, organizationId);
+    public Response putReinstall(Long workspaceId, String name, ReinstallRequestV2 reinstallRequestV2) {
+        Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
         UpdateClusterJson updateClusterJson = conversionService.convert(reinstallRequestV2, UpdateClusterJson.class);
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        return clusterCommonService.put(stack.getId(), updateClusterJson, user, organization);
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        return clusterCommonService.put(stack.getId(), updateClusterJson, user, workspace);
     }
 
     @Override
-    public Response putPassword(Long organizationId, String name, @Valid UserNamePasswordJson userNamePasswordJson) {
-        Stack stack = stackService.getByNameInOrg(name, organizationId);
+    public Response putPassword(Long workspaceId, String name, @Valid UserNamePasswordJson userNamePasswordJson) {
+        Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
         UpdateClusterJson updateClusterJson = conversionService.convert(userNamePasswordJson, UpdateClusterJson.class);
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Organization organization = organizationService.get(restRequestThreadLocalService.getRequestedOrgId(), user);
-        return clusterCommonService.put(stack.getId(), updateClusterJson, user, organization);
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        return clusterCommonService.put(stack.getId(), updateClusterJson, user, workspace);
     }
 
     @Override
-    public Map<String, Object> getStatusByNameInOrganization(Long organizationId, String name) {
-        return stackService.getStatusByNameInOrg(name, organizationId);
+    public Map<String, Object> getStatusByNameInWorkspace(Long workspaceId, String name) {
+        return stackService.getStatusByNameInWorkspace(name, workspaceId);
     }
 }

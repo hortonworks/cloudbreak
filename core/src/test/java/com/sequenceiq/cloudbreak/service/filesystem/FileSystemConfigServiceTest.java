@@ -53,7 +53,7 @@ public class FileSystemConfigServiceTest {
         FileSystem expected = createFileSystem();
         when(fileSystemRepository.findById(TEST_FILES_SYSTEM_ID)).thenReturn(Optional.of(expected));
 
-        FileSystem actual = underTest.getByIdFromAnyAvailableOrganization(TEST_FILES_SYSTEM_ID);
+        FileSystem actual = underTest.getByIdFromAnyAvailableWorkspace(TEST_FILES_SYSTEM_ID);
 
         Assert.assertEquals(expected, actual);
         Assert.assertEquals(expected.getId(), actual.getId());
@@ -67,7 +67,7 @@ public class FileSystemConfigServiceTest {
         expectedException.expect(NotFoundException.class);
         expectedException.expectMessage(String.format(NOT_FOUND_EXCEPTION_MESSAGE, NOT_EXISTING_ID));
 
-        underTest.getByIdFromAnyAvailableOrganization(NOT_EXISTING_ID);
+        underTest.getByIdFromAnyAvailableWorkspace(NOT_EXISTING_ID);
         verify(fileSystemRepository, times(1)).findById(NOT_EXISTING_ID);
     }
 
@@ -78,7 +78,7 @@ public class FileSystemConfigServiceTest {
         expectedException.expect(NotFoundException.class);
         expectedException.expectMessage(String.format(NOT_FOUND_EXCEPTION_MESSAGE, NOT_EXISTING_ID));
 
-        underTest.deleteByIdFromAnyAvailableOrganization(NOT_EXISTING_ID);
+        underTest.deleteByIdFromAnyAvailableWorkspace(NOT_EXISTING_ID);
 
         verify(fileSystemRepository, times(1)).findById(NOT_EXISTING_ID);
         verify(fileSystemRepository, times(0)).delete(any());

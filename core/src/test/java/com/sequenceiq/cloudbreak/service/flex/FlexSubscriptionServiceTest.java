@@ -26,12 +26,12 @@ import org.mockito.Mock;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.repository.FlexSubscriptionRepository;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
 public class FlexSubscriptionServiceTest {
 
@@ -42,13 +42,13 @@ public class FlexSubscriptionServiceTest {
     private TransactionService transactionService;
 
     @Mock
-    private OrganizationService organizationService;
+    private WorkspaceService workspaceService;
 
     @InjectMocks
     private FlexSubscriptionService underTest;
 
     @Mock
-    private Organization organization;
+    private Workspace workspace;
 
     @Mock
     private User user;
@@ -57,59 +57,59 @@ public class FlexSubscriptionServiceTest {
     public void setUp() throws TransactionExecutionException {
         initMocks(this);
         doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).required(any());
-        when(organizationService.getDefaultOrganizationForUser(user)).thenReturn(organization);
+        when(workspaceService.getDefaultWorkspaceForUser(user)).thenReturn(workspace);
     }
 
     @Test(expected = BadRequestException.class)
     public void testCreateShouldThrowBadRequestWhenSubscriptionExistsWithTheSameName() {
-        when(flexSubscriptionRepository.countByNameAndOrganization(anyString(), any())).thenReturn(1L);
+        when(flexSubscriptionRepository.countByNameAndWorkspace(anyString(), any())).thenReturn(1L);
         FlexSubscription subscription = getFlexSubscription("testFlexSubscription", "FLEX-000000000");
 
-        underTest.create(subscription, organization, user);
+        underTest.create(subscription, workspace, user);
     }
 
     @Test(expected = BadRequestException.class)
     public void testCreateShouldThrowBadRequestWhenSubscriptionExistsWithTheSameSubscriptionIdentifier() {
-        when(flexSubscriptionRepository.countByNameAndOrganization(anyString(), any())).thenReturn(0L);
-        when(flexSubscriptionRepository.countBySubscriptionIdAndOrganization(anyString(), any())).thenReturn(1L);
+        when(flexSubscriptionRepository.countByNameAndWorkspace(anyString(), any())).thenReturn(0L);
+        when(flexSubscriptionRepository.countBySubscriptionIdAndWorkspace(anyString(), any())).thenReturn(1L);
         FlexSubscription subscription = getFlexSubscription("testFlexSubscription1", "FLEX-000000001");
 
-        underTest.create(subscription, organization, user);
+        underTest.create(subscription, workspace, user);
     }
 
     @Test
     public void testCreateShouldSetDefaultFlagsForTheFirstSavedSubscription() {
-        when(flexSubscriptionRepository.countByNameAndOrganization(anyString(), any())).thenReturn(0L);
-        when(flexSubscriptionRepository.countBySubscriptionIdAndOrganization(anyString(), any())).thenReturn(0L);
+        when(flexSubscriptionRepository.countByNameAndWorkspace(anyString(), any())).thenReturn(0L);
+        when(flexSubscriptionRepository.countBySubscriptionIdAndWorkspace(anyString(), any())).thenReturn(0L);
         FlexSubscription subscription = getFlexSubscription("testFlexSubscription", "FLEX-000000000", false, false);
         when(flexSubscriptionRepository.save(subscription)).thenReturn(subscription);
-        Set<FlexSubscription> allByOrganization = new HashSet<>(Collections.singletonList(subscription));
-        when(flexSubscriptionRepository.findAllByOrganization(any())).thenReturn(allByOrganization);
-        when(organizationService.retrieveForUser(any())).thenReturn(Stream.of(organization).collect(Collectors.toSet()));
+        Set<FlexSubscription> allByWorkspace = new HashSet<>(Collections.singletonList(subscription));
+        when(flexSubscriptionRepository.findAllByWorkspace(any())).thenReturn(allByWorkspace);
+        when(workspaceService.retrieveForUser(any())).thenReturn(Stream.of(workspace).collect(Collectors.toSet()));
 
-        FlexSubscription result = underTest.create(subscription, organization, user);
+        FlexSubscription result = underTest.create(subscription, workspace, user);
 
         verify(flexSubscriptionRepository, times(1)).save(subscription);
-        verify(flexSubscriptionRepository, times(1)).saveAll(allByOrganization);
+        verify(flexSubscriptionRepository, times(1)).saveAll(allByWorkspace);
         assertTrue(result.isDefault());
         assertTrue(result.isUsedForController());
     }
 
     @Test
     public void testCreateShouldUpdateDefaultFlagsOfOldSubscriptionsWhenNewSubscriptionRequiresDefaultFlags() {
-        when(flexSubscriptionRepository.countByNameAndOrganization(anyString(), any())).thenReturn(0L);
-        when(flexSubscriptionRepository.countBySubscriptionIdAndOrganization(anyString(), any())).thenReturn(0L);
+        when(flexSubscriptionRepository.countByNameAndWorkspace(anyString(), any())).thenReturn(0L);
+        when(flexSubscriptionRepository.countBySubscriptionIdAndWorkspace(anyString(), any())).thenReturn(0L);
         FlexSubscription subscription = getFlexSubscription("testFlexSubscription", "FLEX-000000000", true, true);
         FlexSubscription subscription1 = getFlexSubscription("testFlexSubscription1", "FLEX-000000001", true, true);
         when(flexSubscriptionRepository.save(subscription)).thenReturn(subscription);
-        Set<FlexSubscription> allByOrganization = new HashSet<>(Arrays.asList(subscription1, subscription));
-        when(flexSubscriptionRepository.findAllByOrganization(any())).thenReturn(allByOrganization);
-        when(organizationService.retrieveForUser(any())).thenReturn(Stream.of(organization).collect(Collectors.toSet()));
+        Set<FlexSubscription> allByWorkspace = new HashSet<>(Arrays.asList(subscription1, subscription));
+        when(flexSubscriptionRepository.findAllByWorkspace(any())).thenReturn(allByWorkspace);
+        when(workspaceService.retrieveForUser(any())).thenReturn(Stream.of(workspace).collect(Collectors.toSet()));
 
-        FlexSubscription result = underTest.create(subscription, organization, user);
+        FlexSubscription result = underTest.create(subscription, workspace, user);
 
         verify(flexSubscriptionRepository, times(1)).save(subscription);
-        verify(flexSubscriptionRepository, times(1)).saveAll(allByOrganization);
+        verify(flexSubscriptionRepository, times(1)).saveAll(allByWorkspace);
         assertTrue(result.isDefault());
         assertTrue(result.isUsedForController());
         assertFalse(subscription1.isDefault());
@@ -118,19 +118,19 @@ public class FlexSubscriptionServiceTest {
 
     @Test
     public void testCreateShouldUpdateUsedForControllerFlagOfOldSubscriptionsWhenNewSubscriptionCreatedAsUsedForController() {
-        when(flexSubscriptionRepository.countByNameAndOrganization(anyString(), any())).thenReturn(0L);
-        when(flexSubscriptionRepository.countBySubscriptionIdAndOrganization(anyString(), any())).thenReturn(0L);
+        when(flexSubscriptionRepository.countByNameAndWorkspace(anyString(), any())).thenReturn(0L);
+        when(flexSubscriptionRepository.countBySubscriptionIdAndWorkspace(anyString(), any())).thenReturn(0L);
         FlexSubscription subscription = getFlexSubscription("testFlexSubscription", "FLEX-000000000", true, false);
         FlexSubscription subscription1 = getFlexSubscription("testFlexSubscription1", "FLEX-000000001", true, true);
         when(flexSubscriptionRepository.save(subscription)).thenReturn(subscription);
-        Set<FlexSubscription> allByOrg = new HashSet<>(Arrays.asList(subscription1, subscription));
-        when(flexSubscriptionRepository.findAllByOrganization(any())).thenReturn(allByOrg);
-        when(organizationService.retrieveForUser(any())).thenReturn(Stream.of(organization).collect(Collectors.toSet()));
+        Set<FlexSubscription> allByWorkspace = new HashSet<>(Arrays.asList(subscription1, subscription));
+        when(flexSubscriptionRepository.findAllByWorkspace(any())).thenReturn(allByWorkspace);
+        when(workspaceService.retrieveForUser(any())).thenReturn(Stream.of(workspace).collect(Collectors.toSet()));
 
-        FlexSubscription result = underTest.create(subscription, organization, user);
+        FlexSubscription result = underTest.create(subscription, workspace, user);
 
         verify(flexSubscriptionRepository, times(1)).save(subscription);
-        verify(flexSubscriptionRepository, times(1)).saveAll(allByOrg);
+        verify(flexSubscriptionRepository, times(1)).saveAll(allByWorkspace);
         assertFalse(result.isDefault());
         assertTrue(result.isUsedForController());
         assertTrue(subscription1.isDefault());
@@ -139,19 +139,19 @@ public class FlexSubscriptionServiceTest {
 
     @Test
     public void testCreateShouldUpdateDefaultFlagOfOldSubscriptionsWhenNewSubscriptionCreatedAsDefault() {
-        when(flexSubscriptionRepository.countByNameAndOrganization(anyString(), any())).thenReturn(0L);
-        when(flexSubscriptionRepository.countBySubscriptionIdAndOrganization(anyString(), any())).thenReturn(0L);
+        when(flexSubscriptionRepository.countByNameAndWorkspace(anyString(), any())).thenReturn(0L);
+        when(flexSubscriptionRepository.countBySubscriptionIdAndWorkspace(anyString(), any())).thenReturn(0L);
         FlexSubscription subscription = getFlexSubscription("testFlexSubscription", "FLEX-000000000", false, true);
         FlexSubscription subscription1 = getFlexSubscription("testFlexSubscription1", "FLEX-000000001", true, true);
         when(flexSubscriptionRepository.save(subscription)).thenReturn(subscription);
-        Set<FlexSubscription> allByOrg = new HashSet<>(Arrays.asList(subscription1, subscription));
-        when(flexSubscriptionRepository.findAllByOrganization(any())).thenReturn(allByOrg);
-        when(organizationService.retrieveForUser(any())).thenReturn(Stream.of(organization).collect(Collectors.toSet()));
+        Set<FlexSubscription> allByWorkspace = new HashSet<>(Arrays.asList(subscription1, subscription));
+        when(flexSubscriptionRepository.findAllByWorkspace(any())).thenReturn(allByWorkspace);
+        when(workspaceService.retrieveForUser(any())).thenReturn(Stream.of(workspace).collect(Collectors.toSet()));
 
-        FlexSubscription result = underTest.create(subscription, organization, user);
+        FlexSubscription result = underTest.create(subscription, workspace, user);
 
         verify(flexSubscriptionRepository, times(1)).save(subscription);
-        verify(flexSubscriptionRepository, times(1)).saveAll(allByOrg);
+        verify(flexSubscriptionRepository, times(1)).saveAll(allByWorkspace);
         assertTrue(result.isDefault());
         assertFalse(result.isUsedForController());
         assertFalse(subscription1.isDefault());

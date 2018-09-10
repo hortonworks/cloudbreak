@@ -34,8 +34,8 @@ public class InteractiveCredentialCreationStatusHandler implements ReactorEventH
     }
 
     @Override
-    public void accept(Event<InteractiveCredentialCreationStatus> interactiveCredentialCreationFailedEvent) {
-        InteractiveCredentialCreationStatus interactiveCredentialCreationStatus = interactiveCredentialCreationFailedEvent.getData();
+    public void accept(Event<InteractiveCredentialCreationStatus> interactiveCredentialCreationStatusEvent) {
+        InteractiveCredentialCreationStatus interactiveCredentialCreationStatus = interactiveCredentialCreationStatusEvent.getData();
         String message = interactiveCredentialCreationStatus.getMessage();
         CloudbreakEventsJson notification = new CloudbreakEventsJson();
         if (interactiveCredentialCreationStatus.isError()) {
@@ -46,9 +46,6 @@ public class InteractiveCredentialCreationStatusHandler implements ReactorEventH
         notification.setEventTimestamp(new Date().getTime());
         notification.setEventMessage(message);
         notification.setUserIdV3(interactiveCredentialCreationStatus.getCloudContext().getUserId());
-        notification.setOrganizationId(interactiveCredentialCreationStatus.getCloudContext().getOrganizationId());
-        notification.setOwner(interactiveCredentialCreationStatus.getExtendedCloudCredential().getOwner());
-        notification.setAccount(interactiveCredentialCreationStatus.getExtendedCloudCredential().getAccount());
         notification.setCloud(interactiveCredentialCreationStatus.getExtendedCloudCredential().getCloudPlatform());
         notificationSender.send(new Notification<>(notification));
     }

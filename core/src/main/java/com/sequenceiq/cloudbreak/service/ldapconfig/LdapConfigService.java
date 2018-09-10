@@ -11,17 +11,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.authorization.OrganizationResource;
+import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.repository.LdapConfigRepository;
-import com.sequenceiq.cloudbreak.repository.organization.OrganizationResourceRepository;
-import com.sequenceiq.cloudbreak.service.AbstractOrganizationAwareResourceService;
+import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
+import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 
 @Service
-public class LdapConfigService extends AbstractOrganizationAwareResourceService<LdapConfig> {
+public class LdapConfigService extends AbstractWorkspaceAwareResourceService<LdapConfig> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LdapConfigService.class);
 
@@ -40,13 +40,13 @@ public class LdapConfigService extends AbstractOrganizationAwareResourceService<
     }
 
     @Override
-    public OrganizationResourceRepository<LdapConfig, Long> repository() {
+    public WorkspaceResourceRepository<LdapConfig, Long> repository() {
         return ldapConfigRepository;
     }
 
     @Override
-    public OrganizationResource resource() {
-        return OrganizationResource.LDAP;
+    public WorkspaceResource resource() {
+        return WorkspaceResource.LDAP;
     }
 
     @Override

@@ -22,36 +22,36 @@ import com.sequenceiq.cloudbreak.doc.OperationDescriptions.ManagementPackOpDescr
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Path("/v3/{organizationId}/mpacks")
+@Path("/v3/{workspaceId}/mpacks")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v3/{organizationId}/mpacks", description = ControllerDescription.MANAGEMENT_PACK_V3_DESCRIPTION, protocols = "http,https")
+@Api(value = "/v3/{workspaceId}/mpacks", description = ControllerDescription.MANAGEMENT_PACK_V3_DESCRIPTION, protocols = "http,https")
 public interface ManagementPackV3Endpoint {
 
     @GET
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ManagementPackOpDescription.LIST_BY_ORGANIZATION, produces = ContentType.JSON, notes = Notes.MANAGEMENT_PACK_NOTES,
-            nickname = "listManagementPacksByOrganization")
-    Set<ManagementPackResponse> listByOrganization(@PathParam("organizationId") Long organizationId);
+    @ApiOperation(value = ManagementPackOpDescription.LIST_BY_WORKSPACE, produces = ContentType.JSON, notes = Notes.MANAGEMENT_PACK_NOTES,
+            nickname = "listManagementPacksByWorkspace")
+    Set<ManagementPackResponse> listByWorkspace(@PathParam("workspaceId") Long workspaceId);
 
     @GET
     @Path("/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ManagementPackOpDescription.GET_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.MANAGEMENT_PACK_NOTES,
-            nickname = "getManagementPackInOrganization")
-    ManagementPackResponse getByNameInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
+            nickname = "getManagementPackInWorkspace")
+    ManagementPackResponse getByNameInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @POST
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ManagementPackOpDescription.CREATE_IN_ORG, produces = ContentType.JSON, notes = Notes.MANAGEMENT_PACK_NOTES,
-            nickname = "createManagementPackInOrganization")
-    ManagementPackResponse createInOrganization(@PathParam("organizationId") Long organizationId, @Valid ManagementPackRequest request);
+            nickname = "createManagementPackInWorkspace")
+    ManagementPackResponse createInWorkspace(@PathParam("workspaceId") Long workspaceId, @Valid ManagementPackRequest request);
 
     @DELETE
     @Path("/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ManagementPackOpDescription.DELETE_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.MANAGEMENT_PACK_NOTES,
-            nickname = "deleteManagementPackInOrganization")
-    ManagementPackResponse deleteInOrganization(@PathParam("organizationId") Long organizationId, @PathParam("name") String name);
+            nickname = "deleteManagementPackInWorkspace")
+    ManagementPackResponse deleteInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 }

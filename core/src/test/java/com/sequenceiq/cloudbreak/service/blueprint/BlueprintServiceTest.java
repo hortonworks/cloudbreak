@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -50,7 +50,7 @@ public class BlueprintServiceTest {
     @Before
     public void setup() {
         blueprint.setName("name");
-        blueprint.setOrganization(new Organization());
+        blueprint.setWorkspace(new Workspace());
         blueprint.setStatus(ResourceStatus.USER_MANAGED);
     }
 

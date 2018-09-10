@@ -15,27 +15,27 @@ import com.sequenceiq.cloudbreak.api.model.SmartSenseSubscriptionJson;
 public class SmartSenseSubscriptionV3Controller implements SmartSenseSubscriptionV3Endpoint {
 
     @Override
-    public Set<SmartSenseSubscriptionJson> listByOrganization(Long organizationId) {
+    public Set<SmartSenseSubscriptionJson> listByWorkspace(Long workspaceId) {
         return null;
     }
 
     @Override
-    public SmartSenseSubscriptionJson getByNameInOrganization(Long organizationId, String name) {
+    public SmartSenseSubscriptionJson getByNameInWorkspace(Long workspaceId, String name) {
         return null;
     }
 
     @Override
-    public SmartSenseSubscriptionJson getDefaultInOrganization(Long organizationId) {
+    public SmartSenseSubscriptionJson getDefaultInWorkspace(Long workspaceId) {
         return null;
     }
 
     @Override
-    public SmartSenseSubscriptionJson createInOrganization(Long organizationId, SmartSenseSubscriptionJson request) {
+    public SmartSenseSubscriptionJson createInWorkspace(Long workspaceId, SmartSenseSubscriptionJson request) {
         return null;
     }
 
     @Override
-    public SmartSenseSubscriptionJson deleteInOrganization(Long organizationId, String name) {
+    public SmartSenseSubscriptionJson deleteInWorkspace(Long workspaceId, String name) {
         return null;
     }
 }

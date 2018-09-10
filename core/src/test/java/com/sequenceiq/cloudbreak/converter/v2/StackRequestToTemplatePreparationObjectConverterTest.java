@@ -50,8 +50,8 @@ import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
-import com.sequenceiq.cloudbreak.domain.organization.Organization;
-import com.sequenceiq.cloudbreak.domain.organization.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
@@ -59,7 +59,7 @@ import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
 import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
-import com.sequenceiq.cloudbreak.service.organization.OrganizationService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -151,7 +151,7 @@ public class StackRequestToTemplatePreparationObjectConverterTest {
     private User user;
 
     @Mock
-    private Organization organization;
+    private Workspace workspace;
 
     @Mock
     private ClusterV2Request cluster;
@@ -166,7 +166,7 @@ public class StackRequestToTemplatePreparationObjectConverterTest {
     private BlueprintStackInfo blueprintStackInfo;
 
     @Mock
-    private OrganizationService organizationService;
+    private WorkspaceService workspaceService;
 
     @Before
     public void setUp() {
@@ -182,7 +182,7 @@ public class StackRequestToTemplatePreparationObjectConverterTest {
         when(stackInfoService.blueprintStackInfo(TEST_BLUEPRINT_TEXT)).thenReturn(blueprintStackInfo);
         when(userService.getOrCreate(eq(identityUser))).thenReturn(user);
         when(identityUser.getUsername()).thenReturn("test@hortonworks.com");
-        when(organizationService.get(anyLong(), eq(user))).thenReturn(organization);
+        when(workspaceService.get(anyLong(), eq(user))).thenReturn(workspace);
     }
 
     @Test
@@ -294,7 +294,7 @@ public class StackRequestToTemplatePreparationObjectConverterTest {
     public void testConvertWhenClusterHaveSomeRdsConfigNamesThenTheSameAmountOfRdsConfigShouldBeStored() {
         Set<String> rdsConfigNames = createRdsConfigNames();
         when(cluster.getRdsConfigNames()).thenReturn(rdsConfigNames);
-        rdsConfigNames.forEach(rdsConfigName -> when(rdsConfigService.getByNameForOrg(rdsConfigName, organization)).
+        rdsConfigNames.forEach(rdsConfigName -> when(rdsConfigService.getByNameForWorkspace(rdsConfigName, workspace)).
                 thenReturn(new RDSConfig()));
 
         TemplatePreparationObject result = underTest.convert(source);
@@ -365,7 +365,7 @@ public class StackRequestToTemplatePreparationObjectConverterTest {
         String account = "testAccount";
         when(cloudStorageValidationUtil.isCloudStorageConfigured(cloudStorageRequest)).thenReturn(true);
         when(identityUser.getAccount()).thenReturn(account);
-        when(credentialService.getByNameForOrganization(TEST_CREDENTIAL_NAME, organization)).thenReturn(credential);
+        when(credentialService.getByNameForWorkspace(TEST_CREDENTIAL_NAME, workspace)).thenReturn(credential);
         when(cluster.getCloudStorage()).thenReturn(cloudStorageRequest);
         when(conversionService.convert(cloudStorageRequest, FileSystem.class)).thenReturn(fileSystem);
         when(fileSystemConfigurationProvider.fileSystemConfiguration(fileSystem, source, credential)).thenReturn(expected);
@@ -401,7 +401,7 @@ public class StackRequestToTemplatePreparationObjectConverterTest {
         expected.setProtocol("");
         String ldapConfigName = "configName";
         when(cluster.getLdapConfigName()).thenReturn(ldapConfigName);
-        when(ldapConfigService.getByNameForOrganization(eq(ldapConfigName), eq(organization))).thenReturn(expected);
+        when(ldapConfigService.getByNameForWorkspace(eq(ldapConfigName), eq(workspace))).thenReturn(expected);
 
         TemplatePreparationObject result = underTest.convert(source);
 
