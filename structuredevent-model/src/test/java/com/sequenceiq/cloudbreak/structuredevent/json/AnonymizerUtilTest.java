@@ -87,4 +87,11 @@ public class AnonymizerUtilTest {
                 anonymize(testData));
     }
 
+    @Test
+    public void testLdapPassword() {
+        String testData = "ambari-server sync-ldap --all --ldap-sync-admin-name cloudbreak --ldap-sync-admin-password thisismypassword";
+        Assert.assertEquals("ambari-server sync-ldap --all --ldap-sync-admin-name cloudbreak --ldap-sync-admin-password " + AnonymizerUtil.REPLACEMENT,
+                anonymize(testData));
+    }
+
 }
