@@ -72,7 +72,7 @@ public class PkiUtil {
     private static final Integer MAX_CACHE_SIZE = 200;
 
     private static final Map<String, RSAKeyParameters> CACHE =
-            Collections.synchronizedMap(new LinkedHashMap<String, RSAKeyParameters>(MAX_CACHE_SIZE * 4 / 3, 0.75f, true) {
+            Collections.synchronizedMap(new LinkedHashMap<>(MAX_CACHE_SIZE * 4 / 3, 0.75f, true) {
                 @Override
                 protected boolean removeEldestEntry(Map.Entry<String, RSAKeyParameters> eldest) {
                     return size() > MAX_CACHE_SIZE;

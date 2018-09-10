@@ -11,12 +11,7 @@ public abstract class AbstractCacheDefinition implements CacheDefinition {
         CacheConfiguration cacheConfiguration = new CacheConfiguration();
         cacheConfiguration.setName(getName());
         cacheConfiguration.setMemoryStoreEvictionPolicy(getMemoryStoreEvictionPolicy());
-        if (getMaxEntriesLocalHeap() > 0) {
-            cacheConfiguration.setMaxEntriesLocalHeap(getMaxEntriesLocalHeap());
-        }
-        if (getMaxBytesLocalHeap() > 0) {
-            cacheConfiguration.setMaxBytesLocalHeap(getMaxBytesLocalHeap());
-        }
+        cacheConfiguration.setMaxEntriesLocalHeap(getMaxEntriesLocalHeap());
         cacheConfiguration.setTimeToLiveSeconds(getTimeToLiveSeconds());
         return cacheConfiguration;
     }

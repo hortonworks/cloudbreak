@@ -33,5 +33,4 @@ public class TokenCache extends AbstractCacheDefinition {
     protected long getTimeToLiveSeconds() {
         return TTL_IN_SECONDS;
     }
-
 }
