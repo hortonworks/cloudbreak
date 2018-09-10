@@ -9,7 +9,8 @@ echo "HOME path: "$HOME
 
 if [[ "${TARGET_CBD_VERSION}" != "MOCK" ]]; then
     echo "Get CB CLI for "$TARGET_CBD_VERSION
-    curl -vvv -Ls https://s3-us-west-2.amazonaws.com/cb-cli/cb-cli_"${TARGET_CBD_VERSION}"_$(uname)_x86_64.tgz | tar -xvz --directory /usr/local/bin
+    curl --verbose --show-error --location --insecure https://s3-us-west-2.amazonaws.com/cb-cli/cb-cli_"${TARGET_CBD_VERSION}"_$(uname)_x86_64.tgz | tar -xvz --directory /usr/local/bin
+    #wget --continue --no-check-certificate https://s3-us-west-2.amazonaws.com/cb-cli/cb-cli_"${TARGET_CBD_VERSION}"_$(uname)_x86_64.tgz -O - | tar -xvz --directory /usr/local/bin
     echo "CB CLI version is: "$(cb -v)
 fi
 

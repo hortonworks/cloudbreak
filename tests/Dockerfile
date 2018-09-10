@@ -23,7 +23,11 @@ RUN apk --no-cache --update add \
     libxml2-dev \
     libgcrypt-dev \
     libxslt-dev \
-    libffi-dev
+    libffi-dev \
+    wget \
+    ca-certificates
+
+RUN update-ca-certificates
 
 RUN gem install bundler --no-ri --no-rdoc \
   && rm -r /root/.gem \
