@@ -6,7 +6,7 @@ import (
 
 	"github.com/hortonworks/cb-cli/cli/types"
 	"github.com/hortonworks/cb-cli/cli/utils"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_organization_id_mpacks"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_workspace_id_mpacks"
 	"github.com/hortonworks/cb-cli/models_cloudbreak"
 )
 
@@ -15,9 +15,9 @@ type mockMpackClient struct {
 	postPrivateCapture *models_cloudbreak.ManagementPackRequest
 }
 
-func (m *mockMpackClient) CreateManagementPackInOrganization(params *v3_organization_id_mpacks.CreateManagementPackInOrganizationParams) (*v3_organization_id_mpacks.CreateManagementPackInOrganizationOK, error) {
+func (m *mockMpackClient) CreateManagementPackInWorkspace(params *v3_workspace_id_mpacks.CreateManagementPackInWorkspaceParams) (*v3_workspace_id_mpacks.CreateManagementPackInWorkspaceOK, error) {
 	m.postPublicCapture = params.Body
-	return &v3_organization_id_mpacks.CreateManagementPackInOrganizationOK{
+	return &v3_workspace_id_mpacks.CreateManagementPackInWorkspaceOK{
 		Payload: &models_cloudbreak.ManagementPackResponse{
 			ID:   1,
 			Name: &(&types.S{S: "mpack"}).S,
@@ -25,9 +25,9 @@ func (m *mockMpackClient) CreateManagementPackInOrganization(params *v3_organiza
 	}, nil
 }
 
-func (m *mockMpackClient) ListManagementPacksByOrganization(params *v3_organization_id_mpacks.ListManagementPacksByOrganizationParams) (*v3_organization_id_mpacks.ListManagementPacksByOrganizationOK, error) {
+func (m *mockMpackClient) ListManagementPacksByWorkspace(params *v3_workspace_id_mpacks.ListManagementPacksByWorkspaceParams) (*v3_workspace_id_mpacks.ListManagementPacksByWorkspaceOK, error) {
 	yes := true
-	resp := v3_organization_id_mpacks.ListManagementPacksByOrganizationOK{
+	resp := v3_workspace_id_mpacks.ListManagementPacksByWorkspaceOK{
 		Payload: []*models_cloudbreak.ManagementPackResponse{
 			{
 				Name:     &(&types.S{S: "mpack"}).S,

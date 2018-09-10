@@ -35,9 +35,6 @@ type NetworkResponse struct {
 	// Required: true
 	Name *string `json:"name"`
 
-	// organization of the resource
-	Organization *OrganizationResourceResponse `json:"organization,omitempty"`
-
 	// provider specific parameters of the specified network
 	Parameters map[string]interface{} `json:"parameters,omitempty"`
 
@@ -46,6 +43,9 @@ type NetworkResponse struct {
 
 	// id of the topology the resource belongs to
 	TopologyID int64 `json:"topologyId,omitempty"`
+
+	// workspace of the resource
+	Workspace *WorkspaceResourceResponse `json:"workspace,omitempty"`
 }
 
 /* polymorph NetworkResponse cloudPlatform false */
@@ -56,13 +56,13 @@ type NetworkResponse struct {
 
 /* polymorph NetworkResponse name false */
 
-/* polymorph NetworkResponse organization false */
-
 /* polymorph NetworkResponse parameters false */
 
 /* polymorph NetworkResponse subnetCIDR false */
 
 /* polymorph NetworkResponse topologyId false */
+
+/* polymorph NetworkResponse workspace false */
 
 // Validate validates this network response
 func (m *NetworkResponse) Validate(formats strfmt.Registry) error {
@@ -83,7 +83,7 @@ func (m *NetworkResponse) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateOrganization(formats); err != nil {
+	if err := m.validateWorkspace(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -129,17 +129,17 @@ func (m *NetworkResponse) validateName(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *NetworkResponse) validateOrganization(formats strfmt.Registry) error {
+func (m *NetworkResponse) validateWorkspace(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.Organization) { // not required
+	if swag.IsZero(m.Workspace) { // not required
 		return nil
 	}
 
-	if m.Organization != nil {
+	if m.Workspace != nil {
 
-		if err := m.Organization.Validate(formats); err != nil {
+		if err := m.Workspace.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("organization")
+				return ve.ValidateName("workspace")
 			}
 			return err
 		}

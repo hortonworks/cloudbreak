@@ -205,66 +205,6 @@ func (a *Client) DeleteStackV2(params *DeleteStackV2Params) error {
 }
 
 /*
-GetAllStackV2 retrieves all stacks
-
-Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
-*/
-func (a *Client) GetAllStackV2(params *GetAllStackV2Params) (*GetAllStackV2OK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewGetAllStackV2Params()
-	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "getAllStackV2",
-		Method:             "GET",
-		PathPattern:        "/v2/stacks/all",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &GetAllStackV2Reader{formats: a.formats},
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*GetAllStackV2OK), nil
-
-}
-
-/*
-GetCertificateStackV2 retrieves the TLS certificate used by the gateway
-
-Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
-*/
-func (a *Client) GetCertificateStackV2(params *GetCertificateStackV2Params) (*GetCertificateStackV2OK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewGetCertificateStackV2Params()
-	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "getCertificateStackV2",
-		Method:             "GET",
-		PathPattern:        "/v2/stacks/{id}/certificate",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &GetCertificateStackV2Reader{formats: a.formats},
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*GetCertificateStackV2OK), nil
-
-}
-
-/*
 GetClusterRequestFromName retrieves stack request by stack name
 
 Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
@@ -411,36 +351,6 @@ func (a *Client) GetPublicsStackV2(params *GetPublicsStackV2Params) (*GetPublics
 		return nil, err
 	}
 	return result.(*GetPublicsStackV2OK), nil
-
-}
-
-/*
-GetStackForAmbariV2 retrieves stack by ambari address
-
-Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
-*/
-func (a *Client) GetStackForAmbariV2(params *GetStackForAmbariV2Params) (*GetStackForAmbariV2OK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewGetStackForAmbariV2Params()
-	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "getStackForAmbariV2",
-		Method:             "POST",
-		PathPattern:        "/v2/stacks/ambari",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &GetStackForAmbariV2Reader{formats: a.formats},
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*GetStackForAmbariV2OK), nil
 
 }
 

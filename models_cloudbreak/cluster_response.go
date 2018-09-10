@@ -110,9 +110,6 @@ type ClusterResponse struct {
 	// name of the resource
 	Name string `json:"name,omitempty"`
 
-	// organization of the resource
-	Organization *OrganizationResourceResponse `json:"organization,omitempty"`
-
 	// proxy configuration name for the cluster
 	ProxyName string `json:"proxyName,omitempty"`
 
@@ -141,6 +138,9 @@ type ClusterResponse struct {
 
 	// ambari username
 	UserName string `json:"userName,omitempty"`
+
+	// workspace of the resource
+	Workspace *WorkspaceResourceResponse `json:"workspace,omitempty"`
 }
 
 /* polymorph ClusterResponse ambariDatabaseDetails false */
@@ -201,8 +201,6 @@ type ClusterResponse struct {
 
 /* polymorph ClusterResponse name false */
 
-/* polymorph ClusterResponse organization false */
-
 /* polymorph ClusterResponse proxyName false */
 
 /* polymorph ClusterResponse rdsConfigIds false */
@@ -220,6 +218,8 @@ type ClusterResponse struct {
 /* polymorph ClusterResponse uptime false */
 
 /* polymorph ClusterResponse userName false */
+
+/* polymorph ClusterResponse workspace false */
 
 // Validate validates this cluster response
 func (m *ClusterResponse) Validate(formats strfmt.Registry) error {
@@ -295,11 +295,6 @@ func (m *ClusterResponse) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateOrganization(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
 	if err := m.validateRdsConfigIds(formats); err != nil {
 		// prop
 		res = append(res, err)
@@ -316,6 +311,11 @@ func (m *ClusterResponse) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateStatus(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateWorkspace(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -658,25 +658,6 @@ func (m *ClusterResponse) validateLdapConfig(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *ClusterResponse) validateOrganization(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Organization) { // not required
-		return nil
-	}
-
-	if m.Organization != nil {
-
-		if err := m.Organization.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("organization")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
 func (m *ClusterResponse) validateRdsConfigIds(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.RdsConfigIds) { // not required
@@ -812,6 +793,25 @@ func (m *ClusterResponse) validateStatus(formats strfmt.Registry) error {
 	// value enum
 	if err := m.validateStatusEnum("status", "body", m.Status); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *ClusterResponse) validateWorkspace(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Workspace) { // not required
+		return nil
+	}
+
+	if m.Workspace != nil {
+
+		if err := m.Workspace.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("workspace")
+			}
+			return err
+		}
 	}
 
 	return nil

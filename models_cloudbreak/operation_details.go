@@ -32,9 +32,6 @@ type OperationDetails struct {
 	// event type
 	EventType string `json:"eventType,omitempty"`
 
-	// organization Id
-	OrganizationID int64 `json:"organizationId,omitempty"`
-
 	// resource Id
 	ResourceID int64 `json:"resourceId,omitempty"`
 
@@ -59,6 +56,9 @@ type OperationDetails struct {
 	// user name v3
 	UserNameV3 string `json:"userNameV3,omitempty"`
 
+	// workspace Id
+	WorkspaceID int64 `json:"workspaceId,omitempty"`
+
 	// zoned date time
 	ZonedDateTime strfmt.DateTime `json:"zonedDateTime,omitempty"`
 }
@@ -70,8 +70,6 @@ type OperationDetails struct {
 /* polymorph OperationDetails cloudbreakVersion false */
 
 /* polymorph OperationDetails eventType false */
-
-/* polymorph OperationDetails organizationId false */
 
 /* polymorph OperationDetails resourceId false */
 
@@ -88,6 +86,8 @@ type OperationDetails struct {
 /* polymorph OperationDetails userName false */
 
 /* polymorph OperationDetails userNameV3 false */
+
+/* polymorph OperationDetails workspaceId false */
 
 /* polymorph OperationDetails zonedDateTime false */
 

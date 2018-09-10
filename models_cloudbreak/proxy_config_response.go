@@ -33,9 +33,6 @@ type ProxyConfigResponse struct {
 	// Pattern: (^[a-z][-a-z0-9]*[a-z0-9]$)
 	Name *string `json:"name"`
 
-	// organization of the resource
-	Organization *OrganizationResourceResponse `json:"organization,omitempty"`
-
 	// determines the protocol (http or https)
 	// Required: true
 	// Pattern: ^http(s)?$
@@ -56,6 +53,9 @@ type ProxyConfigResponse struct {
 
 	// Username to use for basic authentication
 	UserName string `json:"userName,omitempty"`
+
+	// workspace of the resource
+	Workspace *WorkspaceResourceResponse `json:"workspace,omitempty"`
 }
 
 /* polymorph ProxyConfigResponse description false */
@@ -64,8 +64,6 @@ type ProxyConfigResponse struct {
 
 /* polymorph ProxyConfigResponse name false */
 
-/* polymorph ProxyConfigResponse organization false */
-
 /* polymorph ProxyConfigResponse protocol false */
 
 /* polymorph ProxyConfigResponse serverHost false */
@@ -73,6 +71,8 @@ type ProxyConfigResponse struct {
 /* polymorph ProxyConfigResponse serverPort false */
 
 /* polymorph ProxyConfigResponse userName false */
+
+/* polymorph ProxyConfigResponse workspace false */
 
 // Validate validates this proxy config response
 func (m *ProxyConfigResponse) Validate(formats strfmt.Registry) error {
@@ -88,11 +88,6 @@ func (m *ProxyConfigResponse) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateOrganization(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
 	if err := m.validateProtocol(formats); err != nil {
 		// prop
 		res = append(res, err)
@@ -104,6 +99,11 @@ func (m *ProxyConfigResponse) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateServerPort(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateWorkspace(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -147,25 +147,6 @@ func (m *ProxyConfigResponse) validateName(formats strfmt.Registry) error {
 
 	if err := validate.Pattern("name", "body", string(*m.Name), `(^[a-z][-a-z0-9]*[a-z0-9]$)`); err != nil {
 		return err
-	}
-
-	return nil
-}
-
-func (m *ProxyConfigResponse) validateOrganization(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Organization) { // not required
-		return nil
-	}
-
-	if m.Organization != nil {
-
-		if err := m.Organization.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("organization")
-			}
-			return err
-		}
 	}
 
 	return nil
@@ -217,6 +198,25 @@ func (m *ProxyConfigResponse) validateServerPort(formats strfmt.Registry) error 
 
 	if err := validate.MaximumInt("serverPort", "body", int64(*m.ServerPort), 65535, false); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *ProxyConfigResponse) validateWorkspace(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Workspace) { // not required
+		return nil
+	}
+
+	if m.Workspace != nil {
+
+		if err := m.Workspace.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("workspace")
+			}
+			return err
+		}
 	}
 
 	return nil

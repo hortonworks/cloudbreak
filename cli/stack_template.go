@@ -29,14 +29,14 @@ var maxCardinality = map[string]int{
 	"ALL": 3,
 }
 
-var getBlueprintClient = func(server, userName, password, authType string) getBlueprintInOrganization {
+var getBlueprintClient = func(server, userName, password, authType string) getBlueprintInWorkspace {
 	cbClient := NewCloudbreakHTTPClient(server, userName, password, authType)
-	return cbClient.Cloudbreak.V3OrganizationIDBlueprints
+	return cbClient.Cloudbreak.V3WorkspaceIDBlueprints
 }
 
-var stackClient = func(server, userName, password, authType string) getStackInOrganization {
+var stackClient = func(server, userName, password, authType string) getStackInWorkspace {
 	cbClient := NewCloudbreakHTTPClient(server, userName, password, authType)
-	return cbClient.Cloudbreak.V3OrganizationIDStacks
+	return cbClient.Cloudbreak.V3WorkspaceIDStacks
 }
 
 func GenerateAwsStackTemplate(c *cli.Context) error {
@@ -114,7 +114,7 @@ func getStringPointer(skippedFields map[string]bool, fieldName string, defaultVa
 	return &defaultValue
 }
 
-func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string) string, boolFinder func(string) bool, int64Finder func(string) int64, getBlueprintClient func(string, string, string, string) getBlueprintInOrganization, storageType cloud.CloudStorageType) *models_cloudbreak.StackV2Request {
+func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string) string, boolFinder func(string) bool, int64Finder func(string) int64, getBlueprintClient func(string, string, string, string) getBlueprintInWorkspace, storageType cloud.CloudStorageType) *models_cloudbreak.StackV2Request {
 	provider := cloud.GetProvider()
 	skippedFields := provider.SkippedFields()
 
@@ -141,8 +141,8 @@ func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string)
 	preExtendTemplateWithOptionalBlocks(&template, boolFinder, storageType)
 	nodes := defaultNodes
 	if bpName := stringFinder(FlBlueprintNameOptional.Name); len(bpName) != 0 {
-		organization := int64Finder(FlOrganizationOptional.Name)
-		bpResp := fetchBlueprint(organization, bpName, getBlueprintClient(stringFinder(FlServerOptional.Name), stringFinder(FlUsername.Name), stringFinder(FlPassword.Name), stringFinder(FlAuthTypeOptional.Name)))
+		workspace := int64Finder(FlWorkspaceOptional.Name)
+		bpResp := fetchBlueprint(workspace, bpName, getBlueprintClient(stringFinder(FlServerOptional.Name), stringFinder(FlUsername.Name), stringFinder(FlPassword.Name), stringFinder(FlAuthTypeOptional.Name)))
 		bp, err := base64.StdEncoding.DecodeString(bpResp.AmbariBlueprint)
 		if err != nil {
 			utils.LogErrorAndExit(err)
@@ -165,7 +165,7 @@ func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string)
 }
 
 func generateAttachedTemplateImpl(stringFinder func(string) string, boolFinder func(string) bool, int64Finder func(string) int64, storageType cloud.CloudStorageType) error {
-	datalake := fetchStack(int64Finder(FlOrganizationOptional.Name), stringFinder(FlWithSourceCluster.Name), stackClient(stringFinder(FlServerOptional.Name), stringFinder(FlUsername.Name), stringFinder(FlPassword.Name), stringFinder(FlAuthTypeOptional.Name)))
+	datalake := fetchStack(int64Finder(FlWorkspaceOptional.Name), stringFinder(FlWithSourceCluster.Name), stackClient(stringFinder(FlServerOptional.Name), stringFinder(FlUsername.Name), stringFinder(FlPassword.Name), stringFinder(FlAuthTypeOptional.Name)))
 	isSharedServiceReady, _ := datalake.Cluster.Blueprint.Tags["shared_services_ready"].(bool)
 	if !isSharedServiceReady {
 		utils.LogErrorMessageAndExit("The source cluster must be a datalake")
@@ -447,17 +447,17 @@ func GenerateReinstallTemplate(c *cli.Context) {
 		InstanceGroups: []*models_cloudbreak.InstanceGroupsV2{},
 	}
 
-	orgID := c.Int64(FlOrganizationOptional.Name)
+	workspaceID := c.Int64(FlWorkspaceOptional.Name)
 	stackName := c.String(FlName.Name)
-	stackResp := fetchStack(orgID, stackName, stackClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name), c.String(FlAuthTypeOptional.Name)))
+	stackResp := fetchStack(workspaceID, stackName, stackClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name), c.String(FlAuthTypeOptional.Name)))
 	provider, ok := cloud.CloudProviders[cloud.CloudType(stackResp.CloudPlatform)]
 	if !ok {
 		utils.LogErrorMessageAndExit("Not supported CloudProvider: " + stackResp.CloudPlatform)
 	}
 
 	bpName := c.String(FlBlueprintNameOptional.Name)
-	organization := c.Int64(FlOrganizationOptional.Name)
-	bpResp := fetchBlueprint(organization, bpName, getBlueprintClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name), c.String(FlAuthTypeOptional.Name)))
+	workspace := c.Int64(FlWorkspaceOptional.Name)
+	bpResp := fetchBlueprint(workspace, bpName, getBlueprintClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name), c.String(FlAuthTypeOptional.Name)))
 	bp, err := base64.StdEncoding.DecodeString(bpResp.AmbariBlueprint)
 	if err != nil {
 		utils.LogErrorAndExit(err)

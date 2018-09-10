@@ -11,7 +11,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/cb-cli/cli/types"
 	"github.com/hortonworks/cb-cli/cli/utils"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_organization_id_stacks"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_workspace_id_stacks"
 	"github.com/hortonworks/cb-cli/models_cloudbreak"
 	"github.com/urfave/cli"
 )
@@ -47,14 +47,14 @@ func CreateStack(c *cli.Context) {
 	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "create cluster")
 
-	orgID := c.Int64(FlOrganizationOptional.Name)
+	workspaceID := c.Int64(FlWorkspaceOptional.Name)
 	req := assembleStackRequest(c)
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	utils.CheckClientVersion(cbClient.Cloudbreak.V1util, Version)
-	cbClient.createStack(orgID, req)
+	cbClient.createStack(workspaceID, req)
 
 	if c.Bool(FlWaitOptional.Name) {
-		cbClient.waitForOperationToFinish(orgID, *req.General.Name, AVAILABLE, AVAILABLE)
+		cbClient.waitForOperationToFinish(workspaceID, *req.General.Name, AVAILABLE, AVAILABLE)
 	}
 }
 
@@ -62,13 +62,13 @@ func ChangeImage(c *cli.Context) {
 	checkRequiredFlagsAndArguments(c)
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 
-	orgID := c.Int64(FlOrganizationOptional.Name)
+	workspaceID := c.Int64(FlWorkspaceOptional.Name)
 	imageId := c.String(FlImageId.Name)
 	imageCatalogName := c.String(FlImageCatalog.Name)
 	clusterName := c.String(FlName.Name)
 	log.Infof("[ChangeImage] changing image for stack stack, name: %s, imageid: %s, imageCatalog: %s", clusterName, imageId, imageCatalogName)
 	req := models_cloudbreak.StackImageChangeRequest{ImageCatalogName: imageCatalogName, ImageID: &imageId}
-	err := cbClient.Cloudbreak.V3OrganizationIDStacks.ChangeImageV3(v3_organization_id_stacks.NewChangeImageV3Params().WithOrganizationID(orgID).WithName(clusterName).WithBody(&req))
+	err := cbClient.Cloudbreak.V3WorkspaceIDStacks.ChangeImageV3(v3_workspace_id_stacks.NewChangeImageV3Params().WithWorkspaceID(workspaceID).WithName(clusterName).WithBody(&req))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -134,10 +134,10 @@ func DescribeStack(c *cli.Context) {
 	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "describe stack")
 
-	orgID := c.Int64(FlOrganizationOptional.Name)
+	workspaceID := c.Int64(FlWorkspaceOptional.Name)
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
-	resp, err := cbClient.Cloudbreak.V3OrganizationIDStacks.GetStackInOrganization(v3_organization_id_stacks.NewGetStackInOrganizationParams().WithOrganizationID(orgID).WithName(c.String(FlName.Name)))
+	resp, err := cbClient.Cloudbreak.V3WorkspaceIDStacks.GetStackInWorkspace(v3_workspace_id_stacks.NewGetStackInWorkspaceParams().WithWorkspaceID(workspaceID).WithName(c.String(FlName.Name)))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -150,12 +150,12 @@ func DescribeStack(c *cli.Context) {
 		strconv.FormatInt(s.ID, 10)})
 }
 
-type getStackInOrganization interface {
-	GetStackInOrganization(client *v3_organization_id_stacks.GetStackInOrganizationParams) (*v3_organization_id_stacks.GetStackInOrganizationOK, error)
+type getStackInWorkspace interface {
+	GetStackInWorkspace(client *v3_workspace_id_stacks.GetStackInWorkspaceParams) (*v3_workspace_id_stacks.GetStackInWorkspaceOK, error)
 }
 
-func fetchStack(orgID int64, name string, client getStackInOrganization) *models_cloudbreak.StackResponse {
-	resp, err := client.GetStackInOrganization(v3_organization_id_stacks.NewGetStackInOrganizationParams().WithOrganizationID(orgID).WithName(name))
+func fetchStack(workspaceID int64, name string, client getStackInWorkspace) *models_cloudbreak.StackResponse {
+	resp, err := client.GetStackInWorkspace(v3_workspace_id_stacks.NewGetStackInWorkspaceParams().WithWorkspaceID(workspaceID).WithName(name))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -175,17 +175,17 @@ func ScaleStack(c *cli.Context) {
 		DesiredCount: &(&types.I32{I: int32(desiredCount)}).I,
 		Group:        &(&types.S{S: c.String(FlGroupName.Name)}).S,
 	}
-	orgID := c.Int64(FlOrganizationOptional.Name)
+	workspaceID := c.Int64(FlWorkspaceOptional.Name)
 	name := c.String(FlName.Name)
 	log.Infof("[ScaleStack] scaling stack, name: %s", name)
-	err = cbClient.Cloudbreak.V3OrganizationIDStacks.PutscalingStackV3(v3_organization_id_stacks.NewPutscalingStackV3Params().WithOrganizationID(orgID).WithName(name).WithBody(req))
+	err = cbClient.Cloudbreak.V3WorkspaceIDStacks.PutscalingStackV3(v3_workspace_id_stacks.NewPutscalingStackV3Params().WithWorkspaceID(workspaceID).WithName(name).WithBody(req))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
 	log.Infof("[ScaleStack] stack scaled, name: %s", name)
 
 	if c.Bool(FlWaitOptional.Name) {
-		cbClient.waitForOperationToFinish(orgID, name, AVAILABLE, AVAILABLE)
+		cbClient.waitForOperationToFinish(workspaceID, name, AVAILABLE, AVAILABLE)
 	}
 }
 
@@ -194,17 +194,17 @@ func StartStack(c *cli.Context) {
 	defer utils.TimeTrack(time.Now(), "start stack")
 
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
-	orgID := c.Int64(FlOrganizationOptional.Name)
+	workspaceID := c.Int64(FlWorkspaceOptional.Name)
 	name := c.String(FlName.Name)
 	log.Infof("[StartStack] starting stack, name: %s", name)
-	err := cbClient.Cloudbreak.V3OrganizationIDStacks.PutstartStackV3(v3_organization_id_stacks.NewPutstartStackV3Params().WithOrganizationID(orgID).WithName(name))
+	err := cbClient.Cloudbreak.V3WorkspaceIDStacks.PutstartStackV3(v3_workspace_id_stacks.NewPutstartStackV3Params().WithWorkspaceID(workspaceID).WithName(name))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
 	log.Infof("[StartStack] stack started, name: %s", name)
 
 	if c.Bool(FlWaitOptional.Name) {
-		cbClient.waitForOperationToFinish(orgID, name, AVAILABLE, AVAILABLE)
+		cbClient.waitForOperationToFinish(workspaceID, name, AVAILABLE, AVAILABLE)
 	}
 }
 
@@ -213,17 +213,17 @@ func StopStack(c *cli.Context) {
 	defer utils.TimeTrack(time.Now(), "stop stack")
 
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
-	orgID := c.Int64(FlOrganizationOptional.Name)
+	workspaceID := c.Int64(FlWorkspaceOptional.Name)
 	name := c.String(FlName.Name)
 	log.Infof("[StopStack] stopping stack, name: %s", name)
-	err := cbClient.Cloudbreak.V3OrganizationIDStacks.PutstopStackV3(v3_organization_id_stacks.NewPutstopStackV3Params().WithOrganizationID(orgID).WithName(name))
+	err := cbClient.Cloudbreak.V3WorkspaceIDStacks.PutstopStackV3(v3_workspace_id_stacks.NewPutstopStackV3Params().WithWorkspaceID(workspaceID).WithName(name))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
 	log.Infof("[StopStack] stack stopted, name: %s", name)
 
 	if c.Bool(FlWaitOptional.Name) {
-		cbClient.waitForOperationToFinish(orgID, name, STOPPED, STOPPED)
+		cbClient.waitForOperationToFinish(workspaceID, name, STOPPED, STOPPED)
 	}
 }
 
@@ -232,10 +232,10 @@ func SyncStack(c *cli.Context) {
 	defer utils.TimeTrack(time.Now(), "sync stack")
 
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
-	orgID := c.Int64(FlOrganizationOptional.Name)
+	workspaceID := c.Int64(FlWorkspaceOptional.Name)
 	name := c.String(FlName.Name)
 	log.Infof("[SyncStack] syncing stack, name: %s", name)
-	err := cbClient.Cloudbreak.V3OrganizationIDStacks.PutsyncStackV3(v3_organization_id_stacks.NewPutsyncStackV3Params().WithOrganizationID(orgID).WithName(name))
+	err := cbClient.Cloudbreak.V3WorkspaceIDStacks.PutsyncStackV3(v3_workspace_id_stacks.NewPutsyncStackV3Params().WithWorkspaceID(workspaceID).WithName(name))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -247,7 +247,7 @@ func RepairStack(c *cli.Context) {
 	defer utils.TimeTrack(time.Now(), "repair stack")
 
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
-	orgID := c.Int64(FlOrganizationOptional.Name)
+	workspaceID := c.Int64(FlWorkspaceOptional.Name)
 	name := c.String(FlName.Name)
 	log.Infof("[RepairStack] repairing stack, id: %s", name)
 
@@ -258,14 +258,14 @@ func RepairStack(c *cli.Context) {
 	request.HostGroups = hostGroups
 	request.RemoveOnly = &removeOnly
 
-	err := cbClient.Cloudbreak.V3OrganizationIDStacks.RepairClusterV3(v3_organization_id_stacks.NewRepairClusterV3Params().WithOrganizationID(orgID).WithName(name).WithBody(&request))
+	err := cbClient.Cloudbreak.V3WorkspaceIDStacks.RepairClusterV3(v3_workspace_id_stacks.NewRepairClusterV3Params().WithWorkspaceID(workspaceID).WithName(name).WithBody(&request))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
 	log.Infof("[RepairStack] stack repaired, name: %s", name)
 
 	if c.Bool(FlWaitOptional.Name) {
-		cbClient.waitForOperationToFinish(orgID, name, AVAILABLE, AVAILABLE)
+		cbClient.waitForOperationToFinish(workspaceID, name, AVAILABLE, AVAILABLE)
 	}
 }
 
@@ -274,17 +274,17 @@ func RetryCluster(c *cli.Context) {
 	defer utils.TimeTrack(time.Now(), "retry cluster creation")
 
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
-	orgID := c.Int64(FlOrganizationOptional.Name)
+	workspaceID := c.Int64(FlWorkspaceOptional.Name)
 	name := c.String(FlName.Name)
 	log.Infof("[RetryCluster] retrying cluster creation, name: %s", name)
-	err := cbClient.Cloudbreak.V3OrganizationIDStacks.RetryStackV3(v3_organization_id_stacks.NewRetryStackV3Params().WithOrganizationID(orgID).WithName(name))
+	err := cbClient.Cloudbreak.V3WorkspaceIDStacks.RetryStackV3(v3_workspace_id_stacks.NewRetryStackV3Params().WithWorkspaceID(workspaceID).WithName(name))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
 	log.Infof("[RetryCluster] cluster creation retried, name: %s", name)
 
 	if c.Bool(FlWaitOptional.Name) {
-		cbClient.waitForOperationToFinish(orgID, name, AVAILABLE, AVAILABLE)
+		cbClient.waitForOperationToFinish(workspaceID, name, AVAILABLE, AVAILABLE)
 	}
 }
 
@@ -294,17 +294,17 @@ func ReinstallStack(c *cli.Context) {
 
 	req := assembleReinstallRequest(c)
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
-	orgID := c.Int64(FlOrganizationOptional.Name)
+	workspaceID := c.Int64(FlWorkspaceOptional.Name)
 	name := c.String(FlName.Name)
 	log.Infof("[RepairStack] reinstalling stack, name: %s", name)
-	err := cbClient.Cloudbreak.V3OrganizationIDStacks.PutreinstallStackV3(v3_organization_id_stacks.NewPutreinstallStackV3Params().WithOrganizationID(orgID).WithName(name).WithBody(req))
+	err := cbClient.Cloudbreak.V3WorkspaceIDStacks.PutreinstallStackV3(v3_workspace_id_stacks.NewPutreinstallStackV3Params().WithWorkspaceID(workspaceID).WithName(name).WithBody(req))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
 	log.Infof("[ReinstallStack] stack reinstalled, name: %s", name)
 
 	if c.Bool(FlWaitOptional.Name) {
-		cbClient.waitForOperationToFinish(orgID, name, AVAILABLE, AVAILABLE)
+		cbClient.waitForOperationToFinish(workspaceID, name, AVAILABLE, AVAILABLE)
 	}
 }
 
@@ -343,13 +343,13 @@ func DeleteStack(c *cli.Context) {
 	defer utils.TimeTrack(time.Now(), "delete stack")
 
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
-	orgID := c.Int64(FlOrganizationOptional.Name)
+	workspaceID := c.Int64(FlWorkspaceOptional.Name)
 	name := c.String(FlName.Name)
-	cbClient.deleteStack(orgID, name, c.Bool(FlForceOptional.Name))
+	cbClient.deleteStack(workspaceID, name, c.Bool(FlForceOptional.Name))
 	log.Infof("[DeleteStack] stack deleted, name: %s", name)
 
 	if c.Bool(FlWaitOptional.Name) {
-		cbClient.waitForOperationToFinish(orgID, name, DELETE_COMPLETED, SKIP)
+		cbClient.waitForOperationToFinish(workspaceID, name, DELETE_COMPLETED, SKIP)
 	}
 }
 
@@ -357,19 +357,19 @@ func ListStacks(c *cli.Context) {
 	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "list stacks")
 
-	orgID := c.Int64(FlOrganizationOptional.Name)
+	workspaceID := c.Int64(FlWorkspaceOptional.Name)
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
-	listStacksImpl(cbClient.Cloudbreak.V3OrganizationIDStacks, output.WriteList, orgID)
+	listStacksImpl(cbClient.Cloudbreak.V3WorkspaceIDStacks, output.WriteList, workspaceID)
 }
 
-type listStacksByOrganizationClient interface {
-	ListStacksByOrganization(*v3_organization_id_stacks.ListStacksByOrganizationParams) (*v3_organization_id_stacks.ListStacksByOrganizationOK, error)
+type listStacksByWorkspaceClient interface {
+	ListStacksByWorkspace(*v3_workspace_id_stacks.ListStacksByWorkspaceParams) (*v3_workspace_id_stacks.ListStacksByWorkspaceOK, error)
 }
 
-func listStacksImpl(client listStacksByOrganizationClient, writer func([]string, []utils.Row), orgID int64) {
+func listStacksImpl(client listStacksByWorkspaceClient, writer func([]string, []utils.Row), workspaceID int64) {
 	log.Infof("[listStacksImpl] sending stack list request")
-	stacksResp, err := client.ListStacksByOrganization(v3_organization_id_stacks.NewListStacksByOrganizationParams().WithOrganizationID(orgID))
+	stacksResp, err := client.ListStacksByWorkspace(v3_workspace_id_stacks.NewListStacksByWorkspaceParams().WithWorkspaceID(workspaceID))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}

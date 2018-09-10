@@ -123,9 +123,6 @@ type StackResponse struct {
 	// the details of the container orchestrator api to use
 	Orchestrator *OrchestratorResponse `json:"orchestrator,omitempty"`
 
-	// organization of the resource
-	Organization *OrganizationResourceResponse `json:"organization,omitempty"`
-
 	// id of the resource owner that is provided by OAuth provider
 	Owner string `json:"owner,omitempty"`
 
@@ -152,6 +149,9 @@ type StackResponse struct {
 
 	// stack related userdefined tags
 	UserDefinedTags map[string]string `json:"userDefinedTags,omitempty"`
+
+	// workspace of the resource
+	Workspace *WorkspaceResourceResponse `json:"workspace,omitempty"`
 }
 
 /* polymorph StackResponse account false */
@@ -218,8 +218,6 @@ type StackResponse struct {
 
 /* polymorph StackResponse orchestrator false */
 
-/* polymorph StackResponse organization false */
-
 /* polymorph StackResponse owner false */
 
 /* polymorph StackResponse parameters false */
@@ -237,6 +235,8 @@ type StackResponse struct {
 /* polymorph StackResponse statusReason false */
 
 /* polymorph StackResponse userDefinedTags false */
+
+/* polymorph StackResponse workspace false */
 
 // Validate validates this stack response
 func (m *StackResponse) Validate(formats strfmt.Registry) error {
@@ -312,17 +312,17 @@ func (m *StackResponse) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateOrganization(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
 	if err := m.validateStackAuthentication(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateStatus(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateWorkspace(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -659,25 +659,6 @@ func (m *StackResponse) validateOrchestrator(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *StackResponse) validateOrganization(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Organization) { // not required
-		return nil
-	}
-
-	if m.Organization != nil {
-
-		if err := m.Organization.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("organization")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
 func (m *StackResponse) validateStackAuthentication(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.StackAuthentication) { // not required
@@ -769,6 +750,25 @@ func (m *StackResponse) validateStatus(formats strfmt.Registry) error {
 	// value enum
 	if err := m.validateStatusEnum("status", "body", m.Status); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *StackResponse) validateWorkspace(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Workspace) { // not required
+		return nil
+	}
+
+	if m.Workspace != nil {
+
+		if err := m.Workspace.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("workspace")
+			}
+			return err
+		}
 	}
 
 	return nil

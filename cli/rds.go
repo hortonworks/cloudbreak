@@ -8,7 +8,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/cb-cli/cli/types"
 	"github.com/hortonworks/cb-cli/cli/utils"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_organization_id_rdsconfigs"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_workspace_id_rdsconfigs"
 	"github.com/hortonworks/cb-cli/models_cloudbreak"
 	"github.com/urfave/cli"
 )
@@ -37,9 +37,9 @@ func (r *rdsOutDescribe) DataAsStringArray() []string {
 }
 
 type rdsClient interface {
-	ListRdsConfigsByOrganization(params *v3_organization_id_rdsconfigs.ListRdsConfigsByOrganizationParams) (*v3_organization_id_rdsconfigs.ListRdsConfigsByOrganizationOK, error)
-	CreateRdsConfigInOrganization(params *v3_organization_id_rdsconfigs.CreateRdsConfigInOrganizationParams) (*v3_organization_id_rdsconfigs.CreateRdsConfigInOrganizationOK, error)
-	TestRdsConnectionInOrganization(params *v3_organization_id_rdsconfigs.TestRdsConnectionInOrganizationParams) (*v3_organization_id_rdsconfigs.TestRdsConnectionInOrganizationOK, error)
+	ListRdsConfigsByWorkspace(params *v3_workspace_id_rdsconfigs.ListRdsConfigsByWorkspaceParams) (*v3_workspace_id_rdsconfigs.ListRdsConfigsByWorkspaceOK, error)
+	CreateRdsConfigInWorkspace(params *v3_workspace_id_rdsconfigs.CreateRdsConfigInWorkspaceParams) (*v3_workspace_id_rdsconfigs.CreateRdsConfigInWorkspaceOK, error)
+	TestRdsConnectionInWorkspace(params *v3_workspace_id_rdsconfigs.TestRdsConnectionInWorkspaceParams) (*v3_workspace_id_rdsconfigs.TestRdsConnectionInWorkspaceOK, error)
 }
 
 func TestRdsByName(c *cli.Context) {
@@ -47,8 +47,8 @@ func TestRdsByName(c *cli.Context) {
 	log.Infof("[TestRdsByParams] test a database configuration")
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	testRdsByNameImpl(
-		cbClient.Cloudbreak.V3OrganizationIDRdsconfigs,
-		c.Int64(FlOrganizationOptional.Name),
+		cbClient.Cloudbreak.V3WorkspaceIDRdsconfigs,
+		c.Int64(FlWorkspaceOptional.Name),
 		c.String(FlName.Name))
 }
 
@@ -57,21 +57,21 @@ func TestRdsByParams(c *cli.Context) {
 	log.Infof("[TestRdsByParams] test a database configuration")
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	testRdsByParamsImpl(
-		cbClient.Cloudbreak.V3OrganizationIDRdsconfigs,
-		c.Int64(FlOrganizationOptional.Name),
+		cbClient.Cloudbreak.V3WorkspaceIDRdsconfigs,
+		c.Int64(FlWorkspaceOptional.Name),
 		c.String(FlRdsUserName.Name),
 		c.String(FlRdsPassword.Name),
 		c.String(FlRdsURL.Name),
 		c.String(FlRdsType.Name))
 }
 
-func testRdsByNameImpl(client rdsClient, orgID int64, name string) {
+func testRdsByNameImpl(client rdsClient, workspaceID int64, name string) {
 	defer utils.TimeTrack(time.Now(), "test database configuration by name")
 	rdsRequest := &models_cloudbreak.RdsTestRequest{
 		Name: name,
 	}
 	log.Infof("[testRdsByParamsImpl] sending test database configuration by parameters request")
-	resp, err := client.TestRdsConnectionInOrganization(v3_organization_id_rdsconfigs.NewTestRdsConnectionInOrganizationParams().WithOrganizationID(orgID).WithBody(rdsRequest))
+	resp, err := client.TestRdsConnectionInWorkspace(v3_workspace_id_rdsconfigs.NewTestRdsConnectionInWorkspaceParams().WithWorkspaceID(workspaceID).WithBody(rdsRequest))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -80,7 +80,7 @@ func testRdsByNameImpl(client rdsClient, orgID int64, name string) {
 	}
 }
 
-func testRdsByParamsImpl(client rdsClient, orgID int64, username string, password string, URL string, rdsType string) {
+func testRdsByParamsImpl(client rdsClient, workspaceID int64, username string, password string, URL string, rdsType string) {
 	defer utils.TimeTrack(time.Now(), "test database configuration by parameters")
 	rdsRequest := &models_cloudbreak.RdsTestRequest{
 		RdsConfig: &models_cloudbreak.RdsConfig{
@@ -92,7 +92,7 @@ func testRdsByParamsImpl(client rdsClient, orgID int64, username string, passwor
 		},
 	}
 	log.Infof("[testRdsByParamsImpl] sending test database configuration by parameters request")
-	resp, err := client.TestRdsConnectionInOrganization(v3_organization_id_rdsconfigs.NewTestRdsConnectionInOrganizationParams().WithOrganizationID(orgID).WithBody(rdsRequest))
+	resp, err := client.TestRdsConnectionInWorkspace(v3_workspace_id_rdsconfigs.NewTestRdsConnectionInWorkspaceParams().WithWorkspaceID(workspaceID).WithBody(rdsRequest))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -106,8 +106,8 @@ func CreateRdsOracle11(c *cli.Context) {
 	log.Infof("[CreateRdsOracle11] creating a database configuration")
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	createRdsImpl(
-		cbClient.Cloudbreak.V3OrganizationIDRdsconfigs,
-		c.Int64(FlOrganizationOptional.Name),
+		cbClient.Cloudbreak.V3WorkspaceIDRdsconfigs,
+		c.Int64(FlWorkspaceOptional.Name),
 		c.String(FlName.Name),
 		c.String(FlRdsUserName.Name),
 		c.String(FlRdsPassword.Name),
@@ -124,8 +124,8 @@ func CreateRdsOracle12(c *cli.Context) {
 	log.Infof("[CreateRdsOracle12] creating a database configuration")
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	createRdsImpl(
-		cbClient.Cloudbreak.V3OrganizationIDRdsconfigs,
-		c.Int64(FlOrganizationOptional.Name),
+		cbClient.Cloudbreak.V3WorkspaceIDRdsconfigs,
+		c.Int64(FlWorkspaceOptional.Name),
 		c.String(FlName.Name),
 		c.String(FlRdsUserName.Name),
 		c.String(FlRdsPassword.Name),
@@ -142,8 +142,8 @@ func CreateRds(c *cli.Context) {
 	log.Infof("[CreateRds] creating a database configuration")
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	createRdsImpl(
-		cbClient.Cloudbreak.V3OrganizationIDRdsconfigs,
-		c.Int64(FlOrganizationOptional.Name),
+		cbClient.Cloudbreak.V3WorkspaceIDRdsconfigs,
+		c.Int64(FlWorkspaceOptional.Name),
 		c.String(FlName.Name),
 		c.String(FlRdsUserName.Name),
 		c.String(FlRdsPassword.Name),
@@ -153,7 +153,7 @@ func CreateRds(c *cli.Context) {
 		nil)
 }
 
-func createRdsImpl(client rdsClient, orgID int64, name string, username string, password string, URL string, rdsType string, jarURL string, oracle *models_cloudbreak.Oracle) {
+func createRdsImpl(client rdsClient, workspaceID int64, name string, username string, password string, URL string, rdsType string, jarURL string, oracle *models_cloudbreak.Oracle) {
 	defer utils.TimeTrack(time.Now(), "create database")
 	rdsRequest := &models_cloudbreak.RdsConfig{
 		Name:               &name,
@@ -168,7 +168,7 @@ func createRdsImpl(client rdsClient, orgID int64, name string, username string, 
 	}
 	var rdsResponse *models_cloudbreak.RDSConfigResponse
 	log.Infof("[createRdsImpl] sending create database request")
-	resp, err := client.CreateRdsConfigInOrganization(v3_organization_id_rdsconfigs.NewCreateRdsConfigInOrganizationParams().WithOrganizationID(orgID).WithBody(rdsRequest))
+	resp, err := client.CreateRdsConfigInWorkspace(v3_workspace_id_rdsconfigs.NewCreateRdsConfigInWorkspaceParams().WithWorkspaceID(workspaceID).WithBody(rdsRequest))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -181,12 +181,12 @@ func DeleteRds(c *cli.Context) error {
 	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "delete a database configuration")
 
-	orgID := c.Int64(FlOrganizationOptional.Name)
+	workspaceID := c.Int64(FlWorkspaceOptional.Name)
 	rdsName := c.String(FlName.Name)
 	log.Infof("[DeleteRds] delete database configuration by name: %s", rdsName)
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 
-	if _, err := cbClient.Cloudbreak.V3OrganizationIDRdsconfigs.DeleteRdsConfigInOrganization(v3_organization_id_rdsconfigs.NewDeleteRdsConfigInOrganizationParams().WithOrganizationID(orgID).WithName(rdsName)); err != nil {
+	if _, err := cbClient.Cloudbreak.V3WorkspaceIDRdsconfigs.DeleteRdsConfigInWorkspace(v3_workspace_id_rdsconfigs.NewDeleteRdsConfigInWorkspaceParams().WithWorkspaceID(workspaceID).WithName(rdsName)); err != nil {
 		utils.LogErrorAndExit(err)
 	}
 	log.Infof("[DeleteRds] database configuration deleted: %s", rdsName)
@@ -199,11 +199,11 @@ func DescribeRds(c *cli.Context) {
 	log.Infof("[DescribeRds] Describes a database configuration")
 	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
 
-	orgID := c.Int64(FlOrganizationOptional.Name)
+	workspaceID := c.Int64(FlWorkspaceOptional.Name)
 	rdsName := c.String(FlName.Name)
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 
-	resp, err := cbClient.Cloudbreak.V3OrganizationIDRdsconfigs.GetRdsConfigInOrganization(v3_organization_id_rdsconfigs.NewGetRdsConfigInOrganizationParams().WithOrganizationID(orgID).WithName(rdsName))
+	resp, err := cbClient.Cloudbreak.V3WorkspaceIDRdsconfigs.GetRdsConfigInWorkspace(v3_workspace_id_rdsconfigs.NewGetRdsConfigInWorkspaceParams().WithWorkspaceID(workspaceID).WithName(rdsName))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -227,12 +227,12 @@ func ListAllRds(c *cli.Context) error {
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 
 	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
-	orgID := c.Int64(FlOrganizationOptional.Name)
-	return listAllRdsImpl(cbClient.Cloudbreak.V3OrganizationIDRdsconfigs, output.WriteList, orgID)
+	workspaceID := c.Int64(FlWorkspaceOptional.Name)
+	return listAllRdsImpl(cbClient.Cloudbreak.V3WorkspaceIDRdsconfigs, output.WriteList, workspaceID)
 }
 
-func listAllRdsImpl(rdsClient rdsClient, writer func([]string, []utils.Row), orgID int64) error {
-	resp, err := rdsClient.ListRdsConfigsByOrganization(v3_organization_id_rdsconfigs.NewListRdsConfigsByOrganizationParams().WithOrganizationID(orgID))
+func listAllRdsImpl(rdsClient rdsClient, writer func([]string, []utils.Row), workspaceID int64) error {
+	resp, err := rdsClient.ListRdsConfigsByWorkspace(v3_workspace_id_rdsconfigs.NewListRdsConfigsByWorkspaceParams().WithWorkspaceID(workspaceID))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}

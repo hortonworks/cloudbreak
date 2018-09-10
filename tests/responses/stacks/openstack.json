@@ -123,7 +123,7 @@
       "attachedClusters": []
     },
     "fileSystemResponse": null,
-    "organization": {
+    "workspace": {
       "id": 1,
       "name": "mock@hortonworks.com"
     }
@@ -142,7 +142,7 @@
     },
     "description": "",
     "topologyId": null,
-    "organization": {
+    "workspace": {
       "id": 1,
       "name": "mock@hortonworks.com"
     },
@@ -159,7 +159,7 @@
     },
     "topologyId": null,
     "name": "n38c93446-90ab-42e5-8b69-49e8bbe89d5e",
-    "organization": {
+    "workspace": {
       "id": 1,
       "name": "mock@hortonworks.com"
     },
@@ -212,7 +212,7 @@
             "id": 116
           }
         ],
-        "organization": {
+        "workspace": {
           "id": 1,
           "name": "mock@hortonworks.com"
         }
@@ -299,7 +299,7 @@
             "id": 120
           }
         ],
-        "organization": {
+        "workspace": {
           "id": 1,
           "name": "mock@hortonworks.com"
         }
@@ -365,7 +365,7 @@
             "id": 121
           }
         ],
-        "organization": {
+        "workspace": {
           "id": 1,
           "name": "mock@hortonworks.com"
         }
@@ -413,7 +413,7 @@
   "hardwareInfoGroups": [],
   "cloudbreakEvents": [],
   "cloudbreakUsages": [],
-  "organization": {
+  "workspace": {
     "id": 1,
     "name": "mock@hortonworks.com"
   },

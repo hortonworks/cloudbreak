@@ -120,7 +120,7 @@ RSpec.describe 'Cluster test cases', :type => :aruba do
   end
 
   it "Cluster - Describe Failure" do
-    requestBody = MockResponse.requestBodyCreate('getStackInOrganization', '{"message":"Stack \'az404\' not found"}', '404')
+    requestBody = MockResponse.requestBodyCreate('getStackInWorkspace', '{"message":"Stack \'az404\' not found"}', '404')
     url = ENV['BASE_URL'] + @mock_endpoint_setup
     MockResponse.post(requestBody, url)    
     result = cb.cluster.describe.name("az404").build(false)   
@@ -283,7 +283,7 @@ RSpec.describe 'Cluster test cases', :type => :aruba do
 
     it "Cluster - Generate attached cluster template " do 
     with_environment 'DEBUG' => '1' do   
-      requestBody = MockResponse.requestBodyCreate('getStackInOrganization', JSON.parse(load_json(@dl_stack_json)), '200')
+      requestBody = MockResponse.requestBodyCreate('getStackInWorkspace', JSON.parse(load_json(@dl_stack_json)), '200')
       url = ENV['BASE_URL'] + @mock_endpoint_setup
       MockResponse.post(requestBody, url)          
       result = cb.cluster.generate_attached_cluster_template.source_cluster("dl-ok").blueprint_name("test").build(false)
@@ -297,7 +297,7 @@ RSpec.describe 'Cluster test cases', :type => :aruba do
       temp_json = JSON.parse(load_json(@dl_stack_json))
       temp_json["status"] = "UPDATE_IN_PROGRESS"
       temp_json["cluster"]["status"] = "UPDATE_IN_PROGRESS"
-      requestBody = MockResponse.requestBodyCreate('getStackInOrganization', temp_json, '200')
+      requestBody = MockResponse.requestBodyCreate('getStackInWorkspace', temp_json, '200')
       url = ENV['BASE_URL'] + @mock_endpoint_setup
       MockResponse.post(requestBody, url)          
       result = cb.cluster.generate_attached_cluster_template.source_cluster("dl-ok").blueprint_name("test").build(false)
@@ -311,7 +311,7 @@ RSpec.describe 'Cluster test cases', :type => :aruba do
       temp_json = JSON.parse(load_json(@dl_stack_json))
       temp_json["status"] = "FAILED"
       temp_json["cluster"]["status"] = "FAILED"
-      requestBody = MockResponse.requestBodyCreate('getStackInOrganization', temp_json, '200')
+      requestBody = MockResponse.requestBodyCreate('getStackInWorkspace', temp_json, '200')
       url = ENV['BASE_URL'] + @mock_endpoint_setup
       MockResponse.post(requestBody, url)          
       result = cb.cluster.generate_attached_cluster_template.source_cluster("dl-ok").blueprint_name("test").build(false)

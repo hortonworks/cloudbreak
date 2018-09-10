@@ -11,7 +11,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/cb-cli/cli/utils"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_organization_id_blueprints"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_workspace_id_blueprints"
 	"github.com/hortonworks/cb-cli/models_cloudbreak"
 	"github.com/urfave/cli"
 )
@@ -57,12 +57,12 @@ func CreateBlueprintFromUrl(c *cli.Context) {
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	urlLocation := c.String(FlURL.Name)
 	createBlueprintImpl(
-		cbClient.Cloudbreak.V3OrganizationIDBlueprints,
+		cbClient.Cloudbreak.V3WorkspaceIDBlueprints,
 		c.String(FlName.Name),
 		c.String(FlDescriptionOptional.Name),
 		c.Bool(FlDlOptional.Name),
 		utils.ReadContentFromURL(urlLocation, new(http.Client)),
-		c.Int64(FlOrganizationOptional.Name))
+		c.Int64(FlWorkspaceOptional.Name))
 }
 
 func CreateBlueprintFromFile(c *cli.Context) {
@@ -72,15 +72,15 @@ func CreateBlueprintFromFile(c *cli.Context) {
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	fileLocation := c.String(FlFile.Name)
 	createBlueprintImpl(
-		cbClient.Cloudbreak.V3OrganizationIDBlueprints,
+		cbClient.Cloudbreak.V3WorkspaceIDBlueprints,
 		c.String(FlName.Name),
 		c.String(FlDescriptionOptional.Name),
 		c.Bool(FlDlOptional.Name),
 		utils.ReadFile(fileLocation),
-		c.Int64(FlOrganizationOptional.Name))
+		c.Int64(FlWorkspaceOptional.Name))
 }
 
-func createBlueprintImpl(client blueprintClient, name string, description string, dl bool, ambariBlueprint []byte, organization int64) *models_cloudbreak.BlueprintResponse {
+func createBlueprintImpl(client blueprintClient, name string, description string, dl bool, ambariBlueprint []byte, workspace int64) *models_cloudbreak.BlueprintResponse {
 	defer utils.TimeTrack(time.Now(), "create blueprint")
 	tags := map[string]interface{}{"shared_services_ready": dl}
 	bpRequest := &models_cloudbreak.BlueprintRequest{
@@ -92,7 +92,7 @@ func createBlueprintImpl(client blueprintClient, name string, description string
 	}
 	var blueprint *models_cloudbreak.BlueprintResponse
 	log.Infof("[createBlueprintImpl] sending create blueprint request")
-	resp, err := client.CreateBlueprintInOrganization(v3_organization_id_blueprints.NewCreateBlueprintInOrganizationParams().WithOrganizationID(organization).WithBody(bpRequest))
+	resp, err := client.CreateBlueprintInWorkspace(v3_workspace_id_blueprints.NewCreateBlueprintInWorkspaceParams().WithWorkspaceID(workspace).WithBody(bpRequest))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -108,7 +108,7 @@ func DescribeBlueprint(c *cli.Context) {
 
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
-	bp := fetchBlueprint(c.Int64(FlOrganizationOptional.Name), c.String(FlName.Name), cbClient.Cloudbreak.V3OrganizationIDBlueprints)
+	bp := fetchBlueprint(c.Int64(FlWorkspaceOptional.Name), c.String(FlName.Name), cbClient.Cloudbreak.V3WorkspaceIDBlueprints)
 	if output.Format != "table" {
 		output.Write(append(blueprintHeader, "Content", "ID"), convertResponseWithContentAndIDToBlueprint(bp))
 	} else {
@@ -116,12 +116,12 @@ func DescribeBlueprint(c *cli.Context) {
 	}
 }
 
-type getBlueprintInOrganization interface {
-	GetBlueprintInOrganization(*v3_organization_id_blueprints.GetBlueprintInOrganizationParams) (*v3_organization_id_blueprints.GetBlueprintInOrganizationOK, error)
+type getBlueprintInWorkspace interface {
+	GetBlueprintInWorkspace(*v3_workspace_id_blueprints.GetBlueprintInWorkspaceParams) (*v3_workspace_id_blueprints.GetBlueprintInWorkspaceOK, error)
 }
 
-func fetchBlueprint(organization int64, name string, client getBlueprintInOrganization) *models_cloudbreak.BlueprintResponse {
-	resp, err := client.GetBlueprintInOrganization(v3_organization_id_blueprints.NewGetBlueprintInOrganizationParams().WithOrganizationID(organization).WithName(name))
+func fetchBlueprint(workspace int64, name string, client getBlueprintInWorkspace) *models_cloudbreak.BlueprintResponse {
+	resp, err := client.GetBlueprintInWorkspace(v3_workspace_id_blueprints.NewGetBlueprintInWorkspaceParams().WithWorkspaceID(workspace).WithName(name))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -133,12 +133,12 @@ func DeleteBlueprint(c *cli.Context) {
 	defer utils.TimeTrack(time.Now(), "delete blueprint")
 
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
-	deleteBlueprintsImpl(cbClient.Cloudbreak.V3OrganizationIDBlueprints, c.Int64(FlOrganizationOptional.Name), c.String(FlName.Name))
+	deleteBlueprintsImpl(cbClient.Cloudbreak.V3WorkspaceIDBlueprints, c.Int64(FlWorkspaceOptional.Name), c.String(FlName.Name))
 }
 
-func deleteBlueprintsImpl(client blueprintClient, organization int64, name string) {
+func deleteBlueprintsImpl(client blueprintClient, workspace int64, name string) {
 	log.Infof("[deleteBlueprintsImpl] sending delete blueprint request with name: %s", name)
-	_, err := client.DeleteBlueprintInOrganization(v3_organization_id_blueprints.NewDeleteBlueprintInOrganizationParams().WithOrganizationID(organization).WithName(name))
+	_, err := client.DeleteBlueprintInWorkspace(v3_workspace_id_blueprints.NewDeleteBlueprintInWorkspaceParams().WithWorkspaceID(workspace).WithName(name))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -151,19 +151,19 @@ func ListBlueprints(c *cli.Context) {
 
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
-	organization := FlOrganizationOptional.Name
-	listBlueprintsImpl(c.Int64(organization), cbClient.Cloudbreak.V3OrganizationIDBlueprints, output.WriteList)
+	workspace := FlWorkspaceOptional.Name
+	listBlueprintsImpl(c.Int64(workspace), cbClient.Cloudbreak.V3WorkspaceIDBlueprints, output.WriteList)
 }
 
 type blueprintClient interface {
-	CreateBlueprintInOrganization(params *v3_organization_id_blueprints.CreateBlueprintInOrganizationParams) (*v3_organization_id_blueprints.CreateBlueprintInOrganizationOK, error)
-	ListBlueprintsByOrganization(params *v3_organization_id_blueprints.ListBlueprintsByOrganizationParams) (*v3_organization_id_blueprints.ListBlueprintsByOrganizationOK, error)
-	DeleteBlueprintInOrganization(params *v3_organization_id_blueprints.DeleteBlueprintInOrganizationParams) (*v3_organization_id_blueprints.DeleteBlueprintInOrganizationOK, error)
+	CreateBlueprintInWorkspace(params *v3_workspace_id_blueprints.CreateBlueprintInWorkspaceParams) (*v3_workspace_id_blueprints.CreateBlueprintInWorkspaceOK, error)
+	ListBlueprintsByWorkspace(params *v3_workspace_id_blueprints.ListBlueprintsByWorkspaceParams) (*v3_workspace_id_blueprints.ListBlueprintsByWorkspaceOK, error)
+	DeleteBlueprintInWorkspace(params *v3_workspace_id_blueprints.DeleteBlueprintInWorkspaceParams) (*v3_workspace_id_blueprints.DeleteBlueprintInWorkspaceOK, error)
 }
 
-func listBlueprintsImpl(organization int64, client blueprintClient, writer func([]string, []utils.Row)) {
+func listBlueprintsImpl(workspace int64, client blueprintClient, writer func([]string, []utils.Row)) {
 	log.Infof("[listBlueprintsImpl] sending blueprint list request")
-	resp, err := client.ListBlueprintsByOrganization(v3_organization_id_blueprints.NewListBlueprintsByOrganizationParams().WithOrganizationID(organization))
+	resp, err := client.ListBlueprintsByWorkspace(v3_workspace_id_blueprints.NewListBlueprintsByWorkspaceParams().WithWorkspaceID(workspace))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}

@@ -6,14 +6,14 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/cb-cli/cli/utils"
-	proxyConfig "github.com/hortonworks/cb-cli/client_cloudbreak/v3_organization_id_proxyconfigs"
+	proxyConfig "github.com/hortonworks/cb-cli/client_cloudbreak/v3_workspace_id_proxyconfigs"
 	"github.com/hortonworks/cb-cli/models_cloudbreak"
 	"github.com/urfave/cli"
 )
 
 type proxyClient interface {
-	CreateProxyconfigInOrganization(params *proxyConfig.CreateProxyconfigInOrganizationParams) (*proxyConfig.CreateProxyconfigInOrganizationOK, error)
-	ListProxyconfigsByOrganization(params *proxyConfig.ListProxyconfigsByOrganizationParams) (*proxyConfig.ListProxyconfigsByOrganizationOK, error)
+	CreateProxyconfigInWorkspace(params *proxyConfig.CreateProxyconfigInWorkspaceParams) (*proxyConfig.CreateProxyconfigInWorkspaceOK, error)
+	ListProxyconfigsByWorkspace(params *proxyConfig.ListProxyconfigsByWorkspaceParams) (*proxyConfig.ListProxyconfigsByWorkspaceOK, error)
 }
 
 var ProxyHeader = []string{"Name", "Host", "Port", "Protocol", "User"}
@@ -34,7 +34,7 @@ func CreateProxy(c *cli.Context) error {
 	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "create proxy")
 
-	orgID := c.Int64(FlOrganizationOptional.Name)
+	workspaceID := c.Int64(FlWorkspaceOptional.Name)
 	name := c.String(FlName.Name)
 	host := c.String(FlProxyHost.Name)
 	port := c.String(FlProxyPort.Name)
@@ -49,10 +49,10 @@ func CreateProxy(c *cli.Context) error {
 
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 
-	return createProxy(cbClient.Cloudbreak.V3OrganizationIDProxyconfigs, orgID, name, host, int32(serverPort), protocol, user, password)
+	return createProxy(cbClient.Cloudbreak.V3WorkspaceIDProxyconfigs, workspaceID, name, host, int32(serverPort), protocol, user, password)
 }
 
-func createProxy(proxyClient proxyClient, orgID int64, name, host string, port int32, protocol, user, password string) error {
+func createProxy(proxyClient proxyClient, workspaceID int64, name, host string, port int32, protocol, user, password string) error {
 	proxyRequest := &models_cloudbreak.ProxyConfigRequest{
 		Name:       &name,
 		ServerHost: &host,
@@ -64,7 +64,7 @@ func createProxy(proxyClient proxyClient, orgID int64, name, host string, port i
 
 	log.Infof("[createProxy] create proxy with name: %s", name)
 	var proxy *models_cloudbreak.ProxyConfigResponse
-	resp, err := proxyClient.CreateProxyconfigInOrganization(proxyConfig.NewCreateProxyconfigInOrganizationParams().WithOrganizationID(orgID).WithBody(proxyRequest))
+	resp, err := proxyClient.CreateProxyconfigInWorkspace(proxyConfig.NewCreateProxyconfigInWorkspaceParams().WithWorkspaceID(workspaceID).WithBody(proxyRequest))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -81,12 +81,12 @@ func ListProxies(c *cli.Context) error {
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 
 	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
-	orgID := c.Int64(FlOrganizationOptional.Name)
-	return listProxiesImpl(cbClient.Cloudbreak.V3OrganizationIDProxyconfigs, output.WriteList, orgID)
+	workspaceID := c.Int64(FlWorkspaceOptional.Name)
+	return listProxiesImpl(cbClient.Cloudbreak.V3WorkspaceIDProxyconfigs, output.WriteList, workspaceID)
 }
 
-func listProxiesImpl(proxyClient proxyClient, writer func([]string, []utils.Row), orgID int64) error {
-	resp, err := proxyClient.ListProxyconfigsByOrganization(proxyConfig.NewListProxyconfigsByOrganizationParams().WithOrganizationID(orgID))
+func listProxiesImpl(proxyClient proxyClient, writer func([]string, []utils.Row), workspaceID int64) error {
+	resp, err := proxyClient.ListProxyconfigsByWorkspace(proxyConfig.NewListProxyconfigsByWorkspaceParams().WithWorkspaceID(workspaceID))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -111,13 +111,13 @@ func DeleteProxy(c *cli.Context) error {
 	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "delete a proxy")
 
-	orgID := c.Int64(FlOrganizationOptional.Name)
+	workspaceID := c.Int64(FlWorkspaceOptional.Name)
 	proxyName := c.String(FlName.Name)
 	log.Infof("[DeleteProxy] delete proxy config by name: %s", proxyName)
 
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 
-	if _, err := cbClient.Cloudbreak.V3OrganizationIDProxyconfigs.DeleteProxyconfigInOrganization(proxyConfig.NewDeleteProxyconfigInOrganizationParams().WithOrganizationID(orgID).WithName(proxyName)); err != nil {
+	if _, err := cbClient.Cloudbreak.V3WorkspaceIDProxyconfigs.DeleteProxyconfigInWorkspace(proxyConfig.NewDeleteProxyconfigInWorkspaceParams().WithWorkspaceID(workspaceID).WithName(proxyName)); err != nil {
 		utils.LogErrorAndExit(err)
 	}
 	log.Infof("[DeleteProxy] proxy config deleted: %s", proxyName)

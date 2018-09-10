@@ -8,14 +8,14 @@ import (
 	_ "github.com/hortonworks/cb-cli/cli/cloud/aws"
 	"github.com/hortonworks/cb-cli/cli/types"
 	"github.com/hortonworks/cb-cli/cli/utils"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_organization_id_imagecatalogs"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_workspace_id_imagecatalogs"
 	"github.com/hortonworks/cb-cli/models_cloudbreak"
 )
 
-type mockListImageCatalogsByOrganizationClient struct {
+type mockListImageCatalogsByWorkspaceClient struct {
 }
 
-func (*mockListImageCatalogsByOrganizationClient) ListImageCatalogsByOrganization(params *v3_organization_id_imagecatalogs.ListImageCatalogsByOrganizationParams) (*v3_organization_id_imagecatalogs.ListImageCatalogsByOrganizationOK, error) {
+func (*mockListImageCatalogsByWorkspaceClient) ListImageCatalogsByWorkspace(params *v3_workspace_id_imagecatalogs.ListImageCatalogsByWorkspaceParams) (*v3_workspace_id_imagecatalogs.ListImageCatalogsByWorkspaceOK, error) {
 	resp := []*models_cloudbreak.ImageCatalogResponse{
 		{
 			Name:          &(&types.S{S: "test"}).S,
@@ -23,14 +23,14 @@ func (*mockListImageCatalogsByOrganizationClient) ListImageCatalogsByOrganizatio
 			URL:           &(&types.S{S: "testurl"}).S,
 		},
 	}
-	return &v3_organization_id_imagecatalogs.ListImageCatalogsByOrganizationOK{Payload: resp}, nil
+	return &v3_workspace_id_imagecatalogs.ListImageCatalogsByWorkspaceOK{Payload: resp}, nil
 }
 
 func TestListImagecatalogsImpl(t *testing.T) {
 	t.Parallel()
 
 	var rows []utils.Row
-	listImagecatalogsImpl(new(mockListImageCatalogsByOrganizationClient), int64(2), func(h []string, r []utils.Row) { rows = r })
+	listImagecatalogsImpl(new(mockListImageCatalogsByWorkspaceClient), int64(2), func(h []string, r []utils.Row) { rows = r })
 	if len(rows) != 1 {
 		t.Fatalf("row number doesn't match 1 == %d", len(rows))
 	}
@@ -45,7 +45,7 @@ func TestListImagecatalogsImpl(t *testing.T) {
 type mockGetPublicImagesClient struct {
 }
 
-func (*mockGetPublicImagesClient) GetImagesByProviderAndCustomImageCatalogInOrganization(params *v3_organization_id_imagecatalogs.GetImagesByProviderAndCustomImageCatalogInOrganizationParams) (*v3_organization_id_imagecatalogs.GetImagesByProviderAndCustomImageCatalogInOrganizationOK, error) {
+func (*mockGetPublicImagesClient) GetImagesByProviderAndCustomImageCatalogInWorkspace(params *v3_workspace_id_imagecatalogs.GetImagesByProviderAndCustomImageCatalogInWorkspaceParams) (*v3_workspace_id_imagecatalogs.GetImagesByProviderAndCustomImageCatalogInWorkspaceOK, error) {
 	resp := &models_cloudbreak.ImagesResponse{
 		BaseImages: []*models_cloudbreak.BaseImageResponse{
 			{
@@ -56,7 +56,7 @@ func (*mockGetPublicImagesClient) GetImagesByProviderAndCustomImageCatalogInOrga
 			},
 		},
 	}
-	return &v3_organization_id_imagecatalogs.GetImagesByProviderAndCustomImageCatalogInOrganizationOK{Payload: resp}, nil
+	return &v3_workspace_id_imagecatalogs.GetImagesByProviderAndCustomImageCatalogInWorkspaceOK{Payload: resp}, nil
 }
 
 func TestListImagesImpl(t *testing.T) {

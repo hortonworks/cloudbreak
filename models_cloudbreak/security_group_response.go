@@ -35,9 +35,6 @@ type SecurityGroupResponse struct {
 	// name of the resource
 	Name string `json:"name,omitempty"`
 
-	// organization of the resource
-	Organization *OrganizationResourceResponse `json:"organization,omitempty"`
-
 	// Exisiting security group id
 	SecurityGroupID string `json:"securityGroupId,omitempty"`
 
@@ -47,6 +44,9 @@ type SecurityGroupResponse struct {
 
 	// list of security rules that relates to the security group
 	SecurityRules []*SecurityRuleResponse `json:"securityRules"`
+
+	// workspace of the resource
+	Workspace *WorkspaceResourceResponse `json:"workspace,omitempty"`
 }
 
 /* polymorph SecurityGroupResponse cloudPlatform false */
@@ -57,13 +57,13 @@ type SecurityGroupResponse struct {
 
 /* polymorph SecurityGroupResponse name false */
 
-/* polymorph SecurityGroupResponse organization false */
-
 /* polymorph SecurityGroupResponse securityGroupId false */
 
 /* polymorph SecurityGroupResponse securityGroupIds false */
 
 /* polymorph SecurityGroupResponse securityRules false */
+
+/* polymorph SecurityGroupResponse workspace false */
 
 // Validate validates this security group response
 func (m *SecurityGroupResponse) Validate(formats strfmt.Registry) error {
@@ -79,17 +79,17 @@ func (m *SecurityGroupResponse) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateOrganization(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
 	if err := m.validateSecurityGroupIds(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateSecurityRules(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateWorkspace(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -121,25 +121,6 @@ func (m *SecurityGroupResponse) validateDescription(formats strfmt.Registry) err
 
 	if err := validate.MaxLength("description", "body", string(*m.Description), 1000); err != nil {
 		return err
-	}
-
-	return nil
-}
-
-func (m *SecurityGroupResponse) validateOrganization(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Organization) { // not required
-		return nil
-	}
-
-	if m.Organization != nil {
-
-		if err := m.Organization.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("organization")
-			}
-			return err
-		}
 	}
 
 	return nil
@@ -180,6 +161,25 @@ func (m *SecurityGroupResponse) validateSecurityRules(formats strfmt.Registry) e
 			}
 		}
 
+	}
+
+	return nil
+}
+
+func (m *SecurityGroupResponse) validateWorkspace(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Workspace) { // not required
+		return nil
+	}
+
+	if m.Workspace != nil {
+
+		if err := m.Workspace.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("workspace")
+			}
+			return err
+		}
 	}
 
 	return nil

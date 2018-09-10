@@ -6,7 +6,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/cb-cli/cli/utils"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_organization_id_audits"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_workspace_id_audits"
 	"github.com/hortonworks/cb-cli/models_cloudbreak"
 	"github.com/urfave/cli"
 	yaml "gopkg.in/yaml.v2"
@@ -29,8 +29,8 @@ type auditOut struct {
 }
 
 type auditClient interface {
-	GetAuditEventsInOrganization(params *v3_organization_id_audits.GetAuditEventsInOrganizationParams) (*v3_organization_id_audits.GetAuditEventsInOrganizationOK, error)
-	GetAuditEventByOrganization(params *v3_organization_id_audits.GetAuditEventByOrganizationParams) (*v3_organization_id_audits.GetAuditEventByOrganizationOK, error)
+	GetAuditEventsInWorkspace(params *v3_workspace_id_audits.GetAuditEventsInWorkspaceParams) (*v3_workspace_id_audits.GetAuditEventsInWorkspaceOK, error)
+	GetAuditEventByWorkspace(params *v3_workspace_id_audits.GetAuditEventByWorkspaceParams) (*v3_workspace_id_audits.GetAuditEventByWorkspaceOK, error)
 }
 
 func (a *auditOut) DataAsStringArray() []string {
@@ -76,19 +76,19 @@ func listAudits(resourceType string, c *cli.Context) {
 	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "list audits")
 	log.Infof("[ListAudits] List all audits for a resource identified by Resource ID")
-	orgID := c.Int64(FlOrganizationOptional.Name)
+	workspaceID := c.Int64(FlWorkspaceOptional.Name)
 	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
 	resourceID := c.String(FlResourceID.Name)
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
-	listAuditsImpl(cbClient.Cloudbreak.V3OrganizationIDAudits, orgID, resourceType, resourceID, output.WriteList)
+	listAuditsImpl(cbClient.Cloudbreak.V3WorkspaceIDAudits, workspaceID, resourceType, resourceID, output.WriteList)
 }
 
-func listAuditsImpl(client auditClient, orgID int64, resourceType string, resourceIDString string, writer func([]string, []utils.Row)) {
+func listAuditsImpl(client auditClient, workspaceID int64, resourceType string, resourceIDString string, writer func([]string, []utils.Row)) {
 	resourceID, err := strconv.ParseInt(resourceIDString, 10, 64)
 	if err != nil {
 		utils.LogErrorMessageAndExit("Unable to parse as number: " + resourceIDString)
 	}
-	resp, err := client.GetAuditEventsInOrganization(v3_organization_id_audits.NewGetAuditEventsInOrganizationParams().WithOrganizationID(orgID).WithResourceType(resourceType).WithResourceID(resourceID))
+	resp, err := client.GetAuditEventsInWorkspace(v3_workspace_id_audits.NewGetAuditEventsInWorkspaceParams().WithWorkspaceID(workspaceID).WithResourceType(resourceType).WithResourceID(resourceID))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -103,19 +103,19 @@ func DescribeAudit(c *cli.Context) {
 	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "describe audit")
 	log.Infof("[DescribeAudit] Show audit entry identified by Audit ID")
-	orgID := c.Int64(FlOrganizationOptional.Name)
+	workspaceID := c.Int64(FlWorkspaceOptional.Name)
 	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
 	auditID := c.String(FlAuditID.Name)
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
-	describeAuditImpl(cbClient.Cloudbreak.V3OrganizationIDAudits, orgID, auditID, output.WriteList)
+	describeAuditImpl(cbClient.Cloudbreak.V3WorkspaceIDAudits, workspaceID, auditID, output.WriteList)
 }
 
-func describeAuditImpl(client auditClient, orgID int64, auditIDString string, writer func([]string, []utils.Row)) {
+func describeAuditImpl(client auditClient, workspaceID int64, auditIDString string, writer func([]string, []utils.Row)) {
 	auditID, err := strconv.ParseInt(auditIDString, 10, 64)
 	if err != nil {
 		utils.LogErrorMessageAndExit("Unable to parse as number: " + auditIDString)
 	}
-	resp, err := client.GetAuditEventByOrganization(v3_organization_id_audits.NewGetAuditEventByOrganizationParams().WithOrganizationID(orgID).WithAuditID(auditID))
+	resp, err := client.GetAuditEventByWorkspace(v3_workspace_id_audits.NewGetAuditEventByWorkspaceParams().WithWorkspaceID(workspaceID).WithAuditID(auditID))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}

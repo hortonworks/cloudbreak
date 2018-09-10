@@ -11,6 +11,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
+	"github.com/hortonworks/cb-cli/client_cloudbreak/autoscale"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1accountpreferences"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1audits"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1blueprints"
@@ -35,24 +36,25 @@ import (
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1util"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v2connectors"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v2stacks"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_organization_id_audits"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_organization_id_blueprints"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_organization_id_connectors"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_organization_id_credentials"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_organization_id_events"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_organization_id_filesystems"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_organization_id_flexsubscriptions"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_organization_id_imagecatalogs"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_organization_id_knoxservices"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_organization_id_ldapconfigs"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_organization_id_mpacks"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_organization_id_proxyconfigs"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_organization_id_rdsconfigs"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_organization_id_recipes"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_organization_id_smartsensesubscriptions"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_organization_id_stacks"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/v3organizations"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_workspace_id_audits"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_workspace_id_blueprints"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_workspace_id_connectors"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_workspace_id_credentials"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_workspace_id_events"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_workspace_id_filesystems"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_workspace_id_flexsubscriptions"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_workspace_id_imagecatalogs"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_workspace_id_knoxservices"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_workspace_id_ldapconfigs"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_workspace_id_mpacks"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_workspace_id_proxyconfigs"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_workspace_id_rdsconfigs"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_workspace_id_recipes"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_workspace_id_smartsensesubscriptions"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_workspace_id_stacks"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v3_workspace_id_users"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v3utils"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v3workspaces"
 )
 
 // Default cloudbreak HTTP client.
@@ -95,6 +97,8 @@ func NewHTTPClientWithConfig(formats strfmt.Registry, cfg *TransportConfig) *Clo
 func New(transport runtime.ClientTransport, formats strfmt.Registry) *Cloudbreak {
 	cli := new(Cloudbreak)
 	cli.Transport = transport
+
+	cli.Autoscale = autoscale.New(transport, formats)
 
 	cli.V1accountpreferences = v1accountpreferences.New(transport, formats)
 
@@ -144,41 +148,43 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *Cloudbreak
 
 	cli.V2stacks = v2stacks.New(transport, formats)
 
-	cli.V3OrganizationIDAudits = v3_organization_id_audits.New(transport, formats)
+	cli.V3WorkspaceIDAudits = v3_workspace_id_audits.New(transport, formats)
 
-	cli.V3OrganizationIDBlueprints = v3_organization_id_blueprints.New(transport, formats)
+	cli.V3WorkspaceIDBlueprints = v3_workspace_id_blueprints.New(transport, formats)
 
-	cli.V3OrganizationIDConnectors = v3_organization_id_connectors.New(transport, formats)
+	cli.V3WorkspaceIDConnectors = v3_workspace_id_connectors.New(transport, formats)
 
-	cli.V3OrganizationIDCredentials = v3_organization_id_credentials.New(transport, formats)
+	cli.V3WorkspaceIDCredentials = v3_workspace_id_credentials.New(transport, formats)
 
-	cli.V3OrganizationIDEvents = v3_organization_id_events.New(transport, formats)
+	cli.V3WorkspaceIDEvents = v3_workspace_id_events.New(transport, formats)
 
-	cli.V3OrganizationIDFilesystems = v3_organization_id_filesystems.New(transport, formats)
+	cli.V3WorkspaceIDFilesystems = v3_workspace_id_filesystems.New(transport, formats)
 
-	cli.V3OrganizationIDFlexsubscriptions = v3_organization_id_flexsubscriptions.New(transport, formats)
+	cli.V3WorkspaceIDFlexsubscriptions = v3_workspace_id_flexsubscriptions.New(transport, formats)
 
-	cli.V3OrganizationIDImagecatalogs = v3_organization_id_imagecatalogs.New(transport, formats)
+	cli.V3WorkspaceIDImagecatalogs = v3_workspace_id_imagecatalogs.New(transport, formats)
 
-	cli.V3OrganizationIDKnoxservices = v3_organization_id_knoxservices.New(transport, formats)
+	cli.V3WorkspaceIDKnoxservices = v3_workspace_id_knoxservices.New(transport, formats)
 
-	cli.V3OrganizationIDLdapconfigs = v3_organization_id_ldapconfigs.New(transport, formats)
+	cli.V3WorkspaceIDLdapconfigs = v3_workspace_id_ldapconfigs.New(transport, formats)
 
-	cli.V3OrganizationIDMpacks = v3_organization_id_mpacks.New(transport, formats)
+	cli.V3WorkspaceIDMpacks = v3_workspace_id_mpacks.New(transport, formats)
 
-	cli.V3OrganizationIDProxyconfigs = v3_organization_id_proxyconfigs.New(transport, formats)
+	cli.V3WorkspaceIDProxyconfigs = v3_workspace_id_proxyconfigs.New(transport, formats)
 
-	cli.V3OrganizationIDRdsconfigs = v3_organization_id_rdsconfigs.New(transport, formats)
+	cli.V3WorkspaceIDRdsconfigs = v3_workspace_id_rdsconfigs.New(transport, formats)
 
-	cli.V3OrganizationIDRecipes = v3_organization_id_recipes.New(transport, formats)
+	cli.V3WorkspaceIDRecipes = v3_workspace_id_recipes.New(transport, formats)
 
-	cli.V3OrganizationIDSmartsensesubscriptions = v3_organization_id_smartsensesubscriptions.New(transport, formats)
+	cli.V3WorkspaceIDSmartsensesubscriptions = v3_workspace_id_smartsensesubscriptions.New(transport, formats)
 
-	cli.V3OrganizationIDStacks = v3_organization_id_stacks.New(transport, formats)
+	cli.V3WorkspaceIDStacks = v3_workspace_id_stacks.New(transport, formats)
 
-	cli.V3organizations = v3organizations.New(transport, formats)
+	cli.V3WorkspaceIDUsers = v3_workspace_id_users.New(transport, formats)
 
 	cli.V3utils = v3utils.New(transport, formats)
+
+	cli.V3workspaces = v3workspaces.New(transport, formats)
 
 	return cli
 }
@@ -224,6 +230,8 @@ func (cfg *TransportConfig) WithSchemes(schemes []string) *TransportConfig {
 
 // Cloudbreak is a client for cloudbreak
 type Cloudbreak struct {
+	Autoscale *autoscale.Client
+
 	V1accountpreferences *v1accountpreferences.Client
 
 	V1audits *v1audits.Client
@@ -272,41 +280,43 @@ type Cloudbreak struct {
 
 	V2stacks *v2stacks.Client
 
-	V3OrganizationIDAudits *v3_organization_id_audits.Client
+	V3WorkspaceIDAudits *v3_workspace_id_audits.Client
 
-	V3OrganizationIDBlueprints *v3_organization_id_blueprints.Client
+	V3WorkspaceIDBlueprints *v3_workspace_id_blueprints.Client
 
-	V3OrganizationIDConnectors *v3_organization_id_connectors.Client
+	V3WorkspaceIDConnectors *v3_workspace_id_connectors.Client
 
-	V3OrganizationIDCredentials *v3_organization_id_credentials.Client
+	V3WorkspaceIDCredentials *v3_workspace_id_credentials.Client
 
-	V3OrganizationIDEvents *v3_organization_id_events.Client
+	V3WorkspaceIDEvents *v3_workspace_id_events.Client
 
-	V3OrganizationIDFilesystems *v3_organization_id_filesystems.Client
+	V3WorkspaceIDFilesystems *v3_workspace_id_filesystems.Client
 
-	V3OrganizationIDFlexsubscriptions *v3_organization_id_flexsubscriptions.Client
+	V3WorkspaceIDFlexsubscriptions *v3_workspace_id_flexsubscriptions.Client
 
-	V3OrganizationIDImagecatalogs *v3_organization_id_imagecatalogs.Client
+	V3WorkspaceIDImagecatalogs *v3_workspace_id_imagecatalogs.Client
 
-	V3OrganizationIDKnoxservices *v3_organization_id_knoxservices.Client
+	V3WorkspaceIDKnoxservices *v3_workspace_id_knoxservices.Client
 
-	V3OrganizationIDLdapconfigs *v3_organization_id_ldapconfigs.Client
+	V3WorkspaceIDLdapconfigs *v3_workspace_id_ldapconfigs.Client
 
-	V3OrganizationIDMpacks *v3_organization_id_mpacks.Client
+	V3WorkspaceIDMpacks *v3_workspace_id_mpacks.Client
 
-	V3OrganizationIDProxyconfigs *v3_organization_id_proxyconfigs.Client
+	V3WorkspaceIDProxyconfigs *v3_workspace_id_proxyconfigs.Client
 
-	V3OrganizationIDRdsconfigs *v3_organization_id_rdsconfigs.Client
+	V3WorkspaceIDRdsconfigs *v3_workspace_id_rdsconfigs.Client
 
-	V3OrganizationIDRecipes *v3_organization_id_recipes.Client
+	V3WorkspaceIDRecipes *v3_workspace_id_recipes.Client
 
-	V3OrganizationIDSmartsensesubscriptions *v3_organization_id_smartsensesubscriptions.Client
+	V3WorkspaceIDSmartsensesubscriptions *v3_workspace_id_smartsensesubscriptions.Client
 
-	V3OrganizationIDStacks *v3_organization_id_stacks.Client
+	V3WorkspaceIDStacks *v3_workspace_id_stacks.Client
 
-	V3organizations *v3organizations.Client
+	V3WorkspaceIDUsers *v3_workspace_id_users.Client
 
 	V3utils *v3utils.Client
+
+	V3workspaces *v3workspaces.Client
 
 	Transport runtime.ClientTransport
 }
@@ -314,6 +324,8 @@ type Cloudbreak struct {
 // SetTransport changes the transport on the client and all its subresources
 func (c *Cloudbreak) SetTransport(transport runtime.ClientTransport) {
 	c.Transport = transport
+
+	c.Autoscale.SetTransport(transport)
 
 	c.V1accountpreferences.SetTransport(transport)
 
@@ -363,40 +375,42 @@ func (c *Cloudbreak) SetTransport(transport runtime.ClientTransport) {
 
 	c.V2stacks.SetTransport(transport)
 
-	c.V3OrganizationIDAudits.SetTransport(transport)
+	c.V3WorkspaceIDAudits.SetTransport(transport)
 
-	c.V3OrganizationIDBlueprints.SetTransport(transport)
+	c.V3WorkspaceIDBlueprints.SetTransport(transport)
 
-	c.V3OrganizationIDConnectors.SetTransport(transport)
+	c.V3WorkspaceIDConnectors.SetTransport(transport)
 
-	c.V3OrganizationIDCredentials.SetTransport(transport)
+	c.V3WorkspaceIDCredentials.SetTransport(transport)
 
-	c.V3OrganizationIDEvents.SetTransport(transport)
+	c.V3WorkspaceIDEvents.SetTransport(transport)
 
-	c.V3OrganizationIDFilesystems.SetTransport(transport)
+	c.V3WorkspaceIDFilesystems.SetTransport(transport)
 
-	c.V3OrganizationIDFlexsubscriptions.SetTransport(transport)
+	c.V3WorkspaceIDFlexsubscriptions.SetTransport(transport)
 
-	c.V3OrganizationIDImagecatalogs.SetTransport(transport)
+	c.V3WorkspaceIDImagecatalogs.SetTransport(transport)
 
-	c.V3OrganizationIDKnoxservices.SetTransport(transport)
+	c.V3WorkspaceIDKnoxservices.SetTransport(transport)
 
-	c.V3OrganizationIDLdapconfigs.SetTransport(transport)
+	c.V3WorkspaceIDLdapconfigs.SetTransport(transport)
 
-	c.V3OrganizationIDMpacks.SetTransport(transport)
+	c.V3WorkspaceIDMpacks.SetTransport(transport)
 
-	c.V3OrganizationIDProxyconfigs.SetTransport(transport)
+	c.V3WorkspaceIDProxyconfigs.SetTransport(transport)
 
-	c.V3OrganizationIDRdsconfigs.SetTransport(transport)
+	c.V3WorkspaceIDRdsconfigs.SetTransport(transport)
 
-	c.V3OrganizationIDRecipes.SetTransport(transport)
+	c.V3WorkspaceIDRecipes.SetTransport(transport)
 
-	c.V3OrganizationIDSmartsensesubscriptions.SetTransport(transport)
+	c.V3WorkspaceIDSmartsensesubscriptions.SetTransport(transport)
 
-	c.V3OrganizationIDStacks.SetTransport(transport)
+	c.V3WorkspaceIDStacks.SetTransport(transport)
 
-	c.V3organizations.SetTransport(transport)
+	c.V3WorkspaceIDUsers.SetTransport(transport)
 
 	c.V3utils.SetTransport(transport)
+
+	c.V3workspaces.SetTransport(transport)
 
 }
