@@ -70,6 +70,9 @@ type AmbariV2Request struct {
 
 	// blueprint validation
 	ValidateBlueprint *bool `json:"validateBlueprint,omitempty"`
+
+	// ambari and stack repository validation
+	ValidateRepositories *bool `json:"validateRepositories,omitempty"`
 }
 
 /* polymorph AmbariV2Request ambariDatabaseDetails false */
@@ -99,6 +102,8 @@ type AmbariV2Request struct {
 /* polymorph AmbariV2Request userName false */
 
 /* polymorph AmbariV2Request validateBlueprint false */
+
+/* polymorph AmbariV2Request validateRepositories false */
 
 // Validate validates this ambari v2 request
 func (m *AmbariV2Request) Validate(formats strfmt.Registry) error {
