@@ -66,8 +66,7 @@ public class ServiceEndpointCollector {
         if ("HDF".equals(stackName) && versionComparator.compare(() -> stackVersion, () -> "3.2") < 0) {
             return Collections.emptyList();
         } else {
-            Collection<ExposedService> exposedServices = ExposedService.knoxServicesForComponents(blueprintComponents);
-            return ExposedServiceResponse.fromExposedServices(exposedServices);
+            return getKnoxServices(blueprint);
         }
     }
 
@@ -92,8 +91,7 @@ public class ServiceEndpointCollector {
 
     public Map<String, Collection<ClusterExposedServiceResponse>> prepareClusterExposedServices(Cluster cluster, String ambariIp) {
         BlueprintTextProcessor blueprintTextProcessor = new BlueprintProcessorFactory().get(cluster.getBlueprint().getBlueprintText());
-        Set<String> componentsInBlueprint = blueprintTextProcessor.getAllComponents();
-        Collection<ExposedService> knownExposedServices = ExposedService.knoxServicesForComponents(componentsInBlueprint);
+        Collection<ExposedService> knownExposedServices = getExposedServices(blueprintTextProcessor, Collections.emptySet());
 
         Gateway gateway = cluster.getGateway();
         Map<String, Collection<ClusterExposedServiceResponse>> clusterExposedServiceMap = new HashMap<>();
@@ -121,6 +119,31 @@ public class ServiceEndpointCollector {
         }
 
         return clusterExposedServiceMap;
+    }
+
+    private Collection<ExposedService> getExposedServices(BlueprintTextProcessor blueprintTextProcessor, Set<String> removableComponents) {
+        Set<String> blueprintComponents = blueprintTextProcessor.getAllComponents();
+        blueprintComponents.removeAll(removableComponents);
+        String stackName = blueprintTextProcessor.getStackName();
+        String stackVersion = blueprintTextProcessor.getStackVersion();
+        VersionComparator versionComparator = new VersionComparator();
+        if ("HDF".equals(stackName) && versionComparator.compare(() -> stackVersion, () -> "3.2") < 0) {
+            return Collections.emptyList();
+        } else {
+            return ExposedService.knoxServicesForComponents(blueprintComponents)
+                    .stream()
+                    .filter(exposedService -> !("HDP".equals(stackName)
+                            && versionComparator.compare(() -> stackVersion, () -> "2.6") <= 0
+                            && exposedService == ExposedService.LIVY_SERVER))
+                    .collect(Collectors.toSet());
+        }
+    }
+
+    private Collection<ExposedServiceResponse> getKnoxServices(Blueprint blueprint) {
+        BlueprintTextProcessor blueprintTextProcessor = blueprintProcessorFactory.get(blueprint.getBlueprintText());
+        Set<String> haComponents = ambariHaComponentFilter.getHaComponents(blueprintTextProcessor);
+        haComponents.remove(ExposedService.RANGER.getServiceName());
+        return ExposedServiceResponse.fromExposedServices(getExposedServices(blueprintTextProcessor, haComponents));
     }
 
     private Stream<String> getExposedServiceStream(GatewayTopology gatewayTopology) {

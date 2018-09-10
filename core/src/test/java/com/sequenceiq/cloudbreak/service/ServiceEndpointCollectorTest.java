@@ -219,6 +219,22 @@ public class ServiceEndpointCollectorTest {
         assertEquals(1, exposedServiceResponses.size());
     }
 
+    @Test
+    public void testGetKnoxServicesWithLivyServer() {
+        when(blueprintService.getByName(any(), any())).thenReturn(new Blueprint());
+        BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
+        when(blueprintProcessorFactory.get(any())).thenReturn(blueprintTextProcessor);
+        when(blueprintTextProcessor.getAllComponents()).thenReturn(new HashSet<>(Arrays.asList("LIVY2_SERVER", "SPARK2_JOBHISTORYSERVER")));
+        when(blueprintTextProcessor.getStackName()).thenReturn("HDP");
+        when(blueprintTextProcessor.getStackVersion()).thenReturn("2.6");
+        Collection<ExposedServiceResponse> exposedServiceResponses = underTest.getKnoxServices(mock(IdentityUser.class), "blueprint");
+        assertEquals(2L, exposedServiceResponses.size());
+
+        when(blueprintTextProcessor.getStackVersion()).thenReturn("3.0");
+        exposedServiceResponses = underTest.getKnoxServices(mock(IdentityUser.class), "blueprint");
+        assertEquals(3L, exposedServiceResponses.size());
+    }
+
     private GatewayTopology gatewayTopology(String name, ExposedService... services) {
         try {
             GatewayTopologyJson gatewayTopologyJson = new GatewayTopologyJson();
