@@ -34,8 +34,6 @@ public class GeneralClusterConfigsView {
 
     private String primaryGatewayInstanceDiscoveryFQDN;
 
-    private int llapNodeCount;
-
     private int kafkaReplicationFactor;
 
     public GeneralClusterConfigsView(GeneralClusterConfigs generalClusterConfigs) {
@@ -53,7 +51,6 @@ public class GeneralClusterConfigsView {
         this.nodeCount = generalClusterConfigs.getNodeCount();
         this.containerExecutor = ExecutorType.CONTAINER.equals(generalClusterConfigs.getExecutorType());
         this.primaryGatewayInstanceDiscoveryFQDN = generalClusterConfigs.getPrimaryGatewayInstanceDiscoveryFQDN().orElse(null);
-        this.llapNodeCount = generalClusterConfigs.getNodeCount() - 1;
         this.kafkaReplicationFactor = generalClusterConfigs.getKafkaReplicationFactor();
     }
 
@@ -157,20 +154,12 @@ public class GeneralClusterConfigsView {
         return instanceGroupsPresented;
     }
 
-    public int getLlapNodeCount() {
-        return llapNodeCount;
-    }
-
     public String getEmail() {
         return email;
     }
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public void setLlapNodeCount(int llapNodeCount) {
-        this.llapNodeCount = llapNodeCount;
     }
 
     public boolean getContainerExecutor() {

@@ -27,8 +27,7 @@
   "configurations": [
     {
       "hive-interactive-env": {
-        "enable_hive_interactive": "true",
-        "num_llap_nodes": "0"
+        "enable_hive_interactive": "true"
       }
     },
     {

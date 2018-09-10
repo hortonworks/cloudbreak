@@ -43,13 +43,6 @@
           "hadoop.proxyuser.hive.hosts": "*"
         }
       }
-    },
-    {
-      "hive-interactive-env": {
-        "properties": {
-          "num_llap_nodes": "4"
-        }
-      }
     }
   ],
   "host_groups": [

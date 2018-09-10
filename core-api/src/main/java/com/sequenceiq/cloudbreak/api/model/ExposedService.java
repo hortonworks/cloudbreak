@@ -20,11 +20,13 @@ public enum ExposedService {
     HIVE_SERVER("Hive Server", "HIVE_SERVER", "HIVE", "/hive/", false, 10001),
     HIVE_SERVER_INTERACTIVE("Hive Server Interactive", "HIVE_SERVER_INTERACTIVE", "HIVE_INTERACTIVE", "/hive/", false, 10501),
     ATLAS("Atlas", "ATLAS_SERVER", "ATLAS", "/atlas/", true, 21000),
-    SPARK_HISTORY_SERVER("Spark History Server", "SPARK_JOBHISTORYSERVER", "SPARKHISTORYUI", "/sparkhistory/", true, 18080),
+    SPARK_HISTORY_SERVER("Spark 1.x History Server", "SPARK_JOBHISTORYSERVER", "SPARKHISTORYUI", "/sparkhistory/", true, 18080),
+    SPARK2_HISTORY_SERVER("Spark History Server", "SPARK2_JOBHISTORYSERVER", "SPARK2HISTORYUI", "/sparkhistory/", true, 18081),
     ZEPPELIN("Zeppelin", "ZEPPELIN_MASTER", "ZEPPELIN", "/zeppelin/", false, 9995),
     RANGER("Ranger", "RANGER_ADMIN", "RANGERUI", "/ranger/", true, 6080),
     DP_PROFILER_AGENT("DP Profiler Agent", "DP_PROFILER_AGENT", "PROFILER-AGENT", "", true, 21900),
-    BEACON_SERVER("Beacon", "BEACON_SERVER", "BEACON", "", true, 25968);
+    BEACON_SERVER("Beacon", "BEACON_SERVER", "BEACON", "", true, 25968),
+    LIVY_SERVER("Livy Server", "LIVY2_SERVER", "LIVYSERVER", "/livy/v1/sessions/", true, 8999);
 
     private final String serviceName;
     private final String portName;

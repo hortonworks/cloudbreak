@@ -196,13 +196,25 @@
     {%- endif %}
     {%- endif %}
 
-    {% if 'SPARK_JOBHISTORYSERVER' in salt['pillar.get']('gateway:location') -%}
+    {% if 'SPARK_JOBHISTORYSERVER' in salt['pillar.get']('gateway:location') and not ('SPARK2_JOBHISTORYSERVER' in salt['pillar.get']('gateway:location')) -%}
     {% if 'SPARKHISTORYUI' in exposed -%}
     <!-- https://{{ salt['grains.get']('gateway-address')[0] }}:8443/gateway/hdc/sparkhistory/ -->
     <service>
         <role>SPARKHISTORYUI</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['SPARK_JOBHISTORYSERVER'] -%}
         <url>http://{{ hostloc }}:{{ ports['SPARKHISTORYUI'] }}/</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
+    {%- endif %}
+
+    {% if 'SPARK2_JOBHISTORYSERVER' in salt['pillar.get']('gateway:location') -%}
+    {% if 'SPARK2HISTORYUI' in exposed -%}
+    <!-- https://{{ salt['grains.get']('gateway-address')[0] }}:8443/gateway/hdc/sparkhistory/ -->
+    <service>
+        <role>SPARKHISTORYUI</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['SPARK2_JOBHISTORYSERVER'] -%}
+        <url>http://{{ hostloc }}:{{ ports['SPARK2HISTORYUI'] }}/</url>
         {%- endfor %}
     </service>
     {%- endif %}
@@ -274,6 +286,17 @@
         <role>BEACON</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['BEACON_SERVER'] -%}
         <url>http://{{ hostloc }}:{{ ports['BEACON'] }}</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
+    {%- endif %}
+
+   {% if 'LIVY2_SERVER' in salt['pillar.get']('gateway:location') -%}
+    {% if 'LIVYSERVER' in exposed -%}
+    <service>
+        <role>LIVYSERVER</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['LIVY2_SERVER'] -%}
+        <url>http://{{ hostloc }}:{{ ports['LIVYSERVER'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}

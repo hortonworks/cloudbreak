@@ -97,10 +97,6 @@ public class HandlebarTemplateTest {
                 {"blueprints/configurations/filesystem/s3.handlebars", "configurations/filesystem/s3.json",
                         s3FileSystemConfigsWithStorageLocations()},
 
-                // LLAP
-                {"blueprints/configurations/llap/global.handlebars", "configurations/llap/global.json",
-                        llapObjectWhenNodeCountPresented()},
-
                 // NIFI
                 {"blueprints/configurations/nifi/global.handlebars", "configurations/nifi/global-with-hdf-nifitargets.json",
                         nifiConfigWhenHdfPresentedThenShouldReturnWithNifiConfig(false)},
