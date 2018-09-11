@@ -209,6 +209,7 @@ public abstract class CloudProviderHelper extends CloudProvider {
         req.setUserName(testParameter.get(DEFAULT_AMBARI_USER));
         req.setPassword(testParameter.get(DEFAULT_AMBARI_PASSWORD));
         req.setBlueprintId(id);
+        req.setValidateRepositories(Boolean.TRUE);
         return req;
     }
 
@@ -219,6 +220,7 @@ public abstract class CloudProviderHelper extends CloudProvider {
         req.setPassword(testParameter.get(DEFAULT_AMBARI_PASSWORD));
         req.setBlueprintName(name);
         req.setValidateBlueprint(false);
+        req.setValidateRepositories(Boolean.TRUE);
         req.setAmbariStackDetails(new AmbariStackDetailsJson());
         return req;
     }

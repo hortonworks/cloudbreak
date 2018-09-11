@@ -190,6 +190,7 @@ public class ModelDescriptions {
         public static final String BLUEPRINT = "blueprint for the cluster";
         public static final String SHARED_SERVICE_REQUEST = "Shared service request";
         public static final String VALIDATE_BLUEPRINT = "blueprint validation";
+        public static final String VALIDATE_REPOSITORIES = "ambari and stack repository validation";
         public static final String SHARED_SERVICE = "shared service for a specific stack";
         public static final String FILESYSTEM = "filesystem for a specific stack";
         public static final String HOURS = "duration - how long the cluster is running in hours";

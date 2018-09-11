@@ -47,7 +47,7 @@ public class BlueprintRequestTest {
                 {"Data Lake: Apache Ranger, Apache Atlas, Apache Hive Metastore", 0},
                 {"Some-Passw0rd", 0},
                 {"doin'n some blueprint?!", 0},
-                {"僕だけがいない町", 0},
+                {"僕だけがいない街", 0},
                 {"ਕੁਝ ਨਾਮ ਮੁੱਲ", 0},
                 {"အခြို့သောအမညျကိုတနျဖိုး", 0},
                 {"некоја вредност за името", 0},
@@ -59,6 +59,9 @@ public class BlueprintRequestTest {
                 {"@#$%|:&*; ABC", 1},
                 {"somevalue%12", 1},
                 {"somevalue;12", 1},
+                {"somevalue/12", 1},
+                {"somevalue/", 1},
+                {"/", 1},
                 {StringUtils.repeat('a', 101), 1}
         });
     }
