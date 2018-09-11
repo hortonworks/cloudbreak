@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.service.user.CachedUserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.user.CachedUserDetailsService;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
@@ -36,6 +37,9 @@ public class UserController implements UserEndpoint {
 
     @Inject
     private CachedUserDetailsService cachedUserDetailsService;
+
+    @Inject
+    private CachedUserService cachedUserService;
 
     @Inject
     private UserProfileService userProfileService;
@@ -56,7 +60,7 @@ public class UserController implements UserEndpoint {
     @Override
     public String evictUserDetails(String id, UserJson user) {
         cachedUserDetailsService.evictUserDetails(id, user.getUsername());
-        userService.evictUser(restRequestThreadLocalService.getIdentityUser());
+        cachedUserService.evictUser(restRequestThreadLocalService.getIdentityUser());
         return user.getUsername();
     }
 
@@ -64,7 +68,7 @@ public class UserController implements UserEndpoint {
     public UserJson evictCurrentUserDetails() {
         IdentityUser user = restRequestThreadLocalService.getIdentityUser();
         cachedUserDetailsService.evictUserDetails(user.getUserId(), user.getUsername());
-        userService.evictUser(user);
+        cachedUserService.evictUser(user);
         return new UserJson(user.getUsername());
     }
 
