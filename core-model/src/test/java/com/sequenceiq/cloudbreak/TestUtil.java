@@ -588,15 +588,19 @@ public class TestUtil {
         return blueprint(name, "{\"host_groups\":[{\"name\":\"slave_1\",\"components\":[{\"name\":\"DATANODE\"}]}]}");
     }
 
-    public static Blueprint blueprint(String name, String blueprintText) {
+    public static Blueprint blueprint(Long id, String name, String blueprintText) {
         Blueprint blueprint = new Blueprint();
-        blueprint.setId(1L);
+        blueprint.setId(id);
         blueprint.setBlueprintText(blueprintText);
         blueprint.setName(name);
         blueprint.setAmbariName("multi-node-yarn");
         blueprint.setStatus(ResourceStatus.DEFAULT);
         blueprint.setTags(getEmptyJson());
         return blueprint;
+    }
+
+    public static Blueprint blueprint(String name, String blueprintText) {
+        return blueprint(1L, name, blueprintText);
     }
 
     public static Blueprint blueprint() {
