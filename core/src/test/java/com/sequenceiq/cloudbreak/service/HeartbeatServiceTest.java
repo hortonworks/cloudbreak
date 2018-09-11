@@ -447,6 +447,11 @@ public class HeartbeatServiceTest {
             public Boolean testWith2SecDelayMax5Times(Supplier<Boolean> action) throws ActionWentFailException {
                 return Boolean.TRUE;
             }
+
+            @Override
+            public <T> T testWith2SecDelayMax15Times(Supplier<T> action) throws ActionWentFailException {
+                return null;
+            }
         }
 
         Set<FlowLog> flowLogs = new HashSet<>(getFlowLogs(2, 5000));
@@ -476,6 +481,11 @@ public class HeartbeatServiceTest {
             @Override
             public Boolean testWith2SecDelayMax5Times(Supplier<Boolean> action) throws ActionWentFailException {
                 throw new ActionWentFailException("Test failed");
+            }
+
+            @Override
+            public <T> T testWith2SecDelayMax15Times(Supplier<T> action) throws ActionWentFailException {
+                return null;
             }
         }
 
