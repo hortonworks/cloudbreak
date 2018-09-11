@@ -7,18 +7,20 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.services.autoscaling.AmazonAutoScaling;
+import com.amazonaws.SdkClientException;
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsResult;
 import com.amazonaws.services.autoscaling.model.Instance;
-import com.amazonaws.services.cloudformation.AmazonCloudFormation;
-import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.cloudformation.model.DescribeStackResourceRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStackResourceResult;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.google.common.base.Splitter;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 
@@ -31,12 +33,22 @@ public class CloudFormationStackUtil {
     @Inject
     private AwsClient awsClient;
 
+    @Retryable(
+            value = SdkClientException.class,
+            maxAttempts = 15,
+            backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000)
+    )
     public String getAutoscalingGroupName(AuthenticatedContext ac, String instanceGroup, String region) {
-        AmazonCloudFormationClient amazonCfClient = awsClient.createCloudFormationClient(new AwsCredentialView(ac.getCloudCredential()), region);
+        AmazonCloudFormationRetryClient amazonCfClient = awsClient.createCloudFormationRetryClient(new AwsCredentialView(ac.getCloudCredential()), region);
         return getAutoscalingGroupName(ac, amazonCfClient, instanceGroup);
     }
 
-    public String getAutoscalingGroupName(AuthenticatedContext ac, AmazonCloudFormation amazonCFClient, String instanceGroup) {
+    @Retryable(
+            value = SdkClientException.class,
+            maxAttempts = 15,
+            backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000)
+    )
+    public String getAutoscalingGroupName(AuthenticatedContext ac, AmazonCloudFormationRetryClient amazonCFClient, String instanceGroup) {
         String cFStackName = getCfStackName(ac);
         DescribeStackResourceResult asGroupResource = amazonCFClient.describeStackResource(new DescribeStackResourceRequest()
                 .withStackName(cFStackName)
@@ -49,11 +61,12 @@ public class CloudFormationStackUtil {
                 .splitToList(ac.getCloudContext().getName()).get(0), ac.getCloudContext().getId());
     }
 
-    public List<String> getInstanceIds(AmazonAutoScaling amazonASClient, String asGroupName) {
+    public List<String> getInstanceIds(AmazonAutoScalingRetryClient amazonASClient, String asGroupName) {
         DescribeAutoScalingGroupsResult describeAutoScalingGroupsResult = amazonASClient
                 .describeAutoScalingGroups(new DescribeAutoScalingGroupsRequest().withAutoScalingGroupNames(asGroupName));
         List<String> instanceIds = new ArrayList<>();
-        if (describeAutoScalingGroupsResult.getAutoScalingGroups().get(0).getInstances() != null) {
+        if (!describeAutoScalingGroupsResult.getAutoScalingGroups().isEmpty()
+                && describeAutoScalingGroupsResult.getAutoScalingGroups().get(0).getInstances() != null) {
             for (Instance instance : describeAutoScalingGroupsResult.getAutoScalingGroups().get(0).getInstances()) {
                 if ("InService".equals(instance.getLifecycleState())) {
                     instanceIds.add(instance.getInstanceId());

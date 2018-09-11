@@ -14,4 +14,14 @@ public class RetryService implements Retry {
     public Boolean testWith2SecDelayMax5Times(Supplier<Boolean> action) throws ActionWentFailException {
         return action.get();
     }
+
+    @Override
+    @Retryable(
+            value = ActionWentFailException.class,
+            maxAttempts = 15,
+            backoff = @Backoff(delay = 2000, multiplier = 2, maxDelay = 10000)
+    )
+    public <T> T testWith2SecDelayMax15Times(Supplier<T> action) throws ActionWentFailException {
+        return action.get();
+    }
 }

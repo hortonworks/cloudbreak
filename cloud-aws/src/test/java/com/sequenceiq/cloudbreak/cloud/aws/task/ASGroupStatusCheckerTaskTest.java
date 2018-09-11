@@ -27,6 +27,7 @@ import com.amazonaws.services.ec2.model.InstanceState;
 import com.amazonaws.services.ec2.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -79,9 +80,12 @@ public class ASGroupStatusCheckerTaskTest {
 
         AmazonAutoScalingClient autoScalingClient = mock(AmazonAutoScalingClient.class);
         when(awsClient.createAutoScalingClient(any(AwsCredentialView.class), anyString())).thenReturn(autoScalingClient);
-        when(autoScalingClient.describeScalingActivities(any(DescribeScalingActivitiesRequest.class))).thenReturn(new DescribeScalingActivitiesResult());
 
-        when(cloudFormationStackUtil.getInstanceIds(any(AmazonAutoScalingClient.class), eq(asGroupName))).thenReturn(instancIds);
+        AmazonAutoScalingRetryClient autoScalingRetryClient = mock(AmazonAutoScalingRetryClient.class);
+        when(awsClient.createAutoScalingRetryClient(any(AwsCredentialView.class), anyString())).thenReturn(autoScalingRetryClient);
+        when(autoScalingRetryClient.describeScalingActivities(any(DescribeScalingActivitiesRequest.class))).thenReturn(new DescribeScalingActivitiesResult());
+
+        when(cloudFormationStackUtil.getInstanceIds(any(AmazonAutoScalingRetryClient.class), eq(asGroupName))).thenReturn(instancIds);
 
         ASGroupStatusCheckerTask asGroupStatusCheckerTask = new ASGroupStatusCheckerTask(authenticatedContext, asGroupName, requiredInstances, awsClient,
                 cloudFormationStackUtil);
@@ -136,9 +140,12 @@ public class ASGroupStatusCheckerTaskTest {
 
         AmazonAutoScalingClient autoScalingClient = mock(AmazonAutoScalingClient.class);
         when(awsClient.createAutoScalingClient(any(AwsCredentialView.class), anyString())).thenReturn(autoScalingClient);
-        when(autoScalingClient.describeScalingActivities(any(DescribeScalingActivitiesRequest.class))).thenReturn(new DescribeScalingActivitiesResult());
 
-        when(cloudFormationStackUtil.getInstanceIds(any(AmazonAutoScalingClient.class), eq(asGroupName))).thenReturn(instancIds);
+        AmazonAutoScalingRetryClient autoScalingRetryClient = mock(AmazonAutoScalingRetryClient.class);
+        when(awsClient.createAutoScalingRetryClient(any(AwsCredentialView.class), anyString())).thenReturn(autoScalingRetryClient);
+        when(autoScalingRetryClient.describeScalingActivities(any(DescribeScalingActivitiesRequest.class))).thenReturn(new DescribeScalingActivitiesResult());
+
+        when(cloudFormationStackUtil.getInstanceIds(any(AmazonAutoScalingRetryClient.class), eq(asGroupName))).thenReturn(instancIds);
 
         ASGroupStatusCheckerTask asGroupStatusCheckerTask = new ASGroupStatusCheckerTask(authenticatedContext, asGroupName, requiredInstances, awsClient,
                 cloudFormationStackUtil);
