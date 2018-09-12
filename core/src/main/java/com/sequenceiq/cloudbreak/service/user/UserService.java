@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.service.user;
 
 import static com.sequenceiq.cloudbreak.api.model.v2.WorkspaceStatus.ACTIVE;
+import static com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.ALL_READ;
+import static com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.ALL_WRITE;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -86,7 +88,7 @@ public class UserService {
                 workspace.setName(identityUser.getUsername());
                 workspace.setStatus(ACTIVE);
                 workspace.setDescription("Default workspace for the user.");
-                workspaceService.create(user, workspace);
+                workspaceService.create(user, workspace, ALL_READ, ALL_WRITE);
                 return user;
             });
         } catch (TransactionExecutionException e) {
