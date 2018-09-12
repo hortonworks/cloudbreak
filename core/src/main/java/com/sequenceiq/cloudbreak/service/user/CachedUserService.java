@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.service.Clock;
 @Service
 public class CachedUserService {
 
-    private static final long CACHE_TTL = 5 * 60 * 1000;
+    private static final long CACHE_TTL = 5 * 1000;
 
     private static final Map<IdentityUser, Entry> CACHE = new ConcurrentHashMap<>();
 
@@ -28,7 +28,7 @@ public class CachedUserService {
 
     private static final Timer TIMER = new Timer();
 
-    private static final long TIMER_PERIOD = 10 * 1000;
+    private static final long TIMER_PERIOD = 1000;
 
     static {
         TIMER.schedule(new TimerTask() {
@@ -59,8 +59,12 @@ public class CachedUserService {
         }
     }
 
-    public void evictUser(IdentityUser identityUser) {
+    public void evictByIdentityUser(IdentityUser identityUser) {
         CACHE.remove(identityUser);
+    }
+
+    public void evictUser(User user) {
+        CACHE.entrySet().removeIf(e -> e.getValue().user.equals(user));
     }
 
     private static class Entry {

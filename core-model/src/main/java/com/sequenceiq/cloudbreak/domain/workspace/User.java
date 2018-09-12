@@ -132,8 +132,7 @@ public class User implements ProvisionEntity {
         } else if (o == null || !java.util.Objects.equals(getClass(), o.getClass())) {
             return false;
         }
-        User user = (User) o;
-        return Objects.equal(userId, user.userId);
+        return Objects.equal(userId, ((User) o).userId);
     }
 
     @Override
