@@ -402,7 +402,7 @@ public class ClusterHostServiceRunner {
         StackRepoDetails hdprepo = clusterComponentConfigProvider.getHDPRepo(clusterId);
         servicePillar.put("hdp", new SaltPillarProperties("/hdp/repo.sls", singletonMap("hdp", hdprepo)));
     }
-
+    
     private Map<String, String> collectUpscaleCandidates(Long clusterId, String hostGroupName, Integer adjustment) {
         HostGroup hostGroup = hostGroupService.getByClusterIdAndName(clusterId, hostGroupName);
         if (hostGroup.getConstraint().getInstanceGroup() != null) {
