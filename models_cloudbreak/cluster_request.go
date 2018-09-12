@@ -140,6 +140,9 @@ type ClusterRequest struct {
 
 	// blueprint validation
 	ValidateBlueprint *bool `json:"validateBlueprint,omitempty"`
+
+	// ambari and stack repository validation
+	ValidateRepositories *bool `json:"validateRepositories,omitempty"`
 }
 
 /* polymorph ClusterRequest ambariDatabaseDetails false */
@@ -207,6 +210,8 @@ type ClusterRequest struct {
 /* polymorph ClusterRequest userName false */
 
 /* polymorph ClusterRequest validateBlueprint false */
+
+/* polymorph ClusterRequest validateRepositories false */
 
 // Validate validates this cluster request
 func (m *ClusterRequest) Validate(formats strfmt.Registry) error {

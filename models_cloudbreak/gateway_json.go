@@ -34,12 +34,6 @@ type GatewayJSON struct {
 	// Knox gateway type
 	GatewayType string `json:"gatewayType,omitempty"`
 
-	// Knox gateway path
-	Path string `json:"path,omitempty"`
-
-	// SSO provider cluster name
-	SsoProvider string `json:"ssoProvider,omitempty"`
-
 	// Knox SSO type
 	SsoType string `json:"ssoType,omitempty"`
 
@@ -59,10 +53,6 @@ type GatewayJSON struct {
 /* polymorph GatewayJson exposedServices false */
 
 /* polymorph GatewayJson gatewayType false */
-
-/* polymorph GatewayJson path false */
-
-/* polymorph GatewayJson ssoProvider false */
 
 /* polymorph GatewayJson ssoType false */
 
