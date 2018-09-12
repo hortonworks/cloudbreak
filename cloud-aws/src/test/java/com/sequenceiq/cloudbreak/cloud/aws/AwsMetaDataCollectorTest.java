@@ -18,13 +18,13 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
-import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.Reservation;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.task.AwsPollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -61,10 +61,10 @@ public class AwsMetaDataCollectorTest {
     private AwsPollTaskFactory awsPollTaskFactory;
 
     @Mock
-    private AmazonCloudFormationClient amazonCFClient;
+    private AmazonCloudFormationRetryClient amazonCFClient;
 
     @Mock
-    private AmazonAutoScalingClient amazonASClient;
+    private AmazonAutoScalingRetryClient amazonASClient;
 
     @Mock
     private AmazonEC2Client amazonEC2Client;
@@ -105,15 +105,15 @@ public class AwsMetaDataCollectorTest {
                 instanceAuthentication));
 
 
-        when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonCFClient);
-        when(awsClient.createAutoScalingClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonASClient);
+        when(awsClient.createCloudFormationRetryClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonCFClient);
+        when(awsClient.createAutoScalingRetryClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonASClient);
         when(awsClient.createAccess(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonEC2Client);
 
-        when(cloudFormationStackUtil.getAutoscalingGroupName(any(AuthenticatedContext.class), any(AmazonCloudFormationClient.class), eq("cbgateway")))
+        when(cloudFormationStackUtil.getAutoscalingGroupName(any(AuthenticatedContext.class), any(AmazonCloudFormationRetryClient.class), eq("cbgateway")))
                 .thenReturn("cbgateway-AAA");
 
         List<String> gatewayIds = Collections.singletonList("i-1");
-        when(cloudFormationStackUtil.getInstanceIds(any(AmazonAutoScalingClient.class), eq("cbgateway-AAA")))
+        when(cloudFormationStackUtil.getInstanceIds(any(AmazonAutoScalingRetryClient.class), eq("cbgateway-AAA")))
                 .thenReturn(gatewayIds);
 
         when(cloudFormationStackUtil.createDescribeInstancesRequest(eq(gatewayIds))).thenReturn(describeInstancesRequestGw);
@@ -153,15 +153,15 @@ public class AwsMetaDataCollectorTest {
                 new InstanceTemplate("fla", "cbgateway", 7L, volumes, InstanceStatus.CREATED, null, 0L, "imageId"),
                 instanceAuthentication));
 
-        when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonCFClient);
-        when(awsClient.createAutoScalingClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonASClient);
+        when(awsClient.createCloudFormationRetryClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonCFClient);
+        when(awsClient.createAutoScalingRetryClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonASClient);
         when(awsClient.createAccess(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonEC2Client);
 
-        when(cloudFormationStackUtil.getAutoscalingGroupName(any(AuthenticatedContext.class), any(AmazonCloudFormationClient.class), eq("cbgateway")))
+        when(cloudFormationStackUtil.getAutoscalingGroupName(any(AuthenticatedContext.class), any(AmazonCloudFormationRetryClient.class), eq("cbgateway")))
                 .thenReturn("cbgateway-AAA");
 
         List<String> gatewayIds = Collections.singletonList("i-1");
-        when(cloudFormationStackUtil.getInstanceIds(any(AmazonAutoScalingClient.class), eq("cbgateway-AAA")))
+        when(cloudFormationStackUtil.getInstanceIds(any(AmazonAutoScalingRetryClient.class), eq("cbgateway-AAA")))
                 .thenReturn(gatewayIds);
 
         when(cloudFormationStackUtil.createDescribeInstancesRequest(eq(gatewayIds))).thenReturn(describeInstancesRequestGw);
@@ -209,15 +209,15 @@ public class AwsMetaDataCollectorTest {
                 instanceAuthentication));
 
 
-        when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonCFClient);
-        when(awsClient.createAutoScalingClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonASClient);
+        when(awsClient.createCloudFormationRetryClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonCFClient);
+        when(awsClient.createAutoScalingRetryClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonASClient);
         when(awsClient.createAccess(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonEC2Client);
 
-        when(cloudFormationStackUtil.getAutoscalingGroupName(any(AuthenticatedContext.class), any(AmazonCloudFormationClient.class), eq("cbgateway")))
+        when(cloudFormationStackUtil.getAutoscalingGroupName(any(AuthenticatedContext.class), any(AmazonCloudFormationRetryClient.class), eq("cbgateway")))
                 .thenReturn("cbgateway-AAA");
 
         List<String> gatewayIds = Arrays.asList("i-1", "i-2");
-        when(cloudFormationStackUtil.getInstanceIds(any(AmazonAutoScalingClient.class), eq("cbgateway-AAA")))
+        when(cloudFormationStackUtil.getInstanceIds(any(AmazonAutoScalingRetryClient.class), eq("cbgateway-AAA")))
                 .thenReturn(gatewayIds);
 
         when(cloudFormationStackUtil.createDescribeInstancesRequest(eq(gatewayIds))).thenReturn(describeInstancesRequestGw);
@@ -268,15 +268,15 @@ public class AwsMetaDataCollectorTest {
                 instanceAuthentication));
 
 
-        when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonCFClient);
-        when(awsClient.createAutoScalingClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonASClient);
+        when(awsClient.createCloudFormationRetryClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonCFClient);
+        when(awsClient.createAutoScalingRetryClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonASClient);
         when(awsClient.createAccess(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonEC2Client);
 
-        when(cloudFormationStackUtil.getAutoscalingGroupName(any(AuthenticatedContext.class), any(AmazonCloudFormationClient.class), eq("cbgateway")))
+        when(cloudFormationStackUtil.getAutoscalingGroupName(any(AuthenticatedContext.class), any(AmazonCloudFormationRetryClient.class), eq("cbgateway")))
                 .thenReturn("cbgateway-AAA");
 
         List<String> gatewayIds = Arrays.asList("i-1", "i-2");
-        when(cloudFormationStackUtil.getInstanceIds(any(AmazonAutoScalingClient.class), eq("cbgateway-AAA")))
+        when(cloudFormationStackUtil.getInstanceIds(any(AmazonAutoScalingRetryClient.class), eq("cbgateway-AAA")))
                 .thenReturn(gatewayIds);
 
         when(cloudFormationStackUtil.createDescribeInstancesRequest(eq(gatewayIds))).thenReturn(describeInstancesRequestGw);
