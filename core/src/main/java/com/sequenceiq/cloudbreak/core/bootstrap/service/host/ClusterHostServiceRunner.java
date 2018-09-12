@@ -273,22 +273,10 @@ public class ClusterHostServiceRunner {
     @Transactional
     public Map<String, String> addAmbariServices(Long stackId, String hostGroupName, Integer scalingAdjustment) throws CloudbreakException {
         Map<String, String> candidates;
-        try {
-            Stack stack = stackRepository.findOneWithLists(stackId);
-            Cluster cluster = stack.getCluster();
-            candidates = collectUpscaleCandidates(cluster.getId(), hostGroupName, scalingAdjustment);
-            Set<Node> allNodes = stackUtil.collectNodes(stack);
-            HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
-            List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
-            SaltConfig saltConfig = createSaltConfig(stack, cluster, gatewayConfigService.getPrimaryGatewayConfig(stack), gatewayConfigs);
-            ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());
-            hostOrchestrator.initServiceRun(gatewayConfigs, allNodes, saltConfig, exitCriteriaModel);
-            hostOrchestrator.runService(gatewayConfigs, allNodes, saltConfig, exitCriteriaModel);
-        } catch (CloudbreakOrchestratorCancelledException e) {
-            throw new CancellationException(e.getMessage());
-        } catch (CloudbreakOrchestratorException | IOException e) {
-            throw new CloudbreakException(e);
-        }
+        Stack stack = stackRepository.findOneWithLists(stackId);
+        Cluster cluster = stack.getCluster();
+        candidates = collectUpscaleCandidates(cluster.getId(), hostGroupName, scalingAdjustment);
+        runAmbariServices(stack, cluster);
         return candidates;
     }
 
