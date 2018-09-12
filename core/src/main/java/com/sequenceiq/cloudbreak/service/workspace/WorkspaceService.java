@@ -12,6 +12,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
@@ -56,14 +57,17 @@ public class WorkspaceService {
     @Inject
     private WorkspaceModificationVerifierService workspaceModificationVerifierService;
 
-    public Workspace create(User user, Workspace workspace) {
+    public Workspace create(User user, Workspace workspace, WorkspacePermissions... workspacePermissions) {
         try {
             return transactionService.required(() -> {
                 Workspace createdWorkspace = workspaceRepository.save(workspace);
                 UserWorkspacePermissions userWorkspacePermissions = new UserWorkspacePermissions();
                 userWorkspacePermissions.setWorkspace(createdWorkspace);
                 userWorkspacePermissions.setUser(user);
-                userWorkspacePermissions.setPermissionSet(Set.of(ALL_READ.value(), ALL_WRITE.value(), WORKSPACE_MANAGE.value()));
+                Set<String> workspacePermissionsSet = workspacePermissions.length == 0
+                        ? Set.of(ALL_READ.value(), ALL_WRITE.value(), WORKSPACE_MANAGE.value())
+                        : Stream.of(workspacePermissions).map(WorkspacePermissions::value).collect(Collectors.toSet());
+                userWorkspacePermissions.setPermissionSet(workspacePermissionsSet);
                 userWorkspacePermissionsService.save(userWorkspacePermissions);
                 return createdWorkspace;
             });
@@ -109,10 +113,10 @@ public class WorkspaceService {
         return userWorkspacePermissions.getWorkspace();
     }
 
-    public Set<User> removeUsers(String orgName, Set<String> userIds, User user) {
+    public Set<User> removeUsers(String workspaceName, Set<String> userIds, User user) {
         try {
             return transactionService.required(() -> {
-                Workspace workspace = getByNameForUserOrThrowNotFound(orgName, user);
+                Workspace workspace = getByNameForUserOrThrowNotFound(workspaceName, user);
                 authorizeWorkspaceManipulation(user, workspace, Action.MANAGE, "You cannot remove users from this workspace.");
 
                 Set<User> users = userService.getByUsersIds(userIds);
@@ -130,13 +134,13 @@ public class WorkspaceService {
         }
     }
 
-    public Set<User> addUsers(String orgName, Set<ChangeWorkspaceUsersJson> changeWorkspaceUsersJsons, User currentUser) {
+    public Set<User> addUsers(String workspaceName, Set<ChangeWorkspaceUsersJson> changeWorkspaceUsersJsons, User currentUser) {
         try {
             return transactionService.required(() -> {
-                Workspace workspace = getByNameForUserOrThrowNotFound(orgName, currentUser);
+                Workspace workspace = getByNameForUserOrThrowNotFound(workspaceName, currentUser);
                 authorizeWorkspaceManipulation(currentUser, workspace, Action.INVITE, "You cannot add users to this workspace.");
 
-                Map<User, Set<String>> usersToAddWithPermissions = orgUserPermissionJsonSetToMap(changeWorkspaceUsersJsons);
+                Map<User, Set<String>> usersToAddWithPermissions = workspaceUserPermissionJsonSetToMap(changeWorkspaceUsersJsons);
                 validateUsersAreNotInTheWorkspaceYet(workspace, usersToAddWithPermissions.keySet());
 
                 Set<UserWorkspacePermissions> userWorkspacePermsToAdd = usersToAddWithPermissions.entrySet().stream()
@@ -158,13 +162,13 @@ public class WorkspaceService {
         }
     }
 
-    public Set<User> updateUsers(String orgName, Set<ChangeWorkspaceUsersJson> updateWorkspaceUsersJsons, User currentUser) {
+    public Set<User> updateUsers(String workspaceName, Set<ChangeWorkspaceUsersJson> updateWorkspaceUsersJsons, User currentUser) {
         try {
             return transactionService.required(() -> {
-                Workspace workspace = getByNameForUserOrThrowNotFound(orgName, currentUser);
+                Workspace workspace = getByNameForUserOrThrowNotFound(workspaceName, currentUser);
                 authorizeWorkspaceManipulation(currentUser, workspace, Action.MANAGE, "You cannot modify the users in this workspace.");
 
-                Map<User, Set<String>> usersToUpdateWithPermissions = orgUserPermissionJsonSetToMap(updateWorkspaceUsersJsons);
+                Map<User, Set<String>> usersToUpdateWithPermissions = workspaceUserPermissionJsonSetToMap(updateWorkspaceUsersJsons);
                 Map<User, UserWorkspacePermissions> toBeUpdated = validateAllUsersAreAlreadyInTheWorkspace(
                         workspace, usersToUpdateWithPermissions.keySet()).stream()
                         .collect(Collectors.toMap(UserWorkspacePermissions::getUser, uop -> uop));
@@ -187,15 +191,15 @@ public class WorkspaceService {
         }
     }
 
-    public Workspace getByNameForUserOrThrowNotFound(String orgName, User currentUser) {
-        Optional<Workspace> workspace = getByNameForUser(orgName, currentUser);
-        return workspace.orElseThrow(() -> new NotFoundException("Cannot find workspace with name: " + orgName));
+    public Workspace getByNameForUserOrThrowNotFound(String workspaceName, User currentUser) {
+        Optional<Workspace> workspace = getByNameForUser(workspaceName, currentUser);
+        return workspace.orElseThrow(() -> new NotFoundException("Cannot find workspace with name: " + workspaceName));
     }
 
-    public Set<User> changeUsers(String orgName, Map<String, Set<String>> userPermissions, User currentUser) {
+    public Set<User> changeUsers(String workspaceName, Map<String, Set<String>> userPermissions, User currentUser) {
         try {
             return transactionService.required(() -> {
-                Workspace workspace = getByNameForUserOrThrowNotFound(orgName, currentUser);
+                Workspace workspace = getByNameForUserOrThrowNotFound(workspaceName, currentUser);
                 authorizeWorkspaceManipulation(currentUser, workspace, Action.MANAGE, "You cannot modify the users in this workspace.");
 
                 Set<UserWorkspacePermissions> oldPermissions = userWorkspacePermissionsService.findForWorkspace(workspace);
@@ -225,17 +229,17 @@ public class WorkspaceService {
         }
     }
 
-    public Workspace deleteByNameForUser(String orgName, User currentUser, Workspace defaultWorkspace) {
+    public Workspace deleteByNameForUser(String workspaceName, User currentUser, Workspace defaultWorkspace) {
         try {
             return transactionService.required(() -> {
-                Workspace workspaceForDelete = getByNameForUserOrThrowNotFound(orgName, currentUser);
+                Workspace workspaceForDelete = getByNameForUserOrThrowNotFound(workspaceName, currentUser);
                 authorizeWorkspaceManipulation(currentUser, workspaceForDelete, Action.MANAGE, "You cannot delete this workspace.");
 
                 workspaceModificationVerifierService.checkThatWorkspaceIsDeletable(currentUser, workspaceForDelete, defaultWorkspace);
                 Long deleted = userWorkspacePermissionsService.deleteByWorkspace(workspaceForDelete);
                 setupDeletionDateAndFlag(workspaceForDelete);
                 workspaceRepository.save(workspaceForDelete);
-                LOGGER.info("Deleted organisation: {}, related permissions: {}", orgName, deleted);
+                LOGGER.info("Deleted workspace: {}, related permissions: {}", workspaceName, deleted);
                 return workspaceForDelete;
             });
         } catch (TransactionExecutionException e) {
@@ -243,7 +247,7 @@ public class WorkspaceService {
         }
     }
 
-    private Map<User, Set<String>> orgUserPermissionJsonSetToMap(Set<ChangeWorkspaceUsersJson> updateWorkspaceUsersJsons) {
+    private Map<User, Set<String>> workspaceUserPermissionJsonSetToMap(Set<ChangeWorkspaceUsersJson> updateWorkspaceUsersJsons) {
         return updateWorkspaceUsersJsons.stream()
                 .collect(Collectors.toMap(json -> userService.getByUserId(json.getUserId()), json -> json.getPermissions()));
     }
