@@ -1,6 +1,8 @@
 name: Cluster_tests_with_recipes
 parameters:
   cleanUp: true
+listeners:
+  - com.sequenceiq.it.cloudbreak.newway.listener.FirstLastTestExecutionBehaviour
 tests:
   - name: openstack_cluster_test_recipes_with_python_script
     parameters:
@@ -9,3 +11,7 @@ tests:
       openstackCredentialName: e2e-recipe-os
     classes:
       - name: com.sequenceiq.it.cloudbreak.GeneralRecipeClusterTests
+        includedMethods:
+          - testCreateClusterWithRecipes
+          - testCheckRecipesOnNodes
+          - testTerminateClusterCheckRecipePreTerm

@@ -36,7 +36,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.AmazonServiceException;
-import com.amazonaws.services.autoscaling.AmazonAutoScaling;
 import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup;
 import com.amazonaws.services.autoscaling.model.DeleteLaunchConfigurationRequest;
@@ -45,7 +44,6 @@ import com.amazonaws.services.autoscaling.model.DetachInstancesRequest;
 import com.amazonaws.services.autoscaling.model.ResumeProcessesRequest;
 import com.amazonaws.services.autoscaling.model.SuspendProcessesRequest;
 import com.amazonaws.services.autoscaling.model.UpdateAutoScalingGroupRequest;
-import com.amazonaws.services.cloudformation.AmazonCloudFormation;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.cloudformation.model.CreateStackRequest;
 import com.amazonaws.services.cloudformation.model.DeleteStackRequest;
@@ -81,6 +79,9 @@ import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationTemplateBuilder.ModelContext;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
+import com.sequenceiq.cloudbreak.cloud.aws.scheduler.AwsBackoffSyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.aws.encryption.EncryptedImageCopyService;
 import com.sequenceiq.cloudbreak.cloud.aws.encryption.EncryptedSnapshotService;
 import com.sequenceiq.cloudbreak.cloud.aws.task.AwsPollTaskFactory;
@@ -100,7 +101,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
-import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper;
 import com.sequenceiq.cloudbreak.common.type.CommonResourceType;
@@ -145,7 +145,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
     private CloudFormationStackUtil cfStackUtil;
 
     @Inject
-    private SyncPollingScheduler<Boolean> syncPollingScheduler;
+    private AwsBackoffSyncPollingScheduler<Boolean> awsBackoffSyncPollingScheduler;
 
     @Inject
     private CloudFormationTemplateBuilder cloudFormationTemplateBuilder;
@@ -188,14 +188,14 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
         String cFStackName = cfStackUtil.getCfStackName(ac);
         AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());
         String regionName = ac.getCloudContext().getLocation().getRegion().value();
-        AmazonCloudFormationClient cfClient = awsClient.createCloudFormationClient(credentialView, regionName);
+        AmazonCloudFormationRetryClient cfRetryClient = awsClient.createCloudFormationRetryClient(credentialView, regionName);
         AmazonEC2Client amazonEC2Client = awsClient.createAccess(credentialView, regionName);
         AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork());
         boolean existingVPC = awsNetworkView.isExistingVPC();
         boolean existingSubnet = awsNetworkView.isExistingSubnet();
         boolean mapPublicIpOnLaunch = isMapPublicOnLaunch(awsNetworkView, amazonEC2Client);
         try {
-            cfClient.describeStacks(new DescribeStacksRequest().withStackName(cFStackName));
+            cfRetryClient.describeStacks(new DescribeStacksRequest().withStackName(cFStackName));
             LOGGER.info("Stack already exists: {}", cFStackName);
         } catch (AmazonServiceException ignored) {
             CloudResource cloudFormationStack = new Builder().type(ResourceType.CLOUDFORMATION_STACK).name(cFStackName).build();
@@ -220,24 +220,22 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
                     .withEncryptedAMIByGroupName(encryptedImageCopyService.createEncryptedImages(ac, stack, resourceNotifier));
             String cfTemplate = cloudFormationTemplateBuilder.build(modelContext);
             LOGGER.debug("CloudFormationTemplate: {}", cfTemplate);
-            cfClient.createStack(createCreateStackRequest(ac, stack, cFStackName, subnet, cfTemplate));
+            cfRetryClient.createStack(createCreateStackRequest(ac, stack, cFStackName, subnet, cfTemplate));
         }
         LOGGER.info("CloudFormation stack creation request sent with stack name: '{}' for stack: '{}'", cFStackName, ac.getCloudContext().getId());
+        AmazonCloudFormationClient cfClient = awsClient.createCloudFormationClient(credentialView, regionName);
         AmazonAutoScalingClient asClient = awsClient.createAutoScalingClient(credentialView, regionName);
         PollTask<Boolean> task = awsPollTaskFactory.newAwsCreateStackStatusCheckerTask(ac, cfClient, asClient, CREATE_COMPLETE, CREATE_FAILED, ERROR_STATUSES,
                 cFStackName);
         try {
-            Boolean statePollerResult = task.call();
-            if (!task.completed(statePollerResult)) {
-                syncPollingScheduler.schedule(task);
-            }
+            awsBackoffSyncPollingScheduler.schedule(task);
         } catch (RuntimeException e) {
             throw new CloudConnectorException(e.getMessage(), e);
         }
 
-        AmazonAutoScalingClient amazonASClient = awsClient.createAutoScalingClient(credentialView, regionName);
-        saveGeneratedSubnet(ac, stack, cFStackName, cfClient, resourceNotifier);
-        List<CloudResource> cloudResources = getCloudResources(ac, stack, cFStackName, cfClient, amazonEC2Client, amazonASClient, mapPublicIpOnLaunch);
+        AmazonAutoScalingRetryClient amazonASClient = awsClient.createAutoScalingRetryClient(credentialView, regionName);
+        saveGeneratedSubnet(ac, stack, cFStackName, cfRetryClient, resourceNotifier);
+        List<CloudResource> cloudResources = getCloudResources(ac, stack, cFStackName, cfRetryClient, amazonEC2Client, amazonASClient, mapPublicIpOnLaunch);
         return check(ac, cloudResources);
     }
 
@@ -283,10 +281,10 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
                 .withParameters(getStackParameters(ac, stack, cFStackName, subnet));
     }
 
-    private List<CloudResource> getCloudResources(AuthenticatedContext ac, CloudStack stack, String cFStackName, AmazonCloudFormation client,
-            AmazonEC2 amazonEC2Client, AmazonAutoScaling amazonASClient, boolean mapPublicIpOnLaunch) {
+    private List<CloudResource> getCloudResources(AuthenticatedContext ac, CloudStack stack, String cFStackName, AmazonCloudFormationRetryClient client,
+            AmazonEC2 amazonEC2Client, AmazonAutoScalingRetryClient amazonASClient, boolean mapPublicIpOnLaunch) {
         List<CloudResource> cloudResources = new ArrayList<>();
-        AmazonCloudFormationClient cloudFormationClient = awsClient.createCloudFormationClient(new AwsCredentialView(ac.getCloudCredential()),
+        AmazonCloudFormationRetryClient cloudFormationClient = awsClient.createCloudFormationRetryClient(new AwsCredentialView(ac.getCloudCredential()),
                 ac.getCloudContext().getLocation().getRegion().value());
         scheduleStatusChecks(stack, ac, cloudFormationClient);
         suspendAutoScaling(ac, stack);
@@ -302,7 +300,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
         return cloudResources;
     }
 
-    private void saveGeneratedSubnet(AuthenticatedContext ac, CloudStack stack, String cFStackName, AmazonCloudFormation client,
+    private void saveGeneratedSubnet(AuthenticatedContext ac, CloudStack stack, String cFStackName, AmazonCloudFormationRetryClient client,
             PersistenceNotifier resourceNotifier) {
         AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork());
         if (awsNetworkView.isExistingVPC()) {
@@ -326,7 +324,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
         }
     }
 
-    private String getCreatedVpc(String cFStackName, AmazonCloudFormation client) {
+    private String getCreatedVpc(String cFStackName, AmazonCloudFormationRetryClient client) {
         Map<String, String> outputs = getOutputs(cFStackName, client);
         if (outputs.containsKey(CREATED_VPC)) {
             return outputs.get(CREATED_VPC);
@@ -336,7 +334,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
         }
     }
 
-    private String getCreatedSubnet(String cFStackName, AmazonCloudFormation client) {
+    private String getCreatedSubnet(String cFStackName, AmazonCloudFormationRetryClient client) {
         Map<String, String> outputs = getOutputs(cFStackName, client);
         if (outputs.containsKey(CREATED_SUBNET)) {
             return outputs.get(CREATED_SUBNET);
@@ -346,7 +344,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
         }
     }
 
-    private String getCreatedS3AccessRoleArn(String cFStackName, AmazonCloudFormation client) {
+    private String getCreatedS3AccessRoleArn(String cFStackName, AmazonCloudFormationRetryClient client) {
         Map<String, String> outputs = getOutputs(cFStackName, client);
         if (outputs.containsKey(S3_ACCESS_ROLE)) {
             return outputs.get(S3_ACCESS_ROLE);
@@ -356,7 +354,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
         }
     }
 
-    private Map<String, String> getElasticIpAllocationIds(String cFStackName, AmazonCloudFormation client) {
+    private Map<String, String> getElasticIpAllocationIds(String cFStackName, AmazonCloudFormationRetryClient client) {
         Map<String, String> outputs = getOutputs(cFStackName, client);
         Map<String, String> elasticIpIds = outputs.entrySet().stream().filter(e -> e.getKey().startsWith(CFS_OUTPUT_EIPALLOCATION_ID))
                 .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
@@ -368,7 +366,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
         }
     }
 
-    private Map<String, String> getOutputs(String cFStackName, AmazonCloudFormation client) {
+    private Map<String, String> getOutputs(String cFStackName, AmazonCloudFormationRetryClient client) {
         DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(cFStackName);
         String outputNotFound = String.format("Couldn't get Cloudformation stack's('%s') output", cFStackName);
         List<Output> cfStackOutputs = client.describeStacks(describeStacksRequest).getStacks()
@@ -398,7 +396,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
     }
 
     private void suspendAutoScaling(AuthenticatedContext ac, CloudStack stack) {
-        AmazonAutoScalingClient amazonASClient = awsClient.createAutoScalingClient(new AwsCredentialView(ac.getCloudCredential()),
+        AmazonAutoScalingRetryClient amazonASClient = awsClient.createAutoScalingRetryClient(new AwsCredentialView(ac.getCloudCredential()),
                 ac.getCloudContext().getLocation().getRegion().value());
         for (Group group : stack.getGroups()) {
             String asGroupName = cfStackUtil.getAutoscalingGroupName(ac, group.getName(), ac.getCloudContext().getLocation().getRegion().value());
@@ -406,7 +404,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
         }
     }
 
-    private void resumeAutoScaling(AmazonAutoScalingClient amazonASClient, Collection<String> groupNames, List<String> autoScalingPolicies) {
+    private void resumeAutoScaling(AmazonAutoScalingRetryClient amazonASClient, Collection<String> groupNames, List<String> autoScalingPolicies) {
         for (String groupName : groupNames) {
             amazonASClient.resumeProcesses(new ResumeProcessesRequest().withAutoScalingGroupName(groupName).withScalingProcesses(autoScalingPolicies));
         }
@@ -491,7 +489,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
         AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());
         String regionName = ac.getCloudContext().getLocation().getRegion().value();
         if (resources != null && !resources.isEmpty()) {
-            AmazonCloudFormationClient cfClient = awsClient.createCloudFormationClient(credentialView, regionName);
+            AmazonCloudFormationRetryClient cfRetryClient = awsClient.createCloudFormationRetryClient(credentialView, regionName);
             CloudResource stackResource = getCloudFormationStackResource(resources);
             AmazonEC2Client amazonEC2Client = awsClient.createAccess(credentialView, regionName);
             if (stackResource == null) {
@@ -502,9 +500,9 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
             LOGGER.info("Deleting CloudFormation stack for stack: {} [cf stack id: {}]", cFStackName, ac.getCloudContext().getId());
             DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(cFStackName);
             try {
-                retryService.testWith2SecDelayMax5Times(() -> {
+                retryService.testWith2SecDelayMax15Times(() -> {
                     try {
-                        cfClient.describeStacks(describeStacksRequest);
+                        cfRetryClient.describeStacks(describeStacksRequest);
                     } catch (AmazonServiceException e) {
                         if (!e.getErrorMessage().contains(cFStackName + " does not exist")) {
                             throw e;
@@ -521,14 +519,13 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
             }
             resumeAutoScalingPolicies(ac, stack);
             DeleteStackRequest deleteStackRequest = new DeleteStackRequest().withStackName(cFStackName);
-            cfClient.deleteStack(deleteStackRequest);
+            cfRetryClient.deleteStack(deleteStackRequest);
+
+            AmazonCloudFormationClient cfClient = awsClient.createCloudFormationClient(credentialView, regionName);
             PollTask<Boolean> task = awsPollTaskFactory.newAwsTerminateStackStatusCheckerTask(ac, cfClient, DELETE_COMPLETE, DELETE_FAILED, ERROR_STATUSES,
                     cFStackName);
             try {
-                Boolean statePollerResult = task.call();
-                if (!task.completed(statePollerResult)) {
-                    syncPollingScheduler.schedule(task);
-                }
+                awsBackoffSyncPollingScheduler.schedule(task);
             } catch (Exception e) {
                 throw new CloudConnectorException(e.getMessage(), e);
             }
@@ -580,7 +577,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
             try {
                 String asGroupName = cfStackUtil.getAutoscalingGroupName(ac, instanceGroup.getName(), ac.getCloudContext().getLocation().getRegion().value());
                 if (asGroupName != null) {
-                    AmazonAutoScalingClient amazonASClient = awsClient.createAutoScalingClient(new AwsCredentialView(ac.getCloudCredential()),
+                    AmazonAutoScalingRetryClient amazonASClient = awsClient.createAutoScalingRetryClient(new AwsCredentialView(ac.getCloudCredential()),
                             ac.getCloudContext().getLocation().getRegion().value());
                     List<AutoScalingGroup> asGroups = amazonASClient.describeAutoScalingGroups(new DescribeAutoScalingGroupsRequest()
                             .withAutoScalingGroupNames(asGroupName)).getAutoScalingGroups();
@@ -649,9 +646,9 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
 
     @Override
     public List<CloudResourceStatus> upscale(AuthenticatedContext ac, CloudStack stack, List<CloudResource> resources) {
-        AmazonCloudFormationClient cloudFormationClient = awsClient.createCloudFormationClient(new AwsCredentialView(ac.getCloudCredential()),
+        AmazonCloudFormationRetryClient cloudFormationClient = awsClient.createCloudFormationRetryClient(new AwsCredentialView(ac.getCloudCredential()),
                 ac.getCloudContext().getLocation().getRegion().value());
-        AmazonAutoScalingClient amazonASClient = awsClient.createAutoScalingClient(new AwsCredentialView(ac.getCloudCredential()),
+        AmazonAutoScalingRetryClient amazonASClient = awsClient.createAutoScalingRetryClient(new AwsCredentialView(ac.getCloudCredential()),
                 ac.getCloudContext().getLocation().getRegion().value());
         AmazonEC2Client amazonEC2Client = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()),
                 ac.getCloudContext().getLocation().getRegion().value());
@@ -707,7 +704,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
                     auth.getCloudContext().getLocation().getRegion().value());
             DetachInstancesRequest detachInstancesRequest = new DetachInstancesRequest().withAutoScalingGroupName(asGroupName).withInstanceIds(instanceIds)
                     .withShouldDecrementDesiredCapacity(true);
-            AmazonAutoScalingClient amazonASClient = awsClient.createAutoScalingClient(new AwsCredentialView(auth.getCloudCredential()),
+            AmazonAutoScalingRetryClient amazonASClient = awsClient.createAutoScalingRetryClient(new AwsCredentialView(auth.getCloudCredential()),
                     auth.getCloudContext().getLocation().getRegion().value());
             detachInstances(instanceIds, detachInstancesRequest, amazonASClient);
             AmazonEC2Client amazonEC2Client = awsClient.createAccess(new AwsCredentialView(auth.getCloudCredential()),
@@ -736,7 +733,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
         }
     }
 
-    private void detachInstances(List<String> instanceIds, DetachInstancesRequest detachInstancesRequest, AmazonAutoScalingClient amazonASClient) {
+    private void detachInstances(List<String> instanceIds, DetachInstancesRequest detachInstancesRequest, AmazonAutoScalingRetryClient amazonASClient) {
         try {
             amazonASClient.detachInstances(detachInstancesRequest);
         } catch (AmazonServiceException e) {
@@ -780,7 +777,8 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
                 .collect(Collectors.toList());
     }
 
-    private List<String> getInstancesForGroup(AuthenticatedContext ac, AmazonAutoScaling amazonASClient, AmazonCloudFormation client, Group group) {
+    private List<String> getInstancesForGroup(AuthenticatedContext ac, AmazonAutoScalingRetryClient amazonASClient, AmazonCloudFormationRetryClient client,
+            Group group) {
         return cfStackUtil.getInstanceIds(amazonASClient, cfStackUtil.getAutoscalingGroupName(ac, client, group.getName()));
     }
 
@@ -807,17 +805,14 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
         return mapPublicIpOnLaunch;
     }
 
-    private void scheduleStatusChecks(CloudStack stack, AuthenticatedContext ac, AmazonCloudFormation cloudFormationClient) {
+    private void scheduleStatusChecks(CloudStack stack, AuthenticatedContext ac, AmazonCloudFormationRetryClient cloudFormationClient) {
         for (Group group : stack.getGroups()) {
             String asGroupName = cfStackUtil.getAutoscalingGroupName(ac, cloudFormationClient, group.getName());
             LOGGER.info("Polling Auto Scaling group until new instances are ready. [stack: {}, asGroup: {}]", ac.getCloudContext().getId(),
                     asGroupName);
             PollTask<Boolean> task = awsPollTaskFactory.newASGroupStatusCheckerTask(ac, asGroupName, group.getInstancesSize(), awsClient, cfStackUtil);
             try {
-                Boolean statePollerResult = task.call();
-                if (!task.completed(statePollerResult)) {
-                    syncPollingScheduler.schedule(task);
-                }
+                awsBackoffSyncPollingScheduler.schedule(task);
             } catch (Exception e) {
                 throw new CloudConnectorException(e.getMessage(), e);
             }

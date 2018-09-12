@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
 import com.amazonaws.services.autoscaling.model.Activity;
 import com.amazonaws.services.autoscaling.model.DescribeScalingActivitiesRequest;
 import com.amazonaws.services.ec2.AmazonEC2;
@@ -27,6 +26,7 @@ import com.amazonaws.services.ec2.model.SpotInstanceRequest;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -63,7 +63,7 @@ public class ASGroupStatusCheckerTask extends PollBooleanStateTask {
 
     private final CloudFormationStackUtil cloudFormationStackUtil;
 
-    private final AmazonAutoScalingClient autoScalingClient;
+    private final AmazonAutoScalingRetryClient autoScalingClient;
 
     private Optional<Activity> latestActivity;
 
@@ -74,7 +74,7 @@ public class ASGroupStatusCheckerTask extends PollBooleanStateTask {
         this.requiredInstances = requiredInstances;
         this.awsClient = awsClient;
         this.cloudFormationStackUtil = cloudFormationStackUtil;
-        autoScalingClient = awsClient.createAutoScalingClient(new AwsCredentialView(getAuthenticatedContext().getCloudCredential()),
+        autoScalingClient = awsClient.createAutoScalingRetryClient(new AwsCredentialView(getAuthenticatedContext().getCloudCredential()),
                 getAuthenticatedContext().getCloudContext().getLocation().getRegion().value());
         List<Activity> autoScalingActivities = getAutoScalingActivities();
         latestActivity = autoScalingActivities.stream().findFirst();

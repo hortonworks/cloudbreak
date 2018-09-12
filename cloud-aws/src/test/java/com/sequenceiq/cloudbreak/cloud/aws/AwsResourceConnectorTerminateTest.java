@@ -18,8 +18,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.ec2.AmazonEC2Client;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.encryption.EncryptedImageCopyService;
 import com.sequenceiq.cloudbreak.cloud.aws.encryption.EncryptedSnapshotService;
+import com.sequenceiq.cloudbreak.cloud.aws.scheduler.AwsBackoffSyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.aws.task.AwsPollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.aws.task.AwsTerminateStackStatusCheckerTask;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -33,7 +35,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.service.Retry;
-import com.sequenceiq.cloudbreak.service.Retry.ActionWentFailException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AwsResourceConnectorTerminateTest {
@@ -64,6 +65,9 @@ public class AwsResourceConnectorTerminateTest {
     private AmazonCloudFormationClient cloudFormationClient;
 
     @Mock
+    private AmazonCloudFormationRetryClient cloudFormationRetryClient;
+
+    @Mock
     private AmazonEC2Client ec2Client;
 
     @Mock
@@ -74,6 +78,9 @@ public class AwsResourceConnectorTerminateTest {
 
     @Mock
     private AwsTerminateStackStatusCheckerTask awsTerminateStackStatusCheckerTask;
+
+    @Mock
+    private AwsBackoffSyncPollingScheduler scheduler;
 
     @Test
     public void testTerminateShouldNotCleanupEncryptedResourcesWhenNoResourcesExist() {
@@ -86,7 +93,6 @@ public class AwsResourceConnectorTerminateTest {
 
     @Test
     public void testTerminateShouldCleanupEncryptedResourcesWhenCloudformationStackResourceDoesNotExist() {
-        when(awsClient.createCloudFormationClient(any(), any())).thenReturn(cloudFormationClient);
         when(awsClient.createAccess(any(), any())).thenReturn(ec2Client);
 
         List<CloudResource> resources = List.of(new Builder().name("ami-87654321").type(ResourceType.AWS_ENCRYPTED_AMI).build(),
@@ -100,10 +106,10 @@ public class AwsResourceConnectorTerminateTest {
     }
 
     @Test
-    public void testTerminateShouldCleanupEncryptedResourcesWhenCloudformationStackDoesNotExist() {
+    public void testTerminateShouldCleanupEncryptedResourcesWhenCloudformationStackDoesNotExist() throws Exception {
         when(awsClient.createCloudFormationClient(any(), any())).thenReturn(cloudFormationClient);
+        when(awsClient.createCloudFormationRetryClient(any(), any())).thenReturn(cloudFormationRetryClient);
         when(awsClient.createAccess(any(), any())).thenReturn(ec2Client);
-        when(retryService.testWith2SecDelayMax5Times(any())).thenThrow(new ActionWentFailException("Stack not exists"));
 
         List<CloudResource> resources = List.of(new Builder().name("ami-87654321").type(ResourceType.AWS_ENCRYPTED_AMI).build(),
                 new Builder().name("snap-1234567812345678").type(ResourceType.AWS_SNAPSHOT).build(),
@@ -119,9 +125,9 @@ public class AwsResourceConnectorTerminateTest {
     @Test
     public void testTerminateShouldCleanupEncryptedResourcesWhenCloudformationStackTerminated() {
         when(awsClient.createCloudFormationClient(any(), any())).thenReturn(cloudFormationClient);
+        when(awsClient.createCloudFormationRetryClient(any(), any())).thenReturn(cloudFormationRetryClient);
         when(awsClient.createAccess(any(), any())).thenReturn(ec2Client);
         when(awsPollTaskFactory.newAwsTerminateStackStatusCheckerTask(any(), any(), any(), any(), any(), any())).thenReturn(awsTerminateStackStatusCheckerTask);
-        when(awsTerminateStackStatusCheckerTask.completed(any())).thenReturn(true);
 
         List<CloudResource> resources = List.of(new Builder().name("ami-87654321").type(ResourceType.AWS_ENCRYPTED_AMI).build(),
                 new Builder().name("snap-1234567812345678").type(ResourceType.AWS_SNAPSHOT).build(),
@@ -130,7 +136,7 @@ public class AwsResourceConnectorTerminateTest {
 
         underTest.terminate(authenticatedContext(), cloudStack, resources);
 
-        verify(cloudFormationClient, times(1)).deleteStack(any());
+        verify(cloudFormationRetryClient, times(1)).deleteStack(any());
         verify(encryptedImageCopyService, times(1)).deleteResources(any(), any(), any());
         verify(snapshotService, times(1)).deleteResources(any(), any(), any());
     }

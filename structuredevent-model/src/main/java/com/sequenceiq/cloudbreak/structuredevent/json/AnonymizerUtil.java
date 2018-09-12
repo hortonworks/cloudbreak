@@ -8,7 +8,12 @@ public class AnonymizerUtil {
 
     private static final ReplacePattern[] PATTERNS = {
             //common PW
-            new ReplacePattern("(?i)(?<=password=|password\":\"|pass:|key\":\"|key=|credential\":\")(?=\\S*)[^\\s'\"]*", REPLACEMENT),
+            new ReplacePattern("(?i)(?<="
+                    + "password=|password\":\"|password:|password |"
+                    + "pass=|pass\":\"|pass:|pass |"
+                    + "key=|key\":\"|key:|key |"
+                    + "credential=|credential\":\"|credential:|credential "
+                    + ")(?=\\S*)[^\\s'\"]*", REPLACEMENT),
             //WASB
             new ReplacePattern("(?i)(?<=\\.blob\\.core\\.windows\\.net\":\")(?=\\S*)[^\\s'\"]*", REPLACEMENT)
     };

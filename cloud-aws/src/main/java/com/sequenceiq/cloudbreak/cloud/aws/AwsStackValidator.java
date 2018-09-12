@@ -5,9 +5,9 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.amazonaws.AmazonServiceException;
-import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
 import com.sequenceiq.cloudbreak.cloud.Validator;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -26,7 +26,7 @@ public class AwsStackValidator implements Validator {
     public void validate(AuthenticatedContext ac, CloudStack cloudStack) {
         AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());
         String regionName = ac.getCloudContext().getLocation().getRegion().value();
-        AmazonCloudFormationClient cfClient = awsClient.createCloudFormationClient(credentialView, regionName);
+        AmazonCloudFormationRetryClient cfClient = awsClient.createCloudFormationRetryClient(credentialView, regionName);
         String cFStackName = cfStackUtil.getCfStackName(ac);
         try {
             cfClient.describeStacks(new DescribeStacksRequest().withStackName(cFStackName));
