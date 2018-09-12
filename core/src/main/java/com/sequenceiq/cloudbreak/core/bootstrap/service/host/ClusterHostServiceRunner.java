@@ -156,15 +156,6 @@ public class ClusterHostServiceRunner {
         }
     }
 
-    public Map<String, String> addAmbariServices(Long stackId, String hostGroupName, Integer scalingAdjustment) throws CloudbreakException {
-        Map<String, String> candidates;
-        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        Cluster cluster = stack.getCluster();
-        candidates = collectUpscaleCandidates(cluster.getId(), hostGroupName, scalingAdjustment);
-        runAmbariServices(stack, cluster);
-        return candidates;
-    }
-
     public String changePrimaryGateway(Stack stack) throws CloudbreakException {
         GatewayConfig formerPrimaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
         List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
@@ -401,6 +392,15 @@ public class ClusterHostServiceRunner {
     private void saveHDPPillar(Long clusterId, Map<String, SaltPillarProperties> servicePillar) {
         StackRepoDetails hdprepo = clusterComponentConfigProvider.getHDPRepo(clusterId);
         servicePillar.put("hdp", new SaltPillarProperties("/hdp/repo.sls", singletonMap("hdp", hdprepo)));
+    }
+
+    public Map<String, String> addAmbariServices(Long stackId, String hostGroupName, Integer scalingAdjustment) throws CloudbreakException {
+        Map<String, String> candidates;
+        Stack stack = stackRepository.findOneWithLists(stackId);
+        Cluster cluster = stack.getCluster();
+        candidates = collectUpscaleCandidates(cluster.getId(), hostGroupName, scalingAdjustment);
+        runAmbariServices(stack, cluster);
+        return candidates;
     }
 
     private Map<String, String> collectUpscaleCandidates(Long clusterId, String hostGroupName, Integer adjustment) {
