@@ -393,16 +393,7 @@ public class ClusterHostServiceRunner {
         StackRepoDetails hdprepo = clusterComponentConfigProvider.getHDPRepo(clusterId);
         servicePillar.put("hdp", new SaltPillarProperties("/hdp/repo.sls", singletonMap("hdp", hdprepo)));
     }
-
-    public Map<String, String> addAmbariServices(Long stackId, String hostGroupName, Integer scalingAdjustment) throws CloudbreakException {
-        Map<String, String> candidates;
-        Stack stack = stackRepository.findOneWithLists(stackId);
-        Cluster cluster = stack.getCluster();
-        candidates = collectUpscaleCandidates(cluster.getId(), hostGroupName, scalingAdjustment);
-        runAmbariServices(stack, cluster);
-        return candidates;
-    }
-
+    
     private Map<String, String> collectUpscaleCandidates(Long clusterId, String hostGroupName, Integer adjustment) {
         HostGroup hostGroup = hostGroupService.getByClusterIdAndName(clusterId, hostGroupName);
         if (hostGroup.getConstraint().getInstanceGroup() != null) {
