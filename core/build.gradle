@@ -24,6 +24,7 @@ plugins {
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 apply plugin: 'info.solidsoft.pitest'
+apply plugin: "jacoco"
 
 bootRun {
     systemProperty 'spring.profiles.active', System.properties['spring.profiles.active']
@@ -223,22 +224,6 @@ dependencies {
   testCompile group: 'com.jayway.restassured',   name: 'rest-assured'
   testCompile group: 'com.jayway.restassured',   name: 'json-path'
   testCompile group: 'com.h2database',           name: 'h2'
-}
-
-jacoco {
-    toolVersion = "0.8.1"
-    reportsDir = file("$buildDir/reports/jacoco")
-}
-
-jacocoTestReport {
-    reports {
-        xml.enabled false
-        csv.enabled false
-        html.destination new File("${buildDir}/jacocoHtml")
-    }
-}
-
-test {
 }
 
 task buildInfo(type: BuildInfoTask, dependsOn: processResources) {
