@@ -84,6 +84,8 @@ jobs:
           command: ./gradlew -Penv=jenkins -b build.gradle check -x checkstyleMain -x checkstyleTest -x spotbugsMain -x test --no-daemon --max-workers 1 --stacktrace
 
   unit-test:
+    environment:
+      CC_TEST_REPORTER_ID: CC_TEST_REPORTER_ID
     docker:
       - image: circleci/openjdk:10-jdk
     environment:
@@ -95,8 +97,22 @@ jobs:
       - restore_cache:
           key: gradle-cache
       - run:
+          name: Setup Code Climate test-reporter
+          command: |
+            curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+            chmod +x ./cc-test-reporter
+      - run:
           name: test
-          command: ./gradlew -Penv=jenkins -b build.gradle test --info --stacktrace --parallel -x checkstyleMain -x checkstyleTest -x spotbugsMain -x spotbugsTest --no-daemon --max-workers 1
+          command: |
+            ./cc-test-reporter before-build
+            ./gradlew -Penv=jenkins -b build.gradle test jacocoTestReport --info --stacktrace --parallel -x checkstyleMain -x checkstyleTest -x spotbugsMain -x spotbugsTest --no-daemon --max-workers 1
+      - run:
+          name: Set jacoco.xml path for code climate
+          command: JACOCO_SOURCE_PATH=core/src/main/java ./cc-test-reporter format-coverage ./core/build/reports/jacoco/test/jacocoTestReport.xml --input-type jacoco
+      - run:
+          name: Upload code climate report
+          command: ./cc-test-reporter upload-coverage -r $CC_TEST_REPORTER_ID
+          when: on_success
       - run:
           name: Save test results
           command: |

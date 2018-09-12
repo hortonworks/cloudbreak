@@ -47,8 +47,10 @@ subprojects {
   apply plugin: 'maven'
   apply plugin: 'checkstyle'
   apply plugin: 'com.github.spotbugs'
+  apply plugin: 'jacoco'
 
-  sourceCompatibility = 10
+
+    sourceCompatibility = 10
   targetCompatibility = 10
 
   configurations {
@@ -81,13 +83,45 @@ subprojects {
     effort = "min"
   }
 
+  jacoco {
+    toolVersion = "0.8.2"
+    reportsDir = file("$buildDir/reports/jacoco")
+  }
+
+  jacocoTestReport {
+    reports {
+      xml.enabled true
+      csv.enabled true
+      html.enabled true
+    }
+      afterEvaluate {
+          classDirectories = files(classDirectories.files.collect {
+              fileTree(
+                      dir: it,
+                      exclude: [
+                              '**/converter/mapper/**'
+                      ]
+              )
+          })
+      }
+  }
+
+  test {
+    jacoco {
+      append = false
+      destinationFile = file("$buildDir/jacoco/jacocoTest.exec")
+      classDumpDir = file("$buildDir/jacoco/classpathdumps")
+    }
+  }
+
   tasks.withType(com.github.spotbugs.SpotBugsTask) {
     reports {
       xml.enabled false
       html.enabled true
     }
+
   }
-  
+
   checkstyle {
     toolVersion = "8.11"
   }
