@@ -30,6 +30,9 @@ public class UserWorkspacePermissionsService {
     @Inject
     private UserWorkspacePermissionsValidator userWorkspacePermissionsValidator;
 
+    @Inject
+    private CachedUserService cachedUserService;
+
     public Set<UserWorkspacePermissions> findForCurrentUser(User currentUser) {
         return userWorkspacePermissionsRepository.findForUser(currentUser);
     }
@@ -55,6 +58,7 @@ public class UserWorkspacePermissionsService {
     }
 
     public Set<UserWorkspacePermissions> deleteAll(Set<UserWorkspacePermissions> toBeDeleted) {
+        toBeDeleted.forEach(p -> cachedUserService.evictUser(p.getUser()));
         userWorkspacePermissionsRepository.deleteAll(toBeDeleted);
         return toBeDeleted;
     }
@@ -73,6 +77,7 @@ public class UserWorkspacePermissionsService {
     }
 
     public Iterable<UserWorkspacePermissions> saveAll(Set<UserWorkspacePermissions> userWorkspacePermsToAdd) {
+        userWorkspacePermsToAdd.forEach(p -> cachedUserService.evictUser(p.getUser()));
         validateSaveAll(userWorkspacePermsToAdd);
         return userWorkspacePermissionsRepository.saveAll(userWorkspacePermsToAdd);
     }

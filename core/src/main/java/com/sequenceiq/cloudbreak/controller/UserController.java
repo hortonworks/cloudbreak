@@ -60,7 +60,7 @@ public class UserController implements UserEndpoint {
     @Override
     public String evictUserDetails(String id, UserJson user) {
         cachedUserDetailsService.evictUserDetails(id, user.getUsername());
-        cachedUserService.evictUser(restRequestThreadLocalService.getIdentityUser());
+        cachedUserService.evictByIdentityUser(restRequestThreadLocalService.getIdentityUser());
         return user.getUsername();
     }
 
@@ -68,7 +68,7 @@ public class UserController implements UserEndpoint {
     public UserJson evictCurrentUserDetails() {
         IdentityUser user = restRequestThreadLocalService.getIdentityUser();
         cachedUserDetailsService.evictUserDetails(user.getUserId(), user.getUsername());
-        cachedUserService.evictUser(user);
+        cachedUserService.evictByIdentityUser(user);
         return new UserJson(user.getUsername());
     }
 
