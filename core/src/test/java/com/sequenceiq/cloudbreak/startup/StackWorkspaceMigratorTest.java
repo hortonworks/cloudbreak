@@ -28,21 +28,21 @@ import org.mockito.stubbing.Answer;
 
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.service.user.UserDetailsService;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceRepository;
 import com.sequenceiq.cloudbreak.repository.workspace.TenantRepository;
+import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceRepository;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.user.UserWorkspacePermissionsService;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.service.user.UserWorkspacePermissionsService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StackWorkspaceMigratorTest {
@@ -156,19 +156,18 @@ public class StackWorkspaceMigratorTest {
         cluster3.setStack(stack3);
         stack3.setCluster(cluster3);
 
-        // orphaned
-        Stack stack4 = new Stack();
-        stack4.setId(4L);
-        stack4.setName("stack4");
-        stack4.setOwner("3");
-        stack4.setAccount("3");
-        Cluster cluster4 = new Cluster();
-        cluster4.setId(4L);
-        cluster4.setStack(stack4);
-        stack4.setCluster(cluster4);
+        // stack not set for cluster
+        Stack stack5 = new Stack();
+        stack5.setId(5L);
+        stack5.setName("stack5");
+        stack5.setOwner("2");
+        stack5.setAccount("2");
+        Cluster cluster5 = new Cluster();
+        cluster5.setId(5L);
+        stack5.setCluster(cluster5);
 
-        Set<Stack> stacks = Set.of(stack1, stack2, stack3, stack4);
-        Set<Cluster> clusters = Set.of(cluster1, cluster2, cluster3, cluster4);
+        Set<Stack> stacks = Set.of(stack1, stack2, stack3, stack5);
+        Set<Cluster> clusters = Set.of(cluster1, cluster2, cluster3, cluster5);
         when(stackRepository.findAllAliveWithNoWorkspaceOrUser()).thenReturn(stacks);
         when(clusterRepository.findAllWithNoWorkspace()).thenReturn(clusters);
 
@@ -191,10 +190,5 @@ public class StackWorkspaceMigratorTest {
         assertEquals("2@hw.com", savedStacks.get(2).getWorkspace().getName());
         assertEquals("2@hw.com", savedStacks.get(2).getCluster().getWorkspace().getName());
         assertEquals("stack3", savedStacks.get(2).getName());
-
-        assertEquals("1@hw.com", savedStacks.get(3).getCreator().getUserId());
-        assertEquals("OrphanedResources", savedStacks.get(3).getWorkspace().getName());
-        assertEquals("OrphanedResources", savedStacks.get(3).getCluster().getWorkspace().getName());
-        assertEquals("stack4", savedStacks.get(3).getName());
     }
 }

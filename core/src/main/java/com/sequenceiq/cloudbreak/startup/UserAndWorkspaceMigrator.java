@@ -20,17 +20,17 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.client.TokenUnavailableException;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.service.user.UserDetailsService;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.Tenant;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.UserWorkspacePermissions;
-import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceRepository;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.workspace.TenantRepository;
+import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceRepository;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
-import com.sequenceiq.cloudbreak.service.user.UserWorkspacePermissionsService;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.service.user.UserWorkspacePermissionsService;
 
 @Component
 public class UserAndWorkspaceMigrator {
