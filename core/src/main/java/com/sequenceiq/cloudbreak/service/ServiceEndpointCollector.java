@@ -84,35 +84,36 @@ public class ServiceEndpointCollector {
     }
 
     public Map<String, Collection<ClusterExposedServiceResponse>> prepareClusterExposedServices(Cluster cluster, String ambariIp) {
-        BlueprintTextProcessor blueprintTextProcessor = new BlueprintProcessorFactory().get(cluster.getBlueprint().getBlueprintText());
-        Collection<ExposedService> knownExposedServices = getExposedServices(blueprintTextProcessor, Collections.emptySet());
-
-        Gateway gateway = cluster.getGateway();
-        Map<String, Collection<ClusterExposedServiceResponse>> clusterExposedServiceMap = new HashMap<>();
-        if (gateway != null) {
-            for (GatewayTopology gatewayTopology : gateway.getTopologies()) {
-                List<ClusterExposedServiceResponse> clusterExposedServiceResponses = new ArrayList<>();
-                Set<String> exposedServicesInTopology = gateway.getTopologies().stream()
-                        .flatMap(this::getExposedServiceStream)
-                        .filter(Objects::nonNull)
-                        .collect(Collectors.toSet());
-                for (ExposedService exposedService : knownExposedServices) {
-                    ClusterExposedServiceResponse clusterExposedServiceResponse = new ClusterExposedServiceResponse();
-                    clusterExposedServiceResponse.setMode(exposedService.isSSOSupported() ? gateway.getSsoType() : SSOType.NONE);
-                    clusterExposedServiceResponse.setDisplayName(exposedService.getPortName());
-                    clusterExposedServiceResponse.setKnoxService(exposedService.getKnoxService());
-                    clusterExposedServiceResponse.setServiceName(exposedService.getServiceName());
-                    Optional<String> serviceUrlForService = getServiceUrlForService(exposedService, ambariIp,
-                            gateway, gatewayTopology.getTopologyName());
-                    serviceUrlForService.ifPresent(clusterExposedServiceResponse::setServiceUrl);
-                    clusterExposedServiceResponse.setOpen(isExposed(exposedService, exposedServicesInTopology));
-                    clusterExposedServiceResponses.add(clusterExposedServiceResponse);
+        if (cluster.getBlueprint() != null && StringUtils.isNotEmpty(cluster.getBlueprint().getBlueprintText())) {
+            BlueprintTextProcessor blueprintTextProcessor = new BlueprintProcessorFactory().get(cluster.getBlueprint().getBlueprintText());
+            Collection<ExposedService> knownExposedServices = getExposedServices(blueprintTextProcessor, Collections.emptySet());
+            Gateway gateway = cluster.getGateway();
+            Map<String, Collection<ClusterExposedServiceResponse>> clusterExposedServiceMap = new HashMap<>();
+            if (gateway != null) {
+                for (GatewayTopology gatewayTopology : gateway.getTopologies()) {
+                    List<ClusterExposedServiceResponse> clusterExposedServiceResponses = new ArrayList<>();
+                    Set<String> exposedServicesInTopology = gateway.getTopologies().stream()
+                            .flatMap(this::getExposedServiceStream)
+                            .filter(Objects::nonNull)
+                            .collect(Collectors.toSet());
+                    for (ExposedService exposedService : knownExposedServices) {
+                        ClusterExposedServiceResponse clusterExposedServiceResponse = new ClusterExposedServiceResponse();
+                        clusterExposedServiceResponse.setMode(exposedService.isSSOSupported() ? gateway.getSsoType() : SSOType.NONE);
+                        clusterExposedServiceResponse.setDisplayName(exposedService.getPortName());
+                        clusterExposedServiceResponse.setKnoxService(exposedService.getKnoxService());
+                        clusterExposedServiceResponse.setServiceName(exposedService.getServiceName());
+                        Optional<String> serviceUrlForService = getServiceUrlForService(exposedService, ambariIp,
+                                gateway, gatewayTopology.getTopologyName());
+                        serviceUrlForService.ifPresent(clusterExposedServiceResponse::setServiceUrl);
+                        clusterExposedServiceResponse.setOpen(isExposed(exposedService, exposedServicesInTopology));
+                        clusterExposedServiceResponses.add(clusterExposedServiceResponse);
+                    }
+                    clusterExposedServiceMap.put(gatewayTopology.getTopologyName(), clusterExposedServiceResponses);
                 }
-                clusterExposedServiceMap.put(gatewayTopology.getTopologyName(), clusterExposedServiceResponses);
             }
+            return clusterExposedServiceMap;
         }
-
-        return clusterExposedServiceMap;
+        return Collections.emptyMap();
     }
 
     private Collection<ExposedService> getExposedServices(BlueprintTextProcessor blueprintTextProcessor, Set<String> removableComponents) {
