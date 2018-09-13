@@ -192,21 +192,21 @@ cb:
             baseurl: http://public-repo-1.hortonworks.com/ambari/sles12/2.x/updates/2.6.2.2
             gpgkey: http://public-repo-1.hortonworks.com/ambari/sles12/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
       2.7:
-        version: 2.7.1.0-160
+        version: 2.7.0.0
         repo:
           redhat7:
-            baseurl: http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos7/2.x/BUILDS/2.7.1.0-160
-            gpgkey: http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos7/2.x/BUILDS/2.7.1.0-160/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
+            baseurl: http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.7.0.0
+            gpgkey: http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.7.0.0/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
           debian9:
-            baseurl: http://s3.amazonaws.com/dev.hortonworks.com/ambari/debian9/2.x/BUILDS/2.7.1.0-160
+            baseurl: http://public-repo-1.hortonworks.com/ambari/debian9/2.x/updates/2.7.0.0
           ubuntu16:
-            baseurl: http://s3.amazonaws.com/dev.hortonworks.com/ambari/ubuntu16/2.x/BUILDS/2.7.1.0-160
+           baseurl: http://public-repo-1.hortonworks.com/ambari/ubuntu16/2.x/updates/2.7.0.0
           sles12:
-            baseurl: http://s3.amazonaws.com/dev.hortonworks.com/ambari/sles12/2.x/BUILDS/2.7.1.0-160
-            gpgkey: http://s3.amazonaws.com/dev.hortonworks.com/ambari/sles12/2.x/BUILDS/2.7.1.0-160/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
+            baseurl: http://public-repo-1.hortonworks.com/ambari/sles12/2.x/updates/2.7.0.0
+            gpgkey: http://public-repo-1.hortonworks.com/ambari/sles12/2.x/updates/2.7.0.0/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
           amazonlinux2:
-            baseurl: http://s3.amazonaws.com/dev.hortonworks.com/ambari/amazonlinux2/2.x/BUILDS/2.7.1.0-160
-            gpgkey: http://s3.amazonaws.com/dev.hortonworks.com/ambari/amazonlinux2/2.x/BUILDS/2.7.1.0-160/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
+            baseurl: http://public-repo-1.hortonworks.com/ambari/amazonlinux2/2.x/updates/2.7.0.0
+            gpgkey: http://public-repo-1.hortonworks.com/ambari/amazonlinux2/2.x/updates/2.7.0.0/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
     database:
       port: 5432
       user: ambari
