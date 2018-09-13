@@ -5,10 +5,14 @@ import java.util.concurrent.TimeUnit;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import net.sf.ehcache.config.SizeOfPolicyConfiguration;
+
 @Service
 public class ImageCatalogCache extends AbstractCacheDefinition {
 
     private static final long MAX_ENTRIES = 1000L;
+
+    private static final int MAX_DEPTH = 503;
 
     @Value("${cb.image.catalog.cache.ttl:15}")
     private long ttlMinutes;
@@ -36,5 +40,10 @@ public class ImageCatalogCache extends AbstractCacheDefinition {
     @Override
     protected long getTimeToLiveSeconds() {
         return ttlMinutes == 0L ? 1 : TimeUnit.MINUTES.toSeconds(ttlMinutes);
+    }
+
+    @Override
+    protected SizeOfPolicyConfiguration getSizeOfPolicyConfiguration() {
+        return new SizeOfPolicyConfiguration().maxDepth(MAX_DEPTH);
     }
 }
