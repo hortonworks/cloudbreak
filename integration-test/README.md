@@ -1,23 +1,25 @@
 # Integration test for Cloudbreak
 
-This is a standalone springboot application with which we can run cloudbreak specific testng testsuites parallel.
+This is a standalone springboot application with which we can run cloudbreak specific testng testsuites parallel. 
+This Springboot project wraps a TestNg framework, which actually runs the testcases.
 
-## Build:
-1. Build cloudbreak with ./gradlew clean build:
-2. The built jar file can be found in the integration-test/build/libs
+#### Build:
+1. Build cloudbreak project with ./gradlew clean build:
+2. This will also produce the integration-test.jar . The built jar file can be found in the integration-test/build/libs
 
-## Run:
-1. from the integrationtest directory:
-2. java -jar build/libs/cloudbreak-integration-test-{versioninfo}.jar [program arguments]
+#### Cloudbreak configuration
+
+1. For mock integration test to function you need to edit the spring configuration file located in cloud-common/src/resource/application.yml and add MOCK as a platform
+
+    `cb.enabledplatforms: AZURE,AWS,GCP,OPENSTACK,MOCK`
+2. Restart cloudbreak
 
 ## Configuration parameters:
-In SpringBoot applications you can define the configuration parameters different ways:
-http://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html
-
 Most of the configutation parameters with their default values (if any) can be found in the src/main/resources/application.yml file.
-You can define your own application.yml file where you can overwrite the default parameters in the working directory where the integration test is running from, or you can define the SPRING_CONFIG_LOCATION environment variable or spring.config.location program argument with the directory of your application.yml.
+You can define your own application.yml file where you can overwrite the default parameters in the working directory where the integration test is running from, or 
+you can define the SPRING_CONFIG_LOCATION environment variable or *spring.config.additional-location* program argument with the location of your application.yml.
 
-### Mandatory parameters
+### Quickstart setup of Integration tests with required parameters
 
 * url of uaa server
 * uaa user
@@ -25,7 +27,10 @@ You can define your own application.yml file where you can overwrite the default
 * url of cloudbreak
 * integrationtest command and related params
 
-You can define these parameters in your application.yml:
+Change directory to integration-test and create your own application.yml with the following content.
+
+* `docker-machine ip cbd` Should tell you the IP of uaa and cloudbreak server
+* user/password can be found in your Profile inside cbd, (UAA_DEFAULT_USER_EMAIL, UAA_DEFAULT_USER_PASSWORD).
 
 ```
 integrationtest:
@@ -38,26 +43,31 @@ integrationtest:
     # cloudbreak properites
     cloudbreak:
         server: http://192.168.59.103:8080
+        
+    #working mode    
+    command: suiteurls        
+    suiteFiles:
+      - classpath:/testsuites/v2/mock/v2-mock-stackcreate-scaling.yaml
+    cleanup:
+        cleanupBeforeStart: true        
 ```
 
-or as program arguments:
+These parameters can also be specified as program arguments or environment variables.
+https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html
 
 ```
-java -jar <path of cloudbreak.jar> --integrationtest.uaa.server=http://192.168.59.103:8089 --integrationtest.uaa.user=example@example.com --integrationtest.uaa.password=password --integrationtest.cloudbreak.server=http://192.168.59.103:8080
+java -jar ./build/libs/cloudbreak-integration-test.jar -Dspring.config.additional-location="application.yml"
 ```
+### Test results
+* Test result can will be logged to STDOUT.
+* TestNG generated result can be found in the `test-output` directory under the working directory
+* ReportNG generated result can be found in the `test-output/html` directory under the working directory
 
-or as environment variables:
 
-```
-export INTEGRATIONTEST_UAA_SERVER=http://192.168.59.103:8089
-export INTEGRATIONTEST_UAA_USER=example@example.com
-export INTEGRATIONTEST_UAA_PASSWORD=password
-export INTEGRATIONTEST_CLOUDBREAK_SERVER=http://192.168.59.103:8080
-```
 
-### integrationtest command and related params
-The following parameters are program arguments, starts with `'--'` (but can be defined other ways, read the above mentioned documentaion):
 #### integrationtest.command
+Integration test framework supports multiple configuration modes. This can be defined with the *integrationtest.command* parameter.
+
 ##### smoketest
 In this case you have to define the smoketests in the `'--integrationtest.testTypes'` program arguments as comma separated list.
 The smoketests are collections of predefined testsuites, which you can find in the src/main/resources/testsuites.
@@ -310,7 +320,3 @@ You can define parameters for the tests as well, for example GcpTempateCreationT
     classes:
       - com.sequenceiq.it.cloudbreak.GcpTemplateCreationTest
 ```
-
-### Test results
-* TestNG generated result can be found in the `test-output` directory under the working directory
-* ReportNG generated result can be found in the `test-output/html` directory under the working directory

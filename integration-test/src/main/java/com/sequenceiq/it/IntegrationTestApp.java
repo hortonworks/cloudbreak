@@ -84,6 +84,8 @@ public class IntegrationTestApp implements CommandLineRunner {
         testng.addListener(new ReportListener());
         setupSuites(testng);
         testng.run();
+        LOG.info("Html result of test run: file://{}/test-output/index.html", System.getProperty("user.dir"));
+        LOG.info("Text based result of test run: file://{}/test-output/emailable-report.html", System.getProperty("user.dir"));
     }
 
     private void setupSuites(TestNG testng) throws Exception {
