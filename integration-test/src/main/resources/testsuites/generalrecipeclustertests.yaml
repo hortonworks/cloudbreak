@@ -3,8 +3,11 @@ parameters:
   cleanUp: true
 listeners:
   - com.sequenceiq.it.cloudbreak.newway.listener.FirstLastTestExecutionBehaviour
+  - com.sequenceiq.it.cloudbreak.newway.listener.StructuredEventsReporterOnFailingCluster
+  - com.sequenceiq.it.cloudbreak.newway.priority.PriorityMethodInterceptor
 tests:
-  - name: openstack_cluster_test_recipes_with_python_script
+  - name: "openstack cluster test recipes with python script"
+    preserveOrder: true
     parameters:
       provider: openstack
       openstackClusterName: e2e-cluster-py-recipe
@@ -12,6 +15,6 @@ tests:
     classes:
       - name: com.sequenceiq.it.cloudbreak.GeneralRecipeClusterTests
         includedMethods:
-          - testCreateClusterWithRecipes
+          - testAClusterCreation
           - testCheckRecipesOnNodes
           - testTerminateClusterCheckRecipePreTerm
