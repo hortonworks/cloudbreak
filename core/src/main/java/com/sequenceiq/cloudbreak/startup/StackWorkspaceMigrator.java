@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.startup;
 
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -10,16 +9,16 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
 @Component
 public class StackWorkspaceMigrator {
@@ -53,19 +52,9 @@ public class StackWorkspaceMigrator {
     private void setWorkspaceAndCreatorForStack(UserMigrationResults userMigrationResults, Stack stack) {
         String owner = stack.getOwner();
         User creator = userMigrationResults.getOwnerIdToUser().get(owner);
-        if (creator == null) {
-            putIntoOrphanedWorkspace(userMigrationResults, stack);
-        } else {
+        if (creator != null) {
             putIntoDefaultWorkspace(stack, creator);
-        }
-        stackRepository.save(stack);
-    }
-
-    private void putIntoOrphanedWorkspace(UserMigrationResults userMigrationResults, Stack stack) {
-        Iterator<User> userIterator = userMigrationResults.getOwnerIdToUser().values().iterator();
-        if (userIterator.hasNext()) {
-            stack.setCreator(userIterator.next());
-            stack.setWorkspace(userMigrationResults.getWorkspaceForOrphanedResources());
+            stackRepository.save(stack);
         }
     }
 
@@ -76,11 +65,14 @@ public class StackWorkspaceMigrator {
     }
 
     private void setWorkspaceForCluster(Map<Long, Stack> stacks, Cluster cluster) {
-        Long stackId = cluster.getStack().getId();
-        Optional<Stack> stack = Optional.ofNullable(stacks.getOrDefault(stackId, stackRepository.findById(stackId).orElse(null)));
-        stack.ifPresent(s -> {
-            cluster.setWorkspace(s.getWorkspace());
-            clusterRepository.save(cluster);
-        });
+        Stack clusterStack = cluster.getStack();
+        if (clusterStack != null) {
+            Long stackId = clusterStack.getId();
+            Optional<Stack> stack = Optional.ofNullable(stacks.getOrDefault(stackId, stackRepository.findById(stackId).orElse(null)));
+            stack.ifPresent(s -> {
+                cluster.setWorkspace(s.getWorkspace());
+                clusterRepository.save(cluster);
+            });
+        }
     }
 }

@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.startup;
 
-import java.util.Iterator;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -8,8 +7,8 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.StructuredEventEntity;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -40,19 +39,9 @@ public class StructuredEventWorkspaceMigrator {
     private void setWorkspaceAndUser(UserMigrationResults userMigrationResults, StructuredEventEntity event) {
         String owner = event.getOwner();
         User creator = userMigrationResults.getOwnerIdToUser().get(owner);
-        if (creator == null) {
-            putIntoOrphanedWorkspace(userMigrationResults, event);
-        } else {
+        if (creator != null) {
             putIntoDefaultWorkspace(event, creator);
-        }
-        structuredEventRepository.save(event);
-    }
-
-    private void putIntoOrphanedWorkspace(UserMigrationResults userMigrationResults, StructuredEventEntity event) {
-        Iterator<User> userIterator = userMigrationResults.getOwnerIdToUser().values().iterator();
-        if (userIterator.hasNext()) {
-            event.setUser(userIterator.next());
-            event.setWorkspace(userMigrationResults.getWorkspaceForOrphanedResources());
+            structuredEventRepository.save(event);
         }
     }
 
