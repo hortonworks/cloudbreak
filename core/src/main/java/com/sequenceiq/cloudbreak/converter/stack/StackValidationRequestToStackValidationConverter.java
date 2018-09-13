@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import javax.inject.Inject;
 
@@ -22,23 +23,24 @@ import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupRequest;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Network;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
 @Component
 public class StackValidationRequestToStackValidationConverter extends AbstractConversionServiceAwareConverter<StackValidationRequest, StackValidation> {
@@ -77,7 +79,6 @@ public class StackValidationRequestToStackValidationConverter extends AbstractCo
 
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
-
         formatAccessDeniedMessage(
                 () -> validateBlueprint(stackValidationRequest, stackValidation, workspace), "blueprint", stackValidationRequest.getBlueprintId()
         );
@@ -124,17 +125,23 @@ public class StackValidationRequestToStackValidationConverter extends AbstractCo
     }
 
     private void validateBlueprint(StackValidationRequest stackValidationRequest, StackValidation stackValidation, Workspace workspace) {
-        if (stackValidationRequest.getBlueprintId() != null) {
-            Blueprint blueprint = blueprintService.get(stackValidationRequest.getBlueprintId());
-            stackValidation.setBlueprint(blueprint);
-        } else if (stackValidationRequest.getBlueprintName() != null) {
-            Blueprint blueprint = blueprintService.getByNameForWorkspace(stackValidationRequest.getBlueprintName(), workspace);
-            stackValidation.setBlueprint(blueprint);
-        } else if (stackValidationRequest.getBlueprint() != null) {
-            Blueprint blueprint = conversionService.convert(stackValidationRequest.getBlueprint(), Blueprint.class);
-            stackValidation.setBlueprint(blueprint);
-        } else {
+        Set<Blueprint> blueprintsInWorkspace = blueprintService.getAllAvailableInWorkspace(workspace);
+        if (stackValidationRequest.getBlueprintId() == null
+                && stackValidationRequest.getBlueprintName() == null
+                && stackValidationRequest.getBlueprint() == null) {
             throw new BadRequestException("Blueprint is not configured for the validation request!");
+        }
+        if (stackValidationRequest.getBlueprintId() != null) {
+            selectBlueprint(blueprintsInWorkspace, stackValidation, bp -> bp.getId().equals(stackValidationRequest.getBlueprintId()));
+        } else if (stackValidationRequest.getBlueprintName() != null) {
+            selectBlueprint(blueprintsInWorkspace, stackValidation, bp -> bp.getName().equals(stackValidationRequest.getBlueprintName()));
+        } else if (stackValidationRequest.getBlueprint() != null) {
+            stackValidation.setBlueprint(conversionService.convert(stackValidationRequest.getBlueprint(), Blueprint.class));
+        }
+        if (stackValidation.getBlueprint() == null) {
+            throw new NotFoundException(String.format("Blueprint could not be validated by id: %d, name: %s or bp text",
+                    stackValidationRequest.getBlueprintId(),
+                    stackValidationRequest.getBlueprintName()));
         }
     }
 
@@ -143,7 +150,7 @@ public class StackValidationRequestToStackValidationConverter extends AbstractCo
         for (HostGroupRequest json : hostGroupsJsons) {
             HostGroup hostGroup = new HostGroup();
             hostGroup.setName(json.getName());
-            Constraint constraint = getConversionService().convert(json.getConstraint(), Constraint.class);
+            Constraint constraint = conversionService.convert(json.getConstraint(), Constraint.class);
             String instanceGroupName = json.getConstraint().getInstanceGroupName();
             if (instanceGroupName != null) {
                 Optional<InstanceGroup> instanceGroup =
@@ -159,8 +166,14 @@ public class StackValidationRequestToStackValidationConverter extends AbstractCo
         return hostGroups;
     }
 
+    private void selectBlueprint(Set<Blueprint> blueprints, StackValidation stackValidation, Predicate<Blueprint> predicate) {
+        blueprints.stream()
+                .filter(predicate)
+                .findFirst().ifPresent(stackValidation::setBlueprint);
+    }
+
     private Set<InstanceGroup> convertInstanceGroups(Set<InstanceGroupRequest> instanceGroupRequests) {
-        return (Set<InstanceGroup>) getConversionService().convert(instanceGroupRequests, TypeDescriptor.forObject(instanceGroupRequests),
+        return (Set<InstanceGroup>) conversionService.convert(instanceGroupRequests, TypeDescriptor.forObject(instanceGroupRequests),
                 TypeDescriptor.collection(Set.class, TypeDescriptor.valueOf(InstanceGroup.class)));
     }
 }

@@ -25,6 +25,9 @@ public class UserWorkspacePermissionsServiceTest {
     @Mock
     private UserWorkspacePermissionsRepository userWorkspacePermissionsRepository;
 
+    @Mock
+    private CachedUserService cachedUserService;
+
     @Spy
     private UserWorkspacePermissionsValidator userWorkspacePermissionsValidator;
 

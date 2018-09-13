@@ -2,8 +2,8 @@ package com.sequenceiq.cloudbreak.startup;
 
 import java.util.Map;
 
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 
 public class UserMigrationResults {
 
