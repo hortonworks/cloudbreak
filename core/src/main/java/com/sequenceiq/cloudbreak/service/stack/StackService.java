@@ -37,8 +37,8 @@ import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
-import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.authorization.PermissionCheckingUtils;
+import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
@@ -59,8 +59,6 @@ import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
@@ -70,6 +68,8 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
@@ -95,9 +95,9 @@ import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
 import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 
 @Service
@@ -342,10 +342,13 @@ public class StackService {
         }
     }
 
-    public StackResponse getStackByNameInWorkspace(String name, Collection<String> entries, User user, Workspace workspace) {
+    public StackResponse getStackByNameInWorkspace(String name, Collection<String> entries, Workspace workspace) {
         try {
             return transactionService.required(() -> {
                 Stack stack = stackRepository.findByNameAndWorkspaceIdWithLists(name, workspace.getId());
+                if (stack == null) {
+                    throw new NotFoundException(String.format(STACK_NOT_FOUND_EXCEPTION_TXT, name));
+                }
                 StackResponse stackResponse = conversionService.convert(stack, StackResponse.class);
                 stackResponse = stackResponseDecorator.decorate(stackResponse, stack, entries);
                 return stackResponse;
@@ -372,10 +375,13 @@ public class StackService {
         }
     }
 
-    public StackV2Request getStackRequestByNameInDefaultWorkspaceForUser(String name, User user, Workspace workspace) {
+    public StackV2Request getStackRequestByNameInWorkspace(String name, Workspace workspace) {
         try {
             return transactionService.required(() -> {
                 Stack stack = stackRepository.findByNameAndWorkspaceIdWithLists(name, workspace.getId());
+                if (stack == null) {
+                    throw new NotFoundException(String.format(STACK_NOT_FOUND_EXCEPTION_TXT, name));
+                }
                 return conversionService.convert(stack, StackV2Request.class);
             });
         } catch (TransactionExecutionException e) {
@@ -383,10 +389,13 @@ public class StackService {
         }
     }
 
-    public StackV2Request getStackRequestByNameInWorkspace(String name, Long workspaceId) {
+    public StackV2Request getStackRequestByNameInWorkspaceId(String name, Long workspaceId) {
         try {
             return transactionService.required(() -> {
                 Stack stack = stackRepository.findByNameAndWorkspaceIdWithLists(name, workspaceId);
+                if (stack == null) {
+                    throw new NotFoundException(String.format(STACK_NOT_FOUND_EXCEPTION_TXT, name));
+                }
                 return conversionService.convert(stack, StackV2Request.class);
             });
         } catch (TransactionExecutionException e) {
@@ -508,6 +517,9 @@ public class StackService {
 
     public void removeInstance(Long stackId, Long workspaceId, String instanceId, boolean forced, User user) {
         Stack stack = getById(stackId);
+        if (stack == null) {
+            throw new NotFoundException(String.format(STACK_NOT_FOUND_EXCEPTION_ID_TXT, stackId));
+        }
         InstanceMetaData metaData = validateInstanceForDownscale(instanceId, stack, workspaceId, user);
         flowManager.triggerStackRemoveInstance(stackId, metaData.getInstanceGroupName(), metaData.getPrivateId(), forced);
     }
@@ -519,6 +531,9 @@ public class StackService {
 
     public void removeInstances(Long stackId, Long workspaceId, Set<String> instanceIds, User user) {
         Stack stack = getById(stackId);
+        if (stack == null) {
+            throw new NotFoundException(String.format(STACK_NOT_FOUND_EXCEPTION_ID_TXT, stackId));
+        }
         permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(stack.getWorkspace().getId(), WorkspaceResource.STACK, Action.WRITE, user);
         Map<String, Set<Long>> instanceIdsByHostgroupMap = new HashMap<>();
         for (String instanceId : instanceIds) {
