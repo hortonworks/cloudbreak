@@ -6,10 +6,14 @@ import java.util.concurrent.TimeUnit;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import net.sf.ehcache.config.SizeOfPolicyConfiguration;
+
 @Service
 public class CloudResourceVmTypeCache extends AbstractCacheDefinition {
 
     private static final long MAX_ENTRIES = 1000L;
+
+    private static final int MAX_DEPTH = 501;
 
     @Value("${cb.cloud.vmtype.cache.ttl:15}")
     private long ttlMinutes;
@@ -37,5 +41,10 @@ public class CloudResourceVmTypeCache extends AbstractCacheDefinition {
     @Override
     protected long getTimeToLiveSeconds() {
         return ttlMinutes == 0L ? 1 : TimeUnit.MINUTES.toSeconds(ttlMinutes);
+    }
+
+    @Override
+    protected SizeOfPolicyConfiguration getSizeOfPolicyConfiguration() {
+        return new SizeOfPolicyConfiguration().maxDepth(MAX_DEPTH);
     }
 }
