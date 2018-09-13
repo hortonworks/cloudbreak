@@ -131,7 +131,7 @@ knox-create-sign-jks:
     - source: salt://gateway/config/gateway-site.xml.j2
     - template: jinja
 
-/var/lib/ambari-server/resources/common-services/KNOX/0.5.0.2.2/configuration/gateway-site.xml:
+/var/lib/ambari-server/resources/stacks/{{ ambari.stack_type|upper }}/{{ ambari.stack_version }}/services/KNOX/configuration/gateway-site.xml:
   file.managed:
     - source: salt://gateway/config/gateway-site.xml.j2
     - template: jinja

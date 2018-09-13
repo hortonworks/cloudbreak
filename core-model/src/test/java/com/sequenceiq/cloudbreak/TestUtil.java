@@ -62,8 +62,6 @@ import com.sequenceiq.cloudbreak.domain.StorageLocations;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -75,6 +73,8 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackStatusView;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.type.KerberosType;
 
 public class TestUtil {
@@ -186,11 +186,7 @@ public class TestUtil {
         Orchestrator orchestrator = new Orchestrator();
         orchestrator.setType("DUMMY");
         orchestrator.setApiEndpoint("endpoint");
-        try {
-            orchestrator.setAttributes(new Json("{\"test\": \"test\"}"));
-        } catch (JsonProcessingException ignored) {
-            orchestrator.setAttributes(null);
-        }
+        orchestrator.setAttributes(new Json("{\"test\": \"test\"}"));
         orchestrator.setId(1L);
         return orchestrator;
     }
@@ -729,14 +725,10 @@ public class TestUtil {
     }
 
     private static void setGatewayTopology(Gateway gateway, String topologyName) {
-        try {
-            GatewayTopology gatewayTopology = new GatewayTopology();
-            gatewayTopology.setTopologyName(topologyName);
-            gatewayTopology.setExposedServices(new Json("{}"));
-            gateway.getTopologies().add(gatewayTopology);
-        } catch (JsonProcessingException e) {
-            LOGGER.error("unexpected error during creating GatewayTopology", e);
-        }
+        GatewayTopology gatewayTopology = new GatewayTopology();
+        gatewayTopology.setTopologyName(topologyName);
+        gatewayTopology.setExposedServices(getEmptyJson());
+        gateway.getTopologies().add(gatewayTopology);
     }
 
     public static Gateway gatewayEnabled() {
@@ -806,11 +798,7 @@ public class TestUtil {
     }
 
     private static Json getEmptyJson() {
-        try {
-            return new Json("");
-        } catch (JsonProcessingException ignore) {
-            return null;
-        }
+        return new Json("{}");
     }
 
 }

@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -46,5 +49,14 @@ public class AmbariRepo {
 
     public void setGpgKeyUrl(String gpgKeyUrl) {
         this.gpgKeyUrl = gpgKeyUrl;
+    }
+
+    public Map<String, Object> asMap() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("predefined", predefined);
+        map.put("version", version);
+        map.put("baseUrl", baseUrl);
+        map.put("gpgKeyUrl", gpgKeyUrl);
+        return map;
     }
 }
