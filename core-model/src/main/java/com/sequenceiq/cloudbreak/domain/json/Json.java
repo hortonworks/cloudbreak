@@ -13,11 +13,13 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
+import net.sf.json.JSONObject;
+
 public class Json implements Serializable {
 
     private final String value;
 
-    Json(String value) {
+    public Json(String value) {
         this.value = value;
     }
 
@@ -43,6 +45,21 @@ public class Json implements Serializable {
         } catch (IOException ignored) {
             return Collections.emptyMap();
         }
+    }
+
+    @JsonIgnore
+    public <T> T getValue(String path) {
+        String[] split = path.split("\\.");
+        JSONObject jsonObject = JSONObject.fromObject(value);
+        if (split.length == 1) {
+            return (T) jsonObject.get(split[0]);
+        }
+
+        JSONObject object = jsonObject;
+        for (int i = 0; i < split.length - 1; i++) {
+            object = object.getJSONObject(split[i]);
+        }
+        return (T) object.get(split[split.length - 1]);
     }
 
     @Override

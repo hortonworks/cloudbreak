@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.user;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -58,6 +59,7 @@ public class UserProfileService {
             userProfile.setUserName(userName);
             addUiProperties(userProfile);
             userProfile.setUser(user);
+            userProfile.setDefaultCredentials(Collections.emptySet());
             userProfile = userProfileRepository.save(userProfile);
         } else if (userProfile.getUserName() == null && userName != null) {
             userProfile.setUserName(userName);

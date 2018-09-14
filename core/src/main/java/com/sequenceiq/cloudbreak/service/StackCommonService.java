@@ -31,9 +31,9 @@ import com.sequenceiq.cloudbreak.api.model.stack.StackScaleRequestV2;
 import com.sequenceiq.cloudbreak.api.model.stack.StackValidationRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRepairRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
+import com.sequenceiq.cloudbreak.authorization.PermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
-import com.sequenceiq.cloudbreak.authorization.PermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintUpdater;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
@@ -45,21 +45,21 @@ import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemVali
 import com.sequenceiq.cloudbreak.controller.validation.stack.StackRequestValidator;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesValidationException;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesValidator;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.decorator.StackDecorator;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 
 @Service
@@ -156,7 +156,7 @@ public class StackCommonService implements StackEndpoint {
     public StackResponse getStackFromDefaultWorkspace(String name, Set<String> entries) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
-        return stackService.getStackByNameInWorkspace(name, entries, user, workspace);
+        return stackService.getStackByNameInWorkspace(name, entries, workspace);
     }
 
     @Override

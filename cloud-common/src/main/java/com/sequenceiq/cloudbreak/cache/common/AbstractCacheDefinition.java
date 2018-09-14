@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cache.common;
 import com.sequenceiq.cloudbreak.cache.CacheDefinition;
 
 import net.sf.ehcache.config.CacheConfiguration;
+import net.sf.ehcache.config.SizeOfPolicyConfiguration;
 
 public abstract class AbstractCacheDefinition implements CacheDefinition {
 
@@ -13,6 +14,7 @@ public abstract class AbstractCacheDefinition implements CacheDefinition {
         cacheConfiguration.setMemoryStoreEvictionPolicy(getMemoryStoreEvictionPolicy());
         cacheConfiguration.setMaxEntriesLocalHeap(getMaxEntriesLocalHeap());
         cacheConfiguration.setTimeToLiveSeconds(getTimeToLiveSeconds());
+        cacheConfiguration.addSizeOfPolicy(getSizeOfPolicyConfiguration());
         return cacheConfiguration;
     }
 
@@ -25,4 +27,6 @@ public abstract class AbstractCacheDefinition implements CacheDefinition {
     protected abstract long getMaxBytesLocalHeap();
 
     protected abstract long getTimeToLiveSeconds();
+
+    protected abstract SizeOfPolicyConfiguration getSizeOfPolicyConfiguration();
 }

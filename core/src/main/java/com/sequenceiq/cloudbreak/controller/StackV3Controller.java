@@ -123,7 +123,7 @@ public class StackV3Controller extends NotificationController implements StackV3
 
     @Override
     public StackV2Request getRequestfromName(Long workspaceId, String name) {
-        return stackService.getStackRequestByNameInWorkspace(name, workspaceId);
+        return stackService.getStackRequestByNameInWorkspaceId(name, workspaceId);
     }
 
     @Override

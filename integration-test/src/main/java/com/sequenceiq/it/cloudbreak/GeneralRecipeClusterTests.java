@@ -11,6 +11,7 @@ import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
 import com.sequenceiq.it.cloudbreak.newway.cloud.OpenstackCloudProvider;
+import com.sequenceiq.it.cloudbreak.newway.priority.Priority;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -65,38 +66,19 @@ public class GeneralRecipeClusterTests extends CloudbreakTest {
 
     @BeforeTest
     @Parameters("provider")
-    public void beforeTest(@org.testng.annotations.Optional(OpenstackCloudProvider.OPENSTACK) String provider) {
+    public void beforeTest(@org.testng.annotations.Optional(OpenstackCloudProvider.OPENSTACK) String provider) throws Exception {
         LOGGER.info("before cluster test set provider: " + provider);
         if (cloudProvider != null) {
             LOGGER.info(cloudProvider + " cloud provider already set - running from factory test");
-            return;
+        } else {
+            cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter());
         }
-        cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter());
-    }
-
-    @BeforeTest
-    public void setupRecipes() throws Exception {
-        given(CloudbreakClient.isCreated());
-        for (String recipe : BASH_RECIPE_NAMES) {
-            given(Recipe.isCreated()
-                    .withName(recipe)
-                    .withDescription(VALID_RECIPE_DESCRIPTION)
-                    .withRecipeType(RecipeType.valueOf(recipe.replace("-", "_").toUpperCase()))
-                    .withContent(Base64.encodeBase64String(BASH_SCRIPT.getBytes()))
-            );
-        }
-        for (String pythonRecipe : PYTHON_RECIPE_NAMES) {
-            given(Recipe.isCreated()
-                    .withName(pythonRecipe)
-                    .withDescription(VALID_RECIPE_DESCRIPTION)
-                    .withRecipeType(RecipeType.valueOf(pythonRecipe.substring(0, pythonRecipe.indexOf("-py")).replace("-", "_").toUpperCase()))
-                    .withContent(Base64.encodeBase64String(PYTHON_SCRIPT.getBytes()))
-            );
-        }
+        setUpRecipes();
     }
 
     @Test
-    public void testCreateClusterWithRecipes() throws Exception {
+    @Priority(10)
+    public void testAClusterCreation() throws Exception {
         given(cloudProvider.aValidCredential());
         given(Cluster.request()
                         .withAmbariRequest(cloudProvider.ambariRequestWithBlueprintName(BLUEPRINT_HDP26_NAME)),
@@ -117,7 +99,8 @@ public class GeneralRecipeClusterTests extends CloudbreakTest {
                 "check ambari is running and components available");
     }
 
-    @Test(priority = 1)
+    @Test()
+    @Priority(20)
     public void testCheckRecipesOnNodes() throws Exception {
         given(cloudProvider.aValidCredential());
         given(cloudProvider.aValidStackIsCreated(), "a stack is created");
@@ -126,7 +109,8 @@ public class GeneralRecipeClusterTests extends CloudbreakTest {
                 getRequiredRecipeAmountForRunningCluster()), "check recipes are ran on all nodes");
     }
 
-    @Test(priority = 2)
+    @Test()
+    @Priority(30)
     public void testTerminateClusterCheckRecipePreTerm() throws Exception {
         given(cloudProvider.aValidCredential());
         given(cloudProvider.aValidStackIsCreated(), "a stack is created");
@@ -148,6 +132,26 @@ public class GeneralRecipeClusterTests extends CloudbreakTest {
         // * 2 since we post both bash and python script
         // + 1 since the hdfs-home (default) recipe/script is only available on the master node
         return FILES_PATH.length * 2 * HOSTGROUPS.length + 1;
+    }
+
+    private void setUpRecipes() throws Exception {
+        given(CloudbreakClient.isCreated());
+        for (String recipe : BASH_RECIPE_NAMES) {
+            given(Recipe.isCreated()
+                    .withName(recipe)
+                    .withDescription(VALID_RECIPE_DESCRIPTION)
+                    .withRecipeType(RecipeType.valueOf(recipe.replace("-", "_").toUpperCase()))
+                    .withContent(Base64.encodeBase64String(BASH_SCRIPT.getBytes()))
+            );
+        }
+        for (String pythonRecipe : PYTHON_RECIPE_NAMES) {
+            given(Recipe.isCreated()
+                    .withName(pythonRecipe)
+                    .withDescription(VALID_RECIPE_DESCRIPTION)
+                    .withRecipeType(RecipeType.valueOf(pythonRecipe.substring(0, pythonRecipe.indexOf("-py")).replace("-", "_").toUpperCase()))
+                    .withContent(Base64.encodeBase64String(PYTHON_SCRIPT.getBytes()))
+            );
+        }
     }
 
 }
