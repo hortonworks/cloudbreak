@@ -834,13 +834,6 @@ var (
 			Usage: "the failed nodes will only be removed, otherwise the failed nodes will be removed and new nodes will be started.",
 		},
 	}
-	FlResourceType = StringFlag{
-		RequiredFlag: REQUIRED,
-		StringFlag: cli.StringFlag{
-			Name:  "resource-type",
-			Usage: "type of resource",
-		},
-	}
 	FlResourceID = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
@@ -858,8 +851,9 @@ var (
 	FlWorkspaceOptional = StringFlag{
 		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{
-			Name:  "workspace",
-			Usage: "name of the workspace",
+			Name:   "workspace",
+			Usage:  "name of the workspace",
+			EnvVar: "CB_WORKSPACE",
 		},
 	}
 	FlUserID = StringFlag{
