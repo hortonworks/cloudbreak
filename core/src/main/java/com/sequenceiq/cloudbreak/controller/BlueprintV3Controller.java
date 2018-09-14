@@ -16,6 +16,7 @@ import org.springframework.stereotype.Controller;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.BlueprintV3Endpoint;
 import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
 import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
+import com.sequenceiq.cloudbreak.api.model.BlueprintViewResponse;
 import com.sequenceiq.cloudbreak.api.model.ParametersQueryResponse;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
@@ -48,10 +49,10 @@ public class BlueprintV3Controller extends NotificationController implements Blu
     private WorkspaceService workspaceService;
 
     @Override
-    public Set<BlueprintResponse> listByWorkspace(Long workspaceId) {
+    public Set<BlueprintViewResponse> listByWorkspace(Long workspaceId) {
         Workspace workspace = getWorkspace(workspaceId);
-        return blueprintService.getAllAvailableInWorkspace(workspace).stream()
-                .map(blueprint -> conversionService.convert(blueprint, BlueprintResponse.class))
+        return blueprintService.getAllAvailableViewInWorkspace(workspace).stream()
+                .map(blueprint -> conversionService.convert(blueprint, BlueprintViewResponse.class))
                 .collect(Collectors.toSet());
     }
 

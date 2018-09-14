@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintMigrationService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialMigrationService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
@@ -102,6 +103,9 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
     @Inject
     private WorkspaceMigrationRunner workspaceMigrationRunner;
 
+    @Inject
+    private BlueprintMigrationService blueprintMigrationService;
+
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
         workspaceMigrationRunner.run();
@@ -120,6 +124,7 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
         }
         ambariDatabaseToRdsConfigMigrationService.migrateAmbariDatabaseClusterComponentsToRdsConfig();
         credentialMigrationService.migrateGcpCredentials();
+        blueprintMigrationService.migrateBlueprints();
     }
 
     private List<Stack> resetStackStatus(Collection<Long> excludeStackIds) {

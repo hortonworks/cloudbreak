@@ -58,6 +58,8 @@ public class BlueprintRequestToBlueprintConverterTest extends AbstractJsonConver
         Blueprint result = underTest.convert(getRequest("stack/blueprint.json"));
         assertAllFieldsNotNull(result, Collections.singletonList("inputParameters"));
         Assert.assertEquals("{}", result.getTags().getValue());
+        Assert.assertEquals("HDP", result.getStackType());
+        Assert.assertEquals("2.3", result.getStackVersion());
     }
 
     @Test
@@ -65,6 +67,8 @@ public class BlueprintRequestToBlueprintConverterTest extends AbstractJsonConver
         Blueprint result = underTest.convert(getRequest("stack/blueprint-empty-tags.json"));
         assertAllFieldsNotNull(result, Collections.singletonList("inputParameters"));
         Assert.assertEquals("{}", result.getTags().getValue());
+        Assert.assertEquals("HDP", result.getStackType());
+        Assert.assertEquals("2.3", result.getStackVersion());
     }
 
     @Test
@@ -72,6 +76,8 @@ public class BlueprintRequestToBlueprintConverterTest extends AbstractJsonConver
         Blueprint result = underTest.convert(getRequest("stack/blueprint-filled-tags.json"));
         assertAllFieldsNotNull(result, Collections.singletonList("inputParameters"));
         Assert.assertTrue(result.getTags().getMap().size() > 1);
+        Assert.assertEquals("HDP", result.getStackType());
+        Assert.assertEquals("2.3", result.getStackVersion());
     }
 
     @Test
@@ -94,6 +100,8 @@ public class BlueprintRequestToBlueprintConverterTest extends AbstractJsonConver
         Blueprint result = underTest.convert(request);
 
         Assert.assertEquals(request.getAmbariBlueprint(), result.getBlueprintText());
+        Assert.assertEquals("HDP", result.getStackType());
+        Assert.assertEquals("2.3", result.getStackVersion());
     }
 
     @Test
@@ -105,6 +113,8 @@ public class BlueprintRequestToBlueprintConverterTest extends AbstractJsonConver
         Blueprint result = underTest.convert(request);
 
         Assert.assertEquals(name, result.getName());
+        Assert.assertEquals("HDP", result.getStackType());
+        Assert.assertEquals("2.3", result.getStackVersion());
     }
 
     @Test
@@ -117,6 +127,8 @@ public class BlueprintRequestToBlueprintConverterTest extends AbstractJsonConver
         Blueprint result = underTest.convert(request);
 
         Assert.assertEquals(generatedName, result.getName());
+        Assert.assertEquals("HDP", result.getStackType());
+        Assert.assertEquals("2.3", result.getStackVersion());
     }
 
     @Test
@@ -135,6 +147,28 @@ public class BlueprintRequestToBlueprintConverterTest extends AbstractJsonConver
         doAnswer(invocation -> {
             throw new IOException("some message");
         }).when(blueprintUtils).countHostGroups(any());
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("Invalid Blueprint: Failed to parse JSON.");
+
+        underTest.convert(getRequest("stack/blueprint.json"));
+    }
+
+    @Test
+    public void testConvertWhenUnableToObtainTheStackTypeFromTheProvidedBlueprintTextThenExceptionWouldCome() {
+        doAnswer(invocation -> {
+            throw new IOException("some message");
+        }).when(blueprintUtils).getBlueprintStackName(any());
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("Invalid Blueprint: Failed to parse JSON.");
+
+        underTest.convert(getRequest("stack/blueprint.json"));
+    }
+
+    @Test
+    public void testConvertWhenUnableToObtainTheStackVersionFromTheProvidedBlueprintTextThenExceptionWouldCome() {
+        doAnswer(invocation -> {
+            throw new IOException("some message");
+        }).when(blueprintUtils).getBlueprintStackVersion(any());
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("Invalid Blueprint: Failed to parse JSON.");
 
