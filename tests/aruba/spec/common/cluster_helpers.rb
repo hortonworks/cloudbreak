@@ -2,19 +2,19 @@ RSpec.shared_context "shared cluster helpers", :a => :b do
   before { @some_var = :some_value }
 
   def status_check(cb, cluster_name)
-    return get_cluster_json(cb, cluster_name)["Response"]["status"]
+    return get_cluster_json(cb, cluster_name)["status"]
   end
 
   def status_check_cluster(cb, cluster_name)
-    return get_cluster_json(cb, cluster_name)["Response"]["cluster"]["status"]
+    return get_cluster_json(cb, cluster_name)["cluster"]["status"]
   end  
 
   def failure_checker(json)
-    status=json["Response"]["status"]
-    cluster_status=json["Response"]["cluster"]["status"]
+    status=json["status"]
+    cluster_status=json["cluster"]["status"]
     if status.include? "FAILED" or cluster_status.downcase.to_s.include? "failed"
-      puts json["Response"]["statusReason"]
-      return json["Response"]["statusReason"]
+      puts json["statusReason"]
+      return json["statusReason"]
     else
       return ""
     end
@@ -34,7 +34,7 @@ RSpec.shared_context "shared cluster helpers", :a => :b do
     sleep 5
     cnt=0
     json = get_cluster_json(cb, cluster_name)
-    current_status = json["Response"]["status"]
+    current_status = json["status"]
     status_reason = failure_checker(json)
     while (cnt < 100 and status != current_status and !status_reason.to_s.downcase.include? "failed") do
       current_status = status_check(cb, cluster_name)
@@ -54,7 +54,7 @@ RSpec.shared_context "shared cluster helpers", :a => :b do
     sleep 5
     cnt=0
     json = get_cluster_json(cb, cluster_name)
-    current_status = json["Response"]["cluster"]["status"]
+    current_status = json["cluster"]["status"]
     status_reason = failure_checker(json)
     while (cnt < 100 and status != current_status and !status_reason.to_s.downcase.include? "failed") do
       current_status = status_check_cluster(cb, cluster_name)
@@ -97,7 +97,7 @@ RSpec.shared_context "shared cluster helpers", :a => :b do
 
   def get_node_count(cb, cluster_name, node_type)
     json = get_cluster_json(cb, cluster_name)
-    json["Response"]['instanceGroups'].each do |s|
+    json['instanceGroups'].each do |s|
       if  s['group'] == node_type
         return s['nodeCount']
       end
