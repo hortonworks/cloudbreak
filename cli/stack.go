@@ -27,9 +27,7 @@ type stackOut struct {
 }
 
 type stackOutDescribe struct {
-	*stackOut
-	Response *models_cloudbreak.StackResponse `json:"Response" yaml:"Response"`
-	ID       string                           `json:"ID" yaml:"ID"`
+	*models_cloudbreak.StackResponse
 }
 
 func (s *stackOut) DataAsStringArray() []string {
@@ -40,7 +38,8 @@ func (s *stackOut) DataAsStringArray() []string {
 }
 
 func (s *stackOutDescribe) DataAsStringArray() []string {
-	return append(s.stackOut.DataAsStringArray(), s.ID)
+	stack := convertResponseToStack(s.StackResponse)
+	return append(stack.DataAsStringArray(), strconv.FormatInt(s.ID, 10))
 }
 
 func CreateStack(c *cli.Context) {
@@ -142,12 +141,7 @@ func DescribeStack(c *cli.Context) {
 		utils.LogErrorAndExit(err)
 	}
 	s := resp.Payload
-	output.Write(append(stackHeader, "ID"), &stackOutDescribe{
-		&stackOut{cloudResourceOut{*s.Name, s.Cluster.Description, GetPlatformName(s.Credential)},
-			s.Status,
-			s.Cluster.Status},
-		s,
-		strconv.FormatInt(s.ID, 10)})
+	output.Write(append(stackHeader, "ID"), &stackOutDescribe{s})
 }
 
 type getStackInWorkspace interface {
