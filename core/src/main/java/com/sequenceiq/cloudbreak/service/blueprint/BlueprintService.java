@@ -35,11 +35,13 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.view.BlueprintView;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.init.blueprint.BlueprintLoaderService;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
+import com.sequenceiq.cloudbreak.repository.BlueprintViewRepository;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
@@ -57,6 +59,9 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
 
     @Inject
     private BlueprintRepository blueprintRepository;
+
+    @Inject
+    private BlueprintViewRepository blueprintViewRepository;
 
     @Inject
     private ClusterService clusterService;
@@ -121,6 +126,16 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
         User user = userService.getOrCreate(identityUser);
         Workspace workspace = getWorkspaceService().get(workspaceId, user);
         return getAllAvailableInWorkspace(workspace);
+    }
+
+    public Set<BlueprintView> getAllAvailableViewInWorkspace(Workspace workspace) {
+        Set<Blueprint> blueprints = blueprintRepository.findAllByWorkspaceIdAndStatus(workspace.getId(), ResourceStatus.DEFAULT);
+        if (blueprintLoaderService.addingDefaultBlueprintsAreNecessaryForTheUser(blueprints)) {
+            LOGGER.info("Modifying blueprints based on the defaults for the '{}' workspace.", workspace.getId());
+            blueprintLoaderService.loadBlueprintsForTheWorkspace(blueprints, workspace, this::saveDefaultsWithReadRight);
+            LOGGER.info("Blueprint modifications finished based on the defaults for '{}' workspace.", workspace.getId());
+        }
+        return blueprintViewRepository.findAllByWorkspace(workspace);
     }
 
     public Set<Blueprint> getAllAvailableInWorkspace(Workspace workspace) {

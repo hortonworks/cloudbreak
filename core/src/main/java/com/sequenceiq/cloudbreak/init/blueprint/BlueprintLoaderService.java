@@ -99,20 +99,22 @@ public class BlueprintLoaderService {
                     || defaultBlueprintContainsNewDescription(blueprintFromDatabase, newBlueprint))) {
                 LOGGER.info("Default Blueprint '{}' needs to modify for the '{}' workspace because the validation text changed.",
                         blueprintFromDatabase.getName(), workspace.getId());
-                resultList.add(prepateBlueprint(blueprintFromDatabase, newBlueprint, workspace));
+                resultList.add(prepareBlueprint(blueprintFromDatabase, newBlueprint, workspace));
             }
         }
         LOGGER.info("Finished to Update default blueprints which are contains text modifications.");
         return resultList;
     }
 
-    private Blueprint prepateBlueprint(Blueprint blueprintFromDatabase, Blueprint newBlueprint, Workspace workspace) {
+    private Blueprint prepareBlueprint(Blueprint blueprintFromDatabase, Blueprint newBlueprint, Workspace workspace) {
         setupBlueprint(blueprintFromDatabase, workspace);
         blueprintFromDatabase.setBlueprintText(newBlueprint.getBlueprintText());
         blueprintFromDatabase.setDescription(newBlueprint.getDescription());
         blueprintFromDatabase.setHostGroupCount(newBlueprint.getHostGroupCount());
         blueprintFromDatabase.setInputParameters(newBlueprint.getInputParameters());
         blueprintFromDatabase.setAmbariName(newBlueprint.getAmbariName());
+        blueprintFromDatabase.setStackType(newBlueprint.getStackType());
+        blueprintFromDatabase.setStackVersion(newBlueprint.getStackVersion());
         return blueprintFromDatabase;
     }
 

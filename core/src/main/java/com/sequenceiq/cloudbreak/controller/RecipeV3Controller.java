@@ -14,6 +14,7 @@ import org.springframework.stereotype.Controller;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.RecipeV3Endpoint;
 import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
 import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
+import com.sequenceiq.cloudbreak.api.model.RecipeViewResponse;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
@@ -24,7 +25,6 @@ import com.sequenceiq.cloudbreak.service.user.UserService;
 @Controller
 @Transactional(TxType.NEVER)
 public class RecipeV3Controller extends NotificationController implements RecipeV3Endpoint {
-
     @Inject
     private RecipeService recipeService;
 
@@ -39,9 +39,9 @@ public class RecipeV3Controller extends NotificationController implements Recipe
     private RestRequestThreadLocalService restRequestThreadLocalService;
 
     @Override
-    public Set<RecipeResponse> listByWorkspace(Long workspaceId) {
-        return recipeService.findAllByWorkspaceId(workspaceId).stream()
-                .map(recipe -> conversionService.convert(recipe, RecipeResponse.class))
+    public Set<RecipeViewResponse> listByWorkspace(Long workspaceId) {
+        return recipeService.findAllViewByWorkspaceId(workspaceId).stream()
+                .map(recipe -> conversionService.convert(recipe, RecipeViewResponse.class))
                 .collect(Collectors.toSet());
     }
 

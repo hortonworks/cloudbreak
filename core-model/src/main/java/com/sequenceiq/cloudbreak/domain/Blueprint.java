@@ -64,6 +64,10 @@ public class Blueprint implements ProvisionEntity, WorkspaceAwareResource {
     @ManyToOne
     private Workspace workspace;
 
+    private String stackType;
+
+    private String stackVersion;
+
     public Json getTags() {
         return tags;
     }
@@ -163,5 +167,21 @@ public class Blueprint implements ProvisionEntity, WorkspaceAwareResource {
     @Override
     public WorkspaceResource getResource() {
         return WorkspaceResource.BLUEPRINT;
+    }
+
+    public String getStackType() {
+        return stackType;
+    }
+
+    public void setStackType(String stackType) {
+        this.stackType = stackType;
+    }
+
+    public String getStackVersion() {
+        return stackVersion;
+    }
+
+    public void setStackVersion(String stackVersion) {
+        this.stackVersion = stackVersion;
     }
 }

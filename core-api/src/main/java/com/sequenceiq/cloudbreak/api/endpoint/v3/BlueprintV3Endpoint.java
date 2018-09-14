@@ -17,6 +17,7 @@ import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
 import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
+import com.sequenceiq.cloudbreak.api.model.BlueprintViewResponse;
 import com.sequenceiq.cloudbreak.api.model.ParametersQueryResponse;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
@@ -30,13 +31,12 @@ import io.swagger.annotations.ApiOperation;
 @Consumes(MediaType.APPLICATION_JSON)
 @Api(value = "/v3/{workspaceId}/blueprints", description = ControllerDescription.BLUEPRINT_V3_DESCRIPTION, protocols = "http,https")
 public interface BlueprintV3Endpoint {
-
     @GET
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = BlueprintOpDescription.LIST_BY_WORKSPACE, produces = JSON, notes = BLUEPRINT_NOTES,
             nickname = "listBlueprintsByWorkspace")
-    Set<BlueprintResponse> listByWorkspace(@PathParam("workspaceId") Long workspaceId);
+    Set<BlueprintViewResponse> listByWorkspace(@PathParam("workspaceId") Long workspaceId);
 
     @GET
     @Path("{name}")

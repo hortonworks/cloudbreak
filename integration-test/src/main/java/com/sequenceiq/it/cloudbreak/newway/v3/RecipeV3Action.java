@@ -1,5 +1,10 @@
 package com.sequenceiq.it.cloudbreak.newway.v3;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
+import com.sequenceiq.cloudbreak.api.model.RecipeViewResponse;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
@@ -37,9 +42,11 @@ public class RecipeV3Action {
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
-        recipeEntity.setResponses(
-                client.getCloudbreakClient().recipeV3Endpoint().listByWorkspace(workspaceId));
-
+        Set<RecipeViewResponse> recipes = client.getCloudbreakClient().recipeV3Endpoint().listByWorkspace(workspaceId);
+        Set<RecipeResponse> detailedRecipes = new HashSet<>();
+        recipes.stream().forEach(
+                recipe -> detailedRecipes.add(client.getCloudbreakClient().recipeV3Endpoint().getByNameInWorkspace(workspaceId, recipe.getName())));
+        recipeEntity.setResponses(detailedRecipes);
     }
 
     public static void delete(IntegrationTestContext integrationTestContext, Entity entity) {

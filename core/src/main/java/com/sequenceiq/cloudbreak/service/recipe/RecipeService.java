@@ -18,10 +18,12 @@ import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.Recipe;
+import com.sequenceiq.cloudbreak.domain.view.RecipeView;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.RecipeRepository;
+import com.sequenceiq.cloudbreak.repository.RecipeViewRepository;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 
@@ -32,6 +34,9 @@ public class RecipeService extends AbstractWorkspaceAwareResourceService<Recipe>
 
     @Inject
     private RecipeRepository recipeRepository;
+
+    @Inject
+    private RecipeViewRepository recipeViewRepository;
 
     @Inject
     private HostGroupRepository hostGroupRepository;
@@ -55,6 +60,10 @@ public class RecipeService extends AbstractWorkspaceAwareResourceService<Recipe>
     private String collectMissingRecipeNames(Set<Recipe> recipes, Collection<String> recipeNames) {
         Set<String> foundRecipes = recipes.stream().map(Recipe::getName).collect(Collectors.toSet());
         return recipeNames.stream().filter(r -> !foundRecipes.contains(r)).collect(Collectors.joining(","));
+    }
+
+    public Set<RecipeView> findAllViewByWorkspaceId(Long workspaceId) {
+        return recipeViewRepository.findAllByWorkspaceId(workspaceId);
     }
 
     @Override
