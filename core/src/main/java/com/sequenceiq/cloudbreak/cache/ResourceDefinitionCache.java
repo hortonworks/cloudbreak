@@ -5,10 +5,10 @@ import java.util.concurrent.TimeUnit;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import net.sf.ehcache.config.CacheConfiguration;
+import com.sequenceiq.cloudbreak.cache.common.AbstractCacheDefinition;
 
 @Service
-public class ResourceDefinitionCache implements CacheDefinition {
+public class ResourceDefinitionCache extends AbstractCacheDefinition {
 
     private static final long MAX_ENTRIES = 1000L;
 
@@ -16,13 +16,17 @@ public class ResourceDefinitionCache implements CacheDefinition {
     private long ttlMinutes;
 
     @Override
-    public CacheConfiguration cacheConfiguration() {
-        CacheConfiguration cacheConfiguration = new CacheConfiguration();
-        cacheConfiguration.setName("resourceDefinitionCache");
-        cacheConfiguration.setMemoryStoreEvictionPolicy("LRU");
-        cacheConfiguration.setMaxEntriesLocalHeap(MAX_ENTRIES);
-        cacheConfiguration.setTimeToLiveSeconds(ttlMinutes == 0L ? 1 : TimeUnit.MINUTES.toSeconds(ttlMinutes));
-        return cacheConfiguration;
+    protected String getName() {
+        return "resourceDefinitionCache";
     }
 
+    @Override
+    protected long getMaxEntries() {
+        return MAX_ENTRIES;
+    }
+
+    @Override
+    protected long getTimeToLiveSeconds() {
+        return ttlMinutes == 0L ? 1 : TimeUnit.MINUTES.toSeconds(ttlMinutes);
+    }
 }

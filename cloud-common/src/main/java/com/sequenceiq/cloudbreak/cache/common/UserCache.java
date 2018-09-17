@@ -1,21 +1,17 @@
 package com.sequenceiq.cloudbreak.cache.common;
 
-import java.util.concurrent.TimeUnit;
-
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ImageCatalogCache extends AbstractCacheDefinition {
+public class UserCache extends AbstractCacheDefinition {
 
     private static final long MAX_ENTRIES = 1000L;
 
-    @Value("${cb.image.catalog.cache.ttl:15}")
-    private long ttlMinutes;
+    private static final long TTL_IN_SECONDS = 5L;
 
     @Override
     protected String getName() {
-        return "imageCatalogCache";
+        return "userCache";
     }
 
     @Override
@@ -25,6 +21,6 @@ public class ImageCatalogCache extends AbstractCacheDefinition {
 
     @Override
     protected long getTimeToLiveSeconds() {
-        return ttlMinutes == 0L ? 1 : TimeUnit.MINUTES.toSeconds(ttlMinutes);
+        return TTL_IN_SECONDS;
     }
 }

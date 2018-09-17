@@ -2,13 +2,12 @@ package com.sequenceiq.cloudbreak.cache;
 
 import java.lang.reflect.Method;
 
+import org.springframework.cache.Cache;
 import org.springframework.cache.interceptor.SimpleKeyGenerator;
-
-import net.sf.ehcache.config.CacheConfiguration;
 
 public interface CacheDefinition {
 
-    CacheConfiguration cacheConfiguration();
+    Cache cacheConfiguration();
 
     default Object generateKey(Object target, Method method, Object... params) {
         return SimpleKeyGenerator.generateKey(params);

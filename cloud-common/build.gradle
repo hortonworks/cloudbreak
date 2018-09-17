@@ -1,8 +1,14 @@
 apply plugin: 'java'
+apply plugin: 'io.spring.dependency-management'
 
-repositories {
+buildscript {
+  repositories {
     maven { url 'http://repo.spring.io/libs-release' }
     mavenCentral()
+  }
+  dependencies {
+    classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+  }
 }
 
 jar {
@@ -26,9 +32,9 @@ dependencies {
     compile group: 'org.springframework.security',          name: 'spring-security-jwt',            version: '1.0.8.RELEASE'
     compile group: 'org.springframework.retry',             name: 'spring-retry',                   version: '1.1.4.RELEASE'
     compile group: 'org.springframework.boot',              name: 'spring-boot-starter-actuator',   version: springBootVersion
+    compile group: 'org.springframework',                   name: 'spring-context-support',         version: springFrameworkVersion
     compile group: 'io.micrometer',                         name: 'micrometer-core',                version: '1.0.5'
     compile group: 'io.micrometer',                         name: 'micrometer-registry-prometheus', version: '1.0.5'
-    compile group: 'net.sf.ehcache',                        name: 'ehcache',                        version: '2.8.3'
     compile group: 'com.fasterxml.jackson.core',            name: 'jackson-databind',               version: jacksonVersion
     compile group: 'commons-io',                            name: 'commons-io',                     version: '2.4'
     compile group: 'com.google.guava',                      name: 'guava',                          version: guavaVersion
@@ -46,9 +52,10 @@ dependencies {
     compile group: 'org.apache.commons',                    name: 'commons-lang3',                  version: apacheCommonsLangVersion
     compile group: 'org.jasypt',                            name: 'jasypt-hibernate4',              version: jasyptVersion
     compile group: 'net.sf.json-lib',                       name: 'json-lib',                       version: '2.4',  classifier: 'jdk15'
+
     testCompile group: 'junit',                             name: 'junit',                          version: junitVersion
     testCompile group: 'org.mockito',                       name: 'mockito-core',                   version: mockitoVersion
-    testCompile group: 'org.springframework.boot',          name:'spring-boot-starter-test',        version:springBootVersion
+    testCompile group: 'org.springframework.boot',          name:'spring-boot-starter-test',        version: springBootVersion
 
 }
 
