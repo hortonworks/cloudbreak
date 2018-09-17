@@ -3,8 +3,12 @@ package com.sequenceiq.cloudbreak.service.user;
 import static com.sequenceiq.cloudbreak.api.model.v2.WorkspaceStatus.ACTIVE;
 
 import java.util.Collections;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Semaphore;
+import java.util.function.Function;
 
 import javax.inject.Inject;
 
@@ -28,6 +32,8 @@ import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 @Service
 public class UserService {
 
+    private static final Map<IdentityUser, Semaphore> UNDER_OPERATION = new ConcurrentHashMap<>();
+
     @Inject
     private CachedUserService cachedUserService;
 
@@ -46,9 +52,20 @@ public class UserService {
     @Retryable(maxAttempts = 5, backoff = @Backoff(delay = 500))
     public User getOrCreate(IdentityUser identityUser) {
         try {
-            return cachedUserService.getCached(identityUser, this::createUser);
+            return getCached(identityUser, this::createUser);
         } catch (Exception e) {
             throw new RetryException(e.getMessage());
+        }
+    }
+
+    private User getCached(IdentityUser identityUser, Function<IdentityUser, User> createUser) throws InterruptedException {
+        Semaphore semaphore = UNDER_OPERATION.computeIfAbsent(identityUser, iu -> new Semaphore(1));
+        semaphore.acquire();
+        try {
+            return cachedUserService.getUser(identityUser, userRepository::findByUserId, this::createUser);
+        } finally {
+            semaphore.release();
+            UNDER_OPERATION.remove(identityUser);
         }
     }
 

@@ -2,8 +2,6 @@ package com.sequenceiq.cloudbreak.cache.common;
 
 import org.springframework.stereotype.Service;
 
-import net.sf.ehcache.config.SizeOfPolicyConfiguration;
-
 @Service
 public class IdentityUserCache extends AbstractCacheDefinition {
 
@@ -11,35 +9,18 @@ public class IdentityUserCache extends AbstractCacheDefinition {
 
     private static final long TTL_IN_SECONDS = 15L * 60;
 
-    private static final int MAX_DEPTH = 502;
-
     @Override
     protected String getName() {
         return "identityUserCache";
     }
 
     @Override
-    protected String getMemoryStoreEvictionPolicy() {
-        return "LRU";
-    }
-
-    @Override
-    protected long getMaxEntriesLocalHeap() {
+    protected long getMaxEntries() {
         return MAX_ENTRIES;
-    }
-
-    @Override
-    protected long getMaxBytesLocalHeap() {
-        return 0L;
     }
 
     @Override
     protected long getTimeToLiveSeconds() {
         return TTL_IN_SECONDS;
-    }
-
-    @Override
-    protected SizeOfPolicyConfiguration getSizeOfPolicyConfiguration() {
-        return new SizeOfPolicyConfiguration().maxDepth(MAX_DEPTH);
     }
 }
