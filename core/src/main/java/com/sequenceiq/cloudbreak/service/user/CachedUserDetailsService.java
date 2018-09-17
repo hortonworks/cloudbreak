@@ -39,6 +39,6 @@ public class CachedUserDetailsService {
 
     @CacheEvict(value = "identityUserCache", key = "#username")
     public void evictUserDetails(String updatedUserId, String username) {
-        LOGGER.info("Remove userid: {} / username: {} from user cache", updatedUserId, username);
+        LOGGER.debug("Remove userid: {} / username: {} from user cache", updatedUserId, username);
     }
 }

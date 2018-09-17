@@ -71,10 +71,10 @@ dependencyManagement {
         dependency group: 'io.swagger',                    name: 'swagger-jersey2-jaxrs',          version: swaggerVersion
         dependency group: 'javax.mail',                    name: 'mail',                           version: '1.5.0-b01'
         dependency group: 'dnsjava',                       name: 'dnsjava',                        version: '2.1.7'
-        dependency group: 'net.sf.ehcache',                name: 'ehcache',                        version: '2.8.3'
         dependency group: 'javax.xml.bind',                name: 'jaxb-api',                       version: '2.3.0'
         dependency group: 'com.sun.xml.bind',              name: 'jaxb-impl',                      version: '2.3.0'
         dependency group: 'org.glassfish.jaxb',            name: 'jaxb-runtime',                   version: '2.3.0'
+        dependency group: 'org.springframework',           name: 'spring-context-support',         version: springFrameworkVersion
 
         dependency group: 'org.springframework.security.oauth', name: 'spring-security-oauth2',    version: springOauthVersion
 
