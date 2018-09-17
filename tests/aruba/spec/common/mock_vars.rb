@@ -78,4 +78,3 @@ RSpec.shared_context "mock shared vars", :a => :b do
     @os_stack_json = "/../../../responses/stacks/openstack.json"
   }
 end
-
