@@ -24,7 +24,7 @@ cloudbreak-conf-tags() {
 
     env-import DOCKER_TAG_ALPINE 3.1
     env-import DOCKER_TAG_HAVEGED 1.1.0
-    env-import DOCKER_TAG_TRAEFIK v1.3.8-alpine
+    env-import DOCKER_TAG_TRAEFIK v1.6.6-alpine
     env-import DOCKER_TAG_CONSUL 0.5
     env-import DOCKER_TAG_REGISTRATOR v7
     env-import DOCKER_TAG_POSTFIX latest
