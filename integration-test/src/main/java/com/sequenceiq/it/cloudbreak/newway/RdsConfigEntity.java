@@ -4,7 +4,7 @@ import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsTestResult;
 
-public class RdsConfigEntity extends AbstractCloudbreakEntity<RDSConfigRequest, RDSConfigResponse> {
+public class RdsConfigEntity extends AbstractCloudbreakEntity<RDSConfigRequest, RDSConfigResponse, RdsConfigEntity> {
 
     public static final String RDS_CONFIG = "RDS_CONFIG";
 

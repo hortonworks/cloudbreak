@@ -4,7 +4,7 @@ import com.sequenceiq.cloudbreak.api.model.DirectoryType;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
 
-public class LdapConfigEntity extends AbstractCloudbreakEntity<LdapConfigRequest, LdapConfigResponse> {
+public class LdapConfigEntity extends AbstractCloudbreakEntity<LdapConfigRequest, LdapConfigResponse, LdapConfigEntity> {
     public static final String LDAP_CONFIG = "LDAP_CONFIG";
 
     LdapConfigEntity(String newId) {

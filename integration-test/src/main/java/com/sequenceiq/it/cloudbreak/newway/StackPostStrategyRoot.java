@@ -29,7 +29,7 @@ public abstract class StackPostStrategyRoot implements Strategy {
     }
 
     protected void setImageSettingsIfNeeded(StackEntity stackEntity, IntegrationTestContext integrationTestContext) {
-        var imageSettings = ImageSettings.getTestContextImageSettings().apply(integrationTestContext);
+        var imageSettings = ImageSettingsEntity.getTestContextImageSettings().apply(integrationTestContext);
         if (imageSettings != null) {
             stackEntity.getRequest().setImageSettings(imageSettings.getRequest());
         }
@@ -65,7 +65,7 @@ public abstract class StackPostStrategyRoot implements Strategy {
     }
 
     protected void setKerberosIfNeeded(StackEntity stackEntity, IntegrationTestContext integrationTestContext) {
-        var kerberos = Kerberos.getTestContextCluster().apply(integrationTestContext);
+        var kerberos = KerberosEntity.getTestContextCluster().apply(integrationTestContext);
         boolean updateKerberos = stackEntity.getRequest().getCluster() != null && stackEntity.getRequest().getCluster().getAmbari() != null
                 && stackEntity.getRequest().getCluster().getAmbari().getKerberos() == null;
         if (kerberos != null && updateKerberos) {
@@ -89,7 +89,7 @@ public abstract class StackPostStrategyRoot implements Strategy {
     }
 
     private void setS3CloudStorageForCluster(Cluster cluster, IntegrationTestContext integrationTestContext) {
-        var accessConfig = AccessConfig.getTestContextAccessConfig().apply(integrationTestContext);
+        var accessConfig = AccessConfigEntity.getTestContextAccessConfig().apply(integrationTestContext);
         List<String> arns = accessConfig
                 .getResponse()
                 .getAccessConfigs()

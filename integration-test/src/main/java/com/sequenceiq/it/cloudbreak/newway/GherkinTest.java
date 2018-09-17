@@ -12,7 +12,7 @@ import com.sequenceiq.it.cloudbreak.newway.log.Log;
 import com.sequenceiq.it.cloudbreak.newway.logsearch.LogSearchUtil;
 import com.sequenceiq.it.config.IntegrationTestConfiguration;
 
-@ContextConfiguration(classes = IntegrationTestConfiguration.class, initializers = ConfigFileApplicationContextInitializer.class)
+@ContextConfiguration(classes = {IntegrationTestConfiguration.class}, initializers = ConfigFileApplicationContextInitializer.class)
 public class GherkinTest extends AbstractTestNGSpringContextTests {
     public static final String RESULT = "RESULT";
 

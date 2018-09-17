@@ -17,7 +17,7 @@ public class AccessConfigAction {
     }
 
     public static void post(IntegrationTestContext integrationTestContext, Entity entity) throws IOException {
-        AccessConfig accessConfig = (AccessConfig) entity;
+        AccessConfigEntity accessConfig = (AccessConfigEntity) entity;
         CloudbreakClient client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
 
         PlatformResourceRequestJson request = new PlatformResourceRequestJson();

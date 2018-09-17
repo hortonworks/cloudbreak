@@ -31,7 +31,6 @@ public class StackPostStrategy implements Strategy {
         StackEntity stackEntity = (StackEntity) entity;
         CloudbreakClient client = getTestContextCloudbreakClient().apply(integrationTestContext);
 
-
         Credential credential = Credential.getTestContextCredential().apply(integrationTestContext);
 
         if (credential != null && stackEntity.getRequest().getGeneral().getCredentialName() == null) {
@@ -45,7 +44,7 @@ public class StackPostStrategy implements Strategy {
             }
             if (cluster.getRequest().getCloudStorage() != null && cluster.getRequest().getCloudStorage().getS3()
                     != null && isEmpty(cluster.getRequest().getCloudStorage().getS3().getInstanceProfile())) {
-                AccessConfig accessConfig = AccessConfig.getTestContextAccessConfig().apply(integrationTestContext);
+                AccessConfigEntity accessConfig = AccessConfigEntity.getTestContextAccessConfig().apply(integrationTestContext);
                 List<String> arns = accessConfig
                         .getResponse()
                         .getAccessConfigs()
@@ -61,7 +60,12 @@ public class StackPostStrategy implements Strategy {
             }
         }
 
-        Kerberos kerberos = Kerberos.getTestContextCluster().apply(integrationTestContext);
+        Integer gatewayPort = integrationTestContext.getContextParam("MOCK_PORT", Integer.class);
+        if (gatewayPort != null) {
+            stackEntity.getRequest().setGatewayPort(gatewayPort);
+        }
+
+        KerberosEntity kerberos = KerberosEntity.getTestContextCluster().apply(integrationTestContext);
         boolean updateKerberos = stackEntity.getRequest().getCluster() != null && stackEntity.getRequest().getCluster().getAmbari() != null
                 && stackEntity.getRequest().getCluster().getAmbari().getKerberos() == null;
         if (kerberos != null && updateKerberos) {
@@ -81,7 +85,7 @@ public class StackPostStrategy implements Strategy {
             }
         }
 
-        ImageSettings imageSettings = ImageSettings.getTestContextImageSettings().apply(integrationTestContext);
+        ImageSettingsEntity imageSettings = ImageSettingsEntity.getTestContextImageSettings().apply(integrationTestContext);
         if (imageSettings != null) {
             stackEntity.getRequest().setImageSettings(imageSettings.getRequest());
         }

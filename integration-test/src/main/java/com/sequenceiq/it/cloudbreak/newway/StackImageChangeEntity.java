@@ -8,30 +8,30 @@ import com.sequenceiq.cloudbreak.api.model.stack.StackImageChangeRequest;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.log.Log;
 
-public class StackImageChange extends AbstractCloudbreakEntity<StackImageChangeRequest, Response> {
+public class StackImageChangeEntity extends AbstractCloudbreakEntity<StackImageChangeRequest, Response, StackImageChangeEntity> {
     public static final String IMAGE_CHANGE = "IMAGE_CHANGE";
 
-    protected StackImageChange(String newId) {
+    protected StackImageChangeEntity(String newId) {
         super(newId);
         setRequest(new StackImageChangeRequest());
     }
 
-    protected StackImageChange() {
+    protected StackImageChangeEntity() {
         this(IMAGE_CHANGE);
     }
 
-    public StackImageChange withImageId(String imageId) {
+    public StackImageChangeEntity withImageId(String imageId) {
         getRequest().setImageId(imageId);
         return this;
     }
 
-    public StackImageChange withImageCatalogName(String imageCatalogName) {
+    public StackImageChangeEntity withImageCatalogName(String imageCatalogName) {
         getRequest().setImageCatalogName(imageCatalogName);
         return this;
     }
 
     public static void changeImage(IntegrationTestContext integrationTestContext, Entity entity) {
-        StackImageChange stackImageChange = (StackImageChange) entity;
+        StackImageChangeEntity stackImageChange = (StackImageChangeEntity) entity;
         CloudbreakClient client;
         client = CloudbreakClient.getTestContextCloudbreakClient().apply(integrationTestContext);
         StackEntity stack;
@@ -41,19 +41,19 @@ public class StackImageChange extends AbstractCloudbreakEntity<StackImageChangeR
                 .changeImage(stack.getRequest().getGeneral().getName(), stackImageChange.getRequest()));
     }
 
-    public static StackImageChange request() {
-        return new StackImageChange();
+    public static StackImageChangeEntity request() {
+        return new StackImageChangeEntity();
     }
 
-    static Function<IntegrationTestContext, StackImageChange> getTestContextStackImageChange(String key) {
-        return testContext -> testContext.getContextParam(key, StackImageChange.class);
+    static Function<IntegrationTestContext, StackImageChangeEntity> getTestContextStackImageChange(String key) {
+        return testContext -> testContext.getContextParam(key, StackImageChangeEntity.class);
     }
 
-    static Function<IntegrationTestContext, StackImageChange> getTestContextStackImageChange() {
+    static Function<IntegrationTestContext, StackImageChangeEntity> getTestContextStackImageChange() {
         return getTestContextStackImageChange(IMAGE_CHANGE);
     }
 
-    public static Action<StackImageChange> changeImage() {
-        return new Action<>(getTestContextStackImageChange(), StackImageChange::changeImage);
+    public static Action<StackImageChangeEntity> changeImage() {
+        return new Action<>(getTestContextStackImageChange(), StackImageChangeEntity::changeImage);
     }
 }

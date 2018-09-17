@@ -24,7 +24,6 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -54,9 +53,6 @@ public class StackDownscaleService {
     @Inject
     private StackUtil stackUtil;
 
-    @Inject
-    private InstanceMetaDataRepository instanceMetaDataRepository;
-
     public void startStackDownscale(StackScalingFlowContext context, StackDownscaleTriggerEvent stackDownscaleTriggerEvent) {
         LOGGER.debug("Downscaling of stack {}", context.getStack().getId());
         stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.DOWNSCALE_IN_PROGRESS);
@@ -75,7 +71,12 @@ public class StackDownscaleService {
         Stack stack = context.getStack();
         InstanceGroup g = stack.getInstanceGroupByInstanceGroupName(instanceGroupName);
         Integer nodeCount = stackScalingService.updateRemovedResourcesState(stack, instanceIds, g);
-        List<String> fqdns = instanceMetaDataRepository.findAllByInstanceIdIn(instanceIds).stream().map(InstanceMetaData::getInstanceId).collect(toList());
+        List<String> fqdns = stack.getInstanceGroups()
+                .stream().filter(ig -> ig.getGroupName().equals(instanceGroupName))
+                .flatMap(instanceGroup -> instanceGroup.getInstanceMetaDataSet().stream())
+                .map(InstanceMetaData::getInstanceId)
+                .filter(instanceIds::contains)
+                .collect(toList());
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.DOWNSCALE_COMPLETED,
                 String.format("Downscale of the cluster infrastructure finished successfully. Terminated node(s): %s", fqdns));
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_DOWNSCALE_SUCCESS, AVAILABLE.name(), fqdns);

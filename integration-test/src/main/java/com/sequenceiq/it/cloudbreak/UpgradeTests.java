@@ -3,7 +3,7 @@ package com.sequenceiq.it.cloudbreak;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
-import com.sequenceiq.it.cloudbreak.newway.StackOperation;
+import com.sequenceiq.it.cloudbreak.newway.StackOperationEntity;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
@@ -47,10 +47,10 @@ public class UpgradeTests extends CloudbreakTest {
         given(cloudProvider.aValidCredential());
         given(Stack.request()
                 .withName(cloudProvider.getClusterName()));
-        given(StackOperation.request()
+        given(StackOperationEntity.request()
                 .withGroupName("host_group_slave_1")
                 .withDesiredCount(DESIRED_COUNT));
-        when(StackOperation.scale());
+        when(StackOperationEntity.scale());
         when(Stack.get());
         then(Stack.waitAndCheckClusterAndStackAvailabilityStatus());
         then(Stack.checkClusterHasAmbariRunning(
@@ -65,8 +65,8 @@ public class UpgradeTests extends CloudbreakTest {
         given(cloudProvider.aValidCredential());
         given(Stack.request()
                 .withName(cloudProvider.getClusterName()));
-        given(StackOperation.request());
-        when(StackOperation.stop());
+        given(StackOperationEntity.request());
+        when(StackOperationEntity.stop());
         when(Stack.get());
         then(Stack.waitAndCheckClusterAndStackStoppedStatus());
     }
@@ -78,8 +78,8 @@ public class UpgradeTests extends CloudbreakTest {
         given(cloudProvider.aValidCredential());
         given(Stack.request()
                 .withName(cloudProvider.getClusterName()));
-        given(StackOperation.request());
-        when(StackOperation.start());
+        given(StackOperationEntity.request());
+        when(StackOperationEntity.start());
         when(Stack.get());
         then(Stack.waitAndCheckClusterAndStackAvailabilityStatus());
         then(Stack.checkClusterHasAmbariRunning(

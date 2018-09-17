@@ -53,6 +53,9 @@ public class StackRequest extends StackBase {
     @ApiModelProperty(StackModelDescription.FLEX_ID)
     private Long flexId;
 
+    @ApiModelProperty(StackModelDescription.GATEWAY_PORT)
+    private Integer gatewayPort;
+
     @ApiModelProperty(StackModelDescription.SOURCE_CREDENTIAL)
     private CredentialSourceRequest credentialSource;
 
@@ -212,5 +215,13 @@ public class StackRequest extends StackBase {
 
     public String getOs() {
         return os;
+    }
+
+    public Integer getGatewayPort() {
+        return gatewayPort;
+    }
+
+    public void setGatewayPort(Integer gatewayPort) {
+        this.gatewayPort = gatewayPort;
     }
 }

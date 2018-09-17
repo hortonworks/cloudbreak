@@ -6,18 +6,29 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
+import com.sequenceiq.it.cloudbreak.newway.mock.DefaultModel;
 import com.sequenceiq.it.spark.ITResponse;
+import com.sequenceiq.it.spark.StatefulRoute;
 import com.sequenceiq.it.util.HostNameUtil;
 
 import spark.Request;
 import spark.Response;
 
-public class AmbariCategorizedHostComponentStateResponse extends ITResponse {
+public class AmbariCategorizedHostComponentStateResponse extends ITResponse implements StatefulRoute {
 
-    private final Map<String, CloudVmMetaDataStatus> instanceMap;
+    private Map<String, CloudVmMetaDataStatus> instanceMap;
+
+    public AmbariCategorizedHostComponentStateResponse() {
+    }
 
     public AmbariCategorizedHostComponentStateResponse(Map<String, CloudVmMetaDataStatus> instanceMap) {
         this.instanceMap = instanceMap;
+    }
+
+    @Override
+    public Object handle(Request request, Response response, DefaultModel model) throws Exception {
+        this.instanceMap = model.getInstanceMap();
+        return handle(request, response);
     }
 
     @Override

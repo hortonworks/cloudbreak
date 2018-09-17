@@ -48,7 +48,7 @@ public class CloudbreakV3Util {
 
     private static final int MAX_RETRY = 360;
 
-    private static long pollingInterval = 10000L;
+    private static long pollingInterval = 1000L;
 
     private CloudbreakV3Util() {
     }
@@ -68,12 +68,12 @@ public class CloudbreakV3Util {
         }
     }
 
-    public static void waitAndCheckStackStatus(CloudbreakClient cloudbreakClient, Long workspaceId, String stackName, String desiredStatus) {
-        waitAndCheckStatuses(cloudbreakClient, workspaceId, stackName, Collections.singletonMap("status", desiredStatus));
+    public static Map<String, String> waitAndCheckStackStatus(CloudbreakClient cloudbreakClient, Long workspaceId, String stackName, String desiredStatus) {
+        return waitAndCheckStatuses(cloudbreakClient, workspaceId, stackName, Collections.singletonMap("status", desiredStatus));
     }
 
-    public static void waitAndCheckClusterStatus(CloudbreakClient cloudbreakClient, Long workspaceId, String stackName, String desiredStatus) {
-        waitAndCheckStatuses(cloudbreakClient, workspaceId, stackName, Collections.singletonMap("clusterStatus", desiredStatus));
+    public static Map<String, String> waitAndCheckClusterStatus(CloudbreakClient cloudbreakClient, Long workspaceId, String stackName, String desiredStatus) {
+        return waitAndCheckStatuses(cloudbreakClient, workspaceId, stackName, Collections.singletonMap("clusterStatus", desiredStatus));
     }
 
     public static void waitAndExpectClusterFailure(CloudbreakClient cloudbreakClient, Long workspaceId, String stackName, String desiredStatus, String keyword) {
@@ -102,16 +102,34 @@ public class CloudbreakV3Util {
         return "";
     }
 
-    public static void waitAndCheckStatuses(CloudbreakClient cloudbreakClient, Long workspaceId, String stackName, Map<String, String> desiredStatuses) {
+    public static Map<String, String> waitAndCheckStatuses(CloudbreakClient cloudbreakClient, Long workspaceId, String stackName,
+            Map<String, String> desiredStatuses) {
+        Map<String, String> ret = new HashMap<>();
         for (int i = 0; i < 3; i++) {
             WaitResult waitResult = waitForStatuses(cloudbreakClient, workspaceId, stackName, desiredStatuses);
             if (waitResult == WaitResult.FAILED) {
-                Assert.fail("The stack has failed");
+                Map<String, Object> statusByNameInWorkspace = cloudbreakClient.stackV3Endpoint().getStatusByNameInWorkspace(workspaceId, stackName);
+                if (statusByNameInWorkspace != null) {
+                    desiredStatuses.forEach((key, value) -> {
+                        Object o = statusByNameInWorkspace.get(key);
+                        if (o != null) {
+                            ret.put(key, o.toString());
+                        }
+                    });
+
+                    StringBuilder builder = new StringBuilder("The stack has failed: ").append(System.lineSeparator());
+                    ret.forEach((key, value) -> {
+                        builder.append(key).append(',').append(value).append(System.lineSeparator());
+                    });
+                    builder.append("statusReason: ").append(statusByNameInWorkspace.get("statusReason"));
+                    Assert.fail(builder.toString());
+                }
             }
             if (waitResult == WaitResult.TIMEOUT) {
                 Assert.fail("Timeout happened");
             }
         }
+        return ret;
     }
 
     public static void waitAndExpectClusterFailure(CloudbreakClient cloudbreakClient, Long workspaceId, String stackName, Map<String, String> desiredStatuses,

@@ -1,11 +1,10 @@
 package com.sequenceiq.it.cloudbreak;
 
-import com.google.api.client.repackaged.org.apache.commons.codec.binary.Base64;
-import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
-import com.sequenceiq.cloudbreak.api.model.RecipeType;
-import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
-import com.sequenceiq.it.cloudbreak.newway.Recipe;
+import java.io.IOException;
+import java.util.Set;
+
+import javax.ws.rs.BadRequestException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StreamUtils;
@@ -13,17 +12,20 @@ import org.testng.Assert;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.Test;
 
-import javax.ws.rs.BadRequestException;
-import java.io.IOException;
-import java.util.Set;
+import com.google.api.client.repackaged.org.apache.commons.codec.binary.Base64;
+import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
+import com.sequenceiq.cloudbreak.api.model.RecipeType;
+import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
+import com.sequenceiq.it.cloudbreak.newway.Recipe;
 
 public class RecipeTests extends CloudbreakTest {
     private static final String VALID_RECIPE_NAME = "valid-recipe";
 
     private static final String VALID_RECIPE_DESCRIPTION = "recipe for API E2E tests";
 
-    private static final String VALID_RECIPE_URI = "https://rawgit.com/hortonworks/cloudbreak/master/integration-test/src/main/resources/"
-            + "recipes/post-install.sh";
+    private static final String VALID_RECIPE_URI = "https://github.com/hortonworks/cloudbreak/blob/master/integration-test/src/main/resources"
+            + "/recipes/post-install.sh";
 
     private static final String VALID_RECIPE_SCRIPT = "echo test";
 
@@ -43,7 +45,7 @@ public class RecipeTests extends CloudbreakTest {
                 .withDescription(VALID_RECIPE_DESCRIPTION)
                 .withRecipeType(RecipeType.POST_AMBARI_START)
                 .withContent(Base64.encodeBase64String(VALID_RECIPE_SCRIPT.getBytes()))
-                );
+        );
         when(Recipe.post());
         then(Recipe.assertThis(
                 (recipe, t) -> Assert.assertEquals(recipe.getResponse().getName(), VALID_RECIPE_NAME + "-post-ambari"))
@@ -115,10 +117,10 @@ public class RecipeTests extends CloudbreakTest {
     public void testCreateSpecialNameRecipe() throws Exception {
         given(CloudbreakClient.created());
         given(Recipe.request()
-                        .withName(SPECIAL_RECIPE_NAME)
-                        .withDescription(VALID_RECIPE_DESCRIPTION)
-                        .withRecipeType(RecipeType.POST_AMBARI_START)
-                        .withContent(getRecipeFile(VALID_RECIPE_SCRIPT_FILE))
+                .withName(SPECIAL_RECIPE_NAME)
+                .withDescription(VALID_RECIPE_DESCRIPTION)
+                .withRecipeType(RecipeType.POST_AMBARI_START)
+                .withContent(getRecipeFile(VALID_RECIPE_SCRIPT_FILE))
         );
         when(Recipe.post());
     }

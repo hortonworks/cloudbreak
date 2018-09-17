@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.api.model.v2.template.GcpEncryption;
 import com.sequenceiq.cloudbreak.api.model.v2.template.GcpParameters;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.Cluster;
-import com.sequenceiq.it.cloudbreak.newway.ImageSettings;
+import com.sequenceiq.it.cloudbreak.newway.ImageSettingsEntity;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
@@ -32,7 +32,7 @@ public class EncryptedClusterTests extends ClusterTests {
         given(Cluster.request()
                         .withAmbariRequest(cloudProvider.ambariRequestWithBlueprintName(blueprintName)),
                 "a cluster request");
-        given(ImageSettings.request()
+        given(ImageSettingsEntity.request()
                 .withImageCatalog("")
                 .withImageId(imageId));
         given(aValidStackRequestWithDifferentEncryptedTypes(cloudProvider).withName(clusterName), "a stack request");

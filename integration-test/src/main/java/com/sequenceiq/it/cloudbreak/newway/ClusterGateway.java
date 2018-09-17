@@ -3,51 +3,47 @@ package com.sequenceiq.it.cloudbreak.newway;
 import java.util.Collections;
 import java.util.function.Function;
 
+import com.amazonaws.services.apigateway.model.GatewayResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.SSOType;
 import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
-public class ClusterGateway extends Entity {
+public class ClusterGateway extends AbstractCloudbreakEntity<GatewayJson, GatewayResponse, ClusterGateway> {
 
     public static final String GATEWAY_REQUEST = "GATEWAY_REQUEST";
 
-    private GatewayJson request;
-
     ClusterGateway(String newId) {
         super(newId);
-        request = new GatewayJson();
+        setRequest(new GatewayJson());
     }
 
     ClusterGateway() {
         this(GATEWAY_REQUEST);
     }
 
+    public ClusterGateway(TestContext testContext) {
+        super(new GatewayJson(), testContext);
+    }
+
     public ClusterGateway withTopology(GatewayTopology topology) {
-        request.setTopologies(Collections.singletonList(topology.getRequest()));
+        getRequest().setTopologies(Collections.singletonList(topology.getRequest()));
         return this;
     }
 
     public ClusterGateway withSsoType(SSOType ssoType) {
-        request.setSsoType(ssoType);
+        getRequest().setSsoType(ssoType);
         return this;
     }
 
     public ClusterGateway withSsoProvider(String ssoProvider) {
-        request.setSsoProvider(ssoProvider);
+        getRequest().setSsoProvider(ssoProvider);
         return this;
     }
 
     public ClusterGateway withPath(String path) {
-        request.setPath(path);
+        getRequest().setPath(path);
         return this;
-    }
-
-    public void setRequest(GatewayJson request) {
-        this.request = request;
-    }
-
-    public GatewayJson getRequest() {
-        return request;
     }
 
     public static ClusterGateway request(String key) {

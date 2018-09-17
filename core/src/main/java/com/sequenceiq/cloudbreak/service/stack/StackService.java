@@ -416,7 +416,9 @@ public class StackService {
     }
 
     public Stack create(Stack stack, String platformString, StatedImage imgFromCatalog, User user, Workspace workspace) {
-        stack.setGatewayPort(nginxPort);
+        if (stack.getGatewayPort() == null) {
+            stack.setGatewayPort(nginxPort);
+        }
         stack.setCreator(user);
 
         stack.setWorkspace(workspace);

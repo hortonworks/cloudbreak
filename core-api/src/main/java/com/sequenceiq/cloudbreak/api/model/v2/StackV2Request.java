@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -87,6 +89,11 @@ public class StackV2Request implements JsonEntity {
 
     @ApiModelProperty(hidden = true)
     private String ownerEmail;
+
+    @ApiModelProperty(StackModelDescription.GATEWAY_PORT)
+    @Min(value = 1025, message = "Port should be between 1025 and 65535")
+    @Max(value = 65535, message = "Port should be between 1025 and 65535")
+    private Integer gatewayPort;
 
     public FailurePolicyRequest getFailurePolicy() {
         return failurePolicy;
@@ -238,5 +245,13 @@ public class StackV2Request implements JsonEntity {
 
     public void setInputs(Map<String, Object> inputs) {
         this.inputs = inputs;
+    }
+
+    public Integer getGatewayPort() {
+        return gatewayPort;
+    }
+
+    public void setGatewayPort(Integer gatewayPort) {
+        this.gatewayPort = gatewayPort;
     }
 }

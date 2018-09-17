@@ -118,6 +118,7 @@ public class StackV2RequestToStackRequestConverter extends AbstractConversionSer
         stackRequest.setOwnerEmail(Strings.isNullOrEmpty(source.getOwnerEmail()) ? cloudbreakUser.getUsername() : source.getOwnerEmail());
         stackRequest.setCloudPlatform(credentialService.getByNameForWorkspace(stackRequest.getCredentialName(), workspace).cloudPlatform());
         convertCustomInputs(source, stackRequest);
+        stackRequest.setGatewayPort(source.getGatewayPort());
         return stackRequest;
     }
 

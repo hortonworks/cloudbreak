@@ -110,7 +110,7 @@ public class AzureCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    StackAuthenticationRequest stackauth() {
+    public StackAuthenticationRequest stackauth() {
         StackAuthenticationRequest stackauth = new StackAuthenticationRequest();
 
         stackauth.setPublicKey(getTestParameter().get(INTEGRATIONTEST_PUBLIC_KEY_FILE).substring(BEGIN_INDEX));

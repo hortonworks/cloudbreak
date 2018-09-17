@@ -1,12 +1,21 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
 import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.v3.CredentialV3Action;
 
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
+@Prototype
 public class Credential extends CredentialEntity {
+
+    Credential() {
+    }
+
+    public Credential(TestContext testContext) {
+        super(testContext);
+    }
 
     public static Function<IntegrationTestContext, Credential> getTestContextCredential(String key) {
         return testContext -> testContext.getContextParam(key, Credential.class);

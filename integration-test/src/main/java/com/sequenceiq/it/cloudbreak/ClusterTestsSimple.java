@@ -11,7 +11,7 @@ import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Cluster;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
-import com.sequenceiq.it.cloudbreak.newway.StackOperation;
+import com.sequenceiq.it.cloudbreak.newway.StackOperationEntity;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
@@ -74,10 +74,10 @@ public class ClusterTestsSimple extends CloudbreakTest {
         given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
         given(cloudProvider.aValidStackCreated(), "a stack is created");
-        given(StackOperation.request()
+        given(StackOperationEntity.request()
                 .withGroupName(COMPUTE_HOST_GROUP)
                 .withDesiredCount(DESIRED_COUNT), "a scale request to " + COMPUTE_HOST_GROUP);
-        when(StackOperation.scale(), "scale");
+        when(StackOperationEntity.scale(), "scale");
         when(Stack.get());
         then(Stack.waitAndCheckClusterAndStackAvailabilityStatus(), "wait for availability");
         then(Stack.checkClusterHasAmbariRunning(
@@ -93,8 +93,8 @@ public class ClusterTestsSimple extends CloudbreakTest {
         given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
         given(cloudProvider.aValidStackCreated(), "a stack is created");
-        given(StackOperation.request());
-        when(StackOperation.stop());
+        given(StackOperationEntity.request());
+        when(StackOperationEntity.stop());
         when(Stack.get());
         then(Stack.waitAndCheckClusterAndStackStoppedStatus(), "stack has been stopped");
     }
@@ -105,8 +105,8 @@ public class ClusterTestsSimple extends CloudbreakTest {
         given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
         given(cloudProvider.aValidStackCreated(), "a stack is created");
-        given(StackOperation.request());
-        when(StackOperation.start());
+        given(StackOperationEntity.request());
+        when(StackOperationEntity.start());
         when(Stack.get());
         then(Stack.waitAndCheckClusterAndStackAvailabilityStatus(), "stack has been started");
         then(Stack.checkClusterHasAmbariRunning(

@@ -4,7 +4,7 @@ import static com.sequenceiq.it.cloudbreak.newway.cloud.AwsCloudProvider.AWS;
 
 import javax.annotation.Nonnull;
 
-import com.sequenceiq.it.cloudbreak.newway.AccessConfig;
+import com.sequenceiq.it.cloudbreak.newway.AccessConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.AttachedClusterStackPostStrategy;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.DatalakeCluster;
@@ -38,7 +38,7 @@ public class SharedServiceAwsTest extends SharedServiceTestRoot {
         given(getResourceHelper().aValidHiveDatabase());
         given(getResourceHelper().aValidRangerDatabase());
         given(getResourceHelper().aValidLdap());
-        given(AccessConfig.isGot());
+        given(AccessConfigEntity.isGot());
         given(getCloudProvider().aValidDatalakeCluster(), "a datalake cluster request");
         given(getCloudProvider().aValidStackRequest()
                 .withInstanceGroups(getCloudProvider().instanceGroups(HostGroupType.MASTER))
@@ -59,7 +59,7 @@ public class SharedServiceAwsTest extends SharedServiceTestRoot {
     public void testClusterAttachedToDatalakeCluster() throws Exception {
         given(CloudbreakClient.created());
         given(getCloudProvider().aValidCredential());
-        given(AccessConfig.isGot());
+        given(AccessConfigEntity.isGot());
         given(DatalakeCluster.isCreatedWithName(getDatalakeClusterName()));
         given(getCloudProvider().aValidAttachedCluster(getDatalakeClusterName()), "an attached cluster request");
         given(getCloudProvider().aValidAttachedStackRequest().withName(getAttachedClusterName()));

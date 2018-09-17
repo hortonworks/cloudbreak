@@ -107,7 +107,7 @@ public class AwsCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    StackAuthenticationRequest stackauth() {
+    public StackAuthenticationRequest stackauth() {
         StackAuthenticationRequest stackauth = new StackAuthenticationRequest();
 
         stackauth.setPublicKey(getTestParameter().get(CloudProviderHelper.INTEGRATIONTEST_PUBLIC_KEY_FILE).substring(BEGIN_INDEX));

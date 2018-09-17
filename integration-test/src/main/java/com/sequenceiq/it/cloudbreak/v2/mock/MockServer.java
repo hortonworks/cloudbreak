@@ -148,6 +148,10 @@ public class MockServer {
         return mockServerAddress;
     }
 
+    public void setMockServerAddress(String address) {
+        mockServerAddress = address;
+    }
+
     protected int getMockPort() {
         return mockPort;
     }
@@ -157,7 +161,13 @@ public class MockServer {
     }
 
     protected String responseFromJsonFile(String path) {
-        try (InputStream inputStream = resourceLoader.getResource("/mockresponse/" + path).getInputStream()) {
+//        try (InputStream inputStream = resourceLoader.getResource("/mockresponse/" + path).getInputStream()) {
+//            return IOUtils.toString(inputStream);
+//        } catch (IOException e) {
+//            LOGGER.error("can't read file from path", e);
+//            return "";
+//        }
+        try (InputStream inputStream = MockServer.class.getResourceAsStream("/mockresponse/" + path)) {
             return IOUtils.toString(inputStream);
         } catch (IOException e) {
             LOGGER.error("can't read file from path", e);

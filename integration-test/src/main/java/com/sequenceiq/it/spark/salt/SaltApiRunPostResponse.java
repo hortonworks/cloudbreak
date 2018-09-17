@@ -41,41 +41,46 @@ public class SaltApiRunPostResponse extends ITResponse {
 
     @Override
     public Object handle(Request request, Response response) throws Exception {
-        if (request.body().contains("manage.status")) {
+        String body = request.body();
+        return createSaltApiResponse(body);
+    }
+
+    public Object createSaltApiResponse(String body) throws JsonProcessingException {
+        if (body.contains("manage.status")) {
             return minionStatuses();
         }
-        if (request.body().contains("network.ipaddrs")) {
+        if (body.contains("network.ipaddrs")) {
             return ipAddresses();
         }
-        if (request.body().contains("grains.append")) {
+        if (body.contains("grains.append")) {
             return grainsResponse();
         }
-        if (request.body().contains("grains.remove")) {
+        if (body.contains("grains.remove")) {
             return grainsResponse();
         }
-        if (request.body().contains("saltutil.sync_grains")) {
+        if (body.contains("saltutil.sync_grains")) {
             return saltUtilSyncGrainsResponse();
         }
-        if (request.body().contains("mine.update")) {
+        if (body.contains("mine.update")) {
             return saltUtilSyncGrainsResponse();
         }
-        if (request.body().contains("state.highstate")) {
+        if (body.contains("state.highstate")) {
             return stateHighState();
         }
-        if (request.body().contains("jobs.active")) {
+        if (body.contains("jobs.active")) {
             return jobsActive();
         }
-        if (request.body().contains("jobs.lookup_jid")) {
+        if (body.contains("jobs.lookup_jid")) {
             return jobsLookupJid();
         }
-        if (request.body().contains("state.apply")) {
+        if (body.contains("state.apply")) {
             return stateApply();
         }
-        if (request.body().contains("key.delete")) {
+        if (body.contains("key.delete")) {
             return "";
         }
-        LOGGER.error("no response for this SALT RUN request: " + request.body());
-        throw new IllegalStateException("no response for this SALT RUN request: " + request.body());
+        LOGGER.error("no response for this SALT RUN request: " + body);
+        throw new IllegalStateException("no response for this SALT RUN request: " + body);
     }
 
     protected Object stateApply() {

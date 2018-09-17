@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.function.Function;
+import com.sequenceiq.it.cloudbreak.newway.actor.CloudbreakUser;
 
 public class CloudbreakClient extends Entity {
     public static final String CLOUDBREAK_CLIENT = "CLOUDBREAK_CLIENT";
@@ -16,6 +17,8 @@ public class CloudbreakClient extends Entity {
     private static com.sequenceiq.cloudbreak.client.CloudbreakClient singletonCloudbreakClient;
 
     private com.sequenceiq.cloudbreak.client.CloudbreakClient cloudbreakClient;
+
+    private Long workspaceId;
 
     CloudbreakClient(String newId) {
         super(newId);
@@ -75,6 +78,42 @@ public class CloudbreakClient extends Entity {
                     new ConfigKey(false, true, true));
         }
         clientEntity.cloudbreakClient = singletonCloudbreakClient;
+    }
+
+    public static synchronized CloudbreakClient createProxyCloudbreakClient(TestParameter testParameter) {
+        CloudbreakClient clientEntity = new CloudbreakClient();
+        if (singletonCloudbreakClient == null) {
+            singletonCloudbreakClient = new ProxyCloudbreakClient(
+                    testParameter.get(CloudbreakTest.CLOUDBREAK_SERVER_ROOT),
+                    testParameter.get(CloudbreakTest.IDENTITY_URL),
+                    testParameter.get(CloudbreakTest.USER),
+                    testParameter.get(CloudbreakTest.PASSWORD),
+                    "cloudbreak_shell",
+                    new ConfigKey(false, true, true));
+        }
+        clientEntity.cloudbreakClient = singletonCloudbreakClient;
+        return clientEntity;
+    }
+
+    public static synchronized CloudbreakClient createProxyCloudbreakClient(TestParameter testParameter, CloudbreakUser cloudbreakUser) {
+        CloudbreakClient clientEntity = new CloudbreakClient();
+        ProxyCloudbreakClient cloudbreakClient = new ProxyCloudbreakClient(
+                testParameter.get(CloudbreakTest.CLOUDBREAK_SERVER_ROOT),
+                testParameter.get(CloudbreakTest.IDENTITY_URL),
+                cloudbreakUser.getUsername(),
+                cloudbreakUser.getPassword(),
+                "cloudbreak_shell",
+                new ConfigKey(false, true, true));
+        clientEntity.cloudbreakClient = cloudbreakClient;
+        return clientEntity;
+    }
+
+    public Long getWorkspaceId() {
+        return workspaceId;
+    }
+
+    public void setWorkspaceId(Long workspaceId) {
+        this.workspaceId = workspaceId;
     }
 }
 

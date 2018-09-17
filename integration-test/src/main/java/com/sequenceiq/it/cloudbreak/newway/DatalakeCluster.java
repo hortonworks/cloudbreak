@@ -5,9 +5,10 @@ import java.util.function.Function;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.v3.DatalakeClusterV3Action;
 
-public class DatalakeCluster extends AbstractCloudbreakEntity<StackV2Request, StackResponse> {
+public class DatalakeCluster extends AbstractCloudbreakEntity<StackV2Request, StackResponse, DatalakeCluster> {
 
     private static final String DATALAKE_CLUSTER_ID = "DATALAKE_CLUSTER";
 
@@ -17,6 +18,10 @@ public class DatalakeCluster extends AbstractCloudbreakEntity<StackV2Request, St
 
     private DatalakeCluster(String id) {
         super(id);
+    }
+
+    public DatalakeCluster(TestContext testContext) {
+        super(new StackV2Request(), testContext);
     }
 
     public static DatalakeCluster isCreatedWithName(String name) {
