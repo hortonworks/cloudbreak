@@ -34,7 +34,7 @@
 # Image catalog
 : ${IMAGE_CATALOG_NAME:="test-catalog"}
 : ${IMAGE_CATALOG_NAME_DEFAULT:="cloudbreak-default"}
-: ${IMAGE_CATALOG_URL:="https://s3-eu-west-1.amazonaws.com/cloudbreak-info/v2-dev-cb-image-catalog.json"}
+: ${IMAGE_CATALOG_URL:="https://cloudbreak-imagecatalog.s3.amazonaws.com/v2-dev-cb-image-catalog.json"}
 
 # Input JSON files
 : ${AWS_INPUT_JSON_FILE:="templates/aws-template.json"}

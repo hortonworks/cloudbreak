@@ -1,7 +1,7 @@
 [
   {
     "name": "cloudbreak-default",
-    "url": "https://s3-eu-west-1.amazonaws.com/cloudbreak-info/v2-dev-cb-image-catalog.json",
+    "url": "https://cloudbreak-imagecatalog.s3.amazonaws.com/v2-dev-cb-image-catalog.json",
     "publicInAccount": true,
     "default": true
   }

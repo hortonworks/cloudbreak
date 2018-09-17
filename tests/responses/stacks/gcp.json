@@ -477,7 +477,7 @@
   "gatewayPort": 9443,
   "image": {
     "imageName": "sequenceiqimage/hdc-hdp--1711170803.tar.gz",
-    "imageCatalogUrl": "https://s3-eu-west-1.amazonaws.com/cloudbreak-info/v2-dev-cb-image-catalog.json",
+    "imageCatalogUrl": "https://cloudbreak-imagecatalog.s3.amazonaws.com/v2-dev-cb-image-catalog.json",
     "imageId": "99d1bab8-2a40-4b4a-531a-447030b54e0f",
     "imageCatalogName": "cloudbreak-default"
   },
