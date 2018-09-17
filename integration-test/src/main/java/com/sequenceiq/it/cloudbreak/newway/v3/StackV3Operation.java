@@ -18,7 +18,7 @@ import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.log.Log;
 
-public class StackV3Operation extends AbstractCloudbreakEntity<StackScaleRequestV2, Response> {
+public class StackV3Operation extends AbstractCloudbreakEntity<StackScaleRequestV2, Response, StackV3Operation> {
     public static final String SCALE = "SCALE";
 
     protected StackV3Operation(String newId) {

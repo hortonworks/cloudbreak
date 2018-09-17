@@ -3,7 +3,7 @@ package com.sequenceiq.it.cloudbreak.newway;
 import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigResponse;
 
-public class ProxyConfigEntity extends AbstractCloudbreakEntity<ProxyConfigRequest, ProxyConfigResponse> {
+public class ProxyConfigEntity extends AbstractCloudbreakEntity<ProxyConfigRequest, ProxyConfigResponse, ProxyConfigEntity> {
     public static final String PROXY_CONFIG = "PROXY_CONFIG";
 
     ProxyConfigEntity(String newId) {

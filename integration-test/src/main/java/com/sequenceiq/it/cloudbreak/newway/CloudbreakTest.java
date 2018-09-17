@@ -18,6 +18,8 @@ import org.springframework.util.StringUtils;
 import org.testng.ITestContext;
 import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.BeforeTest;
 
 import com.sequenceiq.it.IntegrationTestContext;
@@ -33,6 +35,10 @@ public class CloudbreakTest extends GherkinTest {
     public static final String USER = "USER";
 
     public static final String PASSWORD = "PASSWORD";
+
+    public static final String SECOND_USER = "SECOND_USER";
+
+    public static final String SECOND_PASSWORD = "SECOND_PASSWORD";
 
     public static final String AUTOSCALE_CLIENTID = "AUTOSCALE_CLIENTID";
 
@@ -98,6 +104,11 @@ public class CloudbreakTest extends GherkinTest {
         LogSearchUtil.addQueryModelForLogSearchUrlToContext(testContext, LogSearchUtil.LOG_SEARCH_CBOWNER_ID,
                 LogSearchUtil.LOG_SEARCH_CBOWNER_QUERY_TYPE, defaultUaaUser);
 
+        testParameter.put("INTEGRATIONTEST_CLOUDBREAK_SERVER", server + cbRootContextPath);
+        testParameter.put("INTEGRATIONTEST_UAA_SERVER", uaaServer);
+        testParameter.put("INTEGRATIONTEST_UAA_USER", defaultUaaUser);
+        testParameter.put("INTEGRATIONTEST_UAA_PASSWORD", defaultUaaPassword);
+
         try {
             CloudbreakClient client = CloudbreakClient.created();
             client.create(testContext);
@@ -115,6 +126,8 @@ public class CloudbreakTest extends GherkinTest {
         testParameter = tp;
     }
 
+    @BeforeSuite
+    @BeforeClass
     @BeforeTest(alwaysRun = true)
     public void digestParameters(ITestContext testngContext) {
         LOGGER.info("CloudbreakTest load test parameters ::: ");

@@ -9,43 +9,43 @@ import com.sequenceiq.cloudbreak.api.model.stack.StackScaleRequestV2;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.log.Log;
 
-public class StackOperation extends AbstractCloudbreakEntity<StackScaleRequestV2, Response> {
+public class StackOperationEntity extends AbstractCloudbreakEntity<StackScaleRequestV2, Response, StackOperationEntity> {
     public static final String SCALE = "SCALE";
 
-    protected StackOperation(String newId) {
+    protected StackOperationEntity(String newId) {
         super(newId);
         setRequest(new StackScaleRequestV2());
     }
 
-    protected StackOperation() {
+    protected StackOperationEntity() {
         this(SCALE);
     }
 
-    public StackOperation withDesiredCount(int desiredCount) {
+    public StackOperationEntity withDesiredCount(int desiredCount) {
         getRequest().setDesiredCount(desiredCount);
         return this;
     }
 
-    public StackOperation withGroupName(String groupName) {
+    public StackOperationEntity withGroupName(String groupName) {
         getRequest().setGroup(groupName);
         return this;
     }
 
-    public StackOperation withStackId(Long x) {
+    public StackOperationEntity withStackId(Long x) {
         getRequest().setStackId(x);
         return this;
     }
 
-    static Function<IntegrationTestContext, StackOperation> getTestContextStackOperation(String key) {
-        return testContext -> testContext.getContextParam(key, StackOperation.class);
+    static Function<IntegrationTestContext, StackOperationEntity> getTestContextStackOperation(String key) {
+        return testContext -> testContext.getContextParam(key, StackOperationEntity.class);
     }
 
-    static Function<IntegrationTestContext, StackOperation> getTestContextStackOperation() {
+    static Function<IntegrationTestContext, StackOperationEntity> getTestContextStackOperation() {
         return getTestContextStackOperation(SCALE);
     }
 
     public static void scale(IntegrationTestContext integrationTestContext, Entity entity) {
-        StackOperation stackOperation = (StackOperation) entity;
+        StackOperationEntity stackOperation = (StackOperationEntity) entity;
         CloudbreakClient client;
         client = CloudbreakClient.getTestContextCloudbreakClient().apply(integrationTestContext);
         StackEntity stack;
@@ -57,7 +57,7 @@ public class StackOperation extends AbstractCloudbreakEntity<StackScaleRequestV2
     }
 
     public static void start(IntegrationTestContext integrationTestContext, Entity entity) {
-        StackOperation stackOperation = (StackOperation) entity;
+        StackOperationEntity stackOperation = (StackOperationEntity) entity;
         CloudbreakClient client;
         client = CloudbreakClient.getTestContextCloudbreakClient().apply(integrationTestContext);
         StackEntity stack;
@@ -69,7 +69,7 @@ public class StackOperation extends AbstractCloudbreakEntity<StackScaleRequestV2
     }
 
     public static void stop(IntegrationTestContext integrationTestContext, Entity entity) {
-        StackOperation stackOperation = (StackOperation) entity;
+        StackOperationEntity stackOperation = (StackOperationEntity) entity;
         CloudbreakClient client;
         client = CloudbreakClient.getTestContextCloudbreakClient().apply(integrationTestContext);
         StackEntity stack;
@@ -81,7 +81,7 @@ public class StackOperation extends AbstractCloudbreakEntity<StackScaleRequestV2
     }
 
     public static void sync(IntegrationTestContext integrationTestContext, Entity entity) {
-        StackOperation stackOperation = (StackOperation) entity;
+        StackOperationEntity stackOperation = (StackOperationEntity) entity;
         CloudbreakClient client;
         client = CloudbreakClient.getTestContextCloudbreakClient().apply(integrationTestContext);
         StackEntity stack;
@@ -92,27 +92,27 @@ public class StackOperation extends AbstractCloudbreakEntity<StackScaleRequestV2
                         .putSync(stack.getRequest().getGeneral().getName()));
     }
 
-    public static StackOperation request() {
-        return new StackOperation();
+    public static StackOperationEntity request() {
+        return new StackOperationEntity();
     }
 
-    public static Action<StackOperation> scale() {
-        return new Action<>(getTestContextStackOperation(), StackOperation::scale);
+    public static Action<StackOperationEntity> scale() {
+        return new Action<>(getTestContextStackOperation(), StackOperationEntity::scale);
     }
 
-    public static Action<StackOperation> start() {
-        return new Action<>(getTestContextStackOperation(), StackOperation::start);
+    public static Action<StackOperationEntity> start() {
+        return new Action<>(getTestContextStackOperation(), StackOperationEntity::start);
     }
 
-    public static Action<StackOperation> stop() {
-        return new Action<>(getTestContextStackOperation(), StackOperation::stop);
+    public static Action<StackOperationEntity> stop() {
+        return new Action<>(getTestContextStackOperation(), StackOperationEntity::stop);
     }
 
-    public static Action<StackOperation> sync() {
-        return new Action<>(getTestContextStackOperation(), StackOperation::sync);
+    public static Action<StackOperationEntity> sync() {
+        return new Action<>(getTestContextStackOperation(), StackOperationEntity::sync);
     }
 
-    public static Assertion<StackOperation> assertThis(BiConsumer<StackOperation, IntegrationTestContext> check) {
+    public static Assertion<StackOperationEntity> assertThis(BiConsumer<StackOperationEntity, IntegrationTestContext> check) {
         return new Assertion<>(getTestContextStackOperation(GherkinTest.RESULT), check);
     }
 }

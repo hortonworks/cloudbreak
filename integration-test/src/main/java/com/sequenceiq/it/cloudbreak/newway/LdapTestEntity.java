@@ -6,7 +6,7 @@ import com.sequenceiq.cloudbreak.api.model.ldap.LdapTestResult;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapValidationRequest;
 import com.sequenceiq.it.IntegrationTestContext;
 
-public class LdapTestEntity extends AbstractCloudbreakEntity<LdapValidationRequest, LdapTestResult> {
+public class LdapTestEntity extends AbstractCloudbreakEntity<LdapValidationRequest, LdapTestResult, LdapTestEntity> {
     private static final String LDAP_TEST = "LDAP_TEST";
 
     LdapTestEntity(String newId) {

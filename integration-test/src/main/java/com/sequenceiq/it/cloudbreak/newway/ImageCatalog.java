@@ -3,10 +3,20 @@ package com.sequenceiq.it.cloudbreak.newway;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
+import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImageCatalogRequest;
 import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.v3.ImageCatalogV3Action;
 
+@Prototype
 public class ImageCatalog extends ImageCatalogEntity {
+
+    public ImageCatalog(TestContext testContext) {
+        super(new ImageCatalogRequest(), testContext);
+    }
+
+    public ImageCatalog() {
+    }
 
     static Function<IntegrationTestContext, ImageCatalog> getTestContext(String key) {
         return testContext -> testContext.getContextParam(key, ImageCatalog.class);
@@ -27,13 +37,13 @@ public class ImageCatalog extends ImageCatalogEntity {
     }
 
     public static ImageCatalog isCreatedDeleted() {
-        ImageCatalog  imageCatalog = new ImageCatalog();
+        ImageCatalog imageCatalog = new ImageCatalog();
         imageCatalog.setCreationStrategy(ImageCatalogV3Action::createDeleteInGiven);
         return imageCatalog;
     }
 
     public static ImageCatalog isCreatedAsDefault() {
-        ImageCatalog  imageCatalog = new ImageCatalog();
+        ImageCatalog imageCatalog = new ImageCatalog();
         imageCatalog.setCreationStrategy(ImageCatalogV3Action::createAsDefaultInGiven);
         return imageCatalog;
     }
@@ -59,19 +69,24 @@ public class ImageCatalog extends ImageCatalogEntity {
     }
 
     public static Action<ImageCatalog> getImagesByProvider() {
-        return new Action<>(getNew(), ImageCatalogV3Action::getImagesByProvider); }
+        return new Action<>(getNew(), ImageCatalogV3Action::getImagesByProvider);
+    }
 
     public static Action<ImageCatalog> getImagesByProviderFromImageCatalog(String key) {
-        return new Action<>(getTestContext(key),  ImageCatalogV3Action::getImagesByProviderFromImageCatalog); }
+        return new Action<>(getTestContext(key), ImageCatalogV3Action::getImagesByProviderFromImageCatalog);
+    }
 
     public static Action<ImageCatalog> getImagesByProviderFromImageCatalog() {
-        return getImagesByProviderFromImageCatalog(IMAGE_CATALOG); }
+        return getImagesByProviderFromImageCatalog(IMAGE_CATALOG);
+    }
 
     public static Action<ImageCatalog> getRequestFromName(String key) {
-        return new Action<>(getTestContext(key), ImageCatalogV3Action::getRequestByName); }
+        return new Action<>(getTestContext(key), ImageCatalogV3Action::getRequestByName);
+    }
 
     public static Action<ImageCatalog> getRequestFromName() {
-        return getRequestFromName(IMAGE_CATALOG); }
+        return getRequestFromName(IMAGE_CATALOG);
+    }
 
     public static Action<ImageCatalog> delete(String key) {
         return new Action<>(getTestContext(key), ImageCatalogV3Action::delete);

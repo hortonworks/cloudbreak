@@ -15,7 +15,7 @@ public class TestParameter {
 
     private final Map<String, String> parameters;
 
-    TestParameter() {
+    public TestParameter() {
         parameters = new HashMap<>();
     }
 
@@ -23,7 +23,7 @@ public class TestParameter {
     public String get(String key) {
         Optional<String> valueAsProperty = Optional.ofNullable(parameters.get(key));
         if (!valueAsProperty.isPresent()) {
-            LOGGER.info("key has not been found as property, trying as environment variable");
+            LOGGER.debug("key has not been found as property, trying as environment variable");
             valueAsProperty = Optional.ofNullable(parameters.get(key.toUpperCase().replaceAll("\\.", "_")));
         }
         LOGGER.info(valueAsProperty.isPresent()

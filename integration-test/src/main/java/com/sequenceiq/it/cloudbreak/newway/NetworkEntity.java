@@ -1,11 +1,11 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
+import java.util.Map;
+
 import com.sequenceiq.cloudbreak.api.model.NetworkRequest;
 import com.sequenceiq.cloudbreak.api.model.NetworkResponse;
 
-import java.util.Map;
-
-public class NetworkEntity extends AbstractCloudbreakEntity<NetworkRequest, NetworkResponse> {
+public class NetworkEntity extends AbstractCloudbreakEntity<NetworkRequest, NetworkResponse, NetworkEntity> {
     public static final String NETWORK = "NETWORK";
 
     NetworkEntity(String newId) {

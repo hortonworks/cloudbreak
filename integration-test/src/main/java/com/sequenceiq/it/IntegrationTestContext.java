@@ -62,4 +62,8 @@ public class IntegrationTestContext {
             throw new IllegalArgumentException("Param value is not type of " + clazz);
         }
     }
+
+    public void clear() {
+        contextParameters.clear();
+    }
 }

@@ -90,29 +90,29 @@ public class IntegrationTestApp implements CommandLineRunner {
 
     private void setupSuites(TestNG testng) throws Exception {
         switch (itCommand) {
-        case "smoketest":
-            setupSmokeTest(testng, itProps.getTestTypes());
-            break;
-        case "fulltest":
-            if (fullTestRegionIndex > -1 && fullTestRegionNumber > 0) {
-                setupFullTest(testng, fullTestRegionIndex, fullTestRegionNumber);
-            } else {
-                LOG.info("fulltest command require integrationtest.fulltest.regindex and integrationtest.fulltest.regnum parameters!");
-            }
-            break;
-        case "suites":
-            List<String> suiteFiles = itProps.getSuiteFiles();
-            if (!CollectionUtils.isEmpty(suiteFiles)) {
-                testng.setTestSuites(suiteFiles);
-            }
-            break;
-        case "suiteurls":
-            List<String> suitePathes = itProps.getSuiteFiles();
-            testng.setXmlSuites(loadSuites(suitePathes));
-            break;
-        default:
-            LOG.info("Unknown command: {}", itCommand);
-            break;
+            case "smoketest":
+                setupSmokeTest(testng, itProps.getTestTypes());
+                break;
+            case "fulltest":
+                if (fullTestRegionIndex > -1 && fullTestRegionNumber > 0) {
+                    setupFullTest(testng, fullTestRegionIndex, fullTestRegionNumber);
+                } else {
+                    LOG.info("fulltest command require integrationtest.fulltest.regindex and integrationtest.fulltest.regnum parameters!");
+                }
+                break;
+            case "suites":
+                List<String> suiteFiles = itProps.getSuiteFiles();
+                if (!CollectionUtils.isEmpty(suiteFiles)) {
+                    testng.setTestSuites(suiteFiles);
+                }
+                break;
+            case "suiteurls":
+                List<String> suitePathes = itProps.getSuiteFiles();
+                testng.setXmlSuites(loadSuites(suitePathes));
+                break;
+            default:
+                LOG.info("Unknown command: {}", itCommand);
+                break;
         }
     }
 
@@ -151,7 +151,7 @@ public class IntegrationTestApp implements CommandLineRunner {
 
     private List<XmlSuite> loadSuiteResources(Iterable<Resource> suitePathes) throws IOException {
         List<XmlSuite> suites = new ArrayList<>();
-        for (Resource suite: suitePathes) {
+        for (Resource suite : suitePathes) {
             suites.add(loadSuite(suite.getURL().toString(), suite));
         }
         return suites;
@@ -159,14 +159,21 @@ public class IntegrationTestApp implements CommandLineRunner {
 
     private List<XmlSuite> loadSuites(Iterable<String> suitePathes) throws IOException {
         List<XmlSuite> suites = new ArrayList<>();
-        for (String suitePath: suitePathes) {
+        for (String suitePath : suitePathes) {
             suites.add(loadSuite(suitePath));
         }
+        LOG.info("parsed suites: {}", suites.size());
         return suites;
     }
 
     private XmlSuite loadSuite(String suitePath) throws IOException {
-        return loadSuite(suitePath, applicationContext.getResource(suitePath));
+        LOG.info("load suite: {}", suitePath);
+        try {
+            return loadSuite(suitePath, applicationContext.getResource(suitePath));
+        } catch (Exception e) {
+            LOG.info(e.getMessage(), e);
+            throw e;
+        }
     }
 
     private XmlSuite loadSuite(String suitePath, InputStreamSource resource) throws IOException {
@@ -190,5 +197,6 @@ public class IntegrationTestApp implements CommandLineRunner {
         SpringApplication springApp = new SpringApplication(IntegrationTestApp.class);
         springApp.setWebEnvironment(false);
         springApp.run(args);
+        LOG.info("test successfully run");
     }
 }

@@ -3,7 +3,7 @@ package com.sequenceiq.it.cloudbreak.newway;
 import com.sequenceiq.cloudbreak.api.model.RecommendationRequestJson;
 import com.sequenceiq.cloudbreak.api.model.RecommendationResponse;
 
-public class RecommendationEntity extends AbstractCloudbreakEntity<RecommendationRequestJson, RecommendationResponse> {
+public class RecommendationEntity extends AbstractCloudbreakEntity<RecommendationRequestJson, RecommendationResponse, RecommendationEntity> {
 
     static final String RECOMMENDATION = "RECOMMENDATION";
 

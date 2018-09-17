@@ -27,7 +27,7 @@ public class Verification {
 
     private final String httpMethod;
 
-    private final Map<Call, Response> requestResponseMap;
+    private Map<Call, Response> requestResponseMap;
 
     private Integer atLeast;
 
@@ -42,6 +42,12 @@ public class Verification {
         this.regex = regex;
         this.httpMethod = httpMethod;
         this.requestResponseMap = requestResponseMap;
+    }
+
+    public Verification(String path, String httpMethod, boolean regex) {
+        this.path = path;
+        this.regex = regex;
+        this.httpMethod = httpMethod;
     }
 
     public Verification atLeast(int times) {
@@ -75,6 +81,11 @@ public class Verification {
         int times = getTimesMatched();
         checkAtLeast(times);
         checkExactTimes(times);
+    }
+
+    public void verify(Map<Call, Response> requestResponseMap) {
+        this.requestResponseMap = requestResponseMap;
+        verify();
     }
 
     private void logVerify() {

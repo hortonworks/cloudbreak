@@ -1,5 +1,10 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud;
 
+import java.util.Collections;
+import java.util.Map;
+
+import org.apache.commons.lang3.NotImplementedException;
+
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.stack.StackAuthenticationRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
@@ -9,10 +14,6 @@ import com.sequenceiq.it.cloudbreak.newway.Cluster;
 import com.sequenceiq.it.cloudbreak.newway.Credential;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
-import org.apache.commons.lang3.NotImplementedException;
-
-import java.util.Collections;
-import java.util.Map;
 
 public class OpenstackCloudProvider extends CloudProviderHelper {
 
@@ -78,7 +79,7 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    StackAuthenticationRequest stackauth() {
+    public StackAuthenticationRequest stackauth() {
         StackAuthenticationRequest stackauth = new StackAuthenticationRequest();
 
         stackauth.setPublicKey(getTestParameter().get(CloudProviderHelper.INTEGRATIONTEST_PUBLIC_KEY_FILE).substring(BEGIN_INDEX));

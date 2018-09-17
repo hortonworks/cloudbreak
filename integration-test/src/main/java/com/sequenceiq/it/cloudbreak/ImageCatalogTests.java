@@ -1,20 +1,22 @@
 package com.sequenceiq.it.cloudbreak;
 
+import static com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants.CLOUDPROVIDER;
+
+import java.util.Set;
+
+import javax.inject.Inject;
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.ForbiddenException;
+
+import org.testng.Assert;
+import org.testng.annotations.AfterSuite;
+import org.testng.annotations.Test;
+
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImageCatalogResponse;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.ImageCatalog;
 import com.sequenceiq.it.util.LongStringGeneratorUtil;
-import org.testng.Assert;
-import org.testng.annotations.AfterSuite;
-import org.testng.annotations.Test;
-
-import javax.inject.Inject;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.ForbiddenException;
-import java.util.Set;
-
-import static com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants.CLOUDPROVIDER;
 
 public class ImageCatalogTests extends CloudbreakTest {
     private static final String VALID_IMAGECATALOG_NAME = "valid-imagecat";
@@ -229,7 +231,7 @@ public class ImageCatalogTests extends CloudbreakTest {
                 .withName(DEFAULT_IMAGECATALOG_NAME));
         when(ImageCatalog.getRequestFromName(), " get request of default image catalog");
         then(ImageCatalog.assertThis(
-                (imageCatalog, t) -> Assert.assertEquals(imageCatalog.getRequestByName().getName(), DEFAULT_IMAGECATALOG_NAME)),
+                (imageCatalog, t) -> Assert.assertEquals(imageCatalog.getRequest().getName(), DEFAULT_IMAGECATALOG_NAME)),
                 "check image catalog name in request");
     }
 

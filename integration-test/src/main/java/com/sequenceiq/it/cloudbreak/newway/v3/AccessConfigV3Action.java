@@ -9,7 +9,7 @@ import java.util.Map.Entry;
 
 import com.sequenceiq.cloudbreak.api.model.PlatformResourceRequestJson;
 import com.sequenceiq.it.IntegrationTestContext;
-import com.sequenceiq.it.cloudbreak.newway.AccessConfig;
+import com.sequenceiq.it.cloudbreak.newway.AccessConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Credential;
@@ -23,7 +23,7 @@ public class AccessConfigV3Action {
     }
 
     public static void post(IntegrationTestContext integrationTestContext, Entity entity) throws IOException {
-        AccessConfig accessConfig = (AccessConfig) entity;
+        AccessConfigEntity accessConfig = (AccessConfigEntity) entity;
         CloudbreakClient client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
 

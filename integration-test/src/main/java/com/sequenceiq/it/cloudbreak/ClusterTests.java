@@ -12,12 +12,12 @@ import com.sequenceiq.it.cloudbreak.newway.Cluster;
 import com.sequenceiq.it.cloudbreak.newway.ClusterGateway;
 import com.sequenceiq.it.cloudbreak.newway.GatewayTopology;
 import com.sequenceiq.it.cloudbreak.newway.HostGroups;
-import com.sequenceiq.it.cloudbreak.newway.ImageSettings;
-import com.sequenceiq.it.cloudbreak.newway.Kerberos;
+import com.sequenceiq.it.cloudbreak.newway.ImageSettingsEntity;
+import com.sequenceiq.it.cloudbreak.newway.KerberosEntity;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackGetWithEntriesStrategy;
-import com.sequenceiq.it.cloudbreak.newway.StackImageChange;
-import com.sequenceiq.it.cloudbreak.newway.StackOperation;
+import com.sequenceiq.it.cloudbreak.newway.StackImageChangeEntity;
+import com.sequenceiq.it.cloudbreak.newway.StackOperationEntity;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
 import com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType;
@@ -47,7 +47,7 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
         given(Cluster.request()
                         .withAmbariRequest(cloudProvider.ambariRequestWithBlueprintName(blueprintName)),
                 "a cluster request");
-        given(ImageSettings.request()
+        given(ImageSettingsEntity.request()
                 .withImageCatalog("")
                 .withImageId(imageId));
         given(cloudProvider.aValidStackRequest()
@@ -69,10 +69,10 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
         given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
         if (enableKerberos) {
-            Kerberos kerberos = Kerberos.request()
-                    .withMasterKey(Kerberos.DEFAULT_MASTERKEY)
-                    .withAdmin(Kerberos.DEFAULT_ADMIN_USER)
-                    .withPassword(Kerberos.DEFAULT_ADMIN_PASSWORD);
+            KerberosEntity kerberos = KerberosEntity.request()
+                    .withMasterKey(KerberosEntity.DEFAULT_MASTERKEY)
+                    .withAdmin(KerberosEntity.DEFAULT_ADMIN_USER)
+                    .withPassword(KerberosEntity.DEFAULT_ADMIN_PASSWORD);
             given(kerberos);
         }
         AmbariV2Request ambariV2Request = cloudProvider.ambariRequestWithBlueprintName(blueprintName);
@@ -85,7 +85,7 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
                     customAmbariRepoUrl, customAmbariRepoGpgKey);
         }
         given(Cluster.request().withAmbariRequest(ambariV2Request), "a cluster request");
-        given(ImageSettings.request()
+        given(ImageSettingsEntity.request()
                 .withImageCatalog("")
                 .withImageId(imageId));
         given(HostGroups.request()
@@ -103,7 +103,7 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
     }
 
     @Test(dataProvider = "providernameblueprintimageos", priority = 10)
-    public void testCreateNewClusterWithOs(CloudProvider cloudProvider, String clusterName, String blueprintName, String os, Kerberos kerberos)
+    public void testCreateNewClusterWithOs(CloudProvider cloudProvider, String clusterName, String blueprintName, String os, KerberosEntity kerberos)
             throws Exception {
         given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
@@ -111,7 +111,7 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
         given(Cluster.request()
                         .withAmbariRequest(cloudProvider.ambariRequestWithBlueprintName(blueprintName)),
                 "a cluster request");
-        given(ImageSettings.request()
+        given(ImageSettingsEntity.request()
                 .withImageCatalog("")
                 .withOs(os));
         given(cloudProvider.aValidStackRequest()
@@ -133,7 +133,7 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
         given(Cluster.request()
                         .withAmbariRequest(cloudProvider.ambariRequestWithBlueprintName(blueprintName)),
                 "a cluster request");
-        given(ImageSettings.request()
+        given(ImageSettingsEntity.request()
                 .withImageCatalog("")
                 .withImageId(imageId));
         given(ClusterGateway.request()
@@ -164,9 +164,9 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
                 .withName(clusterName), "a stack is created");
         String provider = getTestParameter().get("provider").toLowerCase();
         String imageId = getImageIdWithPkgVersions(provider, "");
-        given(StackImageChange.request().withImageId(imageId));
+        given(StackImageChangeEntity.request().withImageId(imageId));
 
-        when(StackImageChange.changeImage(), "changeImage");
+        when(StackImageChangeEntity.changeImage(), "changeImage");
         when(Stack.get());
 
         then(Stack.waitAndCheckClusterAndStackAvailabilityStatus(),
@@ -181,10 +181,10 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
         given(cloudProvider.aValidCredential());
         given(cloudProvider.aValidStackCreated()
                 .withName(clusterName), "a stack is created");
-        given(StackOperation.request()
+        given(StackOperationEntity.request()
                 .withGroupName(hostgroupName)
                 .withDesiredCount(desiredCount), "a scale request to " + hostgroupName);
-        when(StackOperation.scale(), "scale");
+        when(StackOperationEntity.scale(), "scale");
         when(Stack.get());
         then(Stack.waitAndCheckClusterAndStackAvailabilityStatus(), "wait for availability");
         then(Stack.checkClusterHasAmbariRunning(
@@ -215,8 +215,8 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
         given(cloudProvider.aValidCredential());
         given(cloudProvider.aValidStackCreated()
                 .withName(clusterName), "a stack is created");
-        given(StackOperation.request());
-        when(StackOperation.stop());
+        given(StackOperationEntity.request());
+        when(StackOperationEntity.stop());
         when(Stack.get());
         then(Stack.waitAndCheckClusterAndStackStoppedStatus(), "stack has been stopped");
     }
@@ -227,8 +227,8 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
         given(cloudProvider.aValidCredential());
         given(cloudProvider.aValidStackCreated()
                 .withName(clusterName), "a stack is created");
-        given(StackOperation.request());
-        when(StackOperation.start());
+        given(StackOperationEntity.request());
+        when(StackOperationEntity.start());
         when(Stack.get());
         then(Stack.waitAndCheckClusterAndStackAvailabilityStatus(), "stack has been started");
         then(Stack.checkClusterHasAmbariRunning(
@@ -288,10 +288,10 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
         String imageOs = getTestParameter().get("imageos");
         CloudProvider cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter());
         String clusterName = getTestParameter().get("clusterName");
-        Kerberos kerberos = Kerberos.request()
-                .withMasterKey(Kerberos.DEFAULT_MASTERKEY)
-                .withAdmin(Kerberos.DEFAULT_ADMIN_USER)
-                .withPassword(Kerberos.DEFAULT_ADMIN_PASSWORD);
+        KerberosEntity kerberos = KerberosEntity.request()
+                .withMasterKey(KerberosEntity.DEFAULT_MASTERKEY)
+                .withAdmin(KerberosEntity.DEFAULT_ADMIN_USER)
+                .withPassword(KerberosEntity.DEFAULT_ADMIN_PASSWORD);
         return new Object[][]{
                 {cloudProvider, clusterName, blueprint, imageOs, kerberos}
         };

@@ -1,11 +1,11 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
+import java.util.Map;
+
 import com.sequenceiq.cloudbreak.api.model.PlatformResourceRequestJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformVmtypesResponse;
 
-import java.util.Map;
-
-public class VmTypeEntity extends AbstractCloudbreakEntity<PlatformResourceRequestJson, PlatformVmtypesResponse> {
+public class VmTypeEntity extends AbstractCloudbreakEntity<PlatformResourceRequestJson, PlatformVmtypesResponse, VmTypeEntity> {
     public static final String VMTYPE = "VMTYPE";
 
     VmTypeEntity(String newId) {

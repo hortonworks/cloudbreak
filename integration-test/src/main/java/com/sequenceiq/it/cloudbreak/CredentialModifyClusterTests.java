@@ -7,9 +7,9 @@ import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClusterTestConfiguration;
 import com.sequenceiq.it.cloudbreak.newway.Cluster;
 import com.sequenceiq.it.cloudbreak.newway.Credential;
-import com.sequenceiq.it.cloudbreak.newway.ImageSettings;
+import com.sequenceiq.it.cloudbreak.newway.ImageSettingsEntity;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
-import com.sequenceiq.it.cloudbreak.newway.StackOperation;
+import com.sequenceiq.it.cloudbreak.newway.StackOperationEntity;
 import com.sequenceiq.it.cloudbreak.newway.cloud.AwsCloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
@@ -42,7 +42,7 @@ public class CredentialModifyClusterTests extends CloudbreakClusterTestConfigura
         given(Cluster.request()
                 .withAmbariRequest(cloudProvider.ambariRequestWithBlueprintName(blueprintName)),
                 "a cluster request");
-        given(ImageSettings.request()
+        given(ImageSettingsEntity.request()
                 .withImageCatalog("")
                 .withImageId(imageId));
         given(cloudProvider.aValidStackRequest()
@@ -92,10 +92,10 @@ public class CredentialModifyClusterTests extends CloudbreakClusterTestConfigura
                 .withName(credentialName), "a credential is created.");
         given(cloudProvider.aValidStackCreated()
                 .withName(clusterName), "a stack is created");
-        given(StackOperation.request()
+        given(StackOperationEntity.request()
                 .withGroupName(hostgroupName)
                 .withDesiredCount(desiredCount), "a scale request to " + hostgroupName);
-        when(StackOperation.scale(), "scale");
+        when(StackOperationEntity.scale(), "scale");
         when(Stack.get());
         then(Stack.waitAndCheckClusterAndStackAvailabilityStatus(), "wait for availability");
         then(Stack.checkClusterHasAmbariRunning(
@@ -112,8 +112,8 @@ public class CredentialModifyClusterTests extends CloudbreakClusterTestConfigura
                 .withName(credentialName), "a credential is created.");
         given(cloudProvider.aValidStackCreated()
                 .withName(clusterName), "a stack is created");
-        given(StackOperation.request());
-        when(StackOperation.stop());
+        given(StackOperationEntity.request());
+        when(StackOperationEntity.stop());
         when(Stack.get());
         then(Stack.waitAndCheckClusterAndStackStoppedStatus(), "stack has been stopped");
     }
@@ -125,8 +125,8 @@ public class CredentialModifyClusterTests extends CloudbreakClusterTestConfigura
                 .withName(credentialName), "a credential is created.");
         given(cloudProvider.aValidStackCreated()
                 .withName(clusterName), "a stack is created");
-        given(StackOperation.request());
-        when(StackOperation.start());
+        given(StackOperationEntity.request());
+        when(StackOperationEntity.start());
         when(Stack.get());
         then(Stack.waitAndCheckClusterAndStackAvailabilityStatus(), "stack has been started");
         then(Stack.checkClusterHasAmbariRunning(

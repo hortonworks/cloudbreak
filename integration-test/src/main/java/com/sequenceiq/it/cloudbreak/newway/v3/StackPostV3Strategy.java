@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
 import com.sequenceiq.it.IntegrationTestContext;
-import com.sequenceiq.it.cloudbreak.newway.AccessConfig;
+import com.sequenceiq.it.cloudbreak.newway.AccessConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Cluster;
@@ -26,8 +26,8 @@ import com.sequenceiq.it.cloudbreak.newway.Credential;
 import com.sequenceiq.it.cloudbreak.newway.DatalakeCluster;
 import com.sequenceiq.it.cloudbreak.newway.Entity;
 import com.sequenceiq.it.cloudbreak.newway.HostGroups;
-import com.sequenceiq.it.cloudbreak.newway.ImageSettings;
-import com.sequenceiq.it.cloudbreak.newway.Kerberos;
+import com.sequenceiq.it.cloudbreak.newway.ImageSettingsEntity;
+import com.sequenceiq.it.cloudbreak.newway.KerberosEntity;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.Strategy;
 
@@ -58,7 +58,7 @@ public class StackPostV3Strategy implements Strategy {
             }
             if (cluster.getRequest().getCloudStorage() != null && cluster.getRequest().getCloudStorage().getS3()
                     != null && isEmpty(cluster.getRequest().getCloudStorage().getS3().getInstanceProfile())) {
-                AccessConfig accessConfig = AccessConfig.getTestContextAccessConfig().apply(integrationTestContext);
+                AccessConfigEntity accessConfig = AccessConfigEntity.getTestContextAccessConfig().apply(integrationTestContext);
                 List<String> arns = accessConfig
                         .getResponse()
                         .getAccessConfigs()
@@ -74,7 +74,7 @@ public class StackPostV3Strategy implements Strategy {
             }
         }
 
-        Kerberos kerberos = Kerberos.getTestContextCluster().apply(integrationTestContext);
+        KerberosEntity kerberos = KerberosEntity.getTestContextCluster().apply(integrationTestContext);
         boolean updateKerberos = stackEntity.getRequest().getCluster() != null && stackEntity.getRequest().getCluster().getAmbari() != null
                 && stackEntity.getRequest().getCluster().getAmbari().getKerberos() == null;
         if (kerberos != null && updateKerberos) {
@@ -94,7 +94,7 @@ public class StackPostV3Strategy implements Strategy {
             }
         }
 
-        ImageSettings imageSettings = ImageSettings.getTestContextImageSettings().apply(integrationTestContext);
+        ImageSettingsEntity imageSettings = ImageSettingsEntity.getTestContextImageSettings().apply(integrationTestContext);
         if (imageSettings != null) {
             stackEntity.getRequest().setImageSettings(imageSettings.getRequest());
         }
@@ -134,6 +134,11 @@ public class StackPostV3Strategy implements Strategy {
             stackEntity.getRequest().getNetwork().getParameters().put("noPublicIp", false);
             stackEntity.getRequest().getNetwork().getParameters().put("noFirewallRules", false);
             stackEntity.getRequest().getNetwork().getParameters().put("internetGatewayId", null);
+        }
+
+        Integer gatewayPort = integrationTestContext.getContextParam("MOCK_PORT", Integer.class);
+        if (gatewayPort != null) {
+            stackEntity.getRequest().setGatewayPort(gatewayPort);
         }
 
         log(" Name:\n" + stackEntity.getRequest().getGeneral().getName());

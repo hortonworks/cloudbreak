@@ -42,23 +42,20 @@ public enum HostGroupType {
         return instanceGroupType;
     }
 
-    InstanceGroupV2Request hostgroupRequest(CloudProvider cloudProvider, TestParameter testParameter) {
-        return hostgroup(cloudProvider, name, instanceGroupType,
-                determineInstanceCount(countParameterName, testParameter), getSecurityGroupV2Request());
+    public InstanceGroupV2Request hostgroupRequest(CloudProvider cloudProvider, TestParameter testParameter) {
+        return hostgroup(cloudProvider, name, instanceGroupType, determineInstanceCount(testParameter), getSecurityGroupV2Request());
     }
 
-    InstanceGroupV2Request hostgroupRequest(CloudProvider cloudProvider, TestParameter testParameter, Set<String> recipes) {
-        return hostgroup(cloudProvider, name, instanceGroupType,
-                determineInstanceCount(countParameterName, testParameter), recipes);
+    public InstanceGroupV2Request hostgroupRequest(CloudProvider cloudProvider, TestParameter testParameter, Set<String> recipes) {
+        return hostgroup(cloudProvider, name, instanceGroupType, determineInstanceCount(testParameter), recipes);
     }
 
-    InstanceGroupV2Request hostgroupRequest(CloudProvider cloudProvider, TestParameter testParameter, String securityGroupId) {
-        return hostgroup(cloudProvider, name, instanceGroupType,
-                determineInstanceCount(countParameterName, testParameter), securityGroupId);
+    public InstanceGroupV2Request hostgroupRequest(CloudProvider cloudProvider, TestParameter testParameter, String securityGroupId) {
+        return hostgroup(cloudProvider, name, instanceGroupType, determineInstanceCount(testParameter), securityGroupId);
     }
 
-    private int determineInstanceCount(String key, TestParameter testParameter) {
-        String instanceCount = testParameter.get(key);
+    public int determineInstanceCount(TestParameter testParameter) {
+        String instanceCount = testParameter.get(countParameterName);
         int instanceCountInt;
         try {
             instanceCountInt = Integer.parseInt(instanceCount);

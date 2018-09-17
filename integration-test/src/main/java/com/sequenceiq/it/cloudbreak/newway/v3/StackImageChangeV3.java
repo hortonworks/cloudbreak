@@ -15,7 +15,7 @@ import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.log.Log;
 
-public class StackImageChangeV3 extends AbstractCloudbreakEntity<StackImageChangeRequest, Response> {
+public class StackImageChangeV3 extends AbstractCloudbreakEntity<StackImageChangeRequest, Response, StackImageChangeV3> {
     public static final String IMAGE_CHANGE = "IMAGE_CHANGE";
 
     protected StackImageChangeV3(String newId) {
