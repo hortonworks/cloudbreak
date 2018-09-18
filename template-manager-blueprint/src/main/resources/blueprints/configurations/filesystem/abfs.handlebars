@@ -6,6 +6,7 @@
   },
 {{{/each}}}
   "core-site": {
+    {{{#if-true fileSystemConfigs.abfs.useAsDefault}}}"fs.defaultFS": "{{{ fileSystemConfigs.abfs.defaultFs }}}",{{{/if-true}}}
     "fs.abfs.impl": "org.apache.hadoop.fs.azurebfs.AzureBlobFileSystem",
     "fs.abfss.impl": "org.apache.hadoop.fs.azurebfs.SecureAzureBlobFileSystem",
     "fs.AbstractFileSystem.abfs.impl": "org.apache.hadoop.fs.azurebfs.Abfs",
