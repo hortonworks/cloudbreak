@@ -4,12 +4,16 @@ package com.sequenceiq.it.cloudbreak.newway.v3;
 import static org.springframework.util.StringUtils.isEmpty;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
+import com.sequenceiq.cloudbreak.api.model.stack.StackViewResponse;
 import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
@@ -51,10 +55,14 @@ public class StackV3Action {
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         Log.log(" get all stack");
-        stackEntity.setResponses(
-                client.getCloudbreakClient()
-                        .stackV3Endpoint()
-                        .listByWorkspace(workspaceId));
+        stackEntity.setResponses(toStackResponseSet(client, workspaceId, client.getCloudbreakClient().stackV3Endpoint().listByWorkspace(workspaceId)));
+    }
+
+    private static Set<StackResponse> toStackResponseSet(CloudbreakClient client, Long workspaceId, Set<StackViewResponse> stacks) {
+        Set<StackResponse> detailedStacks = new HashSet<>();
+        stacks.stream().forEach(
+                stack -> detailedStacks.add(client.getCloudbreakClient().stackV3Endpoint().getByNameInWorkspace(workspaceId, stack.getName(), null)));
+        return detailedStacks;
     }
 
     public static void delete(IntegrationTestContext integrationTestContext, Entity entity) {

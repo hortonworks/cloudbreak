@@ -47,6 +47,7 @@ public class StackResponse extends StackBase {
     @ApiModelProperty(StackModelDescription.STACK_STATUS)
     private Status status;
 
+    @ApiModelProperty(StackModelDescription.CLUSTER)
     private ClusterResponse cluster;
 
     @ApiModelProperty(StackModelDescription.STATUS_REASON)

@@ -19,7 +19,9 @@ import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
+import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
 import com.sequenceiq.cloudbreak.repository.ClusterComponentRepository;
+import com.sequenceiq.cloudbreak.repository.ClusterComponentViewRepository;
 
 @Service
 public class ClusterComponentConfigProvider {
@@ -29,6 +31,9 @@ public class ClusterComponentConfigProvider {
     @Inject
     private ClusterComponentRepository componentRepository;
 
+    @Inject
+    private ClusterComponentViewRepository componentViewRepository;
+
     public ClusterComponent getComponent(Long clusterId, ComponentType componentType) {
         return getComponent(clusterId, componentType, componentType.name());
     }
@@ -37,9 +42,17 @@ public class ClusterComponentConfigProvider {
         return componentRepository.findComponentByClusterIdComponentTypeName(clusterId, componentType, name);
     }
 
+    public ClusterComponentView getComponentView(Long clusterId, ComponentType componentType) {
+        return getComponentView(clusterId, componentType, componentType.name());
+    }
+
+    public ClusterComponentView getComponentView(Long clusterId, ComponentType componentType, String name) {
+        return componentViewRepository.findOneByClusterIdAndComponentTypeAndName(clusterId, componentType, name);
+    }
+
     public StackRepoDetails getHDPRepo(Long clusterId) {
         try {
-            ClusterComponent component = getComponent(clusterId, ComponentType.HDP_REPO_DETAILS);
+            ClusterComponentView component = getComponentView(clusterId, ComponentType.HDP_REPO_DETAILS);
             return component == null ? null : component.getAttributes().get(StackRepoDetails.class);
         } catch (IOException e) {
             throw new CloudbreakServiceException("Failed to read HDP repo details.", e);

@@ -7,26 +7,20 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
-import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import com.sequenceiq.cloudbreak.api.model.Status;
-import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
+import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 @Entity
+@SuppressFBWarnings("UWF_UNWRITTEN_FIELD")
 @Table(name = "Cluster")
-public class ClusterView implements ProvisionEntity {
-
-    @Id
-    private Long id;
-
+public class ClusterView extends CompactView {
     @OneToOne(fetch = FetchType.LAZY)
     private StackView stack;
-
-    private String name;
-
-    private String owner;
 
     private String ambariIp;
 
@@ -37,20 +31,13 @@ public class ClusterView implements ProvisionEntity {
     @Enumerated(EnumType.STRING)
     private Status status;
 
-    public Long getId() {
-        return id;
-    }
-
     public StackView getStackView() {
         return stack;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public String getOwner() {
-        return owner;
+    @Override
+    public WorkspaceResource getResource() {
+        return WorkspaceResource.STACK;
     }
 
     public String getAmbariIp() {
