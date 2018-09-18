@@ -110,6 +110,11 @@ dependencyManagement {
       exclude module: 'servlet-api'
     }
 
+    dependencySet(group: 'org.junit.jupiter', version: '5.2.0') {
+      entry 'junit-jupiter-api'
+      entry 'junit-jupiter-engine'
+    }
+
     dependency group: 'activation',                    name: 'activation',                     version: '1.0.2'
 
     dependency group: 'com.google.code.findbugs',      name: 'annotations',                    version: '3.0.1'
@@ -137,6 +142,7 @@ dependencyManagement {
     dependency group: 'javax.xml.bind',                          name: 'jaxb-api',             version: '2.3.0'
     dependency group: 'org.mybatis',                             name: 'mybatis-migrations',   version: '3.2.0'
     dependency group: 'org.mockito',                             name: 'mockito-core',         version: mockitoVersion
+    dependency group: 'org.mockito',                             name: 'mockito-junit-jupiter',         version: '2.21.0'
   }
 }
 
@@ -225,6 +231,9 @@ dependencies {
   testCompile group: 'com.jayway.restassured',   name: 'rest-assured'
   testCompile group: 'com.jayway.restassured',   name: 'json-path'
   testCompile group: 'com.h2database',           name: 'h2'
+  testCompile group: 'org.mockito',              name: 'mockito-junit-jupiter'
+  testCompile group: 'org.junit.jupiter',        name: 'junit-jupiter-api'
+  testRuntime group: 'org.junit.jupiter',        name: 'junit-jupiter-engine'
 }
 
 task buildInfo(type: BuildInfoTask, dependsOn: processResources) {
