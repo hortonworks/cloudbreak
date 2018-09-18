@@ -175,14 +175,12 @@ func listBlueprintsImpl(workspace int64, client blueprintClient, writer func([]s
 	writer(blueprintHeader, tableRows)
 }
 
-func convertResponseToBlueprint(bp *models_cloudbreak.BlueprintResponse) *blueprintOut {
-	jsonRoot := decodeAndParseToJson(bp.AmbariBlueprint)
-	blueprintsNode := jsonRoot["Blueprints"].(map[string]interface{})
+func convertResponseToBlueprint(bp *models_cloudbreak.BlueprintViewResponse) *blueprintOut {
 	return &blueprintOut{
 		Name:           *bp.Name,
 		Description:    *bp.Description,
-		StackName:      fmt.Sprintf("%v", blueprintsNode["stack_name"]),
-		StackVersion:   fmt.Sprintf("%v", blueprintsNode["stack_version"]),
+		StackName:      fmt.Sprintf("%v", bp.StackType),
+		StackVersion:   fmt.Sprintf("%v", bp.StackVersion),
 		HostgroupCount: fmt.Sprint(bp.HostGroupCount),
 		Tags:           bp.Status,
 	}

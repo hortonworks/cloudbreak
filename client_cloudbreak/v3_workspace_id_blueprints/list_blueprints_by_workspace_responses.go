@@ -47,7 +47,7 @@ func NewListBlueprintsByWorkspaceOK() *ListBlueprintsByWorkspaceOK {
 successful operation
 */
 type ListBlueprintsByWorkspaceOK struct {
-	Payload []*models_cloudbreak.BlueprintResponse
+	Payload []*models_cloudbreak.BlueprintViewResponse
 }
 
 func (o *ListBlueprintsByWorkspaceOK) Error() string {

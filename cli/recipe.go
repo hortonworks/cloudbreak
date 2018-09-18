@@ -173,7 +173,7 @@ func listRecipesImpl(client getPublicsRecipeClient, writer func([]string, []util
 
 	tableRows := []utils.Row{}
 	for _, recipe := range recipesResp.Payload {
-		tableRows = append(tableRows, &recipeOut{recipe.Name, *recipe.Description, *recipe.RecipeType})
+		tableRows = append(tableRows, &recipeOut{*recipe.Name, *recipe.Description, *recipe.RecipeType})
 	}
 
 	writer(recipeHeader, tableRows)

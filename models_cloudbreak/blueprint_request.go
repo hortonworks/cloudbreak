@@ -36,7 +36,7 @@ type BlueprintRequest struct {
 	// Required: true
 	// Max Length: 100
 	// Min Length: 1
-	// Pattern: ^[^;%]*$
+	// Pattern: ^[^;\/%]*$
 	Name *string `json:"name"`
 
 	// properties to extend the blueprint with
@@ -155,7 +155,7 @@ func (m *BlueprintRequest) validateName(formats strfmt.Registry) error {
 		return err
 	}
 
-	if err := validate.Pattern("name", "body", string(*m.Name), `^[^;%]*$`); err != nil {
+	if err := validate.Pattern("name", "body", string(*m.Name), `^[^;\/%]*$`); err != nil {
 		return err
 	}
 
