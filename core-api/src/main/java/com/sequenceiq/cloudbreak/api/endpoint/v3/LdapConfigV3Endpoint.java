@@ -39,21 +39,21 @@ public interface LdapConfigV3Endpoint {
     @GET
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = LdapConfigOpDescription.GET_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.LDAP_CONFIG_NOTES,
+    @ApiOperation(value = LdapConfigOpDescription.GET_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.LDAP_CONFIG_NOTES,
             nickname = "getLdapConfigInWorkspace")
     LdapConfigResponse getByNameInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String ldapConfigName);
 
     @POST
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = LdapConfigOpDescription.CREATE_IN_ORG, produces = ContentType.JSON, notes = Notes.LDAP_CONFIG_NOTES,
+    @ApiOperation(value = LdapConfigOpDescription.CREATE_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.LDAP_CONFIG_NOTES,
             nickname = "createLdapConfigsInWorkspace")
     LdapConfigResponse createInWorkspace(@PathParam("workspaceId") Long workspaceId, @Valid LdapConfigRequest request);
 
     @DELETE
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = LdapConfigOpDescription.DELETE_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.LDAP_CONFIG_NOTES,
+    @ApiOperation(value = LdapConfigOpDescription.DELETE_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.LDAP_CONFIG_NOTES,
             nickname = "deleteLdapConfigsInWorkspace")
     LdapConfigResponse deleteInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String ldapConfigName);
 

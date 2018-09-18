@@ -49,7 +49,7 @@ public interface StackV3Endpoint {
     @GET
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = StackOpDescription.GET_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
+    @ApiOperation(value = StackOpDescription.GET_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
             nickname = "getStackInWorkspace")
     StackResponse getByNameInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("entry") Set<String> entries);
@@ -57,7 +57,7 @@ public interface StackV3Endpoint {
     @POST
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = StackOpDescription.CREATE_IN_ORG, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
+    @ApiOperation(value = StackOpDescription.CREATE_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
             nickname = "createStackInWorkspace")
     StackResponse createInWorkspace(@PathParam("workspaceId") Long workspaceId, @Valid StackV2Request request);
 
@@ -65,7 +65,7 @@ public interface StackV3Endpoint {
     @DELETE
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = StackOpDescription.DELETE_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
+    @ApiOperation(value = StackOpDescription.DELETE_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
             nickname = "deleteStackInWorkspace")
     void deleteInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("forced") @DefaultValue("false") Boolean forced,
@@ -75,7 +75,7 @@ public interface StackV3Endpoint {
     @PUT
     @Path("{name}/sync")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = StackOpDescription.SYNC_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
+    @ApiOperation(value = StackOpDescription.SYNC_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
             nickname = "putsyncStackV3")
     Response putSyncInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
@@ -83,7 +83,7 @@ public interface StackV3Endpoint {
     @POST
     @Path("{name}/retry")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = StackOpDescription.RETRY_BY_NAME_IN_ORG,
+    @ApiOperation(value = StackOpDescription.RETRY_BY_NAME_IN_WORKSPACE,
             produces = ContentType.JSON, notes = Notes.RETRY_STACK_NOTES, nickname = "retryStackV3")
     void retryInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
@@ -91,7 +91,7 @@ public interface StackV3Endpoint {
     @PUT
     @Path("{name}/stop")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = StackOpDescription.STOP_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
+    @ApiOperation(value = StackOpDescription.STOP_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
             nickname = "putstopStackV3")
     Response putStopInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
@@ -99,7 +99,7 @@ public interface StackV3Endpoint {
     @PUT
     @Path("{name}/start")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = StackOpDescription.START_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
+    @ApiOperation(value = StackOpDescription.START_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
             nickname = "putstartStackV3")
     Response putStartInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
@@ -107,7 +107,7 @@ public interface StackV3Endpoint {
     @PUT
     @Path("{name}/scaling")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = StackOpDescription.SCALE_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
+    @ApiOperation(value = StackOpDescription.SCALE_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
             nickname = "putscalingStackV3")
     Response putScalingInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @Valid StackScaleRequestV2 updateRequest);
@@ -116,7 +116,7 @@ public interface StackV3Endpoint {
     @POST
     @Path("{name}/manualrepair")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = StackOpDescription.REPAIR_CLUSTER_IN_ORG, produces = ContentType.JSON, notes = Notes.CLUSTER_REPAIR_NOTES,
+    @ApiOperation(value = StackOpDescription.REPAIR_CLUSTER_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.CLUSTER_REPAIR_NOTES,
             nickname = "repairClusterV3")
     Response repairClusterInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             ClusterRepairRequest clusterRepairRequest);
@@ -125,7 +125,7 @@ public interface StackV3Endpoint {
     @DELETE
     @Path("{name}/cluster")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = StackOpDescription.DELETE_WITH_KERBEROS_IN_ORG, produces = ContentType.JSON, notes = Notes.CLUSTER_NOTES,
+    @ApiOperation(value = StackOpDescription.DELETE_WITH_KERBEROS_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.CLUSTER_NOTES,
             nickname = "deleteClusterWithKerberosV3")
     void deleteWithKerberosInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("withStackDelete") @DefaultValue("false") Boolean withStackDelete,
@@ -135,7 +135,7 @@ public interface StackV3Endpoint {
     @GET
     @Path("{name}/request")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = StackOpDescription.GET_STACK_REQUEST_IN_ORG, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
+    @ApiOperation(value = StackOpDescription.GET_STACK_REQUEST_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
             nickname = "getStackRequestFromNameV3")
     StackV2Request getRequestfromName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
@@ -143,7 +143,7 @@ public interface StackV3Endpoint {
     @POST
     @Path("{name}/blueprint")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = StackOpDescription.POST_STACK_FOR_BLUEPRINT_IN_ORG, produces = ContentType.JSON,
+    @ApiOperation(value = StackOpDescription.POST_STACK_FOR_BLUEPRINT_IN_WORKSPACE, produces = ContentType.JSON,
             notes = Notes.STACK_NOTES, nickname = "postStackForBlueprintV3")
     GeneratedBlueprintResponse postStackForBlueprint(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @Valid StackV2Request stackRequest) throws Exception;
@@ -152,7 +152,7 @@ public interface StackV3Endpoint {
     @DELETE
     @Path("{name}/instance/{instanceId}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = StackOpDescription.DELETE_INSTANCE_BY_ID_IN_ORG, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
+    @ApiOperation(value = StackOpDescription.DELETE_INSTANCE_BY_ID_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
             nickname = "deleteInstanceStackV3")
     Response deleteInstance(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @PathParam("instanceId") String instanceId,
@@ -162,14 +162,14 @@ public interface StackV3Endpoint {
     @PUT
     @Path("{name}/changeImage")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = StackOpDescription.CHECK_IMAGE_IN_ORG, produces = ContentType.JSON,
+    @ApiOperation(value = StackOpDescription.CHECK_IMAGE_IN_WORKSPACE, produces = ContentType.JSON,
             notes = Notes.STACK_NOTES, nickname = "changeImageV3")
     Response changeImage(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @Valid StackImageChangeRequest stackImageChangeRequest);
 
     // PutreinstallStackV2
     @PUT
-    @Path("{name}/reinstall}")
+    @Path("{name}/reinstall")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.PUT_BY_NAME, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
             nickname = "putreinstallStackV3")

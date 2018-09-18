@@ -6,7 +6,7 @@ import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
 import org.springframework.core.convert.ConversionService;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v2.ConnectorV2Endpoint;
@@ -19,7 +19,7 @@ import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.PlatformResourceRequest;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 
-@Component
+@Controller
 @Transactional(TxType.NEVER)
 public class PlatformParameterV2Controller implements ConnectorV2Endpoint {
 

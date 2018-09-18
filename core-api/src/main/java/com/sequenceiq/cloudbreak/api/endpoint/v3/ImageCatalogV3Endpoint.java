@@ -43,7 +43,7 @@ public interface ImageCatalogV3Endpoint {
     @GET
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ImageCatalogOpDescription.GET_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.IMAGE_CATALOG_NOTES,
+    @ApiOperation(value = ImageCatalogOpDescription.GET_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.IMAGE_CATALOG_NOTES,
             nickname = "getImageCatalogInWorkspace")
     ImageCatalogResponse getByNameInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("withImages") boolean withImages);
@@ -82,14 +82,14 @@ public interface ImageCatalogV3Endpoint {
     @POST
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ImageCatalogOpDescription.CREATE_IN_ORG, produces = ContentType.JSON, notes = Notes.IMAGE_CATALOG_NOTES,
+    @ApiOperation(value = ImageCatalogOpDescription.CREATE_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.IMAGE_CATALOG_NOTES,
             nickname = "createImageCatalogInWorkspace")
     ImageCatalogResponse createInWorkspace(@PathParam("workspaceId") Long workspaceId, @Valid ImageCatalogRequest request);
 
     @DELETE
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ImageCatalogOpDescription.DELETE_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.IMAGE_CATALOG_NOTES,
+    @ApiOperation(value = ImageCatalogOpDescription.DELETE_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.IMAGE_CATALOG_NOTES,
             nickname = "deleteImageCatalogInWorkspace")
     ImageCatalogResponse deleteInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 

@@ -62,27 +62,27 @@ public interface WorkspaceV3Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = WorkspaceOpDescription.CHANGE_USERS, produces = ContentType.JSON, notes = Notes.WORKSPACE_NOTES,
             nickname = "changeWorkspaceUsers")
-    SortedSet<UserResponseJson> changeUsers(@PathParam("name") String orgName, @Valid Set<ChangeWorkspaceUsersJson> changeWorkspaceUsersJson);
+    SortedSet<UserResponseJson> changeUsers(@PathParam("name") String workspaceName, @Valid Set<ChangeWorkspaceUsersJson> changeWorkspaceUsersJson);
 
     @PUT
     @Path("name/{name}/removeUsers")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = WorkspaceOpDescription.REMOVE_USERS, produces = ContentType.JSON, notes = Notes.WORKSPACE_NOTES,
             nickname = "removeWorkspaceUsers")
-    SortedSet<UserResponseJson> removeUsers(@PathParam("name") String orgName, @Valid Set<String> userIds);
+    SortedSet<UserResponseJson> removeUsers(@PathParam("name") String workspaceName, @Valid Set<String> userIds);
 
     @PUT
     @Path("name/{name}/addUsers")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = WorkspaceOpDescription.ADD_USERS, produces = ContentType.JSON, notes = Notes.WORKSPACE_NOTES,
             nickname = "addWorkspaceUsers")
-    SortedSet<UserResponseJson> addUsers(@PathParam("name") String orgName, @Valid Set<ChangeWorkspaceUsersJson> addWorkspaceUsersJson);
+    SortedSet<UserResponseJson> addUsers(@PathParam("name") String workspaceName, @Valid Set<ChangeWorkspaceUsersJson> addWorkspaceUsersJson);
 
     @PUT
     @Path("name/{name}/updateUsers")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = WorkspaceOpDescription.UPDATE_USERS, produces = ContentType.JSON, notes = Notes.WORKSPACE_NOTES,
             nickname = "updateWorkspaceUsers")
-    SortedSet<UserResponseJson> updateUsers(@PathParam("name") String orgName, @Valid Set<ChangeWorkspaceUsersJson> updateWorkspaceUsersJson);
+    SortedSet<UserResponseJson> updateUsers(@PathParam("name") String workspaceName, @Valid Set<ChangeWorkspaceUsersJson> updateWorkspaceUsersJson);
 
 }

@@ -12,7 +12,7 @@ import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v2.StackV2Endpoint;
 import com.sequenceiq.cloudbreak.api.model.GeneratedBlueprintResponse;
@@ -40,7 +40,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
-@Component
+@Controller
 @Transactional(TxType.NEVER)
 public class StackV2Controller extends NotificationController implements StackV2Endpoint {
 

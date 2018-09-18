@@ -26,14 +26,14 @@ public interface UserV3Endpoint {
     @GET
     @Path("profile")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.UserOpDescription.USER_GET_PROFILE_IN_ORG, produces = ContentType.JSON, notes = Notes.USER_NOTES,
+    @ApiOperation(value = OperationDescriptions.UserOpDescription.USER_GET_PROFILE_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.USER_NOTES,
             nickname = "getUserProfileInWorkspace")
     UserProfileResponse getProfileInWorkspace(@PathParam("workspaceId") Long workspaceId);
 
     @PUT
     @Path("profile")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.UserOpDescription.USER_PUT_PROFILE_IN_ORG, produces = ContentType.JSON, notes = Notes.USER_NOTES,
+    @ApiOperation(value = OperationDescriptions.UserOpDescription.USER_PUT_PROFILE_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.USER_NOTES,
             nickname = "modifyUserProfileInWorkspace")
     void modifyProfileInWorkspace(@PathParam("workspaceId") Long workspaceId, UserProfileRequest userProfileRequest);
 }

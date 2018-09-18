@@ -9,7 +9,7 @@ import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
 import org.springframework.core.convert.ConversionService;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v3.LdapConfigV3Endpoint;
 import com.sequenceiq.cloudbreak.api.model.ldap.LDAPTestRequest;
@@ -22,13 +22,15 @@ import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.ldapconfig.LdapConfigValidator;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.repository.LdapConfigRepository;
+import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
-@Component
+@Controller
 @Transactional(TxType.NEVER)
-public class LdapV3Controller extends NotificationController implements LdapConfigV3Endpoint {
+public class LdapV3Controller extends NotificationController implements LdapConfigV3Endpoint, WorkspaceAwareResourceController<LdapConfig> {
 
     @Inject
     @Named("conversionService")
@@ -102,5 +104,10 @@ public class LdapV3Controller extends NotificationController implements LdapConf
     public LdapConfigRequest getRequestFromName(Long workspaceId, String name) {
         LdapConfig ldapConfig = ldapConfigService.getByNameForWorkspaceId(name, workspaceId);
         return conversionService.convert(ldapConfig, LdapConfigRequest.class);
+    }
+
+    @Override
+    public Class<? extends WorkspaceResourceRepository<LdapConfig, ?>> getWorkspaceAwareResourceRepository() {
+        return LdapConfigRepository.class;
     }
 }

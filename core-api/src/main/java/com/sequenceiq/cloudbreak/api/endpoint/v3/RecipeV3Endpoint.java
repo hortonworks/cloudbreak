@@ -38,21 +38,21 @@ public interface RecipeV3Endpoint {
     @GET
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = RecipeOpDescription.GET_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.RECIPE_NOTES,
+    @ApiOperation(value = RecipeOpDescription.GET_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.RECIPE_NOTES,
             nickname = "getRecipeInWorkspace")
     RecipeResponse getByNameInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @POST
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = RecipeOpDescription.CREATE_IN_ORG, produces = ContentType.JSON, notes = Notes.RECIPE_NOTES,
+    @ApiOperation(value = RecipeOpDescription.CREATE_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.RECIPE_NOTES,
             nickname = "createRecipeInWorkspace")
     RecipeResponse createInWorkspace(@PathParam("workspaceId") Long workspaceId, @Valid RecipeRequest request);
 
     @DELETE
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = RecipeOpDescription.DELETE_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.RECIPE_NOTES,
+    @ApiOperation(value = RecipeOpDescription.DELETE_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.RECIPE_NOTES,
             nickname = "deleteRecipeInWorkspace")
     RecipeResponse deleteInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 

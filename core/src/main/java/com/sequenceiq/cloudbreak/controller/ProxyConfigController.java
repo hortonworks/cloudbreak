@@ -8,7 +8,7 @@ import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ProxyConfigEndpoint;
 import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigRequest;
@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
-@Component
+@Controller
 @Transactional(TxType.NEVER)
 public class ProxyConfigController extends NotificationController implements ProxyConfigEndpoint {
 

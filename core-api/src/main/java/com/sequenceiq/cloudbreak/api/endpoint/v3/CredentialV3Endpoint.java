@@ -39,28 +39,28 @@ public interface CredentialV3Endpoint {
     @GET
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = CredentialOpDescription.GET_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES,
+    @ApiOperation(value = CredentialOpDescription.GET_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES,
             nickname = "getCredentialInWorkspace")
     CredentialResponse getByNameInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @POST
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = CredentialOpDescription.CREATE_IN_ORG, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES,
+    @ApiOperation(value = CredentialOpDescription.CREATE_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES,
             nickname = "createCredentialInWorkspace")
     CredentialResponse createInWorkspace(@PathParam("workspaceId") Long workspaceId, @Valid CredentialRequest request);
 
     @DELETE
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = CredentialOpDescription.DELETE_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES,
+    @ApiOperation(value = CredentialOpDescription.DELETE_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES,
             nickname = "deleteCredentialInWorkspace")
     CredentialResponse deleteInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @PUT
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = CredentialOpDescription.PUT_IN_ORG, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES,
+    @ApiOperation(value = CredentialOpDescription.PUT_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES,
             nickname = "putCredentialInWorkspace")
     CredentialResponse putInWorkspace(@PathParam("workspaceId") Long workspaceId, @Valid CredentialRequest credentialRequest);
 

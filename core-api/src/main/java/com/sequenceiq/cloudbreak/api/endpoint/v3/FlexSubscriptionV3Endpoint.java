@@ -40,35 +40,35 @@ public interface FlexSubscriptionV3Endpoint {
     @GET
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = FlexSubOpDescription.GET_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.FLEX_SUBSCRIPTION_NOTES,
+    @ApiOperation(value = FlexSubOpDescription.GET_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.FLEX_SUBSCRIPTION_NOTES,
             nickname = "getFlexSubscriptionInWorkspace")
     FlexSubscriptionResponse getByNameInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @POST
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = FlexSubOpDescription.CREATE_IN_ORG, produces = ContentType.JSON, notes = Notes.FLEX_SUBSCRIPTION_NOTES,
+    @ApiOperation(value = FlexSubOpDescription.CREATE_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.FLEX_SUBSCRIPTION_NOTES,
             nickname = "createFlexSubscriptionInWorkspace")
     FlexSubscriptionResponse createInWorkspace(@PathParam("workspaceId") Long workspaceId, @Valid FlexSubscriptionRequest request);
 
     @DELETE
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = FlexSubOpDescription.DELETE_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.FLEX_SUBSCRIPTION_NOTES,
+    @ApiOperation(value = FlexSubOpDescription.DELETE_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.FLEX_SUBSCRIPTION_NOTES,
             nickname = "deleteFlexSubscriptionInWorkspace")
     FlexSubscriptionResponse deleteInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @PUT
     @Path("setusedforcontroller/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = FlexSubOpDescription.SET_USED_FOR_CONTROLLER_IN_ORG, produces = ContentType.JSON, notes = FLEX_SUBSCRIPTION_NOTES,
+    @ApiOperation(value = FlexSubOpDescription.SET_USED_FOR_CONTROLLER_IN_WORKSPACE, produces = ContentType.JSON, notes = FLEX_SUBSCRIPTION_NOTES,
             nickname = "putUsedForControllerFlexSubscriptionByNameInWorkspace")
     void setUsedForControllerInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @PUT
     @Path("setdefault/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = FlexSubOpDescription.SET_DEFAULT_IN_ORG, produces = ContentType.JSON, notes = FLEX_SUBSCRIPTION_NOTES,
+    @ApiOperation(value = FlexSubOpDescription.SET_DEFAULT_IN_WORKSPACE, produces = ContentType.JSON, notes = FLEX_SUBSCRIPTION_NOTES,
             nickname = "putDefaultFlexSubscriptionByNameInWorkspace")
     void setDefaultInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 

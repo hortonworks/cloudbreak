@@ -8,7 +8,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.springframework.core.convert.ConversionService;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v3.FileSystemV3Endpoint;
 import com.sequenceiq.cloudbreak.api.model.StructuredParameterQueriesResponse;
@@ -16,15 +16,18 @@ import com.sequenceiq.cloudbreak.api.model.StructuredParameterQueryResponse;
 import com.sequenceiq.cloudbreak.api.model.StructuredParametersQueryRequest;
 import com.sequenceiq.cloudbreak.blueprint.filesystem.query.ConfigQueryEntry;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.repository.FileSystemRepository;
+import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
-@Component
-public class FileSystemV3Controller implements FileSystemV3Endpoint {
+@Controller
+public class FileSystemV3Controller implements FileSystemV3Endpoint, WorkspaceAwareResourceController<FileSystem> {
 
     @Inject
     private UserService userService;
@@ -66,5 +69,10 @@ public class FileSystemV3Controller implements FileSystemV3Endpoint {
         IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
         User user = userService.getOrCreate(identityUser);
         return workspaceService.get(workspaceId, user);
+    }
+
+    @Override
+    public Class<? extends WorkspaceResourceRepository<FileSystem, ?>> getWorkspaceAwareResourceRepository() {
+        return FileSystemRepository.class;
     }
 }

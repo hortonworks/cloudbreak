@@ -13,23 +13,23 @@ import javax.transaction.Transactional.TxType;
 import javax.validation.Valid;
 
 import org.springframework.core.convert.ConversionService;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v3.WorkspaceV3Endpoint;
 import com.sequenceiq.cloudbreak.api.model.users.ChangeWorkspaceUsersJson;
+import com.sequenceiq.cloudbreak.api.model.users.UserResponseJson;
+import com.sequenceiq.cloudbreak.api.model.users.UserResponseJson.UserIdComparator;
 import com.sequenceiq.cloudbreak.api.model.users.WorkspaceRequest;
 import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResponse;
 import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResponse.NameComparator;
-import com.sequenceiq.cloudbreak.api.model.users.UserResponseJson;
-import com.sequenceiq.cloudbreak.api.model.users.UserResponseJson.UserIdComparator;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
-@Component
+@Controller
 @Transactional(TxType.NEVER)
 public class WorkspaceV3Controller extends NotificationController implements WorkspaceV3Endpoint {
 
@@ -79,30 +79,30 @@ public class WorkspaceV3Controller extends NotificationController implements Wor
     }
 
     @Override
-    public SortedSet<UserResponseJson> addUsers(String orgName, @Valid Set<ChangeWorkspaceUsersJson> addWorkspaceUsersJson) {
+    public SortedSet<UserResponseJson> addUsers(String workspaceName, @Valid Set<ChangeWorkspaceUsersJson> addWorkspaceUsersJson) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Set<User> users = workspaceService.addUsers(orgName, addWorkspaceUsersJson, user);
+        Set<User> users = workspaceService.addUsers(workspaceName, addWorkspaceUsersJson, user);
         return usersToSortedResponse(users);
     }
 
     @Override
-    public SortedSet<UserResponseJson> changeUsers(String orgName, @Valid Set<ChangeWorkspaceUsersJson> changeWorkspaceUsersJson) {
+    public SortedSet<UserResponseJson> changeUsers(String workspaceName, @Valid Set<ChangeWorkspaceUsersJson> changeWorkspaceUsersJson) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Set<User> users = workspaceService.changeUsers(orgName, jsonToMap(changeWorkspaceUsersJson), user);
+        Set<User> users = workspaceService.changeUsers(workspaceName, jsonToMap(changeWorkspaceUsersJson), user);
         return usersToSortedResponse(users);
     }
 
     @Override
-    public SortedSet<UserResponseJson> removeUsers(String orgName, @Valid Set<String> userIds) {
+    public SortedSet<UserResponseJson> removeUsers(String workspaceName, @Valid Set<String> userIds) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Set<User> users = workspaceService.removeUsers(orgName, userIds, user);
+        Set<User> users = workspaceService.removeUsers(workspaceName, userIds, user);
         return usersToSortedResponse(users);
     }
 
     @Override
-    public SortedSet<UserResponseJson> updateUsers(String orgName, @Valid Set<ChangeWorkspaceUsersJson> updateWorkspaceUsersJson) {
+    public SortedSet<UserResponseJson> updateUsers(String workspaceName, @Valid Set<ChangeWorkspaceUsersJson> updateWorkspaceUsersJson) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
-        Set<User> users = workspaceService.updateUsers(orgName, updateWorkspaceUsersJson, user);
+        Set<User> users = workspaceService.updateUsers(workspaceName, updateWorkspaceUsersJson, user);
         return usersToSortedResponse(users);
     }
 

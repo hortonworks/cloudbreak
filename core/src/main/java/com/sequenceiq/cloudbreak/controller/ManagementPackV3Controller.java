@@ -16,12 +16,14 @@ import com.sequenceiq.cloudbreak.api.model.mpack.ManagementPackResponse;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.ManagementPack;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.repository.ManagementPackRepository;
+import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.mpack.ManagementPackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Controller
-public class ManagementPackV3Controller extends NotificationController implements ManagementPackV3Endpoint {
+public class ManagementPackV3Controller extends NotificationController implements ManagementPackV3Endpoint, WorkspaceAwareResourceController<ManagementPack> {
 
     @Inject
     private ManagementPackService mpackService;
@@ -63,5 +65,10 @@ public class ManagementPackV3Controller extends NotificationController implement
         ManagementPack deleted = mpackService.deleteByNameFromWorkspace(name, workspaceId);
         notify(ResourceEvent.MANAGEMENT_PACK_DELETED);
         return conversionService.convert(deleted, ManagementPackResponse.class);
+    }
+
+    @Override
+    public Class<? extends WorkspaceResourceRepository<ManagementPack, ?>> getWorkspaceAwareResourceRepository() {
+        return ManagementPackRepository.class;
     }
 }

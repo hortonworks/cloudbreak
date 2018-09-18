@@ -16,6 +16,8 @@ import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.repository.CredentialRepository;
+import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.CredentialV3Endpoint;
@@ -26,7 +28,7 @@ import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Controller
 @Transactional(TxType.NEVER)
-public class CredentialV3Controller extends NotificationController implements CredentialV3Endpoint {
+public class CredentialV3Controller extends NotificationController implements CredentialV3Endpoint, WorkspaceAwareResourceController<Credential> {
 
     @Inject
     private CredentialService credentialService;
@@ -83,5 +85,10 @@ public class CredentialV3Controller extends NotificationController implements Cr
         User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         return credentialService.interactiveLogin(workspaceId, conversionService.convert(credentialRequest, Credential.class), workspace, user);
+    }
+
+    @Override
+    public Class<? extends WorkspaceResourceRepository<Credential, ?>> getWorkspaceAwareResourceRepository() {
+        return CredentialRepository.class;
     }
 }
