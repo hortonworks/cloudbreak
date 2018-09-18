@@ -4,12 +4,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v1.SettingsEndpoint;
 import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
 
-@Component
+@Controller
 public class SettingsController implements SettingsEndpoint {
 
     @Value("${cb.host.discovery.custom.domain:}")

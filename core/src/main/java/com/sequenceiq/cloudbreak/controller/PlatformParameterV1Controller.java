@@ -11,7 +11,7 @@ import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
 import org.springframework.core.convert.ConversionService;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 
 import com.google.common.base.Strings;
@@ -51,15 +51,15 @@ import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformVirtualMachines;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.PlatformResourceRequest;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 import com.sequenceiq.cloudbreak.service.stack.CloudResourceAdvisor;
 import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
-@Component
+@Controller
 @Transactional(TxType.NEVER)
 public class PlatformParameterV1Controller implements ConnectorV1Endpoint {
 

@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v1.UtilEndpoint;
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
@@ -33,18 +33,18 @@ import com.sequenceiq.cloudbreak.api.model.stack.StackMatrix;
 import com.sequenceiq.cloudbreak.blueprint.filesystem.query.ConfigQueryEntry;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionBuilder;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.StackMatrixService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemSupportMatrixService;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.util.ClientVersionUtil;
 
-@Component
+@Controller
 public class UtilController implements UtilEndpoint {
 
     @Inject

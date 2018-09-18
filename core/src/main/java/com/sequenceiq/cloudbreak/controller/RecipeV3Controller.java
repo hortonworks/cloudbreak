@@ -18,13 +18,16 @@ import com.sequenceiq.cloudbreak.api.model.RecipeViewResponse;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.repository.RecipeRepository;
+import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Controller
 @Transactional(TxType.NEVER)
-public class RecipeV3Controller extends NotificationController implements RecipeV3Endpoint {
+public class RecipeV3Controller extends NotificationController implements RecipeV3Endpoint, WorkspaceAwareResourceController<Recipe> {
+
     @Inject
     private RecipeService recipeService;
 
@@ -71,5 +74,10 @@ public class RecipeV3Controller extends NotificationController implements Recipe
     public RecipeRequest getRequestFromName(Long workspaceId, String name) {
         Recipe recipe = recipeService.getByNameForWorkspaceId(name, workspaceId);
         return conversionService.convert(recipe, RecipeRequest.class);
+    }
+
+    @Override
+    public Class<? extends WorkspaceResourceRepository<Recipe, ?>> getWorkspaceAwareResourceRepository() {
+        return RecipeRepository.class;
     }
 }

@@ -11,7 +11,7 @@ import javax.ws.rs.core.Response.Status;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
 
 import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.AccountPreferencesEndpoint;
@@ -24,7 +24,7 @@ import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
 import com.sequenceiq.cloudbreak.service.account.ScheduledAccountPreferencesValidator;
 
-@Component
+@Controller
 @Transactional(TxType.NEVER)
 public class AccountPreferencesController implements AccountPreferencesEndpoint {
 

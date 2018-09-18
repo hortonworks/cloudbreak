@@ -21,6 +21,8 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
+import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.StackImageFilterService;
@@ -28,7 +30,7 @@ import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Controller
 @Transactional(TxType.NEVER)
-public class ImageCatalogV3Controller extends NotificationController implements ImageCatalogV3Endpoint {
+public class ImageCatalogV3Controller extends NotificationController implements ImageCatalogV3Endpoint, WorkspaceAwareResourceController<ImageCatalog> {
 
     @Inject
     private ImageCatalogService imageCatalogService;
@@ -125,5 +127,10 @@ public class ImageCatalogV3Controller extends NotificationController implements 
     public ImageCatalogRequest getRequestFromName(Long workspaceId, String name) {
         ImageCatalog imageCatalog = imageCatalogService.get(workspaceId, name);
         return conversionService.convert(imageCatalog, ImageCatalogRequest.class);
+    }
+
+    @Override
+    public Class<? extends WorkspaceResourceRepository<ImageCatalog, ?>> getWorkspaceAwareResourceRepository() {
+        return ImageCatalogRepository.class;
     }
 }

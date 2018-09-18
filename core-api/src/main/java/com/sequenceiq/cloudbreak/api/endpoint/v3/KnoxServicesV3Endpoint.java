@@ -25,7 +25,7 @@ public interface KnoxServicesV3Endpoint {
     @GET
     @Path("{blueprintName}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.KnoxServicesOpDescription.LIST_IN_ORG_FOR_BLUEPRINT,
+    @ApiOperation(value = OperationDescriptions.KnoxServicesOpDescription.LIST_IN_WORKSPACE_FOR_BLUEPRINT,
             produces = ContentType.JSON,
             nickname = "listByWorkspaceAndBlueprint")
     Collection<ExposedServiceResponse> listByWorkspaceAndBlueprint(@PathParam("workspaceId") Long workspaceId,

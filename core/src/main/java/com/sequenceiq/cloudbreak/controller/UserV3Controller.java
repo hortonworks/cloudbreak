@@ -6,7 +6,7 @@ import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v3.UserV3Endpoint;
 import com.sequenceiq.cloudbreak.api.model.users.UserProfileRequest;
@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
-@Component
+@Controller
 @Transactional(Transactional.TxType.NEVER)
 public class UserV3Controller implements UserV3Endpoint {
 

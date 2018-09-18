@@ -41,21 +41,21 @@ public interface BlueprintV3Endpoint {
     @GET
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = BlueprintOpDescription.GET_BY_NAME_IN_ORG, produces = JSON, notes = BLUEPRINT_NOTES,
+    @ApiOperation(value = BlueprintOpDescription.GET_BY_NAME_IN_WORKSPACE, produces = JSON, notes = BLUEPRINT_NOTES,
             nickname = "getBlueprintInWorkspace")
     BlueprintResponse getByNameInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @POST
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = BlueprintOpDescription.CREATE_IN_ORG, produces = JSON, notes = BLUEPRINT_NOTES,
+    @ApiOperation(value = BlueprintOpDescription.CREATE_IN_WORKSPACE, produces = JSON, notes = BLUEPRINT_NOTES,
             nickname = "createBlueprintInWorkspace")
     BlueprintResponse createInWorkspace(@PathParam("workspaceId") Long workspaceId, @Valid BlueprintRequest request);
 
     @DELETE
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = BlueprintOpDescription.DELETE_BY_NAME_IN_ORG, produces = JSON, notes = BLUEPRINT_NOTES,
+    @ApiOperation(value = BlueprintOpDescription.DELETE_BY_NAME_IN_WORKSPACE, produces = JSON, notes = BLUEPRINT_NOTES,
             nickname = "deleteBlueprintInWorkspace")
     BlueprintResponse deleteInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 

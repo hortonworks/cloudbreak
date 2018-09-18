@@ -1,5 +1,13 @@
 package com.sequenceiq.cloudbreak.controller;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
+
+import org.springframework.core.convert.ConversionService;
+import org.springframework.stereotype.Controller;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v3.ConnectorV3Endpoint;
 import com.sequenceiq.cloudbreak.api.model.PlatformAccessConfigsResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformDisksJson;
@@ -26,15 +34,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
 import com.sequenceiq.cloudbreak.domain.PlatformResourceRequest;
 import com.sequenceiq.cloudbreak.service.platform.PlatformParameterService;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.transaction.Transactional;
-import javax.transaction.Transactional.TxType;
-
-@Component
+@Controller
 @Transactional(TxType.NEVER)
 public class PlatformParameterV3Controller implements ConnectorV3Endpoint {
 

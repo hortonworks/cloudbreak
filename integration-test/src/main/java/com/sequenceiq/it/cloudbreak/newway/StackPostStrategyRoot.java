@@ -1,15 +1,15 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
-import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
-import com.sequenceiq.it.IntegrationTestContext;
+import static com.sequenceiq.it.cloudbreak.newway.log.Log.log;
+import static com.sequenceiq.it.cloudbreak.newway.log.Log.logJSON;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.sequenceiq.it.cloudbreak.newway.log.Log.log;
-import static com.sequenceiq.it.cloudbreak.newway.log.Log.logJSON;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
+import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
+import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
+import com.sequenceiq.it.IntegrationTestContext;
 
 public abstract class StackPostStrategyRoot implements Strategy {
 

@@ -11,7 +11,7 @@ import javax.validation.Valid;
 
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v1.RdsConfigEndpoint;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
@@ -22,12 +22,12 @@ import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
-@Component
+@Controller
 @Transactional(TxType.NEVER)
 public class RdsConfigController extends AbstractRdsConfigController implements RdsConfigEndpoint {
 

@@ -11,7 +11,7 @@ import javax.validation.Valid;
 import javax.ws.rs.core.Response;
 
 import org.springframework.core.convert.ConversionService;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v3.StackV3Endpoint;
 import com.sequenceiq.cloudbreak.api.model.GeneratedBlueprintResponse;
@@ -29,6 +29,8 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
@@ -36,9 +38,9 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
-@Component
+@Controller
 @Transactional(TxType.NEVER)
-public class StackV3Controller extends NotificationController implements StackV3Endpoint {
+public class StackV3Controller extends NotificationController implements StackV3Endpoint, WorkspaceAwareResourceController<Stack> {
 
     @Inject
     private StackCommonService stackCommonService;
@@ -163,5 +165,10 @@ public class StackV3Controller extends NotificationController implements StackV3
     @Override
     public Map<String, Object> getStatusByNameInWorkspace(Long workspaceId, String name) {
         return stackService.getStatusByNameInWorkspace(name, workspaceId);
+    }
+
+    @Override
+    public Class<? extends WorkspaceResourceRepository<Stack, ?>> getWorkspaceAwareResourceRepository() {
+        return StackRepository.class;
     }
 }
