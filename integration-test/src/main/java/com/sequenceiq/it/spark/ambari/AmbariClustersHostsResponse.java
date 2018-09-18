@@ -20,7 +20,7 @@ public class AmbariClustersHostsResponse extends ITResponse {
 
     private final String state;
 
-    public  AmbariClustersHostsResponse(Map<String, CloudVmMetaDataStatus> instanceMap, String state) {
+    public AmbariClustersHostsResponse(Map<String, CloudVmMetaDataStatus> instanceMap, String state) {
         this.instanceMap = instanceMap;
         this.state = state;
     }
@@ -35,18 +35,32 @@ public class AmbariClustersHostsResponse extends ITResponse {
             CloudVmMetaDataStatus status = stringCloudVmMetaDataStatusEntry.getValue();
             if (InstanceStatus.STARTED == status.getCloudVmInstanceStatus().getStatus()) {
                 ObjectNode item = items.addObject();
-                item.putObject("Hosts").put("host_name", HostNameUtil.generateHostNameByIp(status.getMetaData().getPrivateIp()));
+                String hostName = HostNameUtil.generateHostNameByIp(status.getMetaData().getPrivateIp());
+                item.putObject("Hosts").put("host_name", hostName);
                 ArrayNode components = item.putArray("host_components");
-                components.addObject()
-                        .putObject("HostRoles")
+                ObjectNode dataNode = components.addObject();
+                dataNode.putObject("HostRoles")
                         .put("component_name", "DATANODE")
                         .put("state", state);
-                components.addObject()
-                        .putObject("HostRoles")
+                addComponentNode(dataNode, "SLAVE", "DATANODE", "HDF", hostName);
+
+                ObjectNode nodeManagerNode = components.addObject();
+                nodeManagerNode.putObject("HostRoles")
                         .put("component_name", "NODEMANAGER")
                         .put("state", state);
+                addComponentNode(nodeManagerNode, "SLAVE", "NODEMANAGER", "YARN", hostName);
             }
         }
         return rootNode;
+    }
+
+    private void addComponentNode(ObjectNode dataNode, String category, String componentName, String serviceName, String hostName) {
+        ArrayNode dataNodeComponents = dataNode.putArray("component");
+        ObjectNode componentNode = dataNodeComponents.addObject();
+        componentNode.putObject("ServiceComponentInfo")
+                .put("category", category)
+                .put("cluster_name", "clustername")
+                .put("component_name", componentName)
+                .put("service_name", serviceName);
     }
 }

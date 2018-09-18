@@ -80,8 +80,10 @@ public class ClusterResponse implements JsonEntity {
     @ApiModelProperty(StackModelDescription.USERNAME)
     private String userName;
 
+    @ApiModelProperty(ClusterModelDescription.SECURE)
     private boolean secure;
 
+    @ApiModelProperty(ClusterModelDescription.HOSTGROUPS)
     private Set<HostGroupResponse> hostGroups = new HashSet<>();
 
     @ApiModelProperty(ClusterModelDescription.RDSCONFIG_NAMES)
