@@ -1,0 +1,110 @@
+package com.sequenceiq.cloudbreak.structuredevent.rest;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.doNothing;
+
+import java.io.IOException;
+import java.net.URI;
+import java.util.List;
+
+import javax.ws.rs.container.ContainerResponseContext;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+
+import org.glassfish.jersey.internal.MapPropertiesDelegate;
+import org.glassfish.jersey.server.ContainerRequest;
+import org.glassfish.jersey.server.ContainerResponse;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
+
+import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
+import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.structuredevent.StructuredEventClient;
+import com.sequenceiq.cloudbreak.structuredevent.event.StructuredRestCallEvent;
+import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestRequestDetails;
+
+@ExtendWith(MockitoExtension.class)
+class StructuredEventFilterTest {
+
+    @InjectMocks
+    private StructuredEventFilter underTest;
+
+    @Mock
+    private SecurityContext securityContext;
+
+    @Mock
+    private StructuredEventClient structuredEventClient;
+
+    @Mock
+    private RestRequestThreadLocalService restRequestThreadLocalService;
+
+    @Mock
+    private AuthenticatedUserService authenticatedUserService;
+
+    @Mock
+    private CloudbreakNodeConfig cloudbreakNodeConfig;
+
+    @Test
+    void filter() throws IOException {
+        ReflectionTestUtils.setField(underTest, "contentLogging", true);
+
+        MultivaluedMap<String, String> headersMap = createRequestHeader();
+        ContainerRequest requestContext = createRequestContext(headersMap);
+
+        underTest.filter(requestContext);
+
+        RestRequestDetails requestDetais = (RestRequestDetails) requestContext.getProperty("REQUEST_DETAIS");
+
+        headersMap.forEach((key, value) -> assertEquals(value.get(0), requestDetais.getHeaders().get(key)));
+    }
+
+    private ContainerRequest createRequestContext(MultivaluedMap<String, String> headersMap) {
+        MapPropertiesDelegate propertiesDelegate = new MapPropertiesDelegate();
+        ContainerRequest requestContext =
+                new ContainerRequest(URI.create("http://localhost"), URI.create("/test/endpoint"), "PUT", securityContext, propertiesDelegate);
+        requestContext.headers(headersMap);
+        return requestContext;
+    }
+
+    private MultivaluedMap<String, String> createRequestHeader() {
+        MultivaluedMap<String, String> headersMap = new MultivaluedHashMap<>();
+        headersMap.put("x-forwarded-proto", List.of("http"));
+        headersMap.put("x-forwarded-port", List.of("8080"));
+        headersMap.put("x-forwarded-for", List.of("192.168.99.100"));
+        headersMap.put("x-real-ip", List.of("192.168.99.100"));
+        headersMap.put("x-forwarded-server", List.of("192.168.99.1"));
+        headersMap.put("x-forwarded-host", List.of("192.168.99.1"));
+        headersMap.put(HttpHeaders.CONTENT_TYPE, List.of(MediaType.APPLICATION_JSON));
+        return headersMap;
+    }
+
+    @Test
+    void filterWithResponse() throws IOException {
+        ReflectionTestUtils.setField(underTest, "contentLogging", true);
+
+        MultivaluedMap<String, String> headersMap = createRequestHeader();
+        ContainerRequest requestContext = createRequestContext(headersMap);
+        underTest.filter(requestContext);
+
+        requestContext.setProperty("structuredevent.loggingEnabled", Boolean.TRUE);
+
+        ArgumentCaptor<StructuredRestCallEvent> structuredEventCaptor = ArgumentCaptor.forClass(StructuredRestCallEvent.class);
+        doNothing().when(structuredEventClient).sendStructuredEvent(structuredEventCaptor.capture());
+
+        ContainerResponseContext responseContext = new ContainerResponse(requestContext, Response.accepted().build());
+        underTest.filter(requestContext, responseContext);
+
+        StructuredRestCallEvent captorValue = structuredEventCaptor.getValue();
+        headersMap.forEach((key, value) -> assertEquals(value.get(0), captorValue.getRestCall().getRestRequest().getHeaders().get(key)));
+    }
+}
