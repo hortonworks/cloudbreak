@@ -1,0 +1,33 @@
+#!/bin/bash
+
+C_S_REGEX="^(jdbc:(oracle|mysql|postgresql)(:)?):(@|//)(d?).(d?).(d?).(d?).*"
+C_S="{{{ rds.druid.connectionString }}}"
+IS_DRUID={{{#if rds.druid}}}true{{{else}}}false{{{/if}}}
+
+isValidParam() {
+	if [[ $1 != \{\{\{rds.* ]]; then
+		true
+	else
+		false
+	fi
+}
+
+main() {
+	if $IS_DRUID; then
+		if ! isValidParam $C_S; then
+			echo "Connection string is not passed properly!"
+			exit 400
+		else
+			if [[ $C_S =~ $C_S_REGEX ]]; then
+				echo "Connection string has set properly"
+			else
+				echo "Connection string is not formatter properly"
+				exit 400
+			fi
+		fi
+	else
+	    echo "Druid RDS has not set"
+	fi
+}
+
+[[ "$0" == "$BASH_SOURCE" ]] && main "$@"

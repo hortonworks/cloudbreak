@@ -1,0 +1,12 @@
+#!/bin/bash
+
+RDS_PRESENT=true         # This value is always true regardless of that there are any existing RDS configs or not
+HIVE_RDS_EXISTS=true
+RANGER_RDS_EXISTS=true
+
+if true; then
+	if ! ($RDS_PRESENT && $HIVE_RDS_EXISTS && $RANGER_RDS_EXISTS); then
+		echo 'If you would like to set up shared service for a datalake cluster you have to specify both Ranger and Hive database!'
+		exit 400
+	fi
+fi

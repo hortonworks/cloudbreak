@@ -7,6 +7,9 @@ import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
+import com.sequenceiq.cloudbreak.template.views.LdapView;
+
+import static com.sequenceiq.cloudbreak.TestUtil.ldapConfig;
 
 public class RecipeTestUtil {
 
@@ -56,5 +59,9 @@ public class RecipeTestUtil {
     public static AmbariDatabase generalAmbariDatabase() {
         return new AmbariDatabase("cloudbreak", "fancy ambari db name", "ambariDB", "10.1.1.2", 5432,
                 "Ambar!UserName", "Ambar!Passw0rd");
+    }
+
+    public static LdapView generalLdapView() {
+        return new LdapView(ldapConfig());
     }
 }
