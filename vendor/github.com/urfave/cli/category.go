@@ -1,4 +1,4 @@
-package cli
+package cloudbreak
 
 // CommandCategories is a slice of *CommandCategory.
 type CommandCategories []*CommandCategory

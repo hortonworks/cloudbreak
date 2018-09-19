@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/hortonworks/cb-cli/cli/utils"
+	"github.com/hortonworks/cb-cli/utils"
 	"golang.org/x/tools/go/ast/astutil"
 )
 

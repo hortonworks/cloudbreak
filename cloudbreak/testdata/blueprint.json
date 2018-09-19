@@ -1,0 +1,25 @@
+{
+  "host_groups": [
+    {
+      "name": "master",
+      "cardinality": "0-1"
+    },
+    {
+      "name": "slave_1",
+      "cardinality": "1+"
+    },
+    {
+      "name": "slave_2",
+      "cardinality": "3"
+    },
+    {
+      "name": "slave_3"
+    }
+  ],
+  "Blueprints": {
+    "blueprint_name": "multi-node-hdfs-yarn",
+    "stack_name": "HDP",
+    "stack_version": "2.5"
+  }
+}
+  

@@ -1,4 +1,4 @@
-package cli
+package cloudbreak
 
 // BashCompleteFunc is an action to execute when the bash-completion flag is set
 type BashCompleteFunc func(*Context)

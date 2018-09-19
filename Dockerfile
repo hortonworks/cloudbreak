@@ -1,8 +1,10 @@
-FROM golang:1.9.2
+FROM golang:1.11
 LABEL maintainer=Hortonworks
 
 COPY . /go/src/github.com/hortonworks/cb-cli
 WORKDIR /go/src/github.com/hortonworks/cb-cli
+
+ENV GO111MODULE on
 
 RUN make build-linux
 
