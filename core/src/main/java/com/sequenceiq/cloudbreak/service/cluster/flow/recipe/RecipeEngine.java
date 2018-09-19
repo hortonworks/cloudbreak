@@ -34,6 +34,8 @@ import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
@@ -204,6 +206,7 @@ public class RecipeEngine {
                 if (isComponentPresent(blueprintText, "ATLAS_SERVER", hostGroup)) {
                     String script = FileReaderUtils.readFileFromClasspath("scripts/prepare-s3-symlinks.sh")
                             .replaceAll("\\$AMBARI_USER", cluster.getUserName())
+                            .replaceAll("\\$AMBARI_IP", getAmbariPrivateIp(stack))
                             .replaceAll("\\$AMBARI_PASSWORD", cluster.getPassword())
                             .replaceAll("\\$CLUSTER_NAME", cluster.getName());
                     RecipeScript recipeScript = new RecipeScript(script, RecipeType.POST_CLUSTER_INSTALL);
@@ -215,6 +218,17 @@ public class RecipeEngine {
         } catch (IOException e) {
             LOGGER.warn("Cannot create s3 symlinks recipe", e);
         }
+    }
+
+    private String getAmbariPrivateIp(Stack stack) {
+        String result = null;
+        for(InstanceGroup ig : stack.getInstanceGroups()) {
+            if(InstanceGroupType.isGateway(ig.getInstanceGroupType())) {
+                InstanceMetaData imd = ig.getInstanceMetaDataSet().iterator().next();
+                result = imd.getPrivateIp();
+            }
+        }
+        return result;
     }
 
     private void addSmartSenseRecipe(Stack stack, Set<HostGroup> hostGroups) {
