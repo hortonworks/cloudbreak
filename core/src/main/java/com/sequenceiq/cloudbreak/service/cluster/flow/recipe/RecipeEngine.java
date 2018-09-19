@@ -222,8 +222,8 @@ public class RecipeEngine {
 
     private String getAmbariPrivateIp(Stack stack) {
         String result = null;
-        for(InstanceGroup ig : stack.getInstanceGroups()) {
-            if(InstanceGroupType.isGateway(ig.getInstanceGroupType())) {
+        for (InstanceGroup ig : stack.getInstanceGroups()) {
+            if (InstanceGroupType.isGateway(ig.getInstanceGroupType())) {
                 InstanceMetaData imd = ig.getInstanceMetaDataSet().iterator().next();
                 result = imd.getPrivateIp();
             }
