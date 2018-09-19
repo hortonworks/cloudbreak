@@ -1,0 +1,60 @@
+#!/bin/bash
+
+FOLDER="/tmp/cs"
+FILE_NAME="multiCloudStuff"
+FULL_PATH="$FOLDER/$FILE_NAME"
+mkdir -p $FOLDER
+
+printIfValid() {
+	if [[ ! -z $2 ]] && [[ $2 != \{\{\{fileSystemConfigs.* ]]; then
+		echo "$1$2" >> "$FULL_PATH"
+	fi
+}
+
+function printLogic() {
+	if false; then
+		printIfValid "instanceProfile:                            " "{{{fileSystemConfigs.s3.instanceProfile}}}"
+		printIfValid "storage container:                          " "{{{fileSystemConfigs.s3.storageContainer}}}"
+		printIfValid "Attached cloud storage location parameters: " ""
+		printIfValid "default file system?                        " "{{{fileSystemConfigs.s3.defaultFs}}}"
+	elif false; then
+		printIfValid "service account email address:              " "{{{fileSystemConfigs.gcs.serviceAccountEmail}}}"
+		printIfValid "storage container:                          " "{{{fileSystemConfigs.gcs.storageContainer}}}"
+		printIfValid "Attached cloud storage location parameters: " ""
+		printIfValid "default file system?                        " "{{{fileSystemConfigs.gcs.defaultFs}}}"
+	elif false; then
+		printIfValid "account key:                                " "{{{fileSystemConfigs.abfs.accountKey}}}"
+		printIfValid "account name:                               " "{{{fileSystemConfigs.abfs.accountName}}}"
+		printIfValid "storage container name:                     " "{{{fileSystemConfigs.abfs.storageContainerName}}}"
+		printIfValid "storage container:                          " "{{{fileSystemConfigs.abfs.storageContainer}}}"
+		printIfValid "Attached cloud storage location parameters: " ""
+		printIfValid "default file system?                        " "{{{fileSystemConfigs.abfs.defaultFs}}}"
+	elif true; then
+		printIfValid "account name:                               " "nameOfAccount"
+		printIfValid "client ID:                                  " "123456789"
+		printIfValid "credential:                                 " "credentialName"
+		printIfValid "tenant ID:                                  " "412145-23523523-235235"
+		printIfValid "storage container:                          " "StorageContainer"
+		printIfValid "Attached cloud storage location parameters: " "1_file: [1_property: 1_test/test/end], 2_file: [2_property: 2_test/test/end], "
+		printIfValid "default file system?                        " "false"
+	elif false; then
+		printIfValid "account key:                                " "{{{fileSystemConfigs.wasb.accountKey}}}"
+		printIfValid "account name:                               " "{{{fileSystemConfigs.wasb.accountName}}}"
+		printIfValid "storage container name:                     " "{{{fileSystemConfigs.wasb.storageContainerName}}}"
+		printIfValid "secure?                                     " "{{{fileSystemConfigs.wasb.secure}}}"
+		printIfValid "Attached cloud storage location parameters: " ""
+		printIfValid "default file system?                        " "{{{fileSystemConfigs.wasb.defaultFs}}}"
+	fi
+}
+
+main() {
+	printLogic
+	cd $FOLDER
+	if [[ ! -s "$FILE_NAME" ]]; then
+		echo "The expected file does not exists or exists but it is empty!"
+		exit 400
+	fi
+	echo "The file has successfully created!"
+}
+
+[[ "$0" == "$BASH_SOURCE" ]] && main "$@"

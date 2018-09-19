@@ -1,0 +1,72 @@
+#!/bin/bash -e
+
+FOLDER="/tmp/cs"
+FILE_NAME="cloudStuff"
+FULL_PATH="$FOLDER/$FILE_NAME"
+mkdir -p $FOLDER
+
+printIfValid() {
+	if [[ $2 != \{\{\{fileSystemConfigs.* ]]; then
+		echo "$1$2" >> "$FULL_PATH"
+	fi
+}
+
+function printLogic() {
+	if true; then
+	    if false; then
+	        printIfValid "instanceProfile:               " "{{{fileSystemConfigs.s3.instanceProfile}}}"
+	        printIfValid "storage container:             " "{{{fileSystemConfigs.s3.storageContainer}}}"
+	        printIfValid "configFile:                    " "{{{fileSystemConfigs.s3.locations.[0].configFile}}}"
+	        printIfValid "property:                      " "{{{fileSystemConfigs.s3.locations.[0].property}}}"
+	        printIfValid "value:                         " "{{{fileSystemConfigs.s3.locations.[0].value}}}"
+	        printIfValid "default file system?           " "{{{fileSystemConfigs.s3.defaultFs}}}"
+	    elif false; then
+	        printIfValid "service account email address: " "{{{fileSystemConfigs.gcs.serviceAccountEmail}}}"
+	        printIfValid "storage container:             " "{{{fileSystemConfigs.gcs.storageContainer}}}"
+	        printIfValid "configFile:                    " "{{{fileSystemConfigs.gcs.locations.[0].configFile}}}"
+	        printIfValid "property:                      " "{{{fileSystemConfigs.gcs.locations.[0].property}}}"
+	        printIfValid "value:                         " "{{{fileSystemConfigs.gcs.locations.[0].value}}}"
+	        printIfValid "default file system?           " "{{{fileSystemConfigs.gcs.defaultFs}}}"
+	    elif false; then
+	        printIfValid "account key:                   " "{{{fileSystemConfigs.abfs.accountKey}}}"
+	        printIfValid "account name:                  " "{{{fileSystemConfigs.abfs.accountName}}}"
+	        printIfValid "storage container name:        " "{{{fileSystemConfigs.abfs.storageContainerName}}}"
+	        printIfValid "storage container:             " "{{{fileSystemConfigs.abfs.storageContainer}}}"
+	        printIfValid "configFile:                    " "{{{fileSystemConfigs.abfs.locations.[0].configFile}}}"
+	        printIfValid "property:                      " "{{{fileSystemConfigs.abfs.locations.[0].property}}}"
+	        printIfValid "value:                         " "{{{fileSystemConfigs.abfs.locations.[0].value}}}"
+	        printIfValid "default file system?           " "{{{fileSystemConfigs.abfs.defaultFs}}}"
+	    elif true; then
+	        printIfValid "account name:                  " "nameOfAccount"
+	        printIfValid "client ID:                     " "123456789"
+	        printIfValid "credential:                    " "credentialName"
+	        printIfValid "tenant ID:                     " "412145-23523523-235235"
+	        printIfValid "storage container:             " "StorageContainer"
+	        printIfValid "configFile:                    " "1_file"
+	        printIfValid "property:                      " "1_property"
+	        printIfValid "value:                         " "1_test/test/end"
+	        printIfValid "default file system?           " "false"
+	    elif false; then
+	        printIfValid "account key:                   " "{{{fileSystemConfigs.wasb.accountKey}}}"
+	        printIfValid "account name:                  " "{{{fileSystemConfigs.wasb.accountName}}}"
+	        printIfValid "storage container name:        " "{{{fileSystemConfigs.wasb.storageContainerName}}}"
+	        printIfValid "configFile:                    " "{{{fileSystemConfigs.wasb.locations.[0].configFile}}}"
+	        printIfValid "property:                      " "{{{fileSystemConfigs.wasb.locations.[0].property}}}"
+	        printIfValid "value:                         " "{{{fileSystemConfigs.wasb.locations.[0].value}}}"
+	        printIfValid "secure?                        " "{{{fileSystemConfigs.wasb.secure}}}"
+	        printIfValid "default file system?           " "{{{fileSystemConfigs.wasb.defaultFs}}}"
+	    fi
+	fi
+}
+
+main() {
+	printLogic
+	cd $FOLDER
+	if [[ ! -s "$FILE_NAME" ]]; then
+	    echo "The expected file does not exists or exists but it is empty!"
+	    exit 400
+	fi
+	echo "The file has successfully created!"
+}
+
+[[ "$0" == "$BASH_SOURCE" ]] && main "$@"

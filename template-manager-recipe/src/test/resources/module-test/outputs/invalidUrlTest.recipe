@@ -1,0 +1,3 @@
+#!/bin/bash
+
+SET LDAP_URL=ldap://\\:389
