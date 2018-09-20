@@ -96,6 +96,13 @@ integrationtest:
     mockcredential:
         name:
 
+    customAmbari:
+        aws:
+          hdf:
+            version:
+            repoUrl:
+            gpgKeyUrl:
+
     cleanup:
         retryCount: 3
         cleanupBeforeStart: false
