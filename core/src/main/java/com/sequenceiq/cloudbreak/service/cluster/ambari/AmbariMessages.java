@@ -14,6 +14,7 @@ public enum AmbariMessages {
     AMBARI_CLUSTER_INSTALL_FAILED("ambari.cluster.install.failed"),
     AMBARI_CLUSTER_UPSCALE_FAILED("ambari.cluster.upscale.failed"),
     AMBARI_CLUSTER_PREPARE_DEKERBERIZING_FAILED("ambari.cluster.prepare.dekerberizing.failed"),
+    AMBARI_CLUSTER_PREPARE_DEKERBERIZING_ERROR("ambari.cluster.prepare.dekerberizing.error"),
     AMBARI_CLUSTER_DISABLE_KERBEROS_FAILED("ambari.cluster.disable.kerberos.failed"),
     AMBARI_CLUSTER_MR_SMOKE_FAILED("ambari.cluster.mr.smoke.failed"),
     AMBARI_CLUSTER_SERVICES_STARTING("ambari.cluster.services.starting"),

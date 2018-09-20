@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster.ambari;
 
 import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariMessages.AMBARI_CLUSTER_DISABLE_KERBEROS_FAILED;
+import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariMessages.AMBARI_CLUSTER_PREPARE_DEKERBERIZING_ERROR;
 import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariMessages.AMBARI_CLUSTER_PREPARE_DEKERBERIZING_FAILED;
 import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariOperationType.DISABLE_KERBEROS_STATE;
 import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariOperationType.PREPARE_DEKERBERIZING;
@@ -301,10 +302,12 @@ public class AmbariClusterSecurityServiceTest {
         String failed = "failed";
 
         when(ambariOperationService.waitForOperations(stack, ambariClient, operationRequests, PREPARE_DEKERBERIZING))
-                .thenThrow(new AmbariConnectionException("failed"));
+                .thenThrow(new AmbariConnectionException(failed));
+        when(cloudbreakMessagesService.getMessage(AMBARI_CLUSTER_PREPARE_DEKERBERIZING_ERROR.code()))
+        .thenReturn("The de-registration of Kerberos principals couldn't be done, reason: " + failed);
 
         thrown.expect(AmbariOperationFailedException.class);
-        thrown.expectMessage("failed");
+        thrown.expectMessage("The de-registration of Kerberos principals couldn't be done, reason: " + failed);
 
         underTest.prepareSecurity(stack);
 
