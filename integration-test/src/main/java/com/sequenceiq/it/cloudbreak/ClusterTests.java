@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImageResponse;
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImagesResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponseEntries;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.SSOType;
+import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClusterTestConfiguration;
 import com.sequenceiq.it.cloudbreak.newway.Cluster;
@@ -63,7 +64,8 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
     }
 
     @Test(dataProvider = "providernameblueprintimagekerberos", priority = 10)
-    public void testCreateNewHdfCluster(CloudProvider cloudProvider, String clusterName, String blueprintName, String imageId, boolean enableKerberos)
+    public void testCreateNewHdfCluster(CloudProvider cloudProvider, String clusterName, String blueprintName,
+            String imageId, boolean enableKerberos, String imageDescription)
             throws Exception {
         given(CloudbreakClient.isCreated());
         given(cloudProvider.aValidCredential());
@@ -74,9 +76,16 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
                     .withPassword(Kerberos.DEFAULT_ADMIN_PASSWORD);
             given(kerberos);
         }
-        given(Cluster.request()
-                        .withAmbariRequest(cloudProvider.ambariRequestWithBlueprintName(blueprintName)),
-                "a cluster request");
+        AmbariV2Request ambariV2Request = cloudProvider.ambariRequestWithBlueprintName(blueprintName);
+        if (org.apache.commons.lang3.StringUtils.equals(imageDescription, "base")) {
+            String basePropertyKey = "integrationtest.customAmbari." + cloudProvider.getPlatform().toLowerCase() + ".hdf.";
+            String customAmbariVersion = getTestParameter().get(basePropertyKey + "version");
+            String customAmbariRepoUrl = getTestParameter().get(basePropertyKey + "repoUrl");
+            String customAmbariRepoGpgKey = getTestParameter().get(basePropertyKey + "gpgKeyUrl");
+            ambariV2Request = cloudProvider.ambariRequestWithBlueprintNameAndCustomAmbari(blueprintName, customAmbariVersion,
+                    customAmbariRepoUrl, customAmbariRepoGpgKey);
+        }
+        given(Cluster.request().withAmbariRequest(ambariV2Request), "a cluster request");
         given(ImageSettings.request()
                 .withImageCatalog("")
                 .withImageId(imageId));
@@ -269,7 +278,7 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
         String image = getImageId(provider, imageDescription, blueprint);
         Boolean enableKerberos = Boolean.valueOf(getTestParameter().get("enableKerberos"));
         return new Object[][]{
-                {cloudProvider, clusterName, blueprint, image, enableKerberos}
+                {cloudProvider, clusterName, blueprint, image, enableKerberos, imageDescription}
         };
     }
 
