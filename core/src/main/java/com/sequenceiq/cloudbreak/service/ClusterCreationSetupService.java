@@ -240,7 +240,7 @@ public class ClusterCreationSetupService {
                     () -> stackDescriptor.getMinAmbari()) >= 0;
             if (!hasDefaultAmbariRepoUrlForOsType || !hasDefaultStackRepoUrlForOsType || !compatibleAmbari) {
                 String message = String.format("The given repository information seems to be incompatible."
-                        + " Ambari version: %s, Stack type: %s, Stack version: %s, Image Id: %s, Os type: %s.", ambariRepo.getVersion(),
+                                + " Ambari version: %s, Stack type: %s, Stack version: %s, Image Id: %s, Os type: %s.", ambariRepo.getVersion(),
                         stackType, stackRepoDetails.getHdpVersion(), image.getImageId(), image.getOsType());
                 if (strictCheck) {
                     LOGGER.error(message);
@@ -302,18 +302,26 @@ public class ClusterCreationSetupService {
                     repo.getMpacks().addAll(ambariStackDetails.getMpacks().stream().map(
                             rmpack -> conversionService.convert(rmpack, ManagementPackComponent.class)).collect(Collectors.toList()));
                 }
+                setEnableGplIfAvailable(repo, ambariStackDetails);
                 stackRepoDetailsJson = new Json(repo);
             }
         } else {
             stackRepoDetailsJson = stackHdpRepoConfig.get().getAttributes();
+            StackRepoDetails stackRepoDetails = stackRepoDetailsJson.get(StackRepoDetails.class);
             if (ambariStackDetails != null && !ambariStackDetails.getMpacks().isEmpty()) {
-                StackRepoDetails stackRepoDetails = stackRepoDetailsJson.get(StackRepoDetails.class);
                 stackRepoDetails.getMpacks().addAll(ambariStackDetails.getMpacks().stream().map(
                         rmpack -> conversionService.convert(rmpack, ManagementPackComponent.class)).collect(Collectors.toList()));
-                stackRepoDetailsJson = new Json(stackRepoDetails);
             }
+            setEnableGplIfAvailable(stackRepoDetails, ambariStackDetails);
+            stackRepoDetailsJson = new Json(stackRepoDetails);
         }
         return new ClusterComponent(ComponentType.HDP_REPO_DETAILS, stackRepoDetailsJson, cluster);
+    }
+
+    private void setEnableGplIfAvailable(StackRepoDetails repo, AmbariStackDetailsJson ambariStackDetails) {
+        if (ambariStackDetails != null) {
+            repo.setEnableGplRepo(ambariStackDetails.isEnableGplRepo());
+        }
     }
 
     private StackRepoDetails createStackRepoDetails(DefaultStackRepoDetails stackRepoDetails, String osType) {
