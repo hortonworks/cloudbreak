@@ -8,6 +8,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
+
+import com.google.common.base.Preconditions;
+import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.stack.StackAuthenticationRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
@@ -279,5 +283,21 @@ public class AwsCloudProvider extends CloudProviderHelper {
         var request = new StackCreation(aValidStackRequest());
         request.setCreationStrategy(StackAction::determineNetworkAwsFromDatalakeStack);
         return request.getStack();
+    }
+
+    @Override
+    public AmbariV2Request ambariRequestWithBlueprintNameAndCustomAmbari(String bluePrintName, String customAmbariVersion,
+            String customAmbariRepoUrl, String customAmbariRepoGpgKey) {
+        var req = ambariRequestWithBlueprintName(bluePrintName);
+        if (StringUtils.isNoneEmpty(customAmbariVersion)) {
+            Preconditions.checkNotNull(customAmbariRepoUrl);
+            Preconditions.checkNotNull(customAmbariRepoGpgKey);
+            AmbariRepoDetailsJson ambariRepoDetailsJson = new AmbariRepoDetailsJson();
+            ambariRepoDetailsJson.setVersion(customAmbariVersion);
+            ambariRepoDetailsJson.setBaseUrl(customAmbariRepoUrl);
+            ambariRepoDetailsJson.setGpgKeyUrl(customAmbariRepoGpgKey);
+            req.setAmbariRepoDetailsJson(ambariRepoDetailsJson);
+        }
+        return req;
     }
 }

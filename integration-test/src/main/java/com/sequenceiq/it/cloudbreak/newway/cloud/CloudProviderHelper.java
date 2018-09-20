@@ -214,11 +214,17 @@ public abstract class CloudProviderHelper extends CloudProvider {
     }
 
     @Override
-    public AmbariV2Request ambariRequestWithBlueprintName(String name) {
+    public AmbariV2Request ambariRequestWithBlueprintNameAndCustomAmbari(String bluePrintName, String customAmbariVersion,
+            String customAmbariRepoUrl, String customAmbariRepoGpgKey) {
+        return ambariRequestWithBlueprintName(bluePrintName);
+    }
+
+    @Override
+    public AmbariV2Request ambariRequestWithBlueprintName(String bluePrintName) {
         var req = new AmbariV2Request();
         req.setUserName(testParameter.get(DEFAULT_AMBARI_USER));
         req.setPassword(testParameter.get(DEFAULT_AMBARI_PASSWORD));
-        req.setBlueprintName(name);
+        req.setBlueprintName(bluePrintName);
         req.setValidateBlueprint(false);
         req.setValidateRepositories(Boolean.TRUE);
         req.setAmbariStackDetails(new AmbariStackDetailsJson());

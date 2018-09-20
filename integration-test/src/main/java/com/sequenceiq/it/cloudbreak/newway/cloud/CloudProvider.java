@@ -30,7 +30,10 @@ public abstract class CloudProvider {
 
     public abstract StackEntity aValidAttachedStackRequest();
 
-    public abstract AmbariV2Request ambariRequestWithBlueprintName(String blueprintHdp26EdwanalyticsName);
+    public abstract AmbariV2Request ambariRequestWithBlueprintName(String bluePrintName);
+
+    public abstract AmbariV2Request ambariRequestWithBlueprintNameAndCustomAmbari(String bluePrintName, String customAmbariVersion,
+            String customAmbariRepoUrl, String customAmbariRepoGpgKey);
 
     public abstract String getClusterName();
 
