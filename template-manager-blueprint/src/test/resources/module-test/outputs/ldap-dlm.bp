@@ -58,8 +58,8 @@
     },
     {
       "hdfs-site": {
-        "dfs.journalnode.edits.dir": "/hadoopfs/fs1/hdfs/journalnode",
         "dfs.namenode.name.dir": "/hadoopfs/fs1/hdfs/namenode",
+        "dfs.journalnode.edits.dir": "/hadoopfs/fs1/hdfs/journalnode",
         "dfs.namenode.safemode.threshold-pct": "0.99",
         "dfs.namenode.checkpoint.dir": "/hadoopfs/fs1/hdfs/namesecondary"
       }
@@ -90,32 +90,32 @@
     },
     {
       "application-properties": {
-        "atlas.audit.hbase.zookeeper.quorum": "{{zookeeper_quorum}}",
-        "atlas.authentication.method.ldap": "true",
-        "atlas.authentication.method.ldap.ad.base.dn": "cn=users,dc=example,dc=org",
-        "atlas.authentication.method.ldap.ad.bind.dn": "cn=admin,dc=example,dc=org",
-        "atlas.authentication.method.ldap.ad.bind.password": "admin",
-        "atlas.authentication.method.ldap.ad.domain": "ad.hdc.com",
         "atlas.authentication.method.ldap.ad.url": "ldap://localhost:389",
-        "atlas.authentication.method.ldap.base.dn": "cn=users,dc=example,dc=org",
-        "atlas.authentication.method.ldap.bind.dn": "cn=admin,dc=example,dc=org",
-        "atlas.authentication.method.ldap.bind.password": "admin",
-        "atlas.authentication.method.ldap.domain": "ad.hdc.com",
-        "atlas.authentication.method.ldap.groupSearchBase": "cn=groups,dc=example,dc=org",
+        "atlas.audit.hbase.zookeeper.quorum": "{{zookeeper_quorum}}",
+        "atlas.sso.knox.enabled": "true",
+        "atlas.authentication.method.ldap.ad.bind.dn": "cn=admin,dc=example,dc=org",
         "atlas.authentication.method.ldap.groupSearchFilter": "member={0}",
         "atlas.authentication.method.ldap.type": "ldap",
-        "atlas.authentication.method.ldap.ugi-groups": "false",
-        "atlas.authentication.method.ldap.url": "ldap://localhost:389",
+        "atlas.sso.knox.browser.useragent": "Mozilla,chrome",
+        "atlas.authentication.method.ldap.ad.domain": "ad.hdc.com",
+        "atlas.authentication.method.ldap.domain": "ad.hdc.com",
+        "atlas.graph.storage.directory": "/hadoopfs/fs1/atlas/data/berkeley",
         "atlas.authentication.method.ldap.user.searchfilter": "mail={0}",
         "atlas.authentication.method.ldap.userDNpattern": "cn={0},cn=users,dc=example,dc=org",
+        "atlas.graph.storage.hostname": "{{zookeeper_quorum}}",
+        "atlas.authentication.method.ldap.ugi-groups": "false",
+        "atlas.authentication.method.ldap.groupSearchBase": "cn=groups,dc=example,dc=org",
+        "atlas.authentication.method.ldap.base.dn": "cn=users,dc=example,dc=org",
+        "atlas.sso.knox.providerurl": "simple",
+        "atlas.authentication.method.ldap.ad.base.dn": "cn=users,dc=example,dc=org",
         "atlas.authorizer.impl": "ranger",
         "atlas.graph.index.search.directory": "/hadoopfs/fs1/atlas/data/es",
-        "atlas.graph.storage.directory": "/hadoopfs/fs1/atlas/data/berkeley",
-        "atlas.graph.storage.hostname": "{{zookeeper_quorum}}",
-        "atlas.sso.knox.browser.useragent": "Mozilla,chrome",
-        "atlas.sso.knox.enabled": "true",
-        "atlas.sso.knox.providerurl": "simple",
-        "atlas.sso.knox.publicKey": "signcert"
+        "atlas.sso.knox.publicKey": "signcert",
+        "atlas.authentication.method.ldap.ad.bind.password": "admin",
+        "atlas.authentication.method.ldap": "true",
+        "atlas.authentication.method.ldap.url": "ldap://localhost:389",
+        "atlas.authentication.method.ldap.bind.dn": "cn=admin,dc=example,dc=org",
+        "atlas.authentication.method.ldap.bind.password": "admin"
       }
     },
     {
@@ -163,7 +163,15 @@
     {
       "ranger-env": {
         "properties": {
+          "ranger-yarn-plugin-enabled": "No",
+          "is_solrCloud_enabled": "true",
+          "ranger-hive-plugin-enabled": "No",
+          "xasecure.audit.destination.hdfs": "true",
+          "ranger-hdfs-plugin-enabled": "No",
+          "xasecure.audit.destination.solr": "true",
           "ranger_admin_password": "Passw0rd",
+          "ranger-atlas-plugin-enabled": "No",
+          "create_db_dbuser": "false",
           "admin_password": "Passw0rd"
         }
       }
@@ -217,10 +225,26 @@
       }
     },
     {
+      "kafka-broker": {
+        "properties": {
+          "default.replication.factor": "0",
+          "offsets.topic.replication.factor": "0"
+        }
+      }
+    },
+    {
+      "hbase-site": {
+        "properties": {
+          "hbase.tmp.dir": "/hadoopfs/fs1/hbase",
+          "zookeeper.recovery.retry": "10"
+        }
+      }
+    },
+    {
       "beacon-security-site": {
         "properties": {
-          "beacon.sso.knox.authentication.enabled": "true",
           "beacon.sso.knox.providerurl": "simple",
+          "beacon.sso.knox.authentication.enabled": "true",
           "beacon.sso.knox.publicKey": "signcert"
         }
       }
@@ -250,14 +274,6 @@
           "recovery_enabled": "true",
           "commands_to_retry": "START",
           "recovery_type": "AUTO_START"
-        }
-      }
-    },
-    {
-      "hbase-site": {
-        "properties": {
-          "hbase.tmp.dir": "/hadoopfs/fs1/hbase",
-          "zookeeper.recovery.retry": "10"
         }
       }
     },
@@ -294,14 +310,6 @@
       "infra-solr-env": {
         "properties": {
           "infra_solr_datadir": "/hadoopfs/fs1/infra/solr"
-        }
-      }
-    },
-    {
-      "kafka-broker": {
-        "properties": {
-          "default.replication.factor": "0",
-          "offsets.topic.replication.factor": "0"
         }
       }
     }
