@@ -3,7 +3,15 @@
   "ranger-env": {
     "properties": {
       "admin_password": "cloudbreak123!",
-      "ranger_admin_password": "cloudbreak123!"
+      "ranger_admin_password": "cloudbreak123!",
+      "is_solrCloud_enabled": "true",
+      "ranger-hdfs-plugin-enabled": "No",
+      "ranger-hive-plugin-enabled": "No",
+      "ranger-yarn-plugin-enabled": "No",
+      "ranger-atlas-plugin-enabled": "No",
+      "create_db_dbuser": "false",
+      "xasecure.audit.destination.hdfs": "true",
+      "xasecure.audit.destination.solr": "true"
     }
   }
 

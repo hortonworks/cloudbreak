@@ -58,8 +58,8 @@
     },
     {
       "hdfs-site": {
-        "dfs.journalnode.edits.dir": "/hadoopfs/fs1/hdfs/journalnode",
         "dfs.namenode.name.dir": "/hadoopfs/fs1/hdfs/namenode",
+        "dfs.journalnode.edits.dir": "/hadoopfs/fs1/hdfs/journalnode",
         "dfs.namenode.safemode.threshold-pct": "0.99",
         "dfs.namenode.checkpoint.dir": "/hadoopfs/fs1/hdfs/namesecondary"
       }
@@ -154,7 +154,15 @@
     {
       "ranger-env": {
         "properties": {
+          "ranger-yarn-plugin-enabled": "No",
+          "is_solrCloud_enabled": "true",
+          "ranger-hive-plugin-enabled": "No",
+          "xasecure.audit.destination.hdfs": "true",
+          "ranger-hdfs-plugin-enabled": "No",
+          "xasecure.audit.destination.solr": "true",
           "ranger_admin_password": "Passw0rd",
+          "ranger-atlas-plugin-enabled": "No",
+          "create_db_dbuser": "false",
           "admin_password": "Passw0rd"
         }
       }
@@ -208,11 +216,27 @@
       }
     },
     {
+      "kafka-broker": {
+        "properties": {
+          "default.replication.factor": "0",
+          "offsets.topic.replication.factor": "0"
+        }
+      }
+    },
+    {
+      "hbase-site": {
+        "properties": {
+          "hbase.tmp.dir": "/hadoopfs/fs1/hbase",
+          "zookeeper.recovery.retry": "10"
+        }
+      }
+    },
+    {
       "beacon-security-site": {
         "properties": {
+          "beacon.sso.knox.providerurl": "simple",
           "beacon.sso.knox.authentication.enabled": "true",
-          "beacon.sso.knox.publicKey": "signcert",
-          "beacon.sso.knox.providerurl": "simple"
+          "beacon.sso.knox.publicKey": "signcert"
         }
       }
     },
@@ -241,14 +265,6 @@
           "recovery_enabled": "true",
           "commands_to_retry": "START",
           "recovery_type": "AUTO_START"
-        }
-      }
-    },
-    {
-      "hbase-site": {
-        "properties": {
-          "hbase.tmp.dir": "/hadoopfs/fs1/hbase",
-          "zookeeper.recovery.retry": "10"
         }
       }
     },
@@ -285,14 +301,6 @@
       "infra-solr-env": {
         "properties": {
           "infra_solr_datadir": "/hadoopfs/fs1/infra/solr"
-        }
-      }
-    },
-    {
-      "kafka-broker": {
-        "properties": {
-          "default.replication.factor": "0",
-          "offsets.topic.replication.factor": "0"
         }
       }
     }

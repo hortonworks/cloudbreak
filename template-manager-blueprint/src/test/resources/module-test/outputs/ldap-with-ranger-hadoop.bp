@@ -17,7 +17,15 @@
     {
       "ranger-env": {
         "properties": {
+          "ranger-yarn-plugin-enabled": "No",
+          "is_solrCloud_enabled": "true",
+          "ranger-hive-plugin-enabled": "No",
+          "xasecure.audit.destination.hdfs": "true",
+          "ranger-hdfs-plugin-enabled": "No",
+          "xasecure.audit.destination.solr": "true",
           "ranger_admin_password": "Passw0rd",
+          "ranger-atlas-plugin-enabled": "No",
+          "create_db_dbuser": "false",
           "admin_password": "Passw0rd"
         }
       }
