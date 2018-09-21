@@ -139,6 +139,12 @@ integration-test: build-docker
 e2e-test:
 	make -C tests docker-aruba-test
 
+mod-tidy:
+	@docker run --rm -v "${PWD}":/go/src/github.com/hortonworks/cb-cli -w /go/src/github.com/hortonworks/cb-cli -e VERSION=${VERSION} -e GO111MODULE=on golang:1.11 make _mod-tidy
+
+_mod-tidy:
+	go mod tidy -v
+
 .DEFAULT_GOAL := build
 
 .PHONY: build release
