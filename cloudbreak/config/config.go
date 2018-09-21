@@ -48,7 +48,7 @@ func (c ConfigList) Yaml() string {
 func CheckConfigAndCommandFlags(c *cli.Context) error {
 	err := ConfigRead(c)
 	if err == nil {
-		fl.CheckRequiredFlagsAndArguments(c)
+		return fl.CheckRequiredFlagsAndArguments(c)
 	}
 	return err
 }

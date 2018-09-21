@@ -77,6 +77,7 @@ func init() {
 						Flags: fl.NewFlagBuilder().AddFlags(fl.FlLdapServer, fl.FlLdapSecureOptional,
 							fl.FlLdapBindDN, fl.FlLdapBindPassword, fl.FlLdapUserToCreate, fl.FlLdapUserToCreateEmail, fl.FlLdapUserToCreatePassword,
 							fl.FlLdapUserToCreateBase, fl.FlLdapUserToCreateGroups, fl.FlLdapDirectoryType).Build(),
+						Before: fl.CheckRequiredFlagsAndArguments,
 						Action: ldap.CreateLdapUser,
 						BashComplete: func(c *cli.Context) {
 							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlLdapServer, fl.FlLdapSecureOptional,
@@ -91,6 +92,7 @@ func init() {
 						Usage: "list the LDAP users in the given base",
 						Flags: fl.NewFlagBuilder().AddOutputFlag().AddFlags(fl.FlLdapServer, fl.FlLdapSecureOptional,
 							fl.FlLdapBindDN, fl.FlLdapBindPassword, fl.FlLdapUserSearchBase, fl.FlLdapDirectoryType).Build(),
+						Before: fl.CheckRequiredFlagsAndArguments,
 						Action: ldap.ListLdapUsers,
 						BashComplete: func(c *cli.Context) {
 							for _, f := range fl.NewFlagBuilder().AddOutputFlag().AddFlags(fl.FlLdapServer, fl.FlLdapSecureOptional,
@@ -105,6 +107,7 @@ func init() {
 						Flags: fl.NewFlagBuilder().AddFlags(fl.FlLdapServer, fl.FlLdapSecureOptional,
 							fl.FlLdapBindDN, fl.FlLdapBindPassword, fl.FlLdapUserToDelete,
 							fl.FlLdapUserToDeleteBase, fl.FlLdapDirectoryType).Build(),
+						Before: fl.CheckRequiredFlagsAndArguments,
 						Action: ldap.DeleteLdapUser,
 						BashComplete: func(c *cli.Context) {
 							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlLdapServer, fl.FlLdapSecureOptional,
@@ -126,6 +129,7 @@ func init() {
 						Usage: "create a new LDAP group in the given base",
 						Flags: fl.NewFlagBuilder().AddFlags(fl.FlLdapServer, fl.FlLdapSecureOptional,
 							fl.FlLdapBindDN, fl.FlLdapBindPassword, fl.FlLdapGroupToCreate, fl.FlLdapGroupToCreateBase, fl.FlLdapDirectoryType).Build(),
+						Before: fl.CheckRequiredFlagsAndArguments,
 						Action: ldap.CreateLdapGroup,
 						BashComplete: func(c *cli.Context) {
 							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlLdapServer, fl.FlLdapSecureOptional,
@@ -139,6 +143,7 @@ func init() {
 						Usage: "list the LDAP groups in the given base",
 						Flags: fl.NewFlagBuilder().AddOutputFlag().AddFlags(fl.FlLdapServer, fl.FlLdapSecureOptional,
 							fl.FlLdapBindDN, fl.FlLdapBindPassword, fl.FlLdapGroupSearchBase, fl.FlLdapDirectoryType).Build(),
+						Before: fl.CheckRequiredFlagsAndArguments,
 						Action: ldap.ListLdapGroups,
 						BashComplete: func(c *cli.Context) {
 							for _, f := range fl.NewFlagBuilder().AddOutputFlag().AddFlags(fl.FlLdapServer, fl.FlLdapSecureOptional,
@@ -152,6 +157,7 @@ func init() {
 						Usage: "delete a group from LDAP",
 						Flags: fl.NewFlagBuilder().AddFlags(fl.FlLdapServer, fl.FlLdapSecureOptional,
 							fl.FlLdapBindDN, fl.FlLdapBindPassword, fl.FlLdapGroupToDelete, fl.FlLdapGroupToDeleteBase, fl.FlLdapDirectoryType).Build(),
+						Before: fl.CheckRequiredFlagsAndArguments,
 						Action: ldap.DeleteLdapGroup,
 						BashComplete: func(c *cli.Context) {
 							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlLdapServer, fl.FlLdapSecureOptional,

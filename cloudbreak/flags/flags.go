@@ -885,7 +885,7 @@ type IntFlag struct {
 }
 
 func RequiredFlags(flags []cli.Flag) []cli.Flag {
-	required := []cli.Flag{}
+	var required []cli.Flag
 	for _, flag := range flags {
 		if isRequiredVisible(flag) {
 			required = append(required, flag)
@@ -895,7 +895,7 @@ func RequiredFlags(flags []cli.Flag) []cli.Flag {
 }
 
 func OptionalFlags(flags []cli.Flag) []cli.Flag {
-	required := []cli.Flag{}
+	var required []cli.Flag
 	for _, flag := range flags {
 		if flag.GetName() != "generate-bash-completion" {
 			if !isRequiredVisible(flag) {
@@ -906,12 +906,14 @@ func OptionalFlags(flags []cli.Flag) []cli.Flag {
 	return required
 }
 
-func CheckRequiredFlagsAndArguments(c *cli.Context) {
-	checkRequiredFlags(c)
-	argumentsNotAllowed(c)
+func CheckRequiredFlagsAndArguments(c *cli.Context) error {
+	if err := checkRequiredFlags(c); err != nil {
+		return err
+	}
+	return argumentsNotAllowed(c)
 }
 
-func checkRequiredFlags(c *cli.Context) {
+func checkRequiredFlags(c *cli.Context) error {
 	missingFlags := make([]string, 0)
 	for _, f := range c.Command.Flags {
 		if isRequired(f) && len(c.String(f.GetName())) == 0 {
@@ -919,15 +921,20 @@ func checkRequiredFlags(c *cli.Context) {
 		}
 	}
 	if len(missingFlags) > 0 {
-		utils.LogMissingParameterAndExit(c, missingFlags)
+		return utils.LogMissingParameter(c, missingFlags)
 	}
+
+	return nil
 }
 
-func argumentsNotAllowed(c *cli.Context) {
+func argumentsNotAllowed(c *cli.Context) error {
 	args := c.Args()
 	if len(args) > 0 {
-		utils.LogErrorAndExit(fmt.Errorf("Argument %q is not allowed for this command", args.Get(0)))
+		utils.LogErrorMessage(fmt.Sprintf("Argument %q is not allowed for this command", args.Get(0)))
+		return fmt.Errorf("no allowed argument")
 	}
+
+	return nil
 }
 
 func isRequiredVisible(flag cli.Flag) bool {

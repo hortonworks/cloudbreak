@@ -29,11 +29,11 @@ func (e *RESTError) ShortError() string {
 	return fmt.Sprintf("status code: %d, message: %+v ", e.Code, message)
 }
 
-func LogMissingParameterMessageAndExit(c *cli.Context, message string) {
-	LogMissingParameterAndExit(c, nil, message)
+func LogMissingParameterMessage(c *cli.Context, message string) {
+	LogMissingParameter(c, nil, message)
 }
 
-func LogMissingParameterAndExit(c *cli.Context, missingFlags []string, message ...string) {
+func LogMissingParameter(c *cli.Context, missingFlags []string, message ...string) error {
 	if len(message) == 0 {
 		if missingFlags != nil && len(missingFlags) > 0 {
 			LogErrorMessage(fmt.Sprintf("the following parameters are missing: %v\n", strings.Join(missingFlags, ", ")))
@@ -44,9 +44,9 @@ func LogMissingParameterAndExit(c *cli.Context, missingFlags []string, message .
 		LogErrorMessage(message[0])
 	}
 	if err := cli.ShowSubcommandHelp(c); err != nil {
-		LogErrorAndExit(err)
+		LogError(err)
 	}
-	panic("missing")
+	return fmt.Errorf("missing")
 }
 
 func LogErrorAndExit(err error) {
@@ -57,6 +57,15 @@ func LogErrorAndExit(err error) {
 		LogErrorMessage(err.Error())
 	}
 	panic(err.Error())
+}
+
+func LogError(err error) {
+	if e, ok := err.(*RESTError); ok {
+		LogErrorMessage(e.ShortError())
+		log.Debug(e.Error())
+	} else {
+		LogErrorMessage(err.Error())
+	}
 }
 
 func LogErrorMessage(message string) {
