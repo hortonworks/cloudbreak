@@ -40,6 +40,12 @@ public class ModelDescriptions {
 
     public static class CredentialModelDescription {
         public static final String PARAMETERS = "cloud specific parameters for credential";
+        public static final String ACCOUNT_IDENTIFIER = "provider specific identifier of the account/subscription/project that is used by Cloudbreak";
+        public static final String AWS_CREDENTIAL_PREREQUISITES = "AWS specific credential prerequisites.";
+        public static final String AWS_EXTERNAL_ID = "AWS specific identifier for role based credential creation - "
+                + "External id for 'Another AWS account' typed roles.";
+        public static final String AWS_POLICY_JSON = "AWS specific JSON file that is base64 encoded and "
+                + "describes the necessary AWS policies for cloud resource provisioning.";
     }
 
     public static class OrchestratorModelDescription {

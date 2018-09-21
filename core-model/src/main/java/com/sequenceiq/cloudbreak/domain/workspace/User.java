@@ -13,6 +13,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -52,6 +53,9 @@ public class User implements ProvisionEntity {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<UserWorkspacePermissions> userWorkspacePermissions;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private UserPreferences userPreferences;
 
     public Long getId() {
         return id;
@@ -123,6 +127,14 @@ public class User implements ProvisionEntity {
 
     public void setUserWorkspacePermissions(Set<UserWorkspacePermissions> userWorkspacePermissions) {
         this.userWorkspacePermissions = userWorkspacePermissions;
+    }
+
+    public UserPreferences getUserPreferences() {
+        return userPreferences;
+    }
+
+    public void setUserPreferences(UserPreferences userPreferences) {
+        this.userPreferences = userPreferences;
     }
 
     @Override

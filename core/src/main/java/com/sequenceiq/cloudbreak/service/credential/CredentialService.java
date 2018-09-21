@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
 import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
 import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
+import com.sequenceiq.cloudbreak.api.model.v3.credential.CredentialPrerequisites;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
@@ -33,9 +34,9 @@ import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.validation.credential.CredentialValidator;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Topology;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
@@ -44,9 +45,9 @@ import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.notification.Notification;
 import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderCredentialAdapter;
 import com.sequenceiq.cloudbreak.service.user.UserProfileHandler;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
 @Service
 public class CredentialService extends AbstractWorkspaceAwareResourceService<Credential> {
@@ -87,6 +88,9 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
 
     @Inject
     private CredentialValidator credentialValidator;
+
+    @Inject
+    private CredentialPrerequisiteService credentialPrerequisiteService;
 
     public Set<Credential> listAvailablesByWorkspaceId(Long workspaceId) {
         return credentialRepository.findActiveForWorkspaceFilterByPlatforms(workspaceId, accountPreferencesService.enabledPlatforms());
@@ -174,6 +178,52 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
         return credentialRepository.findByTopology(topology);
     }
 
+    @Override
+    public Credential deleteByNameFromWorkspace(String name, Long workspaceId) {
+        Workspace workspace = getWorkspaceService().getByIdForCurrentUser(workspaceId);
+        return delete(name, workspace);
+    }
+
+    @Override
+    public Credential create(Credential resource, Workspace workspace, User user) {
+        Credential created = super.create(resource, workspace, user);
+        userProfileHandler.createProfilePreparation(created, user);
+        return created;
+    }
+
+    @Override
+    public WorkspaceResourceRepository<Credential, Long> repository() {
+        return credentialRepository;
+    }
+
+    @Override
+    public WorkspaceResource resource() {
+        return WorkspaceResource.CREDENTIAL;
+    }
+
+    @Override
+    protected void prepareCreation(Credential resource) {
+
+    }
+
+    public Credential archiveCredential(Credential credential) {
+        credential.setName(generateArchiveName(credential.getName()));
+        credential.setArchived(true);
+        credential.setTopology(null);
+        return credentialRepository.save(credential);
+    }
+
+    public CredentialPrerequisites getPrerequisites(User user, Workspace workspace, String cloudPlatform) {
+        String cloudPlatformUppercased = cloudPlatform.toUpperCase();
+        credentialValidator.validateCredentialCloudPlatform(cloudPlatformUppercased);
+        return credentialPrerequisiteService.getPrerequisites(user, workspace, cloudPlatformUppercased);
+    }
+
+    @Override
+    protected void prepareDeletion(Credential resource) {
+        throw new UnsupportedOperationException("Credential deletion from database is not allowed, thus default deletion process is not supported!");
+    }
+
     private Credential delete(Credential credential, Workspace workspace) {
         checkCredentialIsDeletable(credential);
         LOGGER.info(String.format("Starting to delete credential [name: %s, workspace: %s]", credential.getName(), workspace.getName()));
@@ -205,46 +255,6 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
             }
             throw new BadRequestException(String.format(message, credential.getName(), clusters));
         }
-    }
-
-    @Override
-    public Credential deleteByNameFromWorkspace(String name, Long workspaceId) {
-        Workspace workspace = getWorkspaceService().getByIdForCurrentUser(workspaceId);
-        return delete(name, workspace);
-    }
-
-    @Override
-    public Credential create(Credential resource, Workspace workspace, User user) {
-        Credential created = super.create(resource, workspace, user);
-        userProfileHandler.createProfilePreparation(created, user);
-        return created;
-    }
-
-    @Override
-    public WorkspaceResourceRepository<Credential, Long> repository() {
-        return credentialRepository;
-    }
-
-    @Override
-    public WorkspaceResource resource() {
-        return WorkspaceResource.CREDENTIAL;
-    }
-
-    @Override
-    protected void prepareDeletion(Credential resource) {
-        throw new UnsupportedOperationException("Credential deletion from database is not allowed, thus default deletion process is not supported!");
-    }
-
-    @Override
-    protected void prepareCreation(Credential resource) {
-
-    }
-
-    public Credential archiveCredential(Credential credential) {
-        credential.setName(generateArchiveName(credential.getName()));
-        credential.setArchived(true);
-        credential.setTopology(null);
-        return credentialRepository.save(credential);
     }
 
     private void sendCredentialNotification(Credential credential, ResourceEvent resourceEvent) {

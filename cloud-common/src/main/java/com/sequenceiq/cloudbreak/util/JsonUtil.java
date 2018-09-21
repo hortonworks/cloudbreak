@@ -23,6 +23,8 @@ import net.sf.json.JSONObject;
 
 public class JsonUtil {
 
+    public static final String INVALID_JSON_CONTENT = "INVALID_JSON_CONTENT";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(JsonUtil.class);
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
@@ -100,7 +102,7 @@ public class JsonUtil {
             }
             return node.toString();
         } catch (IOException ignored) {
-            return "INVALID_JSON_CONTENT";
+            return INVALID_JSON_CONTENT;
         }
     }
 

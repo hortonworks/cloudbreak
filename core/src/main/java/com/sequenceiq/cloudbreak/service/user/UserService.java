@@ -21,8 +21,10 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.workspace.Tenant;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.UserPreferences;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.workspace.TenantRepository;
+import com.sequenceiq.cloudbreak.repository.workspace.UserPreferencesRepository;
 import com.sequenceiq.cloudbreak.repository.workspace.UserRepository;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
@@ -48,6 +50,9 @@ public class UserService {
 
     @Inject
     private TransactionService transactionService;
+
+    @Inject
+    private UserPreferencesRepository userPreferencesRepository;
 
     @Retryable(maxAttempts = 5, backoff = @Backoff(delay = 500))
     public User getOrCreate(CloudbreakUser cloudbreakUser) {
@@ -104,6 +109,11 @@ public class UserService {
                 workspace.setStatus(ACTIVE);
                 workspace.setDescription("Default workspace for the user.");
                 workspaceService.create(user, workspace);
+
+                UserPreferences userPreferences = new UserPreferences(null, user);
+                userPreferences = userPreferencesRepository.save(userPreferences);
+                user.setUserPreferences(userPreferences);
+                user = userRepository.save(user);
                 return user;
             });
         } catch (TransactionExecutionException e) {
