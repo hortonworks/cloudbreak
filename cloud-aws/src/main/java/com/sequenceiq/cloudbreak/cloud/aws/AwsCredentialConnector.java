@@ -8,14 +8,18 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeRegionsRequest;
+import com.sequenceiq.cloudbreak.api.model.v3.credential.AwsCredentialPrerequisites;
+import com.sequenceiq.cloudbreak.api.model.v3.credential.CredentialPrerequisites;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
@@ -25,6 +29,9 @@ public class AwsCredentialConnector implements CredentialConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsCredentialConnector.class);
 
+    @Value("${cb.aws.account.id:}")
+    private String accountId;
+
     @Inject
     private AwsSessionCredentialClient credentialClient;
 
@@ -33,6 +40,9 @@ public class AwsCredentialConnector implements CredentialConnector {
 
     @Inject
     private AwsSmartSenseIdGenerator smartSenseIdGenerator;
+
+    @Inject
+    private AwsPlatformParameters awsPlatformParameters;
 
     @Override
     public CloudCredentialStatus verify(AuthenticatedContext authenticatedContext) {
@@ -69,6 +79,12 @@ public class AwsCredentialConnector implements CredentialConnector {
     @Override
     public CloudCredentialStatus delete(AuthenticatedContext auth) {
         return new CloudCredentialStatus(auth.getCloudCredential(), CredentialStatus.DELETED);
+    }
+
+    @Override
+    public CredentialPrerequisites getPrerequisites(CloudContext cloudContext, String externalId) {
+        AwsCredentialPrerequisites awsPrerequisites = new AwsCredentialPrerequisites(externalId, awsPlatformParameters.getCredentialPoliciesJson());
+        return new CredentialPrerequisites(cloudContext.getPlatform().value(), accountId, awsPrerequisites);
     }
 
     private CloudCredentialStatus verifyIamRoleIsAssumable(CloudCredential cloudCredential) {

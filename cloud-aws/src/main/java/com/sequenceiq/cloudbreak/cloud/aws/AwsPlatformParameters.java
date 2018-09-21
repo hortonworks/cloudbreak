@@ -16,6 +16,7 @@ import java.util.Optional;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
@@ -68,9 +70,12 @@ public class AwsPlatformParameters implements PlatformParameters {
 
     private VmRecommendations vmRecommendations;
 
+    private String credentailPoliciesJson;
+
     @PostConstruct
     public void init() {
         vmRecommendations = initVmRecommendations();
+        credentailPoliciesJson = initCBPolicyJson();
     }
 
     @Override
@@ -146,6 +151,10 @@ public class AwsPlatformParameters implements PlatformParameters {
         return AwsConstants.AWS_PLATFORM.value();
     }
 
+    public String getCredentialPoliciesJson() {
+        return credentailPoliciesJson;
+    }
+
     public enum AwsDiskType {
         Standard("standard", "Magnetic"),
         Ephemeral("ephemeral", "Ephemeral"),
@@ -179,5 +188,16 @@ public class AwsPlatformParameters implements PlatformParameters {
             LOGGER.error("Cannot initialize Virtual machine recommendations for AWS", e);
         }
         return result;
+    }
+
+    private String initCBPolicyJson() {
+        String resourceDefinition = resourceDefinition("cb-policy");
+        String minified = JsonUtil.minify(resourceDefinition);
+        if (JsonUtil.INVALID_JSON_CONTENT.equals(minified)) {
+            String message = String.format("Cannot initialize Cloudbreak's policies JSON for AWS: %s", minified);
+            LOGGER.error(message);
+            throw new CloudConnectorException(message);
+        }
+        return Base64.encodeBase64String(minified.getBytes());
     }
 }

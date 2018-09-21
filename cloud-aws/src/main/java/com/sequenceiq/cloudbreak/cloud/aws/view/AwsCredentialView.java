@@ -18,6 +18,10 @@ public class AwsCredentialView {
         return cloudCredential.getParameter("roleArn", String.class);
     }
 
+    public String getExternalId() {
+        return cloudCredential.getParameter("externalId", String.class);
+    }
+
     public Boolean isGovernmentCloudEnabled() {
         Object ev = cloudCredential.getParameter("govCloud", Object.class);
         if (ev instanceof Boolean) {

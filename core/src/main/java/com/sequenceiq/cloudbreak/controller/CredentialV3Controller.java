@@ -15,6 +15,7 @@ import org.springframework.stereotype.Controller;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.CredentialV3Endpoint;
 import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
 import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
+import com.sequenceiq.cloudbreak.api.model.v3.credential.CredentialPrerequisites;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
@@ -85,5 +86,12 @@ public class CredentialV3Controller extends NotificationController implements Cr
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         return credentialService.interactiveLogin(workspaceId, conversionService.convert(credentialRequest, Credential.class), workspace, user);
+    }
+
+    @Override
+    public CredentialPrerequisites getPrerequisitesForCloudPlatform(Long workspaceId, String platform) {
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        return credentialService.getPrerequisites(user, workspace, platform);
     }
 }

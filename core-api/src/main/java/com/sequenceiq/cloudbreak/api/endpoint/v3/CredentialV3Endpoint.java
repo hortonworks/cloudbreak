@@ -14,6 +14,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import com.sequenceiq.cloudbreak.api.model.v3.credential.CredentialPrerequisites;
 import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
 import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
 import com.sequenceiq.cloudbreak.doc.ContentType;
@@ -71,4 +72,10 @@ public interface CredentialV3Endpoint {
             nickname = "interactiveLoginCredentialInWorkspace")
     Map<String, String> interactiveLogin(@PathParam("workspaceId") Long workspaceId, @Valid CredentialRequest credentialRequest);
 
+    @GET
+    @Path("prerequisites/{cloudPlatform}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = CredentialOpDescription.GET_PREREQUISTIES_BY_CLOUD_PROVIDER, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES,
+            nickname = "getPrerequisitesForCloudPlatform")
+    CredentialPrerequisites getPrerequisitesForCloudPlatform(@PathParam("workspaceId") Long workspaceId, @PathParam("cloudPlatform") String platform);
 }

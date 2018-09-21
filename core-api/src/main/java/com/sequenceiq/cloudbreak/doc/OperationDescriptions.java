@@ -68,14 +68,11 @@ public class OperationDescriptions {
         public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private credential by name";
         public static final String INTERACTIVE_LOGIN = "interactive login";
         public static final String DELETE_BY_ID = "delete credential by id";
-        public static final String GET_JKS_FILE = "retrieve azure JKS file by credential id";
-        public static final String PUT_CERTIFICATE_BY_ID = "update azure credential by credential id";
-        public static final String GET_SSH_FILE = "retrieve azure ssh key file for credential by credential id";
-        public static final String GET_BY_CREDENTIAL_NAME = "retrieve credential request by credential name";
         public static final String LIST_BY_WORKSPACE = "list credentials for the given workspace";
         public static final String GET_BY_NAME_IN_WORKSPACE = "get credential by name in workspace";
         public static final String CREATE_IN_WORKSPACE = "create credential in workspace";
         public static final String DELETE_BY_NAME_IN_WORKSPACE = "delete credential by name in workspace";
+        public static final String GET_PREREQUISTIES_BY_CLOUD_PROVIDER = "get credential prerequisites for cloud platform";
     }
 
     public static class StackOpDescription {

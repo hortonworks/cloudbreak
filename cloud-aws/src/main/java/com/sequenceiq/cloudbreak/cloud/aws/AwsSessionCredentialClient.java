@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.aws;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,7 +27,10 @@ public class AwsSessionCredentialClient {
     private static final int DEFAULT_SESSION_CREDENTIALS_DURATION = 3600;
 
     @Value("${cb.aws.external.id:}")
-    private String externalId;
+    private String deprecatedExternalId;
+
+    @Value("${cb.aws.role.session.name:}")
+    private String roleSessionName;
 
     @Inject
     private AwsEnvironmentVariableChecker awsEnvironmentVariableChecker;
@@ -41,11 +45,13 @@ public class AwsSessionCredentialClient {
 
     public BasicSessionCredentials retrieveSessionCredentials(AwsCredentialView awsCredential) {
         LOGGER.debug("retrieving session credential");
+
+        String externalId = awsCredential.getExternalId();
         AssumeRoleRequest assumeRoleRequest = new AssumeRoleRequest()
                 .withDurationSeconds(DEFAULT_SESSION_CREDENTIALS_DURATION)
-                .withExternalId(externalId)
+                .withExternalId(StringUtils.isEmpty(externalId) ? deprecatedExternalId : externalId)
                 .withRoleArn(awsCredential.getRoleArn())
-                .withRoleSessionName("hadoop-provisioning");
+                .withRoleSessionName(roleSessionName);
         AssumeRoleResult result = awsSecurityTokenServiceClient(awsCredential).assumeRole(assumeRoleRequest);
         return new BasicSessionCredentials(
                 result.getCredentials().getAccessKeyId(),

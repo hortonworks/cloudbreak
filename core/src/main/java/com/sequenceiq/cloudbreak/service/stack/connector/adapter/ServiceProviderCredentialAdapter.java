@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConver
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.service.credential.CredentialPrerequisiteService;
 import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
 
 import reactor.bus.EventBus;
@@ -50,7 +51,11 @@ public class ServiceProviderCredentialAdapter {
     @Inject
     private CredentialToExtendedCloudCredentialConverter extendedCloudCredentialConverter;
 
+    @Inject
+    private CredentialPrerequisiteService credentialPrerequisiteService;
+
     public Credential init(Credential credential, Long workspaceId, String userId) {
+        credential = credentialPrerequisiteService.decorateCredential(credential, userId);
         CloudContext cloudContext = new CloudContext(credential.getId(), credential.getName(), credential.cloudPlatform(),
                 credential.getOwner(), userId, workspaceId);
         CloudCredential cloudCredential = credentialConverter.convert(credential);
