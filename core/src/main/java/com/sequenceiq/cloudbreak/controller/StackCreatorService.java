@@ -145,10 +145,12 @@ public class StackCreatorService {
                     stackService.validateOrchestrator(stack.getOrchestrator());
                 }
 
+                start = System.currentTimeMillis();
                 for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
                     templateValidator.validateTemplateRequest(stack.getCredential(), instanceGroup.getTemplate(), stack.getRegion(),
                             stack.getAvailabilityZone(), stack.getPlatformVariant());
                 }
+                LOGGER.info("Stack's instance templates have been validated in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
                 Blueprint blueprint = null;
                 if (stackRequest.getClusterRequest() != null) {
@@ -178,6 +180,7 @@ public class StackCreatorService {
                     LOGGER.info("Cluster has been validated in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
                 }
 
+                start = System.currentTimeMillis();
                 String platformString = platform(stack.cloudPlatform()).value().toLowerCase();
                 StatedImage imgFromCatalog;
                 try {
@@ -187,10 +190,11 @@ public class StackCreatorService {
                 } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
                     throw new RuntimeException(e.getMessage(), e);
                 }
+                LOGGER.info("Image for stack has been determined under {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
                 fillInstanceMetadata(stack);
-                start = System.currentTimeMillis();
 
+                start = System.currentTimeMillis();
                 stack = stackService.create(stack, platformString, imgFromCatalog, user, workspace);
                 LOGGER.info("Stack object and its dependencies has been created in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
