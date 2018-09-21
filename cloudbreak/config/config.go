@@ -110,7 +110,7 @@ func ConfigRead(c *cli.Context) error {
 	}
 	if len(password) == 0 {
 		if len(config.Password) == 0 {
-			fmt.Print("Enter Password: ")
+			fmt.Println("Enter Password: ") // needs trailing new-line
 			bytePassword, ioErr := terminal.ReadPassword(int(syscall.Stdin))
 			fmt.Println()
 			if ioErr != nil {

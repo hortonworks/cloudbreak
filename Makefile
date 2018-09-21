@@ -1,9 +1,10 @@
 BINARY=cb
 
 VERSION ?= $(shell git describe --tags --abbrev=0)-snapshot
+PLUGIN_ENABLED ?= false
 BUILD_TIME=$(shell date +%FT%T)
-LDFLAGS=-ldflags "-X github.com/hortonworks/cb-cli/cloudbreak/common.Version=${VERSION} -X github.com/hortonworks/cb-cli/cloudbreak/common.BuildTime=${BUILD_TIME}"
-LDFLAGS_NOVER=-ldflags "-X github.com/hortonworks/cb-cli/cloudbreak/common.Version=snapshot -X github.com/hortonworks/cb-cli/cloudbreak/common.BuildTime=${BUILD_TIME}"
+LDFLAGS=-ldflags "-X github.com/hortonworks/cb-cli/cloudbreak/common.Version=${VERSION} -X github.com/hortonworks/cb-cli/cloudbreak/common.BuildTime=${BUILD_TIME} -X github.com/hortonworks/cb-cli/plugin.Enabled=${PLUGIN_ENABLED}"
+LDFLAGS_NOVER=-ldflags "-X github.com/hortonworks/cb-cli/cloudbreak/common.Version=snapshot -X github.com/hortonworks/cb-cli/cloudbreak/common.BuildTime=${BUILD_TIME} -X github.com/hortonworks/cb-cli/plugin.Enabled=${PLUGIN_ENABLED}"
 GOFILES_NOVENDOR = $(shell find . -type f -name '*.go' -not -path "./vendor/*" -not -path "./.git/*")
 CB_IP = $(shell echo \${IP})
 ifeq ($(CB_IP),)

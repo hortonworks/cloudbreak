@@ -1,14 +1,17 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/cb-cli/cloudbreak/cmd"
 	"github.com/hortonworks/cb-cli/cloudbreak/common"
 	fl "github.com/hortonworks/cb-cli/cloudbreak/flags"
 	"github.com/hortonworks/cb-cli/cloudbreak/help"
+	"github.com/hortonworks/cb-cli/plugin"
 	"github.com/hortonworks/cb-cli/utils"
 	"github.com/urfave/cli"
+	"golang.org/x/crypto/ssh/terminal"
 	"os"
 	"sort"
 )
@@ -27,6 +30,17 @@ func main() {
 		}
 	}()
 
+	logOutput := os.Stderr
+	formatter := &utils.CBFormatter{
+		IsTerminal: terminal.IsTerminal(int(logOutput.Fd())),
+	}
+	log.SetFormatter(formatter)
+	log.SetOutput(logOutput)
+	log.SetLevel(log.ErrorLevel)
+	if len(os.Args) > 1 && os.Args[1] == "--"+fl.FlDebugOptional.Name || os.Getenv(fl.FlDebugOptional.EnvVar) == "1" {
+		log.SetLevel(log.DebugLevel)
+	}
+
 	app := cli.NewApp()
 	app.Name = "cb"
 	app.HelpName = "Hortonworks Data Cloud command line tool"
@@ -36,17 +50,6 @@ func main() {
 
 	app.Flags = []cli.Flag{
 		fl.FlDebugOptional,
-	}
-
-	app.Before = func(c *cli.Context) error {
-		log.SetOutput(os.Stderr)
-		log.SetLevel(log.ErrorLevel)
-		formatter := &utils.CBFormatter{}
-		log.SetFormatter(formatter)
-		if c.Bool(fl.FlDebugOptional.Name) {
-			log.SetLevel(log.DebugLevel)
-		}
-		return nil
 	}
 
 	cli.AppHelpTemplate = common.AppHelpTemplate
@@ -70,7 +73,40 @@ func main() {
 		},
 	}...)
 
+	if plugin.Enabled == "true" && isNonHelperArgProvided() {
+		subCmd := os.Args[1]
+		argsIndex := 2
+		if os.Args[1] == "--"+fl.FlDebugOptional.Name {
+			if len(os.Args) < 3 {
+				utils.LogErrorAndExit(errors.New("please provide a command"))
+			}
+			subCmd = os.Args[2]
+			argsIndex = 3
+		}
+		found := false
+		for _, c := range app.Commands {
+			if c.Name == subCmd {
+				found = true
+				break
+			}
+		}
+		if !found {
+			plugin.DelegateCommand(subCmd, argsIndex, os.Exit)
+		}
+	}
+
 	if err := app.Run(os.Args); err != nil {
 		panic(err)
 	}
+}
+
+func isNonHelperArgProvided() bool {
+	helperArgs := map[string]bool{
+		"--generate-bash-completion": true,
+		"h":                          true,
+		"-h":                         true,
+		"help":                       true,
+		"--help":                     true,
+	}
+	return len(os.Args) > 1 && !helperArgs[os.Args[1]]
 }

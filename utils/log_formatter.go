@@ -3,11 +3,9 @@ package utils
 import (
 	"bytes"
 	"fmt"
-	"golang.org/x/crypto/ssh/terminal"
 	"runtime"
 	"sort"
 	"strings"
-	"syscall"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
@@ -21,6 +19,7 @@ const (
 )
 
 type CBFormatter struct {
+	IsTerminal bool
 }
 
 func (f *CBFormatter) Format(entry *log.Entry) ([]byte, error) {
@@ -35,7 +34,7 @@ func (f *CBFormatter) Format(entry *log.Entry) ([]byte, error) {
 
 	prefixFieldClashes(entry)
 
-	if terminal.IsTerminal(int(syscall.Stderr)) {
+	if f.IsTerminal {
 		printColored(b, entry, keys)
 	} else {
 		f.appendKeyValue(b, "time", entry.Time.Format(time.RFC3339))
