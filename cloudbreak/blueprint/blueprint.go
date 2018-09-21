@@ -53,7 +53,6 @@ func (b *blueprintOutTableDescribe) DataAsStringArray() []string {
 }
 
 func CreateBlueprintFromUrl(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 
 	log.Infof("[CreateBlueprintFromUrl] creating blueprint from a URL")
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
@@ -68,7 +67,6 @@ func CreateBlueprintFromUrl(c *cli.Context) {
 }
 
 func CreateBlueprintFromFile(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 
 	log.Infof("[CreateBlueprintFromFile] creating blueprint from a file")
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
@@ -105,7 +103,6 @@ func createBlueprintImpl(client blueprintClient, name string, description string
 }
 
 func DescribeBlueprint(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "describe blueprint")
 
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
@@ -131,7 +128,6 @@ func FetchBlueprint(workspace int64, name string, client GetBlueprintInWorkspace
 }
 
 func DeleteBlueprint(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "delete blueprint")
 
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
@@ -148,7 +144,6 @@ func deleteBlueprintsImpl(client blueprintClient, workspace int64, name string) 
 }
 
 func ListBlueprints(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "get blueprints")
 
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)

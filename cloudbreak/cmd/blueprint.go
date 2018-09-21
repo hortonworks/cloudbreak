@@ -19,7 +19,7 @@ func init() {
 					{
 						Name:   "from-url",
 						Flags:  fl.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(fl.FlURL, fl.FlDlOptional).AddAuthenticationFlags().Build(),
-						Before: cf.ConfigRead,
+						Before: cf.CheckConfigAndCommandFlags,
 						Action: bp.CreateBlueprintFromUrl,
 						Usage:  "creates a blueprint by downloading it from a URL location",
 						BashComplete: func(c *cli.Context) {
@@ -31,7 +31,7 @@ func init() {
 					{
 						Name:   "from-file",
 						Flags:  fl.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(fl.FlFile, fl.FlDlOptional).AddAuthenticationFlags().Build(),
-						Before: cf.ConfigRead,
+						Before: cf.CheckConfigAndCommandFlags,
 						Action: bp.CreateBlueprintFromFile,
 						Usage:  "creates a blueprint by reading it from a local file",
 						BashComplete: func(c *cli.Context) {
@@ -46,7 +46,7 @@ func init() {
 				Name:   "delete",
 				Usage:  "deletes a blueprint",
 				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlName).AddAuthenticationFlags().Build(),
-				Before: cf.ConfigRead,
+				Before: cf.CheckConfigAndCommandFlags,
 				Action: bp.DeleteBlueprint,
 				BashComplete: func(c *cli.Context) {
 					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlName).AddAuthenticationFlags().Build() {
@@ -57,7 +57,7 @@ func init() {
 			{
 				Name:   "describe",
 				Usage:  "describes a blueprint",
-				Before: cf.ConfigRead,
+				Before: cf.CheckConfigAndCommandFlags,
 				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlName).AddAuthenticationFlags().AddOutputFlag().Build(),
 				Action: bp.DescribeBlueprint,
 				BashComplete: func(c *cli.Context) {
@@ -70,7 +70,7 @@ func init() {
 				Name:   "list",
 				Usage:  "lists the available blueprints",
 				Flags:  fl.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build(),
-				Before: cf.ConfigRead,
+				Before: cf.CheckConfigAndCommandFlags,
 				Action: bp.ListBlueprints,
 				BashComplete: func(c *cli.Context) {
 					for _, f := range fl.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build() {

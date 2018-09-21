@@ -24,7 +24,6 @@ func (r *accountTagOut) DataAsStringArray() []string {
 }
 
 func ListAccountTags(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "list default tags for account")
 
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
@@ -33,7 +32,6 @@ func ListAccountTags(c *cli.Context) {
 }
 
 func AddAccountTag(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "add a default tag for account")
 
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
@@ -41,7 +39,6 @@ func AddAccountTag(c *cli.Context) {
 }
 
 func DeleteAccountTag(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "delete a default tag of the account")
 
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)

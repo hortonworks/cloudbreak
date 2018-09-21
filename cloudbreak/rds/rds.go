@@ -45,7 +45,6 @@ type rdsClient interface {
 }
 
 func TestRdsByName(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	log.Infof("[TestRdsByParams] test a database configuration")
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
 	testRdsByNameImpl(
@@ -55,7 +54,6 @@ func TestRdsByName(c *cli.Context) {
 }
 
 func TestRdsByParams(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	log.Infof("[TestRdsByParams] test a database configuration")
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
 	testRdsByParamsImpl(
@@ -104,7 +102,6 @@ func testRdsByParamsImpl(client rdsClient, workspaceID int64, username string, p
 }
 
 func CreateRdsOracle11(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	log.Infof("[CreateRdsOracle11] creating a database configuration")
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
 	createRdsImpl(
@@ -122,7 +119,6 @@ func CreateRdsOracle11(c *cli.Context) {
 }
 
 func CreateRdsOracle12(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	log.Infof("[CreateRdsOracle12] creating a database configuration")
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
 	createRdsImpl(
@@ -140,7 +136,6 @@ func CreateRdsOracle12(c *cli.Context) {
 }
 
 func CreateRds(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	log.Infof("[CreateRds] creating a database configuration")
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
 	createRdsImpl(
@@ -180,7 +175,6 @@ func createRdsImpl(client rdsClient, workspaceID int64, name string, username st
 }
 
 func DeleteRds(c *cli.Context) error {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "delete a database configuration")
 
 	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
@@ -196,7 +190,6 @@ func DeleteRds(c *cli.Context) error {
 }
 
 func DescribeRds(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "describe a database configuration")
 	log.Infof("[DescribeRds] Describes a database configuration")
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
@@ -223,7 +216,6 @@ func DescribeRds(c *cli.Context) {
 }
 
 func ListAllRds(c *cli.Context) error {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "list database configurations")
 
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)

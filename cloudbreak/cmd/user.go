@@ -16,7 +16,7 @@ func init() {
 				Name:   "list",
 				Usage:  "list users",
 				Flags:  fl.NewFlagBuilder().AddOutputFlag().AddAuthenticationFlags().Build(),
-				Before: cf.ConfigRead,
+				Before: cf.CheckConfigAndCommandFlags,
 				Action: user.ListUsers,
 				BashComplete: func(c *cli.Context) {
 					for _, f := range fl.NewFlagBuilder().AddOutputFlag().AddAuthenticationFlags().Build() {

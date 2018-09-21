@@ -56,25 +56,25 @@ build-docker:
 	docker run --rm ${USER_NS} -v "${PWD}":/go/src/github.com/hortonworks/cb-cli -w /go/src/github.com/hortonworks/cb-cli -e VERSION=${VERSION} -e GO111MODULE=on golang:1.11 make deps-errcheck build
 
 build-darwin:
-	GOOS=darwin CGO_ENABLED=0 go build -a ${LDFLAGS_NOVER} -o build/Darwin/${BINARY} main.go
+	GOOS=darwin GO111MODULE=on CGO_ENABLED=0 go build -a ${LDFLAGS_NOVER} -o build/Darwin/${BINARY} main.go
 
 dev-debug-darwin:
-	GOOS=darwin CGO_ENABLED=0 go build -a ${LDFLAGS_NOVER} -o /usr/local/bin/${BINARY} main.go
+	GOOS=darwin GO111MODULE=on CGO_ENABLED=0 go build -a ${LDFLAGS_NOVER} -o /usr/local/bin/${BINARY} main.go
 
 build-linux:
-	GOOS=linux CGO_ENABLED=0 go build -a ${LDFLAGS_NOVER} -o build/Linux/${BINARY} main.go
+	GOOS=linux GO111MODULE=on CGO_ENABLED=0 go build -a ${LDFLAGS_NOVER} -o build/Linux/${BINARY} main.go
 
 build-windows:
-	GOOS=windows CGO_ENABLED=0 go build -a ${LDFLAGS_NOVER} -o build/Windows/${BINARY}.exe main.go
+	GOOS=windows GO111MODULE=on CGO_ENABLED=0 go build -a ${LDFLAGS_NOVER} -o build/Windows/${BINARY}.exe main.go
 
 build-darwin-version:
-	GOOS=darwin CGO_ENABLED=0 go build -a ${LDFLAGS} -o build/Darwin/${BINARY} main.go
+	GOOS=darwin GO111MODULE=on CGO_ENABLED=0 go build -a ${LDFLAGS} -o build/Darwin/${BINARY} main.go
 
 build-linux-version:
-	GOOS=linux CGO_ENABLED=0 go build -a ${LDFLAGS} -o build/Linux/${BINARY} main.go
+	GOOS=linux GO111MODULE=on CGO_ENABLED=0 go build -a ${LDFLAGS} -o build/Linux/${BINARY} main.go
 
 build-windows-version:
-	GOOS=windows CGO_ENABLED=0 go build -a ${LDFLAGS} -o build/Windows/${BINARY}.exe main.go
+	GOOS=windows GO111MODULE=on CGO_ENABLED=0 go build -a ${LDFLAGS} -o build/Windows/${BINARY}.exe main.go
 
 generate-swagger: build-swagger-fix
 	rm -rf cloudbreak/api/client cloudbreak/api/model

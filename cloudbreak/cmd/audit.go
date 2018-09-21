@@ -20,7 +20,7 @@ func init() {
 						Name:   "blueprint",
 						Usage:  "list audit for blueprints",
 						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlResourceID).AddOutputFlag().AddAuthenticationFlags().Build(),
-						Before: cf.ConfigRead,
+						Before: cf.CheckConfigAndCommandFlags,
 						Action: audit.ListBlueprintAudits,
 						BashComplete: func(c *cli.Context) {
 							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlResourceID).AddOutputFlag().AddAuthenticationFlags().Build() {
@@ -32,7 +32,7 @@ func init() {
 						Name:   "cluster",
 						Usage:  "list audit for clusters",
 						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlResourceID).AddOutputFlag().AddAuthenticationFlags().Build(),
-						Before: cf.ConfigRead,
+						Before: cf.CheckConfigAndCommandFlags,
 						Action: audit.ListClusterAudits,
 						BashComplete: func(c *cli.Context) {
 							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlResourceID).AddOutputFlag().AddAuthenticationFlags().Build() {
@@ -44,7 +44,7 @@ func init() {
 						Name:   "credential",
 						Usage:  "list audit for credentials",
 						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlResourceID).AddOutputFlag().AddAuthenticationFlags().Build(),
-						Before: cf.ConfigRead,
+						Before: cf.CheckConfigAndCommandFlags,
 						Action: audit.ListCredentialAudits,
 						BashComplete: func(c *cli.Context) {
 							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlResourceID).AddOutputFlag().AddAuthenticationFlags().Build() {
@@ -56,7 +56,7 @@ func init() {
 						Name:   "database",
 						Usage:  "list audit for database configurations",
 						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlResourceID).AddOutputFlag().AddAuthenticationFlags().Build(),
-						Before: cf.ConfigRead,
+						Before: cf.CheckConfigAndCommandFlags,
 						Action: audit.ListDatabaseAudits,
 						BashComplete: func(c *cli.Context) {
 							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlResourceID).AddOutputFlag().AddAuthenticationFlags().Build() {
@@ -68,7 +68,7 @@ func init() {
 						Name:   "imagecatalog",
 						Usage:  "list audit for imagecatalogs",
 						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlResourceID).AddOutputFlag().AddAuthenticationFlags().Build(),
-						Before: cf.ConfigRead,
+						Before: cf.CheckConfigAndCommandFlags,
 						Action: audit.ListImagecatalogAudits,
 						BashComplete: func(c *cli.Context) {
 							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlResourceID).AddOutputFlag().AddAuthenticationFlags().Build() {
@@ -80,7 +80,7 @@ func init() {
 						Name:   "ldap",
 						Usage:  "list audit for ldap configurations",
 						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlResourceID).AddOutputFlag().AddAuthenticationFlags().Build(),
-						Before: cf.ConfigRead,
+						Before: cf.CheckConfigAndCommandFlags,
 						Action: audit.ListLdapAudits,
 						BashComplete: func(c *cli.Context) {
 							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlResourceID).AddOutputFlag().AddAuthenticationFlags().Build() {
@@ -92,7 +92,7 @@ func init() {
 						Name:   "recipe",
 						Usage:  "list audit for recipes",
 						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlResourceID).AddOutputFlag().AddAuthenticationFlags().Build(),
-						Before: cf.ConfigRead,
+						Before: cf.CheckConfigAndCommandFlags,
 						Action: audit.ListRecipeAudits,
 						BashComplete: func(c *cli.Context) {
 							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlResourceID).AddOutputFlag().AddAuthenticationFlags().Build() {
@@ -106,7 +106,7 @@ func init() {
 				Name:   "describe",
 				Usage:  "describe an audit entry",
 				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlAuditID).AddOutputFlag().AddAuthenticationFlags().Build(),
-				Before: cf.ConfigRead,
+				Before: cf.CheckConfigAndCommandFlags,
 				Action: audit.DescribeAudit,
 				BashComplete: func(c *cli.Context) {
 					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlAuditID).AddOutputFlag().AddAuthenticationFlags().Build() {

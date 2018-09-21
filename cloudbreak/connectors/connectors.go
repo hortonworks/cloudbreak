@@ -79,7 +79,6 @@ func (r *instanceOut) GetName() string {
 }
 
 func ListRegions(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "list regions")
 
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
@@ -88,7 +87,6 @@ func ListRegions(c *cli.Context) {
 }
 
 func ListAvailabilityZones(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "list availability zones")
 
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
@@ -112,7 +110,6 @@ func ListGcpVolumeTypes(c *cli.Context) {
 }
 
 func listVolumeTypes(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "list volume types")
 
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
@@ -121,7 +118,6 @@ func listVolumeTypes(c *cli.Context) {
 }
 
 func ListInstanceTypes(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "list instance types")
 
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)

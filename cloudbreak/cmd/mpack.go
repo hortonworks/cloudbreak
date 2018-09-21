@@ -17,7 +17,7 @@ func init() {
 				Usage: "create a new management pack",
 				Flags: fl.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(fl.FLMpackURL,
 					fl.FLMpackPurge, fl.FLMpackPurgeList, fl.FLMpackForce).AddAuthenticationFlags().Build(),
-				Before: cf.ConfigRead,
+				Before: cf.CheckConfigAndCommandFlags,
 				Action: mpack.CreateMpack,
 				BashComplete: func(c *cli.Context) {
 					for _, f := range fl.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(fl.FLMpackURL,
@@ -30,7 +30,7 @@ func init() {
 				Name:   "delete",
 				Usage:  "deletes a management pack",
 				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlName).AddAuthenticationFlags().Build(),
-				Before: cf.ConfigRead,
+				Before: cf.CheckConfigAndCommandFlags,
 				Action: mpack.DeleteMpack,
 				BashComplete: func(c *cli.Context) {
 					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlName).AddAuthenticationFlags().Build() {
@@ -42,7 +42,7 @@ func init() {
 				Name:   "list",
 				Usage:  "list the available management packs",
 				Flags:  fl.NewFlagBuilder().AddOutputFlag().AddAuthenticationFlags().Build(),
-				Before: cf.ConfigRead,
+				Before: cf.CheckConfigAndCommandFlags,
 				Action: mpack.ListMpacks,
 				BashComplete: func(c *cli.Context) {
 					for _, f := range fl.NewFlagBuilder().AddOutputFlag().AddAuthenticationFlags().Build() {

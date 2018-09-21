@@ -47,7 +47,6 @@ func (s *stackOutDescribe) DataAsStringArray() []string {
 }
 
 func CreateStack(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "create cluster")
 
 	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
@@ -61,7 +60,6 @@ func CreateStack(c *cli.Context) {
 }
 
 func ChangeImage(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
 
 	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
@@ -133,7 +131,6 @@ func convertResponseToStack(s *model.StackResponse) *stackOut {
 }
 
 func DescribeStack(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "describe stack")
 
 	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
@@ -160,7 +157,6 @@ func fetchStack(workspaceID int64, name string, client getStackInWorkspace) *mod
 }
 
 func ScaleStack(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	desiredCount, err := strconv.Atoi(c.String(fl.FlDesiredNodeCount.Name))
 	if err != nil {
 		utils.LogErrorMessageAndExit("Unable to parse as number: " + c.String(fl.FlDesiredNodeCount.Name))
@@ -187,7 +183,6 @@ func ScaleStack(c *cli.Context) {
 }
 
 func StartStack(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "start stack")
 
 	cbClient := CloudbreakStack(*oauth.NewCloudbreakHTTPClientFromContext(c))
@@ -206,7 +201,6 @@ func StartStack(c *cli.Context) {
 }
 
 func StopStack(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "stop stack")
 
 	cbClient := CloudbreakStack(*oauth.NewCloudbreakHTTPClientFromContext(c))
@@ -225,7 +219,6 @@ func StopStack(c *cli.Context) {
 }
 
 func SyncStack(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "sync stack")
 
 	cbClient := CloudbreakStack(*oauth.NewCloudbreakHTTPClientFromContext(c))
@@ -240,7 +233,6 @@ func SyncStack(c *cli.Context) {
 }
 
 func RepairStack(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "repair stack")
 
 	cbClient := CloudbreakStack(*oauth.NewCloudbreakHTTPClientFromContext(c))
@@ -267,7 +259,6 @@ func RepairStack(c *cli.Context) {
 }
 
 func RetryCluster(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "retry cluster creation")
 
 	cbClient := CloudbreakStack(*oauth.NewCloudbreakHTTPClientFromContext(c))
@@ -286,7 +277,6 @@ func RetryCluster(c *cli.Context) {
 }
 
 func ReinstallStack(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "reinstall stack")
 
 	req := assembleReinstallRequest(c)
@@ -336,7 +326,6 @@ func assembleReinstallRequest(c *cli.Context) *model.ReinstallRequestV2 {
 }
 
 func DeleteStack(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "delete stack")
 
 	cbClient := CloudbreakStack(*oauth.NewCloudbreakHTTPClientFromContext(c))
@@ -351,7 +340,6 @@ func DeleteStack(c *cli.Context) {
 }
 
 func ListStacks(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "list stacks")
 
 	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)

@@ -68,7 +68,6 @@ func GenerateYarnStackTemplate(c *cli.Context) error {
 }
 
 func GenerateAtachedStackTemplate(c *cli.Context) error {
-	fl.CheckRequiredFlagsAndArguments(c)
 	return generateAttachedTemplateImpl(c.String, c.Bool, c.Int64, getCloudStorageType(c.String))
 }
 
@@ -454,7 +453,6 @@ func convertNodeToInstanceGroup(provider cloud.CloudProvider, node cloud.Node) *
 }
 
 func GenerateReinstallTemplate(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 
 	template := &model.ReinstallRequestV2{
 		BlueprintName:  &(&types.S{S: c.String(fl.FlBlueprintName.Name)}).S,

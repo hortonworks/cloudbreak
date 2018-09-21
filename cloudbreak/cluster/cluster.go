@@ -14,7 +14,6 @@ import (
 )
 
 func ChangeAmbariPassword(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "update ambari password")
 
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)

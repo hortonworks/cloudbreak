@@ -23,7 +23,6 @@ func (u *userListOut) DataAsStringArray() []string {
 }
 
 func ListUsers(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "list users")
 	log.Infof("[ListUsers] List all users in a tenant")
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}

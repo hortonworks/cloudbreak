@@ -45,6 +45,14 @@ func (c ConfigList) Yaml() string {
 	return string(j)
 }
 
+func CheckConfigAndCommandFlags(c *cli.Context) error {
+	err := ConfigRead(c)
+	if err == nil {
+		fl.CheckRequiredFlagsAndArguments(c)
+	}
+	return err
+}
+
 func ConfigRead(c *cli.Context) error {
 	args := c.Args()
 	if args.Present() {
@@ -151,7 +159,7 @@ func ConfigRead(c *cli.Context) error {
 
 func PrintConfig(cfg Config) {
 	cfg.Password = "*"
-	log.Infof("[ConfigRead] Config read from file, setting as global variable:\n%s", cfg.Yaml())
+	log.Infof("[CheckConfigAndCommandFlags] Config read from file, setting as global variable:\n%s", cfg.Yaml())
 }
 
 func GetHomeDirectory() string {

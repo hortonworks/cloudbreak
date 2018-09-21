@@ -20,7 +20,7 @@ func init() {
 						Name:   "read",
 						Usage:  "add user to the workspace with read permission",
 						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlUserID).AddAuthenticationFlags().Build(),
-						Before: cf.ConfigRead,
+						Before: cf.CheckConfigAndCommandFlags,
 						Action: workspace.AddReadUser,
 						BashComplete: func(c *cli.Context) {
 							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlUserID).AddAuthenticationFlags().Build() {
@@ -32,7 +32,7 @@ func init() {
 						Name:   "read-write",
 						Usage:  "add user to the workspace with read and write permission",
 						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlUserID).AddAuthenticationFlags().Build(),
-						Before: cf.ConfigRead,
+						Before: cf.CheckConfigAndCommandFlags,
 						Action: workspace.AddReadWriteUser,
 						BashComplete: func(c *cli.Context) {
 							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlUserID).AddAuthenticationFlags().Build() {
@@ -46,7 +46,7 @@ func init() {
 				Name:   "create",
 				Usage:  "create a new workspace",
 				Flags:  fl.NewFlagBuilder().AddResourceDefaultFlags().AddAuthenticationFlags().Build(),
-				Before: cf.ConfigRead,
+				Before: cf.CheckConfigAndCommandFlags,
 				Action: workspace.CreateWorkspace,
 				BashComplete: func(c *cli.Context) {
 					for _, f := range fl.NewFlagBuilder().AddResourceDefaultFlags().AddAuthenticationFlags().Build() {
@@ -58,7 +58,7 @@ func init() {
 				Name:   "delete",
 				Usage:  "deletes a workspace",
 				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlName).AddAuthenticationFlags().Build(),
-				Before: cf.ConfigRead,
+				Before: cf.CheckConfigAndCommandFlags,
 				Action: workspace.DeleteWorkspace,
 				BashComplete: func(c *cli.Context) {
 					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlName).AddAuthenticationFlags().Build() {
@@ -70,7 +70,7 @@ func init() {
 				Name:   "list",
 				Usage:  "list workspaces",
 				Flags:  fl.NewFlagBuilder().AddOutputFlag().AddAuthenticationFlags().Build(),
-				Before: cf.ConfigRead,
+				Before: cf.CheckConfigAndCommandFlags,
 				Action: workspace.ListWorkspaces,
 				BashComplete: func(c *cli.Context) {
 					for _, f := range fl.NewFlagBuilder().AddOutputFlag().AddAuthenticationFlags().Build() {
@@ -82,7 +82,7 @@ func init() {
 				Name:   "describe",
 				Usage:  "describes a workspace",
 				Flags:  fl.NewFlagBuilder().AddOutputFlag().AddFlags(fl.FlName).AddAuthenticationFlags().Build(),
-				Before: cf.ConfigRead,
+				Before: cf.CheckConfigAndCommandFlags,
 				Action: workspace.DescribeWorkspace,
 				BashComplete: func(c *cli.Context) {
 					for _, f := range fl.NewFlagBuilder().AddOutputFlag().AddFlags(fl.FlName).AddAuthenticationFlags().Build() {
@@ -94,7 +94,7 @@ func init() {
 				Name:   "remove-user",
 				Usage:  "remove user from the workspace",
 				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlUserID).AddAuthenticationFlags().Build(),
-				Before: cf.ConfigRead,
+				Before: cf.CheckConfigAndCommandFlags,
 				Action: workspace.RemoveUser,
 				BashComplete: func(c *cli.Context) {
 					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlUserID).AddAuthenticationFlags().Build() {

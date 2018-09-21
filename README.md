@@ -142,8 +142,7 @@ export HTTP_PROXY=http://user:pass@10.0.0.133:3128/
 
 ## Dependency management
 
-This project uses [Dep](https://github.com/golang/dep) for dependency management. You can install it and download the configured dependency versions with:
+This project uses Go [modules](https://github.com/golang/go/wiki/Modules) for dependency management, introduced in golang 1.11. The Makefile enables module support explicitly on build goals, but you can also choose enable it in your system, by setting:
 ```
-go get -u github.com/golang/dep/cmd/dep (or brew install dep)
-dep ensure
+export GO111MODULE=on
 ```

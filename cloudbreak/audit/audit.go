@@ -75,7 +75,6 @@ func ListRecipeAudits(c *cli.Context) {
 }
 
 func listAudits(resourceType string, c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "list audits")
 	log.Infof("[ListAudits] List all audits for a resource identified by Resource ID")
 	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
@@ -102,7 +101,6 @@ func listAuditsImpl(client auditClient, workspaceID int64, resourceType string, 
 }
 
 func DescribeAudit(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "describe audit")
 	log.Infof("[DescribeAudit] Show audit entry identified by Audit ID")
 	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)

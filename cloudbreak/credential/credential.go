@@ -83,7 +83,6 @@ func ModifyOpenstackCredential(c *cli.Context) {
 }
 
 func CreateCredentialFromFile(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "create credential")
 
 	req := assembleCredentialRequest(c.String(fl.FlInputJson.Name), c.String(fl.FlNameOptional.Name))
@@ -93,7 +92,6 @@ func CreateCredentialFromFile(c *cli.Context) {
 }
 
 func ModifyCredentialFromFile(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "modify credential from file")
 
 	credReq := assembleCredentialRequest(c.String(fl.FlInputJson.Name), c.String(fl.FlNameOptional.Name))
@@ -129,7 +127,6 @@ func assembleCredentialRequest(path, credName string) *model.CredentialRequest {
 }
 
 func createCredential(c *cli.Context, credentialParameters map[string]interface{}) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "create credential")
 
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
@@ -137,7 +134,6 @@ func createCredential(c *cli.Context, credentialParameters map[string]interface{
 }
 
 func modifyCredential(c *cli.Context, credentialParameters map[string]interface{}) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "modify credential")
 
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
@@ -260,7 +256,6 @@ func (c *credentialOutDescribe) DataAsStringArray() []string {
 }
 
 func DescribeCredential(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "describe credential")
 
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
@@ -276,7 +271,6 @@ func DescribeCredential(c *cli.Context) {
 }
 
 func DeleteCredential(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "delete credential")
 
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
@@ -290,7 +284,6 @@ func DeleteCredential(c *cli.Context) {
 }
 
 func ListCredentials(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "list credentials")
 
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)

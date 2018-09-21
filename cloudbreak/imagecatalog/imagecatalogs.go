@@ -80,7 +80,6 @@ func (r *imageDetailsOut) DataAsStringArray() []string {
 }
 
 func CreateImagecatalogFromUrl(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 
 	log.Infof("[CreateImagecatalogFromUrl] creating imagecatalog from a URL")
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
@@ -112,7 +111,6 @@ func createImagecatalogImpl(client imagecatalogClient, workspaceID int64, name s
 }
 
 func ListImagecatalogs(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "list imagecatalogs")
 
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
@@ -141,7 +139,6 @@ func listImagecatalogsImpl(client listImageCatalogsByWorkspaceClient, workspaceI
 }
 
 func DeleteImagecatalog(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "delete imagecatalog")
 
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
@@ -155,7 +152,6 @@ func DeleteImagecatalog(c *cli.Context) {
 }
 
 func SetDefaultImagecatalog(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "set default imagecatalog")
 
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
@@ -171,7 +167,6 @@ func SetDefaultImagecatalog(c *cli.Context) {
 }
 
 func DescribeImagecatalog(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "describe imagecatalog")
 
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
@@ -211,7 +206,6 @@ func ListOpenstackImages(c *cli.Context) {
 }
 
 func listImages(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "list available images")
 
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
@@ -220,7 +214,6 @@ func listImages(c *cli.Context) {
 }
 
 func ListImagesValidForUpgrade(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "list images valid for stack upgrade")
 
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
@@ -282,7 +275,6 @@ func DescribeOpenstackImage(c *cli.Context) {
 }
 
 func describeImage(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "describe image")
 
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)

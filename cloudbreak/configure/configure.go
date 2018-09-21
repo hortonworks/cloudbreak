@@ -8,7 +8,6 @@ import (
 )
 
 func Configure(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 
 	err := cf.WriteConfigToFile(cf.GetHomeDirectory(), c.String(fl.FlServerOptional.Name),
 		c.String(fl.FlUsername.Name), c.String(fl.FlPassword.Name),

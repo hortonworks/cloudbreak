@@ -34,7 +34,6 @@ func (m *mpack) DataAsStringArray() []string {
 }
 
 func CreateMpack(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
 	createMpackImpl(
 		cbClient.Cloudbreak.V3WorkspaceIDMpacks,
@@ -74,7 +73,6 @@ func createMpackImpl(client mpackClient, workspaceID int64, name, description, u
 }
 
 func DeleteMpack(c *cli.Context) error {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "delete a management pack")
 
 	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
@@ -90,7 +88,6 @@ func DeleteMpack(c *cli.Context) error {
 }
 
 func ListMpacks(c *cli.Context) error {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "list management pack")
 
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)

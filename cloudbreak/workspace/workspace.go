@@ -47,7 +47,6 @@ type workspaceClient interface {
 }
 
 func CreateWorkspace(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "create workspace")
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
 	workspaceName := c.String(fl.FlName.Name)
@@ -70,7 +69,6 @@ func createWorkspaceImpl(client workspaceClient, name string, description string
 }
 
 func DeleteWorkspace(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "delete workspace")
 	log.Infof("[DeleteWorkspace] Delete a workspace from a tenant")
 
@@ -86,7 +84,6 @@ func DeleteWorkspace(c *cli.Context) {
 }
 
 func DescribeWorkspace(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "describe workspace")
 	log.Infof("[DescribeWorkspace] Describes a workspaces in a tenant")
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
@@ -106,7 +103,6 @@ func describeWorkspaceImpl(client workspaceClient, writer func([]string, []utils
 }
 
 func ListWorkspaces(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "list workspaces")
 	log.Infof("[ListWorkspaces] List all workspaces in a tenant")
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
@@ -147,7 +143,6 @@ func getWorkspaceListImpl(client workspaceClient) []*model.WorkspaceResponse {
 }
 
 func RemoveUser(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "remove user from workspace")
 	log.Infof("[RemoveUser] Remove user from workspace")
 
@@ -172,7 +167,6 @@ func AddReadWriteUser(c *cli.Context) {
 }
 
 func addUser(c *cli.Context, permissions []string) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "add user to workspace")
 	log.Infof("[AddUser] add user to workspace")
 

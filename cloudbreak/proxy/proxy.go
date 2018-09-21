@@ -33,7 +33,6 @@ func (p *proxy) DataAsStringArray() []string {
 }
 
 func CreateProxy(c *cli.Context) error {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "create proxy")
 
 	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
@@ -77,7 +76,6 @@ func createProxy(proxyClient proxyClient, workspaceID int64, name, host string, 
 }
 
 func ListProxies(c *cli.Context) error {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "list proxies")
 
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
@@ -110,7 +108,6 @@ func listProxiesImpl(proxyClient proxyClient, writer func([]string, []utils.Row)
 }
 
 func DeleteProxy(c *cli.Context) error {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "delete a proxy")
 
 	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)

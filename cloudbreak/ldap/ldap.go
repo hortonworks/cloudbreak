@@ -84,7 +84,6 @@ type ldapClient interface {
 }
 
 func CreateLDAP(c *cli.Context) error {
-	fl.CheckRequiredFlagsAndArguments(c)
 
 	name := c.String(fl.FlName.Name)
 	domain := c.String(fl.FlLdapDomain.Name)
@@ -160,7 +159,6 @@ func createLDAPImpl(ldapClient ldapClient, port int32, workspaceID int64, name, 
 }
 
 func ListLdaps(c *cli.Context) error {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "list ldap configs")
 
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
@@ -203,7 +201,6 @@ func listLdapsImpl(ldapClient ldapClient, writer func([]string, []utils.Row), wo
 }
 
 func DeleteLdap(c *cli.Context) error {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "delete an ldap")
 
 	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
@@ -219,7 +216,6 @@ func DeleteLdap(c *cli.Context) error {
 }
 
 func DescribeLdap(c *cli.Context) {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "describe an ldap")
 
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
@@ -255,7 +251,6 @@ func DescribeLdap(c *cli.Context) {
 }
 
 func CreateLdapUser(c *cli.Context) error {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "create ldap user")
 
 	directoryType := c.String(fl.FlLdapDirectoryType.Name)
@@ -317,7 +312,6 @@ func CreateLdapUser(c *cli.Context) error {
 }
 
 func DeleteLdapUser(c *cli.Context) error {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "delete ldap user")
 
 	directoryType := c.String(fl.FlLdapDirectoryType.Name)
@@ -340,7 +334,6 @@ func DeleteLdapUser(c *cli.Context) error {
 }
 
 func CreateLdapGroup(c *cli.Context) error {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "create ldap group")
 
 	directoryType := c.String(fl.FlLdapDirectoryType.Name)
@@ -368,7 +361,6 @@ func CreateLdapGroup(c *cli.Context) error {
 }
 
 func DeleteLdapGroup(c *cli.Context) error {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "delete ldap group")
 
 	directoryType := c.String(fl.FlLdapDirectoryType.Name)
@@ -391,7 +383,6 @@ func DeleteLdapGroup(c *cli.Context) error {
 }
 
 func ListLdapUsers(c *cli.Context) error {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "list ldap users")
 
 	directoryType := c.String(fl.FlLdapDirectoryType.Name)
@@ -430,7 +421,6 @@ func ListLdapUsers(c *cli.Context) error {
 }
 
 func ListLdapGroups(c *cli.Context) error {
-	fl.CheckRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "list ldap groups")
 
 	directoryType := c.String(fl.FlLdapDirectoryType.Name)
