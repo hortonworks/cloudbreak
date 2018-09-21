@@ -30,5 +30,6 @@ _testmain.go
 cb-cli
 build/
 debug
+json-templates/
 .vscode/
 .history/
