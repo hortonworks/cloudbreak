@@ -1,4 +1,4 @@
-package cloudbreak
+package cli
 
 import (
 	"flag"

@@ -127,7 +127,7 @@ def _set_typedef_defaults(typedef):
 
 def _write_cli_flag_types(outfile, types):
     _fwrite(outfile, """\
-        package cloudbreak
+        package cli
 
         // WARNING: This file is generated!
 
