@@ -74,6 +74,9 @@ public class AzureCloudProvider extends CloudProviderHelper {
                 case "WASB":
                     resourceHelper = new AzureWasbResourceHelper(testParameter, "-azure-wasb");
                     break;
+                case "ABFS":
+                    resourceHelper = new AzureAbfsResourceHelper(testParameter, "-azure-abfs");
+                    break;
                 default:
                     resourceHelper = new AzureAdlsResourceHelper(testParameter, "-azure-adls");
                     break;
@@ -258,6 +261,22 @@ public class AzureCloudProvider extends CloudProviderHelper {
                         getTestParameter().get(Ranger.CONFIG_NAME),
                         getTestParameter().get(Hive.CONFIG_NAME))))
                 .withLdapConfigName(resourceHelper.getLdapConfigName());
+    }
+
+    public Cluster aValidClusterWithFs(String versionDefinitionFile) {
+        AmbariV2Request ambariV2Request = ambariRequestWithBlueprintName(getDatalakeBlueprintName());
+        AmbariStackDetailsJson ambariStackDetails = ambariV2Request.getAmbariStackDetails();
+        ambariStackDetails.setVersionDefinitionFileUrl(versionDefinitionFile);
+        ambariStackDetails.setVersion("3.0");
+        ambariStackDetails.setOs("centos7");
+        ambariStackDetails.setStack("HDP");
+        ambariStackDetails.setRepositoryVersion("3.0.2.0-1");
+        ambariStackDetails.setEnableGplRepo(false);
+        ambariStackDetails.setVerify(false);
+
+        return Cluster.request()
+                .withAmbariRequest(ambariV2Request)
+                .withCloudStorage(resourceHelper.getCloudStorageRequestForDatalake());
     }
 
     public Map<String, Object> azureCredentialDetails() {
