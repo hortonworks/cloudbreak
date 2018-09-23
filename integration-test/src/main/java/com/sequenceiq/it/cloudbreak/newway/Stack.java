@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetaDataJson;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.SshService;
+import com.sequenceiq.it.cloudbreak.SshUtil;
 import com.sequenceiq.it.cloudbreak.newway.v3.CloudbreakV3Util;
 import com.sequenceiq.it.cloudbreak.newway.v3.StackPostV3Strategy;
 import com.sequenceiq.it.cloudbreak.newway.v3.StackV3Action;
@@ -231,6 +232,29 @@ public class Stack extends StackEntity {
                 LOGGER.error("Error occurred during ssh execution: " + e);
             }
             assertEquals(quantity, require, "The number of existing files is different than required.");
+        });
+    }
+
+    public static Assertion<Stack> checkSshCommand(String[] searchOnHost, String privateKey, String sshCommand, String sshChecker) {
+        return assertThis((stack, t) -> {
+            boolean sshResult = false;
+            List<String> ips = new ArrayList<>();
+            List<InstanceGroupResponse> instanceGroups = stack.getResponse().getInstanceGroups();
+            for (InstanceGroupResponse instanceGroup : instanceGroups) {
+                if (Arrays.asList(searchOnHost).contains(instanceGroup.getGroup())) {
+                    for (InstanceMetaDataJson metaData : instanceGroup.getMetadata()) {
+                        ips.add(metaData.getPublicIp());
+                    }
+                }
+            }
+            for (String ip: ips) {
+                try {
+                    sshResult = SshUtil.executeCommand(ip, privateKey, sshCommand, "cloudbreak", SshUtil.getSshCheckMap(sshChecker));
+                } catch (Exception e) {
+                    LOGGER.warn("Error occurred during ssh execution: " + e);
+                }
+                Assert.assertTrue(sshResult, "Ssh command executing was not successful");
+            }
         });
     }
 

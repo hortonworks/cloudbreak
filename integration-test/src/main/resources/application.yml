@@ -95,6 +95,8 @@ integrationtest:
 
     filesystemconfig:
         accountKeyWasb:
+        accountKeyAbfs:
+        accountNameAbfs:
 
     mockcredential:
         name:
