@@ -11,6 +11,7 @@ import java.util.List;
 import javax.annotation.Nonnull;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -28,6 +29,7 @@ import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.RejectedThreadService;
 import com.sequenceiq.periscope.service.ha.PeriscopeNodeConfig;
 
+@Ignore
 public class AbstractMonitorTest {
 
     private static final String EXECUTOR_NAME = "executorName";

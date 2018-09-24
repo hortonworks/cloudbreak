@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import javax.annotation.Nonnull;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -17,6 +18,7 @@ import com.sequenceiq.periscope.monitor.context.ClusterIdEvaluatorContext;
 import com.sequenceiq.periscope.monitor.context.EvaluatorContext;
 import com.sequenceiq.periscope.monitor.executor.ExecutorServiceWithRegistry;
 
+@Ignore
 public class EvaluatorExecutorTest {
 
     @Mock

@@ -19,6 +19,7 @@ import java.util.function.Supplier;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -41,6 +42,7 @@ import com.sequenceiq.periscope.service.DateTimeService;
 import com.sequenceiq.periscope.service.MetricService;
 import com.sequenceiq.periscope.service.StackCollectorService;
 
+@Ignore
 @RunWith(MockitoJUnitRunner.class)
 public class LeaderElectionServiceTest {
 

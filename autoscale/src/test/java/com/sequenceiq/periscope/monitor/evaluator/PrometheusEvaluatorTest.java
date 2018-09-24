@@ -6,6 +6,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -46,6 +47,7 @@ public class PrometheusEvaluatorTest {
     }
 
     @Test
+    @Ignore
     public void testRunCallsFinished() {
         underTest.setContext(new ClusterIdEvaluatorContext(CLUSTER_ID));
         when(clusterService.findById(anyLong())).thenThrow(new RuntimeException("exception from the test"));
