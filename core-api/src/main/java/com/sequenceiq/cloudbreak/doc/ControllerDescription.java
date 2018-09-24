@@ -35,6 +35,7 @@ public class ControllerDescription {
     public static final String WORKSPACE_DESCRIPTION = "Operations on organiztions";
 
     public static final String AUTOSCALE_DESCRIPTION = "Operations by Autoscale";
+    public static final String RECOVERY_DESCRIPTION = "Operations regarding manual recovery";
 
     public static final String LDAP_V3_CONFIG_DESCRIPTION = "Operations on LDAP server configurations by workspace";
     public static final String BLUEPRINT_V3_DESCRIPTION = "Operations on blueprints by workspace";

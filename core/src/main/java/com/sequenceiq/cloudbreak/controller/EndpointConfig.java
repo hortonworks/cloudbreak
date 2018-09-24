@@ -61,6 +61,7 @@ public class EndpointConfig extends ResourceConfig {
         RdsConfigV3Controller.class,
         RecipeController.class,
         RecipeV3Controller.class,
+        RecoveryController.class,
         RepositoryConfigValidationController.class,
         SecurityRuleController.class,
         SettingsController.class,

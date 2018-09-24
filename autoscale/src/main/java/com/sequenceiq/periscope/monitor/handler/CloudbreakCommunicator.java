@@ -22,6 +22,6 @@ public class CloudbreakCommunicator {
 
     public void failureReport(long stackId, FailureReport failureReport) {
         CloudbreakClient cloudbreakClient = cloudbreakClientConfiguration.cloudbreakClient();
-        cloudbreakClient.autoscaleEndpoint().failureReport(stackId, failureReport);
+        cloudbreakClient.recoveryEndpoint().failureReport(stackId, failureReport);
     }
 }

@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.api.CoreApi;
 import com.sequenceiq.cloudbreak.api.endpoint.autoscale.AutoscaleEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.autoscale.RecoveryEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.AccountPreferencesEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.AuditEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.BlueprintEndpoint;
@@ -90,6 +91,7 @@ public class CloudbreakClient {
             ClusterV1Endpoint.class,
             CredentialEndpoint.class,
             CredentialV3Endpoint.class,
+            RecoveryEndpoint.class,
             FlexSubscriptionEndpoint.class,
             FlexSubscriptionV3Endpoint.class,
             ImageCatalogV1Endpoint.class,
@@ -292,6 +294,10 @@ public class CloudbreakClient {
 
     public RecipeV3Endpoint recipeV3Endpoint() {
         return getEndpoint(RecipeV3Endpoint.class);
+    }
+
+    public RecoveryEndpoint recoveryEndpoint() {
+        return getEndpoint(RecoveryEndpoint.class);
     }
 
     public RepositoryConfigValidationEndpoint repositoryConfigValidationEndpoint() {

@@ -17,7 +17,6 @@ import com.sequenceiq.cloudbreak.api.model.AmbariAddressJson;
 import com.sequenceiq.cloudbreak.api.model.AutoscaleClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.AutoscaleStackResponse;
 import com.sequenceiq.cloudbreak.api.model.CertificateResponse;
-import com.sequenceiq.cloudbreak.api.model.FailureReport;
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
@@ -59,13 +58,6 @@ public interface AutoscaleEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.GET_ALL, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "getAllStackForAutoscale")
     Set<AutoscaleStackResponse> getAllForAutoscale();
-
-    @POST
-    @Path("/stack/{id}/cluster/failurereport")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ClusterOpDescription.FAILURE_REPORT, produces = ContentType.JSON, notes = Notes.FAILURE_REPORT_NOTES,
-            nickname = "failureReportClusterForAutoscale")
-    Response failureReport(@PathParam("id") Long stackId, FailureReport failureReport);
 
     @GET
     @Path("/stack/{id}")

@@ -32,6 +32,6 @@ public class UnhealthyNodeStrategy implements Strategy {
         CloudbreakClient client = CloudbreakClient.getTestContextCloudbreakClient().apply(integrationTestContext);
         FailureReport failureReport = new FailureReport();
         failureReport.setFailedNodes(nodes);
-        client.getCloudbreakClient().autoscaleEndpoint().failureReport(id, failureReport);
+        client.getCloudbreakClient().recoveryEndpoint().failureReport(id, failureReport);
     }
 }

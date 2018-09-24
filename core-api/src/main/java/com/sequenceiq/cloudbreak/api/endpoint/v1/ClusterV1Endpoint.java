@@ -19,7 +19,6 @@ import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.ConfigsRequest;
 import com.sequenceiq.cloudbreak.api.model.ConfigsResponse;
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRepairRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
@@ -95,13 +94,6 @@ public interface ClusterV1Endpoint {
     @ApiOperation(value = ClusterOpDescription.UPGRADE_AMBARI, produces = ContentType.JSON, notes = Notes.AMBARI_NOTES,
             nickname = "upgradeCluster")
     Response upgradeCluster(@PathParam("id") Long stackId, @NotNull AmbariRepoDetailsJson ambariRepoDetails);
-
-    @POST
-    @Path("{id}/cluster/manualrepair")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ClusterOpDescription.REPAIR_CLUSTER, produces = ContentType.JSON, notes = Notes.CLUSTER_REPAIR_NOTES,
-            nickname = "repairCluster")
-    Response repairCluster(@PathParam("id") Long stackId, ClusterRepairRequest clusterRepairRequest);
 
     @PUT
     @Path("{id}/cluster/gateway")
