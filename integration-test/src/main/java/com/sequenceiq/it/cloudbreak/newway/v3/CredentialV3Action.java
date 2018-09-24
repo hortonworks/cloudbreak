@@ -1,13 +1,15 @@
 package com.sequenceiq.it.cloudbreak.newway.v3;
 
-import java.io.IOException;
-
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
 import com.sequenceiq.it.cloudbreak.newway.Entity;
 import com.sequenceiq.it.cloudbreak.newway.log.Log;
+
+import java.io.IOException;
+
+import static com.sequenceiq.it.cloudbreak.RetryOnGatewayTimeout.retry;
 
 public class CredentialV3Action {
     private CredentialV3Action() {
@@ -28,7 +30,26 @@ public class CredentialV3Action {
                         .createInWorkspace(workspaceId, credentialEntity.getRequest()));
     }
 
+    public static void put(IntegrationTestContext integrationTestContext, Entity entity) {
+        CredentialEntity credentialEntity = (CredentialEntity) entity;
+        CloudbreakClient client;
+        client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
+                CloudbreakClient.class);
+        Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
+        Log.log(" put "
+                .concat(credentialEntity.getName())
+                .concat(" private credential. "));
+        credentialEntity.setResponse(
+                client.getCloudbreakClient()
+                        .credentialV3Endpoint()
+                        .putInWorkspace(workspaceId, credentialEntity.getRequest()));
+    }
+
     public static void get(IntegrationTestContext integrationTestContext, Entity entity) throws IOException {
+        get(integrationTestContext, entity, 1);
+    }
+
+    public static void get(IntegrationTestContext integrationTestContext, Entity entity, int retryQuantity) throws IOException {
         CredentialEntity credentialEntity = (CredentialEntity) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
@@ -37,22 +58,26 @@ public class CredentialV3Action {
         Log.log(" get "
                 .concat(credentialEntity.getName())
                 .concat(" private credential. "));
-        credentialEntity.setResponse(
-                client.getCloudbreakClient()
+        credentialEntity.setResponse(retry(() -> client.getCloudbreakClient()
                         .credentialV3Endpoint()
-                        .getByNameInWorkspace(workspaceId, credentialEntity.getName()));
+                        .getByNameInWorkspace(workspaceId, credentialEntity.getName()), retryQuantity));
         Log.logJSON(" get credential response: ", credentialEntity.getResponse());
     }
 
     public static void getAll(IntegrationTestContext integrationTestContext, Entity entity) {
+        getAll(integrationTestContext, entity, 1);
+    }
+
+    public static void getAll(IntegrationTestContext integrationTestContext, Entity entity, int retryQuantity) {
         CredentialEntity credentialEntity = (CredentialEntity) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         Log.log(" get all private credential. ");
-        credentialEntity.setResponses(
-                client.getCloudbreakClient().credentialV3Endpoint().listByWorkspace(workspaceId));
+        credentialEntity.setResponses(retry(() -> client.getCloudbreakClient()
+                        .credentialV3Endpoint()
+                        .listByWorkspace(workspaceId), retryQuantity));
     }
 
     public static void delete(IntegrationTestContext integrationTestContext, Entity entity) {
@@ -69,31 +94,39 @@ public class CredentialV3Action {
     }
 
     public static void createInGiven(IntegrationTestContext integrationTestContext, Entity entity) {
-        if (getWithoutException(integrationTestContext, entity)) {
+        createInGiven(integrationTestContext, entity, 1);
+    }
+
+    public static void createInGiven(IntegrationTestContext integrationTestContext, Entity entity, int retryQuantity) {
+        if (getWithoutException(integrationTestContext, entity, retryQuantity)) {
             return;
         }
         if (postWithoutException(integrationTestContext, entity)) {
             return;
         }
         try {
-            get(integrationTestContext, entity);
+            get(integrationTestContext, entity, retryQuantity);
         } catch (IOException iox) {
             throw new RuntimeException(iox);
         }
     }
 
     public static void createDeleteInGiven(IntegrationTestContext integrationTestContext, Entity entity) {
+        createDeleteInGiven(integrationTestContext, entity, 1);
+    }
+
+    public static void createDeleteInGiven(IntegrationTestContext integrationTestContext, Entity entity, int retryQuantity) {
         try {
-            get(integrationTestContext, entity);
+            get(integrationTestContext, entity, retryQuantity);
         } catch (Exception e) {
             post(integrationTestContext, entity);
             delete(integrationTestContext, entity);
         }
     }
 
-    private static boolean getWithoutException(IntegrationTestContext integrationTestContext, Entity entity) {
+    private static boolean getWithoutException(IntegrationTestContext integrationTestContext, Entity entity, int retryQuantity) {
         try {
-            get(integrationTestContext, entity);
+            get(integrationTestContext, entity, retryQuantity);
             return true;
         } catch (Exception ex) {
             return false;

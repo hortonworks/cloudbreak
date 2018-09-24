@@ -1,19 +1,5 @@
 package com.sequenceiq.it.cloudbreak;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.ws.rs.BadRequestException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Optional;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-
 import com.google.api.client.repackaged.org.apache.commons.codec.binary.Base64;
 import com.sequenceiq.cloudbreak.api.model.RecipeType;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
@@ -25,6 +11,18 @@ import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
 import com.sequenceiq.it.cloudbreak.newway.cloud.OpenstackCloudProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Optional;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
+import javax.ws.rs.BadRequestException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 public class RecipeClusterTests extends CloudbreakTest {
 
@@ -76,16 +74,16 @@ public class RecipeClusterTests extends CloudbreakTest {
     @Parameters("provider")
     public void beforeTest(@Optional(OpenstackCloudProvider.OPENSTACK) String provider) {
         LOGGER.info("before cluster test set provider: " + provider);
-        if (cloudProvider != null) {
-            LOGGER.info(cloudProvider + " cloud provider already set - running from factory test");
-            return;
+        if (cloudProvider == null) {
+            cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter());
+        } else {
+            LOGGER.info("cloud provider already set - running from factory test");
         }
-        cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter());
     }
 
     @BeforeTest
     public void setupValidRecipes() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         for (String recipe : RECIPE_NAMES) {
             given(Recipe.isCreated()
                     .withName(recipe)
@@ -98,7 +96,7 @@ public class RecipeClusterTests extends CloudbreakTest {
 
     @BeforeTest
     public void setupInvalidRecipe() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(Recipe.isCreated()
                 .withName(INVALID_RECIPE_NAME)
                 .withDescription(VALID_RECIPE_DESCRIPTION)
@@ -127,7 +125,7 @@ public class RecipeClusterTests extends CloudbreakTest {
     @Test(priority = 1)
     public void testCheckRecipesOnNodes() throws Exception {
         given(cloudProvider.aValidCredential());
-        given(cloudProvider.aValidStackIsCreated(), "a stack is created");
+        given(cloudProvider.aValidStackCreated(), "a stack is created");
         when(Stack.get());
         then(Stack.checkRecipes(HOSTGROUPS, FILES_PATH, defaultPrivateKeyFile, "ls ", 9), "check recipes are ran on nodes");
     }
@@ -145,7 +143,7 @@ public class RecipeClusterTests extends CloudbreakTest {
     @Test(priority = 3)
     public void testTerminateClusterCheckRecipePreTerm() throws Exception {
         given(cloudProvider.aValidCredential());
-        given(cloudProvider.aValidStackIsCreated(), "a stack is created");
+        given(cloudProvider.aValidStackCreated(), "a stack is created");
         when(Stack.delete());
         then(Stack.checkRecipes(HOSTGROUP_MASTER, FILES_PATH_PRE_TERM, defaultPrivateKeyFile, "echo '" + WAIT_SCRIPT + "' > " + WAIT_SCRIPT_PATH
                         + "chmod 777 " + WAIT_SCRIPT_PATH + WAIT_SCRIPT_PATH + "ls ", 1),
@@ -170,7 +168,7 @@ public class RecipeClusterTests extends CloudbreakTest {
     @Test(priority = 5)
     public void cleanUpTerminateFailedCluster() throws Exception {
         given(cloudProvider.aValidCredential());
-        given(cloudProvider.aValidStackIsCreated()
+        given(cloudProvider.aValidStackCreated()
                 .withName(INVALID_CLUSTER_NAME), "a stack is created");
         when(Stack.delete());
         then(Stack.waitAndCheckClusterDeleted(), "stack has been deleted");

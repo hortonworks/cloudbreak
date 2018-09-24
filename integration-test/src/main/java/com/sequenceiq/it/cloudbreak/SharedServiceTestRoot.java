@@ -60,7 +60,7 @@ public abstract class SharedServiceTestRoot extends CloudbreakTest {
     @Priority(10)
     @Test
     public void testADatalakeClusterCreation() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
         given(resourceHelper.aValidHiveDatabase());
         given(resourceHelper.aValidRangerDatabase());
@@ -84,7 +84,7 @@ public abstract class SharedServiceTestRoot extends CloudbreakTest {
     @Priority(20)
     @Test
     public void testClusterAttachedToDatalakeCluster() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
         given(DatalakeCluster.isCreatedWithName(getDatalakeClusterName()));
         given(cloudProvider.aValidAttachedCluster(getDatalakeClusterName()), "an attached cluster request");
@@ -103,9 +103,9 @@ public abstract class SharedServiceTestRoot extends CloudbreakTest {
     @Priority(30)
     @Test
     public void testTerminateAttachedCluster() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
-        given(cloudProvider.aValidStackIsCreated()
+        given(cloudProvider.aValidStackCreated()
                 .withName(getAttachedClusterName()), "a stack is created");
         when(Stack.delete());
         then(Stack.waitAndCheckClusterDeleted(), "stack has been deleted");
@@ -114,9 +114,9 @@ public abstract class SharedServiceTestRoot extends CloudbreakTest {
     @Priority(40)
     @Test
     public void testTerminateDatalakeCluster() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
-        given(cloudProvider.aValidStackIsCreated()
+        given(cloudProvider.aValidStackCreated()
                 .withName(getDatalakeClusterName()), "a stack is created");
         when(Stack.delete());
         then(Stack.waitAndCheckClusterDeleted(), "stack has been deleted");
@@ -171,7 +171,7 @@ public abstract class SharedServiceTestRoot extends CloudbreakTest {
     }
 
     private void cleanUpLdap() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         when(LdapConfig.getAll());
         then(LdapConfig.assertThis((ldapConfig, testContext) -> {
             var responses = ldapConfig.getResponses();
@@ -189,7 +189,7 @@ public abstract class SharedServiceTestRoot extends CloudbreakTest {
     }
 
     private void cleanUpRdsConfigs() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         when(RdsConfig.getAll());
         then(RdsConfig.assertThis((rdsConfig, testContext) -> {
             var responses = rdsConfig.getResponses();

@@ -78,19 +78,19 @@ public class RecommendationsTests extends CloudbreakTest {
     }
 
     private void createBlueprint() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(Blueprint.request().withName(VALID_BP_NAME).withDescription(BP_DESCRIPTION).withAmbariBlueprint(getBlueprintFile()));
         when(Blueprint.post());
     }
 
     private void deleteBlueprint() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(Blueprint.request().withName(VALID_BP_NAME));
         when(Blueprint.delete());
     }
 
     private void deleteCredential() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(Credential.request().withName(cloudProvider.getCredentialName()));
         when(Credential.delete());
     }
@@ -99,11 +99,11 @@ public class RecommendationsTests extends CloudbreakTest {
     @Parameters("provider")
     public void beforeTest(@Optional(OpenstackCloudProvider.OPENSTACK) String provider) {
         LOGGER.info("Provider: {} Region test setup has been started.", provider);
-        if (cloudProvider != null) {
-            LOGGER.info("{} provider already set - running from factory test", cloudProvider);
-            return;
+        if (cloudProvider == null) {
+            cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter());
+        } else {
+            LOGGER.info("cloud provider already set - running from factory test");
         }
-        cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter());
     }
 
     @BeforeClass
@@ -135,7 +135,7 @@ public class RecommendationsTests extends CloudbreakTest {
 
     @Test(priority = 1, groups = "recommendations")
     public void testListRecommendations() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential(), cloudProvider.getPlatform() + " credential is created.");
         given(Recommendation.request()
                 .withRegion(cloudProvider.region())
@@ -156,7 +156,7 @@ public class RecommendationsTests extends CloudbreakTest {
 
     @Test(priority = 2, groups = "recommendations")
     public void testListDiskResponses() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential(), cloudProvider.getPlatform() + " credential is created.");
         given(Recommendation.request()
                 .withRegion(cloudProvider.region())
@@ -176,7 +176,7 @@ public class RecommendationsTests extends CloudbreakTest {
 
     @Test(priority = 3, groups = "recommendations")
     public void testListVirtualMachines() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential(), cloudProvider.getPlatform() + " credential is created.");
         given(Recommendation.request()
                 .withRegion(cloudProvider.region())
@@ -196,7 +196,7 @@ public class RecommendationsTests extends CloudbreakTest {
 
     @Test(priority = 4, groups = "recommendations")
     public void testSetDiskResponses() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential(), cloudProvider.getPlatform() + " credential is created.");
         given(Recommendation.request()
                 .withRegion(cloudProvider.region())

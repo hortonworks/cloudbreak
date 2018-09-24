@@ -52,7 +52,7 @@ public class NetworkClusterTests extends CloudbreakTest {
     public void cleanUpCredentials() throws Exception {
         LOGGER.info("Delete credential: {}", cloudProvider.getCredentialName());
         try {
-            given(CloudbreakClient.isCreated());
+            given(CloudbreakClient.created());
             given(cloudProvider.aValidCredential(), cloudProvider.getCredentialName() + " credential is created.");
             when(Credential.delete());
         } catch (ForbiddenException | NotFoundException e) {
@@ -66,10 +66,10 @@ public class NetworkClusterTests extends CloudbreakTest {
 
         LOGGER.info("Delete cluster: {}", clusterName);
         try {
-            given(CloudbreakClient.isCreated());
+            given(CloudbreakClient.created());
             given(cloudProvider.aValidCredential(), cloudProvider.getCredentialName() + " credential is created.");
             given(Stack.request().withName(clusterName), clusterName + " stack is created.");
-            given(cloudProvider.aValidStackIsCreated());
+            given(cloudProvider.aValidStackCreated());
             when(Stack.delete());
             then(Stack.waitAndCheckClusterDeleted(), clusterName + " stack has been deleted.");
         } catch (ForbiddenException | NotFoundException e) {
@@ -79,7 +79,7 @@ public class NetworkClusterTests extends CloudbreakTest {
 
     @Test(groups = { "aws", "gcp", "openstack" })
     public void testCreateNewCluster() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
         given(Cluster.request().withName(cloudProvider.getClusterName()).withAmbariRequest(cloudProvider
                         .ambariRequestWithBlueprintName(cloudProvider.getBlueprintName())), cloudProvider.getPlatform() + " cluster request ");
@@ -95,7 +95,7 @@ public class NetworkClusterTests extends CloudbreakTest {
 
     @Test(groups = { "azure" })
     public void testCreateNewAzureCluster() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
         given(Cluster.request().withName(cloudProvider.getClusterName()).withAmbariRequest(cloudProvider
                         .ambariRequestWithBlueprintName(cloudProvider.getBlueprintName())), cloudProvider.getPlatform() + " cluster request ");

@@ -1,17 +1,5 @@
 package com.sequenceiq.it.cloudbreak;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
-
 import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImageResponse;
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImagesResponse;
@@ -34,6 +22,17 @@ import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
 import com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.newway.v3.StackV3Action;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class ClusterTests extends CloudbreakClusterTestConfiguration {
 
@@ -43,7 +42,7 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
 
     @Test(dataProvider = "providernameblueprintimage", priority = 10)
     public void testCreateNewRegularCluster(CloudProvider cloudProvider, String clusterName, String blueprintName, String imageId) throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
         given(Cluster.request()
                         .withAmbariRequest(cloudProvider.ambariRequestWithBlueprintName(blueprintName)),
@@ -67,7 +66,7 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
     public void testCreateNewHdfCluster(CloudProvider cloudProvider, String clusterName, String blueprintName,
             String imageId, boolean enableKerberos, String imageDescription)
             throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
         if (enableKerberos) {
             Kerberos kerberos = Kerberos.request()
@@ -106,7 +105,7 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
     @Test(dataProvider = "providernameblueprintimageos", priority = 10)
     public void testCreateNewClusterWithOs(CloudProvider cloudProvider, String clusterName, String blueprintName, String os, Kerberos kerberos)
             throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
         given(kerberos);
         given(Cluster.request()
@@ -129,7 +128,7 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
 
     @Test(dataProvider = "providernameblueprintimage", priority = 10)
     public void testCreateNewClusterWithKnox(CloudProvider cloudProvider, String clusterName, String blueprintName, String imageId) throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
         given(Cluster.request()
                         .withAmbariRequest(cloudProvider.ambariRequestWithBlueprintName(blueprintName)),
@@ -159,9 +158,9 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
 
     @Test(dataProvider = "providername", priority = 15)
     public void testModifyImage(CloudProvider cloudProvider, String clusterName) throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
-        given(cloudProvider.aValidStackIsCreated()
+        given(cloudProvider.aValidStackCreated()
                 .withName(clusterName), "a stack is created");
         String provider = getTestParameter().get("provider").toLowerCase();
         String imageId = getImageIdWithPkgVersions(provider, "");
@@ -178,9 +177,9 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
 
     @Test(dataProvider = "providernamehostgroupdesiredno", priority = 20)
     public void testScaleCluster(CloudProvider cloudProvider, String clusterName, String hostgroupName, int desiredCount) throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
-        given(cloudProvider.aValidStackIsCreated()
+        given(cloudProvider.aValidStackCreated()
                 .withName(clusterName), "a stack is created");
         given(StackOperation.request()
                 .withGroupName(hostgroupName)
@@ -197,9 +196,9 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
 
     @Test(dataProvider = "providername", priority = 25)
     public void testStackImagesDifferent(CloudProvider cloudProvider, String clusterName) throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
-        given(cloudProvider.aValidStackIsCreated()
+        given(cloudProvider.aValidStackCreated()
                 .withName(clusterName), "a stack is created");
 
         when(Stack.get(StackGetWithEntriesStrategy.create(Collections.singleton(StackResponseEntries.HARDWARE_INFO))));
@@ -212,9 +211,9 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
 
     @Test(dataProvider = "providername", priority = 30)
     public void testStopCluster(CloudProvider cloudProvider, String clusterName) throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
-        given(cloudProvider.aValidStackIsCreated()
+        given(cloudProvider.aValidStackCreated()
                 .withName(clusterName), "a stack is created");
         given(StackOperation.request());
         when(StackOperation.stop());
@@ -224,9 +223,9 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
 
     @Test(dataProvider = "providername", priority = 40)
     public void testStartCluster(CloudProvider cloudProvider, String clusterName) throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
-        given(cloudProvider.aValidStackIsCreated()
+        given(cloudProvider.aValidStackCreated()
                 .withName(clusterName), "a stack is created");
         given(StackOperation.request());
         when(StackOperation.start());
@@ -241,9 +240,9 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
 
     @Test(alwaysRun = true, dataProvider = "providernamekerberos", priority = 50)
     public void testTerminateCluster(CloudProvider cloudProvider, String clusterName, boolean enableKerberos) throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
-        given(cloudProvider.aValidStackIsCreated()
+        given(cloudProvider.aValidStackCreated()
                 .withName(clusterName), "a stack is created");
         if (enableKerberos) {
             when(Stack.delete(StackV3Action::deleteWithKerberos));
@@ -331,7 +330,7 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
     }
 
     private String getImageId(String provider, String imageDescription, String blueprintName) throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         CloudbreakClient clientContext = CloudbreakClient.getTestContextCloudbreakClient().apply(getItContext());
         com.sequenceiq.cloudbreak.client.CloudbreakClient client = clientContext.getCloudbreakClient();
         ImagesResponse imagesByProvider = client.imageCatalogEndpoint().getImagesByProvider(provider);
@@ -349,7 +348,7 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
     }
 
     protected String getImageIdWithPkgVersions(String provider, String imageDescription) throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         CloudbreakClient clientContext = CloudbreakClient.getTestContextCloudbreakClient().apply(getItContext());
         com.sequenceiq.cloudbreak.client.CloudbreakClient client = clientContext.getCloudbreakClient();
         ImagesResponse imagesByProvider = client.imageCatalogEndpoint().getImagesByProvider(provider);

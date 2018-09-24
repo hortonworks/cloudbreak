@@ -29,7 +29,7 @@ public class UpgradeTests extends CloudbreakTest {
     @Priority(10)
     @Test
     public void testGetClusterExistingAfterUpgrade() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
         given(Stack.request().withName(cloudProvider.getClusterName()));
         when(Stack.get());
@@ -43,7 +43,7 @@ public class UpgradeTests extends CloudbreakTest {
     @Priority(20)
     @Test
     public void testScaleExistingClusterAfterUpgrade() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
         given(Stack.request()
                 .withName(cloudProvider.getClusterName()));
@@ -61,7 +61,7 @@ public class UpgradeTests extends CloudbreakTest {
     @Priority(30)
     @Test
     public void testStopExistingClusterAfterUpgrade() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
         given(Stack.request()
                 .withName(cloudProvider.getClusterName()));
@@ -74,7 +74,7 @@ public class UpgradeTests extends CloudbreakTest {
     @Priority(40)
     @Test
     public void testStartExistingClusterAfterUpgrade() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
         given(Stack.request()
                 .withName(cloudProvider.getClusterName()));
@@ -93,11 +93,11 @@ public class UpgradeTests extends CloudbreakTest {
         if ("false".equals(getTestParameter().get("cleanUp"))) {
             return;
         }
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
         given(Stack.request()
                 .withName(cloudProvider.getClusterName()));
-        given(cloudProvider.aValidStackIsCreated());
+        given(cloudProvider.aValidStackCreated());
         when(Stack.delete());
         then(Stack.waitAndCheckClusterDeleted());
     }

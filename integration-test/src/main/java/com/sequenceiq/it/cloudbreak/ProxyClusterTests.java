@@ -42,16 +42,16 @@ public class ProxyClusterTests extends CloudbreakTest {
     @Parameters("provider")
     public void beforeTest(@Optional(OpenstackCloudProvider.OPENSTACK) String provider) {
         LOGGER.info("before cluster test set provider: " + provider);
-        if (cloudProvider != null) {
+        if (cloudProvider == null) {
+            cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter());
+        } else {
             LOGGER.info("cloud provider already set - running from factory test");
-            return;
         }
-        cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter());
     }
 
     @BeforeTest
     public void setupProxy() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         String proxyHost = getTestParameter().get("integrationtest.proxyconfig.proxyHost").split(":")[0];
         String proxyUser = getTestParameter().get("integrationtest.proxyconfig.proxyUser");
         String proxyPassword = getTestParameter().get("integrationtest.proxyconfig.proxyPassword");
@@ -102,7 +102,7 @@ public class ProxyClusterTests extends CloudbreakTest {
     @Test(priority = 2)
     public void testTerminateCluster() throws Exception {
         given(cloudProvider.aValidCredential());
-        given(cloudProvider.aValidStackIsCreated(), "a stack is created");
+        given(cloudProvider.aValidStackCreated(), "a stack is created");
         when(Stack.delete());
         then(Stack.waitAndCheckClusterDeleted(), "stack has been deleted");
     }

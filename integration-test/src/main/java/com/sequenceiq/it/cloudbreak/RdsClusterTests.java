@@ -47,16 +47,16 @@ public class RdsClusterTests extends CloudbreakTest {
     @Parameters("provider")
     public void beforeTest(@Optional(OpenstackCloudProvider.OPENSTACK) String provider) {
         LOGGER.info("before cluster test set provider: " + provider);
-        if (cloudProvider != null) {
+        if (cloudProvider == null) {
+            cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter());
+        } else {
             LOGGER.info("cloud provider already set - running from factory test");
-            return;
         }
-        cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter());
     }
 
     @BeforeTest
     public void setupRds() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         String rdsUser = getTestParameter().get("integrationtest.rdsconfig.rdsUser");
         String rdsPassword = getTestParameter().get("integrationtest.rdsconfig.rdsPassword");
         String rdsConnectionUrl = getTestParameter().get("integrationtest.rdsconfig.rdsConnectionUrl");
@@ -103,7 +103,7 @@ public class RdsClusterTests extends CloudbreakTest {
     @Test (priority = 2)
     public void testTerminateCluster() throws Exception {
         given(cloudProvider.aValidCredential());
-        given(cloudProvider.aValidStackIsCreated(), "a stack is created");
+        given(cloudProvider.aValidStackCreated(), "a stack is created");
         when(Stack.delete());
         then(Stack.waitAndCheckClusterDeleted(), "stack has been deleted");
     }

@@ -1,15 +1,5 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud;
 
-import static java.util.Set.of;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-
-import org.apache.commons.lang3.StringUtils;
-
 import com.google.common.base.Preconditions;
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
@@ -26,6 +16,14 @@ import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Aws.Database.Hive;
 import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Aws.Database.Ranger;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+
+import static java.util.Set.of;
 
 public class AwsCloudProvider extends CloudProviderHelper {
 
@@ -67,7 +65,7 @@ public class AwsCloudProvider extends CloudProviderHelper {
         String credentialType = getTestParameter().get("awsCredentialType");
         Map<String, Object> credentialParameters;
         credentialParameters = KEY_BASED_CREDENTIAL.equals(credentialType) ? awsCredentialDetailsKey() : awsCredentialDetailsArn();
-        CredentialEntity credential = create ? Credential.isCreated() : Credential.request();
+        CredentialEntity credential = create ? Credential.created() : Credential.request();
         return credential
                 .withName(getCredentialName())
                 .withDescription(CREDENTIAL_DEFAULT_DESCRIPTION)
@@ -76,19 +74,26 @@ public class AwsCloudProvider extends CloudProviderHelper {
     }
 
     public Map<String, Object> awsCredentialDetailsArn() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("selector", "role-based");
-        map.put("roleArn", getTestParameter().get("integrationtest.awscredential.roleArn"));
-
-        return map;
+        return Map.of("selector", "role-based", "roleArn", getTestParameter().get("integrationtest.awscredential.roleArn"));
     }
 
     public Map<String, Object> awsCredentialDetailsInvalidArn() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("selector", "role-based");
-        map.put("roleArn", "arn:aws:iam::123456789012:role/fake");
+        return Map.of("selector", "role-based", "roleArn", "arn:aws:iam::123456789012:role/fake");
+    }
 
-        return map;
+    public Map<String, Object> awsCredentialDetailsKey() {
+        return Map.of("selector", "key-based", "accessKey", getTestParameter().get("integrationtest.awscredential.accessKey"), "secretKey",
+                getTestParameter().get("integrationtest.awscredential.secretKey"));
+    }
+
+    public Map<String, Object> awsCredentialDetailsInvalidAccessKey() {
+        return Map.of("selector", "key-based", "accessKey", "ABCDEFGHIJKLMNOPQRST", "secretKey",
+                getTestParameter().get("integrationtest.awscredential.secretKey"));
+    }
+
+    public Map<String, Object> awsCredentialDetailsInvalidSecretKey() {
+        return Map.of("selector", "key-based", "accessKey", getTestParameter().get("integrationtest.awscredential.accessKey"), "secretKey",
+                "123456789ABCDEFGHIJKLMNOP0123456789=ABC+");
     }
 
     @Override
@@ -176,20 +181,12 @@ public class AwsCloudProvider extends CloudProviderHelper {
 
     @Override
     public Map<String, Object> networkProperties() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("internetGatewayId", getInternetGatewayId());
-        map.put("vpcId", getVpcId());
-
-        return map;
+        return Map.of("internetGatewayId", getInternetGatewayId(), "vpcId", getVpcId());
     }
 
     @Override
     public Map<String, Object> subnetProperties() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("subnetId", getSubnetId());
-        map.put("vpcId", getVpcId());
-
-        return map;
+        return Map.of("subnetId", getSubnetId(), "vpcId", getVpcId());
     }
 
     @Override
@@ -212,33 +209,6 @@ public class AwsCloudProvider extends CloudProviderHelper {
         NetworkV2Request network = new NetworkV2Request();
         network.setParameters(subnetProperties());
         return network;
-    }
-
-    public Map<String, Object> awsCredentialDetailsKey() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("selector", "key-based");
-        map.put("accessKey", getTestParameter().get("integrationtest.awscredential.accessKey"));
-        map.put("secretKey", getTestParameter().get("integrationtest.awscredential.secretKey"));
-
-        return map;
-    }
-
-    public Map<String, Object> awsCredentialDetailsInvalidAccessKey() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("selector", "key-based");
-        map.put("accessKey", "ABCDEFGHIJKLMNOPQRST");
-        map.put("secretKey", getTestParameter().get("integrationtest.awscredential.secretKey"));
-
-        return map;
-    }
-
-    public Map<String, Object> awsCredentialDetailsInvalidSecretKey() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("selector", "key-based");
-        map.put("accessKey", getTestParameter().get("integrationtest.awscredential.accessKey"));
-        map.put("secretKey", "123456789ABCDEFGHIJKLMNOP0123456789=ABC+");
-
-        return map;
     }
 
     @Override

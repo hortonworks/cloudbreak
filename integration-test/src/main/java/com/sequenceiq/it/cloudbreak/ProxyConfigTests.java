@@ -38,7 +38,7 @@ public class ProxyConfigTests extends CloudbreakTest {
 
     @BeforeTest
     public void setup() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         proxyHost = getTestParameter().get("integrationtest.proxyconfig.proxyHost").split(":")[0];
         proxyUser = getTestParameter().get("integrationtest.proxyconfig.proxyUser");
         proxyPassword = getTestParameter().get("integrationtest.proxyconfig.proxyPassword");

@@ -1,9 +1,5 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import com.sequenceiq.cloudbreak.api.model.RecoveryMode;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
@@ -13,6 +9,10 @@ import com.sequenceiq.it.cloudbreak.newway.Cluster;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public abstract class CloudProvider {
 
@@ -26,7 +26,7 @@ public abstract class CloudProvider {
 
     public abstract AmbariV2Request ambariRequestWithBlueprintId(Long id);
 
-    public abstract Stack aValidStackIsCreated();
+    public abstract Stack aValidStackCreated();
 
     public abstract StackEntity aValidAttachedStackRequest();
 
@@ -71,7 +71,7 @@ public abstract class CloudProvider {
 
     public abstract List<InstanceGroupV2Request> instanceGroups(Set<String> recipes);
 
-    public abstract Stack aValidAttachedClusterStackIsCreated(HostGroupType... groupTypes);
+    public abstract Stack aValidAttachedClusterStackCreated(HostGroupType... groupTypes);
 
     public abstract AmbariV2Request getAmbariRequestWithNoConfigStrategyAndEmptyMpacks(String blueprintName);
 

@@ -1,15 +1,5 @@
 package com.sequenceiq.it.cloudbreak;
 
-import javax.ws.rs.BadRequestException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.testng.Assert;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Optional;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-
 import com.sequenceiq.cloudbreak.api.model.DirectoryType;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
@@ -20,6 +10,15 @@ import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
 import com.sequenceiq.it.cloudbreak.newway.cloud.OpenstackCloudProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testng.Assert;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Optional;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
+import javax.ws.rs.BadRequestException;
 
 public class LdapClusterTests extends CloudbreakTest {
 
@@ -63,16 +62,16 @@ public class LdapClusterTests extends CloudbreakTest {
     @Parameters("provider")
     public void beforeTest(@Optional(OpenstackCloudProvider.OPENSTACK) String provider) {
         LOGGER.info("before cluster test set provider: " + provider);
-        if (cloudProvider != null) {
+        if (cloudProvider == null) {
+            cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter());
+        } else {
             LOGGER.info("cloud provider already set - running from factory test");
-            return;
         }
-        cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter());
     }
 
     @BeforeTest
     public void setupLdap() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         String ldapServerHost = getTestParameter().get("integrationtest.ldapconfig.ldapServerHost");
         String bindPassword = getTestParameter().get("integrationtest.ldapconfig.bindPassword");
         given(LdapConfig.isCreated()
@@ -118,7 +117,7 @@ public class LdapClusterTests extends CloudbreakTest {
     @Test(priority = 1, expectedExceptions = BadRequestException.class)
     public void testTryToDeleteAttachedLdap() throws Exception {
         given(cloudProvider.aValidCredential());
-        given(cloudProvider.aValidStackIsCreated(), "a stack is created");
+        given(cloudProvider.aValidStackCreated(), "a stack is created");
         given(LdapConfig.request()
                 .withName(VALID_LDAP_CONFIG)
         );
@@ -127,9 +126,9 @@ public class LdapClusterTests extends CloudbreakTest {
 
     @Test(priority = 2)
     public void testTerminateCluster() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
-        given(cloudProvider.aValidStackIsCreated(), "a stack is created");
+        given(cloudProvider.aValidStackCreated(), "a stack is created");
         when(Stack.delete());
         then(Stack.waitAndCheckClusterDeleted(), "stack has been deleted");
     }

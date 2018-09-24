@@ -1,14 +1,14 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
-import java.util.concurrent.TimeUnit;
-
-import javax.ws.rs.ForbiddenException;
-
+import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
 
-import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
+import javax.ws.rs.ForbiddenException;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+import java.util.concurrent.TimeUnit;
 
 public class CloudbreakClusterTestConfiguration extends CloudbreakTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakClusterTestConfiguration.class);
@@ -21,12 +21,19 @@ public class CloudbreakClusterTestConfiguration extends CloudbreakTest {
     public void cleanUpClusterBeforeTestClass() throws Exception {
         String clusterName = getTestParameter().get("clusterName");
 
-        given(CloudbreakClient.isCreated());
-        given(Stack.request().withName(clusterName));
+        LOGGER.info("Delete cluster ::: [{}]", clusterName);
         try {
+            given(CloudbreakClient.created());
+            given(Stack.request().withName(clusterName));
             when(Stack.delete(StackAction::deleteWithForce));
-        } catch (Exception e) {
-            LOGGER.info("Could not delete stack", e);
+        } catch (WebApplicationException webappExp) {
+            try (Response response = webappExp.getResponse()) {
+                String exceptionMessage = response.readEntity(String.class);
+                String errorMessage = exceptionMessage.substring(exceptionMessage.lastIndexOf(':') + 1);
+                LOGGER.info("Cloudbreak Delete Cluster Exception message ::: " + errorMessage);
+            } finally {
+                LOGGER.info("Cloudbreak Delete Cluster have been done.");
+            }
         }
 
         int retryCount = 0;

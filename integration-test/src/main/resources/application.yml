@@ -34,6 +34,9 @@ integrationtest:
        projectId:
        serviceAccountId:
        p12File:
+       jsonFile:
+       newServiceAccountId:
+       newP12File:
 
     #ambari credentials
     ambari:
@@ -56,8 +59,22 @@ integrationtest:
        password:
        endpoint:
 
+  # openstack Engineering V2 credential details
+    openstackEngcredential:
+      tenantName:
+      userName:
+      password:
+      endpoint:
+
+  # openstack Kilo V2 Admin credential details
+    openstackAdmincredential:
+      tenantName:
+      userName:
+      password:
+      endpoint:
+
     # openstack Keystone V3 credential details
-    openstackV3credential:
+    openstackFieldcredential:
       name:
       tenantName:
       userDomain:
@@ -73,11 +90,13 @@ integrationtest:
 
     # azure rm credential details
     azurermcredential:
-        name:
-        secretKey:
-        accessKey:
-        subscriptionId:
-        tenantId:
+      name:
+      secretKey:
+      accessKey:
+      subscriptionId:
+      tenantId:
+      newAccessKey:
+      newSecretKey:
 
     rdsconfig:
         rdsUser:

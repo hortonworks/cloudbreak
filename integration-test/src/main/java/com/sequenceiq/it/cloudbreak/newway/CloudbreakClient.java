@@ -1,13 +1,12 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
-import java.util.function.Function;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.sequenceiq.cloudbreak.client.CloudbreakClient.CloudbreakClientBuilder;
 import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.it.IntegrationTestContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.function.Function;
 
 public class CloudbreakClient extends Entity {
     public static final String CLOUDBREAK_CLIENT = "CLOUDBREAK_CLIENT";
@@ -42,7 +41,7 @@ public class CloudbreakClient extends Entity {
         return getTestContextCloudbreakClient(CLOUDBREAK_CLIENT);
     }
 
-    public static CloudbreakClient isCreated() {
+    public static CloudbreakClient created() {
         CloudbreakClient client = new CloudbreakClient();
         client.setCreationStrategy(CloudbreakClient::createProxyCloudbreakClient);
         return client;

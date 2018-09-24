@@ -33,7 +33,7 @@ public class SharedServiceAwsTest extends SharedServiceTestRoot {
     @Priority(10)
     @Test
     public void testADatalakeClusterCreation() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(getCloudProvider().aValidCredential());
         given(getResourceHelper().aValidHiveDatabase());
         given(getResourceHelper().aValidRangerDatabase());
@@ -57,7 +57,7 @@ public class SharedServiceAwsTest extends SharedServiceTestRoot {
     @Priority(20)
     @Test
     public void testClusterAttachedToDatalakeCluster() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(getCloudProvider().aValidCredential());
         given(AccessConfig.isGot());
         given(DatalakeCluster.isCreatedWithName(getDatalakeClusterName()));
@@ -78,9 +78,9 @@ public class SharedServiceAwsTest extends SharedServiceTestRoot {
     @Priority(30)
     @Test
     public void testTerminateAttachedCluster() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(getCloudProvider().aValidCredential());
-        given(getCloudProvider().aValidStackIsCreated()
+        given(getCloudProvider().aValidStackCreated()
                 .withName(getAttachedClusterName()), "a stack is created");
         when(Stack.delete());
         then(Stack.waitAndCheckClusterDeleted(), "stack has been deleted");
@@ -90,9 +90,9 @@ public class SharedServiceAwsTest extends SharedServiceTestRoot {
     @Priority(40)
     @Test
     public void testTerminateDatalakeCluster() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(getCloudProvider().aValidCredential());
-        given(getCloudProvider().aValidStackIsCreated()
+        given(getCloudProvider().aValidStackCreated()
                 .withName(getDatalakeClusterName()), "a stack is created");
         when(Stack.delete());
         then(Stack.waitAndCheckClusterDeleted(), "stack has been deleted");

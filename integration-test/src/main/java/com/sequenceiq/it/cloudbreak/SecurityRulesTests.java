@@ -53,7 +53,7 @@ public class SecurityRulesTests extends CloudbreakTest {
 
     @Test(priority = 1, groups = "securityrules")
     public void testListGateways() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(SecurityRules.request(), " disk types request");
         when(SecurityRules.getDefaultSecurityRules(), " disk types are requested.");
         then(SecurityRules.assertThis(
@@ -68,7 +68,7 @@ public class SecurityRulesTests extends CloudbreakTest {
 
     @Test(priority = 2, groups = "securityrules")
     public void testListCores() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(SecurityRules.request(), " disk types request");
         when(SecurityRules.getDefaultSecurityRules(), " disk types are requested.");
         then(SecurityRules.assertThis(
@@ -83,7 +83,7 @@ public class SecurityRulesTests extends CloudbreakTest {
 
     @Test(priority = 3, groups = "securityrules")
     public void testSetGateway() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(SecurityRules.request(), " disk types request");
         when(SecurityRules.getDefaultSecurityRules(), " disk types are requested.");
         then(SecurityRules.assertThis(
