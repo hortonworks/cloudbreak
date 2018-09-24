@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import com.sequenceiq.cloudbreak.api.model.FailureReport;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupResponse;
+import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.it.IntegrationTestContext;
 
 public class UnhealthyNodeStrategy implements Strategy {
@@ -29,9 +30,19 @@ public class UnhealthyNodeStrategy implements Strategy {
                 .filter(ig -> ig.getGroup().equals(hostgroup)).collect(Collectors.toList()).get(0);
         List<String> nodes = instanceGroup.getMetadata().stream()
                 .map(metadata -> metadata.getDiscoveryFQDN()).collect(Collectors.toList()).subList(0, nodeCount);
-        CloudbreakClient client = CloudbreakClient.getTestContextCloudbreakClient().apply(integrationTestContext);
+        ProxyCloudbreakClient client = getAutoscaleProxyCloudbreakClient(integrationTestContext);
         FailureReport failureReport = new FailureReport();
         failureReport.setFailedNodes(nodes);
-        client.getCloudbreakClient().autoscaleEndpoint().failureReport(id, failureReport);
+        client.autoscaleEndpoint().failureReport(id, failureReport);
+    }
+
+    private ProxyCloudbreakClient getAutoscaleProxyCloudbreakClient(IntegrationTestContext integrationTestContext) {
+        return new ProxyCloudbreakClient(
+                    integrationTestContext.getContextParam(CloudbreakTest.CLOUDBREAK_SERVER_ROOT),
+                    integrationTestContext.getContextParam(CloudbreakTest.IDENTITY_URL),
+                    integrationTestContext.getContextParam(CloudbreakTest.AUTOSCALE_SECRET),
+                    integrationTestContext.getContextParam(CloudbreakTest.AUTOSCALE_CLIENTID),
+                    new ConfigKey(false, true, true));
+
     }
 }

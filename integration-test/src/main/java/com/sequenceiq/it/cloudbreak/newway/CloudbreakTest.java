@@ -27,6 +27,10 @@ public class CloudbreakTest extends GherkinTest {
 
     public static final String PASSWORD = "PASSWORD";
 
+    public static final String AUTOSCALE_CLIENTID = "AUTOSCALE_CLIENTID";
+
+    public static final String AUTOSCALE_SECRET = "AUTOSCALE_SECRET";
+
     public static final String WORKSPACE_ID = "ORGANIZTION_ID";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakTest.class);
@@ -45,6 +49,12 @@ public class CloudbreakTest extends GherkinTest {
 
     @Value("${integrationtest.uaa.password}")
     private String defaultUaaPassword;
+
+    @Value("${integrationtest.uaa.autoscale.clientId:periscope}")
+    private String autoscaleUaaClientId;
+
+    @Value("${integrationtest.uaa.autoscale.clientSecret}")
+    private String autoscaleUaaClientSecret;
 
     @Inject
     private Environment environment;
@@ -66,6 +76,8 @@ public class CloudbreakTest extends GherkinTest {
         testContext.putContextParam(IDENTITY_URL, uaaServer);
         testContext.putContextParam(USER, defaultUaaUser);
         testContext.putContextParam(PASSWORD, defaultUaaPassword);
+        testContext.putContextParam(AUTOSCALE_CLIENTID, autoscaleUaaClientId);
+        testContext.putContextParam(AUTOSCALE_SECRET, autoscaleUaaClientSecret);
 
         try {
             CloudbreakClient client = CloudbreakClient.isCreated();
