@@ -146,3 +146,48 @@ This project uses Go [modules](https://github.com/golang/go/wiki/Modules) for de
 ```
 export GO111MODULE=on
 ```
+
+## Implementing new commands
+Top level commands like `cluster` are separated into a cmd package. You can see an example for these commands in the `cloudbreak/cmd` folder. Each of these resource separated files contain an `init` function that adds the resource specific commands to an internal array:
+```$xslt
+func init() {
+    CloudbreakCommands = append(CloudbreakCommands, cli.Command{})
+}
+```
+The `init()` function is automatically invoked for each file in the `cmd` folder, because it is referenced from the `main.go` file:
+```$xslt
+import (
+	"github.com/hortonworks/cb-cli/cloudbreak/cmd"
+)
+```
+and then added to the main app:
+```$xslt
+app.Commands = append(app.Commands, cmd.CloudbreakCommands...)
+```
+To implement new top level commands you can create your own folder structure and reproduce the above specified:
+```$xslt
+- Create your own resource separation files/folders etc..
+- Implement the init() function for these files
+- Reference these files from the main.go file
+- Add your commands to the app.Commands
+```
+If you'd like to introduce `sub-commands` for already existing top level commands that are not Cloudbreak specific you can move the `cluster.go` file (for example) from
+the `cloudbreak/cmd` folder to a top level `cmd` folder and reference it from the `main.go` file as describe above.
+
+### Plugins
+The CLI also supports a `plugin` model. This means that you can create similar CLI tools like this one and build them independently/separately, but get them invoked by the main CLI tool. Let's assume you'd like to create a `dlm` CLI, but develop it outside from this repository, but with the same framework.
+If you create the `dlm` binary and put it in your `$PATH` you can invoke with the main CLI tool like:
+```$xslt
+cb dlm my-command
+```
+In order to do this the main CLI needs to be built with plugin mode enabled:
+```$xslt
+PLUGIN_ENABLED=true make build
+```
+This way you have introduced another top level command, but you have the advantage to:
+```$xslt
+* dynamically install/enable/disable top level commands without re-building/downloading the top level CLI
+* dynamically upgrade commands without re-building/downloading the top level CLI
+* develop it independently from this repository
+* have an independent CLI tool that can be invoked without the top level CLI
+```
