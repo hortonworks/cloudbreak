@@ -42,17 +42,17 @@ public class ClusterTestsSimple extends CloudbreakTest {
     @Parameters("provider")
     public void beforeTest(@Optional(OpenstackCloudProvider.OPENSTACK) String provider) {
         LOGGER.info("before cluster test set provider: " + provider);
-        if (cloudProvider != null) {
+        if (cloudProvider == null) {
+            cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter());
+        } else {
             LOGGER.info("cloud provider already set - running from factory test");
-            return;
         }
-        cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter());
     }
 
     @Priority(10)
     @Test
     public void testCreateNewCluster() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
         given(Cluster.request()
                 .withAmbariRequest(cloudProvider.ambariRequestWithBlueprintName(BLUEPRINT_HDP26_NAME)),
@@ -71,9 +71,9 @@ public class ClusterTestsSimple extends CloudbreakTest {
     @Priority(20)
     @Test
     public void testScaleCluster() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
-        given(cloudProvider.aValidStackIsCreated(), "a stack is created");
+        given(cloudProvider.aValidStackCreated(), "a stack is created");
         given(StackOperation.request()
                 .withGroupName(COMPUTE_HOST_GROUP)
                 .withDesiredCount(DESIRED_COUNT), "a scale request to " + COMPUTE_HOST_GROUP);
@@ -90,9 +90,9 @@ public class ClusterTestsSimple extends CloudbreakTest {
     @Priority(30)
     @Test
     public void testStopCluster() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
-        given(cloudProvider.aValidStackIsCreated(), "a stack is created");
+        given(cloudProvider.aValidStackCreated(), "a stack is created");
         given(StackOperation.request());
         when(StackOperation.stop());
         when(Stack.get());
@@ -102,9 +102,9 @@ public class ClusterTestsSimple extends CloudbreakTest {
     @Priority(40)
     @Test
     public void testStartCluster() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
-        given(cloudProvider.aValidStackIsCreated(), "a stack is created");
+        given(cloudProvider.aValidStackCreated(), "a stack is created");
         given(StackOperation.request());
         when(StackOperation.start());
         when(Stack.get());
@@ -119,9 +119,9 @@ public class ClusterTestsSimple extends CloudbreakTest {
     @Priority(50)
     @Test
     public void testTerminateCluster() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
-        given(cloudProvider.aValidStackIsCreated(), "a stack is created");
+        given(cloudProvider.aValidStackCreated(), "a stack is created");
         when(Stack.delete());
         then(Stack.waitAndCheckClusterDeleted(), "stack has been deleted");
     }

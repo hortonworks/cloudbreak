@@ -20,9 +20,9 @@ public class RecoveryTests extends ClusterTests {
 
     @Test(dataProvider = "providernameblueprintimage", priority = 15)
     public void testManualRecovery(CloudProvider cloudProvider, String clusterName, String blueprintName, String imageId) throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
-        given(cloudProvider.aValidStackIsCreated()
+        given(cloudProvider.aValidStackCreated()
                 .withName(clusterName));
         when(Stack.makeNodeUnhealthy(HostGroupType.WORKER.getName(), 1));
         when(Stack.get());
@@ -43,9 +43,9 @@ public class RecoveryTests extends ClusterTests {
 
     @Test(dataProvider = "providernameblueprintimage", priority = 15)
     public void testAutoRecovery(CloudProvider cloudProvider, String clusterName, String blueprintName, String imageId) throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
-        given(cloudProvider.aValidStackIsCreated()
+        given(cloudProvider.aValidStackCreated()
                 .withName(clusterName));
         when(Stack.makeNodeUnhealthy(HostGroupType.WORKER.getName(), 1));
         then(Stack.waitAndCheckClusterAndStackAvailabilityStatus());

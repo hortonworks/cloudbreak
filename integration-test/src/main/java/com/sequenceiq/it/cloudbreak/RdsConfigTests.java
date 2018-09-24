@@ -40,7 +40,7 @@ public class RdsConfigTests extends CloudbreakTest {
 
     @BeforeTest
     public void setup() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         rdsUser = getTestParameter().get("integrationtest.rdsconfig.rdsUser");
         rdsPassword = getTestParameter().get("integrationtest.rdsconfig.rdsPassword");
         rdsConnectionUrl = getTestParameter().get("integrationtest.rdsconfig.rdsConnectionUrl");

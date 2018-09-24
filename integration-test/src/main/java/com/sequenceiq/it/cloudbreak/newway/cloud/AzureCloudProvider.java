@@ -1,12 +1,5 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.stack.StackAuthenticationRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
@@ -21,6 +14,12 @@ import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Azure.Database.Hive;
 import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Azure.Database.Ranger;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class AzureCloudProvider extends CloudProviderHelper {
 
@@ -49,6 +48,10 @@ public class AzureCloudProvider extends CloudProviderHelper {
     private static final String CREDENTIAL_ACCESS_KEY_ENV_KEY = "integrationtest.azurermcredential.accessKey";
 
     private static final String CREDENTIAL_SECRET_KEY_ENV_KEY = "integrationtest.azurermcredential.secretKey";
+
+    private static final String CREDENTIAL_NEWACCESS_KEY_ENV_KEY = "integrationtest.azurermcredential.newAccessKey";
+
+    private static final String CREDENTIAL_NEWSECRET_KEY_ENV_KEY = "integrationtest.azurermcredential.newSecretKey";
 
     private static final String CREDENTIAL_TENANT_ID_ENV_KEY = "integrationtest.azurermcredential.tenantId";
 
@@ -88,7 +91,7 @@ public class AzureCloudProvider extends CloudProviderHelper {
 
     @Override
     public CredentialEntity aValidCredential(boolean create) {
-        CredentialEntity credential = create ? Credential.isCreated() : Credential.request();
+        CredentialEntity credential = create ? Credential.created() : Credential.request();
         return credential
                 .withName(getCredentialName())
                 .withDescription(CREDENTIAL_DEFAULT_DESCRIPTION)
@@ -123,9 +126,7 @@ public class AzureCloudProvider extends CloudProviderHelper {
         t.setVolumeSize(Integer.parseInt(getTestParameter().getWithDefault("azureInstanceVolumeSize", "100")));
         t.setVolumeType(getTestParameter().getWithDefault("azureInstanceVolumeType", "Standard_LRS"));
 
-        Map<String, Object> params = new HashMap<>();
-        params.put("encrypted", "false");
-        params.put("managedDisk", "true");
+        Map<String, Object> params = Map.of("encrypted", "false", "managedDisk", "true");
         t.setParameters(params);
         return t;
     }
@@ -170,6 +171,10 @@ public class AzureCloudProvider extends CloudProviderHelper {
         return getTestParameter().getWithDefault("azureSubnetId", SUBNET_DEFAULT_ID);
     }
 
+    public String getNewApplicationID() {
+        return getTestParameter().get(CREDENTIAL_NEWACCESS_KEY_ENV_KEY);
+    }
+
     public String getResourceGroupName() {
         return getTestParameter().getWithDefault("resourceGroupName", RESOURCE_GROUP_DEFAULT_NAME);
     }
@@ -196,14 +201,8 @@ public class AzureCloudProvider extends CloudProviderHelper {
 
     @Override
     public Map<String, Object> subnetProperties() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("subnetId", getSubnetId());
-        map.put("networkId", getVpcId());
-        map.put("resourceGroupName", getResourceGroupName());
-        map.put("noFirewallRules", getNoFirewallRules());
-        map.put("noPublicIp", getNoPublicIp());
-
-        return map;
+        return Map.of("subnetId", getSubnetId(), "networkId", getVpcId(), "resourceGroupName", getResourceGroupName(), "noFirewallRules",
+                getNoFirewallRules(), "noPublicIp", getNoPublicIp());
     }
 
     @Override
@@ -280,53 +279,39 @@ public class AzureCloudProvider extends CloudProviderHelper {
     }
 
     public Map<String, Object> azureCredentialDetails() {
-        Map<String, Object> map = new HashMap<>();
-        map.put(ACCESS_KEY_PARAM_KEY, getTestParameter().get(CREDENTIAL_ACCESS_KEY_ENV_KEY));
-        map.put(SECRET_KEY_PARAM_KEY, getTestParameter().get(CREDENTIAL_SECRET_KEY_ENV_KEY));
-        map.put(SUBSCRIPTION_ID_PARAM_KEY, getTestParameter().get(CREDENTIAL_SUBSCRIPTION_ID_ENV_KEY));
-        map.put(TENANT_ID_PARAM_KEY, getTestParameter().get(CREDENTIAL_TENANT_ID_ENV_KEY));
+        return Map.of(ACCESS_KEY_PARAM_KEY, getTestParameter().get(CREDENTIAL_ACCESS_KEY_ENV_KEY), SECRET_KEY_PARAM_KEY,
+                getTestParameter().get(CREDENTIAL_SECRET_KEY_ENV_KEY), SUBSCRIPTION_ID_PARAM_KEY, getTestParameter().get(CREDENTIAL_SUBSCRIPTION_ID_ENV_KEY),
+                TENANT_ID_PARAM_KEY, getTestParameter().get(CREDENTIAL_TENANT_ID_ENV_KEY));
+    }
 
-        return map;
+    public Map<String, Object> azureCredentialDetailsNewApplication() {
+        return Map.of(ACCESS_KEY_PARAM_KEY, getTestParameter().get(CREDENTIAL_NEWACCESS_KEY_ENV_KEY), SECRET_KEY_PARAM_KEY,
+                getTestParameter().get(CREDENTIAL_NEWSECRET_KEY_ENV_KEY), SUBSCRIPTION_ID_PARAM_KEY, getTestParameter().get(CREDENTIAL_SUBSCRIPTION_ID_ENV_KEY),
+                TENANT_ID_PARAM_KEY, getTestParameter().get(CREDENTIAL_TENANT_ID_ENV_KEY));
     }
 
     public Map<String, Object> azureCredentialDetailsInvalidAccessKey() {
-        Map<String, Object> map = new HashMap<>();
-        map.put(ACCESS_KEY_PARAM_KEY, GENERIC_TEST_VALUE);
-        map.put(SECRET_KEY_PARAM_KEY, getTestParameter().get(CREDENTIAL_SECRET_KEY_ENV_KEY));
-        map.put(SUBSCRIPTION_ID_PARAM_KEY, getTestParameter().get(CREDENTIAL_SUBSCRIPTION_ID_ENV_KEY));
-        map.put(TENANT_ID_PARAM_KEY, getTestParameter().get(CREDENTIAL_TENANT_ID_ENV_KEY));
-
-        return map;
+        return Map.of(ACCESS_KEY_PARAM_KEY, GENERIC_TEST_VALUE, SECRET_KEY_PARAM_KEY,
+                getTestParameter().get(CREDENTIAL_SECRET_KEY_ENV_KEY), SUBSCRIPTION_ID_PARAM_KEY, getTestParameter().get(CREDENTIAL_SUBSCRIPTION_ID_ENV_KEY),
+                TENANT_ID_PARAM_KEY, getTestParameter().get(CREDENTIAL_TENANT_ID_ENV_KEY));
     }
 
     public Map<String, Object> azureCredentialDetailsInvalidSecretKey() {
-        Map<String, Object> map = new HashMap<>();
-        map.put(ACCESS_KEY_PARAM_KEY, getTestParameter().get(CREDENTIAL_ACCESS_KEY_ENV_KEY));
-        map.put(SECRET_KEY_PARAM_KEY, GENERIC_TEST_VALUE);
-        map.put(SUBSCRIPTION_ID_PARAM_KEY, getTestParameter().get(CREDENTIAL_SUBSCRIPTION_ID_ENV_KEY));
-        map.put(TENANT_ID_PARAM_KEY, getTestParameter().get(CREDENTIAL_TENANT_ID_ENV_KEY));
-
-        return map;
+        return Map.of(ACCESS_KEY_PARAM_KEY, getTestParameter().get(CREDENTIAL_ACCESS_KEY_ENV_KEY), SECRET_KEY_PARAM_KEY,
+                GENERIC_TEST_VALUE, SUBSCRIPTION_ID_PARAM_KEY, getTestParameter().get(CREDENTIAL_SUBSCRIPTION_ID_ENV_KEY),
+                TENANT_ID_PARAM_KEY, getTestParameter().get(CREDENTIAL_TENANT_ID_ENV_KEY));
     }
 
     public Map<String, Object> azureCredentialDetailsInvalidSubscriptionID() {
-        Map<String, Object> map = new HashMap<>();
-        map.put(ACCESS_KEY_PARAM_KEY, getTestParameter().get(CREDENTIAL_ACCESS_KEY_ENV_KEY));
-        map.put(SECRET_KEY_PARAM_KEY, getTestParameter().get(CREDENTIAL_SECRET_KEY_ENV_KEY));
-        map.put(SUBSCRIPTION_ID_PARAM_KEY, GENERIC_TEST_VALUE);
-        map.put(TENANT_ID_PARAM_KEY, getTestParameter().get(CREDENTIAL_TENANT_ID_ENV_KEY));
-
-        return map;
+        return Map.of(ACCESS_KEY_PARAM_KEY, getTestParameter().get(CREDENTIAL_ACCESS_KEY_ENV_KEY), SECRET_KEY_PARAM_KEY,
+                getTestParameter().get(CREDENTIAL_SECRET_KEY_ENV_KEY), SUBSCRIPTION_ID_PARAM_KEY, GENERIC_TEST_VALUE,
+                TENANT_ID_PARAM_KEY, getTestParameter().get(CREDENTIAL_TENANT_ID_ENV_KEY));
     }
 
     public Map<String, Object> azureCredentialDetailsInvalidTenantID() {
-        Map<String, Object> map = new HashMap<>();
-        map.put(ACCESS_KEY_PARAM_KEY, getTestParameter().get(CREDENTIAL_ACCESS_KEY_ENV_KEY));
-        map.put(SECRET_KEY_PARAM_KEY, getTestParameter().get(CREDENTIAL_SECRET_KEY_ENV_KEY));
-        map.put(SUBSCRIPTION_ID_PARAM_KEY, getTestParameter().get(CREDENTIAL_SUBSCRIPTION_ID_ENV_KEY));
-        map.put(TENANT_ID_PARAM_KEY, GENERIC_TEST_VALUE);
-
-        return map;
+        return Map.of(ACCESS_KEY_PARAM_KEY, getTestParameter().get(CREDENTIAL_ACCESS_KEY_ENV_KEY), SECRET_KEY_PARAM_KEY,
+                getTestParameter().get(CREDENTIAL_SECRET_KEY_ENV_KEY), SUBSCRIPTION_ID_PARAM_KEY, getTestParameter().get(CREDENTIAL_SUBSCRIPTION_ID_ENV_KEY),
+                TENANT_ID_PARAM_KEY, GENERIC_TEST_VALUE);
     }
 
     @Override

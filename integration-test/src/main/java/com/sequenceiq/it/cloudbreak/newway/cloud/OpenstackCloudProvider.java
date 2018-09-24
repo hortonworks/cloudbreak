@@ -12,7 +12,6 @@ import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 public class OpenstackCloudProvider extends CloudProviderHelper {
@@ -45,6 +44,8 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
 
     private static final String NETWORKING_DEFAULT_OPTION = "self-service";
 
+    private static final String CREDENTIAL_ENGENDPOINT_URL = "integrationtest.openstackEngcredential.endpoint";
+
     private final ResourceHelper<?> resourceHelper;
 
     public OpenstackCloudProvider(TestParameter testParameter) {
@@ -52,14 +53,18 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
         resourceHelper = null;
     }
 
+    public String engOpenStackEndpoint() {
+        return getTestParameter().get(CREDENTIAL_ENGENDPOINT_URL);
+    }
+
     @Override
     public CredentialEntity aValidCredential(boolean create) {
-        CredentialEntity credential = create ? Credential.isCreated() : Credential.request();
+        CredentialEntity credential = create ? Credential.created() : Credential.request();
         return credential
                 .withName(getCredentialName())
                 .withDescription(CREDENTIAL_DEFAULT_DESCRIPTION)
                 .withCloudPlatform(OPENSTACK_CAPITAL)
-                .withParameters(openstackCredentialDetails());
+                .withParameters(openstackCredentialDetailsKilo());
     }
 
     @Override
@@ -159,33 +164,19 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
 
     @Override
     public Map<String, Object> newNetworkProperties() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("publicNetId", getPublicNetId());
-
-        return map;
+        return Map.of("publicNetId", getPublicNetId());
     }
 
     @Override
     public Map<String, Object> networkProperties() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("publicNetId", getPublicNetId());
-        map.put("networkId", getVpcId());
-        map.put("routerId", getRouterId());
-
-        return map;
+        return Map.of("publicNetId", getPublicNetId(), "networkId", getVpcId(), "routerId",
+                getRouterId());
     }
 
     @Override
     public Map<String, Object> subnetProperties() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("networkingOption", getNetworkingOption());
-        map.put("publicNetId", getPublicNetId());
-        map.put("subnetId", getSubnetId());
-        map.put("networkId", getVpcId());
-        map.put("routerId", getRouterId());
-        map.put("internetGatewayId", getInternetGatewayId());
-
-        return map;
+        return Map.of("networkingOption", getNetworkingOption(), "publicNetId", getPublicNetId(), "subnetId", getSubnetId(),
+                "networkId", getVpcId(), "routerId", getRouterId(), "internetGatewayId", getInternetGatewayId());
     }
 
     @Override
@@ -236,56 +227,58 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
         throw new NotImplementedException("not implemented!");
     }
 
-    public Map<String, Object> openstackCredentialDetails() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("tenantName", getTestParameter().get("integrationtest.openstackcredential.tenantName"));
-        map.put("userName", getTestParameter().get("integrationtest.openstackcredential.userName"));
-        map.put("password", getTestParameter().get("integrationtest.openstackcredential.password"));
-        map.put("endpoint", getTestParameter().get("integrationtest.openstackcredential.endpoint"));
-        map.put("keystoneVersion", "cb-keystone-v2");
-        map.put("selector", "cb-keystone-v2");
-
-        return map;
+    public Map<String, Object> openstackCredentialDetailsKilo() {
+        return Map.of("tenantName", getTestParameter().get("integrationtest.openstackcredential.tenantName"), "userName",
+                getTestParameter().get("integrationtest.openstackcredential.userName"), "password",
+                getTestParameter().get("integrationtest.openstackcredential.password"), "endpoint",
+                getTestParameter().get("integrationtest.openstackcredential.endpoint"), "keystoneVersion", "cb-keystone-v2",
+                "selector", "cb-keystone-v2");
     }
 
-    public Map<String, Object> openstackV3CredentialDetails() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("tenantName", getTestParameter().get("integrationtest.openstackV3credential.tenantName"));
-        map.put("userDomain", getTestParameter().get("integrationtest.openstackV3credential.userDomain"));
-        map.put("userName", getTestParameter().get("integrationtest.openstackV3credential.userName"));
-        map.put("password", getTestParameter().get("integrationtest.openstackV3credential.password"));
-        map.put("endpoint", getTestParameter().get("integrationtest.openstackV3credential.endpoint"));
-        map.put("projectDomainName", getTestParameter().get("integrationtest.openstackV3credential.projectDomainName"));
-        map.put("projectName", getTestParameter().get("integrationtest.openstackV3credential.projectName"));
-        map.put("keystoneAuthScope", getTestParameter().get("integrationtest.openstackV3credential.keystoneAuthScope"));
-        map.put("keystoneVersion", "cb-keystone-v3");
-        map.put("apiFacing", getTestParameter().get("integrationtest.openstackV3credential.apiFacing"));
-        map.put("selector", "cb-keystone-v3-project-scope");
+    public Map<String, Object> openstackCredentialDetailsKiloAdmin() {
+        return Map.of("tenantName", getTestParameter().get("integrationtest.openstackAdmincredential.tenantName"), "userName",
+                getTestParameter().get("integrationtest.openstackAdmincredential.userName"), "password",
+                getTestParameter().get("integrationtest.openstackAdmincredential.password"), "endpoint",
+                getTestParameter().get("integrationtest.openstackAdmincredential.endpoint"), "keystoneVersion", "cb-keystone-v2",
+                "selector", "cb-keystone-v2");
+    }
+
+    public Map<String, Object> openstackCredentialDetailsEngineering() {
+        return Map.of("tenantName", getTestParameter().get("integrationtest.openstackEngcredential.tenantName"), "userName",
+                getTestParameter().get("integrationtest.openstackEngcredential.userName"), "password",
+                getTestParameter().get("integrationtest.openstackEngcredential.password"), "endpoint",
+                getTestParameter().get("integrationtest.openstackEngcredential.endpoint"), "keystoneVersion", "cb-keystone-v2",
+                "selector", "cb-keystone-v2");
+    }
+
+    public Map<String, Object> openstackCredentialDetailsField() {
+        Map<String, Object> map = Map.ofEntries(
+                Map.entry("tenantName", getTestParameter().get("integrationtest.openstackFieldcredential.tenantName")),
+                Map.entry("userDomain", getTestParameter().get("integrationtest.openstackFieldcredential.userDomain")),
+                Map.entry("userName", getTestParameter().get("integrationtest.openstackFieldcredential.userName")),
+                Map.entry("password", getTestParameter().get("integrationtest.openstackFieldcredential.password")),
+                Map.entry("endpoint", getTestParameter().get("integrationtest.openstackFieldcredential.endpoint")),
+                Map.entry("projectDomainName", getTestParameter().get("integrationtest.openstackFieldcredential.projectDomainName")),
+                Map.entry("projectName", getTestParameter().get("integrationtest.openstackFieldcredential.projectName")),
+                Map.entry("keystoneAuthScope", getTestParameter().get("integrationtest.openstackFieldcredential.keystoneAuthScope")),
+                Map.entry("keystoneVersion", "cb-keystone-v3"),
+                Map.entry("apiFacing", getTestParameter().get("integrationtest.openstackFieldcredential.apiFacing")),
+                Map.entry("selector", "cb-keystone-v3-project-scope"));
 
         return map;
     }
 
     public Map<String, Object> openstackCredentialDetailsInvalidUser() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("tenantName", getTestParameter().get("integrationtest.openstackcredential.tenantName"));
-        map.put("userName", "kisnyul");
-        map.put("password", getTestParameter().get("integrationtest.openstackcredential.password"));
-        map.put("endpoint", getTestParameter().get("integrationtest.openstackcredential.endpoint"));
-        map.put("keystoneVersion", "cb-keystone-v2");
-        map.put("selector", "cb-keystone-v2");
-
-        return map;
+        return Map.of("tenantName", getTestParameter().get("integrationtest.openstackcredential.tenantName"), "userName", "kisnyul",
+                "password", getTestParameter().get("integrationtest.openstackcredential.password"), "endpoint",
+                getTestParameter().get("integrationtest.openstackcredential.endpoint"), "keystoneVersion", "cb-keystone-v2",
+                "selector", "cb-keystone-v2");
     }
 
     public Map<String, Object> openstackCredentialDetailsInvalidEndpoint() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("tenantName", getTestParameter().get("integrationtest.openstackcredential.tenantName"));
-        map.put("userName", getTestParameter().get("integrationtest.openstackcredential.userName"));
-        map.put("password", getTestParameter().get("integrationtest.openstackcredential.password"));
-        map.put("endpoint", "https://index.hu/");
-        map.put("keystoneVersion", "cb-keystone-v2");
-        map.put("selector", "cb-keystone-v2");
-
-        return map;
+        return Map.of("tenantName", getTestParameter().get("integrationtest.openstackcredential.tenantName"), "userName",
+                getTestParameter().get("integrationtest.openstackcredential.userName"), "password",
+                getTestParameter().get("integrationtest.openstackcredential.password"), "endpoint",
+                "https://index.hu/", "keystoneVersion", "cb-keystone-v2", "selector", "cb-keystone-v2");
     }
 }

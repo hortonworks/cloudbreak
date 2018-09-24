@@ -68,10 +68,10 @@ public class GeneralRecipeClusterTests extends CloudbreakTest {
     @Parameters("provider")
     public void beforeTest(@org.testng.annotations.Optional(OpenstackCloudProvider.OPENSTACK) String provider) throws Exception {
         LOGGER.info("before cluster test set provider: " + provider);
-        if (cloudProvider != null) {
-            LOGGER.info(cloudProvider + " cloud provider already set - running from factory test");
-        } else {
+        if (cloudProvider == null) {
             cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter());
+        } else {
+            LOGGER.info("cloud provider already set - running from factory test");
         }
         setUpRecipes();
     }
@@ -103,7 +103,7 @@ public class GeneralRecipeClusterTests extends CloudbreakTest {
     @Priority(20)
     public void testCheckRecipesOnNodes() throws Exception {
         given(cloudProvider.aValidCredential());
-        given(cloudProvider.aValidStackIsCreated(), "a stack is created");
+        given(cloudProvider.aValidStackCreated(), "a stack is created");
         when(Stack.get());
         then(Stack.checkRecipes(HOSTGROUPS, FILES_PATH, getTestParameter().getRequired("integrationtest.defaultPrivateKeyFile"),
                 getRequiredRecipeAmountForRunningCluster()), "check recipes are ran on all nodes");
@@ -113,7 +113,7 @@ public class GeneralRecipeClusterTests extends CloudbreakTest {
     @Priority(30)
     public void testTerminateClusterCheckRecipePreTerm() throws Exception {
         given(cloudProvider.aValidCredential());
-        given(cloudProvider.aValidStackIsCreated(), "a stack is created");
+        given(cloudProvider.aValidStackCreated(), "a stack is created");
         when(Stack.delete());
         then(Stack.waitAndCheckClusterDeleted(), "stack has been deleted");
     }
@@ -135,7 +135,7 @@ public class GeneralRecipeClusterTests extends CloudbreakTest {
     }
 
     private void setUpRecipes() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         for (String recipe : BASH_RECIPE_NAMES) {
             given(Recipe.isCreated()
                     .withName(recipe)

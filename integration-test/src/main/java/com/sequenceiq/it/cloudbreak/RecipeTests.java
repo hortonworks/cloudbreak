@@ -37,7 +37,7 @@ public class RecipeTests extends CloudbreakTest {
 
     @Test
     public void testCreateValidRecipePostAmbari() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(Recipe.request()
                 .withName(VALID_RECIPE_NAME + "-post-ambari")
                 .withDescription(VALID_RECIPE_DESCRIPTION)
@@ -52,7 +52,7 @@ public class RecipeTests extends CloudbreakTest {
 
     @Test
     public void testCreateValidRecipePreAmbari() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(Recipe.request()
                 .withName(VALID_RECIPE_NAME + "-pre-ambari")
                 .withDescription(VALID_RECIPE_DESCRIPTION)
@@ -67,7 +67,7 @@ public class RecipeTests extends CloudbreakTest {
 
     @Test
     public void testCreateValidRecipePostCluster() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(Recipe.request()
                 .withName(VALID_RECIPE_NAME + "-post-cluster")
                 .withDescription(VALID_RECIPE_DESCRIPTION)
@@ -83,7 +83,7 @@ public class RecipeTests extends CloudbreakTest {
 
     @Test
     public void testCreateValidRecipePreTerm() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(Recipe.request()
                 .withName(VALID_RECIPE_NAME + "-pre-term")
                 .withDescription(VALID_RECIPE_DESCRIPTION)
@@ -98,7 +98,7 @@ public class RecipeTests extends CloudbreakTest {
 
     @Test
     public void testCreateValidRecipeFile() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(Recipe.request()
                 .withName(VALID_RECIPE_NAME + "-from-file")
                 .withDescription(VALID_RECIPE_DESCRIPTION)
@@ -113,7 +113,7 @@ public class RecipeTests extends CloudbreakTest {
 
     @Test(expectedExceptions = BadRequestException.class)
     public void testCreateSpecialNameRecipe() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(Recipe.request()
                         .withName(SPECIAL_RECIPE_NAME)
                         .withDescription(VALID_RECIPE_DESCRIPTION)
@@ -125,7 +125,7 @@ public class RecipeTests extends CloudbreakTest {
 
     @Test(expectedExceptions = BadRequestException.class)
     public void testCreateAgainRecipe() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(Recipe.isCreated()
                 .withName(VALID_RECIPE_NAME + "-again"));
         given(Recipe.request()
@@ -142,7 +142,7 @@ public class RecipeTests extends CloudbreakTest {
 
     @Test(expectedExceptions = BadRequestException.class)
     public void testCreateInvalidRecipeShortName() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(Recipe.request()
                 .withName(INVALID_RECIPE_NAME_SHORT)
                 .withDescription(VALID_RECIPE_DESCRIPTION)
@@ -157,7 +157,7 @@ public class RecipeTests extends CloudbreakTest {
 
     @Test(expectedExceptions = BadRequestException.class)
     public void testCreateInvalidRecipeLongName() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(Recipe.request()
                 .withName(createLongString("a", 101))
                 .withDescription(VALID_RECIPE_DESCRIPTION)
@@ -172,7 +172,7 @@ public class RecipeTests extends CloudbreakTest {
 
     @Test(expectedExceptions = BadRequestException.class)
     public void testCreateInvalidRecipeLongDescr() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(Recipe.request()
                 .withName(VALID_RECIPE_NAME)
                 .withDescription(createLongString("a", 1001))
@@ -187,7 +187,7 @@ public class RecipeTests extends CloudbreakTest {
 
     @Test
     public void testCreateDeleteValidCreateAgain() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
 
         given(Recipe.isCreatedDeleted()
                 .withName(VALID_RECIPE_NAME + "-delete-create")
@@ -210,7 +210,7 @@ public class RecipeTests extends CloudbreakTest {
 
     @AfterSuite
     public void cleanUp() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         when(Recipe.getAll());
         then(Recipe.assertThis(
                 (recipe, t) -> {

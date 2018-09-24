@@ -40,7 +40,7 @@ public class RegionProviderSpecTests extends CloudbreakTest {
     }
 
     private void getSupportedAvailabilityZones(CloudProvider provider, String credentialName) throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(provider.aValidCredential()
                 .withName(credentialName), provider.getPlatform() + " credential is created");
         given(Region.request(), provider.getPlatform() + " region request");
@@ -66,7 +66,7 @@ public class RegionProviderSpecTests extends CloudbreakTest {
         for (String aNameArray : nameArray) {
             LOGGER.info("Delete credential: \'{}\'", aNameArray.toLowerCase().trim());
             try {
-                given(CloudbreakClient.isCreated());
+                given(CloudbreakClient.created());
                 given(Credential.request()
                         .withName(aNameArray));
                 when(Credential.delete());
@@ -82,7 +82,7 @@ public class RegionProviderSpecTests extends CloudbreakTest {
     private void testAzureAvailabilityZoneSupport() throws Exception {
         AzureCloudProvider provider = new AzureCloudProvider(getTestParameter());
 
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(provider.aValidCredential()
                 .withName(AZURE_CRED_NAME), "Azure credential is created");
         given(Region.request(), "Azure region request");

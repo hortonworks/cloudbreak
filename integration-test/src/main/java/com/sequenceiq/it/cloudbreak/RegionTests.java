@@ -38,11 +38,11 @@ public class RegionTests extends CloudbreakTest {
     @Parameters("provider")
     public void beforeTest(@Optional(OpenstackCloudProvider.OPENSTACK) String provider) {
         LOGGER.info("Provider: {} Region test setup has been started.", provider);
-        if (cloudProvider != null) {
-            LOGGER.info("{} provider already set - running from factory test", cloudProvider);
-            return;
+        if (cloudProvider == null) {
+            cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter());
+        } else {
+            LOGGER.info("cloud provider already set - running from factory test");
         }
-        cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter());
     }
 
     @AfterTest
@@ -50,7 +50,7 @@ public class RegionTests extends CloudbreakTest {
         LOGGER.info("Delete credential with name: {}", cloudProvider.getCredentialName());
 
         try {
-            given(CloudbreakClient.isCreated());
+            given(CloudbreakClient.created());
             given(Credential.request()
                     .withName(cloudProvider.getCredentialName()));
             when(Credential.delete());
@@ -65,7 +65,7 @@ public class RegionTests extends CloudbreakTest {
 
     @Test(priority = 1, groups = "regions")
     public void testDefaultRegionForCredential() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential(), cloudProvider.getPlatform() + " credential is created");
         given(Region.request(), cloudProvider.getPlatform() + " region request");
         when(Region.getPlatformRegionsWithRetry(Integer.parseInt(getTestParameter().get("retryQuantity"))), "Default region is requested to "
@@ -83,7 +83,7 @@ public class RegionTests extends CloudbreakTest {
 
     @Test(priority = 2, groups = "regions")
     public void testListRegionsForCredential() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential(), cloudProvider.getPlatform() + " credential is created");
         given(Region.request(), cloudProvider.getPlatform() + " region request");
         when(Region.getPlatformRegionsWithRetry(Integer.parseInt(getTestParameter().get("retryQuantity"))), "Regions are requested to "
@@ -102,7 +102,7 @@ public class RegionTests extends CloudbreakTest {
 
     @Test(priority = 3, groups = "regions")
     public void testListDisplayNamesForCredential() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential(), cloudProvider.getPlatform() + " credential is created");
         given(Region.request(), cloudProvider.getPlatform() + " region request");
         when(Region.getPlatformRegionsWithRetry(Integer.parseInt(getTestParameter().get("retryQuantity"))), "Regions are requested to "
@@ -121,7 +121,7 @@ public class RegionTests extends CloudbreakTest {
 
     @Test(priority = 4, groups = "regions")
     public void testListAvailabilityZonesForCredential() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential(), cloudProvider.getPlatform() + " credential is created");
         given(Region.request(), cloudProvider.getPlatform() + " region request");
         when(Region.getPlatformRegionsWithRetry(Integer.parseInt(getTestParameter().get("retryQuantity"))), "Regions are requested to "

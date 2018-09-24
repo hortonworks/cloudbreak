@@ -10,13 +10,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-public class Retry {
+public class RetryOnGatewayTimeout {
 
     private static final String OUT_OF_ATTEMPTS_MESSAGE = "Ran out of retries but still getting timeout from the API.";
 
     private static final List<WebApplicationException> STORED_EXCEPTIONS = new LinkedList<>();
 
-    private Retry() {
+    private RetryOnGatewayTimeout() {
     }
 
     /**
@@ -54,7 +54,7 @@ public class Retry {
             doRetry(method, attemptQuantity);
         } catch (WebApplicationException e) {
             STORED_EXCEPTIONS.add(e);
-            if (isResponseTimedOut(e)) {
+            if (isResponseGatewayTimedOut(e)) {
                 attemptQuantity--;
                 retry(method, attemptQuantity);
             } else {
@@ -64,7 +64,7 @@ public class Retry {
     }
 
     private static <T> T processResult(WebApplicationException e, Callable<T> method, int attemptQuantity) {
-        if (!isResponseTimedOut(e)) {
+        if (!isResponseGatewayTimedOut(e)) {
             throw e;
         }
         attemptQuantity--;
@@ -88,7 +88,7 @@ public class Retry {
         }
     }
 
-    private static boolean isResponseTimedOut(WebApplicationException e) {
+    private static boolean isResponseGatewayTimedOut(WebApplicationException e) {
         try (Response response = e.getResponse()) {
             return response.getStatus() == HttpServletResponse.SC_GATEWAY_TIMEOUT;
         }

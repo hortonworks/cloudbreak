@@ -38,7 +38,7 @@ public class CloudbreakTest extends GherkinTest {
 
     public static final String AUTOSCALE_SECRET = "AUTOSCALE_SECRET";
 
-    public static final String WORKSPACE_ID = "ORGANIZTION_ID";
+    public static final String WORKSPACE_ID = "ORGANIZATION_ID";
 
     public static final String LOG_SEARCH_QUERY_TYPES = "LOG_SEARCH_QUERY_TYPES";
 
@@ -99,7 +99,7 @@ public class CloudbreakTest extends GherkinTest {
                 LogSearchUtil.LOG_SEARCH_CBOWNER_QUERY_TYPE, defaultUaaUser);
 
         try {
-            CloudbreakClient client = CloudbreakClient.isCreated();
+            CloudbreakClient client = CloudbreakClient.created();
             client.create(testContext);
             testContext.putContextParam(WORKSPACE_ID,
                     client.getCloudbreakClient().workspaceV3Endpoint().getByName(defaultUaaUser).getId());

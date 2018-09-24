@@ -1,10 +1,10 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
-import java.util.function.BiConsumer;
-import java.util.function.Function;
-
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.v3.CredentialV3Action;
+
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 public class Credential extends CredentialEntity {
 
@@ -24,14 +24,22 @@ public class Credential extends CredentialEntity {
         return new Credential();
     }
 
-    public static Credential isCreated() {
+    public static Credential created() {
+        return created(1);
+    }
+
+    public static Credential created(int retryQuantity) {
         Credential credential = new Credential();
-        credential.setCreationStrategy(CredentialV3Action::createInGiven);
+        credential.setCreationStrategy((testContext, entity) -> CredentialV3Action.createInGiven(testContext, entity, retryQuantity));
         return credential;
     }
 
-    public static Credential isDeleted(Credential credential) {
-        credential.setCreationStrategy(CredentialV3Action::createDeleteInGiven);
+    public static Credential deleted(Credential credential) {
+        return deleted(credential, 1);
+    }
+
+    public static Credential deleted(Credential credential, int retryQuantity) {
+        credential.setCreationStrategy((testContext, entity) -> CredentialV3Action.createDeleteInGiven(testContext, entity, retryQuantity));
 
         return credential;
     }
@@ -44,8 +52,24 @@ public class Credential extends CredentialEntity {
         return post(CREDENTIAL);
     }
 
+    public static Action<Credential> put(String key) {
+        return new Action<>(getTestContextCredential(key), CredentialV3Action::put);
+    }
+
+    public static Action<Credential> put() {
+        return put(CREDENTIAL);
+    }
+
     public static Action<Credential> get(String key) {
         return new Action<>(getTestContextCredential(key), CredentialV3Action::get);
+    }
+
+    public static Action<Credential> getWithRetryOnTimeout(int retryQuantity) {
+        return getWithRetryOnTimeout(CREDENTIAL, retryQuantity);
+    }
+
+    public static Action<Credential> getWithRetryOnTimeout(String key, int retryQuantity) {
+        return new Action<>(getTestContextCredential(key), (testContext, entity) -> CredentialV3Action.get(testContext, entity, retryQuantity));
     }
 
     public static Action<Credential> get() {
@@ -54,6 +78,10 @@ public class Credential extends CredentialEntity {
 
     public static Action<Credential> getAll() {
         return new Action<>(getNew(), CredentialV3Action::getAll);
+    }
+
+    public static Action<Credential> getAllWithRetryOnTimeout(int retryQuantity) {
+        return new Action<>(getNew(), (testContext, entity) -> CredentialV3Action.getAll(testContext, entity, retryQuantity));
     }
 
     public static Action<Credential> delete(String key) {

@@ -27,7 +27,7 @@ public class EncryptedClusterTests extends ClusterTests {
 
     @Test(dataProvider = "providernameblueprintimage", priority = 10)
     public void testCreateNewEncryptedCluster(CloudProvider cloudProvider, String clusterName, String blueprintName, String imageId) throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
         given(Cluster.request()
                         .withAmbariRequest(cloudProvider.ambariRequestWithBlueprintName(blueprintName)),

@@ -41,7 +41,7 @@ public class VmTypeTests extends CloudbreakTest {
     }
 
     private void countVMTypesForCredentialInDefaultAvailabilityZone(CloudProvider provider, String credentialName) throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(provider.aValidCredential()
                 .withName(credentialName), provider.getPlatform() + " credential is created");
         given(VmType.request()
@@ -69,7 +69,7 @@ public class VmTypeTests extends CloudbreakTest {
     }
 
     private void listVMTypesForCredentialInDefaultAvailabilityZone(CloudProvider provider, String credentialName) throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(provider.aValidCredential()
                 .withName(credentialName), provider.getPlatform() + " credential is created");
         given(VmType.request()
@@ -93,7 +93,7 @@ public class VmTypeTests extends CloudbreakTest {
     }
 
     private void getDefaultVMTypeForCredentialInDefaultAvailabilityZone(CloudProvider provider, String credentialName) throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(provider.aValidCredential()
                 .withName(credentialName), provider.getPlatform() + " credential is created");
         given(VmType.request()
@@ -129,7 +129,7 @@ public class VmTypeTests extends CloudbreakTest {
             LOGGER.info("Delete credential: {}", aNameArray.toLowerCase().trim());
 
             try {
-                given(CloudbreakClient.isCreated());
+                given(CloudbreakClient.created());
                 given(Credential.request()
                         .withName(aNameArray));
                 when(Credential.delete());
@@ -145,7 +145,7 @@ public class VmTypeTests extends CloudbreakTest {
     public void testCountAzureVMTypesForCredentialInDefaultRegion() throws Exception {
         AzureCloudProvider provider = new AzureCloudProvider(getTestParameter());
 
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(provider.aValidCredential()
                 .withName(AZURE_CRED_NAME), "Azure credential is created");
         given(VmType.request()
@@ -195,7 +195,7 @@ public class VmTypeTests extends CloudbreakTest {
     public void testListAzureVMTypesForCredentialInDefaultRegion() throws Exception {
         AzureCloudProvider provider = new AzureCloudProvider(getTestParameter());
 
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(provider.aValidCredential()
                 .withName(AZURE_CRED_NAME), "Azure credential is created");
         given(VmType.request()
@@ -241,7 +241,7 @@ public class VmTypeTests extends CloudbreakTest {
     public void testAzureDefaultVMTypeForCredentialInDefaultRegion() throws Exception {
         AzureCloudProvider provider = new AzureCloudProvider(getTestParameter());
 
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(provider.aValidCredential()
                 .withName(AZURE_CRED_NAME), "Azure credential is created");
         given(VmType.request()
@@ -268,7 +268,7 @@ public class VmTypeTests extends CloudbreakTest {
     public void testOSDefaultVMTypeSupport() throws Exception {
         OpenstackCloudProvider provider = new OpenstackCloudProvider(getTestParameter());
 
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(provider.aValidCredential()
                 .withName(OS_CRED_NAME), "OpenStack credential is created");
         given(VmType.request()

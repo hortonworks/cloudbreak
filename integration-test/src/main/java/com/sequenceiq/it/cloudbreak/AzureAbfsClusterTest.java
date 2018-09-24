@@ -21,7 +21,7 @@ public class AzureAbfsClusterTest extends CloudbreakTest {
     @Parameters({"clusterName", "versionDefinitionFile"})
     public void testCreateClusterWithAbfs(String clusterName, String versionDefinitionFile) throws Exception {
         AzureCloudProvider azureCloudProvider = new AzureCloudProvider(getTestParameter());
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(azureCloudProvider.aValidCredential());
         given(azureCloudProvider.aValidClusterWithFs(versionDefinitionFile));
         given(azureCloudProvider.aValidStackRequest()
@@ -40,7 +40,7 @@ public class AzureAbfsClusterTest extends CloudbreakTest {
     @Test(priority = 20)
     @Parameters({"sshCommand", "sshChecker", "clusterName"})
     public void testTerasort(String sshCommand, String sshChecker, String clusterName) throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(Stack.request().withName(clusterName));
         when(Stack.get());
         then(Stack.checkSshCommand(HOSTGROUPS, defaultPrivateKeyFile, sshCommand, sshChecker), "check terasort is successful");
@@ -49,7 +49,7 @@ public class AzureAbfsClusterTest extends CloudbreakTest {
     @Test(priority = 30)
     @Parameters({"clusterName"})
     public void cleanUpFs(String clusterName) throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(Stack.request().withName(clusterName));
         when(Stack.get());
         then(Stack.checkSshCommand(HOSTGROUPS, defaultPrivateKeyFile, "hdfs dfs -rm -R abfs://e2econtainer@cloudbreakabfs.dfs.core.windows.net/tera",
@@ -59,7 +59,7 @@ public class AzureAbfsClusterTest extends CloudbreakTest {
     @Test(priority = 40)
     @Parameters({"clusterName"})
     public void testTerminateCluster(String clusterName) throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(Stack.request().withName(clusterName));
         when(Stack.get());
         when(Stack.delete());

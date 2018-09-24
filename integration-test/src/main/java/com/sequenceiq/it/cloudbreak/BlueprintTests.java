@@ -1,12 +1,9 @@
 package com.sequenceiq.it.cloudbreak;
 
-import java.io.IOException;
-
-import javax.inject.Inject;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.ForbiddenException;
-import javax.ws.rs.core.Response;
-
+import com.sequenceiq.it.cloudbreak.newway.Blueprint;
+import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
+import com.sequenceiq.it.util.LongStringGeneratorUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StreamUtils;
@@ -15,10 +12,11 @@ import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.newway.Blueprint;
-import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
-import com.sequenceiq.it.util.LongStringGeneratorUtil;
+import javax.inject.Inject;
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.ForbiddenException;
+import javax.ws.rs.core.Response;
+import java.io.IOException;
 
 public class BlueprintTests extends CloudbreakTest {
 
@@ -51,7 +49,7 @@ public class BlueprintTests extends CloudbreakTest {
 
     @Test(priority = 1, groups = "blueprints")
     public void testCreateValidBlueprint() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(Blueprint.request()
                 .withName(VALID_BP_NAME)
                 .withDescription(BP_DESCRIPTION)
@@ -66,7 +64,7 @@ public class BlueprintTests extends CloudbreakTest {
     //BUG-95607
     @Test(priority = 2, groups = "blueprints")
     public void testCreateSpecialCharacterBlueprint() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(Blueprint.request()
                 .withName(SPECIAL_BP_NAME)
                 .withDescription(BP_DESCRIPTION)
@@ -80,7 +78,7 @@ public class BlueprintTests extends CloudbreakTest {
 
     @Test(expectedExceptions = BadRequestException.class, priority = 3, groups = "blueprints")
     public void testCreateBlueprintWithIllegalSemicolonCharacterInNameShouldThrowBadRequestException() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         String blueprintName = String.format(ILLEGAL_BP_NAME, ";");
         given(Blueprint.request()
                 .withName(blueprintName)
@@ -91,7 +89,7 @@ public class BlueprintTests extends CloudbreakTest {
 
     @Test(expectedExceptions = BadRequestException.class, priority = 4, groups = "blueprints")
     public void testCreateBlueprintWithIllegalPercentageCharacterInNameShouldThrowBadRequestException() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         String blueprintName = String.format(ILLEGAL_BP_NAME, "%");
         given(Blueprint.request()
                 .withName(blueprintName)
@@ -102,7 +100,7 @@ public class BlueprintTests extends CloudbreakTest {
 
     @Test(expectedExceptions = BadRequestException.class, priority = 5, groups = "blueprints")
     public void testCreateBlueprintWithIllegalSlashCharacterInNameShouldThrowBadRequestException() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         String blueprintName = String.format(ILLEGAL_BP_NAME, "/");
         given(Blueprint.request()
                 .withName(blueprintName)
@@ -113,7 +111,7 @@ public class BlueprintTests extends CloudbreakTest {
 
     @Test(expectedExceptions = BadRequestException.class, priority = 6, groups = "blueprints")
     public void testCreateAgainBlueprint() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(Blueprint.isCreated()
                 .withName(AGAIN_BP_NAME), AGAIN_BP_NAME + " blueprint is created.");
         given(Blueprint.request()
@@ -126,7 +124,7 @@ public class BlueprintTests extends CloudbreakTest {
     //"The length of the blueprint's name has to be in range of 1 to 100"
     @Test(expectedExceptions = BadRequestException.class, priority = 7, groups = "blueprints")
     public void testCreateInvalidShortBlueprint() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(Blueprint.request()
                 .withName(INVALID_SHORT_BP_NAME)
                 .withDescription(BP_DESCRIPTION)
@@ -139,7 +137,7 @@ public class BlueprintTests extends CloudbreakTest {
     public void testCreateInvalidLongBlueprint() throws Exception {
         String invalidLongName = longStringGeneratorUtil.stringGenerator(101);
 
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(Blueprint.request()
                 .withName(invalidLongName)
                 .withDescription(BP_DESCRIPTION)
@@ -153,7 +151,7 @@ public class BlueprintTests extends CloudbreakTest {
     public void testCreateLongDescriptionBlueprint() throws Exception {
         String invalidLongDescripton = longStringGeneratorUtil.stringGenerator(1001);
 
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(Blueprint.request()
                 .withName(LONG_DC_BP_NAME)
                 .withDescription(invalidLongDescripton)
@@ -163,7 +161,7 @@ public class BlueprintTests extends CloudbreakTest {
 
     @Test(expectedExceptions = BadRequestException.class, priority = 10, groups = "blueprints")
     public void testCreateEmptyJSONBlueprintException() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(Blueprint.request()
                 .withName(EMPTY_BP_NAME)
                 .withDescription(BP_DESCRIPTION)
@@ -173,7 +171,7 @@ public class BlueprintTests extends CloudbreakTest {
 
     @Test(expectedExceptions = BadRequestException.class, priority = 11, groups = "blueprints")
     public void testCreateEmptyFileBlueprintException() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(Blueprint.request()
                 .withName(EMPTY_BP_NAME)
                 .withDescription(BP_DESCRIPTION)
@@ -183,7 +181,7 @@ public class BlueprintTests extends CloudbreakTest {
 
     @Test(priority = 12, groups = "blueprints")
     public void testCreateEmptyFilelueprintMessage() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(Blueprint.request()
                 .withName(EMPTY_BP_NAME)
                 .withDescription(BP_DESCRIPTION)
@@ -205,7 +203,7 @@ public class BlueprintTests extends CloudbreakTest {
 
     @Test(expectedExceptions = BadRequestException.class, priority = 13, groups = "blueprints")
     public void testCreateInvalidURLBlueprintException() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(Blueprint.request()
                 .withName(INVALIDURL_BP_NAME)
                 .withDescription(BP_DESCRIPTION)
@@ -215,7 +213,7 @@ public class BlueprintTests extends CloudbreakTest {
 
     @Test(priority = 14, groups = "blueprints")
     public void testCreateInvalidURLBlueprintMessage() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(Blueprint.request()
                 .withName(INVALIDURL_BP_NAME)
                 .withDescription(BP_DESCRIPTION)
@@ -237,7 +235,7 @@ public class BlueprintTests extends CloudbreakTest {
 
     @Test(priority = 15, groups = "blueprints")
     public void testDeleteValidBlueprint() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(Blueprint.request()
                 .withName(DELETE_BP_NAME), DELETE_BP_NAME + " blueprint delete request.");
         when(Blueprint.delete(), DELETE_BP_NAME + " blueprint delete request has been posted.");
@@ -249,7 +247,7 @@ public class BlueprintTests extends CloudbreakTest {
 
     @BeforeTest
     public void testCreateDeleteBlueprint() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(Blueprint.request()
                 .withName(DELETE_BP_NAME)
                 .withDescription(BP_DESCRIPTION)
@@ -264,7 +262,7 @@ public class BlueprintTests extends CloudbreakTest {
         for (String aNameArray : nameArray) {
             LOGGER.info("Delete blueprint: \'{}\'", aNameArray.toLowerCase().trim());
             try {
-                given(CloudbreakClient.isCreated());
+                given(CloudbreakClient.created());
                 given(Blueprint.request()
                         .withName(aNameArray));
                 when(Blueprint.delete());

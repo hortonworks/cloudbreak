@@ -44,7 +44,7 @@ public class ImageCatalogTests extends CloudbreakTest {
 
     @Test
     public void testCreateValidImageCatalog() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(ImageCatalog.request()
                 .withName(VALID_IMAGECATALOG_NAME)
                 .withUrl(VALID_IMAGECATALOG_URL),  "an imagecatalog request"
@@ -56,7 +56,7 @@ public class ImageCatalogTests extends CloudbreakTest {
 
     @Test(expectedExceptions = BadRequestException.class)
     public void testCreateInvalidImageCatalogShortName() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(ImageCatalog.request()
                 .withName(INVALID_IMAGECATALOG_NAME_SHORT)
                 .withUrl(VALID_IMAGECATALOG_URL), "an imagecatalog request with short name"
@@ -66,7 +66,7 @@ public class ImageCatalogTests extends CloudbreakTest {
 
     @Test(expectedExceptions = BadRequestException.class)
     public void testCreateInvalidImageCatalogLongName() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(ImageCatalog.request()
                 .withName(longStringGeneratorUtil.stringGenerator(101))
                 .withUrl(VALID_IMAGECATALOG_URL), "an imagecatalog request with long name"
@@ -76,7 +76,7 @@ public class ImageCatalogTests extends CloudbreakTest {
 
     @Test(expectedExceptions = BadRequestException.class)
     public void testCreateInvalidImageCatalogSpecName() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(ImageCatalog.request()
                 .withName(SPECIAL_IMAGECATALOG_NAME)
                 .withUrl(VALID_IMAGECATALOG_URL), "an imagecatalog request with special name"
@@ -87,7 +87,7 @@ public class ImageCatalogTests extends CloudbreakTest {
     // BUG-97072
     @Test(expectedExceptions = BadRequestException.class, enabled = false)
     public void testCreateInvalidImageCatalogUrl() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(ImageCatalog.request()
                 .withName(VALID_IMAGECATALOG_NAME + "-url")
                 .withUrl("https://" + INVALID_IMAGECATALOG_URL), "an imagecatalog request with invalid url"
@@ -98,7 +98,7 @@ public class ImageCatalogTests extends CloudbreakTest {
     // BUG-97072
     @Test(expectedExceptions = BadRequestException.class, enabled = false)
     public void testCreateInvalidImageCatalogUrlInvalidJson() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(ImageCatalog.request()
                 .withName(VALID_IMAGECATALOG_NAME + "-url-invalid-json")
                 .withUrl(INVALID_IMAGECATALOG_JSON), "an imagecatalog request with url invalid json"
@@ -108,7 +108,7 @@ public class ImageCatalogTests extends CloudbreakTest {
 
     @Test(expectedExceptions = BadRequestException.class)
     public void testCreateInvalidImageCatalogUrlNoProtocol() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(ImageCatalog.request()
                 .withName(VALID_IMAGECATALOG_NAME + "-url-np")
                 .withUrl(INVALID_IMAGECATALOG_URL), "an imagecatalog request with url no protocol"
@@ -118,7 +118,7 @@ public class ImageCatalogTests extends CloudbreakTest {
 
     @Test(expectedExceptions = BadRequestException.class)
     public void testCreateDeleteValidCreateAgain() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(ImageCatalog.isCreatedDeleted()
                 .withName(VALID_IMAGECATALOG_NAME + "-delete-create")
                 .withUrl(VALID_IMAGECATALOG_URL), "an imagecatalog request then delete"
@@ -135,7 +135,7 @@ public class ImageCatalogTests extends CloudbreakTest {
 
     @Test(expectedExceptions = BadRequestException.class)
     public void testDeleteCbDefaultImageCatalog() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(ImageCatalog.request()
                 .withName(DEFAULT_IMAGECATALOG_NAME)
         );
@@ -144,7 +144,7 @@ public class ImageCatalogTests extends CloudbreakTest {
 
     @Test
     public void testSetNewDefaultImageCatalog() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(ImageCatalog.request()
                 .withName(VALID_IMAGECATALOG_NAME + "-default")
                 .withUrl(VALID_IMAGECATALOG_URL), "an imagecatalog request and set as default"
@@ -161,7 +161,7 @@ public class ImageCatalogTests extends CloudbreakTest {
 
     @Test
     public void testSetImageCatalogBackAsNotDefault() throws  Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
 
         given(ImageCatalog.isCreatedAsDefault()
                 .withName(VALID_IMAGECATALOG_NAME + "-old")
@@ -192,7 +192,7 @@ public class ImageCatalogTests extends CloudbreakTest {
 
     @Test
     public void testGetImageCatalogByProvider() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         for (String provider : PROVIDERS) {
             getItContext().putContextParam(CLOUDPROVIDER, provider);
             when(ImageCatalog.getImagesByProvider(), "get the imagecatalog by provider " + provider);
@@ -207,7 +207,7 @@ public class ImageCatalogTests extends CloudbreakTest {
 
     @Test
     public void testGetByProviderFromImageCatalog() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         for (String provider : PROVIDERS) {
             getItContext().putContextParam(CLOUDPROVIDER, provider);
             given(ImageCatalog.request()
@@ -224,7 +224,7 @@ public class ImageCatalogTests extends CloudbreakTest {
 
     @Test
     public void testRequestFromDefaultCatalog() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(ImageCatalog.request()
                 .withName(DEFAULT_IMAGECATALOG_NAME));
         when(ImageCatalog.getRequestFromName(), " get request of default image catalog");
@@ -235,14 +235,14 @@ public class ImageCatalogTests extends CloudbreakTest {
 
     @Test(expectedExceptions = ForbiddenException.class)
     public void testGetImageCatalogByInvalidProvider() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         getItContext().putContextParam(CLOUDPROVIDER, INVALID_PROVIDER_NAME);
         when(ImageCatalog.getImagesByProvider(), "get the imagecatalog by invalid provider");
     }
 
     @Test(expectedExceptions = ForbiddenException.class)
     public void testGetByInvalidProviderFromImageCatalog() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         getItContext().putContextParam(CLOUDPROVIDER, INVALID_PROVIDER_NAME);
         given(ImageCatalog.request()
                 .withName(DEFAULT_IMAGECATALOG_NAME));
@@ -257,7 +257,7 @@ public class ImageCatalogTests extends CloudbreakTest {
 
     @Test(expectedExceptions = ForbiddenException.class)
     public void testGetByProviderFromNotExistingImageCatalog() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         getItContext().putContextParam(CLOUDPROVIDER, "openstack");
         given(ImageCatalog.request()
                 .withName("asdfghj987x"));
@@ -266,7 +266,7 @@ public class ImageCatalogTests extends CloudbreakTest {
 
     @Test(expectedExceptions = ForbiddenException.class)
     public void testRequestFromNotExistingImageCatalog() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(ImageCatalog.request()
                 .withName(DEFAULT_IMAGECATALOG_NAME + "sss"));
         when(ImageCatalog.getRequestFromName(), " get request of not existing image catalog");
@@ -275,7 +275,7 @@ public class ImageCatalogTests extends CloudbreakTest {
     @AfterSuite
     public void cleanAll() throws Exception {
         for (String name : IMAGECATALOG_NAMES) {
-            given(CloudbreakClient.isCreated());
+            given(CloudbreakClient.created());
             given(ImageCatalog.request()
                     .withName(name)
             );
@@ -285,7 +285,7 @@ public class ImageCatalogTests extends CloudbreakTest {
 
     @AfterSuite
     public void setDefaults() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(ImageCatalog.request()
                 .withName(DEFAULT_IMAGECATALOG_NAME)
         );

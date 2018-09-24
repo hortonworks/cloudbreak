@@ -54,7 +54,7 @@ public class LdapConfigTests extends CloudbreakTest {
 
     @BeforeTest
     public void setup() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         ldapServerHost = getTestParameter().get("integrationtest.ldapconfig.ldapServerHost");
         bindPassword = getTestParameter().get("integrationtest.ldapconfig.bindPassword");
     }

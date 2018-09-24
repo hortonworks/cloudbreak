@@ -32,7 +32,7 @@ public class DiskTypeTests extends CloudbreakTest {
     }
 
     private void listDiskMappingsForProvider(CloudProvider provider) throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(DiskTypes.request(), " disk types request");
         when(DiskTypes.get(), " disk types are requested.");
         then(DiskTypes.assertThis(
@@ -51,7 +51,7 @@ public class DiskTypeTests extends CloudbreakTest {
     }
 
     private void listDisplayNamesForProvider(CloudProvider provider) throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(DiskTypes.request(), " disk types request");
         when(DiskTypes.get(), " disk types are requested.");
         then(DiskTypes.assertThis(
@@ -70,7 +70,7 @@ public class DiskTypeTests extends CloudbreakTest {
     }
 
     private void listDefaultDisksForProvdier(CloudProvider provider) throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(DiskTypes.request(), " disk types request");
         when(DiskTypes.get(), " disk types are requested.");
         then(DiskTypes.assertThis(
@@ -175,7 +175,7 @@ public class DiskTypeTests extends CloudbreakTest {
     public void testListAWSDiskTypes() throws Exception {
         AwsCloudProvider provider = new AwsCloudProvider(getTestParameter());
 
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(DiskTypes.request().withType(provider.getPlatform()), provider.getPlatform() + " disk types request");
         when(DiskTypes.getByType(), provider.getPlatform() + " disk types are requested.");
         then(DiskTypes.assertThis(
@@ -192,7 +192,7 @@ public class DiskTypeTests extends CloudbreakTest {
     public void testListAzureDiskTypes() throws Exception {
         AzureCloudProvider provider = new AzureCloudProvider(getTestParameter());
 
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(DiskTypes.request().withType(provider.getPlatform()), provider.getPlatform() + " disk types request");
         when(DiskTypes.getByType(), provider.getPlatform() + " disk types are requested.");
         then(DiskTypes.assertThis(
@@ -209,7 +209,7 @@ public class DiskTypeTests extends CloudbreakTest {
     public void testListGCPDiskTypes() throws Exception {
         GcpCloudProvider provider = new GcpCloudProvider(getTestParameter());
 
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(DiskTypes.request().withType(provider.getPlatform()), provider.getPlatform() + " disk types request");
         when(DiskTypes.getByType(), provider.getPlatform() + " disk types are requested.");
         then(DiskTypes.assertThis(
@@ -226,7 +226,7 @@ public class DiskTypeTests extends CloudbreakTest {
     public void testListOSDiskTypes() throws Exception {
         OpenstackCloudProvider provider = new OpenstackCloudProvider(getTestParameter());
 
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(DiskTypes.request().withType(provider.getPlatform()), provider.getPlatform() + " disk types request");
         when(DiskTypes.getByType(), provider.getPlatform() + " disk types are requested.");
         then(DiskTypes.assertThis(
@@ -241,7 +241,7 @@ public class DiskTypeTests extends CloudbreakTest {
 
     @Test(priority = 18, groups = "disktypes")
     public void testListYARNDiskTypes() throws Exception {
-        given(CloudbreakClient.isCreated());
+        given(CloudbreakClient.created());
         given(DiskTypes.request().withType("YARN"), "YARN disk types request");
         when(DiskTypes.getByType(), "YARN disk types are requested.");
         then(DiskTypes.assertThis(

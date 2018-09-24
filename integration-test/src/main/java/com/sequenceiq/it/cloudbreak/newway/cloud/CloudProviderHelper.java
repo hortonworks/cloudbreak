@@ -1,18 +1,5 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud;
 
-import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.COMPUTE;
-import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.MASTER;
-import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.WORKER;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.RecoveryMode;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigRequest;
@@ -31,6 +18,18 @@ import com.sequenceiq.it.cloudbreak.newway.StackAction;
 import com.sequenceiq.it.cloudbreak.newway.StackCreation;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+
+import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.COMPUTE;
+import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.MASTER;
+import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.WORKER;
 
 public abstract class CloudProviderHelper extends CloudProvider {
 
@@ -121,8 +120,8 @@ public abstract class CloudProviderHelper extends CloudProvider {
     }
 
     @Override
-    public Stack aValidStackIsCreated() {
-        return (Stack) Stack.isCreated()
+    public Stack aValidStackCreated() {
+        return (Stack) Stack.created()
                 .withName(getClusterName())
                 .withRegion(region())
                 .withAvailabilityZone(availabilityZone())
@@ -131,7 +130,7 @@ public abstract class CloudProviderHelper extends CloudProvider {
                 .withStackAuthentication(stackauth());
     }
 
-    public Stack aValidAttachedClusterStackIsCreated(HostGroupType... groupTypes) {
+    public Stack aValidAttachedClusterStackCreated(HostGroupType... groupTypes) {
         return (Stack) Stack.request()
                 .withName(getClusterName())
                 .withRegion(region())

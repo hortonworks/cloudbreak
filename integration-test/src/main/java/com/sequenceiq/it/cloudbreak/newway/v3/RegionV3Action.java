@@ -1,7 +1,5 @@
 package com.sequenceiq.it.cloudbreak.newway.v3;
 
-import java.io.IOException;
-
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
@@ -10,7 +8,9 @@ import com.sequenceiq.it.cloudbreak.newway.Entity;
 import com.sequenceiq.it.cloudbreak.newway.Region;
 import com.sequenceiq.it.cloudbreak.newway.log.Log;
 
-import static com.sequenceiq.it.cloudbreak.Retry.retry;
+import java.io.IOException;
+
+import static com.sequenceiq.it.cloudbreak.RetryOnGatewayTimeout.retry;
 
 public class RegionV3Action {
 

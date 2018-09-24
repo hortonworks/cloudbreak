@@ -39,7 +39,7 @@ public class NetworksProviderSpecificTests extends CloudbreakTest {
         String[] providers = {"aws", "azure", "openstack", "gcp"};
         for (String provider : providers) {
             cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter());
-            given(CloudbreakClient.isCreated());
+            given(CloudbreakClient.created());
             given(cloudProvider.aValidCredential()
                     .withName(VALID_CRED_NAME + provider + "-spec")
                     .withDescription("")
@@ -155,7 +155,7 @@ public class NetworksProviderSpecificTests extends CloudbreakTest {
                 VALID_CRED_NAME + "openstack-spec"};
         for (String name : nameArray) {
             try {
-                given(CloudbreakClient.isCreated());
+                given(CloudbreakClient.created());
                 given(Credential.request()
                         .withName(name));
                 when(Credential.delete());
