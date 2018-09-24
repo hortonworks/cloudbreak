@@ -29,10 +29,6 @@ func (e *RESTError) ShortError() string {
 	return fmt.Sprintf("status code: %d, message: %+v ", e.Code, message)
 }
 
-func LogMissingParameterMessage(c *cli.Context, message string) {
-	LogMissingParameter(c, nil, message)
-}
-
 func LogMissingParameter(c *cli.Context, missingFlags []string, message ...string) error {
 	if len(message) == 0 {
 		if missingFlags != nil && len(missingFlags) > 0 {
@@ -42,9 +38,6 @@ func LogMissingParameter(c *cli.Context, missingFlags []string, message ...strin
 		}
 	} else {
 		LogErrorMessage(message[0])
-	}
-	if err := cli.ShowSubcommandHelp(c); err != nil {
-		LogError(err)
 	}
 	return fmt.Errorf("missing")
 }
