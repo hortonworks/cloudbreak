@@ -24,6 +24,6 @@ public class RepairNodeStrategy implements Strategy {
 
         ClusterRepairRequest repairRequest = new ClusterRepairRequest();
         repairRequest.setHostGroups(List.of(hostgroup));
-        client.getCloudbreakClient().clusterEndpoint().repairCluster(id, repairRequest);
+        client.getCloudbreakClient().recoveryEndpoint().repairCluster(id, repairRequest);
     }
 }

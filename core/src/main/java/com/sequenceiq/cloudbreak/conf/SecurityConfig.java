@@ -94,6 +94,8 @@ public class SecurityConfig {
 
         private static final String AUTOSCALE_API = API_ROOT_CONTEXT + "/autoscale/**";
 
+        private static final String RECOVERY_API = API_ROOT_CONTEXT + "/recovery/**";
+
         @Inject
         private ResourceServerTokenServices resourceServerTokenServices;
 
@@ -140,6 +142,8 @@ public class SecurityConfig {
                     .permitAll()
                     .antMatchers(AUTOSCALE_API)
                     .access("#oauth2.hasScope('cloudbreak.autoscale')")
+                    .antMatchers(RECOVERY_API)
+                    .access("#oauth2.hasScope('cloudbreak.stacks') or #oauth2.hasScope('cloudbreak.autoscale')")
 
                     .antMatchers(API_ROOT_CONTEXT + "/v1/users/**").access("#oauth2.hasScope('openid')")
                     .antMatchers(BLUEPRINT_URL_PATTERNS).access("#oauth2.hasScope('cloudbreak.blueprints')")
