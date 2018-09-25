@@ -16,13 +16,12 @@ ifeq ($(CB_PORT),)
 endif
 
 deps: deps-errcheck
-	go get -u github.com/golang/dep/cmd/dep
 	go get -u golang.org/x/tools/cmd/goimports
 	curl -o $(GOPATH)/bin/swagger -L'#' https://github.com/go-swagger/go-swagger/releases/download/0.12.0/swagger_$(shell echo `uname`|tr '[:upper:]' '[:lower:]')_amd64
 	chmod +x $(GOPATH)/bin/swagger
 
 deps-errcheck:
-	go get -u github.com/kisielk/errcheck
+#	go get -u github.com/kisielk/errcheck
 
 formatcheck:
 	([ -z "$(shell gofmt -d $(GOFILES_NOVENDOR))" ]) || (echo "Source is unformatted"; exit 1)
