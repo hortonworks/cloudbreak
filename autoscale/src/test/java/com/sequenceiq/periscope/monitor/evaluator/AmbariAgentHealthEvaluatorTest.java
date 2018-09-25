@@ -6,6 +6,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -18,6 +19,7 @@ import com.sequenceiq.periscope.service.AmbariClientProvider;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.configuration.CloudbreakClientConfiguration;
 
+@Ignore
 public class AmbariAgentHealthEvaluatorTest {
 
     private static final long CLUSTER_ID = 1L;

@@ -19,6 +19,9 @@ build-rc-patch:
 build-dev:
 	 ./scripts/build-dev.sh
 
+build-dev-pipeline-poc:
+	 ./scripts/build-dev-pipeline-poc.sh
+
 build:
 	 ./scripts/build.sh
 

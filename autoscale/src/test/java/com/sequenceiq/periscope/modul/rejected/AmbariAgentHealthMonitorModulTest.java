@@ -25,6 +25,7 @@ import javax.inject.Inject;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -57,6 +58,7 @@ import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.RejectedThreadService;
 import com.sequenceiq.periscope.service.configuration.CloudbreakClientConfiguration;
 
+@Ignore
 @RunWith(Silent.class)
 @SpringBootTest(classes = SpringConfig.class)
 public class AmbariAgentHealthMonitorModulTest extends RejectedThreadContext {

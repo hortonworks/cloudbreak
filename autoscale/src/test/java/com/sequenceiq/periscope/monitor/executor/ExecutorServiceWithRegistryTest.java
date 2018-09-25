@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 import java.util.concurrent.RejectedExecutionException;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -20,6 +21,7 @@ import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.periscope.monitor.evaluator.EvaluatorExecutor;
 
+@Ignore
 public class ExecutorServiceWithRegistryTest {
 
     private static final long CLUSTER_ID = 1L;

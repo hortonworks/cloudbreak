@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -16,6 +17,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.sequenceiq.periscope.model.RejectedThread;
 import com.sequenceiq.periscope.service.RejectedThreadService;
 
+@Ignore
 @RunWith(MockitoJUnitRunner.class)
 public class RejectedThreadMonitorTest {
 

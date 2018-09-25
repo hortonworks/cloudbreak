@@ -13,6 +13,7 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -29,6 +30,7 @@ import com.sequenceiq.periscope.monitor.event.UpdateFailedEvent;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.utils.StackResponseUtils;
 
+@Ignore
 public class UpdateFailedHandlerTest {
     private static final long AUTOSCALE_CLUSTER_ID = 1L;
 
