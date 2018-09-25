@@ -2,13 +2,28 @@ package cmd
 
 import (
 	"github.com/hortonworks/cb-cli/cloudbreak/cluster"
-	"github.com/hortonworks/cb-cli/cloudbreak/common"
 	cf "github.com/hortonworks/cb-cli/cloudbreak/config"
 	fl "github.com/hortonworks/cb-cli/cloudbreak/flags"
 	"github.com/hortonworks/cb-cli/cloudbreak/stack"
 	"github.com/hortonworks/cb-cli/cloudbreak/tag"
 	"github.com/urfave/cli"
 )
+
+var stackTemplateDescription = `Template parameters to fill in the generated template:
+		userName:	Name of the Ambari user
+		password:	Password of the Ambari user
+		name:	Name of the cluster
+		region:	Region of the cluster
+		availabilityZone:	Availability zone of the cluster, on AZURE it is the same as the region
+		blueprintName:	Name of the selected blueprint
+		credentialName:	Name of the selected credential
+		instanceGroups.group:	Name of the instance group
+		instanceGroups.nodeCount:	Number of nodes in the group
+		instanceGroups.template.instanceType:	Name of the selected template
+		instanceGroups.template.volumeCount:	Number of volumes
+		instanceGroups.template.volumeSize:	Size of Volumes in Gb
+		stackAuthentication.publicKey:	Public key
+`
 
 func init() {
 	CloudbreakCommands = append(CloudbreakCommands, cli.Command{
@@ -79,7 +94,7 @@ func init() {
 			{
 				Name:        "generate-template",
 				Usage:       "creates a cluster JSON template",
-				Description: common.StackTemplateDescription,
+				Description: stackTemplateDescription,
 				Subcommands: []cli.Command{
 					{
 						Name:   "yarn",

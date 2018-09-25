@@ -14,6 +14,70 @@ import (
 	"github.com/urfave/cli"
 )
 
+var AppHelpTemplate = `NAME:
+   Cloudbreak command line tool
+USAGE:
+   {{if .UsageText}}{{.UsageText}}{{else}}{{.Name}} {{if .VisibleFlags}}[global options]{{end}}{{if .Commands}} command [command options]{{end}} {{if .ArgsUsage}}{{.ArgsUsage}}{{end}}{{end}}
+   {{if .Version}}{{if not .HideVersion}}
+VERSION:
+   {{.Version}}
+   {{end}}{{end}}{{if len .Authors}}
+AUTHOR(S):
+   {{range .Authors}}{{.}}{{end}}
+   {{end}}{{if .VisibleCommands}}
+COMMANDS:{{range .VisibleCategories}}{{if .Name}}
+   {{.Name}}:{{end}}{{range .VisibleCommands}}
+     {{join .Names ", "}}{{"\t"}}{{.Usage}}{{end}}
+{{end}}{{end}}{{if .VisibleFlags}}
+GLOBAL OPTIONS:
+   {{range .VisibleFlags}}{{.}}
+   {{end}}{{end}}{{if .Copyright}}
+COPYRIGHT:
+   {{.Copyright}}
+   {{end}}
+`
+
+var CommandHelpTemplate = `NAME:
+   Cloudbreak command line tool
+
+USAGE:
+   {{.HelpName}}{{if .VisibleFlags}} [command options]{{end}} {{if .ArgsUsage}}{{.ArgsUsage}}{{end}}{{if .Category}}
+
+CATEGORY:
+   {{.Category}}{{end}}{{if .Description}}
+
+DESCRIPTION:
+   {{.Description}}{{end}}{{if .VisibleFlags}}{{if requiredFlags .Flags}}
+
+REQUIRED OPTIONS:{{range requiredFlags .Flags}}
+   {{.}}{{end}}{{end}}{{if optionalFlags .Flags}}
+
+OPTIONS:
+   {{range optionalFlags .Flags}}{{.}}
+   {{end}}{{end}}{{end}}
+`
+
+var SubCommandHelpTemplate = `NAME:
+   Cloudbreak command line tool
+
+USAGE:
+   {{.HelpName}} command{{if .VisibleFlags}} [command options]{{end}} {{if .ArgsUsage}}{{.ArgsUsage}}{{end}} {{if .Description}}
+
+DESCRIPTION:
+   {{.Description}}{{end}}
+
+COMMANDS:{{range .VisibleCategories}}{{if .Name}}
+   {{.Name}}:{{end}}{{range .VisibleCommands}}
+     {{join .Names ", "}}{{"\t"}}{{.Usage}}{{end}}
+{{end}}{{if .VisibleFlags}}{{if requiredFlags .Flags}}
+REQUIRED OPTIONS:{{range requiredFlags .Flags}}
+   {{.}}{{end}}{{end}}{{if optionalFlags .Flags}}
+
+OPTIONS:
+   {{range optionalFlags .Flags}}{{.}}
+   {{end}}{{end}}{{end}}
+`
+
 var HiddenAppHelpTemplate = `NAME:
    Cloudbreak command line tool
 

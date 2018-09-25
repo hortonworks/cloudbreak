@@ -4,10 +4,11 @@ import (
 	"errors"
 	"fmt"
 	log "github.com/Sirupsen/logrus"
-	"github.com/hortonworks/cb-cli/cloudbreak/cmd"
+	cb "github.com/hortonworks/cb-cli/cloudbreak/cmd"
 	"github.com/hortonworks/cb-cli/cloudbreak/common"
 	fl "github.com/hortonworks/cb-cli/cloudbreak/flags"
-	"github.com/hortonworks/cb-cli/cloudbreak/help"
+	"github.com/hortonworks/cb-cli/cmd"
+	"github.com/hortonworks/cb-cli/help"
 	"github.com/hortonworks/cb-cli/plugin"
 	"github.com/hortonworks/cb-cli/utils"
 	"github.com/urfave/cli"
@@ -52,15 +53,16 @@ func main() {
 		fl.FlDebugOptional,
 	}
 
-	cli.AppHelpTemplate = common.AppHelpTemplate
+	cli.AppHelpTemplate = help.AppHelpTemplate
 	cli.HelpPrinter = help.PrintHelp
-	cli.CommandHelpTemplate = common.CommandHelpTemplate
-	cli.SubcommandHelpTemplate = common.SubCommandHelpTemplate
+	cli.CommandHelpTemplate = help.CommandHelpTemplate
+	cli.SubcommandHelpTemplate = help.SubCommandHelpTemplate
 	app.CommandNotFound = func(c *cli.Context, command string) {
 		fmt.Fprintf(c.App.Writer, "Command not found: %q\n", command)
 	}
 
-	app.Commands = append(app.Commands, cmd.CloudbreakCommands...)
+	app.Commands = append(app.Commands, cb.CloudbreakCommands...)
+	app.Commands = append(app.Commands, cmd.AppCommands...)
 	sortByName(app.Commands)
 
 	// internal commands
