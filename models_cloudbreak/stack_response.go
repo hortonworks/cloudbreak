@@ -46,7 +46,7 @@ type StackResponse struct {
 	// usage information for a specific stack
 	CloudbreakUsages []*CloudbreakUsage `json:"cloudbreakUsages"`
 
-	// cluster
+	// cluster object on stack
 	Cluster *ClusterResponse `json:"cluster,omitempty"`
 
 	// using the cluster name to create subdomain

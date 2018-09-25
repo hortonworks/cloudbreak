@@ -47,7 +47,7 @@ func NewListStacksByWorkspaceOK() *ListStacksByWorkspaceOK {
 successful operation
 */
 type ListStacksByWorkspaceOK struct {
-	Payload []*models_cloudbreak.StackResponse
+	Payload []*models_cloudbreak.StackViewResponse
 }
 
 func (o *ListStacksByWorkspaceOK) Error() string {

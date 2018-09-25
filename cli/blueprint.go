@@ -178,7 +178,7 @@ func listBlueprintsImpl(workspace int64, client blueprintClient, writer func([]s
 func convertResponseToBlueprint(bp *models_cloudbreak.BlueprintViewResponse) *blueprintOut {
 	return &blueprintOut{
 		Name:           *bp.Name,
-		Description:    *bp.Description,
+		Description:    utils.SafeStringConvert(bp.Description),
 		StackName:      fmt.Sprintf("%v", bp.StackType),
 		StackVersion:   fmt.Sprintf("%v", bp.StackVersion),
 		HostgroupCount: fmt.Sprint(bp.HostGroupCount),

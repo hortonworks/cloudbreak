@@ -85,7 +85,7 @@ type ClusterResponse struct {
 	// gateway
 	Gateway *GatewayJSON `json:"gateway,omitempty"`
 
-	// host groups
+	// collection of hostgroups
 	// Unique: true
 	HostGroups []*HostGroupResponse `json:"hostGroups"`
 
@@ -121,7 +121,7 @@ type ClusterResponse struct {
 	// Unique: true
 	RdsConfigs []*RDSConfigResponse `json:"rdsConfigs"`
 
-	// secure
+	// tells wether the cluster is secured or not
 	Secure *bool `json:"secure,omitempty"`
 
 	// shared service for a specific stack

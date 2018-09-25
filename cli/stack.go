@@ -121,6 +121,14 @@ func assembleStackRequest(c *cli.Context) *models_cloudbreak.StackV2Request {
 	return &req
 }
 
+func convertViewResponseToStack(s *models_cloudbreak.StackViewResponse) *stackOut {
+	return &stackOut{
+		cloudResourceOut{*s.Name, utils.SafeStringConvert(s.Cluster.Description), GetPlatformName(s.Credential)},
+		s.Status,
+		s.Cluster.Status,
+	}
+}
+
 func convertResponseToStack(s *models_cloudbreak.StackResponse) *stackOut {
 	return &stackOut{
 		cloudResourceOut{*s.Name, s.Cluster.Description, GetPlatformName(s.Credential)},
@@ -370,7 +378,7 @@ func listStacksImpl(client listStacksByWorkspaceClient, writer func([]string, []
 
 	tableRows := []utils.Row{}
 	for _, stack := range stacksResp.Payload {
-		tableRows = append(tableRows, convertResponseToStack(stack))
+		tableRows = append(tableRows, convertViewResponseToStack(stack))
 	}
 
 	writer(stackHeader, tableRows)
