@@ -46,14 +46,14 @@ func (c ConfigList) Yaml() string {
 }
 
 func CheckConfigAndCommandFlags(c *cli.Context) error {
-	err := ConfigRead(c)
+	err := fl.CheckRequiredFlagsAndArguments(c)
 	if err == nil {
-		return fl.CheckRequiredFlagsAndArguments(c)
+		return configRead(c)
 	}
 	return err
 }
 
-func ConfigRead(c *cli.Context) error {
+func configRead(c *cli.Context) error {
 	args := c.Args()
 	if args.Present() {
 		name := args.First()
