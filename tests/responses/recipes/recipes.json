@@ -3,9 +3,6 @@
     "name":"pre-start-recipe",
     "description":"mock test recipe",
     "recipeType":"PRE_AMBARI_START",
-    "content":"IyEvYmluL2Jhc2gKdG91Y2ggL3ByZS1pbnN0YWxsCmVjaG8gIkhlbGxvIFByZS1JbnN0YWxsIiA+PiAvcHJlLWluc3RhbGw=",
-    "uri":"https://rawgit.com/hortonworks/cb-cli/master/tests/recipes/pre-install.sh",
-    "id":1,
-    "public":true
+    "id":1
   }
 ]

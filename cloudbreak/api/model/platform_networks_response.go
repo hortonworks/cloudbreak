@@ -1,7 +1,7 @@
 package model
 
 import (
-	"github.com/go-openapi/strfmt"
+	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"

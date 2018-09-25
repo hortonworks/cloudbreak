@@ -47,7 +47,7 @@ func NewListRecipesByWorkspaceOK() *ListRecipesByWorkspaceOK {
 successful operation
 */
 type ListRecipesByWorkspaceOK struct {
-	Payload []*model.RecipeResponse
+	Payload []*model.RecipeViewResponse
 }
 
 func (o *ListRecipesByWorkspaceOK) Error() string {
