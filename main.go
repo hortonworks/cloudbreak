@@ -107,6 +107,7 @@ func isNonHelperArgProvided() bool {
 		"-h":                         true,
 		"help":                       true,
 		"--help":                     true,
+		"-v":                         true,
 	}
 	return len(os.Args) > 1 && !helperArgs[os.Args[1]]
 }
