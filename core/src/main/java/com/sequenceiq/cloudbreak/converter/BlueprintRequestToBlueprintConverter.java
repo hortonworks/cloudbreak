@@ -72,22 +72,6 @@ public class BlueprintRequestToBlueprintConverter extends AbstractConversionServ
         return blueprint;
     }
 
-    public Blueprint convert(String name, String blueprintText) {
-        Blueprint blueprint = new Blueprint();
-        blueprint.setName(name);
-        blueprint.setBlueprintText(blueprintText);
-        validateBlueprint(blueprint.getBlueprintText());
-        try {
-            JsonNode root = JsonUtil.readTree(blueprint.getBlueprintText());
-            blueprint.setAmbariName(blueprintUtils.getBlueprintName(root));
-            blueprint.setHostGroupCount(blueprintUtils.countHostGroups(root));
-        } catch (IOException e) {
-            throw new BadRequestException(JSON_PARSE_EXCEPTION_MESSAGE, e);
-        }
-
-        return blueprint;
-    }
-
     private String getNameByItsAvailability(@Nullable String name) {
         return Strings.isNullOrEmpty(name) ? missingResourceNameGenerator.generateName(APIResourceType.BLUEPRINT) : name;
     }
@@ -97,6 +81,8 @@ public class BlueprintRequestToBlueprintConverter extends AbstractConversionServ
             JsonNode root = JsonUtil.readTree(blueprint.getBlueprintText());
             blueprint.setAmbariName(blueprintUtils.getBlueprintName(root));
             blueprint.setHostGroupCount(blueprintUtils.countHostGroups(root));
+            blueprint.setStackType(blueprintUtils.getBlueprintStackName(root));
+            blueprint.setStackVersion(blueprintUtils.getBlueprintStackVersion(root));
         } catch (IOException e) {
             throw new BadRequestException(JSON_PARSE_EXCEPTION_MESSAGE, e);
         }

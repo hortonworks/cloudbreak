@@ -17,6 +17,9 @@ integrationtest:
         server:
         user:
         password:
+        autoscale:
+          clientId:
+          clientSecret:
 
     # cloudbreak properites
     cloudbreak:

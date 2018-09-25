@@ -106,8 +106,15 @@ public class StackDecorator {
     private List<ParameterValidator> parameterValidators;
 
     public Stack decorate(@Nonnull Stack subject, @Nonnull StackRequest request, User user, Workspace workspace) {
+        String stackName = request.getName();
+        long start = System.currentTimeMillis();
         prepareCredential(subject, request, user, workspace);
+        LOGGER.info("Credential was prepared under {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
+        start = System.currentTimeMillis();
         prepareDomainIfDefined(subject, request, user, workspace);
+        LOGGER.info("Domain was prepared under {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
         Long credentialId = request.getCredentialId();
         String credentialName = request.getCredentialName();
         if (credentialId != null || subject.getCredential() != null || credentialName != null) {
@@ -115,20 +122,40 @@ public class StackDecorator {
             if (subject.getInstanceGroups() == null) {
                 throw new BadRequestException("Instance groups must be specified!");
             }
+            start = System.currentTimeMillis();
             PlatformParameters pps = cloudParameterCache.getPlatformParameters().get(Platform.platform(subject.cloudPlatform()));
             Boolean mandatoryNetwork = pps.specialParameters().getSpecialParameters().get(PlatformParametersConsts.NETWORK_IS_MANDATORY);
             if (BooleanUtils.isTrue(mandatoryNetwork) && request.getNetworkId() == null && subject.getNetwork() == null) {
                 throw new BadRequestException("Network must be specified!");
             }
             prepareNetwork(subject, request.getNetworkId());
+            LOGGER.info("Network was prepared and validated under {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
+            start = System.currentTimeMillis();
             prepareOrchestratorIfNotExist(subject, subject.getCredential());
+            LOGGER.info("Orchestrator was prepared under {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
+            start = System.currentTimeMillis();
             if (subject.getFailurePolicy() != null) {
                 validatFailurePolicy(subject, subject.getFailurePolicy());
             }
+            LOGGER.info("Failure policy was validated under {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
+            start = System.currentTimeMillis();
             prepareInstanceGroups(subject, request, subject.getCredential(), user);
+            LOGGER.info("Instance groups were prepared under {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
+            start = System.currentTimeMillis();
             prepareFlexSubscription(subject, request.getFlexId());
-            validate(subject);
+            LOGGER.info("Flex subscriptions were prepared under {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
+            start = System.currentTimeMillis();
+            validateInstanceGroups(subject);
+            LOGGER.info("Validation of gateway instance groups has been finished in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
+            start = System.currentTimeMillis();
             checkSharedServiceStackRequirements(request, user, workspace);
+            LOGGER.info("Validation of shared services requirements has been finished in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
         }
         return subject;
     }
@@ -309,7 +336,7 @@ public class StackDecorator {
         }
     }
 
-    private void validate(Stack stack) {
+    private void validateInstanceGroups(Stack stack) {
         long instanceGroups = stack.getInstanceGroups().stream().filter(ig -> InstanceGroupType.GATEWAY.equals(ig.getInstanceGroupType())).count();
         if (instanceGroups == 0L) {
             throw new BadRequestException("Gateway instance group not configured");

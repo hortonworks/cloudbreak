@@ -10,6 +10,7 @@ import javax.transaction.Transactional.TxType;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.aspect.DisableHasPermission;
 import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByReturnValue;
 import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByTarget;
@@ -28,6 +29,9 @@ public interface BlueprintRepository extends WorkspaceResourceRepository<Bluepri
     @Query("SELECT b FROM Blueprint b WHERE b.workspace.id= :workspaceId AND b.status <> 'DEFAULT_DELETED'")
     @CheckPermissionsByReturnValue
     Set<Blueprint> findAllByNotDeletedInWorkspace(@Param("workspaceId") Long workspaceId);
+
+    @CheckPermissionsByReturnValue
+    Set<Blueprint> findAllByWorkspaceIdAndStatus(Long workspaceId, ResourceStatus status);
 
     @Override
     @DisableHasPermission
