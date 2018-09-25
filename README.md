@@ -113,12 +113,11 @@ If you want to check out the properties of a running cluster the `describe-clust
 cb cluster describe --cluster-name my-cluster
 ```
 
-## Bash/Zsh autocompletion
-To enable autocompletion on bash or zsh source the appropriate file under the `autocomplete` folder:
+## Bash completion
+To enable bash completion run the following command and follow the instructions:
 ```
-source autocomplete/bash_autocomplete
+cb completion
 ```
-On linux copy the file into `/etc/bash_completion.d/cb`. Don't forget to source the file to make it active in the current shell.
 
 ## Debug
 To enable the debug logging use the `--debug` global switch
