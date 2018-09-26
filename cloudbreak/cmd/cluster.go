@@ -100,10 +100,10 @@ func init() {
 						Name:   "yarn",
 						Usage:  "creates an yarn cluster JSON template",
 						Before: cf.CheckConfigAndCommandFlags,
-						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlBlueprintNameOptional, fl.FlBlueprintFileOptional).AddAuthenticationFlags().AddTemplateFlags().AddTemplateFlags().Build(),
+						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlBlueprintNameOptional, fl.FlBlueprintFileOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
 						Action: stack.GenerateYarnStackTemplate,
 						BashComplete: func(c *cli.Context) {
-							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlBlueprintNameOptional, fl.FlBlueprintFileOptional).AddAuthenticationFlags().AddTemplateFlags().AddTemplateFlags().Build() {
+							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlBlueprintNameOptional, fl.FlBlueprintFileOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
 								fl.PrintFlagCompletion(f)
 							}
 						},
