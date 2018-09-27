@@ -103,6 +103,7 @@ cb:
                 Data Science: Apache Spark 2, Apache Zeppelin=hdp26-data-science-spark2;
                 Flow Management: Apache NiFi, Apache NiFi Registry=hdf32-flow-management;
                 Messaging Management: Apache Kafka=hdf32-messaging-kafka;
+                Messaging Management: Apache Kafka, Schema Registry=hdf32-messaging-kafka-registry;
                 Data Lake: Apache Ranger, Apache Atlas, Apache Hive Metastore=hdp26-shared-services;
                 Data Lake: Apache Ranger, Apache Hive Metastore HA=hdp26-shared-services-ha
      internal: >

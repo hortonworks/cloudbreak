@@ -1,6 +1,6 @@
 {
   "inputs": [],
-  "description": "Useful for messaging management with Apache Kafka",
+  "description": "Useful for messaging management with Apache Kafka and Schema Registry",
   "blueprint":
   {
       "Blueprints": {
@@ -19,6 +19,9 @@
         {
           "name": "Services",
           "components": [
+            {
+              "name": "REGISTRY_SERVER"
+            },
             {
               "name": "METRICS_COLLECTOR"
             },
