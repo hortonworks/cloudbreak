@@ -64,11 +64,11 @@ public class CronTimeEvaluator extends EvaluatorExecutor {
     }
 
     private boolean isTrigger(TimeAlert alert) {
-        return dateService.isTrigger(alert, MonitorUpdateRate.CLUSTER_UPDATE_RATE);
+        return dateService.isTrigger(alert, MonitorUpdateRate.CRON_UPDATE_RATE_IN_MILLIS);
     }
 
     private boolean isTrigger(TimeAlert alert, ZonedDateTime zdt) {
-        return dateService.isTrigger(alert, MonitorUpdateRate.CLUSTER_UPDATE_RATE, zdt);
+        return dateService.isTrigger(alert, MonitorUpdateRate.CRON_UPDATE_RATE_IN_MILLIS, zdt);
     }
 
     private boolean isPolicyAttached(BaseAlert alert) {

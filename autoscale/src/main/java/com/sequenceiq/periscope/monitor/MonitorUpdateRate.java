@@ -23,9 +23,14 @@ public final class MonitorUpdateRate {
     public static final String PROMETHEUS_UPDATE_RATE_CRON = "0/10 * * * * ?";
 
     /**
+     * Time update rate in ms, aligned to the cron expression.
+     */
+    public static final long CRON_UPDATE_RATE_IN_MILLIS = 10_000L;
+
+    /**
      * Every 10 seconds.
      */
-    public static final String TIME_UPDATE_RATE_CRON = "0/10 * * * * ?";
+    public static final String TIME_UPDATE_RATE_CRON = "0/" + CRON_UPDATE_RATE_IN_MILLIS / 1000 + " * * * * ?";
 
     /**
      * Every minutes.
@@ -42,12 +47,6 @@ public final class MonitorUpdateRate {
      */
     public static final String EVERY_QUARTER_TO_SEC_RATE_CRON = "45 * * * * ?";
 
-    /**
-     * Time update rate in ms, aligned to the cron expression.
-     */
-    public static final long CLUSTER_UPDATE_RATE = 10_000L;
-
     private MonitorUpdateRate() {
-        throw new IllegalStateException();
     }
 }
