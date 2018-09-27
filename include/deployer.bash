@@ -91,7 +91,7 @@ setup_proxy_environments() {
          done
 
          if [[ "$NON_PROXY_HOSTS" ]]; then
-            CB_JAVA_OPTS+=$(echo_if_not_contains "$CB_JAVA_OPTS" " -Dhttp.nonProxyHosts=$NON_PROXY_HOSTS")
+            CB_JAVA_OPTS+=$(echo_if_not_contains "$CB_JAVA_OPTS" " -Dhttp.nonProxyHosts=\"$NON_PROXY_HOSTS\"")
          fi
          export http_proxy=$HTTP_PROXY
          export https_proxy=$HTTPS_PROXY
@@ -110,7 +110,7 @@ curl-proxy-aware() {
         fi
         if [[ "$NON_PROXY_HOSTS" ]]; then
             CURL_ARGS+=" --noproxy "
-            CURL_ARGS+=$(echo "$NON_PROXY_HOSTS" | sed 's/|/,/g' )
+            CURL_ARGS+=$(echo "\"$NON_PROXY_HOSTS\"" | sed 's/|/,/g' )
         fi
     fi
 
