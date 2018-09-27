@@ -1,0 +1,18 @@
+{
+
+  "registry-common": {
+    "properties": {
+      "registry.storage.connector.user": "heyitsme",
+      "registry.storage.connector.password": "iamsoosecure",
+      "database_name": "registry",
+      "registry.storage.db.hostname": "10.1.1.1:3306",
+      "registry.storage.type": "mysql"
+    }
+  },
+  "registry-env": {
+    "properties": {
+      "create_db_dbuser": "false"
+    }
+  }
+
+}

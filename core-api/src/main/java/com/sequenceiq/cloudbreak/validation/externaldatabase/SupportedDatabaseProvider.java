@@ -27,6 +27,7 @@ public final class SupportedDatabaseProvider {
         supportedExternalDatabases.add(getSupportedServiceEntry("Superset", POSTGRES, MYSQL));
         supportedExternalDatabases.add(getSupportedServiceEntry("Beacon", POSTGRES, MYSQL));
         supportedExternalDatabases.add(getSupportedServiceEntry("Ambari", POSTGRES, MYSQL));
+        supportedExternalDatabases.add(getSupportedServiceEntry("Registry", POSTGRES, MYSQL, ORACLE11, ORACLE12));
     }
 
     public static Set<SupportedExternalDatabaseServiceEntry> supportedExternalDatabases() {

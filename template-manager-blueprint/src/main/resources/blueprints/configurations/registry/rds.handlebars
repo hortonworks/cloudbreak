@@ -1,0 +1,26 @@
+{
+{{{#if rds.registry}}}
+  "registry-common": {
+    "properties": {
+      "jar.storage.type": "local",
+      "registry.storage.connector.user": "{{{ rds.registry.connectionUserName }}}",
+      "registry.storage.connector.password": "{{{ rds.registry.connectionPassword }}}",
+      "database_name": "{{{ rds.registry.databaseName }}}",
+      "registry.storage.db.hostname": "{{{ rds.registry.host }}}:{{{ rds.registry.port }}}",
+      "registry.storage.type": "{{{ rds.registry.databaseEngine }}}",
+      "registry.storage.connector.connectURI":"{{{ rds.registry.connectionString }}}"
+    }
+  },
+  "registry-env": {
+    "properties": {
+      "create_db_dbuser": "false"
+    }
+  }
+{{{else}}}
+  "registry-common": {
+    "properties": {
+      "jar.storage.type": "local"
+    }
+  }
+{{{/if}}}
+}

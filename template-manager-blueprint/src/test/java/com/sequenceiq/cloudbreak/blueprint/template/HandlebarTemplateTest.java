@@ -125,6 +125,13 @@ public class HandlebarTemplateTest {
                 {"blueprints/basics/nifi_registry/identity_providers.handlebars", "configurations/nifi_registry/identity_providers.xml",
                         nifiWithLdap()},
 
+                // REGISTRY
+                {"blueprints/configurations/registry/rds.handlebars", "configurations/registry/registry-with-rds.json",
+                        registryRdsConfigWhenRdsPresentedThenShouldReturnWithRdsConfig()},
+                {"blueprints/configurations/registry/rds.handlebars", "configurations/registry/registry-without-rds.json",
+                        registryWithoutRdsConfigWhenRdsNotPresentedThenShouldReturnWithoutRdsConfig()},
+
+
                 // YARN
                 {"blueprints/configurations/yarn/global.handlebars", "configurations/yarn/global-without-container.json",
                         objectContainerExecutorIsFalseThenShouldReturnWithoutContainerConfigs()},
@@ -591,6 +598,29 @@ public class HandlebarTemplateTest {
         return new TemplateModelContextBuilder()
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withHdfConfigs(new HdfConfigs("nifigtargets", "nifigtargets", "nifigtargets", Optional.empty()))
+                .withBlueprintView(blueprintView)
+                .build();
+    }
+
+    public static Map<String, Object> registryWithoutRdsConfigWhenRdsNotPresentedThenShouldReturnWithoutRdsConfig() {
+        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
+        generalClusterConfigs.setPassword("adminPassword");
+        generalClusterConfigs.setUserName("lastname");
+        generalClusterConfigs.setIdentityUserEmail("admin@example.com");
+
+        BlueprintView blueprintView = new BlueprintView("blueprintText", "2.6", "HDF");
+
+        return new TemplateModelContextBuilder()
+                .withGeneralClusterConfigs(generalClusterConfigs)
+                .withBlueprintView(blueprintView)
+                .build();
+    }
+
+    public static Map<String, Object> registryRdsConfigWhenRdsPresentedThenShouldReturnWithRdsConfig() {
+        RDSConfig rdsConfig = TestUtil.rdsConfig(RdsType.REGISTRY, DatabaseVendor.MYSQL);
+        BlueprintView blueprintView = new BlueprintView("blueprintText", "2.6", "HDF");
+        return new TemplateModelContextBuilder()
+                .withRdsConfigs(Sets.newHashSet(rdsConfig))
                 .withBlueprintView(blueprintView)
                 .build();
     }
