@@ -28,14 +28,14 @@ public class MonitorScheduler {
     private ApplicationContext applicationContext;
 
     @Autowired
-    private List<Monitor> monitorList;
+    private List<Monitor<?>> monitorList;
 
     @Autowired
     private Scheduler scheduler;
 
     @PostConstruct
     public void scheduleMonitors() throws SchedulerException {
-        for (Monitor monitor : monitorList) {
+        for (Monitor<?> monitor : monitorList) {
             LOGGER.info("Monitor sceduled: {}, id: {}, cron: {}", monitor.getClass(), monitor.getIdentifier(), monitor.getTriggerExpression());
             JobDataMap jobDataMap = new JobDataMap();
             jobDataMap.put(MonitorContext.APPLICATION_CONTEXT.name(), applicationContext);

@@ -13,17 +13,11 @@ import com.sequenceiq.periscope.log.MDCBuilder;
 import com.sequenceiq.periscope.monitor.context.EvaluatorContext;
 import com.sequenceiq.periscope.monitor.evaluator.EvaluatorExecutor;
 import com.sequenceiq.periscope.monitor.executor.ExecutorServiceWithRegistry;
-import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.RejectedThreadService;
-import com.sequenceiq.periscope.service.ha.PeriscopeNodeConfig;
 
 public abstract class AbstractMonitor<M extends Monitored> implements Monitor<M> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractMonitor.class);
-
-    private PeriscopeNodeConfig periscopeNodeConfig;
-
-    private ClusterService clusterService;
 
     private ApplicationContext applicationContext;
 
@@ -57,8 +51,6 @@ public abstract class AbstractMonitor<M extends Monitored> implements Monitor<M>
         JobDataMap monitorContext = context.getJobDetail().getJobDataMap();
         applicationContext = (ApplicationContext) monitorContext.get(MonitorContext.APPLICATION_CONTEXT.name());
         executorServiceWithRegistry = applicationContext.getBean(ExecutorServiceWithRegistry.class);
-        clusterService = applicationContext.getBean(ClusterService.class);
-        periscopeNodeConfig = applicationContext.getBean(PeriscopeNodeConfig.class);
         rejectedThreadService = applicationContext.getBean(RejectedThreadService.class);
     }
 
@@ -66,8 +58,8 @@ public abstract class AbstractMonitor<M extends Monitored> implements Monitor<M>
         return applicationContext;
     }
 
-    protected EvaluatorExecutor getEvaluatorExecutorBean(M cluster) {
-        return applicationContext.getBean(getEvaluatorType(cluster).getSimpleName(), EvaluatorExecutor.class);
+    protected EvaluatorExecutor getEvaluatorExecutorBean(M monitored) {
+        return applicationContext.getBean(getEvaluatorType(monitored).getSimpleName(), EvaluatorExecutor.class);
     }
 
     protected abstract List<M> getMonitored();
