@@ -37,21 +37,21 @@ public interface ManagementPackV3Endpoint {
     @GET
     @Path("/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ManagementPackOpDescription.GET_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.MANAGEMENT_PACK_NOTES,
+    @ApiOperation(value = ManagementPackOpDescription.GET_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.MANAGEMENT_PACK_NOTES,
             nickname = "getManagementPackInWorkspace")
     ManagementPackResponse getByNameInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @POST
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ManagementPackOpDescription.CREATE_IN_ORG, produces = ContentType.JSON, notes = Notes.MANAGEMENT_PACK_NOTES,
+    @ApiOperation(value = ManagementPackOpDescription.CREATE_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.MANAGEMENT_PACK_NOTES,
             nickname = "createManagementPackInWorkspace")
     ManagementPackResponse createInWorkspace(@PathParam("workspaceId") Long workspaceId, @Valid ManagementPackRequest request);
 
     @DELETE
     @Path("/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ManagementPackOpDescription.DELETE_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.MANAGEMENT_PACK_NOTES,
+    @ApiOperation(value = ManagementPackOpDescription.DELETE_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.MANAGEMENT_PACK_NOTES,
             nickname = "deleteManagementPackInWorkspace")
     ManagementPackResponse deleteInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 }

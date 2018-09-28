@@ -32,4 +32,5 @@ public interface WorkspaceResourceRepository<T extends WorkspaceAwareResource, I
 
     @CheckPermissionsByWorkspaceId(action = READ, workspaceIdIndex = 1)
     T findByNameAndWorkspaceId(String name, Long workspaceId);
+
 }

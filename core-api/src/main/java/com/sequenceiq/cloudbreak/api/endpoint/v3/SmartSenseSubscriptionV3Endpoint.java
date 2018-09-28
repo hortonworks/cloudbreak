@@ -38,28 +38,28 @@ public interface SmartSenseSubscriptionV3Endpoint {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = SmartSenseSubOpDescription.GET_DEFAULT_IN_ORG, produces = ContentType.JSON, notes = SMARTSENSE_SUBSCRIPTION_NOTES,
+    @ApiOperation(value = SmartSenseSubOpDescription.GET_DEFAULT_IN_WORKSPACE, produces = ContentType.JSON, notes = SMARTSENSE_SUBSCRIPTION_NOTES,
             nickname = "getDefaultSmartSenseSubscriptionInWorkspace")
     SmartSenseSubscriptionJson getDefaultInWorkspace(@PathParam("workspaceId") Long workspaceId);
 
     @GET
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = SmartSenseSubOpDescription.GET_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.SMARTSENSE_SUBSCRIPTION_NOTES,
+    @ApiOperation(value = SmartSenseSubOpDescription.GET_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.SMARTSENSE_SUBSCRIPTION_NOTES,
             nickname = "getSmartSenseSubscriptionInWorkspace")
     SmartSenseSubscriptionJson getByNameInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @POST
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = SmartSenseSubOpDescription.CREATE_IN_ORG, produces = ContentType.JSON, notes = Notes.SMARTSENSE_SUBSCRIPTION_NOTES,
+    @ApiOperation(value = SmartSenseSubOpDescription.CREATE_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.SMARTSENSE_SUBSCRIPTION_NOTES,
             nickname = "createSmartSenseSubscriptionInWorkspace")
     SmartSenseSubscriptionJson createInWorkspace(@PathParam("workspaceId") Long workspaceId, @Valid SmartSenseSubscriptionJson request);
 
     @DELETE
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = SmartSenseSubOpDescription.DELETE_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.SMARTSENSE_SUBSCRIPTION_NOTES,
+    @ApiOperation(value = SmartSenseSubOpDescription.DELETE_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.SMARTSENSE_SUBSCRIPTION_NOTES,
             nickname = "deleteSmartSenseSubscriptionInWorkspace")
     SmartSenseSubscriptionJson deleteInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 

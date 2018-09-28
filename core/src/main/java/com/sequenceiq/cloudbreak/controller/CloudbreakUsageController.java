@@ -10,7 +10,7 @@ import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v1.UsageEndpoint;
 import com.sequenceiq.cloudbreak.api.model.CloudbreakUsageJson;
@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.domain.CbUsageFilterParameters.Builder;
 import com.sequenceiq.cloudbreak.facade.CloudbreakUsagesFacade;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 
-@Component
+@Controller
 @Transactional(TxType.NEVER)
 public class CloudbreakUsageController implements UsageEndpoint {
 

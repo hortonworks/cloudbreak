@@ -1,6 +1,10 @@
 package com.sequenceiq.cloudbreak.structuredevent.rest;
 
 import static com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType.REST;
+import static com.sequenceiq.cloudbreak.structuredevent.rest.urlparsers.RestUrlParser.RESOURCE_ID;
+import static com.sequenceiq.cloudbreak.structuredevent.rest.urlparsers.RestUrlParser.RESOURCE_NAME;
+import static com.sequenceiq.cloudbreak.structuredevent.rest.urlparsers.RestUrlParser.RESOURCE_TYPE;
+import static com.sequenceiq.cloudbreak.structuredevent.rest.urlparsers.RestUrlParser.WORKSPACE_ID;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
@@ -9,7 +13,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -17,8 +23,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.ws.rs.Path;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
@@ -30,28 +38,38 @@ import javax.ws.rs.ext.WriterInterceptorContext;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.glassfish.jersey.message.MessageUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.controller.WorkspaceAwareResourceController;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
 import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
+import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredEventClient;
 import com.sequenceiq.cloudbreak.structuredevent.event.OperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredRestCallEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestCallDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestRequestDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestResponseDetails;
+import com.sequenceiq.cloudbreak.structuredevent.rest.urlparsers.RestUrlParser;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Component
@@ -73,24 +91,11 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
 
     private static final int MAX_CONTENT_LENGTH = 65535;
 
-    private static final String RESOURCE_TYPE = "RESOURCE_TYPE";
-
-    private static final String RESOURCE_ID = "RESOURCE_ID";
-
-    private static final String RESOURCE_NAME = "RESOURCE_NAME";
-
-    private final List<String> urlBlackList = Lists.newArrayList("connectors", "flexsubscriptions", "accountpreferences", "users");
-
     private final List<String> skippedHeadersList = Lists.newArrayList("authorization");
 
-    private final List<String> postUrlPatterns = Lists.newArrayList("\\/cb\\/api\\/v3\\/\\d+\\/([a-z]*).*", "\\/cb\\/api\\/v.\\/([a-z]*).*");
+    private final Map<String, WorkspaceResourceRepository<?, ?>> pathRepositoryMap = new HashMap<>();
 
-    private final List<String> deleteUrlPatterns = Lists.newArrayList(
-            "\\/cb\\/api\\/v.\\/([a-z]*)\\/([0-9]+)",
-            "\\/cb\\/api\\/v.\\/([a-z]*)\\/(user|account)\\/(.*)");
-
-    private final List<String> putUrlPatterns = Lists.newArrayList(
-            "\\/cb\\/api\\/v.\\/([a-z]*)\\/([0-9]+).*", "\\/cb\\/api\\/v.\\/([a-z]*).*");
+    private final Pattern extendRestParamsFromResponsePattern = Pattern.compile("\"id\":([0-9]*)");
 
     @Inject
     private CloudbreakNodeConfig cloudbreakNodeConfig;
@@ -114,10 +119,40 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
     @Inject
     private AuthenticatedUserService authenticatedUserService;
 
+    @Autowired
+    private List<RestUrlParser> restUrlParsers;
+
     @Value("${cb.structuredevent.rest.contentlogging:false}")
     private Boolean contentLogging;
 
-    private final Pattern extendRestParamsFromResponsePattern = Pattern.compile("\"id\":([0-9]*)");
+    @Autowired
+    private ApplicationContext applicationContext;
+
+    @Autowired
+    private ListableBeanFactory listableBeanFactory;
+
+    @PostConstruct
+    public void initializePathRepositoryMap() {
+        Map<String, Object> controllers = listableBeanFactory.getBeansWithAnnotation(Controller.class);
+
+        List<WorkspaceAwareResourceController<?>> workspaceAwareResourceControllers = controllers.values().stream()
+                .filter(controller ->
+                        Arrays.stream(controller.getClass().getSuperclass().getInterfaces())
+                                .anyMatch(iface -> WorkspaceAwareResourceController.class.getSimpleName().equals(iface.getSimpleName()))
+                )
+                .map(controller -> (WorkspaceAwareResourceController<?>) controller)
+                .collect(Collectors.toList());
+
+        for (WorkspaceAwareResourceController<?> workspaceAwareResourceController : workspaceAwareResourceControllers) {
+            Path pathAnnotation = AnnotationUtils.findAnnotation(workspaceAwareResourceController.getClass().getSuperclass(), Path.class);
+            if (pathAnnotation != null) {
+                String pathValue = pathAnnotation.value();
+                Class<? extends WorkspaceResourceRepository<?, ?>> repository = workspaceAwareResourceController.getWorkspaceAwareResourceRepository();
+                WorkspaceResourceRepository<?, ?> resourceRepository = applicationContext.getBean(repository);
+                pathRepositoryMap.put(pathValue, resourceRepository);
+            }
+        }
+    }
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
@@ -127,8 +162,7 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
             requestContext.setProperty(REQUEST_TIME, System.currentTimeMillis());
             StringBuilder body = new StringBuilder();
             requestContext.setEntityStream(logInboundEntity(body, requestContext.getEntityStream(), MessageUtils.getCharset(requestContext.getMediaType())));
-            requestContext.setProperty(REST_PARAMS,
-                    getRequestUrlParameters(requestContext.getMethod(), requestContext.getUriInfo().getRequestUri().getPath()));
+            requestContext.setProperty(REST_PARAMS, getRequestUrlParameters(requestContext));
             requestContext.setProperty(REQUEST_DETAILS, createRequestDetails(requestContext, body.toString()));
         }
     }
@@ -161,6 +195,9 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
             String responseBody = ((LoggingStream) context.getProperty(LOGGINGSTREAM_PROPERTY)).getStringBuilder(
                     MessageUtils.getCharset(context.getMediaType())).toString();
             Map<String, String> restParams = (Map<String, String>) context.getProperty(REST_PARAMS);
+            if (restParams == null) {
+                restParams = new HashMap<>();
+            }
             extendRestParamsFromResponse(restParams, responseBody);
             sendStructuredEvent(restRequest, restResponse, restParams, requestTime, responseBody);
         }
@@ -190,36 +227,13 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
                 restCall));
     }
 
-    private Map<String, String> getRequestUrlParameters(String method, CharSequence url) {
+    private Map<String, String> getRequestUrlParameters(ContainerRequestContext requestContext) {
         Map<String, String> params = Maps.newHashMap();
-        List<String> urlPatterns;
-        switch (method) {
-            case "POST":
-                urlPatterns = postUrlPatterns;
-                break;
-            case "DELETE":
-                urlPatterns = deleteUrlPatterns;
-                break;
-            case "PUT":
-                urlPatterns = putUrlPatterns;
-                break;
-            default:
-                urlPatterns = Lists.newArrayList();
-        }
-        for (String urlRegex : urlPatterns) {
-            Pattern pattern = Pattern.compile(urlRegex);
-            Matcher matcher = pattern.matcher(url);
-            if (matcher.matches()) {
-                if (matcher.groupCount() >= 1) {
-                    params.put(RESOURCE_TYPE, matcher.group(1));
-                }
-                if (matcher.groupCount() >= 2) {
-                    String identifier = matcher.group(2);
-                    if (StringUtils.isNumeric(identifier)) {
-                        params.put(RESOURCE_ID, identifier);
-                    } else {
-                        params.put(RESOURCE_NAME, identifier);
-                    }
+        for (RestUrlParser restUrlParser : restUrlParsers) {
+            if (restUrlParser.fillParams(requestContext, params)) {
+                String workspaceId = params.get(WORKSPACE_ID);
+                if (isResourceIdIsAbsentOrNull(params) && NumberUtils.isCreatable(workspaceId)) {
+                    putResourceIdFromRepository(requestContext, params, restUrlParser, workspaceId);
                 }
                 break;
             }
@@ -227,8 +241,25 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
         return params;
     }
 
+    private void putResourceIdFromRepository(ContainerRequestContext requestContext, Map<String, String> params,
+            RestUrlParser restUrlParser, String workspaceId) {
+        for (Entry<String, WorkspaceResourceRepository<?, ?>> pathRepositoryEntry : pathRepositoryMap.entrySet()) {
+            String pathWithWorkspaceId = pathRepositoryEntry.getKey().replaceFirst("\\{.*\\}", workspaceId);
+            String requestUrl = restUrlParser.getUrl(requestContext);
+            if (('/' + requestUrl).startsWith(pathWithWorkspaceId)) {
+                WorkspaceResourceRepository<?, ?> resourceRepository = pathRepositoryEntry.getValue();
+                String resourceName = params.get(RESOURCE_NAME);
+                if (resourceName != null) {
+                    WorkspaceAwareResource resource = resourceRepository.findByNameAndWorkspaceId(resourceName, Long.valueOf(workspaceId));
+                    params.put(RESOURCE_ID, Long.toString(resource.getId()));
+                }
+                break;
+            }
+        }
+    }
+
     private void extendRestParamsFromResponse(Map<String, String> params, CharSequence responseBody) {
-        if (responseBody != null && !params.containsKey(RESOURCE_ID)) {
+        if (responseBody != null && isResourceIdIsAbsentOrNull(params)) {
             String resourceId = null;
             try {
                 JsonNode jsonNode = JsonUtil.readTree(responseBody.toString());
@@ -250,17 +281,25 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
         }
     }
 
+    private boolean isResourceIdIsAbsentOrNull(Map<String, String> params) {
+        return !params.containsKey(RESOURCE_ID) || params.get(RESOURCE_ID) == null;
+    }
+
     private boolean isLoggingEnabled(ContainerRequestContext requestContext) {
-        String path = requestContext.getUriInfo().getRequestUri().getPath();
-        return !"GET".equals(requestContext.getMethod()) && urlBlackList.stream().noneMatch(path::contains);
+        return !"GET".equals(requestContext.getMethod());
     }
 
     private OperationDetails createOperationDetails(Map<String, String> restParams, Long requestTime,
             Long workspaceId, User currentUser, IdentityUser identityUser) {
-        String resoureceType = restParams.get(RESOURCE_TYPE);
-        String resoureceId = restParams.get(RESOURCE_ID);
-        String resoureceName = restParams.get(RESOURCE_NAME);
-        return new OperationDetails(requestTime, REST, resoureceType, StringUtils.isNotEmpty(resoureceId) ? Long.valueOf(resoureceId) : null, resoureceName,
+        String resourceType = null;
+        String resourceId = null;
+        String resourceName = null;
+        if (restParams != null) {
+            resourceType = restParams.get(RESOURCE_TYPE);
+            resourceId = restParams.get(RESOURCE_ID);
+            resourceName = restParams.get(RESOURCE_NAME);
+        }
+        return new OperationDetails(requestTime, REST, resourceType, StringUtils.isNotEmpty(resourceId) ? Long.valueOf(resourceId) : null, resourceName,
                 currentUser != null ? currentUser.getUserId() : "", currentUser != null ? currentUser.getUserName() : "",
                 cloudbreakNodeConfig.getId(), cbVersion, workspaceId, identityUser != null ? identityUser.getAccount() : "",
                 identityUser != null ? identityUser.getUserId() : "", identityUser != null ? identityUser.getUsername() : "");

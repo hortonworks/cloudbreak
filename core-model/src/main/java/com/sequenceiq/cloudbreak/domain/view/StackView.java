@@ -7,16 +7,11 @@ import static com.sequenceiq.cloudbreak.api.model.Status.STOP_REQUESTED;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
-import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -24,14 +19,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 @Table(name = "Stack")
 // It's only here, because of findbugs does not know the fields will be set by JPA with Reflection
 @SuppressFBWarnings("UWF_UNWRITTEN_FIELD")
-public class StackView implements ProvisionEntity, WorkspaceAwareResource {
-
-    @Id
-    private Long id;
-
-    private String name;
-
-    private String owner;
+public class StackView extends CompactView {
 
     @OneToOne(mappedBy = "stack")
     private ClusterView cluster;
@@ -52,45 +40,18 @@ public class StackView implements ProvisionEntity, WorkspaceAwareResource {
 
     private Long created;
 
-    @ManyToOne
-    private Workspace workspace;
-
     public StackView() {
     }
 
     public StackView(Long id, String name, String owner, String cloudPlatform, StackStatusView stackStatus) {
-        this.id = id;
-        this.name = name;
-        this.owner = owner;
+        super(id, name, owner);
         this.cloudPlatform = cloudPlatform;
         this.stackStatus = stackStatus;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    @Override
-    public Workspace getWorkspace() {
-        return workspace;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public void setWorkspace(Workspace workspace) {
-        this.workspace = workspace;
     }
 
     @Override
     public WorkspaceResource getResource() {
         return WorkspaceResource.STACK;
-    }
-
-    public String getOwner() {
-        return owner;
     }
 
     public ClusterView getClusterView() {

@@ -4,7 +4,7 @@ import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v1.SmartSenseSubscriptionEndpoint;
 import com.sequenceiq.cloudbreak.api.model.SmartSenseSubscriptionJson;
@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
 
-@Component
+@Controller
 @Transactional(TxType.NEVER)
 public class SmartSenseSubscriptionController implements SmartSenseSubscriptionEndpoint {
 

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.repository;
 
 import java.util.Optional;
+import java.util.Set;
 
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
@@ -25,6 +26,10 @@ public interface StackViewRepository extends WorkspaceResourceRepository<StackVi
     @CheckPermissionsByReturnValue
     @Query("SELECT s FROM StackView s WHERE s.id= :id")
     Optional<StackView> findById(@Param("id") Long id);
+
+    @CheckPermissionsByReturnValue
+    @Query("SELECT s FROM StackView s WHERE s.workspace.id= :id AND s.stackStatus.status <> 'DELETE_COMPLETED'")
+    Set<StackView> findByWorkspaceId(@Param("id") Long id);
 
     @Override
     default <S extends StackView> S save(S entity) {

@@ -5,12 +5,12 @@ import java.util.Set;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v3.SmartSenseSubscriptionV3Endpoint;
 import com.sequenceiq.cloudbreak.api.model.SmartSenseSubscriptionJson;
 
-@Component
+@Controller
 @Transactional(TxType.NEVER)
 public class SmartSenseSubscriptionV3Controller implements SmartSenseSubscriptionV3Endpoint {
 

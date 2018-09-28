@@ -165,6 +165,7 @@ public class ModelDescriptions {
         public static final String NETWORK = "stack related network";
         public static final String FLEX_ID = "id of the related flex subscription";
         public static final String SOURCE_CREDENTIAL = "source credential object for cloning";
+        public static final String CLUSTER = "cluster object on stack";
         public static final String CLUSTER_REQUEST = "cluster request object on stack";
         public static final String FLEX_SUBSCRIPTION = "the related flex subscription";
         public static final String NODE_COUNT = "node count of the stack";
@@ -232,6 +233,7 @@ public class ModelDescriptions {
         public static final String PROXY_NAME = "proxy configuration name for the cluster";
         public static final String PROXY_CONFIG_ID = "proxy configuration id for the cluster";
         public static final String LOCATIONS = "cloud storage locations";
+        public static final String SECURE = "tells wether the cluster is secured or not";
     }
 
     public static class GatewayModelDescription {

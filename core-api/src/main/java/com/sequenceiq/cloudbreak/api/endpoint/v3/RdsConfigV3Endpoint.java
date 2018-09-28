@@ -39,28 +39,28 @@ public interface RdsConfigV3Endpoint {
     @POST
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.RdsConfigOpDescription.CREATE_IN_ORG, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
+    @ApiOperation(value = OperationDescriptions.RdsConfigOpDescription.CREATE_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
             nickname = "createRdsConfigInWorkspace")
     RDSConfigResponse createInWorkspace(@PathParam("workspaceId") Long workspaceId, @Valid RDSConfigRequest request);
 
     @GET
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.RdsConfigOpDescription.GET_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
+    @ApiOperation(value = OperationDescriptions.RdsConfigOpDescription.GET_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
             nickname = "getRdsConfigInWorkspace")
     RDSConfigResponse getByNameInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @DELETE
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.RdsConfigOpDescription.DELETE_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
+    @ApiOperation(value = OperationDescriptions.RdsConfigOpDescription.DELETE_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
             nickname = "deleteRdsConfigInWorkspace")
     RDSConfigResponse deleteInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @GET
     @Path("{name}/request")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.RdsConfigOpDescription.GET_REQUEST_IN_ORG, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
+    @ApiOperation(value = OperationDescriptions.RdsConfigOpDescription.GET_REQUEST_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
             nickname = "getRdsRequestFromNameInWorkspace")
     RDSConfigRequest getRequestFromName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 

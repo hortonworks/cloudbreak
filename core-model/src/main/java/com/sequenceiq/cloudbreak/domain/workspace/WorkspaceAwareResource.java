@@ -5,6 +5,8 @@ import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 
 public interface WorkspaceAwareResource {
 
+    Long getId();
+
     Workspace getWorkspace();
 
     String getName();

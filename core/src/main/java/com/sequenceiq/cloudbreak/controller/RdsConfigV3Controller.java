@@ -7,7 +7,7 @@ import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v3.RdsConfigV3Endpoint;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
@@ -16,14 +16,16 @@ import com.sequenceiq.cloudbreak.api.model.rds.RDSTestRequest;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsTestResult;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.repository.RdsConfigRepository;
+import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
-@Component
+@Controller
 @Transactional(TxType.NEVER)
-public class RdsConfigV3Controller extends AbstractRdsConfigController implements RdsConfigV3Endpoint {
+public class RdsConfigV3Controller extends AbstractRdsConfigController implements RdsConfigV3Endpoint, WorkspaceAwareResourceController<RDSConfig> {
 
     @Inject
     private UserService userService;
@@ -71,5 +73,10 @@ public class RdsConfigV3Controller extends AbstractRdsConfigController implement
     public RDSConfigRequest getRequestFromName(Long workspaceId, String name) {
         RDSConfig rdsConfig = getRdsConfigService().getByNameForWorkspaceId(name, workspaceId);
         return getConversionService().convert(rdsConfig, RDSConfigRequest.class);
+    }
+
+    @Override
+    public Class<? extends WorkspaceResourceRepository<RDSConfig, ?>> getWorkspaceAwareResourceRepository() {
+        return RdsConfigRepository.class;
     }
 }

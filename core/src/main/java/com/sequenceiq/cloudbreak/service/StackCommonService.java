@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.StackScaleRequestV2;
 import com.sequenceiq.cloudbreak.api.model.stack.StackValidationRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.StackViewResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRepairRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.authorization.PermissionCheckingUtils;
@@ -58,6 +59,7 @@ import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
@@ -69,6 +71,9 @@ public class StackCommonService implements StackEndpoint {
 
     @Inject
     private StackService stackService;
+
+    @Inject
+    private StackApiViewService stackApiViewService;
 
     @Inject
     private TlsSecurityService tlsSecurityService;
@@ -176,8 +181,8 @@ public class StackCommonService implements StackEndpoint {
         stackService.delete(name, restRequestThreadLocalService.getRequestedWorkspaceId(), forced, deleteDependencies, user);
     }
 
-    public Set<StackResponse> retrieveStacksByWorkspaceId(Long workspaceId) {
-        return stackService.retrieveStacksByWorkspaceId(workspaceId);
+    public Set<StackViewResponse> retrieveStacksByWorkspaceId(Long workspaceId) {
+        return stackApiViewService.retrieveStackViewsByWorkspaceId(workspaceId);
     }
 
     public StackResponse findStackByNameAndWorkspaceId(String name, Long workspaceId, @QueryParam("entry") Set<String> entries) {

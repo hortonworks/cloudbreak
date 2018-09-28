@@ -34,7 +34,7 @@ public interface AuditV3Endpoint {
     @GET
     @Path("events/{resourceType}/{resourceId}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.AuditOpDescription.LIST_IN_ORG, produces = ContentType.JSON, notes = Notes.AUDIT_EVENTS_NOTES,
+    @ApiOperation(value = OperationDescriptions.AuditOpDescription.LIST_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.AUDIT_EVENTS_NOTES,
             nickname = "getAuditEventsInWorkspace")
     List<AuditEvent> getAuditEventsInWorkspace(@PathParam("workspaceId") Long workspaceId,
             @PathParam("resourceType") String resourceType, @PathParam("resourceId") Long resourceId);
@@ -42,7 +42,7 @@ public interface AuditV3Endpoint {
     @GET
     @Path("events/zip/{resourceType}/{resourceId}")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @ApiOperation(value = OperationDescriptions.AuditOpDescription.LIST_IN_ORG_ZIP, produces = ContentType.JSON, notes = Notes.AUDIT_EVENTS_NOTES,
+    @ApiOperation(value = OperationDescriptions.AuditOpDescription.LIST_IN_WORKSPACE_ZIP, produces = ContentType.JSON, notes = Notes.AUDIT_EVENTS_NOTES,
             nickname = "getAuditEventsZipInWorkspace")
     Response getAuditEventsZipInWorkspace(@PathParam("workspaceId") Long workspaceId,
             @PathParam("resourceType") String resourceType, @PathParam("resourceId") Long resourceId);

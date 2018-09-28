@@ -37,21 +37,21 @@ public interface ProxyConfigV3Endpoint {
     @GET
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ProxyConfigOpDescription.GET_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.PROXY_CONFIG_NOTES,
+    @ApiOperation(value = ProxyConfigOpDescription.GET_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.PROXY_CONFIG_NOTES,
             nickname = "getProxyconfigInWorkspace")
     ProxyConfigResponse getByNameInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @POST
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ProxyConfigOpDescription.CREATE_IN_ORG, produces = ContentType.JSON, notes = Notes.PROXY_CONFIG_NOTES,
+    @ApiOperation(value = ProxyConfigOpDescription.CREATE_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.PROXY_CONFIG_NOTES,
             nickname = "createProxyconfigInWorkspace")
     ProxyConfigResponse createInWorkspace(@PathParam("workspaceId") Long workspaceId, @Valid ProxyConfigRequest request);
 
     @DELETE
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ProxyConfigOpDescription.DELETE_BY_NAME_IN_ORG, produces = ContentType.JSON, notes = Notes.PROXY_CONFIG_NOTES,
+    @ApiOperation(value = ProxyConfigOpDescription.DELETE_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.PROXY_CONFIG_NOTES,
             nickname = "deleteProxyconfigInWorkspace")
     ProxyConfigResponse deleteInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 

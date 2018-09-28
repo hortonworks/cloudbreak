@@ -11,7 +11,7 @@ import javax.ws.rs.ext.ExceptionMapper;
 
 import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
 
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.CoreApi;
@@ -27,7 +27,7 @@ import io.swagger.jaxrs.config.SwaggerConfigLocator;
 import io.swagger.jaxrs.config.SwaggerContextService;
 
 @ApplicationPath(CoreApi.API_ROOT_CONTEXT)
-@Component
+@Controller
 public class EndpointConfig extends ResourceConfig {
 
     private static final List<Class<?>> CONTROLLERS  = Arrays.asList(
