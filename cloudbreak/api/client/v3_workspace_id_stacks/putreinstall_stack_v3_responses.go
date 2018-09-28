@@ -53,7 +53,7 @@ func (o *PutreinstallStackV3Default) Code() int {
 }
 
 func (o *PutreinstallStackV3Default) Error() string {
-	return fmt.Sprintf("[PUT /v3/{workspaceId}/stacks/{name}/reinstall}][%d] putreinstallStackV3 default ", o._statusCode)
+	return fmt.Sprintf("[PUT /v3/{workspaceId}/stacks/{name}/reinstall][%d] putreinstallStackV3 default ", o._statusCode)
 }
 
 func (o *PutreinstallStackV3Default) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

@@ -1,0 +1,314 @@
+[
+  {
+    "id": 2,
+    "name": "aws-cluster",
+    "owner": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+    "cloudPlatform": "AWS",
+    "platformVariant": "AWS",
+    "credential": {
+      "name": "amazon",
+      "cloudPlatform": "AWS",
+      "parameters": {
+        "smartSenseId": "null",
+        "selector": "role-based"
+      },
+      "description": "",
+      "topologyId": null,
+      "id": 4,
+      "public": false
+    },
+    "hdpVersion": "2.6.3.0-235",
+    "cluster": {
+      "id": 2,
+      "name": "aws-cluster",
+      "description": "",
+      "status": "REQUESTED",
+      "secure": false,
+      "ambariServerIp": "52.16.174.228",
+      "blueprint": {
+        "id": 7,
+        "name": "EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin 0.7.0",
+        "description": "Useful for EDW analytics using Hive LLAP",
+        "stackType": "HDP",
+        "stackVersion": "2.6",
+        "hostGroupCount": 3,
+        "status": "DEFAULT",
+        "tags": {}
+      },
+      "hostGroups": [
+        {
+          "id": 4,
+          "name": "worker",
+          "metadata": []
+        },
+        {
+          "id": 5,
+          "name": "compute",
+          "metadata": []
+        },
+        {
+          "id": 6,
+          "name": "master",
+          "metadata": []
+        }
+      ],
+      "sharedServiceResponse": {
+        "attachedClusters": [
+        ]
+      }
+    },
+    "parameters": {
+      "instanceProfileStrategy": "CREATE",
+      "AWS_SUBNET": "subnet-445d0c1f",
+      "AWS_S3_ROLE": "arn:aws:iam::755047402263:role/aws-cluster-3938-S3AccessRole-1WONDIIEGB2GR",
+      "AWS_VPC": "vpc-3c0ae35a"
+    },
+    "status": "UPDATE_IN_PROGRESS",
+    "gatewayPort": 9443,
+    "nodeCount": 2,
+    "created": 1515151753768,
+    "flexSubscription": null
+  },
+  {
+    "id": 3,
+    "name": "azure-cluster",
+    "owner": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+    "cloudPlatform": "AZURE",
+    "platformVariant": "AZURE",
+    "credential": {
+      "name": "azure",
+      "cloudPlatform": "AZURE",
+      "parameters": {
+        "tenantId": "a12b1234-1234-12aa-3bcc-4d5e6f78900g",
+        "spDisplayName": null,
+        "subscriptionId": "a12b1234-1234-12aa-3bcc-4d5e6f78900g",
+        "roleType": null,
+        "accessKey": "a12b1234-1234-12aa-3bcc-4d5e6f78900g"
+      },
+      "description": "",
+      "topologyId": null,
+      "id": 2,
+      "public": false
+    },
+    "hdpVersion": "2.6.3.0-235",
+    "cluster": {
+      "id": 3,
+      "name": "azure-cluster",
+      "description": "",
+      "status": "REQUESTED",
+      "secure": false,
+      "ambariServerIp": null,
+      "blueprint": {
+        "id": 7,
+        "name": "EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin 0.7.0",
+        "description": "Useful for EDW analytics using Hive LLAP",
+        "stackType": "HDP",
+        "stackVersion": "2.6",
+        "hostGroupCount": 3,
+        "status": "DEFAULT",
+        "tags":{}
+      },
+      "hostGroups": [
+        {
+          "id": 7,
+          "name": "worker",
+          "metadata": []
+        },
+        {
+          "id": 8,
+          "name": "compute",
+          "metadata": []
+        },
+        {
+          "id": 9,
+          "name": "master",
+          "metadata": []
+        }
+      ],
+      "sharedServiceResponse":{
+        "attachedClusters":[]
+      }
+    },
+    "parameters": {
+      "encryptStorage": "true"
+    },
+    "status": "CREATE_IN_PROGRESS",
+    "gatewayPort": 9443,
+    "nodeCount": 2,
+    "created": 1515152314614,
+    "flexSubscription": null
+  },
+  {
+    "id": 4,
+    "name": "gcp-cluster",
+    "owner": "8781acdb-4d87-4dff-814c-35c191031ad3",
+    "cloudPlatform": "GCP",
+    "platformVariant": "GCP",
+    "credential": {
+      "name": "google",
+      "cloudPlatform": "GCP",
+      "parameters": {
+        "serviceAccountId": "1234567890-abcde1fghijk2lmn1o2p34q5r7stuvz@developer.gserviceaccount.com",
+        "projectId": "cloudbreak"
+      },
+      "description": "",
+      "topologyId": null,
+      "id": 3,
+      "public": false
+    },
+    "hdpVersion": "2.6.3.0-235",
+    "cluster": {
+      "id": 4,
+      "name": "gcp-cluster",
+      "description": "",
+      "status": "AVAILABLE",
+      "secure": false,
+      "ambariServerIp": "35.187.4.62",
+      "blueprint": {
+        "id": 7,
+        "name": "EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin 0.7.0",
+        "description": "Useful for EDW analytics using Hive LLAP",
+        "stackType":"HDP",
+        "stackVersion":"2.6",
+        "hostGroupCount": 3,
+        "status": "DEFAULT",
+        "tags":{}
+      },
+      "hostGroups": [
+        {
+          "id": 12,
+          "name": "master",
+          "metadata": [
+            {
+              "name": "gcpcluster-m-1-20180119120605.c.siq-haas.internal",
+              "groupName": "master",
+              "id": 6,
+              "state": "HEALTHY"
+            }
+          ]
+        },
+        {
+          "id": 11,
+          "name": "worker",
+          "metadata": [
+            {
+              "name": "gcpcluster-w-4-20180119120629.c.siq-haas.internal",
+              "groupName": "worker",
+              "id": 4,
+              "state": "HEALTHY"
+            },
+            {
+              "name": "gcpcluster-w-2-20180119120629.c.siq-haas.internal",
+              "groupName": "worker",
+              "id": 3,
+              "state": "HEALTHY"
+            },
+            {
+              "name": "gcpcluster-w-3-20180119120629.c.siq-haas.internal",
+              "groupName": "worker",
+              "id": 2,
+              "state": "HEALTHY"
+            }
+          ]
+        },
+        {
+          "id": 10,
+          "name": "compute",
+          "metadata": [
+            {
+              "name": "gcpcluster-c-0-20180119120534.c.siq-haas.internal",
+              "groupName": "compute",
+              "id": 1,
+              "state": "HEALTHY"
+            }
+          ]
+        }
+      ],
+      "sharedServiceResponse":{
+        "attachedClusters":[
+
+        ]
+      }
+    },
+    "parameters": {},
+    "status": "AVAILABLE",
+    "gatewayPort": 9443,
+    "nodeCount": 5,
+    "created": 1516363385416,
+    "flexSubscription": null
+  },
+  {
+    "id": 1,
+    "name": "openstack-cluster",
+    "owner": "9960a190-da04-4b57-b320-f107a470d891",
+    "cloudPlatform": "OPENSTACK",
+    "platformVariant": "HEAT",
+    "credential": {
+      "name": "cli-os-cluster",
+      "cloudPlatform": "OPENSTACK",
+      "parameters": {
+        "facing": "public",
+        "endpoint": "http://172.18.0.85:5000/v2.0",
+        "selector": "cb-keystone-v2",
+        "keystoneVersion": "cb-keystone-v2",
+        "userName": "demo",
+        "tenantName": "demo"
+      },
+      "description": "",
+      "topologyId": null,
+      "workspace": {
+        "id": 1,
+        "name": "mock@hortonworks.com"
+      },
+      "id": 35,
+      "public": true
+    },
+    "hdpVersion": "2.6.5.0-292",
+    "cluster": {
+      "id": 1,
+      "name": "openstack-cluster",
+      "description": "",
+      "status": "REQUESTED",
+      "secure": false,
+      "ambariServerIp": null,
+      "blueprint": {
+        "id": 1,
+        "name": "EDW-ETL: Apache Hive, Apache Spark 2",
+        "description": "Useful for ETL data processing with Hive and Spark",
+        "stackType":"HDP",
+        "stackVersion":"2.6",
+        "hostGroupCount": 3,
+        "status": "DEFAULT",
+        "tags": {}
+      },
+      "hostGroups": [
+        {
+          "id": 76,
+          "name": "worker",
+          "metadata": []
+        },
+        {
+          "id": 78,
+          "name": "master",
+          "metadata": []
+        },
+        {
+          "id": 77,
+          "name": "compute",
+          "metadata": []
+        }
+      ],
+      "sharedServiceResponse":{
+        "attachedClusters":[
+
+        ]
+      }
+    },
+    "parameters": {},
+    "status": "REQUESTED",
+    "gatewayPort": 9443,
+    "nodeCount": 3,
+    "created": 1535371251767,
+    "flexSubscription": null
+  }
+]

@@ -338,7 +338,7 @@ func (a *Client) PutreinstallStackV3(params *PutreinstallStackV3Params) error {
 	_, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "putreinstallStackV3",
 		Method:             "PUT",
-		PathPattern:        "/v3/{workspaceId}/stacks/{name}/reinstall}",
+		PathPattern:        "/v3/{workspaceId}/stacks/{name}/reinstall",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
