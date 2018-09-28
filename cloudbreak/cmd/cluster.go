@@ -4,6 +4,7 @@ import (
 	"github.com/hortonworks/cb-cli/cloudbreak/cluster"
 	cf "github.com/hortonworks/cb-cli/cloudbreak/config"
 	fl "github.com/hortonworks/cb-cli/cloudbreak/flags"
+	mm "github.com/hortonworks/cb-cli/cloudbreak/maintenancemode"
 	"github.com/hortonworks/cb-cli/cloudbreak/stack"
 	"github.com/urfave/cli"
 )
@@ -397,6 +398,105 @@ func init() {
 					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlName).AddAuthenticationFlags().AddOutputFlag().Build() {
 						fl.PrintFlagCompletion(f)
 					}
+				},
+			},
+			{
+				Name:  "maintenance-mode",
+				Usage: "enable/disable maintenance mode, change stack repository configurations",
+				Subcommands: []cli.Command{
+					{
+						Name:   "enable",
+						Usage:  "enable maintenance mode",
+						Flags:  fl.NewFlagBuilder().AddAuthenticationFlags().AddFlags(fl.FlName).Build(),
+						Before: cf.CheckConfigAndCommandFlags,
+						Action: mm.EnableMaintenanceMode,
+						BashComplete: func(c *cli.Context) {
+							for _, f := range fl.NewFlagBuilder().AddAuthenticationFlags().AddFlags(fl.FlName).Build() {
+								fl.PrintFlagCompletion(f)
+							}
+						},
+					},
+					{
+						Name:   "disable",
+						Usage:  "disable maintenance mode",
+						Flags:  fl.NewFlagBuilder().AddAuthenticationFlags().AddFlags(fl.FlName).Build(),
+						Before: cf.CheckConfigAndCommandFlags,
+						Action: mm.DisableMaintenanceMode,
+						BashComplete: func(c *cli.Context) {
+							for _, f := range fl.NewFlagBuilder().AddAuthenticationFlags().AddFlags(fl.FlName).Build() {
+								fl.PrintFlagCompletion(f)
+							}
+						},
+					},
+					{
+						Name:   "validate",
+						Usage:  "validate repository configurations with Ambari",
+						Flags:  fl.NewFlagBuilder().AddAuthenticationFlags().AddFlags(fl.FlName).Build(),
+						Before: cf.CheckConfigAndCommandFlags,
+						Action: mm.ValidateRepositoryConfigurations,
+						BashComplete: func(c *cli.Context) {
+							for _, f := range fl.NewFlagBuilder().AddAuthenticationFlags().AddFlags(fl.FlName).Build() {
+								fl.PrintFlagCompletion(f)
+							}
+						},
+					},
+					{
+						Name:   "hdp",
+						Usage:  "configure HDP repository data from file",
+						Flags:  fl.NewFlagBuilder().AddAuthenticationFlags().AddFlags(fl.FlName, fl.FlInputJson).Build(),
+						Before: cf.CheckConfigAndCommandFlags,
+						Action: mm.ChangeHdpRepo,
+						BashComplete: func(c *cli.Context) {
+							for _, f := range fl.NewFlagBuilder().AddAuthenticationFlags().AddFlags(fl.FlName, fl.FlInputJson).Build() {
+								fl.PrintFlagCompletion(f)
+							}
+						},
+					},
+					{
+						Name:   "hdf",
+						Usage:  "configure HDF repository data from file",
+						Flags:  fl.NewFlagBuilder().AddAuthenticationFlags().AddFlags(fl.FlName, fl.FlInputJson).Build(),
+						Before: cf.CheckConfigAndCommandFlags,
+						Action: mm.ChangeHdfRepo,
+						BashComplete: func(c *cli.Context) {
+							for _, f := range fl.NewFlagBuilder().AddAuthenticationFlags().AddFlags(fl.FlName, fl.FlInputJson).Build() {
+								fl.PrintFlagCompletion(f)
+							}
+						},
+					},
+					{
+						Name:   "ambari",
+						Usage:  "configure Ambari repository data from file",
+						Flags:  fl.NewFlagBuilder().AddAuthenticationFlags().AddFlags(fl.FlName, fl.FlInputJson).Build(),
+						Before: cf.CheckConfigAndCommandFlags,
+						Action: mm.ChangeAmbariRepo,
+						BashComplete: func(c *cli.Context) {
+							for _, f := range fl.NewFlagBuilder().AddAuthenticationFlags().AddFlags(fl.FlName, fl.FlInputJson).Build() {
+								fl.PrintFlagCompletion(f)
+							}
+						},
+					},
+					{
+						Name:  "generate-template-json",
+						Usage: "generate repository configuration json",
+						Subcommands: []cli.Command{
+							{
+								Name:   "hdp",
+								Usage:  "generate HDP repository configuration json",
+								Action: mm.GenerateHdpRepoJson,
+							},
+							{
+								Name:   "hdf",
+								Usage:  "generate HDF repository configuration json",
+								Action: mm.GenerateHdfRepoJson,
+							},
+							{
+								Name:   "ambari",
+								Usage:  "generate Ambari repository configuration json",
+								Action: mm.GenerateAmbariRepoJson,
+							},
+						},
+					},
 				},
 			},
 		},

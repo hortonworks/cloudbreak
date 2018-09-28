@@ -1,0 +1,5 @@
+{
+  "Version": "2.7.0.0",
+  "StackBaseUrl": "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.7.0.0",
+  "GpgKeyUrl": "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.7.0.0/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins"
+}

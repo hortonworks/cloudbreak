@@ -295,6 +295,36 @@ func (a *Client) PostStackForBlueprintV3(params *PostStackForBlueprintV3Params) 
 }
 
 /*
+PutClusterV3 updates cluster by stack id
+
+Clusters are materialised Hadoop services on a given infrastructure. They are built based on a Blueprint (running the components and services specified) and on a configured infrastructure Stack. Once a cluster is created and launched, it can be used the usual way as any Hadoop cluster. We suggest to start with the Cluster's Ambari UI for an overview of your cluster.
+*/
+func (a *Client) PutClusterV3(params *PutClusterV3Params) error {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewPutClusterV3Params()
+	}
+
+	_, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "putClusterV3",
+		Method:             "PUT",
+		PathPattern:        "/v3/{workspaceId}/stacks/{name}/cluster",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &PutClusterV3Reader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+
+}
+
+/*
 PutpasswordStackV3 updates stack by name
 
 Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
@@ -524,6 +554,36 @@ func (a *Client) RetryStackV3(params *RetryStackV3Params) error {
 		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &RetryStackV3Reader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+
+}
+
+/*
+SetClusterMaintenanceMode sets maintenance mode for the cluster
+
+Setting maintenance mode for the cluster in order to be able to update Ambari and/or the Hadoop stack.
+*/
+func (a *Client) SetClusterMaintenanceMode(params *SetClusterMaintenanceModeParams) error {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewSetClusterMaintenanceModeParams()
+	}
+
+	_, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "setClusterMaintenanceMode",
+		Method:             "PUT",
+		PathPattern:        "/v3/{workspaceId}/stacks/{name}/maintenance",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &SetClusterMaintenanceModeReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})

@@ -22,6 +22,9 @@ type AmbariStackDetails struct {
 	// enable gpl repository
 	EnableGplRepo *bool `json:"enableGplRepo,omitempty"`
 
+	// gpg key of the Ambari repository
+	GpgKeyURL string `json:"gpgKeyUrl,omitempty"`
+
 	// url the MPACK that needs to be installed before HDF installation
 	MpackURL string `json:"mpackUrl,omitempty"`
 
@@ -30,6 +33,9 @@ type AmbariStackDetails struct {
 
 	// operating system for the stack, like redhat6
 	Os string `json:"os,omitempty"`
+
+	// operating system type for the stack, like centos6
+	OsType string `json:"osType,omitempty"`
 
 	// version of the repository for VDF file creation in Ambari
 	RepositoryVersion string `json:"repositoryVersion,omitempty"`
@@ -61,11 +67,15 @@ type AmbariStackDetails struct {
 
 /* polymorph AmbariStackDetails enableGplRepo false */
 
+/* polymorph AmbariStackDetails gpgKeyUrl false */
+
 /* polymorph AmbariStackDetails mpackUrl false */
 
 /* polymorph AmbariStackDetails mpacks false */
 
 /* polymorph AmbariStackDetails os false */
+
+/* polymorph AmbariStackDetails osType false */
 
 /* polymorph AmbariStackDetails repositoryVersion false */
 

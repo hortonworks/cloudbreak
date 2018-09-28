@@ -24,9 +24,14 @@ type ManagementPackDetails struct {
 	// Min Length: 5
 	// Pattern: (^[a-z][-a-z0-9]*[a-z0-9]$)
 	Name *string `json:"name"`
+
+	// Denotes that the image is prewarmed or base image.
+	PreInstalled *bool `json:"preInstalled,omitempty"`
 }
 
 /* polymorph ManagementPackDetails name false */
+
+/* polymorph ManagementPackDetails preInstalled false */
 
 // Validate validates this management pack details
 func (m *ManagementPackDetails) Validate(formats strfmt.Registry) error {

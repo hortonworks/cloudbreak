@@ -1,0 +1,5 @@
+{
+  "Version": "3.2.0.6-2",
+  "VersionDefinitionFileURL": "http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.2.0.6-2/HDF-3.2.0.6-2.xml",
+  "MpackURL": "http://private-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.2.0.6-2/HDF-3.2.0.6-2-centos7-rpm.tar.gz"
+}

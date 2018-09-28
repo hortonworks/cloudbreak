@@ -863,6 +863,41 @@ var (
 			Usage: "id of the user",
 		},
 	}
+	FlVersion = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "version",
+			Usage: "component version",
+		},
+	}
+	FlVdfUrl = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "vdf-url",
+			Usage: "vdf url",
+		},
+	}
+	FlMPackUrl = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "mpack-url",
+			Usage: "mpack url",
+		},
+	}
+	FlRepoUrl = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "repo-url",
+			Usage: "repository url",
+		},
+	}
+	FlRepoGpgUrl = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "gpg-url",
+			Usage: "repository GPG url",
+		},
+	}
 )
 
 type RequiredFlag struct {
