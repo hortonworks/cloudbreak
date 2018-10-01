@@ -18,7 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.client.TokenUnavailableException;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.service.user.UserDetailsService;
 import com.sequenceiq.cloudbreak.domain.workspace.Tenant;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
@@ -75,9 +75,9 @@ public class UserAndWorkspaceMigrator {
         long start = System.currentTimeMillis();
         while (start + uaaStartupTimeoutMillis > System.currentTimeMillis()) {
             try {
-                List<IdentityUser> identityUsers = tryFetchingUsers();
+                List<CloudbreakUser> cloudbreakUsers = tryFetchingUsers();
                 Map<String, User> ownerIdToUser = new HashMap<>();
-                createUsersAndFillUserDataStructures(identityUsers, ownerIdToUser);
+                createUsersAndFillUserDataStructures(cloudbreakUsers, ownerIdToUser);
                 Workspace orphanedResources = getOrCreateOrphanedResourcesWorkspace();
                 addUsersToOrphanedResourcesWorkspace(ownerIdToUser, orphanedResources);
                 return new UserMigrationResults(ownerIdToUser, orphanedResources);
@@ -95,13 +95,14 @@ public class UserAndWorkspaceMigrator {
         throw new IllegalStateException(errorMessage);
     }
 
-    private List<IdentityUser> tryFetchingUsers() {
+    private List<CloudbreakUser> tryFetchingUsers() {
         return userDetailsService.getAllUsers(clientSecret);
     }
 
-    private void createUsersAndFillUserDataStructures(List<IdentityUser> identityUsers, Map<String, User> ownerIdToUser) throws TransactionExecutionException {
+    private void createUsersAndFillUserDataStructures(List<CloudbreakUser> cloudbreakUsers, Map<String, User> ownerIdToUser)
+            throws TransactionExecutionException {
         transactionService.required(() -> {
-            identityUsers.forEach(identityUser -> {
+            cloudbreakUsers.forEach(identityUser -> {
                 User user = userService.getOrCreate(identityUser);
                 ownerIdToUser.put(identityUser.getUserId(), user);
                 userProfileService.getOrCreate(identityUser.getAccount(), identityUser.getUserId(), identityUser.getUsername(), user);

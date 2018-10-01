@@ -26,12 +26,6 @@ public class ClusterV2Request implements JsonEntity {
     @ApiModelProperty(hidden = true)
     private String name;
 
-    @ApiModelProperty(ClusterModelDescription.EMAIL_NEEDED)
-    private Boolean emailNeeded = Boolean.FALSE;
-
-    @ApiModelProperty(ClusterModelDescription.EMAIL_TO)
-    private String emailTo;
-
     @ApiModelProperty(ClusterModelDescription.LDAP_CONFIG_NAME)
     private String ldapConfigName;
 
@@ -55,28 +49,12 @@ public class ClusterV2Request implements JsonEntity {
     @ApiModelProperty(ClusterModelDescription.SHARED_SERVICE_REQUEST)
     private SharedServiceRequest sharedService;
 
-    public Boolean getEmailNeeded() {
-        return emailNeeded;
-    }
-
-    public void setEmailNeeded(Boolean emailNeeded) {
-        this.emailNeeded = emailNeeded;
-    }
-
-    public String getEmailTo() {
-        return emailTo;
-    }
-
     public String getLdapConfigName() {
         return ldapConfigName;
     }
 
     public void setLdapConfigName(String ldapConfigName) {
         this.ldapConfigName = ldapConfigName;
-    }
-
-    public void setEmailTo(String emailTo) {
-        this.emailTo = emailTo;
     }
 
     public void setExecutorType(ExecutorType executorType) {

@@ -121,12 +121,7 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
     private KerberosConfig kerberosConfig;
 
     @Column(nullable = false)
-    private Boolean emailNeeded;
-
-    @Column(nullable = false)
     private Boolean topologyValidation = Boolean.TRUE;
-
-    private String emailTo;
 
     @Convert(converter = EncryptionConverter.class)
     @Column(length = 1000000, columnDefinition = "TEXT", nullable = false)
@@ -276,14 +271,6 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
         this.statusReason = statusReason;
     }
 
-    public Boolean getEmailNeeded() {
-        return emailNeeded;
-    }
-
-    public void setEmailNeeded(Boolean emailNeeded) {
-        this.emailNeeded = emailNeeded;
-    }
-
     public Set<HostGroup> getHostGroups() {
         return hostGroups;
     }
@@ -414,14 +401,6 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setAttributes(Json attributes) {
         this.attributes = attributes;
-    }
-
-    public String getEmailTo() {
-        return emailTo;
-    }
-
-    public void setEmailTo(String emailTo) {
-        this.emailTo = emailTo;
     }
 
     public Gateway getGateway() {

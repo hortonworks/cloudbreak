@@ -32,7 +32,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.StackDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.ManagementPackComponent;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
@@ -104,7 +104,7 @@ public class ImageService {
 
     //CHECKSTYLE:OFF
     public StatedImage determineImageFromCatalog(Long workspaceId, String imageId, String platformString, String catalogName,
-        Blueprint blueprint, boolean useBaseImage, String os, IdentityUser identityUser, User user) throws CloudbreakImageNotFoundException,
+        Blueprint blueprint, boolean useBaseImage, String os, CloudbreakUser cloudbreakUser, User user) throws CloudbreakImageNotFoundException,
             CloudbreakImageCatalogException {
         StatedImage statedImage;
         if (imageId != null) {
@@ -123,11 +123,11 @@ public class ImageService {
             }
             if (useBaseImage) {
                 LOGGER.info("Image id isn't specified for the stack, falling back to a base image, because repo information is provided");
-                statedImage = imageCatalogService.getLatestBaseImageDefaultPreferred(platformString, os, identityUser, user);
+                statedImage = imageCatalogService.getLatestBaseImageDefaultPreferred(platformString, os, cloudbreakUser, user);
             } else {
                 LOGGER.info("Image id isn't specified for the stack, falling back to a prewarmed "
                     + "image of {}-{} or to a base image if prewarmed doesn't exist", clusterType, clusterVersion);
-                statedImage = imageCatalogService.getPrewarmImageDefaultPreferred(platformString, clusterType, clusterVersion, os, identityUser, user);
+                statedImage = imageCatalogService.getPrewarmImageDefaultPreferred(platformString, clusterType, clusterVersion, os, cloudbreakUser, user);
             }
         }
         return statedImage;

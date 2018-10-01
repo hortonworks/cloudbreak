@@ -27,7 +27,7 @@ import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 
@@ -40,7 +40,7 @@ public class ClusterV2RequestToClusterRequestConverterTest {
     private SharedServiceConfigProvider sharedServiceConfigProvider;
 
     @Mock
-    private IdentityUser user;
+    private CloudbreakUser user;
 
     @Mock
     private ConversionService conversionService;
@@ -127,8 +127,6 @@ public class ClusterV2RequestToClusterRequestConverterTest {
         ClusterRequest result = underTest.convert(source);
 
         Assert.assertEquals(source.getExecutorType(), result.getExecutorType());
-        Assert.assertEquals(source.getEmailNeeded(), result.getEmailNeeded());
-        Assert.assertEquals(source.getEmailTo(), result.getEmailTo());
         Assert.assertEquals(source.getName(), result.getName());
         Assert.assertEquals(source.getProxyName(), result.getProxyName());
         Assert.assertEquals(source.getLdapConfigName(), result.getLdapConfigName());
@@ -138,8 +136,6 @@ public class ClusterV2RequestToClusterRequestConverterTest {
 
     private ClusterV2Request createClusterV2Request(Set<String> rdsConfigNames, AmbariV2Request ambariV2Request) {
         ClusterV2Request request = new ClusterV2Request();
-        request.setEmailNeeded(true);
-        request.setEmailTo("customemailaddress@someemailprovider.com");
         request.setExecutorType(ExecutorType.CONTAINER);
         request.setLdapConfigName("nameOfTheLdapConfig");
         request.setName("some name");

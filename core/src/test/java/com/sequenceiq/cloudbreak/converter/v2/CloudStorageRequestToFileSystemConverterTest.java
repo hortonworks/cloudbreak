@@ -29,7 +29,7 @@ import com.sequenceiq.cloudbreak.api.model.v2.filesystem.AbfsCloudStorageParamet
 import com.sequenceiq.cloudbreak.api.model.v2.filesystem.AdlsCloudStorageParameters;
 import com.sequenceiq.cloudbreak.api.model.v2.filesystem.GcsCloudStorageParameters;
 import com.sequenceiq.cloudbreak.api.model.v2.filesystem.WasbCloudStorageParameters;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.converter.v2.filesystem.CloudStorageRequestToFileSystemConverter;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
@@ -64,7 +64,7 @@ public class CloudStorageRequestToFileSystemConverterTest {
     private ConversionService conversionService;
 
     @Mock
-    private IdentityUser user;
+    private CloudbreakUser user;
 
     @Before
     public void setUp() {

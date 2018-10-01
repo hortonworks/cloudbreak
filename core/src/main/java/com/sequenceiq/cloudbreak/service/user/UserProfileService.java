@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.model.users.UserProfileRequest;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
@@ -103,8 +103,8 @@ public class UserProfileService {
         }
     }
 
-    public void put(UserProfileRequest request, IdentityUser identityUser, User user, Workspace workspace) {
-        UserProfile userProfile = getOrCreate(identityUser.getAccount(), identityUser.getUserId(), identityUser.getUsername(), user);
+    public void put(UserProfileRequest request, CloudbreakUser cloudbreakUser, User user, Workspace workspace) {
+        UserProfile userProfile = getOrCreate(cloudbreakUser.getAccount(), cloudbreakUser.getUserId(), cloudbreakUser.getUsername(), user);
         if (request.getCredentialId() != null) {
             Credential credential = credentialService.get(request.getCredentialId(), workspace);
             storeDefaultCredential(userProfile, credential, workspace);

@@ -20,7 +20,6 @@ import com.sequenceiq.cloudbreak.reactor.api.event.resource.ClusterUpgradeReques
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ClusterUpgradeResult;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
 
 @Configuration
 public class ClusterUpgradeActions {
@@ -33,9 +32,6 @@ public class ClusterUpgradeActions {
 
     @Inject
     private StackUpdater stackUpdater;
-
-    @Inject
-    private EmailSenderService emailSenderService;
 
     @Inject
     private ClusterUpgradeService clusterUpgradeService;

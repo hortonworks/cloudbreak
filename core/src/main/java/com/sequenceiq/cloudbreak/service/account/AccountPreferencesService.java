@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.account;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +15,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.cloud.CloudConstant;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.AccountPreferences;
 import com.sequenceiq.cloudbreak.repository.AccountPreferencesRepository;
 
@@ -38,7 +37,7 @@ public class AccountPreferencesService {
         return accountPreferencesRepository.save(accountPreferences);
     }
 
-    public AccountPreferences saveOne(IdentityUser user, AccountPreferences accountPreferences) {
+    public AccountPreferences saveOne(CloudbreakUser user, AccountPreferences accountPreferences) {
         accountPreferences.setAccount(user.getAccount());
         return save(accountPreferences);
     }
@@ -89,12 +88,12 @@ public class AccountPreferencesService {
         return accountPreferences;
     }
 
-    public AccountPreferences getByUser(IdentityUser user) {
+    public AccountPreferences getByUser(CloudbreakUser user) {
         String account = user.getAccount();
         return getByAccount(account);
     }
 
-    public void delete(IdentityUser user) {
+    public void delete(CloudbreakUser user) {
         AccountPreferences preferences = getByUser(user);
         accountPreferencesRepository.delete(preferences);
     }
@@ -110,12 +109,6 @@ public class AccountPreferencesService {
     private AccountPreferences createDefaultAccountPreferences(String account) {
         AccountPreferences defaultPreferences = new AccountPreferences();
         defaultPreferences.setAccount(account);
-        defaultPreferences.setMaxNumberOfClusters(ZERO);
-        defaultPreferences.setMaxNumberOfNodesPerCluster(ZERO);
-        defaultPreferences.setMaxNumberOfClustersPerUser(ZERO);
-        defaultPreferences.setAllowedInstanceTypes(Collections.emptyList());
-        defaultPreferences.setClusterTimeToLive(ZERO);
-        defaultPreferences.setUserTimeToLive(ZERO);
         return defaultPreferences;
     }
 }

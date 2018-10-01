@@ -25,7 +25,6 @@ import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
-import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
 
 @Service
 public class ClusterTerminationFlowService {
@@ -33,9 +32,6 @@ public class ClusterTerminationFlowService {
 
     @Inject
     private ClusterTerminationService terminationService;
-
-    @Inject
-    private EmailSenderService emailSenderService;
 
     @Inject
     private ClusterService clusterService;
@@ -61,24 +57,15 @@ public class ClusterTerminationFlowService {
             clusterService.updateClusterStatusByStackId(stackView.getId(), DELETE_COMPLETED);
             InMemoryStateStore.deleteCluster(clusterView.getId());
             stackUpdater.updateStackStatus(stackView.getId(), DetailedStackStatus.AVAILABLE);
-            if (clusterView.getEmailNeeded()) {
-                emailSenderService.sendTerminationSuccessEmail(clusterView.getOwner(), clusterView.getEmailTo(),
-                    clusterView.getAmbariIp(), clusterView.getName());
-                flowMessageService.fireEventAndLog(stackView.getId(), Msg.CLUSTER_EMAIL_SENT, DELETE_COMPLETED.name());
-            }
         }
     }
 
     public void finishClusterTerminationNotAllowed(ClusterViewContext context, ClusterTerminationResult payload) {
         StackView stackView = context.getStack();
         Long stackId = stackView.getId();
-        ClusterView clusterView = context.getClusterView();
         flowMessageService.fireEventAndLog(stackId, Msg.CLUSTER_DELETE_FAILED, DELETE_FAILED.name(), "Operation not allowed");
         clusterService.updateClusterStatusByStackId(stackId, AVAILABLE);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE);
-        if (clusterView.getEmailNeeded()) {
-            sendDeleteFailedMail(clusterView, stackId);
-        }
     }
 
     public void handleClusterTerminationError(StackFailureEvent payload) {
@@ -91,19 +78,6 @@ public class ClusterTerminationFlowService {
             cluster.setStatusReason(errorDetails.getMessage());
             clusterService.updateCluster(cluster);
             flowMessageService.fireEventAndLog(cluster.getStack().getId(), Msg.CLUSTER_DELETE_FAILED, DELETE_FAILED.name(), errorDetails.getMessage());
-            if (cluster.getEmailNeeded()) {
-                sendDeleteFailedMail(cluster);
-            }
         }
-    }
-
-    private void sendDeleteFailedMail(Cluster cluster) {
-        emailSenderService.sendTerminationFailureEmail(cluster.getOwner(), cluster.getEmailTo(), cluster.getAmbariIp(), cluster.getName());
-        flowMessageService.fireEventAndLog(cluster.getStack().getId(), Msg.CLUSTER_EMAIL_SENT, DELETE_FAILED.name());
-    }
-
-    private void sendDeleteFailedMail(ClusterView cluster, long stackId) {
-        emailSenderService.sendTerminationFailureEmail(cluster.getOwner(), cluster.getEmailTo(), cluster.getAmbariIp(), cluster.getName());
-        flowMessageService.fireEventAndLog(stackId, Msg.CLUSTER_EMAIL_SENT, DELETE_FAILED.name());
     }
 }

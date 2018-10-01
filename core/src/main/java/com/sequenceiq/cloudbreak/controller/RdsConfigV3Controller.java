@@ -49,7 +49,7 @@ public class RdsConfigV3Controller extends AbstractRdsConfigController implement
     @Override
     public RDSConfigResponse createInWorkspace(Long workspaceId, RDSConfigRequest request) {
         RDSConfig rdsConfig = getConversionService().convert(request, RDSConfig.class);
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         rdsConfig = getRdsConfigService().create(rdsConfig, workspaceId, user);
         notify(ResourceEvent.RDS_CONFIG_CREATED);
         return getConversionService().convert(rdsConfig, RDSConfigResponse.class);
@@ -64,7 +64,7 @@ public class RdsConfigV3Controller extends AbstractRdsConfigController implement
 
     @Override
     public RdsTestResult testRdsConnection(Long workspaceId, RDSTestRequest rdsTestRequest) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = getRdsConfigService().getWorkspaceService().get(workspaceId, user);
         return testRdsConnection(rdsTestRequest, workspace);
     }

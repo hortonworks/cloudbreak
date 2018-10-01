@@ -42,7 +42,7 @@ public class UpdateAmbariRequestToUpdateClusterRequestConverter extends Abstract
         updateStackJson.setValidateBlueprint(true);
         updateStackJson.setKerberosPassword(source.getKerberosPassword());
         updateStackJson.setKerberosPrincipal(source.getKerberosPrincipal());
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         Blueprint blueprint = blueprintService.getByNameForWorkspace(source.getBlueprintName(), workspace);
         updateStackJson.setBlueprintId(blueprint.getId());

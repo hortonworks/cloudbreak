@@ -5,7 +5,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImageCatalogResponse;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
@@ -38,9 +38,9 @@ public class ImageCatalogToImageCatalogResponseConverter extends AbstractConvers
     }
 
     private boolean isDefault(String imageCatalogName) {
-        IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
-        User user = userService.getOrCreate(identityUser);
-        String defaultImageCatalogName = imageCatalogService.getDefaultImageCatalogName(identityUser, user);
+        CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
+        User user = userService.getOrCreate(cloudbreakUser);
+        String defaultImageCatalogName = imageCatalogService.getDefaultImageCatalogName(cloudbreakUser, user);
         return imageCatalogName.equals(defaultImageCatalogName) || (defaultImageCatalogName == null && imageCatalogService.isEnvDefault(imageCatalogName));
     }
 }

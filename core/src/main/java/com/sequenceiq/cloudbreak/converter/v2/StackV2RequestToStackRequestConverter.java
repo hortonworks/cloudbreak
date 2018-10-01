@@ -24,7 +24,7 @@ import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.ImageSettings;
 import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
@@ -111,11 +111,11 @@ public class StackV2RequestToStackRequestConverter extends AbstractConversionSer
         }
         stackRequest.setFlexId(source.getFlexId());
         stackRequest.setCredentialName(source.getGeneral().getCredentialName());
-        IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
-        User user = userService.getOrCreate(identityUser);
+        CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
+        User user = userService.getOrCreate(cloudbreakUser);
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         convertClusterRequest(source, stackRequest, workspace);
-        stackRequest.setOwnerEmail(Strings.isNullOrEmpty(source.getOwnerEmail()) ? identityUser.getUsername() : source.getOwnerEmail());
+        stackRequest.setOwnerEmail(Strings.isNullOrEmpty(source.getOwnerEmail()) ? cloudbreakUser.getUsername() : source.getOwnerEmail());
         stackRequest.setCloudPlatform(credentialService.getByNameForWorkspace(stackRequest.getCredentialName(), workspace).cloudPlatform());
         convertCustomInputs(source, stackRequest);
         return stackRequest;

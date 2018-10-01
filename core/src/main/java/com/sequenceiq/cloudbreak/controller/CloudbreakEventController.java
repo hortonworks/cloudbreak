@@ -45,7 +45,7 @@ public class CloudbreakEventController implements EventEndpoint {
 
     @Override
     public List<CloudbreakEventsJson> getCloudbreakEventsSince(Long since) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         return cloudbreakEventsFacade.retrieveEventsForWorkspace(workspace, since);
     }

@@ -60,12 +60,6 @@ public class ClusterRequest implements JsonEntity {
     @ApiModelProperty(ClusterModelDescription.HOSTGROUPS)
     private Set<HostGroupRequest> hostGroups;
 
-    @ApiModelProperty(ClusterModelDescription.EMAIL_NEEDED)
-    private Boolean emailNeeded = Boolean.FALSE;
-
-    @ApiModelProperty(ClusterModelDescription.EMAIL_TO)
-    private String emailTo;
-
     private GatewayJson gateway;
 
     @ApiModelProperty(StackModelDescription.ENABLE_SECURITY)
@@ -193,14 +187,6 @@ public class ClusterRequest implements JsonEntity {
         this.hostGroups = hostGroups;
     }
 
-    public Boolean getEmailNeeded() {
-        return emailNeeded;
-    }
-
-    public void setEmailNeeded(Boolean emailNeeded) {
-        this.emailNeeded = emailNeeded;
-    }
-
     public Boolean getEnableSecurity() {
         return enableSecurity;
     }
@@ -319,14 +305,6 @@ public class ClusterRequest implements JsonEntity {
 
     public void setConfigStrategy(ConfigStrategy configStrategy) {
         this.configStrategy = configStrategy;
-    }
-
-    public String getEmailTo() {
-        return emailTo;
-    }
-
-    public void setEmailTo(String emailTo) {
-        this.emailTo = emailTo;
     }
 
     public Set<BlueprintInputJson> getBlueprintInputs() {

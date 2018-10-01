@@ -40,8 +40,6 @@ public class ClusterApiView extends CompactView {
 
     private String ambariIp;
 
-    private Boolean emailNeeded;
-
     private String emailTo;
 
     @Enumerated(EnumType.STRING)
@@ -98,14 +96,6 @@ public class ClusterApiView extends CompactView {
 
     public void setAmbariIp(String ambariIp) {
         this.ambariIp = ambariIp;
-    }
-
-    public Boolean getEmailNeeded() {
-        return emailNeeded;
-    }
-
-    public void setEmailNeeded(Boolean emailNeeded) {
-        this.emailNeeded = emailNeeded;
     }
 
     public String getEmailTo() {

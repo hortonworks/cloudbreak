@@ -27,7 +27,7 @@ import com.sequenceiq.cloudbreak.api.model.stack.StackValidationRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRepairRequest;
 import com.sequenceiq.cloudbreak.api.model.users.UserNamePasswordJson;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
@@ -116,35 +116,35 @@ public class StackV2Controller extends NotificationController implements StackV2
 
     @Override
     public Response putScaling(String name, StackScaleRequestV2 updateRequest) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         return stackCommonService.putScalingInWorkspace(name, workspace.getId(), updateRequest);
     }
 
     @Override
     public Response putStart(String name) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         return stackCommonService.putStartInWorkspace(name, workspace.getId());
     }
 
     @Override
     public Response putStop(String name) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         return stackCommonService.putStopInWorkspace(name, workspace.getId());
     }
 
     @Override
     public Response putSync(String name) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         return stackCommonService.putSyncInWorkspace(name, workspace.getId());
     }
 
     @Override
     public Response putReinstall(String name, ReinstallRequestV2 reinstallRequestV2) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Stack stack = stackService.getByNameInWorkspace(name, restRequestThreadLocalService.getRequestedWorkspaceId());
         UpdateClusterJson updateClusterJson = conversionService.convert(reinstallRequestV2, UpdateClusterJson.class);
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
@@ -153,7 +153,7 @@ public class StackV2Controller extends NotificationController implements StackV2
 
     @Override
     public Response putPassword(String name, UserNamePasswordJson userNamePasswordJson) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         Stack stack = stackService.getByNameInWorkspace(name, workspace.getId());
         UpdateClusterJson updateClusterJson = conversionService.convert(userNamePasswordJson, UpdateClusterJson.class);
@@ -192,25 +192,25 @@ public class StackV2Controller extends NotificationController implements StackV2
 
     @Override
     public StackV2Request getRequestfromName(String name) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         return stackService.getStackRequestByNameInWorkspace(name, workspace);
     }
 
     @Override
     public StackResponse postPrivate(StackV2Request stackRequest) {
-        IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
-        User user = userService.getOrCreate(identityUser);
+        CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
+        User user = userService.getOrCreate(cloudbreakUser);
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
-        return stackCommonService.createInWorkspace(conversionService.convert(stackRequest, StackRequest.class), identityUser, user, workspace);
+        return stackCommonService.createInWorkspace(conversionService.convert(stackRequest, StackRequest.class), cloudbreakUser, user, workspace);
     }
 
     @Override
     public StackResponse postPublic(StackV2Request stackRequest) {
-        IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
-        User user = userService.getOrCreate(identityUser);
+        CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
+        User user = userService.getOrCreate(cloudbreakUser);
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
-        return stackCommonService.createInWorkspace(conversionService.convert(stackRequest, StackRequest.class), identityUser, user, workspace);
+        return stackCommonService.createInWorkspace(conversionService.convert(stackRequest, StackRequest.class), cloudbreakUser, user, workspace);
     }
 
     @Override
@@ -220,7 +220,7 @@ public class StackV2Controller extends NotificationController implements StackV2
 
     @Override
     public void retry(String stackName) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         stackCommonService.retryInWorkspace(stackName, workspace.getId());
     }
@@ -234,7 +234,7 @@ public class StackV2Controller extends NotificationController implements StackV2
 
     @Override
     public Response changeImage(String stackName, StackImageChangeRequest stackImageChangeRequest) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         return stackCommonService.changeImageByNameInWorkspace(stackName, workspace.getId(), stackImageChangeRequest);
     }

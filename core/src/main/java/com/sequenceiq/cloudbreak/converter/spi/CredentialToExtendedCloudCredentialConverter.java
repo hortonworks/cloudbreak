@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
@@ -26,9 +26,9 @@ public class CredentialToExtendedCloudCredentialConverter {
 
     public ExtendedCloudCredential convert(Credential credential) {
         CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(credential);
-        IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
-        User user = userService.getOrCreate(identityUser);
+        CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
+        User user = userService.getOrCreate(cloudbreakUser);
         return new ExtendedCloudCredential(cloudCredential, credential.cloudPlatform(), credential.getDescription(),
-                identityUser, user.getUserId(), credential.getWorkspace().getId());
+                cloudbreakUser, user.getUserId(), credential.getWorkspace().getId());
     }
 }

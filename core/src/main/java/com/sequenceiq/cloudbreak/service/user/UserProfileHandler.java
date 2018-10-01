@@ -8,7 +8,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
@@ -25,8 +25,8 @@ public class UserProfileHandler {
     private RestRequestThreadLocalService restRequestThreadLocalService;
 
     public void createProfilePreparation(Credential credential, User user) {
-        IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
-        UserProfile userProfile = userProfileService.getOrCreate(identityUser.getAccount(), identityUser.getUserId(), user);
+        CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
+        UserProfile userProfile = userProfileService.getOrCreate(cloudbreakUser.getAccount(), cloudbreakUser.getUserId(), user);
         if (userProfile != null && userProfile.getDefaultCredentials().isEmpty()) {
             userProfile.setDefaultCredentials(Sets.newHashSet(credential));
             userProfileService.save(userProfile);

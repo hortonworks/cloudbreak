@@ -48,14 +48,14 @@ public class FlexSubscriptionV3Controller implements FlexSubscriptionV3Endpoint,
 
     @Override
     public Set<FlexSubscriptionResponse> listByWorkspace(Long workspaceId) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Set<FlexSubscription> subscriptions = flexSubscriptionService.findAllForUserAndWorkspace(user, workspaceId);
         return new HashSet<>(toJsonConverter.convert(subscriptions));
     }
 
     @Override
     public FlexSubscriptionResponse getByNameInWorkspace(Long workspaceId, String name) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         FlexSubscription subscription = flexSubscriptionService.findOneByNameAndWorkspace(name, workspaceId, user);
         return toJsonConverter.convert(subscription);
     }
@@ -63,7 +63,7 @@ public class FlexSubscriptionV3Controller implements FlexSubscriptionV3Endpoint,
     @Override
     public FlexSubscriptionResponse createInWorkspace(Long workspaceId, FlexSubscriptionRequest request) {
         FlexSubscription subscription = toFlexSubscriptionConverter.convert(request);
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         subscription = flexSubscriptionService.create(subscription, workspaceId, user);
         return toJsonConverter.convert(subscription);
     }
@@ -76,14 +76,14 @@ public class FlexSubscriptionV3Controller implements FlexSubscriptionV3Endpoint,
 
     @Override
     public void setUsedForControllerInWorkspace(Long workspaceId, String name) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(workspaceId, user);
         flexSubscriptionService.setUsedForControllerFlexSubscription(name, user, workspace);
     }
 
     @Override
     public void setDefaultInWorkspace(Long workspaceId, String name) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(workspaceId, user);
         flexSubscriptionService.setDefaultFlexSubscription(name, user, workspace);
     }

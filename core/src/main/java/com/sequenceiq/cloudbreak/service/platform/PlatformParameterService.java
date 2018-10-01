@@ -93,7 +93,7 @@ public class PlatformParameterService {
         }
         checkFieldIsNotEmpty(request.getRegion(), "region");
         checkFieldIsNotEmpty(request.getAvailabilityZone(), "availabilityZone");
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(workspaceId, user);
         return cloudResourceAdvisor.createForBlueprint(request.getBlueprintName(), request.getBlueprintId(),
                         resourceRequest, user, workspace);

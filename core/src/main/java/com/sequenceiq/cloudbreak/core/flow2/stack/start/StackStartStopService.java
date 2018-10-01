@@ -30,7 +30,6 @@ import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
 import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
 import com.sequenceiq.cloudbreak.service.usages.UsageService;
@@ -45,9 +44,6 @@ public class StackStartStopService {
 
     @Inject
     private FlowMessageService flowMessageService;
-
-    @Inject
-    private EmailSenderService emailSenderService;
 
     @Inject
     private ClusterService clusterService;
@@ -105,12 +101,6 @@ public class StackStartStopService {
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_STOPPED, STOPPED.name());
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_BILLING_STOPPED, BillingStatus.BILLING_STOPPED.name());
         usageService.stopUsagesForStack(stack);
-
-        if (stack.getCluster() != null && stack.getCluster().getEmailNeeded()) {
-            emailSenderService.sendStopSuccessEmail(stack.getCluster().getOwner(), stack.getCluster().getEmailTo(),
-                    stackUtil.extractAmbariIp(stack), stack.getCluster().getName());
-            flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_NOTIFICATION_EMAIL, STOPPED.name());
-        }
     }
 
     public void handleStackStopError(StackView stack, StackFailureEvent payload) {
@@ -158,11 +148,6 @@ public class StackStartStopService {
         flowMessageService.fireEventAndLog(stackView.getId(), msg, stackStatus.name(), exception.getMessage());
         if (stackView.getClusterView() != null) {
             clusterService.updateClusterStatusByStackId(stackView.getId(), STOPPED);
-            if (stackView.getClusterView().getEmailNeeded()) {
-                emailSenderService.sendStopFailureEmail(stackView.getClusterView().getOwner(), stackView.getClusterView().getEmailTo(),
-                        stackUtil.extractAmbariIp(stackView), stackView.getClusterView().getName());
-                flowMessageService.fireEventAndLog(stackView.getId(), Msg.STACK_NOTIFICATION_EMAIL, stackStatus.name());
-            }
         }
     }
 }

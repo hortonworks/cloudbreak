@@ -10,7 +10,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.service.user.UserDetailsService;
 import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
 
@@ -30,11 +30,11 @@ public class CachedUserDetailsService {
     private UserService userService;
 
     @Cacheable(cacheNames = "identityUserCache", key = "#username")
-    public IdentityUser getDetails(String username, UserFilterField filterField) {
-        IdentityUser identityUser = cachedUserDetailsService.getDetails(username, filterField, clientSecret);
+    public CloudbreakUser getDetails(String username, UserFilterField filterField) {
+        CloudbreakUser cloudbreakUser = cachedUserDetailsService.getDetails(username, filterField, clientSecret);
         //ensure that the user is created into our database
-        userService.getOrCreate(identityUser);
-        return identityUser;
+        userService.getOrCreate(cloudbreakUser);
+        return cloudbreakUser;
     }
 
     @CacheEvict(value = "identityUserCache", key = "#username")

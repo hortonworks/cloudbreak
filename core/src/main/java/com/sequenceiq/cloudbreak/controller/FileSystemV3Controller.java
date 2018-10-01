@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v3.FileSystemV3Endpoint;
 import com.sequenceiq.cloudbreak.api.model.StructuredParameterQueriesResponse;
 import com.sequenceiq.cloudbreak.api.model.StructuredParameterQueryResponse;
 import com.sequenceiq.cloudbreak.api.model.StructuredParametersQueryRequest;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
@@ -66,8 +66,8 @@ public class FileSystemV3Controller implements FileSystemV3Endpoint, WorkspaceAw
     }
 
     private Workspace getWorkspace(Long workspaceId) {
-        IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
-        User user = userService.getOrCreate(identityUser);
+        CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
+        User user = userService.getOrCreate(cloudbreakUser);
         return workspaceService.get(workspaceId, user);
     }
 

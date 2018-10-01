@@ -242,7 +242,6 @@ public class OperationDescriptions {
         public static final String PLATFORM_ENABLEMENT = "is platform selection enabled";
         public static final String PUT_PRIVATE = "update account preferences of admin user";
         public static final String POST_PRIVATE = "post account preferences of admin user";
-        public static final String VALIDATE = "validate account preferences of all stacks";
     }
 
     public static class LdapConfigOpDescription {

@@ -37,7 +37,7 @@ public class ManagementPackDetailsToManagementPackComponentConverter
     public ManagementPackComponent convert(ManagementPackDetails source) {
         ManagementPackComponent mpack = new ManagementPackComponent();
         if (StringUtils.isNoneEmpty(source.getName())) {
-            User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+            User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
             Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
             ManagementPack dmpack = managementPackService.getByNameForWorkspace(source.getName(), workspace);
             mpack.setName(source.getName());

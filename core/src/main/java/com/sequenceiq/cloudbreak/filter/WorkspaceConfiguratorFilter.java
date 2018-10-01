@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
@@ -58,9 +58,9 @@ public class WorkspaceConfiguratorFilter extends OncePerRequestFilter {
                 LOGGER.error(String.format("WorkspaceID couldn't be parsed from the V3 request URI: %s", requestURI), e);
             }
         } else {
-            IdentityUser identityUser = authenticatedUserService.getCbUser();
-            if (identityUser != null) {
-                User user = userService.getOrCreate(identityUser);
+            CloudbreakUser cloudbreakUser = authenticatedUserService.getCbUser();
+            if (cloudbreakUser != null) {
+                User user = userService.getOrCreate(cloudbreakUser);
                 Workspace workspace = workspaceService.getDefaultWorkspaceForUser(user);
                 if (workspace == null) {
                     throw new NotFoundException("Workspace not found");

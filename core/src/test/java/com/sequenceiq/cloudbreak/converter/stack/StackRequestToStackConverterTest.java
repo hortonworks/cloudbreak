@@ -35,7 +35,7 @@ import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.cloudbreak.converter.AbstractJsonConverterTest;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
@@ -87,12 +87,12 @@ public class StackRequestToStackConverterTest extends AbstractJsonConverterTest<
     private RestRequestThreadLocalService restRequestThreadLocalService;
 
     @Mock
-    private IdentityUser identityUser;
+    private CloudbreakUser cloudbreakUser;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        when(restRequestThreadLocalService.getIdentityUser()).thenReturn(identityUser);
+        when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
     }
 
     @Test

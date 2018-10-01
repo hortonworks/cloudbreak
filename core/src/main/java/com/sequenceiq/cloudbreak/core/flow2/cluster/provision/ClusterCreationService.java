@@ -19,12 +19,11 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.OrchestratorView;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
-import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
-import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TerminationFailedException;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
@@ -43,9 +42,6 @@ public class ClusterCreationService {
 
     @Inject
     private ClusterService clusterService;
-
-    @Inject
-    private EmailSenderService emailSenderService;
 
     @Inject
     private ClusterTerminationService clusterTerminationService;
@@ -99,12 +95,6 @@ public class ClusterCreationService {
         Cluster cluster = clusterService.getById(stackView.getClusterView().getId());
 
         clusterService.cleanupKerberosCredential(cluster);
-
-        if (cluster.getEmailNeeded()) {
-            emailSenderService.sendProvisioningSuccessEmail(cluster.getOwner(), stackView.getClusterView().getEmailTo(), ambariIp,
-                    cluster.getName(), cluster.getGateway() != null);
-            flowMessageService.fireEventAndLog(stackView.getId(), Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, AVAILABLE.name());
-        }
     }
 
     public void handleClusterCreationFailure(StackView stackView, Exception exception) {
@@ -121,11 +111,6 @@ public class ClusterCreationService {
                 }
             } catch (CloudbreakException | TerminationFailedException ex) {
                 LOGGER.error("Cluster containers could not be deleted, preparation for reinstall failed: ", ex);
-            }
-
-            if (cluster != null && cluster.getEmailNeeded()) {
-                emailSenderService.sendProvisioningFailureEmail(cluster.getOwner(), stackView.getClusterView().getEmailTo(), cluster.getName());
-                flowMessageService.fireEventAndLog(stackView.getId(), Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, AVAILABLE.name());
             }
         } else {
             LOGGER.error("Cluster was null. Flow action was not required.");

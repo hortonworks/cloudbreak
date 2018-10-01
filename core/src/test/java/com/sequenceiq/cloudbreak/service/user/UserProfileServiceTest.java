@@ -18,7 +18,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.api.model.users.UserProfileRequest;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
@@ -167,7 +167,7 @@ public class UserProfileServiceTest {
 
     @Test
     public void testAddDefaultCredentials() {
-        IdentityUser identityUser = new IdentityUser(null, null, null, null, null, null, null);
+        CloudbreakUser cloudbreakUser = new CloudbreakUser(null, null, null);
         UserProfile userProfile = new UserProfile();
         userProfile.setUser(new User());
         Workspace workspace = createWorkspace(1L);
@@ -176,10 +176,10 @@ public class UserProfileServiceTest {
         when(userProfileRepository.save(any(UserProfile.class))).thenReturn(userProfile);
         when(credentialService.get(anyLong(), any())).thenReturn(createCredential(1L, null, workspace));
 
-        userProfileService.put(userProfileRequest, identityUser, null, workspace);
+        userProfileService.put(userProfileRequest, cloudbreakUser, null, workspace);
         assertEquals(1, userProfile.getDefaultCredentials().size());
 
-        userProfileService.put(userProfileRequest, identityUser, null, workspace);
+        userProfileService.put(userProfileRequest, cloudbreakUser, null, workspace);
         assertEquals(1, userProfile.getDefaultCredentials().size());
 
         workspace = createWorkspace(2L);
@@ -187,7 +187,7 @@ public class UserProfileServiceTest {
 
         when(credentialService.getByNameForWorkspace(anyString(), any())).thenReturn(createCredential(2L, "cred", workspace));
 
-        userProfileService.put(userProfileRequest, identityUser, null, workspace);
+        userProfileService.put(userProfileRequest, cloudbreakUser, null, workspace);
         assertEquals(2, userProfile.getDefaultCredentials().size());
     }
 

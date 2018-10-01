@@ -17,8 +17,7 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
 
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.security.OwnerBasedPermissionEvaluator;
@@ -54,18 +53,7 @@ public class OwnerBasedPermissionEvaluatorTest {
     @Test
     public void testWriteOwner() {
         when(oauth.getUserAuthentication()).thenReturn(new TestingAuthenticationToken("principal", "credential"));
-        IdentityUser user = new IdentityUser("userid", "", "", Collections.emptyList(), "", "", null);
-        when(cachedUserDetailsService.getDetails(anyString(), any(UserFilterField.class))).thenReturn(user);
-
-        boolean result = underTest.hasPermission(oauth, stack, "write");
-
-        Assert.assertTrue(result);
-    }
-
-    @Test
-    public void testWriteNotOwnerButAdmin() {
-        when(oauth.getUserAuthentication()).thenReturn(new TestingAuthenticationToken("principal", "credential"));
-        IdentityUser user = new IdentityUser("admin", "", "account", Collections.singletonList(IdentityUserRole.ADMIN), "", "", null);
+        CloudbreakUser user = new CloudbreakUser("userid", "", "");
         when(cachedUserDetailsService.getDetails(anyString(), any(UserFilterField.class))).thenReturn(user);
 
         boolean result = underTest.hasPermission(oauth, stack, "write");
@@ -76,7 +64,7 @@ public class OwnerBasedPermissionEvaluatorTest {
     @Test
     public void testReadNotOwnerNotAdmin() {
         when(oauth.getUserAuthentication()).thenReturn(new TestingAuthenticationToken("principal", "credential"));
-        IdentityUser user = new IdentityUser("admin", "", "account", Collections.emptyList(), "", "", null);
+        CloudbreakUser user = new CloudbreakUser("admin", "", "account");
         when(cachedUserDetailsService.getDetails(anyString(), any(UserFilterField.class))).thenReturn(user);
         boolean result = underTest.hasPermission(oauth, stack, "read");
 
@@ -86,7 +74,7 @@ public class OwnerBasedPermissionEvaluatorTest {
     @Test
     public void testReadNotOwnerNotAdminNotAccount() {
         when(oauth.getUserAuthentication()).thenReturn(new TestingAuthenticationToken("principal", "credential"));
-        IdentityUser user = new IdentityUser("admin", "", "test-account", Collections.emptyList(), "", "", null);
+        CloudbreakUser user = new CloudbreakUser("admin", "", "test-account");
         when(cachedUserDetailsService.getDetails(anyString(), any(UserFilterField.class))).thenReturn(user);
         boolean result = underTest.hasPermission(oauth, stack, "read");
 
@@ -96,7 +84,7 @@ public class OwnerBasedPermissionEvaluatorTest {
     @Test
     public void testWriteNotOwnerNotAdmin() {
         when(oauth.getUserAuthentication()).thenReturn(new TestingAuthenticationToken("principal", "credential"));
-        IdentityUser user = new IdentityUser("admin", "", "account", Collections.emptyList(), "", "", null);
+        CloudbreakUser user = new CloudbreakUser("admin", "", "account");
         when(cachedUserDetailsService.getDetails(anyString(), any(UserFilterField.class))).thenReturn(user);
         boolean result = underTest.hasPermission(oauth, stack, "write");
 

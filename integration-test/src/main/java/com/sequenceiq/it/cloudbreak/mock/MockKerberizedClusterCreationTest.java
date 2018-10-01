@@ -37,7 +37,6 @@ public class MockKerberizedClusterCreationTest extends MockClusterCreationWithSa
                 ambariPort,
                 ambariUser,
                 ambariPassword,
-                emailNeeded,
                 enableSecurity,
                 kerberosMasterKey,
                 kerberosAdmin,

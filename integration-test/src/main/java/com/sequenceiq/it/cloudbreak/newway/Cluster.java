@@ -5,11 +5,11 @@ import java.util.function.Function;
 
 import javax.inject.Inject;
 
-import com.sequenceiq.cloudbreak.api.model.SharedServiceRequest;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
+import com.sequenceiq.cloudbreak.api.model.SharedServiceRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.CloudStorageRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
@@ -60,16 +60,6 @@ public class Cluster extends Entity {
 
     public Cluster withAmbariRequest(AmbariV2Request ambariRequest) {
         request.setAmbari(ambariRequest);
-        return this;
-    }
-
-    public Cluster withEmailNeeded(Boolean aBoolean) {
-        request.setEmailNeeded(aBoolean);
-        return this;
-    }
-
-    public Cluster withEmailTo(String parameters) {
-        request.setEmailTo(parameters);
         return this;
     }
 

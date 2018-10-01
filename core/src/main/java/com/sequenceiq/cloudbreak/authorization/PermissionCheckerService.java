@@ -102,7 +102,7 @@ public class PermissionCheckerService {
             return permissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature);
         }
 
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         PermissionChecker<? extends Annotation> permissionChecker = permissionCheckerMap.get(methodAnnotation.annotationType());
         WorkspaceResource resource = classWorkspaceResourceType.resource();
         return permissionChecker.checkPermissions(methodAnnotation, resource, user, proceedingJoinPoint, methodSignature);

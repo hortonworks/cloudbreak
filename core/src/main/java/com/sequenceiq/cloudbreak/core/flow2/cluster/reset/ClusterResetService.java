@@ -16,7 +16,6 @@ import com.sequenceiq.cloudbreak.domain.view.ClusterView;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
 
 @Service
 public class ClusterResetService {
@@ -30,9 +29,6 @@ public class ClusterResetService {
 
     @Inject
     private StackUpdater stackUpdater;
-
-    @Inject
-    private EmailSenderService emailSenderService;
 
     public void resetCluster(long stackId) {
         flowMessageService.fireEventAndLog(stackId, Msg.AMBARI_CLUSTER_RESET, Status.UPDATE_IN_PROGRESS.name());
@@ -50,9 +46,5 @@ public class ClusterResetService {
         clusterService.updateClusterStatusByStackId(stackView.getId(), Status.CREATE_FAILED, errorMessage);
         stackUpdater.updateStackStatus(stackView.getId(), DetailedStackStatus.AVAILABLE);
         flowMessageService.fireEventAndLog(stackView.getId(), Msg.AMBARI_CLUSTER_CREATE_FAILED, Status.CREATE_FAILED.name(), errorMessage);
-        if (cluster.getEmailNeeded()) {
-            emailSenderService.sendProvisioningFailureEmail(cluster.getOwner(), stackView.getClusterView().getEmailTo(), cluster.getName());
-            flowMessageService.fireEventAndLog(stackView.getId(), Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, Status.AVAILABLE.name());
-        }
     }
 }

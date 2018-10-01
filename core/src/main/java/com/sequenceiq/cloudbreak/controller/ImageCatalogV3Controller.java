@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImageCatalogResponse;
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImagesResponse;
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.UpdateImageCatalogRequest;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
@@ -68,7 +68,7 @@ public class ImageCatalogV3Controller extends NotificationController implements 
     @Override
     public ImageCatalogResponse createInWorkspace(Long workspaceId, ImageCatalogRequest request) {
         ImageCatalog imageCatalog = conversionService.convert(request, ImageCatalog.class);
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         imageCatalog = imageCatalogService.create(imageCatalog, workspaceId, user);
         notify(ResourceEvent.IMAGE_CATALOG_CREATED);
         return conversionService.convert(imageCatalog, ImageCatalogResponse.class);
@@ -76,9 +76,9 @@ public class ImageCatalogV3Controller extends NotificationController implements 
 
     @Override
     public ImageCatalogResponse deleteInWorkspace(Long workspaceId, String name) {
-        IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
-        User user = userService.getOrCreate(identityUser);
-        ImageCatalog deleted = imageCatalogService.delete(workspaceId, name, identityUser, user);
+        CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
+        User user = userService.getOrCreate(cloudbreakUser);
+        ImageCatalog deleted = imageCatalogService.delete(workspaceId, name, cloudbreakUser, user);
         notify(ResourceEvent.IMAGE_CATALOG_DELETED);
         return conversionService.convert(deleted, ImageCatalogResponse.class);
     }
@@ -91,9 +91,9 @@ public class ImageCatalogV3Controller extends NotificationController implements 
 
     @Override
     public ImagesResponse getImagesByProvider(Long workspaceId, String platform) throws Exception {
-        IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
-        User user = userService.getOrCreate(identityUser);
-        Images images = imageCatalogService.getImagesOsFiltered(platform, null, identityUser, user).getImages();
+        CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
+        User user = userService.getOrCreate(cloudbreakUser);
+        Images images = imageCatalogService.getImagesOsFiltered(platform, null, cloudbreakUser, user).getImages();
         return conversionService.convert(images, ImagesResponse.class);
     }
 
@@ -111,16 +111,16 @@ public class ImageCatalogV3Controller extends NotificationController implements 
 
     @Override
     public ImageCatalogResponse putPublicInWorkspace(Long workspaceId, UpdateImageCatalogRequest request) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         ImageCatalog imageCatalog = imageCatalogService.update(workspaceId, conversionService.convert(request, ImageCatalog.class), user);
         return conversionService.convert(imageCatalog, ImageCatalogResponse.class);
     }
 
     @Override
     public ImageCatalogResponse putSetDefaultByNameInWorkspace(Long workspaceId, String name) {
-        IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
-        User user = userService.getOrCreate(identityUser);
-        return conversionService.convert(imageCatalogService.setAsDefault(workspaceId, name, identityUser, user), ImageCatalogResponse.class);
+        CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
+        User user = userService.getOrCreate(cloudbreakUser);
+        return conversionService.convert(imageCatalogService.setAsDefault(workspaceId, name, cloudbreakUser, user), ImageCatalogResponse.class);
     }
 
     @Override

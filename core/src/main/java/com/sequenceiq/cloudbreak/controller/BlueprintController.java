@@ -65,14 +65,14 @@ public class BlueprintController extends NotificationController implements Bluep
 
     @Override
     public BlueprintResponse postPublic(BlueprintRequest request) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         return createInWorkspace(request, user, workspace);
     }
 
     @Override
     public BlueprintResponse postPrivate(BlueprintRequest request) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         return createInWorkspace(request, user, workspace);
     }
@@ -114,13 +114,13 @@ public class BlueprintController extends NotificationController implements Bluep
     }
 
     private BlueprintResponse getBlueprintResponse(String name) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         return conversionService.convert(blueprintService.getByNameForWorkspace(name, workspace), BlueprintResponse.class);
     }
 
     private Set<BlueprintResponse> listForUsersDefaultWorkspace() {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         return blueprintService.getAllAvailableInWorkspace(workspace).stream()
                 .map(blueprint -> conversionService.convert(blueprint, BlueprintResponse.class))

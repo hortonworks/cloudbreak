@@ -27,7 +27,6 @@ import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
@@ -44,9 +43,6 @@ public class ClusterUpscaleFlowService {
 
     @Inject
     private FlowMessageService flowMessageService;
-
-    @Inject
-    private EmailSenderService emailSenderService;
 
     @Inject
     private StackUpdater stackUpdater;
@@ -72,11 +68,6 @@ public class ClusterUpscaleFlowService {
             LOGGER.info("Cluster upscaled successfully");
             clusterService.updateClusterStatusByStackId(stackView.getId(), AVAILABLE);
             flowMessageService.fireEventAndLog(stackView.getId(), Msg.AMBARI_CLUSTER_SCALED_UP, AVAILABLE.name());
-            if (stackView.getClusterView().getEmailNeeded()) {
-                emailSenderService.sendUpscaleSuccessEmail(stackView.getClusterView().getOwner(), stackView.getClusterView().getEmailTo(),
-                        stackUtil.extractAmbariIp(stackView), stackView.getClusterView().getName());
-                flowMessageService.fireEventAndLog(stackView.getId(), Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, AVAILABLE.name());
-            }
         } else {
             LOGGER.info("Cluster upscale failed. {} hosts failed to upscale", numOfFailedHosts);
             clusterService.updateClusterStatusByStackId(stackView.getId(), UPDATE_FAILED);

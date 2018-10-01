@@ -57,7 +57,7 @@ public class RecipeV3Controller extends NotificationController implements Recipe
     @Override
     public RecipeResponse createInWorkspace(Long workspaceId, RecipeRequest request) {
         Recipe recipe = conversionService.convert(request, Recipe.class);
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         recipe = recipeService.create(recipe, workspaceId, user);
         notify(ResourceEvent.RECIPE_CREATED);
         return conversionService.convert(recipe, RecipeResponse.class);

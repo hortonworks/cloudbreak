@@ -45,7 +45,7 @@ public class CredentialController extends NotificationController implements Cred
 
     @Override
     public CredentialResponse postPublic(CredentialRequest credentialRequest) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         return createCredential(credentialRequest, user, workspace);
     }
@@ -57,7 +57,7 @@ public class CredentialController extends NotificationController implements Cred
 
     @Override
     public CredentialResponse putPublic(CredentialRequest credentialRequest) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         return modifyCredential(credentialRequest, user, workspace);
     }
@@ -79,21 +79,21 @@ public class CredentialController extends NotificationController implements Cred
 
     @Override
     public CredentialResponse getPublic(String name) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         return credentialService.convertToResponse(credentialService.getByNameForWorkspace(name, workspace));
     }
 
     @Override
     public CredentialResponse get(Long id) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         return credentialService.convertToResponse(credentialService.get(id, workspace));
     }
 
     @Override
     public void delete(Long id) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         executeAndNotify(identityUser -> credentialService.delete(id, workspace), ResourceEvent.CREDENTIAL_DELETED);
     }
@@ -105,7 +105,7 @@ public class CredentialController extends NotificationController implements Cred
 
     @Override
     public void deletePrivate(String name) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         executeAndNotify(identityUser -> credentialService.delete(name, workspace), ResourceEvent.CREDENTIAL_DELETED);
     }
@@ -117,7 +117,7 @@ public class CredentialController extends NotificationController implements Cred
 
     @Override
     public Map<String, String> publicInteractiveLogin(CredentialRequest credentialRequest) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         return interactiveLogin(credentialRequest, workspace, user);
     }

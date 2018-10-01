@@ -5,7 +5,7 @@ import javax.inject.Inject;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
 import com.sequenceiq.cloudbreak.service.user.CachedUserDetailsService;
 
@@ -14,7 +14,7 @@ public class RestRequestThreadLocalService {
 
     private static final ThreadLocal<Long> REQUESTED_ORG_ID = new ThreadLocal<>();
 
-    private static final ThreadLocal<IdentityUser> IDENTITY_USER = new ThreadLocal<>();
+    private static final ThreadLocal<CloudbreakUser> IDENTITY_USER = new ThreadLocal<>();
 
     @Inject
     private CachedUserDetailsService cachedUserDetailsService;
@@ -31,11 +31,11 @@ public class RestRequestThreadLocalService {
         REQUESTED_ORG_ID.remove();
     }
 
-    public void setIdentityUser(IdentityUser identityUser) {
-        IDENTITY_USER.set(identityUser);
+    public void setIdentityUser(CloudbreakUser cloudbreakUser) {
+        IDENTITY_USER.set(cloudbreakUser);
     }
 
-    public IdentityUser getIdentityUser() {
+    public CloudbreakUser getCloudbreakUser() {
         return IDENTITY_USER.get();
     }
 

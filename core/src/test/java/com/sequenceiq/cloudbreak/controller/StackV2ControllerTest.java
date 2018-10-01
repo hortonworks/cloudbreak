@@ -19,7 +19,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.model.stack.StackImageChangeRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRepairRequest;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -65,7 +65,7 @@ public class StackV2ControllerTest {
     private UserService userService;
 
     @Mock
-    private IdentityUser identityUser;
+    private CloudbreakUser cloudbreakUser;
 
     private Stack stack;
 
@@ -81,8 +81,8 @@ public class StackV2ControllerTest {
         workspace.setName("Top Sercet FBI");
 
         when(stackService.getByNameInWorkspace(eq(stackName), anyLong())).thenReturn(stack);
-        when(restRequestThreadLocalService.getIdentityUser()).thenReturn(identityUser);
-        when(userService.getOrCreate(any(IdentityUser.class))).thenReturn(new User());
+        when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
+        when(userService.getOrCreate(any(CloudbreakUser.class))).thenReturn(new User());
         when(workspaceService.get(anyLong(), any(User.class))).thenReturn(workspace);
     }
 

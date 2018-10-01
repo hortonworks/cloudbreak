@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.blueprint.sharedservice.SharedServiceConfigsVie
 import com.sequenceiq.cloudbreak.blueprint.utils.StackInfoService;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
@@ -98,7 +98,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
             Map<String, List<InstanceMetaData>> groupInstances = instanceGroupMetadataCollector.collectMetadata(source);
             HdfConfigs hdfConfigs = hdfConfigProvider.createHdfConfig(cluster.getHostGroups(), groupInstances, cluster.getBlueprint().getBlueprintText());
             BaseFileSystemConfigurationsView fileSystemConfigurationView = getFileSystemConfigurationView(source, fileSystem);
-            IdentityUser identityUser = cachedUserDetailsService.getDetails(cluster.getOwner(), UserFilterField.USERID);
+            CloudbreakUser cloudbreakUser = cachedUserDetailsService.getDetails(cluster.getOwner(), UserFilterField.USERID);
             Stack dataLakeStack = getDataLakeStack(source);
             StackInputs stackInputs = getStackInputs(source);
             Map<String, Object> fixInputs = stackInputs.getFixInputs() == null ? new HashMap<>() : stackInputs.getFixInputs();
@@ -114,7 +114,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
                     .withBlueprintView(blueprintViewProvider.getBlueprintView(cluster.getBlueprint()))
                     .withStackRepoDetailsHdpVersion(stackRepoDetailsHdpVersion)
                     .withFileSystemConfigurationView(fileSystemConfigurationView)
-                    .withGeneralClusterConfigs(generalClusterConfigsProvider.generalClusterConfigs(source, cluster, identityUser))
+                    .withGeneralClusterConfigs(generalClusterConfigsProvider.generalClusterConfigs(source, cluster, cloudbreakUser))
                     .withSmartSenseSubscription(aDefault.isPresent() ? aDefault.get() : null)
                     .withLdapConfig(ldapConfig)
                     .withHdfConfigs(hdfConfigs)

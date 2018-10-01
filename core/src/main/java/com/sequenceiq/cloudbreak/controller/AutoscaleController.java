@@ -77,7 +77,7 @@ public class AutoscaleController implements AutoscaleEndpoint {
     @Override
     public Response putCluster(Long stackId, String owner, @Valid UpdateClusterJson updateRequest) {
         setupIdentityForAutoscale(stackId, owner);
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         return clusterCommonService.put(stackId, updateRequest, user, workspace);
     }
@@ -117,7 +117,7 @@ public class AutoscaleController implements AutoscaleEndpoint {
             restRequestThreadLocalService.setIdentityUserByOwner(owner);
             Stack stack = stackService.get(id);
             if (WorkspacePermissions.Action.WRITE.name().equalsIgnoreCase(permission)) {
-                User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+                User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
                 permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(stack.getWorkspace().getId(), STACK, WorkspacePermissions.Action.WRITE, user);
             }
             return true;

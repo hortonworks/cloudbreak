@@ -50,7 +50,7 @@ public class InteractiveCredentialCreationHandler implements ReactorEventHandler
 
         ExtendedCloudCredential extendedCloudCredential = interactiveCredentialCreationRequest.getExtendedCloudCredential();
         Credential credential = extendedCloudCredentialToCredentialConverter.convert(extendedCloudCredential);
-        User user = userService.getOrCreate(extendedCloudCredential.getIdentityUser());
+        User user = userService.getOrCreate(extendedCloudCredential.getCloudbreakUser());
         try {
             credentialService.createWithRetry(credential, extendedCloudCredential.getWorkspaceId(), user);
         } catch (DuplicateKeyValueException e) {

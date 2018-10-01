@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 
@@ -26,8 +26,8 @@ public class IdentityUserConfiguratorFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        IdentityUser identityUser = authenticatedUserService.getCbUser();
-        restRequestThreadLocalService.setIdentityUser(identityUser);
+        CloudbreakUser cloudbreakUser = authenticatedUserService.getCbUser();
+        restRequestThreadLocalService.setIdentityUser(cloudbreakUser);
         filterChain.doFilter(request, response);
         restRequestThreadLocalService.removeIdentityUser();
     }

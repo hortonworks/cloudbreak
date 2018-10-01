@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.service.audit;
 
 import com.sequenceiq.cloudbreak.api.model.audit.AuditEvent;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.StructuredEventEntity;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
@@ -62,7 +62,7 @@ public class AuditEventServiceTest {
     private User user;
 
     @Mock
-    private IdentityUser identityUser;
+    private CloudbreakUser cloudbreakUser;
 
     @InjectMocks
     private AuditEventService underTest;
@@ -71,8 +71,8 @@ public class AuditEventServiceTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         when(testWorkspace.getId()).thenReturn(TEST_DEFAULT_ORG_ID);
-        when(restRequestThreadLocalService.getIdentityUser()).thenReturn(identityUser);
-        when(userService.getOrCreate(identityUser)).thenReturn(user);
+        when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
+        when(userService.getOrCreate(cloudbreakUser)).thenReturn(user);
         when(workspaceService.getDefaultWorkspaceForUser(user)).thenReturn(testWorkspace);
     }
 

@@ -49,7 +49,7 @@ public class RdsConfigController extends AbstractRdsConfigController implements 
 
     @Override
     public Set<RDSConfigResponse> getPrivates() {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = getRdsConfigService().getWorkspaceService().get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         Set<RDSConfig> rdsConfigs = getRdsConfigService().retrieveRdsConfigsInWorkspace(workspace);
         return toJsonList(rdsConfigs);
@@ -57,7 +57,7 @@ public class RdsConfigController extends AbstractRdsConfigController implements 
 
     @Override
     public RDSConfigResponse getPrivate(String name) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = getRdsConfigService().getWorkspaceService().get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         RDSConfig rdsConfig = getRdsConfigService().getByNameForWorkspace(name, workspace);
         return getConversionService().convert(rdsConfig, RDSConfigResponse.class);
@@ -65,7 +65,7 @@ public class RdsConfigController extends AbstractRdsConfigController implements 
 
     @Override
     public RDSConfigResponse getPublic(String name) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = getRdsConfigService().getWorkspaceService().get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         RDSConfig rdsConfig = getRdsConfigService().getByNameForWorkspace(name, workspace);
         return getConversionService().convert(rdsConfig, RDSConfigResponse.class);
@@ -73,7 +73,7 @@ public class RdsConfigController extends AbstractRdsConfigController implements 
 
     @Override
     public Set<RDSConfigResponse> getPublics() {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = getRdsConfigService().getWorkspaceService().get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         Set<RDSConfig> rdsConfigs = getRdsConfigService().retrieveRdsConfigsInWorkspace(workspace);
         return toJsonList(rdsConfigs);
@@ -102,14 +102,14 @@ public class RdsConfigController extends AbstractRdsConfigController implements 
 
     @Override
     public RdsTestResult testRdsConnection(RDSTestRequest rdsTestRequest) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = getRdsConfigService().getWorkspaceService().get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         return testRdsConnection(rdsTestRequest, workspace);
     }
 
     @Override
     public RDSConfigRequest getRequestFromName(String name) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = getRdsConfigService().getWorkspaceService().get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         RDSConfig rdsConfig = getRdsConfigService().getByNameForWorkspace(name, workspace);
         return getConversionService().convert(rdsConfig, RDSConfigRequest.class);
@@ -118,7 +118,7 @@ public class RdsConfigController extends AbstractRdsConfigController implements 
     private RDSConfigResponse createRdsConfig(RDSConfigRequest rdsConfigJson) {
         RDSConfig rdsConfig = getConversionService().convert(rdsConfigJson, RDSConfig.class);
         try {
-            User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+            User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
             Workspace workspace = getRdsConfigService().getWorkspaceService().get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
             rdsConfig = getRdsConfigService().create(rdsConfig, workspace, user);
             notify(ResourceEvent.RDS_CONFIG_CREATED);

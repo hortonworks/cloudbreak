@@ -27,7 +27,6 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
-import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
 import com.sequenceiq.cloudbreak.service.usages.UsageService;
@@ -42,9 +41,6 @@ public class StackDownscaleService {
 
     @Inject
     private FlowMessageService flowMessageService;
-
-    @Inject
-    private EmailSenderService emailSenderService;
 
     @Inject
     private StackScalingService stackScalingService;
@@ -83,12 +79,6 @@ public class StackDownscaleService {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.DOWNSCALE_COMPLETED,
                 String.format("Downscale of the cluster infrastructure finished successfully. Terminated node(s): %s", fqdns));
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_DOWNSCALE_SUCCESS, AVAILABLE.name(), fqdns);
-
-        if (stack.getCluster() != null && stack.getCluster().getEmailNeeded()) {
-            emailSenderService.sendDownScaleSuccessEmail(stack.getCluster().getOwner(), stack.getCluster().getEmailTo(),
-                    stackUtil.extractAmbariIp(stack), stack.getCluster().getName());
-            flowMessageService.fireEventAndLog(context.getStack().getId(), Msg.STACK_NOTIFICATION_EMAIL, AVAILABLE.name());
-        }
         usageService.scaleUsagesForStack(stack.getId(), instanceGroupName, nodeCount);
     }
 

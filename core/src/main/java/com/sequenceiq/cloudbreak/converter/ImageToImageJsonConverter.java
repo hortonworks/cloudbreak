@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.ImageJson;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
@@ -45,9 +45,9 @@ public class ImageToImageJsonConverter extends AbstractConversionServiceAwareCon
 
     private void decorateWithImageCatalogUrl(Image source, ImageJson imageJson) {
         if (Strings.isNullOrEmpty(source.getImageCatalogUrl())) {
-            IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
-            User user = userService.getOrCreate(identityUser);
-            imageJson.setImageCatalogUrl(imageCatalogService.getImageDefaultCatalogUrl(identityUser, user));
+            CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
+            User user = userService.getOrCreate(cloudbreakUser);
+            imageJson.setImageCatalogUrl(imageCatalogService.getImageDefaultCatalogUrl(cloudbreakUser, user));
         } else {
             imageJson.setImageCatalogUrl(source.getImageCatalogUrl());
         }

@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
 import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
 import com.sequenceiq.cloudbreak.api.model.BlueprintViewResponse;
 import com.sequenceiq.cloudbreak.api.model.ParametersQueryResponse;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
@@ -67,7 +67,7 @@ public class BlueprintV3Controller extends NotificationController implements Blu
     @Override
     public BlueprintResponse createInWorkspace(Long workspaceId, BlueprintRequest request) {
         Blueprint blueprint = conversionService.convert(request, Blueprint.class);
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         blueprint = blueprintService.create(blueprint, workspaceId, user);
         notify(ResourceEvent.BLUEPRINT_CREATED);
         return conversionService.convert(blueprint, BlueprintResponse.class);
@@ -99,8 +99,8 @@ public class BlueprintV3Controller extends NotificationController implements Blu
     }
 
     private Workspace getWorkspace(Long workspaceId) {
-        IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
-        User user = userService.getOrCreate(identityUser);
+        CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
+        User user = userService.getOrCreate(cloudbreakUser);
         return workspaceService.get(workspaceId, user);
     }
 

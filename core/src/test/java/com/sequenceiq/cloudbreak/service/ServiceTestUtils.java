@@ -114,7 +114,6 @@ public final class ServiceTestUtils {
         Cluster cluster = new Cluster();
         cluster.setName("test-cluster");
         cluster.setDescription("test cluster");
-        cluster.setEmailNeeded(false);
         cluster.setAmbariIp("168.192.12.13");
         cluster.setStatus(Status.AVAILABLE);
         cluster.setStatusReason("");

@@ -1,12 +1,7 @@
 package com.sequenceiq.cloudbreak.common.service.user;
 
-import static java.util.Collections.singletonList;
-
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -26,8 +21,7 @@ import com.sequenceiq.cloudbreak.client.AccessToken;
 import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.cloudbreak.client.IdentityClient;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Service
@@ -36,8 +30,6 @@ public class UserDetailsService {
     private static final Logger LOGGER = LoggerFactory.getLogger(UserDetailsService.class);
 
     private static final int ACCOUNT_PART = 2;
-
-    private static final int ROLE_PART = 2;
 
     private static final String UAA_DATE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
 
@@ -72,7 +64,7 @@ public class UserDetailsService {
         identityWebTarget = RestClientUtil.get(configKey).target(identityServerUrl).path("Users");
     }
 
-    public IdentityUser getDetails(String username, UserFilterField filterField, String clientSecret) {
+    public CloudbreakUser getDetails(String username, UserFilterField filterField, String clientSecret) {
         try {
             return getIdentityUser(username, filterField, clientSecret);
         } catch (UserDetailsUnavailableException e) {
@@ -82,16 +74,16 @@ public class UserDetailsService {
                 if (username.contains(EMAIL_SEPARATOR)) {
                     account = username.substring(username.indexOf(EMAIL_SEPARATOR) + 1);
                 }
-                return new IdentityUser(username, username, account, singletonList(IdentityUserRole.ADMIN), "", "", new Date());
+                return new CloudbreakUser(username, username, account);
             }
             throw e;
         }
     }
 
-    public List<IdentityUser> getAllUsers(String clientSecret) {
+    public List<CloudbreakUser> getAllUsers(String clientSecret) {
         try {
             AccessToken accessToken = identityClient.getToken(clientSecret);
-            List<IdentityUser> identityUsers = new ArrayList<>();
+            List<CloudbreakUser> cloudbreakUsers = new ArrayList<>();
             long totalResults = getTotalResults(accessToken);
             for (long startIndex = 1L; startIndex <= totalResults; startIndex += ITEMS_PER_PAGE) {
                 WebTarget target = identityWebTarget.queryParam("startIndex", startIndex)
@@ -102,12 +94,12 @@ public class UserDetailsService {
 
                 JsonNode root = JsonUtil.readTree(result);
                 root.get("resources").forEach(resource -> {
-                    IdentityUser identityUser = getIdentityUserFromJson(resource);
-                    identityUsers.add(identityUser);
+                    CloudbreakUser cloudbreakUser = getIdentityUserFromJson(resource);
+                    cloudbreakUsers.add(cloudbreakUser);
                 });
             }
 
-            return identityUsers;
+            return cloudbreakUsers;
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
@@ -127,7 +119,7 @@ public class UserDetailsService {
         }
     }
 
-    private IdentityUser getIdentityUser(String username, UserFilterField filterField, String clientSecret) {
+    private CloudbreakUser getIdentityUser(String username, UserFilterField filterField, String clientSecret) {
         WebTarget target = getWebTarget(username, filterField);
         AccessToken accessToken = identityClient.getToken(clientSecret);
         String scimResponse = target.request(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + accessToken.getToken()).get(String.class);
@@ -146,9 +138,8 @@ public class UserDetailsService {
         }
     }
 
-    private IdentityUser getIdentityUserFromJson(JsonNode userNode) {
+    private CloudbreakUser getIdentityUserFromJson(JsonNode userNode) {
         String account = null;
-        List<IdentityUserRole> roles = new ArrayList<>();
         for (JsonNode node : userNode.get("groups")) {
             String group = node.get("display").asText();
             if (group.startsWith("sequenceiq.account")) {
@@ -159,10 +150,9 @@ public class UserDetailsService {
                 account = parts[ACCOUNT_PART];
             } else if (group.startsWith("sequenceiq.cloudbreak")) {
                 String[] parts = group.split("\\.");
-                roles.add(IdentityUserRole.fromString(parts[ROLE_PART]));
             }
         }
-        return createIdentityUser(roles, account, userNode);
+        return createIdentityUser(account, userNode);
     }
 
     private WebTarget getWebTarget(String username, UserFilterField filterField) {
@@ -182,15 +172,11 @@ public class UserDetailsService {
         return target;
     }
 
-    private IdentityUser createIdentityUser(List<IdentityUserRole> roles, String account, JsonNode userNode) {
+    private CloudbreakUser createIdentityUser(String account, JsonNode userNode) {
         String userId = userNode.get("id").asText();
         String email = userNode.get("userName").asText();
-        String givenName = getGivenName(userNode);
-        String familyName = getFamilyName(userNode);
-        String dateOfCreation = userNode.get("meta").get("created").asText();
-        Date created = parseUserCreated(dateOfCreation);
         account = StringUtils.isEmpty(account) ? userId : account;
-        return new IdentityUser(userId, email, account, roles, givenName, familyName, created);
+        return new CloudbreakUser(userId, email, account);
     }
 
     private String getGivenName(JsonNode userNode) {
@@ -209,14 +195,5 @@ public class UserDetailsService {
             }
         }
         return "";
-    }
-
-    private Date parseUserCreated(String dateOfCreation) {
-        try {
-            SimpleDateFormat uaaDateFormat = new SimpleDateFormat(UAA_DATE_PATTERN);
-            return uaaDateFormat.parse(dateOfCreation);
-        } catch (ParseException e) {
-            throw new UserDetailsUnavailableException("User details cannot be retrieved, becuase creation date of user cannot be parsed.", e);
-        }
     }
 }

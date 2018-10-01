@@ -5,13 +5,13 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 
 @ControllerAdvice
 public class UserContextControllerAdvice {
 
     @ModelAttribute("user")
-    public IdentityUser getRoles(HttpServletRequest request) {
-        return (IdentityUser) request.getAttribute("user");
+    public CloudbreakUser getRoles(HttpServletRequest request) {
+        return (CloudbreakUser) request.getAttribute("user");
     }
 }

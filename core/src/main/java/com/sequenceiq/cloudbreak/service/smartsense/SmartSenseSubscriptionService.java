@@ -22,7 +22,7 @@ import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.model.SmartSenseSubscriptionJson;
 import com.sequenceiq.cloudbreak.aspect.PermissionType;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.SmartSenseConfigurationNotFoundException;
@@ -81,13 +81,13 @@ public class SmartSenseSubscriptionService {
         return subscriptions.hasNext() ? Optional.of(subscriptions.next()) : Optional.empty();
     }
 
-    public SmartSenseSubscription getDefaultForUser(@Nonnull IdentityUser cbUser) {
+    public SmartSenseSubscription getDefaultForUser(@Nonnull CloudbreakUser cbUser) {
         Optional<SmartSenseSubscription> subscription = obtainSmartSenseSubscription(cbUser);
         checkSmartSenseSubscriptionAuthorization(subscription);
         return subscription.get();
     }
 
-    private Optional<SmartSenseSubscription> obtainSmartSenseSubscription(IdentityUser cbUser) {
+    private Optional<SmartSenseSubscription> obtainSmartSenseSubscription(CloudbreakUser cbUser) {
         Optional<SmartSenseSubscription> subscription = getByAccountAndOwnerSilently(cbUser);
         if (subscription.isPresent()) {
             upgradeDefaultSmartSenseSubscription(subscription.get());
@@ -98,7 +98,7 @@ public class SmartSenseSubscriptionService {
         return subscription;
     }
 
-    private Optional<SmartSenseSubscription> getByAccountAndOwnerSilently(IdentityUser cbUser) {
+    private Optional<SmartSenseSubscription> getByAccountAndOwnerSilently(CloudbreakUser cbUser) {
         try {
             return Optional.ofNullable(smartSenseSubscriptionRepository.findByAccountAndOwner(cbUser.getAccount(), cbUser.getUserId()));
         } catch (AccessDeniedException ignore) {
@@ -126,7 +126,7 @@ public class SmartSenseSubscriptionService {
     }
 
     @Nullable
-    private SmartSenseSubscription createSubscriptionFromIdentityUser(IdentityUser cbUser) {
+    private SmartSenseSubscription createSubscriptionFromIdentityUser(CloudbreakUser cbUser) {
         SmartSenseSubscription newSubscription = null;
         if (!StringUtils.isEmpty(defaultSmartsenseId)) {
             LOGGER.info("Generating default SmartSense subscription");

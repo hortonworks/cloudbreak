@@ -77,7 +77,7 @@ public class StackValidationRequestToStackValidationConverter extends AbstractCo
         stackValidation.setInstanceGroups(instanceGroups);
         stackValidation.setHostGroups(convertHostGroupsFromJson(instanceGroups, stackValidationRequest.getHostGroups()));
 
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         formatAccessDeniedMessage(
                 () -> validateBlueprint(stackValidationRequest, stackValidation, workspace), "blueprint", stackValidationRequest.getBlueprintId()

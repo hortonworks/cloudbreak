@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.StackValidationRequest;
 import com.sequenceiq.cloudbreak.authorization.PermissionCheckerService;
 import com.sequenceiq.cloudbreak.authorization.PermissionCheckingUtils;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
@@ -62,18 +62,18 @@ public class StackV1Controller extends NotificationController implements StackV1
 
     @Override
     public StackResponse postPrivate(StackRequest stackRequest) {
-        IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
-        User user = userService.getOrCreate(identityUser);
+        CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
+        User user = userService.getOrCreate(cloudbreakUser);
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
-        return stackCommonService.createInWorkspace(stackRequest, identityUser, user, workspace);
+        return stackCommonService.createInWorkspace(stackRequest, cloudbreakUser, user, workspace);
     }
 
     @Override
     public StackResponse postPublic(StackRequest stackRequest) {
-        IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
-        User user = userService.getOrCreate(identityUser);
+        CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
+        User user = userService.getOrCreate(cloudbreakUser);
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
-        return stackCommonService.createInWorkspace(stackRequest, identityUser, user, workspace);
+        return stackCommonService.createInWorkspace(stackRequest, cloudbreakUser, user, workspace);
     }
 
     @Override

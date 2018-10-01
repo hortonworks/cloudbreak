@@ -56,7 +56,7 @@ public class ProxyConfigV3Controller extends NotificationController implements P
     @Override
     public ProxyConfigResponse createInWorkspace(Long workspaceId, ProxyConfigRequest request) {
         ProxyConfig config = conversionService.convert(request, ProxyConfig.class);
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         config = proxyConfigService.create(config, workspaceId, user);
         notify(ResourceEvent.PROXY_CONFIG_CREATED);
         return conversionService.convert(config, ProxyConfigResponse.class);

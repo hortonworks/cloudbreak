@@ -40,7 +40,7 @@ import com.sequenceiq.cloudbreak.api.model.v2.TemplateV2Request;
 import com.sequenceiq.cloudbreak.blueprint.GeneralClusterConfigsProvider;
 import com.sequenceiq.cloudbreak.blueprint.sharedservice.SharedServiceConfigsViewProvider;
 import com.sequenceiq.cloudbreak.blueprint.utils.StackInfoService;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Credential;
@@ -145,7 +145,7 @@ public class StackRequestToTemplatePreparationObjectConverterTest {
     private UserService userService;
 
     @Mock
-    private IdentityUser identityUser;
+    private CloudbreakUser cloudbreakUser;
 
     @Mock
     private User user;
@@ -171,7 +171,7 @@ public class StackRequestToTemplatePreparationObjectConverterTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        when(restRequestThreadLocalService.getIdentityUser()).thenReturn(identityUser);
+        when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
         when(source.getGeneral()).thenReturn(generalSettings);
         when(generalSettings.getCredentialName()).thenReturn(TEST_CREDENTIAL_NAME);
         when(source.getCluster()).thenReturn(cluster);
@@ -180,8 +180,8 @@ public class StackRequestToTemplatePreparationObjectConverterTest {
         when(blueprintService.get(BLUEPRINT_ID)).thenReturn(blueprint);
         when(blueprint.getBlueprintText()).thenReturn(TEST_BLUEPRINT_TEXT);
         when(stackInfoService.blueprintStackInfo(TEST_BLUEPRINT_TEXT)).thenReturn(blueprintStackInfo);
-        when(userService.getOrCreate(eq(identityUser))).thenReturn(user);
-        when(identityUser.getUsername()).thenReturn("test@hortonworks.com");
+        when(userService.getOrCreate(eq(cloudbreakUser))).thenReturn(user);
+        when(cloudbreakUser.getUsername()).thenReturn("test@hortonworks.com");
         when(workspaceService.get(anyLong(), eq(user))).thenReturn(workspace);
     }
 
@@ -364,7 +364,7 @@ public class StackRequestToTemplatePreparationObjectConverterTest {
         Credential credential = new Credential();
         String account = "testAccount";
         when(cloudStorageValidationUtil.isCloudStorageConfigured(cloudStorageRequest)).thenReturn(true);
-        when(identityUser.getAccount()).thenReturn(account);
+        when(cloudbreakUser.getAccount()).thenReturn(account);
         when(credentialService.getByNameForWorkspace(TEST_CREDENTIAL_NAME, workspace)).thenReturn(credential);
         when(cluster.getCloudStorage()).thenReturn(cloudStorageRequest);
         when(conversionService.convert(cloudStorageRequest, FileSystem.class)).thenReturn(fileSystem);
