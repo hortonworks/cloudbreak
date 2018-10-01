@@ -1,0 +1,85 @@
+## This macro formats the results (whether passed, skipped or failed) of the test
+## methods in a single class for inclusion in the HTML report.  It assumes that the
+## the results for the class are in a variable called $classResults.  $id is a page
+## scope variable that is used to assign unique identifiers to divs.
+
+#foreach ($testResult in $classResults)
+<tr>
+  <td class="method">
+    #set ($testInstanceName = "")
+    #if ($testResult.testName)
+      #set ($testInstanceName = " ($testResult.testName)")
+    #end
+    #if ($testResult.method.description && $testResult.method.description.length() > 0)
+      <span class="description" title="$testResult.method.description">$testResult.name$testInstanceName</span>
+    #else
+      $testResult.name$testInstanceName
+    #end
+    #set ($logSearchUrlIndexPostFix = "logSearchUrl")
+    #set ($logSearchUrl = $testResult.testContext.getAttribute("$testResult.name$testInstanceName$logSearchUrlIndexPostFix"))
+    #if ( $logSearchUrl )
+    &#183; <a href=$logSearchUrl target="_blank">LogSearch</a>
+    #end
+  </td>
+  <td class="duration">
+    $utils.formatDuration($testResult.startMillis, $testResult.endMillis)s
+  </td>
+  <td class="result">
+    ## Display the dependencies for skipped test methods.
+    #if ($testResult.status == 3) ## 3 means skipped.
+      #if( $utils.hasDependentGroups($testResult) )
+        <i>$messages.getString("dependsOnGroups"): </i>
+        <span class="dependency">$utils.getDependentGroups($testResult)</span>
+        <br />
+      #end
+      #if ($utils.hasDependentMethods($testResult))
+        <i>$messages.getString("dependsOnMethods"): </i>
+        <span class="dependency">$utils.getDependentMethods($testResult)</span>
+      #end
+      #if ($utils.hasSkipException($testResult))
+      	<i>$messages.getString("skipped.reason"): </i>
+      	<span class="dependency">$utils.getSkipExceptionMessage($testResult)</span>
+      #end
+    #end
+
+    #if ($utils.hasArguments($testResult))
+      <i>$messages.getString("methodArguments"): </i><span class="arguments">$utils.getArguments($testResult)</span><br />
+    #end
+
+    ## Show logger output for the test.
+    #set ($output = $utils.getTestOutput($testResult))
+    #if ($output.size() > 0)
+    <div class="testOutput">
+      #foreach( $line in $output )
+        #if ($meta.shouldEscapeOutput())
+          $utils.escapeHTMLString($line)<br />
+        #else
+          $line
+        #end
+      #end
+    </div>
+    #end
+
+
+    #if ($testResult.throwable && ( $testResult.status == 2 || $meta.shouldShowExpectedExceptions()))
+    <a href="javascript:toggleElement('exception-$id', 'block')" title="$messages.getString("clickToExpandCollapse")"><b>$utils.escapeHTMLString( $testResult.throwable.toString() )</b></a><br />
+    <div class="stackTrace" id="exception-$id">
+      #foreach ($element in $testResult.throwable.stackTrace)
+        $utils.escapeHTMLString( $element.toString() )<br />
+      #end
+      #set ($causes = $utils.getCauses($testResult.throwable))
+      #foreach ($throwable in $causes)
+        #set ($id = $id + 1)
+        <b>$messages.getString("causedBy"): </b> <a href="javascript:toggleElement('exception-$id', 'block')" title="Click to expand/collapse">$utils.escapeHTMLString( $throwable.toString() )</a><br />
+        <div class="stackTrace" id="exception-$id">
+          #foreach ($element in $throwable.stackTrace)
+            $utils.escapeHTMLString($element.toString())<br />
+          #end
+        </div>
+      #end
+    </div>
+    #end
+    #set ($id = $id + 1)
+  </td>
+</tr>
+#end
