@@ -17,7 +17,7 @@ public abstract class StackPostStrategyRoot implements Strategy {
 
     protected static final String NETWORK_ID_KEY = "networkId";
 
-    protected void postStackAndSetRequestForEntity(CloudbreakClient client, StackEntity stackEntity) throws Exception {
+    protected void postStackAndSetRequestForEntity(IntegrationTestContext context, CloudbreakClient client, StackEntity stackEntity) throws Exception {
         log(" Name:\n" + stackEntity.getRequest().getGeneral().getName());
         logJSON(" Stack post request:\n", stackEntity.getRequest());
         stackEntity.setResponse(
