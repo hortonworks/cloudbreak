@@ -15,7 +15,7 @@ import org.springframework.stereotype.Controller;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.UsageEndpoint;
 import com.sequenceiq.cloudbreak.api.model.CloudbreakUsageJson;
 import com.sequenceiq.cloudbreak.api.model.flex.CloudbreakFlexUsageJson;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.CbUsageFilterParameters;
 import com.sequenceiq.cloudbreak.domain.CbUsageFilterParameters.Builder;
 import com.sequenceiq.cloudbreak.facade.CloudbreakUsagesFacade;
@@ -51,7 +51,7 @@ public class CloudbreakUsageController implements UsageEndpoint {
             String userId,
             String cloud,
             String zone) {
-        IdentityUser user = restRequestThreadLocalService.getIdentityUser();
+        CloudbreakUser user = restRequestThreadLocalService.getCloudbreakUser();
         CbUsageFilterParameters params = new Builder().setAccount(user.getAccount()).setOwner(userId)
                 .setSince(since).setCloud(cloud).setRegion(zone).setFilterEndDate(filterEndDate).build();
         return cloudbreakUsagesFacade.getUsagesFor(params);
@@ -63,7 +63,7 @@ public class CloudbreakUsageController implements UsageEndpoint {
             Long filterEndDate,
             String cloud,
             String zone) {
-        IdentityUser user = restRequestThreadLocalService.getIdentityUser();
+        CloudbreakUser user = restRequestThreadLocalService.getCloudbreakUser();
         CbUsageFilterParameters params = new Builder().setAccount(user.getAccount()).setOwner(user.getUserId())
                 .setSince(since).setCloud(cloud).setRegion(zone).setFilterEndDate(filterEndDate).build();
         return cloudbreakUsagesFacade.getUsagesFor(params);

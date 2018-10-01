@@ -21,7 +21,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.aspect.PermissionType;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.repository.SmartSenseSubscriptionRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
@@ -44,7 +44,7 @@ public class SmartSenseSubscriptionServiceTest {
     @Mock
     private AuthorizationService authorizationService;
 
-    private IdentityUser user;
+    private CloudbreakUser user;
 
     @Before
     public void setUp() {

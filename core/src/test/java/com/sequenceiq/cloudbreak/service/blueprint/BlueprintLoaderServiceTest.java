@@ -3,9 +3,7 @@ package com.sequenceiq.cloudbreak.service.blueprint;
 import static com.sequenceiq.cloudbreak.api.model.ResourceStatus.DEFAULT;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -19,7 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.init.blueprint.BlueprintLoaderService;
@@ -176,7 +174,7 @@ public class BlueprintLoaderServiceTest {
         return blueprint;
     }
 
-    public static IdentityUser identityUser() {
-        return new IdentityUser(LUCKY_MAN, LUCKY_MAN, LOTTERY_WINNERS, new ArrayList<>(), LUCKY_MAN, LUCKY_MAN, new Date());
+    public static CloudbreakUser identityUser() {
+        return new CloudbreakUser(LUCKY_MAN, LUCKY_MAN, LOTTERY_WINNERS);
     }
 }

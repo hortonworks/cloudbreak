@@ -13,11 +13,9 @@ import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.view.ClusterView;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Service
@@ -32,9 +30,6 @@ public class ClusterStartService {
 
     @Inject
     private FlowMessageService flowMessageService;
-
-    @Inject
-    private EmailSenderService emailSenderService;
 
     @Inject
     private StackUtil stackUtil;
@@ -54,21 +49,11 @@ public class ClusterStartService {
         clusterService.updateClusterStatusByStackId(stack.getId(), Status.AVAILABLE);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.AVAILABLE, "Ambari cluster started.");
         flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_STARTED, Status.AVAILABLE.name(), ambariIp);
-        if (cluster.getEmailNeeded()) {
-            emailSenderService.sendStartSuccessEmail(cluster.getOwner(), cluster.getEmailTo(), ambariIp, cluster.getName());
-            flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, Status.AVAILABLE.name());
-        }
     }
 
     public void handleClusterStartFailure(StackView stackView, String errorReason) {
-        ClusterView clusterView = stackView.getClusterView();
         clusterService.updateClusterStatusByStackId(stackView.getId(), Status.START_FAILED);
         stackUpdater.updateStackStatus(stackView.getId(), DetailedStackStatus.AVAILABLE, "Cluster could not be started: " + errorReason);
         flowMessageService.fireEventAndLog(stackView.getId(), Msg.AMBARI_CLUSTER_START_FAILED, Status.START_FAILED.name(), errorReason);
-        if (clusterView.getEmailNeeded()) {
-            emailSenderService.sendStartFailureEmail(stackView.getClusterView().getOwner(), clusterView.getEmailTo(),
-                    stackUtil.extractAmbariIp(stackView), clusterView.getName());
-            flowMessageService.fireEventAndLog(stackView.getId(), Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, Status.START_FAILED.name());
-        }
     }
 }

@@ -35,7 +35,7 @@ public class PlatformResourceRequestJsonToPlatformResourceRequest extends
     public PlatformResourceRequest convert(PlatformResourceRequestJson source) {
         PlatformResourceRequest platformResourceRequest = new PlatformResourceRequest();
 
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         if (!Strings.isNullOrEmpty(source.getCredentialName())) {
             platformResourceRequest.setCredential(credentialService.getByNameForWorkspaceId(source.getCredentialName(), workspace.getId()));

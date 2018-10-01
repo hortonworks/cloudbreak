@@ -119,7 +119,7 @@ public class UtilController implements UtilEndpoint {
 
     @Override
     public Collection<ExposedServiceResponse> getKnoxServices(String blueprintName) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         return serviceEndpointCollector.getKnoxServices(blueprintName, workspace);
     }
@@ -131,7 +131,7 @@ public class UtilController implements UtilEndpoint {
 
     @Override
     public ParametersQueryResponse getCustomParameters(ParametersQueryRequest parametersQueryRequest) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         Set<String> strings = blueprintService.queryCustomParameters(parametersQueryRequest.getBlueprintName(), workspace);
         Map<String, String> result = new HashMap<>();
@@ -145,7 +145,7 @@ public class UtilController implements UtilEndpoint {
 
     @Override
     public StructuredParameterQueriesResponse getFileSystemParameters(StructuredParametersQueryRequest structuredParametersQueryRequest) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         Set<ConfigQueryEntry> entries = blueprintService.queryFileSystemParameters(
                 structuredParametersQueryRequest.getBlueprintName(),

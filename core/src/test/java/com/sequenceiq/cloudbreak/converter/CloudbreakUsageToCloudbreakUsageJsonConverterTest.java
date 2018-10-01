@@ -7,9 +7,6 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 
-import java.util.Arrays;
-import java.util.Date;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -19,8 +16,7 @@ import org.mockito.MockitoAnnotations;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.CloudbreakUsageJson;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 import com.sequenceiq.cloudbreak.service.user.CachedUserDetailsService;
@@ -33,7 +29,7 @@ public class CloudbreakUsageToCloudbreakUsageJsonConverterTest extends AbstractE
     @Mock
     private CachedUserDetailsService cachedUserDetailsService;
 
-    private IdentityUser user;
+    private CloudbreakUser user;
 
     @Before
     public void setUp() {
@@ -88,9 +84,9 @@ public class CloudbreakUsageToCloudbreakUsageJsonConverterTest extends AbstractE
         return TestUtil.gcpCloudbreakUsage(1L);
     }
 
-    private IdentityUser createCbUser() {
-        return new IdentityUser("dummyUserId", "john.smith@example.com", "dummyAccount",
-                Arrays.asList(IdentityUserRole.ADMIN, IdentityUserRole.USER), "John", "Smith", new Date());
+    private CloudbreakUser createCbUser() {
+        return new CloudbreakUser("dummyUserId", "john.smith@example.com", "dummyAccount"
+        );
     }
 
 }

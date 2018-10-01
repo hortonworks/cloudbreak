@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.api.model.users.UserProfileRequest;
 import com.sequenceiq.cloudbreak.api.model.users.UserProfileResponse;
 import com.sequenceiq.cloudbreak.api.model.users.UserResponseJson;
 import com.sequenceiq.cloudbreak.api.model.users.UserResponseJson.UserIdComparator;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
@@ -60,13 +60,13 @@ public class UserController implements UserEndpoint {
     @Override
     public String evictUserDetails(String id, UserJson user) {
         cachedUserDetailsService.evictUserDetails(id, user.getUsername());
-        cachedUserService.evictByIdentityUser(restRequestThreadLocalService.getIdentityUser());
+        cachedUserService.evictByIdentityUser(restRequestThreadLocalService.getCloudbreakUser());
         return user.getUsername();
     }
 
     @Override
     public UserJson evictCurrentUserDetails() {
-        IdentityUser user = restRequestThreadLocalService.getIdentityUser();
+        CloudbreakUser user = restRequestThreadLocalService.getCloudbreakUser();
         cachedUserDetailsService.evictUserDetails(user.getUserId(), user.getUsername());
         cachedUserService.evictByIdentityUser(user);
         return new UserJson(user.getUsername());
@@ -74,23 +74,23 @@ public class UserController implements UserEndpoint {
 
     @Override
     public UserProfileResponse getProfile() {
-        IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
-        User user = userService.getOrCreate(identityUser);
-        UserProfile userProfile = userProfileService.getOrCreate(identityUser.getAccount(), identityUser.getUserId(), identityUser.getUsername(), user);
+        CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
+        User user = userService.getOrCreate(cloudbreakUser);
+        UserProfile userProfile = userProfileService.getOrCreate(cloudbreakUser.getAccount(), cloudbreakUser.getUserId(), cloudbreakUser.getUsername(), user);
         return conversionService.convert(userProfile, UserProfileResponse.class);
     }
 
     @Override
     public void modifyProfile(UserProfileRequest userProfileRequest) {
-        IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
-        User user = userService.getOrCreate(identityUser);
+        CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
+        User user = userService.getOrCreate(cloudbreakUser);
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
-        userProfileService.put(userProfileRequest, identityUser, user, workspace);
+        userProfileService.put(userProfileRequest, cloudbreakUser, user, workspace);
     }
 
     @Override
     public SortedSet<UserResponseJson> getAll() {
-        IdentityUser user = restRequestThreadLocalService.getIdentityUser();
+        CloudbreakUser user = restRequestThreadLocalService.getCloudbreakUser();
         Set<UserResponseJson> userResponseJsons = userService.getAll(user).stream()
                 .map(u -> conversionService.convert(u, UserResponseJson.class))
                 .collect(Collectors.toSet());

@@ -36,7 +36,7 @@ public class AuditV3Controller extends BaseAuditController implements AuditV3End
 
     @Override
     public List<AuditEvent> getAuditEventsInWorkspace(Long workspaceId, String resourceType, Long resourceId) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         return auditEventService.getAuditEventsByWorkspaceId(workspaceId, resourceType, resourceId, user);
     }
 

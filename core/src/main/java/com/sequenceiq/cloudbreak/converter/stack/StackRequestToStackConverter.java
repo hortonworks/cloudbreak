@@ -89,9 +89,9 @@ public class StackRequestToStackConverter extends AbstractConversionServiceAware
     public Stack convert(StackRequest source) {
         Stack stack = new Stack();
 
-        String owner = Optional.ofNullable(source.getOwner()).orElse(restRequestThreadLocalService.getIdentityUser().getUserId());
+        String owner = Optional.ofNullable(source.getOwner()).orElse(restRequestThreadLocalService.getCloudbreakUser().getUserId());
         stack.setOwner(owner);
-        String account = Optional.ofNullable(source.getAccount()).orElse(restRequestThreadLocalService.getIdentityUser().getAccount());
+        String account = Optional.ofNullable(source.getAccount()).orElse(restRequestThreadLocalService.getCloudbreakUser().getAccount());
         stack.setAccount(account);
 
         stack.setName(source.getName());
@@ -100,7 +100,7 @@ public class StackRequestToStackConverter extends AbstractConversionServiceAware
         setPlatform(source);
         stack.setCloudPlatform(source.getCloudPlatform());
         Map<String, String> sourceTags = source.getApplicationTags();
-        String email = Optional.ofNullable(source.getOwnerEmail()).orElse(restRequestThreadLocalService.getIdentityUser().getUsername());
+        String email = Optional.ofNullable(source.getOwnerEmail()).orElse(restRequestThreadLocalService.getCloudbreakUser().getUsername());
         stack.setTags(getTags(mergeTags(sourceTags, source.getUserDefinedTags(), getDefaultTags(source, account, email))));
         stack.setInputs(getInputs(mergeInputs(source.getCustomInputs())));
         preparateSharedServiceProperties(source, stack, sourceTags);

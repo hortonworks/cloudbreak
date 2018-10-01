@@ -15,7 +15,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.security.access.AccessDeniedException;
 
 import com.sequenceiq.cloudbreak.api.model.SmartSenseSubscriptionJson;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.SmartSenseSubscriptionToSmartSenseSubscriptionJsonConverter;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
@@ -41,48 +41,48 @@ public class SmartSenseSubscriptionControllerTest {
     private SmartSenseSubscriptionToSmartSenseSubscriptionJsonConverter toJsonConverter;
 
     @Mock
-    private IdentityUser identityUser;
+    private CloudbreakUser cloudbreakUser;
 
     @Test
     public void testGetWhenSmartSenseNotAvailable() {
         String exceptionMessage = "Unable to identify SmartSense subscription for the user.";
-        when(restRequestThreadLocalService.getIdentityUser()).thenReturn(identityUser);
-        when(smartSenseSubService.getDefaultForUser(identityUser)).thenThrow(new SmartSenseSubscriptionAccessDeniedException(exceptionMessage));
+        when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
+        when(smartSenseSubService.getDefaultForUser(cloudbreakUser)).thenThrow(new SmartSenseSubscriptionAccessDeniedException(exceptionMessage));
 
         thrown.expect(SmartSenseSubscriptionAccessDeniedException.class);
         thrown.expectMessage(exceptionMessage);
 
         underTest.get();
-        verify(restRequestThreadLocalService, times(1)).getIdentityUser();
-        verify(smartSenseSubService, times(1)).getDefaultForUser(identityUser);
+        verify(restRequestThreadLocalService, times(1)).getCloudbreakUser();
+        verify(smartSenseSubService, times(1)).getDefaultForUser(cloudbreakUser);
     }
 
     @Test
     public void testGetWhenSmartSenseSubscriptionCannotBeAuthenticated() {
         String exceptionMessage = "Access Denied";
-        when(restRequestThreadLocalService.getIdentityUser()).thenReturn(identityUser);
-        when(smartSenseSubService.getDefaultForUser(identityUser)).thenThrow(new AccessDeniedException(exceptionMessage));
+        when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
+        when(smartSenseSubService.getDefaultForUser(cloudbreakUser)).thenThrow(new AccessDeniedException(exceptionMessage));
 
         thrown.expect(AccessDeniedException.class);
         thrown.expectMessage(exceptionMessage);
 
         underTest.get();
-        verify(restRequestThreadLocalService, times(1)).getIdentityUser();
-        verify(smartSenseSubService, times(1)).getDefaultForUser(identityUser);
+        verify(restRequestThreadLocalService, times(1)).getCloudbreakUser();
+        verify(smartSenseSubService, times(1)).getDefaultForUser(cloudbreakUser);
     }
 
     @Test
     public void testGetWhenSmartSenseSubscriptionIsValid() {
         SmartSenseSubscription subscription = createSmartSenseSubscription();
-        when(restRequestThreadLocalService.getIdentityUser()).thenReturn(identityUser);
-        when(smartSenseSubService.getDefaultForUser(identityUser)).thenReturn(subscription);
+        when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
+        when(smartSenseSubService.getDefaultForUser(cloudbreakUser)).thenReturn(subscription);
         when(toJsonConverter.convert(subscription)).thenCallRealMethod();
 
         SmartSenseSubscriptionJson json = underTest.get();
 
         Assert.assertNotNull(json);
-        verify(restRequestThreadLocalService, times(1)).getIdentityUser();
-        verify(smartSenseSubService, times(1)).getDefaultForUser(identityUser);
+        verify(restRequestThreadLocalService, times(1)).getCloudbreakUser();
+        verify(smartSenseSubService, times(1)).getDefaultForUser(cloudbreakUser);
         verify(toJsonConverter, times(1)).convert(subscription);
     }
 

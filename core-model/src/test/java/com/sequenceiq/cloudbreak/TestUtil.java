@@ -9,7 +9,6 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -38,8 +37,7 @@ import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.v2.WorkspaceStatus;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
@@ -102,14 +100,14 @@ public class TestUtil {
         }
     }
 
-    public static IdentityUser cbAdminUser() {
-        return new IdentityUser("userid", "testuser", "testaccount",
-                Arrays.asList(IdentityUserRole.ADMIN, IdentityUserRole.USER), "givenname", "familyname", new Date());
+    public static CloudbreakUser cbAdminUser() {
+        return new CloudbreakUser("userid", "testuser", "testaccount"
+        );
     }
 
-    public static IdentityUser cbUser() {
-        return new IdentityUser("userid", "testuser", "testaccount",
-                Collections.singletonList(IdentityUserRole.USER), "givenname", "familyname", new Date());
+    public static CloudbreakUser cbUser() {
+        return new CloudbreakUser("userid", "testuser", "testaccount"
+        );
     }
 
     public static Credential awsCredential() {

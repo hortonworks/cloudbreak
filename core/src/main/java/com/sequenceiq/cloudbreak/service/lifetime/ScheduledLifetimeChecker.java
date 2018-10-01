@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.lifetime;
 
 import java.time.Duration;
+import java.util.Calendar;
 import java.util.Map;
 import java.util.Optional;
 
@@ -16,7 +17,6 @@ import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesValidationException;
-import com.sequenceiq.cloudbreak.service.account.AccountPreferencesValidator;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.startup.WorkspaceMigrationRunner;
 
@@ -26,9 +26,6 @@ public class ScheduledLifetimeChecker {
 
     @Inject
     private StackService stackService;
-
-    @Inject
-    private AccountPreferencesValidator preferencesValidator;
 
     @Inject
     private ReactorFlowManager flowManager;
@@ -43,7 +40,7 @@ public class ScheduledLifetimeChecker {
                 getStackTimeToLive(stack).ifPresent(ttl -> {
                     try {
                         if (Status.DELETE_IN_PROGRESS != stack.getStatus() && stack.getCluster() != null && stack.getCluster().getCreationFinished() != null) {
-                            preferencesValidator.validateClusterTimeToLive(stack.getCluster().getCreationFinished(), ttl.toMillis());
+                            validateClusterTimeToLive(stack.getCluster().getCreationFinished(), ttl.toMillis());
                         }
                     } catch (AccountPreferencesValidationException ignored) {
                         terminateStack(stack);
@@ -62,6 +59,14 @@ public class ScheduledLifetimeChecker {
         if (!stack.isDeleteCompleted()) {
             LOGGER.info("Trigger termination of stack: '{}', owner: '{}', account: '{}'.", stack.getName(), stack.getOwner(), stack.getAccount());
             flowManager.triggerTermination(stack.getId(), false, false);
+        }
+    }
+
+    private void validateClusterTimeToLive(Long created, Long clusterTimeToLive) throws AccountPreferencesValidationException {
+        long now = Calendar.getInstance().getTimeInMillis();
+        long clusterRunningTime = now - created;
+        if (clusterRunningTime > clusterTimeToLive) {
+            throw new AccountPreferencesValidationException("The maximum running time that is configured for the account is exceeded by the cluster!");
         }
     }
 }

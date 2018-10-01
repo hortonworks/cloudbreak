@@ -27,7 +27,7 @@ public class SqlUtil {
                 return orig.split("\\n")[1].replace("  Detail: ", "");
             }
         },
-        COMMON(null) {
+        COMMON("") {
             @Override
             public String clean(String orig) {
                 return orig.split("\\n")[0];

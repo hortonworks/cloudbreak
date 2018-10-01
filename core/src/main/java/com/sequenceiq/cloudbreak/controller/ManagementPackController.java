@@ -81,7 +81,7 @@ public class ManagementPackController extends NotificationController implements 
 
     @Override
     public void deletePrivate(String name) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         executeAndNotify(identityUser -> mpackService.deleteByNameFromWorkspace(name, workspace.getId()), ResourceEvent.MANAGEMENT_PACK_DELETED);
     }
@@ -103,7 +103,7 @@ public class ManagementPackController extends NotificationController implements 
 
     @Override
     public void deletePublic(String name) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         executeAndNotify(identityUser -> mpackService.deleteByNameFromWorkspace(name, workspace.getId()), ResourceEvent.MANAGEMENT_PACK_DELETED);
     }
@@ -128,18 +128,18 @@ public class ManagementPackController extends NotificationController implements 
     }
 
     private ManagementPackResponse post(ManagementPackRequest mpackRequest) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         return createMpack(user, mpackRequest);
     }
 
     private Set<ManagementPackResponse> getAll() {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         return toJsonList(mpackService.findAllByWorkspace(workspace));
     }
 
     private ManagementPackResponse getByName(String name) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         return conversionService.convert(mpackService.getByNameForWorkspace(name, workspace), ManagementPackResponse.class);
     }

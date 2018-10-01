@@ -94,7 +94,7 @@ public class StackValidationRequestToStackValidationConverterTest {
     public void invalidBlueprintValidationRequest() {
         validationRequest = new StackValidationRequest();
         Workspace workspace = TestUtil.workspace(1L, "myWorkspace");
-        when(restRequestThreadLocalService.getIdentityUser()).thenReturn(TestUtil.cbAdminUser());
+        when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(TestUtil.cbAdminUser());
         when(workspaceService.get(anyLong(), any())).thenReturn(workspace);
         try {
             StackValidation result = underTest.convert(validationRequest);
@@ -190,7 +190,7 @@ public class StackValidationRequestToStackValidationConverterTest {
 
     private void mockUserRelated() {
         when(workspaceService.get(anyLong(), any())).thenReturn(workspace);
-        when(restRequestThreadLocalService.getIdentityUser()).thenReturn(TestUtil.cbAdminUser());
+        when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(TestUtil.cbAdminUser());
     }
 
 }

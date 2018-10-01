@@ -39,7 +39,7 @@ import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.PlacementSettings;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.Tags;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
@@ -89,7 +89,7 @@ public class StackV2RequestToStackRequestConverterTest {
     private Credential credential;
 
     @Mock
-    private IdentityUser cbUser;
+    private CloudbreakUser cbUser;
 
     @Mock
     private User user;
@@ -101,7 +101,7 @@ public class StackV2RequestToStackRequestConverterTest {
     public void setUp() {
         credentialService = mock(CredentialService.class);
         MockitoAnnotations.initMocks(this);
-        when(restRequestThreadLocalService.getIdentityUser()).thenReturn(cbUser);
+        when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cbUser);
         when(userService.getOrCreate(eq(cbUser))).thenReturn(user);
         when(workspaceService.get(anyLong(), eq(user))).thenReturn(workspace);
         when(credentialService.getByNameForWorkspace(any(), any(Workspace.class))).thenReturn(credential);
@@ -130,7 +130,7 @@ public class StackV2RequestToStackRequestConverterTest {
         Assert.assertEquals(source.getGeneral().getCredentialName(), result.getCredentialName());
         Assert.assertEquals(CLOUD_PLATFORM, result.getCloudPlatform());
         verify(conversionService, times(1)).convert(any(), any());
-        verify(restRequestThreadLocalService, times(1)).getIdentityUser();
+        verify(restRequestThreadLocalService, times(1)).getCloudbreakUser();
     }
 
     @Test
@@ -161,7 +161,7 @@ public class StackV2RequestToStackRequestConverterTest {
             Assert.assertEquals(s2, result.getParameters().get(s));
         });
         verify(conversionService, times(1)).convert(any(), any());
-        verify(restRequestThreadLocalService, times(1)).getIdentityUser();
+        verify(restRequestThreadLocalService, times(1)).getCloudbreakUser();
     }
 
     @Test
@@ -178,7 +178,7 @@ public class StackV2RequestToStackRequestConverterTest {
         Assert.assertEquals(placementSettings.getAvailabilityZone(), result.getAvailabilityZone());
         Assert.assertEquals(placementSettings.getRegion(), result.getRegion());
         verify(conversionService, times(1)).convert(any(), any());
-        verify(restRequestThreadLocalService, times(1)).getIdentityUser();
+        verify(restRequestThreadLocalService, times(1)).getCloudbreakUser();
     }
 
     @Test
@@ -192,7 +192,7 @@ public class StackV2RequestToStackRequestConverterTest {
         Assert.assertNull(result.getAvailabilityZone());
         Assert.assertNull(result.getRegion());
         verify(conversionService, times(1)).convert(any(), any());
-        verify(restRequestThreadLocalService, times(1)).getIdentityUser();
+        verify(restRequestThreadLocalService, times(1)).getCloudbreakUser();
     }
 
     @Test
@@ -210,7 +210,7 @@ public class StackV2RequestToStackRequestConverterTest {
         Assert.assertNotNull(result.getUserDefinedTags());
         Assert.assertTrue(result.getUserDefinedTags().isEmpty());
         verify(conversionService, times(1)).convert(any(), any());
-        verify(restRequestThreadLocalService, times(1)).getIdentityUser();
+        verify(restRequestThreadLocalService, times(1)).getCloudbreakUser();
     }
 
     @Test
@@ -246,7 +246,7 @@ public class StackV2RequestToStackRequestConverterTest {
             Assert.assertEquals(s2, result.getUserDefinedTags().get(s));
         });
         verify(conversionService, times(1)).convert(any(), any());
-        verify(restRequestThreadLocalService, times(1)).getIdentityUser();
+        verify(restRequestThreadLocalService, times(1)).getCloudbreakUser();
     }
 
     @Test
@@ -266,7 +266,7 @@ public class StackV2RequestToStackRequestConverterTest {
         instanceGroupRequest.forEach(request -> Assert.assertTrue(result.getInstanceGroups().contains(request)));
 
         verify(conversionService, times(instanceGroupV2Requests.size() + 1)).convert(any(), any());
-        verify(restRequestThreadLocalService, times(1)).getIdentityUser();
+        verify(restRequestThreadLocalService, times(1)).getCloudbreakUser();
     }
 
     @Test
@@ -280,7 +280,7 @@ public class StackV2RequestToStackRequestConverterTest {
         Assert.assertNull(result.getImageCatalog());
         Assert.assertNull(result.getImageId());
         verify(conversionService, times(1)).convert(any(), any());
-        verify(restRequestThreadLocalService, times(1)).getIdentityUser();
+        verify(restRequestThreadLocalService, times(1)).getCloudbreakUser();
     }
 
     @Test
@@ -297,7 +297,7 @@ public class StackV2RequestToStackRequestConverterTest {
         Assert.assertEquals(source.getImageSettings().getImageCatalog(), result.getImageCatalog());
         Assert.assertEquals(source.getImageSettings().getImageId(), result.getImageId());
         verify(conversionService, times(1)).convert(any(), any());
-        verify(restRequestThreadLocalService, times(1)).getIdentityUser();
+        verify(restRequestThreadLocalService, times(1)).getCloudbreakUser();
     }
 
     @Test
@@ -307,7 +307,7 @@ public class StackV2RequestToStackRequestConverterTest {
 
         underTest.convert(source);
 
-        verify(restRequestThreadLocalService, times(1)).getIdentityUser();
+        verify(restRequestThreadLocalService, times(1)).getCloudbreakUser();
         verify(conversionService, times(1)).convert(any(), any());
     }
 
@@ -318,7 +318,7 @@ public class StackV2RequestToStackRequestConverterTest {
 
         underTest.convert(source);
 
-        verify(restRequestThreadLocalService, times(1)).getIdentityUser();
+        verify(restRequestThreadLocalService, times(1)).getCloudbreakUser();
         verify(conversionService, times(1)).convert(any(), any());
     }
 
@@ -328,7 +328,7 @@ public class StackV2RequestToStackRequestConverterTest {
 
         underTest.convert(source);
 
-        verify(restRequestThreadLocalService, times(1)).getIdentityUser();
+        verify(restRequestThreadLocalService, times(1)).getCloudbreakUser();
         verify(conversionService, times(1)).convert(any(), any());
     }
 
@@ -339,7 +339,7 @@ public class StackV2RequestToStackRequestConverterTest {
 
         underTest.convert(source);
 
-        verify(restRequestThreadLocalService, times(1)).getIdentityUser();
+        verify(restRequestThreadLocalService, times(1)).getCloudbreakUser();
         verify(conversionService, times(1)).convert(any(), any());
     }
 
@@ -350,7 +350,7 @@ public class StackV2RequestToStackRequestConverterTest {
 
         underTest.convert(source);
 
-        verify(restRequestThreadLocalService, times(1)).getIdentityUser();
+        verify(restRequestThreadLocalService, times(1)).getCloudbreakUser();
         verify(conversionService, times(1)).convert(any(), any());
     }
 
@@ -360,7 +360,7 @@ public class StackV2RequestToStackRequestConverterTest {
 
         underTest.convert(source);
 
-        verify(restRequestThreadLocalService, times(1)).getIdentityUser();
+        verify(restRequestThreadLocalService, times(1)).getCloudbreakUser();
         verify(conversionService, times(1)).convert(any(), any());
     }
 
@@ -373,7 +373,7 @@ public class StackV2RequestToStackRequestConverterTest {
         StackRequest result = underTest.convert(source);
 
         Assert.assertEquals(TEST_OWNER_EMAIL, result.getOwnerEmail());
-        verify(restRequestThreadLocalService, times(1)).getIdentityUser();
+        verify(restRequestThreadLocalService, times(1)).getCloudbreakUser();
         verify(conversionService, times(1)).convert(any(), any());
     }
 
@@ -386,7 +386,7 @@ public class StackV2RequestToStackRequestConverterTest {
         StackRequest result = underTest.convert(source);
 
         Assert.assertEquals(TEST_OWNER_EMAIL, result.getOwnerEmail());
-        verify(restRequestThreadLocalService, times(1)).getIdentityUser();
+        verify(restRequestThreadLocalService, times(1)).getCloudbreakUser();
         verify(conversionService, times(1)).convert(any(), any());
     }
 
@@ -398,7 +398,7 @@ public class StackV2RequestToStackRequestConverterTest {
         StackRequest result = underTest.convert(source);
 
         Assert.assertEquals(TEST_OWNER_EMAIL, result.getOwnerEmail());
-        verify(restRequestThreadLocalService, times(1)).getIdentityUser();
+        verify(restRequestThreadLocalService, times(1)).getCloudbreakUser();
         verify(conversionService, times(1)).convert(any(), any());
     }
 
@@ -474,7 +474,7 @@ public class StackV2RequestToStackRequestConverterTest {
         verify(sharedServiceConfigProvider, times(1)).isConfigured(source.getCluster());
         verify(stackService, times(1)).getByNameInWorkspace(eq(source.getCluster().getSharedService().getSharedCluster()), anyLong());
         verify(mockStack, times(1)).getId();
-        verify(restRequestThreadLocalService, times(1)).getIdentityUser();
+        verify(restRequestThreadLocalService, times(1)).getCloudbreakUser();
     }
 
     private StackV2Request createStackV2Request() {

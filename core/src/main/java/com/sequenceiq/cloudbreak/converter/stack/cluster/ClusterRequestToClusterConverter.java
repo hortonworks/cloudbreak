@@ -45,7 +45,6 @@ public class ClusterRequestToClusterConverter extends AbstractConversionServiceA
         cluster.setName(source.getName());
         cluster.setStatus(REQUESTED);
         cluster.setDescription(source.getDescription());
-        cluster.setEmailNeeded(source.getEmailNeeded());
         cluster.setUserName(source.getUserName());
         cluster.setPassword(source.getPassword());
         cluster.setExecutorType(source.getExecutorType());
@@ -58,7 +57,6 @@ public class ClusterRequestToClusterConverter extends AbstractConversionServiceA
             cluster.setKerberosConfig(kerberosConfig);
         }
         cluster.setConfigStrategy(source.getConfigStrategy());
-        cluster.setEmailTo(source.getEmailTo());
         cluster.setCloudbreakAmbariPassword(PasswordUtil.generatePassword());
         cluster.setCloudbreakAmbariUser("cloudbreak");
         FileSystemBase fileSystem = source.getFileSystem();

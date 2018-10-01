@@ -1,17 +1,10 @@
 package com.sequenceiq.cloudbreak.domain;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-
-import org.apache.commons.lang3.StringUtils;
 
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
@@ -23,20 +16,6 @@ public class AccountPreferences {
 
     @Id
     private String account;
-
-    private Long maxNumberOfClusters;
-
-    private Long maxNumberOfNodesPerCluster;
-
-    private Long maxNumberOfClustersPerUser;
-
-    private String allowedInstanceTypes;
-
-    @Column(nullable = false)
-    private Long clusterTimeToLive;
-
-    @Column(nullable = false)
-    private Long userTimeToLive;
 
     @Column(columnDefinition = "TEXT")
     private String platforms;
@@ -51,63 +30,6 @@ public class AccountPreferences {
 
     public void setAccount(String account) {
         this.account = account;
-    }
-
-    public Long getMaxNumberOfClusters() {
-        return maxNumberOfClusters;
-    }
-
-    public void setMaxNumberOfClusters(Long maxNumberOfClusters) {
-        this.maxNumberOfClusters = maxNumberOfClusters;
-    }
-
-    public Long getMaxNumberOfNodesPerCluster() {
-        return maxNumberOfNodesPerCluster;
-    }
-
-    public void setMaxNumberOfNodesPerCluster(Long maxNumberOfNodesPerCluster) {
-        this.maxNumberOfNodesPerCluster = maxNumberOfNodesPerCluster;
-    }
-
-    public List<String> getAllowedInstanceTypes() {
-        return StringUtils.isEmpty(allowedInstanceTypes) ? new ArrayList<>() : Arrays.asList(allowedInstanceTypes.split(INSTANCE_TYPE_SEPARATOR));
-    }
-
-    public void setAllowedInstanceTypes(Iterable<String> allowedInstanceTypes) {
-        StringBuilder builder = new StringBuilder();
-        Iterator<String> it = allowedInstanceTypes.iterator();
-        while (it.hasNext()) {
-            String instanceType = it.next();
-            builder.append(instanceType);
-            if (it.hasNext()) {
-                builder.append(INSTANCE_TYPE_SEPARATOR);
-            }
-        }
-        this.allowedInstanceTypes = builder.toString();
-    }
-
-    public Long getClusterTimeToLive() {
-        return clusterTimeToLive;
-    }
-
-    public void setClusterTimeToLive(Long clusterTimeToLive) {
-        this.clusterTimeToLive = clusterTimeToLive;
-    }
-
-    public Long getUserTimeToLive() {
-        return userTimeToLive;
-    }
-
-    public void setUserTimeToLive(Long userTimeToLive) {
-        this.userTimeToLive = userTimeToLive;
-    }
-
-    public Long getMaxNumberOfClustersPerUser() {
-        return maxNumberOfClustersPerUser;
-    }
-
-    public void setMaxNumberOfClustersPerUser(Long maxNumberOfClustersPerUser) {
-        this.maxNumberOfClustersPerUser = maxNumberOfClustersPerUser;
     }
 
     public String getPlatforms() {

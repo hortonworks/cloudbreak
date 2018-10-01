@@ -16,8 +16,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Template;
@@ -43,13 +42,12 @@ public class TemplateService {
     @Inject
     private StackService stackService;
 
-    public Set<Template> retrievePrivateTemplates(IdentityUser user) {
+    public Set<Template> retrievePrivateTemplates(CloudbreakUser user) {
         return templateRepository.findForUser(user.getUserId());
     }
 
-    public Set<Template> retrieveAccountTemplates(IdentityUser user) {
-        return user.getRoles().contains(IdentityUserRole.ADMIN) ? templateRepository.findAllInAccount(user.getAccount())
-                : templateRepository.findForUser(user.getUserId(), user.getAccount());
+    public Set<Template> retrieveAccountTemplates(CloudbreakUser user) {
+        return templateRepository.findForUser(user.getUserId(), user.getAccount());
     }
 
     public Template get(Long id) {
@@ -73,23 +71,23 @@ public class TemplateService {
         return savedTemplate;
     }
 
-    public void delete(Long templateId, IdentityUser user) {
+    public void delete(Long templateId, CloudbreakUser user) {
         Template template = Optional.ofNullable(templateRepository.findByIdInAccount(templateId, user.getAccount()))
                 .orElseThrow(notFound("Template", templateId));
         delete(template);
     }
 
-    public Template getPrivateTemplate(String name, IdentityUser user) {
+    public Template getPrivateTemplate(String name, CloudbreakUser user) {
         return Optional.ofNullable(templateRepository.findByNameInUser(name, user.getUserId()))
                 .orElseThrow(notFound("Template", name));
     }
 
-    public Template getPublicTemplate(String name, IdentityUser user) {
+    public Template getPublicTemplate(String name, CloudbreakUser user) {
         return Optional.ofNullable(templateRepository.findOneByName(name, user.getAccount()))
                 .orElseThrow(notFound("Template", name));
     }
 
-    public void delete(String templateName, IdentityUser user) {
+    public void delete(String templateName, CloudbreakUser user) {
         Template template = Optional.ofNullable(templateRepository.findByNameInAccount(templateName, user.getAccount(), user.getUserId()))
                 .orElseThrow(notFound("Template", templateName));
         delete(template);

@@ -111,7 +111,7 @@ public class StackRequestToTemplatePreparationObjectConverter extends AbstractCo
     @Override
     public TemplatePreparationObject convert(StackV2Request source) {
         try {
-            User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+            User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
             Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
             Credential credential = credentialService.getByNameForWorkspace(source.getGeneral().getCredentialName(), workspace);
             Optional<FlexSubscription> flexSubscription = getFlexSubscription(source);
@@ -126,7 +126,7 @@ public class StackRequestToTemplatePreparationObjectConverter extends AbstractCo
             Gateway gateway = source.getCluster().getAmbari().getGateway() == null ? null : getConversionService().convert(source, Gateway.class);
             BlueprintView blueprintView = new BlueprintView(blueprint.getBlueprintText(), blueprintStackInfo.getVersion(), blueprintStackInfo.getType());
             GeneralClusterConfigs generalClusterConfigs = generalClusterConfigsProvider.generalClusterConfigs(source, user,
-                    restRequestThreadLocalService.getIdentityUser().getUsername());
+                    restRequestThreadLocalService.getCloudbreakUser().getUsername());
             TemplatePreparationObject.Builder builder = TemplatePreparationObject.Builder.builder()
                     .withFlexSubscription(flexSubscription.orElse(null))
                     .withRdsConfigs(rdsConfigs)

@@ -38,7 +38,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV2;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateService;
@@ -135,7 +135,7 @@ public class ImageCatalogServiceTest {
     private WorkspaceService workspaceService;
 
     @Mock
-    private IdentityUser identityUser;
+    private CloudbreakUser cloudbreakUser;
 
     @Mock
     private User user;
@@ -145,8 +145,8 @@ public class ImageCatalogServiceTest {
         setupImageCatalogProvider(CUSTOM_IMAGE_CATALOG_URL, V2_CATALOG_FILE);
 
         when(accountPreferencesService.enabledPlatforms()).thenReturn(new HashSet<>(Arrays.asList("AZURE", "AWS", "GCP", "OPENSTACK")));
-        when(identityUser.getUserId()).thenReturn("userid");
-        when(identityUser.getAccount()).thenReturn("account");
+        when(cloudbreakUser.getUserId()).thenReturn("userid");
+        when(cloudbreakUser.getAccount()).thenReturn("account");
 
         constants.addAll(Collections.singletonList(new AwsCloudConstant()));
 
@@ -163,7 +163,7 @@ public class ImageCatalogServiceTest {
         setupUserProfileService();
         setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CATALOG_FILE);
 
-        StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS", null, identityUser, user);
+        StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS", null, cloudbreakUser, user);
 
         assertEquals("7aca1fa6-980c-44e2-a75e-3144b18a5993", image.getImage().getUuid());
         assertFalse(image.getImage().isDefaultImage());
@@ -175,7 +175,7 @@ public class ImageCatalogServiceTest {
         setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CATALOG_FILE);
         ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "cbVersion", "2.1.0-dev.200", null);
 
-        StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS", null, identityUser, user);
+        StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS", null, cloudbreakUser, user);
 
         assertEquals("7aca1fa6-980c-44e2-a75e-3144b18a5993", image.getImage().getUuid());
         assertTrue(image.getImage().isDefaultImage());
@@ -187,7 +187,7 @@ public class ImageCatalogServiceTest {
         setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CATALOG_FILE);
         ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "cbVersion", "2.1.0-dev.1", null);
 
-        StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS", null, identityUser, user);
+        StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS", null, cloudbreakUser, user);
 
         assertEquals("7aca1fa6-980c-44e2-a75e-3144b18a5993", image.getImage().getUuid());
         assertTrue(image.getImage().isDefaultImage());
@@ -199,7 +199,7 @@ public class ImageCatalogServiceTest {
         setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CATALOG_FILE);
         ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "cbVersion", "2.1.0-dev.2", null);
 
-        StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS", null, identityUser, user);
+        StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS", null, cloudbreakUser, user);
 
         assertEquals("f6e778fc-7f17-4535-9021-515351df3691", image.getImage().getUuid());
         assertTrue(image.getImage().isDefaultImage());
@@ -394,7 +394,7 @@ public class ImageCatalogServiceTest {
         when(imageCatalogRepository.findByNameAndWorkspaceId(name, ORG_ID)).thenReturn(imageCatalog);
         setupUserProfileService();
 
-        underTest.delete(ORG_ID, name, identityUser, user);
+        underTest.delete(ORG_ID, name, cloudbreakUser, user);
 
         verify(imageCatalogRepository, times(1)).save(imageCatalog);
 
@@ -409,7 +409,7 @@ public class ImageCatalogServiceTest {
         thrown.expectMessage("cloudbreak-default cannot be deleted because it is an environment default image catalog.");
         thrown.expect(BadRequestException.class);
 
-        underTest.delete(ORG_ID, name, identityUser, user);
+        underTest.delete(ORG_ID, name, cloudbreakUser, user);
     }
 
     @Test

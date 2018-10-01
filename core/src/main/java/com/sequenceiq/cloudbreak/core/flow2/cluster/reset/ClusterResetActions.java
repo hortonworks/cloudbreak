@@ -23,7 +23,6 @@ import com.sequenceiq.cloudbreak.reactor.api.event.resource.ClusterResetRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ClusterResetResult;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
 
 @Configuration
 public class ClusterResetActions {
@@ -37,9 +36,6 @@ public class ClusterResetActions {
 
     @Inject
     private StackUpdater stackUpdater;
-
-    @Inject
-    private EmailSenderService emailSenderService;
 
     @Inject
     private ClusterResetService clusterResetService;

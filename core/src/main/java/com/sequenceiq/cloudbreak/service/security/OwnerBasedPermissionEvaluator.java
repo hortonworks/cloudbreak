@@ -19,8 +19,7 @@ import org.springframework.util.ReflectionUtils;
 
 import com.sequenceiq.cloudbreak.aspect.PermissionType;
 import com.sequenceiq.cloudbreak.authorization.SpecialScopes;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
 import com.sequenceiq.cloudbreak.service.user.CachedUserDetailsService;
 
@@ -48,7 +47,7 @@ public class OwnerBasedPermissionEvaluator implements PermissionEvaluator {
             return oauth.getOAuth2Request().getScope().contains(SpecialScopes.AUTO_SCALE.getScope());
         }
 
-        IdentityUser user = cachedUserDetailsService.getDetails((String) authentication.getPrincipal(), UserFilterField.USERNAME);
+        CloudbreakUser user = cachedUserDetailsService.getDetails((String) authentication.getPrincipal(), UserFilterField.USERNAME);
         Collection<?> targets = target instanceof Collection ? (Collection<?>) target : Collections.singleton(target);
         return targets.stream().allMatch(t -> {
             try {
@@ -66,12 +65,12 @@ public class OwnerBasedPermissionEvaluator implements PermissionEvaluator {
     }
 
     //CHECKSTYLE:OFF
-    private boolean hasPermission(IdentityUser user, PermissionType p, Object targetDomainObject) throws IllegalAccessException {
+    private boolean hasPermission(CloudbreakUser user, PermissionType p, Object targetDomainObject) throws IllegalAccessException {
         String owner = getOwner(targetDomainObject);
         String account = getAccount(targetDomainObject);
         return owner == null && account == null
                 || user.getUserId().equals(owner)
-                || account.equals(user.getAccount()) && (user.getRoles().contains(IdentityUserRole.ADMIN) || p == PermissionType.READ);
+                || account.equals(user.getAccount()) && p == PermissionType.READ;
     }
     //CHECKSTYLE:ON
 

@@ -198,7 +198,7 @@ public class PlatformParameterV1Controller implements ConnectorV1Endpoint {
         }
         fieldIsNotEmpty(resourceRequest.getRegion(), "region");
         fieldIsNotEmpty(resourceRequest.getAvailabilityZone(), "availabilityZone");
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         PlatformRecommendation recommendedVms =
                 cloudResourceAdvisor.createForBlueprint(recommendationRequestJson.getBlueprintName(), recommendationRequestJson.getBlueprintId(),

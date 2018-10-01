@@ -8,7 +8,7 @@ import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v1.SmartSenseSubscriptionEndpoint;
 import com.sequenceiq.cloudbreak.api.model.SmartSenseSubscriptionJson;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.SmartSenseSubscriptionToSmartSenseSubscriptionJsonConverter;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
@@ -29,7 +29,7 @@ public class SmartSenseSubscriptionController implements SmartSenseSubscriptionE
 
     @Override
     public SmartSenseSubscriptionJson get() {
-        IdentityUser cbUser = restRequestThreadLocalService.getIdentityUser();
+        CloudbreakUser cbUser = restRequestThreadLocalService.getCloudbreakUser();
         SmartSenseSubscription subscription = smartSenseSubService.getDefaultForUser(cbUser);
         return toJsonConverter.convert(subscription);
     }

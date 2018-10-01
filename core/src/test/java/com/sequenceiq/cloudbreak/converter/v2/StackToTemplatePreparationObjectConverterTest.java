@@ -35,7 +35,7 @@ import com.sequenceiq.cloudbreak.blueprint.sharedservice.SharedServiceConfigsVie
 import com.sequenceiq.cloudbreak.blueprint.utils.StackInfoService;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -137,7 +137,7 @@ public class StackToTemplatePreparationObjectConverterTest {
     private Blueprint blueprint;
 
     @Mock
-    private IdentityUser user;
+    private CloudbreakUser user;
 
     @Mock
     private Json stackInputs;

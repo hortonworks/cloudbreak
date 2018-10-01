@@ -18,7 +18,7 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.workspace.Tenant;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
@@ -32,7 +32,7 @@ import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 @Service
 public class UserService {
 
-    private static final Map<IdentityUser, Semaphore> UNDER_OPERATION = new ConcurrentHashMap<>();
+    private static final Map<CloudbreakUser, Semaphore> UNDER_OPERATION = new ConcurrentHashMap<>();
 
     @Inject
     private CachedUserService cachedUserService;
@@ -50,22 +50,22 @@ public class UserService {
     private TransactionService transactionService;
 
     @Retryable(maxAttempts = 5, backoff = @Backoff(delay = 500))
-    public User getOrCreate(IdentityUser identityUser) {
+    public User getOrCreate(CloudbreakUser cloudbreakUser) {
         try {
-            return getCached(identityUser, this::createUser);
+            return getCached(cloudbreakUser, this::createUser);
         } catch (Exception e) {
             throw new RetryException(e.getMessage());
         }
     }
 
-    private User getCached(IdentityUser identityUser, Function<IdentityUser, User> createUser) throws InterruptedException {
-        Semaphore semaphore = UNDER_OPERATION.computeIfAbsent(identityUser, iu -> new Semaphore(1));
+    private User getCached(CloudbreakUser cloudbreakUser, Function<CloudbreakUser, User> createUser) throws InterruptedException {
+        Semaphore semaphore = UNDER_OPERATION.computeIfAbsent(cloudbreakUser, iu -> new Semaphore(1));
         semaphore.acquire();
         try {
-            return cachedUserService.getUser(identityUser, userRepository::findByUserId, this::createUser);
+            return cachedUserService.getUser(cloudbreakUser, userRepository::findByUserId, this::createUser);
         } finally {
             semaphore.release();
-            UNDER_OPERATION.remove(identityUser);
+            UNDER_OPERATION.remove(cloudbreakUser);
         }
     }
 
@@ -81,16 +81,16 @@ public class UserService {
         return userRepository.findByUserIdIn(userIds);
     }
 
-    public Set<User> getAll(IdentityUser identityUser) {
-        User user = userRepository.findByUserId(identityUser.getUsername());
+    public Set<User> getAll(CloudbreakUser cloudbreakUser) {
+        User user = userRepository.findByUserId(cloudbreakUser.getUsername());
         return userRepository.findAllByTenant(user.getTenant());
     }
 
-    private User createUser(IdentityUser identityUser) {
+    private User createUser(CloudbreakUser cloudbreakUser) {
         try {
             return transactionService.requiresNew(() -> {
                 User user = new User();
-                user.setUserId(identityUser.getUsername());
+                user.setUserId(cloudbreakUser.getUsername());
 
                 Tenant tenant = tenantRepository.findByName("DEFAULT");
                 user.setTenant(tenant);
@@ -100,7 +100,7 @@ public class UserService {
                 //create workspace
                 Workspace workspace = new Workspace();
                 workspace.setTenant(tenant);
-                workspace.setName(identityUser.getUsername());
+                workspace.setName(cloudbreakUser.getUsername());
                 workspace.setStatus(ACTIVE);
                 workspace.setDescription("Default workspace for the user.");
                 workspaceService.create(user, workspace);
@@ -109,7 +109,7 @@ public class UserService {
         } catch (TransactionExecutionException e) {
             if (e.getCause() instanceof ConstraintViolationException) {
                 try {
-                    return transactionService.requiresNew(() -> userRepository.findByUserId(identityUser.getUsername()));
+                    return transactionService.requiresNew(() -> userRepository.findByUserId(cloudbreakUser.getUsername()));
                 } catch (TransactionExecutionException e2) {
                     throw new TransactionRuntimeExecutionException(e2);
                 }

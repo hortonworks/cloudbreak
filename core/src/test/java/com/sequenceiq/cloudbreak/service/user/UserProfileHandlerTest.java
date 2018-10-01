@@ -8,7 +8,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
-import java.util.Date;
 import java.util.Set;
 
 import org.junit.Before;
@@ -17,8 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
@@ -52,10 +50,10 @@ public class UserProfileHandlerTest {
 
     @Test
     public void testCreateProfilePreparation() {
-        IdentityUser identityUser = createIdentityUser();
+        CloudbreakUser cloudbreakUser = createIdentityUser();
         User user = createUser();
         UserProfile userProfile = createUserProfile(Collections.emptySet());
-        when(restRequestThreadLocalService.getIdentityUser()).thenReturn(identityUser);
+        when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
         when(userProfileService.getOrCreate(ACCOUNT_A, USER_ID_1, user)).thenReturn(userProfile);
 
         underTest.createProfilePreparation(createCredential(CREDENTIAL_A), user);
@@ -67,10 +65,10 @@ public class UserProfileHandlerTest {
 
     @Test
     public void testCreateProfilePreparationWhenDefaultIsPresent() {
-        IdentityUser identityUser = createIdentityUser();
+        CloudbreakUser cloudbreakUser = createIdentityUser();
         User user = createUser();
         UserProfile userProfile = createUserProfile(Collections.singleton(createCredential(CREDENTIAL_A)));
-        when(restRequestThreadLocalService.getIdentityUser()).thenReturn(identityUser);
+        when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
         when(userProfileService.getOrCreate(ACCOUNT_A, USER_ID_1, user)).thenReturn(userProfile);
 
         underTest.createProfilePreparation(createCredential(CREDENTIAL_B), user);
@@ -80,8 +78,8 @@ public class UserProfileHandlerTest {
         verify(userProfileService, never()).save(userProfile);
     }
 
-    private IdentityUser createIdentityUser() {
-        return new IdentityUser(USER_ID_1, USERNAME_1, ACCOUNT_A, Collections.singletonList(IdentityUserRole.USER), "givenName", "familyName", new Date());
+    private CloudbreakUser createIdentityUser() {
+        return new CloudbreakUser(USER_ID_1, USERNAME_1, ACCOUNT_A);
     }
 
     private User createUser() {

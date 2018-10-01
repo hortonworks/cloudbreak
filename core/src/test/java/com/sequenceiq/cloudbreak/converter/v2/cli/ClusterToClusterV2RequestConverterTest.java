@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.converter.v2.cli;
 import static com.sequenceiq.cloudbreak.api.model.ResourceStatus.DEFAULT;
 import static com.sequenceiq.cloudbreak.api.model.ResourceStatus.USER_MANAGED;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -56,34 +55,6 @@ public class ClusterToClusterV2RequestConverterTest {
 
         ClusterV2Request result = underTest.convert(cluster);
         assertEquals(expected, result.getAmbari());
-    }
-
-    @Test
-    public void testConvertWhenEmailIsNeededThenThisTrueValueShouldBePlaced() {
-        when(cluster.getEmailNeeded()).thenReturn(true);
-
-        ClusterV2Request result = underTest.convert(cluster);
-
-        assertTrue(result.getEmailNeeded());
-    }
-
-    @Test
-    public void testConvertWhenEmailIsNotNeededThenThisFalseValueShouldBePlaced() {
-        when(cluster.getEmailNeeded()).thenReturn(false);
-
-        ClusterV2Request result = underTest.convert(cluster);
-
-        assertFalse(result.getEmailNeeded());
-    }
-
-    @Test
-    public void testEmailToValueProperlyPassedToResultInstance() {
-        String emailAddress = "someemail@address.com";
-        when(cluster.getEmailTo()).thenReturn(emailAddress);
-
-        ClusterV2Request result = underTest.convert(cluster);
-
-        assertEquals(emailAddress, result.getEmailTo());
     }
 
     @Test

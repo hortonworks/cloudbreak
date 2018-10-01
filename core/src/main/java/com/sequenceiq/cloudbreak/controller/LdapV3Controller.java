@@ -64,7 +64,7 @@ public class LdapV3Controller extends NotificationController implements LdapConf
     @Override
     public LdapConfigResponse createInWorkspace(Long workspaceId, LdapConfigRequest request) {
         LdapConfig ldapConfig = conversionService.convert(request, LdapConfig.class);
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         ldapConfig = ldapConfigService.create(ldapConfig, workspaceId, user);
         notify(ResourceEvent.LDAP_CREATED);
         return conversionService.convert(ldapConfig, LdapConfigResponse.class);

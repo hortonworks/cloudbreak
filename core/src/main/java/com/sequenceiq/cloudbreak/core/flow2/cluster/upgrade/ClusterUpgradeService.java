@@ -11,7 +11,6 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Service
@@ -24,9 +23,6 @@ public class ClusterUpgradeService {
 
     @Inject
     private StackUpdater stackUpdater;
-
-    @Inject
-    private EmailSenderService emailSenderService;
 
     @Inject
     private StackUtil stackUtil;

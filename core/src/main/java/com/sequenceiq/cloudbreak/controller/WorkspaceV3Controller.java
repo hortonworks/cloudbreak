@@ -48,7 +48,7 @@ public class WorkspaceV3Controller extends NotificationController implements Wor
 
     @Override
     public WorkspaceResponse create(@Valid WorkspaceRequest workspaceRequest) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = conversionService.convert(workspaceRequest, Workspace.class);
         workspace = workspaceService.create(user, workspace);
         notify(ResourceEvent.WORKSPACE_CREATED);
@@ -57,21 +57,21 @@ public class WorkspaceV3Controller extends NotificationController implements Wor
 
     @Override
     public SortedSet<WorkspaceResponse> getAll() {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Set<Workspace> workspaces = workspaceService.retrieveForUser(user);
         return workspacesToSortedResponse(workspaces);
     }
 
     @Override
     public WorkspaceResponse getByName(String name) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.getByNameForUserOrThrowNotFound(name, user);
         return conversionService.convert(workspace, WorkspaceResponse.class);
     }
 
     @Override
     public WorkspaceResponse deleteByName(String name) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace defaultWorkspace = workspaceService.getDefaultWorkspaceForUser(user);
         Workspace workspace = workspaceService.deleteByNameForUser(name, user, defaultWorkspace);
         notify(ResourceEvent.WORKSPACE_DELETED);
@@ -80,28 +80,28 @@ public class WorkspaceV3Controller extends NotificationController implements Wor
 
     @Override
     public SortedSet<UserResponseJson> addUsers(String workspaceName, @Valid Set<ChangeWorkspaceUsersJson> addWorkspaceUsersJson) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Set<User> users = workspaceService.addUsers(workspaceName, addWorkspaceUsersJson, user);
         return usersToSortedResponse(users);
     }
 
     @Override
     public SortedSet<UserResponseJson> changeUsers(String workspaceName, @Valid Set<ChangeWorkspaceUsersJson> changeWorkspaceUsersJson) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Set<User> users = workspaceService.changeUsers(workspaceName, jsonToMap(changeWorkspaceUsersJson), user);
         return usersToSortedResponse(users);
     }
 
     @Override
     public SortedSet<UserResponseJson> removeUsers(String workspaceName, @Valid Set<String> userIds) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Set<User> users = workspaceService.removeUsers(workspaceName, userIds, user);
         return usersToSortedResponse(users);
     }
 
     @Override
     public SortedSet<UserResponseJson> updateUsers(String workspaceName, @Valid Set<ChangeWorkspaceUsersJson> updateWorkspaceUsersJson) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Set<User> users = workspaceService.updateUsers(workspaceName, updateWorkspaceUsersJson, user);
         return usersToSortedResponse(users);
     }

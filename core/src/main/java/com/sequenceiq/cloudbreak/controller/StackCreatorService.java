@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.StackSensitiveDataPropagator;
@@ -36,21 +36,19 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.ClusterCreationSetupService;
 import com.sequenceiq.cloudbreak.service.StackUnderOperationService;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
-import com.sequenceiq.cloudbreak.service.account.AccountPreferencesValidationException;
-import com.sequenceiq.cloudbreak.service.account.AccountPreferencesValidator;
 import com.sequenceiq.cloudbreak.service.decorator.StackDecorator;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
@@ -91,9 +89,6 @@ public class StackCreatorService {
     private ConversionService conversionService;
 
     @Inject
-    private AccountPreferencesValidator accountPreferencesValidator;
-
-    @Inject
     private TemplateValidator templateValidator;
 
     @Inject
@@ -108,7 +103,7 @@ public class StackCreatorService {
     @Inject
     private StackUnderOperationService stackUnderOperationService;
 
-    public StackResponse createStack(IdentityUser identityUser, User user, Workspace workspace, StackRequest stackRequest) {
+    public StackResponse createStack(CloudbreakUser cloudbreakUser, User user, Workspace workspace, StackRequest stackRequest) {
         ValidationResult validationResult = stackRequestValidator.validate(stackRequest);
         if (validationResult.getState() == State.ERROR) {
             LOGGER.info("Stack request has validation error(s): {}.", validationResult.getFormattedErrors());
@@ -136,10 +131,6 @@ public class StackCreatorService {
                 start = System.currentTimeMillis();
                 stack = stackDecorator.decorate(stack, stackRequest, user, workspace);
                 LOGGER.info("Stack object has been decorated in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
-
-                start = System.currentTimeMillis();
-                validateAccountPreferences(stack, identityUser);
-                LOGGER.info("Account preferences has been validated in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
                 if (stack.getOrchestrator() != null && stack.getOrchestrator().getApiEndpoint() != null) {
                     stackService.validateOrchestrator(stack.getOrchestrator());
@@ -186,7 +177,7 @@ public class StackCreatorService {
                 try {
                     imgFromCatalog = imageService.determineImageFromCatalog(workspace.getId(),
                             stackRequest.getImageId(), platformString, stackRequest.getImageCatalog(), blueprint,
-                            shouldUseBaseImage(stackRequest.getClusterRequest()), stackRequest.getOs(), identityUser, user);
+                            shouldUseBaseImage(stackRequest.getClusterRequest()), stackRequest.getOs(), cloudbreakUser, user);
                 } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
                     throw new RuntimeException(e.getMessage(), e);
                 }
@@ -261,14 +252,6 @@ public class StackCreatorService {
             Cluster cluster = clusterCreationService.prepare(stackRequest.getClusterRequest(), stack, blueprint, user, workspace);
             LOGGER.info("Cluster object and its dependencies has been created in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
             stack.setCluster(cluster);
-        }
-    }
-
-    private void validateAccountPreferences(Stack stack, IdentityUser user) {
-        try {
-            accountPreferencesValidator.validate(stack, user.getAccount(), user.getUserId());
-        } catch (AccountPreferencesValidationException e) {
-            throw new BadRequestException(e.getMessage(), e);
         }
     }
 }

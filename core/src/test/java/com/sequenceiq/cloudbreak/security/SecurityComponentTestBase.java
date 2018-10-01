@@ -6,10 +6,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -32,8 +29,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import com.sequenceiq.cloudbreak.aspect.HasPermissionAspects;
 import com.sequenceiq.cloudbreak.aspect.HasPermissionService;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
 import com.sequenceiq.cloudbreak.conf.SecurityConfig;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
@@ -90,36 +86,17 @@ public abstract class SecurityComponentTestBase {
         when(resourceServerTokenServices.loadAuthentication(anyString())).thenReturn(auth);
     }
 
-    protected void setupLoggedInUser(IdentityUser loggedInUser) {
+    protected void setupLoggedInUser(CloudbreakUser loggedInUser) {
         when(cachedUserDetailsService.getDetails(anyString(), any(UserFilterField.class))).thenReturn(loggedInUser);
     }
 
-    protected IdentityUser getUserFromDifferentAccount(boolean admin, String... scopes) {
+    protected CloudbreakUser getOwner(String... scopes) {
         addScopes(scopes);
-        return new IdentityUser(USER_B_ID, "", ACCOUNT_B, getIdentityUserRoles(admin), "", "", new Date());
-    }
-
-    protected IdentityUser getUserFromDifferentAccount(String... scopes) {
-        addScopes(scopes);
-        List<IdentityUserRole> identityUserRoles = Collections.emptyList();
-        return new IdentityUser(USER_B_ID, "", ACCOUNT_B, identityUserRoles, "", "", new Date());
-    }
-
-    protected IdentityUser getAUser() {
-        return getUserFromDifferentAccount(true);
-    }
-
-    protected IdentityUser getOwner(boolean admin, String... scopes) {
-        addScopes(scopes);
-        return new IdentityUser(USER_A_ID, "", ACCOUNT_A, getIdentityUserRoles(admin), "", "", new Date());
+        return new CloudbreakUser(USER_A_ID, "", ACCOUNT_A);
     }
 
     private void addScopes(String[] scopes) {
         when(oAuth2Request.getScope()).thenReturn(new HashSet<>(Arrays.asList(scopes)));
-    }
-
-    private List<IdentityUserRole> getIdentityUserRoles(boolean admin) {
-        return admin ? Collections.singletonList(IdentityUserRole.ADMIN) : Collections.emptyList();
     }
 
     @Configuration

@@ -44,7 +44,7 @@ public class AuditEventService extends AbstractWorkspaceAwareResourceService<Str
     private RestRequestThreadLocalService restRequestThreadLocalService;
 
     public AuditEvent getAuditEvent(Long auditId) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         return getAuditEventByWorkspaceId(workspaceService.getDefaultWorkspaceForUser(user).getId(), auditId);
     }
 

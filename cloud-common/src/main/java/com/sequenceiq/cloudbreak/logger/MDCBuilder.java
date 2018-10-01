@@ -9,7 +9,7 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Maps;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 
 public class MDCBuilder {
     public static final String MDC_CONTEXT_ID = "MDC_CONTEXT_ID";
@@ -50,7 +50,7 @@ public class MDCBuilder {
         MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), StringUtils.isEmpty(type) ? "" : type);
     }
 
-    public static void buildUserMdcContext(IdentityUser user) {
+    public static void buildUserMdcContext(CloudbreakUser user) {
         if (user != null) {
             MDC.put(LoggerContextKey.OWNER_ID.toString(), user.getUserId());
         }

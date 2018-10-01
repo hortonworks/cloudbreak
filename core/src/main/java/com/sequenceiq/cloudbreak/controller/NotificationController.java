@@ -6,7 +6,7 @@ import java.util.function.Consumer;
 import javax.inject.Inject;
 
 import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
@@ -32,18 +32,18 @@ public abstract class NotificationController {
     @Inject
     private RestRequestThreadLocalService restRequestThreadLocalService;
 
-    protected final void executeAndNotify(Consumer<IdentityUser> consumer, ResourceEvent resourceEvent) {
-        IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
-        consumer.accept(identityUser);
+    protected final void executeAndNotify(Consumer<CloudbreakUser> consumer, ResourceEvent resourceEvent) {
+        CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
+        consumer.accept(cloudbreakUser);
         notify(resourceEvent);
     }
 
     protected final void notify(ResourceEvent resourceEvent) {
-        IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
+        CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
         Long orgId = restRequestThreadLocalService.getRequestedWorkspaceId();
         CloudbreakEventsJson notification = new CloudbreakEventsJson();
         notification.setEventTimestamp(new Date().getTime());
-        notification.setUserIdV3(userService.getOrCreate(identityUser).getUserId());
+        notification.setUserIdV3(userService.getOrCreate(cloudbreakUser).getUserId());
         notification.setWorkspaceId(orgId);
         notification.setEventType(resourceEvent.name());
         notification.setEventMessage(messagesService.getMessage(resourceEvent.getMessage()));

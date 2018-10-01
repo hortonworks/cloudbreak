@@ -70,8 +70,8 @@ public class CachedRemoteTokenService implements ResourceServerTokenServices {
         }
         Jwt jwtToken = JwtHelper.decode(accessToken);
         try {
-            Map<String, Object> claims = objectMapper.readValue(jwtToken.getClaims(), new MapTypeReference());
-            return claims.get("user") == null ? getOAuth2Authentication(accessToken) : getSSOAuthentication(accessToken);
+            Map<String, String> claims = objectMapper.readValue(jwtToken.getClaims(), new MapTypeReference());
+            return "uaa".equals(claims.get("zid")) ? getOAuth2Authentication(accessToken) : getSSOAuthentication(accessToken);
         } catch (IOException e) {
             LOGGER.error("Token does not claim anything", e);
             throw new InvalidTokenException("Invalid JWT token, does not claim anything", e);
@@ -92,14 +92,19 @@ public class CachedRemoteTokenService implements ResourceServerTokenServices {
             SignatureVerifier verifier = isAssymetricKey(jwtSignKey) ? new RsaVerifier(jwtSignKey) : new MacSigner(jwtSignKey);
             Jwt jwt = JwtHelper.decodeAndVerify(accessToken, verifier);
             Map<String, Object> claims = objectMapper.readValue(jwt.getClaims(), new MapTypeReference());
-            Object userClaim = claims.get("user");
             Map<String, Object> tokenMap = new HashMap<>();
-            Map<String, Object> userMap = objectMapper.readValue(userClaim.toString(), new MapTypeReference());
+            Object userName;
+            if (claims.get("user") != null) {
+                Object userClaim = claims.get("user");
+                Map<String, Object> userMap = objectMapper.readValue(userClaim.toString(), new MapTypeReference());
+                userName = userMap.get("email");
+            } else {
+                userName = claims.get("sub");
+            }
             String exp = claims.get("exp").toString();
             tokenMap.put("exp", Long.valueOf(exp));
-            Object email = userMap.get("email");
-            tokenMap.put("user_id", email);
-            tokenMap.put("user_name", email);
+            tokenMap.put("user_id", userName);
+            tokenMap.put("user_name", userName);
             tokenMap.put("scope", Arrays.asList("cloudbreak.networks.read", "periscope.cluster", "cloudbreak.usages.user", "cloudbreak.recipes", "openid",
                 "cloudbreak.templates.read", "cloudbreak.usages.account", "cloudbreak.events", "cloudbreak.stacks.read",
                 "cloudbreak.blueprints", "cloudbreak.networks", "cloudbreak.templates", "cloudbreak.credentials.read",

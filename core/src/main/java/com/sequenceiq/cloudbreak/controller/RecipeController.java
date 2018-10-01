@@ -57,7 +57,7 @@ public class RecipeController extends NotificationController implements RecipeEn
 
     @Override
     public RecipeRequest getRequestfromName(String name) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         Recipe recipe = recipeService.getByNameForWorkspace(name, workspace);
         return conversionService.convert(recipe, RecipeRequest.class);
@@ -65,49 +65,49 @@ public class RecipeController extends NotificationController implements RecipeEn
 
     @Override
     public RecipeResponse postPublic(RecipeRequest recipeRequest) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         return createInDefaultWorkspace(recipeRequest, user);
     }
 
     @Override
     public RecipeResponse postPrivate(RecipeRequest recipeRequest) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         return createInDefaultWorkspace(recipeRequest, user);
     }
 
     @Override
     public Set<RecipeResponse> getPrivates() {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         return listForUsersDefaultWorkspace(user);
     }
 
     @Override
     public Set<RecipeResponse> getPublics() {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         return listForUsersDefaultWorkspace(user);
     }
 
     @Override
     public RecipeResponse getPrivate(String name) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         return getRecipeResponse(name, user);
     }
 
     @Override
     public RecipeResponse getPublic(String name) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         return getRecipeResponse(name, user);
     }
 
     @Override
     public void deletePublic(String name) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         deleteInDefaultWorkspace(name, user);
     }
 
     @Override
     public void deletePrivate(String name) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         deleteInDefaultWorkspace(name, user);
     }
 

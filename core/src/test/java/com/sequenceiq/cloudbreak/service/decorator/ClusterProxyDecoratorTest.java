@@ -8,8 +8,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
-import java.util.Date;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,7 +16,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.mapper.ProxyConfigMapper;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
@@ -41,7 +39,7 @@ public class ClusterProxyDecoratorTest {
     @Mock
     private User user;
 
-    private final IdentityUser identityUser = new IdentityUser("test", "test", "test", null, "test", "test", new Date());
+    private final CloudbreakUser cloudbreakUser = new CloudbreakUser("test", "test", "test");
 
     private Cluster cluster;
 

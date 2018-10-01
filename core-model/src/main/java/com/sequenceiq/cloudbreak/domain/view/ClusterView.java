@@ -24,10 +24,6 @@ public class ClusterView extends CompactView {
 
     private String ambariIp;
 
-    private Boolean emailNeeded;
-
-    private String emailTo;
-
     @Enumerated(EnumType.STRING)
     private Status status;
 
@@ -42,14 +38,6 @@ public class ClusterView extends CompactView {
 
     public String getAmbariIp() {
         return ambariIp;
-    }
-
-    public Boolean getEmailNeeded() {
-        return emailNeeded;
-    }
-
-    public String getEmailTo() {
-        return emailTo;
     }
 
     public Status getStatus() {

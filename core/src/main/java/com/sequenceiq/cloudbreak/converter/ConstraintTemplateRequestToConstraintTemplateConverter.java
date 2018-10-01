@@ -37,7 +37,7 @@ public class ConstraintTemplateRequestToConstraintTemplateConverter
         constraintTemplate.setDescription(source.getDescription());
         constraintTemplate.setStatus(ResourceStatus.USER_MANAGED);
         Long workspaceId = restRequestThreadLocalService.getRequestedWorkspaceId();
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(workspaceId, user);
         constraintTemplate.setWorkspace(workspace);
         return constraintTemplate;

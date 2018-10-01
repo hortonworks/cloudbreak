@@ -106,7 +106,7 @@ public class ProxyConfigController extends NotificationController implements Pro
 
     private ProxyConfigResponse createInDefaultWorkspace(ProxyConfigRequest request) {
         ProxyConfig proxyConfig = proxyConfigMapper.mapRequestToEntity(request);
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         proxyConfig = proxyConfigService.create(proxyConfig, restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         return notifyAndReturn(proxyConfig, ResourceEvent.PROXY_CONFIG_CREATED);
     }

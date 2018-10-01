@@ -4,8 +4,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 
 import org.junit.Assert;
@@ -21,7 +19,7 @@ import org.mockito.Spy;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV2;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
@@ -64,7 +62,7 @@ public class ImageCatalogServiceDefaultTest {
     private AccountPreferencesService accountPreferencesService;
 
     @Mock
-    private IdentityUser identityUser;
+    private CloudbreakUser cloudbreakUser;
 
     @Mock
     private User user;
@@ -118,8 +116,8 @@ public class ImageCatalogServiceDefaultTest {
         when(imageCatalogProvider.getImageCatalogV2("")).thenReturn(catalog);
         when(accountPreferencesService.enabledPlatforms()).thenReturn(new HashSet<>(Arrays.asList(PROVIDERS)));
 
-        when(userProfileService.getOrCreate(identityUser.getAccount(), identityUser.getUserId(), user)).thenReturn(new UserProfile());
-        when(userProfileService.getOrCreate(identityUser.getAccount(), identityUser.getUserId(), identityUser.getUsername(), user))
+        when(userProfileService.getOrCreate(cloudbreakUser.getAccount(), cloudbreakUser.getUserId(), user)).thenReturn(new UserProfile());
+        when(userProfileService.getOrCreate(cloudbreakUser.getAccount(), cloudbreakUser.getUserId(), cloudbreakUser.getUsername(), user))
                 .thenReturn(new UserProfile());
     }
 
@@ -129,13 +127,13 @@ public class ImageCatalogServiceDefaultTest {
         ReflectionTestUtils.setField(underTest, "cbVersion", cbVersion);
         ReflectionTestUtils.setField(underTest, "defaultCatalogUrl", "");
         // WHEN
-        StatedImage statedImage = underTest.getPrewarmImageDefaultPreferred(provider, clusterType, clusterVersion, os, identityUser, user);
+        StatedImage statedImage = underTest.getPrewarmImageDefaultPreferred(provider, clusterType, clusterVersion, os, cloudbreakUser, user);
         // THEN
         Assert.assertEquals("Wrong default image has been selected", expectedImageId, statedImage.getImage().getUuid());
     }
 
-    private IdentityUser getIdentityUser() {
-        return new IdentityUser(ImageCatalogServiceTest.USER_ID, ImageCatalogServiceTest.USERNAME, ImageCatalogServiceTest.ACCOUNT,
-                Collections.emptyList(), "givenName", "familyName", new Date());
+    private CloudbreakUser getCloudbreakUser() {
+        return new CloudbreakUser(ImageCatalogServiceTest.USER_ID, ImageCatalogServiceTest.USERNAME, ImageCatalogServiceTest.ACCOUNT
+        );
     }
 }

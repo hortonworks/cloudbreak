@@ -54,7 +54,7 @@ public class ManagementPackV3Controller extends NotificationController implement
     @Override
     public ManagementPackResponse createInWorkspace(Long workspaceId, @Valid ManagementPackRequest request) {
         ManagementPack managementPack = conversionService.convert(request, ManagementPack.class);
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         managementPack = mpackService.create(managementPack, workspaceId, user);
         notify(ResourceEvent.MANAGEMENT_PACK_CREATED);
         return conversionService.convert(managementPack, ManagementPackResponse.class);

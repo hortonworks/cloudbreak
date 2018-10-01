@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.api.model.stack.StackViewResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRepairRequest;
 import com.sequenceiq.cloudbreak.api.model.users.UserNamePasswordJson;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
@@ -76,15 +76,15 @@ public class StackV3Controller extends NotificationController implements StackV3
 
     @Override
     public StackResponse createInWorkspace(Long workspaceId, StackV2Request request) {
-        IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
-        User user = userService.getOrCreate(identityUser);
+        CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
+        User user = userService.getOrCreate(cloudbreakUser);
         Workspace workspace = workspaceService.get(workspaceId, user);
-        return stackCommonService.createInWorkspace(conversionService.convert(request, StackRequest.class), identityUser, user, workspace);
+        return stackCommonService.createInWorkspace(conversionService.convert(request, StackRequest.class), cloudbreakUser, user, workspace);
     }
 
     @Override
     public void deleteInWorkspace(Long workspaceId, String name, Boolean forced, Boolean deleteDependencies) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         stackCommonService.deleteInWorkspace(name, workspaceId, forced, deleteDependencies, user);
     }
 
@@ -148,7 +148,7 @@ public class StackV3Controller extends NotificationController implements StackV3
     public Response putReinstall(Long workspaceId, String name, ReinstallRequestV2 reinstallRequestV2) {
         Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
         UpdateClusterJson updateClusterJson = conversionService.convert(reinstallRequestV2, UpdateClusterJson.class);
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         return clusterCommonService.put(stack.getId(), updateClusterJson, user, workspace);
     }
@@ -157,7 +157,7 @@ public class StackV3Controller extends NotificationController implements StackV3
     public Response putPassword(Long workspaceId, String name, @Valid UserNamePasswordJson userNamePasswordJson) {
         Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
         UpdateClusterJson updateClusterJson = conversionService.convert(userNamePasswordJson, UpdateClusterJson.class);
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         return clusterCommonService.put(stack.getId(), updateClusterJson, user, workspace);
     }

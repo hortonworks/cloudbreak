@@ -8,9 +8,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.time.Instant;
-import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -26,7 +23,7 @@ import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.service.user.UserDetailsService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -94,10 +91,10 @@ public class StackWorkspaceMigratorTest {
     @Before
     public void setup() throws TransactionExecutionException {
         doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).required(any());
-        when(userService.getOrCreate(any(IdentityUser.class))).thenAnswer((Answer<User>) invocation -> {
-            IdentityUser identityUser = invocation.getArgument(0);
+        when(userService.getOrCreate(any(CloudbreakUser.class))).thenAnswer((Answer<User>) invocation -> {
+            CloudbreakUser cloudbreakUser = invocation.getArgument(0);
             User user = new User();
-            user.setUserId(identityUser.getUsername());
+            user.setUserId(cloudbreakUser.getUsername());
             return user;
         });
         when(workspaceRepository.save(any(Workspace.class)))
@@ -105,15 +102,13 @@ public class StackWorkspaceMigratorTest {
         when(workspaceRepository.getByName(anyString(), any())).thenReturn(null);
         when(userWorkspacePermissionsService.findForUserAndWorkspace(any(), any())).thenReturn(null);
 
-        List<IdentityUser> identityUsers = List.of(
-                new IdentityUser("1", "1@hw.com", "1",
-                        Collections.emptyList(), "1", "1", Date.from(Instant.now())),
-                new IdentityUser("2", "2@hw.com", "2",
-                        Collections.emptyList(), "1", "1", Date.from(Instant.now()))
+        List<CloudbreakUser> cloudbreakUsers = List.of(
+                new CloudbreakUser("1", "1@hw.com", "1"),
+                new CloudbreakUser("2", "2@hw.com", "2")
         );
 
         userAndWorkspaceMigrator.setUaaStartupTimeoutSec(300L);
-        when(userDetailsService.getAllUsers(null)).thenReturn(identityUsers);
+        when(userDetailsService.getAllUsers(null)).thenReturn(cloudbreakUsers);
         userMigrationResults = userAndWorkspaceMigrator.migrateUsersAndWorkspaces();
 
         when(workspaceService.getDefaultWorkspaceForUser(any(User.class))).thenAnswer((Answer<Workspace>) invocation -> {

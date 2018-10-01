@@ -24,7 +24,7 @@ public class WorkspaceRequestToWorkspaceConverter extends AbstractConversionServ
 
     @Override
     public Workspace convert(WorkspaceRequest source) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = new Workspace();
         workspace.setName(source.getName());
         workspace.setDescription(source.getDescription());

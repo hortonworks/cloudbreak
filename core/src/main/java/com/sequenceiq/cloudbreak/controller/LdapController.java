@@ -113,7 +113,7 @@ public class LdapController extends NotificationController implements LdapConfig
         LdapTestResult ldapTestResult = new LdapTestResult();
         try {
             if (existingLDAPConfigName != null) {
-                User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+                User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
                 Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
                 LdapConfig ldapConfig = ldapConfigService.getByNameForWorkspaceId(existingLDAPConfigName, workspace.getId());
                 ldapConfigValidator.validateLdapConnection(ldapConfig);
@@ -129,7 +129,7 @@ public class LdapController extends NotificationController implements LdapConfig
 
     @Override
     public LdapConfigRequest getRequestFromName(String name) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         LdapConfig ldapConfig = ldapConfigService.getByNameForWorkspaceId(name, workspace.getId());
         return conversionService.convert(ldapConfig, LdapConfigRequest.class);
@@ -137,7 +137,7 @@ public class LdapController extends NotificationController implements LdapConfig
 
     private LdapConfigResponse createConfig(LdapConfigRequest request) {
         LdapConfig ldapConfig = conversionService.convert(request, LdapConfig.class);
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         LdapConfig response = ldapConfigService.create(ldapConfig, workspace, user);
         notify(ResourceEvent.LDAP_CREATED);
@@ -145,13 +145,13 @@ public class LdapController extends NotificationController implements LdapConfig
     }
 
     private LdapConfigResponse getLdapConfigResponse(String name) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         return conversionService.convert(ldapConfigService.getByNameForWorkspace(name, workspace), LdapConfigResponse.class);
     }
 
     private Set<LdapConfigResponse> listForUsersDefaultWorkspace() {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         return ldapConfigService.findAllByWorkspace(workspace).stream()
                 .map(ldapConfig -> conversionService.convert(ldapConfig, LdapConfigResponse.class))
@@ -159,7 +159,7 @@ public class LdapController extends NotificationController implements LdapConfig
     }
 
     private void deleteInDefaultWorkspace(String name) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         executeAndNotify(identityUser -> ldapConfigService.deleteByNameFromWorkspace(name, workspace.getId()), ResourceEvent.LDAP_DELETED);
     }

@@ -18,7 +18,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-import org.joda.time.Instant;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -32,7 +31,7 @@ import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
@@ -234,8 +233,8 @@ public class StackImageFilterServiceTest {
         return stack;
     }
 
-    private IdentityUser setupLoggedInUser() {
-        IdentityUser user = new IdentityUser("", "", "", Collections.emptyList(), "", "", Instant.now().toDate());
+    private CloudbreakUser setupLoggedInUser() {
+        CloudbreakUser user = new CloudbreakUser("", "", "");
         when(authenticatedUserService.getCbUser()).thenReturn(user);
         return user;
     }

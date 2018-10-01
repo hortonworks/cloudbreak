@@ -85,7 +85,7 @@ public class ClusterV1Controller implements ClusterV1Endpoint {
 
     @Override
     public ClusterResponse post(Long stackId, ClusterRequest request) throws Exception {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         Stack stack = stackService.getByIdWithLists(stackId);
         clusterCreationSetupService.validate(request, stack, user, workspace);
@@ -130,7 +130,7 @@ public class ClusterV1Controller implements ClusterV1Endpoint {
 
     @Override
     public Response put(Long stackId, UpdateClusterJson updateJson) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         return clusterCommonService.put(stackId, updateJson, user, workspace);
     }

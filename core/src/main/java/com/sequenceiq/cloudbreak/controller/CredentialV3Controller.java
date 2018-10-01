@@ -60,7 +60,7 @@ public class CredentialV3Controller extends NotificationController implements Cr
 
     @Override
     public CredentialResponse createInWorkspace(Long workspaceId, CredentialRequest request) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Credential credential = credentialService.create(conversionService.convert(request, Credential.class), workspaceId, user);
         notify(ResourceEvent.CREDENTIAL_CREATED);
         return conversionService.convert(credential, CredentialResponse.class);
@@ -75,14 +75,14 @@ public class CredentialV3Controller extends NotificationController implements Cr
 
     @Override
     public CredentialResponse putInWorkspace(Long workspaceId, CredentialRequest credentialRequest) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         return conversionService.convert(credentialService.updateByWorkspaceId(
                 workspaceId, conversionService.convert(credentialRequest, Credential.class), user), CredentialResponse.class);
     }
 
     @Override
     public Map<String, String> interactiveLogin(Long workspaceId, CredentialRequest credentialRequest) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getIdentityUser());
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         return credentialService.interactiveLogin(workspaceId, conversionService.convert(credentialRequest, Credential.class), workspace, user);
     }

@@ -19,7 +19,6 @@ import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TerminationService;
@@ -32,9 +31,6 @@ public class StackTerminationService {
 
     @Inject
     private TerminationService terminationService;
-
-    @Inject
-    private EmailSenderService emailSenderService;
 
     @Inject
     private ClusterService clusterService;
@@ -68,11 +64,6 @@ public class StackTerminationService {
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_DELETE_COMPLETED, DELETE_COMPLETED.name());
         clusterService.updateClusterStatusByStackId(stack.getId(), DELETE_COMPLETED);
         clusterService.cleanupKerberosCredential(stack.getCluster());
-        if (stack.getCluster() != null && stack.getCluster().getEmailNeeded()) {
-            emailSenderService.sendTerminationSuccessEmail(stack.getCluster().getOwner(), stack.getCluster().getEmailTo(),
-                    stackUtil.extractAmbariIp(stack), stack.getCluster().getName());
-            flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_NOTIFICATION_EMAIL, DELETE_COMPLETED.name());
-        }
         usageService.closeUsagesForStack(stack.getId());
         if (deleteDependencies) {
             dependecyDeletionService.deleteDependencies(stack);
@@ -102,16 +93,5 @@ public class StackTerminationService {
             }
         }
         flowMessageService.fireEventAndLog(stackView.getId(), eventMessage, status.name(), stackUpdateMessage);
-        if (stackView.getClusterView() != null && stackView.getClusterView().getEmailNeeded()) {
-            String ambariIp = stackUtil.extractAmbariIp(stackView);
-            if (forced) {
-                emailSenderService.sendTerminationSuccessEmail(stackView.getClusterView().getOwner(), stackView.getClusterView().getEmailTo(),
-                        ambariIp, stackView.getClusterView().getName());
-            } else {
-                emailSenderService.sendTerminationFailureEmail(stackView.getClusterView().getOwner(), stackView.getClusterView().getEmailTo(),
-                        ambariIp, stackView.getClusterView().getName());
-            }
-            flowMessageService.fireEventAndLog(stackView.getId(), Msg.STACK_NOTIFICATION_EMAIL, status.name());
-        }
     }
 }

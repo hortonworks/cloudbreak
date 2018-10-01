@@ -31,14 +31,6 @@ public class AccountPreferencesToAccountPreferencesJsonConverter
     @Override
     public AccountPreferencesResponse convert(AccountPreferences source) {
         AccountPreferencesResponse json = new AccountPreferencesResponse();
-        json.setMaxNumberOfClusters(source.getMaxNumberOfClusters());
-        json.setMaxNumberOfNodesPerCluster(source.getMaxNumberOfNodesPerCluster());
-        json.setAllowedInstanceTypes(source.getAllowedInstanceTypes());
-        long clusterTimeToLive = source.getClusterTimeToLive() == ZERO ? ZERO : source.getClusterTimeToLive() / HOUR_IN_MS;
-        json.setClusterTimeToLive(clusterTimeToLive);
-        long userTimeToLive = source.getUserTimeToLive() == ZERO ? ZERO : source.getUserTimeToLive() / HOUR_IN_MS;
-        json.setUserTimeToLive(userTimeToLive);
-        json.setMaxNumberOfClustersPerUser(source.getMaxNumberOfClustersPerUser());
         json.setPlatforms(source.getPlatforms());
         json.setSmartsenseEnabled(smartsenseEnabled);
         SupportedDatabaseProvider.supportedExternalDatabases().forEach(item ->
