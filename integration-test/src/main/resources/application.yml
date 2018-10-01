@@ -125,6 +125,19 @@ integrationtest:
         skipRemainingTestsAfterOneFailed: true
         cleanUpOnFailure: true
 
+    logsearch:
+      url:
+      queryTypes:
+        - id:
+          name:
+          label:
+        - id:
+          name:
+          label:
+        - id:
+          name:
+          label:
+
     credentialNames:
         GCP: it-gcp-credential
         AWS: it-aws-credential

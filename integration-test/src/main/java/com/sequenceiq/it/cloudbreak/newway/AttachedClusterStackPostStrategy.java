@@ -23,6 +23,6 @@ public class AttachedClusterStackPostStrategy extends StackPostStrategyRoot {
         setImageSettingsIfNeeded(stackEntity, integrationTestContext);
         setHostGroupIfNeeded(stackEntity, integrationTestContext);
 
-        postStackAndSetRequestForEntity(client, stackEntity);
+        postStackAndSetRequestForEntity(integrationTestContext, client, stackEntity);
     }
 }
