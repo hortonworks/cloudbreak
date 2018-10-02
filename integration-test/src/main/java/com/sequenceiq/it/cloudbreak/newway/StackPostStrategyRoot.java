@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
 import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.cloudbreak.newway.logsearch.LogSearchUtil;
 
 public abstract class StackPostStrategyRoot implements Strategy {
 
@@ -17,7 +18,7 @@ public abstract class StackPostStrategyRoot implements Strategy {
 
     protected static final String NETWORK_ID_KEY = "networkId";
 
-    protected void postStackAndSetRequestForEntity(CloudbreakClient client, StackEntity stackEntity) throws Exception {
+    protected void postStackAndSetRequestForEntity(IntegrationTestContext context, CloudbreakClient client, StackEntity stackEntity) throws Exception {
         log(" Name:\n" + stackEntity.getRequest().getGeneral().getName());
         logJSON(" Stack post request:\n", stackEntity.getRequest());
         stackEntity.setResponse(
@@ -26,6 +27,9 @@ public abstract class StackPostStrategyRoot implements Strategy {
                         .postPrivate(stackEntity.getRequest()));
         logJSON(" Stack post response:\n", stackEntity.getResponse());
         log(" ID:\n" + stackEntity.getResponse().getId());
+
+        LogSearchUtil.addQueryModelForLogSearchUrlToContext(context, LogSearchUtil.LOG_SEARCH_CBID_ID,
+                LogSearchUtil.LOG_SEARCH_CBID_QUERY_TYPE, stackEntity.getResponse().getId().toString());
     }
 
     protected void setImageSettingsIfNeeded(StackEntity stackEntity, IntegrationTestContext integrationTestContext) {

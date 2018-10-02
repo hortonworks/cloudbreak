@@ -21,6 +21,7 @@ import com.sequenceiq.it.cloudbreak.newway.ImageSettings;
 import com.sequenceiq.it.cloudbreak.newway.Kerberos;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.Strategy;
+import com.sequenceiq.it.cloudbreak.newway.logsearch.LogSearchUtil;
 
 public abstract class StackPostV3StrategyRoot implements Strategy {
 
@@ -39,6 +40,9 @@ public abstract class StackPostV3StrategyRoot implements Strategy {
                         .createInWorkspace(workspaceId, stackEntity.getRequest()));
         logJSON(" Stack post response:\n", stackEntity.getResponse());
         log(" ID:\n" + stackEntity.getResponse().getId());
+
+        LogSearchUtil.addQueryModelForLogSearchUrlToContext(integrationTestContext, LogSearchUtil.LOG_SEARCH_CBID_ID,
+                LogSearchUtil.LOG_SEARCH_CBID_QUERY_TYPE, stackEntity.getResponse().getId().toString());
     }
 
     protected void setImageSettingsIfNeeded(StackEntity stackEntity, IntegrationTestContext integrationTestContext) {

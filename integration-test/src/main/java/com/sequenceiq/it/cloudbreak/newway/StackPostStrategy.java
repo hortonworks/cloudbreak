@@ -1,21 +1,23 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
-import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
-import com.sequenceiq.it.IntegrationTestContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static com.sequenceiq.it.cloudbreak.newway.CloudbreakClient.getTestContextCloudbreakClient;
+import static com.sequenceiq.it.cloudbreak.newway.log.Log.log;
+import static com.sequenceiq.it.cloudbreak.newway.log.Log.logJSON;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static com.sequenceiq.it.cloudbreak.newway.CloudbreakClient.getTestContextCloudbreakClient;
-import static com.sequenceiq.it.cloudbreak.newway.log.Log.log;
-import static com.sequenceiq.it.cloudbreak.newway.log.Log.logJSON;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
+import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
+import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
+import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.cloudbreak.newway.logsearch.LogSearchUtil;
 
 public class StackPostStrategy implements Strategy {
 
@@ -130,5 +132,8 @@ public class StackPostStrategy implements Strategy {
                         .postPrivate(stackEntity.getRequest()));
         logJSON(" Stack post response:\n", stackEntity.getResponse());
         log(" ID:\n" + stackEntity.getResponse().getId());
+
+        LogSearchUtil.addQueryModelForLogSearchUrlToContext(integrationTestContext, LogSearchUtil.LOG_SEARCH_CBID_ID,
+                LogSearchUtil.LOG_SEARCH_CBID_QUERY_TYPE, stackEntity.getResponse().getId().toString());
     }
 }
