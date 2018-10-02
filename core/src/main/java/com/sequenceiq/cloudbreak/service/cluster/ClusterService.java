@@ -689,7 +689,7 @@ public class ClusterService {
     }
 
     public void cleanupKerberosCredential(Cluster cluster) {
-        if (cluster.isSecure() && cluster.getKerberosConfig() != null) {
+        if (cluster != null && cluster.isSecure() && cluster.getKerberosConfig() != null) {
             KerberosConfig kerberosConfig = cluster.getKerberosConfig();
             kerberosConfig.setPassword(null);
             kerberosConfig.setPrincipal(null);
