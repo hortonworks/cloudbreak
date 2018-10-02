@@ -67,6 +67,7 @@ public class StackTerminationService {
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_BILLING_TERMINATED, BillingStatus.BILLING_TERMINATED.name());
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_DELETE_COMPLETED, DELETE_COMPLETED.name());
         clusterService.updateClusterStatusByStackId(stack.getId(), DELETE_COMPLETED);
+        clusterService.cleanupKerberosCredential(stack.getCluster());
         if (stack.getCluster() != null && stack.getCluster().getEmailNeeded()) {
             emailSenderService.sendTerminationSuccessEmail(stack.getCluster().getOwner(), stack.getCluster().getEmailTo(),
                     stackUtil.extractAmbariIp(stack), stack.getCluster().getName());

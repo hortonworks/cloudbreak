@@ -110,7 +110,6 @@ public class ClusterCreationService {
     public void handleClusterCreationFailure(StackView stackView, Exception exception) {
         if (stackView.getClusterView() != null) {
             Cluster cluster = clusterService.getById(stackView.getClusterView().getId());
-            clusterService.cleanupKerberosCredential(cluster);
             String errorMessage = getErrorMessageFromException(exception);
             clusterService.updateClusterStatusByStackId(stackView.getId(), CREATE_FAILED, errorMessage);
             stackUpdater.updateStackStatus(stackView.getId(), DetailedStackStatus.AVAILABLE);
