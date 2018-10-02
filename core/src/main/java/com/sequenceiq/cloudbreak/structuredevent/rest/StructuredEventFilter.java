@@ -251,7 +251,9 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
                 String resourceName = params.get(RESOURCE_NAME);
                 if (resourceName != null) {
                     WorkspaceAwareResource resource = resourceRepository.findByNameAndWorkspaceId(resourceName, Long.valueOf(workspaceId));
-                    params.put(RESOURCE_ID, Long.toString(resource.getId()));
+                    if (resource != null) {
+                        params.put(RESOURCE_ID, Long.toString(resource.getId()));
+                    }
                 }
                 break;
             }
