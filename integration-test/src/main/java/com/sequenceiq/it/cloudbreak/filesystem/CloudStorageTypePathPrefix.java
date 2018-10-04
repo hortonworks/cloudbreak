@@ -3,7 +3,7 @@ package com.sequenceiq.it.cloudbreak.filesystem;
 import javax.annotation.Nonnull;
 
 import com.sequenceiq.cloudbreak.api.model.v2.CloudStorageRequest;
-import com.sequenceiq.cloudbreak.api.model.v2.filesystem.AbfsCloudStorageParameters;
+import com.sequenceiq.cloudbreak.api.model.v2.filesystem.AdlsGen2CloudStorageParameters;
 import com.sequenceiq.cloudbreak.api.model.v2.filesystem.AdlsCloudStorageParameters;
 import com.sequenceiq.cloudbreak.api.model.v2.filesystem.CloudStorageParameters;
 import com.sequenceiq.cloudbreak.api.model.v2.filesystem.GcsCloudStorageParameters;
@@ -44,11 +44,11 @@ public enum CloudStorageTypePathPrefix {
             }
         }
     },
-    ABFS("abfs") {
+    ADLS_GEN_2("adlsgen2") {
         @Override
         public void setParameterForRequest(CloudStorageRequest request, CloudStorageParameters parameters) {
-            if (parameters == null || parameters instanceof AbfsCloudStorageParameters) {
-                request.setAbfs((AbfsCloudStorageParameters) parameters);
+            if (parameters == null || parameters instanceof AdlsGen2CloudStorageParameters) {
+                request.setAdlsGen2((AdlsGen2CloudStorageParameters) parameters);
             }
         }
     };

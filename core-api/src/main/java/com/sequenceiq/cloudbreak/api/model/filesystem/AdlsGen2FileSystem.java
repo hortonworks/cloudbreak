@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonAutoDetect(fieldVisibility = ANY, getterVisibility = NONE, setterVisibility = NONE)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AbfsFileSystem extends BaseFileSystem {
+public class AdlsGen2FileSystem extends BaseFileSystem {
 
     private String accountKey;
 
@@ -47,10 +47,10 @@ public class AbfsFileSystem extends BaseFileSystem {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof AbfsFileSystem)) {
+        if (!(o instanceof AdlsGen2FileSystem)) {
             return false;
         }
-        AbfsFileSystem that = (AbfsFileSystem) o;
+        AdlsGen2FileSystem that = (AdlsGen2FileSystem) o;
         return Objects.equals(getAccountKey(), that.getAccountKey())
                 && Objects.equals(getAccountName(), that.getAccountName())
                 && Objects.equals(getStorageContainerName(), that.getStorageContainerName());

@@ -141,7 +141,6 @@ public class TemplateModelContextBuilder {
         Map<String, Object> blueprintTemplateModelContext = new HashMap<>();
         blueprintTemplateModelContext.put(HandleBarModelKey.COMPONENTS.modelKey(), components);
         blueprintTemplateModelContext.put(HandleBarModelKey.LDAP.modelKey(), ldap.orElse(null));
-        blueprintTemplateModelContext.put(HandleBarModelKey.LDAP.modelKey(), ldap.orElse(null));
         blueprintTemplateModelContext.put(HandleBarModelKey.GATEWAY.modelKey(), gateway.orElse(null));
         blueprintTemplateModelContext.put(HandleBarModelKey.RDS.modelKey(), rds);
         blueprintTemplateModelContext.put(HandleBarModelKey.FILESYSTEMCONFIGS.modelKey(), ModelConverterUtils.convert(fileSystemConfig));

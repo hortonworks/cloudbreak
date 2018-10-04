@@ -19,13 +19,13 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.core.convert.ConversionService;
 
-import com.sequenceiq.cloudbreak.api.model.filesystem.AbfsFileSystem;
+import com.sequenceiq.cloudbreak.api.model.filesystem.AdlsGen2FileSystem;
 import com.sequenceiq.cloudbreak.api.model.filesystem.AdlsFileSystem;
 import com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.api.model.filesystem.GcsFileSystem;
 import com.sequenceiq.cloudbreak.api.model.filesystem.WasbFileSystem;
 import com.sequenceiq.cloudbreak.api.model.v2.CloudStorageRequest;
-import com.sequenceiq.cloudbreak.api.model.v2.filesystem.AbfsCloudStorageParameters;
+import com.sequenceiq.cloudbreak.api.model.v2.filesystem.AdlsGen2CloudStorageParameters;
 import com.sequenceiq.cloudbreak.api.model.v2.filesystem.AdlsCloudStorageParameters;
 import com.sequenceiq.cloudbreak.api.model.v2.filesystem.GcsCloudStorageParameters;
 import com.sequenceiq.cloudbreak.api.model.v2.filesystem.WasbCloudStorageParameters;
@@ -136,22 +136,22 @@ public class CloudStorageRequestToFileSystemConverterTest {
     }
 
     @Test
-    public void testConvertWhenAbfsParametersNotNullThenItsValuesShouldBePlacedIntoTheResultInstance() {
+    public void testConvertWhenAdlsGen2ParametersNotNullThenItsValuesShouldBePlacedIntoTheResultInstance() {
         CloudStorageRequest request = createV2Request();
-        AbfsCloudStorageParameters abfsFileSystemParameters = new AbfsCloudStorageParameters();
-        abfsFileSystemParameters.setAccountKey("123456789");
-        abfsFileSystemParameters.setAccountName("accountNameValue");
-        request.setAbfs(abfsFileSystemParameters);
-        AbfsCloudStorageParameters abfsCloudStorageParameters = new AbfsCloudStorageParameters();
-        when(fileSystemResolver.propagateConfiguration(request)).thenReturn(abfsCloudStorageParameters);
+        AdlsGen2CloudStorageParameters adlsGen2FileSystemParameters = new AdlsGen2CloudStorageParameters();
+        adlsGen2FileSystemParameters.setAccountKey("123456789");
+        adlsGen2FileSystemParameters.setAccountName("accountNameValue");
+        request.setAdlsGen2(adlsGen2FileSystemParameters);
+        AdlsGen2CloudStorageParameters adlsGen2CloudStorageParameters = new AdlsGen2CloudStorageParameters();
+        when(fileSystemResolver.propagateConfiguration(request)).thenReturn(adlsGen2CloudStorageParameters);
         when(underTest.getConversionService()).thenReturn(conversionService);
-        when(conversionService.convert(abfsCloudStorageParameters, AbfsFileSystem.class)).thenReturn(new AbfsFileSystem());
-        when(fileSystemResolver.propagateConfiguration(request)).thenReturn(new AbfsCloudStorageParameters());
+        when(conversionService.convert(adlsGen2CloudStorageParameters, AdlsGen2FileSystem.class)).thenReturn(new AdlsGen2FileSystem());
+        when(fileSystemResolver.propagateConfiguration(request)).thenReturn(new AdlsGen2CloudStorageParameters());
 
         FileSystem result = underTest.convert(request);
 
         checkWhetherTheBasicDataHasPassedOrNot(result);
-        assertEquals(FileSystemType.ABFS, result.getType());
+        assertEquals(FileSystemType.ADLS_GEN_2, result.getType());
         verify(fileSystemResolver, times(1)).propagateConfiguration(request);
     }
 

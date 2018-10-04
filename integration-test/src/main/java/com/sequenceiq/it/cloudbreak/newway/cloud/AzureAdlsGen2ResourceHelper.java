@@ -4,24 +4,24 @@ import static com.sequenceiq.cloudbreak.api.model.rds.RdsType.HIVE;
 import static com.sequenceiq.cloudbreak.api.model.rds.RdsType.RANGER;
 
 import com.sequenceiq.cloudbreak.api.model.v2.CloudStorageRequest;
-import com.sequenceiq.cloudbreak.api.model.v2.filesystem.AbfsCloudStorageParameters;
+import com.sequenceiq.cloudbreak.api.model.v2.filesystem.AdlsGen2CloudStorageParameters;
 import com.sequenceiq.it.cloudbreak.filesystem.CloudStorageTypePathPrefix;
 import com.sequenceiq.it.cloudbreak.newway.RdsConfig;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Azure.Database.Hive;
 import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Azure.Database.Ranger;
 
-public class AzureAbfsResourceHelper extends ResourceHelper<AbfsCloudStorageParameters> {
+public class AzureAdlsGen2ResourceHelper extends ResourceHelper<AdlsGen2CloudStorageParameters> {
 
     private static final String RANGER_RDS_ENTITY_ID = "AZURE_RANGER_DB_CONFIG";
 
     private static final String HIVE_RDS_ENTITY_ID = "AZURE_HIVE_DB_CONFIG";
 
-    AzureAbfsResourceHelper(TestParameter testParameter) {
+    AzureAdlsGen2ResourceHelper(TestParameter testParameter) {
         super(testParameter);
     }
 
-    AzureAbfsResourceHelper(TestParameter testParameter, String postfix) {
+    AzureAdlsGen2ResourceHelper(TestParameter testParameter, String postfix) {
         super(testParameter, postfix);
     }
 
@@ -42,19 +42,19 @@ public class AzureAbfsResourceHelper extends ResourceHelper<AbfsCloudStoragePara
     @Override
     public CloudStorageRequest getCloudStorageRequestForDatalake() {
         var request = new CloudStorageRequest();
-        request.setAbfs(getCloudStorage());
-        request.setLocations(defaultDatalakeStorageLocations(CloudStorageTypePathPrefix.ABFS, getTestParameter().get("cloudStorageName")));
+        request.setAdlsGen2(getCloudStorage());
+        request.setLocations(defaultDatalakeStorageLocations(CloudStorageTypePathPrefix.ADLS_GEN_2, getTestParameter().get("cloudStorageName")));
         return request;
     }
 
     @Override
     public CloudStorageRequest getCloudStorageRequestForAttachedCluster() {
-        return getCloudStorageForAttachedCluster(CloudStorageTypePathPrefix.ABFS, getTestParameter().get("cloudStorageName"), getCloudStorage());
+        return getCloudStorageForAttachedCluster(CloudStorageTypePathPrefix.ADLS_GEN_2, getTestParameter().get("cloudStorageName"), getCloudStorage());
     }
 
     @Override
-    public AbfsCloudStorageParameters getCloudStorage() {
-        var parameters = new AbfsCloudStorageParameters();
+    public AdlsGen2CloudStorageParameters getCloudStorage() {
+        var parameters = new AdlsGen2CloudStorageParameters();
         parameters.setAccountKey(getTestParameter().get("integrationtest.filesystemconfig.accountKeyAbfs"));
         parameters.setAccountName(getTestParameter().get("integrationtest.filesystemconfig.accountNameAbfs"));
         return parameters;

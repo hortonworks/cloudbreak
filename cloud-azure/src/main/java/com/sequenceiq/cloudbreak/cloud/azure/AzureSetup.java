@@ -40,7 +40,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
-import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAbfsView;
+import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsGen2View;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudWasbView;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
@@ -151,8 +151,8 @@ public class AzureSetup implements Setup {
         FileSystemType fileSystemType = spiFileSystem.getType();
         if (FileSystemType.ADLS.equals(fileSystemType)) {
             validateAdlsFileSystem(credential, spiFileSystem);
-        } else if (FileSystemType.ABFS.equals(fileSystemType)) {
-            validateAbfsFileSystem(spiFileSystem);
+        } else if (FileSystemType.ADLS_GEN_2.equals(fileSystemType)) {
+            validateAdlsGen2FileSystem(spiFileSystem);
         } else {
             validateWasbFileSystem(spiFileSystem);
         }
@@ -163,8 +163,8 @@ public class AzureSetup implements Setup {
 
     }
 
-    private void validateAbfsFileSystem(SpiFileSystem fileSystem) throws URISyntaxException, InvalidKeyException, StorageException {
-        CloudAbfsView cloudFileSystem = (CloudAbfsView) fileSystem.getCloudFileSystem();
+    private void validateAdlsGen2FileSystem(SpiFileSystem fileSystem) throws URISyntaxException, InvalidKeyException, StorageException {
+        CloudAdlsGen2View cloudFileSystem = (CloudAdlsGen2View) fileSystem.getCloudFileSystem();
         String accountName = cloudFileSystem.getAccountName();
         String accountKey = cloudFileSystem.getAccountKey();
         String connectionString = "DefaultEndpointsProtocol=https;AccountName=" + accountName + ";AccountKey=" + accountKey + ";EndpointSuffix=core.windows.net";

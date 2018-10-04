@@ -15,9 +15,11 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.api.model.filesystem.AbfsFileSystem;
 import com.sequenceiq.cloudbreak.api.model.filesystem.AdlsFileSystem;
+import com.sequenceiq.cloudbreak.api.model.filesystem.AdlsGen2FileSystem;
 import com.sequenceiq.cloudbreak.api.model.filesystem.GcsFileSystem;
 import com.sequenceiq.cloudbreak.api.model.filesystem.S3FileSystem;
 import com.sequenceiq.cloudbreak.api.model.filesystem.WasbFileSystem;
@@ -29,14 +31,13 @@ import com.sequenceiq.cloudbreak.recipe.testrepeater.TestFile;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
 import com.sequenceiq.cloudbreak.template.filesystem.StorageLocationView;
-import com.sequenceiq.cloudbreak.template.filesystem.abfs.AbfsFileSystemConfigurationsView;
+import com.sequenceiq.cloudbreak.template.filesystem.adlsgen2.AdlsGen2FileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.adls.AdlsFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.gcs.GcsFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.s3.S3FileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.wasb.WasbFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
-import org.apache.commons.lang3.StringUtils;
 
 class RecipeModulTestModelProvider {
 
@@ -103,17 +104,17 @@ class RecipeModulTestModelProvider {
                 .build();
     }
 
-    static TemplatePreparationObject testTemplateWithSingleAbfsStorage() {
+    static TemplatePreparationObject testTemplateWithSingleAdlsGen2Storage() {
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
-                .withFileSystemConfigurationView(getAbfsConfigView(getStorageLocationViews(1)))
+                .withFileSystemConfigurationView(getAdlsGen2ConfigView(getStorageLocationViews(1)))
                 .build();
     }
 
-    static TemplatePreparationObject testTemplateWithTwoAbfsStorage() {
+    static TemplatePreparationObject testTemplateWithTwoAdlsGen2Storage() {
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
-                .withFileSystemConfigurationView(getAbfsConfigView(getStorageLocationViews(2)))
+                .withFileSystemConfigurationView(getAdlsGen2ConfigView(getStorageLocationViews(2)))
                 .build();
     }
 
@@ -218,13 +219,13 @@ class RecipeModulTestModelProvider {
         return new GcsFileSystemConfigurationsView(fs, locationViews, false);
     }
 
-    private static AbfsFileSystemConfigurationsView getAbfsConfigView(Collection<StorageLocationView> locationViews) {
-        var fs = new AbfsFileSystem();
+    private static AdlsGen2FileSystemConfigurationsView getAdlsGen2ConfigView(Collection<StorageLocationView> locationViews) {
+        var fs = new AdlsGen2FileSystem();
         fs.setAccountKey("someKeyValue");
         fs.setAccountName("nameOfAccount");
         fs.setStorageContainerName("ContainerName");
         fs.setStorageContainer("StorageContainer");
-        return new AbfsFileSystemConfigurationsView(fs, locationViews, false);
+        return new AdlsGen2FileSystemConfigurationsView(fs, locationViews, false);
     }
 
     private static AdlsFileSystemConfigurationsView getAdlsConfigView(Collection<StorageLocationView> locationViews) {

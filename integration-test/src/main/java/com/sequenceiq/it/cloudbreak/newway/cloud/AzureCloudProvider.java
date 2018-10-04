@@ -77,8 +77,8 @@ public class AzureCloudProvider extends CloudProviderHelper {
                 case "WASB":
                     resourceHelper = new AzureWasbResourceHelper(testParameter, "-azure-wasb");
                     break;
-                case "ABFS":
-                    resourceHelper = new AzureAbfsResourceHelper(testParameter, "-azure-abfs");
+                case "ADLS_GEN_2":
+                    resourceHelper = new AzureAdlsGen2ResourceHelper(testParameter, "-azure-adls-gen2");
                     break;
                 default:
                     resourceHelper = new AzureAdlsResourceHelper(testParameter, "-azure-adls");

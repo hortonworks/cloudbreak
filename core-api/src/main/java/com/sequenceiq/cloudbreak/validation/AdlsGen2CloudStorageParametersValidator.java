@@ -7,9 +7,9 @@ import javax.validation.ConstraintValidatorContext;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.sequenceiq.cloudbreak.api.model.v2.filesystem.AbfsCloudStorageParameters;
+import com.sequenceiq.cloudbreak.api.model.v2.filesystem.AdlsGen2CloudStorageParameters;
 
-public class AbfsCloudStorageParametersValidator implements ConstraintValidator<ValidAbfsCloudStorageParameters, AbfsCloudStorageParameters> {
+public class AdlsGen2CloudStorageParametersValidator implements ConstraintValidator<ValidAdlsGen2CloudStorageParameters, AdlsGen2CloudStorageParameters> {
 
     private static final int MIN_ACCOUNT_NAME_LENGTH = 3;
 
@@ -18,11 +18,11 @@ public class AbfsCloudStorageParametersValidator implements ConstraintValidator<
     private String failMessage = "";
 
     @Override
-    public void initialize(ValidAbfsCloudStorageParameters constraintAnnotation) {
+    public void initialize(ValidAdlsGen2CloudStorageParameters constraintAnnotation) {
     }
 
     @Override
-    public boolean isValid(AbfsCloudStorageParameters value, ConstraintValidatorContext context) {
+    public boolean isValid(AdlsGen2CloudStorageParameters value, ConstraintValidatorContext context) {
         boolean result;
         if (!isAccountNameValid(value.getAccountName())
                 || !isAccountKeyValid(value.getAccountKey())) {

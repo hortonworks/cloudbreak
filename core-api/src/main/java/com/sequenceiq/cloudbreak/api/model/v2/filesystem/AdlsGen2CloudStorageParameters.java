@@ -5,14 +5,14 @@ import java.util.Objects;
 import javax.validation.constraints.NotNull;
 
 import com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType;
-import com.sequenceiq.cloudbreak.validation.ValidAbfsCloudStorageParameters;
+import com.sequenceiq.cloudbreak.validation.ValidAdlsGen2CloudStorageParameters;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
-@ValidAbfsCloudStorageParameters
-public class AbfsCloudStorageParameters implements CloudStorageParameters {
+@ValidAdlsGen2CloudStorageParameters
+public class AdlsGen2CloudStorageParameters implements CloudStorageParameters {
 
     @ApiModelProperty
     @NotNull
@@ -41,7 +41,7 @@ public class AbfsCloudStorageParameters implements CloudStorageParameters {
     @ApiModelProperty(hidden = true)
     @Override
     public FileSystemType getType() {
-        return FileSystemType.ABFS;
+        return FileSystemType.ADLS_GEN_2;
     }
 
     @Override
@@ -49,10 +49,10 @@ public class AbfsCloudStorageParameters implements CloudStorageParameters {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof AbfsCloudStorageParameters)) {
+        if (!(o instanceof AdlsGen2CloudStorageParameters)) {
             return false;
         }
-        AbfsCloudStorageParameters that = (AbfsCloudStorageParameters) o;
+        AdlsGen2CloudStorageParameters that = (AdlsGen2CloudStorageParameters) o;
         return Objects.equals(getAccountKey(), that.getAccountKey())
                 && Objects.equals(getAccountName(), that.getAccountName());
     }

@@ -23,12 +23,12 @@ function printLogic() {
 		printIfValid "Attached cloud storage location parameters: " "1_file: [1_property: 1_test/test/end], 2_file: [2_property: 2_test/test/end], "
 		printIfValid "default file system?                        " "false"
 	elif false; then
-		printIfValid "account key:                                " "{{{fileSystemConfigs.abfs.accountKey}}}"
-		printIfValid "account name:                               " "{{{fileSystemConfigs.abfs.accountName}}}"
-		printIfValid "storage container name:                     " "{{{fileSystemConfigs.abfs.storageContainerName}}}"
-		printIfValid "storage container:                          " "{{{fileSystemConfigs.abfs.storageContainer}}}"
+		printIfValid "account key:                                " "{{{fileSystemConfigs.adls_gen_2.accountKey}}}"
+		printIfValid "account name:                               " "{{{fileSystemConfigs.adls_gen_2.accountName}}}"
+		printIfValid "storage container name:                     " "{{{fileSystemConfigs.adls_gen_2.storageContainerName}}}"
+		printIfValid "storage container:                          " "{{{fileSystemConfigs.adls_gen_2.storageContainer}}}"
 		printIfValid "Attached cloud storage location parameters: " ""
-		printIfValid "default file system?                        " "{{{fileSystemConfigs.abfs.defaultFs}}}"
+		printIfValid "default file system?                        " "{{{fileSystemConfigs.adls_gen_2.defaultFs}}}"
 	elif false; then
 		printIfValid "account name:                               " "{{{fileSystemConfigs.adls.accountName}}}"
 		printIfValid "client ID:                                  " "{{{fileSystemConfigs.adls.clientId}}}"

@@ -28,6 +28,10 @@
         {
           "supportedFileSytem" : "ADLS",
           "minVersion" : "2.6.0"
+        },
+        {
+          "supportedFileSytem" : "ADLS_GEN_2",
+          "minVersion" : "3.0.0"
         }
       ]
     }

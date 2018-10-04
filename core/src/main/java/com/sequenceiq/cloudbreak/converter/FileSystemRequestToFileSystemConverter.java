@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
-import com.sequenceiq.cloudbreak.api.model.filesystem.AbfsFileSystem;
+import com.sequenceiq.cloudbreak.api.model.filesystem.AdlsGen2FileSystem;
 import com.sequenceiq.cloudbreak.api.model.filesystem.AdlsFileSystem;
 import com.sequenceiq.cloudbreak.api.model.filesystem.BaseFileSystem;
 import com.sequenceiq.cloudbreak.api.model.filesystem.GcsFileSystem;
@@ -66,9 +66,9 @@ public class FileSystemRequestToFileSystemConverter extends AbstractConversionSe
         } else if (source.getWasb() != null) {
             baseFileSystem = getConversionService().convert(source.getWasb(), WasbFileSystem.class);
             fs.setType(source.getWasb().getType());
-        } else if (source.getAbfs() != null) {
-            baseFileSystem = getConversionService().convert(source.getAbfs(), AbfsFileSystem.class);
-            fs.setType(source.getAbfs().getType());
+        } else if (source.getAdlsGen2() != null) {
+            baseFileSystem = getConversionService().convert(source.getAdlsGen2(), AdlsGen2FileSystem.class);
+            fs.setType(source.getAdlsGen2().getType());
         }
         return baseFileSystem;
     }

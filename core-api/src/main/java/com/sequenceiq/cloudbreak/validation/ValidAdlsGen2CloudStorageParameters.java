@@ -12,10 +12,10 @@ import javax.validation.Payload;
 @Documented
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = AbfsCloudStorageParametersValidator.class)
-public @interface ValidAbfsCloudStorageParameters {
+@Constraint(validatedBy = AdlsGen2CloudStorageParametersValidator.class)
+public @interface ValidAdlsGen2CloudStorageParameters {
 
-    String message() default "WASB Cloud Storage Parameters contains one or more invalid data.";
+    String message() default "ADLS Gen2 Cloud Storage Parameters contains one or more invalid data.";
 
     Class<?>[] groups() default {};
 

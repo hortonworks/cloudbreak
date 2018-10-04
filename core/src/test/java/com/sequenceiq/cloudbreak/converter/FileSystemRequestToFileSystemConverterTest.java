@@ -20,13 +20,13 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
-import com.sequenceiq.cloudbreak.api.model.filesystem.AbfsFileSystem;
+import com.sequenceiq.cloudbreak.api.model.filesystem.AdlsGen2FileSystem;
 import com.sequenceiq.cloudbreak.api.model.filesystem.AdlsFileSystem;
 import com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.api.model.filesystem.GcsFileSystem;
 import com.sequenceiq.cloudbreak.api.model.filesystem.S3FileSystem;
 import com.sequenceiq.cloudbreak.api.model.filesystem.WasbFileSystem;
-import com.sequenceiq.cloudbreak.api.model.v2.filesystem.AbfsCloudStorageParameters;
+import com.sequenceiq.cloudbreak.api.model.v2.filesystem.AdlsGen2CloudStorageParameters;
 import com.sequenceiq.cloudbreak.api.model.v2.filesystem.AdlsCloudStorageParameters;
 import com.sequenceiq.cloudbreak.api.model.v2.filesystem.GcsCloudStorageParameters;
 import com.sequenceiq.cloudbreak.api.model.v2.filesystem.S3CloudStorageParameters;
@@ -78,7 +78,7 @@ public class FileSystemRequestToFileSystemConverterTest {
         verify(conversionService, times(0)).convert(any(GcsCloudStorageParameters.class), eq(GcsFileSystem.class));
         verify(conversionService, times(0)).convert(any(S3CloudStorageParameters.class), eq(S3FileSystem.class));
         verify(conversionService, times(0)).convert(any(WasbCloudStorageParameters.class), eq(WasbFileSystem.class));
-        verify(conversionService, times(0)).convert(any(AbfsCloudStorageParameters.class), eq(AbfsFileSystem.class));
+        verify(conversionService, times(0)).convert(any(AdlsGen2CloudStorageParameters.class), eq(AdlsGen2FileSystem.class));
     }
 
     @Test
@@ -95,7 +95,7 @@ public class FileSystemRequestToFileSystemConverterTest {
         verify(conversionService, times(0)).convert(any(AdlsCloudStorageParameters.class), eq(AdlsFileSystem.class));
         verify(conversionService, times(0)).convert(any(S3CloudStorageParameters.class), eq(S3FileSystem.class));
         verify(conversionService, times(0)).convert(any(WasbCloudStorageParameters.class), eq(WasbFileSystem.class));
-        verify(conversionService, times(0)).convert(any(AbfsCloudStorageParameters.class), eq(AbfsFileSystem.class));
+        verify(conversionService, times(0)).convert(any(AdlsGen2CloudStorageParameters.class), eq(AdlsGen2FileSystem.class));
     }
 
     @Test
@@ -112,7 +112,7 @@ public class FileSystemRequestToFileSystemConverterTest {
         verify(conversionService, times(0)).convert(any(GcsCloudStorageParameters.class), eq(GcsFileSystem.class));
         verify(conversionService, times(0)).convert(any(AdlsCloudStorageParameters.class), eq(AdlsFileSystem.class));
         verify(conversionService, times(0)).convert(any(WasbCloudStorageParameters.class), eq(WasbFileSystem.class));
-        verify(conversionService, times(0)).convert(any(AbfsCloudStorageParameters.class), eq(AbfsFileSystem.class));
+        verify(conversionService, times(0)).convert(any(AdlsGen2CloudStorageParameters.class), eq(AdlsGen2FileSystem.class));
     }
 
     @Test
@@ -129,20 +129,20 @@ public class FileSystemRequestToFileSystemConverterTest {
         verify(conversionService, times(0)).convert(any(GcsCloudStorageParameters.class), eq(GcsFileSystem.class));
         verify(conversionService, times(0)).convert(any(AdlsCloudStorageParameters.class), eq(AdlsFileSystem.class));
         verify(conversionService, times(0)).convert(any(S3CloudStorageParameters.class), eq(S3FileSystem.class));
-        verify(conversionService, times(0)).convert(any(AbfsCloudStorageParameters.class), eq(AbfsFileSystem.class));
+        verify(conversionService, times(0)).convert(any(AdlsGen2CloudStorageParameters.class), eq(AdlsGen2FileSystem.class));
     }
 
     @Test
     public void testConvertWhenAsbfNotNullThenItWillBeSetAsBaseFileSystem() {
-        AbfsCloudStorageParameters abfs = new AbfsCloudStorageParameters();
-        when(request.getAbfs()).thenReturn(abfs);
-        when(conversionService.convert(abfs, AbfsFileSystem.class)).thenReturn(new AbfsFileSystem());
+        AdlsGen2CloudStorageParameters adlsGen2 = new AdlsGen2CloudStorageParameters();
+        when(request.getAdlsGen2()).thenReturn(adlsGen2);
+        when(conversionService.convert(adlsGen2, AdlsGen2FileSystem.class)).thenReturn(new AdlsGen2FileSystem());
 
         FileSystem result = underTest.convert(request);
 
         assertNotNull(result.getConfigurations());
-        assertEquals(FileSystemType.ABFS, result.getType());
-        verify(conversionService, times(1)).convert(abfs, AbfsFileSystem.class);
+        assertEquals(FileSystemType.ADLS_GEN_2, result.getType());
+        verify(conversionService, times(1)).convert(adlsGen2, AdlsGen2FileSystem.class);
         verify(conversionService, times(0)).convert(any(GcsCloudStorageParameters.class), eq(GcsFileSystem.class));
         verify(conversionService, times(0)).convert(any(AdlsCloudStorageParameters.class), eq(AdlsFileSystem.class));
         verify(conversionService, times(0)).convert(any(S3CloudStorageParameters.class), eq(S3FileSystem.class));

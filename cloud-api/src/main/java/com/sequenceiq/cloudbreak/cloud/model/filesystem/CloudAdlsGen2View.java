@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.model.filesystem;
 
 import java.util.Objects;
 
-public class CloudAbfsView extends CloudFileSystemView {
+public class CloudAdlsGen2View extends CloudFileSystemView {
 
     private String accountKey;
 
@@ -10,7 +10,7 @@ public class CloudAbfsView extends CloudFileSystemView {
 
     private String resourceGroupName;
 
-    public CloudAbfsView() {
+    public CloudAdlsGen2View() {
     }
 
     public String getAccountKey() {
@@ -42,10 +42,10 @@ public class CloudAbfsView extends CloudFileSystemView {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof CloudAbfsView)) {
+        if (!(o instanceof CloudAdlsGen2View)) {
             return false;
         }
-        CloudAbfsView that = (CloudAbfsView) o;
+        CloudAdlsGen2View that = (CloudAdlsGen2View) o;
         return Objects.equals(getAccountKey(), that.getAccountKey())
                 && Objects.equals(getAccountName(), that.getAccountName())
                 && Objects.equals(getResourceGroupName(), that.getResourceGroupName());

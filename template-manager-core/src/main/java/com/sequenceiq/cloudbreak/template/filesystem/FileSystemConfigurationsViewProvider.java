@@ -6,7 +6,7 @@ import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.model.filesystem.AbfsFileSystem;
+import com.sequenceiq.cloudbreak.api.model.filesystem.AdlsGen2FileSystem;
 import com.sequenceiq.cloudbreak.api.model.filesystem.AdlsFileSystem;
 import com.sequenceiq.cloudbreak.api.model.filesystem.GcsFileSystem;
 import com.sequenceiq.cloudbreak.api.model.filesystem.S3FileSystem;
@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.api.model.filesystem.WasbFileSystem;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.StorageLocation;
 import com.sequenceiq.cloudbreak.domain.StorageLocations;
-import com.sequenceiq.cloudbreak.template.filesystem.abfs.AbfsFileSystemConfigurationsView;
+import com.sequenceiq.cloudbreak.template.filesystem.adlsgen2.AdlsGen2FileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.adls.AdlsFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.gcs.GcsFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.s3.S3FileSystemConfigurationsView;
@@ -56,9 +56,9 @@ public class FileSystemConfigurationsViewProvider {
         } else if (source.getType().isWasb()) {
             fileSystemConfigurationsView =
                     new WasbFileSystemConfigurationsView(source.getConfigurations().get(WasbFileSystem.class), locations, source.isDefaultFs());
-        } else if (source.getType().isAbfs()) {
+        } else if (source.getType().isAdlsGen2()) {
             fileSystemConfigurationsView =
-                    new AbfsFileSystemConfigurationsView(source.getConfigurations().get(AbfsFileSystem.class), locations, source.isDefaultFs());
+                    new AdlsGen2FileSystemConfigurationsView(source.getConfigurations().get(AdlsGen2FileSystem.class), locations, source.isDefaultFs());
         }
         return fileSystemConfigurationsView;
     }
