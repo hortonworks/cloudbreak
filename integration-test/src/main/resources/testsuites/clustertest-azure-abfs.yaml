@@ -2,17 +2,17 @@ name: Cluster_tests_azure
 parallel: tests
 threadCount: 1
 parameters:
-  azureCredentialName: autotesting-azure-abfs
+  azureCredentialName: autotesting-azure-adlsgen2
 tests:
-- name: "azure cluster test with abfs"
+- name: "azure cluster test with adlsgen2"
   preserveOrder: true
   parameters:
-    clusterName: e2e-azure-abfs
+    clusterName: e2e-azure-adlsgen2
     provider: azure
     datalakeBlueprintName: "HDP 3.0 - Data Science: Apache Spark 2, Apache Zeppelin"
     image: hdp
     instancegroupName: worker
-    cloudStorageType: abfs
+    cloudStorageType: ADLS_GEN_2
     cloudStorageName: e2etest@cloudbreakabfs.dfs.core.windows.net
     versionDefinitionFile: "http://s3.amazonaws.com/dev.hortonworks.com/HDP/centos7/3.x/BUILDS/3.0.2.0-1/HDP-3.0.2.0-1.xml"
     sshCommand: sudo -S su - hdfs -c 'hadoop jar /usr/hdp/current/hadoop-mapreduce-client/hadoop-mapreduce-examples.jar teragen 1000000 abfs://e2econtainer@cloudbreakabfs.dfs.core.windows.net/tera/input;
@@ -20,7 +20,7 @@ tests:
                 hadoop jar /usr/hdp/current/hadoop-mapreduce-client/hadoop-mapreduce-examples.jar teravalidate abfs://e2econtainer@cloudbreakabfs.dfs.core.windows.net/tera/output abfs://e2econtainer@cloudbreakabfs.dfs.core.windows.net/tera/validate'
     sshChecker: notContains:Container killed on request
   classes:
-  - name: com.sequenceiq.it.cloudbreak.AzureAbfsClusterTest
+  - name: com.sequenceiq.it.cloudbreak.AzureAdlsGen2ClusterTest
     includedMethods:
     - testCreateClusterWithAbfs
     - testTerasort

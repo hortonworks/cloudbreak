@@ -1,6 +1,6 @@
-package com.sequenceiq.cloudbreak.template.filesystem.abfs;
+package com.sequenceiq.cloudbreak.template.filesystem.adlsgen2;
 
-import static com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType.ABFS;
+import static com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType.ADLS_GEN_2;
 
 import org.springframework.stereotype.Component;
 
@@ -8,16 +8,16 @@ import com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.template.filesystem.AbstractFileSystemConfigurator;
 
 @Component
-public class AbfsFileSystemConfigurator extends AbstractFileSystemConfigurator<AbfsFileSystemConfigurationsView> {
+public class AdlsGen2FileSystemConfigurator extends AbstractFileSystemConfigurator<AdlsGen2FileSystemConfigurationsView> {
 
     @Override
     public FileSystemType getFileSystemType() {
-        return ABFS;
+        return ADLS_GEN_2;
     }
 
     @Override
     public String getProtocol() {
-        return ABFS.getProtocol();
+        return ADLS_GEN_2.getProtocol();
     }
 
 }

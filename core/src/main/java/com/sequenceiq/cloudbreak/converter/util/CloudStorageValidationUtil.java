@@ -13,6 +13,6 @@ public class CloudStorageValidationUtil {
                 || cloudStorageRequest.getGcs() != null
                 || cloudStorageRequest.getS3() != null
                 || cloudStorageRequest.getWasb() != null
-                || cloudStorageRequest.getAbfs() != null);
+                || cloudStorageRequest.getAdlsGen2() != null);
     }
 }

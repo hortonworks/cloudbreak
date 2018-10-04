@@ -10,7 +10,7 @@ import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.cloud.AzureCloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
 
-public class AzureAbfsClusterTest extends CloudbreakTest {
+public class AzureAdlsGen2ClusterTest extends CloudbreakTest {
 
     private static final String[] HOSTGROUPS = {"master"};
 
@@ -19,7 +19,7 @@ public class AzureAbfsClusterTest extends CloudbreakTest {
 
     @Test(priority = 10)
     @Parameters({"clusterName", "versionDefinitionFile"})
-    public void testCreateClusterWithAbfs(String clusterName, String versionDefinitionFile) throws Exception {
+    public void testCreateClusterWithAdlsGen2(String clusterName, String versionDefinitionFile) throws Exception {
         AzureCloudProvider azureCloudProvider = new AzureCloudProvider(getTestParameter());
         given(CloudbreakClient.created());
         given(azureCloudProvider.aValidCredential());

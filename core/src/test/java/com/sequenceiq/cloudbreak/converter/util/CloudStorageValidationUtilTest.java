@@ -7,7 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.model.v2.CloudStorageRequest;
-import com.sequenceiq.cloudbreak.api.model.v2.filesystem.AbfsCloudStorageParameters;
+import com.sequenceiq.cloudbreak.api.model.v2.filesystem.AdlsGen2CloudStorageParameters;
 import com.sequenceiq.cloudbreak.api.model.v2.filesystem.AdlsCloudStorageParameters;
 import com.sequenceiq.cloudbreak.api.model.v2.filesystem.GcsCloudStorageParameters;
 import com.sequenceiq.cloudbreak.api.model.v2.filesystem.S3CloudStorageParameters;
@@ -52,9 +52,9 @@ public class CloudStorageValidationUtilTest {
     }
 
     @Test
-    public void testIsCloudStorageConfiguredWhenAbfsNotNull() {
+    public void testIsCloudStorageConfiguredWhenAdlsGen2NotNull() {
         CloudStorageRequest cloudStorageRequest = new CloudStorageRequest();
-        cloudStorageRequest.setAbfs(new AbfsCloudStorageParameters());
+        cloudStorageRequest.setAdlsGen2(new AdlsGen2CloudStorageParameters());
         boolean actual = underTest.isCloudStorageConfigured(cloudStorageRequest);
 
         Assert.assertTrue(actual);

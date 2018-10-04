@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
 import com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.api.model.v2.CloudStorageRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.StorageLocationRequest;
-import com.sequenceiq.cloudbreak.api.model.v2.filesystem.AbfsCloudStorageParameters;
+import com.sequenceiq.cloudbreak.api.model.v2.filesystem.AdlsGen2CloudStorageParameters;
 import com.sequenceiq.cloudbreak.api.model.v2.filesystem.AdlsCloudStorageParameters;
 import com.sequenceiq.cloudbreak.api.model.v2.filesystem.CloudStorageParameters;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
@@ -63,7 +63,7 @@ public class CloudStorageRequestToFileSystemRequestConverterTest {
         when(request.getWasb()).thenReturn(null);
         when(request.getGcs()).thenReturn(null);
         when(request.getS3()).thenReturn(null);
-        when(request.getAbfs()).thenReturn(null);
+        when(request.getAdlsGen2()).thenReturn(null);
         when(fileSystemResolver.propagateConfiguration(request)).thenReturn(cloudStorageParameters);
         when(cloudStorageParameters.getType()).thenReturn(TEST_FILE_SYSTEM);
 
@@ -75,7 +75,7 @@ public class CloudStorageRequestToFileSystemRequestConverterTest {
         assertNull(result.getGcs());
         assertNull(result.getS3());
         assertNull(result.getWasb());
-        assertNull(result.getAbfs());
+        assertNull(result.getAdlsGen2());
         assertEquals(storageLocations, result.getLocations());
         assertEquals(TEST_FILE_SYSTEM.name(), result.getType());
         verify(nameGenerator, times(1)).generateName(APIResourceType.FILESYSTEM);
@@ -83,10 +83,10 @@ public class CloudStorageRequestToFileSystemRequestConverterTest {
     }
 
     @Test
-    public void testConvertCheckAllParamsHasPassedProperlyWhenAbfsIsNotNull() {
-        AbfsCloudStorageParameters abfs = new AbfsCloudStorageParameters();
+    public void testConvertCheckAllParamsHasPassedProperlyWhenAdlsGen2IsNotNull() {
+        AdlsGen2CloudStorageParameters adlsGen2 = new AdlsGen2CloudStorageParameters();
         Set<StorageLocationRequest> storageLocations = new LinkedHashSet<>();
-        when(request.getAbfs()).thenReturn(abfs);
+        when(request.getAdlsGen2()).thenReturn(adlsGen2);
         when(request.getAdls()).thenReturn(null);
         when(request.getWasb()).thenReturn(null);
         when(request.getGcs()).thenReturn(null);
@@ -98,7 +98,7 @@ public class CloudStorageRequestToFileSystemRequestConverterTest {
 
         assertEquals(TEST_FILE_SYSTEM_NAME, result.getName());
         assertFalse(result.isDefaultFs());
-        assertEquals(abfs, result.getAbfs());
+        assertEquals(adlsGen2, result.getAdlsGen2());
         assertNull(result.getGcs());
         assertNull(result.getS3());
         assertNull(result.getWasb());

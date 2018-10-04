@@ -31,7 +31,7 @@ public class CloudStorageRequestToFileSystemRequestConverter extends AbstractCon
         request.setGcs(source.getGcs());
         request.setWasb(source.getWasb());
         request.setS3(source.getS3());
-        request.setAbfs(source.getAbfs());
+        request.setAdlsGen2(source.getAdlsGen2());
         CloudStorageParameters fileSystem = fileSystemResolver.propagateConfiguration(source);
         request.setLocations(source.getLocations());
         request.setType(fileSystem.getType().name());

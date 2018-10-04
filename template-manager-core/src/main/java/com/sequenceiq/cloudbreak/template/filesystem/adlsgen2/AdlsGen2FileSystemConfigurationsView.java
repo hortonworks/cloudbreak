@@ -1,13 +1,13 @@
-package com.sequenceiq.cloudbreak.template.filesystem.abfs;
+package com.sequenceiq.cloudbreak.template.filesystem.adlsgen2;
 
 import java.util.Collection;
 
-import com.sequenceiq.cloudbreak.api.model.filesystem.AbfsFileSystem;
+import com.sequenceiq.cloudbreak.api.model.filesystem.AdlsGen2FileSystem;
 import com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.StorageLocationView;
 
-public class AbfsFileSystemConfigurationsView extends BaseFileSystemConfigurationsView {
+public class AdlsGen2FileSystemConfigurationsView extends BaseFileSystemConfigurationsView {
 
     private String accountName;
 
@@ -17,12 +17,12 @@ public class AbfsFileSystemConfigurationsView extends BaseFileSystemConfiguratio
 
     private String storageContainer;
 
-    public AbfsFileSystemConfigurationsView(AbfsFileSystem abfsFileSystem, Collection<StorageLocationView> locations, boolean deafultFs) {
-        super(abfsFileSystem.getStorageContainer(), deafultFs, locations);
-        this.accountName = abfsFileSystem.getAccountName();
-        this.accountKey = abfsFileSystem.getAccountKey();
-        this.storageContainerName = abfsFileSystem.getStorageContainerName();
-        this.storageContainer = abfsFileSystem.getStorageContainer();
+    public AdlsGen2FileSystemConfigurationsView(AdlsGen2FileSystem adlsGen2FileSystem, Collection<StorageLocationView> locations, boolean deafultFs) {
+        super(adlsGen2FileSystem.getStorageContainer(), deafultFs, locations);
+        this.accountName = adlsGen2FileSystem.getAccountName();
+        this.accountKey = adlsGen2FileSystem.getAccountKey();
+        this.storageContainerName = adlsGen2FileSystem.getStorageContainerName();
+        this.storageContainer = adlsGen2FileSystem.getStorageContainer();
     }
 
     public String getAccountName() {
@@ -61,6 +61,6 @@ public class AbfsFileSystemConfigurationsView extends BaseFileSystemConfiguratio
 
     @Override
     public String getType() {
-        return FileSystemType.ABFS.name();
+        return FileSystemType.ADLS_GEN_2.name();
     }
 }

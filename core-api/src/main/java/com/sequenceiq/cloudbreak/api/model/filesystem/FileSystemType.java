@@ -14,7 +14,7 @@ public enum FileSystemType {
 
     ADLS(AdlsFileSystem.class, "adl", "{{{ accountName }}}.azuredatalakestore.net/{{{ storageName }}}"),
 
-    ABFS(AbfsFileSystem.class, "abfs", "{{{ storageName }}}@{{{ accountName }}}.blob.core.windows.net"),
+    ADLS_GEN_2(AdlsGen2FileSystem.class, "abfs", "{{{ storageName }}}@{{{ accountName }}}.blob.core.windows.net"),
 
     S3(S3FileSystem.class, "s3a", "{{{ storageName }}}/{{{ clusterName }}}");
 
@@ -55,8 +55,8 @@ public enum FileSystemType {
         return WASB.equals(this);
     }
 
-    public boolean isAbfs() {
-        return ABFS.equals(this);
+    public boolean isAdlsGen2() {
+        return ADLS_GEN_2.equals(this);
     }
 
     public boolean isS3() {

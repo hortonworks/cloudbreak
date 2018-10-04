@@ -63,7 +63,7 @@ public class FileSystemSupportMatrixServiceTest {
         Set<CloudStorageSupportedResponse> matrix = underTest.getCloudStorageMatrix("3.0.0");
         assertEquals(3L, matrix.size());
         matrix.forEach(response -> assertTrue(!response.getFileSystemType().isEmpty()));
-        assertEquals(2L,
+        assertEquals(3L,
                 matrix.stream().filter(response -> "AZURE".equalsIgnoreCase(response.getProvider())).findFirst().get().getFileSystemType().size());
     }
 }

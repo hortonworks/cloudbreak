@@ -4,7 +4,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.cloudbreak.api.model.v2.filesystem.AbfsCloudStorageParameters;
+import com.sequenceiq.cloudbreak.api.model.v2.filesystem.AdlsGen2CloudStorageParameters;
 import com.sequenceiq.cloudbreak.api.model.v2.filesystem.AdlsCloudStorageParameters;
 import com.sequenceiq.cloudbreak.api.model.v2.filesystem.GcsCloudStorageParameters;
 import com.sequenceiq.cloudbreak.api.model.v2.filesystem.S3CloudStorageParameters;
@@ -45,7 +45,7 @@ public abstract class FileSystemBase implements JsonEntity {
 
     @Valid
     @ApiModelProperty
-    private AbfsCloudStorageParameters abfs;
+    private AdlsGen2CloudStorageParameters adlsGen2;
 
     public String getName() {
         return name;
@@ -103,11 +103,11 @@ public abstract class FileSystemBase implements JsonEntity {
         this.s3 = s3;
     }
 
-    public AbfsCloudStorageParameters getAbfs() {
-        return abfs;
+    public AdlsGen2CloudStorageParameters getAdlsGen2() {
+        return adlsGen2;
     }
 
-    public void setAbfs(AbfsCloudStorageParameters abfs) {
-        this.abfs = abfs;
+    public void setAdlsGen2(AdlsGen2CloudStorageParameters adlsGen2) {
+        this.adlsGen2 = adlsGen2;
     }
 }
