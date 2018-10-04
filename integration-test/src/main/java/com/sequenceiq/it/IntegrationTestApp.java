@@ -30,11 +30,11 @@ import org.testng.internal.YamlParser;
 import org.testng.xml.IFileParser;
 import org.testng.xml.SuiteXmlParser;
 import org.testng.xml.XmlSuite;
-import org.uncommons.reportng.HTMLReporter;
 import org.uncommons.reportng.JUnitXMLReporter;
 
 import com.sequenceiq.it.cloudbreak.config.ITProps;
 import com.sequenceiq.it.cloudbreak.newway.listener.ReportListener;
+import com.sequenceiq.it.cloudbreak.newway.logsearch.CustomHTMLReporter;
 
 @EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class, DataSourceTransactionManagerAutoConfiguration.class,
         HibernateJpaAutoConfiguration.class})
@@ -79,7 +79,7 @@ public class IntegrationTestApp implements CommandLineRunner {
         testng.setVerbose(2);
         testng.setOutputDirectory(outputDirectory + "/test-output");
         testng.addListener(new ThreadLocalTestListener());
-        testng.addListener(new HTMLReporter());
+        testng.addListener(new CustomHTMLReporter());
         testng.addListener(new JUnitXMLReporter());
         testng.addListener(new ReportListener());
         setupSuites(testng);

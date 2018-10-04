@@ -127,6 +127,21 @@ integrationtest:
         skipRemainingTestsAfterOneFailed: true
         cleanUpOnFailure: true
 
+    logsearch:
+      url:
+      components:
+      timeRangeInterval: 8
+      queryTypes:
+      - id: cbid
+        name: sdi_cb_id
+        label: 'Cb Id'
+      - id: cbname
+        name: sdi_cb_name
+        label: 'Cb Name'
+      - id: cbowner
+        name: sdt_cb_owner
+        label: 'Sdt Cb Owner'
+
     credentialNames:
         GCP: it-gcp-credential
         AWS: it-aws-credential
