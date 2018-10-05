@@ -30,7 +30,7 @@ type CloudStorageType int
 const (
 	WASB CloudStorageType = iota
 	ADLS
-	ABFS
+	ADLS_GEN2
 	S3
 	GCS
 	NO_CLOUD_STORAGE

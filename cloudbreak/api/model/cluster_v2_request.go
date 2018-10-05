@@ -26,12 +26,6 @@ type ClusterV2Request struct {
 	// external cloud storage configuration
 	CloudStorage *CloudStorageRequest `json:"cloudStorage,omitempty"`
 
-	// send email about the result of the cluster installation
-	EmailNeeded *bool `json:"emailNeeded,omitempty"`
-
-	// send email to the requested address
-	EmailTo string `json:"emailTo,omitempty"`
-
 	// executor type of cluster
 	ExecutorType string `json:"executorType,omitempty"`
 
@@ -52,10 +46,6 @@ type ClusterV2Request struct {
 /* polymorph ClusterV2Request ambari false */
 
 /* polymorph ClusterV2Request cloudStorage false */
-
-/* polymorph ClusterV2Request emailNeeded false */
-
-/* polymorph ClusterV2Request emailTo false */
 
 /* polymorph ClusterV2Request executorType false */
 

@@ -20,11 +20,11 @@ import (
 
 type FileSystemResponse struct {
 
-	// abfs
-	Abfs *AbfsCloudStorageParameters `json:"abfs,omitempty"`
-
 	// adls
 	Adls *AdlsCloudStorageParameters `json:"adls,omitempty"`
+
+	// adls gen2
+	AdlsGen2 *AdlsGen2CloudStorageParameters `json:"adlsGen2,omitempty"`
 
 	// true if fs.defaultFS should point to this filesystem
 	DefaultFs *bool `json:"defaultFs,omitempty"`
@@ -55,9 +55,9 @@ type FileSystemResponse struct {
 	Wasb *WasbCloudStorageParameters `json:"wasb,omitempty"`
 }
 
-/* polymorph FileSystemResponse abfs false */
-
 /* polymorph FileSystemResponse adls false */
+
+/* polymorph FileSystemResponse adlsGen2 false */
 
 /* polymorph FileSystemResponse defaultFs false */
 
@@ -79,12 +79,12 @@ type FileSystemResponse struct {
 func (m *FileSystemResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateAbfs(formats); err != nil {
+	if err := m.validateAdls(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
 
-	if err := m.validateAdls(formats); err != nil {
+	if err := m.validateAdlsGen2(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -130,25 +130,6 @@ func (m *FileSystemResponse) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *FileSystemResponse) validateAbfs(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Abfs) { // not required
-		return nil
-	}
-
-	if m.Abfs != nil {
-
-		if err := m.Abfs.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("abfs")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
 func (m *FileSystemResponse) validateAdls(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Adls) { // not required
@@ -160,6 +141,25 @@ func (m *FileSystemResponse) validateAdls(formats strfmt.Registry) error {
 		if err := m.Adls.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("adls")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *FileSystemResponse) validateAdlsGen2(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.AdlsGen2) { // not required
+		return nil
+	}
+
+	if m.AdlsGen2 != nil {
+
+		if err := m.AdlsGen2.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("adlsGen2")
 			}
 			return err
 		}

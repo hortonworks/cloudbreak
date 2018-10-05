@@ -20,11 +20,11 @@ import (
 
 type CloudStorageRequest struct {
 
-	// abfs
-	Abfs *AbfsCloudStorageParameters `json:"abfs,omitempty"`
-
 	// adls
 	Adls *AdlsCloudStorageParameters `json:"adls,omitempty"`
+
+	// adls gen2
+	AdlsGen2 *AdlsGen2CloudStorageParameters `json:"adlsGen2,omitempty"`
 
 	// gcs
 	Gcs *GcsCloudStorageParameters `json:"gcs,omitempty"`
@@ -40,9 +40,9 @@ type CloudStorageRequest struct {
 	Wasb *WasbCloudStorageParameters `json:"wasb,omitempty"`
 }
 
-/* polymorph CloudStorageRequest abfs false */
-
 /* polymorph CloudStorageRequest adls false */
+
+/* polymorph CloudStorageRequest adlsGen2 false */
 
 /* polymorph CloudStorageRequest gcs false */
 
@@ -56,12 +56,12 @@ type CloudStorageRequest struct {
 func (m *CloudStorageRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateAbfs(formats); err != nil {
+	if err := m.validateAdls(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
 
-	if err := m.validateAdls(formats); err != nil {
+	if err := m.validateAdlsGen2(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -92,25 +92,6 @@ func (m *CloudStorageRequest) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *CloudStorageRequest) validateAbfs(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Abfs) { // not required
-		return nil
-	}
-
-	if m.Abfs != nil {
-
-		if err := m.Abfs.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("abfs")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
 func (m *CloudStorageRequest) validateAdls(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Adls) { // not required
@@ -122,6 +103,25 @@ func (m *CloudStorageRequest) validateAdls(formats strfmt.Registry) error {
 		if err := m.Adls.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("adls")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *CloudStorageRequest) validateAdlsGen2(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.AdlsGen2) { // not required
+		return nil
+	}
+
+	if m.AdlsGen2 != nil {
+
+		if err := m.AdlsGen2.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("adlsGen2")
 			}
 			return err
 		}

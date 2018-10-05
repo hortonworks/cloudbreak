@@ -5,7 +5,6 @@ import (
 	cf "github.com/hortonworks/cb-cli/cloudbreak/config"
 	fl "github.com/hortonworks/cb-cli/cloudbreak/flags"
 	"github.com/hortonworks/cb-cli/cloudbreak/stack"
-	"github.com/hortonworks/cb-cli/cloudbreak/tag"
 	"github.com/urfave/cli"
 )
 
@@ -398,55 +397,6 @@ func init() {
 					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlName).AddAuthenticationFlags().AddOutputFlag().Build() {
 						fl.PrintFlagCompletion(f)
 					}
-				},
-			},
-			{
-				Name:   "tags",
-				Hidden: true,
-				Usage:  "default tags related operations",
-				Subcommands: []cli.Command{
-					{
-						Name:  "account",
-						Usage: "manipulates default tags for the account",
-						Subcommands: []cli.Command{
-							{
-								Name:   "add",
-								Usage:  "adds a new default tag to the account",
-								Before: cf.CheckConfigAndCommandFlags,
-								Flags:  fl.NewFlagBuilder().AddFlags(fl.FlKey, fl.FlValue).AddAuthenticationFlags().AddOutputFlag().Build(),
-								Action: tag.AddAccountTag,
-								BashComplete: func(c *cli.Context) {
-									for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlKey, fl.FlValue).AddAuthenticationFlags().AddOutputFlag().Build() {
-										fl.PrintFlagCompletion(f)
-									}
-								},
-							},
-							{
-								Name:   "delete",
-								Usage:  "deletes a default tag of the account",
-								Before: cf.CheckConfigAndCommandFlags,
-								Flags:  fl.NewFlagBuilder().AddFlags(fl.FlKey).AddAuthenticationFlags().AddOutputFlag().Build(),
-								Action: tag.DeleteAccountTag,
-								BashComplete: func(c *cli.Context) {
-									for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlKey).AddAuthenticationFlags().AddOutputFlag().Build() {
-										fl.PrintFlagCompletion(f)
-									}
-								},
-							},
-							{
-								Name:   "list",
-								Usage:  "lists the default tags for the account",
-								Before: cf.CheckConfigAndCommandFlags,
-								Flags:  fl.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build(),
-								Action: tag.ListAccountTags,
-								BashComplete: func(c *cli.Context) {
-									for _, f := range fl.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build() {
-										fl.PrintFlagCompletion(f)
-									}
-								},
-							},
-						},
-					},
 				},
 			},
 		},

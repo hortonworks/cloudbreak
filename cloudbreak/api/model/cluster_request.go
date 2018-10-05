@@ -68,12 +68,6 @@ type ClusterRequest struct {
 	// Min Length: 0
 	Description *string `json:"description,omitempty"`
 
-	// send email about the result of the cluster installation
-	EmailNeeded *bool `json:"emailNeeded,omitempty"`
-
-	// send email to the requested address
-	EmailTo string `json:"emailTo,omitempty"`
-
 	// enable Kerberos security
 	EnableSecurity *bool `json:"enableSecurity,omitempty"`
 
@@ -172,10 +166,6 @@ type ClusterRequest struct {
 /* polymorph ClusterRequest customQueue false */
 
 /* polymorph ClusterRequest description false */
-
-/* polymorph ClusterRequest emailNeeded false */
-
-/* polymorph ClusterRequest emailTo false */
 
 /* polymorph ClusterRequest enableSecurity false */
 

@@ -174,36 +174,6 @@ func (a *Client) PutAccountPreferencesEndpoint(params *PutAccountPreferencesEndp
 
 }
 
-/*
-ValidateAccountPreferencesEndpoint validates account preferences of all stacks
-
-Account related preferences that could be managed by the account admins and different restrictions could be added to Cloudbreak resources.
-*/
-func (a *Client) ValidateAccountPreferencesEndpoint(params *ValidateAccountPreferencesEndpointParams) error {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewValidateAccountPreferencesEndpointParams()
-	}
-
-	_, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "validateAccountPreferencesEndpoint",
-		Method:             "GET",
-		PathPattern:        "/v1/accountpreferences/validate",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &ValidateAccountPreferencesEndpointReader{formats: a.formats},
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	})
-	if err != nil {
-		return err
-	}
-	return nil
-
-}
-
 // SetTransport changes the transport on the client
 func (a *Client) SetTransport(transport runtime.ClientTransport) {
 	a.transport = transport

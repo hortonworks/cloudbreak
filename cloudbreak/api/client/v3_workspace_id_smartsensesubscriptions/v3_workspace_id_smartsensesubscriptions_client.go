@@ -85,6 +85,36 @@ func (a *Client) DeleteSmartSenseSubscriptionInWorkspace(params *DeleteSmartSens
 }
 
 /*
+GetDefaultSmartSenseSubscriptionInWorkspace gets default smart sense subscription by name in workspace
+
+SmartSense subscriptions could be configured.
+*/
+func (a *Client) GetDefaultSmartSenseSubscriptionInWorkspace(params *GetDefaultSmartSenseSubscriptionInWorkspaceParams) (*GetDefaultSmartSenseSubscriptionInWorkspaceOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetDefaultSmartSenseSubscriptionInWorkspaceParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getDefaultSmartSenseSubscriptionInWorkspace",
+		Method:             "GET",
+		PathPattern:        "/v3/{workspaceId}/smartsensesubscriptions",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetDefaultSmartSenseSubscriptionInWorkspaceReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetDefaultSmartSenseSubscriptionInWorkspaceOK), nil
+
+}
+
+/*
 GetSmartSenseSubscriptionInWorkspace gets smart sense subscription by name in workspace
 
 SmartSense subscriptions could be configured.
@@ -111,36 +141,6 @@ func (a *Client) GetSmartSenseSubscriptionInWorkspace(params *GetSmartSenseSubsc
 		return nil, err
 	}
 	return result.(*GetSmartSenseSubscriptionInWorkspaceOK), nil
-
-}
-
-/*
-ListSmartSenseSubscriptionsByWorkspace lists smart sense subscriptions for the given workspace
-
-SmartSense subscriptions could be configured.
-*/
-func (a *Client) ListSmartSenseSubscriptionsByWorkspace(params *ListSmartSenseSubscriptionsByWorkspaceParams) (*ListSmartSenseSubscriptionsByWorkspaceOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewListSmartSenseSubscriptionsByWorkspaceParams()
-	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "listSmartSenseSubscriptionsByWorkspace",
-		Method:             "GET",
-		PathPattern:        "/v3/{workspaceId}/smartsensesubscriptions",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &ListSmartSenseSubscriptionsByWorkspaceReader{formats: a.formats},
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*ListSmartSenseSubscriptionsByWorkspaceOK), nil
 
 }
 

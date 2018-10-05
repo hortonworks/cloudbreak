@@ -4,10 +4,11 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/hortonworks/cb-cli/cloudbreak/blueprint"
-	"github.com/hortonworks/cb-cli/cloudbreak/oauth"
 	"strconv"
 	"strings"
+
+	"github.com/hortonworks/cb-cli/cloudbreak/blueprint"
+	"github.com/hortonworks/cb-cli/cloudbreak/oauth"
 
 	"github.com/hortonworks/cb-cli/cloudbreak/api/model"
 	"github.com/hortonworks/cb-cli/cloudbreak/cloud"
@@ -97,8 +98,8 @@ func getCloudStorageType(stringFinder func(string) string) cloud.CloudStorageTyp
 		return cloud.GCS
 	case "s3":
 		return cloud.S3
-	case "abfs":
-		return cloud.ABFS
+	case "adls-gen2":
+		return cloud.ADLS_GEN2
 	default:
 		return cloud.NO_CLOUD_STORAGE
 	}
@@ -205,7 +206,7 @@ func generateCloudStorage(fileSystem *model.FileSystemResponse) *model.CloudStor
 			Adls:      fileSystem.Adls,
 			Gcs:       fileSystem.Gcs,
 			Wasb:      fileSystem.Wasb,
-			Abfs:      fileSystem.Abfs,
+			AdlsGen2:  fileSystem.AdlsGen2,
 			Locations: generateLocations(fileSystem.Locations),
 		}
 	}
@@ -428,9 +429,9 @@ func extendTemplateWithStorageType(template *model.StackV2Request, storageType c
 			},
 			Locations: []*model.StorageLocationRequest{},
 		}
-	} else if storageType == cloud.ABFS {
+	} else if storageType == cloud.ADLS_GEN2 {
 		template.Cluster.CloudStorage = &model.CloudStorageRequest{
-			Abfs: &model.AbfsCloudStorageParameters{
+			AdlsGen2: &model.AdlsGen2CloudStorageParameters{
 				AccountKey:  &(&types.S{S: "____"}).S,
 				AccountName: &(&types.S{S: "____"}).S,
 			},
