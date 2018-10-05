@@ -10,7 +10,7 @@ import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 
 @Entity
 @Table(name = "Recipe")
-public class RecipeView extends CompactView {
+public class RecipeView extends CompactViewWithOwner {
     @Enumerated(EnumType.STRING)
     private RecipeType recipeType;
 

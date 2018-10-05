@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 
 @Entity
 @Table(name = "Blueprint")
-public class BlueprintView extends CompactView {
+public class BlueprintView extends CompactViewWithOwner {
     private String stackType;
 
     private String stackVersion;

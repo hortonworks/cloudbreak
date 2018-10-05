@@ -13,14 +13,13 @@ import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByWorkspaceId;
 import com.sequenceiq.cloudbreak.aspect.workspace.WorkspaceResourceType;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
-import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.EntityType;
 
 @EntityType(entityClass = ProxyConfig.class)
 @Transactional(TxType.REQUIRED)
 @DisableHasPermission
 @WorkspaceResourceType(resource = WorkspaceResource.PROXY)
-public interface ProxyConfigRepository extends WorkspaceResourceRepository<ProxyConfig, Long> {
+public interface ProxyConfigRepository extends EnvironmentResourceRepository<ProxyConfig, Long> {
 
     @Override
     @CheckPermissionsByWorkspaceId

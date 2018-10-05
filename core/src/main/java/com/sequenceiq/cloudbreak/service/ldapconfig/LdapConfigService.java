@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.repository.EnvironmentRepository;
 import com.sequenceiq.cloudbreak.repository.LdapConfigRepository;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
@@ -30,6 +31,9 @@ public class LdapConfigService extends AbstractWorkspaceAwareResourceService<Lda
 
     @Inject
     private ClusterService clusterService;
+
+    @Inject
+    private EnvironmentRepository environmentRepository;
 
     public LdapConfig get(Long id) {
         return ldapConfigRepository.findById(id).orElseThrow(notFound("LdapConfig", id));
@@ -69,6 +73,5 @@ public class LdapConfigService extends AbstractWorkspaceAwareResourceService<Lda
 
     @Override
     protected void prepareCreation(LdapConfig resource) {
-
     }
 }
