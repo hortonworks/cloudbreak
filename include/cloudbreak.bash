@@ -5,6 +5,7 @@ cloudbreak-config() {
   env-import DOCKER_MACHINE ""
   cloudbreak-conf-tags
   cloudbreak-conf-images
+  cloudbreak-conf-capabilities
   cloudbreak-conf-cert
   cloudbreak-conf-db
   cloudbreak-conf-defaults
@@ -92,6 +93,14 @@ cloudbreak-conf-images() {
     declare desc="Defines image catalog urls"
 
     env-import CB_IMAGE_CATALOG_URL ""
+}
+
+cloudbreak-conf-capabilities() {
+    declare desc="Enables capabilities"
+
+    env-import CB_CAPABILITIES ""
+    CB_CAPABILITIES=$(echo $CB_CAPABILITIES | awk '{print toupper($0)}')
+    env-import INFO_APP_CAPABILITIES "$CB_CAPABILITIES"
 }
 
 cloudbreak-conf-smtp() {
