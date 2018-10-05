@@ -1,6 +1,7 @@
 name: Connectors_Regions_Tests
 parameters:
   cleanUp: true
+  retryQuantity: 3
 
 tests:
   - name: region_os_test
