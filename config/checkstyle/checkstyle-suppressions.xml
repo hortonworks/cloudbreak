@@ -29,7 +29,7 @@
     <suppress id="IllegalTransaction" files="com.sequenceiq.cloudbreak.service.TransactionService.java|com.sequenceiq.cloudbreak.controller.*|com.sequenceiq.cloudbreak.structuredevent.StructuredFlowEventFactory|com.sequenceiq.cloudbreak.repository.*Repository.java|com.sequenceiq.cloudbreak.structuredevent.db.*Repository.java"/>
     <suppress checks="RegexpSingleline" files="FlexSubscription.java"/>
     <suppress id="hashtable-instantiation" files="LdapConfigValidator.java"/>
-
+    <suppress checks="MethodName" files="EnvironmentResourceRepository.java"/>
     <!-- suppressing checks in application runner classes -->
     <suppress id="sysout" files="VersionedApplication.java"/>
     <suppress checks="HideUtilityClassConstructor" files=".*Application.java"/>

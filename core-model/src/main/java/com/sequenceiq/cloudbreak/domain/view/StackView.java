@@ -19,7 +19,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 @Table(name = "Stack")
 // It's only here, because of findbugs does not know the fields will be set by JPA with Reflection
 @SuppressFBWarnings("UWF_UNWRITTEN_FIELD")
-public class StackView extends CompactView {
+public class StackView extends CompactViewWithOwner {
 
     @OneToOne(mappedBy = "stack")
     private ClusterView cluster;

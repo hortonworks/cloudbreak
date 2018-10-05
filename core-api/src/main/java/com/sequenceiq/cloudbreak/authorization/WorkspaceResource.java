@@ -19,7 +19,8 @@ public enum WorkspaceResource {
     SECURITY_GROUP("Security group", "securitygroup"),
     CONSTRAINT_TEMPLATE("Constraint template", "constrainttemplate"),
     FILESYSTEM("File system", "filesystem"),
-    CLUSTER_TEMPLATE("Cluster template", "clustertemplate");
+    CLUSTER_TEMPLATE("Cluster template", "clustertemplate"),
+    ENVIRONMENT("Environment", "env");
 
     private final String readableName;
 

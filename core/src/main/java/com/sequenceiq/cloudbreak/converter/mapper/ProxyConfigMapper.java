@@ -17,7 +17,8 @@ public interface ProxyConfigMapper {
             @Mapping(target = "owner", ignore = true),
             @Mapping(target = "account", ignore = true),
             @Mapping(target = "id", ignore = true),
-            @Mapping(target = "workspace", ignore = true)
+            @Mapping(target = "workspace", ignore = true),
+            @Mapping(target = "environments", ignore = true)
     })
     ProxyConfig mapRequestToEntity(ProxyConfigRequest proxyConfigRequest);
 
