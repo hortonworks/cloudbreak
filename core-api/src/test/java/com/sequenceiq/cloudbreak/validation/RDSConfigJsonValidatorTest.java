@@ -22,6 +22,8 @@ public class RDSConfigJsonValidatorTest {
 
     private static final String VALID_CONNECTION_URL = "jdbc:oracle://test.eu-west-1.rds.amazonaws.com:5432/test";
 
+    private static final String VALID_CONNECTION_URL_WITH_GETPARAM = "jdbc:mysql://test.eu-west-1.rds.amazonaws.com:3306/hivedb?useSSL=true&requireSSL=false";
+
     private static final String VALID_JAR_URL = "https://someurl.com";
 
     private static final String VALID_NAME = "some-valid-name";
@@ -68,6 +70,17 @@ public class RDSConfigJsonValidatorTest {
     @Test
     public void testIsValidWhenConnectionUrlContainsHyphenInMiddleInDatabaseNameThenTrueReturns() {
         when(json.getConnectionURL()).thenReturn("jdbc:postgresql://somedb.c8uqzbscgqmb.eu-west-1.rds.amazonaws.com:5432/mydb-asd");
+        when(json.getName()).thenReturn(VALID_NAME);
+        when(json.getType()).thenReturn(TEST_TYPE);
+        when(json.getConnectorJarUrl()).thenReturn(VALID_JAR_URL);
+
+        assertTrue(underTest.isValid(json, constraintValidatorContext));
+        verify(constraintValidatorContext, times(NOT_EVEN_ONCE)).buildConstraintViolationWithTemplate(anyString());
+    }
+
+    @Test
+    public void testIsValidWhenConnectionUrlContainsGetParametersThenTrueReturns() {
+        when(json.getConnectionURL()).thenReturn(VALID_CONNECTION_URL_WITH_GETPARAM);
         when(json.getName()).thenReturn(VALID_NAME);
         when(json.getType()).thenReturn(TEST_TYPE);
         when(json.getConnectorJarUrl()).thenReturn(VALID_JAR_URL);
