@@ -44,7 +44,7 @@ public class RegionProviderSpecTests extends CloudbreakTest {
         given(provider.aValidCredential()
                 .withName(credentialName), provider.getPlatform() + " credential is created");
         given(Region.request(), provider.getPlatform() + " region request");
-        when(Region.getPlatformRegions(), "Regions are requested to " + provider.getPlatform()
+        when(Region.getPlatformRegionsWithRetry(Integer.parseInt(getTestParameter().get("retryQuantity"))), "Regions are requested to " + provider.getPlatform()
                 + " credential");
         then(Region.assertThis(
                 (region, t) -> {
@@ -86,7 +86,7 @@ public class RegionProviderSpecTests extends CloudbreakTest {
         given(provider.aValidCredential()
                 .withName(AZURE_CRED_NAME), "Azure credential is created");
         given(Region.request(), "Azure region request");
-        when(Region.getPlatformRegions(), "Regions are requested to Azure credential");
+        when(Region.getPlatformRegionsWithRetry(Integer.parseInt(getTestParameter().get("retryQuantity"))), "Regions are requested to Azure credential");
         then(Region.assertThis(
                 (region, t) -> {
                     Collection<String> availibilityZones = region.getRegionResponse().getAvailabilityZones()

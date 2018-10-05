@@ -57,6 +57,14 @@ public class Region extends Entity {
         return new Action<>(getTestContextRegion(key), RegionV3Action::getRegionsByCredentialId);
     }
 
+    public static Action<Region> getPlatformRegionsWithRetry(int retryQuantity) {
+        return getPlatformRegionsWithRetry(REGION, retryQuantity);
+    }
+
+    public static Action<Region> getPlatformRegionsWithRetry(String key, int retryQuantity) {
+        return new Action<>(getTestContextRegion(key), (testContext, entity) -> RegionV3Action.getRegionsByCredentialId(testContext, entity, retryQuantity));
+    }
+
     public static Action<Region> getPlatformRegions() {
         return getPlatformRegions(REGION);
     }

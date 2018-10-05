@@ -68,8 +68,8 @@ public class RegionTests extends CloudbreakTest {
         given(CloudbreakClient.isCreated());
         given(cloudProvider.aValidCredential(), cloudProvider.getPlatform() + " credential is created");
         given(Region.request(), cloudProvider.getPlatform() + " region request");
-        when(Region.getPlatformRegions(), "Default region is requested to " + cloudProvider.getPlatform()
-                + " credential");
+        when(Region.getPlatformRegionsWithRetry(Integer.parseInt(getTestParameter().get("retryQuantity"))), "Default region is requested to "
+                + cloudProvider.getPlatform() + " credential");
         then(Region.assertThis(
                 (region, t) -> {
                     LOGGER.info("{} Default Region is ::: {}",
@@ -86,8 +86,8 @@ public class RegionTests extends CloudbreakTest {
         given(CloudbreakClient.isCreated());
         given(cloudProvider.aValidCredential(), cloudProvider.getPlatform() + " credential is created");
         given(Region.request(), cloudProvider.getPlatform() + " region request");
-        when(Region.getPlatformRegions(), "Regions are requested to " + cloudProvider.getPlatform()
-                + " credential");
+        when(Region.getPlatformRegionsWithRetry(Integer.parseInt(getTestParameter().get("retryQuantity"))), "Regions are requested to "
+                + cloudProvider.getPlatform() + " credential");
         then(Region.assertThis(
                 (region, t) -> {
                     int regionsCount = region.getRegionResponse().getRegions().size();
@@ -105,8 +105,8 @@ public class RegionTests extends CloudbreakTest {
         given(CloudbreakClient.isCreated());
         given(cloudProvider.aValidCredential(), cloudProvider.getPlatform() + " credential is created");
         given(Region.request(), cloudProvider.getPlatform() + " region request");
-        when(Region.getPlatformRegions(), "Regions are requested to " + cloudProvider.getPlatform()
-                + " credential");
+        when(Region.getPlatformRegionsWithRetry(Integer.parseInt(getTestParameter().get("retryQuantity"))), "Regions are requested to "
+                + cloudProvider.getPlatform() + " credential");
         then(Region.assertThis(
                 (region, t) -> {
                     int displayNamesCount = region.getRegionResponse().getDisplayNames().size();
@@ -124,8 +124,8 @@ public class RegionTests extends CloudbreakTest {
         given(CloudbreakClient.isCreated());
         given(cloudProvider.aValidCredential(), cloudProvider.getPlatform() + " credential is created");
         given(Region.request(), cloudProvider.getPlatform() + " region request");
-        when(Region.getPlatformRegions(), "Regions are requested to " + cloudProvider.getPlatform()
-                + " credential");
+        when(Region.getPlatformRegionsWithRetry(Integer.parseInt(getTestParameter().get("retryQuantity"))), "Regions are requested to "
+                + cloudProvider.getPlatform() + " credential");
         then(Region.assertThis(
                 (region, t) -> {
                     int availibilityZonesCount = region.getRegionResponse().getAvailabilityZones().size();
