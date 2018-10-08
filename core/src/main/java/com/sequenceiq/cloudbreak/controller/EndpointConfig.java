@@ -40,6 +40,7 @@ public class EndpointConfig extends ResourceConfig {
         CloudbreakEventV3Controller.class,
         CloudbreakUsageController.class,
         ClusterV1Controller.class,
+        ClusterTemplateV3Controller.class,
         CredentialController.class,
         CredentialV3Controller.class,
         FlexSubscriptionController.class,
