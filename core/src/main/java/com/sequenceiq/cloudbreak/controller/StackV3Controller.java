@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.api.model.stack.StackScaleRequestV2;
 import com.sequenceiq.cloudbreak.api.model.stack.StackViewResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRepairRequest;
 import com.sequenceiq.cloudbreak.api.model.users.UserNamePasswordJson;
+import com.sequenceiq.cloudbreak.api.model.v2.StackFromTemplateRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -82,6 +83,14 @@ public class StackV3Controller extends NotificationController implements StackV3
         User user = userService.getOrCreate(cloudbreakUser);
         Workspace workspace = workspaceService.get(workspaceId, user);
         return stackCommonService.createInWorkspace(conversionService.convert(request, StackRequest.class), cloudbreakUser, user, workspace);
+    }
+
+    @Override
+    public StackResponse createInWorkspaceFromTemplate(Long workspaceId, String templateName, @Valid StackFromTemplateRequest request) {
+        CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
+        User user = userService.getOrCreate(cloudbreakUser);
+        Workspace workspace = workspaceService.get(workspaceId, user);
+        return stackCommonService.createInWorkspaceFromTemplate(templateName, request, cloudbreakUser, user, workspace);
     }
 
     @Override

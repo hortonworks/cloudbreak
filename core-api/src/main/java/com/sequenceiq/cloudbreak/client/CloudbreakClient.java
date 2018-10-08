@@ -55,6 +55,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v2.ConnectorV2Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v2.StackV2Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.AuditV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.BlueprintV3Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v3.ClusterTemplateV3EndPoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.ConnectorV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.CredentialV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.FileSystemV3Endpoint;
@@ -63,7 +64,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v3.ImageCatalogV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.KnoxServicesV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.LdapConfigV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.ManagementPackV3Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v3.WorkspaceV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.ProxyConfigV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.RdsConfigV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.RecipeV3Endpoint;
@@ -71,6 +71,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v3.SmartSenseSubscriptionV3Endpoin
 import com.sequenceiq.cloudbreak.api.endpoint.v3.StackV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.UserV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.UtilV3Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v3.WorkspaceV3Endpoint;
 
 import net.jodah.expiringmap.ExpirationPolicy;
 import net.jodah.expiringmap.ExpiringMap;
@@ -88,6 +89,7 @@ public class CloudbreakClient {
             EventV3Endpoint.class,
             UsageEndpoint.class,
             ClusterV1Endpoint.class,
+            ClusterTemplateV3EndPoint.class,
             CredentialEndpoint.class,
             CredentialV3Endpoint.class,
             FlexSubscriptionEndpoint.class,
@@ -348,6 +350,10 @@ public class CloudbreakClient {
 
     public UtilV3Endpoint utilV3Endpoint() {
         return getEndpoint(UtilV3Endpoint.class);
+    }
+
+    public ClusterTemplateV3EndPoint clusterTemplateV3EndPoint() {
+        return getEndpoint(ClusterTemplateV3EndPoint.class);
     }
 
     protected <E> E getEndpoint(Class<E> clazz) {

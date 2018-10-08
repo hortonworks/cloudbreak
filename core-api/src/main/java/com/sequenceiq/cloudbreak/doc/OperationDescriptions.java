@@ -106,6 +106,7 @@ public class OperationDescriptions {
         public static final String LIST_BY_WORKSPACE = "list stacks for the given workspace";
         public static final String GET_BY_NAME_IN_WORKSPACE = "get stack by name in workspace";
         public static final String CREATE_IN_WORKSPACE = "create stack in workspace";
+        public static final String CREATE_IN_WORKSPACE_FROM_TEMPLATE = "create stack in workspace from template";
         public static final String DELETE_BY_NAME_IN_WORKSPACE = "delete stack by name in workspace";
         public static final String SYNC_BY_NAME_IN_WORKSPACE = "syncs the stack by name in workspace";
         public static final String RETRY_BY_NAME_IN_WORKSPACE = "retries the stack by name in workspace";
@@ -151,6 +152,10 @@ public class OperationDescriptions {
         public static final String DELETE_PRIVATE_BY_NAME = "delete private cluster template by name";
         public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private cluster template by name";
         public static final String DELETE_BY_ID = "delete cluster template by id";
+        public static final String LIST_BY_WORKSPACE = "list cluster templates for the given workspace";
+        public static final String GET_BY_NAME_IN_WORKSPACE = "get cluster template by name in workspace";
+        public static final String CREATE_IN_WORKSPACE = "create cluster template in workspace";
+        public static final String DELETE_BY_NAME_IN_WORKSPACE = "delete cluster template by name in workspace";
     }
 
     public static class RecipeOpDescription {

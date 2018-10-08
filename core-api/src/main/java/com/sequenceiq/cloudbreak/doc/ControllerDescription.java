@@ -38,6 +38,7 @@ public class ControllerDescription {
 
     public static final String LDAP_V3_CONFIG_DESCRIPTION = "Operations on LDAP server configurations by workspace";
     public static final String BLUEPRINT_V3_DESCRIPTION = "Operations on blueprints by workspace";
+    public static final String CLUSTERTEMPLATE_V3_DESCRIPTION = "Operations on ClusterTemplates by workspace";
     public static final String CREDENTIAL_V3_DESCRIPTION = "Operations on credentials by workspace";
     public static final String FLEX_SUBSCRIPTION_V3_DESCRIPTION = "Operations on Flex subscriptions by workspace";
     public static final String MANAGEMENT_PACK_V3_DESCRIPTION = "Operations on Management pack by Workspace";

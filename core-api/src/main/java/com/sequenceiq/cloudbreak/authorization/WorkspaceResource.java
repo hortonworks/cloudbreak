@@ -18,7 +18,8 @@ public enum WorkspaceResource {
     TOPOLOGY("Topology", "topology"),
     SECURITY_GROUP("Security group", "securitygroup"),
     CONSTRAINT_TEMPLATE("Constraint template", "constrainttemplate"),
-    FILESYSTEM("File system", "filesystem");
+    FILESYSTEM("File system", "filesystem"),
+    CLUSTER_TEMPLATE("Cluster template", "clustertemplate");
 
     private final String readableName;
 

@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.api.model.stack.StackScaleRequestV2;
 import com.sequenceiq.cloudbreak.api.model.stack.StackViewResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRepairRequest;
 import com.sequenceiq.cloudbreak.api.model.users.UserNamePasswordJson;
+import com.sequenceiq.cloudbreak.api.model.v2.StackFromTemplateRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
@@ -64,6 +65,14 @@ public interface StackV3Endpoint {
     @ApiOperation(value = StackOpDescription.CREATE_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
             nickname = "createStackInWorkspace")
     StackResponse createInWorkspace(@PathParam("workspaceId") Long workspaceId, @Valid StackV2Request request);
+
+    @POST
+    @Path("{templateName}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = StackOpDescription.CREATE_IN_WORKSPACE_FROM_TEMPLATE, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
+            nickname = "createInWorkspaceFromTemplate")
+    StackResponse createInWorkspaceFromTemplate(@PathParam("workspaceId") Long workspaceId, @PathParam("templateName") String templateName,
+            @Valid StackFromTemplateRequest request);
 
     // deleteStackV2
     @DELETE
