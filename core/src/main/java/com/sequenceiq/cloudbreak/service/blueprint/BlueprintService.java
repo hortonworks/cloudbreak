@@ -135,7 +135,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
             blueprintLoaderService.loadBlueprintsForTheWorkspace(blueprints, workspace, this::saveDefaultsWithReadRight);
             LOGGER.info("Blueprint modifications finished based on the defaults for '{}' workspace.", workspace.getId());
         }
-        return blueprintViewRepository.findAllByWorkspace(workspace);
+        return blueprintViewRepository.findAllByNotDeletedInWorkspace(workspace.getId());
     }
 
     public Set<Blueprint> getAllAvailableInWorkspace(Workspace workspace) {
