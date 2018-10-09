@@ -102,10 +102,12 @@ public class GeneralRecipeClusterTests extends CloudbreakTest {
     @Test()
     @Priority(20)
     public void testCheckRecipesOnNodes() throws Exception {
+        LOGGER.info("Default Private Key File is: {}", defaultPrivateKeyFile);
+
         given(cloudProvider.aValidCredential());
         given(cloudProvider.aValidStackIsCreated(), "a stack is created");
         when(Stack.get());
-        then(Stack.checkRecipes(HOSTGROUPS, FILES_PATH, getTestParameter().getRequired("integrationtest.defaultPrivateKeyFile"),
+        then(Stack.checkRecipes(HOSTGROUPS, FILES_PATH, defaultPrivateKeyFile,
                 getRequiredRecipeAmountForRunningCluster()), "check recipes are ran on all nodes");
     }
 
