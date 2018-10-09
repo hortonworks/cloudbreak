@@ -260,9 +260,9 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
                 Map.entry("endpoint", getTestParameter().get("integrationtest.openstackFieldcredential.endpoint")),
                 Map.entry("projectDomainName", getTestParameter().get("integrationtest.openstackFieldcredential.projectDomainName")),
                 Map.entry("projectName", getTestParameter().get("integrationtest.openstackFieldcredential.projectName")),
-                Map.entry("keystoneAuthScope", getTestParameter().get("integrationtest.openstackFieldcredential.keystoneAuthScope")),
+                Map.entry("keystoneAuthScope", "cb-keystone-v3-project-scope"),
                 Map.entry("keystoneVersion", "cb-keystone-v3"),
-                Map.entry("apiFacing", getTestParameter().get("integrationtest.openstackFieldcredential.apiFacing")),
+                Map.entry("apiFacing", "internal"),
                 Map.entry("selector", "cb-keystone-v3-project-scope"));
 
         return map;
