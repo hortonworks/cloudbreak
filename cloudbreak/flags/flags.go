@@ -305,7 +305,7 @@ var (
 		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{
 			Name:  "cloud-storage",
-			Usage: "type of the cloud storage [wasb/WASB, adls/ADLS, s3/S3, gcs/GCS, adls-gen2/ADLS-GEN2]",
+			Usage: "type of the cloud storage [wasb/WASB, adls-gen1/ADLS-GEN1, s3/S3, gcs/GCS, adls-gen2/ADLS-GEN2]",
 		},
 	}
 	FlDefaultEncryptionOptional = BoolFlag{

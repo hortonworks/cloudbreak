@@ -90,8 +90,8 @@ func getNetworkMode(c *cli.Context) cloud.NetworkMode {
 func getCloudStorageType(stringFinder func(string) string) cloud.CloudStorageType {
 	storageType := stringFinder(fl.FlCloudStorageTypeOptional.Name)
 	switch strings.ToLower(storageType) {
-	case "adls":
-		return cloud.ADLS
+	case "adls-gen1":
+		return cloud.ADLS_GEN1
 	case "wasb":
 		return cloud.WASB
 	case "gcs":
@@ -406,7 +406,7 @@ func extendTemplateWithStorageType(template *model.StackV2Request, storageType c
 			},
 			Locations: []*model.StorageLocationRequest{},
 		}
-	} else if storageType == cloud.ADLS {
+	} else if storageType == cloud.ADLS_GEN1 {
 		template.Cluster.CloudStorage = &model.CloudStorageRequest{
 			Adls: &model.AdlsCloudStorageParameters{
 				AccountName: &(&types.S{S: "____"}).S,
