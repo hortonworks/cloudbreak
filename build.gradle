@@ -67,11 +67,9 @@ subprojects {
     repositories {
       mavenDeployer {
         configuration = configurations.deployerJars
-        repository(url: "s3://cloudbreak-maven/releases") {
-          authentication(userName: "$System.env.AWS_ACCESS_KEY", passphrase: "$System.env.AWS_SECRET_ACCESS_KEY")
+        repository(url: "http://repo.hortonworks.com/content/repositories/releases") {
+          authentication(userName: "$System.env.NEXUS_PRIV_USER", passphrase: "$System.env.NEXUS_PRIV_PASS")
         }
-        snapshotRepository(url: "s3://cloudbreak-maven/snapshots") {
-          authentication(userName: "$System.env.AWS_ACCESS_KEY", passphrase: "$System.env.AWS_SECRET_ACCESS_KEY")
         }
       }
     }
