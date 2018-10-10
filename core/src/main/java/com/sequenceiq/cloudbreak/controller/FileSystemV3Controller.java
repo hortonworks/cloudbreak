@@ -18,16 +18,16 @@ import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.repository.FileSystemRepository;
-import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
-import com.sequenceiq.cloudbreak.template.filesystem.query.ConfigQueryEntry;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.template.filesystem.query.ConfigQueryEntry;
+import com.sequenceiq.cloudbreak.util.WorkspaceEntityType;
 
 @Controller
-public class FileSystemV3Controller implements FileSystemV3Endpoint, WorkspaceAwareResourceController<FileSystem> {
+@WorkspaceEntityType(FileSystem.class)
+public class FileSystemV3Controller implements FileSystemV3Endpoint {
 
     @Inject
     private UserService userService;
@@ -69,10 +69,5 @@ public class FileSystemV3Controller implements FileSystemV3Endpoint, WorkspaceAw
         CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
         User user = userService.getOrCreate(cloudbreakUser);
         return workspaceService.get(workspaceId, user);
-    }
-
-    @Override
-    public Class<? extends WorkspaceResourceRepository<FileSystem, ?>> getWorkspaceAwareResourceRepository() {
-        return FileSystemRepository.class;
     }
 }

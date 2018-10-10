@@ -62,7 +62,7 @@ import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterResponse;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
-import com.sequenceiq.cloudbreak.service.RepositoryLookupService;
+import com.sequenceiq.cloudbreak.service.CrudRepositoryLookupService;
 import com.sequenceiq.cloudbreak.service.TransactionExecutorService;
 import com.sequenceiq.periscope.PeriscopeApplication;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterRequest;
@@ -473,7 +473,7 @@ public class MetricTest {
     public static class TestConfig {
 
         @MockBean
-        private RepositoryLookupService repositoryLookupService;
+        private CrudRepositoryLookupService repositoryLookupService;
 
         @MockBean
         private ClusterRepository clusterRepository;

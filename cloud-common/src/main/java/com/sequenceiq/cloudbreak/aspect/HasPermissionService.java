@@ -20,7 +20,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
-import com.sequenceiq.cloudbreak.service.RepositoryLookupService;
+import com.sequenceiq.cloudbreak.service.CrudRepositoryLookupService;
 
 @Service
 public class HasPermissionService {
@@ -31,7 +31,7 @@ public class HasPermissionService {
     private AuthorizationService authorizationService;
 
     @Inject
-    private RepositoryLookupService repositoryLookupService;
+    private CrudRepositoryLookupService repositoryLookupService;
 
     public Object hasPermission(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
 
@@ -80,7 +80,7 @@ public class HasPermissionService {
     private Object lookup(JoinPoint proceedingJoinPoint, int index) {
         ParameterizedType type = getParameterizedType(proceedingJoinPoint);
         Class<?> resourceType = (Class<?>) type.getActualTypeArguments()[0];
-        CrudRepository<Object, Serializable> repository = repositoryLookupService.getRepositoryForEntity(resourceType);
+        CrudRepository<?, Serializable> repository = repositoryLookupService.getRepositoryForEntity(resourceType);
         return repository.findById((Serializable) proceedingJoinPoint.getArgs()[index]).orElse(null);
     }
 

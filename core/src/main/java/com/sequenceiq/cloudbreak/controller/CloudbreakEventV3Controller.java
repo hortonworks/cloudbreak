@@ -22,19 +22,19 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.facade.CloudbreakEventsFacade;
-import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredEventService;
-import com.sequenceiq.cloudbreak.structuredevent.db.StructuredEventRepository;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventContainer;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
+import com.sequenceiq.cloudbreak.util.WorkspaceEntityType;
 
 @Controller
 @Transactional(TxType.NEVER)
-public class CloudbreakEventV3Controller implements EventV3Endpoint, WorkspaceAwareResourceController<StructuredEventEntity> {
+@WorkspaceEntityType(StructuredEventEntity.class)
+public class CloudbreakEventV3Controller implements EventV3Endpoint {
 
     @Inject
     private CloudbreakEventsFacade cloudbreakEventsFacade;
@@ -90,10 +90,5 @@ public class CloudbreakEventV3Controller implements EventV3Endpoint, WorkspaceAw
 
     private Stack getStackIfAvailable(Long workspaceId, String name) {
         return Optional.ofNullable(stackService.getByNameInWorkspace(name, workspaceId)).orElseThrow(notFound("stack", name));
-    }
-
-    @Override
-    public Class<? extends WorkspaceResourceRepository<StructuredEventEntity, ?>> getWorkspaceAwareResourceRepository() {
-        return StructuredEventRepository.class;
     }
 }

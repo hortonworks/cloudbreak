@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,13 +46,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.controller.WorkspaceAwareResourceController;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
 import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
@@ -70,6 +67,8 @@ import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestRequestDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestResponseDetails;
 import com.sequenceiq.cloudbreak.structuredevent.rest.urlparsers.RestUrlParser;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
+import com.sequenceiq.cloudbreak.util.WorkspaceAwareRepositoryLookupService;
+import com.sequenceiq.cloudbreak.util.WorkspaceEntityType;
 
 @Component
 public class StructuredEventFilter implements WriterInterceptor, ContainerRequestFilter, ContainerResponseFilter {
@@ -130,25 +129,20 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
     @Autowired
     private ListableBeanFactory listableBeanFactory;
 
+    @Autowired
+    private WorkspaceAwareRepositoryLookupService repositoryLookupService;
+
     @PostConstruct
     public void initializePathRepositoryMap() {
-        Map<String, Object> controllers = listableBeanFactory.getBeansWithAnnotation(Controller.class);
-
-        List<WorkspaceAwareResourceController<?>> workspaceAwareResourceControllers = controllers.values().stream()
-                .filter(controller ->
-                        Arrays.stream(controller.getClass().getSuperclass().getInterfaces())
-                                .anyMatch(iface -> WorkspaceAwareResourceController.class.getSimpleName().equals(iface.getSimpleName()))
-                )
-                .map(controller -> (WorkspaceAwareResourceController<?>) controller)
-                .collect(Collectors.toList());
-
-        for (WorkspaceAwareResourceController<?> workspaceAwareResourceController : workspaceAwareResourceControllers) {
-            Path pathAnnotation = AnnotationUtils.findAnnotation(workspaceAwareResourceController.getClass().getSuperclass(), Path.class);
+        Map<String, Object> workspaceEntityTypes = listableBeanFactory.getBeansWithAnnotation(WorkspaceEntityType.class);
+        for (Object workspaceEntityType : workspaceEntityTypes.values()) {
+            Path pathAnnotation = AnnotationUtils.findAnnotation(workspaceEntityType.getClass().getSuperclass(), Path.class);
+            WorkspaceEntityType entityTypeAnnotation = AnnotationUtils.findAnnotation(workspaceEntityType.getClass(), WorkspaceEntityType.class);
             if (pathAnnotation != null) {
                 String pathValue = pathAnnotation.value();
-                Class<? extends WorkspaceResourceRepository<?, ?>> repository = workspaceAwareResourceController.getWorkspaceAwareResourceRepository();
-                WorkspaceResourceRepository<?, ?> resourceRepository = applicationContext.getBean(repository);
-                pathRepositoryMap.put(pathValue, resourceRepository);
+                Class<?> entityClass = entityTypeAnnotation.value();
+                WorkspaceResourceRepository<?, ?> repository = repositoryLookupService.getRepositoryForEntity(entityClass);
+                pathRepositoryMap.put(pathValue, repository);
             }
         }
     }
