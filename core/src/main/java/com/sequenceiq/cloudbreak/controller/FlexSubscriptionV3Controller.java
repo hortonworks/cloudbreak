@@ -15,18 +15,18 @@ import com.sequenceiq.cloudbreak.api.model.FlexSubscriptionResponse;
 import com.sequenceiq.cloudbreak.converter.FlexSubscriptionRequestToFlexSubscriptionConverter;
 import com.sequenceiq.cloudbreak.converter.FlexSubscriptionToJsonConverter;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
-import com.sequenceiq.cloudbreak.repository.FlexSubscriptionRepository;
-import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.util.WorkspaceEntityType;
 
 @Controller
 @Transactional(TxType.NEVER)
-public class FlexSubscriptionV3Controller implements FlexSubscriptionV3Endpoint, WorkspaceAwareResourceController<FlexSubscription> {
+@WorkspaceEntityType(FlexSubscription.class)
+public class FlexSubscriptionV3Controller implements FlexSubscriptionV3Endpoint {
 
     @Inject
     private FlexSubscriptionService flexSubscriptionService;
@@ -86,10 +86,5 @@ public class FlexSubscriptionV3Controller implements FlexSubscriptionV3Endpoint,
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(workspaceId, user);
         flexSubscriptionService.setDefaultFlexSubscription(name, user, workspace);
-    }
-
-    @Override
-    public Class<? extends WorkspaceResourceRepository<FlexSubscription, ?>> getWorkspaceAwareResourceRepository() {
-        return FlexSubscriptionRepository.class;
     }
 }

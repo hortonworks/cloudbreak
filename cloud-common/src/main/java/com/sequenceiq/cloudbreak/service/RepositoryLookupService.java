@@ -5,22 +5,19 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
-import javax.inject.Inject;
 
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-@Service
-public class RepositoryLookupService {
+public abstract class RepositoryLookupService<T extends CrudRepository<?, ?>> {
 
-    @Inject
-    private List<CrudRepository<?, ?>> repositoryList;
+    private List<T> repositoryList;
 
-    private final Map<Class<?>, CrudRepository<?, ?>> repositoryMap = new HashMap<>();
+    private final Map<Class<?>, T> repositoryMap = new HashMap<>();
 
     @PostConstruct
     private void checkRepoMap() {
+        repositoryList = getRepositoryList();
         if (CollectionUtils.isEmpty(repositoryList)) {
             throw new IllegalStateException("No repositories provided!");
         } else {
@@ -29,12 +26,12 @@ public class RepositoryLookupService {
     }
 
     private void fillRepositoryMap() {
-        for (CrudRepository<?, ?> repo : repositoryList) {
+        for (T repo : repositoryList) {
             repositoryMap.put(getEntityClassForRepository(repo), repo);
         }
     }
 
-    private Class<?> getEntityClassForRepository(CrudRepository<?, ?> repo) {
+    private Class<?> getEntityClassForRepository(T repo) {
         Class<?> originalInterface = repo.getClass().getInterfaces()[0];
         EntityType annotation = originalInterface.getAnnotation(EntityType.class);
         if (annotation == null) {
@@ -50,4 +47,6 @@ public class RepositoryLookupService {
         }
         return repo;
     }
+
+    protected abstract List<T> getRepositoryList();
 }

@@ -33,7 +33,7 @@ import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
 import com.sequenceiq.cloudbreak.conf.SecurityConfig;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
-import com.sequenceiq.cloudbreak.service.RepositoryLookupService;
+import com.sequenceiq.cloudbreak.service.CrudRepositoryLookupService;
 import com.sequenceiq.cloudbreak.service.security.OwnerBasedPermissionEvaluator;
 import com.sequenceiq.cloudbreak.service.security.ScimAccountGroupReaderFilter;
 import com.sequenceiq.cloudbreak.service.user.CachedUserDetailsService;
@@ -122,7 +122,7 @@ public abstract class SecurityComponentTestBase {
         private CachedUserDetailsService cachedUserDetailsService;
 
         @MockBean
-        private RepositoryLookupService repositoryLookupService;
+        private CrudRepositoryLookupService repositoryLookupService;
 
         @MockBean
         private AuthenticationManager authenticationManager;

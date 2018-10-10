@@ -23,16 +23,16 @@ import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
-import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.util.WorkspaceEntityType;
 
 @Controller
 @Transactional(TxType.NEVER)
-public class BlueprintV3Controller extends NotificationController implements BlueprintV3Endpoint, WorkspaceAwareResourceController<Blueprint> {
+@WorkspaceEntityType(Blueprint.class)
+public class BlueprintV3Controller extends NotificationController implements BlueprintV3Endpoint {
 
     @Inject
     private BlueprintService blueprintService;
@@ -102,10 +102,5 @@ public class BlueprintV3Controller extends NotificationController implements Blu
         CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
         User user = userService.getOrCreate(cloudbreakUser);
         return workspaceService.get(workspaceId, user);
-    }
-
-    @Override
-    public Class<? extends WorkspaceResourceRepository<Blueprint, ?>> getWorkspaceAwareResourceRepository() {
-        return BlueprintRepository.class;
     }
 }

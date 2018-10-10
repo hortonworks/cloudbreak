@@ -18,14 +18,14 @@ import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.repository.RdsConfigRepository;
-import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.util.WorkspaceEntityType;
 
 @Controller
 @Transactional(TxType.NEVER)
-public class RdsConfigV3Controller extends AbstractRdsConfigController implements RdsConfigV3Endpoint, WorkspaceAwareResourceController<RDSConfig> {
+@WorkspaceEntityType(RDSConfig.class)
+public class RdsConfigV3Controller extends AbstractRdsConfigController implements RdsConfigV3Endpoint {
 
     @Inject
     private UserService userService;
@@ -73,10 +73,5 @@ public class RdsConfigV3Controller extends AbstractRdsConfigController implement
     public RDSConfigRequest getRequestFromName(Long workspaceId, String name) {
         RDSConfig rdsConfig = getRdsConfigService().getByNameForWorkspaceId(name, workspaceId);
         return getConversionService().convert(rdsConfig, RDSConfigRequest.class);
-    }
-
-    @Override
-    public Class<? extends WorkspaceResourceRepository<RDSConfig, ?>> getWorkspaceAwareResourceRepository() {
-        return RdsConfigRepository.class;
     }
 }

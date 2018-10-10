@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.repository.ResourceRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.RepositoryLookupService;
+import com.sequenceiq.cloudbreak.service.CrudRepositoryLookupService;
 
 @Component
 public class CloudResourcePersisterService implements Persister<ResourceNotification> {
@@ -29,7 +29,7 @@ public class CloudResourcePersisterService implements Persister<ResourceNotifica
     private ConversionService conversionService;
 
     @Inject
-    private RepositoryLookupService repositoryLookupService;
+    private CrudRepositoryLookupService repositoryLookupService;
 
     @Override
     public ResourceNotification persist(ResourceNotification notification) {

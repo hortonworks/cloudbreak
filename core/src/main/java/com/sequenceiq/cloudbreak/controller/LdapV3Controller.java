@@ -22,15 +22,15 @@ import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.ldapconfig.LdapConfigValidator;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
-import com.sequenceiq.cloudbreak.repository.LdapConfigRepository;
-import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.util.WorkspaceEntityType;
 
 @Controller
 @Transactional(TxType.NEVER)
-public class LdapV3Controller extends NotificationController implements LdapConfigV3Endpoint, WorkspaceAwareResourceController<LdapConfig> {
+@WorkspaceEntityType(LdapConfig.class)
+public class LdapV3Controller extends NotificationController implements LdapConfigV3Endpoint {
 
     @Inject
     @Named("conversionService")
@@ -104,10 +104,5 @@ public class LdapV3Controller extends NotificationController implements LdapConf
     public LdapConfigRequest getRequestFromName(Long workspaceId, String name) {
         LdapConfig ldapConfig = ldapConfigService.getByNameForWorkspaceId(name, workspaceId);
         return conversionService.convert(ldapConfig, LdapConfigRequest.class);
-    }
-
-    @Override
-    public Class<? extends WorkspaceResourceRepository<LdapConfig, ?>> getWorkspaceAwareResourceRepository() {
-        return LdapConfigRepository.class;
     }
 }
