@@ -256,6 +256,9 @@ cloudbreak-conf-defaults() {
 
     env-import PUBLIC_HTTP_PORT 80
     env-import PUBLIC_HTTPS_PORT 443
+
+    env-import CB_DISABLE_SHOW_CLI "false"
+    env-import CB_DISABLE_SHOW_BLUEPRINT "false"
 }
 
 cloudbreak-conf-autscale() {
