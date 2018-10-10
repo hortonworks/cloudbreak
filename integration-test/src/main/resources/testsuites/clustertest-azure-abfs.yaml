@@ -22,7 +22,7 @@ tests:
   classes:
   - name: com.sequenceiq.it.cloudbreak.AzureAdlsGen2ClusterTest
     includedMethods:
-    - testCreateClusterWithAbfs
+    - testCreateClusterWithAdlsGen2
     - testTerasort
     - cleanUpFs
     - testTerminateCluster
