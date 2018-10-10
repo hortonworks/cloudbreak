@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
@@ -21,21 +22,21 @@ import com.sequenceiq.cloudbreak.api.model.CertificateResponse;
 import com.sequenceiq.cloudbreak.api.model.GeneratedBlueprintResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformVariantsJson;
 import com.sequenceiq.cloudbreak.api.model.ReinstallRequestV2;
-import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
-import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
-import com.sequenceiq.cloudbreak.api.model.stack.StackScaleRequestV2;
-import com.sequenceiq.cloudbreak.api.model.stack.StackValidationRequest;
 import com.sequenceiq.cloudbreak.api.model.StatusRequest;
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
 import com.sequenceiq.cloudbreak.api.model.UserNamePasswordJson;
+import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
+import com.sequenceiq.cloudbreak.api.model.stack.StackScaleRequestV2;
+import com.sequenceiq.cloudbreak.api.model.stack.StackValidationRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRepairRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
 import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintUpdater;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
 import com.sequenceiq.cloudbreak.service.OperationRetryService;
@@ -77,6 +78,12 @@ public class StackV2Controller extends NotificationController implements StackV2
 
     @Autowired
     private ClusterService clusterService;
+
+    @Value("${cb.disable.show.blueprint:false}")
+    private boolean disableShowBlueprint;
+
+    @Value("${cb.disable.show.cli:false}")
+    private boolean disableShowCli;
 
     @Override
     public Set<StackResponse> getPrivates() {
@@ -235,6 +242,9 @@ public class StackV2Controller extends NotificationController implements StackV2
 
     @Override
     public StackV2Request getRequestfromName(String name) {
+        if (disableShowCli) {
+            return null;
+        }
         IdentityUser user = authenticatedUserService.getCbUser();
         return stackService.getStackRequestByName(name, user);
     }
@@ -251,12 +261,16 @@ public class StackV2Controller extends NotificationController implements StackV2
 
     @Override
     public GeneratedBlueprintResponse postStackForBlueprint(StackV2Request stackRequest) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        stackRequest.setAccount(user.getAccount());
-        stackRequest.setOwner(user.getUserId());
-        BlueprintPreparationObject blueprintPreparationObject = conversionService.convert(stackRequest, BlueprintPreparationObject.class);
-        String blueprintText = centralBlueprintUpdater.getBlueprintText(blueprintPreparationObject);
-        return new GeneratedBlueprintResponse(blueprintText);
+        GeneratedBlueprintResponse result = null;
+        if (!disableShowBlueprint) {
+            IdentityUser user = authenticatedUserService.getCbUser();
+            stackRequest.setAccount(user.getAccount());
+            stackRequest.setOwner(user.getUserId());
+            BlueprintPreparationObject blueprintPreparationObject = conversionService.convert(stackRequest, BlueprintPreparationObject.class);
+            String blueprintText = centralBlueprintUpdater.getBlueprintText(blueprintPreparationObject);
+            result = new GeneratedBlueprintResponse(blueprintText);
+        }
+        return result;
     }
 
     @Override

@@ -16,6 +16,7 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
@@ -93,6 +94,9 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
     @Inject
     private StackService stackService;
 
+    @Value("${cb.disable.show.blueprint:false}")
+    private boolean disableShowBlueprint;
+
     @Override
     public ClusterResponse convert(Cluster source) {
         return doConvert(source);
@@ -148,7 +152,7 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
     }
 
     private <R extends ClusterResponse> void setExtendedBlueprintText(Cluster source, R clusterResponse) {
-        if (StringUtils.isNoneEmpty(source.getExtendedBlueprintText())) {
+        if (StringUtils.isNoneEmpty(source.getExtendedBlueprintText()) && !disableShowBlueprint) {
             clusterResponse.setExtendedBlueprintText(anonymize(source.getExtendedBlueprintText()));
         }
     }
