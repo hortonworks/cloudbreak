@@ -1,6 +1,8 @@
 apply plugin: 'java'
 
 repositories {
+    mavenLocal()
+    maven { url = "$repoUrl" }
     maven { url 'http://repo.spring.io/libs-release' }
     mavenCentral()
 }
