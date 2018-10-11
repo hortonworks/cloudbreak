@@ -94,12 +94,17 @@ public class AmbariClusterStatusUpdater {
 
     private boolean updateClusterStatus(Long stackId, Cluster cluster, Status newClusterStatus) {
         boolean result = false;
-        if (cluster.getStatus() != newClusterStatus) {
-            LOGGER.info("Cluster {} status is updated from {} to {}", cluster.getId(), cluster.getStatus(), newClusterStatus);
-            clusterService.updateClusterStatusByStackId(stackId, newClusterStatus);
-            result = true;
+
+        Status status = cluster.getStatus();
+        if (status != newClusterStatus) {
+            if (!status.equals(Status.MAINTENANCE_MODE_ENABLED)
+                    || (status.equals(Status.MAINTENANCE_MODE_ENABLED) && !newClusterStatus.equals(Status.AVAILABLE))) {
+                LOGGER.info("Cluster {} status is updated from {} to {}", cluster.getId(), status, newClusterStatus);
+                clusterService.updateClusterStatusByStackId(stackId, newClusterStatus);
+                result = true;
+            }
         } else {
-            LOGGER.info("Cluster {} status hasn't changed: {}", cluster.getId(), cluster.getStatus());
+            LOGGER.info("Cluster {} status hasn't changed: {}", cluster.getId(), status);
         }
         return result;
     }

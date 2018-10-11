@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 import org.testng.collections.Lists;
 
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.core.flow2.CheckResult;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.InstanceMetadataUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.InstanceMetadataUpdater.Package;

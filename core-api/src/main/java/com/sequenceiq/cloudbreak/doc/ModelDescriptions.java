@@ -19,6 +19,7 @@ public class ModelDescriptions {
     public static final String WORKSPACE_OF_THE_RESOURCE = "workspace of the resource";
     public static final String USER_ID_V3 = "User ID in the new authorization model";
     public static final String WORKSPACE_ID = "Workspace ID of the resource";
+    public static final String PREINSTALLED = "Denotes that the image is prewarmed or base image.";
 
     private ModelDescriptions() {
     }
@@ -231,6 +232,7 @@ public class ModelDescriptions {
         public static final String PROXY_NAME = "proxy configuration name for the cluster";
         public static final String PROXY_CONFIG_ID = "proxy configuration id for the cluster";
         public static final String LOCATIONS = "cloud storage locations";
+        public static final String STATUS_MAINTENANCE_MODE = "maintenance mode status";
         public static final String SECURE = "tells wether the cluster is secured or not";
     }
 
@@ -305,6 +307,7 @@ public class ModelDescriptions {
         public static final String STACK = "name of the stack, like HDP";
         public static final String VERSION = "version of the stack";
         public static final String OS = "operating system for the stack, like redhat6";
+        public static final String OS_TYPE = "operating system type for the stack, like centos6";
         public static final String STACK_REPO_ID = "id of the stack repository";
         public static final String UTILS_REPO_ID = "id of the stack utils repository";
         public static final String STACK_BASE_URL = "url of the stack repository";

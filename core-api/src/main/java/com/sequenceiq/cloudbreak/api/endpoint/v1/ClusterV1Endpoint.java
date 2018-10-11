@@ -109,4 +109,5 @@ public interface ClusterV1Endpoint {
     @ApiOperation(value = OperationDescriptions.GatewayOpDescription.UPDATE_GATEWAY_TOPOLOGIES, produces = ContentType.JSON, notes = Notes.GATEWAY_NOTES,
             nickname = "updateGatewayTopologies")
     GatewayJson updateGatewayTopologies(@PathParam("id") Long stackId, @NotNull UpdateGatewayTopologiesJson request);
+
 }

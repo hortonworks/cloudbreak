@@ -17,6 +17,7 @@ public class StackImageUpdateFlowTriggerCondition implements FlowTriggerConditio
     @Override
     public boolean isFlowTriggerable(Long stackId) {
         StackView stack = stackService.getViewByIdWithoutAuth(stackId);
-        return stack.isAvailable() && stack.getClusterView().getStatus() == Status.AVAILABLE;
+        Status clusterStatus = stack.getClusterView().getStatus();
+        return stack.isAvailable() && (clusterStatus.isAvailable());
     }
 }

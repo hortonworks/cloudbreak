@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.core.flow2.stack.image.update;
+package com.sequenceiq.cloudbreak.core.flow2;
 
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 

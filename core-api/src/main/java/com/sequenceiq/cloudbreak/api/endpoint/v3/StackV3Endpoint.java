@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -18,7 +19,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import com.sequenceiq.cloudbreak.api.model.GeneratedBlueprintResponse;
+import com.sequenceiq.cloudbreak.api.model.MaintenanceModeJson;
 import com.sequenceiq.cloudbreak.api.model.ReinstallRequestV2;
+import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.api.model.stack.StackImageChangeRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.StackScaleRequestV2;
@@ -29,6 +32,7 @@ import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
+import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription;
 
 import io.swagger.annotations.Api;
@@ -190,4 +194,18 @@ public interface StackV3Endpoint {
     @ApiOperation(value = StackOpDescription.GET_STATUS_BY_NAME, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
             nickname = "statusStackV3")
     Map<String, Object> getStatusByNameInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
+
+    @PUT
+    @Path("{name}/maintenance")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OperationDescriptions.ClusterOpDescription.SET_MAINTENANCE_MODE, produces = ContentType.JSON, notes = Notes.MAINTENANCE_NOTES,
+            nickname = "setClusterMaintenanceMode")
+    Response setClusterMaintenanceMode(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name, @NotNull MaintenanceModeJson maintenanceMode);
+
+    @PUT
+    @Path("{name}/cluster")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OperationDescriptions.ClusterOpDescription.PUT_BY_STACK_ID, produces = ContentType.JSON, notes = Notes.CLUSTER_NOTES,
+            nickname = "putClusterV3")
+    Response put(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name, @Valid UpdateClusterJson updateJson);
 }

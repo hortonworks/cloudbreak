@@ -51,6 +51,8 @@ public class CloudbreakITContextConstants {
 
     public static final String FSREQUEST = "FSREQUEST";
 
+    public static final String WORKSPACE_ID = "WORKSPACE_ID";
+
     private CloudbreakITContextConstants() {
     }
 }

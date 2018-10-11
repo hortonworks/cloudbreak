@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
 import com.sequenceiq.cloudbreak.core.flow2.FlowState;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.EphemeralClusterFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.downscale.ClusterDownscaleFlowConfig;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.maintenance.MaintenanceModeValidationFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.repair.ChangePrimaryGatewayFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.reset.ClusterResetFlowConfig;
@@ -95,7 +96,8 @@ public class OfflineStateGenerator {
                     new StackStopFlowConfig(),
                     new StackSyncFlowConfig(),
                     new StackTerminationFlowConfig(),
-                    new StackUpscaleConfig()
+                    new StackUpscaleConfig(),
+                    new MaintenanceModeValidationFlowConfig()
             );
 
     private static final ConfigurableApplicationContext APP_CONTEXT = new CustomApplicationContext();

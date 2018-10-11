@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.model.Status.CREATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.model.Status.DELETE_COMPLETED;
 import static com.sequenceiq.cloudbreak.api.model.Status.DELETE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.model.Status.MAINTENANCE_MODE_ENABLED;
 import static com.sequenceiq.cloudbreak.api.model.Status.REQUESTED;
 import static com.sequenceiq.cloudbreak.api.model.Status.START_FAILED;
 import static com.sequenceiq.cloudbreak.api.model.Status.START_IN_PROGRESS;
@@ -341,6 +342,10 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
 
     public boolean isAvailable() {
         return AVAILABLE.equals(status);
+    }
+
+    public boolean isMaintenanceModeEnabled() {
+        return MAINTENANCE_MODE_ENABLED.equals(status);
     }
 
     public boolean isStopped() {

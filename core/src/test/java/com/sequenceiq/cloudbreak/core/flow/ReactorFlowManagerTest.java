@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.core.flow;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -23,10 +25,12 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.TestUtil;
+import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.cloud.Acceptable;
 import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
+import com.sequenceiq.cloudbreak.controller.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
@@ -106,6 +110,7 @@ public class ReactorFlowManagerTest {
         underTest.triggerClusterRepairFlow(STACK_ID, new HashMap<>(), true);
         underTest.triggerEphemeralUpdate(STACK_ID);
         underTest.triggerStackImageUpdate(STACK_ID, "asdf", null, null);
+        underTest.triggerMaintenanceModeValidationFlow(STACK_ID);
 
         // Not start from 0 because flow cancellations
         int count = 5;
@@ -156,6 +161,23 @@ public class ReactorFlowManagerTest {
     }
 
     @Test
+    public void testClusterUpscaleInMaintenanceMode() {
+        Stack stack = TestUtil.stack();
+        stack.setCluster(TestUtil.cluster());
+        stack.getCluster().setStatus(Status.MAINTENANCE_MODE_ENABLED);
+        when(stackService.getByIdWithTransaction(1L)).thenReturn(stack);
+
+        InstanceGroupAdjustmentJson instGroupAdjustment = new InstanceGroupAdjustmentJson();
+        try {
+            underTest.triggerStackUpscale(1L, instGroupAdjustment, false);
+        } catch (CloudbreakApiException e) {
+            assertEquals("Operation not allowed in maintenance mode.", e.getMessage());
+        }
+
+        verify(reactor, never()).notify(eq(FlowChainTriggers.FULL_UPSCALE_TRIGGER_EVENT), any(Event.class));
+    }
+
+    @Test
     public void testtriggerStackImageUpdate() {
         long stackId = 1L;
         String imageID = "imageID";
@@ -163,6 +185,13 @@ public class ReactorFlowManagerTest {
         String imageCatalogUrl = "imageCatalogUrl";
         underTest.triggerStackImageUpdate(stackId, imageID, imageCatalogName, imageCatalogUrl);
         verify(reactor).notify(eq(FlowChainTriggers.STACK_IMAGE_UPDATE_TRIGGER_EVENT), any(Event.class));
+    }
+
+    @Test
+    public void testTriggerMaintenanceModeValidationFlow() {
+        long stackId = 1L;
+        underTest.triggerMaintenanceModeValidationFlow(stackId);
+        verify(reactor).notify(eq(FlowChainTriggers.CLUSTER_MAINTENANCE_MODE_VALIDATION_TRIGGER_EVENT), any(Event.class));
     }
 
     private static class TestAcceptable implements Acceptable {

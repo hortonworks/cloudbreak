@@ -1,6 +1,10 @@
 package com.sequenceiq.cloudbreak.service;
 
+import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.api.model.Status.MAINTENANCE_MODE_ENABLED;
+
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.ws.rs.core.Response;
@@ -14,6 +18,7 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
+import com.sequenceiq.cloudbreak.api.model.MaintenanceModeStatus;
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.users.UserNamePasswordJson;
@@ -21,6 +26,7 @@ import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -88,8 +94,31 @@ public class ClusterCommonService {
             clusterHostgroupAdjustmentChange(stackId, updateJson, stack);
             return Response.status(Status.NO_CONTENT).build();
         }
+
+        if (Objects.nonNull(updateJson.getAmbariStackDetails())) {
+            return updateStackDetails(updateJson, stack);
+        }
         LOGGER.error("Invalid cluster update request received. Stack id: {}", stackId);
         throw new BadRequestException("Invalid update cluster request!");
+    }
+
+    private Response updateStackDetails(UpdateClusterJson updateJson, Stack stack) {
+        Cluster cluster = stack.getCluster();
+        if (!cluster.isMaintenanceModeEnabled()) {
+            return Response.status(Status.BAD_REQUEST.getStatusCode(), String.format(
+                    "Repo update is only permitted in maintenance mode, current status is: '%s'", stack.getCluster().getStatus())).build();
+        }
+
+        AmbariStackDetailsJson ambariStackDetails = updateJson.getAmbariStackDetails();
+        Long clusterId = cluster.getId();
+        if ("AMBARI".equals(ambariStackDetails.getStack())) {
+            clusterService.updateAmbariRepoDetails(clusterId, ambariStackDetails);
+        } else if ("HDP".equals(ambariStackDetails.getStack())) {
+            clusterService.updateHdpRepoDetails(clusterId, ambariStackDetails);
+        } else if ("HDF".equals(ambariStackDetails.getStack())) {
+            clusterService.updateHdfRepoDetails(clusterId, ambariStackDetails);
+        }
+        return Response.status(Status.NO_CONTENT).build();
     }
 
     private void clusterHostgroupAdjustmentChange(Long stackId, UpdateClusterJson updateJson, Stack stack) {
@@ -139,5 +168,48 @@ public class ClusterCommonService {
         LOGGER.info("Cluster username password update request received. Stack id:  {}, username: {}",
                 stackId, userNamePasswordJson.getUserName());
         clusterService.updateUserNamePassword(stackId, userNamePasswordJson);
+    }
+
+    public Response setMaintenanceMode(Stack stack, MaintenanceModeStatus maintenanceMode) {
+        Cluster cluster = stack.getCluster();
+        if (cluster == null) {
+            throw new BadRequestException(String.format("Cluster does not exist on stack with '%s' id.", stack.getId()));
+        }
+        if (!stack.isAvailable()) {
+            throw new BadRequestException(String.format(
+                    "Stack '%s' is currently in '%s' state. Maintenance mode can be set to a cluster if the underlying stack is 'AVAILABLE'.",
+                    stack.getId(), stack.getStatus()));
+        }
+        if (!cluster.isAvailable() && !cluster.isMaintenanceModeEnabled()) {
+            throw new BadRequestException(String.format(
+                    "Cluster '%s' is currently in '%s' state. Maintenance mode can be set to a cluster if it is 'AVAILABLE'.",
+                    cluster.getId(), cluster.getStatus()));
+        }
+        switch (maintenanceMode) {
+            case ENABLED:
+                cluster.setStatus(MAINTENANCE_MODE_ENABLED);
+                break;
+            case DISABLED:
+                cluster.setStatus(AVAILABLE);
+                break;
+            default:
+                // Nothing to do here
+                break;
+
+        }
+
+        Response status = Response.ok().build();
+        if (maintenanceMode.equals(MaintenanceModeStatus.VALIDATION_REQUESTED)) {
+            if (!MAINTENANCE_MODE_ENABLED.equals(cluster.getStatus())) {
+                throw new BadRequestException(String.format(
+                        "Maintenance mode is not enabled for cluster '%s' (status:'%s'), it should be enabled before validation.",
+                        cluster.getId(),
+                        cluster.getStatus()));
+            }
+            clusterService.triggerMaintenanceModeValidation(stack);
+            status = Response.accepted().build();
+        }
+        clusterService.save(cluster);
+        return status;
     }
 }

@@ -12,7 +12,7 @@ echo -e "\n\033[1;96m--- Kill running test container\033[0m\n"
 cd ..
 $INTEGCB_LOCATION/.deps/bin/docker-compose down
 
-export INTEGRATIONTEST_SUITEFILES=file:/it/src/main/resources/testsuites/v2/mock/v2-mock-stackcreate-scaling.yaml,file:/it/src/main/resources/testsuites/v2/mock/v2-mock-knoxgateway-stackcreate.yaml,file:/it/src/main/resources/testsuites/v2/mock/v2-mock-kerberized-stackcreate-scaling.yaml,file:/it/src/main/resources/testsuites/blueprinttests.yaml,file:/it/src/main/resources/testsuites/recipetests.yaml,file:/it/src/main/resources/testsuites/repoconfigstests.yaml,file:/it/src/main/resources/testsuites/disktypetests.yaml,file:/it/src/main/resources/testsuites/securityruletests.yaml,file:/it/src/main/resources/testsuites/v2/mock/clustermocktestset.yaml${ADDITIONAL_SUITEFILES+,$ADDITIONAL_SUITEFILES}
+export INTEGRATIONTEST_SUITEFILES=file:/it/src/main/resources/testsuites/v2/mock/v2-mock-stackcreate-scaling.yaml,file:/it/src/main/resources/testsuites/v2/mock/v2-mock-knoxgateway-stackcreate.yaml,file:/it/src/main/resources/testsuites/v2/mock/v2-mock-kerberized-stackcreate-scaling.yaml,file:/it/src/main/resources/testsuites/blueprinttests.yaml,file:/it/src/main/resources/testsuites/recipetests.yaml,file:/it/src/main/resources/testsuites/repoconfigstests.yaml,file:/it/src/main/resources/testsuites/disktypetests.yaml,file:/it/src/main/resources/testsuites/securityruletests.yaml,file:/it/src/main/resources/testsuites/v2/mock/clustermocktestset.yaml,file:/it/src/main/resources/testsuites/v2/mock/v2-mock-stack-maintenance-mode.yaml${ADDITIONAL_SUITEFILES+,$ADDITIONAL_SUITEFILES}
 
 echo -e "\n\033[1;96m--- Tests to run:\033[0m\n"
 echo $INTEGRATIONTEST_SUITEFILES

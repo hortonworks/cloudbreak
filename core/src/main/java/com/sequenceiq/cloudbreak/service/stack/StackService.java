@@ -404,7 +404,11 @@ public class StackService {
     }
 
     public Stack getByNameInWorkspace(String name, Long workspaceId) {
-        return stackRepository.findByNameAndWorkspaceId(name, workspaceId);
+        Stack stack = stackRepository.findByNameAndWorkspaceId(name, workspaceId);
+        if (stack == null) {
+            throw new NotFoundException(String.format(STACK_NOT_FOUND_EXCEPTION_TXT, name));
+        }
+        return stack;
     }
 
     public Stack getByNameInWorkspaceWithLists(String name, Long workspaceId) {
@@ -706,6 +710,9 @@ public class StackService {
                 return null;
             });
         } catch (TransactionExecutionException e) {
+            if (e.getCause() instanceof BadRequestException) {
+                throw e.getCause();
+            }
             throw new TransactionRuntimeExecutionException(e);
         }
 
@@ -840,7 +847,7 @@ public class StackService {
     private void validateClusterStatus(Stack stack) {
         Cluster cluster = stack.getCluster();
         if (cluster != null && !cluster.isAvailable()) {
-            throw new BadRequestException(String.format("Cluster '%s' is currently in '%s' state. Node count can only be updated if it's running.",
+            throw new BadRequestException(String.format("Cluster '%s' is currently in '%s' state. Node count can only be updated if it's not available.",
                     cluster.getName(), cluster.getStatus()));
         }
     }
