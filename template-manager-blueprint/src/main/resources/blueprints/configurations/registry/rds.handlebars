@@ -6,8 +6,9 @@
       "registry.storage.connector.user": "{{{ rds.registry.connectionUserName }}}",
       "registry.storage.connector.password": "{{{ rds.registry.connectionPassword }}}",
       "database_name": "{{{ rds.registry.databaseName }}}",
-      "registry.storage.db.hostname": "{{{ rds.registry.host }}}:{{{ rds.registry.port }}}",
-      "registry.storage.type": "{{{ rds.registry.databaseEngine }}}",
+      "registry.storage.db.hostname": "{{{ rds.registry.host }}}:{{{ rds.registry.port }}}",{{{#eq rds.registry.databaseEngine 'postgres'}}}
+      "registry.storage.type": "postgresql",{{{/eq}}}{{{#neq rds.registry.databaseEngine 'postgres'}}}
+      "registry.storage.type": "{{{ rds.registry.databaseEngine }}}",{{{/neq}}}
       "registry.storage.connector.connectURI":"{{{ rds.registry.connectionString }}}"
     }
   },
