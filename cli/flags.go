@@ -757,6 +757,13 @@ var (
 			Usage: "adds custom Kerberos configuration to the template",
 		},
 	}
+	FlWithBlueprintValidation = BoolFlag{
+		RequiredFlag: OPTIONAL,
+		BoolFlag: cli.BoolFlag{
+			Name:  "with-blueprint-validation",
+			Usage: "enable Ambari blueprint validation",
+		},
+	}
 	FlWithSourceCluster = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
@@ -916,7 +923,7 @@ func (fb *FlagBuilder) AddOutputFlag() *FlagBuilder {
 }
 
 func (fb *FlagBuilder) AddTemplateFlags() *FlagBuilder {
-	for _, f := range []cli.Flag{FlWithCustomDomainOptional, FlWithTagsOptional, FlWithImageOptional, FlWithKerberosManagedOptional, FlWithKerberosExistingMITOptional, FlWithKerberosExistingADOptional, FlWithKerberosCustomOptional} {
+	for _, f := range []cli.Flag{FlWithCustomDomainOptional, FlWithTagsOptional, FlWithImageOptional, FlWithKerberosManagedOptional, FlWithKerberosExistingMITOptional, FlWithKerberosExistingADOptional, FlWithKerberosCustomOptional, FlWithBlueprintValidation} {
 		fb.flags = append(fb.flags, f)
 	}
 	return fb

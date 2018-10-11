@@ -76,7 +76,7 @@ func createImagecatalogImpl(client imagecatalogClient, name string, public bool,
 		}
 		ic = resp.Payload
 	}
-	log.Infof("[createImagecatalogImpl] imagecatalog created: %s (id: %d)", ic.Name, ic.ID)
+	log.Infof("[createImagecatalogImpl] imagecatalog created: %s (id: %d)", *ic.Name, ic.ID)
 }
 
 func ListImagecatalogs(c *cli.Context) {

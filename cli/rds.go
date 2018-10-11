@@ -171,7 +171,7 @@ func createRdsImpl(client rdsClient, name string, username string, password stri
 		}
 		rdsResponse = resp.Payload
 	}
-	log.Infof("[createRdsImpl] rds created: %s (id: %d)", rdsResponse.Name, rdsResponse.ID)
+	log.Infof("[createRdsImpl] rds created: %s (id: %d)", *rdsResponse.Name, rdsResponse.ID)
 }
 
 func DeleteRds(c *cli.Context) error {
