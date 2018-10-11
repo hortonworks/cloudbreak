@@ -5,6 +5,8 @@ plugins {
 group 'com.sequenceiq'
 
 repositories {
+  mavenLocal()
+  maven { url = "$repoUrl" }
   maven { url 'http://repo.spring.io/libs-release' }
     mavenCentral()
 }

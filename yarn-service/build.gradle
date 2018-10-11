@@ -6,6 +6,8 @@ version = '3.0.0'
 
 buildscript {
     repositories {
+        mavenLocal()
+        maven { url = "$repoUrl" }
         jcenter()
     }
     dependencies {
@@ -15,6 +17,8 @@ buildscript {
 }
 
 repositories {
+    mavenLocal()
+    maven { url = "$repoUrl" }
     jcenter()
 }
 

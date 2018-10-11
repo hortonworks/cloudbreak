@@ -3,6 +3,8 @@ apply plugin: 'io.spring.dependency-management'
 
 buildscript {
   repositories {
+    mavenLocal()
+    maven { url = "$repoUrl" }
     maven { url 'http://repo.spring.io/libs-release' }
     mavenCentral()
   }
