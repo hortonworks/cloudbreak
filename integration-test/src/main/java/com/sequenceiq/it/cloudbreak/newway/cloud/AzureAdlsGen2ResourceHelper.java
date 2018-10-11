@@ -43,7 +43,6 @@ public class AzureAdlsGen2ResourceHelper extends ResourceHelper<AdlsGen2CloudSto
     public CloudStorageRequest getCloudStorageRequestForDatalake() {
         var request = new CloudStorageRequest();
         request.setAdlsGen2(getCloudStorage());
-        request.setLocations(defaultDatalakeStorageLocations(CloudStorageTypePathPrefix.ADLS_GEN_2, getTestParameter().get("cloudStorageName")));
         return request;
     }
 
