@@ -16,13 +16,13 @@ import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.repository.environment.EnvironmentResourceRepository;
 import com.sequenceiq.cloudbreak.repository.ProxyConfigRepository;
-import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
-import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.environment.AbstractEnvironmentAwareService;
 
 @Service
-public class ProxyConfigService extends AbstractWorkspaceAwareResourceService<ProxyConfig> {
+public class ProxyConfigService extends AbstractEnvironmentAwareService<ProxyConfig> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProxyConfigService.class);
 
@@ -41,7 +41,7 @@ public class ProxyConfigService extends AbstractWorkspaceAwareResourceService<Pr
     }
 
     @Override
-    public WorkspaceResourceRepository<ProxyConfig, Long> repository() {
+    public EnvironmentResourceRepository<ProxyConfig, Long> repository() {
         return proxyConfigRepository;
     }
 

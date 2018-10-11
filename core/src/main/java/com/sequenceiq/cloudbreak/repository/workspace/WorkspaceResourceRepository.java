@@ -6,6 +6,7 @@ import java.io.Serializable;
 import java.util.Set;
 
 import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
 
 import org.springframework.data.repository.NoRepositoryBean;
 
@@ -17,7 +18,7 @@ import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
 
 @NoRepositoryBean
-@Transactional(Transactional.TxType.REQUIRED)
+@Transactional(TxType.REQUIRED)
 @DisableHasPermission
 public interface WorkspaceResourceRepository<T extends WorkspaceAwareResource, ID extends Serializable> extends DisabledBaseRepository<T, ID> {
 
@@ -32,5 +33,4 @@ public interface WorkspaceResourceRepository<T extends WorkspaceAwareResource, I
 
     @CheckPermissionsByWorkspaceId(action = READ, workspaceIdIndex = 1)
     T findByNameAndWorkspaceId(String name, Long workspaceId);
-
 }

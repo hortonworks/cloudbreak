@@ -11,12 +11,13 @@ import org.springframework.dao.DataIntegrityViolationException;
 
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
@@ -29,6 +30,18 @@ public abstract class AbstractWorkspaceAwareResourceService<T extends WorkspaceA
 
     @Inject
     private WorkspaceService workspaceService;
+
+    @Inject
+    private RestRequestThreadLocalService restRequestThreadLocalService;
+
+    @Inject
+    private UserService userService;
+
+    @Override
+    public T createForLoggedInUser(T resource, @Nonnull Long workspaceId) {
+        User user = getLoggedInUser();
+        return create(resource, workspaceId, user);
+    }
 
     @Override
     public T create(T resource, @Nonnull Long workspaceId, User user) {
@@ -125,6 +138,10 @@ public abstract class AbstractWorkspaceAwareResourceService<T extends WorkspaceA
 
     public WorkspaceService getWorkspaceService() {
         return workspaceService;
+    }
+
+    protected User getLoggedInUser() {
+        return userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
     }
 
     protected abstract WorkspaceResourceRepository<T, Long> repository();

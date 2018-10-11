@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
+import javax.validation.constraints.NotEmpty;
 
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Controller;
@@ -23,6 +24,8 @@ import com.sequenceiq.cloudbreak.controller.validation.ldapconfig.LdapConfigVali
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.repository.LdapConfigRepository;
+import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.util.WorkspaceEntityType;
@@ -42,12 +45,6 @@ public class LdapV3Controller extends NotificationController implements LdapConf
     @Inject
     private LdapConfigValidator ldapConfigValidator;
 
-    @Inject
-    private UserService userService;
-
-    @Inject
-    private RestRequestThreadLocalService restRequestThreadLocalService;
-
     @Override
     public Set<LdapConfigResponse> listConfigsByWorkspace(Long workspaceId) {
         return ldapConfigService.findAllByWorkspaceId(workspaceId).stream()
@@ -64,8 +61,7 @@ public class LdapV3Controller extends NotificationController implements LdapConf
     @Override
     public LdapConfigResponse createInWorkspace(Long workspaceId, LdapConfigRequest request) {
         LdapConfig ldapConfig = conversionService.convert(request, LdapConfig.class);
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        ldapConfig = ldapConfigService.create(ldapConfig, workspaceId, user);
+        ldapConfig = ldapConfigService.createInEnvironment(ldapConfig, request.getEnvironments(), workspaceId);
         notify(ResourceEvent.LDAP_CREATED);
         return conversionService.convert(ldapConfig, LdapConfigResponse.class);
     }
@@ -104,5 +100,15 @@ public class LdapV3Controller extends NotificationController implements LdapConf
     public LdapConfigRequest getRequestFromName(Long workspaceId, String name) {
         LdapConfig ldapConfig = ldapConfigService.getByNameForWorkspaceId(name, workspaceId);
         return conversionService.convert(ldapConfig, LdapConfigRequest.class);
+    }
+
+    @Override
+    public LdapConfigResponse attachToEnvironments(Long workspaceId, String name, @NotEmpty Set<String> environmentNames) {
+        return null;
+    }
+
+    @Override
+    public LdapConfigResponse detachFromEnvironments(Long workspaceId, String name, @NotEmpty Set<String> environmentNames) {
+        return null;
     }
 }

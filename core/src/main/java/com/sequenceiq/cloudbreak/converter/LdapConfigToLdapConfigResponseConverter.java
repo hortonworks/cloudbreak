@@ -1,9 +1,12 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
+import com.sequenceiq.cloudbreak.domain.view.CompactView;
 
 @Component
 public class LdapConfigToLdapConfigResponseConverter extends AbstractConversionServiceAwareConverter<LdapConfig, LdapConfigResponse> {
@@ -28,6 +31,7 @@ public class LdapConfigToLdapConfigResponseConverter extends AbstractConversionS
         json.setGroupNameAttribute(config.getGroupNameAttribute());
         json.setGroupMemberAttribute(config.getGroupMemberAttribute());
         json.setAdminGroup(config.getAdminGroup());
+        json.setEnvironments(config.getEnvironments().stream().map(CompactView::getName).collect(Collectors.toSet()));
         return json;
     }
 }

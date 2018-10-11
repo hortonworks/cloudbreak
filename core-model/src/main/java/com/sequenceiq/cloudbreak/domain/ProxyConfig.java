@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -64,7 +65,7 @@ public class ProxyConfig implements ProvisionEntity, EnvironmentAwareResource {
 
     @ManyToMany(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
     @JoinTable(name = "env_proxy", joinColumns = @JoinColumn(name = "proxyid"), inverseJoinColumns = @JoinColumn(name = "envid"))
-    private Set<EnvironmentView> environments;
+    private Set<EnvironmentView> environments = new HashSet<>();
 
     public Long getId() {
         return id;

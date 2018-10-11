@@ -26,12 +26,14 @@ import com.sequenceiq.cloudbreak.api.model.users.ChangeWorkspaceUsersJson;
 import com.sequenceiq.cloudbreak.authorization.WorkspacePermissions;
 import com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.UserWorkspacePermissions;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceRepository;
+import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
@@ -56,6 +58,9 @@ public class WorkspaceService {
 
     @Inject
     private WorkspaceModificationVerifierService workspaceModificationVerifierService;
+
+    @Inject
+    private RestRequestThreadLocalService restRequestThreadLocalService;
 
     public Workspace create(User user, Workspace workspace) {
         try {
@@ -94,12 +99,24 @@ public class WorkspaceService {
         return Optional.ofNullable(workspaceRepository.getByName(name, user.getTenant()));
     }
 
-    public Workspace getById(Long id) {
+    /**
+     * Use this method with caution, since it is not authorized! Don!t use it in REST context!
+     *
+     * @param id id of Workspace
+     * @return Workspace
+     */
+    public Workspace getByIdWithoutAuth(Long id) {
         Optional<Workspace> workspace = workspaceRepository.findById(id);
         if (workspace.isPresent()) {
             return workspace.get();
         }
         throw new IllegalArgumentException(String.format("No Workspace found with id: %s", id));
+    }
+
+    public Workspace getByIdForCurrentUser(Long id) {
+        CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
+        User user = userService.getOrCreate(cloudbreakUser);
+        return get(id, user);
     }
 
     public Workspace get(Long id, User user) {

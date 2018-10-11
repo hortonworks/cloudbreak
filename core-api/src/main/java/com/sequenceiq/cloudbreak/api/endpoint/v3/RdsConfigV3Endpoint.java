@@ -3,10 +3,12 @@ package com.sequenceiq.cloudbreak.api.endpoint.v3;
 import java.util.Set;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -20,6 +22,7 @@ import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
+import com.sequenceiq.cloudbreak.doc.OperationDescriptions.RdsConfigOpDescription;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -71,4 +74,20 @@ public interface RdsConfigV3Endpoint {
             nickname = "testRdsConnectionInWorkspace")
     RdsTestResult testRdsConnection(@PathParam("workspaceId") Long workspaceId, @Valid RDSTestRequest rdsTestRequest);
 
+    @PUT
+    @Path("{name}/attach")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = RdsConfigOpDescription.ATTACH_TO_ENVIRONMENTS, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
+            nickname = "attachRdsResourceToEnvironments")
+    RDSConfigResponse attachToEnvironments(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name, @NotEmpty Set<String> environmentNames);
+
+    @PUT
+    @Path("{name}/detach")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = RdsConfigOpDescription.DETACH_FROM_ENVIRONMENTS, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
+            nickname = "detachRdsResourceFromEnvironments")
+    RDSConfigResponse detachFromEnvironments(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
+            @NotEmpty Set<String> environmentNames);
 }

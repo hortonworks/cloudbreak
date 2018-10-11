@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -91,7 +92,7 @@ public class LdapConfig implements ProvisionEntity, EnvironmentAwareResource {
 
     @ManyToMany(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
     @JoinTable(name = "env_ldap", joinColumns = @JoinColumn(name = "ldapid"), inverseJoinColumns = @JoinColumn(name = "envid"))
-    private Set<EnvironmentView> environments;
+    private Set<EnvironmentView> environments = new HashSet<>();
 
     public LdapConfig copyWithoutWorkspace() {
         LdapConfig copy = new LdapConfig();
@@ -116,6 +117,7 @@ public class LdapConfig implements ProvisionEntity, EnvironmentAwareResource {
         copy.setGroupMemberAttribute(groupMemberAttribute);
         copy.setDomain(domain);
         copy.setAdminGroup(adminGroup);
+        copy.setEnvironments(environments);
         return copy;
     }
 

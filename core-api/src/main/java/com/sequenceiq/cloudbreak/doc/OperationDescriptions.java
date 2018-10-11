@@ -267,6 +267,8 @@ public class OperationDescriptions {
         public static final String GET_BY_NAME_IN_WORKSPACE = "get LDAP config by name in workspace";
         public static final String CREATE_IN_WORKSPACE = "create LDAP config in workspace";
         public static final String DELETE_BY_NAME_IN_WORKSPACE = "delete LDAP config by name in workspace";
+        public static final String ATTACH_TO_ENVIRONMENTS = "attach ldap resource to environemnts";
+        public static final String DETACH_FROM_ENVIRONMENTS = "detach ldap resource from environemnts";
     }
 
     public static class UtilityOpDescription {
@@ -298,6 +300,8 @@ public class OperationDescriptions {
         public static final String CREATE_IN_WORKSPACE = "create RDS config in workspace";
         public static final String DELETE_BY_NAME_IN_WORKSPACE = "delete RDS config by name in workspace";
         public static final String GET_REQUEST_IN_WORKSPACE = "get request in workspace";
+        public static final String ATTACH_TO_ENVIRONMENTS = "attach rds resource to environemnts";
+        public static final String DETACH_FROM_ENVIRONMENTS = "detach rds resource from environemnts";
     }
 
     public static class ProxyConfigOpDescription {
@@ -315,6 +319,8 @@ public class OperationDescriptions {
         public static final String GET_BY_NAME_IN_WORKSPACE = "get proxy configuration by name in workspace";
         public static final String CREATE_IN_WORKSPACE = "create proxy configuration in workspace";
         public static final String DELETE_BY_NAME_IN_WORKSPACE = "delete proxy configuration by name in workspace";
+        public static final String ATTACH_TO_ENVIRONMENTS = "attach proxy resource to environemnts";
+        public static final String DETACH_FROM_ENVIRONMENTS = "detach proxy resource from environemnts";
     }
 
     public static class ManagementPackOpDescription {
@@ -449,5 +455,14 @@ public class OperationDescriptions {
 
     public static class KnoxServicesOpDescription {
         public static final String LIST_IN_WORKSPACE_FOR_BLUEPRINT = "list supported exposable services for the specified blueprint";
+    }
+
+    public static class EnvironmentOpDescription {
+
+        public static final String CREATE = "Create an environment.";
+        public static final String GET = "Get an environment.";
+        public static final String ATTACH_RESOURCES = "Attach resources to an environment.";
+        public static final String DETACH_RESOURCES = "Detach resources from an environment.";
+        public static final String LIST = "List all environments in the workspace.";
     }
 }

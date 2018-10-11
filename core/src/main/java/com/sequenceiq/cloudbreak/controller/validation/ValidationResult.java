@@ -22,7 +22,7 @@ public class ValidationResult {
         this.errors = errors;
         formattedErrors = IntStream.range(0, errors.size())
                 .mapToObj(i -> i + 1 + ". " + errors.get(i))
-                .collect(Collectors.joining("\n"));
+                .collect(Collectors.joining("\n "));
     }
 
     public ValidationResult merge(ValidationResult other) {

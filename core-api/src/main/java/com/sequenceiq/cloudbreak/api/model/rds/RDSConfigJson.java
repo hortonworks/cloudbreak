@@ -1,9 +1,13 @@
 package com.sequenceiq.cloudbreak.api.model.rds;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.RDSConfig;
 import com.sequenceiq.cloudbreak.validation.ValidRDSConfigJson;
 
@@ -27,6 +31,9 @@ public abstract class RDSConfigJson implements JsonEntity {
 
     @ApiModelProperty(RDSConfig.CONNECTOR_JAR_URL)
     private String connectorJarUrl;
+
+    @ApiModelProperty(ModelDescriptions.ENVIRONMENTS)
+    private Set<String> environments = new HashSet<>();
 
     public String getConnectionURL() {
         return connectionURL;
@@ -60,4 +67,11 @@ public abstract class RDSConfigJson implements JsonEntity {
         this.connectorJarUrl = connectorJarUrl;
     }
 
+    public Set<String> getEnvironments() {
+        return environments;
+    }
+
+    public void setEnvironments(Set<String> environments) {
+        this.environments = environments;
+    }
 }
