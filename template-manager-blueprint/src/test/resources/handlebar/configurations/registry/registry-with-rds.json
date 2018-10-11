@@ -2,11 +2,13 @@
 
   "registry-common": {
     "properties": {
+      "jar.storage.type": "local",
       "registry.storage.connector.user": "heyitsme",
       "registry.storage.connector.password": "iamsoosecure",
       "database_name": "registry",
       "registry.storage.db.hostname": "10.1.1.1:3306",
-      "registry.storage.type": "mysql"
+      "registry.storage.type": "mysql",
+      "registry.storage.connector.connectURI":"jdbc:mysql://10.1.1.1:3306/registry"
     }
   },
   "registry-env": {
