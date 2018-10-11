@@ -1,0 +1,5 @@
+{
+  "hive-site": {
+    "hive.metastore.warehouse.dir": "/somewhere/else"
+  }
+}

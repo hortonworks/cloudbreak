@@ -35,6 +35,7 @@ public class AzureAdlsGen2ClusterTest extends CloudbreakTest {
                 getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_USER),
                 getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_PASSWORD)),
                 "check ambari is running and components available");
+        then(Stack.checkCloudStoragePropertiesInBlueprint());
     }
 
     @Test(priority = 20)
