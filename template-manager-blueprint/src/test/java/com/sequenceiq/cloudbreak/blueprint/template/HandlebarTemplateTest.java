@@ -130,7 +130,8 @@ public class HandlebarTemplateTest {
                         registryRdsConfigWhenRdsPresentedThenShouldReturnWithRdsConfig()},
                 {"blueprints/configurations/registry/rds.handlebars", "configurations/registry/registry-without-rds.json",
                         registryWithoutRdsConfigWhenRdsNotPresentedThenShouldReturnWithoutRdsConfig()},
-
+                {"blueprints/configurations/registry/rds.handlebars", "configurations/registry/registry-with-postgres-rds.json",
+                        registryRdsConfigWhenPostGresDBEngineShouldReturnWithCorrectDatabaseTypeConfig()},
 
                 // YARN
                 {"blueprints/configurations/yarn/global.handlebars", "configurations/yarn/global-without-container.json",
@@ -618,6 +619,15 @@ public class HandlebarTemplateTest {
 
     public static Map<String, Object> registryRdsConfigWhenRdsPresentedThenShouldReturnWithRdsConfig() {
         RDSConfig rdsConfig = TestUtil.rdsConfig(RdsType.REGISTRY, DatabaseVendor.MYSQL);
+        BlueprintView blueprintView = new BlueprintView("blueprintText", "2.6", "HDF");
+        return new TemplateModelContextBuilder()
+                .withRdsConfigs(Sets.newHashSet(rdsConfig))
+                .withBlueprintView(blueprintView)
+                .build();
+    }
+
+    public static Map<String, Object> registryRdsConfigWhenPostGresDBEngineShouldReturnWithCorrectDatabaseTypeConfig() {
+        RDSConfig rdsConfig = TestUtil.rdsConfig(RdsType.REGISTRY, DatabaseVendor.POSTGRES);
         BlueprintView blueprintView = new BlueprintView("blueprintText", "2.6", "HDF");
         return new TemplateModelContextBuilder()
                 .withRdsConfigs(Sets.newHashSet(rdsConfig))

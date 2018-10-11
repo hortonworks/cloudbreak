@@ -1,0 +1,20 @@
+{
+
+  "registry-common": {
+    "properties": {
+      "jar.storage.type": "local",
+      "registry.storage.connector.user": "heyitsme",
+      "registry.storage.connector.password": "iamsoosecure",
+      "database_name": "registry",
+      "registry.storage.db.hostname": "10.1.1.1:5432",
+      "registry.storage.type": "postgresql",
+      "registry.storage.connector.connectURI":"jdbc:postgresql://10.1.1.1:5432/registry"
+    }
+  },
+  "registry-env": {
+    "properties": {
+      "create_db_dbuser": "false"
+    }
+  }
+
+}
