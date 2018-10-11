@@ -25,6 +25,36 @@ type Client struct {
 }
 
 /*
+AttachRdsResourceToEnvironments attaches rds resource to environemnts
+
+An RDS Configuration describe a connection to an external Relational Database Service that can be used as the Hive Metastore.
+*/
+func (a *Client) AttachRdsResourceToEnvironments(params *AttachRdsResourceToEnvironmentsParams) (*AttachRdsResourceToEnvironmentsOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewAttachRdsResourceToEnvironmentsParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "attachRdsResourceToEnvironments",
+		Method:             "PUT",
+		PathPattern:        "/v3/{workspaceId}/rdsconfigs/{name}/attach",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &AttachRdsResourceToEnvironmentsReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*AttachRdsResourceToEnvironmentsOK), nil
+
+}
+
+/*
 CreateRdsConfigInWorkspace creates r d s config in workspace
 
 An RDS Configuration describe a connection to an external Relational Database Service that can be used as the Hive Metastore.
@@ -81,6 +111,36 @@ func (a *Client) DeleteRdsConfigInWorkspace(params *DeleteRdsConfigInWorkspacePa
 		return nil, err
 	}
 	return result.(*DeleteRdsConfigInWorkspaceOK), nil
+
+}
+
+/*
+DetachRdsResourceFromEnvironments detaches rds resource from environemnts
+
+An RDS Configuration describe a connection to an external Relational Database Service that can be used as the Hive Metastore.
+*/
+func (a *Client) DetachRdsResourceFromEnvironments(params *DetachRdsResourceFromEnvironmentsParams) (*DetachRdsResourceFromEnvironmentsOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewDetachRdsResourceFromEnvironmentsParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "detachRdsResourceFromEnvironments",
+		Method:             "PUT",
+		PathPattern:        "/v3/{workspaceId}/rdsconfigs/{name}/detach",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &DetachRdsResourceFromEnvironmentsReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*DetachRdsResourceFromEnvironmentsOK), nil
 
 }
 

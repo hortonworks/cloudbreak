@@ -898,6 +898,41 @@ var (
 			Usage: "repository GPG url",
 		},
 	}
+	FlEnvironmentCredential = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "credential",
+			Usage: "name of the credential",
+		},
+	}
+	FlEnvironmentRegions = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name:  "regions",
+			Usage: "region names for the environment",
+		},
+	}
+	FlEnvironmentLdaps = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name:  "ldaps",
+			Usage: "ldap config names for the environment",
+		},
+	}
+	FlEnvironmentProxies = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name:  "proxies",
+			Usage: "proxy config names for the environment",
+		},
+	}
+	FlEnvironmentRdses = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name:  "rds",
+			Usage: "rds config names for the environment",
+		},
+	}
 )
 
 type RequiredFlag struct {

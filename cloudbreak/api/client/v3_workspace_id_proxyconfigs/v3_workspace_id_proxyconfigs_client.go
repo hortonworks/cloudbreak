@@ -25,6 +25,36 @@ type Client struct {
 }
 
 /*
+AttachProxyResourceToEnvironments attaches proxy resource to environemnts
+
+An proxy Configuration describe a connection to an external proxy server which provides internet access cluster members. It's applied for package manager and Ambari too
+*/
+func (a *Client) AttachProxyResourceToEnvironments(params *AttachProxyResourceToEnvironmentsParams) (*AttachProxyResourceToEnvironmentsOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewAttachProxyResourceToEnvironmentsParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "attachProxyResourceToEnvironments",
+		Method:             "PUT",
+		PathPattern:        "/v3/{workspaceId}/proxyconfigs/{name}/attach",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &AttachProxyResourceToEnvironmentsReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*AttachProxyResourceToEnvironmentsOK), nil
+
+}
+
+/*
 CreateProxyconfigInWorkspace creates proxy configuration in workspace
 
 An proxy Configuration describe a connection to an external proxy server which provides internet access cluster members. It's applied for package manager and Ambari too
@@ -81,6 +111,36 @@ func (a *Client) DeleteProxyconfigInWorkspace(params *DeleteProxyconfigInWorkspa
 		return nil, err
 	}
 	return result.(*DeleteProxyconfigInWorkspaceOK), nil
+
+}
+
+/*
+DetachProxyResourceFromEnvironments detaches proxy resource from environemnts
+
+An proxy Configuration describe a connection to an external proxy server which provides internet access cluster members. It's applied for package manager and Ambari too
+*/
+func (a *Client) DetachProxyResourceFromEnvironments(params *DetachProxyResourceFromEnvironmentsParams) (*DetachProxyResourceFromEnvironmentsOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewDetachProxyResourceFromEnvironmentsParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "detachProxyResourceFromEnvironments",
+		Method:             "PUT",
+		PathPattern:        "/v3/{workspaceId}/proxyconfigs/{name}/detach",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &DetachProxyResourceFromEnvironmentsReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*DetachProxyResourceFromEnvironmentsOK), nil
 
 }
 

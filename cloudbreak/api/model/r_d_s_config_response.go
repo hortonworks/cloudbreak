@@ -44,6 +44,10 @@ type RDSConfigResponse struct {
 	// Required: true
 	DatabaseEngineDisplayName *string `json:"databaseEngineDisplayName"`
 
+	// Environments of the resource
+	// Unique: true
+	Environments []string `json:"environments"`
+
 	// id of the resource
 	ID int64 `json:"id,omitempty"`
 
@@ -78,6 +82,8 @@ type RDSConfigResponse struct {
 /* polymorph RDSConfigResponse databaseEngine false */
 
 /* polymorph RDSConfigResponse databaseEngineDisplayName false */
+
+/* polymorph RDSConfigResponse environments false */
 
 /* polymorph RDSConfigResponse id false */
 
@@ -116,6 +122,11 @@ func (m *RDSConfigResponse) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateDatabaseEngineDisplayName(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateEnvironments(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -184,6 +195,19 @@ func (m *RDSConfigResponse) validateDatabaseEngine(formats strfmt.Registry) erro
 func (m *RDSConfigResponse) validateDatabaseEngineDisplayName(formats strfmt.Registry) error {
 
 	if err := validate.Required("databaseEngineDisplayName", "body", m.DatabaseEngineDisplayName); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *RDSConfigResponse) validateEnvironments(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Environments) { // not required
+		return nil
+	}
+
+	if err := validate.UniqueItems("environments", "body", m.Environments); err != nil {
 		return err
 	}
 

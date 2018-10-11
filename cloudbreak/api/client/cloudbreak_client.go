@@ -40,6 +40,7 @@ import (
 	"github.com/hortonworks/cb-cli/cloudbreak/api/client/v3_workspace_id_blueprints"
 	"github.com/hortonworks/cb-cli/cloudbreak/api/client/v3_workspace_id_connectors"
 	"github.com/hortonworks/cb-cli/cloudbreak/api/client/v3_workspace_id_credentials"
+	"github.com/hortonworks/cb-cli/cloudbreak/api/client/v3_workspace_id_environments"
 	"github.com/hortonworks/cb-cli/cloudbreak/api/client/v3_workspace_id_events"
 	"github.com/hortonworks/cb-cli/cloudbreak/api/client/v3_workspace_id_filesystems"
 	"github.com/hortonworks/cb-cli/cloudbreak/api/client/v3_workspace_id_flexsubscriptions"
@@ -155,6 +156,8 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *Cloudbreak
 	cli.V3WorkspaceIDConnectors = v3_workspace_id_connectors.New(transport, formats)
 
 	cli.V3WorkspaceIDCredentials = v3_workspace_id_credentials.New(transport, formats)
+
+	cli.V3WorkspaceIDEnvironments = v3_workspace_id_environments.New(transport, formats)
 
 	cli.V3WorkspaceIDEvents = v3_workspace_id_events.New(transport, formats)
 
@@ -288,6 +291,8 @@ type Cloudbreak struct {
 
 	V3WorkspaceIDCredentials *v3_workspace_id_credentials.Client
 
+	V3WorkspaceIDEnvironments *v3_workspace_id_environments.Client
+
 	V3WorkspaceIDEvents *v3_workspace_id_events.Client
 
 	V3WorkspaceIDFilesystems *v3_workspace_id_filesystems.Client
@@ -382,6 +387,8 @@ func (c *Cloudbreak) SetTransport(transport runtime.ClientTransport) {
 	c.V3WorkspaceIDConnectors.SetTransport(transport)
 
 	c.V3WorkspaceIDCredentials.SetTransport(transport)
+
+	c.V3WorkspaceIDEnvironments.SetTransport(transport)
 
 	c.V3WorkspaceIDEvents.SetTransport(transport)
 

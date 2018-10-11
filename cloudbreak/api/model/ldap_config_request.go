@@ -42,6 +42,10 @@ type LdapConfigRequest struct {
 	// domain in LDAP server (e.g. ad.seq.com).
 	Domain string `json:"domain,omitempty"`
 
+	// Environments of the resource
+	// Unique: true
+	Environments []string `json:"environments"`
+
 	// Group Member Attribute (defaults to member)
 	GroupMemberAttribute string `json:"groupMemberAttribute,omitempty"`
 
@@ -101,6 +105,8 @@ type LdapConfigRequest struct {
 
 /* polymorph LdapConfigRequest domain false */
 
+/* polymorph LdapConfigRequest environments false */
+
 /* polymorph LdapConfigRequest groupMemberAttribute false */
 
 /* polymorph LdapConfigRequest groupNameAttribute false */
@@ -145,6 +151,11 @@ func (m *LdapConfigRequest) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateDirectoryType(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateEnvironments(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -250,6 +261,19 @@ func (m *LdapConfigRequest) validateDirectoryType(formats strfmt.Registry) error
 
 	// value enum
 	if err := m.validateDirectoryTypeEnum("directoryType", "body", m.DirectoryType); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *LdapConfigRequest) validateEnvironments(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Environments) { // not required
+		return nil
+	}
+
+	if err := validate.UniqueItems("environments", "body", m.Environments); err != nil {
 		return err
 	}
 

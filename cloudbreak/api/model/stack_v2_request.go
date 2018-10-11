@@ -35,6 +35,11 @@ type StackV2Request struct {
 	// id of the related flex subscription
 	FlexID int64 `json:"flexId,omitempty"`
 
+	// port of the gateway secured proxy
+	// Maximum: 65535
+	// Minimum: 1025
+	GatewayPort int32 `json:"gatewayPort,omitempty"`
+
 	// general configuration parameters for a cluster (e.g. 'name', 'credentialname')
 	// Required: true
 	General *GeneralSettings `json:"general"`
@@ -81,6 +86,8 @@ type StackV2Request struct {
 
 /* polymorph StackV2Request flexId false */
 
+/* polymorph StackV2Request gatewayPort false */
+
 /* polymorph StackV2Request general false */
 
 /* polymorph StackV2Request hdpVersion false */
@@ -118,6 +125,11 @@ func (m *StackV2Request) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateFailurePolicy(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateGatewayPort(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -215,6 +227,23 @@ func (m *StackV2Request) validateFailurePolicy(formats strfmt.Registry) error {
 			}
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (m *StackV2Request) validateGatewayPort(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.GatewayPort) { // not required
+		return nil
+	}
+
+	if err := validate.MinimumInt("gatewayPort", "body", int64(m.GatewayPort), 1025, false); err != nil {
+		return err
+	}
+
+	if err := validate.MaximumInt("gatewayPort", "body", int64(m.GatewayPort), 65535, false); err != nil {
+		return err
 	}
 
 	return nil

@@ -25,6 +25,36 @@ type Client struct {
 }
 
 /*
+AttachLdapResourceToEnvironments attaches ldap resource to environemnts
+
+LDAP server integration enables the user to provide a central place to store usernames and passwords for the users of his/her clusters.
+*/
+func (a *Client) AttachLdapResourceToEnvironments(params *AttachLdapResourceToEnvironmentsParams) (*AttachLdapResourceToEnvironmentsOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewAttachLdapResourceToEnvironmentsParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "attachLdapResourceToEnvironments",
+		Method:             "PUT",
+		PathPattern:        "/v3/{workspaceId}/ldapconfigs/{name}/attach",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &AttachLdapResourceToEnvironmentsReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*AttachLdapResourceToEnvironmentsOK), nil
+
+}
+
+/*
 CreateLdapConfigsInWorkspace creates l d a p config in workspace
 
 LDAP server integration enables the user to provide a central place to store usernames and passwords for the users of his/her clusters.
@@ -81,6 +111,36 @@ func (a *Client) DeleteLdapConfigsInWorkspace(params *DeleteLdapConfigsInWorkspa
 		return nil, err
 	}
 	return result.(*DeleteLdapConfigsInWorkspaceOK), nil
+
+}
+
+/*
+DetachLdapResourceFromEnvironments detaches ldap resource from environemnts
+
+LDAP server integration enables the user to provide a central place to store usernames and passwords for the users of his/her clusters.
+*/
+func (a *Client) DetachLdapResourceFromEnvironments(params *DetachLdapResourceFromEnvironmentsParams) (*DetachLdapResourceFromEnvironmentsOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewDetachLdapResourceFromEnvironmentsParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "detachLdapResourceFromEnvironments",
+		Method:             "PUT",
+		PathPattern:        "/v3/{workspaceId}/ldapconfigs/{name}/detach",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &DetachLdapResourceFromEnvironmentsReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*DetachLdapResourceFromEnvironmentsOK), nil
 
 }
 

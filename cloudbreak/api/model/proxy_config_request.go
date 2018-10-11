@@ -23,6 +23,10 @@ type ProxyConfigRequest struct {
 	// Min Length: 0
 	Description *string `json:"description,omitempty"`
 
+	// Environments of the resource
+	// Unique: true
+	Environments []string `json:"environments"`
+
 	// Name of the proxy configuration resource
 	// Required: true
 	// Max Length: 100
@@ -57,6 +61,8 @@ type ProxyConfigRequest struct {
 
 /* polymorph ProxyConfigRequest description false */
 
+/* polymorph ProxyConfigRequest environments false */
+
 /* polymorph ProxyConfigRequest name false */
 
 /* polymorph ProxyConfigRequest password false */
@@ -74,6 +80,11 @@ func (m *ProxyConfigRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateDescription(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateEnvironments(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -115,6 +126,19 @@ func (m *ProxyConfigRequest) validateDescription(formats strfmt.Registry) error 
 	}
 
 	if err := validate.MaxLength("description", "body", string(*m.Description), 1000); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *ProxyConfigRequest) validateEnvironments(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Environments) { // not required
+		return nil
+	}
+
+	if err := validate.UniqueItems("environments", "body", m.Environments); err != nil {
 		return err
 	}
 

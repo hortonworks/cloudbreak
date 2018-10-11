@@ -73,6 +73,9 @@ type StackRequest struct {
 	// id of the related flex subscription
 	FlexID int64 `json:"flexId,omitempty"`
 
+	// port of the gateway secured proxy
+	GatewayPort int32 `json:"gatewayPort,omitempty"`
+
 	// specific version of HDP
 	HdpVersion string `json:"hdpVersion,omitempty"`
 
@@ -160,6 +163,8 @@ type StackRequest struct {
 /* polymorph StackRequest failurePolicy false */
 
 /* polymorph StackRequest flexId false */
+
+/* polymorph StackRequest gatewayPort false */
 
 /* polymorph StackRequest hdpVersion false */
 

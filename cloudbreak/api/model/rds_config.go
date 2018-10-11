@@ -33,6 +33,10 @@ type RdsConfig struct {
 	// URL that points to the jar of the connection driver(connector)
 	ConnectorJarURL string `json:"connectorJarUrl,omitempty"`
 
+	// Environments of the resource
+	// Unique: true
+	Environments []string `json:"environments"`
+
 	// Name of the RDS configuration resource
 	// Required: true
 	Name *string `json:"name"`
@@ -52,6 +56,8 @@ type RdsConfig struct {
 /* polymorph RdsConfig connectionUserName false */
 
 /* polymorph RdsConfig connectorJarUrl false */
+
+/* polymorph RdsConfig environments false */
 
 /* polymorph RdsConfig name false */
 
@@ -74,6 +80,11 @@ func (m *RdsConfig) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateConnectionUserName(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateEnvironments(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -120,6 +131,19 @@ func (m *RdsConfig) validateConnectionURL(formats strfmt.Registry) error {
 func (m *RdsConfig) validateConnectionUserName(formats strfmt.Registry) error {
 
 	if err := validate.Required("connectionUserName", "body", m.ConnectionUserName); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *RdsConfig) validateEnvironments(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Environments) { // not required
+		return nil
+	}
+
+	if err := validate.UniqueItems("environments", "body", m.Environments); err != nil {
 		return err
 	}
 
