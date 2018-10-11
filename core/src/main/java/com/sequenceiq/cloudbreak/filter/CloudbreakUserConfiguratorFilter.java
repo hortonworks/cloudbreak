@@ -13,13 +13,13 @@ import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 
-public class IdentityUserConfiguratorFilter extends OncePerRequestFilter {
+public class CloudbreakUserConfiguratorFilter extends OncePerRequestFilter {
 
     private final RestRequestThreadLocalService restRequestThreadLocalService;
 
     private final AuthenticatedUserService authenticatedUserService;
 
-    public IdentityUserConfiguratorFilter(RestRequestThreadLocalService restRequestThreadLocalService, AuthenticatedUserService authenticatedUserService) {
+    public CloudbreakUserConfiguratorFilter(RestRequestThreadLocalService restRequestThreadLocalService, AuthenticatedUserService authenticatedUserService) {
         this.restRequestThreadLocalService = restRequestThreadLocalService;
         this.authenticatedUserService = authenticatedUserService;
     }
@@ -27,8 +27,8 @@ public class IdentityUserConfiguratorFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         CloudbreakUser cloudbreakUser = authenticatedUserService.getCbUser();
-        restRequestThreadLocalService.setIdentityUser(cloudbreakUser);
+        restRequestThreadLocalService.setCloudbreakUser(cloudbreakUser);
         filterChain.doFilter(request, response);
-        restRequestThreadLocalService.removeIdentityUser();
+        restRequestThreadLocalService.removeCloudbreakUser();
     }
 }

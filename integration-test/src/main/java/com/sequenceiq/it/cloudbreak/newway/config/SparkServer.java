@@ -44,13 +44,6 @@ public class SparkServer {
 
     private final java.util.Stack<Call> callStack = new java.util.Stack<>();
 
-    public SparkServer() {
-    }
-
-    public SparkServer(int port) {
-        this.port = port;
-    }
-
     public Map<Call, Response> getRequestResponseMap() {
         return requestResponseMap;
     }
@@ -60,6 +53,11 @@ public class SparkServer {
     }
 
     public void initSparkService() {
+        initSparkService(port);
+    }
+
+    public void initSparkService(int sparkPort) {
+        port = sparkPort;
         if (sparkService == null) {
             sparkService = Service.ignite();
         }

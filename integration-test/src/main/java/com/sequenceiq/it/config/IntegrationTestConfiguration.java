@@ -2,7 +2,6 @@ package com.sequenceiq.it.config;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ThreadLocalRandom;
 
 import org.kohsuke.randname.RandomNameGenerator;
 import org.slf4j.Logger;
@@ -12,7 +11,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.EnumerablePropertySource;
@@ -23,7 +21,6 @@ import org.testng.TestNG;
 
 import com.sequenceiq.it.SuiteContext;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
-import com.sequenceiq.it.cloudbreak.newway.config.SparkServer;
 
 @Configuration
 @ComponentScan("com.sequenceiq.it")
@@ -78,13 +75,5 @@ public class IntegrationTestConfiguration {
             }
         }
         return rtn;
-    }
-
-    @Bean(name = "imageCatalogMockServer")
-    @Scope("prototype")
-    public SparkServer imageCatalogMockServer() {
-        //get random range of ports
-        int randomPort = ThreadLocalRandom.current().nextInt(9400, 9749 + 1);
-        return new SparkServer(randomPort);
     }
 }

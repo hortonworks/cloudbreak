@@ -37,9 +37,9 @@ public class FilterConfiguration {
     }
 
     @Bean
-    public FilterRegistrationBean<IdentityUserConfiguratorFilter> identityUserConfiguratorFilterRegistrationBean() {
-        FilterRegistrationBean<IdentityUserConfiguratorFilter> registrationBean = new FilterRegistrationBean<>();
-        IdentityUserConfiguratorFilter filter = new IdentityUserConfiguratorFilter(restRequestThreadLocalService, authenticatedUserService);
+    public FilterRegistrationBean<CloudbreakUserConfiguratorFilter> identityUserConfiguratorFilterRegistrationBean() {
+        FilterRegistrationBean<CloudbreakUserConfiguratorFilter> registrationBean = new FilterRegistrationBean<>();
+        CloudbreakUserConfiguratorFilter filter = new CloudbreakUserConfiguratorFilter(restRequestThreadLocalService, authenticatedUserService);
         registrationBean.setFilter(filter);
         registrationBean.setOrder(Integer.MAX_VALUE);
         return registrationBean;
