@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.converter;
 import static com.sequenceiq.cloudbreak.api.model.DatabaseVendor.ORACLE11;
 import static com.sequenceiq.cloudbreak.api.model.DatabaseVendor.ORACLE12;
 
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -11,6 +13,7 @@ import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.model.rds.OracleParameters;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.domain.view.CompactView;
 
 @Component
 public class RDSConfigToRDSConfigRequestConverter extends AbstractConversionServiceAwareConverter<RDSConfig, RDSConfigRequest> {
@@ -28,6 +31,8 @@ public class RDSConfigToRDSConfigRequestConverter extends AbstractConversionServ
         rdsConfigRequest.setType(source.getType());
         DatabaseVendor databaseEngine = source.getDatabaseEngine();
         rdsConfigRequest.setOracle(prepareOracleRequest(databaseEngine));
+        rdsConfigRequest.setEnvironments(source.getEnvironments().stream()
+                .map(CompactView::getName).collect(Collectors.toSet()));
         return rdsConfigRequest;
     }
 

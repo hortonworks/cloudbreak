@@ -43,6 +43,7 @@ public class EndpointConfig extends ResourceConfig {
         ClusterTemplateV3Controller.class,
         CredentialController.class,
         CredentialV3Controller.class,
+        EnvironmentV3Controller.class,
         FlexSubscriptionController.class,
         FlexSubscriptionV3Controller.class,
         ImageCatalogV1Controller.class,

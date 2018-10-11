@@ -118,9 +118,8 @@ public class RdsConfigController extends AbstractRdsConfigController implements 
     private RDSConfigResponse createRdsConfig(RDSConfigRequest rdsConfigJson) {
         RDSConfig rdsConfig = getConversionService().convert(rdsConfigJson, RDSConfig.class);
         try {
-            User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-            Workspace workspace = getRdsConfigService().getWorkspaceService().get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
-            rdsConfig = getRdsConfigService().create(rdsConfig, workspace, user);
+            rdsConfig = getRdsConfigService().createInEnvironment(rdsConfig, rdsConfigJson.getEnvironments(),
+                    restRequestThreadLocalService.getRequestedWorkspaceId());
             notify(ResourceEvent.RDS_CONFIG_CREATED);
         } catch (DataIntegrityViolationException ex) {
             String msg = String.format("Error with resource [%s], %s", APIResourceType.RDS_CONFIG, getProperSqlErrorMessage(ex));

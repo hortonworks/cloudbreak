@@ -1,10 +1,13 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
+import com.sequenceiq.cloudbreak.domain.view.CompactView;
 
 @Component
 public class ProxyConfigToProxyConfigResponseConverter extends AbstractConversionServiceAwareConverter<ProxyConfig, ProxyConfigResponse> {
@@ -20,6 +23,8 @@ public class ProxyConfigToProxyConfigResponseConverter extends AbstractConversio
         response.setServerHost(source.getServerHost());
         response.setServerPort(source.getServerPort());
         response.setUserName(source.getUserName());
+        response.setEnvironments(source.getEnvironments().stream()
+                .map(CompactView::getName).collect(Collectors.toSet()));
         return response;
     }
 }

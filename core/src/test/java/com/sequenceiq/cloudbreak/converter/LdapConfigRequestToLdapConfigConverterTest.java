@@ -23,7 +23,6 @@ public class LdapConfigRequestToLdapConfigConverterTest extends AbstractJsonConv
         // WHEN
         LdapConfig result = underTest.convert(getRequest("stack/ldap_config.json"));
         // THEN
-        // TODO remove skippedFields: environments
         assertAllFieldsNotNull(result, Collections.singletonList("environments"));
     }
 

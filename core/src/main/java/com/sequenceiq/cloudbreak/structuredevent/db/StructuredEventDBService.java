@@ -41,7 +41,7 @@ public class StructuredEventDBService extends AbstractWorkspaceAwareResourceServ
 
     @Override
     public StructuredEventEntity create(StructuredEventEntity resource, @Nonnull Long workspaceId, User user) {
-        Workspace workspace = getWorkspaceService().getById(workspaceId);
+        Workspace workspace = getWorkspaceService().getByIdWithoutAuth(workspaceId);
         return create(resource, workspace, user);
     }
 

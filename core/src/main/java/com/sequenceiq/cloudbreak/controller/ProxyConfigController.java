@@ -16,10 +16,8 @@ import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigResponse;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.converter.mapper.ProxyConfigMapper;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigService;
-import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Controller
 @Transactional(TxType.NEVER)
@@ -30,9 +28,6 @@ public class ProxyConfigController extends NotificationController implements Pro
 
     @Autowired
     private ProxyConfigMapper proxyConfigMapper;
-
-    @Inject
-    private UserService userService;
 
     @Inject
     private RestRequestThreadLocalService restRequestThreadLocalService;
@@ -106,8 +101,8 @@ public class ProxyConfigController extends NotificationController implements Pro
 
     private ProxyConfigResponse createInDefaultWorkspace(ProxyConfigRequest request) {
         ProxyConfig proxyConfig = proxyConfigMapper.mapRequestToEntity(request);
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        proxyConfig = proxyConfigService.create(proxyConfig, restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        proxyConfig = proxyConfigService.createInEnvironment(proxyConfig, request.getEnvironments(),
+                restRequestThreadLocalService.getRequestedWorkspaceId());
         return notifyAndReturn(proxyConfig, ResourceEvent.PROXY_CONFIG_CREATED);
     }
 

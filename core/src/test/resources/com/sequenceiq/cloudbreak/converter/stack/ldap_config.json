@@ -11,5 +11,6 @@
   "groupSearchBase": "cn=groups,dc=example,dc=org",
   "userNameAttribute": "cn",
   "domain": "ad.hdc.com",
-  "adminGroup": "ambariadmins"
+  "adminGroup": "ambariadmins",
+  "environments": ["env1", "env2"]
 }

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -86,7 +87,7 @@ public class RDSConfig implements ProvisionEntity, EnvironmentAwareResource {
 
     @ManyToMany(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
     @JoinTable(name = "env_rds", joinColumns = @JoinColumn(name = "rdsid"), inverseJoinColumns = @JoinColumn(name = "envid"))
-    private Set<EnvironmentView> environments;
+    private Set<EnvironmentView> environments = new HashSet<>();
 
     public Long getId() {
         return id;

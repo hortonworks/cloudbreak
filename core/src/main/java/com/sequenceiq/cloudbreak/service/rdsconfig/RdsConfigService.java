@@ -22,17 +22,17 @@ import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionValidator;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.repository.environment.EnvironmentResourceRepository;
 import com.sequenceiq.cloudbreak.repository.RdsConfigRepository;
-import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.environment.AbstractEnvironmentAwareService;
 import com.sequenceiq.cloudbreak.util.NameUtil;
 
 @Service
-public class RdsConfigService extends AbstractWorkspaceAwareResourceService<RDSConfig> {
+public class RdsConfigService extends AbstractEnvironmentAwareService<RDSConfig> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RdsConfigService.class);
 
@@ -126,7 +126,7 @@ public class RdsConfigService extends AbstractWorkspaceAwareResourceService<RDSC
     }
 
     @Override
-    public WorkspaceResourceRepository<RDSConfig, Long> repository() {
+    public EnvironmentResourceRepository<RDSConfig, Long> repository() {
         return rdsConfigRepository;
     }
 

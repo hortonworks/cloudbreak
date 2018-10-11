@@ -22,6 +22,7 @@ public interface ProxyConfigMapper {
     })
     ProxyConfig mapRequestToEntity(ProxyConfigRequest proxyConfigRequest);
 
+    @Mappings(@Mapping(target = "environments", ignore = true))
     ProxyConfigResponse mapEntityToResponse(ProxyConfig proxyConfigRequest);
 
     Set<ProxyConfigResponse> mapEntityToResponse(Set<ProxyConfig> proxyConfigRequest);

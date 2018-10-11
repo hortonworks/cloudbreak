@@ -78,6 +78,8 @@ public class Notes {
     public static final String WORKSPACE_NOTES = "Workspaces are a way of grouping resources, workspace owners can add users to their workspaces"
             + " with different permission sets";
     public static final String AUDIT_EVENTS_NOTES = "Audit event operations";
+    public static final String ENVIRONMENT_NOTES = "Environment consists of a credential and various other resources and enables users to quickly "
+            + "create clusters in given regions in a given cloud provider.";
 
     private Notes() {
     }

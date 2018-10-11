@@ -9,6 +9,8 @@ import com.sequenceiq.cloudbreak.domain.workspace.User;
 
 public interface WorkspaceAwareResourceService<T extends WorkspaceAwareResource> {
 
+    T createForLoggedInUser(T resource, Long workspaceId);
+
     T create(T resource, Long workspaceId, User user);
 
     T create(T resource, Workspace workspace, User user);

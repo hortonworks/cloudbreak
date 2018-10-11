@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
+import javax.validation.constraints.NotEmpty;
 
 import org.springframework.stereotype.Controller;
 
@@ -49,8 +50,7 @@ public class RdsConfigV3Controller extends AbstractRdsConfigController implement
     @Override
     public RDSConfigResponse createInWorkspace(Long workspaceId, RDSConfigRequest request) {
         RDSConfig rdsConfig = getConversionService().convert(request, RDSConfig.class);
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        rdsConfig = getRdsConfigService().create(rdsConfig, workspaceId, user);
+        rdsConfig = getRdsConfigService().createInEnvironment(rdsConfig, request.getEnvironments(), workspaceId);
         notify(ResourceEvent.RDS_CONFIG_CREATED);
         return getConversionService().convert(rdsConfig, RDSConfigResponse.class);
     }
@@ -67,6 +67,16 @@ public class RdsConfigV3Controller extends AbstractRdsConfigController implement
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = getRdsConfigService().getWorkspaceService().get(workspaceId, user);
         return testRdsConnection(rdsTestRequest, workspace);
+    }
+
+    @Override
+    public RDSConfigResponse attachToEnvironments(Long workspaceId, String name, @NotEmpty Set<String> environmentNames) {
+        return null;
+    }
+
+    @Override
+    public RDSConfigResponse detachFromEnvironments(Long workspaceId, String name, @NotEmpty Set<String> environmentNames) {
+        return null;
     }
 
     @Override

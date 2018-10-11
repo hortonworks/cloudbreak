@@ -137,9 +137,8 @@ public class LdapController extends NotificationController implements LdapConfig
 
     private LdapConfigResponse createConfig(LdapConfigRequest request) {
         LdapConfig ldapConfig = conversionService.convert(request, LdapConfig.class);
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
-        LdapConfig response = ldapConfigService.create(ldapConfig, workspace, user);
+        LdapConfig response = ldapConfigService.createInEnvironment(ldapConfig, request.getEnvironments(),
+                restRequestThreadLocalService.getRequestedWorkspaceId());
         notify(ResourceEvent.LDAP_CREATED);
         return conversionService.convert(response, LdapConfigResponse.class);
     }
