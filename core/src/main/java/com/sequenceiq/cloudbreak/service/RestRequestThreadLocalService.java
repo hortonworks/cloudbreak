@@ -14,7 +14,7 @@ public class RestRequestThreadLocalService {
 
     private static final ThreadLocal<Long> REQUESTED_ORG_ID = new ThreadLocal<>();
 
-    private static final ThreadLocal<CloudbreakUser> IDENTITY_USER = new ThreadLocal<>();
+    private static final ThreadLocal<CloudbreakUser> CLOUDBREAK_USER = new ThreadLocal<>();
 
     @Inject
     private CachedUserDetailsService cachedUserDetailsService;
@@ -31,20 +31,20 @@ public class RestRequestThreadLocalService {
         REQUESTED_ORG_ID.remove();
     }
 
-    public void setIdentityUser(CloudbreakUser cloudbreakUser) {
-        IDENTITY_USER.set(cloudbreakUser);
+    public void setCloudbreakUser(CloudbreakUser cloudbreakUser) {
+        CLOUDBREAK_USER.set(cloudbreakUser);
     }
 
     public CloudbreakUser getCloudbreakUser() {
-        return IDENTITY_USER.get();
+        return CLOUDBREAK_USER.get();
     }
 
-    public void removeIdentityUser() {
-        IDENTITY_USER.remove();
+    public void removeCloudbreakUser() {
+        CLOUDBREAK_USER.remove();
     }
 
     @PreAuthorize("#oauth2.hasScope('cloudbreak.autoscale')")
-    public void setIdentityUserByOwner(String owner) {
-        IDENTITY_USER.set(cachedUserDetailsService.getDetails(owner, UserFilterField.USERID));
+    public void setCloudbreakUserByOwner(String owner) {
+        CLOUDBREAK_USER.set(cachedUserDetailsService.getDetails(owner, UserFilterField.USERID));
     }
 }

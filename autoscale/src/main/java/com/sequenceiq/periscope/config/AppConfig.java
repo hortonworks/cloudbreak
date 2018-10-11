@@ -20,6 +20,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 
+import com.sequenceiq.cloudbreak.client.CaasClient;
 import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.cloudbreak.client.IdentityClient;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
@@ -43,6 +44,9 @@ public class AppConfig implements AsyncConfigurer {
 
     @Value("${periscope.client.id}")
     private String clientId;
+
+    @Value("${periscope.caas.url:}")
+    private String caasUrl;
 
     @Inject
     @Named("identityServerUrl")
@@ -77,6 +81,11 @@ public class AppConfig implements AsyncConfigurer {
         scheduler.setAutoStartup(true);
         scheduler.setJobFactory(new SimpleJobFactory());
         return scheduler;
+    }
+
+    @Bean
+    public CaasClient caasClient() {
+        return new CaasClient(caasUrl, new ConfigKey(certificateValidation, restDebug, ignorePreValidation));
     }
 
     @Bean

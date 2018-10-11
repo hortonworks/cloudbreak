@@ -50,9 +50,6 @@ public class UserDetailsService {
     @Value("${cert.ignorePreValidation}")
     private boolean ignorePreValidation;
 
-    @Value("${cb.jwt.signKey}")
-    private String jwtSignKey;
-
     @Inject
     private IdentityClient identityClient;
 
@@ -68,15 +65,12 @@ public class UserDetailsService {
         try {
             return getIdentityUser(username, filterField, clientSecret);
         } catch (UserDetailsUnavailableException e) {
-            if (jwtSignKey != null) {
-                LOGGER.info("{} Assume SSO token", e.getMessage());
-                String account = username;
-                if (username.contains(EMAIL_SEPARATOR)) {
-                    account = username.substring(username.indexOf(EMAIL_SEPARATOR) + 1);
-                }
-                return new CloudbreakUser(username, username, account);
+            LOGGER.info("{} Assume SSO token", e.getMessage());
+            String account = username;
+            if (username.contains(EMAIL_SEPARATOR)) {
+                account = username.substring(username.indexOf(EMAIL_SEPARATOR) + 1);
             }
-            throw e;
+            return new CloudbreakUser(username, username, account);
         }
     }
 

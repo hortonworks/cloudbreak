@@ -5,6 +5,7 @@ import static com.sequenceiq.it.spark.ITResponse.IMAGE_CATALOG;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.ThreadLocalRandom;
 
 import javax.inject.Inject;
 import javax.ws.rs.client.Client;
@@ -13,7 +14,6 @@ import javax.ws.rs.client.WebTarget;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.it.cloudbreak.mock.json.CBVersion;
@@ -28,14 +28,14 @@ public class ImageCatalogMockServerSetup {
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageCatalogMockServerSetup.class);
 
     @Inject
-    @Qualifier("imageCatalogMockServer")
     private SparkServer sparkServer;
 
     @Inject
     private TestParameter testParameter;
 
     public void configureImgCatalogMock() {
-        sparkServer.initSparkService();
+        int randomPort = ThreadLocalRandom.current().nextInt(9400, 9749 + 1);
+        sparkServer.initSparkService(randomPort);
         startImageCatalog();
     }
 

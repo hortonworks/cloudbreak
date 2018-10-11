@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
 
+import com.sequenceiq.cloudbreak.client.CaasClient;
 import com.sequenceiq.cloudbreak.client.IdentityClient;
 import com.sequenceiq.cloudbreak.common.service.token.CachedRemoteTokenService;
 
@@ -20,9 +21,6 @@ public class RemoteTokenConfig {
     @Value("${cb.client.secret}")
     private String clientSecret;
 
-    @Value("${cb.jwt.signKey:}")
-    private String jwtSignKey;
-
     @Inject
     @Named("identityServerUrl")
     private String identityServerUrl;
@@ -30,9 +28,12 @@ public class RemoteTokenConfig {
     @Inject
     private IdentityClient identityClient;
 
+    @Inject
+    private CaasClient caasClient;
+
     @Bean
     public ResourceServerTokenServices remoteTokenServices() {
-        return new CachedRemoteTokenService(clientId, clientSecret, identityServerUrl, jwtSignKey, identityClient);
+        return new CachedRemoteTokenService(clientId, clientSecret, identityServerUrl, caasClient, identityClient);
     }
 
 }
