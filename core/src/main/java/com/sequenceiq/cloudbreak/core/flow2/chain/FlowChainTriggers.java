@@ -31,6 +31,8 @@ public class FlowChainTriggers {
 
     public static final String STACK_IMAGE_UPDATE_TRIGGER_EVENT = "STACK_IMAGE_UPDATE_TRIGGER_EVENT";
 
+    public static final String CLUSTER_MAINTENANCE_MODE_VALIDATION_TRIGGER_EVENT = "CLUSTER_MAINTENANCE_MODE_VALIDATION_TRIGGER_EVENT";
+
     private FlowChainTriggers() {
     }
 }

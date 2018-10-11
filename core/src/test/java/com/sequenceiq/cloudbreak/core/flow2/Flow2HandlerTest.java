@@ -27,6 +27,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.context.ApplicationContext;
 import org.springframework.statemachine.ExtendedState;
@@ -38,18 +39,22 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.cedarsoftware.util.io.JsonWriter;
 import com.google.common.collect.Lists;
+import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainHandler;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChains;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.sync.ClusterSyncFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.config.FlowConfiguration;
 import com.sequenceiq.cloudbreak.core.flow2.restart.DefaultRestartAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.start.StackStartFlowConfig;
 import com.sequenceiq.cloudbreak.domain.FlowLog;
 import com.sequenceiq.cloudbreak.domain.StateStatus;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.repository.FlowLogRepository;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.flowlog.FlowLogService;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -124,6 +129,9 @@ public class Flow2HandlerTest {
     @Mock
     private TransactionService transactionService;
 
+    @Mock
+    private ClusterService clusterService;
+
     private FlowState flowState;
 
     private Event<? extends Payload> dummyEvent;
@@ -147,6 +155,9 @@ public class Flow2HandlerTest {
         given(flowConfig.createFlow(anyString(), anyLong())).willReturn(flow);
         given(flowConfig.getFlowTriggerCondition()).willReturn(flowTriggerCondition);
         given(flowTriggerCondition.isFlowTriggerable(anyLong())).willReturn(true);
+        Cluster cluster = new Cluster();
+        cluster.setStatus(Status.AVAILABLE);
+        given(clusterService.findOneByStackId(anyLong())).willReturn(cluster);
         given(flow.getCurrentState()).willReturn(flowState);
         Event<Payload> event = new Event<>(payload);
         event.setKey("KEY");
@@ -155,6 +166,29 @@ public class Flow2HandlerTest {
         verify(runningFlows, times(1)).put(eq(flow), isNull(String.class));
         verify(flowLogService, times(1))
                 .save(anyString(), nullable(String.class), eq("KEY"), any(Payload.class), any(), eq(flowConfig.getClass()), eq(flowState));
+        verify(flow, times(1)).sendEvent(anyString(), any());
+    }
+
+    @Test
+    public void testNewSyncFlowMaintenanceActive() {
+        ClusterSyncFlowConfig syncFlowConfig = Mockito.mock(ClusterSyncFlowConfig.class);
+        given(syncFlowConfig.getFlowTriggerCondition()).willReturn(new DefaultFlowTriggerCondition());
+
+        BDDMockito.<FlowConfiguration<?>>given(flowConfigurationMap.get(any())).willReturn(syncFlowConfig);
+        given(syncFlowConfig.createFlow(anyString(), anyLong())).willReturn(flow);
+        given(syncFlowConfig.getFlowTriggerCondition()).willReturn(flowTriggerCondition);
+        given(flowTriggerCondition.isFlowTriggerable(anyLong())).willReturn(true);
+        Cluster cluster = new Cluster();
+        cluster.setStatus(Status.MAINTENANCE_MODE_ENABLED);
+        given(clusterService.findOneByStackId(anyLong())).willReturn(cluster);
+        given(flow.getCurrentState()).willReturn(flowState);
+        Event<Payload> event = new Event<>(payload);
+        event.setKey("KEY");
+        underTest.accept(event);
+        verify(flowConfigurationMap, times(1)).get(anyString());
+        verify(runningFlows, times(1)).put(eq(flow), isNull(String.class));
+        verify(flowLogService, times(1))
+                .save(anyString(), nullable(String.class), eq("KEY"), any(Payload.class), any(), eq(syncFlowConfig.getClass()), eq(flowState));
         verify(flow, times(1)).sendEvent(anyString(), any());
     }
 

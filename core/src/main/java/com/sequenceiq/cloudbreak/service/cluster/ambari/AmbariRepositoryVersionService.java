@@ -4,10 +4,12 @@ package com.sequenceiq.cloudbreak.service.cluster.ambari;
 import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.CUSTOM_VDF_REPO_KEY;
 import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.VDF_REPO_KEY_PREFIX;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -20,16 +22,16 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.sequenceiq.ambari.client.services.ClusterService;
 import com.sequenceiq.ambari.client.services.StackService;
+import com.sequenceiq.cloudbreak.cloud.VersionComparator;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.Versioned;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
-import com.sequenceiq.cloudbreak.json.JsonHelper;
-import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
+import com.sequenceiq.cloudbreak.json.JsonHelper;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
-import com.sequenceiq.cloudbreak.cloud.VersionComparator;
 import com.sequenceiq.cloudbreak.util.AmbariClientExceptionUtil;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
@@ -95,6 +97,15 @@ public class AmbariRepositoryVersionService {
     public boolean isVersionNewerOrEqualThanLimited(Versioned currentVersion, Versioned limitedAPIVersion) {
         Comparator<Versioned> versionComparator = new VersionComparator();
         return versionComparator.compare(currentVersion, limitedAPIVersion) > -1;
+    }
+
+    public String getOsTypeForStackRepoDetails(StackRepoDetails stackRepoDetails) {
+        Map<String, String> stackRepo = stackRepoDetails.getStack();
+        stackRepo = removeVDFRelatedRepoDetails(stackRepo);
+        String [] unwantedKeys = {StackRepoDetails.REPO_ID_TAG, StackRepoDetails.MPACK_TAG};
+        Set<String> keys = stackRepo.keySet();
+        keys.removeAll(Arrays.asList(unwantedKeys));
+        return (keys.size() > 0) ? keys.iterator().next() : "";
     }
 
     private StackRepoDetails getStackRepoDetails(long clusterId, Orchestrator orchestrator) throws CloudbreakException {

@@ -52,7 +52,8 @@ public class StackImageFilterService {
     }
 
     private Images getApplicableImages(String imageCatalogName, StatedImages statedImages, Stack stack) {
-        if (!Status.AVAILABLE.equals(stack.getStackStatus().getStatus()) || !Status.AVAILABLE.equals(stack.getCluster().getStatus())) {
+        if (!Status.AVAILABLE.equals(stack.getStackStatus().getStatus())
+                || (!stack.getCluster().isAvailable() && !stack.getCluster().isMaintenanceModeEnabled())) {
             throw new BadRequestException("To retrieve list of images for upgrade both stack and cluster have to be in AVAILABLE state");
         }
 

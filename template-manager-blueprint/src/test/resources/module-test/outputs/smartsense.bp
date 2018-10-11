@@ -54,7 +54,7 @@
     },
     {
       "product-info": {
-        "product-info-content": "{\"componentId\":\"cloudbreak-hdp\",\"instanceInfo\":{\"flexSubscriptionId\":\"\",\"guid\":\"cbc--clustername--111-222-333-444\",\"name\":\"111-222-333-444\",\"parentGuid\":\"\"},\"productId\":\"cloudbreak\",\"productVersion\":\"2.4.62\",\"schemaVersion\":\"1.0.0\",\"type\":\"cluster\"}"
+        "product-info-content": "{\"componentId\":\"cloudbreak-hdp\",\"instanceInfo\":{\"flexSubscriptionId\":\"\",\"guid\":\"cbc--clustername--111-222-333-444\",\"name\":\"111-222-333-444\",\"parentGuid\":\"\"},\"productId\":\"cloudbreak\",\"productVersion\":\"2.4.63\",\"schemaVersion\":\"1.0.0\",\"type\":\"cluster\"}"
       }
     }
   ],

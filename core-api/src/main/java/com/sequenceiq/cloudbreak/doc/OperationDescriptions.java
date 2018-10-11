@@ -130,6 +130,7 @@ public class OperationDescriptions {
         public static final String PUT_BY_STACK_ID = "update cluster by stack id";
         public static final String PUT_BY_STACK_NAME = "update cluster by stack name";
         public static final String UPGRADE_AMBARI = "upgrade the Ambari version";
+        public static final String SET_MAINTENANCE_MODE = "set maintenance mode for the cluster";
         public static final String GET_CLUSTER_PROPERTIES = "get cluster properties with blueprint outputs";
         public static final String FAILURE_REPORT = "failure report";
         public static final String REPAIR_CLUSTER = "repair the cluster";

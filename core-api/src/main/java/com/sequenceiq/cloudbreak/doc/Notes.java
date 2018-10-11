@@ -46,7 +46,7 @@ public class Notes {
     public static final String ACCOUNT_PREFERENCES_NOTES = "Account related preferences that could be managed by the account admins and different "
             + "restrictions could be added to Cloudbreak resources.";
     public static final String AMBARI_NOTES = "Ambari is used to provision the Hadoop clusters.";
-
+    public static final String MAINTENANCE_NOTES = "Setting maintenance mode for the cluster in order to be able to update Ambari and/or the Hadoop stack.";
     public static final String USER_NOTES = "Users can be invited under an account by the administrator, and all resources "
             + "(e.g. resources, networks, blueprints, credentials, clusters) can be shared across account users";
     public static final String TOPOLOGY_NOTES = "A topology gives system administrators an easy way to associate compute nodes with data centers and racks.";

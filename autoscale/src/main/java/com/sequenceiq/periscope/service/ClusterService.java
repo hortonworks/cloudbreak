@@ -215,4 +215,3 @@ public class ClusterService {
                 clusterRepository.countByStateAndAutoscalingEnabledAndPeriscopeNodeId(SUSPENDED, true, periscopeNodeConfig.getId()));
     }
 }
-

@@ -23,11 +23,22 @@ public class ManagementPackDetails implements JsonEntity {
     @ApiModelProperty(ModelDescriptions.NAME)
     private String name;
 
+    @ApiModelProperty(ModelDescriptions.PREINSTALLED)
+    private Boolean preInstalled;
+
     public String getName() {
         return name;
     }
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Boolean getPreInstalled() {
+        return preInstalled;
+    }
+
+    public void setPreInstalled(Boolean preInstalled) {
+        this.preInstalled = preInstalled;
     }
 }

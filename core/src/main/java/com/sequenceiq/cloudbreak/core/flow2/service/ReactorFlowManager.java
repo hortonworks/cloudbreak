@@ -13,14 +13,17 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncEvent.STA
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.cloud.Acceptable;
@@ -36,6 +39,7 @@ import com.sequenceiq.cloudbreak.core.flow2.event.ClusterAndStackDownscaleTrigge
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterCredentialChangeTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleDetails;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterScaleTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.MaintenanceModeValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.MultiHostgroupClusterAndStackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
@@ -43,6 +47,7 @@ import com.sequenceiq.cloudbreak.core.flow2.event.StackImageUpdateTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackSyncTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.EphemeralClusterUpdateTriggerEvent;
@@ -63,6 +68,13 @@ import reactor.rx.Promise;
 public class ReactorFlowManager {
 
     private static final long WAIT_FOR_ACCEPT = 10L;
+
+    private static final List<String> ALLOWED_FLOW_TRIGGERS_IN_MAINTENANCE = List.of(
+            FlowChainTriggers.FULL_SYNC_TRIGGER_EVENT,
+            FlowChainTriggers.STACK_IMAGE_UPDATE_TRIGGER_EVENT,
+            FlowChainTriggers.TERMINATION_TRIGGER_EVENT,
+            FlowChainTriggers.CLUSTER_MAINTENANCE_MODE_VALIDATION_TRIGGER_EVENT
+    );
 
     @Inject
     private EventBus reactor;
@@ -242,6 +254,11 @@ public class ReactorFlowManager {
         notify(selector, new StackImageUpdateTriggerEvent(selector, stackId, newImageId, imageCatalogName, imageCatalogUrl));
     }
 
+    public void triggerMaintenanceModeValidationFlow(Long stackId) {
+        String selector = FlowChainTriggers.CLUSTER_MAINTENANCE_MODE_VALIDATION_TRIGGER_EVENT;
+        notify(selector, new MaintenanceModeValidationTriggerEvent(selector, stackId));
+    }
+
     public void cancelRunningFlows(Long stackId) {
         StackEvent cancelEvent = new StackEvent(Flow2Handler.FLOW_CANCEL, stackId);
         reactor.notify(Flow2Handler.FLOW_CANCEL, eventFactory.createEventWithErrHandler(cancelEvent));
@@ -257,6 +274,10 @@ public class ReactorFlowManager {
 
     private void notify(String selector, Acceptable acceptable, Function<Long, Stack> getStackFn) {
         Event<Acceptable> event = eventFactory.createEventWithErrHandler(acceptable);
+
+        Stack stack = getStackFn.apply(event.getData().getStackId());
+        Optional.ofNullable(stack).map(Stack::getCluster).map(Cluster::getStatus).ifPresent(isTriggerAllowedInMaintenance(selector));
+
         reactor.notify(selector, event);
         try {
             Boolean accepted = true;
@@ -264,12 +285,19 @@ public class ReactorFlowManager {
                 accepted = event.getData().accepted().await(WAIT_FOR_ACCEPT, TimeUnit.SECONDS);
             }
             if (accepted == null || !accepted) {
-                Stack stack = getStackFn.apply(event.getData().getStackId());
                 throw new FlowsAlreadyRunningException(String.format("Stack %s has flows under operation, request not allowed.", stack.getName()));
             }
         } catch (InterruptedException e) {
             throw new CloudbreakApiException(e.getMessage());
         }
 
+    }
+
+    private Consumer<Status> isTriggerAllowedInMaintenance(String selector) {
+        return status -> {
+            if (Status.MAINTENANCE_MODE_ENABLED.equals(status) && !ALLOWED_FLOW_TRIGGERS_IN_MAINTENANCE.contains(selector)) {
+                throw new CloudbreakApiException("Operation not allowed in maintenance mode.");
+            }
+        };
     }
 }

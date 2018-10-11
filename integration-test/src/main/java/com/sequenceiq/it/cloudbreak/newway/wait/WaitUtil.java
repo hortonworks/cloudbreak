@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.ws.rs.ForbiddenException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -85,6 +87,12 @@ public class WaitUtil {
                     currentStatuses.put(statusPath, currStatus);
                 }
             } catch (RuntimeException ignore) {
+                if (ignore instanceof ForbiddenException) {
+                    desiredStatuses.entrySet().stream()
+                            .filter(entry -> "DELETE_COMPLETED".equals(entry.getValue()))
+                            .map(Map.Entry::getKey)
+                            .forEach(statusPath -> currentStatuses.put(statusPath, "DELETE_COMPLETED"));
+                }
                 continue;
             }
 

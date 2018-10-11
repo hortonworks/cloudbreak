@@ -22,11 +22,16 @@ public enum Status {
     START_IN_PROGRESS,
     START_FAILED,
     STOP_FAILED,
-    WAIT_FOR_SYNC;
+    WAIT_FOR_SYNC,
+    MAINTENANCE_MODE_ENABLED;
 
     public boolean isRemovableStatus() {
         return Arrays.asList(AVAILABLE, UPDATE_FAILED, CREATE_FAILED, ENABLE_SECURITY_FAILED, DELETE_FAILED,
                 DELETE_COMPLETED, STOPPED, START_FAILED, STOP_FAILED).contains(valueOf(name()));
+    }
+
+    public boolean isAvailable() {
+        return Arrays.asList(AVAILABLE, MAINTENANCE_MODE_ENABLED).contains(valueOf(name()));
     }
 
     public boolean isStopPhaseActive() {
