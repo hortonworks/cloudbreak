@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.ws.rs.ProcessingException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
@@ -99,7 +101,6 @@ public class CachedRemoteTokenService implements ResourceServerTokenServices {
             }
             CaasUser userInfo = caasClient.getUserInfo(tenant, accessToken);
             Map<String, Object> tokenMap = new HashMap<>();
-            tokenMap.put("exp", introspectResponse.getExp());
             tokenMap.put("user_id", userInfo.getId());
             tokenMap.put("user_name", userInfo.getPreferredUsername());
             tokenMap.put("scope", Arrays.asList("cloudbreak.networks.read", "periscope.cluster", "cloudbreak.usages.user", "cloudbreak.recipes", "openid",
@@ -117,7 +118,7 @@ public class CachedRemoteTokenService implements ResourceServerTokenServices {
                 LOGGER.info("JWT token verified for: {}", oAuth2Authentication.getPrincipal());
             }
             return oAuth2Authentication;
-        } catch (IOException e) {
+        } catch (IOException | ProcessingException e) {
             LOGGER.error("Failed to parse the JWT token", e);
             throw new InvalidTokenException("The specified JWT token is invalid", e);
         }

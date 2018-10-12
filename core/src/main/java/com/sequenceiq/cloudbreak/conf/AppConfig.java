@@ -104,8 +104,17 @@ public class AppConfig implements ResourceLoaderAware {
     @Value("${cert.ignorePreValidation}")
     private boolean ignorePreValidation;
 
-    @Value("${cb.caas.url:}")
+    @Value("${caas.protocol:http}")
+    private String caasProtocol;
+
+    @Value("${caas.url:}")
     private String caasUrl;
+
+    @Value("${caas.cert.validation:false}")
+    private boolean caasCertificateValidation;
+
+    @Value("${caas.cert.ignorePreValidation:false}")
+    private boolean caasIgnorePreValidation;
 
     @Inject
     private StackUnderOperationService stackUnderOperationService;
@@ -241,7 +250,7 @@ public class AppConfig implements ResourceLoaderAware {
 
     @Bean
     public CaasClient caasClient() {
-        return new CaasClient(caasUrl, new ConfigKey(certificateValidation, restDebug, ignorePreValidation));
+        return new CaasClient(caasProtocol, caasUrl, new ConfigKey(caasCertificateValidation, restDebug, caasIgnorePreValidation));
     }
 
     @Bean

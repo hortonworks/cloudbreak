@@ -45,9 +45,6 @@ public class AppConfig implements AsyncConfigurer {
     @Value("${periscope.client.id}")
     private String clientId;
 
-    @Value("${periscope.caas.url:}")
-    private String caasUrl;
-
     @Inject
     @Named("identityServerUrl")
     private String identityServerUrl;
@@ -60,6 +57,18 @@ public class AppConfig implements AsyncConfigurer {
 
     @Value("${cert.ignorePreValidation}")
     private boolean ignorePreValidation;
+
+    @Value("${caas.url:}")
+    private String caasUrl;
+
+    @Value("${caas.protocol:http}")
+    private String caasProtocol;
+
+    @Value("${caas.cert.validation:false}")
+    private boolean caasCertificateValidation;
+
+    @Value("${caas.cert.ignorePreValidation:false}")
+    private boolean caasIgnorePreValidation;
 
     @Inject
     private PersistRejectedThreadExecutionHandler persistRejectedThreadExecutionHandler;
@@ -85,7 +94,7 @@ public class AppConfig implements AsyncConfigurer {
 
     @Bean
     public CaasClient caasClient() {
-        return new CaasClient(caasUrl, new ConfigKey(certificateValidation, restDebug, ignorePreValidation));
+        return new CaasClient(caasProtocol, caasUrl, new ConfigKey(caasCertificateValidation, restDebug, caasIgnorePreValidation));
     }
 
     @Bean
