@@ -34,6 +34,7 @@ import com.microsoft.azure.management.network.NetworkInterface;
 import com.microsoft.azure.management.network.NicIPConfiguration;
 import com.microsoft.azure.management.network.Subnet;
 import com.microsoft.azure.management.resources.Deployment;
+import com.microsoft.azure.management.resources.fluentcore.arm.models.HasId;
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.api.model.ArmAttachedStorageOption;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
@@ -61,6 +62,8 @@ import com.sequenceiq.cloudbreak.service.Retry.ActionWentFailException;
 
 @Service
 public class AzureResourceConnector implements ResourceConnector<Map<String, Map<String, Object>>> {
+
+    public static final String RESOURCE_GROUP_NAME = "resourceGroupName";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureResourceConnector.class);
 
@@ -99,7 +102,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
             AdjustmentType adjustmentType, Long threshold) {
         AzureCredentialView azureCredentialView = new AzureCredentialView(ac.getCloudCredential());
         String stackName = azureUtils.getStackName(ac.getCloudContext());
-        String resourceGroupName = azureUtils.getResourceGroupName(ac.getCloudContext());
+        String resourceGroupName = azureUtils.getResourceGroupName(ac.getCloudContext(), stack);
         AzureClient client = ac.getParameter(AzureClient.class);
 
         AzureStackView azureStackView = getAzureStack(azureCredentialView, stack, getNumberOfAvailableIPsInSubnets(client, stack.getNetwork()), ac);
@@ -138,7 +141,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
             throw new CloudConnectorException(String.format("Error in provisioning stack %s: %s", stackName, e.getMessage()));
         }
 
-        CloudResource cloudResource = new Builder().type(ResourceType.ARM_TEMPLATE).name(stackName).build();
+        CloudResource cloudResource = new Builder().type(ResourceType.ARM_TEMPLATE).name(resourceGroupName).build();
         List<CloudResourceStatus> resources = check(ac, Collections.singletonList(cloudResource));
         LOGGER.debug("Launched resources: {}", resources);
         return resources;
@@ -155,9 +158,10 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
                 case ARM_TEMPLATE:
                     LOGGER.info("Checking Azure group stack status of: {}", stackName);
                     try {
+                        String resourceGroupName = resource.getName();
                         CloudResourceStatus templateResourceStatus;
-                        if (client.templateDeploymentExists(stackName, stackName)) {
-                            Deployment resourceGroupDeployment = client.getTemplateDeployment(stackName, stackName);
+                        if (client.templateDeploymentExists(resourceGroupName, stackName)) {
+                            Deployment resourceGroupDeployment = client.getTemplateDeployment(resourceGroupName, stackName);
                             templateResourceStatus = azureUtils.getTemplateStatus(resource, resourceGroupDeployment, client, stackName);
                         } else {
                             templateResourceStatus = new CloudResourceStatus(resource, ResourceStatus.DELETED);
@@ -184,24 +188,25 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
     }
 
     @Override
-    public List<CloudResourceStatus> terminate(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) {
-        AzureClient client = authenticatedContext.getParameter(AzureClient.class);
+    public List<CloudResourceStatus> terminate(AuthenticatedContext ac, CloudStack stack, List<CloudResource> resources) {
+        AzureClient client = ac.getParameter(AzureClient.class);
+        String resourceGroupName = azureUtils.getResourceGroupName(ac.getCloudContext(), stack);
         for (CloudResource resource : resources) {
             try {
                 try {
                     retryService.testWith2SecDelayMax5Times(() -> {
-                        if (!client.resourceGroupExists(resource.getName())) {
+                        if (!client.resourceGroupExists(resourceGroupName)) {
                             throw new ActionWentFailException("Resource group not exists");
                         }
                         return true;
                     });
-                    client.deleteResourceGroup(resource.getName());
+                    client.deleteResourceGroup(resourceGroupName);
                 } catch (ActionWentFailException ignored) {
-                    LOGGER.info("Resource group not found with name: {}", resource.getName());
+                    LOGGER.info("Resource group not found with name: {}", resourceGroupName);
                 }
                 if (azureStorage.isPersistentStorage(azureStorage.getPersistentStorageName(stack))) {
-                    CloudContext cloudCtx = authenticatedContext.getCloudContext();
-                    AzureCredentialView azureCredentialView = new AzureCredentialView(authenticatedContext.getCloudCredential());
+                    CloudContext cloudCtx = ac.getCloudContext();
+                    AzureCredentialView azureCredentialView = new AzureCredentialView(ac.getCloudCredential());
                     String imageStorageName = azureStorage.getImageStorageName(azureCredentialView, cloudCtx, stack);
                     String imageResourceGroupName = azureStorage.getImageResourceGroupName(cloudCtx, stack);
                     String diskContainer = azureStorage.getDiskContainerName(cloudCtx);
@@ -211,11 +216,11 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
                 if (e.response().code() != AzureConstants.NOT_FOUND) {
                     throw new CloudConnectorException(String.format("Could not delete resource group: %s", resource.getName()), e);
                 } else {
-                    return check(authenticatedContext, Collections.emptyList());
+                    return check(ac, Collections.emptyList());
                 }
             }
         }
-        return check(authenticatedContext, resources);
+        return check(ac, resources);
     }
 
     @Override
@@ -224,30 +229,30 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
     }
 
     @Override
-    public List<CloudResourceStatus> upscale(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) {
-        AzureClient client = authenticatedContext.getParameter(AzureClient.class);
-        AzureCredentialView azureCredentialView = new AzureCredentialView(authenticatedContext.getCloudCredential());
+    public List<CloudResourceStatus> upscale(AuthenticatedContext ac, CloudStack stack, List<CloudResource> resources) {
+        AzureClient client = ac.getParameter(AzureClient.class);
+        AzureCredentialView azureCredentialView = new AzureCredentialView(ac.getCloudCredential());
 
-        String stackName = azureUtils.getStackName(authenticatedContext.getCloudContext());
+        String stackName = azureUtils.getStackName(ac.getCloudContext());
 
         AzureStackView azureStackView = getAzureStack(azureCredentialView, stack,
-                getNumberOfAvailableIPsInSubnets(client, stack.getNetwork()), authenticatedContext);
+                getNumberOfAvailableIPsInSubnets(client, stack.getNetwork()), ac);
 
-        String customImageId = azureStorage.getCustomImageId(client, authenticatedContext, stack);
+        String customImageId = azureStorage.getCustomImageId(client, ac, stack);
         String template = azureTemplateBuilder.build(stackName, customImageId, azureCredentialView, azureStackView,
-                authenticatedContext.getCloudContext(), stack);
+                ac.getCloudContext(), stack);
 
-        String parameters = azureTemplateBuilder.buildParameters(authenticatedContext.getCloudCredential(), stack.getNetwork(), stack.getImage());
-        String resourceGroupName = azureUtils.getResourceGroupName(authenticatedContext.getCloudContext());
+        String parameters = azureTemplateBuilder.buildParameters(ac.getCloudCredential(), stack.getNetwork(), stack.getImage());
+        String resourceGroupName = azureUtils.getResourceGroupName(ac.getCloudContext(), stack);
 
         try {
-            String region = authenticatedContext.getCloudContext().getLocation().getRegion().value();
+            String region = ac.getCloudContext().getLocation().getRegion().value();
             Map<String, AzureDiskType> storageAccounts = azureStackView.getStorageAccounts();
             for (Entry<String, AzureDiskType> entry : storageAccounts.entrySet()) {
                 azureStorage.createStorage(client, entry.getKey(), entry.getValue(), resourceGroupName, region,
                         azureStorage.isEncrytionNeeded(stack.getParameters()), stack.getTags());
             }
-            Deployment templateDeployment = client.createTemplateDeployment(stackName, stackName, template, parameters);
+            Deployment templateDeployment = client.createTemplateDeployment(resourceGroupName, stackName, template, parameters);
             LOGGER.info("created template deployment for upscale: {}", templateDeployment.exportTemplate().template());
             CloudResource armTemplate = resources.stream().filter(r -> r.getType() == ResourceType.ARM_TEMPLATE).findFirst()
                     .orElseThrow(() -> new CloudConnectorException(String.format("Arm Template not found for: %s  ", stackName)));
@@ -292,17 +297,16 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
             List<CloudInstance> vms) {
         AzureClient client = ac.getParameter(AzureClient.class);
         AzureCredentialView azureCredentialView = new AzureCredentialView(ac.getCloudCredential());
-        String stackName = azureUtils.getStackName(ac.getCloudContext());
+        String resourceGroupName = azureUtils.getResourceGroupName(ac.getCloudContext(), stack);
         Map<String, Map<String, Object>> resp = new HashMap<>(vms.size());
         for (CloudInstance instance : vms) {
-            resp.put(instance.getInstanceId(), collectInstanceResourcesToRemove(ac, stack, client, azureCredentialView, stackName,
-                    instance));
+            resp.put(instance.getInstanceId(), collectInstanceResourcesToRemove(ac, stack, client, azureCredentialView, resourceGroupName, instance));
         }
         return resp;
     }
 
     private Map<String, Object> collectInstanceResourcesToRemove(AuthenticatedContext ac, CloudStack stack, AzureClient client,
-            AzureCredentialView azureCredentialView, String stackName, CloudInstance instance) {
+            AzureCredentialView azureCredentialView, String resourceGroupName, CloudInstance instance) {
         String instanceId = instance.getInstanceId();
         Long privateId = instance.getTemplate().getPrivateId();
         AzureDiskType azureDiskType = AzureDiskType.getByValue(instance.getTemplate().getVolumeType());
@@ -311,7 +315,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
         Map<String, Object> resourcesToRemove = new HashMap<>();
         resourcesToRemove.put(ATTACHED_DISK_STORAGE_NAME, attachedDiskStorageName);
         try {
-            VirtualMachine virtualMachine = client.getVirtualMachine(stackName, instanceId);
+            VirtualMachine virtualMachine = client.getVirtualMachine(resourceGroupName, instanceId);
             if (virtualMachine != null) {
                 List<String> networkInterfaceIds = virtualMachine.networkInterfaceIds();
                 List<String> networkInterfacesNames = new ArrayList<>();
@@ -372,19 +376,18 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
     public List<CloudResourceStatus> downscale(AuthenticatedContext ac, CloudStack stack, List<CloudResource> resources, List<CloudInstance> vms,
             Map<String, Map<String, Object>> resourcesToRemove) {
         AzureClient client = ac.getParameter(AzureClient.class);
-        String stackName = azureUtils.getStackName(ac.getCloudContext());
-        String resourceGroupName = azureUtils.getResourceGroupName(ac.getCloudContext());
+        String resourceGroupName = azureUtils.getResourceGroupName(ac.getCloudContext(), stack);
         String diskContainer = azureStorage.getDiskContainerName(ac.getCloudContext());
         for (CloudInstance instance : vms) {
             String instanceId = instance.getInstanceId();
             Map<String, Object> instanceResources = resourcesToRemove.get(instanceId);
             try {
-                deallocateVirtualMachine(client, stackName, instanceId);
-                deleteVirtualMachine(client, stackName, instanceId);
+                deallocateVirtualMachine(client, resourceGroupName, instanceId);
+                deleteVirtualMachine(client, resourceGroupName, instanceId);
                 if (instanceResources != null) {
-                    deleteNetworkInterfaces(client, stackName,
+                    deleteNetworkInterfaces(client, resourceGroupName,
                             CollectionUtils.emptyIfNull((Collection<String>) instanceResources.get(NETWORK_INTERFACES_NAMES)));
-                    deletePublicIps(client, stackName, CollectionUtils.emptyIfNull((Collection<String>) instanceResources.get(PUBLIC_ADDRESS_NAME)));
+                    deletePublicIps(client, resourceGroupName, CollectionUtils.emptyIfNull((Collection<String>) instanceResources.get(PUBLIC_ADDRESS_NAME)));
                     deleteDisk(CollectionUtils.emptyIfNull((Collection<String>) instanceResources.get(STORAGE_PROFILE_DISK_NAMES)), client, resourceGroupName,
                             (String) instanceResources.get(ATTACHED_DISK_STORAGE_NAME), diskContainer);
                     deleteManagedDisks(CollectionUtils.emptyIfNull((Collection<String>) instanceResources.get(MANAGED_DISK_IDS)), client);
@@ -395,7 +398,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
             } catch (CloudConnectorException e) {
                 throw e;
             } catch (RuntimeException e) {
-                throw new CloudConnectorException(String.format("Failed to cleanup resources after downscale: %s", stackName), e);
+                throw new CloudConnectorException(String.format("Failed to cleanup resources after downscale: %s", resourceGroupName), e);
             }
         }
         return check(ac, resources);
@@ -471,28 +474,29 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
         }
     }
 
-    private void deleteNetworkInterfaces(AzureClient client, String stackName, Collection<String> networkInterfacesNames)
+    private void deleteNetworkInterfaces(AzureClient client, String resourceGroupName, Collection<String> networkInterfacesNames)
             throws CloudConnectorException {
         for (String networkInterfacesName : networkInterfacesNames) {
             try {
-                client.deleteNetworkInterface(stackName, networkInterfacesName);
+                client.deleteNetworkInterface(resourceGroupName, networkInterfacesName);
             } catch (CloudException e) {
                 if (e.response().code() != AzureConstants.NOT_FOUND) {
                     throw new CloudConnectorException(String.format("Could not delete network interface: %s", networkInterfacesName), e);
                 } else {
-                    LOGGER.info("network interface not found: {}, {}", stackName, networkInterfacesName);
+                    LOGGER.info("network interface not found: {}, {}", resourceGroupName, networkInterfacesName);
                 }
             }
         }
     }
 
-    private void deletePublicIps(AzureClient client, String stackName, Collection<String> publicIpNames) {
+    private void deletePublicIps(AzureClient client, String resourceGroupName, Collection<String> publicIpNames) {
         for (String publicIpName : publicIpNames) {
             try {
-                if (client.getPublicIpAddress(stackName, publicIpName) != null) {
-                    client.deletePublicIpAddressByName(stackName, publicIpName);
+                HasId publicIpAddress = client.getPublicIpAddress(resourceGroupName, publicIpName);
+                if (publicIpAddress != null) {
+                    client.deletePublicIpAddressById(publicIpAddress.id());
                 } else {
-                    LOGGER.info("public ip not found: stackName={}, publicIpName={}", stackName, publicIpName);
+                    LOGGER.info("public ip not found: stackName={}, publicIpName={}", resourceGroupName, publicIpName);
                 }
             } catch (CloudException e) {
                 throw new CloudConnectorException(String.format("Could not delete public IP address: %s", publicIpName), e);
@@ -500,24 +504,24 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
         }
     }
 
-    private void deleteVirtualMachine(AzureClient client, String stackName, String privateInstanceId)
+    private void deleteVirtualMachine(AzureClient client, String resourceGroupName, String privateInstanceId)
             throws CloudConnectorException {
-        if (client.isVirtualMachineExists(stackName, privateInstanceId)) {
-            client.deleteVirtualMachine(stackName, privateInstanceId);
+        if (client.isVirtualMachineExists(resourceGroupName, privateInstanceId)) {
+            client.deleteVirtualMachine(resourceGroupName, privateInstanceId);
         } else {
-            LOGGER.info("virtual machine not found: stackName={}, privateInstanceId={}", stackName, privateInstanceId);
+            LOGGER.info("virtual machine not found: resourceGroupName={}, privateInstanceId={}", resourceGroupName, privateInstanceId);
         }
     }
 
-    private void deallocateVirtualMachine(AzureClient client, String stackName, String privateInstanceId)
+    private void deallocateVirtualMachine(AzureClient client, String resourceGroupName, String privateInstanceId)
             throws CloudConnectorException {
         try {
-            client.deallocateVirtualMachine(stackName, privateInstanceId);
+            client.deallocateVirtualMachine(resourceGroupName, privateInstanceId);
         } catch (CloudException e) {
             if (e.response().code() != AzureConstants.NOT_FOUND) {
                 throw new CloudConnectorException(String.format("Could not deallocate machine: %s", privateInstanceId), e);
             } else {
-                LOGGER.info("virtual machine not found: stackName={}, privateInstanceId={}", stackName, privateInstanceId);
+                LOGGER.info("virtual machine not found: resourceGroupName={}, privateInstanceId={}", resourceGroupName, privateInstanceId);
             }
         }
     }

@@ -187,6 +187,11 @@ public class AwsSetup implements Setup {
     public void validateFileSystem(CloudCredential credential, SpiFileSystem spiFileSystem) {
     }
 
+    @Override
+    public void validateParameters(AuthenticatedContext authenticatedContext, Map<String, String> parameters) throws Exception {
+
+    }
+
     private void validateExistingKeyPair(InstanceAuthentication instanceAuthentication, AwsCredentialView credentialView, String region) {
         String keyPairName = awsClient.getExistingKeyPairName(instanceAuthentication);
         if (StringUtils.isNoneEmpty(keyPairName)) {

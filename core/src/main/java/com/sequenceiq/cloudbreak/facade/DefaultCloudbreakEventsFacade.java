@@ -24,12 +24,12 @@ public class DefaultCloudbreakEventsFacade implements CloudbreakEventsFacade {
     @Override
     public List<CloudbreakEventsJson> retrieveEventsForWorkspace(Workspace workspace, Long since) {
         List<StructuredNotificationEvent> cloudbreakEvents = cloudbreakEventService.cloudbreakEvents(workspace, since);
-        return converterUtil.toList(cloudbreakEvents, CloudbreakEventsJson.class);
+        return converterUtil.convertAll(cloudbreakEvents, CloudbreakEventsJson.class);
     }
 
     @Override
     public List<CloudbreakEventsJson> retrieveEventsByStack(Long stackId) {
         List<StructuredNotificationEvent> cloudbreakEvents = cloudbreakEventService.cloudbreakEventsForStack(stackId);
-        return converterUtil.toList(cloudbreakEvents, CloudbreakEventsJson.class);
+        return converterUtil.convertAll(cloudbreakEvents, CloudbreakEventsJson.class);
     }
 }

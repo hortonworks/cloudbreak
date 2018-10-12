@@ -16,8 +16,6 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
@@ -415,9 +413,9 @@ public class AzureClient {
 
     public boolean isVirtualMachineExists(String resourceGroup, String vmName) {
         return handleAuthException(() -> {
-            Iterable<VirtualMachine> vmIterable = () -> azure.virtualMachines().listByResourceGroup(resourceGroup).iterator();
-            Stream<VirtualMachine> vmStream = StreamSupport.stream(vmIterable.spliterator(), false);
-            Optional<VirtualMachine> vm = vmStream.filter(virtualMachine -> vmName.equals(virtualMachine.name())).findFirst();
+            Optional<VirtualMachine> vm = azure.virtualMachines().listByResourceGroup(resourceGroup).stream()
+                    .filter(virtualMachine -> vmName.equals(virtualMachine.name()))
+                    .findFirst();
             return vm.isPresent();
         });
     }
@@ -578,13 +576,13 @@ public class AzureClient {
         return handleAuthException(() -> azure.networkSecurityGroups());
     }
 
-    public LoadBalancer getLoadBalancer(String name, String loadBalancerName) {
-        return handleAuthException(() -> azure.loadBalancers().getByResourceGroup(name, loadBalancerName));
+    public LoadBalancer getLoadBalancer(String resourceGroupName, String loadBalancerName) {
+        return handleAuthException(() -> azure.loadBalancers().getByResourceGroup(resourceGroupName, loadBalancerName));
     }
 
-    public List<String> getLoadBalancerIps(String name, String loadBalancerName) {
+    public List<String> getLoadBalancerIps(String resourceGroupName, String loadBalancerName) {
         List<String> ipList = new ArrayList<>();
-        List<String> publicIpAddressIds = getLoadBalancer(name, loadBalancerName).publicIPAddressIds();
+        List<String> publicIpAddressIds = getLoadBalancer(resourceGroupName, loadBalancerName).publicIPAddressIds();
         for (String publicIpAddressId : publicIpAddressIds) {
             PublicIPAddress publicIpAddress = getPublicIpAddressById(publicIpAddressId);
             ipList.add(publicIpAddress.ipAddress());

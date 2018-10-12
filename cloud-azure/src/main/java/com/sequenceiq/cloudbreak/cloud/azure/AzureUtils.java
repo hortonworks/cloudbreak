@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import static com.sequenceiq.cloudbreak.cloud.azure.AzureResourceConnector.RESOURCE_GROUP_NAME;
 import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
 
 import java.util.Arrays;
@@ -38,6 +39,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Component
@@ -142,6 +144,14 @@ public class AzureUtils {
 
     public String getResourceGroupName(CloudContext cloudContext) {
         return getStackName(cloudContext);
+    }
+
+    public String getResourceGroupName(CloudContext cloudContext, CloudStack cloudStack) {
+        return cloudStack.getParameters().getOrDefault(RESOURCE_GROUP_NAME, getResourceGroupName(cloudContext));
+    }
+
+    public String getResourceGroupName(CloudContext cloudContext, DynamicModel dynamicModel) {
+        return dynamicModel.getParameters().getOrDefault(RESOURCE_GROUP_NAME, getResourceGroupName(cloudContext)).toString();
     }
 
     public boolean isExistingNetwork(Network network) {
