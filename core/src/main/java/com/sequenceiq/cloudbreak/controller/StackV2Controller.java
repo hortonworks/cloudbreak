@@ -11,6 +11,7 @@ import javax.ws.rs.core.Response;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Controller;
 
@@ -73,6 +74,12 @@ public class StackV2Controller extends NotificationController implements StackV2
 
     @Inject
     private RestRequestThreadLocalService restRequestThreadLocalService;
+
+    @Value("${cb.disable.show.blueprint:false}")
+    private boolean disableShowBlueprint;
+
+    @Value("${cb.disable.show.cli:false}")
+    private boolean disableShowCli;
 
     @Override
     public Set<StackResponse> getStacksInDefaultWorkspace() {
@@ -192,6 +199,9 @@ public class StackV2Controller extends NotificationController implements StackV2
 
     @Override
     public StackV2Request getRequestfromName(String name) {
+        if (disableShowCli) {
+            return null;
+        }
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         return stackService.getStackRequestByNameInWorkspace(name, workspace);
@@ -215,6 +225,9 @@ public class StackV2Controller extends NotificationController implements StackV2
 
     @Override
     public GeneratedBlueprintResponse postStackForBlueprint(StackV2Request stackRequest) {
+        if (disableShowBlueprint) {
+            return null;
+        }
         return stackCommonService.postStackForBlueprint(stackRequest);
     }
 
