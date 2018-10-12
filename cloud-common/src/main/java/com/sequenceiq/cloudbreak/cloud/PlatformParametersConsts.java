@@ -18,6 +18,8 @@ public class PlatformParametersConsts {
 
     public static final String STARTSTOP_SUPPORTED = "startStopSupported";
 
+    public static final String REGIONS_SUPPORTED = "regionsSupported";
+
     private PlatformParametersConsts() {
 
     }

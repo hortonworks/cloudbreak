@@ -50,6 +50,10 @@ public class CloudParameterCache {
         return result == null || result;
     }
 
+    public boolean areRegionsSupported(String platform) {
+        return getSpecialParameters(Platform.platform(platform)).get(PlatformParametersConsts.REGIONS_SUPPORTED);
+    }
+
     private Map<String, Boolean> getSpecialParameters(Platform platform) {
         PlatformParameters platformParameters = getPlatformParameters().get(platform);
         if (platformParameters == null) {

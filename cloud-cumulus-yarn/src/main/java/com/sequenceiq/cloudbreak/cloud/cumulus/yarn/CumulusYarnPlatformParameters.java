@@ -93,6 +93,7 @@ public class CumulusYarnPlatformParameters implements PlatformParameters {
         specialParameters.put(PlatformParametersConsts.UPSCALING_SUPPORTED, Boolean.TRUE);
         specialParameters.put(PlatformParametersConsts.DOWNSCALING_SUPPORTED, Boolean.FALSE);
         specialParameters.put(PlatformParametersConsts.STARTSTOP_SUPPORTED, Boolean.FALSE);
+        specialParameters.put(PlatformParametersConsts.REGIONS_SUPPORTED, Boolean.FALSE);
         return new SpecialParameters(specialParameters);
     }
 

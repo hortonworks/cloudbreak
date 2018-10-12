@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.environment.Environment;
 import com.sequenceiq.cloudbreak.service.platform.PlatformParameterService;
+import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 
 import reactor.fn.tuple.Tuple2;
 
@@ -29,6 +30,9 @@ public class EnvironmentCreationValidator implements Validator<Tuple2<Environmen
 
     @Inject
     private PlatformParameterService platformParameterService;
+
+    @Inject
+    private CloudParameterCache cloudParameterCache;
 
     @Override
     public ValidationResult validate(Tuple2<Environment, EnvironmentRequest> subject) {
@@ -73,21 +77,35 @@ public class EnvironmentCreationValidator implements Validator<Tuple2<Environmen
     }
 
     private void validateRegions(Set<String> requestedRegions, Credential credential, ValidationResultBuilder resultBuilder) {
-        PlatformResourceRequest platformResourceRequest = new PlatformResourceRequest();
-        platformResourceRequest.setCredential(credential);
-        platformResourceRequest.setCloudPlatform(credential.cloudPlatform());
-        // TODO: no idea where to get it from: platformResourceRequest.setPlatformVariant();
-        CloudRegions regions = platformParameterService.getRegionsByCredential(platformResourceRequest);
-        Set<String> existingRegions = regions.getCloudRegions().keySet()
-                .stream().map(Region::getRegionName).collect(Collectors.toSet());
-        requestedRegions = new HashSet<>(requestedRegions);
-        requestedRegions.removeAll(existingRegions);
-        if (!requestedRegions.isEmpty()) {
-            resultBuilder.error(String.format("The following regions does not exist in your cloud provider: [%s]. "
-                            + "Existing regions are: [%s]",
-                    requestedRegions.stream().collect(Collectors.joining(", ")),
-                    existingRegions.stream().collect(Collectors.joining(", "))
-            ));
+        String cloudPlatform = credential.cloudPlatform();
+        if (cloudParameterCache.areRegionsSupported(cloudPlatform)) {
+            validateRegionsWhereSupported(requestedRegions, credential, resultBuilder, cloudPlatform);
+        } else if (!requestedRegions.isEmpty()) {
+            resultBuilder.error(String.format("Regions are not supporeted on cloudprovider: [%s].", cloudPlatform));
+        }
+    }
+
+    private void validateRegionsWhereSupported(Set<String> requestedRegions, Credential credential, ValidationResultBuilder resultBuilder,
+            String cloudPlatform) {
+        if (requestedRegions.isEmpty()) {
+            resultBuilder.error(String.format("Regions are mandatory on cloudprovider: [%s]", cloudPlatform));
+        } else {
+            PlatformResourceRequest platformResourceRequest = new PlatformResourceRequest();
+            platformResourceRequest.setCredential(credential);
+            platformResourceRequest.setCloudPlatform(cloudPlatform);
+            // TODO: no idea where to get it from: platformResourceRequest.setPlatformVariant();
+            CloudRegions regions = platformParameterService.getRegionsByCredential(platformResourceRequest);
+            Set<String> existingRegions = regions.getCloudRegions().keySet()
+                    .stream().map(Region::getRegionName).collect(Collectors.toSet());
+            requestedRegions = new HashSet<>(requestedRegions);
+            requestedRegions.removeAll(existingRegions);
+            if (!requestedRegions.isEmpty()) {
+                resultBuilder.error(String.format("The following regions does not exist in your cloud provider: [%s]. "
+                                + "Existing regions are: [%s]",
+                        requestedRegions.stream().collect(Collectors.joining(", ")),
+                        existingRegions.stream().collect(Collectors.joining(", "))
+                ));
+            }
         }
     }
 }
