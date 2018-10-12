@@ -45,20 +45,21 @@ public class AzureMetadataCollector implements MetadataCollector {
 
         List<InstanceTemplate> templates = Lists.transform(vms, CloudInstance::getTemplate);
 
-        String resourceName = resource.getName();
-        Map<String, InstanceTemplate> templateMap = Maps.uniqueIndex(templates, from -> azureUtils.getPrivateInstanceId(resourceName,
-                from.getGroupName(), Long.toString(from.getPrivateId())));
+        String stackName = azureUtils.getStackName(authenticatedContext.getCloudContext());
+        String resourceGroupName = resource.getName();
+        Map<String, InstanceTemplate> templateMap = Maps.uniqueIndex(templates,
+                from -> azureUtils.getPrivateInstanceId(stackName, from.getGroupName(), Long.toString(from.getPrivateId())));
 
         try {
             for (Entry<String, InstanceTemplate> instance : templateMap.entrySet()) {
                 AzureClient azureClient = authenticatedContext.getParameter(AzureClient.class);
-                VirtualMachine vm = azureClient.getVirtualMachine(resourceName, instance.getKey());
+                VirtualMachine vm = azureClient.getVirtualMachine(resourceGroupName, instance.getKey());
                 String subnetId = vm.getPrimaryNetworkInterface().primaryIPConfiguration().subnetName();
                 String instanceName = vm.computerName();
 
                 String privateIp = null;
                 String publicIp = null;
-                Integer faultDomainCount = azureClient.getFaultDomainNumber(resourceName, vm.name());
+                Integer faultDomainCount = azureClient.getFaultDomainNumber(resourceGroupName, vm.name());
                 String platform = authenticatedContext.getCloudContext().getPlatform().value();
                 String location = authenticatedContext.getCloudContext().getLocation().getRegion().value();
                 String hostgroupNm = instance.getValue().getGroupName();
@@ -68,7 +69,7 @@ public class AzureMetadataCollector implements MetadataCollector {
                         .append(LOCALITY_SEPARATOR)
                         .append(location)
                         .append(LOCALITY_SEPARATOR)
-                        .append(resourceName)
+                        .append(resourceGroupName)
                         .append(LOCALITY_SEPARATOR)
                         .append(hostgroupNm)
                         .append(LOCALITY_SEPARATOR)

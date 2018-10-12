@@ -119,7 +119,7 @@ public class AzureStorage {
     }
 
     private String buildStorageName(ArmAttachedStorageOption armAttachedStorageOption, AzureCredentialView acv, Long vmId, CloudContext cloudContext,
-                AzureDiskType storageType) {
+            AzureDiskType storageType) {
         String result;
         String name = cloudContext.getName().toLowerCase().replaceAll("\\s+|-", "");
         name = name.length() > MAX_LENGTH_OF_NAME_SLICE ? name.substring(0, MAX_LENGTH_OF_NAME_SLICE) : name;
@@ -175,7 +175,7 @@ public class AzureStorage {
             if (isPersistentStorage(getPersistentStorageName(stack))) {
                 return getPersistentStorageName(stack);
             }
-            return armUtils.getResourceGroupName(cloudContext);
+            return armUtils.getResourceGroupName(cloudContext, stack);
         } else {
             return imageStoreResourceGroup;
         }

@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.mock;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.net.ssl.SSLContext;
@@ -90,6 +91,11 @@ public class MockSetup implements Setup {
 
     @Override
     public void validateFileSystem(CloudCredential credential, SpiFileSystem spiFileSystem) {
+    }
+
+    @Override
+    public void validateParameters(AuthenticatedContext authenticatedContext, Map<String, String> parameters) throws Exception {
+
     }
 
     @Override

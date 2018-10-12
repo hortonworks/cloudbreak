@@ -56,7 +56,7 @@ public class StackSyncActions {
 
     @Bean(name = "SYNC_STATE")
     public Action<?, ?> stackSyncAction() {
-        return new AbstractStackSyncAction<StackSyncTriggerEvent>(StackSyncTriggerEvent.class) {
+        return new AbstractStackSyncAction<>(StackSyncTriggerEvent.class) {
             @Override
             protected void prepareExecution(StackSyncTriggerEvent payload, Map<Object, Object> variables) {
                 variables.put(STATUS_UPDATE_ENABLED, payload.getStatusUpdateEnabled());
@@ -70,7 +70,8 @@ public class StackSyncActions {
             @Override
             protected Selectable createRequest(StackSyncContext context) {
                 List<CloudInstance> cloudInstances = cloudInstanceConverter.convert(context.getInstanceMetaData());
-                return new GetInstancesStateRequest<GetInstancesStateResult>(context.getCloudContext(), context.getCloudCredential(), cloudInstances);
+                cloudInstances.forEach(instance -> context.getStack().getParameters().forEach(instance::putParameter));
+                return new GetInstancesStateRequest<>(context.getCloudContext(), context.getCloudCredential(), cloudInstances);
             }
         };
     }

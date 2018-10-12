@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud;
 
+import java.util.Map;
+
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -53,6 +55,15 @@ public interface Setup {
      * @throws Exception exception is thrown when the filesystem does not meet the desired requirements
      */
     void validateFileSystem(CloudCredential credential, SpiFileSystem spiFileSystem) throws Exception;
+
+    /**
+     * Implementation of this method shall validate the parameters if valid or not.
+     *
+     * @param authenticatedContext the context which already contains the authenticated client
+     * @param parameters map of parameters
+     * @throws Exception exception is thrown when the parameters does not meet the desired requirements
+     */
+    void validateParameters(AuthenticatedContext authenticatedContext, Map<String, String> parameters) throws Exception;
 
     /**
      * Implementation of this method shall contain basic checks if scaling is possible or not.

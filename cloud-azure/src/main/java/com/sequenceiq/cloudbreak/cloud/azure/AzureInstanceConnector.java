@@ -35,13 +35,13 @@ public class AzureInstanceConnector implements InstanceConnector {
 
     @Override
     public List<CloudVmInstanceStatus> start(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms) {
-        String stackName = armTemplateUtils.getStackName(ac.getCloudContext());
         List<CloudVmInstanceStatus> statuses = new ArrayList<>();
 
         for (CloudInstance vm : vms) {
             try {
+                String resourceGroupName = armTemplateUtils.getResourceGroupName(ac.getCloudContext(), vm);
                 AzureClient azureClient = ac.getParameter(AzureClient.class);
-                azureClient.startVirtualMachine(stackName, vm.getInstanceId());
+                azureClient.startVirtualMachine(resourceGroupName, vm.getInstanceId());
                 statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.IN_PROGRESS));
             } catch (RuntimeException e) {
                 statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.FAILED, e.getMessage()));
@@ -52,13 +52,13 @@ public class AzureInstanceConnector implements InstanceConnector {
 
     @Override
     public List<CloudVmInstanceStatus> stop(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms) {
-        String stackName = armTemplateUtils.getStackName(ac.getCloudContext());
         List<CloudVmInstanceStatus> statuses = new ArrayList<>();
 
         for (CloudInstance vm : vms) {
             try {
+                String resourceGroupName = armTemplateUtils.getResourceGroupName(ac.getCloudContext(), vm);
                 AzureClient azureClient = ac.getParameter(AzureClient.class);
-                azureClient.deallocateVirtualMachine(stackName, vm.getInstanceId());
+                azureClient.deallocateVirtualMachine(resourceGroupName, vm.getInstanceId());
                 statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.IN_PROGRESS));
             } catch (RuntimeException e) {
                 statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.FAILED, e.getMessage()));
@@ -70,14 +70,14 @@ public class AzureInstanceConnector implements InstanceConnector {
     @Override
     public List<CloudVmInstanceStatus> check(AuthenticatedContext ac, List<CloudInstance> vms) {
         List<CloudVmInstanceStatus> statuses = new ArrayList<>();
-        String stackName = armTemplateUtils.getStackName(ac.getCloudContext());
 
         for (CloudInstance vm : vms) {
+            String resourceGroupName = armTemplateUtils.getResourceGroupName(ac.getCloudContext(), vm);
             try {
                 AzureClient azureClient = ac.getParameter(AzureClient.class);
-                boolean virtualMachineExists = azureClient.isVirtualMachineExists(stackName, vm.getInstanceId());
+                boolean virtualMachineExists = azureClient.isVirtualMachineExists(resourceGroupName, vm.getInstanceId());
                 if (virtualMachineExists) {
-                    VirtualMachine virtualMachine = azureClient.getVirtualMachine(stackName, vm.getInstanceId());
+                    VirtualMachine virtualMachine = azureClient.getVirtualMachine(resourceGroupName, vm.getInstanceId());
                     PowerState virtualMachinePowerState = virtualMachine.powerState();
                     String computerName = virtualMachine.computerName();
                     vm.putParameter(INSTANCE_NAME, computerName);

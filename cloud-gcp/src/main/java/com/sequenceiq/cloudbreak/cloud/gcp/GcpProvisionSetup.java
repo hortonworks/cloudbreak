@@ -8,6 +8,7 @@ import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getProjectId
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getTarName;
 
 import java.io.IOException;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -121,6 +122,11 @@ public class GcpProvisionSetup implements Setup {
 
     @Override
     public void validateFileSystem(CloudCredential credential, SpiFileSystem spiFileSystem) {
+    }
+
+    @Override
+    public void validateParameters(AuthenticatedContext authenticatedContext, Map<String, String> parameters) throws Exception {
+
     }
 
     @Override

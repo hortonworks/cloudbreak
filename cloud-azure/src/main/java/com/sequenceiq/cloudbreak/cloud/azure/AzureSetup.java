@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
+import javax.ws.rs.BadRequestException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +22,7 @@ import com.microsoft.azure.credentials.ApplicationTokenCredentials;
 import com.microsoft.azure.management.datalake.store.DataLakeStoreAccountManagementClient;
 import com.microsoft.azure.management.datalake.store.implementation.DataLakeStoreAccountManagementClientImpl;
 import com.microsoft.azure.management.datalake.store.models.DataLakeStoreAccount;
+import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.CloudBlobClient;
@@ -131,14 +133,14 @@ public class AzureSetup implements Setup {
 
     @Override
     public void prerequisites(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier persistenceNotifier) {
-        String storageGroup = azureUtils.getResourceGroupName(ac.getCloudContext());
-        CloudResource cloudResource = new Builder().type(ResourceType.ARM_TEMPLATE).name(storageGroup).build();
+        String resourceGroupName = azureUtils.getResourceGroupName(ac.getCloudContext(), stack);
+        CloudResource cloudResource = new Builder().type(ResourceType.ARM_TEMPLATE).name(resourceGroupName).build();
         String region = ac.getCloudContext().getLocation().getRegion().value();
         try {
             AzureClient client = ac.getParameter(AzureClient.class);
             persistenceNotifier.notifyAllocation(cloudResource, ac.getCloudContext());
-            if (!client.resourceGroupExists(storageGroup)) {
-                client.createResourceGroup(storageGroup, region, stack.getTags(), defaultCostTaggingService.prepareTemplateTagging());
+            if (!client.resourceGroupExists(resourceGroupName)) {
+                client.createResourceGroup(resourceGroupName, region, stack.getTags(), defaultCostTaggingService.prepareTemplateTagging());
             }
         } catch (Exception ex) {
             throw new CloudConnectorException(ex);
@@ -159,6 +161,20 @@ public class AzureSetup implements Setup {
     }
 
     @Override
+    public void validateParameters(AuthenticatedContext ac, Map<String, String> parameters) throws Exception {
+        AzureClient client = ac.getParameter(AzureClient.class);
+        String resourceGroupName = parameters.get(AzureResourceConnector.RESOURCE_GROUP_NAME);
+        if (StringUtils.isEmpty(resourceGroupName)) {
+            return;
+        }
+        ResourceGroup resourceGroup = client.getResourceGroup(resourceGroupName);
+        if (resourceGroup != null) {
+            throw new BadRequestException("Resourcegroup name already exists: " + resourceGroup.name());
+        }
+
+    }
+
+    @Override
     public void scalingPrerequisites(AuthenticatedContext authenticatedContext, CloudStack stack, boolean upscale) {
 
     }
@@ -167,7 +183,8 @@ public class AzureSetup implements Setup {
         CloudAdlsGen2View cloudFileSystem = (CloudAdlsGen2View) fileSystem.getCloudFileSystem();
         String accountName = cloudFileSystem.getAccountName();
         String accountKey = cloudFileSystem.getAccountKey();
-        String connectionString = "DefaultEndpointsProtocol=https;AccountName=" + accountName + ";AccountKey=" + accountKey + ";EndpointSuffix=core.windows.net";
+        String connectionString = "DefaultEndpointsProtocol=https;AccountName="
+                + accountName + ";AccountKey=" + accountKey + ";EndpointSuffix=core.windows.net";
         CloudStorageAccount storageAccount = CloudStorageAccount.parse(connectionString);
         CloudBlobClient blobClient = storageAccount.createCloudBlobClient();
         CloudBlobContainer containerReference = blobClient.getContainerReference(TEST_CONTAINER + System.nanoTime());
@@ -225,8 +242,8 @@ public class AzureSetup implements Setup {
         }
     }
 
-    private boolean storageContainsImage(AzureClient client, String groupName, String storageName, String image) {
-        List<ListBlobItem> listBlobItems = client.listBlobInStorage(groupName, storageName, IMAGES_CONTAINER);
+    private boolean storageContainsImage(AzureClient client, String resourceGroupName, String storageName, String image) {
+        List<ListBlobItem> listBlobItems = client.listBlobInStorage(resourceGroupName, storageName, IMAGES_CONTAINER);
         for (ListBlobItem listBlobItem : listBlobItems) {
             if (getNameFromConnectionString(listBlobItem.getUri().getPath()).equals(image.split("/")[image.split("/").length - 1])) {
                 return true;

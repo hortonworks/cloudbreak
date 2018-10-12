@@ -36,23 +36,21 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.start.StackStartStopContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.start.StackStartStopService;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.util.ConverterUtil;
 
 @Configuration
 public class StackStopActions {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackStopActions.class);
 
     @Inject
-    private InstanceMetaDataToCloudInstanceConverter cloudInstanceConverter;
-
-    @Inject
-    private ResourceToCloudResourceConverter cloudResourceConverter;
+    private ConverterUtil converterUtil;
 
     @Inject
     private StackStartStopService stackStartStopService;
@@ -68,8 +66,9 @@ public class StackStopActions {
 
             @Override
             protected Selectable createRequest(StackStartStopContext context) {
-                List<CloudInstance> cloudInstances = cloudInstanceConverter.convert(context.getInstanceMetaData());
-                List<CloudResource> cloudResources = cloudResourceConverter.convert(context.getStack().getResources());
+                List<CloudInstance> cloudInstances = converterUtil.convertAll(context.getInstanceMetaData(), CloudInstance.class);
+                List<CloudResource> cloudResources = converterUtil.convertAll(context.getStack().getResources(), CloudResource.class);
+                cloudInstances.forEach(instance -> context.getStack().getParameters().forEach(instance::putParameter));
                 return new StopInstancesRequest<StopInstancesResult>(context.getCloudContext(), context.getCloudCredential(), cloudResources, cloudInstances);
             }
         };

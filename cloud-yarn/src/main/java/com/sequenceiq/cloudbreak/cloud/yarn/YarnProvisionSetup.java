@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.yarn;
 
+import java.util.Map;
+
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.Setup;
@@ -31,6 +33,11 @@ public class YarnProvisionSetup implements Setup {
 
     @Override
     public void validateFileSystem(CloudCredential credential, SpiFileSystem spiFileSystem) {
+
+    }
+
+    @Override
+    public void validateParameters(AuthenticatedContext authenticatedContext, Map<String, String> parameters) throws Exception {
 
     }
 

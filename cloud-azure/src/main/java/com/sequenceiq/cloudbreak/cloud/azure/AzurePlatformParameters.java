@@ -137,6 +137,8 @@ public class AzurePlatformParameters implements PlatformParameters {
                 Optional.of("^[a-z0-9]{0,24}$")));
         additionalStackParameterValidations.add(new StackParamValidation("attachedStorageOption", false, ArmAttachedStorageOption.class,
                 Optional.empty()));
+        additionalStackParameterValidations.add(new StackParamValidation(AzureResourceConnector.RESOURCE_GROUP_NAME, false, String.class,
+                Optional.empty()));
         return additionalStackParameterValidations;
     }
 

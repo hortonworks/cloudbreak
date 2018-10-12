@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.openstack.common;
 
+import java.util.Map;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -88,6 +89,11 @@ public class OpenStackSetup implements Setup {
 
     @Override
     public void validateFileSystem(CloudCredential credential, SpiFileSystem spiFileSystem) {
+    }
+
+    @Override
+    public void validateParameters(AuthenticatedContext authenticatedContext, Map<String, String> parameters) throws Exception {
+
     }
 
     @Override

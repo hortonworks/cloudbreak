@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.validation.ParametersValidator;
 import com.sequenceiq.cloudbreak.controller.validation.StackSensitiveDataPropagator;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.State;
@@ -103,6 +104,9 @@ public class StackCreatorService {
     @Inject
     private StackUnderOperationService stackUnderOperationService;
 
+    @Inject
+    private ParametersValidator parametersValidator;
+
     public StackResponse createStack(CloudbreakUser cloudbreakUser, User user, Workspace workspace, StackRequest stackRequest) {
         ValidationResult validationResult = stackRequestValidator.validate(stackRequest);
         if (validationResult.getState() == State.ERROR) {
@@ -143,6 +147,7 @@ public class StackCreatorService {
                 }
                 LOGGER.info("Stack's instance templates have been validated in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
+                CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(stack.getCredential());
                 Blueprint blueprint = null;
                 if (stackRequest.getClusterRequest() != null) {
                     start = System.currentTimeMillis();
@@ -159,8 +164,6 @@ public class StackCreatorService {
                     stackService.validateStack(stackValidation, stackRequest.getClusterRequest().getValidateBlueprint());
                     LOGGER.info("Stack has been validated in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
-                    CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(stack.getCredential());
-
                     start = System.currentTimeMillis();
                     fileSystemValidator.validateFileSystem(stackValidationRequest.getPlatform(), cloudCredential, stackValidationRequest.getFileSystem(),
                             stack.getCreator().getUserId(), stack.getWorkspace().getId());
@@ -170,6 +173,11 @@ public class StackCreatorService {
                     clusterCreationService.validate(stackRequest.getClusterRequest(), cloudCredential, stack, user, workspace);
                     LOGGER.info("Cluster has been validated in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
                 }
+
+                start = System.currentTimeMillis();
+                parametersValidator.validate(stackRequest.getCloudPlatform(), cloudCredential, stack.getParameters(), stack.getCreator().getUserId(),
+                        stack.getWorkspace().getId());
+                LOGGER.info("Parameter validation has been finished under {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
                 start = System.currentTimeMillis();
                 String platformString = platform(stack.cloudPlatform()).value().toLowerCase();
