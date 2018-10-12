@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.api.model.environment.request;
 
+import java.util.HashSet;
 import java.util.Set;
 
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
@@ -32,9 +32,8 @@ public class EnvironmentRequest extends EnvironmentBaseRequest {
     @ApiModelProperty(EnvironmentRequestModelDescription.CREDENTIAL)
     private CredentialRequest credential;
 
-    @NotEmpty
     @ApiModelProperty(EnvironmentRequestModelDescription.REGIONS)
-    private Set<String> regions;
+    private Set<String> regions = new HashSet<>();
 
     public String getName() {
         return name;
@@ -73,6 +72,6 @@ public class EnvironmentRequest extends EnvironmentBaseRequest {
     }
 
     public void setRegions(Set<String> regions) {
-        this.regions = regions;
+        this.regions = regions == null ? new HashSet<>() : regions;
     }
 }

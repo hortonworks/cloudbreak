@@ -91,6 +91,7 @@ public interface PlatformParameters {
         specialParameters.put(PlatformParametersConsts.UPSCALING_SUPPORTED, Boolean.TRUE);
         specialParameters.put(PlatformParametersConsts.DOWNSCALING_SUPPORTED, Boolean.TRUE);
         specialParameters.put(PlatformParametersConsts.STARTSTOP_SUPPORTED, Boolean.TRUE);
+        specialParameters.put(PlatformParametersConsts.REGIONS_SUPPORTED, Boolean.TRUE);
         return new SpecialParameters(specialParameters);
     }
 

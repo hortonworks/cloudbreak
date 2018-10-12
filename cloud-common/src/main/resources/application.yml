@@ -32,7 +32,7 @@ cert:
 
 cb:
   uaa.startup.timeout.sec: 300
-  enabledplatforms: AZURE,AWS,GCP,OPENSTACK
+  enabledplatforms: AZURE,AWS,GCP,OPENSTACK,MOCK,YARN
   platform.default.rootVolumeSize:
     AWS: 50
     AZURE: 30
