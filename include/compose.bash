@@ -507,6 +507,8 @@ cloudbreak:
         - CB_DEFAULT_GATEWAY_CIDR
         $( if [[ "$CB_AUDIT_FILE_ENABLED" = true ]]; then echo "- CB_AUDIT_FILEPATH=/cloudbreak-log/cb-audit.log"; fi )
         $( if [[ -n "$CB_KAFKA_BOOTSTRAP_SERVERS" ]]; then echo "- CB_KAFKA_BOOTSTRAP_SERVERS"; fi )
+        - CB_DISABLE_SHOW_CLI
+        - CB_DISABLE_SHOW_BLUEPRINT
         - SMARTSENSE_UPLOAD_HOST
         - SMARTSENSE_UPLOAD_USERNAME
         - SMARTSENSE_UPLOAD_PASSWORD

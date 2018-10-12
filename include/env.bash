@@ -80,6 +80,8 @@ CB_DB_ENV_USER - User for the Cloudbreak database authentication
 CB_DB_ROOT_PATH - Deprecated - Location of the database volume on Cloudbreak host
 CB_DEFAULT_SUBSCRIPTION_ADDRESS - Address of the default subscription for Cloudbreak notifications
 CB_CAPABILITIES - Comma separated list of enabled capabilities
+CB_DISABLE_SHOW_CLI - Disables the 'show cli commond' function
+CB_DISABLE_SHOW_BLUEPRINT - Disables the 'show generated blueprint' function
 CB_ENABLEDPLATFORMS - Disables Cloudbreak resource called Platform
 CB_ENABLED_LINUX_TYPES - List of enabled OS types from image catalog
 CBD_FORCE_START - Disables docker-compose.yml and uaa.yml validation
