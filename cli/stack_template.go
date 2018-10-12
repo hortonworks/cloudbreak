@@ -121,9 +121,10 @@ func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string)
 	template := models_cloudbreak.StackV2Request{
 		Cluster: &models_cloudbreak.ClusterV2Request{
 			Ambari: &models_cloudbreak.AmbariV2Request{
-				BlueprintName: "____",
-				UserName:      &(&types.S{S: "____"}).S,
-				Password:      &(&types.S{S: ""}).S,
+				BlueprintName:     "____",
+				UserName:          &(&types.S{S: "____"}).S,
+				Password:          &(&types.S{S: ""}).S,
+				ValidateBlueprint: &(&types.B{B: false}).B,
 			},
 		},
 		General: &models_cloudbreak.GeneralSettings{
@@ -329,6 +330,9 @@ func preExtendTemplateWithOptionalBlocks(template *models_cloudbreak.StackV2Requ
 			Descriptor: "____",
 			Krb5Conf:   "____",
 		}
+	}
+	if withBlueprintValidation := boolFinder(FlWithBlueprintValidation.Name); withBlueprintValidation {
+		template.Cluster.Ambari.ValidateBlueprint = &(&types.B{B: true}).B
 	}
 	extendTemplateWithStorageType(template, storageType)
 }
