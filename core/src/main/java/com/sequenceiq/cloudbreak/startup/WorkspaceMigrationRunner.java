@@ -59,7 +59,7 @@ public class WorkspaceMigrationRunner {
                                     service::pureSave);
                         });
                 structuredEventWorkspaceMigrator.migrate(userMigrationResults);
-            }
+            } 
             finished.set(true);
         } catch (TransactionExecutionException e) {
             LOGGER.error("Error during db migration", e);
