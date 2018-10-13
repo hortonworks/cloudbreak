@@ -1072,7 +1072,7 @@ public class ClusterService {
     public void updateAmbariRepoDetails(Long clusterId, AmbariStackDetailsJson ambariStackDetails) {
         if (Objects.isNull(ambariStackDetails.getVersion())
                 || Objects.isNull(ambariStackDetails.getStackBaseURL())) {
-            throw new BadRequestException(String.format("Ambari repo details not complete."));
+            throw new BadRequestException("Ambari repo details not complete.");
         }
 
         AmbariRepo ambariRepo = clusterComponentConfigProvider.getAmbariRepo(clusterId);
@@ -1087,7 +1087,7 @@ public class ClusterService {
             component.setAttributes(new Json(ambariRepo));
             clusterComponentConfigProvider.store(component);
         } catch (JsonProcessingException ignored) {
-            throw new BadRequestException(String.format("Ambari repo details cannot be saved."));
+            throw new BadRequestException("Ambari repo details cannot be saved.");
         }
     }
 
@@ -1120,17 +1120,17 @@ public class ClusterService {
             component.setAttributes(new Json(hdpRepo));
             clusterComponentConfigProvider.store(component);
         } catch (JsonProcessingException ignored) {
-            throw new BadRequestException(String.format("HDP repo details cannot be saved."));
+            throw new BadRequestException("HDP repo details cannot be saved.");
         }
     }
 
     private void checkMandatoryHdpFields(AmbariStackDetailsJson ambariStackDetails) {
-        if (anyHdpHdfCommonFieldNull(ambariStackDetails)) {
-            throw new BadRequestException(String.format("HDP repo details not complete."));
+        if (isAnyHdpHdfCommonFieldNull(ambariStackDetails)) {
+            throw new BadRequestException("HDP repo details not complete.");
         }
     }
 
-    private boolean anyHdpHdfCommonFieldNull(AmbariStackDetailsJson ambariStackDetails) {
+    private boolean isAnyHdpHdfCommonFieldNull(AmbariStackDetailsJson ambariStackDetails) {
         return Objects.isNull(ambariStackDetails.getStackRepoId())
                 || Objects.isNull(ambariStackDetails.getOsType())
                 || Objects.isNull(ambariStackDetails.getStackBaseURL())
@@ -1143,10 +1143,10 @@ public class ClusterService {
     }
 
     public void updateHdfRepoDetails(Long clusterId, AmbariStackDetailsJson ambariStackDetails) {
-        if (anyHdpHdfCommonFieldNull(ambariStackDetails)
+        if (isAnyHdpHdfCommonFieldNull(ambariStackDetails)
                 || Objects.isNull(ambariStackDetails.getVersionDefinitionFileUrl())
                 || Objects.isNull(ambariStackDetails.getMpackUrl())) {
-            throw new BadRequestException(String.format("HDF repo details not complete."));
+            throw new BadRequestException("HDF repo details not complete.");
         }
 
         StackRepoDetails hdfRepo = clusterComponentConfigProvider.getStackRepoDetails(clusterId);
@@ -1185,15 +1185,15 @@ public class ClusterService {
             component.setAttributes(new Json(hdfRepo));
             clusterComponentConfigProvider.store(component);
         } catch (JsonProcessingException ignored) {
-            throw new BadRequestException(String.format("HDF repo details cannot be saved."));
+            throw new BadRequestException("HDF repo details cannot be saved.");
         }
     }
 
     private void checkMandatoryHdfFields(AmbariStackDetailsJson ambariStackDetails) {
-        if (anyHdpHdfCommonFieldNull(ambariStackDetails)
+        if (isAnyHdpHdfCommonFieldNull(ambariStackDetails)
                 || Objects.isNull(ambariStackDetails.getMpackUrl())
-                || (Objects.isNull(ambariStackDetails.getMpacks()) && StringUtils.isEmpty(ambariStackDetails.getMpacks().get(0).getName()))) {
-            throw new BadRequestException(String.format("HDF repo details not complete."));
+                || (Objects.isNull(ambariStackDetails.getMpacks()) && StringUtils.isEmpty(ambariStackDetails.getMpacks().iterator().next().getName()))) {
+            throw new BadRequestException("HDF repo details not complete.");
         }
     }
 

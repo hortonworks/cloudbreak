@@ -128,7 +128,7 @@ public class MaintenanceModeValidationServiceTest {
 
         when(clusterComponentConfigProvider.getStackRepoDetails(eq(cluster.getId()))).thenReturn(repoDetails);
         when(jsonHelper.createJsonFromString(eq(stackRepo))).thenReturn(JsonUtil.readTree(stackRepo));
-        underTest.validateStackRepository(cluster.getId(), stackRepo, warnings);
+        warnings.addAll(underTest.validateStackRepository(cluster.getId(), stackRepo));
         assertEquals(0, warnings.size());
     }
 
@@ -147,7 +147,7 @@ public class MaintenanceModeValidationServiceTest {
 
         when(clusterComponentConfigProvider.getStackRepoDetails(eq(cluster.getId()))).thenReturn(repoDetails);
         when(jsonHelper.createJsonFromString(eq(stackRepo))).thenReturn(JsonUtil.readTree(stackRepo));
-        underTest.validateStackRepository(cluster.getId(), stackRepo, warnings);
+        warnings.addAll(underTest.validateStackRepository(cluster.getId(), stackRepo));
         assertEquals(5, warnings.size());
     }
 
@@ -158,7 +158,7 @@ public class MaintenanceModeValidationServiceTest {
         repoDetails.setBaseUrl("http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.2.2");
         repoDetails.setVersion("2.6.2.2");
         when(clusterComponentConfigProvider.getAmbariRepo(eq(cluster.getId()))).thenReturn(repoDetails);
-        underTest.validateAmbariRepository(cluster.getId(), warnings);
+        warnings.addAll(underTest.validateAmbariRepository(cluster.getId()));
         assertEquals(0, warnings.size());
     }
 
@@ -169,7 +169,7 @@ public class MaintenanceModeValidationServiceTest {
         repoDetails.setBaseUrl("http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.2.3");
         repoDetails.setVersion("2.6.2.2");
         when(clusterComponentConfigProvider.getAmbariRepo(eq(cluster.getId()))).thenReturn(repoDetails);
-        underTest.validateAmbariRepository(cluster.getId(), warnings);
+        warnings.addAll(underTest.validateAmbariRepository(cluster.getId()));
         assertEquals(1, warnings.size());
     }
 
@@ -189,7 +189,7 @@ public class MaintenanceModeValidationServiceTest {
         when(componentConfigProvider.getImage(anyLong())).thenReturn(imageInComponent);
         when(imageCatalogService.getImage(anyString(), anyString(), anyString())).thenReturn(statedImage);
         when(imageUpdateService.checkPackageVersions(any(Stack.class), any(StatedImage.class))).thenReturn(CheckResult.ok());
-        underTest.validateImageCatalog(stack, warnings);
+        warnings.addAll(underTest.validateImageCatalog(stack));
         assertEquals(0, warnings.size());
 
     }
@@ -210,7 +210,7 @@ public class MaintenanceModeValidationServiceTest {
         when(componentConfigProvider.getImage(anyLong())).thenReturn(imageInComponent);
         when(imageCatalogService.getImage(anyString(), anyString(), anyString())).thenReturn(statedImage);
         when(imageUpdateService.checkPackageVersions(any(Stack.class), any(StatedImage.class))).thenReturn(CheckResult.failed("Failure"));
-        underTest.validateImageCatalog(stack, warnings);
+        warnings.addAll(underTest.validateImageCatalog(stack));
         assertEquals(1, warnings.size());
 
     }

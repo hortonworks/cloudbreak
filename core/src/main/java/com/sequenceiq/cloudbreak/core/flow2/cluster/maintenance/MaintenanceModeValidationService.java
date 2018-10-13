@@ -5,15 +5,18 @@ import static com.sequenceiq.cloudbreak.api.model.Status.MAINTENANCE_MODE_ENABLE
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_IN_PROGRESS;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -70,26 +73,31 @@ public class MaintenanceModeValidationService {
     private JsonHelper jsonHelper;
 
     public String fetchStackRepository(Long stackId) {
-        clusterService.updateClusterStatusByStackId(stackId, UPDATE_IN_PROGRESS);
-        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.CLUSTER_OPERATION, "Validating repos and images...");
-        flowMessageService.fireEventAndLog(stackId, Msg.MAINTENANCE_MODE_VALIDATION_STARTED, Status.UPDATE_IN_PROGRESS.name());
-
         String stackRepo = clusterService.getStackRepositoryJson(stackId);
         if (stackRepo == null) {
             LOGGER.info("Stack repository info cannot be fetched due missing OS type.");
             return null;
-        }
-        if ("".equals(stackRepo)) {
+        } else if (stackRepo.isEmpty()) {
             throw new CloudbreakServiceException("Stack repository info cannot be validated!");
         }
+
         LOGGER.info(String.format("Stack repo fetched: %s", stackRepo));
         return stackRepo;
     }
 
-    public List<Warning> validateStackRepository(Long clusterId, String stackRepo,
-            List<Warning> warnings) {
+    public void setUpValidationFlow(Long stackId) {
+        clusterService.updateClusterStatusByStackId(stackId, UPDATE_IN_PROGRESS);
+        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.CLUSTER_OPERATION, "Validating repos and images...");
+        flowMessageService.fireEventAndLog(stackId, Msg.MAINTENANCE_MODE_VALIDATION_STARTED, Status.UPDATE_IN_PROGRESS.name());
+    }
 
+    public List<Warning> validateStackRepository(Long clusterId, String stackRepo) {
+        List<Warning> warnings = new ArrayList<>();
         StackRepoDetails repoDetails = clusterComponentConfigProvider.getStackRepoDetails(clusterId);
+        String hdpVersion = repoDetails.getHdpVersion();
+        if (StringUtils.isEmpty(hdpVersion)) {
+            throw new CloudbreakServiceException("HDP version is null in database, validation aborted!");
+        }
         Map<String, String> stack = repoDetails.getStack();
         if (Objects.nonNull(stackRepo)) {
             JsonNode stackRepoJson = jsonHelper.createJsonFromString(stackRepo).path("Repositories");
@@ -97,10 +105,11 @@ public class MaintenanceModeValidationService {
             String osType = stackRepoJson.path("os_type").asText();
             String repoId = stackRepoJson.path("repo_id").asText();
 
-            if (!stack.get(StackRepoDetails.REPO_ID_TAG).contentEquals(repoId)) {
+            String configuredRepoId = stack.get(StackRepoDetails.REPO_ID_TAG);
+            if (!configuredRepoId.contentEquals(repoId)) {
                 warnings.add(new Warning(WarningType.STACK_REPO_WARNING,
                         String.format("Incorrect repo id! Configured '%s', but fetched '%s' from Ambari.",
-                                stack.get(StackRepoDetails.REPO_ID_TAG),
+                                configuredRepoId,
                                 repoId)));
             }
             String configuredBaseUrl = stack.get(osType);
@@ -117,24 +126,18 @@ public class MaintenanceModeValidationService {
         }
 
         stack.remove(StackRepoDetails.REPO_ID_TAG);
-        String hdpVersion = repoDetails.getHdpVersion();
-        if (hdpVersion == null || "".equals(hdpVersion)) {
-            throw new CloudbreakServiceException("HDP version is null in database, validation aborted!");
-        }
-        stack.entrySet().stream().filter(element -> !element.getValue().contains(hdpVersion)).
-                forEach(element -> {
-                    LOGGER.warn("Stack repo naming validation warning! {} cannot be found in {}",
-                            hdpVersion, element.getValue());
-                    warnings.add(new Warning(WarningType.STACK_NAMING_WARNING,
-                            String.format("Stack version: '%s' cannot be found in parameter: '%s'.",
-                                    hdpVersion,
-                                    element.getValue())));
-                });
+        List<Warning> notFound = stack.entrySet().stream().filter(element -> !element.getValue().contains(hdpVersion))
+                .peek(element -> LOGGER.warn("Stack repo naming validation warning! {} cannot be found in {}", hdpVersion, element.getValue()))
+                .map(element -> new Warning(WarningType.STACK_NAMING_WARNING,
+                        String.format("Stack version: '%s' cannot be found in parameter: '%s'.", hdpVersion, element.getValue())))
+                .collect(Collectors.toList());
+        warnings.addAll(notFound);
+
         return warnings;
     }
 
-    public List<Warning> validateAmbariRepository(Long clusterId, List<Warning> warnings) {
-
+    public List<Warning> validateAmbariRepository(Long clusterId) {
+        List<Warning> warnings = new ArrayList<>();
         AmbariRepo repoDetails = clusterComponentConfigProvider.getAmbariRepo(clusterId);
         String baseUrl = repoDetails.getBaseUrl();
         String version = repoDetails.getVersion();
@@ -148,13 +151,14 @@ public class MaintenanceModeValidationService {
         return warnings;
     }
 
-    public List<Warning> validateImageCatalog(Stack stack, List<Warning> warnings) {
+    public List<Warning> validateImageCatalog(Stack stack) {
+        List<Warning> warnings = new ArrayList<>();
         try {
             Image image = componentConfigProvider.getImage(stack.getId());
             StatedImage statedImage = imageCatalogService.getImage(image.getImageCatalogUrl(),
                     image.getImageCatalogName(), image.getImageId());
 
-            if (image.getPackageVersions().size() > 0) {
+            if (!image.getPackageVersions().isEmpty()) {
                 CheckResult checkResult = stackImageUpdateService.checkPackageVersions(stack, statedImage);
                 if (checkResult.getStatus().equals(EventStatus.FAILED)) {
                     warnings.add(new Warning(WarningType.IMAGE_INCOMPATIBILITY_WARNING, checkResult.getMessage()));
@@ -166,13 +170,13 @@ public class MaintenanceModeValidationService {
         return warnings;
     }
 
-    public void handleValidationSuccess(long stackId, List<Warning> warnings) {
+    public void handleValidationSuccess(Long stackId, List<Warning> warnings) {
         LOGGER.info("Maintenance mode validation flow has been finished successfully");
         clusterService.updateClusterStatusByStackId(stackId, MAINTENANCE_MODE_ENABLED);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE, "Validation has been finished");
 
         try {
-            if (warnings.size() > 0) {
+            if (!warnings.isEmpty()) {
                 String warningJson = new ObjectMapper().writeValueAsString(warnings);
                 LOGGER.warn(String.format("Found warnings: {%s}", warningJson));
                 flowMessageService.fireEventAndLog(stackId, Msg.MAINTENANCE_MODE_VALIDATION_FINISHED_FOUND_WARNINGS,
@@ -186,7 +190,7 @@ public class MaintenanceModeValidationService {
         }
     }
 
-    public void handleValidationFailure(long stackId, Exception error) {
+    public void handleValidationFailure(Long stackId, Exception error) {
         String errorDetailes = error.getMessage();
         LOGGER.warn("Error during Maintenance mode validation flow: ", error);
         clusterService.updateClusterStatusByStackId(stackId, MAINTENANCE_MODE_ENABLED);
