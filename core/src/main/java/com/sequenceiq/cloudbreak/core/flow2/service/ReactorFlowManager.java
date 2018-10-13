@@ -72,8 +72,10 @@ public class ReactorFlowManager {
     private static final List<String> ALLOWED_FLOW_TRIGGERS_IN_MAINTENANCE = List.of(
             FlowChainTriggers.FULL_SYNC_TRIGGER_EVENT,
             FlowChainTriggers.STACK_IMAGE_UPDATE_TRIGGER_EVENT,
+            FlowChainTriggers.CLUSTER_MAINTENANCE_MODE_VALIDATION_TRIGGER_EVENT,
             FlowChainTriggers.TERMINATION_TRIGGER_EVENT,
-            FlowChainTriggers.CLUSTER_MAINTENANCE_MODE_VALIDATION_TRIGGER_EVENT
+            FlowChainTriggers.PROPER_TERMINATION_TRIGGER_EVENT,
+            StackTerminationEvent.TERMINATION_EVENT.event()
     );
 
     @Inject
