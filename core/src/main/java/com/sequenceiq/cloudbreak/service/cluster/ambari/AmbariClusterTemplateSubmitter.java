@@ -13,50 +13,28 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.io.CharStreams;
 import com.sequenceiq.ambari.client.services.ClusterService;
-import com.sequenceiq.cloudbreak.blueprint.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 import groovyx.net.http.HttpResponseException;
 
 @Service
-public class AmbariClusterTemplateService {
+public class AmbariClusterTemplateSubmitter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AmbariClusterTemplateService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AmbariClusterTemplateSubmitter.class);
 
     private static final String KEY_TYPE = "PERSISTED";
 
     @Inject
-    private KerberosDetailService kerberosDetailService;
-
-    @Inject
-    private AmbariSecurityConfigProvider ambariSecurityConfigProvider;
-
-    @Inject
-    private AmbariRepositoryVersionService ambariRepositoryVersionService;
+    private AmbariClusterTemplateGenerator ambariClusterTemplateGenerator;
 
     void addClusterTemplate(Cluster cluster, Map<String, List<Map<String, String>>> hostGroupMappings, ClusterService ambariClient) throws CloudbreakException {
         String clusterName = cluster.getName();
-        String blueprintName = cluster.getBlueprint().getAmbariName();
-        String configStrategy = cluster.getConfigStrategy().name();
-        String clusterTemplate;
 
         if (ambariClient.getClusterName() == null) {
             try {
-                String repositoryVersion = ambariRepositoryVersionService.getRepositoryVersion(cluster.getId(), cluster.getStack().getOrchestrator());
-                if (cluster.isSecure()) {
-                    KerberosConfig kerberosConfig = cluster.getKerberosConfig();
-                    String principal = kerberosDetailService.resolvePrincipalForKerberos(kerberosConfig);
-                    clusterTemplate = ambariClient.createClusterJson(blueprintName, hostGroupMappings,
-                            ambariSecurityConfigProvider.getAmbariPassword(cluster), configStrategy,
-                            principal, kerberosConfig.getPassword(), KEY_TYPE, false, repositoryVersion);
-                } else {
-                    clusterTemplate = ambariClient.createClusterJson(blueprintName, hostGroupMappings,
-                            ambariSecurityConfigProvider.getAmbariPassword(cluster), configStrategy,
-                            null, null, null, false, repositoryVersion);
-                }
+                String clusterTemplate = ambariClusterTemplateGenerator.generateClusterTemplate(cluster, hostGroupMappings, ambariClient);
                 LOGGER.info("Submitted cluster creation template: {}", JsonUtil.minify(clusterTemplate, Collections.singleton("credentials")));
                 ambariClient.createClusterFromTemplate(clusterName, clusterTemplate);
             } catch (HttpResponseException exception) {

@@ -97,7 +97,7 @@ public class AmbariClusterSetupService implements ClusterSetupService {
     private AmbariViewProvider ambariViewProvider;
 
     @Inject
-    private AmbariClusterTemplateService ambariClusterTemplateService;
+    private AmbariClusterTemplateSubmitter ambariClusterTemplateSubmitter;
 
     @Inject
     private AmbariRepositoryVersionService ambariRepositoryVersionService;
@@ -158,7 +158,7 @@ public class AmbariClusterSetupService implements ClusterSetupService {
             PollingResult waitForHostsResult = ambariPollingServiceProvider.hostsPollingService(stack, ambariClient, hostsInCluster);
             ambariClusterConnectorPollingResultChecker
                     .checkPollingResult(waitForHostsResult, cloudbreakMessagesService.getMessage(AMBARI_CLUSTER_HOST_JOIN_FAILED.code()));
-            ambariClusterTemplateService.addClusterTemplate(cluster, hostGroupMappings, ambariClient);
+            ambariClusterTemplateSubmitter.addClusterTemplate(cluster, hostGroupMappings, ambariClient);
             Pair<PollingResult, Exception> pollingResult =
                     ambariOperationService.waitForOperationsToStart(stack, ambariClient, singletonMap("INSTALL_START", 1), START_OPERATION_STATE);
 

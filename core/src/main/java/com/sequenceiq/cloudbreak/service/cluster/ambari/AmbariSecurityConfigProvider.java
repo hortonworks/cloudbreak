@@ -24,6 +24,10 @@ public class AmbariSecurityConfigProvider {
         return cluster.getCloudbreakAmbariPassword();
     }
 
+    public String getAmbariUserProvidedPassword(Cluster cluster) {
+        return cluster.getPassword();
+    }
+
     public String getAmbariSecurityMasterKey(Cluster cluster) {
         String securityMasterKey = cluster.getAmbariSecurityMasterKey();
         if (Strings.isNullOrEmpty(securityMasterKey)) {
