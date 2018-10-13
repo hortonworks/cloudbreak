@@ -78,7 +78,7 @@ public class AmbariClusterSetupServiceTest {
     private AmbariViewProvider ambariViewProvider;
 
     @Mock
-    private AmbariClusterTemplateService ambariClusterTemplateService;
+    private AmbariClusterTemplateSubmitter ambariClusterTemplateSubmitter;
 
     @Mock
     private AmbariRepositoryVersionService ambariRepositoryVersionService;
