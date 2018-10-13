@@ -161,9 +161,11 @@ public class ClusterToClusterV2RequestConverterTest {
     @Test
     public void testConvertWhenRdsConfigsContainsElementsThenUserManagedOnesNameShouldBeStored() {
         RDSConfig notUserManaged = new RDSConfig();
+        notUserManaged.setId(0L);
         notUserManaged.setStatus(DEFAULT);
 
         RDSConfig userManaged = new RDSConfig();
+        notUserManaged.setId(1L);
         userManaged.setStatus(USER_MANAGED);
 
         Set<RDSConfig> rdsConfigs = new LinkedHashSet<>(2);

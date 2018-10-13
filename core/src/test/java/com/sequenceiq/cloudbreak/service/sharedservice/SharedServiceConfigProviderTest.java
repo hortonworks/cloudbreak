@@ -329,8 +329,10 @@ public class SharedServiceConfigProviderTest {
 
     private Set<RDSConfig> createRdsConfigs(ResourceStatus... statuses) {
         Set<RDSConfig> configs = new LinkedHashSet<>(statuses.length);
+        long id = 0;
         for (ResourceStatus status : statuses) {
             RDSConfig config = new RDSConfig();
+            config.setId(id++);
             config.setStatus(status);
             configs.add(config);
         }

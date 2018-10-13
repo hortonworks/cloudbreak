@@ -2,10 +2,6 @@ package com.sequenceiq.cloudbreak.api.model.environment.response;
 
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
-import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
-import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigResponse;
-import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigResponse;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.EnvironmentResponseModelDescription;
 
 import io.swagger.annotations.ApiModel;
@@ -14,47 +10,47 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
 
-    @ApiModelProperty(EnvironmentResponseModelDescription.CREDENTIAL)
-    private CredentialResponse credential;
+    @ApiModelProperty(EnvironmentResponseModelDescription.CREDENTIAL_NAME)
+    private String credentialName;
 
-    @ApiModelProperty(EnvironmentResponseModelDescription.PROXY_CONFIGS)
-    private Set<ProxyConfigResponse> proxyConfigs;
+    @ApiModelProperty(EnvironmentResponseModelDescription.PROXY_CONFIG_NAMES)
+    private Set<String> proxyConfigs;
 
-    @ApiModelProperty(EnvironmentResponseModelDescription.LDAP_CONFIGS)
-    private Set<LdapConfigResponse> ldapConfigs;
+    @ApiModelProperty(EnvironmentResponseModelDescription.LDAP_CONFIGS_NAMES)
+    private Set<String> ldapConfigs;
 
-    @ApiModelProperty(EnvironmentResponseModelDescription.RDS_CONFIGS)
-    private Set<RDSConfigResponse> rdsConfigs;
+    @ApiModelProperty(EnvironmentResponseModelDescription.RDS_CONFIG_NAMES)
+    private Set<String> rdsConfigs;
 
-    public CredentialResponse getCredential() {
-        return credential;
+    public String getCredentialName() {
+        return credentialName;
     }
 
-    public void setCredential(CredentialResponse credential) {
-        this.credential = credential;
+    public void setCredentialName(String credentialName) {
+        this.credentialName = credentialName;
     }
 
-    public Set<ProxyConfigResponse> getProxyConfigs() {
+    public Set<String> getProxyConfigs() {
         return proxyConfigs;
     }
 
-    public void setProxyConfigs(Set<ProxyConfigResponse> proxyConfigs) {
+    public void setProxyConfigs(Set<String> proxyConfigs) {
         this.proxyConfigs = proxyConfigs;
     }
 
-    public Set<LdapConfigResponse> getLdapConfigs() {
+    public Set<String> getLdapConfigs() {
         return ldapConfigs;
     }
 
-    public void setLdapConfigs(Set<LdapConfigResponse> ldapConfigs) {
+    public void setLdapConfigs(Set<String> ldapConfigs) {
         this.ldapConfigs = ldapConfigs;
     }
 
-    public Set<RDSConfigResponse> getRdsConfigs() {
+    public Set<String> getRdsConfigs() {
         return rdsConfigs;
     }
 
-    public void setRdsConfigs(Set<RDSConfigResponse> rdsConfigs) {
+    public void setRdsConfigs(Set<String> rdsConfigs) {
         this.rdsConfigs = rdsConfigs;
     }
 }

@@ -48,14 +48,18 @@ public class EnvironmentCreationValidatorTest {
         Credential credential = new Credential();
 
         LdapConfig ldapConfig = new LdapConfig();
+        ldapConfig.setId(0L);
         ldapConfig.setName("ldap1");
 
         ProxyConfig proxyConfig = new ProxyConfig();
+        proxyConfig.setId(0L);
         proxyConfig.setName("proxy1");
 
         RDSConfig rdsConfig1 = new RDSConfig();
+        rdsConfig1.setId(0L);
         rdsConfig1.setName("rds1");
         RDSConfig rdsConfig2 = new RDSConfig();
+        rdsConfig1.setId(1L);
         rdsConfig2.setName("rds2");
 
         Environment environment = new Environment();
@@ -137,14 +141,18 @@ public class EnvironmentCreationValidatorTest {
         Credential credential = new Credential();
 
         LdapConfig ldapConfig = new LdapConfig();
+        ldapConfig.setId(0L);
         ldapConfig.setName("ldap1");
 
         ProxyConfig proxyConfig = new ProxyConfig();
+        proxyConfig.setId(0L);
         proxyConfig.setName("proxy1");
 
         RDSConfig rdsConfig1 = new RDSConfig();
+        rdsConfig1.setId(0L);
         rdsConfig1.setName("rds1");
         RDSConfig rdsConfig2 = new RDSConfig();
+        rdsConfig1.setId(1L);
         rdsConfig2.setName("rds2");
 
         Environment environment = new Environment();
@@ -175,14 +183,18 @@ public class EnvironmentCreationValidatorTest {
         Credential credential = new Credential();
 
         LdapConfig ldapConfig = new LdapConfig();
+        ldapConfig.setId(0L);
         ldapConfig.setName("ldap1");
 
         ProxyConfig proxyConfig = new ProxyConfig();
+        proxyConfig.setId(0L);
         proxyConfig.setName("proxy1");
 
         RDSConfig rdsConfig1 = new RDSConfig();
+        rdsConfig1.setId(0L);
         rdsConfig1.setName("rds1");
         RDSConfig rdsConfig2 = new RDSConfig();
+        rdsConfig1.setId(1L);
         rdsConfig2.setName("rds2");
 
         Environment environment = new Environment();

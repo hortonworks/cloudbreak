@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.domain;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -311,5 +312,22 @@ public class LdapConfig implements ProvisionEntity, EnvironmentAwareResource {
     @Override
     public WorkspaceResource getResource() {
         return WorkspaceResource.LDAP;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        LdapConfig that = (LdapConfig) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

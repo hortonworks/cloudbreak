@@ -209,7 +209,7 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
 
     @Override
     public Credential deleteByNameFromWorkspace(String name, Long workspaceId) {
-        Workspace workspace = getWorkspaceService().getByIdWithoutAuth(workspaceId);
+        Workspace workspace = getWorkspaceService().getByIdForCurrentUser(workspaceId);
         return delete(name, workspace);
     }
 

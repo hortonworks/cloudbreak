@@ -18,7 +18,7 @@ import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentRequest;
-import com.sequenceiq.cloudbreak.api.model.environment.response.SimpleEnvironmentResponse;
+import com.sequenceiq.cloudbreak.api.model.environment.response.DetailedEnvironmentResponse;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.environment.EnvironmentCreationValidator;
@@ -91,7 +91,7 @@ public class EnvironmentServiceTest {
 
         initMocks();
 
-        SimpleEnvironmentResponse response = environmentService.createForLoggedInUser(environmentRequest, workspaceId);
+        DetailedEnvironmentResponse response = environmentService.createForLoggedInUser(environmentRequest, workspaceId);
         assertNotNull(response);
     }
 
@@ -110,7 +110,7 @@ public class EnvironmentServiceTest {
 
         initMocks();
 
-        SimpleEnvironmentResponse response = environmentService.createForLoggedInUser(environmentRequest, workspaceId);
+        DetailedEnvironmentResponse response = environmentService.createForLoggedInUser(environmentRequest, workspaceId);
         assertNotNull(response);
     }
 
@@ -125,7 +125,7 @@ public class EnvironmentServiceTest {
         when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(new CloudbreakUser("", "", ""));
         when(userService.getOrCreate(any())).thenReturn(new User());
         when(transactionService.required(any())).thenReturn(new Environment());
-        when(conversionService.convert(any(Environment.class), eq(SimpleEnvironmentResponse.class))).thenReturn(new SimpleEnvironmentResponse());
+        when(conversionService.convert(any(Environment.class), eq(DetailedEnvironmentResponse.class))).thenReturn(new DetailedEnvironmentResponse());
     }
 
 }

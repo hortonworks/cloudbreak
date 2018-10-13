@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,6 +88,8 @@ public class TestUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(TestUtil.class);
 
     private static final String DUMMY_NAME = "dummyName";
+
+    private static AtomicLong uniqueId = new AtomicLong(0L);
 
     private TestUtil() {
     }
@@ -402,6 +405,7 @@ public class TestUtil {
         cluster.setGateway(gateway);
         cluster.setExecutorType(ExecutorType.DEFAULT);
         RDSConfig rdsConfig = new RDSConfig();
+        rdsConfig.setId(generateUniqueId());
         Set<RDSConfig> rdsConfigs = new HashSet<>();
         rdsConfigs.add(rdsConfig);
         cluster.setRdsConfigs(rdsConfigs);
@@ -510,7 +514,7 @@ public class TestUtil {
 
     public static LdapConfig ldapConfig() {
         LdapConfig config = new LdapConfig();
-        config.setId(1L);
+        config.setId(generateUniqueId());
         config.setName(DUMMY_NAME);
         config.setDescription(DUMMY_DESCRIPTION);
         config.setUserSearchBase("cn=users,dc=example,dc=org");
@@ -534,7 +538,7 @@ public class TestUtil {
 
     public static LdapConfig ldapConfigWithSpecialChars() {
         LdapConfig config = new LdapConfig();
-        config.setId(1L);
+        config.setId(generateUniqueId());
         config.setName(DUMMY_NAME);
         config.setDescription(DUMMY_DESCRIPTION);
         config.setUserSearchBase("cn=users,dc=example,dc=org");
@@ -558,7 +562,7 @@ public class TestUtil {
 
     public static LdapConfig adConfig() {
         LdapConfig config = new LdapConfig();
-        config.setId(1L);
+        config.setId(generateUniqueId());
         config.setName(DUMMY_NAME);
         config.setDescription(DUMMY_DESCRIPTION);
         config.setUserSearchBase("cn=users,dc=example,dc=org");
@@ -692,6 +696,7 @@ public class TestUtil {
 
     public static RDSConfig rdsConfig(RdsType rdsType, DatabaseVendor databaseVendor) {
         RDSConfig rdsConfig = new RDSConfig();
+        rdsConfig.setId(generateUniqueId());
         rdsConfig.setName(rdsType.name());
         rdsConfig.setConnectionPassword("iamsoosecure");
         rdsConfig.setConnectionUserName("heyitsme");
@@ -710,6 +715,7 @@ public class TestUtil {
 
     public static RDSConfig rdsConfig(RdsType rdsType) {
         RDSConfig rdsConfig = new RDSConfig();
+        rdsConfig.setId(generateUniqueId());
         rdsConfig.setName(rdsType.name());
         rdsConfig.setConnectionPassword("iamsoosecure");
         rdsConfig.setConnectionUserName("heyitsme");
@@ -801,4 +807,7 @@ public class TestUtil {
         return new Json("{}");
     }
 
+    public static Long generateUniqueId() {
+        return uniqueId.incrementAndGet();
+    }
 }
