@@ -78,7 +78,7 @@ subprojects {
   }
 
   spotbugs {
-    toolVersion = "3.1.5"
+    toolVersion = "3.1.7"
     excludeFilter = file("$rootProject.projectDir/config/spotbugs/excludeFilter.xml")
     effort = "min"
   }
