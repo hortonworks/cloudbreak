@@ -343,6 +343,13 @@ var (
 			Usage: "custom key encryption for GCP instances which can use your kms key",
 		},
 	}
+	FlWithBlueprintValidation = BoolFlag{
+		RequiredFlag: OPTIONAL,
+		BoolFlag: cli.BoolFlag{
+			Name:  "with-blueprint-validation",
+			Usage: "enable Ambari blueprint validation",
+		},
+	}
 	FlExecutionType = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
@@ -1043,7 +1050,7 @@ func (fb *FlagBuilder) AddOutputFlag() *FlagBuilder {
 }
 
 func (fb *FlagBuilder) AddTemplateFlags() *FlagBuilder {
-	for _, f := range []cli.Flag{FlWithCustomDomainOptional, FlWithTagsOptional, FlWithImageOptional, FlWithKerberosManagedOptional, FlWithKerberosExistingMITOptional, FlWithKerberosExistingADOptional, FlWithKerberosCustomOptional} {
+	for _, f := range []cli.Flag{FlWithCustomDomainOptional, FlWithTagsOptional, FlWithImageOptional, FlWithKerberosManagedOptional, FlWithKerberosExistingMITOptional, FlWithKerberosExistingADOptional, FlWithKerberosCustomOptional, FlWithBlueprintValidation} {
 		fb.flags = append(fb.flags, f)
 	}
 	return fb
