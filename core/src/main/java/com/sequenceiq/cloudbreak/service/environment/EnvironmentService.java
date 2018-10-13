@@ -2,6 +2,9 @@ package com.sequenceiq.cloudbreak.service.environment;
 
 import static com.sequenceiq.cloudbreak.authorization.WorkspaceResource.ENVIRONMENT;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -11,8 +14,8 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentAttachRequest;
-import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentDetachRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentRequest;
+import com.sequenceiq.cloudbreak.api.model.environment.response.DetailedEnvironmentResponse;
 import com.sequenceiq.cloudbreak.api.model.environment.response.SimpleEnvironmentResponse;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
@@ -50,13 +53,26 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
     private EnvironmentCreationValidator environmentCreationValidator;
 
     @Inject
+    private EnvironmentViewService environmentViewService;
+
+    @Inject
     private EnvironmentRepository environmentRepository;
 
     @Inject
     @Named("conversionService")
     private ConversionService conversionService;
 
-    public SimpleEnvironmentResponse createForLoggedInUser(EnvironmentRequest request, @Nonnull Long workspaceId) {
+    public Set<SimpleEnvironmentResponse> listByWorkspaceId(Long workspaceId) {
+        return environmentViewService.findAllByWorkspaceId(workspaceId).stream()
+                .map(env -> conversionService.convert(env, SimpleEnvironmentResponse.class))
+                .collect(Collectors.toSet());
+    }
+
+    public DetailedEnvironmentResponse get(String environmentName, Long workspaceId) {
+        return conversionService.convert(getByNameForWorkspaceId(environmentName, workspaceId), DetailedEnvironmentResponse.class);
+    }
+
+    public DetailedEnvironmentResponse createForLoggedInUser(EnvironmentRequest request, @Nonnull Long workspaceId) {
         Environment environment = conversionService.convert(request, Environment.class);
         environment.setLdapConfigs(ldapConfigService.findByNamesInWorkspace(request.getLdapConfigs(), workspaceId));
         environment.setProxyConfigs(proxyConfigService.findByNamesInWorkspace(request.getProxyConfigs(), workspaceId));
@@ -67,7 +83,7 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
             throw new BadRequestException(validationResult.getFormattedErrors());
         }
         environment = createForLoggedInUser(environment, workspaceId);
-        return conversionService.convert(environment, SimpleEnvironmentResponse.class);
+        return conversionService.convert(environment, DetailedEnvironmentResponse.class);
     }
 
     private void setCredential(EnvironmentRequest request, Environment environment, Long workspaceId) {
@@ -87,11 +103,11 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
         environment.setCloudPlatform(credential.cloudPlatform());
     }
 
-    public Environment attachResources(Environment environment, EnvironmentAttachRequest request) {
+    public DetailedEnvironmentResponse attachResources(String environmentName, EnvironmentAttachRequest request, Long workspaceId) {
         return null;
     }
 
-    public Environment detachResources(Environment environment, EnvironmentDetachRequest request) {
+    public DetailedEnvironmentResponse detachResources(String environmentName, EnvironmentAttachRequest request, Long workspaceId) {
         return null;
     }
 

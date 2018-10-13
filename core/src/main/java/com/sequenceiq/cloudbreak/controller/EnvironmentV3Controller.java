@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.controller;
 
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -16,6 +15,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v3.EnvironmentV3Endpoint;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentAttachRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentDetachRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentRequest;
+import com.sequenceiq.cloudbreak.api.model.environment.response.DetailedEnvironmentResponse;
 import com.sequenceiq.cloudbreak.api.model.environment.response.SimpleEnvironmentResponse;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
@@ -43,31 +43,28 @@ public class EnvironmentV3Controller implements EnvironmentV3Endpoint {
     private ConversionService conversionService;
 
     @Override
-    public SimpleEnvironmentResponse create(Long workspaceId, @Valid EnvironmentRequest request) {
+    public DetailedEnvironmentResponse create(Long workspaceId, @Valid EnvironmentRequest request) {
         return environmentService.createForLoggedInUser(request, workspaceId);
     }
 
     @Override
     public Set<SimpleEnvironmentResponse> list(Long workspaceId) {
-        return environmentService.findAllByWorkspaceId(workspaceId).stream()
-                .map(env -> conversionService.convert(env, SimpleEnvironmentResponse.class))
-                .collect(Collectors.toSet());
+        return environmentService.listByWorkspaceId(workspaceId);
     }
 
     @Override
-    public SimpleEnvironmentResponse get(Long workspaceId, String environmentName) {
-        return conversionService.convert(environmentService.getByNameForWorkspaceId(environmentName, workspaceId), SimpleEnvironmentResponse.class);
+    public DetailedEnvironmentResponse get(Long workspaceId, String environmentName) {
+        return environmentService.get(environmentName, workspaceId);
     }
 
-    // TODO: finish
     @Override
-    public SimpleEnvironmentResponse attachResources(Long workspaceId, String environmentName, @Valid EnvironmentAttachRequest request) {
+    public DetailedEnvironmentResponse attachResources(Long workspaceId, String environmentName, @Valid EnvironmentAttachRequest request) {
         return null;
     }
 
     // TODO: finish
     @Override
-    public SimpleEnvironmentResponse detachResources(Long workspaceId, String environmentName, @Valid EnvironmentDetachRequest request) {
+    public DetailedEnvironmentResponse detachResources(Long workspaceId, String environmentName, @Valid EnvironmentDetachRequest request) {
         return null;
     }
 }

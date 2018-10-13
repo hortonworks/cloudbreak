@@ -16,6 +16,7 @@ import javax.ws.rs.core.MediaType;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentAttachRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentDetachRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentRequest;
+import com.sequenceiq.cloudbreak.api.model.environment.response.DetailedEnvironmentResponse;
 import com.sequenceiq.cloudbreak.api.model.environment.response.SimpleEnvironmentResponse;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
@@ -34,7 +35,7 @@ public interface EnvironmentV3Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.CREATE, produces = ContentType.JSON, notes = Notes.ENVIRONMENT_NOTES,
             nickname = "create")
-    SimpleEnvironmentResponse create(@PathParam("workspaceId") Long workspaceId, @Valid EnvironmentRequest request);
+    DetailedEnvironmentResponse create(@PathParam("workspaceId") Long workspaceId, @Valid EnvironmentRequest request);
 
     @GET
     @Path("/{name}")
@@ -42,7 +43,7 @@ public interface EnvironmentV3Endpoint {
     @QueryParam("")
     @ApiOperation(value = EnvironmentOpDescription.GET, produces = ContentType.JSON, notes = Notes.ENVIRONMENT_NOTES,
             nickname = "get")
-    SimpleEnvironmentResponse get(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String environmentName);
+    DetailedEnvironmentResponse get(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String environmentName);
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -55,7 +56,7 @@ public interface EnvironmentV3Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.ATTACH_RESOURCES, produces = ContentType.JSON, notes = Notes.ENVIRONMENT_NOTES,
             nickname = "attachResources")
-    SimpleEnvironmentResponse attachResources(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String environmentName,
+    DetailedEnvironmentResponse attachResources(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String environmentName,
             @Valid EnvironmentAttachRequest request);
 
     @PUT
@@ -63,6 +64,6 @@ public interface EnvironmentV3Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.DETACH_RESOURCES, produces = ContentType.JSON, notes = Notes.ENVIRONMENT_NOTES,
             nickname = "detachResources")
-    SimpleEnvironmentResponse detachResources(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String environmentName,
+    DetailedEnvironmentResponse detachResources(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String environmentName,
             @Valid EnvironmentDetachRequest request);
 }

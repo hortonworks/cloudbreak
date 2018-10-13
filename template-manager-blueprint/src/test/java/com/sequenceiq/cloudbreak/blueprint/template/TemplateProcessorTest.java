@@ -253,6 +253,7 @@ public class TemplateProcessorTest {
 
     private RDSConfig rdsConfig(String rdsType) {
         RDSConfig rdsConfig = new RDSConfig();
+        rdsConfig.setId(TestUtil.generateUniqueId());
         rdsConfig.setName(rdsType);
         rdsConfig.setConnectionPassword("iamsoosecure");
         rdsConfig.setConnectionUserName("heyitsme");
