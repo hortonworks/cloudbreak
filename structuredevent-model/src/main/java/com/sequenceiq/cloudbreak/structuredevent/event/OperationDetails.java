@@ -25,8 +25,6 @@ public class OperationDetails implements Serializable {
 
     private String userNameV3;
 
-    private String account;
-
     private String userId;
 
     private String userName;
@@ -41,14 +39,14 @@ public class OperationDetails implements Serializable {
     }
 
     public OperationDetails(StructuredEventType eventType, String resourceType, Long resourceId, String resourceName, String userIdV3,
-            String userNameV3, String cloudbreakId, String cloudbreakVersion, Long workspaceId, String account, String userId, String userName) {
+            String userNameV3, String cloudbreakId, String cloudbreakVersion, Long workspaceId, String userId, String userName) {
         this(Calendar.getInstance().getTimeInMillis(), eventType, resourceType, resourceId, resourceName, userIdV3,
-                userNameV3, cloudbreakId, cloudbreakVersion, workspaceId, account, userId, userName);
+                userNameV3, cloudbreakId, cloudbreakVersion, workspaceId, userId, userName);
     }
 
     public OperationDetails(Long timestamp, StructuredEventType eventType, String resourceType, Long resourceId,
             String resourceName, String userIdV3, String userNameV3, String cloudbreakId,
-            String cloudbreakVersion, Long workspaceId, String account, String userId, String userName) {
+            String cloudbreakVersion, Long workspaceId, String userId, String userName) {
         this.timestamp = timestamp;
         this.eventType = eventType;
         this.resourceId = resourceId;
@@ -59,7 +57,6 @@ public class OperationDetails implements Serializable {
         this.cloudbreakId = cloudbreakId;
         this.cloudbreakVersion = cloudbreakVersion;
         this.workspaceId = workspaceId;
-        this.account = account;
         this.userId = userId;
         this.userName = userName;
     }
@@ -146,14 +143,6 @@ public class OperationDetails implements Serializable {
 
     public void setWorkspaceId(Long workspaceId) {
         this.workspaceId = workspaceId;
-    }
-
-    public String getAccount() {
-        return account;
-    }
-
-    public void setAccount(String account) {
-        this.account = account;
     }
 
     public String getUserId() {

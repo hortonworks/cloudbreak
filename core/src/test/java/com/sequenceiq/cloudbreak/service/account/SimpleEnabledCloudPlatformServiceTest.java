@@ -21,14 +21,14 @@ import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SimpleAccountPreferencesServiceTest {
+public class SimpleEnabledCloudPlatformServiceTest {
 
     public static final String AWS = "AWS";
 
     private static final String OPENSTACK = "OPENSTACK";
 
     @InjectMocks
-    private final AccountPreferencesService underTest = new AccountPreferencesService();
+    private final PreferencesService underTest = new PreferencesService();
 
     @Spy
     private final List<CloudConstant> cloudConstants = new ArrayList<>();
@@ -44,7 +44,7 @@ public class SimpleAccountPreferencesServiceTest {
 
     @Test
     public void testEnabledPlatformsWhenEnabledPlatformsIsEmpty() {
-        ReflectionTestUtils.setField(underTest, AccountPreferencesService.class, "enabledPlatforms", "", null);
+        ReflectionTestUtils.setField(underTest, PreferencesService.class, "enabledPlatforms", "", null);
         Set<String> actual = underTest.enabledPlatforms();
 
         assertThat(actual, containsInAnyOrder(AWS, OPENSTACK));
@@ -52,7 +52,7 @@ public class SimpleAccountPreferencesServiceTest {
 
     @Test
     public void testEnabledPlatformsWhenEnabledPlatformsIsNotEmpty() {
-        ReflectionTestUtils.setField(underTest, AccountPreferencesService.class, "enabledPlatforms", "AWS,PL1,PL2", null);
+        ReflectionTestUtils.setField(underTest, PreferencesService.class, "enabledPlatforms", "AWS,PL1,PL2", null);
         Set<String> actual = underTest.enabledPlatforms();
 
         assertThat(actual, containsInAnyOrder(AWS, "PL1", "PL2"));

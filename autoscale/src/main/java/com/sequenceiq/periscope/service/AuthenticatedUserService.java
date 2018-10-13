@@ -23,7 +23,7 @@ public class AuthenticatedUserService {
             OAuth2Authentication oauth = (OAuth2Authentication) authentication;
             if (oauth.getUserAuthentication() != null) {
                 String username = (String) authentication.getPrincipal();
-                return cachedUserDetailsService.getDetails(username, UserFilterField.USERNAME);
+                return cachedUserDetailsService.getDetails(username, "tenant", UserFilterField.USERNAME);
             }
         }
         return null;

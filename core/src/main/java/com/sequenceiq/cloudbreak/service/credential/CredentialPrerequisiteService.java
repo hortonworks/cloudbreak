@@ -47,8 +47,7 @@ public class CredentialPrerequisiteService {
     private UserPreferencesService userPreferencesService;
 
     public CredentialPrerequisites getPrerequisites(User user, Workspace workspace, String cloudPlatform) {
-        CloudContext cloudContext = new CloudContext(null, null, cloudPlatform,
-                user.getUserId(), user.getUserId(), workspace.getId());
+        CloudContext cloudContext = new CloudContext(null, null, cloudPlatform, user.getUserId(), workspace.getId());
         UserPreferences userPreferences = userPreferencesService.getWithExternalId(user);
         CredentialPrerequisitesRequest request = new CredentialPrerequisitesRequest(cloudContext, userPreferences.getExternalId());
         LOGGER.info("Triggering event: {}", request);

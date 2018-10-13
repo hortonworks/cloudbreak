@@ -68,11 +68,6 @@ public class SshKey extends Entity {
         return this;
     }
 
-    public SshKey withOwner(String owner) {
-        request.setOwner(owner);
-        return this;
-    }
-
     public SshKey withPlatformVariant(String platformVariant) {
         request.setPlatformVariant(platformVariant);
         return this;

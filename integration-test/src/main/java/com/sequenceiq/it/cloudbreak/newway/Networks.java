@@ -24,11 +24,6 @@ public class Networks extends Entity {
         super(NETWORKS);
     }
 
-    public Networks withAccount(String account) {
-        platformResourceRequestJson.setAccount(account);
-        return this;
-    }
-
     public Networks withAvailabilityZone(String availabilityZone) {
         platformResourceRequestJson.setAvailabilityZone(availabilityZone);
         return this;
@@ -46,11 +41,6 @@ public class Networks extends Entity {
 
     public Networks withPlatformVariant(String platformVariant) {
         platformResourceRequestJson.setPlatformVariant(platformVariant);
-        return this;
-    }
-
-    public Networks withOwner(String owner) {
-        platformResourceRequestJson.setOwner(owner);
         return this;
     }
 

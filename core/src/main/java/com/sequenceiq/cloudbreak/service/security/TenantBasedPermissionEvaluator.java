@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.security;
 
 import java.io.Serializable;
-import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
@@ -15,19 +14,21 @@ import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ReflectionUtils;
 
 import com.sequenceiq.cloudbreak.aspect.PermissionType;
 import com.sequenceiq.cloudbreak.authorization.SpecialScopes;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
+import com.sequenceiq.cloudbreak.domain.workspace.Tenant;
+import com.sequenceiq.cloudbreak.domain.workspace.TenantAwareResource;
+import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.user.CachedUserDetailsService;
 
 @Service
 @Lazy
-public class OwnerBasedPermissionEvaluator implements PermissionEvaluator {
+public class TenantBasedPermissionEvaluator implements PermissionEvaluator {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(OwnerBasedPermissionEvaluator.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TenantBasedPermissionEvaluator.class);
 
     @Inject
     @Lazy
@@ -47,16 +48,10 @@ public class OwnerBasedPermissionEvaluator implements PermissionEvaluator {
             return oauth.getOAuth2Request().getScope().contains(SpecialScopes.AUTO_SCALE.getScope());
         }
 
-        CloudbreakUser user = cachedUserDetailsService.getDetails((String) authentication.getPrincipal(), UserFilterField.USERNAME);
+        CloudbreakUser user = cachedUserDetailsService.getDetails((String) authentication.getPrincipal(),
+                AuthenticatedUserService.getTenant(oauth), UserFilterField.USERNAME);
         Collection<?> targets = target instanceof Collection ? (Collection<?>) target : Collections.singleton(target);
-        return targets.stream().allMatch(t -> {
-            try {
-                return hasPermission(user, p, t);
-            } catch (IllegalAccessException e) {
-                LOGGER.error("Object doesn't have properties to check permission with class: " + t.getClass().getCanonicalName(), e);
-                return false;
-            }
-        });
+        return targets.stream().allMatch(t -> hasPermission(user, p, t));
     }
 
     @Override
@@ -65,32 +60,19 @@ public class OwnerBasedPermissionEvaluator implements PermissionEvaluator {
     }
 
     //CHECKSTYLE:OFF
-    private boolean hasPermission(CloudbreakUser user, PermissionType p, Object targetDomainObject) throws IllegalAccessException {
-        String owner = getOwner(targetDomainObject);
-        String account = getAccount(targetDomainObject);
-        return owner == null && account == null
-                || user.getUserId().equals(owner)
-                || account.equals(user.getAccount()) && p == PermissionType.READ;
+    private boolean hasPermission(CloudbreakUser cbUser, PermissionType p, Object targetDomainObject) {
+        Optional<Tenant> tenant = getTenant(targetDomainObject);
+        return tenant.isPresent() && tenant.get().getName().contentEquals(cbUser.getTenant());
     }
     //CHECKSTYLE:ON
 
-    private String getAccount(Object targetDomainObject) throws IllegalAccessException {
-        String result = "";
-        Field accountField = ReflectionUtils.findField(targetDomainObject.getClass(), "account");
-        if (accountField != null) {
-            accountField.setAccessible(true);
-            result = (String) accountField.get(targetDomainObject);
+    private Optional<Tenant> getTenant(Object targetDomainObject) {
+        if (targetDomainObject instanceof TenantAwareResource) {
+            TenantAwareResource tenantAwareResource = (TenantAwareResource) targetDomainObject;
+            return Optional.of(tenantAwareResource.getTenant());
         }
-        return result;
+        return Optional.empty();
     }
 
-    private String getOwner(Object targetDomainObject) throws IllegalAccessException {
-        String result = "";
-        Field ownerField = ReflectionUtils.findField(targetDomainObject.getClass(), "owner");
-        if (ownerField != null) {
-            ownerField.setAccessible(true);
-            result = (String) ownerField.get(targetDomainObject);
-        }
-        return result;
-    }
 }
+

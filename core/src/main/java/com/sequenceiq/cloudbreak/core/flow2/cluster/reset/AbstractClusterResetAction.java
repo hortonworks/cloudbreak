@@ -25,7 +25,7 @@ public abstract class AbstractClusterResetAction<P extends Payload> extends Abst
     @Override
     protected ClusterViewContext createFlowContext(String flowId, StateContext<ClusterResetState, ClusterResetEvent> stateContext, P payload) {
         StackView stack = stackService.getViewByIdWithoutAuth(payload.getStackId());
-        MDCBuilder.buildMdcContext(stack.getId().toString(), stack.getName(), stack.getOwner(), "CLUSTER");
+        MDCBuilder.buildMdcContext(stack.getId().toString(), stack.getName(), "CLUSTER");
         return new ClusterViewContext(flowId, stack);
     }
 

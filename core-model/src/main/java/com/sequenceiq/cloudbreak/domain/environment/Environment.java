@@ -159,11 +159,6 @@ public class Environment implements WorkspaceAwareResource {
         return WorkspaceResource.ENVIRONMENT;
     }
 
-    @Override
-    public String getOwner() {
-        return null;
-    }
-
     public String getCloudPlatform() {
         return cloudPlatform;
     }

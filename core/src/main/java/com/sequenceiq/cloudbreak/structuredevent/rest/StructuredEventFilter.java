@@ -296,7 +296,7 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
         }
         return new OperationDetails(requestTime, REST, resourceType, StringUtils.isNotEmpty(resourceId) ? Long.valueOf(resourceId) : null, resourceName,
                 currentUser != null ? currentUser.getUserId() : "", currentUser != null ? currentUser.getUserName() : "",
-                cloudbreakNodeConfig.getId(), cbVersion, workspaceId, cloudbreakUser != null ? cloudbreakUser.getAccount() : "",
+                cloudbreakNodeConfig.getId(), cbVersion, workspaceId,
                 cloudbreakUser != null ? cloudbreakUser.getUserId() : "", cloudbreakUser != null ? cloudbreakUser.getUsername() : "");
     }
 

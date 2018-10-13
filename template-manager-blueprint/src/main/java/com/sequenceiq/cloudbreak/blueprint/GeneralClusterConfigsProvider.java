@@ -11,13 +11,12 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
-import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
-import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
+import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 
 @Service
 public class GeneralClusterConfigsProvider {
@@ -29,7 +28,7 @@ public class GeneralClusterConfigsProvider {
     @Inject
     private BlueprintProcessorFactory blueprintProcessorFactory;
 
-    public GeneralClusterConfigs generalClusterConfigs(Stack stack, Cluster cluster, CloudbreakUser cloudbreakUser) {
+    public GeneralClusterConfigs generalClusterConfigs(Stack stack, Cluster cluster) {
         boolean gatewayInstanceMetadataPresented = false;
         boolean instanceMetadataPresented = false;
         if (stack.getInstanceGroups() != null && !stack.getInstanceGroups().isEmpty()) {
@@ -40,7 +39,6 @@ public class GeneralClusterConfigsProvider {
             instanceMetadataPresented = true;
         }
         GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
-        generalClusterConfigs.setIdentityUserEmail(cloudbreakUser.getUsername());
         generalClusterConfigs.setAmbariIp(cluster.getAmbariIp());
         generalClusterConfigs.setInstanceGroupsPresented(instanceMetadataPresented);
         generalClusterConfigs.setGatewayInstanceMetadataPresented(gatewayInstanceMetadataPresented);

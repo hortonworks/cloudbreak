@@ -80,10 +80,6 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
     @Column(nullable = false)
     private String name;
 
-    private String owner;
-
-    private String account;
-
     @Column(nullable = false)
     private String region;
 
@@ -203,22 +199,6 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
 
     public String getName() {
         return name;
-    }
-
-    public String getOwner() {
-        return owner;
-    }
-
-    public void setOwner(String owner) {
-        this.owner = owner;
-    }
-
-    public String getAccount() {
-        return account;
-    }
-
-    public void setAccount(String account) {
-        this.account = account;
     }
 
     public String getDescription() {

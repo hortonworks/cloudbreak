@@ -46,7 +46,7 @@ public class CloudbreakEndpointBasedPermissionEvaluatorTest {
     @Before
     public void setup() {
         when(authentication.getPrincipal()).thenReturn("owner");
-        when(cachedUserDetailsService.getDetails(eq("owner"), eq(UserFilterField.USERNAME))).thenReturn(periscopeUserOk);
+        when(cachedUserDetailsService.getDetails(eq("owner"), eq("tenant"), eq(UserFilterField.USERNAME))).thenReturn(periscopeUserOk);
     }
 
     @Test
@@ -59,7 +59,7 @@ public class CloudbreakEndpointBasedPermissionEvaluatorTest {
 
         Assert.assertTrue(underTest.hasPermission(authentication, target, READ));
 
-        verify(cachedUserDetailsService, times(0)).getDetails(anyString(), any(UserFilterField.class));
+        verify(cachedUserDetailsService, times(0)).getDetails(anyString(), anyString(), any(UserFilterField.class));
         verify(stackSecurityService, times(1)).hasAccess(eq(1L), eq(periscopeUserOk.getId()), eq(READ));
     }
 
@@ -73,7 +73,7 @@ public class CloudbreakEndpointBasedPermissionEvaluatorTest {
 
         Assert.assertFalse(underTest.hasPermission(authentication, target, READ));
 
-        verify(cachedUserDetailsService, times(0)).getDetails(anyString(), any(UserFilterField.class));
+        verify(cachedUserDetailsService, times(0)).getDetails(anyString(), anyString(), any(UserFilterField.class));
         verify(stackSecurityService, times(1)).hasAccess(eq(1L), eq(periscopeUserBad.getId()), eq(READ));
     }
 
@@ -84,7 +84,7 @@ public class CloudbreakEndpointBasedPermissionEvaluatorTest {
 
         Assert.assertTrue(underTest.hasPermission(authentication, target, READ));
 
-        verify(cachedUserDetailsService, times(1)).getDetails(anyString(), any(UserFilterField.class));
+        verify(cachedUserDetailsService, times(1)).getDetails(anyString(), anyString(), any(UserFilterField.class));
         verify(stackSecurityService, times(0)).hasAccess(anyLong(), anyString(), eq(READ));
     }
 
@@ -95,7 +95,7 @@ public class CloudbreakEndpointBasedPermissionEvaluatorTest {
 
         Assert.assertFalse(underTest.hasPermission(authentication, target, READ));
 
-        verify(cachedUserDetailsService, times(1)).getDetails(anyString(), any(UserFilterField.class));
+        verify(cachedUserDetailsService, times(1)).getDetails(anyString(), anyString(), any(UserFilterField.class));
         verify(stackSecurityService, times(0)).hasAccess(anyLong(), anyString(), eq(READ));
     }
 
@@ -103,7 +103,7 @@ public class CloudbreakEndpointBasedPermissionEvaluatorTest {
     public void testHasAccessPeriscopeUserAllowed() {
         Assert.assertTrue(underTest.hasPermission(authentication, periscopeUserOk, READ));
 
-        verify(cachedUserDetailsService, times(0)).getDetails(anyString(), any(UserFilterField.class));
+        verify(cachedUserDetailsService, times(0)).getDetails(anyString(), anyString(), any(UserFilterField.class));
         verify(stackSecurityService, times(0)).hasAccess(anyLong(), anyString(), eq(READ));
     }
 }

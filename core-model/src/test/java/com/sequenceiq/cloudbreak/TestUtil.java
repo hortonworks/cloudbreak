@@ -73,6 +73,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackStatusView;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.domain.workspace.Tenant;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.type.KerberosType;
@@ -143,7 +144,7 @@ public class TestUtil {
     }
 
     public static StackView stackView(Status stackStatus, Credential credential) {
-        return new StackView(1L, "simplestack", "userid", credential.cloudPlatform(), new StackStatusView());
+        return new StackView(1L, "simplestack", credential.cloudPlatform(), new StackStatusView());
     }
 
     public static Stack stack(Status stackStatus, Credential credential) {
@@ -152,14 +153,15 @@ public class TestUtil {
         user.setUserName("Alma ur");
         Workspace workspace = new Workspace();
         workspace.setId(1L);
+        Tenant tenant = new Tenant();
+        tenant.setName("testtenant");
+        workspace.setTenant(tenant);
         Stack stack = new Stack();
         stack.setCreator(user);
         stack.setWorkspace(workspace);
         stack.setStackStatus(new StackStatus(stack, stackStatus, "statusReason", DetailedStackStatus.UNKNOWN));
         stack.setCredential(credential);
         stack.setName("simplestack");
-        stack.setOwner("userid");
-        stack.setAccount("account");
         stack.setId(1L);
         stack.setInstanceGroups(generateGcpInstanceGroups(3));
         stack.setRegion("region");
@@ -619,12 +621,10 @@ public class TestUtil {
         CloudbreakUsage cloudbreakUsage = new CloudbreakUsage();
         cloudbreakUsage.setId(id);
         cloudbreakUsage.setInstanceGroup("master");
-        cloudbreakUsage.setAccount("account");
         cloudbreakUsage.setCosts(2.0D);
         cloudbreakUsage.setDay(new Date());
         cloudbreakUsage.setInstanceHours(1L);
         cloudbreakUsage.setInstanceType("xlarge");
-        cloudbreakUsage.setOwner("owner");
         cloudbreakUsage.setProvider(GCP);
         cloudbreakUsage.setRegion("Central US");
         cloudbreakUsage.setStackName("usagestack");
@@ -688,8 +688,6 @@ public class TestUtil {
     public static SmartSenseSubscription smartSenseSubscription() {
         SmartSenseSubscription smartSenseSubscription = new SmartSenseSubscription();
         smartSenseSubscription.setSubscriptionId("1234-1234-1234-1244");
-        smartSenseSubscription.setAccount("hortonworks");
-        smartSenseSubscription.setOwner("hwx-user");
         smartSenseSubscription.setId(1L);
         return smartSenseSubscription;
     }

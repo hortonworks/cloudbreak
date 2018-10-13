@@ -54,7 +54,7 @@ public class UserProfileHandlerTest {
         User user = createUser();
         UserProfile userProfile = createUserProfile(Collections.emptySet());
         when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
-        when(userProfileService.getOrCreate(ACCOUNT_A, USER_ID_1, user)).thenReturn(userProfile);
+        when(userProfileService.getOrCreate(user)).thenReturn(userProfile);
 
         underTest.createProfilePreparation(createCredential(CREDENTIAL_A), user);
 
@@ -69,7 +69,7 @@ public class UserProfileHandlerTest {
         User user = createUser();
         UserProfile userProfile = createUserProfile(Collections.singleton(createCredential(CREDENTIAL_A)));
         when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
-        when(userProfileService.getOrCreate(ACCOUNT_A, USER_ID_1, user)).thenReturn(userProfile);
+        when(userProfileService.getOrCreate(user)).thenReturn(userProfile);
 
         underTest.createProfilePreparation(createCredential(CREDENTIAL_B), user);
 

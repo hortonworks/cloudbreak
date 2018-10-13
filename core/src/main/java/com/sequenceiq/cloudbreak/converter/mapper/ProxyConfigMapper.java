@@ -14,8 +14,6 @@ import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 public interface ProxyConfigMapper {
 
     @Mappings({
-            @Mapping(target = "owner", ignore = true),
-            @Mapping(target = "account", ignore = true),
             @Mapping(target = "id", ignore = true),
             @Mapping(target = "workspace", ignore = true),
             @Mapping(target = "environments", ignore = true)

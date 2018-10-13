@@ -70,7 +70,7 @@ public class ImageCatalogV1Controller implements ImageCatalogV1Endpoint {
     public ImagesResponse getImagesByProvider(String platform) throws Exception {
         CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
         User user = userService.getOrCreate(cloudbreakUser);
-        Images images = imageCatalogService.getImagesOsFiltered(platform, null, cloudbreakUser, user).getImages();
+        Images images = imageCatalogService.getImagesOsFiltered(platform, null, user).getImages();
         return conversionService.convert(images, ImagesResponse.class);
     }
 

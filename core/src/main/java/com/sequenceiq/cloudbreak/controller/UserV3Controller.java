@@ -44,7 +44,7 @@ public class UserV3Controller implements UserV3Endpoint {
     public UserProfileResponse getProfileInWorkspace(Long workspaceId) {
         CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
         User user = userService.getOrCreate(cloudbreakUser);
-        UserProfile userProfile = userProfileService.getOrCreate(cloudbreakUser.getAccount(), cloudbreakUser.getUserId(), cloudbreakUser.getUsername(), user);
+        UserProfile userProfile = userProfileService.getOrCreate(user);
         return conversionService.convert(userProfile, UserProfileResponse.class);
     }
 
@@ -53,6 +53,6 @@ public class UserV3Controller implements UserV3Endpoint {
         CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
         User user = userService.getOrCreate(cloudbreakUser);
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
-        userProfileService.put(userProfileRequest, cloudbreakUser, user, workspace);
+        userProfileService.put(userProfileRequest, user, workspace);
     }
 }

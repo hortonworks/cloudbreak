@@ -169,8 +169,6 @@ public class BlueprintLoaderServiceTest {
         blueprint.setStatus(resourceStatus);
         blueprint.setDescription("test validation" + index);
         blueprint.setName("multi-node-hdfs-yarn" + index);
-        blueprint.setOwner(LUCKY_MAN);
-        blueprint.setAccount(LOTTERY_WINNERS);
         return blueprint;
     }
 

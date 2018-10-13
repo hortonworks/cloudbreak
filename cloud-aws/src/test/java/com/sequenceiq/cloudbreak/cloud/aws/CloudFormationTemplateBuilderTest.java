@@ -759,7 +759,7 @@ public class CloudFormationTemplateBuilderTest {
 
     private AuthenticatedContext authenticatedContext() {
         Location location = Location.location(Region.region("region"), AvailabilityZone.availabilityZone("az"));
-        CloudContext cloudContext = new CloudContext(5L, "name", "platform", "owner", "variant",
+        CloudContext cloudContext = new CloudContext(5L, "name", "platform", "variant",
                 location, USER_ID, WORKSPACE_ID);
         CloudCredential credential = new CloudCredential(1L, null);
         return new AuthenticatedContext(cloudContext, credential);

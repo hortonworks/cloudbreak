@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.TreeNode;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -43,6 +44,10 @@ public class JsonUtil {
 
     public static <T> T readValue(String content, Class<T> valueType) throws IOException {
         return MAPPER.readValue(content, valueType);
+    }
+
+    public static <T> T readValue(String content, TypeReference valueTypeRef) throws IOException {
+        return MAPPER.readValue(content, valueTypeRef);
     }
 
     public static <T> T readValue(Map<String, Object> map, Class<T> valueType) {

@@ -417,8 +417,6 @@ public class MetricTest {
 
     private StackResponse getStackResponse(Status stackStatus, Status clusterStatus) {
         StackResponse stackResponse = new StackResponse();
-        stackResponse.setOwner(USER_A_ID);
-        stackResponse.setAccount(ACCOUNT_A);
         stackResponse.setStatus(stackStatus);
         stackResponse.setCluster(new ClusterResponse());
         stackResponse.getCluster().setStatus(clusterStatus);

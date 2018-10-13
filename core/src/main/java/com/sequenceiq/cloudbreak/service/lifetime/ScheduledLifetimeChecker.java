@@ -18,7 +18,6 @@ import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesValidationException;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.startup.WorkspaceMigrationRunner;
 
 @Service
 public class ScheduledLifetimeChecker {
@@ -30,23 +29,18 @@ public class ScheduledLifetimeChecker {
     @Inject
     private ReactorFlowManager flowManager;
 
-    @Inject
-    private WorkspaceMigrationRunner workspaceMigrationRunner;
-
     @Scheduled(fixedRate = 60 * 1000, initialDelay = 60 * 1000)
     public void validate() {
-        if (workspaceMigrationRunner.isFinished()) {
-            for (Stack stack : stackService.getAllAlive()) {
-                getStackTimeToLive(stack).ifPresent(ttl -> {
-                    try {
-                        if (Status.DELETE_IN_PROGRESS != stack.getStatus() && stack.getCluster() != null && stack.getCluster().getCreationFinished() != null) {
-                            validateClusterTimeToLive(stack.getCluster().getCreationFinished(), ttl.toMillis());
-                        }
-                    } catch (AccountPreferencesValidationException ignored) {
-                        terminateStack(stack);
+        for (Stack stack : stackService.getAllAlive()) {
+            getStackTimeToLive(stack).ifPresent(ttl -> {
+                try {
+                    if (Status.DELETE_IN_PROGRESS != stack.getStatus() && stack.getCluster() != null && stack.getCluster().getCreationFinished() != null) {
+                        validateClusterTimeToLive(stack.getCluster().getCreationFinished(), ttl.toMillis());
                     }
-                });
-            }
+                } catch (AccountPreferencesValidationException ignored) {
+                    terminateStack(stack);
+                }
+            });
         }
     }
 
@@ -57,7 +51,8 @@ public class ScheduledLifetimeChecker {
 
     private void terminateStack(Stack stack) {
         if (!stack.isDeleteCompleted()) {
-            LOGGER.info("Trigger termination of stack: '{}', owner: '{}', account: '{}'.", stack.getName(), stack.getOwner(), stack.getAccount());
+            LOGGER.info("Trigger termination of stack: '{}', workspace: '{}', tenant: '{}'.",
+                    stack.getName(), stack.getWorkspace().getName(), stack.getWorkspace().getTenant().getName());
             flowManager.triggerTermination(stack.getId(), false, false);
         }
     }
@@ -66,7 +61,9 @@ public class ScheduledLifetimeChecker {
         long now = Calendar.getInstance().getTimeInMillis();
         long clusterRunningTime = now - created;
         if (clusterRunningTime > clusterTimeToLive) {
-            throw new AccountPreferencesValidationException("The maximum running time that is configured for the account is exceeded by the cluster!");
+            LOGGER.info("The maximum running time exceeded by the cluster! clusterRunningTime: {}, clusterTimeToLive: {}",
+                    clusterRunningTime, clusterTimeToLive);
+            throw new AccountPreferencesValidationException("The maximum running time exceeded by the cluster!");
         }
     }
 }

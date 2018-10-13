@@ -44,7 +44,7 @@ public class RestRequestThreadLocalService {
     }
 
     @PreAuthorize("#oauth2.hasScope('cloudbreak.autoscale')")
-    public void setCloudbreakUserByOwner(String owner) {
-        CLOUDBREAK_USER.set(cachedUserDetailsService.getDetails(owner, UserFilterField.USERID));
+    public void setCloudbreakUserByUsernameAndTenant(String owner, String tenant) {
+        CLOUDBREAK_USER.set(cachedUserDetailsService.getDetails(owner, tenant, UserFilterField.USERID));
     }
 }

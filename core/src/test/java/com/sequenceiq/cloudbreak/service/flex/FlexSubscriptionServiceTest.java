@@ -166,8 +166,6 @@ public class FlexSubscriptionServiceTest {
         FlexSubscription subscription = new FlexSubscription();
         subscription.setName(name);
         subscription.setSubscriptionId(subscriptionId);
-        subscription.setAccount("userName");
-        subscription.setOwner("userId");
         subscription.setUsedForController(usedForController);
         subscription.setDefault(usedAsDefault);
         SmartSenseSubscription sSSubscription = new SmartSenseSubscription();

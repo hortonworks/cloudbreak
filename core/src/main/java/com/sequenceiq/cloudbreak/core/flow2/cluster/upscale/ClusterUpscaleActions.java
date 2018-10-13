@@ -165,7 +165,7 @@ public class ClusterUpscaleActions {
         protected ClusterUpscaleContext createFlowContext(String flowId, StateContext<ClusterUpscaleState, ClusterUpscaleEvent> stateContext, P payload) {
             Map<Object, Object> variables = stateContext.getExtendedState().getVariables();
             StackView stack = stackService.getViewByIdWithoutAuth(payload.getStackId());
-            MDCBuilder.buildMdcContext(stack.getId().toString(), stack.getName(), stack.getOwner(), "CLUSTER");
+            MDCBuilder.buildMdcContext(stack.getId().toString(), stack.getName(), "CLUSTER");
             return new ClusterUpscaleContext(flowId, stack, getHostgroupName(variables), getAdjustment(variables));
         }
 

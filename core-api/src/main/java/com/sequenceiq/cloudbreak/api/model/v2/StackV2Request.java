@@ -82,12 +82,6 @@ public class StackV2Request implements JsonEntity {
     private ClusterV2Request cluster;
 
     @ApiModelProperty(hidden = true)
-    private String owner;
-
-    @ApiModelProperty(hidden = true)
-    private String account;
-
-    @ApiModelProperty(hidden = true)
     private String ownerEmail;
 
     @ApiModelProperty(StackModelDescription.GATEWAY_PORT)
@@ -125,22 +119,6 @@ public class StackV2Request implements JsonEntity {
 
     public void setCluster(ClusterV2Request cluster) {
         this.cluster = cluster;
-    }
-
-    public String getOwner() {
-        return owner;
-    }
-
-    public void setOwner(String owner) {
-        this.owner = owner;
-    }
-
-    public String getAccount() {
-        return account;
-    }
-
-    public void setAccount(String account) {
-        this.account = account;
     }
 
     public StackAuthenticationRequest getStackAuthentication() {

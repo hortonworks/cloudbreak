@@ -22,7 +22,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 @Entity
 @SuppressFBWarnings("UWF_UNWRITTEN_FIELD")
 @Table(name = "Cluster")
-public class ClusterApiView extends CompactViewWithOwner {
+public class ClusterApiView extends CompactView {
     @OneToOne(fetch = FetchType.LAZY)
     private StackApiView stack;
 

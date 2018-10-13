@@ -80,8 +80,6 @@ public abstract class AbstractRdsConfigProvider {
         rdsConfig.setConnectionDriver(DatabaseVendor.POSTGRES.connectionDriver());
         rdsConfig.setStatus(ResourceStatus.DEFAULT);
         rdsConfig.setCreationDate(new Date().getTime());
-        rdsConfig.setOwner(stack.getOwner());
-        rdsConfig.setAccount(stack.getAccount());
         rdsConfig.setClusters(Collections.singleton(cluster));
         rdsConfig = rdsConfigService.createIfNotExists(stack.getCreator(), rdsConfig, stack.getWorkspace().getId());
 

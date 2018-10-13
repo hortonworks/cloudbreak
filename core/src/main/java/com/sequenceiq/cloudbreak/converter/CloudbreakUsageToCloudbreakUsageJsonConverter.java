@@ -11,10 +11,10 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.CloudbreakUsageJson;
 import com.sequenceiq.cloudbreak.api.model.UsageStatus;
-import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
+import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.usages.UsageTimeService;
-import com.sequenceiq.cloudbreak.service.user.CachedUserDetailsService;
 
 @Component
 public class CloudbreakUsageToCloudbreakUsageJsonConverter extends AbstractConversionServiceAwareConverter<CloudbreakUsage, CloudbreakUsageJson> {
@@ -24,7 +24,7 @@ public class CloudbreakUsageToCloudbreakUsageJsonConverter extends AbstractConve
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakUsageToCloudbreakUsageJsonConverter.class);
 
     @Inject
-    private CachedUserDetailsService cachedUserDetailsService;
+    private RestRequestThreadLocalService restRequestThreadLocalService;
 
     @Inject
     private UsageTimeService usageTimeService;
@@ -33,15 +33,7 @@ public class CloudbreakUsageToCloudbreakUsageJsonConverter extends AbstractConve
     public CloudbreakUsageJson convert(CloudbreakUsage entity) {
         CloudbreakUsageJson json = new CloudbreakUsageJson();
         String day = new SimpleDateFormat(DATE_FORMAT).format(entity.getDay());
-        String cbUser;
-        try {
-            cbUser = cachedUserDetailsService.getDetails(entity.getOwner(), UserFilterField.USERID).getUsername();
-        } catch (Exception ignored) {
-            LOGGER.warn("Expected user was not found with '{}' id. Maybe it was deleted by the admin user.", entity.getOwner());
-            cbUser = entity.getOwner();
-        }
-        json.setOwner(entity.getOwner());
-        json.setAccount(entity.getAccount());
+        CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
         json.setProvider(entity.getProvider());
         json.setRegion(entity.getRegion());
         json.setAvailabilityZone(entity.getAvailabilityZone());
@@ -50,7 +42,7 @@ public class CloudbreakUsageToCloudbreakUsageJsonConverter extends AbstractConve
         json.setDay(day);
         json.setStackId(entity.getStackId());
         json.setStackName(entity.getStackName());
-        json.setUsername(cbUser);
+        json.setUsername(cloudbreakUser.getUsername());
         json.setCosts(entity.getCosts());
         json.setInstanceType(entity.getInstanceType());
         json.setInstanceGroup(entity.getInstanceGroup());

@@ -60,7 +60,6 @@ import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecution
 import com.sequenceiq.cloudbreak.service.ha.FlowDistributor;
 import com.sequenceiq.cloudbreak.service.ha.HeartbeatService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.startup.WorkspaceMigrationRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HeartbeatServiceTest {
@@ -103,9 +102,6 @@ public class HeartbeatServiceTest {
     @Mock
     private TransactionService transactionService;
 
-    @Mock
-    private WorkspaceMigrationRunner workspaceMigrationRunner;
-
     @Captor
     private ArgumentCaptor<String> stringCaptor;
 
@@ -114,7 +110,6 @@ public class HeartbeatServiceTest {
 
     @Before
     public void init() throws TransactionExecutionException {
-        when(workspaceMigrationRunner.isFinished()).thenReturn(true);
         when(cloudbreakNodeConfig.isNodeIdSpecified()).thenReturn(true);
         when(cloudbreakNodeConfig.getId()).thenReturn(MY_ID);
         ReflectionTestUtils.setField(heartbeatService, "heartbeatThresholdRate", 70000);

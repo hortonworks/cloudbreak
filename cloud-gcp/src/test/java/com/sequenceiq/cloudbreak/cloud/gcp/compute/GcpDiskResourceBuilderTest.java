@@ -110,7 +110,7 @@ class GcpDiskResourceBuilderTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        CloudContext cloudContext = new CloudContext(privateId, "testname", "GCP", "owner", USER_ID, WORKSPACE_ID);
+        CloudContext cloudContext = new CloudContext(privateId, "testname", "GCP", USER_ID, WORKSPACE_ID);
         CloudCredential cloudCredential = new CloudCredential(privateId, "credentialname");
         cloudCredential.putParameter("projectId", "projectId");
 

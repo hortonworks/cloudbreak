@@ -4,19 +4,16 @@ import static com.gs.collections.impl.utility.StringIterate.isEmpty;
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
 
-import java.io.IOException;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -27,31 +24,31 @@ import org.springframework.stereotype.Component;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
-import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
-import com.sequenceiq.cloudbreak.domain.AccountPreferences;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
-import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
+import com.sequenceiq.cloudbreak.service.account.PreferencesService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -71,7 +68,7 @@ public class StackRequestToStackConverter extends AbstractConversionServiceAware
     private OrchestratorTypeResolver orchestratorTypeResolver;
 
     @Inject
-    private AccountPreferencesService accountPreferencesService;
+    private PreferencesService preferencesService;
 
     @Inject
     private StackService stackService;
@@ -89,19 +86,14 @@ public class StackRequestToStackConverter extends AbstractConversionServiceAware
     public Stack convert(StackRequest source) {
         Stack stack = new Stack();
 
-        String owner = Optional.ofNullable(source.getOwner()).orElse(restRequestThreadLocalService.getCloudbreakUser().getUserId());
-        stack.setOwner(owner);
-        String account = Optional.ofNullable(source.getAccount()).orElse(restRequestThreadLocalService.getCloudbreakUser().getAccount());
-        stack.setAccount(account);
-
         stack.setName(source.getName());
         stack.setDisplayName(source.getName());
         stack.setRegion(getRegion(source));
         setPlatform(source);
         stack.setCloudPlatform(source.getCloudPlatform());
         Map<String, String> sourceTags = source.getApplicationTags();
-        String email = Optional.ofNullable(source.getOwnerEmail()).orElse(restRequestThreadLocalService.getCloudbreakUser().getUsername());
-        stack.setTags(getTags(mergeTags(sourceTags, source.getUserDefinedTags(), getDefaultTags(source, account, email))));
+        stack.setTags(getTags(mergeTags(sourceTags, source.getUserDefinedTags(),
+                getDefaultTags(source, restRequestThreadLocalService.getCloudbreakUser()))));
         stack.setInputs(getInputs(mergeInputs(source.getCustomInputs())));
         preparateSharedServiceProperties(source, stack, sourceTags);
         StackAuthentication stackAuthentication = conversionService.convert(source.getStackAuthentication(), StackAuthentication.class);
@@ -172,15 +164,11 @@ public class StackRequestToStackConverter extends AbstractConversionServiceAware
         }
     }
 
-    private Map<String, String> getDefaultTags(StackRequest source, String account, String email) {
+    private Map<String, String> getDefaultTags(StackRequest source, CloudbreakUser cbUser) {
         Map<String, String> result = new HashMap<>();
         try {
-            AccountPreferences pref = accountPreferencesService.getByAccount(account);
-            if (pref != null && pref.getDefaultTags() != null && StringUtils.isNoneBlank(pref.getDefaultTags().getValue())) {
-                result = pref.getDefaultTags().get(Map.class);
-            }
-            result.putAll(defaultCostTaggingService.prepareDefaultTags(source.getAccount(), email, result, source.getCloudPlatform()));
-        } catch (IOException e) {
+            result.putAll(defaultCostTaggingService.prepareDefaultTags(cbUser, result, source.getCloudPlatform()));
+        } catch (Exception e) {
             LOGGER.debug("Exception during reading default tags.", e);
         }
         return result;

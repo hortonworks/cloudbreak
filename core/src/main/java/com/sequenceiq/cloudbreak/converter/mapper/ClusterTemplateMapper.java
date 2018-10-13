@@ -19,7 +19,6 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
 public interface ClusterTemplateMapper {
 
     @Mappings({
-            @Mapping(target = "owner", ignore = true),
             @Mapping(target = "id", ignore = true),
             @Mapping(target = "workspace", ignore = true),
             @Mapping(target = "status", expression = "java(com.sequenceiq.cloudbreak.api.model.ResourceStatus.USER_MANAGED)")

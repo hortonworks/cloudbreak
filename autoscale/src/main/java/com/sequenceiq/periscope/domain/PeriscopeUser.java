@@ -13,15 +13,15 @@ public class PeriscopeUser {
 
     private String email;
 
-    private String account;
+    private String tenant;
 
     public PeriscopeUser() {
     }
 
-    public PeriscopeUser(String id, String email, String account) {
+    public PeriscopeUser(String id, String email, String tenant) {
         this.id = id;
         this.email = email;
-        this.account = account;
+        this.tenant = tenant;
     }
 
     public String getId() {
@@ -40,11 +40,11 @@ public class PeriscopeUser {
         this.email = email;
     }
 
-    public String getAccount() {
-        return account;
+    public String getTenant() {
+        return tenant;
     }
 
-    public void setAccount(String account) {
-        this.account = account;
+    public void setTenant(String tenant) {
+        this.tenant = tenant;
     }
 }

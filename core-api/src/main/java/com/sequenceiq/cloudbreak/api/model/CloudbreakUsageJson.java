@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.api.model;
 
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.UsageModelDescription;
 
@@ -9,14 +8,9 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel("CloudbreakUsage")
 public class CloudbreakUsageJson implements JsonEntity {
-    @ApiModelProperty(ModelDescriptions.OWNER)
-    private String owner;
 
     @ApiModelProperty(StackModelDescription.USERNAME)
     private String username;
-
-    @ApiModelProperty(ModelDescriptions.ACCOUNT)
-    private String account;
 
     @ApiModelProperty(UsageModelDescription.DAY)
     private String day;
@@ -68,22 +62,6 @@ public class CloudbreakUsageJson implements JsonEntity {
 
     @ApiModelProperty(UsageModelDescription.STACK_UUID)
     private String stackUuid;
-
-    public String getOwner() {
-        return owner;
-    }
-
-    public void setOwner(String owner) {
-        this.owner = owner;
-    }
-
-    public String getAccount() {
-        return account;
-    }
-
-    public void setAccount(String account) {
-        this.account = account;
-    }
 
     public String getDay() {
         return day;

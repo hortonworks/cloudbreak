@@ -48,11 +48,6 @@ public class Gateway extends Entity {
         this.response = response;
     }
 
-    public Gateway withAccount(String account) {
-        request.setAccount(account);
-        return this;
-    }
-
     public Gateway withAvailabilityZone(String availabilityZone) {
         request.setAvailabilityZone(availabilityZone);
         return this;

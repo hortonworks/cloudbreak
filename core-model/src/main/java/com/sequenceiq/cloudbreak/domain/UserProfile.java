@@ -17,11 +17,13 @@ import javax.persistence.UniqueConstraint;
 
 import com.sequenceiq.cloudbreak.domain.json.EncryptedJsonToString;
 import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.domain.workspace.Tenant;
+import com.sequenceiq.cloudbreak.domain.workspace.TenantAwareResource;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"account", "owner"}))
-public class UserProfile {
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = "user_id"))
+public class UserProfile implements TenantAwareResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "userprofile_generator")
@@ -30,12 +32,6 @@ public class UserProfile {
 
     @OneToOne
     private ImageCatalog imageCatalog;
-
-    @Column(nullable = false)
-    private String owner;
-
-    @Column(nullable = false)
-    private String account;
 
     @Column
     private String userName;
@@ -56,22 +52,6 @@ public class UserProfile {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getOwner() {
-        return owner;
-    }
-
-    public void setOwner(String owner) {
-        this.owner = owner;
-    }
-
-    public String getAccount() {
-        return account;
-    }
-
-    public void setAccount(String account) {
-        this.account = account;
     }
 
     public String getUserName() {
@@ -112,5 +92,10 @@ public class UserProfile {
 
     public void setDefaultCredentials(Set<Credential> defaultCredentials) {
         this.defaultCredentials = defaultCredentials;
+    }
+
+    @Override
+    public Tenant getTenant() {
+        return getUser().getTenant();
     }
 }

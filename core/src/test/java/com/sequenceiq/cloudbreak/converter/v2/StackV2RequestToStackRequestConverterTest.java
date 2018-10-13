@@ -303,7 +303,6 @@ public class StackV2RequestToStackRequestConverterTest {
     @Test
     public void testConvertWhenOwnerIsNullThenAuthenticatedUserServiceShouldProvideTheValue() {
         StackV2Request source = createStackV2Request();
-        source.setOwner(null);
 
         underTest.convert(source);
 
@@ -314,7 +313,6 @@ public class StackV2RequestToStackRequestConverterTest {
     @Test
     public void testConvertWhenOwnerIsEmptyThenAuthenticatedUserServiceShouldProvideTheValue() {
         StackV2Request source = createStackV2Request();
-        source.setOwner("");
 
         underTest.convert(source);
 
@@ -335,7 +333,6 @@ public class StackV2RequestToStackRequestConverterTest {
     @Test
     public void testConvertWhenAccountIsNullThenAuthenticatedUserServiceShouldProvideTheValue() {
         StackV2Request source = createStackV2Request();
-        source.setAccount(null);
 
         underTest.convert(source);
 
@@ -346,7 +343,6 @@ public class StackV2RequestToStackRequestConverterTest {
     @Test
     public void testConvertWhenAccountIsEmptyThenAuthenticatedUserServiceShouldProvideTheValue() {
         StackV2Request source = createStackV2Request();
-        source.setAccount("");
 
         underTest.convert(source);
 
@@ -532,7 +528,6 @@ public class StackV2RequestToStackRequestConverterTest {
 
     private void makeCbUserReturnNullsAsUsedFields() {
         when(cbUser.getUserId()).thenReturn(null);
-        when(cbUser.getAccount()).thenReturn(null);
         when(cbUser.getUsername()).thenReturn(null);
     }
 

@@ -23,7 +23,7 @@ import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
-import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
+import com.sequenceiq.cloudbreak.service.account.PreferencesService;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
@@ -59,7 +59,7 @@ public class ImageCatalogServiceDefaultTest {
     private ImageCatalogRepository imageCatalogRepository;
 
     @Mock
-    private AccountPreferencesService accountPreferencesService;
+    private PreferencesService preferencesService;
 
     @Mock
     private CloudbreakUser cloudbreakUser;
@@ -114,10 +114,10 @@ public class ImageCatalogServiceDefaultTest {
         String catalogJson = FileReaderUtils.readFileFromClasspath(catalogFile);
         CloudbreakImageCatalogV2 catalog = JsonUtil.readValue(catalogJson, CloudbreakImageCatalogV2.class);
         when(imageCatalogProvider.getImageCatalogV2("")).thenReturn(catalog);
-        when(accountPreferencesService.enabledPlatforms()).thenReturn(new HashSet<>(Arrays.asList(PROVIDERS)));
+        when(preferencesService.enabledPlatforms()).thenReturn(new HashSet<>(Arrays.asList(PROVIDERS)));
 
-        when(userProfileService.getOrCreate(cloudbreakUser.getAccount(), cloudbreakUser.getUserId(), user)).thenReturn(new UserProfile());
-        when(userProfileService.getOrCreate(cloudbreakUser.getAccount(), cloudbreakUser.getUserId(), cloudbreakUser.getUsername(), user))
+        when(userProfileService.getOrCreate(user)).thenReturn(new UserProfile());
+        when(userProfileService.getOrCreate(user))
                 .thenReturn(new UserProfile());
     }
 

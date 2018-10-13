@@ -18,8 +18,6 @@ public class CloudContext {
 
     private final Platform platform;
 
-    private final String owner;
-
     private final Variant variant;
 
     private final Location location;
@@ -28,23 +26,21 @@ public class CloudContext {
 
     private final Long workspaceId;
 
-    public CloudContext(Long id, String name, String platform, String owner, String userId, Long workspaceId) {
+    public CloudContext(Long id, String name, String platform, String userId, Long workspaceId) {
         this.id = id;
         this.name = name;
         this.platform = Platform.platform(platform);
-        this.owner = owner;
         this.userId = userId;
         this.workspaceId = workspaceId;
         variant = null;
         location = null;
     }
 
-    public CloudContext(Long id, String name, String platform, String owner, String variant,
+    public CloudContext(Long id, String name, String platform, String variant,
             Location location, String userId, Long workspaceId) {
         this.id = id;
         this.name = name;
         this.platform = Platform.platform(platform);
-        this.owner = owner;
         this.variant = Variant.variant(variant);
         this.location = location;
         this.userId = userId;
@@ -65,10 +61,6 @@ public class CloudContext {
 
     public Variant getVariant() {
         return variant;
-    }
-
-    public String getOwner() {
-        return owner;
     }
 
     public CloudPlatformVariant getPlatformVariant() {
@@ -93,7 +85,6 @@ public class CloudContext {
         .append("id=").append(id)
         .append(", name='").append(name).append('\'')
         .append(", platform='").append(platform).append('\'')
-        .append(", owner='").append(owner).append('\'')
         .append(", userId='").append(userId).append('\'')
         .append(", workspaceId='").append(workspaceId).append('\'')
         .append('}');

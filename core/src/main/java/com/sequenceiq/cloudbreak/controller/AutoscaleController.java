@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.authorization.PermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.authorization.WorkspacePermissions;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.workspace.Tenant;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
@@ -64,19 +65,20 @@ public class AutoscaleController implements AutoscaleEndpoint {
     private ClusterCommonService clusterCommonService;
 
     @Override
-    public Response putStack(Long id, String owner, @Valid UpdateStackJson updateRequest) {
-        setupIdentityForAutoscale(id, owner);
+    public Response putStack(Long id, String userName, @Valid UpdateStackJson updateRequest) {
+        setupIdentityForAutoscale(id, userName);
         return stackCommonService.putInDefaultWorkspace(id, updateRequest);
     }
 
-    private void setupIdentityForAutoscale(Long id, String owner) {
-        restRequestThreadLocalService.setCloudbreakUserByOwner(owner);
+    private void setupIdentityForAutoscale(Long id, String userName) {
+        Tenant tenant = stackService.getTenant(id);
+        restRequestThreadLocalService.setCloudbreakUserByUsernameAndTenant(userName, tenant.getName());
         restRequestThreadLocalService.setRequestedWorkspaceId(stackService.getWorkspaceId(id));
     }
 
     @Override
-    public Response putCluster(Long stackId, String owner, @Valid UpdateClusterJson updateRequest) {
-        setupIdentityForAutoscale(stackId, owner);
+    public Response putCluster(Long stackId, String userName, @Valid UpdateClusterJson updateRequest) {
+        setupIdentityForAutoscale(stackId, userName);
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         return clusterCommonService.put(stackId, updateRequest, user, workspace);
@@ -114,7 +116,7 @@ public class AutoscaleController implements AutoscaleEndpoint {
     @Override
     public Boolean authorizeForAutoscale(Long id, String owner, String permission) {
         try {
-            restRequestThreadLocalService.setCloudbreakUserByOwner(owner);
+            restRequestThreadLocalService.setCloudbreakUserByUsernameAndTenant(owner, "DEFAULT");
             Stack stack = stackService.get(id);
             if (WorkspacePermissions.Action.WRITE.name().equalsIgnoreCase(permission)) {
                 User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());

@@ -5,7 +5,6 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 
@@ -25,12 +24,6 @@ public class AutoscaleStackResponse {
     @NotNull
     @ApiModelProperty(value = StackModelDescription.STACK_NAME, required = true)
     private String name;
-
-    @ApiModelProperty(ModelDescriptions.OWNER)
-    private String owner;
-
-    @ApiModelProperty(ModelDescriptions.ACCOUNT)
-    private String account;
 
     @ApiModelProperty(StackModelDescription.GATEWAY_PORT)
     private Integer gatewayPort;
@@ -67,22 +60,6 @@ public class AutoscaleStackResponse {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getOwner() {
-        return owner;
-    }
-
-    public void setOwner(String owner) {
-        this.owner = owner;
-    }
-
-    public String getAccount() {
-        return account;
-    }
-
-    public void setAccount(String account) {
-        this.account = account;
     }
 
     public Integer getGatewayPort() {

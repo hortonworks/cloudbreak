@@ -17,14 +17,13 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.model.users.UserProfileRequest;
-import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.UserProfileRepository;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
@@ -46,23 +45,17 @@ public class UserProfileService {
     @Inject
     private UserService userService;
 
-    public UserProfile getOrCreate(String account, String owner, User user) {
-        return getOrCreate(account, owner, null, user);
-    }
-
-    public UserProfile getOrCreate(String account, String owner, String userName, User user) {
-        UserProfile userProfile = getSilently(account, owner);
+    public UserProfile getOrCreate(User user) {
+        UserProfile userProfile = getSilently(user);
         if (userProfile == null) {
             userProfile = new UserProfile();
-            userProfile.setAccount(account);
-            userProfile.setOwner(owner);
-            userProfile.setUserName(userName);
+            userProfile.setUserName(user.getUserName());
             addUiProperties(userProfile);
             userProfile.setUser(user);
             userProfile.setDefaultCredentials(Collections.emptySet());
             userProfile = userProfileRepository.save(userProfile);
-        } else if (userProfile.getUserName() == null && userName != null) {
-            userProfile.setUserName(userName);
+        } else if (userProfile.getUserName() == null && user.getUserName() != null) {
+            userProfile.setUserName(user.getUserName());
             userProfile = userProfileRepository.save(userProfile);
         } else if (userProfile.getUser() == null) {
             userProfile.setUser(user);
@@ -71,9 +64,9 @@ public class UserProfileService {
         return userProfile;
     }
 
-    private UserProfile getSilently(String account, String owner) {
+    private UserProfile getSilently(User user) {
         try {
-            return userProfileRepository.findOneByOwnerAndAccount(account, owner);
+            return userProfileRepository.findOneByUser(user.getId());
         } catch (AccessDeniedException ignore) {
             return null;
         }
@@ -103,8 +96,8 @@ public class UserProfileService {
         }
     }
 
-    public void put(UserProfileRequest request, CloudbreakUser cloudbreakUser, User user, Workspace workspace) {
-        UserProfile userProfile = getOrCreate(cloudbreakUser.getAccount(), cloudbreakUser.getUserId(), cloudbreakUser.getUsername(), user);
+    public void put(UserProfileRequest request, User user, Workspace workspace) {
+        UserProfile userProfile = getOrCreate(user);
         if (request.getCredentialId() != null) {
             Credential credential = credentialService.get(request.getCredentialId(), workspace);
             storeDefaultCredential(userProfile, credential, workspace);

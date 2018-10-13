@@ -67,7 +67,7 @@ public class UserService {
         Semaphore semaphore = UNDER_OPERATION.computeIfAbsent(cloudbreakUser, iu -> new Semaphore(1));
         semaphore.acquire();
         try {
-            return cachedUserService.getUser(cloudbreakUser, userRepository::findByUserId, this::createUser);
+            return cachedUserService.getUser(cloudbreakUser, userRepository::findByTenantNameAndUserName, this::createUser);
         } finally {
             semaphore.release();
             UNDER_OPERATION.remove(cloudbreakUser);
@@ -96,8 +96,14 @@ public class UserService {
             return transactionService.requiresNew(() -> {
                 User user = new User();
                 user.setUserId(cloudbreakUser.getUsername());
+                user.setUserName(cloudbreakUser.getUsername());
 
-                Tenant tenant = tenantRepository.findByName("DEFAULT");
+                Tenant tenant = tenantRepository.findByName(cloudbreakUser.getTenant());
+                if (tenant == null) {
+                    tenant = new Tenant();
+                    tenant.setName(cloudbreakUser.getTenant());
+                    tenant = tenantRepository.save(tenant);
+                }
                 user.setTenant(tenant);
                 user.setTenantPermissionSet(Collections.emptySet());
                 user = userRepository.save(user);

@@ -245,8 +245,6 @@ public class ClusterService {
                 kerberosConfigRepository.save(cluster.getKerberosConfig());
             }
             cluster.setStack(stack);
-            cluster.setOwner(stack.getOwner());
-            cluster.setAccount(stack.getAccount());
             stack.setCluster(cluster);
 
             start = System.currentTimeMillis();

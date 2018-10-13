@@ -159,9 +159,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(instanceGroupMetadataCollector.collectMetadata(source)).thenReturn(groupInstances);
         when(cluster.getBlueprint()).thenReturn(blueprint);
         when(blueprint.getBlueprintText()).thenReturn(TEST_BLUEPRINT_TEXT);
-        when(blueprint.getOwner()).thenReturn(CLUSTER_OWNER);
-        when(cluster.getOwner()).thenReturn(CLUSTER_OWNER);
-        when(cachedUserDetailsService.getDetails(CLUSTER_OWNER, UserFilterField.USERID)).thenReturn(user);
+        when(cachedUserDetailsService.getDetails(CLUSTER_OWNER, "tenant", UserFilterField.USERID)).thenReturn(user);
         when(source.getInputs()).thenReturn(stackInputs);
         when(stackInputs.get(StackInputs.class)).thenReturn(null);
         when(stackInfoService.blueprintStackInfo(TEST_BLUEPRINT_TEXT)).thenReturn(blueprintStackInfo);
@@ -336,7 +334,7 @@ public class StackToTemplatePreparationObjectConverterTest {
     @Test
     public void testConvertWhenGeneralClusterConfigsProvidedThenThisShouldBeStored() {
         GeneralClusterConfigs expected = mock(GeneralClusterConfigs.class);
-        when(generalClusterConfigsProvider.generalClusterConfigs(source, cluster, user)).thenReturn(expected);
+        when(generalClusterConfigsProvider.generalClusterConfigs(source, cluster)).thenReturn(expected);
 
         TemplatePreparationObject result = underTest.convert(source);
 

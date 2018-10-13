@@ -41,8 +41,6 @@ public class UsageGeneratorService {
         CloudbreakUsage newUsage = new CloudbreakUsage();
         newUsage.setStackUuid(usage.getStackUuid());
         newUsage.setParentUuid(cloudbreakNodeConfig.getInstanceUUID());
-        newUsage.setOwner(usage.getOwner());
-        newUsage.setAccount(usage.getAccount());
         newUsage.setProvider(usage.getProvider());
         newUsage.setRegion(usage.getRegion());
         newUsage.setAvailabilityZone(usage.getAvailabilityZone());
@@ -69,8 +67,6 @@ public class UsageGeneratorService {
         CloudbreakUsage newUsage = new CloudbreakUsage();
         newUsage.setStackUuid(usage.getStackUuid());
         newUsage.setParentUuid(cloudbreakNodeConfig.getInstanceUUID());
-        newUsage.setOwner(usage.getOwner());
-        newUsage.setAccount(usage.getAccount());
         newUsage.setProvider(usage.getProvider());
         newUsage.setRegion(usage.getRegion());
         newUsage.setAvailabilityZone(usage.getAvailabilityZone());
@@ -97,8 +93,6 @@ public class UsageGeneratorService {
         CloudbreakUsage usage = new CloudbreakUsage();
         usage.setStackUuid(stack.getUuid());
         usage.setParentUuid(cloudbreakNodeConfig.getInstanceUUID());
-        usage.setOwner(stack.getOwner());
-        usage.setAccount(stack.getAccount());
         usage.setProvider(stack.cloudPlatform());
         usage.setRegion(stack.getRegion());
         usage.setAvailabilityZone(stack.getAvailabilityZone());

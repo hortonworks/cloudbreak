@@ -46,12 +46,6 @@ public class Topology implements ProvisionEntity, WorkspaceAwareResource {
     @ManyToOne
     private Workspace workspace;
 
-    @Column
-    private String account;
-
-    @Column
-    private String owner;
-
     public Workspace getWorkspace() {
         return workspace;
     }
@@ -111,22 +105,5 @@ public class Topology implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setDeleted(boolean deleted) {
         this.deleted = deleted;
-    }
-
-    public String getAccount() {
-        return account;
-    }
-
-    @Override
-    public String getOwner() {
-        return owner;
-    }
-
-    public void setAccount(String account) {
-        this.account = account;
-    }
-
-    public void setOwner(String owner) {
-        this.owner = owner;
     }
 }

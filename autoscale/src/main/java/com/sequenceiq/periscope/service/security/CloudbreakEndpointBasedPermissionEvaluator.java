@@ -51,7 +51,7 @@ public class CloudbreakEndpointBasedPermissionEvaluator implements PermissionEva
                 }
                 Long stackId = getStackIdFromTarget(t);
                 if (stackId == null) {
-                    PeriscopeUser user = cachedUserDetailsService.getDetails((String) authentication.getPrincipal(), UserFilterField.USERNAME);
+                    PeriscopeUser user = cachedUserDetailsService.getDetails((String) authentication.getPrincipal(), "tenant", UserFilterField.USERNAME);
                     return owner.equals(user.getId());
                 }
                 return stackSecurityService.hasAccess(stackId, owner, permission.toString());

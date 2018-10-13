@@ -9,7 +9,6 @@ import javax.ws.rs.ProcessingException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.jwt.Jwt;
 import org.springframework.security.jwt.JwtHelper;
@@ -65,12 +64,12 @@ public class CachedRemoteTokenService implements ResourceServerTokenServices {
     }
 
     @Override
-    @Cacheable(cacheNames = "tokenCache", key = "#accessToken")
+//    @Cacheable(cacheNames = "tokenCache", key = "#accessToken")
     public OAuth2Authentication loadAuthentication(String accessToken) throws AuthenticationException, InvalidTokenException {
         Jwt jwtToken = JwtHelper.decode(accessToken);
         try {
             Map<String, String> claims = objectMapper.readValue(jwtToken.getClaims(), new MapTypeReference());
-            return "uaa".equals(claims.get("zid")) ? getOAuth2Authentication(accessToken) : getSSOAuthentication(accessToken, jwtToken);
+            return "uaa".equals(claims.get("zid")) ? getOAuth2Authentication(accessToken) : getSSOAuthentication(accessToken, claims);
         } catch (IOException e) {
             LOGGER.error("Token does not claim anything", e);
             throw new InvalidTokenException("Invalid JWT token, does not claim anything", e);
@@ -86,12 +85,11 @@ public class CachedRemoteTokenService implements ResourceServerTokenServices {
         return oAuth2Authentication;
     }
 
-    private OAuth2Authentication getSSOAuthentication(String accessToken, Jwt jwt) {
+    private OAuth2Authentication getSSOAuthentication(String accessToken, Map<String, String> claims) {
         try {
-            Map<String, Object> claims = objectMapper.readValue(jwt.getClaims(), new MapTypeReference());
             String tenant;
             if (claims.get("aud") != null) {
-                tenant = claims.get("aud").toString();
+                tenant = claims.get("aud");
                 LOGGER.info("tenant for the token is: {}", tenant);
             } else {
                 throw new InvalidTokenException("No 'aud' claim in token");
@@ -102,6 +100,7 @@ public class CachedRemoteTokenService implements ResourceServerTokenServices {
             }
             CaasUser userInfo = caasClient.getUserInfo(accessToken);
             Map<String, Object> tokenMap = new HashMap<>();
+            tokenMap.put("tenant", tenant);
             tokenMap.put("user_id", userInfo.getId());
             tokenMap.put("user_name", userInfo.getPreferredUsername());
             tokenMap.put("scope", Arrays.asList("cloudbreak.networks.read", "periscope.cluster", "cloudbreak.usages.user", "cloudbreak.recipes", "openid",
@@ -119,7 +118,7 @@ public class CachedRemoteTokenService implements ResourceServerTokenServices {
                 LOGGER.info("JWT token verified for: {}", oAuth2Authentication.getPrincipal());
             }
             return oAuth2Authentication;
-        } catch (IOException | ProcessingException e) {
+        } catch (ProcessingException e) {
             LOGGER.error("Failed to parse the JWT token", e);
             throw new InvalidTokenException("The specified JWT token is invalid", e);
         }
@@ -129,6 +128,6 @@ public class CachedRemoteTokenService implements ResourceServerTokenServices {
         return key.startsWith("-----BEGIN");
     }
 
-    private static class MapTypeReference extends TypeReference<Map<String, Object>> {
+    public static class MapTypeReference extends TypeReference<Map<String, Object>> {
     }
 }

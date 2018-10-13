@@ -29,12 +29,6 @@ public class PlatformResourceRequestJson {
     @ApiModelProperty(PlatformResourceRequestModelDescription.FILTER)
     private Map<String, String> filters = new HashMap<>();
 
-    @ApiModelProperty(hidden = true)
-    private String owner;
-
-    @ApiModelProperty(hidden = true)
-    private String account;
-
     @ApiModelProperty(PlatformResourceRequestModelDescription.AVAILABILITY_ZONE)
     private String availabilityZone;
 
@@ -60,22 +54,6 @@ public class PlatformResourceRequestJson {
 
     public void setRegion(String region) {
         this.region = region;
-    }
-
-    public String getOwner() {
-        return owner;
-    }
-
-    public void setOwner(String owner) {
-        this.owner = owner;
-    }
-
-    public String getAccount() {
-        return account;
-    }
-
-    public void setAccount(String account) {
-        this.account = account;
     }
 
     public String getPlatformVariant() {

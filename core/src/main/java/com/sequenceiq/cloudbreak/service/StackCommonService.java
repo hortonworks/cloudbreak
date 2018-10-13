@@ -293,8 +293,6 @@ public class StackCommonService implements StackEndpoint {
     }
 
     public GeneratedBlueprintResponse postStackForBlueprint(StackV2Request stackRequest) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        stackRequest.setOwner(user.getUserId());
         TemplatePreparationObject templatePreparationObject = conversionService.convert(stackRequest, TemplatePreparationObject.class);
         String blueprintText = centralBlueprintUpdater.getBlueprintText(templatePreparationObject);
         return new GeneratedBlueprintResponse(blueprintText);

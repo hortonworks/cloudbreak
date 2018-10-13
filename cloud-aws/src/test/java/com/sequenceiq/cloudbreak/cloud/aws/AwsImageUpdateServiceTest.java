@@ -76,7 +76,7 @@ public class AwsImageUpdateServiceTest {
     public void setup() {
         MockitoAnnotations.initMocks(this);
         Location location = Location.location(Region.region("region"));
-        CloudContext cloudContext = new CloudContext(1L, "cloudContext", "AWS", "owner", "variant",
+        CloudContext cloudContext = new CloudContext(1L, "cloudContext", "AWS", "variant",
                 location, USER_ID, WORKSPACE_ID);
         CloudCredential cc = new CloudCredential(1L, "cc");
         ac = new AuthenticatedContext(cloudContext, cc);

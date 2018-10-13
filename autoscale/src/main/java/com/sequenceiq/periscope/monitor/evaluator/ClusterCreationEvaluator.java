@@ -102,7 +102,7 @@ public class ClusterCreationEvaluator extends EvaluatorExecutor {
     }
 
     private void createCluster(AutoscaleStackResponse stack, AmbariStack resolvedAmbari) {
-        PeriscopeUser user = new PeriscopeUser(stack.getOwner(), null, stack.getAccount());
+        PeriscopeUser user = new PeriscopeUser(null, null, null);
         MDCBuilder.buildMdcContext(user, stack.getStackId(), null);
         LOGGER.info("Creating cluster for Ambari host: {}", resolvedAmbari.getAmbari().getHost());
         Cluster cluster = clusterService.create(user, resolvedAmbari, null);

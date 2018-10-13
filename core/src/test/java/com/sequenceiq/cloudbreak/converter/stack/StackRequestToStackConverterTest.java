@@ -37,18 +37,18 @@ import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
-import com.sequenceiq.cloudbreak.converter.AbstractJsonConverterTest;
-import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.converter.AbstractJsonConverterTest;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
+import com.sequenceiq.cloudbreak.service.account.PreferencesService;
 import com.sequenceiq.cloudbreak.service.stack.StackParameterService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -75,7 +75,7 @@ public class StackRequestToStackConverterTest extends AbstractJsonConverterTest<
     private AuthenticatedUserService authenticatedUserService;
 
     @Mock
-    private AccountPreferencesService accountPreferencesService;
+    private PreferencesService preferencesService;
 
     @Mock
     private DefaultCostTaggingService defaultCostTaggingService;
@@ -100,7 +100,7 @@ public class StackRequestToStackConverterTest extends AbstractJsonConverterTest<
         initMocks();
         ReflectionTestUtils.setField(underTest, "defaultRegions", "AWS:eu-west-2");
         given(orchestratorTypeResolver.resolveType(any(Orchestrator.class))).willReturn(OrchestratorType.HOST);
-        given(defaultCostTaggingService.prepareDefaultTags(any(String.class), any(String.class), anyMap(), anyString())).willReturn(new HashMap<>());
+        given(defaultCostTaggingService.prepareDefaultTags(any(CloudbreakUser.class), anyMap(), anyString())).willReturn(new HashMap<>());
         // WHEN
         Stack stack = underTest.convert(getRequest("stack.json"));
         // THEN
@@ -131,7 +131,7 @@ public class StackRequestToStackConverterTest extends AbstractJsonConverterTest<
     public void testConvertWithLoginUserName() throws CloudbreakException {
         initMocks();
         ReflectionTestUtils.setField(underTest, "defaultRegions", "AWS:eu-west-2");
-        given(defaultCostTaggingService.prepareDefaultTags(any(String.class), any(String.class), anyMap(), anyString())).willReturn(new HashMap<>());
+        given(defaultCostTaggingService.prepareDefaultTags(any(CloudbreakUser.class), anyMap(), anyString())).willReturn(new HashMap<>());
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("You can not modify the default user!");
         // WHEN
@@ -149,7 +149,7 @@ public class StackRequestToStackConverterTest extends AbstractJsonConverterTest<
     public void testForNoRegionAndNoDefaultRegion() throws CloudbreakException {
         initMocks();
         given(orchestratorTypeResolver.resolveType(any(String.class))).willReturn(OrchestratorType.HOST);
-        given(defaultCostTaggingService.prepareDefaultTags(any(String.class), any(String.class), anyMap(), anyString())).willReturn(new HashMap<>());
+        given(defaultCostTaggingService.prepareDefaultTags(any(CloudbreakUser.class), anyMap(), anyString())).willReturn(new HashMap<>());
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("No default region is specified. Region cannot be empty.");
 

@@ -39,7 +39,7 @@ public class FileSystemValidator {
             return;
         }
         LOGGER.debug("Sending fileSystemRequest to {} to validate the file system", platform);
-        CloudContext cloudContext = new CloudContext(null, null, platform, null, userId, workspaceId);
+        CloudContext cloudContext = new CloudContext(null, null, platform, userId, workspaceId);
         SpiFileSystem spiFileSystem = converter.convert(fileSystemRequest);
         FileSystemValidationRequest request = new FileSystemValidationRequest(spiFileSystem, cloudCredential, cloudContext);
         eventBus.notify(request.selector(), eventFactory.createEvent(request));

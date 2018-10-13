@@ -29,16 +29,16 @@ public class CachedUserDetailsService {
     @Inject
     private UserService userService;
 
-    @Cacheable(cacheNames = "identityUserCache", key = "#username")
-    public CloudbreakUser getDetails(String username, UserFilterField filterField) {
-        CloudbreakUser cloudbreakUser = cachedUserDetailsService.getDetails(username, filterField, clientSecret);
+    @Cacheable(cacheNames = "identityUserCache", key = "{ #username, #tenant }")
+    public CloudbreakUser getDetails(String username, String tenant, UserFilterField filterField) {
+        CloudbreakUser cloudbreakUser = cachedUserDetailsService.getDetails(username, tenant, filterField, clientSecret);
         //ensure that the user is created into our database
         userService.getOrCreate(cloudbreakUser);
         return cloudbreakUser;
     }
 
-    @CacheEvict(value = "identityUserCache", key = "#username")
-    public void evictUserDetails(String updatedUserId, String username) {
-        LOGGER.debug("Remove userid: {} / username: {} from user cache", updatedUserId, username);
+    @CacheEvict(value = "identityUserCache", key = "{ #username, #tenant }")
+    public void evictUserDetails(String updatedUserId, String username, String tenant) {
+        LOGGER.debug("Remove userid: {} / username: {} / tenant: {} from user cache", updatedUserId, username, tenant);
     }
 }

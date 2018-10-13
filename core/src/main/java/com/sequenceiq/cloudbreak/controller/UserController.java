@@ -58,16 +58,9 @@ public class UserController implements UserEndpoint {
     private RestRequestThreadLocalService restRequestThreadLocalService;
 
     @Override
-    public String evictUserDetails(String id, UserJson user) {
-        cachedUserDetailsService.evictUserDetails(id, user.getUsername());
-        cachedUserService.evictByIdentityUser(restRequestThreadLocalService.getCloudbreakUser());
-        return user.getUsername();
-    }
-
-    @Override
     public UserJson evictCurrentUserDetails() {
         CloudbreakUser user = restRequestThreadLocalService.getCloudbreakUser();
-        cachedUserDetailsService.evictUserDetails(user.getUserId(), user.getUsername());
+        cachedUserDetailsService.evictUserDetails(user.getUserId(), user.getUsername(), user.getTenant());
         cachedUserService.evictByIdentityUser(user);
         return new UserJson(user.getUsername());
     }
@@ -76,7 +69,7 @@ public class UserController implements UserEndpoint {
     public UserProfileResponse getProfile() {
         CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
         User user = userService.getOrCreate(cloudbreakUser);
-        UserProfile userProfile = userProfileService.getOrCreate(cloudbreakUser.getAccount(), cloudbreakUser.getUserId(), cloudbreakUser.getUsername(), user);
+        UserProfile userProfile = userProfileService.getOrCreate(user);
         return conversionService.convert(userProfile, UserProfileResponse.class);
     }
 
@@ -85,7 +78,7 @@ public class UserController implements UserEndpoint {
         CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
         User user = userService.getOrCreate(cloudbreakUser);
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
-        userProfileService.put(userProfileRequest, cloudbreakUser, user, workspace);
+        userProfileService.put(userProfileRequest, user, workspace);
     }
 
     @Override

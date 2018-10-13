@@ -70,12 +70,6 @@ public class StackRequest extends StackBase {
     private ClusterRequest clusterRequest;
 
     @ApiModelProperty(hidden = true)
-    private String owner;
-
-    @ApiModelProperty(hidden = true)
-    private String account;
-
-    @ApiModelProperty(hidden = true)
     private String ownerEmail;
 
     public StackRequest() {
@@ -159,22 +153,6 @@ public class StackRequest extends StackBase {
 
     public void setClusterRequest(ClusterRequest clusterRequest) {
         this.clusterRequest = clusterRequest;
-    }
-
-    public String getOwner() {
-        return owner;
-    }
-
-    public void setOwner(String owner) {
-        this.owner = owner;
-    }
-
-    public String getAccount() {
-        return account;
-    }
-
-    public void setAccount(String account) {
-        this.account = account;
     }
 
     public StackAuthenticationRequest getStackAuthentication() {

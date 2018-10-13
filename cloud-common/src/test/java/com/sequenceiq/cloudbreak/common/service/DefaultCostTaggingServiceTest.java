@@ -16,6 +16,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.type.CloudbreakResourceType;
 import com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag;
@@ -23,6 +24,8 @@ import com.sequenceiq.cloudbreak.service.Clock;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DefaultCostTaggingServiceTest {
+
+    private static final CloudbreakUser CB_USER = new CloudbreakUser("123", "apache1@apache.com", "tenant");
 
     @Mock
     private Clock clock;
@@ -48,10 +51,9 @@ public class DefaultCostTaggingServiceTest {
         long epochSeconds = 1526991986L;
         when(clock.getCurrentInstant()).thenReturn(Instant.ofEpochSecond(epochSeconds));
 
-        Map<String, String> result = underTest.prepareDefaultTags("Apache", "apache1@apache.com", new HashMap<>(), CloudConstants.AWS);
+        Map<String, String> result = underTest.prepareDefaultTags(CB_USER, new HashMap<>(), CloudConstants.AWS);
 
-        Assert.assertEquals(5L, result.size());
-        Assert.assertEquals("Apache", result.get(DefaultApplicationTag.CB_ACOUNT_NAME.key()));
+        Assert.assertEquals(4L, result.size());
         Assert.assertEquals("apache1@apache.com", result.get(DefaultApplicationTag.CB_USER_NAME.key()));
         Assert.assertEquals("2.2.0", result.get(DefaultApplicationTag.CB_VERSION.key()));
         Assert.assertEquals("apache1@apache.com", result.get(DefaultApplicationTag.OWNER.key()));
@@ -63,10 +65,9 @@ public class DefaultCostTaggingServiceTest {
         long epochSeconds = 1526991986L;
         when(clock.getCurrentInstant()).thenReturn(Instant.ofEpochSecond(epochSeconds));
 
-        Map<String, String> result = underTest.prepareDefaultTags("Apache", "apache1@apache.com", new HashMap<>(), CloudConstants.GCP);
+        Map<String, String> result = underTest.prepareDefaultTags(CB_USER, new HashMap<>(), CloudConstants.GCP);
 
-        Assert.assertEquals(5L, result.size());
-        Assert.assertEquals("apache", result.get(DefaultApplicationTag.CB_ACOUNT_NAME.key()));
+        Assert.assertEquals(4L, result.size());
         Assert.assertEquals("apache1", result.get(DefaultApplicationTag.CB_USER_NAME.key()));
         Assert.assertEquals("2-2-0", result.get(DefaultApplicationTag.CB_VERSION.key()));
         Assert.assertEquals("apache1", result.get(DefaultApplicationTag.OWNER.key().toLowerCase()));
@@ -80,10 +81,9 @@ public class DefaultCostTaggingServiceTest {
         Map<String, String> sourceMap = new HashMap<>();
         sourceMap.put(DefaultApplicationTag.OWNER.key(), "appletree");
 
-        Map<String, String> result = underTest.prepareDefaultTags("Apache", "apache1@apache.com", sourceMap, CloudConstants.AZURE);
+        Map<String, String> result = underTest.prepareDefaultTags(CB_USER, sourceMap, CloudConstants.AZURE);
 
-        Assert.assertEquals(4L, result.size());
-        Assert.assertEquals("Apache", result.get(DefaultApplicationTag.CB_ACOUNT_NAME.key()));
+        Assert.assertEquals(3L, result.size());
         Assert.assertEquals("apache1@apache.com", result.get(DefaultApplicationTag.CB_USER_NAME.key()));
         Assert.assertEquals("2.2.0", result.get(DefaultApplicationTag.CB_VERSION.key()));
         Assert.assertNull(result.get(DefaultApplicationTag.OWNER.key()));

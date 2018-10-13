@@ -27,7 +27,7 @@ public class ScimAccountGroupReaderFilter extends OncePerRequestFilter {
             IOException {
         if (SecurityContextHolder.getContext().getAuthentication() != null) {
             String username = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            PeriscopeUser user = cachedUserDetailsService.getDetails(username, UserFilterField.USERNAME);
+            PeriscopeUser user = cachedUserDetailsService.getDetails(username, "tenant", UserFilterField.USERNAME);
             request.setAttribute("user", user);
         }
         filterChain.doFilter(request, response);

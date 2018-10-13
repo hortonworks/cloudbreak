@@ -181,11 +181,6 @@ public class AbstractEnvironmentAwareServiceTest {
         public WorkspaceResource getResource() {
             return null;
         }
-
-        @Override
-        public String getOwner() {
-            return null;
-        }
     }
 
     private static class TestResourceService extends AbstractEnvironmentAwareService<TestResource> {

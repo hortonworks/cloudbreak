@@ -270,7 +270,7 @@ public class StackDecorator {
                             request.getAvailabilityZone(), request.getPlatformVariant());
                     template = templateDecorator.decorate(credential, template, request.getRegion(),
                             request.getAvailabilityZone(), request.getPlatformVariant());
-                    template = templateService.create(subject.getOwner(), subject.getAccount(), user, template, subject.getWorkspace());
+                    template = templateService.create(user, template, subject.getWorkspace());
                 }
                 instanceGroup.setTemplate(template);
             }

@@ -26,7 +26,6 @@ import com.sequenceiq.cloudbreak.api.model.flex.FlexUsageComponentJson;
 import com.sequenceiq.cloudbreak.api.model.flex.FlexUsageControllerJson;
 import com.sequenceiq.cloudbreak.api.model.flex.FlexUsageHdpInstanceJson;
 import com.sequenceiq.cloudbreak.api.model.flex.FlexUsageProductJson;
-import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
@@ -114,20 +113,9 @@ public class FlexUsageGenerator {
         controllerJson.setInstanceId(parentUuid);
         controllerJson.setProvider(cbInstanceProvider);
         controllerJson.setRegion(cbInstanceRegion);
-        aUsage.ifPresent(cloudbreakUsage -> controllerJson.setUserName(getUserEmail(cloudbreakUsage)));
+        aUsage.ifPresent(cloudbreakUsage -> controllerJson.setUserName("DUMMY"));
         smartSenseSubscriptionOptional.ifPresent(smartSenseSubscription -> controllerJson.setSmartSenseId(smartSenseSubscription.getSubscriptionId()));
         return controllerJson;
-    }
-
-    private String getUserEmail(CloudbreakUsage source) {
-        String cbUser;
-        try {
-            cbUser = cachedUserDetailsService.getDetails(source.getOwner(), UserFilterField.USERID).getUsername();
-        } catch (Exception ignored) {
-            LOGGER.warn("Expected user was not found with '{}' id. Maybe it was deleted by the admin user.", source.getOwner());
-            cbUser = source.getOwner();
-        }
-        return cbUser;
     }
 
     private List<FlexUsageProductJson> getFlexUsageProductJsons(Iterable<CloudbreakUsage> usages, Long fromDate) {

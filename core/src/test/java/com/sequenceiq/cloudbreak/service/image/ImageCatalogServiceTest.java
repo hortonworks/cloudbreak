@@ -44,15 +44,15 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateService;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
-import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.service.account.PreferencesService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserProfileHandler;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
@@ -111,7 +111,7 @@ public class ImageCatalogServiceTest {
     private ImageCatalogRepository imageCatalogRepository;
 
     @Mock
-    private AccountPreferencesService accountPreferencesService;
+    private PreferencesService preferencesService;
 
     @Mock
     private UserProfileHandler userProfileHandler;
@@ -144,9 +144,7 @@ public class ImageCatalogServiceTest {
     public void beforeTest() throws Exception {
         setupImageCatalogProvider(CUSTOM_IMAGE_CATALOG_URL, V2_CATALOG_FILE);
 
-        when(accountPreferencesService.enabledPlatforms()).thenReturn(new HashSet<>(Arrays.asList("AZURE", "AWS", "GCP", "OPENSTACK")));
-        when(cloudbreakUser.getUserId()).thenReturn("userid");
-        when(cloudbreakUser.getAccount()).thenReturn("account");
+        when(preferencesService.enabledPlatforms()).thenReturn(new HashSet<>(Arrays.asList("AZURE", "AWS", "GCP", "OPENSTACK")));
 
         constants.addAll(Collections.singletonList(new AwsCloudConstant()));
 
@@ -441,7 +439,7 @@ public class ImageCatalogServiceTest {
 
     private void setupUserProfileService() {
         UserProfile userProfile = new UserProfile();
-        when(userProfileService.getOrCreate(anyString(), anyString(), any(User.class))).thenReturn(userProfile);
+        when(userProfileService.getOrCreate(any(User.class))).thenReturn(userProfile);
     }
 
     private ImageCatalog getImageCatalog() {

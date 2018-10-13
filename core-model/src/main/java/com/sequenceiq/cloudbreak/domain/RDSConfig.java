@@ -66,10 +66,6 @@ public class RDSConfig implements ProvisionEntity, EnvironmentAwareResource {
     @Column(nullable = false)
     private String stackVersion;
 
-    private String owner;
-
-    private String account;
-
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private ResourceStatus status;
@@ -152,22 +148,6 @@ public class RDSConfig implements ProvisionEntity, EnvironmentAwareResource {
 
     public void setStackVersion(String stackVersion) {
         this.stackVersion = stackVersion;
-    }
-
-    public String getAccount() {
-        return account;
-    }
-
-    public void setAccount(String account) {
-        this.account = account;
-    }
-
-    public String getOwner() {
-        return owner;
-    }
-
-    public void setOwner(String owner) {
-        this.owner = owner;
     }
 
     public ResourceStatus getStatus() {

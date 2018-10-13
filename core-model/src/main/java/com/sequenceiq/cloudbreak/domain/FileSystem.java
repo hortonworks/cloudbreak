@@ -38,10 +38,6 @@ public class FileSystem implements ProvisionEntity, WorkspaceAwareResource {
 
     private boolean defaultFs;
 
-    private String owner;
-
-    private String account;
-
     @Column(nullable = false)
     private String description;
 
@@ -99,22 +95,6 @@ public class FileSystem implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setDefaultFs(boolean defaultFs) {
         this.defaultFs = defaultFs;
-    }
-
-    public String getOwner() {
-        return owner;
-    }
-
-    public void setOwner(String owner) {
-        this.owner = owner;
-    }
-
-    public String getAccount() {
-        return account;
-    }
-
-    public void setAccount(String account) {
-        this.account = account;
     }
 
     public String getDescription() {

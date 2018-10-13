@@ -21,7 +21,7 @@ public interface UserRepository extends DisabledBaseRepository<User, Long> {
 
     User findByUserId(String userId);
 
-    @Query("SELECT u FROM User u WHERE u.userName = :userName AND u.tenant.name = :tenantName")
+    @Query("SELECT u FROM User u INNER JOIN u.tenant t WHERE u.userName = :userName AND t.name = :tenantName")
     User findByTenantNameAndUserName(@Param("tenantName") String tenantName, @Param("userName") String userName);
 
     @Query("SELECT u FROM User u WHERE u.tenant = :tenant")

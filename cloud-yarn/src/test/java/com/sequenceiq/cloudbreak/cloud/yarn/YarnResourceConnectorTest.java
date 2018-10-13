@@ -237,7 +237,7 @@ public class YarnResourceConnectorTest {
     private void setUpHappyPath(ArgumentCaptor<CreateApplicationRequest> createRequestCaptor, ArgumentCaptor<ApplicationDetailRequest> requestCaptor)
             throws MalformedURLException {
         when(authenticatedContextMock.getCloudContext()).thenReturn(new CloudContext(1L, "name",
-                "platform", "owner", USER_ID, WORKSPACE_ID));
+                "platform", USER_ID, WORKSPACE_ID));
         when(stackMock.getImage()).thenReturn(imageMock);
         when(imageMock.getImageName()).thenReturn(IMAGE_NAME);
         List<Group> groupList = Collections.emptyList();
@@ -271,7 +271,7 @@ public class YarnResourceConnectorTest {
         ReflectionTestUtils.setField(underTest, "maxResourceNameLength", 8);
 
         when(authenticatedContextMock.getCloudContext()).thenReturn(new CloudContext(1L, "name", "platform",
-                "owner", USER_ID, WORKSPACE_ID));
+                USER_ID, WORKSPACE_ID));
 
         when(yarnClientUtilMock.createYarnClient(authenticatedContextMock)).thenReturn(yarnClientMock);
         ArgumentCaptor<ApplicationDetailRequest> requestCaptor = ArgumentCaptor.forClass(ApplicationDetailRequest.class);

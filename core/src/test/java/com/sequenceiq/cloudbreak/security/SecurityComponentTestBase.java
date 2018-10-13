@@ -34,8 +34,8 @@ import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
 import com.sequenceiq.cloudbreak.conf.SecurityConfig;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.CrudRepositoryLookupService;
-import com.sequenceiq.cloudbreak.service.security.OwnerBasedPermissionEvaluator;
 import com.sequenceiq.cloudbreak.service.security.ScimAccountGroupReaderFilter;
+import com.sequenceiq.cloudbreak.service.security.TenantBasedPermissionEvaluator;
 import com.sequenceiq.cloudbreak.service.user.CachedUserDetailsService;
 
 @RunWith(SpringRunner.class)
@@ -87,7 +87,7 @@ public abstract class SecurityComponentTestBase {
     }
 
     protected void setupLoggedInUser(CloudbreakUser loggedInUser) {
-        when(cachedUserDetailsService.getDetails(anyString(), any(UserFilterField.class))).thenReturn(loggedInUser);
+        when(cachedUserDetailsService.getDetails(anyString(), anyString(), any(UserFilterField.class))).thenReturn(loggedInUser);
     }
 
     protected CloudbreakUser getOwner(String... scopes) {
@@ -107,7 +107,7 @@ public abstract class SecurityComponentTestBase {
             includeFilters = {
                     @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = {
                             AuthorizationService.class,
-                            OwnerBasedPermissionEvaluator.class,
+                            TenantBasedPermissionEvaluator.class,
                             ScimAccountGroupReaderFilter.class,
                             SecurityConfig.class
                     })

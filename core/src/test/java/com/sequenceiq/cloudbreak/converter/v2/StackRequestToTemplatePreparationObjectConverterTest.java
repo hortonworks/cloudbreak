@@ -366,7 +366,6 @@ public class StackRequestToTemplatePreparationObjectConverterTest {
         Credential credential = new Credential();
         String account = "testAccount";
         when(cloudStorageValidationUtil.isCloudStorageConfigured(cloudStorageRequest)).thenReturn(true);
-        when(cloudbreakUser.getAccount()).thenReturn(account);
         when(credentialService.getByNameForWorkspace(TEST_CREDENTIAL_NAME, workspace)).thenReturn(credential);
         when(cluster.getCloudStorage()).thenReturn(cloudStorageRequest);
         when(conversionService.convert(cloudStorageRequest, FileSystem.class)).thenReturn(fileSystem);

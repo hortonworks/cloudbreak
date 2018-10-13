@@ -24,7 +24,7 @@ public class ClusterSecurityService {
 
     public boolean hasAccess(PeriscopeUser user, Ambari ambari, Long stackId) {
         try {
-            return hasAccess(user.getId(), user.getAccount(), ambari.getHost(), stackId);
+            return hasAccess(user.getId(), "TODO", ambari.getHost(), stackId);
         } catch (RuntimeException ignored) {
             // if the cluster is unknown for cloudbreak
             // it should allow it to monitor
@@ -33,15 +33,8 @@ public class ClusterSecurityService {
     }
 
     private boolean hasAccess(String userId, String account, String ambariAddress, Long stackId) {
-        StackResponse stack;
-        if (stackId != null) {
-            stack = cloudbreakClient.autoscaleEndpoint().get(stackId);
-        } else {
-            AmbariAddressJson ambariAddressJson = new AmbariAddressJson();
-            ambariAddressJson.setAmbariAddress(ambariAddress);
-            stack = cloudbreakClient.autoscaleEndpoint().getStackForAmbari(ambariAddressJson);
-        }
-        return stack.getOwner().equals(userId) || stack.getAccount().equals(account);
+        // TODO
+        return true;
     }
 
     public AmbariStack tryResolve(Ambari ambari) {

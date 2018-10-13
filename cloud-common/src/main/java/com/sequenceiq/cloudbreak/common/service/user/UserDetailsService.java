@@ -10,7 +10,6 @@ import javax.inject.Named;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,11 +28,7 @@ public class UserDetailsService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserDetailsService.class);
 
-    private static final int ACCOUNT_PART = 2;
-
     private static final String UAA_DATE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
-
-    private static final String EMAIL_SEPARATOR = "@";
 
     private static final long ITEMS_PER_PAGE = 1000L;
 
@@ -61,20 +56,15 @@ public class UserDetailsService {
         identityWebTarget = RestClientUtil.get(configKey).target(identityServerUrl).path("Users");
     }
 
-    public CloudbreakUser getDetails(String username, UserFilterField filterField, String clientSecret) {
+    public CloudbreakUser getDetails(String username, String tenant, UserFilterField filterField, String clientSecret) {
         try {
-            return getIdentityUser(username, filterField, clientSecret);
+            return getIdentityUser(username, tenant, filterField, clientSecret);
         } catch (UserDetailsUnavailableException e) {
-            LOGGER.info("{} Assume SSO token", e.getMessage());
-            String account = username;
-            if (username.contains(EMAIL_SEPARATOR)) {
-                account = username.substring(username.indexOf(EMAIL_SEPARATOR) + 1);
-            }
-            return new CloudbreakUser(username, username, account);
+            return new CloudbreakUser(username, username, tenant);
         }
     }
 
-    public List<CloudbreakUser> getAllUsers(String clientSecret) {
+    public List<CloudbreakUser> getAllUsers(String tenant, String clientSecret) {
         try {
             AccessToken accessToken = identityClient.getToken(clientSecret);
             List<CloudbreakUser> cloudbreakUsers = new ArrayList<>();
@@ -88,7 +78,7 @@ public class UserDetailsService {
 
                 JsonNode root = JsonUtil.readTree(result);
                 root.get("resources").forEach(resource -> {
-                    CloudbreakUser cloudbreakUser = getIdentityUserFromJson(resource);
+                    CloudbreakUser cloudbreakUser = createIdentityUser(resource, tenant);
                     cloudbreakUsers.add(cloudbreakUser);
                 });
             }
@@ -113,7 +103,7 @@ public class UserDetailsService {
         }
     }
 
-    private CloudbreakUser getIdentityUser(String username, UserFilterField filterField, String clientSecret) {
+    private CloudbreakUser getIdentityUser(String username, String tenant, UserFilterField filterField, String clientSecret) {
         WebTarget target = getWebTarget(username, filterField);
         AccessToken accessToken = identityClient.getToken(clientSecret);
         String scimResponse = target.request(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + accessToken.getToken()).get(String.class);
@@ -126,27 +116,10 @@ public class UserDetailsService {
             if (userNode == null) {
                 throw new UserDetailsUnavailableException("User details cannot be retrieved from identity server.");
             }
-            return getIdentityUserFromJson(userNode);
+            return createIdentityUser(userNode, tenant);
         } catch (IOException e) {
             throw new UserDetailsUnavailableException("User details cannot be retrieved from identity server.", e);
         }
-    }
-
-    private CloudbreakUser getIdentityUserFromJson(JsonNode userNode) {
-        String account = null;
-        for (JsonNode node : userNode.get("groups")) {
-            String group = node.get("display").asText();
-            if (group.startsWith("sequenceiq.account")) {
-                String[] parts = group.split("\\.");
-                if (account != null && !account.equals(parts[ACCOUNT_PART])) {
-                    throw new IllegalStateException("A user can belong to only one account.");
-                }
-                account = parts[ACCOUNT_PART];
-            } else if (group.startsWith("sequenceiq.cloudbreak")) {
-                String[] parts = group.split("\\.");
-            }
-        }
-        return createIdentityUser(account, userNode);
     }
 
     private WebTarget getWebTarget(String username, UserFilterField filterField) {
@@ -166,11 +139,10 @@ public class UserDetailsService {
         return target;
     }
 
-    private CloudbreakUser createIdentityUser(String account, JsonNode userNode) {
+    private CloudbreakUser createIdentityUser(JsonNode userNode, String tenant) {
         String userId = userNode.get("id").asText();
         String email = userNode.get("userName").asText();
-        account = StringUtils.isEmpty(account) ? userId : account;
-        return new CloudbreakUser(userId, email, account);
+        return new CloudbreakUser(userId, email, tenant);
     }
 
     private String getGivenName(JsonNode userNode) {

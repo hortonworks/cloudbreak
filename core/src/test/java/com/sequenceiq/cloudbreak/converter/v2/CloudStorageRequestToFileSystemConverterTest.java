@@ -70,7 +70,6 @@ public class CloudStorageRequestToFileSystemConverterTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         when(user.getUserId()).thenReturn(USER_ID);
-        when(user.getAccount()).thenReturn(USER_ACCOUNT);
         when(nameGenerator.generateName(APIResourceType.FILESYSTEM)).thenReturn(FILE_SYSTEM_NAME);
         underTest = spy(underTest);
     }

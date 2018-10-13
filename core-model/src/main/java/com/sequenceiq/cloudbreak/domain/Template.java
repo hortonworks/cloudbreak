@@ -14,14 +14,16 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.json.EncryptedJsonToString;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"account", "name"}))
-public class Template implements ProvisionEntity {
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name"}))
+public class Template implements ProvisionEntity, WorkspaceAwareResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "template_generator")
@@ -36,12 +38,6 @@ public class Template implements ProvisionEntity {
 
     @Column(nullable = false)
     private String instanceType;
-
-    @Column(nullable = false)
-    private String owner;
-
-    @Column(nullable = false)
-    private String account;
 
     @Column(nullable = false)
     private Integer volumeCount;
@@ -110,22 +106,6 @@ public class Template implements ProvisionEntity {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public String getOwner() {
-        return owner;
-    }
-
-    public void setOwner(String owner) {
-        this.owner = owner;
-    }
-
-    public String getAccount() {
-        return account;
-    }
-
-    public void setAccount(String account) {
-        this.account = account;
     }
 
     public Integer getVolumeCount() {
@@ -214,5 +194,10 @@ public class Template implements ProvisionEntity {
 
     public void setWorkspace(Workspace workspace) {
         this.workspace = workspace;
+    }
+
+    @Override
+    public WorkspaceResource getResource() {
+        return WorkspaceResource.STACK;
     }
 }

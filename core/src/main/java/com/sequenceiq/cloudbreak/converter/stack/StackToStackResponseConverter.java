@@ -78,8 +78,6 @@ public class StackToStackResponseConverter extends AbstractConversionServiceAwar
         }
 
         stackJson.setName(source.getName());
-        stackJson.setOwner(source.getOwner());
-        stackJson.setAccount(source.getAccount());
         stackJson.setStackAuthentication(conversionService.convert(source.getStackAuthentication(), StackAuthenticationResponse.class));
         stackJson.setId(source.getId());
         if (source.getCredential() == null) {

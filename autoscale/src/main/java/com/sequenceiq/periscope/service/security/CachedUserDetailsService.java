@@ -22,10 +22,10 @@ public class CachedUserDetailsService {
     @Inject
     private UserDetailsService cachedUserDetailsService;
 
-    @Cacheable(cacheNames = "identityUserCache", key = "#username")
-    public PeriscopeUser getDetails(String username, UserFilterField filterField) {
-        CloudbreakUser cloudbreakUser = cachedUserDetailsService.getDetails(username, filterField, clientSecret);
-        return new PeriscopeUser(cloudbreakUser.getUserId(), cloudbreakUser.getUsername(), cloudbreakUser.getAccount());
+    @Cacheable(cacheNames = "identityUserCache", key = "{ #username, #tenant }")
+    public PeriscopeUser getDetails(String username, String tenant, UserFilterField filterField) {
+        CloudbreakUser cloudbreakUser = cachedUserDetailsService.getDetails(username, tenant, filterField, clientSecret);
+        return new PeriscopeUser(cloudbreakUser.getUserId(), cloudbreakUser.getUsername(), cloudbreakUser.getTenant());
     }
 
 }

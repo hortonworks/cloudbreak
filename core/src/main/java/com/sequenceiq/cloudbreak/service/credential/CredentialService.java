@@ -43,7 +43,7 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.environment.EnvironmentViewRepository;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
-import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
+import com.sequenceiq.cloudbreak.service.account.PreferencesService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.notification.Notification;
 import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
@@ -77,7 +77,7 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
     private UserProfileHandler userProfileHandler;
 
     @Inject
-    private AccountPreferencesService accountPreferencesService;
+    private PreferencesService preferencesService;
 
     @Inject
     private NotificationSender notificationSender;
@@ -98,12 +98,12 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
     private EnvironmentViewRepository environmentViewRepository;
 
     public Set<Credential> listAvailablesByWorkspaceId(Long workspaceId) {
-        return credentialRepository.findActiveForWorkspaceFilterByPlatforms(workspaceId, accountPreferencesService.enabledPlatforms());
+        return credentialRepository.findActiveForWorkspaceFilterByPlatforms(workspaceId, preferencesService.enabledPlatforms());
     }
 
     public Credential get(Long id, Workspace workspace) {
         return Optional.ofNullable(credentialRepository.findActiveByIdAndWorkspaceFilterByPlatforms(id, workspace.getId(),
-                accountPreferencesService.enabledPlatforms())).orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_ID, id));
+                preferencesService.enabledPlatforms())).orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_ID, id));
     }
 
     public Map<String, String> interactiveLogin(Long workspaceId, Credential credential, Workspace workspace, User user) {
@@ -115,7 +115,7 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
         credentialValidator.validateCredentialCloudPlatform(credential.cloudPlatform());
         Credential original = Optional.ofNullable(
                 credentialRepository.findActiveByNameAndWorkspaceIdFilterByPlatforms(credential.getName(), workspaceId,
-                        accountPreferencesService.enabledPlatforms()))
+                        preferencesService.enabledPlatforms()))
                 .orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, credential.getName()));
         if (original.cloudPlatform() != null && !Objects.equals(credential.cloudPlatform(), original.cloudPlatform())) {
             throw new BadRequestException("Modifying credential platform is forbidden");
@@ -143,14 +143,14 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
 
     public Credential delete(Long id, Workspace workspace) {
         Credential credential = Optional.ofNullable(
-                credentialRepository.findActiveByIdAndWorkspaceFilterByPlatforms(id, workspace.getId(), accountPreferencesService.enabledPlatforms()))
+                credentialRepository.findActiveByIdAndWorkspaceFilterByPlatforms(id, workspace.getId(), preferencesService.enabledPlatforms()))
                 .orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_ID, id));
         return delete(credential, workspace);
     }
 
     public Credential delete(String name, Workspace workspace) {
         Credential credential = Optional.ofNullable(
-                credentialRepository.findActiveByNameAndWorkspaceIdFilterByPlatforms(name, workspace.getId(), accountPreferencesService.enabledPlatforms()))
+                credentialRepository.findActiveByNameAndWorkspaceIdFilterByPlatforms(name, workspace.getId(), preferencesService.enabledPlatforms()))
                 .orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, name));
         return delete(credential, workspace);
     }

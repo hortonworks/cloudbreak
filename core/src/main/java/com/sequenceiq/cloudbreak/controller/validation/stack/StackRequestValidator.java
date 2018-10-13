@@ -151,7 +151,7 @@ public class StackRequestValidator implements Validator<StackRequest> {
             String region, ValidationResultBuilder validationBuilder) {
         Long workspaceId = restRequestThreadLocalService.getRequestedWorkspaceId();
         Credential cred = credentialService.getByNameForWorkspaceId(credentialName, workspaceId);
-        Optional<PlatformEncryptionKeysResponse> keys = getEncryptionKeysWithExceptionHandling(cred.getId(), region, cred.getOwner(), cred.getOwner());
+        Optional<PlatformEncryptionKeysResponse> keys = getEncryptionKeysWithExceptionHandling(cred.getId(), region);
         if (keys.isPresent() && !keys.get().getEncryptionKeyConfigs().isEmpty()) {
             if (!instanceGroupRequest.getTemplate().getParameters().containsKey(KEY)) {
                 validationBuilder.error("There is no encryption key provided but CUSTOM type is given for encryption.");
@@ -162,20 +162,18 @@ public class StackRequestValidator implements Validator<StackRequest> {
         }
     }
 
-    private Optional<PlatformEncryptionKeysResponse> getEncryptionKeysWithExceptionHandling(Long id, String region, String owner, String account) {
+    private Optional<PlatformEncryptionKeysResponse> getEncryptionKeysWithExceptionHandling(Long id, String region) {
         try {
-            return Optional.ofNullable(parameterV1Controller.getEncryptionKeys(getRequestForEncryptionKeys(id, region, owner, account)));
+            return Optional.ofNullable(parameterV1Controller.getEncryptionKeys(getRequestForEncryptionKeys(id, region)));
         } catch (RuntimeException ignore) {
             return Optional.empty();
         }
     }
 
-    private PlatformResourceRequestJson getRequestForEncryptionKeys(Long credentialId, String region, String owner, String account) {
+    private PlatformResourceRequestJson getRequestForEncryptionKeys(Long credentialId, String region) {
         PlatformResourceRequestJson request = new PlatformResourceRequestJson();
         request.setCredentialId(credentialId);
         request.setRegion(region);
-        request.setOwner(owner);
-        request.setAccount(account);
         return request;
     }
 

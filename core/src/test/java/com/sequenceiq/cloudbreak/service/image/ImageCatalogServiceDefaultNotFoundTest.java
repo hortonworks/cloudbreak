@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
-import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
+import com.sequenceiq.cloudbreak.service.account.PreferencesService;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
@@ -42,7 +42,7 @@ public class ImageCatalogServiceDefaultNotFoundTest {
     private ImageCatalogRepository imageCatalogRepository;
 
     @Mock
-    private AccountPreferencesService accountPreferencesService;
+    private PreferencesService preferencesService;
 
     @Mock
     private User user;
@@ -58,8 +58,8 @@ public class ImageCatalogServiceDefaultNotFoundTest {
         CloudbreakImageCatalogV2 catalog = JsonUtil.readValue(catalogJson, CloudbreakImageCatalogV2.class);
         cloudbreakUser = getCloudbreakUser();
         when(imageCatalogProvider.getImageCatalogV2("")).thenReturn(catalog);
-        when(accountPreferencesService.enabledPlatforms()).thenReturn(new HashSet<>(Arrays.asList(PROVIDERS)));
-        when(userProfileService.getOrCreate(cloudbreakUser.getAccount(), cloudbreakUser.getUserId(), user)).thenReturn(new UserProfile());
+        when(preferencesService.enabledPlatforms()).thenReturn(new HashSet<>(Arrays.asList(PROVIDERS)));
+        when(userProfileService.getOrCreate(user)).thenReturn(new UserProfile());
     }
 
     @Test(expected = CloudbreakImageNotFoundException.class)
