@@ -48,19 +48,18 @@ public class WorkspaceMigrationRunner {
     public void run() {
         try {
             Long stacksWithMissingWorkspace = transactionService.required(() -> stackRepository.countStacksWithNoWorkspaceOrCreator());
-            if (stacksWithMissingWorkspace == 0) {
-                return;
+            if (stacksWithMissingWorkspace > 0) {
+                UserMigrationResults userMigrationResults = userAndWorkspaceMigrator.migrateUsersAndWorkspaces();
+                stackWorkspaceMigrator.migrateStackWorkspaceAndCreator(userMigrationResults);
+                services.stream()
+                        .filter(service -> !service.resource().equals(WorkspaceResource.STRUCTURED_EVENT))
+                        .map(service -> (WorkspaceAwareResourceService<WorkspaceAwareResource>) service)
+                        .forEach(service -> {
+                            workspaceAwareResourceMigrator.migrateResourceWorkspace(userMigrationResults, service::findAll,
+                                    service::pureSave);
+                        });
+                structuredEventWorkspaceMigrator.migrate(userMigrationResults);
             }
-            UserMigrationResults userMigrationResults = userAndWorkspaceMigrator.migrateUsersAndWorkspaces();
-            stackWorkspaceMigrator.migrateStackWorkspaceAndCreator(userMigrationResults);
-            services.stream()
-                    .filter(service -> !service.resource().equals(WorkspaceResource.STRUCTURED_EVENT))
-                    .map(service -> (WorkspaceAwareResourceService<WorkspaceAwareResource>) service)
-                    .forEach(service -> {
-                        workspaceAwareResourceMigrator.migrateResourceWorkspace(userMigrationResults, service::findAll,
-                                service::pureSave);
-                    });
-            structuredEventWorkspaceMigrator.migrate(userMigrationResults);
 
             finished.set(true);
         } catch (TransactionExecutionException e) {
