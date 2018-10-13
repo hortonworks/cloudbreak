@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status.Family;
 
@@ -283,6 +284,11 @@ public class CloudbreakV3Util {
                     }
                     currentStatuses.put(statusPath, currStatus);
                 }
+            } catch (ForbiddenException e) {
+                desiredStatuses.entrySet().stream()
+                        .filter(entry -> "DELETE_COMPLETED".equals(entry.getValue()))
+                        .map(Map.Entry::getKey)
+                        .forEach(statusPath -> currentStatuses.put(statusPath, "DELETE_COMPLETED"));
             } catch (RuntimeException ignore) {
                 continue;
             }
