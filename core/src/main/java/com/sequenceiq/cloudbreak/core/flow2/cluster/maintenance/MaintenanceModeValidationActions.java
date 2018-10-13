@@ -40,9 +40,9 @@ public class MaintenanceModeValidationActions {
 
             @Override
             protected void doExecute(StackContext context, MaintenanceModeValidationTriggerEvent payload, Map<Object, Object> variables) {
-                String stackRepo = maintenanceModeValidationService.
-                        fetchStackRepository(context.getStack().getId());
-                putWarnings(variables, new ArrayList<Warning>());
+                maintenanceModeValidationService.setUpValidationFlow(context.getStack().getId());
+                String stackRepo = maintenanceModeValidationService.fetchStackRepository(context.getStack().getId());
+                putWarnings(variables, new ArrayList<>());
                 variables.put(STACK_REPO, stackRepo);
                 sendEvent(context.getFlowId(), new StackEvent(FETCH_STACK_REPO_INFO_FINISHED_EVENT.event(),
                         context.getStack().getId()));
@@ -58,8 +58,8 @@ public class MaintenanceModeValidationActions {
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
                 List<Warning> warnings = getWarnings(variables);
                 String stackRepo = (String) variables.get(STACK_REPO);
-                warnings = maintenanceModeValidationService.validateStackRepository(
-                        context.getStack().getCluster().getId(), stackRepo, warnings);
+                warnings.addAll(maintenanceModeValidationService.validateStackRepository(
+                        context.getStack().getCluster().getId(), stackRepo));
                 sendEvent(context.getFlowId(), new StackEvent(VALIDATE_STACK_REPO_INFO_FINISHED_EVENT.event(),
                         context.getStack().getId()));
                 putWarnings(variables, warnings);
@@ -74,8 +74,7 @@ public class MaintenanceModeValidationActions {
             @Override
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
                 List<Warning> warnings = getWarnings(variables);
-                warnings = maintenanceModeValidationService.validateAmbariRepository(context.getStack().getCluster().getId(),
-                        warnings);
+                warnings.addAll(maintenanceModeValidationService.validateAmbariRepository(context.getStack().getCluster().getId()));
                 sendEvent(context.getFlowId(), new StackEvent(VALIDATE_AMBARI_REPO_INFO_FINISHED_EVENT.event(),
                         context.getStack().getId()));
                 putWarnings(variables, warnings);
@@ -89,7 +88,7 @@ public class MaintenanceModeValidationActions {
             @Override
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
                 List<Warning> warnings = getWarnings(variables);
-                warnings = maintenanceModeValidationService.validateImageCatalog(context.getStack(), warnings);
+                warnings.addAll(maintenanceModeValidationService.validateImageCatalog(context.getStack()));
                 sendEvent(context.getFlowId(), new StackEvent(VALIDATE_IMAGE_COMPATIBILITY_FINISHED_EVENT.event(),
                         context.getStack().getId()));
                 putWarnings(variables, warnings);
@@ -114,7 +113,7 @@ public class MaintenanceModeValidationActions {
         return new AbstractStackFailureAction<MaintenanceModeValidationState, MaintenanceModeValidationEvent>() {
 
             @Override
-            protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 maintenanceModeValidationService.handleValidationFailure(context.getStackView().getId(),
                         payload.getException());
                 sendEvent(context.getFlowId(), VALIDATION_FAIL_HANDLED_EVENT.event(), payload);

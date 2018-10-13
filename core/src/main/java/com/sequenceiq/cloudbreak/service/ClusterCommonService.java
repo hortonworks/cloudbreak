@@ -7,12 +7,12 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
+import javax.inject.Inject;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
@@ -24,46 +24,55 @@ import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.users.UserNamePasswordJson;
 import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
+import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.decorator.HostGroupDecorator;
+import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Service
 public class ClusterCommonService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterCommonService.class);
 
-    @Autowired
+    @Inject
     @Qualifier("conversionService")
     private ConversionService conversionService;
 
-    @Autowired
+    @Inject
     private HostGroupDecorator hostGroupDecorator;
 
-    @Autowired
+    @Inject
     private ClusterService clusterService;
 
-    @Autowired
+    @Inject
     private HostGroupService hostGroupService;
 
-    @Autowired
+    @Inject
     private BlueprintValidator blueprintValidator;
 
-    @Autowired
+    @Inject
     private StackService stackService;
 
-    @Autowired
+    @Inject
     private ClusterCreationSetupService clusterCreationSetupService;
+
+    @Inject
+    private CloudbreakEventService cloudbreakEventService;
+
+    @Inject
+    private CloudbreakMessagesService messagesService;
 
     public Response put(Long stackId, UpdateClusterJson updateJson, User user, Workspace workspace) {
         Stack stack = stackService.getById(stackId);
@@ -174,23 +183,34 @@ public class ClusterCommonService {
         Cluster cluster = stack.getCluster();
         if (cluster == null) {
             throw new BadRequestException(String.format("Cluster does not exist on stack with '%s' id.", stack.getId()));
-        }
-        if (!stack.isAvailable()) {
+        } else if (!stack.isAvailable()) {
             throw new BadRequestException(String.format(
                     "Stack '%s' is currently in '%s' state. Maintenance mode can be set to a cluster if the underlying stack is 'AVAILABLE'.",
                     stack.getId(), stack.getStatus()));
-        }
-        if (!cluster.isAvailable() && !cluster.isMaintenanceModeEnabled()) {
+        } else if (!cluster.isAvailable() && !cluster.isMaintenanceModeEnabled()) {
             throw new BadRequestException(String.format(
                     "Cluster '%s' is currently in '%s' state. Maintenance mode can be set to a cluster if it is 'AVAILABLE'.",
                     cluster.getId(), cluster.getStatus()));
         }
+
+        Response status = Response.ok().build();
         switch (maintenanceMode) {
             case ENABLED:
-                cluster.setStatus(MAINTENANCE_MODE_ENABLED);
+                saveAndFireEventOnClusterStatusChange(cluster, stack.getId(), MAINTENANCE_MODE_ENABLED, ResourceEvent.MAINTENANCE_MODE_ENABLED);
                 break;
             case DISABLED:
-                cluster.setStatus(AVAILABLE);
+                saveAndFireEventOnClusterStatusChange(cluster, stack.getId(), AVAILABLE, ResourceEvent.MAINTENANCE_MODE_DISABLED);
+                break;
+            case VALIDATION_REQUESTED:
+                if (!MAINTENANCE_MODE_ENABLED.equals(cluster.getStatus())) {
+                    throw new BadRequestException(String.format(
+                            "Maintenance mode is not enabled for cluster '%s' (status:'%s'), it should be enabled before validation.",
+                            cluster.getId(),
+                            cluster.getStatus()));
+                }
+                clusterService.triggerMaintenanceModeValidation(stack);
+                clusterService.save(cluster);
+                status = Response.accepted().build();
                 break;
             default:
                 // Nothing to do here
@@ -198,18 +218,14 @@ public class ClusterCommonService {
 
         }
 
-        Response status = Response.ok().build();
-        if (maintenanceMode.equals(MaintenanceModeStatus.VALIDATION_REQUESTED)) {
-            if (!MAINTENANCE_MODE_ENABLED.equals(cluster.getStatus())) {
-                throw new BadRequestException(String.format(
-                        "Maintenance mode is not enabled for cluster '%s' (status:'%s'), it should be enabled before validation.",
-                        cluster.getId(),
-                        cluster.getStatus()));
-            }
-            clusterService.triggerMaintenanceModeValidation(stack);
-            status = Response.accepted().build();
-        }
-        clusterService.save(cluster);
         return status;
+    }
+
+    private void saveAndFireEventOnClusterStatusChange(Cluster cluster, Long stackId, com.sequenceiq.cloudbreak.api.model.Status status, ResourceEvent event) {
+        if (!status.equals(cluster.getStatus())) {
+            cluster.setStatus(status);
+            clusterService.save(cluster);
+            cloudbreakEventService.fireCloudbreakEvent(stackId, event.name(), messagesService.getMessage(event.getMessage()));
+        }
     }
 }

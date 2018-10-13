@@ -31,7 +31,9 @@ public enum ResourceEvent {
     TOPOLOGY_CREATED("resource.topology.created"),
     FILESYSTEM_CREATED("resource.esystem.created"),
     FILESYSTEM_DELETED("resource.filesystem.deleted"),
-    TOPOLOGY_DELETED("resource.topology.deleted");
+    TOPOLOGY_DELETED("resource.topology.deleted"),
+    MAINTENANCE_MODE_ENABLED("resource.maintenancemode.enabled"),
+    MAINTENANCE_MODE_DISABLED("resource.maintenancemode.disabled");
 
     private final String message;
 

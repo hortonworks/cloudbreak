@@ -4,8 +4,8 @@ package com.sequenceiq.cloudbreak.service.cluster.ambari;
 import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.CUSTOM_VDF_REPO_KEY;
 import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.VDF_REPO_KEY_PREFIX;
 
-import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -58,7 +58,7 @@ public class AmbariRepositoryVersionService {
     @Inject
     private JsonHelper jsonHelper;
 
-    public String getRepositoryVersion(long clusterId, Orchestrator orchestrator) throws CloudbreakException {
+    public String getRepositoryVersion(Long clusterId, Orchestrator orchestrator) throws CloudbreakException {
         StackRepoDetails stackRepoDetails = getStackRepoDetails(clusterId, orchestrator);
         AmbariRepo ambariRepoDetails = clusterComponentConfigProvider.getAmbariRepo(clusterId);
         String result = "";
@@ -69,7 +69,7 @@ public class AmbariRepositoryVersionService {
         return result;
     }
 
-    public void setBaseRepoURL(String stackName, long clusterId, Orchestrator orchestrator, StackService ambariClient) throws CloudbreakException {
+    public void setBaseRepoURL(String stackName, Long clusterId, Orchestrator orchestrator, StackService ambariClient) throws CloudbreakException {
         StackRepoDetails stackRepoDetails = getStackRepoDetails(clusterId, orchestrator);
         if (stackRepoDetails != null) {
             try {
@@ -104,8 +104,8 @@ public class AmbariRepositoryVersionService {
         stackRepo = removeVDFRelatedRepoDetails(stackRepo);
         String [] unwantedKeys = {StackRepoDetails.REPO_ID_TAG, StackRepoDetails.MPACK_TAG};
         Set<String> keys = stackRepo.keySet();
-        keys.removeAll(Arrays.asList(unwantedKeys));
-        return (keys.size() > 0) ? keys.iterator().next() : "";
+        keys.removeAll(List.of(unwantedKeys));
+        return keys.isEmpty() ? "" : keys.iterator().next();
     }
 
     private StackRepoDetails getStackRepoDetails(long clusterId, Orchestrator orchestrator) throws CloudbreakException {

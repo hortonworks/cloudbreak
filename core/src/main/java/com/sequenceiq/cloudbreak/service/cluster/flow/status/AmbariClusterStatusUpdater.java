@@ -97,8 +97,7 @@ public class AmbariClusterStatusUpdater {
 
         Status status = cluster.getStatus();
         if (status != newClusterStatus) {
-            if (!status.equals(Status.MAINTENANCE_MODE_ENABLED)
-                    || (status.equals(Status.MAINTENANCE_MODE_ENABLED) && !newClusterStatus.equals(Status.AVAILABLE))) {
+            if (!status.equals(Status.MAINTENANCE_MODE_ENABLED) || !newClusterStatus.equals(Status.AVAILABLE)) {
                 LOGGER.info("Cluster {} status is updated from {} to {}", cluster.getId(), status, newClusterStatus);
                 clusterService.updateClusterStatusByStackId(stackId, newClusterStatus);
                 result = true;
