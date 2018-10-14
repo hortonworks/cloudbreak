@@ -58,6 +58,9 @@ public class AppConfig implements AsyncConfigurer {
     @Value("${cert.ignorePreValidation}")
     private boolean ignorePreValidation;
 
+    @Value("${caas.hostheader:}")
+    private String caasHostHeader;
+
     @Value("${caas.url:}")
     private String caasUrl;
 
@@ -94,7 +97,8 @@ public class AppConfig implements AsyncConfigurer {
 
     @Bean
     public CaasClient caasClient() {
-        return new CaasClient(caasProtocol, caasUrl, new ConfigKey(caasCertificateValidation, restDebug, caasIgnorePreValidation));
+        return new CaasClient(caasProtocol, caasHostHeader, caasUrl,
+                new ConfigKey(caasCertificateValidation, restDebug, caasIgnorePreValidation));
     }
 
     @Bean
