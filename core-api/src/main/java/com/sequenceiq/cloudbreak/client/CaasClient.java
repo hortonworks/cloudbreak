@@ -19,18 +19,22 @@ public class CaasClient {
 
     private final String caasDomain;
 
+    private final String hostHeader;
+
     private final ConfigKey configKey;
 
-    public CaasClient(String caasProtocol, String caasDomain, ConfigKey configKey) {
+    public CaasClient(String caasProtocol, String hostHeader, String caasDomain, ConfigKey configKey) {
         this.caasProtocol = caasProtocol;
         this.caasDomain = caasDomain;
+        this.hostHeader = hostHeader;
         this.configKey = configKey;
     }
 
     public CaasUser getUserInfo(String tenant, String dpsJwtToken) {
-        WebTarget caasWebTarget = getCaasWebTarget(tenant);
+        WebTarget caasWebTarget = getCaasWebTarget();
         WebTarget userInfoWebTarget = caasWebTarget.path("/oidc/userinfo");
         MultivaluedMap<String, Object> headers = new MultivaluedHashMap<>();
+        headers.add("Host", tenant + '.' + hostHeader);
         headers.add("Cookie", "dps-jwt=" + dpsJwtToken);
         return userInfoWebTarget.request()
                 .accept(MediaType.APPLICATION_JSON_TYPE)
@@ -39,16 +43,19 @@ public class CaasClient {
     }
 
     public IntrospectResponse introSpect(String tenant, String dpsJwtToken) {
-        WebTarget caasWebTarget = getCaasWebTarget(tenant);
+        WebTarget caasWebTarget = getCaasWebTarget();
         WebTarget introspectWebTarget = caasWebTarget.path("/oidc/introspect");
+        MultivaluedMap<String, Object> headers = new MultivaluedHashMap<>();
+        headers.add("Host", tenant + '.' + hostHeader);
         return introspectWebTarget.request()
                 .accept(MediaType.APPLICATION_JSON_TYPE)
+                .headers(headers)
                 .post(Entity.json(new IntrospectRequest(dpsJwtToken)), IntrospectResponse.class);
     }
 
-    private WebTarget getCaasWebTarget(String tenant) {
+    private WebTarget getCaasWebTarget() {
         if (StringUtils.isNotEmpty(caasDomain)) {
-            return RestClientUtil.get(configKey).target(caasProtocol + "://" + tenant + '.' + caasDomain);
+            return RestClientUtil.get(configKey).target(caasProtocol + "://" + caasDomain);
         } else {
             LOGGER.warn("CAAS isn't configured");
             throw new InvalidTokenException("CAAS isn't configured");

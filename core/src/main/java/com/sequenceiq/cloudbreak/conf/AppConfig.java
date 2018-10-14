@@ -107,6 +107,9 @@ public class AppConfig implements ResourceLoaderAware {
     @Value("${caas.protocol:http}")
     private String caasProtocol;
 
+    @Value("${caas.hostheader:}")
+    private String caasHostHeader;
+
     @Value("${caas.url:}")
     private String caasUrl;
 
@@ -250,7 +253,8 @@ public class AppConfig implements ResourceLoaderAware {
 
     @Bean
     public CaasClient caasClient() {
-        return new CaasClient(caasProtocol, caasUrl, new ConfigKey(caasCertificateValidation, restDebug, caasIgnorePreValidation));
+        return new CaasClient(caasProtocol, caasHostHeader, caasUrl,
+                new ConfigKey(caasCertificateValidation, restDebug, caasIgnorePreValidation));
     }
 
     @Bean
