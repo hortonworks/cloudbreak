@@ -51,13 +51,13 @@ public class CachedRemoteTokenServiceTest {
     public void testLoadAuthentication() throws IOException {
         CaasUser caasUser = new CaasUser();
         caasUser.setPreferredUsername("admin@example.com");
-        when(caasClient.getUserInfo(anyString(), anyString())).thenReturn(caasUser);
+        when(caasClient.getUserInfo(anyString())).thenReturn(caasUser);
         IntrospectResponse introspectResponse = new IntrospectResponse();
         introspectResponse.setActive(true);
         introspectResponse.setAud("tenant");
         introspectResponse.setSub("admin@example.com");
         introspectResponse.setExp(System.currentTimeMillis() + 10000);
-        when(caasClient.introSpect(anyString(), anyString())).thenReturn(introspectResponse);
+        when(caasClient.introSpect(anyString())).thenReturn(introspectResponse);
 
         String ssoToken = FileReaderUtils.readFileFromClasspath("sso_token_mac_signed.txt");
         CachedRemoteTokenService tokenService = new CachedRemoteTokenService("clientId", "clientSecret", "http://localhost:8089", caasClient, identityClient);
@@ -75,7 +75,7 @@ public class CachedRemoteTokenServiceTest {
         introspectResponse.setAud("tenant");
         introspectResponse.setSub("admin@example.com");
         introspectResponse.setExp(System.currentTimeMillis() + 10000);
-        when(caasClient.introSpect(anyString(), anyString())).thenReturn(introspectResponse);
+        when(caasClient.introSpect(anyString())).thenReturn(introspectResponse);
 
         String ssoToken = FileReaderUtils.readFileFromClasspath("sso_token_mac_signed.txt");
         CachedRemoteTokenService tokenService = new CachedRemoteTokenService("clientId", "clientSecret", "http://localhost:8089", caasClient, identityClient);
