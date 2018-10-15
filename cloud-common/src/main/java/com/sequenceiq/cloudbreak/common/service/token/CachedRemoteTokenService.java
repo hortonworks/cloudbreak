@@ -92,14 +92,15 @@ public class CachedRemoteTokenService implements ResourceServerTokenServices {
             String tenant;
             if (claims.get("aud") != null) {
                 tenant = claims.get("aud").toString();
+                LOGGER.info("tenant for the token is: {}", tenant);
             } else {
                 throw new InvalidTokenException("No 'aud' claim in token");
             }
-            IntrospectResponse introspectResponse = caasClient.introSpect(tenant, accessToken);
+            IntrospectResponse introspectResponse = caasClient.introSpect(accessToken);
             if (!introspectResponse.isActive()) {
                 throw new InvalidTokenException("The specified JWT token is not active");
             }
-            CaasUser userInfo = caasClient.getUserInfo(tenant, accessToken);
+            CaasUser userInfo = caasClient.getUserInfo(accessToken);
             Map<String, Object> tokenMap = new HashMap<>();
             tokenMap.put("user_id", userInfo.getId());
             tokenMap.put("user_name", userInfo.getPreferredUsername());

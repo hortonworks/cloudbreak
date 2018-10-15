@@ -27,8 +27,8 @@ public class CaasClient {
         this.configKey = configKey;
     }
 
-    public CaasUser getUserInfo(String tenant, String dpsJwtToken) {
-        WebTarget caasWebTarget = getCaasWebTarget(tenant);
+    public CaasUser getUserInfo(String dpsJwtToken) {
+        WebTarget caasWebTarget = getCaasWebTarget();
         WebTarget userInfoWebTarget = caasWebTarget.path("/oidc/userinfo");
         MultivaluedMap<String, Object> headers = new MultivaluedHashMap<>();
         headers.add("Cookie", "dps-jwt=" + dpsJwtToken);
@@ -38,17 +38,17 @@ public class CaasClient {
                 .get(CaasUser.class);
     }
 
-    public IntrospectResponse introSpect(String tenant, String dpsJwtToken) {
-        WebTarget caasWebTarget = getCaasWebTarget(tenant);
+    public IntrospectResponse introSpect(String dpsJwtToken) {
+        WebTarget caasWebTarget = getCaasWebTarget();
         WebTarget introspectWebTarget = caasWebTarget.path("/oidc/introspect");
         return introspectWebTarget.request()
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .post(Entity.json(new IntrospectRequest(dpsJwtToken)), IntrospectResponse.class);
     }
 
-    private WebTarget getCaasWebTarget(String tenant) {
+    private WebTarget getCaasWebTarget() {
         if (StringUtils.isNotEmpty(caasDomain)) {
-            return RestClientUtil.get(configKey).target(caasProtocol + "://" + tenant + '.' + caasDomain);
+            return RestClientUtil.get(configKey).target(caasProtocol + "://" + caasDomain);
         } else {
             LOGGER.warn("CAAS isn't configured");
             throw new InvalidTokenException("CAAS isn't configured");
