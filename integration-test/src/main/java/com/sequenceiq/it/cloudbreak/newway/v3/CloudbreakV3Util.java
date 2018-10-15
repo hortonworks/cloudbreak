@@ -49,7 +49,7 @@ public class CloudbreakV3Util {
 
     private static final int MAX_RETRY = 360;
 
-    private static long pollingInterval = 1000L;
+    private static long pollingInterval = 10000L;
 
     private CloudbreakV3Util() {
     }
