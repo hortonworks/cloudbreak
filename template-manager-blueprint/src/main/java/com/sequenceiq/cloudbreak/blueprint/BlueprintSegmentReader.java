@@ -40,6 +40,9 @@ public class BlueprintSegmentReader implements ResourceLoaderAware {
     @Value("${cb.blueprint.settings.path:blueprints/settings}")
     private String settingsTemplatePath;
 
+    @Value("${cb.blueprint.settings.path:blueprints/forcedConfigurations}")
+    private String forcedConfigurationsPath;
+
     private ResourceLoader resourceLoader;
 
     public Map<ServiceName, TemplateFiles> collectAllServiceFile() {
@@ -52,6 +55,10 @@ public class BlueprintSegmentReader implements ResourceLoaderAware {
 
     public Map<ServiceName, TemplateFiles> collectAllSettingsFile() {
         return readAllFilesFromParameterDir(settingsTemplatePath);
+    }
+
+    public Map<ServiceName, TemplateFiles> collectAllForcedConfigFile() {
+        return readAllFilesFromParameterDir(forcedConfigurationsPath);
     }
 
     private Map<ServiceName, TemplateFiles> readAllFilesFromParameterDir(String dir) {

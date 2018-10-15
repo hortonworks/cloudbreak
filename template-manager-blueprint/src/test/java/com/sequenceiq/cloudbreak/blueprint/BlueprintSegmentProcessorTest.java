@@ -64,8 +64,13 @@ public class BlueprintSegmentProcessorTest {
         serviceFiles.put(serviceName("atlas"), templateFiles(
                 Lists.newArrayList("handlebar/configurations/atlas/atlas-with-ldap.json", "handlebar/configurations/atlas/atlas-without-ldap.json")));
 
+        Map<ServiceName, TemplateFiles> forcedConfigFiles = new HashMap<>();
+        forcedConfigFiles.put(serviceName("filesystem"), templateFiles(
+                Lists.newArrayList("blueprints/forcedConfigurations/filesystem/wasb.handlebars", "blueprints/forcedConfigurations/filesystem/services.json")));
+
         when(blueprintSegmentReader.collectAllConfigFile()).thenReturn(configFiles);
         when(blueprintSegmentReader.collectAllServiceFile()).thenReturn(serviceFiles);
+        when(blueprintSegmentReader.collectAllForcedConfigFile()).thenReturn(forcedConfigFiles);
         when(blueprintProcessor.componentsExistsInBlueprint(anySet())).thenReturn(true);
         when(templateProcessor.process(anyString(), any(TemplatePreparationObject.class), anyMap())).thenReturn(expectedBlueprint);
         when(blueprintProcessor.addConfigEntryStringToBlueprint(anyString(), anyBoolean())).thenReturn(blueprintProcessor);

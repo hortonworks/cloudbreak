@@ -28,6 +28,7 @@ public class BlueprintSegmentReaderTest {
         ReflectionTestUtils.setField(underTest, "blueprintTemplatePath", "blueprints/configurations");
         ReflectionTestUtils.setField(underTest, "basicTemplatePath", "blueprints/basics");
         ReflectionTestUtils.setField(underTest, "settingsTemplatePath", "blueprints/settings");
+        ReflectionTestUtils.setField(underTest, "forcedConfigurationsPath", "blueprints/forcedConfigurations");
     }
 
     @Test
@@ -35,9 +36,11 @@ public class BlueprintSegmentReaderTest {
         Map<ServiceName, TemplateFiles> configFiles = underTest.collectAllConfigFile();
         Map<ServiceName, TemplateFiles> serviceFiles = underTest.collectAllServiceFile();
         Map<ServiceName, TemplateFiles> settingsFiles = underTest.collectAllSettingsFile();
+        Map<ServiceName, TemplateFiles> forcedConfigFiles = underTest.collectAllForcedConfigFile();
 
         Assert.assertEquals(3L, configFiles.size());
-        Assert.assertEquals(24L, serviceFiles.size());
+        Assert.assertEquals(23L, serviceFiles.size());
         Assert.assertEquals(1L, settingsFiles.size());
+        Assert.assertEquals(1L, forcedConfigFiles.size());
     }
 }

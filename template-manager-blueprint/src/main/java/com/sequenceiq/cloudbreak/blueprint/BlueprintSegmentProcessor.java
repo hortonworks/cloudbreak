@@ -69,8 +69,17 @@ public class BlueprintSegmentProcessor {
             String serviceContent = prepareContent(file, source, customProperties);
             LOGGER.debug("The generated content is: {}", serviceContent);
             resultBlueprint.set(blueprintProcessorFactory.get(resultBlueprint.get()).addSettingsEntryStringToBlueprint(serviceContent, false).asText());
-
         });
+
+        Map<ServiceName, TemplateFiles> forcedConfigMap = blueprintSegmentReader.collectAllForcedConfigFile();
+        LOGGER.info("The collected entries are for forcedConfigMap: {}", forcedConfigMap);
+        collectContents(forcedConfigMap, resultBlueprint.get(), file -> {
+            LOGGER.info("The actual file is: {}", file);
+            String serviceContent = prepareContent(file, source, customProperties);
+            LOGGER.debug("The generated content is: {}", serviceContent);
+            resultBlueprint.set(blueprintProcessorFactory.get(resultBlueprint.get()).addConfigEntryStringToBlueprint(serviceContent, true).asText());
+        });
+
         return resultBlueprint.get();
     }
 

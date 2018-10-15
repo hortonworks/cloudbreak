@@ -336,6 +336,15 @@ public class Stack extends StackEntity {
         });
     }
 
+    public static Assertion<Stack> checkCloudStoragePropertiesInBlueprint() {
+        return assertThis((stack, t) -> {
+            String ambariBlueprint = stack.getResponse().getCluster().getBlueprint().getAmbariBlueprint();
+            stack.getResponse().getCluster().getFileSystemResponse().getLocations()
+                    .stream()
+                    .forEach(location -> assertTrue(ambariBlueprint.contains(location.getValue())));
+        });
+    }
+
     public static Action<Stack> repair(String hostgroupName) {
         return new Action<>(getTestContextStack(), new RepairNodeStrategy(hostgroupName));
     }

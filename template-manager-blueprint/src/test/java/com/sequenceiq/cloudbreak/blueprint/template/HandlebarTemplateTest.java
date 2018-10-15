@@ -74,27 +74,27 @@ public class HandlebarTemplateTest {
                         objectWithoutEverything()},
 
                 // ADLS
-                {"blueprints/configurations/filesystem/adls.handlebars", "configurations/filesystem/adls.json",
+                {"blueprints/forcedConfigurations/filesystem/adls.handlebars", "forcedConfigurations/filesystem/adls.json",
                         adlsNotDefaultFileSystemConfigs()},
-                {"blueprints/configurations/filesystem/adls.handlebars", "configurations/filesystem/adls-default.json",
+                {"blueprints/forcedConfigurations/filesystem/adls.handlebars", "forcedConfigurations/filesystem/adls-default.json",
                         adlsFileSystemConfigsWithStorageLocation()},
 
                 // WASB
-                {"blueprints/configurations/filesystem/wasb.handlebars", "configurations/filesystem/wasb.json",
+                {"blueprints/forcedConfigurations/filesystem/wasb.handlebars", "forcedConfigurations/filesystem/wasb.json",
                         wasbNotDefaultFileSystemConfigs()},
-                {"blueprints/configurations/filesystem/wasb.handlebars", "configurations/filesystem/wasb-secure-default.json",
+                {"blueprints/forcedConfigurations/filesystem/wasb.handlebars", "forcedConfigurations/filesystem/wasb-secure-default.json",
                         wasbSecureFileSystemConfigsWithStorageLocations()},
-                {"blueprints/configurations/filesystem/wasb.handlebars", "configurations/filesystem/wasb-unsecure-default.json",
+                {"blueprints/forcedConfigurations/filesystem/wasb.handlebars", "forcedConfigurations/filesystem/wasb-unsecure-default.json",
                         wasbUnSecureDefaultFileSystemConfigsWithStorageLocations()},
 
                 // GCS
-                {"blueprints/configurations/filesystem/gcs.handlebars", "configurations/filesystem/gcs.json",
+                {"blueprints/forcedConfigurations/filesystem/gcs.handlebars", "forcedConfigurations/filesystem/gcs.json",
                         gcsFileSystemConfigs()},
-                {"blueprints/configurations/filesystem/gcs.handlebars", "configurations/filesystem/gcs-default.json",
+                {"blueprints/forcedConfigurations/filesystem/gcs.handlebars", "forcedConfigurations/filesystem/gcs-default.json",
                         gcsFileSystemConfigsWithStorageLocations()},
 
                 // S3
-                {"blueprints/configurations/filesystem/s3.handlebars", "configurations/filesystem/s3.json",
+                {"blueprints/forcedConfigurations/filesystem/s3.handlebars", "forcedConfigurations/filesystem/s3.json",
                         s3FileSystemConfigsWithStorageLocations()},
 
                 // NIFI
@@ -274,7 +274,7 @@ public class HandlebarTemplateTest {
                 {"blueprints/configurations/atlas/ldap.handlebars", "configurations/atlas/atlas-without-ldap.json",
                         withoutLdapConfigWhenLdapNotPresentedThenShouldReturnWithoutLdapConfig()},
 
-                {"blueprints/configurations/filesystem/s3.handlebars", "configurations/filesystem/s3-duplicated-key.json",
+                {"blueprints/forcedConfigurations/filesystem/s3.handlebars", "forcedConfigurations/filesystem/s3-duplicated-key.json",
                         s3FileSystemConfigsWithStorageLocationsAndDuplicatedKey()}
         });
     }
