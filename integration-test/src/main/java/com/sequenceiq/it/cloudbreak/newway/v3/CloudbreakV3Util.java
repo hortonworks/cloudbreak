@@ -55,7 +55,7 @@ public class CloudbreakV3Util {
     }
 
     @SuppressFBWarnings("ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD")
-    @Value("${integrationtest.testsuite.pollingInterval:10000}")
+    @Value("${integrationtest.testsuite.pollingInterval}")
     public void setPollingInterval(int pollingInterval) {
         this.pollingInterval = pollingInterval;
     }

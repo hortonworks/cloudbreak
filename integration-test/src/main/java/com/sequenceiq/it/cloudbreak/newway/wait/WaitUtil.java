@@ -25,7 +25,7 @@ public class WaitUtil {
 
     private static final int MAX_RETRY = 360;
 
-    @Value("${integrationtest.testsuite.pollingInterval:1000}")
+    @Value("${integrationtest.testsuite.pollingInterval}")
     private long pollingInterval;
 
     public Map<String, String> waitAndCheckStatuses(CloudbreakClient cloudbreakClient, String stackName, Map<String, String> desiredStatuses) {
