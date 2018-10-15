@@ -45,6 +45,7 @@ public class ClusterTemplateMapperImpl implements ClusterTemplateMapper {
         clusterTemplateResponse.setTemplate( mapJsonToStackV2Request( clusterTemplate.getTemplate() ) );
         clusterTemplateResponse.setCloudPlatform( clusterTemplate.getCloudPlatform() );
         clusterTemplateResponse.setStatus( clusterTemplate.getStatus() );
+        clusterTemplateResponse.setId( clusterTemplate.getId() );
 
         return clusterTemplateResponse;
     }
