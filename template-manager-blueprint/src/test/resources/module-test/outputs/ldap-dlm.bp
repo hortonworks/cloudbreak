@@ -83,7 +83,6 @@
         "hive.server2.transport.mode": "http",
         "hive.exec.compress.output": "true",
         "hive.merge.mapfiles": "true",
-        "hive.metastore.warehouse.dir": "/apps/hive/warehouse",
         "hive.server2.tez.initialize.default.sessions": "true",
         "hive.metastore.transactional.event.listeners": "org.apache.hive.hcatalog.listener.DbNotificationListener"
       }
