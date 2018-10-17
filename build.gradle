@@ -70,7 +70,6 @@ subprojects {
         repository(url: "$System.env.NEXUS_URL") {
           authentication(userName: "$System.env.NEXUS_USER", passphrase: "$System.env.NEXUS_PASSWORD")
         }
-        }
       }
     }
   }
