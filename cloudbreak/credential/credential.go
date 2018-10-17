@@ -1,6 +1,7 @@
 package credential
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"github.com/hortonworks/cb-cli/cloudbreak/common"
@@ -21,6 +22,29 @@ import (
 	"github.com/hortonworks/cb-cli/utils"
 	"github.com/urfave/cli"
 )
+
+var AwsPrerequisiteOutputHeader = []string{"Account Id", "CloudPlatform", "External Id", "Policy JSON"}
+
+type awsPrerequisiteOutput struct {
+	AccountId     string `json:"AccountId" yaml:"AccountId"`
+	CloudPlatform string `json:"CloudPlatform" yaml:"CloudPlatform"`
+	ExternalId    string `json:"ExternalId" yaml:"ExternalId"`
+	PolicyJSON    string `json:"PolicyJSON" yaml:"PolicyJSON"`
+}
+
+func (p *awsPrerequisiteOutput) DataAsStringArray() []string {
+	var raw map[string]interface{}
+	err := json.Unmarshal([]byte(p.PolicyJSON), &raw)
+	if err != nil {
+		return []string{p.CloudPlatform, p.AccountId, p.ExternalId, string(err.Error())}
+	}
+
+	policyJSON, err := json.MarshalIndent(raw, "", "  ")
+	if err != nil {
+		return []string{p.CloudPlatform, p.AccountId, p.ExternalId, string(err.Error())}
+	}
+	return []string{p.AccountId, p.CloudPlatform, p.ExternalId, string(policyJSON)}
+}
 
 func CreateAwsCredential(c *cli.Context) {
 	cloud.SetProviderType(cloud.AWS)
@@ -316,4 +340,36 @@ func GetPlatformName(credRes *model.CredentialResponse) string {
 		return *credRes.CloudPlatform + "_GOV"
 	}
 	return *credRes.CloudPlatform
+}
+
+func GetAwsCredentialPrerequisites(c *cli.Context) {
+	defer utils.TimeTrack(time.Now(), "get credentials prerequisites for Aws")
+
+	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
+	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
+	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
+
+	log.Infof("[GetAwsCredentialPrerequisites] sending Aws credential prerequisites request")
+	prerequisitesForCloudPlatformParams := v3_workspace_id_credentials.NewGetPrerequisitesForCloudPlatformParams().WithWorkspaceID(workspaceID).WithCloudPlatform("aws")
+	credPrereqResp, err := cbClient.Cloudbreak.V3WorkspaceIDCredentials.GetPrerequisitesForCloudPlatform(prerequisitesForCloudPlatformParams)
+	if err != nil {
+		utils.LogErrorAndExit(err)
+	}
+
+	prerequisites := credPrereqResp.Payload
+	output.Write(AwsPrerequisiteOutputHeader, convertAwsPrerequistiesToJSON(prerequisites))
+}
+
+func convertAwsPrerequistiesToJSON(prerequisites *model.CredentialPrerequisites) *awsPrerequisiteOutput {
+	policyJsonEncoded := utils.SafeStringConvert(prerequisites.Aws.PolicyJSON)
+	policyJson, err := base64.StdEncoding.DecodeString(policyJsonEncoded)
+	if err != nil {
+		utils.LogErrorMessageAndExit("Could not parse AWS cb-policy.json from the response.")
+	}
+	return &awsPrerequisiteOutput{
+		AccountId:     utils.SafeStringConvert(prerequisites.AccountID),
+		CloudPlatform: utils.SafeStringConvert(prerequisites.CloudPlatform),
+		ExternalId:    utils.SafeStringConvert(prerequisites.Aws.ExternalID),
+		PolicyJSON:    string(policyJson),
+	}
 }

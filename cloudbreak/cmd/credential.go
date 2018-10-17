@@ -364,6 +364,24 @@ func init() {
 					}
 				},
 			},
+			{
+				Name:  "prerequisites",
+				Usage: "get the necessary prerequisites for credential creation",
+				Subcommands: []cli.Command{
+					{
+						Name:   "aws",
+						Usage:  "get prerequisites for aws credential creation",
+						Before: cf.CheckConfigAndCommandFlags,
+						Flags:  fl.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build(),
+						Action: credential.GetAwsCredentialPrerequisites,
+						BashComplete: func(c *cli.Context) {
+							for _, f := range fl.NewFlagBuilder().AddResourceDefaultFlags().AddAuthenticationFlags().Build() {
+								fl.PrintFlagCompletion(f)
+							}
+						},
+					},
+				},
+			},
 		},
 	})
 }

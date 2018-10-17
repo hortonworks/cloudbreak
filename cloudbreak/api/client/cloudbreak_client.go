@@ -38,6 +38,7 @@ import (
 	"github.com/hortonworks/cb-cli/cloudbreak/api/client/v2stacks"
 	"github.com/hortonworks/cb-cli/cloudbreak/api/client/v3_workspace_id_audits"
 	"github.com/hortonworks/cb-cli/cloudbreak/api/client/v3_workspace_id_blueprints"
+	"github.com/hortonworks/cb-cli/cloudbreak/api/client/v3_workspace_id_clustertemplate"
 	"github.com/hortonworks/cb-cli/cloudbreak/api/client/v3_workspace_id_connectors"
 	"github.com/hortonworks/cb-cli/cloudbreak/api/client/v3_workspace_id_credentials"
 	"github.com/hortonworks/cb-cli/cloudbreak/api/client/v3_workspace_id_environments"
@@ -152,6 +153,8 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *Cloudbreak
 	cli.V3WorkspaceIDAudits = v3_workspace_id_audits.New(transport, formats)
 
 	cli.V3WorkspaceIDBlueprints = v3_workspace_id_blueprints.New(transport, formats)
+
+	cli.V3WorkspaceIDClustertemplate = v3_workspace_id_clustertemplate.New(transport, formats)
 
 	cli.V3WorkspaceIDConnectors = v3_workspace_id_connectors.New(transport, formats)
 
@@ -287,6 +290,8 @@ type Cloudbreak struct {
 
 	V3WorkspaceIDBlueprints *v3_workspace_id_blueprints.Client
 
+	V3WorkspaceIDClustertemplate *v3_workspace_id_clustertemplate.Client
+
 	V3WorkspaceIDConnectors *v3_workspace_id_connectors.Client
 
 	V3WorkspaceIDCredentials *v3_workspace_id_credentials.Client
@@ -383,6 +388,8 @@ func (c *Cloudbreak) SetTransport(transport runtime.ClientTransport) {
 	c.V3WorkspaceIDAudits.SetTransport(transport)
 
 	c.V3WorkspaceIDBlueprints.SetTransport(transport)
+
+	c.V3WorkspaceIDClustertemplate.SetTransport(transport)
 
 	c.V3WorkspaceIDConnectors.SetTransport(transport)
 

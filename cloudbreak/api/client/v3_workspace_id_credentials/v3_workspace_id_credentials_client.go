@@ -115,6 +115,36 @@ func (a *Client) GetCredentialInWorkspace(params *GetCredentialInWorkspaceParams
 }
 
 /*
+GetPrerequisitesForCloudPlatform gets credential prerequisites for cloud platform
+
+Cloudbreak is launching Hadoop clusters on the user's behalf - on different cloud providers. One key point is that Cloudbreak does not store your Cloud provider account details (such as username, password, keys, private SSL certificates, etc). We work around the concept that Identity and Access Management is fully controlled by you - the end user. The Cloudbreak deployer is purely acting on behalf of the end user - without having access to the user's account.
+*/
+func (a *Client) GetPrerequisitesForCloudPlatform(params *GetPrerequisitesForCloudPlatformParams) (*GetPrerequisitesForCloudPlatformOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetPrerequisitesForCloudPlatformParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getPrerequisitesForCloudPlatform",
+		Method:             "GET",
+		PathPattern:        "/v3/{workspaceId}/credentials/prerequisites/{cloudPlatform}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetPrerequisitesForCloudPlatformReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetPrerequisitesForCloudPlatformOK), nil
+
+}
+
+/*
 InteractiveLoginCredentialInWorkspace interactives login
 
 Cloudbreak is launching Hadoop clusters on the user's behalf - on different cloud providers. One key point is that Cloudbreak does not store your Cloud provider account details (such as username, password, keys, private SSL certificates, etc). We work around the concept that Identity and Access Management is fully controlled by you - the end user. The Cloudbreak deployer is purely acting on behalf of the end user - without having access to the user's account.
