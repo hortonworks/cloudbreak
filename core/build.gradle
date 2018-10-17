@@ -134,6 +134,7 @@ dependencyManagement {
     dependency group: 'org.springframework.retry',          name: 'spring-retry',                version: '1.2.0.RELEASE'
     dependency group: 'org.springframework.security.oauth', name: 'spring-security-oauth2',      version: springOauthVersion
     dependency group: 'org.springframework',                name: 'spring-context-support',      version: springFrameworkVersion
+    dependency group: 'org.springframework.vault',          name: 'spring-vault-core',           version: '2.1.0.RELEASE'
 
     dependency group: 'com.google.code.gson',               name: 'gson',                        version: '2.6.2'
     dependency group: 'org.codehaus.groovy',                name: 'groovy-all',                  version: '2.5.0'
@@ -167,6 +168,7 @@ dependencies {
   compile group: 'org.springframework.retry',          name: 'spring-retry'
   compile group: 'org.springframework.statemachine',   name: 'spring-statemachine-core'
   compile group: 'org.springframework.security.oauth', name: 'spring-security-oauth2'
+  compile group: 'org.springframework.vault',          name: 'spring-vault-core'
 
   compile group: 'io.projectreactor',                  name: 'reactor-core'
   compile group: 'io.projectreactor',                  name: 'reactor-bus'
