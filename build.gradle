@@ -67,8 +67,8 @@ subprojects {
     repositories {
       mavenDeployer {
         configuration = configurations.deployerJars
-        repository(url: "$System.env.NEXUS_URL") {
-          authentication(userName: "$System.env.NEXUS_USER", passphrase: "$System.env.NEXUS_PASSWORD")
+        repository(url: "http://repo.hortonworks.com/content/repositories/releases") {
+          authentication(userName: "$System.env.NEXUS_PRIV_USER", passphrase: "$System.env.NEXUS_PRIV_PASS")
         }
         }
       }
