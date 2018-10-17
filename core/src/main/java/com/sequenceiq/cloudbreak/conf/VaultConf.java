@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.conf;
 
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.vault.authentication.ClientAuthentication;
 import org.springframework.vault.authentication.TokenAuthentication;
@@ -10,17 +11,24 @@ import org.springframework.vault.config.AbstractVaultConfiguration;
 @Configuration
 class VaultConf extends AbstractVaultConfiguration {
 
+    @Value("${cb.vault.addr}")
+    private String address;
 
-    //TODO: these variables need to come from Profile file fordev environment
+    @Value("${cb.vault.port}")
+    private int port;
+
+    @Value("${cb.vault.root.token}")
+    private String rootToken;
+
     @Override
     public VaultEndpoint vaultEndpoint() {
-        VaultEndpoint endpoint = VaultEndpoint.create("192.168.64.2", 8200);
+        VaultEndpoint endpoint = VaultEndpoint.create(address, port);
         endpoint.setScheme("http");
         return endpoint;
     }
 
     @Override
     public ClientAuthentication clientAuthentication() {
-        return new TokenAuthentication("4uZQovesNGpco8z4n9s6DKNi");
+        return new TokenAuthentication(rootToken);
     }
 }
