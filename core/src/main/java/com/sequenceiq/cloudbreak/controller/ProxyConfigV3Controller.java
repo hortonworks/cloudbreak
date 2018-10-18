@@ -33,8 +33,8 @@ public class ProxyConfigV3Controller extends NotificationController implements P
     private ConversionService conversionService;
 
     @Override
-    public Set<ProxyConfigResponse> listByWorkspace(Long workspaceId) {
-        return proxyConfigService.findAllByWorkspaceId(workspaceId).stream()
+    public Set<ProxyConfigResponse> listByWorkspace(Long workspaceId, String environment, Boolean attachGlobal) {
+        return proxyConfigService.findAllInWorkspaceAndEnvironment(workspaceId, environment, attachGlobal).stream()
                 .map(config -> conversionService.convert(config, ProxyConfigResponse.class))
                 .collect(Collectors.toSet());
     }

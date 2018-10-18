@@ -35,10 +35,12 @@ import com.sequenceiq.cloudbreak.controller.validation.credential.CredentialVali
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Topology;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.repository.environment.EnvironmentViewRepository;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
@@ -91,6 +93,9 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
 
     @Inject
     private CredentialPrerequisiteService credentialPrerequisiteService;
+
+    @Inject
+    private EnvironmentViewRepository environmentViewRepository;
 
     public Set<Credential> listAvailablesByWorkspaceId(Long workspaceId) {
         return credentialRepository.findActiveForWorkspaceFilterByPlatforms(workspaceId, accountPreferencesService.enabledPlatforms());
@@ -254,6 +259,12 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
                         + "The following cluster is using this credential: [%s]";
             }
             throw new BadRequestException(String.format(message, credential.getName(), clusters));
+        }
+        Set<EnvironmentView> environments = environmentViewRepository.findAllByCredentialId(credential.getId());
+        if (!environments.isEmpty()) {
+            String environmentList = environments.stream().map(EnvironmentView::getName).collect(Collectors.joining(", "));
+            String message = "The following environments are using the '%s' credential: [%s]. Please remove them before deleting the credential.";
+            throw new BadRequestException(String.format(message, credential.getName(), environmentList));
         }
     }
 

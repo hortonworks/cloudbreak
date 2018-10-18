@@ -41,8 +41,8 @@ public class LdapV3Controller extends NotificationController implements LdapConf
     private LdapConfigValidator ldapConfigValidator;
 
     @Override
-    public Set<LdapConfigResponse> listConfigsByWorkspace(Long workspaceId) {
-        return ldapConfigService.findAllByWorkspaceId(workspaceId).stream()
+    public Set<LdapConfigResponse> listConfigsByWorkspace(Long workspaceId, String environment, Boolean attachGlobal) {
+        return ldapConfigService.findAllInWorkspaceAndEnvironment(workspaceId, environment, attachGlobal).stream()
                 .map(ldapConfig -> conversionService.convert(ldapConfig, LdapConfigResponse.class))
                 .collect(Collectors.toSet());
     }
