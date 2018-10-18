@@ -375,7 +375,7 @@ func init() {
 						Flags:  fl.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build(),
 						Action: credential.GetAwsCredentialPrerequisites,
 						BashComplete: func(c *cli.Context) {
-							for _, f := range fl.NewFlagBuilder().AddResourceDefaultFlags().AddAuthenticationFlags().Build() {
+							for _, f := range fl.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build() {
 								fl.PrintFlagCompletion(f)
 							}
 						},
