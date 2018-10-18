@@ -48,7 +48,7 @@ public class LdapConfigV3Action {
         ldapconfigEntity.setResponses(
                 client.getCloudbreakClient()
                         .ldapConfigV3Endpoint()
-                        .listConfigsByWorkspace(workspaceId));
+                        .listConfigsByWorkspace(workspaceId, null, null));
         logJSON(" get all ldap config response: ", ldapconfigEntity.getResponse());
     }
 

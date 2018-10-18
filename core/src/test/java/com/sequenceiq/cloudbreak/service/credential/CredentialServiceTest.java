@@ -13,14 +13,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
-import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.controller.validation.credential.CredentialValidator;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
-import com.sequenceiq.cloudbreak.service.TransactionService;
-import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -30,19 +27,28 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.sequenceiq.cloudbreak.TestUtil;
+import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.controller.validation.credential.CredentialValidator;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Topology;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.repository.environment.EnvironmentViewRepository;
+import com.sequenceiq.cloudbreak.service.TransactionService;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderCredentialAdapter;
 import com.sequenceiq.cloudbreak.service.user.UserProfileHandler;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CredentialServiceTest {
@@ -101,6 +107,9 @@ public class CredentialServiceTest {
 
     @Mock
     private TransactionService transactionService;
+
+    @Mock
+    private EnvironmentViewRepository environmentViewRepository;
 
     @InjectMocks
     private final CredentialService credentialService = new CredentialService();
@@ -317,11 +326,13 @@ public class CredentialServiceTest {
         when(credentialRepository.findActiveByNameAndWorkspaceIdFilterByPlatforms(TEST_CREDENTIAL_NAME, ORG_ID, CLOUD_PLATFORMS)).thenReturn(testCredential);
         when(stackRepository.findByCredential(testCredential)).thenReturn(Set.of(stack));
 
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage(String.format("There is a cluster associated with credential config '%s'. Please remove before deleting the credential. "
-                + "The following cluster is using this credential: [%s]", TEST_CREDENTIAL_NAME, stackName));
-
-        credentialService.delete(TEST_CREDENTIAL_NAME, workspace);
+        try {
+            credentialService.delete(TEST_CREDENTIAL_NAME, workspace);
+        } catch (BadRequestException ex) {
+            String msg = String.format(String.format("There is a cluster associated with credential config '%s'. Please remove before deleting the credential. "
+                    + "The following cluster is using this credential: [%s]", TEST_CREDENTIAL_NAME, stackName));
+            Assert.assertEquals(msg, ex.getMessage());
+        }
 
         verify(stackRepository, times(1)).findByCredential(testCredential);
         verify(userProfileHandler, times(0)).destroyProfileCredentialPreparation(testCredential);
@@ -339,15 +350,52 @@ public class CredentialServiceTest {
         when(credentialRepository.findActiveByNameAndWorkspaceIdFilterByPlatforms(TEST_CREDENTIAL_NAME, ORG_ID, CLOUD_PLATFORMS)).thenReturn(testCredential);
         when(stackRepository.findByCredential(testCredential)).thenReturn(Set.of(stack1, stack2));
 
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage(String.format("There are clusters associated with credential config '%s'. Please remove these before deleting the credential. "
-                + "The following clusters are using this credential: [%s]", TEST_CREDENTIAL_NAME, String.format("%s, %s", stack1Name, stack2Name)));
-
-        credentialService.delete(TEST_CREDENTIAL_NAME, workspace);
+        try {
+            credentialService.delete(TEST_CREDENTIAL_NAME, workspace);
+        } catch (BadRequestException ex) {
+            String msg = String.format("There are clusters associated with credential config '%s'. Please remove these before deleting the credential. "
+                    + "The following clusters are using this credential: [%s]", TEST_CREDENTIAL_NAME, String.format("%s, %s", stack1Name, stack2Name));
+            Assert.assertEquals(msg, ex.getMessage());
+        }
 
         verify(stackRepository, times(1)).findByCredential(testCredential);
         verify(userProfileHandler, times(0)).destroyProfileCredentialPreparation(testCredential);
         verify(credentialRepository, times(0)).save(testCredential);
+    }
+
+    @Test
+    public void testDeleteByNameWhenEnvironmentsUsesTheGivenCredentialThenBadRequestExceptionShouldComeWithExpectedMessage() {
+        // GIVEN
+        Credential credential = new Credential();
+        credential.setName(TEST_CREDENTIAL_NAME);
+        credential.setArchived(false);
+        credential.setTopology(new Topology());
+        credential.setWorkspace(workspace);
+        EnvironmentView env1 = new EnvironmentView();
+        env1.setId(TestUtil.generateUniqueId());
+        env1.setName("env1");
+        EnvironmentView env2 = new EnvironmentView();
+        env2.setId(TestUtil.generateUniqueId());
+        env2.setName("env2");
+        Set<EnvironmentView> envs = new HashSet<>();
+        envs.add(env1);
+        envs.add(env2);
+        when(credentialRepository.findActiveByNameAndWorkspaceIdFilterByPlatforms(TEST_CREDENTIAL_NAME, ORG_ID, CLOUD_PLATFORMS)).thenReturn(credential);
+        when(stackRepository.findByCredential(credential)).thenReturn(Collections.emptySet());
+        when(environmentViewRepository.findAllByCredentialId(credential.getId())).thenReturn(envs);
+        // WHEN
+        try {
+            credentialService.delete(TEST_CREDENTIAL_NAME, workspace);
+        } catch (BadRequestException ex) {
+            String msg = String.format("The following environments are using the '%s' credential: [%s]. Please remove them before deleting the credential.",
+                TEST_CREDENTIAL_NAME, envs.stream().map(EnvironmentView::getName).collect(Collectors.joining(", ")));
+            Assert.assertEquals(msg, ex.getMessage());
+        }
+        // THEN
+        verify(stackRepository, times(1)).findByCredential(credential);
+        verify(environmentViewRepository, times(1)).findAllByCredentialId(credential.getId());
+        verify(userProfileHandler, times(0)).destroyProfileCredentialPreparation(credential);
+        verify(credentialRepository, times(0)).save(credential);
     }
 
     @Test
@@ -359,6 +407,7 @@ public class CredentialServiceTest {
         credential.setWorkspace(workspace);
         when(credentialRepository.findActiveByNameAndWorkspaceIdFilterByPlatforms(TEST_CREDENTIAL_NAME, ORG_ID, CLOUD_PLATFORMS)).thenReturn(credential);
         when(stackRepository.findByCredential(credential)).thenReturn(Collections.emptySet());
+        when(environmentViewRepository.findAllByCredentialId(credential.getId())).thenReturn(Collections.emptySet());
 
         credentialService.delete(TEST_CREDENTIAL_NAME, workspace);
 

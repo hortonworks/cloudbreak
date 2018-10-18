@@ -6,9 +6,12 @@ import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
+import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonStringSetUtils;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
@@ -23,6 +26,10 @@ public class EnvironmentView extends CompactView {
     @Convert(converter = JsonToString.class)
     @Column(columnDefinition = "TEXT", nullable = false)
     private Json regions;
+
+    @ManyToOne
+    @JoinColumn(nullable = false)
+    private Credential credential;
 
     public Json getRegions() {
         return regions;

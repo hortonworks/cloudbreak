@@ -46,7 +46,7 @@ public class ProxyConfigV3Action {
         proxyconfigEntity.setResponses(
                 client.getCloudbreakClient()
                         .proxyConfigV3Endpoint()
-                        .listByWorkspace(workspaceId));
+                        .listByWorkspace(workspaceId, null, null));
         logJSON(" get all proxy config response: ", proxyconfigEntity.getResponse());
     }
 

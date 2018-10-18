@@ -12,6 +12,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigRequest;
@@ -34,7 +35,8 @@ public interface ProxyConfigV3Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ProxyConfigOpDescription.LIST_BY_WORKSPACE, produces = ContentType.JSON, notes = Notes.PROXY_CONFIG_NOTES,
             nickname = "listProxyconfigsByWorkspace")
-    Set<ProxyConfigResponse> listByWorkspace(@PathParam("workspaceId") Long workspaceId);
+    Set<ProxyConfigResponse> listByWorkspace(@PathParam("workspaceId") Long workspaceId, @QueryParam("environment") String environment,
+            @QueryParam("attachGlobal") Boolean attachGlobal);
 
     @GET
     @Path("{name}")

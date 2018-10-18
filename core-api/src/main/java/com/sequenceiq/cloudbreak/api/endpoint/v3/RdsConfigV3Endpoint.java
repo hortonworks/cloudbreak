@@ -12,6 +12,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
@@ -37,7 +38,8 @@ public interface RdsConfigV3Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.RdsConfigOpDescription.LIST_BY_WORKSPACE, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
             nickname = "listRdsConfigsByWorkspace")
-    Set<RDSConfigResponse> listByWorkspace(@PathParam("workspaceId") Long workspaceId);
+    Set<RDSConfigResponse> listByWorkspace(@PathParam("workspaceId") Long workspaceId, @QueryParam("environment") String environment,
+            @QueryParam("attachGlobal") Boolean attachGlobal);
 
     @POST
     @Path("")

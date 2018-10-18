@@ -35,8 +35,8 @@ public class RdsConfigV3Controller extends AbstractRdsConfigController implement
     private RestRequestThreadLocalService restRequestThreadLocalService;
 
     @Override
-    public Set<RDSConfigResponse> listByWorkspace(Long workspaceId) {
-        return getRdsConfigService().findAllByWorkspaceId(workspaceId).stream()
+    public Set<RDSConfigResponse> listByWorkspace(Long workspaceId, String environment, Boolean attachGlobal) {
+        return getRdsConfigService().findAllInWorkspaceAndEnvironment(workspaceId, environment, attachGlobal).stream()
                 .map(rdsConfig -> getConversionService().convert(rdsConfig, RDSConfigResponse.class))
                 .collect(Collectors.toSet());
     }
