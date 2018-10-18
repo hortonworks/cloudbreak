@@ -215,6 +215,42 @@ func DescribeRds(c *cli.Context) {
 
 }
 
+func AttachRdsToEnvs(c *cli.Context) {
+	defer utils.TimeTrack(time.Now(), "attach rds to environments")
+
+	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
+	rdsName := c.String(fl.FlName.Name)
+	environments := utils.DelimitedStringToArray(c.String(fl.FlEnvironments.Name), ",")
+	log.Infof("[AttachRdsToEnvs] attach rds config '%s' to environments: %s", rdsName, environments)
+
+	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
+	attachRequest := v3_workspace_id_rdsconfigs.NewAttachRdsResourceToEnvironmentsParams().WithWorkspaceID(workspaceID).WithName(rdsName).WithBody(environments)
+	response, err := cbClient.Cloudbreak.V3WorkspaceIDRdsconfigs.AttachRdsResourceToEnvironments(attachRequest)
+	if err != nil {
+		utils.LogErrorAndExit(err)
+	}
+	rds := response.Payload
+	log.Infof("[AttachRdsToEnvs] rds config '%s' is now attached to the following environments: %s", *rds.Name, rds.Environments)
+}
+
+func DetachRdsFromEnvs(c *cli.Context) {
+	defer utils.TimeTrack(time.Now(), "detach rds from environments")
+
+	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
+	rdsName := c.String(fl.FlName.Name)
+	environments := utils.DelimitedStringToArray(c.String(fl.FlEnvironments.Name), ",")
+	log.Infof("[DetachRdsFromEnvs] detach rds config '%s' from environments: %s", rdsName, environments)
+
+	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
+	detachRequest := v3_workspace_id_rdsconfigs.NewDetachRdsResourceFromEnvironmentsParams().WithWorkspaceID(workspaceID).WithName(rdsName).WithBody(environments)
+	response, err := cbClient.Cloudbreak.V3WorkspaceIDRdsconfigs.DetachRdsResourceFromEnvironments(detachRequest)
+	if err != nil {
+		utils.LogErrorAndExit(err)
+	}
+	rds := response.Payload
+	log.Infof("[DetachRdsFromEnvs] rds config '%s' is now attached to the following environments: %s", *rds.Name, rds.Environments)
+}
+
 func ListAllRds(c *cli.Context) error {
 	defer utils.TimeTrack(time.Now(), "list database configurations")
 

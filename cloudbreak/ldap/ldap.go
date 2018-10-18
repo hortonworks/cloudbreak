@@ -250,6 +250,42 @@ func DescribeLdap(c *cli.Context) {
 		strconv.FormatInt(l.ID, 10)})
 }
 
+func AttachLdapToEnvs(c *cli.Context) {
+	defer utils.TimeTrack(time.Now(), "attach ldap to environments")
+
+	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
+	ldapName := c.String(fl.FlName.Name)
+	environments := utils.DelimitedStringToArray(c.String(fl.FlEnvironments.Name), ",")
+	log.Infof("[AttachLdapToEnvs] attach ldap config '%s' to environments: %s", ldapName, environments)
+
+	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
+	attachRequest := v3_workspace_id_ldapconfigs.NewAttachLdapResourceToEnvironmentsParams().WithWorkspaceID(workspaceID).WithName(ldapName).WithBody(environments)
+	response, err := cbClient.Cloudbreak.V3WorkspaceIDLdapconfigs.AttachLdapResourceToEnvironments(attachRequest)
+	if err != nil {
+		utils.LogErrorAndExit(err)
+	}
+	ldap := response.Payload
+	log.Infof("[AttachLdapToEnvs] ldap config '%s' is now attached to the following environments: %s", *ldap.Name, ldap.Environments)
+}
+
+func DetachLdapFromEnvs(c *cli.Context) {
+	defer utils.TimeTrack(time.Now(), "detach ldap from environments")
+
+	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
+	ldapName := c.String(fl.FlName.Name)
+	environments := utils.DelimitedStringToArray(c.String(fl.FlEnvironments.Name), ",")
+	log.Infof("[DetachLdapFromEnvs] detach ldap config '%s' from environments: %s", ldapName, environments)
+
+	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
+	detachRequest := v3_workspace_id_ldapconfigs.NewDetachLdapResourceFromEnvironmentsParams().WithWorkspaceID(workspaceID).WithName(ldapName).WithBody(environments)
+	response, err := cbClient.Cloudbreak.V3WorkspaceIDLdapconfigs.DetachLdapResourceFromEnvironments(detachRequest)
+	if err != nil {
+		utils.LogErrorAndExit(err)
+	}
+	ldap := response.Payload
+	log.Infof("[DetachLdapFromEnvs] ldap config '%s' is now attached to the following environments: %s", *ldap.Name, ldap.Environments)
+}
+
 func CreateLdapUser(c *cli.Context) error {
 	defer utils.TimeTrack(time.Now(), "create ldap user")
 

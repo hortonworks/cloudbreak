@@ -912,25 +912,32 @@ var (
 			Usage: "region names for the environment",
 		},
 	}
-	FlEnvironmentLdaps = StringFlag{
+	FlEnvironmentLdapsOptional = StringFlag{
 		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{
 			Name:  "ldaps",
 			Usage: "ldap config names for the environment",
 		},
 	}
-	FlEnvironmentProxies = StringFlag{
+	FlEnvironmentProxiesOptional = StringFlag{
 		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{
 			Name:  "proxies",
 			Usage: "proxy config names for the environment",
 		},
 	}
-	FlEnvironmentRdses = StringFlag{
+	FlEnvironmentRdsesOptional = StringFlag{
 		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{
 			Name:  "rds",
 			Usage: "rds config names for the environment",
+		},
+	}
+	FlEnvironments = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "environments",
+			Usage: "environment names to be used for attaching, detaching resources",
 		},
 	}
 )

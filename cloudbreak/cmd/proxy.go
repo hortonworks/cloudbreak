@@ -27,6 +27,30 @@ func init() {
 				},
 			},
 			{
+				Name:   "attach",
+				Usage:  "attach a proxy to environments",
+				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlEnvironments).AddOutputFlag().AddAuthenticationFlags().Build(),
+				Before: cf.CheckConfigAndCommandFlags,
+				Action: proxy.AttachProxyToEnvs,
+				BashComplete: func(c *cli.Context) {
+					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlEnvironments).AddOutputFlag().AddAuthenticationFlags().Build() {
+						fl.PrintFlagCompletion(f)
+					}
+				},
+			},
+			{
+				Name:   "detach",
+				Usage:  "detach a proxy from environments",
+				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlEnvironments).AddOutputFlag().AddAuthenticationFlags().Build(),
+				Before: cf.CheckConfigAndCommandFlags,
+				Action: proxy.DetachProxyFromEnvs,
+				BashComplete: func(c *cli.Context) {
+					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlEnvironments).AddOutputFlag().AddAuthenticationFlags().Build() {
+						fl.PrintFlagCompletion(f)
+					}
+				},
+			},
+			{
 				Name:   "delete",
 				Usage:  "deletes a proxy",
 				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlName).AddOutputFlag().AddAuthenticationFlags().Build(),

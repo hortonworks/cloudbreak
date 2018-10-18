@@ -91,6 +91,30 @@ func init() {
 				},
 			},
 			{
+				Name:   "attach",
+				Usage:  "attach an RDS to environments",
+				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlEnvironments).AddAuthenticationFlags().AddOutputFlag().Build(),
+				Before: cf.CheckConfigAndCommandFlags,
+				Action: rds.AttachRdsToEnvs,
+				BashComplete: func(c *cli.Context) {
+					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlEnvironments).AddAuthenticationFlags().AddOutputFlag().Build() {
+						fl.PrintFlagCompletion(f)
+					}
+				},
+			},
+			{
+				Name:   "detach",
+				Usage:  "detach an RDS from environments",
+				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlEnvironments).AddOutputFlag().AddAuthenticationFlags().Build(),
+				Before: cf.CheckConfigAndCommandFlags,
+				Action: rds.DetachRdsFromEnvs,
+				BashComplete: func(c *cli.Context) {
+					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlEnvironments).AddOutputFlag().AddAuthenticationFlags().Build() {
+						fl.PrintFlagCompletion(f)
+					}
+				},
+			},
+			{
 				Name:   "list",
 				Usage:  "list the available database configurations",
 				Flags:  fl.NewFlagBuilder().AddOutputFlag().AddAuthenticationFlags().Build(),

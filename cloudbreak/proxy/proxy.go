@@ -75,6 +75,42 @@ func createProxy(proxyClient proxyClient, workspaceID int64, name, host string, 
 	return nil
 }
 
+func AttachProxyToEnvs(c *cli.Context) {
+	defer utils.TimeTrack(time.Now(), "attach proxy to environments")
+
+	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
+	proxyName := c.String(fl.FlName.Name)
+	environments := utils.DelimitedStringToArray(c.String(fl.FlEnvironments.Name), ",")
+	log.Infof("[AttachProxyToEnvs] attach proxy config '%s' to environments: %s", proxyName, environments)
+
+	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
+	attachRequest := proxyConfig.NewAttachProxyResourceToEnvironmentsParams().WithWorkspaceID(workspaceID).WithName(proxyName).WithBody(environments)
+	response, err := cbClient.Cloudbreak.V3WorkspaceIDProxyconfigs.AttachProxyResourceToEnvironments(attachRequest)
+	if err != nil {
+		utils.LogErrorAndExit(err)
+	}
+	proxy := response.Payload
+	log.Infof("[AttachProxyToEnvs] proxy config '%s' is now attached to the following environments: %s", *proxy.Name, proxy.Environments)
+}
+
+func DetachProxyFromEnvs(c *cli.Context) {
+	defer utils.TimeTrack(time.Now(), "detach proxy from environments")
+
+	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
+	proxyName := c.String(fl.FlName.Name)
+	environments := utils.DelimitedStringToArray(c.String(fl.FlEnvironments.Name), ",")
+	log.Infof("[DetachProxyFromEnvs] detach proxy config '%s' from environments: %s", proxyName, environments)
+
+	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
+	detachRequest := proxyConfig.NewDetachProxyResourceFromEnvironmentsParams().WithWorkspaceID(workspaceID).WithName(proxyName).WithBody(environments)
+	response, err := cbClient.Cloudbreak.V3WorkspaceIDProxyconfigs.DetachProxyResourceFromEnvironments(detachRequest)
+	if err != nil {
+		utils.LogErrorAndExit(err)
+	}
+	proxy := response.Payload
+	log.Infof("[DetachProxyFromEnvs] proxy config '%s' is now attached to the following environments: %s", *proxy.Name, proxy.Environments)
+}
+
 func ListProxies(c *cli.Context) error {
 	defer utils.TimeTrack(time.Now(), "list proxies")
 
