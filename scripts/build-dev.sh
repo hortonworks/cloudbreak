@@ -10,10 +10,19 @@ LATEST_RC_MINOR=$(echo $LATEST_RC_MAJOR_MINOR_VERSION | cut -d'.' -f 2)
 INCREASED_MINOR=$((LATEST_RC_MINOR+1))
 ACTUAL_VERSION="$LATEST_RC_MAJOR.$INCREASED_MINOR"
 
+if [ "$(git tag -l $ACTUAL_VERSION.0-dev.1)" == '' ]; then
+    echo "no dev version found: $ACTUAL_VERSION"
+    VERSION=$ACTUAL_VERSION.0-dev.1
+else
+    LATEST_DEV_VERSION=$(echo $(git tag -l --sort=-v:refname | grep "$ACTUAL_VERSION\\.0-dev" | head -n 1))
+    LATEST_DEV_NUMBER=$(echo $LATEST_DEV_VERSION | cut -d'.' -f 4)
+    VERSION=$ACTUAL_VERSION.0-dev.$((LATEST_DEV_NUMBER+1))
+fi;
 
-export VERSION=2.10.0-dev.57
+git tag -a $VERSION -m "$VERSION"
+git push origin $VERSION
 
-./gradlew -Penv=jenkins -b build.gradle build -x checkstyleMain -x checkstyleTest -x spotbugsMain -x spotbugsTest uploadArchives -Pversion=$VERSION --info --stacktrace --parallel
+./gradlew -Penv=jenkins -b build.gradle clean build uploadArchives -Pversion=$VERSION --info --stacktrace --parallel
 
 echo "Computed next dev version: $VERSION"
 echo VERSION=$VERSION > $WORKSPACE/version
