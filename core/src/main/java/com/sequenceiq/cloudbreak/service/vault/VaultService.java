@@ -19,16 +19,24 @@ public class VaultService {
     @Inject
     private VaultTemplate template;
 
-    public void writeSecrets(String path, String userName, String password) {
-        Map<String, String> data = new HashMap<>();
-        data.put("username", userName);
-        data.put("password", password);
-        operations.write(path, data);
+
+    public void addFieldToSecret(String path, String pathIdentifier, String key, String value) {
+        String realPath = path + "/" + pathIdentifier;
+        VaultResponse response = operations.read(realPath);
+        Map<String, Object> existingData = new HashMap<>();
+        if(response != null && response.getData() != null){
+            existingData = response.getData();
+        }
+        existingData.put(key, value);
+        operations.write(realPath, existingData);
     }
 
-    public Map<String, Object> findOutnewFeature(String key) {
+    public String resolveSingleValue(String path, String key) {
         VaultResponse response = template.read(key);
-        return response.getData();
+        if(response != null && response.getData() != null){
+            return String.valueOf(response.getData().get(key));
+        }
+        return "";
     }
 
 }
