@@ -14,7 +14,7 @@ class VaultConf extends AbstractVaultConfiguration {
     @Value("${cb.vault.addr}")
     private String address;
 
-    @Value("${cb.vault.port}")
+    @Value("${cb.vault.port:8200}")
     private int port;
 
     @Value("${cb.vault.root.token}")
