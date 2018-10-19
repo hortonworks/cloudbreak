@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.domain;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -13,6 +14,8 @@ import javax.persistence.SequenceGenerator;
 
 import com.sequenceiq.cloudbreak.common.type.CommonStatus;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
+import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 
 @Entity
@@ -40,6 +43,12 @@ public class Resource implements ProvisionEntity {
     @ManyToOne
     @JoinColumn(name = "resource_stack")
     private Stack stack;
+
+    private String instanceId;
+
+    @Convert(converter = JsonToString.class)
+    @Column(columnDefinition = "TEXT")
+    private Json attributes;
 
     public Resource() {
 
@@ -116,5 +125,21 @@ public class Resource implements ProvisionEntity {
 
     public void setStack(Stack stack) {
         this.stack = stack;
+    }
+
+    public String getInstanceId() {
+        return instanceId;
+    }
+
+    public void setInstanceId(String instanceId) {
+        this.instanceId = instanceId;
+    }
+
+    public Json getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(Json attributes) {
+        this.attributes = attributes;
     }
 }

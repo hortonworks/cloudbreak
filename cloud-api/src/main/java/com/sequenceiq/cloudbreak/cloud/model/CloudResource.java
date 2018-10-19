@@ -15,6 +15,8 @@ public class CloudResource extends DynamicModel {
 
     public static final String IMAGE = "IMAGE";
 
+    public static final String ATTRIBUTES = "attributes";
+
     private final ResourceType type;
 
     private final CommonStatus status;
@@ -27,7 +29,10 @@ public class CloudResource extends DynamicModel {
 
     private final boolean persistent;
 
-    private CloudResource(ResourceType type, CommonStatus status, String name, String reference, String group, boolean persistent, Map<String, Object> params) {
+    private String instanceId;
+
+    private CloudResource(ResourceType type, CommonStatus status, String name, String reference, String group, boolean persistent, Map<String, Object> params,
+            String instanceId) {
         super(params);
         this.type = type;
         this.status = status;
@@ -35,6 +40,7 @@ public class CloudResource extends DynamicModel {
         this.reference = reference;
         this.group = group;
         this.persistent = persistent;
+        this.instanceId = instanceId;
     }
 
     public ResourceType getType() {
@@ -78,6 +84,14 @@ public class CloudResource extends DynamicModel {
         return new Builder();
     }
 
+    public String getInstanceId() {
+        return instanceId;
+    }
+
+    public void setInstanceId(String instanceId) {
+        this.instanceId = instanceId;
+    }
+
     public static class Builder {
         private ResourceType type;
 
@@ -91,6 +105,8 @@ public class CloudResource extends DynamicModel {
 
         private String group;
 
+        private String instanceId;
+
         private Map<String, Object> parameters = new HashMap<>();
 
         public Builder cloudResource(CloudResource cloudResource) {
@@ -100,6 +116,7 @@ public class CloudResource extends DynamicModel {
             reference = cloudResource.getReference();
             persistent = cloudResource.isPersistent();
             group = cloudResource.getGroup();
+            instanceId = cloudResource.getInstanceId();
             return this;
         }
 
@@ -138,12 +155,17 @@ public class CloudResource extends DynamicModel {
             return this;
         }
 
+        public Builder instanceId(String instanceId) {
+            this.instanceId = instanceId;
+            return this;
+        }
+
         public CloudResource build() {
             Preconditions.checkNotNull(type);
             Preconditions.checkNotNull(status);
             Preconditions.checkNotNull(name);
             Preconditions.checkNotNull(parameters);
-            return new CloudResource(type, status, name, reference, group, persistent, parameters);
+            return new CloudResource(type, status, name, reference, group, persistent, parameters, instanceId);
         }
     }
 }
