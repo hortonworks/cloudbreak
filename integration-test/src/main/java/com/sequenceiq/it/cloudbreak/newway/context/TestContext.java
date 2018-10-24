@@ -330,7 +330,7 @@ public class TestContext implements ApplicationContextAware {
         return entity;
     }
 
-    private CloudbreakClient getCloudbreakClient(String who) {
+    public CloudbreakClient getCloudbreakClient(String who) {
         CloudbreakClient cloudbreakClient = clients.get(who);
         if (cloudbreakClient == null) {
             throw new IllegalStateException("Should create a client for this user: " + who);

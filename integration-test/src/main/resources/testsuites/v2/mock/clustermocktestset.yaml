@@ -1,6 +1,12 @@
 name: "mock-cluster-tests"
+# parallel: classes
+# threadCount: 1
 tests:
   - name: "mockclusters"
     classes:
       - com.sequenceiq.it.cloudbreak.newway.testcase.TerminationTest
       - com.sequenceiq.it.cloudbreak.newway.testcase.UpscaleTest
+      - com.sequenceiq.it.cloudbreak.newway.testcase.ClusterStopTest
+      - com.sequenceiq.it.cloudbreak.newway.testcase.KerberosTest
+      - com.sequenceiq.it.cloudbreak.newway.testcase.RecipeTest
+      - com.sequenceiq.it.cloudbreak.newway.testcase.SharedServiceTest

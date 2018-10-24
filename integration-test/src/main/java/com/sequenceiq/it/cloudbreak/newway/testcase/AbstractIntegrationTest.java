@@ -37,6 +37,8 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
 
     protected static final Map<String, String> STACK_FAILED = Map.of("status", "AVAILABLE", "clusterStatus", "CREATE_FAILED");
 
+    protected static final Map<String, String> STACK_STOPPED = Map.of("status", "STOPPED", "clusterStatus", "STOPPED");
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractIntegrationTest.class);
 
     @Value("${integrationtest.cleanup.cleanupBeforeStart:false}")

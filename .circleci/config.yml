@@ -139,6 +139,7 @@ jobs:
       - run:
           name: integration-test
           command: cd integration-test && make without-build && make revert-db
+          no_output_timeout: 45m
       - run:
           name: Save test results
           command: |

@@ -3,6 +3,9 @@ package com.sequenceiq.it.cloudbreak.newway;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsTestResult;
+import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
+
+import javax.ws.rs.WebApplicationException;
 
 public class RdsConfigEntity extends AbstractCloudbreakEntity<RDSConfigRequest, RDSConfigResponse, RdsConfigEntity> {
 
@@ -17,6 +20,33 @@ public class RdsConfigEntity extends AbstractCloudbreakEntity<RDSConfigRequest, 
 
     RdsConfigEntity() {
         this(RDS_CONFIG);
+    }
+
+    public RdsConfigEntity(TestContext testContext) {
+        super(new RDSConfigRequest(), testContext);
+    }
+
+    @Override
+    public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
+        LOGGER.info("Cleaning up resource with name: {}", getName());
+        try {
+            cloudbreakClient.getCloudbreakClient().rdsConfigV3Endpoint().deleteInWorkspace(cloudbreakClient.getWorkspaceId(), getName());
+        } catch (WebApplicationException ignore) {
+            LOGGER.info("Something happend.");
+        }
+    }
+
+    public RdsConfigEntity valid() {
+        return withName(getNameCreator().getRandomNameForMock())
+                .withConnectionUserName("user")
+                .withConnectionPassword("password")
+                .withConnectionURL("jdbc:postgresql://somedb.com:5432/mydb")
+                .withType("HIVE");
+    }
+
+    public RdsConfigEntity withRequest(RDSConfigRequest request) {
+        setRequest(request);
+        return this;
     }
 
     public RdsConfigEntity withName(String name) {

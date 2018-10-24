@@ -4,13 +4,21 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.cloudbreak.newway.action.ActionV2;
+import com.sequenceiq.it.cloudbreak.newway.action.LdapConfigPostAction;
+import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.v3.LdapConfigV3Action;
 
+@Prototype
 public class LdapConfig extends LdapConfigEntity {
     private static final String LDAPCONFIG = "LdapCONFIG";
 
     private LdapConfig() {
         super(LDAPCONFIG);
+    }
+
+    public LdapConfig(TestContext testContext) {
+        super(testContext);
     }
 
     private static Function<IntegrationTestContext, LdapConfig> getTestContext(String key) {
@@ -82,4 +90,16 @@ public class LdapConfig extends LdapConfigEntity {
         ldapConfig.setCreationStrategy(LdapConfigV3Action::createInGiven);
         return ldapConfig;
     }
+
+    public static ActionV2<LdapConfigEntity> postV2() {
+        return new LdapConfigPostAction();
+    }
+
+    public static LdapConfigEntity getByName(TestContext testContext, LdapConfigEntity entity, CloudbreakClient cloudbreakClient) {
+        entity.setResponse(
+                cloudbreakClient.getCloudbreakClient().ldapConfigV3Endpoint().getByNameInWorkspace(cloudbreakClient.getWorkspaceId(), entity.getName())
+        );
+        return entity;
+    }
+
 }

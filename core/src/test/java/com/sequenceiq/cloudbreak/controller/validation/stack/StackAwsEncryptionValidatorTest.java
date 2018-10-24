@@ -1,45 +1,51 @@
 package com.sequenceiq.cloudbreak.controller.validation.stack;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import com.sequenceiq.cloudbreak.api.model.EncryptionKeyConfigJson;
+import com.sequenceiq.cloudbreak.api.model.PlatformEncryptionKeysResponse;
+import com.sequenceiq.cloudbreak.api.model.PlatformResourceRequestJson;
+import com.sequenceiq.cloudbreak.api.model.TemplateRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupRequest;
+import com.sequenceiq.cloudbreak.api.model.v2.template.EncryptionType;
+import com.sequenceiq.cloudbreak.controller.PlatformParameterV1Controller;
+import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
+import com.sequenceiq.cloudbreak.controller.validation.template.TemplateRequestValidator;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.credential.CredentialService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.cloudbreak.api.model.EncryptionKeyConfigJson;
-import com.sequenceiq.cloudbreak.api.model.PlatformEncryptionKeysResponse;
-import com.sequenceiq.cloudbreak.api.model.PlatformResourceRequestJson;
-import com.sequenceiq.cloudbreak.api.model.TemplateRequest;
-import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupRequest;
-import com.sequenceiq.cloudbreak.api.model.v2.template.EncryptionType;
-import com.sequenceiq.cloudbreak.controller.PlatformParameterV1Controller;
-import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
-import com.sequenceiq.cloudbreak.controller.validation.template.TemplateRequestValidator;
-import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.credential.CredentialService;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class StackAwsEncryptionValidatorTest {
+public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBase {
 
     private static final String TYPE = "type";
 
@@ -71,10 +77,26 @@ public class StackAwsEncryptionValidatorTest {
     @Mock
     private RestRequestThreadLocalService restRequestThreadLocalService;
 
+    @Mock
+    private ClusterRequest clusterRequest;
+
+    @Mock
+    private BlueprintService blueprintService;
+
+    @Mock
+    private Blueprint blueprint;
+
+    @Mock
+    private Json blueprintTags;
+
     @InjectMocks
     private StackRequestValidator underTest;
 
     private Map<String, Object> parameters;
+
+    public StackAwsEncryptionValidatorTest() {
+        super(LoggerFactory.getLogger(StackAwsEncryptionValidatorTest.class));
+    }
 
     @Before
     public void setup() {
@@ -82,6 +104,12 @@ public class StackAwsEncryptionValidatorTest {
         when(subject.getClusterToAttach()).thenReturn(null);
         when(templateRequestValidator.validate(any())).thenReturn(ValidationResult.builder().build());
         when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(1L);
+        when(subject.getClusterRequest()).thenReturn(clusterRequest);
+        when(clusterRequest.getBlueprintName()).thenReturn("dummy");
+        when(blueprintService.getByNameForWorkspaceId(anyString(), anyLong())).thenReturn(blueprint);
+        when(blueprint.getTags()).thenReturn(blueprintTags);
+        when(blueprintTags.getMap()).thenReturn(Collections.emptyMap());
+        when(clusterRequest.getHostGroups()).thenReturn(Set.of(new HostGroupRequest()));
     }
 
     @Test
@@ -91,7 +119,7 @@ public class StackAwsEncryptionValidatorTest {
 
         ValidationResult result = underTest.validate(subject);
 
-        assertTrue(result.getErrors().isEmpty());
+        assertValidationErrorIsEmpty(result.getErrors());
         verify(credentialService, times(0)).getByNameForWorkspaceId(nullable(String.class), anyLong());
         verify(parameterV1Controller, times(0)).getEncryptionKeys(any(PlatformResourceRequestJson.class));
     }
@@ -103,7 +131,7 @@ public class StackAwsEncryptionValidatorTest {
 
         ValidationResult result = underTest.validate(subject);
 
-        assertTrue(result.getErrors().isEmpty());
+        assertValidationErrorIsEmpty(result.getErrors());
         verify(credentialService, times(0)).getByNameForWorkspaceId(nullable(String.class), anyLong());
         verify(parameterV1Controller, times(0)).getEncryptionKeys(any(PlatformResourceRequestJson.class));
     }
@@ -115,7 +143,7 @@ public class StackAwsEncryptionValidatorTest {
 
         ValidationResult result = underTest.validate(subject);
 
-        assertTrue(result.getErrors().isEmpty());
+        assertValidationErrorIsEmpty(result.getErrors());
         verify(credentialService, times(0)).getByNameForWorkspaceId(nullable(String.class), anyLong());
         verify(parameterV1Controller, times(0)).getEncryptionKeys(any(PlatformResourceRequestJson.class));
     }
@@ -129,7 +157,7 @@ public class StackAwsEncryptionValidatorTest {
 
         ValidationResult result = underTest.validate(subject);
 
-        assertTrue(result.getErrors().isEmpty());
+        assertValidationErrorIsEmpty(result.getErrors());
         verify(credentialService, times(1)).getByNameForWorkspaceId(any(), anyLong());
         verify(parameterV1Controller, times(1)).getEncryptionKeys(any(PlatformResourceRequestJson.class));
     }
@@ -143,7 +171,7 @@ public class StackAwsEncryptionValidatorTest {
 
         ValidationResult result = underTest.validate(subject);
 
-        assertTrue(result.getErrors().isEmpty());
+        assertValidationErrorIsEmpty(result.getErrors());
         verify(credentialService, times(1)).getByNameForWorkspaceId(any(), anyLong());
         verify(parameterV1Controller, times(1)).getEncryptionKeys(any(PlatformResourceRequestJson.class));
     }
@@ -194,7 +222,7 @@ public class StackAwsEncryptionValidatorTest {
 
         ValidationResult result = underTest.validate(subject);
 
-        assertTrue(result.getErrors().isEmpty());
+        assertValidationErrorIsEmpty(result.getErrors());
         verify(credentialService, times(1)).getByNameForWorkspaceId(any(), anyLong());
         verify(parameterV1Controller, times(1)).getEncryptionKeys(any(PlatformResourceRequestJson.class));
     }
