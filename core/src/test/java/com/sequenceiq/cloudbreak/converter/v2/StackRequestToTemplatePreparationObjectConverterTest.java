@@ -63,6 +63,7 @@ import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.service.vault.VaultService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
@@ -167,6 +168,9 @@ public class StackRequestToTemplatePreparationObjectConverterTest {
 
     @Mock
     private WorkspaceService workspaceService;
+
+    @Mock
+    private VaultService vaultService;
 
     @Before
     public void setUp() {

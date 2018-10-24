@@ -35,8 +35,10 @@ import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.CachedUserDetailsService;
+import com.sequenceiq.cloudbreak.service.vault.VaultService;
 import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
 import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationProvider;
 import com.sequenceiq.cloudbreak.template.model.HdfConfigs;
@@ -86,6 +88,9 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
     @Inject
     private BlueprintViewProvider blueprintViewProvider;
 
+    @Inject
+    private VaultService vaultService;
+
     @Override
     public TemplatePreparationObject convert(Stack source) {
         try {
@@ -103,8 +108,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
             StackInputs stackInputs = getStackInputs(source);
             Map<String, Object> fixInputs = stackInputs.getFixInputs() == null ? new HashMap<>() : stackInputs.getFixInputs();
             fixInputs.putAll(stackInputs.getDatalakeInputs() == null ? new HashMap<>() : stackInputs.getDatalakeInputs());
-
-            return TemplatePreparationObject.Builder.builder()
+            return Builder.builder()
                     .withFlexSubscription(source.getFlexSubscription())
                     .withRdsConfigs(postgresConfigService.createRdsConfigIfNeeded(source, cluster))
                     .withHostgroups(hostGroupService.getByCluster(cluster.getId()))
@@ -116,7 +120,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
                     .withFileSystemConfigurationView(fileSystemConfigurationView)
                     .withGeneralClusterConfigs(generalClusterConfigsProvider.generalClusterConfigs(source, cluster, cloudbreakUser))
                     .withSmartSenseSubscription(aDefault.isPresent() ? aDefault.get() : null)
-                    .withLdapConfig(ldapConfig)
+                    .withLdapConfig(ldapConfig, ldapConfig == null ? "" : vaultService.resolveSingleValue(ldapConfig.getBindPassword(), "bindPassword"))
                     .withHdfConfigs(hdfConfigs)
                     .withKerberosConfig(cluster.isSecure() ? cluster.getKerberosConfig() : null)
                     .withSharedServiceConfigs(sharedServiceConfigProvider.createSharedServiceConfigs(source, dataLakeStack))

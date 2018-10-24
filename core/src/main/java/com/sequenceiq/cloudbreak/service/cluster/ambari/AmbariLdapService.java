@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.service.vault.VaultService;
 import com.sequenceiq.cloudbreak.template.views.LdapView;
 
 @Service
@@ -31,12 +32,16 @@ public class AmbariLdapService {
     @Inject
     private AmbariRepositoryVersionService ambariRepositoryVersionService;
 
+    @Inject
+    private VaultService vaultService;
+
     public void setupLdap(Stack stack, Cluster cluster, AmbariRepo ambariRepo) {
         AmbariClient ambariClient = clientFactory.getAmbariClient(stack, cluster);
         LdapConfig ldapConfig = cluster.getLdapConfig();
         if (ldapConfig != null) {
             LOGGER.info("Setup LDAP on Ambari API for stack: {}", stack.getId());
-            LdapView ldapView = new LdapView(ldapConfig);
+            String bindPassword = vaultService.resolveSingleValue(ldapConfig.getBindPassword(), "bindPassword");
+            LdapView ldapView = new LdapView(ldapConfig, bindPassword);
             Map<String, Object> ldapConfigs = new HashMap<>();
             ldapConfigs.put("ambari.ldap.authentication.enabled", true);
             ldapConfigs.put("ambari.ldap.connectivity.server.host", ldapView.getHost());
