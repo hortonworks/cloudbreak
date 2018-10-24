@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster.ambari;
 
+import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariRepositoryVersionService.AMBARI_VERSION_2_7_2_0;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
+import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -25,7 +28,10 @@ public class AmbariLdapService {
     @Inject
     private AmbariClientFactory clientFactory;
 
-    public void setupLdap(Stack stack, Cluster cluster) {
+    @Inject
+    private AmbariRepositoryVersionService ambariRepositoryVersionService;
+
+    public void setupLdap(Stack stack, Cluster cluster, AmbariRepo ambariRepo) {
         AmbariClient ambariClient = clientFactory.getAmbariClient(stack, cluster);
         LdapConfig ldapConfig = cluster.getLdapConfig();
         if (ldapConfig != null) {
@@ -50,7 +56,11 @@ public class AmbariLdapService {
             ldapConfigs.put("ambari.ldap.connectivity.bind_password", AMBARI_SERVER_CONF_LDAP_PASSWORD_DAT);
             ldapConfigs.put("ambari.ldap.advanced.referrals", "follow");
             ldapConfigs.put("ambari.ldap.connectivity.anonymous_bind", false);
-            ldapConfigs.put("ambari.ldap.advance.collision_behavior", "convert");
+            if (ambariRepositoryVersionService.isVersionNewerOrEqualThanLimited(ambariRepo::getVersion, AMBARI_VERSION_2_7_2_0)) {
+                ldapConfigs.put("ambari.ldap.advanced.collision_behavior", "convert");
+            } else {
+                ldapConfigs.put("ambari.ldap.advance.collision_behavior", "convert");
+            }
             ldapConfigs.put("ambari.ldap.advanced.force_lowercase_usernames", false);
             ldapConfigs.put("ambari.ldap.advanced.pagination_enabled", true);
             ldapConfigs.put("ambari.ldap.advanced.group_mapping_rules", ldapView.getAdminGroup());
