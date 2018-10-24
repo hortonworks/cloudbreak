@@ -38,6 +38,7 @@ import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
 import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
+import com.sequenceiq.cloudbreak.service.vault.VaultService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
@@ -45,6 +46,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
 import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationProvider;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationsViewProvider;
@@ -108,6 +110,9 @@ public class StackRequestToTemplatePreparationObjectConverter extends AbstractCo
     @Inject
     private WorkspaceService workspaceService;
 
+    @Inject
+    private VaultService vaultService;
+
     @Override
     public TemplatePreparationObject convert(StackV2Request source) {
         try {
@@ -127,7 +132,7 @@ public class StackRequestToTemplatePreparationObjectConverter extends AbstractCo
             BlueprintView blueprintView = new BlueprintView(blueprint.getBlueprintText(), blueprintStackInfo.getVersion(), blueprintStackInfo.getType());
             GeneralClusterConfigs generalClusterConfigs = generalClusterConfigsProvider.generalClusterConfigs(source, user,
                     restRequestThreadLocalService.getCloudbreakUser().getUsername());
-            TemplatePreparationObject.Builder builder = TemplatePreparationObject.Builder.builder()
+            Builder builder = Builder.builder()
                     .withFlexSubscription(flexSubscription.orElse(null))
                     .withRdsConfigs(rdsConfigs)
                     .withHostgroupViews(hostgroupViews)
@@ -137,7 +142,7 @@ public class StackRequestToTemplatePreparationObjectConverter extends AbstractCo
                     .withFileSystemConfigurationView(fileSystemConfigurationView)
                     .withGeneralClusterConfigs(generalClusterConfigs)
                     .withSmartSenseSubscription(smartsenseSubscription)
-                    .withLdapConfig(ldapConfig)
+                    .withLdapConfig(ldapConfig, ldapConfig == null ? "" : vaultService.resolveSingleValue(ldapConfig.getBindPassword(), "bindPassword"))
                     .withKerberosConfig(kerberosConfig);
 
             SharedServiceRequest sharedService = source.getCluster().getSharedService();
