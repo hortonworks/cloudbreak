@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.aspect.vault.VaultIdentifier;
+import com.sequenceiq.cloudbreak.aspect.vault.VaultResolver;
 import com.sequenceiq.cloudbreak.aspect.vault.VaultValue;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -448,11 +449,8 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, VaultId
         this.ldapConfig = ldapConfig;
     }
 
+    @VaultResolver("cloudbreakAmbariUser")
     public String getCloudbreakAmbariUser() {
-        return cloudbreakAmbariUser;
-    }
-
-    public String getOriginalCloudbreakAmbariUser() {
         return cloudbreakAmbariUser;
     }
 
@@ -460,6 +458,7 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, VaultId
         this.cloudbreakAmbariUser = cloudbreakAmbariUser;
     }
 
+    @VaultResolver("cloudbreakAmbariPassword")
     public String getCloudbreakAmbariPassword() {
         return cloudbreakAmbariPassword;
     }
@@ -516,6 +515,7 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, VaultId
         this.uptime = uptime;
     }
 
+    @VaultResolver("ambariSecurityMasterKey")
     public String getAmbariSecurityMasterKey() {
         return ambariSecurityMasterKey;
     }

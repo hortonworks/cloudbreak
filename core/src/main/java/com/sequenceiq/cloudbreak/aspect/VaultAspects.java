@@ -37,18 +37,20 @@ public class VaultAspects {
         try{
             for (Field field : methodSignature.getReturnType().getDeclaredFields()) {
                 if (field.isAnnotationPresent(VaultValue.class)) {
+                    LOGGER.info("Found annotation on {}", field);
                     field.setAccessible(true);
                     //TODO: get type of secret from Class annotation
                     VaultIdentifier vaultIdentifier = (VaultIdentifier) entity;
                     String resourceId = vaultIdentifier.getUniqueIdentifier();
                     //TODO: should create the map of all properties beforehand
-                    vaultService.addFieldToSecret("pepsi/cb/clusters", resourceId.toString(), field.getName(), (String) field.get(entity));
-                    LOGGER.info("Found annotation for {}", field);
+                    String path = vaultService.addFieldToSecret("pepsi/cb/clusters", resourceId, field.getName(), (String) field.get(entity));
+                    LOGGER.info("Field: {} saved at path: {}", field.getName(), path);
+                    field.set(entity, path);
                     //TODO: should override original value of field with path of resource
                 }
             }
         } catch (Exception e){
-            LOGGER.warn("Looks like something went wrong with Vault. Data is not encrypted!");
+            LOGGER.warn("Looks like something went wrong with Vault. Data is not encrypted!", e);
         }
 
         Object proceed = proceedingJoinPoint.proceed();
