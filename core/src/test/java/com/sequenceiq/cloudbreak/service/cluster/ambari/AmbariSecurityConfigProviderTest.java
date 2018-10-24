@@ -32,7 +32,7 @@ public class AmbariSecurityConfigProviderTest {
 
     @Before
     public void init() {
-        when(vaultService.resolveSingleValue(anyString(), anyString())).then(returnsFirstArg());
+        when(vaultService.resolveSingleValue(anyString())).then(returnsFirstArg());
     }
 
     @Test

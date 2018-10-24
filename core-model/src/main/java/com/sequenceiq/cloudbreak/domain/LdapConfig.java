@@ -6,7 +6,6 @@ import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -23,8 +22,8 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import com.sequenceiq.cloudbreak.api.model.DirectoryType;
+import com.sequenceiq.cloudbreak.aspect.vault.VaultValue;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
-import com.sequenceiq.cloudbreak.domain.converter.EncryptionConverter;
 import com.sequenceiq.cloudbreak.domain.environment.EnvironmentAwareResource;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
@@ -60,8 +59,8 @@ public class LdapConfig implements ProvisionEntity, EnvironmentAwareResource {
     @Column(nullable = false)
     private String bindDn;
 
-    @Convert(converter = EncryptionConverter.class)
     @Column(nullable = false)
+    @VaultValue
     private String bindPassword;
 
     @Enumerated(EnumType.STRING)
@@ -329,4 +328,5 @@ public class LdapConfig implements ProvisionEntity, EnvironmentAwareResource {
     public int hashCode() {
         return Objects.hash(id);
     }
+
 }

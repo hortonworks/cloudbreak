@@ -446,14 +446,14 @@ public class HandlebarTemplateTest {
 
     public static Map<String, Object> ldapConfigWhenLdapPresentedThenShouldReturnWithLdapConfig() {
         return new TemplateModelContextBuilder()
-                .withLdap(new LdapView(ldapConfig()))
+                .withLdap(new LdapView(ldapConfig(), "admin"))
                 .withGateway(TestUtil.gatewayEnabled())
                 .build();
     }
 
     public static Map<String, Object> ldapConfigWhenLdapPresentedThenShouldReturnWithAdConfig() {
         return new TemplateModelContextBuilder()
-                .withLdap(new LdapView(adConfig()))
+                .withLdap(new LdapView(adConfig(), "admin"))
                 .withGateway(TestUtil.gatewayEnabled())
                 .build();
     }
@@ -556,7 +556,7 @@ public class HandlebarTemplateTest {
 
     public static Map<String, Object> nifiWithLdap() {
         return new TemplateModelContextBuilder()
-                .withLdap(new LdapView(ldapConfigWithSpecialChars()))
+                .withLdap(new LdapView(ldapConfigWithSpecialChars(), "admin<>char"))
                 .withHdfConfigs(new HdfConfigs("<property>nodeEntities</property>",
                         "<property>registryNodeEntities</property>",
                         "<property>nodeUserEntities</property>",
@@ -580,7 +580,7 @@ public class HandlebarTemplateTest {
 
         return new TemplateModelContextBuilder()
                 .withGeneralClusterConfigs(generalClusterConfigs)
-                .withLdap(new LdapView(ldapConfig()))
+                .withLdap(new LdapView(ldapConfig(), "admin<>char"))
                 .withFixInputs(properties)
                 .withHdfConfigs(new HdfConfigs("nifigtargets", "nifigtargets", "nifigtargets",
                         withProxyHost ? Optional.of("nifiproxyhost") : Optional.empty()))
@@ -643,7 +643,7 @@ public class HandlebarTemplateTest {
 
     private static Object hiveWhenLdapPresentedThenShouldReturnWithLdapConfigs() {
         return new TemplateModelContextBuilder()
-                .withLdap(new LdapView(ldapConfig()))
+                .withLdap(new LdapView(ldapConfig(), "admin<>char"))
                 .build();
     }
 

@@ -54,7 +54,7 @@ class RecipeModulTestModelProvider {
     static TemplatePreparationObject testTemplateWithLocalLdap() {
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
-                .withLdapConfig(ldapConfig())
+                .withLdapConfig(ldapConfig(), "admin")
                 .build();
     }
 
@@ -63,7 +63,7 @@ class RecipeModulTestModelProvider {
         ldapConfig.setServerHost(String.format("%s%s", StringUtils.repeat("some-superlong-content", "-", 93), ".com"));
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
-                .withLdapConfig(ldapConfig)
+                .withLdapConfig(ldapConfig, "admin")
                 .build();
     }
 
@@ -72,7 +72,7 @@ class RecipeModulTestModelProvider {
         ldapConfig.setServerHost("\\");
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
-                .withLdapConfig(ldapConfig)
+                .withLdapConfig(ldapConfig, "admin")
                 .build();
     }
 
