@@ -34,7 +34,6 @@ import com.sequenceiq.cloudbreak.controller.exception.FlowsAlreadyRunningExcepti
 import com.sequenceiq.cloudbreak.core.flow2.Flow2Handler;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.EphemeralClusterEvent;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterAndStackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterCredentialChangeTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleDetails;
@@ -227,14 +226,9 @@ public class ReactorFlowManager {
 
     public void triggerClusterTermination(Long stackId, Boolean withStackDelete, Boolean deleteDependencies) {
         Boolean secure = stackService.getByIdWithTransaction(stackId).getCluster().isSecure();
-        if (withStackDelete) {
-            String selector = secure ? FlowChainTriggers.PROPER_TERMINATION_TRIGGER_EVENT : FlowChainTriggers.TERMINATION_TRIGGER_EVENT;
-            notify(selector, new TerminationEvent(selector, stackId, false, deleteDependencies));
-            cancelRunningFlows(stackId);
-        } else {
-            String selector = (secure ? ClusterTerminationEvent.PROPER_TERMINATION_EVENT : ClusterTerminationEvent.TERMINATION_EVENT).event();
-            notify(selector, new StackEvent(selector, stackId));
-        }
+        String selector = secure ? FlowChainTriggers.PROPER_TERMINATION_TRIGGER_EVENT : FlowChainTriggers.TERMINATION_TRIGGER_EVENT;
+        notify(selector, new TerminationEvent(selector, stackId, false, deleteDependencies));
+        cancelRunningFlows(stackId);
     }
 
     public void triggerManualRepairFlow(Long stackId) {
