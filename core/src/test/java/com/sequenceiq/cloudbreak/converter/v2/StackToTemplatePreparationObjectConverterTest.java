@@ -56,6 +56,7 @@ import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.CachedUserDetailsService;
+import com.sequenceiq.cloudbreak.service.vault.VaultService;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationProvider;
@@ -148,6 +149,9 @@ public class StackToTemplatePreparationObjectConverterTest {
     @Mock
     private BlueprintViewProvider blueprintViewProvider;
 
+    @Mock
+    private VaultService vaultService;
+
     @Before
     public void setUp() throws IOException {
         MockitoAnnotations.initMocks(this);
@@ -165,6 +169,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(source.getInputs()).thenReturn(stackInputs);
         when(stackInputs.get(StackInputs.class)).thenReturn(null);
         when(stackInfoService.blueprintStackInfo(TEST_BLUEPRINT_TEXT)).thenReturn(blueprintStackInfo);
+        when(vaultService.resolveSingleValue(any(), any())).thenReturn("admin<>");
     }
 
     @Test
@@ -260,6 +265,7 @@ public class StackToTemplatePreparationObjectConverterTest {
     public void testConvertWhenClusterFromClusterServiceHasLdapConfigThenItShouldBeStored() {
         LdapConfig ldapConfig = new LdapConfig();
         ldapConfig.setProtocol("");
+        ldapConfig.setBindDn("admin<>");
         when(cluster.getLdapConfig()).thenReturn(ldapConfig);
 
         TemplatePreparationObject result = underTest.convert(source);
