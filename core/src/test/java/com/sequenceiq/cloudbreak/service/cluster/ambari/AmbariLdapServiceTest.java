@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
+import com.sequenceiq.cloudbreak.service.vault.VaultService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AmbariLdapServiceTest {
@@ -38,6 +39,9 @@ public class AmbariLdapServiceTest {
 
     @Mock
     private AmbariRepositoryVersionService ambariRepositoryVersionService;
+
+    @Mock
+    private VaultService vaultService;
 
     @Captor
     private ArgumentCaptor<Map<String, Object>> captor;
