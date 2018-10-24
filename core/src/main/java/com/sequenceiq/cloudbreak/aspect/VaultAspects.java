@@ -8,7 +8,6 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
-import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -27,16 +26,20 @@ public class VaultAspects {
     private VaultService vaultService;
 
     @Pointcut("execution(public * com.sequenceiq.cloudbreak.repository.*.save(..)) ")
-    public void allRepositories() {
+    public void onRepositorySave() {
     }
 
-    @Around("allRepositories()")
+    @Pointcut("execution(public void com.sequenceiq.cloudbreak.repository.*.delete(..)) ")
+    public void onRepositoryDelete() {
+    }
+
+    @Around("onRepositorySave()")
     public Object saveToVault(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
         Object entity = proceedingJoinPoint.getArgs()[0];
         try {
             for (Field field : entity.getClass().getDeclaredFields()) {
                 if (field.isAnnotationPresent(VaultValue.class)) {
-                    LOGGER.info("Found annotation on {}", field);
+                    LOGGER.info("Found VaultValue annotation on {}", field);
                     field.setAccessible(true);
                     //TODO: get type of secret from Class annotation
                     VaultIdentifier vaultIdentifier = (VaultIdentifier) entity;
@@ -51,6 +54,26 @@ public class VaultAspects {
             LOGGER.warn("Looks like something went wrong with Vault. Data is not encrypted!", e);
         }
 
+        Object proceed = proceedingJoinPoint.proceed();
+        return proceed;
+    }
+
+    @Around("onRepositoryDelete()")
+    public Object removeFromVault(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
+        Object entity = proceedingJoinPoint.getArgs()[0];
+        try {
+            for (Field field : entity.getClass().getDeclaredFields()) {
+                if (field.isAnnotationPresent(VaultValue.class)) {
+                    LOGGER.info("Found VaultValue annotation on {}", field);
+                    field.setAccessible(true);
+                    String path = (String) field.get(entity);
+                    vaultService.deleteSecret(path);
+                    LOGGER.info("Secret deleted at path: {}", path);
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.warn("Looks like something went wrong with Vault. Secret is not deleted!", e);
+        }
         Object proceed = proceedingJoinPoint.proceed();
         return proceed;
     }
