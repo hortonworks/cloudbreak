@@ -40,7 +40,6 @@ import javax.persistence.UniqueConstraint;
 import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.Status;
-import com.sequenceiq.cloudbreak.aspect.vault.VaultIdentifier;
 import com.sequenceiq.cloudbreak.aspect.vault.VaultValue;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -65,7 +64,7 @@ import com.sequenceiq.cloudbreak.type.KerberosType;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name"}))
-public class Cluster implements ProvisionEntity, WorkspaceAwareResource, VaultIdentifier {
+public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "cluster_generator")
@@ -572,8 +571,4 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, VaultId
         return Objects.hash(id);
     }
 
-    @Override
-    public String getUniqueIdentifier() {
-        return getStack().getUuid();
-    }
 }
