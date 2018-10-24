@@ -7,6 +7,7 @@ include docker_env.tmp
 else
 $(shell echo export TEST_ENV=boot2docker > docker_env.tmp)
 endif
+REPO_URL ?= https://cloudbreak-maven.s3.amazonaws.com/releases
 
 all: download-cbd buildcb runtest
 
@@ -19,8 +20,8 @@ without-build: download-cbd runtest
 build-with-docker: download-cbd docker-build runtest
 
 download-jar-from-s3:
-	curl https://cloudbreak-maven.s3.amazonaws.com/releases/com/sequenceiq/cloudbreak/$(VERSION)/cloudbreak-$(VERSION).jar -o ../core/build/libs/cloudbreak.jar --create-dirs
-	curl https://cloudbreak-maven.s3.amazonaws.com/releases/com/sequenceiq/cloudbreak-integration-test/$(VERSION)/cloudbreak-integration-test-$(VERSION).jar -o ../integration-test/build/libs/cloudbreak-integration-test.jar --create-dirs
+	curl ${REPO_URL}/com/sequenceiq/cloudbreak/$(VERSION)/cloudbreak-$(VERSION).jar -o ../core/build/libs/cloudbreak.jar --create-dirs
+	curl ${REPO_URL}/com/sequenceiq/cloudbreak-integration-test/$(VERSION)/cloudbreak-integration-test-$(VERSION).jar -o ../integration-test/build/libs/cloudbreak-integration-test.jar --create-dirs
 
 download-cbd:
 	./scripts/download-cbd.sh
