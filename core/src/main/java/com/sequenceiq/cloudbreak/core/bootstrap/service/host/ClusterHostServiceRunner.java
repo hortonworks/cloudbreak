@@ -71,6 +71,7 @@ import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.vault.VaultService;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 import com.sequenceiq.cloudbreak.util.StackUtil;
@@ -137,6 +138,9 @@ public class ClusterHostServiceRunner {
 
     @Inject
     private AmbariRepositoryVersionService ambariRepositoryVersionService;
+
+    @Inject
+    private VaultService vaultService;
 
     public void runAmbariServices(Stack stack, Cluster cluster) {
         try {
@@ -400,6 +404,7 @@ public class ClusterHostServiceRunner {
 
     private void saveLdapPillar(LdapConfig ldapConfig, Map<String, SaltPillarProperties> servicePillar) {
         if (ldapConfig != null) {
+            ldapConfig.setBindPassword(vaultService.resolveSingleValue(ldapConfig.getBindPassword()));
             servicePillar.put("ldap", new SaltPillarProperties("/gateway/ldap.sls", singletonMap("ldap", ldapConfig)));
         }
     }
