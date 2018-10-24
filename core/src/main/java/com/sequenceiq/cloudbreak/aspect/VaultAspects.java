@@ -41,13 +41,16 @@ public class VaultAspects {
                 if (field.isAnnotationPresent(VaultValue.class)) {
                     LOGGER.info("Found VaultValue annotation on {}", field);
                     field.setAccessible(true);
-                    //TODO: get type of secret from Class annotation
                     VaultIdentifier vaultIdentifier = (VaultIdentifier) entity;
                     String resourceId = vaultIdentifier.getUniqueIdentifier();
                     //TODO: should create the map of all properties beforehand
-                    String path = vaultService.addFieldToSecret("pepsi/cb/clusters", resourceId, field.getName(), (String) field.get(entity));
-                    LOGGER.info("Field: {} saved at path: {}", field.getName(), path);
-                    field.set(entity, path);
+                    String value = (String) field.get(entity);
+                    if (value == null || !value.startsWith("pepsi")) {
+                        String resourceType = entity.getClass().getSimpleName().toLowerCase();
+                        String path = vaultService.addFieldToSecret("pepsi/cb/" + resourceType, resourceId, field.getName(), value);
+                        LOGGER.info("Field: {} saved at path: {}", field.getName(), path);
+                        field.set(entity, path);
+                    }
                 }
             }
         } catch (Exception e) {
