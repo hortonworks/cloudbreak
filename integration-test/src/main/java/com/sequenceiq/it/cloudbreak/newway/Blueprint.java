@@ -4,9 +4,20 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.cloudbreak.newway.action.ActionV2;
+import com.sequenceiq.it.cloudbreak.newway.action.BlueprintPostAction;
+import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.v3.BlueprintV3Action;
 
+@Prototype
 public class Blueprint extends BlueprintEntity {
+
+    public Blueprint() {
+    }
+
+    public Blueprint(TestContext testContext) {
+        super(testContext);
+    }
 
     static Function<IntegrationTestContext, Blueprint> getTestContext(String key) {
         return testContext -> testContext.getContextParam(key, Blueprint.class);
@@ -56,6 +67,17 @@ public class Blueprint extends BlueprintEntity {
 
     public static Assertion<Blueprint> assertThis(BiConsumer<Blueprint, IntegrationTestContext> check) {
         return new Assertion<>(getTestContext(GherkinTest.RESULT), check);
+    }
+
+    public static BlueprintEntity getByName(TestContext testContext, BlueprintEntity entity, CloudbreakClient cloudbreakClient) {
+        entity.setResponse(
+                cloudbreakClient.getCloudbreakClient().blueprintV3Endpoint().getByNameInWorkspace(cloudbreakClient.getWorkspaceId(), entity.getName())
+        );
+        return entity;
+    }
+
+    public static ActionV2<BlueprintEntity> postV2() {
+        return new BlueprintPostAction();
     }
 
     @Override

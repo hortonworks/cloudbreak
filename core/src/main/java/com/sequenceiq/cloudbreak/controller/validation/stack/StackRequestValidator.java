@@ -9,6 +9,11 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -67,6 +72,12 @@ public class StackRequestValidator implements Validator<StackRequest> {
     @Inject
     private TemplateRequestValidator templateRequestValidator;
 
+    @Inject
+    private BlueprintService blueprintService;
+
+    @Inject
+    private RdsConfigService rdsConfigService;
+
     @Override
     public ValidationResult validate(StackRequest subject) {
         ValidationResultBuilder validationBuilder = ValidationResult.builder();
@@ -116,6 +127,7 @@ public class StackRequestValidator implements Validator<StackRequest> {
     }
 
     private void validateSharedService(StackRequest stackRequest, ValidationResultBuilder validationBuilder) {
+        checkResourceRequirementsIfBlueprintIsDatalakeReady(stackRequest, validationBuilder);
         if (stackRequest.getClusterToAttach() != null) {
             Optional<Stack> stack = stackRepository.findById(stackRequest.getClusterToAttach());
             if (stack.isPresent() && AVAILABLE.equals(stack.get().getStatus())) {
@@ -177,6 +189,41 @@ public class StackRequestValidator implements Validator<StackRequest> {
         request.setOwner(owner);
         request.setAccount(account);
         return request;
+    }
+
+    private void checkResourceRequirementsIfBlueprintIsDatalakeReady(StackRequest stackRequest, ValidationResultBuilder validationBuilder) {
+        Blueprint blueprint = blueprintService.getByNameForWorkspaceId(stackRequest.getClusterRequest()
+                .getBlueprintName(), restRequestThreadLocalService.getRequestedWorkspaceId());
+        boolean sharedServiceReadyBlueprint = Optional.ofNullable((Boolean) blueprint.getTags().getMap().get("shared_services_ready")).orElse(false);
+        if (sharedServiceReadyBlueprint) {
+            Set<RdsType> rdsTypes = getGivenRdsTypes(stackRequest.getClusterRequest());
+            String rdsErrorMessageFormat = "For a Datalake cluster (since you have selected a datalake ready blueprint) you should provide at least one %s "
+                    + "rds/database configuration to the Cluster request";
+            if (!rdsTypes.contains(RdsType.HIVE)) {
+                validationBuilder.error(String.format(rdsErrorMessageFormat, "Hive"));
+            }
+            if (!rdsTypes.contains(RdsType.RANGER)) {
+                validationBuilder.error(String.format(rdsErrorMessageFormat, "Ranger"));
+            }
+            if (isLdapNotProvided(stackRequest.getClusterRequest())) {
+                validationBuilder.error("For a Datalake cluster (since you have selected a datalake ready blueprint) you should provide an "
+                        + "LDAP configuration or its name/id to the Cluster request");
+            }
+        }
+    }
+
+    private boolean isLdapNotProvided(ClusterRequest clusterRequest) {
+        return clusterRequest.getLdapConfig() == null && clusterRequest.getLdapConfigName() == null && clusterRequest.getLdapConfigId() == null;
+    }
+
+    private Set<RdsType> getGivenRdsTypes(ClusterRequest clusterRequest) {
+        Set<RdsType> types = clusterRequest.getRdsConfigIds().stream().map(id -> RdsType.valueOf(rdsConfigService.get(id).getType()))
+                .collect(Collectors.toSet());
+        types.addAll(clusterRequest.getRdsConfigJsons().stream().map(rdsConfigRequest -> RdsType.valueOf(rdsConfigRequest.getType()))
+                .collect(Collectors.toSet()));
+        types.addAll(clusterRequest.getRdsConfigNames().stream().map(s -> RdsType.valueOf(
+                rdsConfigService.getByNameForWorkspaceId(s, restRequestThreadLocalService.getRequestedWorkspaceId()).getType())).collect(Collectors.toSet()));
+        return types;
     }
 
 }

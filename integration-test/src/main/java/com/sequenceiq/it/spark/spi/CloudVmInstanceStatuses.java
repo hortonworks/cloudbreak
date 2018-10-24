@@ -17,7 +17,7 @@ public class CloudVmInstanceStatuses extends ITResponse {
         this.instanceMap = instanceMap;
     }
 
-    private List<CloudVmInstanceStatus> createCloudVmInstanceStatuses() {
+    public List<CloudVmInstanceStatus> createCloudVmInstanceStatuses() {
         List<CloudVmInstanceStatus> cloudVmInstanceStatuses = new ArrayList<>();
         for (Entry<String, CloudVmMetaDataStatus> stringCloudVmMetaDataStatusEntry : instanceMap.entrySet()) {
             cloudVmInstanceStatuses.add(stringCloudVmMetaDataStatusEntry.getValue().getCloudVmInstanceStatus());

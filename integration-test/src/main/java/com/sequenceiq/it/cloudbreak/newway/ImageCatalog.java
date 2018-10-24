@@ -5,6 +5,8 @@ import java.util.function.Function;
 
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImageCatalogRequest;
 import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.cloudbreak.newway.action.ActionV2;
+import com.sequenceiq.it.cloudbreak.newway.action.ImageCatalogPostAction;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.v3.ImageCatalogV3Action;
 
@@ -106,5 +108,23 @@ public class ImageCatalog extends ImageCatalogEntity {
 
     public static Action<ImageCatalog> setDefault() {
         return setDefault(IMAGE_CATALOG);
+    }
+
+    public static ImageCatalogEntity getByNameAndImages(TestContext testContext, ImageCatalogEntity entity, CloudbreakClient cloudbreakClient) {
+        entity.setResponse(
+                cloudbreakClient.getCloudbreakClient().imageCatalogV3Endpoint().getByNameInWorkspace(cloudbreakClient.getWorkspaceId(), entity.getName(), true)
+        );
+        return entity;
+    }
+
+    public static ImageCatalogEntity getByNameWithoutImages(TestContext testContext, ImageCatalogEntity entity, CloudbreakClient cloudbreakClient) {
+        entity.setResponse(
+                cloudbreakClient.getCloudbreakClient().imageCatalogV3Endpoint().getByNameInWorkspace(cloudbreakClient.getWorkspaceId(), entity.getName(), false)
+        );
+        return entity;
+    }
+
+    public static ActionV2<ImageCatalogEntity> postV2() {
+        return new ImageCatalogPostAction();
     }
 }

@@ -77,6 +77,13 @@ public class InstanceGroupEntity extends AbstractCloudbreakEntity<InstanceGroupV
         return this;
     }
 
+    public InstanceGroupEntity withRecipes(String... recipeNames) {
+        for (String recipeName : recipeNames) {
+            getRequest().getRecipeNames().add(recipeName);
+        }
+        return this;
+    }
+
     public InstanceGroupEntity withGroup(String group) {
         getRequest().setGroup(group);
         return this;
@@ -105,10 +112,6 @@ public class InstanceGroupEntity extends AbstractCloudbreakEntity<InstanceGroupV
     private RecoveryMode getRecoveryModeParam(HostGroupType hostGroupType) {
         String argumentName = String.join("", hostGroupType.getName(), RECOVERY_MODE);
         String argumentValue = getTestParameter().getWithDefault(argumentName, MANUAL);
-        if (argumentValue.equals(AUTO)) {
-            return RecoveryMode.AUTO;
-        } else {
-            return RecoveryMode.MANUAL;
-        }
+        return argumentValue.equals(AUTO) ? RecoveryMode.AUTO : RecoveryMode.MANUAL;
     }
 }

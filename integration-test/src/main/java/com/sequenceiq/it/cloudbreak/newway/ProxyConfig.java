@@ -5,6 +5,9 @@ import java.util.function.Function;
 
 import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigRequest;
 import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.cloudbreak.newway.action.ActionV2;
+import com.sequenceiq.it.cloudbreak.newway.action.ProxyConfigPostAction;
+import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.v3.ProxyConfigV3Action;
 
 public class ProxyConfig extends ProxyConfigEntity {
@@ -74,5 +77,16 @@ public class ProxyConfig extends ProxyConfigEntity {
 
     public static Assertion<ProxyConfig> assertThis(BiConsumer<ProxyConfig, IntegrationTestContext> check) {
         return new Assertion<>(getTestContext(GherkinTest.RESULT), check);
+    }
+
+    public static ProxyConfigEntity getByName(TestContext testContext, ProxyConfigEntity entity, CloudbreakClient cloudbreakClient) {
+        entity.setResponse(
+                cloudbreakClient.getCloudbreakClient().proxyConfigV3Endpoint().getByNameInWorkspace(cloudbreakClient.getWorkspaceId(), entity.getName())
+        );
+        return entity;
+    }
+
+    public static ActionV2<ProxyConfigEntity> postV2() {
+        return new ProxyConfigPostAction();
     }
 }

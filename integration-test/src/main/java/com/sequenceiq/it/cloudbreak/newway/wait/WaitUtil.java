@@ -1,22 +1,20 @@
 package com.sequenceiq.it.cloudbreak.newway.wait;
 
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.ws.rs.ForbiddenException;
-
+import com.sequenceiq.cloudbreak.api.endpoint.v3.StackV3Endpoint;
+import com.sequenceiq.it.cloudbreak.WaitResult;
+import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v3.StackV3Endpoint;
-import com.sequenceiq.it.cloudbreak.WaitResult;
-import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
+import javax.ws.rs.ForbiddenException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Component
 public class WaitUtil {
@@ -54,7 +52,7 @@ public class WaitUtil {
             throw new RuntimeException(builder.toString());
         } else if (waitResult == WaitResult.TIMEOUT) {
             throw new RuntimeException("Timeout happened");
-        } else {
+        } else if (!"DELETE_COMPLETED".equals(desiredStatuses.get("status"))) {
             Map<String, Object> statusByNameInWorkspace = cloudbreakClient.getCloudbreakClient()
                     .stackV3Endpoint().getStatusByNameInWorkspace(cloudbreakClient.getWorkspaceId(), stackName);
             if (statusByNameInWorkspace != null) {
@@ -92,6 +90,7 @@ public class WaitUtil {
                             .filter(entry -> "DELETE_COMPLETED".equals(entry.getValue()))
                             .map(Map.Entry::getKey)
                             .forEach(statusPath -> currentStatuses.put(statusPath, "DELETE_COMPLETED"));
+                    break;
                 }
                 continue;
             }

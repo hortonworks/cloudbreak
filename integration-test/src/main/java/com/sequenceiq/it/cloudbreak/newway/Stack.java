@@ -19,6 +19,10 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.sequenceiq.it.cloudbreak.newway.action.StackDeleteAction;
+import com.sequenceiq.it.cloudbreak.newway.action.StackStartAction;
+import com.sequenceiq.it.cloudbreak.newway.action.StackStopAction;
+import com.sequenceiq.it.cloudbreak.newway.action.StackSyncPutAction;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -125,6 +129,10 @@ public class Stack extends StackEntity {
 
     public static Action<Stack> delete(String key, Strategy strategy) {
         return new Action<>(getTestContextStack(key), strategy);
+    }
+
+    public static ActionV2<StackEntity> deleteV2() {
+        return new StackDeleteAction();
     }
 
     public static Action<Stack> delete(String key) {
@@ -338,5 +346,17 @@ public class Stack extends StackEntity {
 
     public static Action<Stack> repair(String hostgroupName) {
         return new Action<>(getTestContextStack(), new RepairNodeStrategy(hostgroupName));
+    }
+
+    public static ActionV2<StackEntity> stopV2() {
+        return new StackStopAction();
+    }
+
+    public static ActionV2<StackEntity> startV2() {
+        return new StackStartAction();
+    }
+
+    public static ActionV2<StackEntity> sync() {
+        return new StackSyncPutAction();
     }
 }

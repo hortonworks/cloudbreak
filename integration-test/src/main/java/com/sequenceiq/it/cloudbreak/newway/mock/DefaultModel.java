@@ -47,6 +47,10 @@ public class DefaultModel extends MockModel {
         saltMock.addSaltMappings();
     }
 
+    public SPIMock getSpiMock() {
+        return spiMock;
+    }
+
     public AmbariMock getAmbariMock() {
         return ambariMock;
     }

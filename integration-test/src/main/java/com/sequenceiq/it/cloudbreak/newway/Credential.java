@@ -1,6 +1,8 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
 import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.cloudbreak.newway.action.ActionV2;
+import com.sequenceiq.it.cloudbreak.newway.action.CredentialPostAction;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.v3.CredentialV3Action;
 
@@ -103,5 +105,16 @@ public class Credential extends CredentialEntity {
 
     public static Assertion<Credential> assertThis(BiConsumer<Credential, IntegrationTestContext> check) {
         return new Assertion<>(getTestContextCredential(GherkinTest.RESULT), check);
+    }
+
+    public static ActionV2<CredentialEntity> postV2() {
+        return new CredentialPostAction();
+    }
+
+    public static CredentialEntity getByName(TestContext testContext, CredentialEntity entity, CloudbreakClient cloudbreakClient) {
+        entity.setResponse(
+                cloudbreakClient.getCloudbreakClient().credentialV3Endpoint().getByNameInWorkspace(cloudbreakClient.getWorkspaceId(), entity.getName())
+        );
+        return entity;
     }
 }

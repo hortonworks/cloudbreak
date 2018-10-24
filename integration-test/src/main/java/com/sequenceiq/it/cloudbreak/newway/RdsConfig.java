@@ -4,8 +4,12 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.cloudbreak.newway.action.ActionV2;
+import com.sequenceiq.it.cloudbreak.newway.action.RdsConfigPostAction;
+import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.v3.RdsConfigV3Action;
 
+@Prototype
 public class RdsConfig extends RdsConfigEntity {
     private static final String RDSCONFIG = "RDSCONFIG";
 
@@ -15,6 +19,10 @@ public class RdsConfig extends RdsConfigEntity {
 
     protected RdsConfig(String newId) {
         super(newId);
+    }
+
+    public RdsConfig(TestContext testContext) {
+        super(testContext);
     }
 
     private static Function<IntegrationTestContext, RdsConfig> getTestContext(String key) {
@@ -85,5 +93,9 @@ public class RdsConfig extends RdsConfigEntity {
 
     public static Assertion<RdsConfig> assertThis(BiConsumer<RdsConfig, IntegrationTestContext> check) {
         return new Assertion<>(getTestContext(GherkinTest.RESULT), check);
+    }
+
+    public static ActionV2<RdsConfigEntity> postV2() {
+        return new RdsConfigPostAction();
     }
 }
