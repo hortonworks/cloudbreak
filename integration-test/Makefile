@@ -7,7 +7,9 @@ include docker_env.tmp
 else
 $(shell echo export TEST_ENV=boot2docker > docker_env.tmp)
 endif
-REPO_URL ?= https://cloudbreak-maven.s3.amazonaws.com/releases
+ifeq ($(REPO_URL),"")
+REPO_URL = https://cloudbreak-maven.s3.amazonaws.com/releases
+endif
 
 all: download-cbd buildcb runtest
 
