@@ -9,6 +9,8 @@ import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariMessages.AM
 import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariMessages.AMBARI_CLUSTER_UPSCALE_FAILED;
 import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariOperationType.STOP_AMBARI_PROGRESS_STATE;
 import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariOperationType.UPSCALE_AMBARI_PROGRESS_STATE;
+import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariRepositoryVersionService.AMBARI_VERSION_2_7_0_0;
+import static com.sequenceiq.cloudbreak.service.cluster.ambari.HostGroupAssociationBuilder.FQDN;
 import static java.util.Collections.singletonMap;
 
 import java.util.Collection;
@@ -29,9 +31,9 @@ import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.ambari.client.AmbariConnectionException;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
@@ -66,10 +68,16 @@ public class AmbariClusterModificationService implements ClusterModificationServ
     private HostMetadataRepository hostMetadataRepository;
 
     @Inject
+    private HostGroupAssociationBuilder hostGroupAssociationBuilder;
+
+    @Inject
     private CloudbreakMessagesService cloudbreakMessagesService;
 
     @Inject
     private CloudbreakEventService eventService;
+
+    @Inject
+    private AmbariRepositoryVersionService ambariRepositoryVersionService;
 
     @Inject
     private AmbariPollingServiceProvider ambariPollingServiceProvider;
@@ -89,7 +97,7 @@ public class AmbariClusterModificationService implements ClusterModificationServ
             Pair<PollingResult, Exception> pollingResult = ambariOperationService.waitForOperations(
                     stack,
                     ambariClient,
-                    installServices(upscaleHostNames, stack, ambariClient, hostGroup.getName()),
+                    installServices(upscaleHostNames, stack, ambariClient, hostGroup),
                     UPSCALE_AMBARI_PROGRESS_STATE);
             String message = pollingResult.getRight() == null
                     ? cloudbreakMessagesService.getMessage(AMBARI_CLUSTER_UPSCALE_FAILED.code())
@@ -166,7 +174,7 @@ public class AmbariClusterModificationService implements ClusterModificationServ
         return requestId;
     }
 
-    private Map<String, Integer> installServices(List<String> hosts, Stack stack, AmbariClient ambariClient, String hostGroup) {
+    private Map<String, Integer> installServices(List<String> hosts, Stack stack, AmbariClient ambariClient, HostGroup hostGroup) {
         try {
             String blueprintName = stack.getCluster().getBlueprint().getAmbariName();
             // In case If we changed the blueprintName field we need to query the validation name information from ambari
@@ -174,7 +182,18 @@ public class AmbariClusterModificationService implements ClusterModificationServ
             if (!blueprintsMap.entrySet().isEmpty()) {
                 blueprintName = blueprintsMap.keySet().iterator().next();
             }
-            return singletonMap("UPSCALE_REQUEST", ambariClient.addHostsWithBlueprint(blueprintName, hostGroup, hosts));
+            List<Map<String, String>> hostGroupAssociation = hostGroupAssociationBuilder.buildHostGroupAssociation(hostGroup);
+            Map<String, String> hostsWithRackInfo = hostGroupAssociation.stream()
+                    .filter(associationMap -> hosts.stream().anyMatch(host -> host.equals(associationMap.get(FQDN))))
+                    .collect(Collectors.toMap(association -> association.get(FQDN), association -> association.get("rack")));
+            int upscaleRequestCode = ambariClient.addHostsAndRackInfoWithBlueprint(blueprintName, hostGroup.getName(), hostsWithRackInfo);
+            String ambariServerVersion = ambariClient.ambariServerVersion();
+            if (!ambariRepositoryVersionService.isVersionNewerOrEqualThanLimited(() -> ambariServerVersion, AMBARI_VERSION_2_7_0_0)) {
+                for (String host : hosts) {
+                    ambariClient.updateRack(host, hostsWithRackInfo.get(host));
+                }
+            }
+            return singletonMap("UPSCALE_REQUEST", upscaleRequestCode);
         } catch (HttpResponseException e) {
             if ("Conflict".equals(e.getMessage())) {
                 throw new BadRequestException("Host already exists.", e);
