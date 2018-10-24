@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.FIELD)
-public @interface VaultValue {
+@Target({ElementType.METHOD, ElementType.TYPE})
+public @interface VaultResolver {
     String value() default "";
 }
