@@ -32,7 +32,7 @@ public class VaultService {
     }
 
     public String resolveSingleValue(String path, String key) {
-        VaultResponse response = template.read(path + '/' + key);
+        VaultResponse response = template.read(path);
         if (response != null && response.getData() != null) {
             return String.valueOf(response.getData().get(key));
         }
