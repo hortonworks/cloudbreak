@@ -15,7 +15,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
 import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
 import com.sequenceiq.periscope.domain.Cluster;
@@ -37,11 +37,11 @@ public class CloudbreakEndpointBasedPermissionEvaluatorTest {
     private StackSecurityService stackSecurityService;
 
     @Mock
-    private Authentication authentication;
+    private OAuth2Authentication authentication;
 
-    private final PeriscopeUser periscopeUserOk = new PeriscopeUser("owner", "email", "account");
+    private final PeriscopeUser periscopeUserOk = new PeriscopeUser("owner", "email", "tenant");
 
-    private final PeriscopeUser periscopeUserBad = new PeriscopeUser("owner-bad", "email", "account");
+    private final PeriscopeUser periscopeUserBad = new PeriscopeUser("owner-bad", "email", "tenant");
 
     @Before
     public void setup() {

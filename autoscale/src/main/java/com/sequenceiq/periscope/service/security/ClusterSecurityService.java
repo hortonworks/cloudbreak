@@ -24,7 +24,7 @@ public class ClusterSecurityService {
 
     public boolean hasAccess(PeriscopeUser user, Ambari ambari, Long stackId) {
         try {
-            return hasAccess(user.getId(), "TODO", ambari.getHost(), stackId);
+            return hasAccess(user.getId(), user.getTenant(), ambari.getHost(), stackId);
         } catch (RuntimeException ignored) {
             // if the cluster is unknown for cloudbreak
             // it should allow it to monitor

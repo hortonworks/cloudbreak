@@ -13,12 +13,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
 
 import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.PeriscopeUser;
+import com.sequenceiq.periscope.service.AuthenticatedUserService;
 
 @Service
 @Lazy
@@ -51,7 +53,8 @@ public class CloudbreakEndpointBasedPermissionEvaluator implements PermissionEva
                 }
                 Long stackId = getStackIdFromTarget(t);
                 if (stackId == null) {
-                    PeriscopeUser user = cachedUserDetailsService.getDetails((String) authentication.getPrincipal(), "tenant", UserFilterField.USERNAME);
+                    String tenant = AuthenticatedUserService.getTenant((OAuth2Authentication) authentication);
+                    PeriscopeUser user = cachedUserDetailsService.getDetails((String) authentication.getPrincipal(), tenant, UserFilterField.USERNAME);
                     return owner.equals(user.getId());
                 }
                 return stackSecurityService.hasAccess(stackId, owner, permission.toString());
