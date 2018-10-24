@@ -1,27 +1,33 @@
 package com.sequenceiq.cloudbreak.service.cluster.ambari;
 
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Service;
 
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.service.vault.VaultService;
 
 @Service
 public class AmbariSecurityConfigProvider {
 
     private static final String DEFAULT_AMBARI_SECURITY_MASTER_KEY = "bigdata";
 
+    @Inject
+    private VaultService vaultService;
+
     public String getAmbariUserName(Cluster cluster) {
         if (Strings.isNullOrEmpty(cluster.getCloudbreakAmbariUser())) {
             return cluster.getUserName();
         }
-        return cluster.getCloudbreakAmbariUser();
+        return vaultService.resolveSingleValue(cluster.getCloudbreakAmbariUser(), "cloudbreakAmbariUser");
     }
 
     public String getAmbariPassword(Cluster cluster) {
         if (Strings.isNullOrEmpty(cluster.getCloudbreakAmbariPassword())) {
             return cluster.getPassword();
         }
-        return cluster.getCloudbreakAmbariPassword();
+        return vaultService.resolveSingleValue(cluster.getCloudbreakAmbariPassword(), "cloudbreakAmbariPassword");
     }
 
     public String getAmbariUserProvidedPassword(Cluster cluster) {
@@ -33,6 +39,6 @@ public class AmbariSecurityConfigProvider {
         if (Strings.isNullOrEmpty(securityMasterKey)) {
             securityMasterKey = DEFAULT_AMBARI_SECURITY_MASTER_KEY;
         }
-        return securityMasterKey;
+        return vaultService.resolveSingleValue(securityMasterKey, "ambariSecurityMasterKey");
     }
 }
