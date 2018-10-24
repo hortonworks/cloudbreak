@@ -1,15 +1,22 @@
 package com.sequenceiq.cloudbreak.service.cluster.ambari;
 
+import static org.mockito.AdditionalAnswers.returnsFirstArg;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.service.vault.VaultService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AmbariSecurityConfigProviderTest {
@@ -19,6 +26,14 @@ public class AmbariSecurityConfigProviderTest {
 
     @InjectMocks
     private final AmbariSecurityConfigProvider underTest = new AmbariSecurityConfigProvider();
+
+    @Mock
+    private VaultService vaultService;
+
+    @Before
+    public void init() {
+        when(vaultService.resolveSingleValue(anyString(), anyString())).then(returnsFirstArg());
+    }
 
     @Test
     public void testGetAmbariUserNameWhenCloudbreakAmbariUserNameIsNullThenShouldReturnUserName() {
