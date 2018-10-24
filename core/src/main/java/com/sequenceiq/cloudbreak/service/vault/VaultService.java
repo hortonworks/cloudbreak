@@ -39,4 +39,8 @@ public class VaultService {
         return "";
     }
 
+    public void deleteSecret(String path) {
+        operations.delete(path);
+    }
+
 }
