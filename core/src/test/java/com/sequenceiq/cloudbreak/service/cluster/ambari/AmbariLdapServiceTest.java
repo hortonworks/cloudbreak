@@ -21,6 +21,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.model.DirectoryType;
+import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -34,6 +35,9 @@ public class AmbariLdapServiceTest {
 
     @Mock
     private AmbariClientFactory ambariClientFactory;
+
+    @Mock
+    private AmbariRepositoryVersionService ambariRepositoryVersionService;
 
     @Captor
     private ArgumentCaptor<Map<String, Object>> captor;
@@ -85,7 +89,9 @@ public class AmbariLdapServiceTest {
 
     @Test
     public void setupLdap() {
-        ambariLdapService.setupLdap(stack, cluster);
+        AmbariRepo ambariRepo = mock(AmbariRepo.class);
+        when(ambariRepositoryVersionService.isVersionNewerOrEqualThanLimited(any(), any())).thenReturn(false);
+        ambariLdapService.setupLdap(stack, cluster, ambariRepo);
 
         verify(ambariClient).configureLdap(captor.capture());
         Map<String, Object> parameters = captor.getValue();
@@ -108,6 +114,38 @@ public class AmbariLdapServiceTest {
         assertThat(parameters, hasEntry("ambari.ldap.advanced.referrals", "follow"));
         assertThat(parameters, hasEntry("ambari.ldap.connectivity.anonymous_bind", false));
         assertThat(parameters, hasEntry("ambari.ldap.advance.collision_behavior", "convert"));
+        assertThat(parameters, hasEntry("ambari.ldap.advanced.force_lowercase_usernames", false));
+        assertThat(parameters, hasEntry("ambari.ldap.advanced.pagination_enabled", true));
+        assertThat(parameters, hasEntry("ambari.ldap.advanced.group_mapping_rules", ldapConfig.getAdminGroup()));
+    }
+
+    @Test
+    public void setupLdapWithAmbari2720() {
+        AmbariRepo ambariRepo = mock(AmbariRepo.class);
+        when(ambariRepositoryVersionService.isVersionNewerOrEqualThanLimited(any(), any())).thenReturn(true);
+        ambariLdapService.setupLdap(stack, cluster, ambariRepo);
+
+        verify(ambariClient).configureLdap(captor.capture());
+        Map<String, Object> parameters = captor.getValue();
+        assertThat(parameters, hasEntry("ambari.ldap.authentication.enabled", true));
+        assertThat(parameters, hasEntry("ambari.ldap.connectivity.server.host", ldapConfig.getServerHost()));
+        assertThat(parameters, hasEntry("ambari.ldap.connectivity.server.port", ldapConfig.getServerPort()));
+        assertThat(parameters, hasEntry("ambari.ldap.connectivity.secondary.server.host", ldapConfig.getServerHost()));
+        assertThat(parameters, hasEntry("ambari.ldap.connectivity.secondary.server.port", ldapConfig.getServerPort()));
+        assertThat(parameters, hasEntry("ambari.ldap.connectivity.use_ssl", true));
+        assertThat(parameters, hasEntry("ambari.ldap.attributes.dn_attr", ldapConfig.getUserDnPattern()));
+        assertThat(parameters, hasEntry("ambari.ldap.attributes.user.object_class", ldapConfig.getUserObjectClass()));
+        assertThat(parameters, hasEntry("ambari.ldap.attributes.group.object_class", ldapConfig.getGroupObjectClass()));
+        assertThat(parameters, hasEntry("ambari.ldap.attributes.user.name_attr", ldapConfig.getUserNameAttribute()));
+        assertThat(parameters, hasEntry("ambari.ldap.attributes.group.name_attr", ldapConfig.getGroupNameAttribute()));
+        assertThat(parameters, hasEntry("ambari.ldap.attributes.user.search_base", ldapConfig.getUserSearchBase()));
+        assertThat(parameters, hasEntry("ambari.ldap.attributes.group.search_base", ldapConfig.getGroupSearchBase()));
+        assertThat(parameters, hasEntry("ambari.ldap.attributes.group.member_attr", ldapConfig.getGroupMemberAttribute()));
+        assertThat(parameters, hasEntry("ambari.ldap.connectivity.bind_dn", ldapConfig.getBindDn()));
+        assertThat(parameters, hasEntry("ambari.ldap.connectivity.bind_password", "/etc/ambari-server/conf/ldap-password.dat"));
+        assertThat(parameters, hasEntry("ambari.ldap.advanced.referrals", "follow"));
+        assertThat(parameters, hasEntry("ambari.ldap.connectivity.anonymous_bind", false));
+        assertThat(parameters, hasEntry("ambari.ldap.advanced.collision_behavior", "convert"));
         assertThat(parameters, hasEntry("ambari.ldap.advanced.force_lowercase_usernames", false));
         assertThat(parameters, hasEntry("ambari.ldap.advanced.pagination_enabled", true));
         assertThat(parameters, hasEntry("ambari.ldap.advanced.group_mapping_rules", ldapConfig.getAdminGroup()));

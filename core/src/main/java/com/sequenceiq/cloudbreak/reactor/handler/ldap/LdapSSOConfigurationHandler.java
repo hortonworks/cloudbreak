@@ -60,7 +60,7 @@ public class LdapSSOConfigurationHandler implements ReactorEventHandler<LdapSSOC
             AmbariRepo ambariRepo = clusterComponentConfigProvider.getAmbariRepo(stack.getCluster().getId());
             if (ambariRepositoryVersionService.setupLdapAndSsoOnApi(ambariRepo)) {
                 LOGGER.info("Setup LDAP and SSO on API");
-                ambariLdapService.setupLdap(stack, stack.getCluster());
+                ambariLdapService.setupLdap(stack, stack.getCluster(), ambariRepo);
                 ambariLdapService.syncLdap(stack, stack.getCluster());
                 ambariSSOService.setupSSO(stack, stack.getCluster());
             } else {
