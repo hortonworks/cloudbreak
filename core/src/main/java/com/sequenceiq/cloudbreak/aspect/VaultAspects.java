@@ -31,11 +31,10 @@ public class VaultAspects {
     }
 
     @Around("allRepositories()")
-    public Object hasPermission(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
+    public Object saveToVault(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
         Object entity = proceedingJoinPoint.getArgs()[0];
-        MethodSignature methodSignature = (MethodSignature) proceedingJoinPoint.getSignature();
-        try{
-            for (Field field : methodSignature.getReturnType().getDeclaredFields()) {
+        try {
+            for (Field field : entity.getClass().getDeclaredFields()) {
                 if (field.isAnnotationPresent(VaultValue.class)) {
                     LOGGER.info("Found annotation on {}", field);
                     field.setAccessible(true);
@@ -46,10 +45,9 @@ public class VaultAspects {
                     String path = vaultService.addFieldToSecret("pepsi/cb/clusters", resourceId, field.getName(), (String) field.get(entity));
                     LOGGER.info("Field: {} saved at path: {}", field.getName(), path);
                     field.set(entity, path);
-                    //TODO: should override original value of field with path of resource
                 }
             }
-        } catch (Exception e){
+        } catch (Exception e) {
             LOGGER.warn("Looks like something went wrong with Vault. Data is not encrypted!", e);
         }
 
