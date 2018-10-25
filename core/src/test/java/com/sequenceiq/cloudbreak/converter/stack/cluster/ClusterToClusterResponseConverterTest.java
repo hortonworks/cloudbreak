@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.converter.stack.cluster;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
@@ -53,19 +54,20 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariViewProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.vault.VaultService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
 public class ClusterToClusterResponseConverterTest extends AbstractEntityConverterTest<Cluster> {
@@ -130,6 +132,9 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
     @Mock
     private ServiceEndpointCollector serviceEndpointCollector;
 
+    @Mock
+    private VaultService vaultService;
+
     private StackServiceComponentDescriptor stackServiceComponentDescriptor;
 
     @Before
@@ -141,6 +146,7 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
         given(stackService.findClustersConnectedToDatalake(anyLong())).willReturn(new HashSet<>());
         given(conversionService.convert(any(Workspace.class), eq(WorkspaceResourceResponse.class)))
                 .willReturn(new WorkspaceResourceResponse());
+        when(vaultService.resolveSingleValue(anyString())).then(returnsFirstArg());
         stackServiceComponentDescriptor = createStackServiceComponentDescriptor();
     }
 

@@ -415,7 +415,7 @@ public class TestUtil {
 
         Map<String, String> map = new HashMap<>();
         try {
-            cluster.setAttributes(new Json(map));
+            cluster.setAttributes(new Json(map).getValue());
         } catch (JsonProcessingException ignored) {
             cluster.setAttributes(null);
         }

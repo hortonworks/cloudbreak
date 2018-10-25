@@ -51,7 +51,6 @@ import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.converter.EncryptionConverter;
-import com.sequenceiq.cloudbreak.domain.json.EncryptedJsonToString;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -128,7 +127,7 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
     @Column(nullable = false)
     private Boolean topologyValidation = Boolean.TRUE;
 
-    @Convert(converter = EncryptionConverter.class)
+    @VaultValue
     @Column(length = 1000000, columnDefinition = "TEXT", nullable = false)
     private String extendedBlueprintText;
 
@@ -157,9 +156,9 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
     @ManyToOne
     private LdapConfig ldapConfig;
 
-    @Convert(converter = EncryptedJsonToString.class)
+    @VaultValue
     @Column(columnDefinition = "TEXT")
-    private Json attributes;
+    private String attributes;
 
     @Convert(converter = JsonToString.class)
     @Column(columnDefinition = "TEXT")
@@ -415,11 +414,11 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
                 || DELETE_IN_PROGRESS.equals(status);
     }
 
-    public Json getAttributes() {
+    public String getAttributes() {
         return attributes;
     }
 
-    public void setAttributes(Json attributes) {
+    public void setAttributes(String attributes) {
         this.attributes = attributes;
     }
 
