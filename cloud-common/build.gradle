@@ -1,10 +1,5 @@
 apply plugin: 'java'
 
-repositories {
-    maven { url 'http://repo.spring.io/libs-release' }
-    mavenCentral()
-}
-
 jar {
     baseName = 'cloud-common'
     archiveName = 'cloud-common.jar'
