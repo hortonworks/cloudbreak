@@ -169,7 +169,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(source.getInputs()).thenReturn(stackInputs);
         when(stackInputs.get(StackInputs.class)).thenReturn(null);
         when(stackInfoService.blueprintStackInfo(TEST_BLUEPRINT_TEXT)).thenReturn(blueprintStackInfo);
-        when(vaultService.resolveSingleValue(any(), any())).thenReturn("admin<>");
+        when(vaultService.resolveSingleValue(any())).thenReturn("admin<>");
     }
 
     @Test

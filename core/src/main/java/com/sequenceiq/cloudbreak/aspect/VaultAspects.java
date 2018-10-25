@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.aspect;
 
 import java.lang.reflect.Field;
+import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -12,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.aspect.vault.VaultIdentifier;
 import com.sequenceiq.cloudbreak.aspect.vault.VaultValue;
 import com.sequenceiq.cloudbreak.service.vault.VaultService;
 
@@ -41,14 +41,14 @@ public class VaultAspects {
                 if (field.isAnnotationPresent(VaultValue.class)) {
                     LOGGER.info("Found VaultValue annotation on {}", field);
                     field.setAccessible(true);
-                    VaultIdentifier vaultIdentifier = (VaultIdentifier) entity;
-                    String resourceId = vaultIdentifier.getUniqueIdentifier();
-                    //TODO: should create the map of all properties beforehand
+                    String tenant = "pepsi";
                     String value = (String) field.get(entity);
-                    if (value == null || !value.startsWith("pepsi")) {
+                    if (value != null && !value.startsWith(tenant)) {
                         String resourceType = entity.getClass().getSimpleName().toLowerCase();
-                        String path = vaultService.addFieldToSecret("pepsi/cb/" + resourceType, resourceId, field.getName(), value);
-                        LOGGER.info("Field: {} saved at path: {}", field.getName(), path);
+                        String resourceId = UUID.randomUUID().toString();
+                        String path = String.format("%s/cb/%s/%s", tenant, resourceType, resourceId);
+                        vaultService.addFieldToSecret(path, value);
+                        LOGGER.info("Field: '{}' is saved at path: {}", field.getName(), path);
                         field.set(entity, path);
                     }
                 }

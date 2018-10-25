@@ -22,7 +22,6 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import com.sequenceiq.cloudbreak.api.model.DirectoryType;
-import com.sequenceiq.cloudbreak.aspect.vault.VaultIdentifier;
 import com.sequenceiq.cloudbreak.aspect.vault.VaultValue;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.environment.EnvironmentAwareResource;
@@ -31,7 +30,7 @@ import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name"}))
-public class LdapConfig implements ProvisionEntity, EnvironmentAwareResource, VaultIdentifier {
+public class LdapConfig implements ProvisionEntity, EnvironmentAwareResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "ldapconfig_generator")
@@ -330,8 +329,4 @@ public class LdapConfig implements ProvisionEntity, EnvironmentAwareResource, Va
         return Objects.hash(id);
     }
 
-    @Override
-    public String getUniqueIdentifier() {
-        return "ldap-" + name;
-    }
 }
