@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.aspect.vault.VaultValue;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.vault.VaultService;
 
 @Component
@@ -34,7 +35,7 @@ public class VaultAspects {
     }
 
     @Around("onRepositorySave()")
-    public Object saveToVault(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
+    public Object saveToVault(ProceedingJoinPoint proceedingJoinPoint) throws CloudbreakException {
         Object entity = proceedingJoinPoint.getArgs()[0];
         try {
             for (Field field : entity.getClass().getDeclaredFields()) {
@@ -46,7 +47,8 @@ public class VaultAspects {
                     if (value != null && !value.startsWith(tenant)) {
                         String resourceType = entity.getClass().getSimpleName().toLowerCase();
                         String resourceId = UUID.randomUUID().toString();
-                        String path = String.format("%s/cb/%s/%s", tenant, resourceType, resourceId);
+                        String fieldName = field.getName().toLowerCase();
+                        String path = String.format("%s/cb/%s/%s/%s", tenant, resourceType, fieldName, resourceId);
                         vaultService.addFieldToSecret(path, value);
                         LOGGER.info("Field: '{}' is saved at path: {}", field.getName(), path);
                         field.set(entity, path);
@@ -55,14 +57,21 @@ public class VaultAspects {
             }
         } catch (Exception e) {
             LOGGER.warn("Looks like something went wrong with Vault. Data is not encrypted!", e);
+            throw new CloudbreakException(e);
         }
 
-        Object proceed = proceedingJoinPoint.proceed();
+        Object proceed;
+        try {
+            proceed = proceedingJoinPoint.proceed();
+        } catch (Throwable throwable) {
+            LOGGER.error("Failed to invoke repository save", throwable);
+            throw new CloudbreakException(throwable);
+        }
         return proceed;
     }
 
     @Around("onRepositoryDelete()")
-    public Object removeFromVault(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
+    public Object removeFromVault(ProceedingJoinPoint proceedingJoinPoint) throws CloudbreakException {
         Object entity = proceedingJoinPoint.getArgs()[0];
         try {
             for (Field field : entity.getClass().getDeclaredFields()) {
@@ -76,8 +85,16 @@ public class VaultAspects {
             }
         } catch (Exception e) {
             LOGGER.warn("Looks like something went wrong with Vault. Secret is not deleted!", e);
+            throw new CloudbreakException(e);
         }
-        Object proceed = proceedingJoinPoint.proceed();
+
+        Object proceed;
+        try {
+            proceed = proceedingJoinPoint.proceed();
+        } catch (Throwable throwable) {
+            LOGGER.error("Failed to invoke repository delete", throwable);
+            throw new CloudbreakException(throwable);
+        }
         return proceed;
     }
 

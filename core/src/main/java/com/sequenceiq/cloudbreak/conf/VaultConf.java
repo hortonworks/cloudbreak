@@ -10,13 +10,13 @@ import org.springframework.vault.config.AbstractVaultConfiguration;
 @Configuration
 class VaultConf extends AbstractVaultConfiguration {
 
-    @Value("${cb.vault.addr}")
+    @Value("${cb.vault.addr:vault.service.consul}")
     private String address;
 
     @Value("${cb.vault.port:8200}")
     private int port;
 
-    @Value("${cb.vault.root.token}")
+    @Value("${cb.vault.root.token:}")
     private String rootToken;
 
     @Override
