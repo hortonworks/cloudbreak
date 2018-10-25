@@ -14,6 +14,7 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentAttachRequest;
+import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentDetachRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.response.DetailedEnvironmentResponse;
 import com.sequenceiq.cloudbreak.api.model.environment.response.SimpleEnvironmentResponse;
@@ -21,8 +22,12 @@ import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
+import com.sequenceiq.cloudbreak.controller.validation.environment.EnvironmentAttachValidator;
 import com.sequenceiq.cloudbreak.controller.validation.environment.EnvironmentCreationValidator;
 import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.LdapConfig;
+import com.sequenceiq.cloudbreak.domain.ProxyConfig;
+import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.environment.Environment;
 import com.sequenceiq.cloudbreak.repository.environment.EnvironmentRepository;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
@@ -51,6 +56,9 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
 
     @Inject
     private EnvironmentCreationValidator environmentCreationValidator;
+
+    @Inject
+    private EnvironmentAttachValidator environmentAttachValidator;
 
     @Inject
     private EnvironmentViewService environmentViewService;
@@ -104,11 +112,42 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
     }
 
     public DetailedEnvironmentResponse attachResources(String environmentName, EnvironmentAttachRequest request, Long workspaceId) {
-        return null;
+        Set<LdapConfig> ldapsToAttach = ldapConfigService.findByNamesInWorkspace(request.getLdapConfigs(), workspaceId);
+        Set<ProxyConfig> proxiesToAttach = proxyConfigService.findByNamesInWorkspace(request.getProxyConfigs(), workspaceId);
+        Set<RDSConfig> rdssToAttach = rdsConfigService.findByNamesInWorkspace(request.getRdsConfigs(), workspaceId);
+        ValidationResult validationResult = environmentAttachValidator.validate(request, ldapsToAttach, proxiesToAttach, rdssToAttach);
+        if (validationResult.hasError()) {
+            throw new BadRequestException(validationResult.getFormattedErrors());
+        }
+        Environment environment = getByNameForWorkspaceId(environmentName, workspaceId);
+        environment = doAttach(ldapsToAttach, proxiesToAttach, rdssToAttach, environment);
+        return conversionService.convert(environment, DetailedEnvironmentResponse.class);
     }
 
-    public DetailedEnvironmentResponse detachResources(String environmentName, EnvironmentAttachRequest request, Long workspaceId) {
-        return null;
+    private Environment doAttach(Set<LdapConfig> ldapsToAttach, Set<ProxyConfig> proxiesToAttach, Set<RDSConfig> rdssToAttach, Environment environment) {
+        ldapsToAttach.removeAll(environment.getLdapConfigs());
+        environment.getLdapConfigs().addAll(ldapsToAttach);
+        proxiesToAttach.removeAll(environment.getProxyConfigs());
+        environment.getProxyConfigs().addAll(proxiesToAttach);
+        rdssToAttach.removeAll(environment.getRdsConfigs());
+        environment.getRdsConfigs().addAll(rdssToAttach);
+        environment = environmentRepository.save(environment);
+        return environment;
+    }
+
+    public DetailedEnvironmentResponse detachResources(String environmentName, EnvironmentDetachRequest request, Long workspaceId) {
+        Environment environment = getByNameForWorkspaceId(environmentName, workspaceId);
+        Set<LdapConfig> ldapsToRemove = environment.getLdapConfigs().stream()
+                .filter(ldap -> request.getLdapConfigs().contains(ldap.getName())).collect(Collectors.toSet());
+        environment.getLdapConfigs().removeAll(ldapsToRemove);
+        Set<ProxyConfig> proxiesToRemove = environment.getProxyConfigs().stream()
+                .filter(proxy -> request.getProxyConfigs().contains(proxy.getName())).collect(Collectors.toSet());
+        environment.getProxyConfigs().removeAll(proxiesToRemove);
+        Set<RDSConfig> rdssToRemove = environment.getRdsConfigs().stream()
+                .filter(rds -> request.getRdsConfigs().contains(rds.getName())).collect(Collectors.toSet());
+        environment.getRdsConfigs().removeAll(rdssToRemove);
+        environment = environmentRepository.save(environment);
+        return conversionService.convert(environment, DetailedEnvironmentResponse.class);
     }
 
     @Override
@@ -118,6 +157,7 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
 
     @Override
     protected void prepareDeletion(Environment resource) {
+
     }
 
     @Override

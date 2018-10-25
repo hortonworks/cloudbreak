@@ -22,7 +22,6 @@ import com.sequenceiq.cloudbreak.api.model.rds.RdsTestResult;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
-import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.RdsConfigOpDescription;
 
 import io.swagger.annotations.Api;
@@ -36,7 +35,7 @@ public interface RdsConfigV3Endpoint {
     @GET
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.RdsConfigOpDescription.LIST_BY_WORKSPACE, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
+    @ApiOperation(value = RdsConfigOpDescription.LIST_BY_WORKSPACE, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
             nickname = "listRdsConfigsByWorkspace")
     Set<RDSConfigResponse> listByWorkspace(@PathParam("workspaceId") Long workspaceId, @QueryParam("environment") String environment,
             @QueryParam("attachGlobal") Boolean attachGlobal);
@@ -44,35 +43,35 @@ public interface RdsConfigV3Endpoint {
     @POST
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.RdsConfigOpDescription.CREATE_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
+    @ApiOperation(value = RdsConfigOpDescription.CREATE_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
             nickname = "createRdsConfigInWorkspace")
     RDSConfigResponse createInWorkspace(@PathParam("workspaceId") Long workspaceId, @Valid RDSConfigRequest request);
 
     @GET
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.RdsConfigOpDescription.GET_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
+    @ApiOperation(value = RdsConfigOpDescription.GET_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
             nickname = "getRdsConfigInWorkspace")
     RDSConfigResponse getByNameInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @DELETE
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.RdsConfigOpDescription.DELETE_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
+    @ApiOperation(value = RdsConfigOpDescription.DELETE_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
             nickname = "deleteRdsConfigInWorkspace")
     RDSConfigResponse deleteInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @GET
     @Path("{name}/request")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.RdsConfigOpDescription.GET_REQUEST_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
+    @ApiOperation(value = RdsConfigOpDescription.GET_REQUEST_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
             nickname = "getRdsRequestFromNameInWorkspace")
     RDSConfigRequest getRequestFromName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @POST
     @Path("testconnect")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.RdsConfigOpDescription.POST_CONNECTION_TEST, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
+    @ApiOperation(value = RdsConfigOpDescription.POST_CONNECTION_TEST, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
             nickname = "testRdsConnectionInWorkspace")
     RdsTestResult testRdsConnection(@PathParam("workspaceId") Long workspaceId, @Valid RDSTestRequest rdsTestRequest);
 

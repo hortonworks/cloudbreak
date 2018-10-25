@@ -70,18 +70,18 @@ public class RdsConfigV3Controller extends AbstractRdsConfigController implement
     }
 
     @Override
+    public RDSConfigRequest getRequestFromName(Long workspaceId, String name) {
+        RDSConfig rdsConfig = getRdsConfigService().getByNameForWorkspaceId(name, workspaceId);
+        return getConversionService().convert(rdsConfig, RDSConfigRequest.class);
+    }
+
+    @Override
     public RDSConfigResponse attachToEnvironments(Long workspaceId, String name, @NotEmpty Set<String> environmentNames) {
-        return null;
+        return getRdsConfigService().attachToEnvironmentsAndConvert(name, environmentNames, workspaceId, RDSConfigResponse.class);
     }
 
     @Override
     public RDSConfigResponse detachFromEnvironments(Long workspaceId, String name, @NotEmpty Set<String> environmentNames) {
-        return null;
-    }
-
-    @Override
-    public RDSConfigRequest getRequestFromName(Long workspaceId, String name) {
-        RDSConfig rdsConfig = getRdsConfigService().getByNameForWorkspaceId(name, workspaceId);
-        return getConversionService().convert(rdsConfig, RDSConfigRequest.class);
+        return getRdsConfigService().detachFromEnvironmentsAndConvert(name, environmentNames, workspaceId, RDSConfigResponse.class);
     }
 }

@@ -1,11 +1,13 @@
 package com.sequenceiq.cloudbreak.service.environment;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
@@ -25,7 +27,7 @@ public class EnvironmentViewService extends AbstractWorkspaceAwareResourceServic
     }
 
     public Set<EnvironmentView> findByNamesInWorkspace(Set<String> names, @NotNull Long workspaceId) {
-        return environmentViewRepository.findAllByNameInAndWorkspaceId(names, workspaceId);
+        return CollectionUtils.isEmpty(names) ? new HashSet<>() : environmentViewRepository.findAllByNameInAndWorkspaceId(names, workspaceId);
     }
 
     @Override
