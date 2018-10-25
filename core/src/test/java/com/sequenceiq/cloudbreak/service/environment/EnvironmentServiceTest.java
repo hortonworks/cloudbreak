@@ -10,6 +10,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.junit.Before;
@@ -187,6 +188,7 @@ public class EnvironmentServiceTest {
         Credential credential = new Credential();
         credential.setName("credential1");
         environment.setCredential(credential);
+        environment.setWorkloadClusters(new HashSet<>());
 
         when(environmentRepository.findByNameAndWorkspaceId(ENVIRONMENT_NAME, WORKSPACE_ID)).thenReturn(environment);
         when(environmentRepository.save(any(Environment.class)))

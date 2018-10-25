@@ -41,15 +41,17 @@ import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.Tags;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentViewService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
 public class StackV2RequestToStackRequestConverterTest {
 
@@ -71,6 +73,9 @@ public class StackV2RequestToStackRequestConverterTest {
     private CredentialService credentialService;
 
     @Mock
+    private EnvironmentViewService environmentService;
+
+    @Mock
     private StackService stackService;
 
     @Mock
@@ -89,6 +94,9 @@ public class StackV2RequestToStackRequestConverterTest {
     private Credential credential;
 
     @Mock
+    private EnvironmentView environmentView;
+
+    @Mock
     private CloudbreakUser cbUser;
 
     @Mock
@@ -105,7 +113,9 @@ public class StackV2RequestToStackRequestConverterTest {
         when(userService.getOrCreate(eq(cbUser))).thenReturn(user);
         when(workspaceService.get(anyLong(), eq(user))).thenReturn(workspace);
         when(credentialService.getByNameForWorkspace(any(), any(Workspace.class))).thenReturn(credential);
+        when(environmentService.getByNameForWorkspace(any(), any(Workspace.class))).thenReturn(environmentView);
         when(credential.cloudPlatform()).thenReturn(CLOUD_PLATFORM);
+        when(environmentView.getCloudPlatform()).thenReturn(CLOUD_PLATFORM);
         when(conversionService.convert(any(NetworkV2Request.class), any())).thenReturn(NETWORK_REQUEST);
     }
 
@@ -128,6 +138,7 @@ public class StackV2RequestToStackRequestConverterTest {
         Assert.assertEquals("SALT", result.getOrchestrator().getType());
         Assert.assertEquals(source.getFlexId(), result.getFlexId());
         Assert.assertEquals(source.getGeneral().getCredentialName(), result.getCredentialName());
+        Assert.assertEquals(source.getGeneral().getEnvironmentName(), result.getEnvironment());
         Assert.assertEquals(CLOUD_PLATFORM, result.getCloudPlatform());
         verify(conversionService, times(1)).convert(any(), any());
         verify(restRequestThreadLocalService, times(1)).getCloudbreakUser();
@@ -519,6 +530,7 @@ public class StackV2RequestToStackRequestConverterTest {
         GeneralSettings generalSettings = new GeneralSettings();
         generalSettings.setName("some name");
         generalSettings.setCredentialName("credential name");
+        generalSettings.setEnvironmentName("environment name");
         return generalSettings;
     }
 

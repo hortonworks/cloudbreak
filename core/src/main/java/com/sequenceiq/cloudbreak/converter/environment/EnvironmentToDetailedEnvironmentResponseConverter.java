@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.converter.environment;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.model.environment.response.DetailedEnvironmentResponse;
 import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
@@ -11,6 +12,7 @@ import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.environment.Environment;
+import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 
 @Component
 public class EnvironmentToDetailedEnvironmentResponseConverter extends AbstractConversionServiceAwareConverter<Environment, DetailedEnvironmentResponse> {
@@ -28,6 +30,9 @@ public class EnvironmentToDetailedEnvironmentResponseConverter extends AbstractC
         response.setLdapConfigs(source.getLdapConfigs().stream().map(LdapConfig::getName).collect(Collectors.toSet()));
         response.setProxyConfigs(source.getProxyConfigs().stream().map(ProxyConfig::getName).collect(Collectors.toSet()));
         response.setRdsConfigs(source.getRdsConfigs().stream().map(RDSConfig::getName).collect(Collectors.toSet()));
+        if (!CollectionUtils.isEmpty(source.getWorkloadClusters())) {
+            response.setWorkloadClusters(source.getWorkloadClusters().stream().map(StackApiView::getName).collect(Collectors.toSet()));
+        }
         return response;
     }
 }

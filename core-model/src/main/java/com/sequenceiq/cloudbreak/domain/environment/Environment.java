@@ -14,6 +14,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -26,6 +27,7 @@ import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonStringSetUtils;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
+import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
 
@@ -69,6 +71,10 @@ public class Environment implements WorkspaceAwareResource {
     @ManyToMany(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
     @JoinTable(name = "env_rds", joinColumns = @JoinColumn(name = "envid"), inverseJoinColumns = @JoinColumn(name = "rdsid"))
     private Set<RDSConfig> rdsConfigs;
+
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinColumn(name = "environment_id")
+    private Set<StackApiView> workloadClusters;
 
     @Override
     public Long getId() {
@@ -152,6 +158,14 @@ public class Environment implements WorkspaceAwareResource {
 
     public void setRdsConfigs(Set<RDSConfig> rdsConfigs) {
         this.rdsConfigs = rdsConfigs;
+    }
+
+    public Set<StackApiView> getWorkloadClusters() {
+        return workloadClusters;
+    }
+
+    public void setWorkloadClusters(Set<StackApiView> workloadClusters) {
+        this.workloadClusters = workloadClusters;
     }
 
     @Override

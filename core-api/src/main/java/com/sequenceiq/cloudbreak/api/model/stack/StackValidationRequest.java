@@ -46,6 +46,9 @@ public class StackValidationRequest implements JsonEntity {
     @ApiModelProperty(value = ModelDescriptions.CLOUD_PLATFORM, required = true)
     private String platform;
 
+    @ApiModelProperty(StackModelDescription.ENVIRONMENT)
+    private String environment;
+
     @ApiModelProperty(StackModelDescription.CREDENTIAL_ID)
     private Long credentialId;
 
@@ -134,6 +137,14 @@ public class StackValidationRequest implements JsonEntity {
 
     public void setNetwork(NetworkRequest network) {
         this.network = network;
+    }
+
+    public String getEnvironment() {
+        return environment;
+    }
+
+    public void setEnvironment(String environment) {
+        this.environment = environment;
     }
 
     public Long getCredentialId() {

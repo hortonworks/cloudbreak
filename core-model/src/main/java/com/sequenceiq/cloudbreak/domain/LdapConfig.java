@@ -118,7 +118,6 @@ public class LdapConfig implements ProvisionEntity, EnvironmentAwareResource {
         copy.setGroupMemberAttribute(groupMemberAttribute);
         copy.setDomain(domain);
         copy.setAdminGroup(adminGroup);
-        copy.setEnvironments(environments);
         return copy;
     }
 

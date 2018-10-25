@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.base.Strings;
@@ -41,11 +42,12 @@ import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentViewService;
 import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
@@ -105,7 +107,14 @@ public class StackDecorator {
     @Inject
     private List<ParameterValidator> parameterValidators;
 
+    @Inject
+    private EnvironmentViewService environmentViewService;
+
     public Stack decorate(@Nonnull Stack subject, @Nonnull StackRequest request, User user, Workspace workspace) {
+        if (!StringUtils.isEmpty(request.getEnvironment())) {
+            subject.setEnvironment(environmentViewService.getByNameForWorkspace(request.getEnvironment(), workspace));
+        }
+
         String stackName = request.getName();
         long start = System.currentTimeMillis();
         prepareCredential(subject, request, user, workspace);
@@ -210,7 +219,9 @@ public class StackDecorator {
     }
 
     private void prepareCredential(Stack subject, StackRequest request, User user, Workspace workspace) {
-        if (subject.getCredential() == null) {
+        if (subject.getEnvironment() != null) {
+            subject.setCredential(subject.getEnvironment().getCredential());
+        } else if (subject.getCredential() == null) {
             if (request.getCredentialId() != null) {
                 Credential credential = credentialService.get(request.getCredentialId(), workspace);
                 subject.setCredential(credential);

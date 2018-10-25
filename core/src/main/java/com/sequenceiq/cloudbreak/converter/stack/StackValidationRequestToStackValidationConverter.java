@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.model.NetworkRequest;
 import com.sequenceiq.cloudbreak.api.model.SpecialParameters;
@@ -32,11 +33,13 @@ import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentViewService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.user.UserService;
@@ -53,6 +56,9 @@ public class StackValidationRequestToStackValidationConverter extends AbstractCo
 
     @Inject
     private CredentialService credentialService;
+
+    @Inject
+    private EnvironmentViewService environmentViewService;
 
     @Inject
     @Qualifier("conversionService")
@@ -84,6 +90,11 @@ public class StackValidationRequestToStackValidationConverter extends AbstractCo
         );
         formatAccessDeniedMessage(
                 () -> {
+                    validateEnvironment(stackValidationRequest, stackValidation, workspace);
+                }, "environment", stackValidationRequest.getEnvironment()
+        );
+        formatAccessDeniedMessage(
+                () -> {
                     validateCredential(stackValidationRequest, stackValidation, workspace);
                 }, "credential", stackValidationRequest.getCredentialId()
         );
@@ -109,6 +120,14 @@ public class StackValidationRequestToStackValidationConverter extends AbstractCo
         }
     }
 
+    private void validateEnvironment(StackValidationRequest stackValidationRequest, StackValidation stackValidation, Workspace workspace) {
+        if (!StringUtils.isEmpty(stackValidationRequest.getEnvironment())) {
+            EnvironmentView environment = environmentViewService.getByNameForWorkspace(stackValidationRequest.getEnvironment(), workspace);
+            stackValidation.setEnvironment(environmentViewService.getByNameForWorkspace(stackValidationRequest.getEnvironment(), workspace));
+            stackValidation.setCredential(environment.getCredential());
+        }
+    }
+
     private void validateCredential(StackValidationRequest stackValidationRequest, StackValidation stackValidation, Workspace workspace) {
         if (stackValidationRequest.getCredentialId() != null) {
             Credential credential = credentialService.get(stackValidationRequest.getCredentialId(), workspace);
@@ -119,7 +138,7 @@ public class StackValidationRequestToStackValidationConverter extends AbstractCo
         } else if (stackValidationRequest.getCredential() != null) {
             Credential credential = conversionService.convert(stackValidationRequest.getCredential(), Credential.class);
             stackValidation.setCredential(credential);
-        } else {
+        } else if (stackValidation.getCredential() == null) {
             throw new BadRequestException("Credential is not configured for the validation request!");
         }
     }

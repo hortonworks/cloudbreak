@@ -130,6 +130,9 @@ public class StackToStackResponseConverter extends AbstractConversionServiceAwar
         convertComponentConfig(stackJson, source);
         convertTags(stackJson, source.getTags());
         addFlexSubscription(stackJson, source);
+        if (source.getEnvironment() != null) {
+            stackJson.setEnvironment(source.getEnvironment().getName());
+        }
         return stackJson;
     }
 

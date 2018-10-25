@@ -15,4 +15,13 @@ public class ExceptionMessageFormatterUtil {
                     String.format("Access to %s '%s' is denied or %s doesn't exist.", resourceName, id, resourceName), e);
         }
     }
+
+    public static void formatAccessDeniedMessage(Runnable r, String resourceType, String resourceName) {
+        try {
+            r.run();
+        } catch (AccessDeniedException e) {
+            throw new AccessDeniedException(
+                    String.format("Access to %s '%s' is denied or %s doesn't exist.", resourceType, resourceName, resourceType), e);
+        }
+    }
 }
