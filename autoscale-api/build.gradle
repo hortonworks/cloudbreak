@@ -1,7 +1,8 @@
 apply plugin: 'java'
 
 repositories {
-  mavenCentral()
+  mavenLocal()
+  maven { url = "$repoUrl" }
 }
 
 jar {
