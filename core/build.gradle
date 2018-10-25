@@ -1,18 +1,19 @@
 import org.ajoberstar.grgit.Grgit
 
 buildscript {
-    repositories {
-        maven { url 'http://repo.spring.io/libs-release' }
-        mavenCentral()
-        jcenter()
-        maven { url "http://maven.sequenceiq.com/releases" }
-    }
-    dependencies {
-        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
-        classpath "com.smokejumperit.gradle.license:Gradle-License-Report:0.0.2"
-        classpath "gradle.plugin.com.palantir:jacoco-coverage:0.4.0"
-        classpath "gradle.plugin.com.github.jk1:gradle-license-report:0.3.4"
-    }
+  repositories {
+    maven { url 'http://repo.spring.io/libs-release' }
+    mavenCentral()
+    mavenLocal()
+    jcenter()
+    maven { url "http://maven.sequenceiq.com/releases" }
+  }
+  dependencies {
+    classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+    classpath "com.smokejumperit.gradle.license:Gradle-License-Report:0.0.2"
+    classpath "gradle.plugin.com.palantir:jacoco-coverage:0.4.0"
+    classpath "gradle.plugin.com.github.jk1:gradle-license-report:0.3.4"
+  }
 }
 
 plugins {
