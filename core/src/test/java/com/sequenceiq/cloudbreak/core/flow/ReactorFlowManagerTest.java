@@ -32,7 +32,6 @@ import com.sequenceiq.cloudbreak.cloud.Acceptable;
 import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.controller.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -113,7 +112,7 @@ public class ReactorFlowManagerTest {
         underTest.triggerMaintenanceModeValidationFlow(STACK_ID);
 
         // Not start from 0 because flow cancellations
-        int count = 5;
+        int count = 6;
         for (Method method : underTest.getClass().getDeclaredMethods()) {
             if (method.getName().startsWith("trigger")) {
                 count++;
@@ -126,7 +125,7 @@ public class ReactorFlowManagerTest {
     public void testClusterTerminationOnlyNotSecuredCluster() {
         underTest.triggerClusterTermination(1L, false, false);
 
-        verify(reactor).notify(eq(ClusterTerminationEvent.TERMINATION_EVENT.event()), any(Event.class));
+        verify(reactor).notify(eq(FlowChainTriggers.TERMINATION_TRIGGER_EVENT), any(Event.class));
     }
 
     @Test
@@ -138,7 +137,7 @@ public class ReactorFlowManagerTest {
 
         underTest.triggerClusterTermination(1L, false, false);
 
-        verify(reactor).notify(eq(ClusterTerminationEvent.PROPER_TERMINATION_EVENT.event()), any(Event.class));
+        verify(reactor).notify(eq(FlowChainTriggers.PROPER_TERMINATION_TRIGGER_EVENT), any(Event.class));
     }
 
     @Test
