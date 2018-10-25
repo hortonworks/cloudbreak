@@ -7,6 +7,9 @@ include docker_env.tmp
 else
 $(shell echo export TEST_ENV=boot2docker > docker_env.tmp)
 endif
+ifeq ($(REPO_URL),"")
+REPO_URL = https://cloudbreak-maven.s3.amazonaws.com/releases
+endif
 
 all: download-cbd buildcb runtest
 
@@ -17,6 +20,10 @@ delete-and-run: download-cbd cbd-delete buildcb runtest
 without-build: download-cbd runtest
 
 build-with-docker: download-cbd docker-build runtest
+
+download-jar-from-s3:
+	curl ${REPO_URL}/com/sequenceiq/cloudbreak/$(VERSION)/cloudbreak-$(VERSION).jar -o ../core/build/libs/cloudbreak.jar --create-dirs
+	curl ${REPO_URL}/com/sequenceiq/cloudbreak-integration-test/$(VERSION)/cloudbreak-integration-test-$(VERSION).jar -o ../integration-test/build/libs/cloudbreak-integration-test.jar --create-dirs
 
 download-cbd:
 	./scripts/download-cbd.sh
