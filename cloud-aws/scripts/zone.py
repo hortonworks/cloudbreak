@@ -9,8 +9,11 @@ with open(sys.argv[1]) as data_file:
 
 for zone in zoneVmTypes["items"]:
     zoneName = zone["zone"]
-    zone["zone"] = zoneData[zoneName]["zoneid"]
-    zone["defaultVmType"] = zoneData[zoneName]["defaultvm"]
+    try:
+        zone["zone"] = zoneData[zoneName]["zoneid"]
+        zone["defaultVmType"] = zoneData[zoneName]["defaultvm"]
+    except KeyError:
+        print (">>>>> " + zoneName + " is not in zones.json, please add if you need <<<<<")
 
 with open(sys.argv[2], 'w') as outfile:
     json.dump(zoneVmTypes, outfile, indent=2)
