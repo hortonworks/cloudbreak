@@ -47,6 +47,8 @@ import com.sequenceiq.cloudbreak.cloud.model.component.StackInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
+import com.sequenceiq.cloudbreak.controller.validation.environment.ClusterCreationEnvironmentValidator;
 import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
 import com.sequenceiq.cloudbreak.controller.validation.mpack.ManagementPackValidator;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConfigValidator;
@@ -56,12 +58,12 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
@@ -130,6 +132,9 @@ public class ClusterCreationSetupService {
     @Inject
     private RdsConfigValidator rdsConfigValidator;
 
+    @Inject
+    private ClusterCreationEnvironmentValidator environmentValidator;
+
     public void validate(ClusterRequest request, Stack stack, User user, Workspace workspace) {
         validate(request, null, stack, user, workspace);
     }
@@ -147,6 +152,10 @@ public class ClusterCreationSetupService {
                 stack.getCreator().getUserId(), stack.getWorkspace().getId());
         mpackValidator.validateMpacks(request, workspace);
         rdsConfigValidator.validateRdsConfigs(request, user, workspace);
+        ValidationResult environmentValidationResult = environmentValidator.validate(request, stack);
+        if (environmentValidationResult.hasError()) {
+            throw new BadRequestException(environmentValidationResult.getFormattedErrors());
+        }
     }
 
     public Cluster prepare(ClusterRequest request, Stack stack, User user, Workspace workspace) throws CloudbreakImageNotFoundException,

@@ -20,6 +20,7 @@ public class StackRequestToStackValidationRequestConverter extends AbstractConve
         StackValidationRequest stackValidationRequest = new StackValidationRequest();
         stackValidationRequest.setBlueprint(clusterRequest.getBlueprint());
         stackValidationRequest.setBlueprintId(clusterRequest.getBlueprintId());
+        stackValidationRequest.setEnvironment(source.getEnvironment());
         stackValidationRequest.setCredential(source.getCredential());
         stackValidationRequest.setCredentialId(source.getCredentialId());
         stackValidationRequest.setNetwork(source.getNetwork());

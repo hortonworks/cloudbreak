@@ -61,6 +61,7 @@ import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
+import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
@@ -180,6 +181,9 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
     @ManyToOne
     @JoinColumn(name = "createdBy")
     private User creator;
+
+    @ManyToOne
+    private EnvironmentView environment;
 
     public Set<InstanceGroup> getInstanceGroups() {
         return instanceGroups;
@@ -371,6 +375,14 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setCreator(User creator) {
         this.creator = creator;
+    }
+
+    public EnvironmentView getEnvironment() {
+        return environment;
+    }
+
+    public void setEnvironment(EnvironmentView environment) {
+        this.environment = environment;
     }
 
     public List<Resource> getResourcesByType(ResourceType resourceType) {

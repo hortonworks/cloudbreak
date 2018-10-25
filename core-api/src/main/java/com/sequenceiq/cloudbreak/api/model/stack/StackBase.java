@@ -80,6 +80,9 @@ public abstract class StackBase implements JsonEntity {
     @ApiModelProperty(StackModelDescription.CUSTOM)
     private Map<String, Object> customInputs = new HashMap<>();
 
+    @ApiModelProperty(StackModelDescription.ENVIRONMENT)
+    private String environment;
+
     public OnFailureAction getOnFailureAction() {
         return onFailureAction;
     }
@@ -232,5 +235,13 @@ public abstract class StackBase implements JsonEntity {
 
     public void setCustomInputs(Map<String, Object> customInputs) {
         this.customInputs = customInputs;
+    }
+
+    public String getEnvironment() {
+        return environment;
+    }
+
+    public void setEnvironment(String environment) {
+        this.environment = environment;
     }
 }

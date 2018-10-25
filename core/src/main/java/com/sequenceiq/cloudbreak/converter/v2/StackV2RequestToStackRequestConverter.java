@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentViewService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -47,6 +48,9 @@ public class StackV2RequestToStackRequestConverter extends AbstractConversionSer
 
     @Inject
     private CredentialService credentialService;
+
+    @Inject
+    private EnvironmentViewService environmentViewService;
 
     @Inject
     private StackService stackService;
@@ -111,15 +115,24 @@ public class StackV2RequestToStackRequestConverter extends AbstractConversionSer
         }
         stackRequest.setFlexId(source.getFlexId());
         stackRequest.setCredentialName(source.getGeneral().getCredentialName());
+        stackRequest.setEnvironment(source.getGeneral().getEnvironmentName());
         CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
         User user = userService.getOrCreate(cloudbreakUser);
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         convertClusterRequest(source, stackRequest, workspace);
         stackRequest.setOwnerEmail(Strings.isNullOrEmpty(source.getOwnerEmail()) ? cloudbreakUser.getUsername() : source.getOwnerEmail());
-        stackRequest.setCloudPlatform(credentialService.getByNameForWorkspace(stackRequest.getCredentialName(), workspace).cloudPlatform());
+        setCloudPlatform(stackRequest, workspace);
         convertCustomInputs(source, stackRequest);
         stackRequest.setGatewayPort(source.getGatewayPort());
         return stackRequest;
+    }
+
+    private void setCloudPlatform(StackRequest stackRequest, Workspace workspace) {
+        if (stackRequest.getEnvironment() != null) {
+            stackRequest.setCloudPlatform(environmentViewService.getByNameForWorkspace(stackRequest.getEnvironment(), workspace).getCloudPlatform());
+        } else {
+            stackRequest.setCloudPlatform(credentialService.getByNameForWorkspace(stackRequest.getCredentialName(), workspace).cloudPlatform());
+        }
     }
 
     private void convertCustomInputs(StackV2Request source, StackRequest stackRequest) {

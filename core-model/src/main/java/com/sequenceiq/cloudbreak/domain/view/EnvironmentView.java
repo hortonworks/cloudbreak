@@ -55,6 +55,14 @@ public class EnvironmentView extends CompactView {
         this.cloudPlatform = cloudPlatform;
     }
 
+    public Credential getCredential() {
+        return credential;
+    }
+
+    public void setCredential(Credential credential) {
+        this.credential = credential;
+    }
+
     @Override
     public WorkspaceResource getResource() {
         return WorkspaceResource.ENVIRONMENT;

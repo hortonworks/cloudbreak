@@ -141,7 +141,7 @@ public class StackCreatorService {
                 MDCBuilder.buildMdcContext(stack);
 
                 start = System.currentTimeMillis();
-                stack = stackSensitiveDataPropagator.propagate(stackRequest.getCredentialSource(), stack, workspace);
+                stack = stackSensitiveDataPropagator.propagate(stackRequest, stack, workspace);
                 LOGGER.info("Stack propagated with sensitive data in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
                 start = System.currentTimeMillis();

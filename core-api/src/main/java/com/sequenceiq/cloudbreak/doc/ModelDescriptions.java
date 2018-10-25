@@ -188,6 +188,7 @@ public class ModelDescriptions {
         public static final String GENERAL_SETTINGS = "general configuration parameters for a cluster (e.g. 'name', 'credentialname')";
         public static final String PLACEMENT_SETTINGS = "placement configuration parameters for a cluster (e.g. 'region', 'availabilityZone')";
         public static final String SHARED_SERVICE_REQUEST = "Shared service request";
+        public static final String ENVIRONMENT = "environment where the stack will be created";
     }
 
     public static class ClusterModelDescription {
@@ -615,9 +616,7 @@ public class ModelDescriptions {
         public static final String PROXY_CONFIG_NAMES = "Name of the proxy configurations in the environment.";
         public static final String RDS_CONFIG_NAMES = "Name of the RDS configurations in the environment.";
         public static final String LDAP_CONFIGS_NAMES = "Name of the LDAP configurations in the environment.";
-        public static final String PROXY_CONFIGS = "Proxy configurations in the environment.";
-        public static final String RDS_CONFIGS = "RDS configurations in the environment.";
-        public static final String LDAP_CONFIGS = "LDAP configurations in the environment.";
+        public static final String WORKLOAD_CLUSTER_NAMES = "Name of the workload clusters created in the environment.";
         public static final String REGIONS = "Regions of the environment.";
         public static final String CLOUD_PLATFORM = "Cloud platform of the environment.";
     }

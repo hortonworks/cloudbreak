@@ -46,6 +46,7 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
@@ -217,6 +218,9 @@ public class StackToStackResponseConverterTest extends AbstractEntityConverterTe
         stack.setClusterNameAsSubdomain(false);
         Resource s3ArnResource = new Resource(ResourceType.S3_ACCESS_ROLE_ARN, "s3Arn", stack);
         stack.setResources(Collections.singleton(s3ArnResource));
+        EnvironmentView environmentView = new EnvironmentView();
+        environmentView.setName("env");
+        stack.setEnvironment(environmentView);
         return stack;
     }
 }

@@ -9,7 +9,6 @@ import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 
 @Component
 public class EnvironmentViewToSimpleEnvironmentResponseConverter extends AbstractConversionServiceAwareConverter<EnvironmentView, SimpleEnvironmentResponse> {
-
     @Override
     public SimpleEnvironmentResponse convert(EnvironmentView source) {
         SimpleEnvironmentResponse response = new SimpleEnvironmentResponse();
@@ -18,6 +17,7 @@ public class EnvironmentViewToSimpleEnvironmentResponseConverter extends Abstrac
         response.setDescription(source.getDescription());
         response.setRegions(source.getRegionsSet());
         response.setCloudPlatform(source.getCloudPlatform());
+        response.setCredentialName(source.getCredential().getName());
         response.setWorkspace(getConversionService().convert(source.getWorkspace(), WorkspaceResourceResponse.class));
         return response;
     }

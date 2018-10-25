@@ -11,7 +11,6 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 public abstract class EnvironmentBaseResponse {
-
     @ApiModelProperty(ModelDescriptions.ID)
     private Long id;
 
@@ -26,6 +25,9 @@ public abstract class EnvironmentBaseResponse {
 
     @ApiModelProperty(EnvironmentResponseModelDescription.CLOUD_PLATFORM)
     private String cloudPlatform;
+
+    @ApiModelProperty(EnvironmentResponseModelDescription.CREDENTIAL_NAME)
+    private String credentialName;
 
     private WorkspaceResourceResponse workspace;
 
@@ -76,4 +78,13 @@ public abstract class EnvironmentBaseResponse {
     public void setCloudPlatform(String cloudPlatform) {
         this.cloudPlatform = cloudPlatform;
     }
+
+    public String getCredentialName() {
+        return credentialName;
+    }
+
+    public void setCredentialName(String credentialName) {
+        this.credentialName = credentialName;
+    }
+
 }

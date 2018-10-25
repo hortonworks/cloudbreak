@@ -12,7 +12,6 @@ import javax.transaction.Transactional.TxType;
 import org.springframework.data.repository.NoRepositoryBean;
 
 import com.sequenceiq.cloudbreak.aspect.DisableHasPermission;
-import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByWorkspace;
 import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByWorkspaceId;
 import com.sequenceiq.cloudbreak.domain.environment.EnvironmentAwareResource;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
@@ -23,13 +22,13 @@ import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepositor
 @DisableHasPermission
 public interface EnvironmentResourceRepository<T extends EnvironmentAwareResource, ID extends Serializable> extends WorkspaceResourceRepository<T, ID> {
 
-    @CheckPermissionsByWorkspace(action = READ, workspaceIndex = 0)
+    @CheckPermissionsByWorkspaceId(action = READ, workspaceIdIndex = 0)
     Set<T> findAllByWorkspaceIdAndEnvironments(Long workspaceId, EnvironmentView environment);
 
-    @CheckPermissionsByWorkspace(action = READ, workspaceIndex = 0)
+    @CheckPermissionsByWorkspaceId(action = READ, workspaceIdIndex = 0)
     Set<T> findAllByWorkspaceIdAndEnvironmentsIsNull(Long workspaceId);
 
-    @CheckPermissionsByWorkspace(action = READ, workspaceIndex = 0)
+    @CheckPermissionsByWorkspaceId(action = READ, workspaceIdIndex = 0)
     Set<T> findAllByWorkspaceIdAndEnvironmentsIsNotNull(Long workspaceId);
 
     @CheckPermissionsByWorkspaceId(action = READ, workspaceIdIndex = 1)

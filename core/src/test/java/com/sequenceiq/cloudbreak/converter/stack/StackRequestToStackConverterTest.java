@@ -109,7 +109,7 @@ public class StackRequestToStackConverterTest extends AbstractJsonConverterTest<
                 Arrays.asList("description", "statusReason", "cluster", "credential", "gatewayPort", "template", "network", "securityConfig", "securityGroup",
                         "version", "created", "platformVariant", "cloudPlatform", "saltPassword", "stackTemplate", "flexSubscription", "datalakeId",
                         "customHostname", "customDomain", "clusterNameAsSubdomain", "hostgroupNameAsHostname", "loginUserName", "parameters",
-                        "rootVolumeSize", "creator"));
+                        "rootVolumeSize", "creator", "environment"));
         assertEquals("YARN", stack.getRegion());
     }
 

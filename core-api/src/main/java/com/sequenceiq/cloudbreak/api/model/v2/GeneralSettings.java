@@ -24,9 +24,11 @@ public class GeneralSettings implements JsonEntity {
     @ApiModelProperty(value = StackModelDescription.STACK_NAME, required = true)
     private String name;
 
-    @NotNull
     @ApiModelProperty(StackModelDescription.CREDENTIAL_NAME)
     private String credentialName;
+
+    @ApiModelProperty(StackModelDescription.ENVIRONMENT)
+    private String environmentName;
 
     public String getName() {
         return name;
@@ -42,5 +44,13 @@ public class GeneralSettings implements JsonEntity {
 
     public void setCredentialName(String credentialName) {
         this.credentialName = credentialName;
+    }
+
+    public String getEnvironmentName() {
+        return environmentName;
+    }
+
+    public void setEnvironmentName(String environmentName) {
+        this.environmentName = environmentName;
     }
 }
