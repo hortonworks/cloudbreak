@@ -41,6 +41,10 @@ allprojects {
   apply plugin: 'idea'
   apply plugin: 'eclipse'
   group = 'com.sequenceiq'
+  repositories {
+    mavenLocal()
+    maven { url = "$repoUrl" }
+  }
   configurations {
     testRuntime {
       exclude group: "org.springframework.cloud"

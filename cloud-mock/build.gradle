@@ -4,7 +4,9 @@ repositories {
     mavenLocal()
     maven { url = "$repoUrl" }
     maven { url 'http://repo.spring.io/libs-release' }
+    mavenLocal()
     mavenCentral()
+    maven { url = "$repoUrl" }
 }
 
 jar {
