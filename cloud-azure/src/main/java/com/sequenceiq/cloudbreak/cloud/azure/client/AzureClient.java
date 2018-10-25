@@ -363,7 +363,7 @@ public class AzureClient {
     public CloudBlobContainer getBlobContainer(String resourceGroup, String storageName, String containerName) {
         LOGGER.debug("get blob container: RG={}, storageName={}, containerName={}", resourceGroup, storageName, containerName);
         List<StorageAccountKey> keys = getStorageAccountKeys(resourceGroup, storageName);
-        String storageConnectionString = String.format("DefaultEndpointsProtocol=http;AccountName=%s;AccountKey=%s", storageName, keys.get(0).value());
+        String storageConnectionString = String.format("DefaultEndpointsProtocol=https;AccountName=%s;AccountKey=%s", storageName, keys.get(0).value());
         try {
             CloudStorageAccount storageAccount = CloudStorageAccount.parse(storageConnectionString);
             CloudBlobClient blobClient = storageAccount.createCloudBlobClient();
