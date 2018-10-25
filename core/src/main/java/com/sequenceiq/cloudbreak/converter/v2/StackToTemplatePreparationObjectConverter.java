@@ -120,7 +120,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
                     .withFileSystemConfigurationView(fileSystemConfigurationView)
                     .withGeneralClusterConfigs(generalClusterConfigsProvider.generalClusterConfigs(source, cluster, cloudbreakUser))
                     .withSmartSenseSubscription(aDefault.isPresent() ? aDefault.get() : null)
-                    .withLdapConfig(ldapConfig, ldapConfig == null ? "" : vaultService.resolveSingleValue(ldapConfig.getBindPassword(), "bindPassword"))
+                    .withLdapConfig(ldapConfig, ldapConfig == null ? "" : vaultService.resolveSingleValue(ldapConfig.getBindPassword()))
                     .withHdfConfigs(hdfConfigs)
                     .withKerberosConfig(cluster.isSecure() ? cluster.getKerberosConfig() : null)
                     .withSharedServiceConfigs(sharedServiceConfigProvider.createSharedServiceConfigs(source, dataLakeStack))

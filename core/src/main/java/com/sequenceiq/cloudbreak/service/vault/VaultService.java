@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.service.vault;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.security.InvalidKeyException;
+import java.util.Collections;
 
 import javax.inject.Inject;
 
@@ -19,22 +19,19 @@ public class VaultService {
     @Inject
     private VaultTemplate template;
 
-    public String addFieldToSecret(String path, String pathIdentifier, String key, String value) {
-        String realPath = path + '/' + pathIdentifier;
-        VaultResponse response = operations.read(realPath);
-        Map<String, Object> existingData = new HashMap<>();
+    public String addFieldToSecret(String path, String value) throws Exception {
+        VaultResponse response = operations.read(path);
         if (response != null && response.getData() != null) {
-            existingData = response.getData();
+            throw new InvalidKeyException(String.format("Path: %s already exists!", path));
         }
-        existingData.put(key, value);
-        operations.write(realPath, existingData);
-        return realPath;
+        operations.write(path, Collections.singletonMap("secret", value));
+        return path;
     }
 
-    public String resolveSingleValue(String path, String key) {
+    public String resolveSingleValue(String path) {
         VaultResponse response = template.read(path);
         if (response != null && response.getData() != null) {
-            return String.valueOf(response.getData().get(key));
+            return String.valueOf(response.getData().get("secret"));
         }
         return "";
     }

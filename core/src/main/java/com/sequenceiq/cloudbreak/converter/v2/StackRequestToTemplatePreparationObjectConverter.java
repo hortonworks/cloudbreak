@@ -142,7 +142,7 @@ public class StackRequestToTemplatePreparationObjectConverter extends AbstractCo
                     .withFileSystemConfigurationView(fileSystemConfigurationView)
                     .withGeneralClusterConfigs(generalClusterConfigs)
                     .withSmartSenseSubscription(smartsenseSubscription)
-                    .withLdapConfig(ldapConfig, ldapConfig == null ? "" : vaultService.resolveSingleValue(ldapConfig.getBindPassword(), "bindPassword"))
+                    .withLdapConfig(ldapConfig, ldapConfig == null ? "" : vaultService.resolveSingleValue(ldapConfig.getBindPassword()))
                     .withKerberosConfig(kerberosConfig);
 
             SharedServiceRequest sharedService = source.getCluster().getSharedService();
