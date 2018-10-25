@@ -4,6 +4,7 @@ buildscript {
   repositories {
     maven { url 'http://repo.spring.io/libs-release' }
     mavenCentral()
+    mavenLocal()
     jcenter()
     maven { url "http://maven.sequenceiq.com/releases" }
   }

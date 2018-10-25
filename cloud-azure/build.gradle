@@ -4,6 +4,8 @@ apply plugin: 'info.solidsoft.pitest'
 sourceCompatibility = 1.8
 
 repositories {
+  mavenLocal()
+  maven { url = "$repoUrl" }
   maven { url 'http://repo.spring.io/libs-release' }
   mavenCentral()
 }
