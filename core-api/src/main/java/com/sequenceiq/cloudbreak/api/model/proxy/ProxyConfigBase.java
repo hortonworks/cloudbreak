@@ -107,6 +107,6 @@ public abstract class ProxyConfigBase implements JsonEntity {
     }
 
     public void setEnvironments(Set<String> environments) {
-        this.environments = environments;
+        this.environments = environments == null ? new HashSet<>() : environments;
     }
 }

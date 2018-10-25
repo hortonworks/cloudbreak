@@ -5,6 +5,7 @@ import static java.lang.String.format;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -26,6 +27,7 @@ import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.UserWorkspacePermissions;
+import com.sequenceiq.cloudbreak.repository.environment.EnvironmentResourceRepository;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.user.UserWorkspacePermissionsService;
 
@@ -143,7 +145,10 @@ public class PermissionCheckingUtils {
 
     public Optional<Class<?>> getWorkspaceAwareRepositoryClass(ProceedingJoinPoint proceedingJoinPoint) {
         return Arrays.stream(proceedingJoinPoint.getTarget().getClass().getInterfaces())
-                .filter(i -> Arrays.asList(i.getInterfaces()).contains(WorkspaceResourceRepository.class))
+                .filter(i -> {
+                    List<Class<?>> interfaces = Arrays.asList(i.getInterfaces());
+                    return interfaces.contains(WorkspaceResourceRepository.class) || interfaces.contains(EnvironmentResourceRepository.class);
+                })
                 .findFirst();
     }
 

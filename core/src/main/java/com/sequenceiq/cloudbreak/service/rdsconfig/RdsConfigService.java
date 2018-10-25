@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,8 +26,11 @@ import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.repository.environment.EnvironmentResourceRepository;
 import com.sequenceiq.cloudbreak.repository.RdsConfigRepository;
+import com.sequenceiq.cloudbreak.repository.environment.EnvironmentResourceRepository;
+import com.sequenceiq.cloudbreak.service.TransactionService;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.environment.AbstractEnvironmentAwareService;
 import com.sequenceiq.cloudbreak.util.NameUtil;
@@ -44,6 +48,27 @@ public class RdsConfigService extends AbstractEnvironmentAwareService<RDSConfig>
 
     @Inject
     private RdsConnectionValidator rdsConnectionValidator;
+
+    @Inject
+    private TransactionService transactionService;
+
+    @Override
+    public RDSConfig attachToEnvironments(String resourceName, Set<String> environments, @NotNull Long workspaceId) {
+        try {
+            return transactionService.required(() -> super.attachToEnvironments(resourceName, environments, workspaceId));
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
+        }
+    }
+
+    @Override
+    public RDSConfig detachFromEnvironments(String resourceName, Set<String> environments, @NotNull Long workspaceId) {
+        try {
+            return transactionService.required(() -> super.detachFromEnvironments(resourceName, environments, workspaceId));
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
+        }
+    }
 
     public Set<RDSConfig> retrieveRdsConfigsInWorkspace(Workspace workspace) {
         return rdsConfigRepository.findAllByWorkspaceId(workspace.getId());

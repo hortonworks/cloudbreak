@@ -99,11 +99,11 @@ public class LdapV3Controller extends NotificationController implements LdapConf
 
     @Override
     public LdapConfigResponse attachToEnvironments(Long workspaceId, String name, @NotEmpty Set<String> environmentNames) {
-        return null;
+        return ldapConfigService.attachToEnvironmentsAndConvert(name, environmentNames, workspaceId, LdapConfigResponse.class);
     }
 
     @Override
     public LdapConfigResponse detachFromEnvironments(Long workspaceId, String name, @NotEmpty Set<String> environmentNames) {
-        return null;
+        return ldapConfigService.detachFromEnvironmentsAndConvert(name, environmentNames, workspaceId, LdapConfigResponse.class);
     }
 }

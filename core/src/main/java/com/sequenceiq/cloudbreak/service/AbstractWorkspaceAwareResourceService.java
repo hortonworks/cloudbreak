@@ -15,8 +15,6 @@ import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
-import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
-import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -24,9 +22,6 @@ import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 public abstract class AbstractWorkspaceAwareResourceService<T extends WorkspaceAwareResource> implements WorkspaceAwareResourceService<T> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractWorkspaceAwareResourceService.class);
-
-    @Inject
-    private TransactionService transactionService;
 
     @Inject
     private WorkspaceService workspaceService;
@@ -53,17 +48,12 @@ public abstract class AbstractWorkspaceAwareResourceService<T extends WorkspaceA
     public T create(T resource, Workspace workspace, User user) {
         try {
             prepareCreation(resource);
-            return transactionService.required(() -> {
-                setWorkspace(resource, user, workspace);
-                return repository().save(resource);
-            });
-        } catch (TransactionExecutionException e) {
-            if (e.getCause() instanceof DataIntegrityViolationException) {
-                String message = String.format("%s already exists with name '%s' in workspace %s",
-                        resource().getShortName(), resource.getName(), resource.getWorkspace().getName());
-                throw new BadRequestException(message, e);
-            }
-            throw new TransactionRuntimeExecutionException(e);
+            setWorkspace(resource, user, workspace);
+            return repository().save(resource);
+        } catch (DataIntegrityViolationException e) {
+            String message = String.format("%s already exists with name '%s' in workspace %s",
+                    resource().getShortName(), resource.getName(), resource.getWorkspace().getName());
+            throw new BadRequestException(message, e);
         }
     }
 
@@ -130,10 +120,6 @@ public abstract class AbstractWorkspaceAwareResourceService<T extends WorkspaceA
     @Override
     public Iterable<T> pureSaveAll(Iterable<T> resources) {
         return repository().saveAll(resources);
-    }
-
-    public TransactionService getTransactionService() {
-        return transactionService;
     }
 
     public WorkspaceService getWorkspaceService() {
