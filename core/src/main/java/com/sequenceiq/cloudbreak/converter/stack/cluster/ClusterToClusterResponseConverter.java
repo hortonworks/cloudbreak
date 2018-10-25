@@ -54,6 +54,7 @@ import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.vault.VaultService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Component
@@ -94,6 +95,9 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
 
     @Inject
     private StackService stackService;
+
+    @Inject
+    private VaultService vaultService;
 
     @Value("${cb.disable.show.blueprint:false}")
     private boolean disableShowBlueprint;
@@ -155,7 +159,8 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
 
     private <R extends ClusterResponse> void setExtendedBlueprintText(Cluster source, R clusterResponse) {
         if (StringUtils.isNoneEmpty(source.getExtendedBlueprintText()) && !disableShowBlueprint) {
-            clusterResponse.setExtendedBlueprintText(anonymize(source.getExtendedBlueprintText()));
+            String fromVault = vaultService.resolveSingleValue(source.getExtendedBlueprintText());
+            clusterResponse.setExtendedBlueprintText(anonymize(fromVault));
         }
     }
 
@@ -178,8 +183,9 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
     }
 
     private void convertCustomQueue(Cluster source, ClusterResponse clusterResponse) {
-        if (source.getAttributes().getValue() != null) {
-            Map<String, Object> attributes = source.getAttributes().getMap();
+        if (source.getAttributes() != null) {
+            Json fromVault = new Json(vaultService.resolveSingleValue(source.getAttributes()));
+            Map<String, Object> attributes = fromVault.getMap();
             Object customQueue = attributes.get(CUSTOM_QUEUE.name());
             if (customQueue != null) {
                 clusterResponse.setCustomQueue(customQueue.toString());
@@ -235,7 +241,8 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
             clusterResponse.setLdapConfigId(source.getLdapConfig().getId());
         }
         if (source.getAttributes() != null) {
-            clusterResponse.setAttributes(source.getAttributes().getMap());
+            Json fromVault = new Json(vaultService.resolveSingleValue(source.getAttributes()));
+            clusterResponse.setAttributes(fromVault.getMap());
         }
     }
 
