@@ -1,5 +1,6 @@
 buildscript {
   repositories {
+    maven { url = "$repoUrl" }
     mavenCentral()
     jcenter()
     maven {
@@ -34,6 +35,10 @@ allprojects {
   apply plugin: 'idea'
   apply plugin: 'eclipse'
   group = 'com.sequenceiq'
+  repositories {
+    mavenLocal()
+    maven { url = "$repoUrl" }
+  }
   configurations {
     testRuntime {
       exclude group: "org.springframework.cloud"
@@ -65,11 +70,8 @@ subprojects {
     repositories {
       mavenDeployer {
         configuration = configurations.deployerJars
-        repository(url: "s3://cloudbreak-maven/releases") {
-          authentication(userName: "$System.env.AWS_ACCESS_KEY", passphrase: "$System.env.AWS_SECRET_ACCESS_KEY")
-        }
-        snapshotRepository(url: "s3://cloudbreak-maven/snapshots") {
-          authentication(userName: "$System.env.AWS_ACCESS_KEY", passphrase: "$System.env.AWS_SECRET_ACCESS_KEY")
+        repository(url: "$System.env.NEXUS_URL") {
+          authentication(userName: "$System.env.NEXUS_USER", passphrase: "$System.env.NEXUS_PASSWORD")
         }
       }
     }
@@ -122,10 +124,13 @@ subprojects {
   }
 
   repositories {
+    mavenLocal()
+    maven { url = "$repoUrl" }
     mavenCentral()
     maven { url "https://cloudbreak-maven.s3.amazonaws.com/releases" }
     maven { url "https://repo.spring.io/release" }
     maven { url "https://plugins.gradle.org/m2/" }
     mavenLocal()
+    maven { url "https://plugins.gradle.org/m2/" }
   }
 }
