@@ -3,8 +3,8 @@ import org.ajoberstar.grgit.Grgit
 buildscript {
   repositories {
     mavenLocal()
-    maven { url = "$repoUrl" }
     mavenCentral()
+    maven { url = "$repoUrl" }
     jcenter()
   }
   dependencies {
