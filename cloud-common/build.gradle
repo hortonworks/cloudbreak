@@ -4,7 +4,10 @@ apply plugin: 'io.spring.dependency-management'
 buildscript {
   repositories {
     maven { url 'http://repo.spring.io/libs-release' }
+    mavenLocal()
+    maven { url = "$repoUrl" }
     mavenCentral()
+    jcenter()
   }
   dependencies {
     classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
