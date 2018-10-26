@@ -19,6 +19,9 @@ public class StackToAutoscaleStackResponseJsonConverter extends AbstractConversi
     @Override
     public AutoscaleStackResponse convert(Stack source) {
         AutoscaleStackResponse result = new AutoscaleStackResponse();
+        result.setTenant(source.getWorkspace().getTenant().getName());
+        result.setWorkspaceId(source.getWorkspace().getId());
+        result.setUserId(source.getCreator().getUserId());
         result.setStackId(source.getId());
         result.setName(source.getName());
         result.setGatewayPort(source.getGatewayPort());

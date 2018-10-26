@@ -9,6 +9,7 @@ import javax.ws.rs.ProcessingException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.jwt.Jwt;
 import org.springframework.security.jwt.JwtHelper;
@@ -64,7 +65,7 @@ public class CachedRemoteTokenService implements ResourceServerTokenServices {
     }
 
     @Override
-//    @Cacheable(cacheNames = "tokenCache", key = "#accessToken")
+    @Cacheable(cacheNames = "tokenCache", key = "#accessToken")
     public OAuth2Authentication loadAuthentication(String accessToken) throws AuthenticationException, InvalidTokenException {
         Jwt jwtToken = JwtHelper.decode(accessToken);
         try {

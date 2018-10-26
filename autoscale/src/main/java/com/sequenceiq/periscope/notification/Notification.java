@@ -6,6 +6,8 @@ import com.sequenceiq.periscope.domain.History;
 
 public class Notification {
 
+    private Long workspaceId;
+
     private String eventType;
 
     private Date eventTimestamp;
@@ -14,7 +16,13 @@ public class Notification {
 
     private String eventMessage;
 
-    private String owner;
+    public Long getWorkspaceId() {
+        return workspaceId;
+    }
+
+    public void setWorkspaceId(Long workspaceId) {
+        this.workspaceId = workspaceId;
+    }
 
     public String getEventType() {
         return eventType;
@@ -46,13 +54,5 @@ public class Notification {
 
     public void setEventMessage(String eventMessage) {
         this.eventMessage = eventMessage;
-    }
-
-    public String getOwner() {
-        return owner;
-    }
-
-    public void setOwner(String owner) {
-        this.owner = owner;
     }
 }

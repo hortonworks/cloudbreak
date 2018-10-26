@@ -34,7 +34,6 @@ import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
 import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.user.CachedUserDetailsService;
 
 @Service
 public class FlexUsageGenerator {
@@ -49,9 +48,6 @@ public class FlexUsageGenerator {
     private static final long TIMESTAMP_MAX_SEC = 9999999999L;
 
     private static final long UP_TO_MILLIS = 1000;
-
-    @Inject
-    private CachedUserDetailsService cachedUserDetailsService;
 
     @Inject
     private SmartSenseSubscriptionService smartSenseSubscriptionService;

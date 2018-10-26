@@ -24,7 +24,6 @@ import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetaDataJson;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.domain.Cluster;
-import com.sequenceiq.periscope.domain.PeriscopeUser;
 import com.sequenceiq.periscope.monitor.event.UpdateFailedEvent;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.utils.StackResponseUtils;
@@ -232,9 +231,6 @@ public class UpdateFailedHandlerTest {
         cluster.setId(AUTOSCALE_CLUSTER_ID);
         cluster.setStackId(CLOUDBREAK_STACK_ID);
         cluster.setState(ClusterState.RUNNING);
-        PeriscopeUser periscopeUser = new PeriscopeUser();
-        periscopeUser.setId("");
-        cluster.setUser(periscopeUser);
         return cluster;
     }
 }

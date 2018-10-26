@@ -133,7 +133,7 @@ public class StackCommonService implements StackEndpoint {
     private UserService userService;
 
     @Inject
-    private RestRequestThreadLocalService restRequestThreadLocalService;
+    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     public StackResponse createInWorkspace(StackRequest stackRequest, CloudbreakUser cloudbreakUser, User user, Workspace workspace) {
         return stackCreatorService.createStack(cloudbreakUser, user, workspace, stackRequest);

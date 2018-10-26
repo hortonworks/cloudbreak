@@ -11,6 +11,6 @@ public class UserToUserJsonConverter extends AbstractConversionServiceAwareConve
 
     @Override
     public UserJson convert(User user) {
-        return new UserJson(user.getUserId());
+        return new UserJson(user.getUserName());
     }
 }

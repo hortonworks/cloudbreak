@@ -37,7 +37,6 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.History;
-import com.sequenceiq.periscope.domain.PeriscopeUser;
 import com.sequenceiq.periscope.model.RejectedThread;
 import com.sequenceiq.periscope.modul.rejected.StackCollectorContext.StackCollectorSpringConfig;
 import com.sequenceiq.periscope.monitor.executor.ExecutorServiceWithRegistry;
@@ -118,7 +117,7 @@ public class StackCollectorServiceModulTest extends StackCollectorContext {
         waitForTasksToFinish();
 
         verify(ambariClient, times(1)).healthCheck();
-        verify(httpNotificationSender, times(0)).send(any(History.class));
+        verify(httpNotificationSender, times(0)).send(any(Cluster.class), any(History.class));
     }
 
     @Test
@@ -206,7 +205,6 @@ public class StackCollectorServiceModulTest extends StackCollectorContext {
         Cluster cluster = new Cluster();
         cluster.setId(stackId);
         cluster.setStackId(stackId);
-        cluster.setUser(new PeriscopeUser());
         return cluster;
     }
 

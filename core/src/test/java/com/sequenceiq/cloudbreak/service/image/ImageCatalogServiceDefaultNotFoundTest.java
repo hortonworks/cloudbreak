@@ -73,7 +73,7 @@ public class ImageCatalogServiceDefaultNotFoundTest {
     }
 
     private CloudbreakUser getCloudbreakUser() {
-        return new CloudbreakUser(ImageCatalogServiceTest.USER_ID, ImageCatalogServiceTest.USERNAME, ImageCatalogServiceTest.ACCOUNT
-        );
+        return new CloudbreakUser(ImageCatalogServiceTest.USER_ID, ImageCatalogServiceTest.USERNAME, ImageCatalogServiceTest.EMAIL,
+                ImageCatalogServiceTest.TENANT);
     }
 }

@@ -31,10 +31,10 @@ public class MDCBuilder {
 
     public static void buildMdcContext(Object object) {
         if (object == null) {
-            MDC.put(LoggerContextKey.USER.toString(), "cloudbreak");
-            MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), "cloudbreakLog");
+            MDC.put(LoggerContextKey.USER.toString(), "undefined");
+            MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), "undefined");
             MDC.put(LoggerContextKey.RESOURCE_ID.toString(), "undefined");
-            MDC.put(LoggerContextKey.RESOURCE_NAME.toString(), "cb");
+            MDC.put(LoggerContextKey.RESOURCE_NAME.toString(), "undefined");
         } else {
             MDC.put(LoggerContextKey.WORKSPACE.toString(), getFieldValue(object, "workspace"));
             MDC.put(LoggerContextKey.RESOURCE_ID.toString(), getFieldValue(object, "id"));
@@ -43,15 +43,19 @@ public class MDCBuilder {
         }
     }
 
-    public static void buildMdcContext(String stackId, String stackName, String type) {
-        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), StringUtils.isEmpty(stackId) ? "" : stackId);
-        MDC.put(LoggerContextKey.RESOURCE_NAME.toString(), StringUtils.isEmpty(stackName) ? "" : stackName);
+    public static void buildMdcContext(Long resourceId, String resourceName, String type) {
+        buildMdcContext(resourceId == null ? "" : String.valueOf(resourceId), resourceName, type);
+    }
+
+    public static void buildMdcContext(String resourceId, String resourceName, String type) {
+        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), StringUtils.isEmpty(resourceId) ? "" : resourceId);
+        MDC.put(LoggerContextKey.RESOURCE_NAME.toString(), StringUtils.isEmpty(resourceName) ? "" : resourceName);
         MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), StringUtils.isEmpty(type) ? "" : type);
     }
 
     public static void buildUserMdcContext(CloudbreakUser user) {
         if (user != null) {
-            MDC.put(LoggerContextKey.USER.toString(), user.getUsername());
+            MDC.put(LoggerContextKey.USER.toString(), user.getUserId());
             MDC.put(LoggerContextKey.TENANT.toString(), user.getTenant());
         }
     }

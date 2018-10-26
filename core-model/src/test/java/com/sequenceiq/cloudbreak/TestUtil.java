@@ -106,13 +106,11 @@ public class TestUtil {
     }
 
     public static CloudbreakUser cbAdminUser() {
-        return new CloudbreakUser("userid", "testuser", "testaccount"
-        );
+        return new CloudbreakUser("userid", "testuser", "email", "testaccount");
     }
 
     public static CloudbreakUser cbUser() {
-        return new CloudbreakUser("userid", "testuser", "testaccount"
-        );
+        return new CloudbreakUser("userid", "testuser", "email", "testaccount");
     }
 
     public static Credential awsCredential() {

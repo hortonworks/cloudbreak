@@ -36,7 +36,6 @@ import com.sequenceiq.cloudbreak.blueprint.utils.StackInfoService;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
@@ -55,7 +54,6 @@ import com.sequenceiq.cloudbreak.service.cluster.ambari.InstanceGroupMetadataCol
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.user.CachedUserDetailsService;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationProvider;
@@ -84,9 +82,6 @@ public class StackToTemplatePreparationObjectConverterTest {
 
     @Mock
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
-
-    @Mock
-    private CachedUserDetailsService cachedUserDetailsService;
 
     @Mock
     private InstanceGroupMetadataCollector instanceGroupMetadataCollector;
@@ -159,7 +154,6 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(instanceGroupMetadataCollector.collectMetadata(source)).thenReturn(groupInstances);
         when(cluster.getBlueprint()).thenReturn(blueprint);
         when(blueprint.getBlueprintText()).thenReturn(TEST_BLUEPRINT_TEXT);
-        when(cachedUserDetailsService.getDetails(CLUSTER_OWNER, "tenant", UserFilterField.USERID)).thenReturn(user);
         when(source.getInputs()).thenReturn(stackInputs);
         when(stackInputs.get(StackInputs.class)).thenReturn(null);
         when(stackInfoService.blueprintStackInfo(TEST_BLUEPRINT_TEXT)).thenReturn(blueprintStackInfo);

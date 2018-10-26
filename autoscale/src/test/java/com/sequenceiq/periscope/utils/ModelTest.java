@@ -19,7 +19,7 @@ import com.openpojo.validation.test.impl.SetterTester;
 
 public class ModelTest {
 
-    private static final int EXPECTED_CLASS_COUNT = 13;
+    private static final int EXPECTED_CLASS_COUNT = 14;
 
     private static final String DOMAIN_PACKAGE = "com.sequenceiq.periscope.domain";
 

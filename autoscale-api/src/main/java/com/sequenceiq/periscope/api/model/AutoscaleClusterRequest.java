@@ -3,6 +3,8 @@ package com.sequenceiq.periscope.api.model;
 import java.util.List;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 
 import com.sequenceiq.periscope.doc.ApiDescription.ClusterJsonsProperties;
 
@@ -11,6 +13,11 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel("AutoscaleClusterRequest")
 public class AutoscaleClusterRequest extends ClusterBaseJson {
+
+    @ApiModelProperty(ClusterJsonsProperties.WORKSPACE_ID)
+    @NotNull
+    @Min(1L)
+    private Long workspaceId;
 
     @ApiModelProperty(ClusterJsonsProperties.PASSWORD)
     private String pass;
@@ -40,6 +47,14 @@ public class AutoscaleClusterRequest extends ClusterBaseJson {
         super(host, port, user, stackId);
         this.pass = pass;
         this.enableAutoscaling = enableAutoscaling;
+    }
+
+    public Long getWorkspaceId() {
+        return workspaceId;
+    }
+
+    public void setWorkspaceId(Long workspaceId) {
+        this.workspaceId = workspaceId;
     }
 
     public String getPass() {

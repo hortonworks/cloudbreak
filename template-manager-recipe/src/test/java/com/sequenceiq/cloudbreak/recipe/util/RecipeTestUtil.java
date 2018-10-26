@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.recipe.util;
 
+import static com.sequenceiq.cloudbreak.TestUtil.ldapConfig;
+
 import java.util.Optional;
 
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
@@ -8,8 +10,6 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.LdapView;
-
-import static com.sequenceiq.cloudbreak.TestUtil.ldapConfig;
 
 public class RecipeTestUtil {
 

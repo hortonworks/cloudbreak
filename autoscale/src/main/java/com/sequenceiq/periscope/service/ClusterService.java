@@ -6,7 +6,6 @@ import static com.sequenceiq.periscope.service.NotFoundException.notFound;
 import static org.springframework.util.StringUtils.isEmpty;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.StreamSupport;
 
 import javax.annotation.PostConstruct;
@@ -17,17 +16,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.api.model.ScalingConfigurationRequest;
 import com.sequenceiq.periscope.domain.Ambari;
 import com.sequenceiq.periscope.domain.Cluster;
+import com.sequenceiq.periscope.domain.ClusterPertain;
 import com.sequenceiq.periscope.domain.MetricType;
-import com.sequenceiq.periscope.domain.PeriscopeUser;
 import com.sequenceiq.periscope.domain.SecurityConfig;
 import com.sequenceiq.periscope.model.AmbariStack;
 import com.sequenceiq.periscope.repository.ClusterRepository;
 import com.sequenceiq.periscope.repository.SecurityConfigRepository;
-import com.sequenceiq.periscope.repository.UserRepository;
 import com.sequenceiq.periscope.service.ha.PeriscopeNodeConfig;
 
 @Service
@@ -37,9 +36,6 @@ public class ClusterService {
 
     @Inject
     private ClusterRepository clusterRepository;
-
-    @Inject
-    private UserRepository userRepository;
 
     @Inject
     private SecurityConfigRepository securityConfigRepository;
@@ -53,8 +49,8 @@ public class ClusterService {
     @Inject
     private MetricService metricService;
 
-    public Cluster create(PeriscopeUser user, AmbariStack stack, ClusterState clusterState) {
-        return create(new Cluster(), user, stack, clusterState);
+    public Cluster create(AmbariStack stack, ClusterState clusterState, ClusterPertain clusterPertain) {
+        return create(new Cluster(), clusterPertain, stack, clusterState);
     }
 
     @PostConstruct
@@ -62,12 +58,10 @@ public class ClusterService {
         calculateClusterStateMetrics();
     }
 
-    public Cluster create(Cluster cluster, PeriscopeUser user, AmbariStack stack, ClusterState clusterState) {
-        PeriscopeUser periscopeUser = createUserIfAbsent(user);
-        cluster.setUser(periscopeUser);
+    public Cluster create(Cluster cluster, ClusterPertain clusterPertain, AmbariStack stack, ClusterState clusterState) {
+        cluster.setClusterPertain(clusterPertain);
         cluster.setAmbari(stack.getAmbari());
         cluster.setStackId(stack.getStackId());
-
         if (clusterState != null) {
             cluster.setState(clusterState);
         }
@@ -111,8 +105,8 @@ public class ClusterService {
         return cluster;
     }
 
-    public List<Cluster> findAllByUser(PeriscopeUser user) {
-        return clusterRepository.findByUserId(user.getId());
+    public List<Cluster> findAllByUser(CloudbreakUser user) {
+        return clusterRepository.findByUserId(user.getUserId());
     }
 
     public Cluster findOneByStackId(Long stackId) {
@@ -195,11 +189,6 @@ public class ClusterService {
         if (clusterForTheSameStackAndAmbari) {
             throw new BadRequestException("Cluster exists for the same Cloudbreak stack id and Ambari host.");
         }
-    }
-
-    private PeriscopeUser createUserIfAbsent(PeriscopeUser user) {
-        Optional<PeriscopeUser> periscopeUserOpt = userRepository.findById(user.getId());
-        return periscopeUserOpt.orElse(userRepository.save(user));
     }
 
     private void addPrometheusAlertsToConsul(Cluster cluster) {

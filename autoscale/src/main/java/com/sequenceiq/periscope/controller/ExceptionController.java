@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import com.sequenceiq.periscope.log.MDCBuilder;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.periscope.controller.json.ExceptionMessageJson;
 import com.sequenceiq.periscope.controller.json.IdExceptionMessageJson;
 import com.sequenceiq.periscope.service.NotFoundException;

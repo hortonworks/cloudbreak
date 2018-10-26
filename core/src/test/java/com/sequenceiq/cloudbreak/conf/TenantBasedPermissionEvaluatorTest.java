@@ -16,15 +16,11 @@ import org.springframework.security.oauth2.provider.OAuth2Request;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.security.TenantBasedPermissionEvaluator;
-import com.sequenceiq.cloudbreak.service.user.CachedUserDetailsService;
 
 public class TenantBasedPermissionEvaluatorTest {
 
     @InjectMocks
     private TenantBasedPermissionEvaluator underTest;
-
-    @Mock
-    private CachedUserDetailsService cachedUserDetailsService;
 
     @Mock
     private OAuth2Authentication oauth;

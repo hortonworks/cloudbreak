@@ -9,12 +9,11 @@ import com.sequenceiq.cloudbreak.api.model.AutoscaleClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.periscope.domain.Ambari;
-import com.sequenceiq.periscope.domain.PeriscopeUser;
 import com.sequenceiq.periscope.domain.SecurityConfig;
 import com.sequenceiq.periscope.model.AmbariStack;
 
 @Service
-public class ClusterSecurityService {
+public class AmbariUtilService {
 
     @Inject
     private CloudbreakClient cloudbreakClient;
@@ -22,19 +21,10 @@ public class ClusterSecurityService {
     @Inject
     private TlsSecurityService tlsSecurityService;
 
-    public boolean hasAccess(PeriscopeUser user, Ambari ambari, Long stackId) {
-        try {
-            return hasAccess(user.getId(), user.getTenant(), ambari.getHost(), stackId);
-        } catch (RuntimeException ignored) {
-            // if the cluster is unknown for cloudbreak
-            // it should allow it to monitor
-            return true;
-        }
-    }
-
-    private boolean hasAccess(String userId, String account, String ambariAddress, Long stackId) {
-        // TODO
-        return true;
+    public Long getStackId(Ambari ambari) {
+        AmbariAddressJson ambariAddressJson = new AmbariAddressJson();
+        ambariAddressJson.setAmbariAddress(ambari.getHost());
+        return cloudbreakClient.autoscaleEndpoint().getStackForAmbari(ambariAddressJson).getId();
     }
 
     public AmbariStack tryResolve(Ambari ambari) {

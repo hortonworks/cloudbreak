@@ -69,9 +69,6 @@ public class StackRequest extends StackBase {
     @ApiModelProperty(StackModelDescription.CLUSTER_REQUEST)
     private ClusterRequest clusterRequest;
 
-    @ApiModelProperty(hidden = true)
-    private String ownerEmail;
-
     public StackRequest() {
     }
 
@@ -169,14 +166,6 @@ public class StackRequest extends StackBase {
 
     public void setCredentialName(String credentialName) {
         this.credentialName = credentialName;
-    }
-
-    public String getOwnerEmail() {
-        return ownerEmail;
-    }
-
-    public void setOwnerEmail(String ownerEmail) {
-        this.ownerEmail = ownerEmail;
     }
 
     public Long getClusterToAttach() {

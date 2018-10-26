@@ -14,14 +14,14 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.model.AutoscaleStackResponse;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.periscope.api.model.ScalingStatus;
 import com.sequenceiq.periscope.aspects.AmbariRequestLogging;
 import com.sequenceiq.periscope.domain.Ambari;
 import com.sequenceiq.periscope.domain.Cluster;
+import com.sequenceiq.periscope.domain.ClusterPertain;
 import com.sequenceiq.periscope.domain.History;
-import com.sequenceiq.periscope.domain.PeriscopeUser;
 import com.sequenceiq.periscope.domain.SecurityConfig;
-import com.sequenceiq.periscope.log.MDCBuilder;
 import com.sequenceiq.periscope.model.AmbariStack;
 import com.sequenceiq.periscope.monitor.context.EvaluatorContext;
 import com.sequenceiq.periscope.notification.HttpNotificationSender;
@@ -71,7 +71,7 @@ public class ClusterCreationEvaluator extends EvaluatorExecutor {
             Cluster cluster = clusterService.findOneByStackId(stack.getStackId());
             AmbariStack resolvedAmbari = createAmbariStack(stack);
             if (cluster != null) {
-                ambariHealthCheck(cluster.getUser(), resolvedAmbari);
+                ambariHealthCheck(resolvedAmbari);
                 updateCluster(stack, cluster, resolvedAmbari);
             } else {
                 clusterService.validateClusterUniqueness(resolvedAmbari);
@@ -102,12 +102,12 @@ public class ClusterCreationEvaluator extends EvaluatorExecutor {
     }
 
     private void createCluster(AutoscaleStackResponse stack, AmbariStack resolvedAmbari) {
-        PeriscopeUser user = new PeriscopeUser(null, null, null);
-        MDCBuilder.buildMdcContext(user, stack.getStackId(), null);
+        MDCBuilder.buildMdcContext(stack.getStackId(), stack.getName(), "CLUSTER");
         LOGGER.info("Creating cluster for Ambari host: {}", resolvedAmbari.getAmbari().getHost());
-        Cluster cluster = clusterService.create(user, resolvedAmbari, null);
+        Cluster cluster = clusterService.create(resolvedAmbari, null,
+                new ClusterPertain(stack.getTenant(), stack.getWorkspaceId(), stack.getUserId()));
         History history = historyService.createEntry(ScalingStatus.ENABLED, "Autoscaling has been enabled for the cluster.", 0, cluster);
-        notificationSender.send(history);
+        notificationSender.send(cluster, history);
     }
 
     private void updateCluster(AutoscaleStackResponse stack, Cluster cluster, AmbariStack resolvedAmbari) {
@@ -116,7 +116,7 @@ public class ClusterCreationEvaluator extends EvaluatorExecutor {
             LOGGER.info("Update cluster and set it's state to 'RUNNING' for Ambari host: {}", resolvedAmbari.getAmbari().getHost());
             cluster = clusterService.update(cluster.getId(), resolvedAmbari, RUNNING, cluster.isAutoscalingEnabled());
             History history = historyService.createEntry(ScalingStatus.ENABLED, "Autoscaling has been enabled for the cluster.", 0, cluster);
-            notificationSender.send(history);
+            notificationSender.send(cluster, history);
         }
     }
 
@@ -127,10 +127,10 @@ public class ClusterCreationEvaluator extends EvaluatorExecutor {
         return new AmbariStack(new Ambari(host, gatewayPort, stack.getUserName(), stack.getPassword()), stack.getStackId(), securityConfig);
     }
 
-    private void ambariHealthCheck(PeriscopeUser user, AmbariStack ambariStack) {
+    private void ambariHealthCheck(AmbariStack ambariStack) {
         String host = ambariStack.getAmbari().getHost();
         try {
-            AmbariClient client = ambariClientProvider.createAmbariClient(new Cluster(user, ambariStack));
+            AmbariClient client = ambariClientProvider.createAmbariClient(new Cluster(ambariStack));
             String healthCheckResult = ambariRequestLogging.logging(client::healthCheck, "healthCheck");
             if (!"RUNNING".equals(healthCheckResult)) {
                 throw new AmbariHealtCheckException(String.format("Ambari on host '%s' is not in 'RUNNING' state.", host));

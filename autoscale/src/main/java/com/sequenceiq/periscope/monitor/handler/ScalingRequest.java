@@ -15,12 +15,12 @@ import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupAdjustmen
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.common.type.ScalingHardLimitsService;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.periscope.api.model.ScalingStatus;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.History;
 import com.sequenceiq.periscope.domain.MetricType;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
-import com.sequenceiq.periscope.log.MDCBuilder;
 import com.sequenceiq.periscope.notification.HttpNotificationSender;
 import com.sequenceiq.periscope.service.HistoryService;
 import com.sequenceiq.periscope.service.MetricService;
@@ -100,7 +100,7 @@ public class ScalingRequest implements Runnable {
             instanceGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
             instanceGroupAdjustmentJson.setInstanceGroup(hostGroup);
             updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
-            cloudbreakClient.autoscaleEndpoint().putStack(stackId, cluster.getUser().getId(), updateStackJson);
+            cloudbreakClient.autoscaleEndpoint().putStack(stackId, cluster.getClusterPertain().getUserId(), updateStackJson);
             scalingStatus = ScalingStatus.SUCCESS;
             statusReason = "Upscale successfully triggered";
             metricService.incrementCounter(MetricType.CLUSTER_UPSCALE_SUCCESSFUL);
@@ -131,7 +131,7 @@ public class ScalingRequest implements Runnable {
             hostGroupAdjustmentJson.setWithStackUpdate(true);
             hostGroupAdjustmentJson.setHostGroup(hostGroup);
             updateClusterJson.setHostGroupAdjustment(hostGroupAdjustmentJson);
-            cloudbreakClient.autoscaleEndpoint().putCluster(stackId, cluster.getUser().getId(), updateClusterJson);
+            cloudbreakClient.autoscaleEndpoint().putCluster(stackId, cluster.getClusterPertain().getUserId(), updateClusterJson);
             scalingStatus = ScalingStatus.SUCCESS;
             statusReason = "Downscale successfully triggered";
             metricService.incrementCounter(MetricType.CLUSTER_DOWNSCALE_SUCCESSFUL);
@@ -147,6 +147,6 @@ public class ScalingRequest implements Runnable {
 
     private void createHistoryAndNotify(int totalNodes, String statusReason, ScalingStatus scalingStatus) {
         History history = historyService.createEntry(scalingStatus, StringUtils.substring(statusReason, 0, STATUSREASON_MAX_LENGTH), totalNodes, policy);
-        notificationSender.send(history);
+        notificationSender.send(policy.getAlert().getCluster(), history);
     }
 }

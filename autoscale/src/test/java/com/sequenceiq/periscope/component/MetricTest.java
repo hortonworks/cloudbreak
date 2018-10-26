@@ -62,6 +62,8 @@ import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterResponse;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.CrudRepositoryLookupService;
 import com.sequenceiq.cloudbreak.service.TransactionExecutorService;
 import com.sequenceiq.periscope.PeriscopeApplication;
@@ -73,9 +75,9 @@ import com.sequenceiq.periscope.controller.AutoScaleClusterV1Controller;
 import com.sequenceiq.periscope.controller.AutoScaleClusterV2Controller;
 import com.sequenceiq.periscope.domain.Ambari;
 import com.sequenceiq.periscope.domain.Cluster;
+import com.sequenceiq.periscope.domain.ClusterPertain;
 import com.sequenceiq.periscope.domain.MetricType;
 import com.sequenceiq.periscope.domain.PeriscopeNode;
-import com.sequenceiq.periscope.domain.PeriscopeUser;
 import com.sequenceiq.periscope.monitor.event.UpdateFailedEvent;
 import com.sequenceiq.periscope.monitor.executor.LoggedExecutorService;
 import com.sequenceiq.periscope.monitor.handler.UpdateFailedHandler;
@@ -88,12 +90,11 @@ import com.sequenceiq.periscope.repository.ScalingPolicyRepository;
 import com.sequenceiq.periscope.repository.SecurityConfigRepository;
 import com.sequenceiq.periscope.repository.SubscriptionRepository;
 import com.sequenceiq.periscope.repository.TimeAlertRepository;
-import com.sequenceiq.periscope.repository.UserRepository;
-import com.sequenceiq.periscope.service.AuthenticatedUserService;
+import com.sequenceiq.periscope.service.AutoscaleRestRequestThreadLocalService;
 import com.sequenceiq.periscope.service.MetricService;
 import com.sequenceiq.periscope.service.ha.LeaderElectionService;
 import com.sequenceiq.periscope.service.ha.PeriscopeNodeConfig;
-import com.sequenceiq.periscope.service.security.CachedUserDetailsService;
+import com.sequenceiq.periscope.service.security.CloudbreakAuthorizationService;
 import com.zaxxer.hikari.HikariDataSource;
 
 import springfox.documentation.swagger.web.SwaggerResourcesProvider;
@@ -182,6 +183,12 @@ public class MetricTest {
     private TestRestTemplate restTemplate;
 
     @MockBean
+    private CloudbreakAuthorizationService cloudbreakAuthorizationService;
+
+    @MockBean
+    private AutoscaleRestRequestThreadLocalService restRequestThreadLocalService;
+
+    @MockBean
     private AuthenticatedUserService authenticatedUserService;
 
     @MockBean
@@ -236,13 +243,13 @@ public class MetricTest {
     public void testMetricsWhenAddActiveCluster() {
         when(cloudbreakClient.autoscaleEndpoint()).thenReturn(autoscaleEndpoint);
         when(autoscaleEndpoint.get(eq(STACK_ID))).thenReturn(getStackResponse(AVAILABLE, AVAILABLE));
-        when(authenticatedUserService.getPeriscopeUser()).thenReturn(getOwnerUser());
         when(clusterRepository.save(any())).thenAnswer(this::saveCluster);
         when(historyRepository.save(any())).then(returnsFirstArg());
         when(clusterRepository.countByStateAndAutoscalingEnabledAndPeriscopeNodeId(eq(ClusterState.RUNNING), eq(true), anyString()))
                 .thenReturn(1);
         when(clusterRepository.countByStateAndAutoscalingEnabledAndPeriscopeNodeId(eq(ClusterState.SUSPENDED), eq(true), anyString()))
                 .thenReturn(0);
+        when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(new CloudbreakUser("id", "name", "email", "tenant"));
 
         autoScaleClusterV1Controller.addCluster(getCreateAutoscaleClusterRequest());
 
@@ -261,7 +268,6 @@ public class MetricTest {
         metricService.submitGauge(MetricType.CLUSTER_STATE_SUSPENDED, 0);
         when(clusterRepository.findByStackId(STACK_ID)).thenReturn(getACluster(ClusterState.RUNNING));
         when(clusterRepository.findById(CLUSTER_ID)).thenReturn(Optional.of(getACluster(ClusterState.RUNNING)));
-        when(authenticatedUserService.getPeriscopeUser()).thenReturn(getOwnerUser());
         when(clusterRepository.save(any())).thenAnswer(this::saveCluster);
         when(historyRepository.save(any())).then(returnsFirstArg());
         when(clusterRepository.countByStateAndAutoscalingEnabledAndPeriscopeNodeId(eq(ClusterState.RUNNING), eq(true), anyString()))
@@ -285,7 +291,6 @@ public class MetricTest {
         metricService.submitGauge(MetricType.CLUSTER_STATE_SUSPENDED, 1);
         when(clusterRepository.findByStackId(STACK_ID)).thenReturn(getACluster(ClusterState.SUSPENDED));
         when(clusterRepository.findById(CLUSTER_ID)).thenReturn(Optional.of(getACluster(ClusterState.SUSPENDED)));
-        when(authenticatedUserService.getPeriscopeUser()).thenReturn(getOwnerUser());
         when(clusterRepository.save(any())).thenAnswer(this::saveCluster);
         when(historyRepository.save(any())).then(returnsFirstArg());
         when(clusterRepository.countByStateAndAutoscalingEnabledAndPeriscopeNodeId(eq(ClusterState.RUNNING), eq(true), anyString()))
@@ -339,7 +344,6 @@ public class MetricTest {
         metricService.submitGauge(MetricType.CLUSTER_STATE_ACTIVE, 1);
         when(clusterRepository.findByStackId(STACK_ID)).thenReturn(getACluster(ClusterState.RUNNING));
         when(clusterRepository.findById(CLUSTER_ID)).thenReturn(Optional.of(getACluster(ClusterState.RUNNING)));
-        when(authenticatedUserService.getPeriscopeUser()).thenReturn(getOwnerUser());
         when(clusterRepository.save(any())).thenAnswer(this::saveCluster);
         when(historyRepository.save(any())).then(returnsFirstArg());
         when(clusterRepository.countByStateAndAutoscalingEnabledAndPeriscopeNodeId(eq(ClusterState.RUNNING), eq(true), anyString()))
@@ -392,7 +396,7 @@ public class MetricTest {
 
     private Cluster saveCluster(InvocationOnMock i) {
         Cluster cluster = i.getArgument(0);
-        cluster.setUser(getOwnerUser());
+        cluster.setClusterPertain(getClusterPertain());
         cluster.setId(CLUSTER_ID);
         return cluster;
     }
@@ -401,15 +405,15 @@ public class MetricTest {
         return new AutoscaleClusterRequest("host", "port", USER_A_ID, "pass", STACK_ID, true);
     }
 
-    private PeriscopeUser getOwnerUser() {
-        return new PeriscopeUser(USER_A_ID, USER_A_EMAIL, ACCOUNT_A);
+    private ClusterPertain getClusterPertain() {
+        return new ClusterPertain("tenant", 1L, "user");
     }
 
     private Cluster getACluster(ClusterState clusterState) {
         Cluster cluster = new Cluster();
         cluster.setId(CLUSTER_ID);
         cluster.setStackId(STACK_ID);
-        cluster.setUser(getOwnerUser());
+        cluster.setClusterPertain(getClusterPertain());
         cluster.setAmbari(new Ambari("host", "port", USER_A_ID, ""));
         cluster.setState(clusterState);
         return cluster;
@@ -486,9 +490,6 @@ public class MetricTest {
         private PrometheusAlertRepository prometheusAlertRepository;
 
         @MockBean
-        private UserRepository userRepository;
-
-        @MockBean
         private SecurityConfigRepository securityConfigRepository;
 
         @MockBean
@@ -505,9 +506,6 @@ public class MetricTest {
 
         @MockBean
         private SwaggerResourcesProvider swaggerResourcesProvider;
-
-        @MockBean
-        private CachedUserDetailsService cachedUserDetailsService;
 
         @MockBean
         private Scheduler scheduler;

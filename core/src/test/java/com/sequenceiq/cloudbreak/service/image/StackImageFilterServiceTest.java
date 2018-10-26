@@ -12,7 +12,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -201,9 +200,9 @@ public class StackImageFilterServiceTest {
 
     private StatedImages getStatedImages() {
         Images images = new Images(
-                Arrays.asList(getImage("a", IMAGE_BASE_ID)),
-                Arrays.asList(getImage("b", IMAGE_HDP_ID)),
-                Arrays.asList(getImage("c", IMAGE_HDF_ID)),
+                Collections.singletonList(getImage("a", IMAGE_BASE_ID)),
+                Collections.singletonList(getImage("b", IMAGE_HDP_ID)),
+                Collections.singletonList(getImage("c", IMAGE_HDF_ID)),
                 new HashSet<>()
         );
         return StatedImages.statedImages(images, CUSTOM_IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME);
@@ -234,7 +233,7 @@ public class StackImageFilterServiceTest {
     }
 
     private CloudbreakUser setupLoggedInUser() {
-        CloudbreakUser user = new CloudbreakUser("", "", "");
+        CloudbreakUser user = new CloudbreakUser("", "", "", "");
         when(authenticatedUserService.getCbUser()).thenReturn(user);
         return user;
     }

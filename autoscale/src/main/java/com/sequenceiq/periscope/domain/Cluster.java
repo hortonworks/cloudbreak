@@ -12,8 +12,6 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
@@ -23,7 +21,7 @@ import com.sequenceiq.periscope.model.AmbariStack;
 import com.sequenceiq.periscope.monitor.Monitored;
 
 @Entity
-public class Cluster implements Monitored {
+public class Cluster implements Monitored, Clustered {
 
     private static final int DEFAULT_MIN_SIZE = 2;
 
@@ -37,14 +35,13 @@ public class Cluster implements Monitored {
     private long id;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    private ClusterPertain clusterPertain;
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private Ambari ambari;
 
     @OneToOne(mappedBy = "cluster", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
     private SecurityConfig securityConfig;
-
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private PeriscopeUser user;
 
     @Enumerated(EnumType.STRING)
     private ClusterState state = ClusterState.PENDING;
@@ -84,8 +81,7 @@ public class Cluster implements Monitored {
     public Cluster() {
     }
 
-    public Cluster(PeriscopeUser user, AmbariStack ambariStack) {
-        this.user = user;
+    public Cluster(AmbariStack ambariStack) {
         stackId = ambariStack.getStackId();
         ambari = ambariStack.getAmbari();
     }
@@ -106,6 +102,14 @@ public class Cluster implements Monitored {
         this.id = id;
     }
 
+    public ClusterPertain getClusterPertain() {
+        return clusterPertain;
+    }
+
+    public void setClusterPertain(ClusterPertain clusterPertain) {
+        this.clusterPertain = clusterPertain;
+    }
+
     public Ambari getAmbari() {
         return ambari;
     }
@@ -120,14 +124,6 @@ public class Cluster implements Monitored {
 
     public void setSecurityConfig(SecurityConfig securityConfig) {
         this.securityConfig = securityConfig;
-    }
-
-    public PeriscopeUser getUser() {
-        return user;
-    }
-
-    public void setUser(PeriscopeUser user) {
-        this.user = user;
     }
 
     public ClusterState getState() {
@@ -258,8 +254,14 @@ public class Cluster implements Monitored {
         return lastEvaluated;
     }
 
+    @Override
     public void setLastEvaluated(long lastEvaluated) {
         this.lastEvaluated = lastEvaluated;
+    }
+
+    @Override
+    public Cluster getCluster() {
+        return this;
     }
 }
 

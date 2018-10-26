@@ -41,15 +41,15 @@ import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.Tags;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
 public class StackV2RequestToStackRequestConverterTest {
 
@@ -77,7 +77,7 @@ public class StackV2RequestToStackRequestConverterTest {
     private SharedServiceConfigProvider sharedServiceConfigProvider;
 
     @Mock
-    private RestRequestThreadLocalService restRequestThreadLocalService;
+    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     @Mock
     private UserService userService;
@@ -363,12 +363,10 @@ public class StackV2RequestToStackRequestConverterTest {
     @Test
     public void testConvertWhenOwnerEmailIsNullThenAuthenticatedUserServiceShouldProvideTheValue() {
         StackV2Request source = createStackV2Request();
-        source.setOwnerEmail(null);
         when(cbUser.getUsername()).thenReturn(TEST_OWNER_EMAIL);
 
-        StackRequest result = underTest.convert(source);
+        underTest.convert(source);
 
-        Assert.assertEquals(TEST_OWNER_EMAIL, result.getOwnerEmail());
         verify(restRequestThreadLocalService, times(1)).getCloudbreakUser();
         verify(conversionService, times(1)).convert(any(), any());
     }
@@ -376,12 +374,10 @@ public class StackV2RequestToStackRequestConverterTest {
     @Test
     public void testConvertWhenOwnerEmailIsEmptyThenAuthenticatedUserServiceShouldProvideTheValue() {
         StackV2Request source = createStackV2Request();
-        source.setOwnerEmail("");
         when(cbUser.getUsername()).thenReturn(TEST_OWNER_EMAIL);
 
-        StackRequest result = underTest.convert(source);
+        underTest.convert(source);
 
-        Assert.assertEquals(TEST_OWNER_EMAIL, result.getOwnerEmail());
         verify(restRequestThreadLocalService, times(1)).getCloudbreakUser();
         verify(conversionService, times(1)).convert(any(), any());
     }
@@ -389,11 +385,9 @@ public class StackV2RequestToStackRequestConverterTest {
     @Test
     public void testConvertWhenOwnerEmailIsNotEmptyThenTheProvidedValueShouldBeSet() {
         StackV2Request source = createStackV2Request();
-        source.setOwnerEmail(TEST_OWNER_EMAIL);
 
-        StackRequest result = underTest.convert(source);
+        underTest.convert(source);
 
-        Assert.assertEquals(TEST_OWNER_EMAIL, result.getOwnerEmail());
         verify(restRequestThreadLocalService, times(1)).getCloudbreakUser();
         verify(conversionService, times(1)).convert(any(), any());
     }

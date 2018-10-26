@@ -36,16 +36,16 @@ import io.swagger.annotations.ApiOperation;
 public interface AutoscaleEndpoint {
 
     @PUT
-    @Path("/stack/{id}/{owner}")
+    @Path("/stack/{id}/{userId}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.PUT_BY_ID, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "putStackForAutoscale")
-    Response putStack(@PathParam("id") Long id, @PathParam("owner") String owner, @Valid UpdateStackJson updateRequest);
+    Response putStack(@PathParam("id") Long id, @PathParam("userId") String userId, @Valid UpdateStackJson updateRequest);
 
     @PUT
-    @Path("/stack/{id}/{owner}/cluster")
+    @Path("/stack/{id}/{userId}/cluster")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.PUT_BY_ID, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "putClusterForAutoscale")
-    Response putCluster(@PathParam("id") Long id, @PathParam("owner") String owner, @Valid UpdateClusterJson updateRequest);
+    Response putCluster(@PathParam("id") Long id, @PathParam("userId") String userId, @Valid UpdateClusterJson updateRequest);
 
     @POST
     @Path("ambari")
@@ -81,9 +81,10 @@ public interface AutoscaleEndpoint {
     AutoscaleClusterResponse getForAutoscale(@PathParam("id") Long id);
 
     @GET
-    @Path("/stack/{id}/authorize/{owner}/{permission}")
+    @Path("/stack/{id}/authorize/{userId}/{tenant}/{permission}")
     @Produces(MediaType.APPLICATION_JSON)
-    Boolean authorizeForAutoscale(@PathParam("id") Long id, @PathParam("owner") String owner, @PathParam("permission") String permission);
+    Boolean authorizeForAutoscale(@PathParam("id") Long id, @PathParam("userId") String userId, @PathParam("tenant") String tenant,
+            @PathParam("permission") String permission);
 
     @GET
     @Path("/stack/{id}/certificate")
