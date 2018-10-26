@@ -2,6 +2,8 @@ import org.ajoberstar.grgit.Grgit
 
 buildscript {
     repositories {
+        mavenLocal()
+        maven { url = "$repoUrl" }
         mavenCentral()
         jcenter()
     }
