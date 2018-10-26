@@ -2,6 +2,9 @@ apply plugin: 'java'
 
 repositories {
     mavenCentral()
+    maven { url = "$repoUrl" }
+    mavenCentral()
+    jcenter()
 }
 
 jar {
