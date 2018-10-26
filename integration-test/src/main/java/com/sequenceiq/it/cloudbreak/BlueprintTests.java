@@ -166,7 +166,7 @@ public class BlueprintTests extends CloudbreakTest {
                 .withName(EMPTY_BP_NAME)
                 .withDescription(BP_DESCRIPTION)
                 .withAmbariBlueprint(getEmptyBlueprintFile()), EMPTY_BP_NAME + " blueprint with no content request.");
-        when(Blueprint.post(), EMPTY_BP_NAME + " blueprint  with no content request has been posted.");
+        when(Blueprint.post(), EMPTY_BP_NAME + " blueprint with no content request has been posted.");
     }
 
     @Test(expectedExceptions = BadRequestException.class, priority = 11, groups = "blueprints")
@@ -180,7 +180,7 @@ public class BlueprintTests extends CloudbreakTest {
     }
 
     @Test(priority = 12, groups = "blueprints")
-    public void testCreateEmptyFilelueprintMessage() throws Exception {
+    public void testCreateEmptyFileBlueprintMessage() throws Exception {
         given(CloudbreakClient.created());
         given(Blueprint.request()
                 .withName(EMPTY_BP_NAME)
