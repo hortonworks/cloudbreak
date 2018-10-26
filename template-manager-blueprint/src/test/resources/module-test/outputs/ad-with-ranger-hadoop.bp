@@ -24,6 +24,9 @@
           "ranger-hdfs-plugin-enabled": "No",
           "xasecure.audit.destination.solr": "true",
           "ranger_admin_password": "Passw0rd",
+          "rangerusersync_user_password": "Passw0rd",
+          "rangertagsync_user_password": "Passw0rd",
+          "keyadmin_user_password": "Passw0rd",
           "ranger-atlas-plugin-enabled": "No",
           "create_db_dbuser": "false",
           "admin_password": "Passw0rd"

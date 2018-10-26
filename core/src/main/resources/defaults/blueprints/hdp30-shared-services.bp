@@ -52,12 +52,6 @@
           },
           {
             "name": "INFRA_SOLR"
-          },
-          {
-            "name": "HIVE_METASTORE"
-          },
-          {
-            "name": "HIVE_CLIENT"
           }
         ],
         "cardinality": "1"
