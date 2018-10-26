@@ -1,12 +1,14 @@
 package com.sequenceiq.cloudbreak.api.model.v3.credential;
 
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
+import com.sequenceiq.cloudbreak.api.model.annotations.Immutable;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.CredentialModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+@Immutable
 @ApiModel
 public class CredentialPrerequisites implements JsonEntity {
 

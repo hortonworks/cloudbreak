@@ -1,13 +1,17 @@
 package com.sequenceiq.cloudbreak.api.model;
 
-public final class NetworkConfig {
-    public static final String OPEN_NETWORK = "0.0.0.0/0";
+public enum NetworkConfig {
+    OPEN_NETWORK("0.0.0.0/0"),
+    SUBNET_8("10.0.0.0/8"),
+    SUBNET_16("10.0.0.0/16");
 
-    public static final String SUBNET_8 = "10.0.0.0/8";
+    private final String cidr;
 
-    public static final String SUBNET_16 = "10.0.0.0/16";
+    NetworkConfig(String cidr) {
+        this.cidr = cidr;
+    }
 
-    private NetworkConfig() {
-        throw new IllegalStateException();
+    public String getCidr() {
+        return cidr;
     }
 }

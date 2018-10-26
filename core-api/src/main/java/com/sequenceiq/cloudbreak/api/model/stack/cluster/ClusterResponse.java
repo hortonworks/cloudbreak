@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 import com.sequenceiq.cloudbreak.api.model.KerberosResponse;
 import com.sequenceiq.cloudbreak.api.model.SharedServiceResponse;
 import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.api.model.annotations.TransformSetterType;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
@@ -56,6 +57,7 @@ public class ClusterResponse implements JsonEntity {
     @ApiModelProperty(ClusterModelDescription.MINUTES)
     private int minutesUp;
 
+    @TransformSetterType
     @ApiModelProperty(ClusterModelDescription.CLUSTER_NAME)
     private String cluster;
 

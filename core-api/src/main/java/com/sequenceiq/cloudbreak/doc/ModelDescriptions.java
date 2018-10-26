@@ -536,6 +536,13 @@ public class ModelDescriptions {
         public static final String HOSTGROUPS = "List of hostgroups where the failed nodes will be repaired";
         public static final String REMOVE_ONLY = "If true, the failed nodes will only be removed, otherwise the failed nodes will be removed and "
                 + "new nodes will be started.";
+        public static final String NODES = "List of nested objects consisting of deleteVolumes flag and a list of node IDs which will "
+                + "be repaired specifically. The existing disk volumes on the nodes will be re-created if the deleteVolumes flag is true.";
+    }
+
+    public static class RepairClusterNodeRequest {
+        public static final String DELETE_VOLUMES = "If true, delete volumes, otherwise reattaches them to a newly created node instance.";
+        public static final String IDS = "Node ID list of nodes that need replacement.";
     }
 
     public static class SmartSenseSubscriptionModelDescription {
