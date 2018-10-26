@@ -61,22 +61,13 @@ for term in terms["items"]:
        "maximumNumber": 24
     })
 
-    if vmAttributes["instanceFamily"] == "Storage optimized":
-        item["meta"]["configs"].append({
-            "volumeParameterType": "ST1",
-            "minimumSize": 500,
-            "maximumSize": 17592,
-            "minimumNumber": 1,
-            "maximumNumber": 24
-        })
-    else:
-        item["meta"]["configs"].append({
-            "volumeParameterType": "ST1",
-            "minimumSize": 0,
-            "maximumSize": 0,
-            "minimumNumber": 0,
-            "maximumNumber": 0
-        })
+    item["meta"]["configs"].append({
+        "volumeParameterType": "ST1",
+        "minimumSize": 500,
+        "maximumSize": 17592,
+        "minimumNumber": 1,
+        "maximumNumber": 24
+    })
 
     storage = vmAttributes["storage"]
 
