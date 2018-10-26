@@ -15,6 +15,7 @@ import org.junit.runner.RunWith;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.FilterType;
@@ -30,13 +31,11 @@ import org.springframework.test.context.junit4.SpringRunner;
 import com.sequenceiq.cloudbreak.aspect.HasPermissionAspects;
 import com.sequenceiq.cloudbreak.aspect.HasPermissionService;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
 import com.sequenceiq.cloudbreak.conf.SecurityConfig;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.CrudRepositoryLookupService;
 import com.sequenceiq.cloudbreak.service.security.ScimAccountGroupReaderFilter;
 import com.sequenceiq.cloudbreak.service.security.TenantBasedPermissionEvaluator;
-import com.sequenceiq.cloudbreak.service.user.CachedUserDetailsService;
 
 @RunWith(SpringRunner.class)
 @TestPropertySource(properties = {
@@ -65,9 +64,6 @@ public abstract class SecurityComponentTestBase {
     @Inject
     private OAuth2Request oAuth2Request;
 
-    @Inject
-    private CachedUserDetailsService cachedUserDetailsService;
-
     @Before
     public void before() {
         setupSpringSecurityForFakeLoggedInUser();
@@ -86,13 +82,9 @@ public abstract class SecurityComponentTestBase {
         when(resourceServerTokenServices.loadAuthentication(anyString())).thenReturn(auth);
     }
 
-    protected void setupLoggedInUser(CloudbreakUser loggedInUser) {
-        when(cachedUserDetailsService.getDetails(anyString(), anyString(), any(UserFilterField.class))).thenReturn(loggedInUser);
-    }
-
     protected CloudbreakUser getOwner(String... scopes) {
         addScopes(scopes);
-        return new CloudbreakUser(USER_A_ID, "", ACCOUNT_A);
+        return new CloudbreakUser(USER_A_ID, "", "", ACCOUNT_A);
     }
 
     private void addScopes(String[] scopes) {
@@ -101,25 +93,17 @@ public abstract class SecurityComponentTestBase {
 
     @Configuration
     @EnableAspectJAutoProxy(proxyTargetClass = true)
-    @ComponentScan(basePackages =
-            {"com.sequenceiq.cloudbreak"},
-            useDefaultFilters = false,
-            includeFilters = {
-                    @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = {
-                            AuthorizationService.class,
-                            TenantBasedPermissionEvaluator.class,
-                            ScimAccountGroupReaderFilter.class,
-                            SecurityConfig.class
-                    })
-            })
+    @ComponentScan(basePackages = "com.sequenceiq.cloudbreak", useDefaultFilters = false, includeFilters = @Filter(type = FilterType.ASSIGNABLE_TYPE, value = {
+            AuthorizationService.class,
+            TenantBasedPermissionEvaluator.class,
+            ScimAccountGroupReaderFilter.class,
+            SecurityConfig.class
+    }))
 
     public static class SecurityComponentTestBaseConfig {
 
         @MockBean
         private ResourceServerTokenServices resourceServerTokenServices;
-
-        @MockBean
-        private CachedUserDetailsService cachedUserDetailsService;
 
         @MockBean
         private CrudRepositoryLookupService repositoryLookupService;

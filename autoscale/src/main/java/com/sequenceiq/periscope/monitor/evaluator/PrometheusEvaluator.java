@@ -17,11 +17,11 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.util.JaxRSUtil;
 import com.sequenceiq.periscope.domain.BaseAlert;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.PrometheusAlert;
-import com.sequenceiq.periscope.log.MDCBuilder;
 import com.sequenceiq.periscope.model.PrometheusResponse;
 import com.sequenceiq.periscope.model.PrometheusResponse.Result;
 import com.sequenceiq.periscope.model.TlsConfiguration;

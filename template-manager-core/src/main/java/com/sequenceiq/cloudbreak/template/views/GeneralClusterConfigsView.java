@@ -37,21 +37,35 @@ public class GeneralClusterConfigsView {
     private int kafkaReplicationFactor;
 
     public GeneralClusterConfigsView(GeneralClusterConfigs generalClusterConfigs) {
-        this.email = generalClusterConfigs.getIdentityUserEmail();
-        this.gatewayInstanceMetadataPresented = generalClusterConfigs.isGatewayInstanceMetadataPresented();
-        this.instanceGroupsPresented = generalClusterConfigs.getInstanceGroupsPresented();
-        this.clusterName = generalClusterConfigs.getClusterName();
-        this.stackName = generalClusterConfigs.getStackName();
-        this.uuid = generalClusterConfigs.getUuid();
-        this.userName = generalClusterConfigs.getUserName();
-        this.password = generalClusterConfigs.getPassword();
-        this.executorType = generalClusterConfigs.getExecutorType();
-        this.ambariIp = generalClusterConfigs.getAmbariIp();
-        this.orchestratorType = generalClusterConfigs.getOrchestratorType();
-        this.nodeCount = generalClusterConfigs.getNodeCount();
-        this.containerExecutor = ExecutorType.CONTAINER.equals(generalClusterConfigs.getExecutorType());
-        this.primaryGatewayInstanceDiscoveryFQDN = generalClusterConfigs.getPrimaryGatewayInstanceDiscoveryFQDN().orElse(null);
-        this.kafkaReplicationFactor = generalClusterConfigs.getKafkaReplicationFactor();
+        email = generalClusterConfigs.getIdentityUserEmail();
+        gatewayInstanceMetadataPresented = generalClusterConfigs.isGatewayInstanceMetadataPresented();
+        instanceGroupsPresented = generalClusterConfigs.getInstanceGroupsPresented();
+        clusterName = generalClusterConfigs.getClusterName();
+        stackName = generalClusterConfigs.getStackName();
+        uuid = generalClusterConfigs.getUuid();
+        userName = generalClusterConfigs.getUserName();
+        password = generalClusterConfigs.getPassword();
+        executorType = generalClusterConfigs.getExecutorType();
+        ambariIp = generalClusterConfigs.getAmbariIp();
+        orchestratorType = generalClusterConfigs.getOrchestratorType();
+        nodeCount = generalClusterConfigs.getNodeCount();
+        containerExecutor = ExecutorType.CONTAINER.equals(generalClusterConfigs.getExecutorType());
+        primaryGatewayInstanceDiscoveryFQDN = generalClusterConfigs.getPrimaryGatewayInstanceDiscoveryFQDN().orElse(null);
+        kafkaReplicationFactor = generalClusterConfigs.getKafkaReplicationFactor();
+        gatewayInstanceMetadataPresented = generalClusterConfigs.isGatewayInstanceMetadataPresented();
+        instanceGroupsPresented = generalClusterConfigs.getInstanceGroupsPresented();
+        clusterName = generalClusterConfigs.getClusterName();
+        stackName = generalClusterConfigs.getStackName();
+        uuid = generalClusterConfigs.getUuid();
+        userName = generalClusterConfigs.getUserName();
+        password = generalClusterConfigs.getPassword();
+        executorType = generalClusterConfigs.getExecutorType();
+        ambariIp = generalClusterConfigs.getAmbariIp();
+        orchestratorType = generalClusterConfigs.getOrchestratorType();
+        nodeCount = generalClusterConfigs.getNodeCount();
+        containerExecutor = ExecutorType.CONTAINER.equals(generalClusterConfigs.getExecutorType());
+        primaryGatewayInstanceDiscoveryFQDN = generalClusterConfigs.getPrimaryGatewayInstanceDiscoveryFQDN().orElse(null);
+        kafkaReplicationFactor = generalClusterConfigs.getKafkaReplicationFactor();
     }
 
     public OrchestratorType getOrchestratorType() {

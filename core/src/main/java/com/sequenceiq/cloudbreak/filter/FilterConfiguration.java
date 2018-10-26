@@ -7,9 +7,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
-import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
 @Configuration
 public class FilterConfiguration {
@@ -18,7 +18,7 @@ public class FilterConfiguration {
     private AuthenticatedUserService authenticatedUserService;
 
     @Inject
-    private RestRequestThreadLocalService restRequestThreadLocalService;
+    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     @Inject
     private WorkspaceService workspaceService;
@@ -46,10 +46,19 @@ public class FilterConfiguration {
     }
 
     @Bean
+    public FilterRegistrationBean<UserCreatorFilter> userCreatorFilterRegistrationBean() {
+        FilterRegistrationBean<UserCreatorFilter> registrationBean = new FilterRegistrationBean<>();
+        UserCreatorFilter filter = new UserCreatorFilter(userService, authenticatedUserService);
+        registrationBean.setFilter(filter);
+        registrationBean.setOrder(Integer.MAX_VALUE);
+        return registrationBean;
+    }
+
+    @Bean
     public FilterRegistrationBean<MDCContextFilter> mdcContextFilterRegistrationBean() {
         FilterRegistrationBean<MDCContextFilter> registrationBean = new FilterRegistrationBean<>();
-        MDCContextFilter userFilter = new MDCContextFilter(authenticatedUserService);
-        registrationBean.setFilter(userFilter);
+        MDCContextFilter filter = new MDCContextFilter(authenticatedUserService);
+        registrationBean.setFilter(filter);
         registrationBean.setOrder(Integer.MAX_VALUE);
         return registrationBean;
     }

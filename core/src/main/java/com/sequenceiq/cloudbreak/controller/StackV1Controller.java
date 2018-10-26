@@ -24,7 +24,7 @@ import com.sequenceiq.cloudbreak.authorization.PermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
@@ -52,7 +52,7 @@ public class StackV1Controller extends NotificationController implements StackV1
     private WorkspaceService workspaceService;
 
     @Inject
-    private RestRequestThreadLocalService restRequestThreadLocalService;
+    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     @Inject
     private PermissionCheckerService permissionCheckerService;

@@ -35,12 +35,13 @@ public class CloudbreakUsageToCloudbreakUsageJsonConverterTest extends AbstractE
     @Test
     public void testConvert() {
         // GIVEN
-        given(restRequestThreadLocalService.getCloudbreakUser()).willReturn(new CloudbreakUser("userId", "john.smith@example.com", "tenant"));
+        given(restRequestThreadLocalService.getCloudbreakUser()).willReturn(new CloudbreakUser("userId", "John Smith", "john.smith@example.com",
+                "tenant"));
         // WHEN
         CloudbreakUsageJson result = underTest.convert(getSource());
         // THEN
         assertEquals(GCP, result.getProvider());
-        assertEquals("john.smith@example.com", result.getUsername());
+        assertEquals("John Smith", result.getUsername());
         assertAllFieldsNotNull(result, Lists.newArrayList("availabilityZone", "duration"));
     }
 
@@ -49,12 +50,13 @@ public class CloudbreakUsageToCloudbreakUsageJsonConverterTest extends AbstractE
         // GIVEN
         getSource().setProvider(AWS);
         getSource().setRegion("us_east_1");
-        given(restRequestThreadLocalService.getCloudbreakUser()).willReturn(new CloudbreakUser("userId", "john.smith@example.com", "tenant"));
+        given(restRequestThreadLocalService.getCloudbreakUser()).willReturn(new CloudbreakUser("userId", "John Smith", "john.smith@example.com",
+                "tenant"));
         // WHEN
         CloudbreakUsageJson result = underTest.convert(getSource());
         // THEN
         assertEquals(AWS, result.getProvider());
-        assertEquals("john.smith@example.com", result.getUsername());
+        assertEquals("John Smith", result.getUsername());
         assertAllFieldsNotNull(result, Lists.newArrayList("availabilityZone", "duration"));
     }
 
@@ -64,12 +66,13 @@ public class CloudbreakUsageToCloudbreakUsageJsonConverterTest extends AbstractE
         getSource().setProvider(GCP);
         getSource().setRegion("us_central1");
         getSource().setAvailabilityZone("us_central1_a");
-        given(restRequestThreadLocalService.getCloudbreakUser()).willReturn(new CloudbreakUser("userId", "john.smith@example.com", "tenant"));
+        given(restRequestThreadLocalService.getCloudbreakUser()).willReturn(new CloudbreakUser("userId", "John Smith", "john.smith@example.com",
+                "tenant"));
         // WHEN
         CloudbreakUsageJson result = underTest.convert(getSource());
         // THEN
         assertEquals(GCP, result.getProvider());
-        assertEquals("john.smith@example.com", result.getUsername());
+        assertEquals("John Smith", result.getUsername());
         assertAllFieldsNotNull(result, Lists.newArrayList("availabilityZone", "duration"));
     }
 

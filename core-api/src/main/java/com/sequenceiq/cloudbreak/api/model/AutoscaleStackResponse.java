@@ -15,6 +15,15 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AutoscaleStackResponse {
 
+    @ApiModelProperty(StackModelDescription.TENANANT)
+    private String tenant;
+
+    @ApiModelProperty(StackModelDescription.WORKSPACE_ID)
+    private Long workspaceId;
+
+    @ApiModelProperty(StackModelDescription.USER_ID)
+    private String userId;
+
     @ApiModelProperty(StackModelDescription.STACK_ID)
     private Long stackId;
 
@@ -45,6 +54,30 @@ public class AutoscaleStackResponse {
 
     @ApiModelProperty(StackModelDescription.CREATED)
     private Long created;
+
+    public String getTenant() {
+        return tenant;
+    }
+
+    public void setTenant(String tenant) {
+        this.tenant = tenant;
+    }
+
+    public Long getWorkspaceId() {
+        return workspaceId;
+    }
+
+    public void setWorkspaceId(Long workspaceId) {
+        this.workspaceId = workspaceId;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
 
     public Long getStackId() {
         return stackId;

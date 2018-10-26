@@ -67,7 +67,7 @@ public class UserService {
         Semaphore semaphore = UNDER_OPERATION.computeIfAbsent(cloudbreakUser, iu -> new Semaphore(1));
         semaphore.acquire();
         try {
-            return cachedUserService.getUser(cloudbreakUser, userRepository::findByTenantNameAndUserName, this::createUser);
+            return cachedUserService.getUser(cloudbreakUser, userRepository::findByTenantNameAndUserId, this::createUser);
         } finally {
             semaphore.release();
             UNDER_OPERATION.remove(cloudbreakUser);
@@ -87,7 +87,7 @@ public class UserService {
     }
 
     public Set<User> getAll(CloudbreakUser cloudbreakUser) {
-        User user = userRepository.findByUserId(cloudbreakUser.getUsername());
+        User user = userRepository.findByUserId(cloudbreakUser.getUserId());
         return userRepository.findAllByTenant(user.getTenant());
     }
 
@@ -95,7 +95,7 @@ public class UserService {
         try {
             return transactionService.requiresNew(() -> {
                 User user = new User();
-                user.setUserId(cloudbreakUser.getUsername());
+                user.setUserId(cloudbreakUser.getUserId());
                 user.setUserName(cloudbreakUser.getUsername());
 
                 Tenant tenant = tenantRepository.findByName(cloudbreakUser.getTenant());
@@ -125,7 +125,7 @@ public class UserService {
         } catch (TransactionExecutionException e) {
             if (e.getCause() instanceof ConstraintViolationException) {
                 try {
-                    return transactionService.requiresNew(() -> userRepository.findByUserId(cloudbreakUser.getUsername()));
+                    return transactionService.requiresNew(() -> userRepository.findByUserId(cloudbreakUser.getUserId()));
                 } catch (TransactionExecutionException e2) {
                     throw new TransactionRuntimeExecutionException(e2);
                 }

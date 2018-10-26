@@ -105,8 +105,10 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.cluster LEFT JOIN FETCH s.credential LEFT JOIN FETCH s.network LEFT JOIN FETCH s.orchestrator "
             + "LEFT JOIN FETCH s.stackStatus LEFT JOIN FETCH s.securityConfig LEFT JOIN FETCH s.failurePolicy LEFT JOIN FETCH"
             + " s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData WHERE s.stackStatus.status <> 'DELETE_COMPLETED' "
-            + "AND s.stackStatus.status <> 'DELETE_IN_PROGRESS'")
-    Set<Stack> findAliveOnes();
+            + "AND s.stackStatus.status <> 'DELETE_IN_PROGRESS' "
+            + "AND s.cluster.ambariIp IS NOT NULL "
+            + "AND s.cluster.status = 'AVAILABLE' ")
+    Set<Stack> findAliveOnesWithAmbari();
 
     @DisableCheckPermissions
     Long countByFlexSubscription(FlexSubscription flexSubscription);

@@ -14,7 +14,7 @@ import javax.persistence.SequenceGenerator;
 @Entity
 @DiscriminatorColumn(name = "alert_type")
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
-public abstract class BaseAlert {
+public abstract class BaseAlert implements Clustered {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "alert_generator")
@@ -64,6 +64,7 @@ public abstract class BaseAlert {
         return scalingPolicy == null ? null : scalingPolicy.getId();
     }
 
+    @Override
     public abstract Cluster getCluster();
 
 }

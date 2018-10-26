@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -41,7 +41,7 @@ public class RecipeController extends NotificationController implements RecipeEn
     private UserService userService;
 
     @Inject
-    private RestRequestThreadLocalService restRequestThreadLocalService;
+    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     @Override
     public RecipeResponse get(Long id) {

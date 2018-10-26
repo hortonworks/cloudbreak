@@ -11,6 +11,7 @@ import com.sequenceiq.periscope.api.AutoscaleApi;
 import com.sequenceiq.periscope.controller.mapper.AccessDeniedExceptionMapper;
 import com.sequenceiq.periscope.controller.mapper.BadRequestExceptionMapper;
 import com.sequenceiq.periscope.controller.mapper.ConstraintViolationExceptionMapper;
+import com.sequenceiq.periscope.controller.mapper.ConversionExceptionMapper;
 import com.sequenceiq.periscope.controller.mapper.ConversionFailedExceptionMapper;
 import com.sequenceiq.periscope.controller.mapper.DataIntegrityViolationExceptionMapper;
 import com.sequenceiq.periscope.controller.mapper.DefaultExceptionMapper;
@@ -59,6 +60,7 @@ public class EndpointConfig extends ResourceConfig {
     private void registerExceptionMappers() {
         register(AccessDeniedExceptionMapper.class);
         register(BadRequestExceptionMapper.class);
+        register(ConversionExceptionMapper.class);
         register(ConversionFailedExceptionMapper.class);
         register(HttpMediaTypeNotSupportedExceptionMapper.class);
         register(HttpMessageNotReadableExceptionMapper.class);

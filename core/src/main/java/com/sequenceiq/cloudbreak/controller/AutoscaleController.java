@@ -23,13 +23,13 @@ import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.authorization.PermissionCheckingUtils;
-import com.sequenceiq.cloudbreak.authorization.WorkspacePermissions;
+import com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.workspace.Tenant;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
-import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -47,7 +47,7 @@ public class AutoscaleController implements AutoscaleEndpoint {
     private UserService userService;
 
     @Inject
-    private RestRequestThreadLocalService restRequestThreadLocalService;
+    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     @Inject
     private PermissionCheckingUtils permissionCheckingUtils;
@@ -65,20 +65,20 @@ public class AutoscaleController implements AutoscaleEndpoint {
     private ClusterCommonService clusterCommonService;
 
     @Override
-    public Response putStack(Long id, String userName, @Valid UpdateStackJson updateRequest) {
-        setupIdentityForAutoscale(id, userName);
+    public Response putStack(Long id, String userId, @Valid UpdateStackJson updateRequest) {
+        setupIdentityForAutoscale(id, userId);
         return stackCommonService.putInDefaultWorkspace(id, updateRequest);
     }
 
-    private void setupIdentityForAutoscale(Long id, String userName) {
+    private void setupIdentityForAutoscale(Long id, String userId) {
         Tenant tenant = stackService.getTenant(id);
-        restRequestThreadLocalService.setCloudbreakUserByUsernameAndTenant(userName, tenant.getName());
+        restRequestThreadLocalService.setCloudbreakUserByUsernameAndTenant(userId, tenant.getName());
         restRequestThreadLocalService.setRequestedWorkspaceId(stackService.getWorkspaceId(id));
     }
 
     @Override
-    public Response putCluster(Long stackId, String userName, @Valid UpdateClusterJson updateRequest) {
-        setupIdentityForAutoscale(stackId, userName);
+    public Response putCluster(Long stackId, String userId, @Valid UpdateClusterJson updateRequest) {
+        setupIdentityForAutoscale(stackId, userId);
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         return clusterCommonService.put(stackId, updateRequest, user, workspace);
@@ -114,13 +114,13 @@ public class AutoscaleController implements AutoscaleEndpoint {
     }
 
     @Override
-    public Boolean authorizeForAutoscale(Long id, String owner, String permission) {
+    public Boolean authorizeForAutoscale(Long id, String userId, String tenant, String permission) {
         try {
-            restRequestThreadLocalService.setCloudbreakUserByUsernameAndTenant(owner, "DEFAULT");
+            restRequestThreadLocalService.setCloudbreakUserByUsernameAndTenant(userId, tenant);
             Stack stack = stackService.get(id);
-            if (WorkspacePermissions.Action.WRITE.name().equalsIgnoreCase(permission)) {
+            if (Action.WRITE.name().equalsIgnoreCase(permission)) {
                 User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-                permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(stack.getWorkspace().getId(), STACK, WorkspacePermissions.Action.WRITE, user);
+                permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(stack.getWorkspace().getId(), STACK, Action.WRITE, user);
             }
             return true;
         } catch (RuntimeException ignore) {

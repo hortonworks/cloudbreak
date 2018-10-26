@@ -10,6 +10,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
@@ -18,11 +19,8 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.aspect.PermissionType;
 import com.sequenceiq.cloudbreak.authorization.SpecialScopes;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
 import com.sequenceiq.cloudbreak.domain.workspace.Tenant;
 import com.sequenceiq.cloudbreak.domain.workspace.TenantAwareResource;
-import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
-import com.sequenceiq.cloudbreak.service.user.CachedUserDetailsService;
 
 @Service
 @Lazy
@@ -32,7 +30,7 @@ public class TenantBasedPermissionEvaluator implements PermissionEvaluator {
 
     @Inject
     @Lazy
-    private CachedUserDetailsService cachedUserDetailsService;
+    private ConversionService conversionService;
 
     @Override
     public boolean hasPermission(Authentication authentication, Object target, Object permission) {
@@ -48,8 +46,7 @@ public class TenantBasedPermissionEvaluator implements PermissionEvaluator {
             return oauth.getOAuth2Request().getScope().contains(SpecialScopes.AUTO_SCALE.getScope());
         }
 
-        CloudbreakUser user = cachedUserDetailsService.getDetails((String) authentication.getPrincipal(),
-                AuthenticatedUserService.getTenant(oauth), UserFilterField.USERNAME);
+        CloudbreakUser user = conversionService.convert(oauth, CloudbreakUser.class);
         Collection<?> targets = target instanceof Collection ? (Collection<?>) target : Collections.singleton(target);
         return targets.stream().allMatch(t -> hasPermission(user, p, t));
     }

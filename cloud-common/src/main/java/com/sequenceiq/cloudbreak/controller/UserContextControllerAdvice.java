@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.controller.advice;
+package com.sequenceiq.cloudbreak.controller;
 
 import javax.servlet.http.HttpServletRequest;
 

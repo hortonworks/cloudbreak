@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.domain.converter.EncryptionConverter;
 
 @Entity
 @NamedQueries(@NamedQuery(name = "SecurityConfig.findByClusterId", query = "SELECT s FROM SecurityConfig s WHERE s.cluster.id= :id"))
-public class SecurityConfig {
+public class SecurityConfig implements Clustered {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "securityconfig_generator")
@@ -68,6 +68,7 @@ public class SecurityConfig {
         return serverCert == null ? null : new String(Base64.decodeBase64(serverCert));
     }
 
+    @Override
     public Cluster getCluster() {
         return cluster;
     }

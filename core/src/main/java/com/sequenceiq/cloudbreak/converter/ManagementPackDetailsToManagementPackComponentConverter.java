@@ -11,12 +11,12 @@ import com.sequenceiq.cloudbreak.api.model.mpack.ManagementPackDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.ManagementPackComponent;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.ManagementPack;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
-import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.mpack.ManagementPackService;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
 @Component
 public class ManagementPackDetailsToManagementPackComponentConverter
@@ -31,7 +31,7 @@ public class ManagementPackDetailsToManagementPackComponentConverter
     private UserService userService;
 
     @Inject
-    private RestRequestThreadLocalService restRequestThreadLocalService;
+    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     @Override
     public ManagementPackComponent convert(ManagementPackDetails source) {

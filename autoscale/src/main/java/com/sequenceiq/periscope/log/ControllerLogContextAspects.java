@@ -1,7 +1,5 @@
 package com.sequenceiq.periscope.log;
 
-import javax.inject.Inject;
-
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
@@ -11,16 +9,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.periscope.domain.PeriscopeUser;
-import com.sequenceiq.periscope.service.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 @Component
 @Aspect
 public class ControllerLogContextAspects {
     private static final Logger LOGGER = LoggerFactory.getLogger(ControllerLogContextAspects.class);
-
-    @Inject
-    private AuthenticatedUserService authenticatedUserService;
 
     @Pointcut("execution(public * com.sequenceiq.periscope.controller.*Controller.*(..))")
     public void interceptControllerMethodCalls() {
@@ -32,8 +26,7 @@ public class ControllerLogContextAspects {
         CodeSignature sig = (CodeSignature) joinPoint.getSignature();
         String[] paramNames = sig.getParameterNames();
         Long clusterId = getClusterId(paramNames, args);
-        PeriscopeUser user = authenticatedUserService.getPeriscopeUser();
-        MDCBuilder.buildMdcContext(user, clusterId);
+        MDCBuilder.buildMdcContext(clusterId, "", "CLUSTER");
         LOGGER.debug("A controller method has been intercepted: {} with params {}, {}, MDC logger context is built.", joinPoint.toShortString(),
                 sig.getParameterNames(), args);
     }

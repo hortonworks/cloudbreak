@@ -263,7 +263,7 @@ public class StackService {
     public Set<AutoscaleStackResponse> getAllForAutoscale() {
         try {
             return transactionService.required(() -> {
-                Set<Stack> aliveOnes = stackRepository.findAliveOnes();
+                Set<Stack> aliveOnes = stackRepository.findAliveOnesWithAmbari();
                 return convertStacksForAutoscale(aliveOnes);
             });
         } catch (TransactionExecutionException e) {

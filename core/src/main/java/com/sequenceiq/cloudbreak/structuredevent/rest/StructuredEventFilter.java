@@ -56,7 +56,7 @@ import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
 import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
-import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredEventClient;
@@ -108,7 +108,7 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
     private UserService userService;
 
     @Inject
-    private RestRequestThreadLocalService restRequestThreadLocalService;
+    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     @Inject
     @Named("structuredEventClient")
@@ -207,7 +207,7 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
         User user = null;
         if (cloudbreakUser == null) {
             String serviceId = authenticatedUserService.getServiceAccountId();
-            cloudbreakUser = new CloudbreakUser(serviceId, serviceId, serviceId);
+            cloudbreakUser = new CloudbreakUser(serviceId, serviceId, serviceId, serviceId);
         } else {
             try {
                 user = userService.getOrCreate(cloudbreakUser);

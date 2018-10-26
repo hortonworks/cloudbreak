@@ -63,7 +63,9 @@ public class ImageCatalogServiceTest {
 
     public static final String USERNAME = "username";
 
-    public static final String ACCOUNT = "account";
+    public static final String EMAIL = "email@hwx.com";
+
+    public static final String TENANT = "tenant";
 
     private static final String GIVEN_CB_VERSION = "2.8.0";
 

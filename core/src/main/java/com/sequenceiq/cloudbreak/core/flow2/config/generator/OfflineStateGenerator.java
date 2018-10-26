@@ -345,7 +345,7 @@ public class OfflineStateGenerator {
         }
 
         @Override
-        public Set<Stack> findAliveOnes() {
+        public Set<Stack> findAliveOnesWithAmbari() {
             return null;
         }
 

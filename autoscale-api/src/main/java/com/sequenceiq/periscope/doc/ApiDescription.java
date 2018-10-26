@@ -92,6 +92,7 @@ public class ApiDescription {
     }
 
     public static class ClusterJsonsProperties {
+        public static final String WORKSPACE_ID = "Workspace id";
         public static final String HOST = "Ambari server host address";
         public static final String PORT = "Ambari server port";
         public static final String USERNAME = "Ambari server username";

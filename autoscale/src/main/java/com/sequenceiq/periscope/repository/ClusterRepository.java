@@ -19,7 +19,8 @@ public interface ClusterRepository extends BaseRepository<Cluster, Long> {
 
     Cluster findByStackId(@Param("stackId") Long stackId);
 
-    List<Cluster> findByUserId(String id);
+    @Query("SELECT c FROM Cluster c LEFT JOIN FETCH c.clusterPertain WHERE c.clusterPertain.userId = :userId")
+    List<Cluster> findByUserId(@Param("userId") String userId);
 
     List<Cluster> findByStateAndPeriscopeNodeId(ClusterState state, String nodeId);
 

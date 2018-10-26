@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.service.Clock;
 @RunWith(MockitoJUnitRunner.class)
 public class DefaultCostTaggingServiceTest {
 
-    private static final CloudbreakUser CB_USER = new CloudbreakUser("123", "apache1@apache.com", "tenant");
+    private static final CloudbreakUser CB_USER = new CloudbreakUser("123", "apache1@apache.com", "apache1@apache.com", "tenant");
 
     @Mock
     private Clock clock;

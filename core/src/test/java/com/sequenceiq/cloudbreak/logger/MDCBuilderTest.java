@@ -13,17 +13,17 @@ public class MDCBuilderTest {
     @Test
     public void buildSimpleContext() {
         MDCBuilder.buildMdcContext(null);
-        assertEquals("cloudbreakLog", MDC.get(LoggerContextKey.RESOURCE_TYPE.toString()));
+        assertEquals("undefined", MDC.get(LoggerContextKey.RESOURCE_TYPE.toString()));
         assertEquals("undefined", MDC.get(LoggerContextKey.RESOURCE_ID.toString()));
-        assertEquals("cb", MDC.get(LoggerContextKey.RESOURCE_NAME.toString()));
+        assertEquals("undefined", MDC.get(LoggerContextKey.RESOURCE_NAME.toString()));
     }
 
     @Test
     public void buildSimpleContextWithNull() {
         MDCBuilder.buildMdcContext();
-        assertEquals("cloudbreakLog", MDC.get(LoggerContextKey.RESOURCE_TYPE.toString()));
+        assertEquals("undefined", MDC.get(LoggerContextKey.RESOURCE_TYPE.toString()));
         assertEquals("undefined", MDC.get(LoggerContextKey.RESOURCE_ID.toString()));
-        assertEquals("cb", MDC.get(LoggerContextKey.RESOURCE_NAME.toString()));
+        assertEquals("undefined", MDC.get(LoggerContextKey.RESOURCE_NAME.toString()));
     }
 
     @Test

@@ -20,13 +20,13 @@ public class CachedUserService {
 
     @Cacheable(cacheNames = "userCache", key = "#cloudbreakUser")
     public User getUser(CloudbreakUser cloudbreakUser, BiFunction<String, String, User> findByTenantAndUsername, Function<CloudbreakUser, User> createUser) {
-        return Optional.ofNullable(findByTenantAndUsername.apply(cloudbreakUser.getTenant(), cloudbreakUser.getUsername()))
+        return Optional.ofNullable(findByTenantAndUsername.apply(cloudbreakUser.getTenant(), cloudbreakUser.getUserId()))
                 .orElseGet(() -> createUser.apply(cloudbreakUser));
     }
 
     @CacheEvict(cacheNames = "userCache", key = "#cloudbreakUser")
     public void evictByIdentityUser(CloudbreakUser cloudbreakUser) {
-        LOGGER.debug("Remove user from user cache, tenant: {} / username: {} ", cloudbreakUser.getTenant(), cloudbreakUser.getUsername());
+        LOGGER.debug("Remove user from user cache, tenant: {} / username: {} ", cloudbreakUser.getTenant(), cloudbreakUser.getUserId());
     }
 
     @CacheEvict(value = "userCache", allEntries = true)

@@ -173,6 +173,6 @@ public class BlueprintLoaderServiceTest {
     }
 
     public static CloudbreakUser identityUser() {
-        return new CloudbreakUser(LUCKY_MAN, LUCKY_MAN, LOTTERY_WINNERS);
+        return new CloudbreakUser(LUCKY_MAN, LUCKY_MAN, LUCKY_MAN, LOTTERY_WINNERS);
     }
 }
