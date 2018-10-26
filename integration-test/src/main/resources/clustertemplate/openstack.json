@@ -1,0 +1,125 @@
+{
+    "general": {
+        "name": "",
+        "credentialName": "autotesting-os-cred"
+    },
+    "placement": {
+        "availabilityZone": "nova",
+        "region": "RegionOne"
+    },
+    "parameters": {},
+    "inputs": {},
+    "tags": {
+        "applicationTags": {},
+        "userDefinedTags": {},
+        "defaultTags": {}
+    },
+    "instanceGroups": [
+        {
+            "nodeCount": 1,
+            "group": "master",
+            "type": "GATEWAY",
+            "parameters": {},
+            "template": {
+                "volumeCount": 0,
+                "volumeSize": 100,
+                "parameters": {},
+                "volumeType": "HDD",
+                "instanceType": "cloudbreak"
+            },
+            "securityGroup": {
+                "securityRules": [
+                    {
+                        "subnet": "0.0.0.0/0",
+                        "ports": "9443",
+                        "protocol": "tcp"
+                    },
+                    {
+                        "subnet": "0.0.0.0/0",
+                        "ports": "22",
+                        "protocol": "tcp"
+                    },
+                    {
+                        "subnet": "0.0.0.0/0",
+                        "ports": "443",
+                        "protocol": "tcp"
+                    }
+                ]
+            },
+            "recipeNames": [],
+            "recoveryMode": "MANUAL"
+        },
+        {
+            "nodeCount": 1,
+            "group": "worker",
+            "type": "CORE",
+            "parameters": {},
+            "template": {
+                "volumeCount": 0,
+                "volumeSize": 100,
+                "parameters": {},
+                "volumeType": "HDD",
+                "instanceType": "cloudbreak"
+            },
+            "securityGroup": {
+                "securityRules": [
+                    {
+                        "subnet": "0.0.0.0/0",
+                        "ports": "22",
+                        "protocol": "tcp"
+                    }
+                ]
+            },
+            "recipeNames": [],
+            "recoveryMode": "MANUAL"
+        },
+        {
+            "nodeCount": 0,
+            "group": "compute",
+            "type": "CORE",
+            "parameters": {},
+            "template": {
+                "volumeCount": 0,
+                "volumeSize": 100,
+                "parameters": {},
+                "volumeType": "HDD",
+                "instanceType": "cloudbreak"
+            },
+            "securityGroup": {
+                "securityRules": [
+                    {
+                        "subnet": "0.0.0.0/0",
+                        "ports": "22",
+                        "protocol": "tcp"
+                    }
+                ]
+            },
+            "recipeNames": [],
+            "recoveryMode": "MANUAL"
+        }
+    ],
+    "stackAuthentication": {
+        "publicKeyId": "seq-master"
+    },
+    "network": {
+        "parameters": {
+            "subnetId": "0404bf21-db5f-4987-8576-e65a4a99b14e",
+            "networkingOption": "provider",
+            "networkId": "a5ad7a1d-d3a6-4180-8d61-07a23f6fb449"
+        }
+    },
+    "cluster": {
+        "rdsConfigNames": [],
+        "executorType": "DEFAULT",
+        "ambari": {
+            "blueprintName": "Data Science: Apache Spark 2, Apache Zeppelin",
+            "enableSecurity": false,
+            "userName": "admin",
+            "password": "",
+            "validateBlueprint": false,
+            "validateRepositories": false,
+            "configStrategy": "ALWAYS_APPLY_DONT_OVERRIDE_CUSTOM_VALUES",
+            "ambariSecurityMasterKey": ""
+        }
+    }
+}
