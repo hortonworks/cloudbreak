@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.api.model;
 
+import com.sequenceiq.cloudbreak.api.model.annotations.Immutable;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 
 import io.swagger.annotations.ApiModelProperty;
 
+@Immutable
 public class CertificateResponse {
 
     @ApiModelProperty(StackModelDescription.CERTIFICATE)

@@ -19,7 +19,7 @@ import com.sequenceiq.cloudbreak.api.model.users.UserJson;
 import com.sequenceiq.cloudbreak.api.model.users.UserProfileRequest;
 import com.sequenceiq.cloudbreak.api.model.users.UserProfileResponse;
 import com.sequenceiq.cloudbreak.api.model.users.UserResponseJson;
-import com.sequenceiq.cloudbreak.api.model.users.UserResponseJson.UserIdComparator;
+import com.sequenceiq.cloudbreak.api.model.users.UserIdComparator;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.domain.workspace.User;

@@ -23,6 +23,8 @@ import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
+import com.sequenceiq.cloudbreak.api.model.annotations.TransformGetterType;
+import com.sequenceiq.cloudbreak.api.model.annotations.TransformSetterType;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
@@ -91,6 +93,7 @@ public class ClusterRequest implements JsonEntity {
     @ApiModelProperty(ClusterModelDescription.LDAP_CONFIG)
     private LdapConfigRequest ldapConfig;
 
+    @TransformGetterType
     @ApiModelProperty(ClusterModelDescription.VALIDATE_BLUEPRINT)
     private Boolean validateBlueprint = Boolean.TRUE;
 
@@ -133,6 +136,7 @@ public class ClusterRequest implements JsonEntity {
     @ApiModelProperty(ClusterModelDescription.BLUEPRINT_INPUTS)
     private Set<BlueprintInputJson> blueprintInputs = new HashSet<>();
 
+    @TransformSetterType
     @ApiModelProperty(ClusterModelDescription.BLUEPRINT_CUSTOM_PROPERTIES)
     private String blueprintCustomProperties;
 

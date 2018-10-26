@@ -4,10 +4,12 @@ import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.CredentialModelDes
 import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.CredentialModelDescription.AWS_POLICY_JSON;
 
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
+import com.sequenceiq.cloudbreak.api.model.annotations.Immutable;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+@Immutable
 @ApiModel
 public class AwsCredentialPrerequisites implements JsonEntity {
 

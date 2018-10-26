@@ -5,6 +5,7 @@ import java.util.Set;
 import javax.validation.Valid;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.sequenceiq.cloudbreak.api.model.annotations.TransformGetterType;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.users.UserNamePasswordJson;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
@@ -22,6 +23,7 @@ public class UpdateAmbariRequest implements JsonEntity {
     @ApiModelProperty(ClusterModelDescription.BLUEPRINT_ID)
     private String blueprintName;
 
+    @TransformGetterType
     @ApiModelProperty(ClusterModelDescription.VALIDATE_BLUEPRINT)
     private Boolean validateBlueprint = Boolean.TRUE;
 

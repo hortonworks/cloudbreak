@@ -6,6 +6,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.sequenceiq.cloudbreak.api.model.annotations.TransformGetterType;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.users.UserNamePasswordJson;
@@ -31,6 +32,7 @@ public class UpdateClusterJson implements JsonEntity {
     @ApiModelProperty(ClusterModelDescription.BLUEPRINT_ID)
     private Long blueprintId;
 
+    @TransformGetterType
     @ApiModelProperty(ClusterModelDescription.VALIDATE_BLUEPRINT)
     private Boolean validateBlueprint = Boolean.TRUE;
 

@@ -1,10 +1,12 @@
 package com.sequenceiq.cloudbreak.api.model;
 
+import com.sequenceiq.cloudbreak.api.model.annotations.Immutable;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+@Immutable
 @ApiModel
 public class AmbariDatabaseTestResult implements JsonEntity {
 

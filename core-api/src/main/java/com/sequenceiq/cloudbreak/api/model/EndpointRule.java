@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.api.model;
 
 public class EndpointRule {
 
-    public static final EndpointRule DENY_RULE = new EndpointRule(Action.DENY.getText(), NetworkConfig.OPEN_NETWORK);
+    public static final EndpointRule DENY_RULE = new EndpointRule(EndpointRuleAction.DENY.getText(), NetworkConfig.OPEN_NETWORK.getCidr());
 
     private final String action;
 
@@ -28,18 +28,4 @@ public class EndpointRule {
         return description;
     }
 
-    public enum Action {
-        PERMIT("permit"),
-        DENY("deny");
-
-        private final String text;
-
-        Action(String value) {
-            text = value;
-        }
-
-        public String getText() {
-            return text;
-        }
-    }
 }
