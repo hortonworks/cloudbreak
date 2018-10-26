@@ -71,7 +71,7 @@ subprojects {
       mavenDeployer {
         configuration = configurations.deployerJars
         repository(url: "$System.env.NEXUS_URL") {
-          authentication(userName: "$System.env.NEXUS_USER", pass: "$System.env.NEXUS_PASSWORD")
+          authentication(userName: "$System.env.NEXUS_USER", password: "$System.env.NEXUS_PASSWORD")
         }
       }
     }
