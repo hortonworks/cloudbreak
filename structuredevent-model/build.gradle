@@ -2,10 +2,6 @@ apply plugin: 'java'
 
 repositories {
     mavenLocal()
-<<<<<<< HEAD
-    maven { url = "$repoUrl" }
-=======
->>>>>>> nexus added
     mavenCentral()
     maven { url = "$repoUrl" }
 }
