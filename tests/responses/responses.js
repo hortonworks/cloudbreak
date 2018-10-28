@@ -39,6 +39,7 @@ var profile = require('./users/default-profile.json');
 var matrix = require('./utilsmatrix.json');
 var mpacks = require('./mpacks/mpacks.json');
 var workspaces = require('./workspaces/workspaces.json');
+var environments = require('./environment/envs.json');
 
 const OK = 200;
 
@@ -147,6 +148,7 @@ responses.getPlatformSecurityGroups= responseObject(securitygroups, OK);
 responses.createManagementPackInWorkspace = responseObject(mpacks, OK);
 responses.postPrivateManagementPack = responseObject(mpacks, OK);
 responses.getWorkspaces = responseObject(workspaces, OK);
+responses.list = responseObject(environments, OK)
 
 responses.postRepositoryConfigsValidation= responseObject({
   "utilsBaseURL" : true,

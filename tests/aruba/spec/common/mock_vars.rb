@@ -76,5 +76,6 @@ RSpec.shared_context "mock shared vars", :a => :b do
     @audit_json_single = "/../../../responses/audit/audit_single.json"
     @dl_stack_json = "/../../../responses/stacks/datalake.json"
     @os_stack_json = "/../../../responses/stacks/openstack.json"
+    @env_single_json = "/../../../responses/environment/openstack.json"
   }
 end

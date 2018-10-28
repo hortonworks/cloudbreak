@@ -1,0 +1,15 @@
+{
+    "id": 2,
+    "name": "openstack",
+    "description": "For openstack",
+    "regions": ["RegionOne"],
+    "cloudPlatform": "OPENSTACK",
+    "workspace": {
+        "id": 1,
+        "name": "mock@hortonworks.com"
+    },
+    "credentialName": "mock-openstack",
+    "proxyConfigs": [],
+    "ldapConfigs": [],
+    "rdsConfigs": []
+}

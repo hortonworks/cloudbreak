@@ -1,0 +1,34 @@
+[
+  {
+    "Name": "mock-unemployed-good",
+    "Description": "test credential",
+    "CloudPlatform": "MOCK",
+    "Regions": [
+      "Europe"
+    ]
+  },
+  {
+    "Name": "mock-moving-misery",
+    "Description": "anyad",
+    "CloudPlatform": "MOCK",
+    "Regions": [
+      "Europe"
+    ]
+  },
+  {
+    "Name": "kiskutya",
+    "Description": "",
+    "CloudPlatform": "OPENSTACK",
+    "Regions": [
+      "RegionOne"
+    ]
+  },
+  {
+    "Name": "mock-resident-peace",
+    "Description": "test credential",
+    "CloudPlatform": "MOCK",
+    "Regions": [
+      "Europe"
+    ]
+  }
+]
