@@ -1,4 +1,4 @@
-export IMAGE = hortonworks/cb-auth
+export DOCKER_IMAGE = hortonworks/cb-auth
 VERSION ?= $(shell git  describe --tags --abbrev=0)
 UNAME = $(shell uname)
 
