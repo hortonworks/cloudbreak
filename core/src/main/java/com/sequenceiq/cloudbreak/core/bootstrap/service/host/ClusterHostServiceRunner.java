@@ -156,6 +156,15 @@ public class ClusterHostServiceRunner {
         }
     }
 
+    public Map<String, String> addAmbariServices(Long stackId, String hostGroupName, Integer scalingAdjustment) throws CloudbreakException {
+        Map<String, String> candidates;
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        Cluster cluster = stack.getCluster();
+        candidates = collectUpscaleCandidates(cluster.getId(), hostGroupName, scalingAdjustment);
+        runAmbariServices(stack, cluster);
+        return candidates;
+    }
+
     public String changePrimaryGateway(Stack stack) throws CloudbreakException {
         GatewayConfig formerPrimaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
         List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);

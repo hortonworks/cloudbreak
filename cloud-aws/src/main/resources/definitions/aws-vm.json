@@ -36,7 +36,7 @@
           "Price": "3.7440000000", 
           "Cpu": "64", 
           "Memory": "256",
-          "encryption_supported": false
+          "encryption_supported": true
         }
       }, 
       "value": "m4.16xlarge"
@@ -118,7 +118,7 @@
           "Price": "0.7810000000", 
           "Cpu": "4", 
           "Memory": "30.5",
-          "encryption_supported": false
+          "encryption_supported": true
         }
       }, 
       "value": "d2.xlarge"
@@ -159,7 +159,7 @@
           "Price": "0.1984000000", 
           "Cpu": "4", 
           "Memory": "16",
-          "encryption_supported": false
+          "encryption_supported": true
         }
       }, 
       "value": "t3.xlarge"
@@ -282,7 +282,7 @@
           "Price": "0.0470000000", 
           "Cpu": "1", 
           "Memory": "1.7",
-          "encryption_supported": true
+          "encryption_supported": false
         }
       }, 
       "value": "m1.small"
@@ -323,7 +323,7 @@
           "Price": "0.1540000000", 
           "Cpu": "2", 
           "Memory": "7.5",
-          "encryption_supported": true
+          "encryption_supported": false
         }
       }, 
       "value": "m3.large"
@@ -446,7 +446,7 @@
           "Price": "0.2750000000", 
           "Cpu": "2", 
           "Memory": "17.1",
-          "encryption_supported": false
+          "encryption_supported": true
         }
       }, 
       "value": "m2.xlarge"
@@ -528,7 +528,7 @@
           "Price": "1.4820000000", 
           "Cpu": "16", 
           "Memory": "122",
-          "encryption_supported": false
+          "encryption_supported": true
         }
       }, 
       "value": "r3.4xlarge"
@@ -569,7 +569,7 @@
           "Price": "2.7520000000", 
           "Cpu": "32", 
           "Memory": "244",
-          "encryption_supported": false
+          "encryption_supported": true
         }
       }, 
       "value": "i3.8xlarge"
@@ -610,7 +610,7 @@
           "Price": "3.8880000000", 
           "Cpu": "48", 
           "Memory": "384",
-          "encryption_supported": false
+          "encryption_supported": true
         }
       }, 
       "value": "r5d.12xlarge"
@@ -897,7 +897,7 @@
           "Price": "2.5320000000", 
           "Cpu": "24", 
           "Memory": "192",
-          "encryption_supported": false
+          "encryption_supported": true
         }
       }, 
       "value": "z1d.6xlarge"
@@ -938,7 +938,7 @@
           "Price": "2.3400000000", 
           "Cpu": "40", 
           "Memory": "160",
-          "encryption_supported": false
+          "encryption_supported": true
         }
       }, 
       "value": "m4.10xlarge"
@@ -1061,7 +1061,7 @@
           "Price": "0.3710000000", 
           "Cpu": "4", 
           "Memory": "30.5",
-          "encryption_supported": false
+          "encryption_supported": true
         }
       }, 
       "value": "r3.xlarge"
@@ -1143,7 +1143,7 @@
           "Price": "0.5500000000", 
           "Cpu": "4", 
           "Memory": "34.2",
-          "encryption_supported": false
+          "encryption_supported": true
         }
       }, 
       "value": "m2.2xlarge"
@@ -1184,7 +1184,7 @@
           "Price": "1.9930000000", 
           "Cpu": "36", 
           "Memory": "60",
-          "encryption_supported": false
+          "encryption_supported": true
         }
       }, 
       "value": "c4.8xlarge"
@@ -1266,7 +1266,7 @@
           "Price": "1.9080000000", 
           "Cpu": "36", 
           "Memory": "72",
-          "encryption_supported": false
+          "encryption_supported": true
         }
       }, 
       "value": "c5.9xlarge"
@@ -1307,7 +1307,7 @@
           "Price": "7.5020000000", 
           "Cpu": "32", 
           "Memory": "244",
-          "encryption_supported": false
+          "encryption_supported": true
         }
       }, 
       "value": "i2.8xlarge"
@@ -1348,7 +1348,7 @@
           "Price": "1.3760000000", 
           "Cpu": "16", 
           "Memory": "122",
-          "encryption_supported": false
+          "encryption_supported": true
         }
       }, 
       "value": "i3.4xlarge"
@@ -1389,7 +1389,7 @@
           "Price": "1.1000000000", 
           "Cpu": "8", 
           "Memory": "68.4",
-          "encryption_supported": false
+          "encryption_supported": true
         }
       }, 
       "value": "m2.4xlarge"
@@ -1430,7 +1430,7 @@
           "Price": "5.3760000000", 
           "Cpu": "96", 
           "Memory": "384",
-          "encryption_supported": false
+          "encryption_supported": true
         }
       }, 
       "value": "m5.24xlarge"
@@ -1471,7 +1471,7 @@
           "Price": "0.3790000000", 
           "Cpu": "4", 
           "Memory": "15",
-          "encryption_supported": false
+          "encryption_supported": true
         }
       }, 
       "value": "m1.xlarge"
@@ -1717,7 +1717,7 @@
           "Price": "0.2400000000", 
           "Cpu": "4", 
           "Memory": "8",
-          "encryption_supported": true
+          "encryption_supported": false
         }
       }, 
       "value": "c5d.xlarge"
@@ -1758,7 +1758,7 @@
           "Price": "0.0276000000", 
           "Cpu": "1", 
           "Memory": "2",
-          "encryption_supported": true
+          "encryption_supported": false
         }
       }, 
       "value": "t2.small"
@@ -1840,7 +1840,7 @@
           "Price": "0.1330000000", 
           "Cpu": "2", 
           "Memory": "8",
-          "encryption_supported": true
+          "encryption_supported": false
         }
       }, 
       "value": "m5d.large"
@@ -1881,7 +1881,7 @@
           "Price": "0.1480000000", 
           "Cpu": "2", 
           "Memory": "1.7",
-          "encryption_supported": true
+          "encryption_supported": false
         }
       }, 
       "value": "c1.medium"
@@ -1922,7 +1922,7 @@
           "Price": "0.0138000000", 
           "Cpu": "1", 
           "Memory": "1",
-          "encryption_supported": true
+          "encryption_supported": false
         }
       }, 
       "value": "t2.micro"
@@ -2004,7 +2004,7 @@
           "Price": "0.0950000000", 
           "Cpu": "1", 
           "Memory": "3.75",
-          "encryption_supported": true
+          "encryption_supported": false
         }
       }, 
       "value": "m1.medium"
@@ -2127,7 +2127,7 @@
           "Price": "0.0770000000", 
           "Cpu": "1", 
           "Memory": "3.75",
-          "encryption_supported": true
+          "encryption_supported": false
         }
       }, 
       "value": "m3.medium"
@@ -2209,7 +2209,7 @@
           "Price": "0.1900000000", 
           "Cpu": "2", 
           "Memory": "7.5",
-          "encryption_supported": true
+          "encryption_supported": false
         }
       }, 
       "value": "m1.large"
@@ -2250,7 +2250,7 @@
           "Price": "0.0992000000", 
           "Cpu": "2", 
           "Memory": "8",
-          "encryption_supported": true
+          "encryption_supported": false
         }
       }, 
       "value": "t3.large"
@@ -2414,7 +2414,7 @@
           "Price": "0.5600000000", 
           "Cpu": "8", 
           "Memory": "64",
-          "encryption_supported": false
+          "encryption_supported": true
         }
       }, 
       "value": "r5.2xlarge"
@@ -2485,7 +2485,6 @@
             "maximumNumber": 24
           }, 
           {
-            "minimumSize": 0, 
             "minimumNumber": 0, 
             "volumeParameterType": "EPHEMERAL", 
             "maximumSize": 0, 
@@ -2496,7 +2495,7 @@
           "Price": "0.1482000000", 
           "Cpu": "2", 
           "Memory": "15.25",
-          "encryption_supported": false
+          "encryption_supported": true
         }
       }, 
       "value": "r4.large"
@@ -2504,20 +2503,6 @@
     {
       "meta": {
         "configs": [
-          {
-            "minimumSize": 1, 
-            "minimumNumber": 1, 
-            "volumeParameterType": "MAGNETIC", 
-            "maximumSize": 1024, 
-            "maximumNumber": 24
-          }, 
-          {
-            "minimumSize": 1, 
-            "minimumNumber": 1, 
-            "volumeParameterType": "SSD", 
-            "maximumSize": 17592, 
-            "maximumNumber": 24
-          }, 
           {
             "minimumSize": 500, 
             "minimumNumber": 1, 
@@ -2783,7 +2768,7 @@
           "Price": "0.5928000000", 
           "Cpu": "8", 
           "Memory": "61",
-          "encryption_supported": false
+          "encryption_supported": true
         }
       }, 
       "value": "r4.2xlarge"
@@ -2865,7 +2850,7 @@
           "Price": "0.2120000000", 
           "Cpu": "4", 
           "Memory": "8",
-          "encryption_supported": false
+          "encryption_supported": true
         }
       }, 
       "value": "c5.xlarge"
@@ -2947,7 +2932,7 @@
           "Price": "0.1170000000", 
           "Cpu": "2", 
           "Memory": "8",
-          "encryption_supported": false
+          "encryption_supported": true
         }
       }, 
       "value": "m4.large"
@@ -3029,7 +3014,7 @@
           "Price": "3.0680000000", 
           "Cpu": "32", 
           "Memory": "244",
-          "encryption_supported": false
+          "encryption_supported": true
         }
       }, 
       "value": "g3.8xlarge"
@@ -3111,7 +3096,7 @@
           "Price": "6.3840000000", 
           "Cpu": "96", 
           "Memory": "384",
-          "encryption_supported": false
+          "encryption_supported": true
         }
       }, 
       "value": "m5d.24xlarge"
@@ -3192,7 +3177,8 @@
         "properties": {
           "Price": "3.3600000000", 
           "Cpu": "48", 
-          "Memory": "384"
+          "Memory": "384",
+          "encryption_supported": true
         }
       }, 
       "value": "r5.12xlarge"
@@ -3233,7 +3219,7 @@
           "Price": "0.4240000000", 
           "Cpu": "8", 
           "Memory": "16",
-          "encryption_supported": false
+          "encryption_supported": true
         }
       }, 
       "value": "c5.2xlarge"
@@ -3315,7 +3301,7 @@
           "Price": "0.3968000000", 
           "Cpu": "8", 
           "Memory": "32",
-          "encryption_supported": false
+          "encryption_supported": true
         }
       }, 
       "value": "t3.2xlarge"
@@ -3397,7 +3383,7 @@
           "Price": "0.2964000000", 
           "Cpu": "4", 
           "Memory": "30.5",
-          "encryption_supported": false
+          "encryption_supported": true
         }
       }, 
       "value": "r4.xlarge"
@@ -3479,7 +3465,7 @@
           "Price": "0.5320000000", 
           "Cpu": "8", 
           "Memory": "32",
-          "encryption_supported": false
+          "encryption_supported": true
         }
       }, 
       "value": "m5d.2xlarge"
@@ -3520,7 +3506,7 @@
           "Price": "0.4800000000", 
           "Cpu": "8", 
           "Memory": "16",
-          "encryption_supported": true
+          "encryption_supported": false
         }
       }, 
       "value": "c5d.2xlarge"
@@ -3725,7 +3711,7 @@
           "Price": "0.9360000000", 
           "Cpu": "16", 
           "Memory": "64",
-          "encryption_supported": false
+          "encryption_supported": true
         }
       }, 
       "value": "m4.4xlarge"
@@ -3807,7 +3793,7 @@
           "Price": "0.1400000000", 
           "Cpu": "2", 
           "Memory": "16",
-          "encryption_supported": false
+          "encryption_supported": true
         }
       }, 
       "value": "r5.large"
@@ -3848,7 +3834,7 @@
           "Price": "1.1200000000", 
           "Cpu": "16", 
           "Memory": "128",
-          "encryption_supported": false
+          "encryption_supported": true
         }
       }, 
       "value": "r5.4xlarge"
@@ -4012,7 +3998,7 @@
           "Price": "0.9560000000", 
           "Cpu": "16", 
           "Memory": "30",
-          "encryption_supported": false
+          "encryption_supported": true
         }
       }, 
       "value": "c3.4xlarge"
@@ -4053,7 +4039,7 @@
           "Price": "6.7200000000", 
           "Cpu": "96", 
           "Memory": "768",
-          "encryption_supported": true
+          "encryption_supported": false
         }
       }, 
       "value": "r5.24xlarge"
@@ -4094,7 +4080,7 @@
           "Price": "0.2208000000", 
           "Cpu": "4", 
           "Memory": "16",
-          "encryption_supported": false
+          "encryption_supported": true
         }
       }, 
       "value": "t2.xlarge"
@@ -4135,7 +4121,7 @@
           "Price": "0.5920000000", 
           "Cpu": "8", 
           "Memory": "7",
-          "encryption_supported": true
+          "encryption_supported": false
         }
       }, 
       "value": "c1.xlarge"
@@ -4176,7 +4162,7 @@
           "Price": "0.1850000000", 
           "Cpu": "2", 
           "Memory": "15.25",
-          "encryption_supported": false
+          "encryption_supported": true
         }
       }, 
       "value": "r3.large"
@@ -4217,7 +4203,7 @@
           "Price": "0.2660000000", 
           "Cpu": "4", 
           "Memory": "16",
-          "encryption_supported": true
+          "encryption_supported": false
         }
       }, 
       "value": "m5d.xlarge"
@@ -4257,7 +4243,8 @@
         "properties": {
           "Price": "0.1060000000", 
           "Cpu": "2", 
-          "Memory": "4"
+          "Memory": "4",
+          "encryption_supported": true
         }
       }, 
       "value": "c5.large"
@@ -4298,7 +4285,7 @@
           "Price": "0.4780000000", 
           "Cpu": "8", 
           "Memory": "15",
-          "encryption_supported": true
+          "encryption_supported": false
         }
       }, 
       "value": "c3.2xlarge"
@@ -4338,7 +4325,8 @@
         "properties": {
           "Price": "5.0640000000", 
           "Cpu": "48", 
-          "Memory": "384"
+          "Memory": "384",
+          "encryption_supported": true
         }
       }, 
       "value": "z1d.12xlarge"
@@ -4420,7 +4408,7 @@
           "Price": "0.0248000000", 
           "Cpu": "2", 
           "Memory": "2",
-          "encryption_supported": false
+          "encryption_supported": true
         }
       }, 
       "value": "t3.small"
@@ -4584,7 +4572,7 @@
           "Price": "0.4980000000", 
           "Cpu": "8", 
           "Memory": "15",
-          "encryption_supported": false
+          "encryption_supported": true
         }
       }, 
       "value": "c4.2xlarge"
@@ -4666,7 +4654,7 @@
           "Price": "0.7410000000", 
           "Cpu": "8", 
           "Memory": "61",
-          "encryption_supported": false
+          "encryption_supported": true
         }
       }, 
       "value": "r3.2xlarge"
@@ -4707,7 +4695,7 @@
           "Price": "6.1360000000", 
           "Cpu": "64", 
           "Memory": "488",
-          "encryption_supported": false
+          "encryption_supported": true
         }
       }, 
       "value": "g3.16xlarge"
