@@ -4,7 +4,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
@@ -17,11 +16,6 @@ import static org.mockito.Mockito.when;
 import java.util.Optional;
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action;
-import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
-import com.sequenceiq.cloudbreak.authorization.PermissionCheckingUtils;
-import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -30,22 +24,28 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.security.access.AccessDeniedException;
 
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.authorization.PermissionCheckingUtils;
+import com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action;
+import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
+import com.sequenceiq.cloudbreak.repository.SaltSecurityConfigRepository;
 import com.sequenceiq.cloudbreak.repository.SecurityConfigRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
@@ -57,11 +57,9 @@ import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
 import com.sequenceiq.cloudbreak.service.user.UserService;
-
-import org.springframework.security.access.AccessDeniedException;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StackServiceTest {
@@ -153,6 +151,9 @@ public class StackServiceTest {
 
     @Mock
     private SecurityConfigRepository securityConfigRepository;
+
+    @Mock
+    private SaltSecurityConfigRepository saltSecurityConfigRepository;
 
     @Mock
     private ImageService imageService;
@@ -770,7 +771,7 @@ public class StackServiceTest {
 
         when(stackRepository.save(stack)).thenReturn(stack);
 
-        when(tlsSecurityService.storeSSHKeys()).thenReturn(securityConfig);
+        when(tlsSecurityService.generateSecurityKeys()).thenReturn(securityConfig);
         when(connector.getPlatformParameters(stack)).thenReturn(parameters);
 
         expectedException.expectCause(org.hamcrest.Matchers.any(CloudbreakImageNotFoundException.class));
@@ -784,9 +785,6 @@ public class StackServiceTest {
             stack = underTest.create(stack, platformString, mock(StatedImage.class), user, workspace);
         } finally {
             verify(stack, times(1)).setPlatformVariant(eq(VARIANT_VALUE));
-            verify(securityConfig, times(1)).setSaltPassword(anyObject());
-            verify(securityConfig, times(1)).setSaltBootPassword(anyObject());
-            verify(securityConfig, times(1)).setKnoxMasterSecret(anyObject());
             verify(securityConfig, times(1)).setStack(stack);
             verify(securityConfigRepository, times(1)).save(securityConfig);
         }
@@ -802,16 +800,13 @@ public class StackServiceTest {
 
         when(stackRepository.save(stack)).thenReturn(stack);
 
-        when(tlsSecurityService.storeSSHKeys()).thenReturn(securityConfig);
+        when(tlsSecurityService.generateSecurityKeys()).thenReturn(securityConfig);
         when(connector.getPlatformParameters(stack)).thenReturn(parameters);
 
         try {
             stack = underTest.create(stack, "AWS", mock(StatedImage.class), user, workspace);
         } finally {
             verify(stack, times(1)).setPlatformVariant(eq(VARIANT_VALUE));
-            verify(securityConfig, times(1)).setSaltPassword(anyObject());
-            verify(securityConfig, times(1)).setSaltBootPassword(anyObject());
-            verify(securityConfig, times(1)).setKnoxMasterSecret(anyObject());
             verify(securityConfig, times(1)).setStack(stack);
             verify(securityConfigRepository, times(1)).save(securityConfig);
 
