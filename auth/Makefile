@@ -1,4 +1,4 @@
-IMAGE = hortonworks/cb-auth
+export IMAGE = hortonworks/cb-auth
 VERSION ?= $(shell git  describe --tags --abbrev=0)
 UNAME = $(shell uname)
 
