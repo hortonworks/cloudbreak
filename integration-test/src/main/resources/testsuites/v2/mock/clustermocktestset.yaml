@@ -10,3 +10,4 @@ tests:
       - com.sequenceiq.it.cloudbreak.newway.testcase.KerberosTest
       - com.sequenceiq.it.cloudbreak.newway.testcase.RecipeTest
       - com.sequenceiq.it.cloudbreak.newway.testcase.SharedServiceTest
+      - com.sequenceiq.it.cloudbreak.newway.testcase.EnvironmentTest

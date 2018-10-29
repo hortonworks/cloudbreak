@@ -55,6 +55,13 @@ public class RdsConfig extends RdsConfigEntity {
         return rdsConfig;
     }
 
+    public static RdsConfigEntity post(TestContext testContext, RdsConfigEntity entity, CloudbreakClient cloudbreakClient) {
+        entity.setResponse(
+                cloudbreakClient.getCloudbreakClient().rdsConfigV3Endpoint().createInWorkspace(cloudbreakClient.getWorkspaceId(), entity.getRequest())
+        );
+        return entity;
+    }
+
     public static Action<RdsConfig> post(String key) {
         return new Action<>(getTestContext(key), RdsConfigV3Action::post);
     }
