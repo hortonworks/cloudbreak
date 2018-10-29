@@ -78,6 +78,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.OrchestratorRepository;
+import com.sequenceiq.cloudbreak.repository.SaltSecurityConfigRepository;
 import com.sequenceiq.cloudbreak.repository.SecurityConfigRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.StackStatusRepository;
@@ -99,7 +100,6 @@ import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
-import com.sequenceiq.cloudbreak.util.PasswordUtil;
 
 @Service
 public class StackService {
@@ -171,6 +171,9 @@ public class StackService {
 
     @Inject
     private SecurityConfigRepository securityConfigRepository;
+
+    @Inject
+    private SaltSecurityConfigRepository saltSecurityConfigRepository;
 
     @Inject
     private StackResponseDecorator stackResponseDecorator;
@@ -476,17 +479,12 @@ public class StackService {
             LOGGER.info("Instance metadatas saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
             start = System.currentTimeMillis();
-            SecurityConfig securityConfig = tlsSecurityService.storeSSHKeys();
-            LOGGER.info("Generating SSH keys took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
-
-            start = System.currentTimeMillis();
-            securityConfig.setSaltPassword(PasswordUtil.generatePassword());
-            securityConfig.setSaltBootPassword(PasswordUtil.generatePassword());
-            securityConfig.setKnoxMasterSecret(PasswordUtil.generatePassword());
-            LOGGER.info("Generating salt passwords took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+            SecurityConfig securityConfig = tlsSecurityService.generateSecurityKeys();
+            LOGGER.info("Generating security keys took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
             securityConfig.setStack(savedStack);
             start = System.currentTimeMillis();
+            saltSecurityConfigRepository.save(securityConfig.getSaltSecurityConfig());
             securityConfigRepository.save(securityConfig);
             LOGGER.info("Security config save took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
             savedStack.setSecurityConfig(securityConfig);

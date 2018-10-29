@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -10,9 +10,7 @@ import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 
-import org.apache.commons.codec.binary.Base64;
-
-import com.sequenceiq.cloudbreak.domain.converter.EncryptionConverter;
+import com.sequenceiq.cloudbreak.aspect.vault.VaultValue;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 
 @Entity
@@ -23,39 +21,17 @@ public class SecurityConfig implements ProvisionEntity {
     @SequenceGenerator(name = "securityconfig_generator", sequenceName = "securityconfig_id_seq", allocationSize = 1)
     private Long id;
 
-    @Convert(converter = EncryptionConverter.class)
-    @Column(columnDefinition = "TEXT")
+    @VaultValue
     private String clientKey;
 
-    @Convert(converter = EncryptionConverter.class)
-    @Column(columnDefinition = "TEXT")
+    @VaultValue
     private String clientCert;
-
-    @Column(columnDefinition = "TEXT")
-    private String cloudbreakSshPublicKey;
-
-    @Convert(converter = EncryptionConverter.class)
-    @Column(columnDefinition = "TEXT")
-    private String cloudbreakSshPrivateKey;
-
-    @Column(columnDefinition = "TEXT")
-    private String saltSignPublicKey;
-
-    @Convert(converter = EncryptionConverter.class)
-    @Column(columnDefinition = "TEXT")
-    private String saltSignPrivateKey;
-
-    @Convert(converter = EncryptionConverter.class)
-    private String saltPassword;
-
-    @Convert(converter = EncryptionConverter.class)
-    private String saltBootPassword;
-
-    @Convert(converter = EncryptionConverter.class)
-    private String knoxMasterSecret;
 
     @OneToOne(fetch = FetchType.LAZY)
     private Stack stack;
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    private SaltSecurityConfig saltSecurityConfig;
 
     @Column(nullable = false)
     private boolean usePrivateIpToTls;
@@ -68,64 +44,20 @@ public class SecurityConfig implements ProvisionEntity {
         this.id = id;
     }
 
-    public String getClientKeyDecoded() {
-        return clientKey == null ? null : new String(Base64.decodeBase64(clientKey));
-    }
-
     public void setClientKey(String clientKey) {
         this.clientKey = clientKey;
     }
 
-    public String getClientCertDecoded() {
-        return clientCert == null ? null : new String(Base64.decodeBase64(clientCert));
+    public String getClientKey() {
+        return clientKey;
     }
 
-    public String getClientCertRaw() {
+    public String getClientCert() {
         return clientCert;
     }
 
     public void setClientCert(String clientCert) {
         this.clientCert = clientCert;
-    }
-
-    public String getCloudbreakSshPublicKeyDecoded() {
-        return cloudbreakSshPublicKey == null ? null : new String(Base64.decodeBase64(cloudbreakSshPublicKey));
-    }
-
-    public void setCloudbreakSshPublicKey(String cloudbreakSshPublicKey) {
-        this.cloudbreakSshPublicKey = cloudbreakSshPublicKey;
-    }
-
-    public String getCloudbreakSshPrivateKeyDecoded() {
-        return cloudbreakSshPrivateKey == null ? null : new String(Base64.decodeBase64(cloudbreakSshPrivateKey));
-    }
-
-    public void setCloudbreakSshPrivateKey(String cloudbreakSshPrivateKey) {
-        this.cloudbreakSshPrivateKey = cloudbreakSshPrivateKey;
-    }
-
-    public String getSaltPassword() {
-        return saltPassword;
-    }
-
-    public void setSaltPassword(String saltPassword) {
-        this.saltPassword = saltPassword;
-    }
-
-    public String getSaltBootPassword() {
-        return saltBootPassword;
-    }
-
-    public void setSaltBootPassword(String saltBootPassword) {
-        this.saltBootPassword = saltBootPassword;
-    }
-
-    public String getKnoxMasterSecret() {
-        return knoxMasterSecret;
-    }
-
-    public void setKnoxMasterSecret(String knoxMasterSecret) {
-        this.knoxMasterSecret = knoxMasterSecret;
     }
 
     public Stack getStack() {
@@ -136,7 +68,15 @@ public class SecurityConfig implements ProvisionEntity {
         this.stack = stack;
     }
 
-    public boolean usePrivateIpToTls() {
+    public SaltSecurityConfig getSaltSecurityConfig() {
+        return saltSecurityConfig;
+    }
+
+    public void setSaltSecurityConfig(SaltSecurityConfig saltSecurityConfig) {
+        this.saltSecurityConfig = saltSecurityConfig;
+    }
+
+    public boolean isUsePrivateIpToTls() {
         return usePrivateIpToTls;
     }
 
@@ -144,19 +84,4 @@ public class SecurityConfig implements ProvisionEntity {
         this.usePrivateIpToTls = usePrivateIpToTls;
     }
 
-    public String getSaltSignPublicKeyDecoded() {
-        return saltSignPublicKey == null ? null : new String(Base64.decodeBase64(saltSignPublicKey));
-    }
-
-    public void setSaltSignPublicKey(String saltSignPublicKey) {
-        this.saltSignPublicKey = saltSignPublicKey;
-    }
-
-    public String getSaltSignPrivateKeyDecoded() {
-        return saltSignPrivateKey == null ? null : new String(Base64.decodeBase64(saltSignPrivateKey));
-    }
-
-    public void setSaltSignPrivateKey(String saltSignPrivateKey) {
-        this.saltSignPrivateKey = saltSignPrivateKey;
-    }
 }
