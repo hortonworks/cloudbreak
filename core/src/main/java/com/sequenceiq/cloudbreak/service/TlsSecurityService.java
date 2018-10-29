@@ -16,11 +16,14 @@ import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.client.PkiUtil;
 import com.sequenceiq.cloudbreak.client.SaltClientConfig;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.domain.SaltSecurityConfig;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.SecurityConfigRepository;
+import com.sequenceiq.cloudbreak.service.vault.VaultService;
+import com.sequenceiq.cloudbreak.util.PasswordUtil;
 
 @Component
 public class TlsSecurityService {
@@ -31,11 +34,18 @@ public class TlsSecurityService {
     @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
 
-    public SecurityConfig storeSSHKeys() {
+    @Inject
+    private VaultService vaultService;
+
+    public SecurityConfig generateSecurityKeys() {
         SecurityConfig securityConfig = new SecurityConfig();
+        SaltSecurityConfig saltSecurityConfig = new SaltSecurityConfig();
+        securityConfig.setSaltSecurityConfig(saltSecurityConfig);
         generateClientKeys(securityConfig);
-        generateTempSshKeypair(securityConfig);
+        generateSaltBootSignKeypair(saltSecurityConfig);
         generateSaltSignKeypair(securityConfig);
+        generateSaltPassword(saltSecurityConfig);
+        generateSaltBootPassword(saltSecurityConfig);
         return securityConfig;
     }
 
@@ -51,37 +61,48 @@ public class TlsSecurityService {
         securityConfig.setClientCert(BaseEncoding.base64().encode(clientCert.getBytes()));
     }
 
-    public void generateTempSshKeypair(SecurityConfig securityConfig) {
+    private void generateSaltBootSignKeypair(SaltSecurityConfig saltSecurityConfig) {
         KeyPair keyPair = PkiUtil.generateKeypair();
         String privateKey = PkiUtil.convert(keyPair.getPrivate());
         String publicKey = PkiUtil.convertOpenSshPublicKey(keyPair.getPublic());
-        securityConfig.setCloudbreakSshPublicKey(BaseEncoding.base64().encode(publicKey.getBytes()));
-        securityConfig.setCloudbreakSshPrivateKey(BaseEncoding.base64().encode(privateKey.getBytes()));
+        saltSecurityConfig.setSaltBootSignPublicKey(BaseEncoding.base64().encode(publicKey.getBytes()));
+        saltSecurityConfig.setSaltBootSignPrivateKey(BaseEncoding.base64().encode(privateKey.getBytes()));
     }
 
-    public void generateSaltSignKeypair(SecurityConfig securityConfig) {
+    private void generateSaltSignKeypair(SecurityConfig securityConfig) {
         KeyPair keyPair = PkiUtil.generateKeypair();
         String privateKey = PkiUtil.convert(keyPair.getPrivate());
         String publicKey = PkiUtil.convertOpenSshPublicKey(keyPair.getPublic());
-        securityConfig.setSaltSignPublicKey(BaseEncoding.base64().encode(publicKey.getBytes()));
-        securityConfig.setSaltSignPrivateKey(BaseEncoding.base64().encode(privateKey.getBytes()));
+        SaltSecurityConfig saltSecurityConfig = securityConfig.getSaltSecurityConfig();
+        saltSecurityConfig.setSaltSignPublicKey(BaseEncoding.base64().encode(publicKey.getBytes()));
+        saltSecurityConfig.setSaltSignPrivateKey(BaseEncoding.base64().encode(privateKey.getBytes()));
+    }
+
+    private void generateSaltBootPassword(SaltSecurityConfig saltSecurityConfig) {
+        saltSecurityConfig.setSaltBootPassword(PasswordUtil.generatePassword());
+    }
+
+    private void generateSaltPassword(SaltSecurityConfig saltSecurityConfig) {
+        saltSecurityConfig.setSaltPassword(PasswordUtil.generatePassword());
     }
 
     public GatewayConfig buildGatewayConfig(Long stackId, InstanceMetaData gatewayInstance, Integer gatewayPort,
-        SaltClientConfig saltClientConfig, Boolean knoxGatewayEnabled) {
+            SaltClientConfig saltClientConfig, Boolean knoxGatewayEnabled) {
         SecurityConfig securityConfig = securityConfigRepository.findOneByStackId(stackId);
         String connectionIp = getGatewayIp(securityConfig, gatewayInstance);
         HttpClientConfig conf = buildTLSClientConfig(stackId, connectionIp, gatewayInstance);
+        SaltSecurityConfig saltSecurityConfig = securityConfig.getSaltSecurityConfig();
+        String saltSignPrivateKeyB64 = vaultService.resolveSingleValue(saltSecurityConfig.getSaltSignPrivateKey());
         return new GatewayConfig(connectionIp, gatewayInstance.getPublicIpWrapper(), gatewayInstance.getPrivateIp(), gatewayInstance.getDiscoveryFQDN(),
-            gatewayPort, conf.getServerCert(), conf.getClientCert(), conf.getClientKey(),
-            saltClientConfig.getSaltPassword(), saltClientConfig.getSaltBootPassword(), saltClientConfig.getSignatureKeyPem(),
-            knoxGatewayEnabled, InstanceMetadataType.GATEWAY_PRIMARY.equals(gatewayInstance.getInstanceMetadataType()),
-            securityConfig.getSaltSignPrivateKeyDecoded(), securityConfig.getSaltSignPublicKeyDecoded());
+                gatewayPort, conf.getServerCert(), conf.getClientCert(), conf.getClientKey(),
+                saltClientConfig.getSaltPassword(), saltClientConfig.getSaltBootPassword(), saltClientConfig.getSignatureKeyPem(),
+                knoxGatewayEnabled, InstanceMetadataType.GATEWAY_PRIMARY.equals(gatewayInstance.getInstanceMetadataType()),
+                new String(decodeBase64(saltSignPrivateKeyB64)), new String(decodeBase64(saltSecurityConfig.getSaltSignPublicKey())));
     }
 
     public String getGatewayIp(SecurityConfig securityConfig, InstanceMetaData gatewayInstance) {
         String gatewayIP = gatewayInstance.getPublicIpWrapper();
-        if (securityConfig.usePrivateIpToTls()) {
+        if (securityConfig.isUsePrivateIpToTls()) {
             gatewayIP = gatewayInstance.getPrivateIp();
         }
         return gatewayIP;
@@ -94,8 +115,14 @@ public class TlsSecurityService {
 
     public HttpClientConfig buildTLSClientConfig(Long stackId, String apiAddress, InstanceMetaData gateway) {
         SecurityConfig securityConfig = securityConfigRepository.findOneByStackId(stackId);
-        return securityConfig != null ? new HttpClientConfig(apiAddress,
-                gateway.getServerCert(), securityConfig.getClientCertDecoded(), securityConfig.getClientKeyDecoded()) : new HttpClientConfig(apiAddress);
+        if (securityConfig == null) {
+            return new HttpClientConfig(apiAddress);
+        } else {
+            String clientCertB64 = vaultService.resolveSingleValue(securityConfig.getClientCert());
+            String clientKeyB64 = vaultService.resolveSingleValue(securityConfig.getClientKey());
+            return new HttpClientConfig(apiAddress, gateway.getServerCert(),
+                    new String(decodeBase64(clientCertB64)), new String(decodeBase64(clientKeyB64)));
+        }
     }
 
     public CertificateResponse getCertificates(Long stackId) {
@@ -107,8 +134,9 @@ public class TlsSecurityService {
         if (serverCert == null) {
             throw new NotFoundException("Server certificate was not found.");
         }
-        return new CertificateResponse(decodeBase64(serverCert),
-            securityConfig.getClientKeyDecoded().getBytes(), securityConfig.getClientCertDecoded().getBytes());
+        String clientCertB64 = vaultService.resolveSingleValue(securityConfig.getClientCert());
+        String clientKeyB64 = vaultService.resolveSingleValue(securityConfig.getClientKey());
+        return new CertificateResponse(decodeBase64(serverCert), decodeBase64(clientKeyB64), decodeBase64(clientCertB64));
     }
 
 }
