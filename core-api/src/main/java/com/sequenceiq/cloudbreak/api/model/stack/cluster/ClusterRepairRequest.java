@@ -2,16 +2,16 @@ package com.sequenceiq.cloudbreak.api.model.stack.cluster;
 
 import java.util.List;
 
-import javax.validation.constraints.NotNull;
-
+import com.sequenceiq.cloudbreak.api.model.annotations.MutuallyExclusiveNotNull;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.RepairClusterRequest;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
+@MutuallyExclusiveNotNull(fieldNames = {"hostGroups", "nodes"})
 public class ClusterRepairRequest {
-    @NotNull
+
     @ApiModelProperty(value = RepairClusterRequest.HOSTGROUPS, required = true)
     private List<String> hostGroups;
 

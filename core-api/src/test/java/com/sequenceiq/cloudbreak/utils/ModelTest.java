@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.utils;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.junit.Test;
 
@@ -16,6 +17,7 @@ import com.openpojo.validation.rule.impl.NoStaticExceptFinalRule;
 import com.openpojo.validation.rule.impl.SetterMustExistRule;
 import com.openpojo.validation.test.impl.GetterTester;
 import com.openpojo.validation.test.impl.SetterTester;
+import com.sequenceiq.cloudbreak.api.model.annotations.IgnorePojoValidation;
 import com.sequenceiq.cloudbreak.api.model.annotations.Immutable;
 import com.sequenceiq.cloudbreak.api.model.annotations.TransformGetterType;
 import com.sequenceiq.cloudbreak.api.model.annotations.TransformSetterType;
@@ -24,8 +26,11 @@ public class ModelTest {
 
     private static final String DOMAIN_PACKAGE = "com.sequenceiq.cloudbreak.api.model";
 
+    private static final Pattern TESTCLASS_NAME_PATTERN = Pattern.compile("^\\S+?Test(?:\\$\\S+)?$");
+
     private static final PojoClassFilter BASE_CLASS_FILTER = pojoClass -> !pojoClass.isEnum() && !pojoClass.isAbstract()
-            && !pojoClass.getName().endsWith("Test");
+            && pojoClass.getAnnotation(IgnorePojoValidation.class) == null
+            && !TESTCLASS_NAME_PATTERN.matcher(pojoClass.getName()).matches();
 
     private static final PojoClassFilter POJO_CLASS_FILTER = new FilterChain(BASE_CLASS_FILTER,
             pojoClass -> pojoClass.getAnnotation(Immutable.class) == null

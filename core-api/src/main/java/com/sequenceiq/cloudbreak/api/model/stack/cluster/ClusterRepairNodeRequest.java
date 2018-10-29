@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.api.model.stack.cluster;
 
 import java.util.List;
 
+import javax.validation.constraints.NotEmpty;
+
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.RepairClusterNodeRequest;
 
 import io.swagger.annotations.ApiModel;
@@ -13,6 +15,7 @@ public class ClusterRepairNodeRequest {
     @ApiModelProperty(RepairClusterNodeRequest.DELETE_VOLUMES)
     private boolean deleteVolumes;
 
+    @NotEmpty
     @ApiModelProperty(RepairClusterNodeRequest.IDS)
     private List<String> ids;
 
