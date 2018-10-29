@@ -34,3 +34,9 @@ build-release:
 git-secrets:
 	brew install git-secrets
 	git secrets --install
+
+build-cloudbreak-dockerhub:
+	 make -C docker-cloudbreak dockerhub
+
+build-autoscale-dockerhub:
+	 make -C docker-autoscale dockerhub

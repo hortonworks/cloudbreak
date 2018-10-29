@@ -3,8 +3,10 @@ apply plugin: 'java'
 sourceCompatibility = 1.8
 
 repositories {
-  maven { url 'http://repo.spring.io/libs-release' }
+  mavenLocal()
   mavenCentral()
+  maven { url = "$repoUrl" }
+  maven { url 'http://repo.spring.io/libs-release' }
 }
 
 jar {
