@@ -11,6 +11,8 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 public class MutuallyExclusiveNotNullValidatorTest {
 
     private static Validator validator;
@@ -36,14 +38,14 @@ public class MutuallyExclusiveNotNullValidatorTest {
     }
 
     @Test
-    public void fail_both_null() {
+    public void failBothNull() {
         DummyClass dummyObject = new DummyClass(null, null);
         Set<ConstraintViolation<DummyClass>> violations = validator.validate(dummyObject);
         Assert.assertFalse(violations.isEmpty());
     }
 
     @Test
-    public void fail_both_nonnull() {
+    public void failBothNonNull() {
         DummyClass dummyObject = new DummyClass("a", "b");
         Set<ConstraintViolation<DummyClass>> violations = validator.validate(dummyObject);
         Assert.assertFalse(violations.isEmpty());
@@ -51,8 +53,12 @@ public class MutuallyExclusiveNotNullValidatorTest {
 
     @MutuallyExclusiveNotNull(fieldNames = {"a", "b"})
     static class DummyClass {
-        String a;
-        String b;
+
+        @SuppressFBWarnings("URF_UNREAD_FIELD")
+        private String a;
+
+        @SuppressFBWarnings("URF_UNREAD_FIELD")
+        private String b;
 
         DummyClass(String a, String b) {
             this.a = a;

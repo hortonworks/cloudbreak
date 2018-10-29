@@ -11,7 +11,7 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.Payload;
 
-@Target( { ElementType.TYPE })
+@Target({ ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = MutuallyExclusiveNotNull.MutuallyExclusiveNotNullValidator.class)
 public @interface MutuallyExclusiveNotNull {
@@ -24,7 +24,7 @@ public @interface MutuallyExclusiveNotNull {
 
     @IgnorePojoValidation
     class MutuallyExclusiveNotNullValidator implements ConstraintValidator<MutuallyExclusiveNotNull, Object> {
-        String[] fieldNames;
+        private String[] fieldNames;
 
         @Override
         public void initialize(MutuallyExclusiveNotNull constraintAnnotation) {
@@ -40,6 +40,7 @@ public @interface MutuallyExclusiveNotNull {
             try {
                 for (String fieldName : fieldNames) {
                     Field field = value.getClass().getDeclaredField(fieldName);
+                    field.setAccessible(true);
                     Object fieldValue = field.get(value);
                     if (fieldValue != null) {
                         if (!hasNotNull) {
