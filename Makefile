@@ -38,6 +38,9 @@ git-secrets:
 build-cloudbreak-dockerhub:
 	 make -C docker-cloudbreak dockerhub
 
+build-cloudbreak-shell-dockerhub:
+	 make -C docker-cloudbreak-shell dockerhub
+
 build-autoscale-dockerhub:
 	 make -C docker-autoscale dockerhub
 
