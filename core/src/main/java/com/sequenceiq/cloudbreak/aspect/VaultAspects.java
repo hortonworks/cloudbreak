@@ -42,13 +42,13 @@ public class VaultAspects {
                 if (field.isAnnotationPresent(VaultValue.class)) {
                     LOGGER.info("Found VaultValue annotation on {}", field);
                     field.setAccessible(true);
-                    String tenant = "pepsi";
+                    String secretPath = "secret";
                     String value = (String) field.get(entity);
-                    if (value != null && !value.startsWith(tenant)) {
+                    if (value != null && !value.startsWith(secretPath)) {
                         String resourceType = entity.getClass().getSimpleName().toLowerCase();
                         String resourceId = UUID.randomUUID().toString();
                         String fieldName = field.getName().toLowerCase();
-                        String path = String.format("%s/cb/%s/%s/%s", tenant, resourceType, fieldName, resourceId);
+                        String path = String.format("%s/cb/%s/%s/%s", secretPath, resourceType, fieldName, resourceId);
                         vaultService.addFieldToSecret(path, value);
                         LOGGER.info("Field: '{}' is saved at path: {}", field.getName(), path);
                         field.set(entity, path);
