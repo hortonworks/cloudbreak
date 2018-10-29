@@ -352,6 +352,7 @@ public class ClusterHostServiceRunner {
             gateway.put("signcert", clusterGateway.getSignCert());
             gateway.put("signkey", clusterGateway.getSignKey());
             gateway.put("tokencert", clusterGateway.getTokenCert());
+            gateway.put("mastersecret", clusterGateway.getKnoxMasterSecret());
             List<Map<String, Object>> topologies = getTopologies(clusterGateway);
             gateway.put("topologies", topologies);
             if (cluster.getBlueprint() != null) {
@@ -361,7 +362,6 @@ public class ClusterHostServiceRunner {
         }
 
         gateway.put("kerberos", cluster.isSecure());
-        gateway.put("mastersecret", cluster.getStack().getSecurityConfig().getKnoxMasterSecret());
         Map<String, List<String>> serviceLocation = componentLocator.getComponentLocation(cluster, new HashSet<>(ExposedService.getAllServiceName()));
 
         List<String> rangerLocations = serviceLocation.get(ExposedService.RANGER.getServiceName());
