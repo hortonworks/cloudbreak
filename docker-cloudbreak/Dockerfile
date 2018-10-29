@@ -18,9 +18,6 @@ RUN apt-get update --no-install-recommends && apt-get install -y zip procps
 # install the cloudbreak app
 ADD ${REPO_URL}/com/sequenceiq/cloudbreak/$VERSION/cloudbreak-$VERSION.jar /cloudbreak.jar
 
-# add jmx exporter
-ADD jmx_prometheus_javaagent-0.10.jar /jmx_prometheus_javaagent.jar
-
 # extract schema files
 RUN ( unzip cloudbreak.jar schema/* -d / ) || \
     ( unzip cloudbreak.jar BOOT-INF/classes/schema/* -d /tmp/ && mv /tmp/BOOT-INF/classes/schema/ /schema/ )
