@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.SSOType;
 import com.sequenceiq.cloudbreak.client.PkiUtil;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
+import com.sequenceiq.cloudbreak.util.PasswordUtil;
 
 @Component
 public class GatewayConvertUtil {
@@ -56,6 +57,7 @@ public class GatewayConvertUtil {
         }
         gateway.setSsoType(source.getSsoType() != null ? source.getSsoType() : SSOType.NONE);
         gateway.setTokenCert(source.getTokenCert());
+        gateway.setKnoxMasterSecret(PasswordUtil.generatePassword());
     }
 
     public void generateSignKeys(Gateway gateway) {
