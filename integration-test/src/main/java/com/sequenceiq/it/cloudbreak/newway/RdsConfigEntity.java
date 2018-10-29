@@ -1,11 +1,11 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
+import javax.ws.rs.WebApplicationException;
+
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsTestResult;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-
-import javax.ws.rs.WebApplicationException;
 
 public class RdsConfigEntity extends AbstractCloudbreakEntity<RDSConfigRequest, RDSConfigResponse, RdsConfigEntity> {
 

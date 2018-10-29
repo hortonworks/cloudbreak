@@ -1,8 +1,12 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
+import javax.ws.rs.WebApplicationException;
+
 import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigResponse;
+import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
+@Prototype
 public class ProxyConfigEntity extends AbstractCloudbreakEntity<ProxyConfigRequest, ProxyConfigResponse, ProxyConfigEntity> {
     public static final String PROXY_CONFIG = "PROXY_CONFIG";
 
@@ -13,6 +17,35 @@ public class ProxyConfigEntity extends AbstractCloudbreakEntity<ProxyConfigReque
 
     ProxyConfigEntity() {
         this(PROXY_CONFIG);
+    }
+
+    public ProxyConfigEntity(TestContext testContext) {
+        super(new ProxyConfigRequest(), testContext);
+    }
+
+    public ProxyConfigEntity(ProxyConfigRequest proxyConfigRequest, TestContext testContext) {
+        super(proxyConfigRequest, testContext);
+    }
+
+    @Override
+    public ProxyConfigEntity valid() {
+        return withName(getNameCreator().getRandomNameForMock())
+                .withDescription("Proxy config for integration test")
+                .withServerHost("1.2.3.4")
+                .withServerUser("mock")
+                .withPassword("akarmi")
+                .withServerPort(9)
+                .withProtocol("http");
+    }
+
+    @Override
+    public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
+        LOGGER.info("Cleaning up resource with name: {}", getName());
+        try {
+            cloudbreakClient.getCloudbreakClient().proxyConfigV3Endpoint().deleteInWorkspace(cloudbreakClient.getWorkspaceId(), getName());
+        } catch (WebApplicationException ignore) {
+            LOGGER.info("Something happend.");
+        }
     }
 
     public ProxyConfigEntity withName(String name) {

@@ -45,6 +45,14 @@ public class LdapConfig extends LdapConfigEntity {
         return ldapConfig;
     }
 
+    public static LdapConfigEntity post(TestContext testContext, LdapConfigEntity entity, CloudbreakClient cloudbreakClient) {
+        entity.setResponse(
+                cloudbreakClient.getCloudbreakClient().ldapConfigV3Endpoint().createInWorkspace(cloudbreakClient.getWorkspaceId(), entity.getRequest())
+
+        );
+        return entity;
+    }
+
     public static Action<LdapConfig> post(String key) {
         return new Action<>(getTestContext(key), LdapConfigV3Action::post);
     }
@@ -101,5 +109,4 @@ public class LdapConfig extends LdapConfigEntity {
         );
         return entity;
     }
-
 }

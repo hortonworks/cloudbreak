@@ -1,11 +1,11 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
+import javax.ws.rs.WebApplicationException;
+
 import com.sequenceiq.cloudbreak.api.model.DirectoryType;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-
-import javax.ws.rs.WebApplicationException;
 
 public class LdapConfigEntity extends AbstractCloudbreakEntity<LdapConfigRequest, LdapConfigResponse, LdapConfigEntity> {
     public static final String LDAP_CONFIG = "LDAP_CONFIG";

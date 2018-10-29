@@ -47,6 +47,13 @@ public class ProxyConfig extends ProxyConfigEntity {
         return proxyConfig;
     }
 
+    public static ProxyConfigEntity post(TestContext testContext, ProxyConfigEntity entity, CloudbreakClient cloudbreakClient) {
+        entity.setResponse(
+                cloudbreakClient.getCloudbreakClient().proxyConfigV3Endpoint().createInWorkspace(cloudbreakClient.getWorkspaceId(), entity.getRequest())
+        );
+        return entity;
+    }
+
     public static Action<ProxyConfig> post(String key) {
         return new Action<>(getTestContext(key), ProxyConfigV3Action::post);
     }

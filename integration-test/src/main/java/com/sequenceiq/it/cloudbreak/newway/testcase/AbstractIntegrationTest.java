@@ -20,9 +20,15 @@ import org.testng.annotations.DataProvider;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
 import com.sequenceiq.it.cloudbreak.newway.ImageCatalog;
 import com.sequenceiq.it.cloudbreak.newway.ImageCatalogEntity;
+import com.sequenceiq.it.cloudbreak.newway.LdapConfigEntity;
+import com.sequenceiq.it.cloudbreak.newway.ProxyConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
+import com.sequenceiq.it.cloudbreak.newway.RdsConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.action.CredentialCreateAction;
 import com.sequenceiq.it.cloudbreak.newway.action.ImageCatalogCreateIfNotExistsAction;
+import com.sequenceiq.it.cloudbreak.newway.action.LdapConfigCreateIfNotExistsAction;
+import com.sequenceiq.it.cloudbreak.newway.action.ProxyConfigCreateIfNotExistsAction;
+import com.sequenceiq.it.cloudbreak.newway.action.RdsConfigCreateIfNotExistsAction;
 import com.sequenceiq.it.cloudbreak.newway.actor.Actor;
 import com.sequenceiq.it.cloudbreak.newway.context.PurgeGarbageService;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
@@ -92,6 +98,24 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
                 .given(ImageCatalog.class)
                 .when(new ImageCatalogCreateIfNotExistsAction())
                 .when(ImageCatalogEntity::putSetDefaultByName);
+    }
+
+    protected void createDefaultProxyConfig(TestContext testContext) {
+        testContext
+                .given(ProxyConfigEntity.class)
+                .when(new ProxyConfigCreateIfNotExistsAction());
+    }
+
+    protected void createDefaultLdapConfig(TestContext testContext) {
+        testContext
+                .given(LdapConfigEntity.class)
+                .when(new LdapConfigCreateIfNotExistsAction());
+    }
+
+    protected void createDefaultRdsConfig(TestContext testContext) {
+        testContext
+                .given(RdsConfigEntity.class)
+                .when(new RdsConfigCreateIfNotExistsAction());
     }
 
     protected void createDefaultUser(TestContext testContext) {

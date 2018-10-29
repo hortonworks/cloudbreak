@@ -58,6 +58,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v3.BlueprintV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.ClusterTemplateV3EndPoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.ConnectorV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.CredentialV3Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v3.EnvironmentV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.FileSystemV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.FlexSubscriptionV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.ImageCatalogV3Endpoint;
@@ -85,6 +86,7 @@ public class CloudbreakClient {
             AutoscaleEndpoint.class,
             BlueprintEndpoint.class,
             BlueprintV3Endpoint.class,
+            EnvironmentV3Endpoint.class,
             EventEndpoint.class,
             EventV3Endpoint.class,
             UsageEndpoint.class,
@@ -194,6 +196,10 @@ public class CloudbreakClient {
 
     public BlueprintV3Endpoint blueprintV3Endpoint() {
         return getEndpoint(BlueprintV3Endpoint.class);
+    }
+
+    public EnvironmentV3Endpoint environmentV3Endpoint() {
+        return getEndpoint(EnvironmentV3Endpoint.class);
     }
 
     public EventEndpoint eventEndpoint() {
