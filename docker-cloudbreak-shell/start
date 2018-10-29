@@ -1,0 +1,57 @@
+#!/bin/bash
+
+#set -eo pipefail
+[[ "$TRACE" ]] && set -x
+
+: ${CLOUDBREAK_ADDRESS:=https://cloudbreak-api.sequenceiq.com/}
+: ${IDENTITY_ADDRESS:=https://identity.sequenceiq.com}
+
+: ${SECURE_RANDOM:=true}
+
+cb_shell() {
+    : ${SEQUENCEIQ_USER:? required}
+    : ${SEQUENCEIQ_PASSWORD:? required}
+
+    export CLOUDBREAK_ADDRESS IDENTITY_ADDRESS SEQUENCEIQ_USER SEQUENCEIQ_PASSWORD
+
+    [[ "$TRACE" ]] && debugopts="-Dlogging.config=/logback.xml"
+
+    # we shouldnt pass any --xxx parameter, but 1 paam is required
+    # otherwise only the usage is printed and cb-shell terminates
+
+    if [[ "$EXECUTION_COMMAND" ]]; then
+      if [ -z "$OUTPUT_FILE" ]; then OUTPUT_FILE=output.log; fi
+      echo "$EXECUTION_COMMAND" >> $OUTPUT_FILE
+      echo "$EXECUTION_COMMAND" | java  $CB_PARAMS -jar /cloudbreak-shell.jar --sequenceiq.user=$SEQUENCEIQ_USER --cmdfile=/data/cmdfile "$@" >> $OUTPUT_FILE
+    elif [ ! -f /data/cmdfile ]; then
+      java  $CB_PARAMS -jar /cloudbreak-shell.jar --sequenceiq.user=$SEQUENCEIQ_USER "$@"
+    else
+      if [ -z "$OUTPUT_FILE" ]; then OUTPUT_FILE=output.log; fi
+      java  $CB_PARAMS -jar /cloudbreak-shell.jar --sequenceiq.user=$SEQUENCEIQ_USER --cmdfile=/data/cmdfile "$@" >> $OUTPUT_FILE
+    fi
+}
+
+check_custom_jar() {
+    if [[ "$CLOUDBREAK_CUSTOM_JAR_URL" ]]; then
+        curl -Lko /cloudbreak-shell.jar  "$CLOUDBREAK_CUSTOM_JAR_URL"
+    fi
+}
+
+get_cert() {
+  if [ -n "$CERT_URL" ]; then
+    curl -O $CERT_URL && keytool -import -noprompt -trustcacerts -file sequenceiq.com.crt -alias "sequenceiq" -keystore /usr/lib/jvm/java-7-openjdk/jre/lib/security/cacerts -storepass changeit
+  fi
+
+  if [ "$SECURE_RANDOM" == "false" ]; then
+    CB_PARAMS=-Djava.security.egd=file:/dev/urandom
+  fi
+}
+
+
+main() {
+    get_cert
+    check_custom_jar
+    cb_shell "$@"
+}
+
+[[ "$0" == "$BASH_SOURCE" ]] && main "$@"
