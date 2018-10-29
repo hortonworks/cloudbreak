@@ -1,103 +1,103 @@
 import org.ajoberstar.grgit.Grgit
 
 buildscript {
-  repositories {
-    mavenLocal()
-    mavenCentral()
-    maven { url = "$repoUrl" }
-    jcenter()
-  }
-  dependencies {
-    classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
-  }
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven { url = "$repoUrl" }
+        jcenter()
+    }
+    dependencies {
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+    }
 }
 
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 
 springBoot {
-  mainClassName = 'com.sequenceiq.it.IntegrationTestApp'
+    mainClassName = 'com.sequenceiq.it.IntegrationTestApp'
 }
 
 bootRun {
-  systemProperty 'spring.profiles.active', System.properties['spring.profiles.active']
-  systemProperty 'spring.config.location', System.properties['spring.config.location']
-  if (project.hasProperty('jvmArgs')) {
-    jvmArgs += project.jvmArgs.split("\\s+").toList()
-  }
+    systemProperty 'spring.profiles.active', System.properties['spring.profiles.active']
+    systemProperty 'spring.config.location', System.properties['spring.config.location']
+    if (project.hasProperty('jvmArgs')) {
+        jvmArgs += project.jvmArgs.split("\\s+").toList()
+    }
 }
 
 jar {
-  baseName = 'cloudbreak-integration-test'
-  archiveName = 'cloudbreak-integration-test.jar'
+    baseName = 'cloudbreak-integration-test'
+    archiveName = 'cloudbreak-integration-test.jar'
 }
 
 bootJar {
-  baseName = 'cloudbreak-integration-test'
-  archiveName = 'cloudbreak-integration-test.jar'
-  manifest {
-    def grgit = Grgit.open(currentDir: project.projectDir)
-    attributes "Implementation-Version": grgit.describe()
-  }
+    baseName = 'cloudbreak-integration-test'
+    archiveName = 'cloudbreak-integration-test.jar'
+    manifest {
+        def grgit = Grgit.open(currentDir: project.projectDir)
+        attributes "Implementation-Version": grgit.describe()
+    }
 }
 
 task runMockServer(type:JavaExec) {
-  main = 'com.sequenceiq.it.spark.MockSparkServer'
-  classpath = sourceSets.main.runtimeClasspath
-  systemProperty "MOCK_SERVER_ADDRESS", System.getProperty("MOCK_SERVER_ADDRESS")
+    main = 'com.sequenceiq.it.spark.MockSparkServer'
+    classpath = sourceSets.main.runtimeClasspath
+    systemProperty "MOCK_SERVER_ADDRESS", System.getProperty("MOCK_SERVER_ADDRESS")
 }
 
 dependencies {
-  compile project(':cloud-common')
-  compile project(':core-api')
-  compile (project(':orchestrator-api')) {
-    transitive = false;
-  }
-  compile (project(':orchestrator-salt')) {
-    transitive = false;
-  }
-  compile (project(':cloud-api')) {
-    transitive = false;
-  }
-  compile (project(':autoscale-api')) {
-    transitive = false;
-  }
-  compile("com.sequenceiq:${ambariClientName}:${ambariClientVersion}") {
-    exclude group: 'org.slf4j';
-  }
-  compile (group: 'com.amazonaws',                name: 'aws-java-sdk',                   version: awsSdkVersion) {
-    exclude group: 'commons-logging'
-  }
+    compile project(':cloud-common')
+    compile project(':core-api')
+    compile (project(':orchestrator-api')) {
+        transitive = false;
+    }
+    compile (project(':orchestrator-salt')) {
+        transitive = false;
+    }
+    compile (project(':cloud-api')) {
+        transitive = false;
+    }
+    compile (project(':autoscale-api')) {
+        transitive = false;
+    }
+    compile("com.sequenceiq:${ambariClientName}:${ambariClientVersion}") {
+        exclude group: 'org.slf4j';
+    }
+    compile (group: 'com.amazonaws',                name: 'aws-java-sdk',                   version: awsSdkVersion) {
+        exclude group: 'commons-logging'
+    }
 
-  compile group: 'org.kohsuke', name: 'wordnet-random-name', version: '1.3'
-  compile group: 'com.google.code.gson',          name: 'gson',                           version: '2.6.2'
-  compile group: 'org.codehaus.groovy',           name: 'groovy-all',                     version: '2.5.0'
-  compile (group: 'com.microsoft.azure',          name: 'azure',                          version: azureSdkVersion) { exclude group: 'org.slf4j' }
-  compile group:  'com.google.apis',              name: 'google-api-services-compute',    version: 'v1-rev133-1.22.0'
-  compile group: 'com.google.apis',               name: 'google-api-services-storage',    version: 'v1-rev94-1.22.0'
-  compile group: 'com.microsoft.azure',           name: 'azure-storage',                  version: '5.0.0'
-  compile group: 'com.microsoft.azure',           name: 'azure-data-lake-store-sdk',      version: '2.1.5'
-  compile group:  'org.springframework.boot',     name: 'spring-boot-starter',            version: springBootVersion
-  compile group:  'org.springframework.boot',     name: 'spring-boot-starter-test',       version: springBootVersion
-  compile group:  'org.springframework.boot',     name: 'spring-boot-starter-web',        version: springBootVersion
-  compile group:  'org.springframework',          name: 'spring-context-support',         version: springFrameworkVersion
-  compile group:  'org.apache.velocity',          name: 'velocity',                       version: '1.7'
-  compile group:  'com.hierynomus',               name: 'sshj',                           version: '0.15.0'
-  compile group:  'org.testng',                   name: 'testng',                         version: '6.9.10'
-  compile group:  'javax.el',                     name: 'javax.el-api',                   version: '3.0.0'
-  compile group:  'org.apache.commons',           name: 'commons-lang3',                  version: '3.4'
-  compile group: 'org.pacesys.openstack4j.connectors', name: 'openstack4j-jersey2',       version: '3.1.0-jersey26_v3fix'
-  compile(group:  'org.apache.sshd',              name: 'sshd-core',                      version: '1.2.0') {
-    exclude group: 'ch.qos.logback'
-  }
-  compile group: 'com.sparkjava',                 name: 'spark-core',                     version: '2.7.2'
+    compile group: 'org.kohsuke', name: 'wordnet-random-name', version: '1.3'
+    compile group: 'com.google.code.gson',          name: 'gson',                           version: '2.6.2'
+    compile group: 'org.codehaus.groovy',           name: 'groovy-all',                     version: '2.5.0'
+    compile (group: 'com.microsoft.azure',          name: 'azure',                          version: azureSdkVersion) { exclude group: 'org.slf4j' }
+    compile group:  'com.google.apis',              name: 'google-api-services-compute',    version: 'v1-rev133-1.22.0'
+    compile group: 'com.google.apis',               name: 'google-api-services-storage',    version: 'v1-rev94-1.22.0'
+    compile group: 'com.microsoft.azure',           name: 'azure-storage',                  version: '5.0.0'
+    compile group: 'com.microsoft.azure',           name: 'azure-data-lake-store-sdk',      version: '2.1.5'
+    compile group:  'org.springframework.boot',     name: 'spring-boot-starter',            version: springBootVersion
+    compile group:  'org.springframework.boot',     name: 'spring-boot-starter-test',       version: springBootVersion
+    compile group:  'org.springframework.boot',     name: 'spring-boot-starter-web',        version: springBootVersion
+    compile group:  'org.springframework',          name: 'spring-context-support',         version: springFrameworkVersion
+    compile group:  'org.apache.velocity',          name: 'velocity',                       version: '1.7'
+    compile group:  'com.hierynomus',               name: 'sshj',                           version: '0.15.0'
+    compile group:  'org.testng',                   name: 'testng',                         version: '6.9.10'
+    compile group:  'javax.el',                     name: 'javax.el-api',                   version: '3.0.0'
+    compile group:  'org.apache.commons',           name: 'commons-lang3',                  version: '3.4'
+    compile group: 'org.pacesys.openstack4j.connectors', name: 'openstack4j-jersey2',       version: '3.1.0-jersey26_v3fix'
+    compile(group:  'org.apache.sshd',              name: 'sshd-core',                      version: '1.2.0') {
+        exclude group: 'ch.qos.logback'
+    }
+    compile group: 'com.sparkjava',                 name: 'spark-core',                     version: '2.7.2'
 
-  compile ("org.uncommons:reportng:1.1.4") {
-    exclude group: "velocity"
-  }
-  compile group: 'com.google.code.findbugs',      name: 'annotations',                    version: '3.0.1'
-  runtime group: 'com.google.inject',             name: 'guice',                          version: '3.0'
-  runtime group: 'javax.xml.bind',                name: 'jaxb-api', version: '2.3.0'
+    compile ("org.uncommons:reportng:1.1.4") {
+        exclude group: "velocity"
+    }
+    compile group: 'com.google.code.findbugs',      name: 'annotations',                    version: '3.0.1'
+    runtime group: 'com.google.inject',             name: 'guice',                          version: '3.0'
+    runtime group: 'javax.xml.bind',                name: 'jaxb-api', version: '2.3.0'
 }
 
 task buildInfo(type: BuildInfoTask, dependsOn: processResources) {
@@ -110,54 +110,54 @@ task buildInfo(type: BuildInfoTask, dependsOn: processResources) {
 compileJava.dependsOn buildInfo
 
 class BuildInfoTask extends DefaultTask {
-  File destination = new File("build.info")
-  String applicationPropertiesPath
-  String basename
-  String buildVersion
+    File destination = new File("build.info")
+    String applicationPropertiesPath
+    String basename
+    String buildVersion
 
-  @TaskAction
-  def writeBuildInfo() {
-    List<File> applicationDestinations = []
+    @TaskAction
+    def writeBuildInfo() {
+        List<File> applicationDestinations = []
 
-    applicationDestinations += project.file("out/production/resources")
-    applicationDestinations += new File(applicationPropertiesPath + "/resources/main")
+        applicationDestinations += project.file("out/production/resources")
+        applicationDestinations += new File(applicationPropertiesPath + "/resources/main")
 
-    destination.mkdirs()
-    String activeProfile = determineActiveProfile()
+        destination.mkdirs()
+        String activeProfile = determineActiveProfile()
 
-    // if using dev environment this condition is true
-    if (buildVersion.contains("+") || buildVersion == "unspecified") {
-      def grgit = Grgit.open(currentDir: project.projectDir)
-      buildVersion = grgit.describe()
-      println "buildVersion from git: " + buildVersion
+        // if using dev environment this condition is true
+        if (buildVersion.contains("+") || buildVersion == "unspecified") {
+            def grgit = Grgit.open(currentDir: project.projectDir)
+            buildVersion = grgit.describe()
+            println "buildVersion from git: " + buildVersion
+        }
+        new File(destination, "build.info").withWriter { out ->
+            [
+                    "ARTIFACT_BASENAME=" + basename,
+                    "ARTIFACT_VERSION=" + buildVersion,
+            ].each { out.println it }
+        }
+        applicationDestinations.each {
+            it.mkdirs()
+            new File(it, "application.properties").withWriter { out ->
+                [
+                        "info.app.name=" + basename,
+                        "info.app.version=" + buildVersion,
+                        "spring.profiles.active=" + activeProfile
+                ].each { out.println it }
+            }
+        }
     }
-    new File(destination, "build.info").withWriter { out ->
-      [
-              "ARTIFACT_BASENAME=" + basename,
-              "ARTIFACT_VERSION=" + buildVersion,
-      ].each { out.println it }
-    }
-    applicationDestinations.each {
-      it.mkdirs()
-      new File(it, "application.properties").withWriter { out ->
-        [
-                "info.app.name=" + basename,
-                "info.app.version=" + buildVersion,
-                "spring.profiles.active=" + activeProfile
-        ].each { out.println it }
-      }
-    }
-  }
 
-  private String determineActiveProfile() {
-    String activeProfile = "dev"
-    if (buildVersion.contains("dev") || buildVersion.equals("unspecified")) {
-      activeProfile = "dev"
-    } else if (buildVersion.contains("rc")) {
-      activeProfile = "rc"
-    } else {
-      activeProfile = "prod"
+    private String determineActiveProfile() {
+        String activeProfile = "dev"
+        if (buildVersion.contains("dev") || buildVersion.equals("unspecified")) {
+            activeProfile = "dev"
+        } else if (buildVersion.contains("rc")) {
+            activeProfile = "rc"
+        } else {
+            activeProfile = "prod"
+        }
+        return activeProfile
     }
-    return activeProfile
-  }
 }
