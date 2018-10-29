@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.repository.cluster.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.OrchestratorRepository;
+import com.sequenceiq.cloudbreak.repository.SaltSecurityConfigRepository;
 import com.sequenceiq.cloudbreak.repository.SecurityConfigRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.StackStatusRepository;
@@ -184,6 +185,9 @@ public class StackServiceSecurityComponentTest extends SecurityComponentTestBase
 
         @MockBean
         private SecurityConfigRepository securityConfigRepository;
+
+        @MockBean
+        private SaltSecurityConfigRepository saltSecurityConfigRepository;
 
         @MockBean
         private UserRepository userRepository;

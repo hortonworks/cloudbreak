@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.ConversionService;
@@ -37,6 +38,7 @@ import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.SaltSecurityConfig;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
@@ -44,6 +46,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
+import com.sequenceiq.cloudbreak.service.vault.VaultService;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Service
@@ -69,6 +72,9 @@ public class ImageService {
     @Inject
     private BlueprintUtils blueprintUtils;
 
+    @Inject
+    private VaultService vaultService;
+
     public Image getImage(Long stackId) throws CloudbreakImageNotFoundException {
         return componentConfigProvider.getImage(stackId);
     }
@@ -79,12 +85,13 @@ public class ImageService {
             Platform platform = platform(stack.cloudPlatform());
             String region = stack.getRegion();
             SecurityConfig securityConfig = stack.getSecurityConfig();
-            String cbPrivKey = securityConfig.getCloudbreakSshPrivateKeyDecoded();
-            byte[] cbSshKeyDer = PkiUtil.getPublicKeyDer(cbPrivKey);
+            SaltSecurityConfig saltSecurityConfig = securityConfig.getSaltSecurityConfig();
+            String cbPrivKey = vaultService.resolveSingleValue(saltSecurityConfig.getSaltBootSignPrivateKey());
+            byte[] cbSshKeyDer = PkiUtil.getPublicKeyDer(new String(Base64.decodeBase64(cbPrivKey)));
             String sshUser = stack.getStackAuthentication().getLoginUserName();
-            String cbCert = securityConfig.getClientCertRaw();
-            Map<InstanceGroupType, String> userData = userDataBuilder.buildUserData(platform, cbSshKeyDer, sshUser, params,
-                    securityConfig.getSaltBootPassword(), cbCert);
+            String cbCert = vaultService.resolveSingleValue(securityConfig.getClientCert());
+            String saltBootPassword = vaultService.resolveSingleValue(saltSecurityConfig.getSaltBootPassword());
+            Map<InstanceGroupType, String> userData = userDataBuilder.buildUserData(platform, cbSshKeyDer, sshUser, params, saltBootPassword, cbCert);
 
             LOGGER.info("Determined image from catalog: {}", imgFromCatalog);
 

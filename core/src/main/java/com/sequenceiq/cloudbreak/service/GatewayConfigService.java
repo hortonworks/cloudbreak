@@ -5,20 +5,26 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.codec.binary.Base64;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.client.SaltClientConfig;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.SaltSecurityConfig;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.service.vault.VaultService;
 
 @Service
 public class GatewayConfigService {
 
     @Inject
     private TlsSecurityService tlsSecurityService;
+
+    @Inject
+    private VaultService vaultService;
 
     public List<GatewayConfig> getAllGatewayConfigs(Stack stack) {
         List<GatewayConfig> result = new ArrayList<>();
@@ -47,7 +53,7 @@ public class GatewayConfigService {
 
     public String getGatewayIp(Stack stack, InstanceMetaData gatewayInstance) {
         String gatewayIP = gatewayInstance.getPublicIpWrapper();
-        if (stack.getSecurityConfig().usePrivateIpToTls()) {
+        if (stack.getSecurityConfig().isUsePrivateIpToTls()) {
             gatewayIP = gatewayInstance.getPrivateIp();
         }
         return gatewayIP;
@@ -55,6 +61,10 @@ public class GatewayConfigService {
 
     private SaltClientConfig getSaltClientConfig(Stack stack) {
         SecurityConfig securityConfig = stack.getSecurityConfig();
-        return new SaltClientConfig(securityConfig.getSaltPassword(), securityConfig.getSaltBootPassword(), securityConfig.getCloudbreakSshPrivateKeyDecoded());
+        SaltSecurityConfig saltSecurityConfig = securityConfig.getSaltSecurityConfig();
+        String privateKey = vaultService.resolveSingleValue(saltSecurityConfig.getSaltBootSignPrivateKey());
+        String saltBootPassword = vaultService.resolveSingleValue(saltSecurityConfig.getSaltBootPassword());
+        String saltPassword = vaultService.resolveSingleValue(saltSecurityConfig.getSaltPassword());
+        return new SaltClientConfig(saltPassword, saltBootPassword, new String(Base64.decodeBase64(privateKey)));
     }
 }
