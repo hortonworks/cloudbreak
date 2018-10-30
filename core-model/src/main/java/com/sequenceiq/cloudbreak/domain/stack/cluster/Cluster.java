@@ -37,6 +37,8 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.Status;
@@ -533,6 +535,10 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
     @Override
     public WorkspaceResource getResource() {
         return WorkspaceResource.STACK;
+    }
+
+    public boolean isAdJoinable() {
+        return isSecure() && kerberosConfig != null && StringUtils.isNotBlank(kerberosConfig.getLdapUrl());
     }
 
     @Override

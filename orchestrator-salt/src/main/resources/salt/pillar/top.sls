@@ -14,6 +14,10 @@ base:
     - metadata.init
     - proxy.proxy
 
+  'G@roles:ad_member or G@roles:ad_leave':
+    - match: compound
+    - sssd.ad
+
   'roles:gateway':
     - match: grain
     - gateway.init

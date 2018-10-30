@@ -232,8 +232,10 @@ public class ClusterHostServiceRunner {
         decoratePillarWithAmbariDatabase(cluster, servicePillar);
 
         if (cluster.getLdapConfig() != null) {
-            saveLdapPillar(cluster.getLdapConfig().copyWithoutWorkspace(), servicePillar);
+            LdapConfig ldapConfig = cluster.getLdapConfig().copyWithoutWorkspace();
+            saveLdapPillar(ldapConfig, servicePillar);
         }
+        saveSssdAdPillar(cluster, servicePillar);
         saveDockerPillar(cluster.getExecutorType(), servicePillar);
         saveHDPPillar(cluster.getId(), servicePillar);
         Map<String, Object> credentials = new HashMap<>();
@@ -251,6 +253,18 @@ public class ClusterHostServiceRunner {
         decoratePillarWithJdbcConnectors(cluster, servicePillar);
 
         return new SaltConfig(servicePillar, createGrainProperties(gatewayConfigs));
+    }
+
+    private void saveSssdAdPillar(Cluster cluster, Map<String, SaltPillarProperties> servicePillar) {
+        if (cluster.isAdJoinable()) {
+            KerberosConfig kerberosConfig = cluster.getKerberosConfig();
+            Map<String, Object> sssdConnfig = new HashMap<>();
+            sssdConnfig.put("username", kerberosConfig.getPrincipal());
+            sssdConnfig.put("domainuppercase", kerberosConfig.getRealm().toUpperCase());
+            sssdConnfig.put("domain", kerberosConfig.getRealm().toLowerCase());
+            sssdConnfig.put("password", kerberosConfig.getPassword());
+            servicePillar.put("sssd-ad", new SaltPillarProperties("/sssd/ad.sls", singletonMap("sssd-ad", sssdConnfig)));
+        }
     }
 
     private void decoratePillarWithAmbariDatabase(Cluster cluster, Map<String, SaltPillarProperties> servicePillar)

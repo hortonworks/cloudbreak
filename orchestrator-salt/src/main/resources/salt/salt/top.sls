@@ -10,6 +10,10 @@ base:
     - docker
     - recipes.runner
 
+  'roles:ad_member':
+    - match: grain
+    - sssd.ad
+
   'roles:kerberos_server_master':
     - match: grain
     - kerberos.master
@@ -98,3 +102,7 @@ base:
   'G@recipes:post and G@roles:kerberos_server_slave':
     - match: compound
     - kerberos.kprop
+
+  'roles:ad_leave':
+    - match: grain
+    - sssd.ad-leave
