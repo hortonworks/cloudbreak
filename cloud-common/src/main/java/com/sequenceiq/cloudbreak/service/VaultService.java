@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.vault;
+package com.sequenceiq.cloudbreak.service;
 
 import java.security.InvalidKeyException;
 import java.util.Collections;

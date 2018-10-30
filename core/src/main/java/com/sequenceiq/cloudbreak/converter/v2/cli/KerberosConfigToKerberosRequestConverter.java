@@ -12,15 +12,15 @@ public class KerberosConfigToKerberosRequestConverter extends AbstractConversion
     @Override
     public KerberosRequest convert(KerberosConfig source) {
         KerberosRequest config = new KerberosRequest();
-        config.setTcpAllowed(source.getTcpAllowed());
+        config.setTcpAllowed(source.isTcpAllowed());
         config.setPassword("");
         switch (source.getType()) {
             case CB_MANAGED:
                 config.setMasterKey("");
-                config.setAdmin(source.getAdmin());
+                config.setAdmin("");
                 break;
             case EXISTING_AD:
-                config.setPrincipal(source.getPrincipal());
+                config.setPrincipal("");
                 config.setUrl(source.getUrl());
                 config.setAdminUrl(source.getAdminUrl());
                 config.setRealm(source.getRealm());
@@ -28,15 +28,15 @@ public class KerberosConfigToKerberosRequestConverter extends AbstractConversion
                 config.setContainerDn(source.getContainerDn());
                 break;
             case EXISTING_MIT:
-                config.setPrincipal(source.getPrincipal());
+                config.setPrincipal("");
                 config.setUrl(source.getUrl());
                 config.setAdminUrl(source.getAdminUrl());
                 config.setRealm(source.getRealm());
                 break;
             case CUSTOM:
-                config.setPrincipal(source.getPrincipal());
-                config.setDescriptor(source.getDescriptor());
-                config.setKrb5Conf(source.getKrb5Conf());
+                config.setPrincipal("");
+                config.setDescriptor("");
+                config.setKrb5Conf("");
                 break;
             default:
         }
