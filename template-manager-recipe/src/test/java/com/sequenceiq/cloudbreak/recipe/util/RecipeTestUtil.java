@@ -62,6 +62,6 @@ public class RecipeTestUtil {
     }
 
     public static LdapView generalLdapView() {
-        return new LdapView(ldapConfig(), "admin");
+        return new LdapView(ldapConfig(), "cn=admin,dc=example,dc=org", "admin");
     }
 }

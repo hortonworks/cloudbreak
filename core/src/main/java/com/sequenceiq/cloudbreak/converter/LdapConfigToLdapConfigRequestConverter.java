@@ -16,9 +16,9 @@ public class LdapConfigToLdapConfigRequestConverter extends AbstractConversionSe
     public LdapConfigRequest convert(LdapConfig source) {
         LdapConfigRequest ldapConfigRequest = new LdapConfigRequest();
         ldapConfigRequest.setName(source.getName());
+        ldapConfigRequest.setBindDn("fake-user");
         ldapConfigRequest.setBindPassword("fake-password");
         ldapConfigRequest.setAdminGroup(source.getAdminGroup());
-        ldapConfigRequest.setBindDn(source.getBindDn());
         ldapConfigRequest.setDescription(source.getDescription());
         ldapConfigRequest.setDirectoryType(source.getDirectoryType());
         ldapConfigRequest.setDomain(source.getDomain());

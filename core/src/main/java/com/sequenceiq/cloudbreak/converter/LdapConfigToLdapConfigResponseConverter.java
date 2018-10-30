@@ -16,7 +16,6 @@ public class LdapConfigToLdapConfigResponseConverter extends AbstractConversionS
         json.setName(config.getName());
         json.setDescription(config.getDescription());
         json.setId(config.getId());
-        json.setBindDn(config.getBindDn());
         json.setServerHost(config.getServerHost());
         json.setServerPort(config.getServerPort());
         json.setProtocol(config.getProtocol());
