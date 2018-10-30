@@ -113,7 +113,6 @@ public class AmbariLdapServiceTest {
         assertThat(parameters, hasEntry("ambari.ldap.attributes.user.search_base", ldapConfig.getUserSearchBase()));
         assertThat(parameters, hasEntry("ambari.ldap.attributes.group.search_base", ldapConfig.getGroupSearchBase()));
         assertThat(parameters, hasEntry("ambari.ldap.attributes.group.member_attr", ldapConfig.getGroupMemberAttribute()));
-        assertThat(parameters, hasEntry("ambari.ldap.connectivity.bind_dn", ldapConfig.getBindDn()));
         assertThat(parameters, hasEntry("ambari.ldap.connectivity.bind_password", "/etc/ambari-server/conf/ldap-password.dat"));
         assertThat(parameters, hasEntry("ambari.ldap.advanced.referrals", "follow"));
         assertThat(parameters, hasEntry("ambari.ldap.connectivity.anonymous_bind", false));
@@ -145,7 +144,6 @@ public class AmbariLdapServiceTest {
         assertThat(parameters, hasEntry("ambari.ldap.attributes.user.search_base", ldapConfig.getUserSearchBase()));
         assertThat(parameters, hasEntry("ambari.ldap.attributes.group.search_base", ldapConfig.getGroupSearchBase()));
         assertThat(parameters, hasEntry("ambari.ldap.attributes.group.member_attr", ldapConfig.getGroupMemberAttribute()));
-        assertThat(parameters, hasEntry("ambari.ldap.connectivity.bind_dn", ldapConfig.getBindDn()));
         assertThat(parameters, hasEntry("ambari.ldap.connectivity.bind_password", "/etc/ambari-server/conf/ldap-password.dat"));
         assertThat(parameters, hasEntry("ambari.ldap.advanced.referrals", "follow"));
         assertThat(parameters, hasEntry("ambari.ldap.connectivity.anonymous_bind", false));

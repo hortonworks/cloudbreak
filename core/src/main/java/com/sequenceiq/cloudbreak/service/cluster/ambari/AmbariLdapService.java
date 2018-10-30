@@ -40,8 +40,9 @@ public class AmbariLdapService {
         LdapConfig ldapConfig = cluster.getLdapConfig();
         if (ldapConfig != null) {
             LOGGER.info("Setup LDAP on Ambari API for stack: {}", stack.getId());
+            String bindDn = vaultService.resolveSingleValue(ldapConfig.getBindDn());
             String bindPassword = vaultService.resolveSingleValue(ldapConfig.getBindPassword());
-            LdapView ldapView = new LdapView(ldapConfig, bindPassword);
+            LdapView ldapView = new LdapView(ldapConfig, bindDn, bindPassword);
             Map<String, Object> ldapConfigs = new HashMap<>();
             ldapConfigs.put("ambari.ldap.authentication.enabled", true);
             ldapConfigs.put("ambari.ldap.connectivity.server.host", ldapView.getHost());

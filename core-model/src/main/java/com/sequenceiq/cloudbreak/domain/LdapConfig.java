@@ -57,6 +57,7 @@ public class LdapConfig implements ProvisionEntity, EnvironmentAwareResource {
     private String protocol;
 
     @Column(nullable = false)
+    @VaultValue
     private String bindDn;
 
     @Column(nullable = false)

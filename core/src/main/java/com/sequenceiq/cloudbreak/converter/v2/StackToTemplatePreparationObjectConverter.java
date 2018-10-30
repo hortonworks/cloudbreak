@@ -108,6 +108,12 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
             StackInputs stackInputs = getStackInputs(source);
             Map<String, Object> fixInputs = stackInputs.getFixInputs() == null ? new HashMap<>() : stackInputs.getFixInputs();
             fixInputs.putAll(stackInputs.getDatalakeInputs() == null ? new HashMap<>() : stackInputs.getDatalakeInputs());
+            String bindDn = null;
+            String bindPassword = null;
+            if (ldapConfig != null) {
+                bindDn = vaultService.resolveSingleValue(ldapConfig.getBindDn());
+                bindPassword = vaultService.resolveSingleValue(ldapConfig.getBindPassword());
+            }
             return Builder.builder()
                     .withFlexSubscription(source.getFlexSubscription())
                     .withRdsConfigs(postgresConfigService.createRdsConfigIfNeeded(source, cluster))
@@ -120,7 +126,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
                     .withFileSystemConfigurationView(fileSystemConfigurationView)
                     .withGeneralClusterConfigs(generalClusterConfigsProvider.generalClusterConfigs(source, cluster, cloudbreakUser))
                     .withSmartSenseSubscription(aDefault.isPresent() ? aDefault.get() : null)
-                    .withLdapConfig(ldapConfig, ldapConfig == null ? "" : vaultService.resolveSingleValue(ldapConfig.getBindPassword()))
+                    .withLdapConfig(ldapConfig, bindDn, bindPassword)
                     .withHdfConfigs(hdfConfigs)
                     .withKerberosConfig(cluster.isSecure() ? cluster.getKerberosConfig() : null)
                     .withSharedServiceConfigs(sharedServiceConfigProvider.createSharedServiceConfigs(source, dataLakeStack))

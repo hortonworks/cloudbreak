@@ -22,6 +22,10 @@ public class LdapConfigRequest extends LdapConfigBase {
     private String name;
 
     @NotNull
+    @ApiModelProperty(value = LdapConfigModelDescription.BIND_DN, required = true)
+    private String bindDn;
+
+    @NotNull
     @ApiModelProperty(value = LdapConfigModelDescription.BIND_PASSWORD, required = true)
     private String bindPassword;
 
@@ -31,6 +35,14 @@ public class LdapConfigRequest extends LdapConfigBase {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getBindDn() {
+        return bindDn;
+    }
+
+    public void setBindDn(String bindDn) {
+        this.bindDn = bindDn;
     }
 
     public String getBindPassword() {

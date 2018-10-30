@@ -85,14 +85,14 @@ class BlueprintModulTestModelProvider {
     static TemplatePreparationObject blueprintObjectWhenLdapPresentedThenRangerAndHadoopLdapShouldConfigured() {
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
-                .withLdapConfig(ldapConfig(), "admin")
+                .withLdapConfig(ldapConfig(), "cn=admin,dc=example,dc=org", "admin")
                 .build();
     }
 
     static TemplatePreparationObject blueprintObjectWhenADPresentedThenRangerAndHadoopADShouldConfigured() {
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
-                .withLdapConfig(adConfig(), "admin")
+                .withLdapConfig(adConfig(), "cn=admin,dc=example,dc=org", "admin")
                 .build();
     }
 
@@ -100,7 +100,7 @@ class BlueprintModulTestModelProvider {
         return getPreparedBuilder()
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .withRdsConfigs(new HashSet<>(Collections.singleton(rdsConfig(RdsType.RANGER))))
-                .withLdapConfig(ldapConfig(), "admin")
+                .withLdapConfig(ldapConfig(), "cn=admin,dc=example,dc=org", "admin")
                 .build();
     }
 
@@ -144,7 +144,7 @@ class BlueprintModulTestModelProvider {
     static TemplatePreparationObject blueprintObjectWhenNifiAndHdfAndLdapPresentedThenHdfShouldConfigured() {
         return getPreparedBuilder("master", "slave_1")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDF"))
-                .withLdapConfig(ldapConfig(), "admin")
+                .withLdapConfig(ldapConfig(), "cn=admin,dc=example,dc=org", "admin")
                 .withHdfConfigs(new HdfConfigs("<property name=\"Node Identity 10.0.0.1\">CN=10.0.0.1, OU=NIFI</property>",
                         "<property name=\"Node Identity 10.0.0.1\">CN=10.0.0.1, OU=NIFI</property>",
                         "<property name=\"Node Identity 10.0.0.1\">CN=10.0.0.1, OU=NIFI</property>", Optional.empty()))
@@ -175,7 +175,7 @@ class BlueprintModulTestModelProvider {
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .withRdsConfigs(new HashSet<>(Collections.singleton(rdsConfig(RdsType.RANGER))))
-                .withLdapConfig(ldapConfig(), "admin")
+                .withLdapConfig(ldapConfig(), "cn=admin,dc=example,dc=org", "admin")
                 .build();
     }
 
@@ -183,7 +183,7 @@ class BlueprintModulTestModelProvider {
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .withRdsConfigs(new HashSet<>(Collections.singleton(rdsConfig(RdsType.RANGER))))
-                .withLdapConfig(adConfig(), "admin")
+                .withLdapConfig(adConfig(), "cn=admin,dc=example,dc=org", "admin")
                 .build();
     }
 
@@ -191,7 +191,7 @@ class BlueprintModulTestModelProvider {
         return getPreparedBuilder()
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .withRdsConfigs(new HashSet<>(Collections.singleton(rdsConfig(RdsType.RANGER, DatabaseVendor.ORACLE11))))
-                .withLdapConfig(ldapConfig(), "admin")
+                .withLdapConfig(ldapConfig(), "cn=admin,dc=example,dc=org", "admin")
                 .build();
     }
 
@@ -214,7 +214,7 @@ class BlueprintModulTestModelProvider {
                 .withHostgroups(getHostGroups("master", "worker", "compute"))
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .withRdsConfigs(Sets.newHashSet(rdsConfig(RdsType.RANGER), rdsConfig(RdsType.HIVE)))
-                .withLdapConfig(ldapConfig(), "admin")
+                .withLdapConfig(ldapConfig(), "cn=admin,dc=example,dc=org", "admin")
                 .withGeneralClusterConfigs(configs)
                 .withSharedServiceConfigs(datalakeSharedServiceConfig().get())
                 .build();
@@ -231,7 +231,7 @@ class BlueprintModulTestModelProvider {
                 .withHostgroups(groups)
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .withRdsConfigs(Sets.newHashSet(rdsConfig(RdsType.RANGER), rdsConfig(RdsType.HIVE)))
-                .withLdapConfig(ldapConfig(), "admin")
+                .withLdapConfig(ldapConfig(), "cn=admin,dc=example,dc=org", "admin")
                 .withGeneralClusterConfigs(configs)
                 .build();
     }
@@ -243,7 +243,7 @@ class BlueprintModulTestModelProvider {
                 .withHostgroups(getHostGroups("master", "worker", "compute"))
                 .withBlueprintView(generalBlueprintView(testFile.getFileContent(), "2.6", "HDP"))
                 .withRdsConfigs(Sets.newHashSet(rdsConfig(RdsType.BEACON)))
-                .withLdapConfig(ldapConfig(), "admin")
+                .withLdapConfig(ldapConfig(), "cn=admin,dc=example,dc=org", "admin")
                 .withGateway(gatewayEnabled())
                 .withGeneralClusterConfigs(configs)
                 .build();
@@ -256,7 +256,7 @@ class BlueprintModulTestModelProvider {
                 .withHostgroups(getHostGroups("master", "worker", "compute"))
                 .withBlueprintView(generalBlueprintView(testFile.getFileContent(), "2.6", "HDP"))
                 .withRdsConfigs(Sets.newHashSet(rdsConfig(RdsType.BEACON)))
-                .withLdapConfig(adConfig(), "admin")
+                .withLdapConfig(adConfig(), "cn=admin,dc=example,dc=org", "admin")
                 .withGateway(gatewayEnabled())
                 .withGeneralClusterConfigs(configs)
                 .build();
@@ -310,7 +310,7 @@ class BlueprintModulTestModelProvider {
         return getPreparedBuilder()
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .withRdsConfigs(new HashSet<>(Collections.singleton(rdsConfig(RdsType.DRUID))))
-                .withLdapConfig(ldapConfig(), "admin")
+                .withLdapConfig(ldapConfig(), "cn=admin,dc=example,dc=org", "admin")
                 .build();
     }
 
@@ -323,14 +323,14 @@ class BlueprintModulTestModelProvider {
     static TemplatePreparationObject blueprintObjectWhenAtlasAndLdapPresentedThenBothShouldConfigured() {
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
-                .withLdapConfig(ldapConfig(), "admin")
+                .withLdapConfig(ldapConfig(), "cn=admin,dc=example,dc=org", "admin")
                 .build();
     }
 
     static TemplatePreparationObject blueprintObjectWhenAtlasAndADPresentedThenBothShouldConfigured() {
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
-                .withLdapConfig(adConfig(), "admin")
+                .withLdapConfig(adConfig(), "cn=admin,dc=example,dc=org", "admin")
                 .build();
     }
 
