@@ -277,7 +277,7 @@ public class ClusterHostServiceRunner {
         if (ambariRdsConfig == null) {
             throw new CloudbreakOrchestratorFailedException("Ambari RDSConfig is missing for stack");
         }
-        RdsView ambariRdsView = new RdsView(ambariRdsConfig);
+        RdsView ambariRdsView = new RdsView(rdsConfigService.resolveVaultValues(ambariRdsConfig));
         servicePillar.put("ambari-database", new SaltPillarProperties("/ambari/database.sls", singletonMap("ambari", singletonMap("database", ambariRdsView))));
     }
 
