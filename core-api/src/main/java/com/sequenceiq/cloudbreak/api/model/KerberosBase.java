@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.api.model;
 
 import static com.sequenceiq.cloudbreak.type.KerberosType.CB_MANAGED;
-import static com.sequenceiq.cloudbreak.type.KerberosType.CUSTOM;
 import static com.sequenceiq.cloudbreak.type.KerberosType.EXISTING_AD;
 import static com.sequenceiq.cloudbreak.type.KerberosType.EXISTING_MIT;
 
@@ -14,8 +13,6 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 import com.sequenceiq.cloudbreak.type.KerberosType;
 import com.sequenceiq.cloudbreak.validation.RequiredKerberosField;
-import com.sequenceiq.cloudbreak.validation.ValidJson;
-import com.sequenceiq.cloudbreak.validation.ValidKerberosDescriptor;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -49,14 +46,6 @@ public abstract class KerberosBase implements JsonEntity {
 
     @RequiredKerberosField
     private Boolean tcpAllowed = false;
-
-    @RequiredKerberosField(types = CUSTOM)
-    @ValidKerberosDescriptor
-    private String descriptor;
-
-    @RequiredKerberosField(types = CUSTOM)
-    @ValidJson(message = "The krb5 configuration must be a valid JSON")
-    private String krb5Conf;
 
     @NotNull
     private KerberosType type;
@@ -125,19 +114,4 @@ public abstract class KerberosBase implements JsonEntity {
         this.tcpAllowed = tcpAllowed;
     }
 
-    public String getDescriptor() {
-        return descriptor;
-    }
-
-    public void setDescriptor(String descriptor) {
-        this.descriptor = descriptor;
-    }
-
-    public String getKrb5Conf() {
-        return krb5Conf;
-    }
-
-    public void setKrb5Conf(String krb5Conf) {
-        this.krb5Conf = krb5Conf;
-    }
 }

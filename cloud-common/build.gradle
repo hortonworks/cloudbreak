@@ -38,6 +38,9 @@ dependencies {
     compile group: 'org.springframework.retry',             name: 'spring-retry',                   version: '1.1.4.RELEASE'
     compile group: 'org.springframework.boot',              name: 'spring-boot-starter-actuator',   version: springBootVersion
     compile group: 'org.springframework',                   name: 'spring-context-support',         version: springFrameworkVersion
+    compile (group: 'org.springframework.vault',             name: 'spring-vault-core',              version: '2.1.0.RELEASE') {
+        exclude group: 'org.springframework'
+    }
     compile group: 'io.micrometer',                         name: 'micrometer-core',                version: '1.0.5'
     compile group: 'io.micrometer',                         name: 'micrometer-registry-prometheus', version: '1.0.5'
     compile group: 'com.fasterxml.jackson.core',            name: 'jackson-databind',               version: jacksonVersion
