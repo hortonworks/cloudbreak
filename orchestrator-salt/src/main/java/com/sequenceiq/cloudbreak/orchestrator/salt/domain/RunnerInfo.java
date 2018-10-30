@@ -48,6 +48,7 @@ public class RunnerInfo {
 
     public String getErrorResultSummary() {
         StringBuilder summary = new StringBuilder();
+        appendIfPresent(summary, "Name: ", name);
         appendIfPresent(summary, "Comment: ", comment);
         appendIfPresent(summary, "Stdout: ", getStdout());
         appendIfPresent(summary, "Stderr: ", getStderr());

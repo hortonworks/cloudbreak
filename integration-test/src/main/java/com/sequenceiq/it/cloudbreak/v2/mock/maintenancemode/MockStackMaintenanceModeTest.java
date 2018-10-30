@@ -98,7 +98,7 @@ public class MockStackMaintenanceModeTest extends AbstractCloudbreakIntegrationT
         UpdateClusterJson udateJson = new UpdateClusterJson();
         AmbariStackDetailsJson ambariStackDetails = new AmbariStackDetailsJson();
         ambariStackDetails.setStack("AMBARI");
-        ambariStackDetails.setVersion("2.7.0.0");
+        ambariStackDetails.setVersion("2.7");
         ambariStackDetails.setStackBaseURL("http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.7.0.0");
         ambariStackDetails.setGpgKeyUrl("http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.7.0.0/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins");
         udateJson.setAmbariStackDetails(ambariStackDetails);
@@ -119,7 +119,7 @@ public class MockStackMaintenanceModeTest extends AbstractCloudbreakIntegrationT
         UpdateClusterJson udateJson = new UpdateClusterJson();
         AmbariStackDetailsJson ambariStackDetails = new AmbariStackDetailsJson();
         ambariStackDetails.setStack("HDP");
-        ambariStackDetails.setVersion("2.6.5.0");
+        ambariStackDetails.setVersion("2.6");
         ambariStackDetails.setEnableGplRepo(false);
         ambariStackDetails.setMpacks(List.of());
         ambariStackDetails.setOsType("redhat7");
