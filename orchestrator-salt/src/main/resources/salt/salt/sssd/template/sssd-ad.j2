@@ -1,0 +1,31 @@
+[nss]
+filter_users = root
+filter_groups = root
+override_shell = /bin/bash
+override_homedir = /home/%u
+reconnection_retries = 3
+entry_cache_nowait_percentage = 75
+debug_level = 5
+
+[sssd]
+domains = {{ pillar['sssd-ad']['domain'] }}
+config_file_version = 2
+services = nss, pam
+default_domain_suffix = {{ pillar['sssd-ad']['domain'] }}
+
+[domain/{{ pillar['sssd-ad']['domain'] }}]
+ad_domain = {{ pillar['sssd-ad']['domain'] }}
+krb5_realm = {{ pillar['sssd-ad']['domainuppercase'] }}
+realmd_tags = manages-system joined-with-samba
+cache_credentials = True
+id_provider = ad
+krb5_store_password_if_offline = True
+default_shell = /bin/bash
+ldap_id_mapping = True
+use_fully_qualified_names = True
+fallback_homedir = /home/%u
+access_provider = ad
+dyndns_update = true
+dyndns_refresh_interval = 43200
+dyndns_update_ptr = true
+dyndns_ttl = 3600

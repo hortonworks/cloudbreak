@@ -9,13 +9,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.StackPreTerminationRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.StackPreTerminationSuccess;
 import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
+import com.sequenceiq.cloudbreak.service.cluster.flow.PreTerminationStateExecutor;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -40,6 +41,9 @@ public class StackPreTerminationHandler implements ReactorEventHandler<StackPreT
     @Inject
     private HostGroupService hostGroupService;
 
+    @Inject
+    private PreTerminationStateExecutor preTerminationStateExecutor;
+
     @Override
     public void accept(Event<StackPreTerminationRequest> requestEvent) {
         StackPreTerminationRequest request = requestEvent.getData();
@@ -49,6 +53,7 @@ public class StackPreTerminationHandler implements ReactorEventHandler<StackPreT
             if (cluster != null) {
                 Set<HostGroup> hostGroups = hostGroupService.getByCluster(cluster.getId());
                 recipeEngine.executePreTerminationRecipes(stack, hostGroups);
+                preTerminationStateExecutor.leaveAdDomain(stack);
             }
         } catch (Exception ex) {
             LOGGER.error("Pre-termination failed: {}", ex.getMessage(), ex);

@@ -58,5 +58,7 @@ public interface HostOrchestrator extends HostRecipeExecutor {
     void changePrimaryGateway(GatewayConfig formerGateway, GatewayConfig newPrimaryGateway, List<GatewayConfig> allGatewayConfigs, Set<Node> allNodes,
             ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException;
 
+    void leaveAdDomain(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorFailedException;
+
     byte[] getStateConfigZip() throws IOException;
 }
