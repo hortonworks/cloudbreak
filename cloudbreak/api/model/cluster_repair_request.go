@@ -6,6 +6,8 @@ package model
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"strconv"
+
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
@@ -22,11 +24,16 @@ type ClusterRepairRequest struct {
 	// Required: true
 	HostGroups []string `json:"hostGroups"`
 
+	// List of nested objects consisting of deleteVolumes flag and a list of node IDs which will be repaired specifically. The existing disk volumes on the nodes will be re-created if the deleteVolumes flag is true.
+	Nodes []*ClusterRepairNodeRequest `json:"nodes"`
+
 	// If true, the failed nodes will only be removed, otherwise the failed nodes will be removed and new nodes will be started.
 	RemoveOnly *bool `json:"removeOnly,omitempty"`
 }
 
 /* polymorph ClusterRepairRequest hostGroups false */
+
+/* polymorph ClusterRepairRequest nodes false */
 
 /* polymorph ClusterRepairRequest removeOnly false */
 
@@ -35,6 +42,11 @@ func (m *ClusterRepairRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateHostGroups(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateNodes(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -49,6 +61,33 @@ func (m *ClusterRepairRequest) validateHostGroups(formats strfmt.Registry) error
 
 	if err := validate.Required("hostGroups", "body", m.HostGroups); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *ClusterRepairRequest) validateNodes(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Nodes) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.Nodes); i++ {
+
+		if swag.IsZero(m.Nodes[i]) { // not required
+			continue
+		}
+
+		if m.Nodes[i] != nil {
+
+			if err := m.Nodes[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("nodes" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
 	}
 
 	return nil

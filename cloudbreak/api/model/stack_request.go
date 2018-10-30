@@ -67,6 +67,9 @@ type StackRequest struct {
 	// stack related default tags
 	DefaultTags map[string]string `json:"defaultTags,omitempty"`
 
+	// environment where the stack will be created
+	Environment string `json:"environment,omitempty"`
+
 	// failure policy in case of failures
 	FailurePolicy *FailurePolicyRequest `json:"failurePolicy,omitempty"`
 
@@ -159,6 +162,8 @@ type StackRequest struct {
 /* polymorph StackRequest customInputs false */
 
 /* polymorph StackRequest defaultTags false */
+
+/* polymorph StackRequest environment false */
 
 /* polymorph StackRequest failurePolicy false */
 

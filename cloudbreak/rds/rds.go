@@ -13,9 +13,10 @@ import (
 	"github.com/hortonworks/cb-cli/cloudbreak/types"
 	"github.com/hortonworks/cb-cli/utils"
 	"github.com/urfave/cli"
+	"strings"
 )
 
-var rdsHeader = []string{"Name", "ConnectionURL", "DatabaseEngine", "Type", "Driver"}
+var rdsHeader = []string{"Name", "ConnectionURL", "DatabaseEngine", "Type", "Driver", "Environments"}
 
 type rds struct {
 	Name           string `json:"Name" yaml:"Name"`
@@ -23,6 +24,7 @@ type rds struct {
 	DatabaseEngine string `json:"DatabaseEngine" yaml:"DatabaseEngine"`
 	Type           string `json:"Type" yaml:"Type"`
 	Driver         string `json:"Driver" yaml:"Driver"`
+	Environments   []string
 }
 
 type rdsOutDescribe struct {
@@ -31,7 +33,7 @@ type rdsOutDescribe struct {
 }
 
 func (r *rds) DataAsStringArray() []string {
-	return []string{r.Name, r.URL, r.DatabaseEngine, r.Type, r.Driver}
+	return []string{r.Name, r.URL, r.DatabaseEngine, r.Type, r.Driver, strings.Join(r.Environments, ",")}
 }
 
 func (r *rdsOutDescribe) DataAsStringArray() []string {
@@ -113,6 +115,7 @@ func CreateRdsOracle11(c *cli.Context) {
 		c.String(fl.FlRdsURL.Name),
 		c.String(fl.FlRdsType.Name),
 		c.String(fl.FlRdsConnectorJarURLOptional.Name),
+		utils.DelimitedStringToArray(c.String(fl.FlEnvironmentsOptional.Name), ","),
 		&model.Oracle{
 			Version: &(&types.S{S: "11"}).S,
 		})
@@ -130,6 +133,7 @@ func CreateRdsOracle12(c *cli.Context) {
 		c.String(fl.FlRdsURL.Name),
 		c.String(fl.FlRdsType.Name),
 		c.String(fl.FlRdsConnectorJarURLOptional.Name),
+		utils.DelimitedStringToArray(c.String(fl.FlEnvironmentsOptional.Name), ","),
 		&model.Oracle{
 			Version: &(&types.S{S: "12"}).S,
 		})
@@ -147,10 +151,11 @@ func CreateRds(c *cli.Context) {
 		c.String(fl.FlRdsURL.Name),
 		c.String(fl.FlRdsType.Name),
 		c.String(fl.FlRdsConnectorJarURLOptional.Name),
+		utils.DelimitedStringToArray(c.String(fl.FlEnvironmentsOptional.Name), ","),
 		nil)
 }
 
-func createRdsImpl(client rdsClient, workspaceID int64, name string, username string, password string, URL string, rdsType string, jarURL string, oracle *model.Oracle) {
+func createRdsImpl(client rdsClient, workspaceID int64, name string, username string, password string, URL string, rdsType string, jarURL string, environments []string, oracle *model.Oracle) {
 	defer utils.TimeTrack(time.Now(), "create database")
 	rdsRequest := &model.RdsConfig{
 		Name:               &name,
@@ -159,6 +164,7 @@ func createRdsImpl(client rdsClient, workspaceID int64, name string, username st
 		ConnectionURL:      &URL,
 		Type:               &rdsType,
 		ConnectorJarURL:    jarURL,
+		Environments:       environments,
 	}
 	if oracle != nil {
 		rdsRequest.Oracle = oracle
@@ -211,6 +217,7 @@ func DescribeRds(c *cli.Context) {
 			DatabaseEngine: *r.DatabaseEngine,
 			Type:           getEmptyIfNil(r.Type),
 			Driver:         getEmptyIfNil(r.ConnectionDriver),
+			Environments:   r.Environments,
 		}, strconv.FormatInt(r.ID, 10)})
 
 }
@@ -275,6 +282,7 @@ func listAllRdsImpl(rdsClient rdsClient, writer func([]string, []utils.Row), wor
 			DatabaseEngine: *r.DatabaseEngine,
 			Type:           getEmptyIfNil(r.Type),
 			Driver:         getEmptyIfNil(r.ConnectionDriver),
+			Environments:   r.Environments,
 		}
 		tableRows = append(tableRows, row)
 	}

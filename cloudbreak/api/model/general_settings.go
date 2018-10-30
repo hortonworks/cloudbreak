@@ -19,8 +19,10 @@ import (
 type GeneralSettings struct {
 
 	// credential resource name for the stack
-	// Required: true
-	CredentialName *string `json:"credentialName"`
+	CredentialName string `json:"credentialName,omitempty"`
+
+	// environment where the stack will be created
+	EnvironmentName string `json:"environmentName,omitempty"`
 
 	// name of the stack
 	// Required: true
@@ -32,16 +34,13 @@ type GeneralSettings struct {
 
 /* polymorph GeneralSettings credentialName false */
 
+/* polymorph GeneralSettings environmentName false */
+
 /* polymorph GeneralSettings name false */
 
 // Validate validates this general settings
 func (m *GeneralSettings) Validate(formats strfmt.Registry) error {
 	var res []error
-
-	if err := m.validateCredentialName(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
 
 	if err := m.validateName(formats); err != nil {
 		// prop
@@ -51,15 +50,6 @@ func (m *GeneralSettings) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-func (m *GeneralSettings) validateCredentialName(formats strfmt.Registry) error {
-
-	if err := validate.Required("credentialName", "body", m.CredentialName); err != nil {
-		return err
-	}
-
 	return nil
 }
 

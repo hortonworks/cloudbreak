@@ -11,6 +11,7 @@ import (
 	fl "github.com/hortonworks/cb-cli/cloudbreak/flags"
 	"github.com/hortonworks/cb-cli/utils"
 	"github.com/urfave/cli"
+	"strings"
 )
 
 type proxyClient interface {
@@ -18,18 +19,19 @@ type proxyClient interface {
 	ListProxyconfigsByWorkspace(params *proxyConfig.ListProxyconfigsByWorkspaceParams) (*proxyConfig.ListProxyconfigsByWorkspaceOK, error)
 }
 
-var ProxyHeader = []string{"Name", "Host", "Port", "Protocol", "User"}
+var ProxyHeader = []string{"Name", "Host", "Port", "Protocol", "User", "Environments"}
 
 type proxy struct {
-	Name     string `json:"Name" yaml:"Name"`
-	Host     string `json:"Host" yaml:"Host"`
-	Port     string `json:"Port" yaml:"Port"`
-	Protocol string `json:"Protocol" yaml:"Protocol"`
-	User     string `json:"User" yaml:"User"`
+	Name         string `json:"Name" yaml:"Name"`
+	Host         string `json:"Host" yaml:"Host"`
+	Port         string `json:"Port" yaml:"Port"`
+	Protocol     string `json:"Protocol" yaml:"Protocol"`
+	User         string `json:"User" yaml:"User"`
+	Environments []string
 }
 
 func (p *proxy) DataAsStringArray() []string {
-	return []string{p.Name, p.Host, p.Port, p.Protocol, p.User}
+	return []string{p.Name, p.Host, p.Port, p.Protocol, p.User, strings.Join(p.Environments, ",")}
 }
 
 func CreateProxy(c *cli.Context) error {
@@ -42,6 +44,7 @@ func CreateProxy(c *cli.Context) error {
 	protocol := c.String(fl.FlProxyProtocol.Name)
 	user := c.String(fl.FlProxyUser.Name)
 	password := c.String(fl.FlProxyPassword.Name)
+	environments := utils.DelimitedStringToArray(c.String(fl.FlEnvironmentsOptional.Name), ",")
 
 	if protocol != "http" && protocol != "https" {
 		utils.LogErrorMessageAndExit("Proxy protocol must be either http or https")
@@ -50,17 +53,18 @@ func CreateProxy(c *cli.Context) error {
 
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
 
-	return createProxy(cbClient.Cloudbreak.V3WorkspaceIDProxyconfigs, workspaceID, name, host, int32(serverPort), protocol, user, password)
+	return createProxy(cbClient.Cloudbreak.V3WorkspaceIDProxyconfigs, workspaceID, name, host, int32(serverPort), protocol, user, password, environments)
 }
 
-func createProxy(proxyClient proxyClient, workspaceID int64, name, host string, port int32, protocol, user, password string) error {
+func createProxy(proxyClient proxyClient, workspaceID int64, name, host string, port int32, protocol, user, password string, environments []string) error {
 	proxyRequest := &model.ProxyConfigRequest{
-		Name:       &name,
-		ServerHost: &host,
-		ServerPort: &port,
-		Protocol:   &protocol,
-		UserName:   user,
-		Password:   password,
+		Name:         &name,
+		ServerHost:   &host,
+		ServerPort:   &port,
+		Protocol:     &protocol,
+		UserName:     user,
+		Password:     password,
+		Environments: environments,
 	}
 
 	log.Infof("[createProxy] create proxy with name: %s", name)
@@ -130,11 +134,12 @@ func listProxiesImpl(proxyClient proxyClient, writer func([]string, []utils.Row)
 	var tableRows []utils.Row
 	for _, p := range resp.Payload {
 		row := &proxy{
-			Name:     *p.Name,
-			Host:     *p.ServerHost,
-			Port:     strconv.Itoa(int(*p.ServerPort)),
-			Protocol: *p.Protocol,
-			User:     p.UserName,
+			Name:         *p.Name,
+			Host:         *p.ServerHost,
+			Port:         strconv.Itoa(int(*p.ServerPort)),
+			Protocol:     *p.Protocol,
+			User:         p.UserName,
+			Environments: p.Environments,
 		}
 		tableRows = append(tableRows, row)
 	}

@@ -49,6 +49,10 @@ type DetailedEnvironmentResponse struct {
 	// Unique: true
 	Regions []string `json:"regions"`
 
+	// Name of the workload clusters created in the environment.
+	// Unique: true
+	WorkloadClusters []string `json:"workloadClusters"`
+
 	// workspace
 	Workspace *WorkspaceResourceResponse `json:"workspace,omitempty"`
 }
@@ -70,6 +74,8 @@ type DetailedEnvironmentResponse struct {
 /* polymorph DetailedEnvironmentResponse rdsConfigs false */
 
 /* polymorph DetailedEnvironmentResponse regions false */
+
+/* polymorph DetailedEnvironmentResponse workloadClusters false */
 
 /* polymorph DetailedEnvironmentResponse workspace false */
 
@@ -93,6 +99,11 @@ func (m *DetailedEnvironmentResponse) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateRegions(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateWorkloadClusters(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -154,6 +165,19 @@ func (m *DetailedEnvironmentResponse) validateRegions(formats strfmt.Registry) e
 	}
 
 	if err := validate.UniqueItems("regions", "body", m.Regions); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *DetailedEnvironmentResponse) validateWorkloadClusters(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.WorkloadClusters) { // not required
+		return nil
+	}
+
+	if err := validate.UniqueItems("workloadClusters", "body", m.WorkloadClusters); err != nil {
 		return err
 	}
 

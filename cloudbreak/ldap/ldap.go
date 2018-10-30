@@ -23,7 +23,7 @@ import (
 
 var LdapHeader = []string{"Name", "Server", "Domain", "BindDn", "DirectoryType",
 	"UserSearchBase", "UserDnPattern", "UserNameAttribute", "UserObjectClass",
-	"GroupMemberAttribute", "GroupNameAttribute", "GroupObjectClass", "GroupSearchBase"}
+	"GroupMemberAttribute", "GroupNameAttribute", "GroupObjectClass", "GroupSearchBase", "Environments"}
 
 type ldap struct {
 	Name                 string `json:"Name" yaml:"Name"`
@@ -40,6 +40,7 @@ type ldap struct {
 	GroupObjectClass     string `json:"GroupObjectClass,omitempty" yaml:"GroupObjectClass,omitempty"`
 	GroupSearchBase      string `json:"GroupSearchBase,omitempty" yaml:"GroupSearchBase,omitempty"`
 	AdminGroup           string `json:"AdminGroup,omitempty" yaml:"AdminGroup,omitempty"`
+	Environments         []string
 }
 
 type ldapOutDescribe struct {
@@ -49,7 +50,7 @@ type ldapOutDescribe struct {
 
 func (l *ldap) DataAsStringArray() []string {
 	return []string{l.Name, l.Server, l.Domain, l.BindDn, l.DirectoryType, l.UserSearchBase, l.UserDnPattern, l.UserNameAttribute,
-		l.UserObjectClass, l.GroupMemberAttribute, l.GroupNameAttribute, l.GroupObjectClass, l.GroupSearchBase}
+		l.UserObjectClass, l.GroupMemberAttribute, l.GroupNameAttribute, l.GroupObjectClass, l.GroupSearchBase, strings.Join(l.Environments, ",")}
 }
 
 func (l *ldapOutDescribe) DataAsStringArray() []string {
@@ -104,6 +105,8 @@ func CreateLDAP(c *cli.Context) error {
 
 	server := c.String(fl.FlLdapServer.Name)
 
+	environments := utils.DelimitedStringToArray(c.String(fl.FlEnvironmentsOptional.Name), ",")
+
 	ldapRegexp := regexp.MustCompile("^(?:ldap://|ldaps://)[a-z0-9-.]+:\\d+$")
 	if !ldapRegexp.MatchString(server) {
 		utils.LogErrorMessageAndExit("Invalid ldap server address format, e.g: ldaps://10.0.0.1:389")
@@ -117,12 +120,12 @@ func CreateLDAP(c *cli.Context) error {
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
 
 	return createLDAPImpl(cbClient.Cloudbreak.V3WorkspaceIDLdapconfigs, int32(serverPort), workspaceID, name, server, protocol, domain, bindDn, bindPassword, directoryType,
-		userSearchBase, userDnPattern, userNameAttribute, userObjectClass, groupSearchBase, groupMemberAttribute, groupNameAttribute, groupObjectClass, adminGroup)
+		userSearchBase, userDnPattern, userNameAttribute, userObjectClass, groupSearchBase, groupMemberAttribute, groupNameAttribute, groupObjectClass, adminGroup, environments)
 }
 
 func createLDAPImpl(ldapClient ldapClient, port int32, workspaceID int64, name, server, protocol, domain, bindDn, bindPassword, directoryType,
 	userSearchBase, userDnPattern, userNameAttribute, userObjectClass, groupSearchBase, groupMemberAttribute, groupNameAttribute,
-	groupObjectClass, adminGroup string) error {
+	groupObjectClass, adminGroup string, environments []string) error {
 	defer utils.TimeTrack(time.Now(), "create ldap")
 
 	host := server[strings.LastIndex(server, "/")+1 : strings.LastIndex(server, ":")]
@@ -144,6 +147,7 @@ func createLDAPImpl(ldapClient ldapClient, port int32, workspaceID int64, name, 
 		GroupObjectClass:     groupObjectClass,
 		GroupSearchBase:      groupSearchBase,
 		AdminGroup:           adminGroup,
+		Environments:         environments,
 	}
 
 	log.Infof("[createLDAPImpl] create ldap with name: %s", name)
@@ -192,6 +196,7 @@ func listLdapsImpl(ldapClient ldapClient, writer func([]string, []utils.Row), wo
 			GroupObjectClass:     l.GroupObjectClass,
 			GroupSearchBase:      l.GroupSearchBase,
 			AdminGroup:           l.AdminGroup,
+			Environments:         l.Environments,
 		}
 		tableRows = append(tableRows, row)
 	}
@@ -246,6 +251,7 @@ func DescribeLdap(c *cli.Context) {
 			GroupObjectClass:     l.GroupObjectClass,
 			GroupSearchBase:      l.GroupSearchBase,
 			AdminGroup:           l.AdminGroup,
+			Environments:         l.Environments,
 		},
 		strconv.FormatInt(l.ID, 10)})
 }

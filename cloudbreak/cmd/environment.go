@@ -51,6 +51,18 @@ func init() {
 				},
 			},
 			{
+				Name:   "delete",
+				Usage:  "deletes an environment",
+				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlName).AddOutputFlag().AddAuthenticationFlags().Build(),
+				Before: cf.CheckConfigAndCommandFlags,
+				Action: env.DeleteEnvironment,
+				BashComplete: func(c *cli.Context) {
+					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlName).AddOutputFlag().AddAuthenticationFlags().Build() {
+						fl.PrintFlagCompletion(f)
+					}
+				},
+			},
+			{
 				Name:  "attach",
 				Usage: "attach resources to an environment (LDAP, RDS or Proxy)",
 				Flags: fl.NewFlagBuilder().AddFlags(fl.FlName,

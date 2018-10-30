@@ -133,7 +133,7 @@ func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string)
 		},
 		General: &model.GeneralSettings{
 			Name:           &(&types.S{S: ""}).S,
-			CredentialName: &(&types.S{S: "____"}).S,
+			CredentialName: "____",
 		},
 		Placement: &model.PlacementSettings{
 			Region:           getStringPointer(skippedFields, cloud.REGION_FIELD, "____"),
@@ -181,7 +181,7 @@ func generateAttachedTemplateImpl(stringFinder func(string) string, boolFinder f
 		attachedClusterTemplate := generateStackTemplateImpl(cloud.EXISTING_NETWORK_EXISTING_SUBNET, stringFinder, boolFinder, int64Finder, getBlueprintClient, storageType)
 		attachedClusterTemplate.Placement.Region = &datalake.Region
 		attachedClusterTemplate.Placement.AvailabilityZone = datalake.AvailabilityZone
-		attachedClusterTemplate.General.CredentialName = datalake.Credential.Name
+		attachedClusterTemplate.General.CredentialName = *datalake.Credential.Name
 		attachedClusterTemplate.Network = cloud.GetProvider().GenerateNetworkRequestFromNetworkResponse(datalake.Network)
 		attachedClusterTemplate.Cluster.LdapConfigName = *datalake.Cluster.LdapConfig.Name
 		attachedClusterTemplate.Cluster.CloudStorage = generateCloudStorage(datalake.Cluster.FileSystemResponse)

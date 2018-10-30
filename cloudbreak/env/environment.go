@@ -127,7 +127,7 @@ func DescribeEnvironment(c *cli.Context) {
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
 	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
 	envName := c.String(fl.FlName.Name)
-	log.Infof("[DescribeEnvironment] describe environment config by name: %s", envName)
+	log.Infof("[DescribeEnvironment] describe environment by name: %s", envName)
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
 
 	resp, err := cbClient.Cloudbreak.V3WorkspaceIDEnvironments.Get(v3_workspace_id_environments.NewGetParams().WithWorkspaceID(workspaceID).WithName(envName))
@@ -139,6 +139,18 @@ func DescribeEnvironment(c *cli.Context) {
 		output.Write(append(EnvironmentHeader, "Ldaps", "Proxies", "Rds", "ID"), convertResponseToJsonOutput(env))
 	} else {
 		output.Write(append(EnvironmentHeader, "ID"), convertResponseToTableOutput(env))
+	}
+}
+
+func DeleteEnvironment(c *cli.Context) {
+	defer utils.TimeTrack(time.Now(), "delete an environment")
+	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
+	envName := c.String(fl.FlName.Name)
+	log.Infof("[DeleteEnvironment] delete environment by name: %s", envName)
+	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
+	_, err := cbClient.Cloudbreak.V3WorkspaceIDEnvironments.Delete(v3_workspace_id_environments.NewDeleteParams().WithWorkspaceID(workspaceID).WithName(envName))
+	if err != nil {
+		utils.LogErrorAndExit(err)
 	}
 }
 

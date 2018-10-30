@@ -42,7 +42,7 @@ func TestListRdsImpl(t *testing.T) {
 		t.Fatalf("row number doesn't match 1 == %d", len(rows))
 	}
 	for _, r := range rows {
-		expected := "test connectionURL databaseEngine type "
+		expected := "test connectionURL databaseEngine type  "
 		if strings.Join(r.DataAsStringArray(), " ") != expected {
 			t.Errorf("row data not match %s == %s", expected, strings.Join(r.DataAsStringArray(), " "))
 		}

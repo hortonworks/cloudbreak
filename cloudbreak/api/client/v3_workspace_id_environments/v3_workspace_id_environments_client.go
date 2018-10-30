@@ -85,6 +85,36 @@ func (a *Client) Create(params *CreateParams) (*CreateOK, error) {
 }
 
 /*
+Delete deletes an environment only possible if no cluster is running in the environment
+
+Environment consists of a credential and various other resources and enables users to quickly create clusters in given regions in a given cloud provider.
+*/
+func (a *Client) Delete(params *DeleteParams) (*DeleteOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewDeleteParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "delete",
+		Method:             "DELETE",
+		PathPattern:        "/v3/{workspaceId}/environments/{name}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &DeleteReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*DeleteOK), nil
+
+}
+
+/*
 DetachResources detaches resources from an environment
 
 Environment consists of a credential and various other resources and enables users to quickly create clusters in given regions in a given cloud provider.

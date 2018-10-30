@@ -21,6 +21,9 @@ type SimpleEnvironmentResponse struct {
 	// Cloud platform of the environment.
 	CloudPlatform string `json:"cloudPlatform,omitempty"`
 
+	// Name of the credential of the environment.
+	CredentialName string `json:"credentialName,omitempty"`
+
 	// description of the resource
 	Description string `json:"description,omitempty"`
 
@@ -39,6 +42,8 @@ type SimpleEnvironmentResponse struct {
 }
 
 /* polymorph SimpleEnvironmentResponse cloudPlatform false */
+
+/* polymorph SimpleEnvironmentResponse credentialName false */
 
 /* polymorph SimpleEnvironmentResponse description false */
 

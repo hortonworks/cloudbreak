@@ -38,6 +38,9 @@ type StackValidationRequest struct {
 	// credential resource name for the stack
 	CredentialName string `json:"credentialName,omitempty"`
 
+	// environment where the stack will be created
+	Environment string `json:"environment,omitempty"`
+
 	// cluster related filesystem
 	FileSystem *FileSystem `json:"fileSystem,omitempty"`
 
@@ -73,6 +76,8 @@ type StackValidationRequest struct {
 /* polymorph StackValidationRequest credentialId false */
 
 /* polymorph StackValidationRequest credentialName false */
+
+/* polymorph StackValidationRequest environment false */
 
 /* polymorph StackValidationRequest fileSystem false */
 

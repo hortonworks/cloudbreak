@@ -63,6 +63,10 @@ for the list rds configs by workspace operation typically these are written to a
 */
 type ListRdsConfigsByWorkspaceParams struct {
 
+	/*AttachGlobal*/
+	AttachGlobal *bool
+	/*Environment*/
+	Environment *string
 	/*WorkspaceID*/
 	WorkspaceID int64
 
@@ -104,6 +108,28 @@ func (o *ListRdsConfigsByWorkspaceParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithAttachGlobal adds the attachGlobal to the list rds configs by workspace params
+func (o *ListRdsConfigsByWorkspaceParams) WithAttachGlobal(attachGlobal *bool) *ListRdsConfigsByWorkspaceParams {
+	o.SetAttachGlobal(attachGlobal)
+	return o
+}
+
+// SetAttachGlobal adds the attachGlobal to the list rds configs by workspace params
+func (o *ListRdsConfigsByWorkspaceParams) SetAttachGlobal(attachGlobal *bool) {
+	o.AttachGlobal = attachGlobal
+}
+
+// WithEnvironment adds the environment to the list rds configs by workspace params
+func (o *ListRdsConfigsByWorkspaceParams) WithEnvironment(environment *string) *ListRdsConfigsByWorkspaceParams {
+	o.SetEnvironment(environment)
+	return o
+}
+
+// SetEnvironment adds the environment to the list rds configs by workspace params
+func (o *ListRdsConfigsByWorkspaceParams) SetEnvironment(environment *string) {
+	o.Environment = environment
+}
+
 // WithWorkspaceID adds the workspaceID to the list rds configs by workspace params
 func (o *ListRdsConfigsByWorkspaceParams) WithWorkspaceID(workspaceID int64) *ListRdsConfigsByWorkspaceParams {
 	o.SetWorkspaceID(workspaceID)
@@ -122,6 +148,38 @@ func (o *ListRdsConfigsByWorkspaceParams) WriteToRequest(r runtime.ClientRequest
 		return err
 	}
 	var res []error
+
+	if o.AttachGlobal != nil {
+
+		// query param attachGlobal
+		var qrAttachGlobal bool
+		if o.AttachGlobal != nil {
+			qrAttachGlobal = *o.AttachGlobal
+		}
+		qAttachGlobal := swag.FormatBool(qrAttachGlobal)
+		if qAttachGlobal != "" {
+			if err := r.SetQueryParam("attachGlobal", qAttachGlobal); err != nil {
+				return err
+			}
+		}
+
+	}
+
+	if o.Environment != nil {
+
+		// query param environment
+		var qrEnvironment string
+		if o.Environment != nil {
+			qrEnvironment = *o.Environment
+		}
+		qEnvironment := qrEnvironment
+		if qEnvironment != "" {
+			if err := r.SetQueryParam("environment", qEnvironment); err != nil {
+				return err
+			}
+		}
+
+	}
 
 	// path param workspaceId
 	if err := r.SetPathParam("workspaceId", swag.FormatInt64(o.WorkspaceID)); err != nil {

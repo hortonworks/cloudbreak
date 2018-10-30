@@ -940,6 +940,13 @@ var (
 			Usage: "environment names to be used for attaching, detaching resources",
 		},
 	}
+	FlEnvironmentsOptional = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name:  "environments",
+			Usage: "names of environments in which the created resource should be attached during the creation",
+		},
+	}
 )
 
 type RequiredFlag struct {
