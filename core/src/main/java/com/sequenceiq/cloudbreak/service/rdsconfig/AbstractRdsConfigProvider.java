@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -59,6 +60,7 @@ public abstract class AbstractRdsConfigProvider {
 
     public Set<RDSConfig> createPostgresRdsConfigIfNeeded(Stack stack, Cluster cluster) {
         Set<RDSConfig> rdsConfigs = rdsConfigRepository.findByClusterId(cluster.getId());
+        rdsConfigs = rdsConfigs.stream().map(c -> rdsConfigService.resolveVaultValues(c)).collect(Collectors.toSet());
         if (isRdsConfigNeeded(cluster.getBlueprint())
                 && rdsConfigs.stream().noneMatch(rdsConfig -> rdsConfig.getType().equalsIgnoreCase(getRdsType().name()))) {
             LOGGER.info("Creating postgres RDSConfig for {}", getRdsType().name());

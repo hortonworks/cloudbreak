@@ -25,7 +25,7 @@ public class RDSConfigToRDSConfigRequestConverter extends AbstractConversionServ
         RDSConfigRequest rdsConfigRequest = new RDSConfigRequest();
         rdsConfigRequest.setName(source.getName());
         rdsConfigRequest.setConnectorJarUrl(source.getConnectorJarUrl());
-        rdsConfigRequest.setConnectionUserName(source.getConnectionUserName());
+        rdsConfigRequest.setConnectionUserName("fake-username");
         rdsConfigRequest.setConnectionPassword("fake-password");
         rdsConfigRequest.setConnectionURL(source.getConnectionURL());
         rdsConfigRequest.setType(source.getType());
