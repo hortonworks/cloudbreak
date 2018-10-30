@@ -2485,6 +2485,7 @@
             "maximumNumber": 24
           }, 
           {
+            "minimumSize": 0,
             "minimumNumber": 0, 
             "volumeParameterType": "EPHEMERAL", 
             "maximumSize": 0, 
@@ -2504,17 +2505,31 @@
       "meta": {
         "configs": [
           {
-            "minimumSize": 500, 
-            "minimumNumber": 1, 
-            "volumeParameterType": "ST1", 
-            "maximumSize": 17592, 
+            "minimumSize": 1,
+            "minimumNumber": 1,
+            "volumeParameterType": "MAGNETIC",
+            "maximumSize": 1024,
             "maximumNumber": 24
-          }, 
+          },
           {
-            "minimumSize": 0, 
-            "minimumNumber": 0, 
-            "volumeParameterType": "EPHEMERAL", 
-            "maximumSize": 0, 
+            "minimumSize": 1,
+            "minimumNumber": 1,
+            "volumeParameterType": "SSD",
+            "maximumSize": 17592,
+            "maximumNumber": 24
+          },
+          {
+            "minimumSize": 500,
+            "minimumNumber": 1,
+            "volumeParameterType": "ST1",
+            "maximumSize": 17592,
+            "maximumNumber": 24
+          },
+          {
+            "minimumSize": 0,
+            "minimumNumber": 0,
+            "volumeParameterType": "EPHEMERAL",
+            "maximumSize": 0,
             "maximumNumber": 0
           }
         ], 
