@@ -126,6 +126,17 @@ knox-create-sign-jks:
 
 {% endif %}
 
+{% if salt['pillar.get']('gateway:kerberos') is defined and salt['pillar.get']('gateway:kerberos') == True %}
+
+/etc/knox/conf/krb5JAASLogin.conf:
+  file.managed:
+    - source: salt://gateway/config/krb5JAASLogin.conf.j2
+    - template: jinja
+    - user: knox
+    - group: knox
+
+{% endif %}
+
 /usr/{{ ambari.stack_type }}/current/knox-server/conf/gateway-site.xml:
   file.managed:
     - source: salt://gateway/config/gateway-site.xml.j2
