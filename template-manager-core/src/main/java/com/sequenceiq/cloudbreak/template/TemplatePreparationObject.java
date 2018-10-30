@@ -213,8 +213,8 @@ public class TemplatePreparationObject {
             return this;
         }
 
-        public Builder withLdapConfig(LdapConfig ldapConfig, String bindPassword) {
-            this.ldapConfig = ldapConfig != null ? Optional.of(new LdapView(ldapConfig, bindPassword)) : Optional.empty();
+        public Builder withLdapConfig(LdapConfig ldapConfig, String bindDn, String bindPassword) {
+            this.ldapConfig = ldapConfig != null ? Optional.of(new LdapView(ldapConfig, bindDn, bindPassword)) : Optional.empty();
             return this;
         }
 

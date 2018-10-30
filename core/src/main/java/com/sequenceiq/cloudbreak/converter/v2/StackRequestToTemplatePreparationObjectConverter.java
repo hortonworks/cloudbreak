@@ -132,6 +132,12 @@ public class StackRequestToTemplatePreparationObjectConverter extends AbstractCo
             BlueprintView blueprintView = new BlueprintView(blueprint.getBlueprintText(), blueprintStackInfo.getVersion(), blueprintStackInfo.getType());
             GeneralClusterConfigs generalClusterConfigs = generalClusterConfigsProvider.generalClusterConfigs(source, user,
                     restRequestThreadLocalService.getCloudbreakUser().getUsername());
+            String bindDn = null;
+            String bindPassword = null;
+            if (ldapConfig != null) {
+                bindDn = vaultService.resolveSingleValue(ldapConfig.getBindDn());
+                bindPassword = vaultService.resolveSingleValue(ldapConfig.getBindPassword());
+            }
             Builder builder = Builder.builder()
                     .withFlexSubscription(flexSubscription.orElse(null))
                     .withRdsConfigs(rdsConfigs)
@@ -142,7 +148,7 @@ public class StackRequestToTemplatePreparationObjectConverter extends AbstractCo
                     .withFileSystemConfigurationView(fileSystemConfigurationView)
                     .withGeneralClusterConfigs(generalClusterConfigs)
                     .withSmartSenseSubscription(smartsenseSubscription)
-                    .withLdapConfig(ldapConfig, ldapConfig == null ? "" : vaultService.resolveSingleValue(ldapConfig.getBindPassword()))
+                    .withLdapConfig(ldapConfig, bindDn, bindPassword)
                     .withKerberosConfig(kerberosConfig);
 
             SharedServiceRequest sharedService = source.getCluster().getSharedService();
