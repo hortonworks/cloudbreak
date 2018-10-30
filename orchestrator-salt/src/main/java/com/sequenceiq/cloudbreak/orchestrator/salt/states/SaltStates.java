@@ -95,7 +95,8 @@ public class SaltStates {
             logRunnerInfos(stringMapEntry);
             for (RunnerInfo targetObject : stringMapEntry.getValue()) {
                 if (!targetObject.getResult()) {
-                    LOGGER.error("SaltStates: State id: {} job state has failed. {}", targetObject.getStateId(), targetObject.getComment());
+                    LOGGER.error("SaltStates: State id: {} job state has failed. Name: {} Reason: {}", targetObject.getStateId(), targetObject.getName(),
+                            targetObject.getComment());
                     missingTargetsWithErrors.put(stringMapEntry.getKey(), targetObject.getErrorResultSummary());
                 }
             }

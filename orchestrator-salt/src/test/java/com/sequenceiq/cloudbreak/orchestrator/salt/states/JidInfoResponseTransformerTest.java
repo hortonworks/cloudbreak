@@ -57,7 +57,7 @@ public class JidInfoResponseTransformerTest {
         RunnerInfo noExtraInfo = res.get("host-10-0-0-6.openstacklocal").get(0);
         assertEquals("No changes needed to be made", noExtraInfo.getComment());
         assertEquals("null", noExtraInfo.getStderr());
-        assertEquals("\nComment: No changes needed to be made", noExtraInfo.getErrorResultSummary());
+        assertEquals("\nName: /etc/hosts\nComment: No changes needed to be made", noExtraInfo.getErrorResultSummary());
     }
 }
 

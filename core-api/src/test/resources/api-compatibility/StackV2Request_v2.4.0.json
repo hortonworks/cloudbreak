@@ -123,7 +123,7 @@
       "validateBlueprint": false,
       "ambariStackDetails": {
         "stack": "string",
-        "version": "string",
+        "version": "2.6",
         "os": "string",
         "stackRepoId": "string",
         "stackBaseURL": "string",

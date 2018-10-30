@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.api.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.validation.constraints.Pattern;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -23,6 +25,8 @@ public class AmbariStackDetailsJson implements JsonEntity {
     private String stack;
 
     @ApiModelProperty(AmbariStackDetailsDescription.VERSION)
+    @Pattern(regexp = "(^[0-9]+\\.[0-9]+$)",
+            message = "Valid stack version is in MAJOR.MINOR format eg.: 2.6")
     private String version;
 
     @ApiModelProperty(AmbariStackDetailsDescription.OS)
