@@ -18,7 +18,7 @@ else
   SCOPE=patch
 fi
 
-./gradlew -Penv=jenkins -b build.gradle clean build uploadArchives -Preckon.scope=$SCOPE -Preckon.stage=final --refresh-dependencies --info --stacktrace --parallel
+./gradlew -Penv=jenkins -b build.gradle build uploadArchives -Preckon.scope=$SCOPE -Preckon.stage=final --refresh-dependencies --info --stacktrace --parallel -x checkstyleMain -x checkstyleTest -x findbugsMain -x findbugsTest
 RECKONED_VERSION=$(./gradlew -Penv=jenkins -b build.gradle buildInfo -Preckon.scope=$SCOPE -Preckon.stage=final | grep Reckoned)
 VERSION=${RECKONED_VERSION#Reckoned version: }
 
