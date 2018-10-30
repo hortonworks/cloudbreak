@@ -7,8 +7,20 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel("ProxyConfigRequest")
 public class ProxyConfigRequest extends ProxyConfigBase {
+
+    @ApiModelProperty(ProxyConfigModelDescription.USERNAME)
+    private String userName;
+
     @ApiModelProperty(ProxyConfigModelDescription.PASSWORD)
     private String password;
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
 
     public String getPassword() {
         return password;
