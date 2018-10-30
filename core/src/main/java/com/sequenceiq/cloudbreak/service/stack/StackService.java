@@ -58,6 +58,7 @@ import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
+import com.sequenceiq.cloudbreak.domain.environment.Environment;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -205,6 +206,10 @@ public class StackService {
 
     public Long countByOwner(String owner) {
         return stackRepository.countActiveByOwner(owner);
+    }
+
+    public Long countAliveByEnvironment(Environment environment) {
+        return stackRepository.countAliveOnesByWorkspaceAndEnvironment(environment.getWorkspace().getId(), environment.getId());
     }
 
     public Set<StackResponse> retrieveStacksByWorkspaceId(Long workspaceId) {

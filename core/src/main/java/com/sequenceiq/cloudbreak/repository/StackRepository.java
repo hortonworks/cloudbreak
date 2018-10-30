@@ -128,6 +128,11 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
             + "AND s.stackStatus.status <> 'DELETE_COMPLETED'")
     Long countStacksWithNoWorkspaceOrCreator();
 
+    @CheckPermissionsByWorkspaceId
+    @Query("SELECT COUNT(s) FROM Stack s WHERE s.workspace.id = :workspaceId AND s.environment.id = :environmentId "
+            + "AND s.stackStatus.status <> 'DELETE_COMPLETED'")
+    Long countAliveOnesByWorkspaceAndEnvironment(@Param("workspaceId") Long workspaceId, @Param("environmentId") Long environmentId);
+
     @DisableCheckPermissions
     @Query("SELECT COUNT(s) FROM Stack s WHERE s.account = :account AND s.stackStatus.status <> 'DELETE_COMPLETED'")
     Long countActiveByAccount(@Param("account") String account);

@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 import reactor.fn.tuple.Tuple;
 
@@ -64,6 +65,9 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
     private EnvironmentViewService environmentViewService;
 
     @Inject
+    private StackService stackService;
+
+    @Inject
     private EnvironmentRepository environmentRepository;
 
     @Inject
@@ -78,6 +82,21 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
 
     public DetailedEnvironmentResponse get(String environmentName, Long workspaceId) {
         return conversionService.convert(getByNameForWorkspaceId(environmentName, workspaceId), DetailedEnvironmentResponse.class);
+    }
+
+    @Override
+    protected void prepareDeletion(Environment environment) {
+        Long alive = stackService.countAliveByEnvironment(environment);
+        if (alive > 0) {
+            throw new BadRequestException("Cannot delete environment. "
+                    + "All clusters must be terminated before environment deletion. Alive clusters: " + alive);
+        }
+    }
+
+    public DetailedEnvironmentResponse delete(String environmentName, Long workspaceId) {
+        Environment environment = getByNameForWorkspaceId(environmentName, workspaceId);
+        delete(environment);
+        return conversionService.convert(environment, DetailedEnvironmentResponse.class);
     }
 
     public DetailedEnvironmentResponse createForLoggedInUser(EnvironmentRequest request, @Nonnull Long workspaceId) {
@@ -153,11 +172,6 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
     @Override
     protected WorkspaceResourceRepository<Environment, Long> repository() {
         return environmentRepository;
-    }
-
-    @Override
-    protected void prepareDeletion(Environment resource) {
-
     }
 
     @Override

@@ -58,6 +58,11 @@ public class EnvironmentV3Controller implements EnvironmentV3Endpoint {
     }
 
     @Override
+    public DetailedEnvironmentResponse delete(Long workspaceId, String environmentName) {
+        return environmentService.delete(environmentName, workspaceId);
+    }
+
+    @Override
     public DetailedEnvironmentResponse attachResources(Long workspaceId, String environmentName, @Valid EnvironmentAttachRequest request) {
         return environmentService.attachResources(environmentName, request, workspaceId);
     }
