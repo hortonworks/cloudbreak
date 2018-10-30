@@ -48,9 +48,6 @@ public abstract class ProxyConfigBase implements JsonEntity {
     @ApiModelProperty(value = ProxyConfigModelDescription.PROTOCOL, required = true)
     private String protocol;
 
-    @ApiModelProperty(ProxyConfigModelDescription.USERNAME)
-    private String userName;
-
     @ApiModelProperty(ModelDescriptions.ENVIRONMENTS)
     private Set<String> environments = new HashSet<>();
 
@@ -84,14 +81,6 @@ public abstract class ProxyConfigBase implements JsonEntity {
 
     public void setProtocol(String protocol) {
         this.protocol = protocol;
-    }
-
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
     }
 
     public String getDescription() {
