@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 
@@ -26,6 +27,7 @@ import com.sequenceiq.cloudbreak.blueprint.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.service.VaultService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AmbariClusterTemplateGeneratorTest {
@@ -41,6 +43,9 @@ public class AmbariClusterTemplateGeneratorTest {
 
     @Mock
     private ClusterService ambariClient;
+
+    @Mock
+    private VaultService vaultService;
 
     @Before
     public void init() {
@@ -72,6 +77,7 @@ public class AmbariClusterTemplateGeneratorTest {
         kerberosConfig.setPassword("KerberosPassword");
         cluster.setKerberosConfig(kerberosConfig);
         given(kerberosDetailService.resolvePrincipalForKerberos(any())).willReturn("principal");
+        when(vaultService.resolveSingleValue("KerberosPassword")).thenReturn("KerberosPassword");
 
         // WHEN
         underTest.generateClusterTemplate(cluster, new HashMap<>(), ambariClient);
