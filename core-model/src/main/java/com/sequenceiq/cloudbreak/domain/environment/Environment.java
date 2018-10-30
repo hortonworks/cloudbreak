@@ -19,17 +19,18 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.domain.json.JsonStringSetUtils;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name"}))
@@ -128,12 +129,8 @@ public class Environment implements WorkspaceAwareResource {
         this.regions = regions;
     }
 
-    public Set<String> getRegionsSet() {
-        return JsonStringSetUtils.jsonToStringSet(regions);
-    }
-
-    public void setRegionsSet(Set<String> regions) {
-        this.regions = JsonStringSetUtils.stringSetToJson(regions);
+    public Set<Region> getRegionSet() {
+        return regions == null ? Set.of() : JsonUtil.jsonToType(regions.getValue(), new TypeReference<Set<Region>>() { });
     }
 
     public Set<LdapConfig> getLdapConfigs() {

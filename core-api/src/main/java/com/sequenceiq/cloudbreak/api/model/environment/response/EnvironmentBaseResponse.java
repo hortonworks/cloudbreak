@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.api.model.environment.response;
 
-import java.util.Set;
-
+import com.sequenceiq.cloudbreak.api.model.CompactRegionResponse;
 import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.EnvironmentResponseModelDescription;
@@ -21,7 +20,7 @@ public abstract class EnvironmentBaseResponse {
     private String description;
 
     @ApiModelProperty(EnvironmentResponseModelDescription.REGIONS)
-    private Set<String> regions;
+    private CompactRegionResponse regions;
 
     @ApiModelProperty(EnvironmentResponseModelDescription.CLOUD_PLATFORM)
     private String cloudPlatform;
@@ -55,11 +54,11 @@ public abstract class EnvironmentBaseResponse {
         this.description = description;
     }
 
-    public Set<String> getRegions() {
+    public CompactRegionResponse getRegions() {
         return regions;
     }
 
-    public void setRegions(Set<String> regions) {
+    public void setRegions(CompactRegionResponse regions) {
         this.regions = regions;
     }
 

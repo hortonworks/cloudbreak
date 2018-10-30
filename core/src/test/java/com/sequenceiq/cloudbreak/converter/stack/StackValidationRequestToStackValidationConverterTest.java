@@ -13,7 +13,9 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -30,10 +32,12 @@ import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
+import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentViewService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.user.UserService;
@@ -41,6 +45,8 @@ import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StackValidationRequestToStackValidationConverterTest {
+    @Rule
+    public ExpectedException expectedEx = ExpectedException.none();
 
     @Mock
     private BlueprintService blueprintService;
@@ -68,6 +74,9 @@ public class StackValidationRequestToStackValidationConverterTest {
 
     @Mock
     private RestRequestThreadLocalService restRequestThreadLocalService;
+
+    @Mock
+    private EnvironmentViewService environmentViewService;
 
     @InjectMocks
     private StackValidationRequestToStackValidationConverter underTest;
@@ -172,6 +181,41 @@ public class StackValidationRequestToStackValidationConverterTest {
         StackValidation result = underTest.convert(validationRequest);
 
         assertEquals(bpName, result.getBlueprint().getName());
+    }
+
+    @Test
+    public void convertShouldUseEnvironmentCredentialWhenItisGiven() {
+        // GIVEN
+        validationRequest.setNetworkId(442L);
+        validationRequest.setBlueprintName(bpName);
+        EnvironmentView environmentView = new EnvironmentView();
+        environmentView.setName("env");
+        environmentView.setCredential(credential);
+        validationRequest.setEnvironment(environmentView.getName());
+        Map<Platform, PlatformParameters> platformParametersMap = new HashMap<>();
+        platformParametersMap.put(Platform.platform("GCP"), parameters);
+        when(cloudParameterCache.getPlatformParameters()).thenReturn(platformParametersMap);
+        when(networkService.get(any())).thenReturn(TestUtil.network());
+        when(environmentViewService.getByNameForWorkspace(environmentView.getName(), workspace)).thenReturn(environmentView);
+        // WHEN
+        StackValidation actualResult = underTest.convert(validationRequest);
+        // THEN
+        assertEquals(credential, actualResult.getCredential());
+        assertEquals(environmentView, actualResult.getEnvironment());
+    }
+
+    @Test
+    public void convertShouldThrowAccessDeniedExceptinWhenNoEnvironmentAndCredentialAreGiven() {
+        // GIVEN
+        validationRequest.setNetworkId(442L);
+        validationRequest.setBlueprintName(bpName);
+        validationRequest.setCredentialId(null);
+        validationRequest.setCredential(null);
+        expectedEx.expect(BadRequestException.class);
+        expectedEx.expectMessage("Credential is not configured for the validation request!");
+        // WHEN
+        underTest.convert(validationRequest);
+        // THEN expected exception should be thrown
     }
 
     private void mockCredentialRelated() {

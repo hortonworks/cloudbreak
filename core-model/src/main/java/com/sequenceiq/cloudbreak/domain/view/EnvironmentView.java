@@ -10,11 +10,13 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.environment.Region;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.domain.json.JsonStringSetUtils;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Entity
 @Table(name = "Environment")
@@ -39,12 +41,8 @@ public class EnvironmentView extends CompactView {
         this.regions = regions;
     }
 
-    public Set<String> getRegionsSet() {
-        return JsonStringSetUtils.jsonToStringSet(regions);
-    }
-
-    public void setRegionsSet(Set<String> regions) {
-        this.regions = JsonStringSetUtils.stringSetToJson(regions);
+    public Set<Region> getRegionSet() {
+        return JsonUtil.jsonToType(regions.getValue(), new TypeReference<Set<Region>>() { });
     }
 
     public String getCloudPlatform() {

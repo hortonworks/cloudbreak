@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.environment;
 
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.environment.response.SimpleEnvironmentResponse;
@@ -9,13 +11,16 @@ import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 
 @Component
 public class EnvironmentViewToSimpleEnvironmentResponseConverter extends AbstractConversionServiceAwareConverter<EnvironmentView, SimpleEnvironmentResponse> {
+    @Inject
+    private RegionConverter regionConverter;
+
     @Override
     public SimpleEnvironmentResponse convert(EnvironmentView source) {
         SimpleEnvironmentResponse response = new SimpleEnvironmentResponse();
         response.setId(source.getId());
         response.setName(source.getName());
         response.setDescription(source.getDescription());
-        response.setRegions(source.getRegionsSet());
+        response.setRegions(regionConverter.convertRegions(source.getRegionSet()));
         response.setCloudPlatform(source.getCloudPlatform());
         response.setCredentialName(source.getCredential().getName());
         response.setWorkspace(getConversionService().convert(source.getWorkspace(), WorkspaceResourceResponse.class));

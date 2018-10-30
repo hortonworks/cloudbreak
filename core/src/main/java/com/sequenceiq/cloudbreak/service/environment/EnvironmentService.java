@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.service.environment;
 
 import static com.sequenceiq.cloudbreak.authorization.WorkspaceResource.ENVIRONMENT;
 
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -9,16 +11,18 @@ import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentAttachRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentDetachRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.response.DetailedEnvironmentResponse;
 import com.sequenceiq.cloudbreak.api.model.environment.response.SimpleEnvironmentResponse;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
@@ -26,19 +30,22 @@ import com.sequenceiq.cloudbreak.controller.validation.environment.EnvironmentAt
 import com.sequenceiq.cloudbreak.controller.validation.environment.EnvironmentCreationValidator;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
+import com.sequenceiq.cloudbreak.domain.PlatformResourceRequest;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.environment.Environment;
+import com.sequenceiq.cloudbreak.domain.environment.Region;
+import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.repository.environment.EnvironmentRepository;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
+import com.sequenceiq.cloudbreak.service.platform.PlatformParameterService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-
-import reactor.fn.tuple.Tuple;
+import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 
 @Service
 public class EnvironmentService extends AbstractWorkspaceAwareResourceService<Environment> {
@@ -74,6 +81,12 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
     @Named("conversionService")
     private ConversionService conversionService;
 
+    @Inject
+    private PlatformParameterService platformParameterService;
+
+    @Inject
+    private CloudParameterCache cloudParameterCache;
+
     public Set<SimpleEnvironmentResponse> listByWorkspaceId(Long workspaceId) {
         return environmentViewService.findAllByWorkspaceId(workspaceId).stream()
                 .map(env -> conversionService.convert(env, SimpleEnvironmentResponse.class))
@@ -105,7 +118,9 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
         environment.setProxyConfigs(proxyConfigService.findByNamesInWorkspace(request.getProxyConfigs(), workspaceId));
         environment.setRdsConfigs(rdsConfigService.findByNamesInWorkspace(request.getRdsConfigs(), workspaceId));
         setCredential(request, environment, workspaceId);
-        ValidationResult validationResult = environmentCreationValidator.validate(Tuple.of(environment, request));
+        boolean regionsSupported = cloudParameterCache.areRegionsSupported(environment.getCloudPlatform());
+        setRegions(environment, request, regionsSupported);
+        ValidationResult validationResult = environmentCreationValidator.validate(environment, request, regionsSupported);
         if (validationResult.hasError()) {
             throw new BadRequestException(validationResult.getFormattedErrors());
         }
@@ -113,9 +128,36 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
         return conversionService.convert(environment, DetailedEnvironmentResponse.class);
     }
 
+    private void setRegions(Environment environment, EnvironmentRequest environmentRequest, boolean regionsSupported) {
+        try {
+            if (regionsSupported) {
+                PlatformResourceRequest platformResourceRequest = new PlatformResourceRequest();
+                platformResourceRequest.setCredential(environment.getCredential());
+                platformResourceRequest.setCloudPlatform(environment.getCloudPlatform());
+                CloudRegions cloudRegions = platformParameterService.getRegionsByCredential(platformResourceRequest);
+                Set<Region> regionSet = new HashSet<>();
+                Map<com.sequenceiq.cloudbreak.cloud.model.Region, String> displayNames = cloudRegions.getDisplayNames();
+                for (com.sequenceiq.cloudbreak.cloud.model.Region r : cloudRegions.getCloudRegions().keySet()) {
+                    if (environmentRequest.getRegions().contains(r.getRegionName())) {
+                        Region region = new Region();
+                        region.setName(r.getRegionName());
+                        String displayName = displayNames.get(r);
+                        region.setDisplayName(StringUtils.isEmpty(displayName) ? r.getRegionName() : displayName);
+                        regionSet.add(region);
+                    }
+                }
+                environment.setRegions(new Json(regionSet));
+            } else {
+                environment.setRegions(new Json(new HashSet<>()));
+            }
+        } catch (JsonProcessingException e) {
+            throw new BadRequestException(e.getMessage());
+        }
+    }
+
     private void setCredential(EnvironmentRequest request, Environment environment, Long workspaceId) {
         Credential credential;
-        if (StringUtils.isNotEmpty(request.getCredentialName())) {
+        if (!StringUtils.isEmpty(request.getCredentialName())) {
             try {
                 credential = credentialService.getByNameForWorkspaceId(request.getCredentialName(), workspaceId);
             } catch (NotFoundException e) {

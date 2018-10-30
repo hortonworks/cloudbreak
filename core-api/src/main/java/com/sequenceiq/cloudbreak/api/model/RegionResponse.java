@@ -2,24 +2,17 @@ package com.sequenceiq.cloudbreak.api.model;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ConnectorModelDescription;
 
 import io.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RegionResponse implements JsonEntity {
-
-    @ApiModelProperty(ConnectorModelDescription.REGIONS)
-    private Set<String> regions;
-
-    @ApiModelProperty(ConnectorModelDescription.REGION_DISPLAYNAMES)
-    private Map<String, String> displayNames;
-
+public class RegionResponse extends CompactRegionResponse {
     @ApiModelProperty(ConnectorModelDescription.AVAILABILITY_ZONES)
     private  Map<String, Collection<String>> availabilityZones;
 
@@ -27,25 +20,17 @@ public class RegionResponse implements JsonEntity {
     private String defaultRegion;
 
     public RegionResponse() {
-        regions = new HashSet<>();
         availabilityZones = new HashMap<>();
-        displayNames = new HashMap<>();
     }
 
+    @JsonProperty("regions")
     public Set<String> getRegions() {
-        return regions;
+        return super.getRegions();
     }
 
+    @JsonProperty("regions")
     public void setRegions(Set<String> regions) {
-        this.regions = regions;
-    }
-
-    public Map<String, String> getDisplayNames() {
-        return displayNames;
-    }
-
-    public void setDisplayNames(Map<String, String> displayNames) {
-        this.displayNames = displayNames;
+        super.setRegions(regions);
     }
 
     public Map<String, Collection<String>> getAvailabilityZones() {

@@ -123,13 +123,15 @@ public class StackValidationRequestToStackValidationConverter extends AbstractCo
     private void validateEnvironment(StackValidationRequest stackValidationRequest, StackValidation stackValidation, Workspace workspace) {
         if (!StringUtils.isEmpty(stackValidationRequest.getEnvironment())) {
             EnvironmentView environment = environmentViewService.getByNameForWorkspace(stackValidationRequest.getEnvironment(), workspace);
-            stackValidation.setEnvironment(environmentViewService.getByNameForWorkspace(stackValidationRequest.getEnvironment(), workspace));
+            stackValidation.setEnvironment(environment);
             stackValidation.setCredential(environment.getCredential());
         }
     }
 
     private void validateCredential(StackValidationRequest stackValidationRequest, StackValidation stackValidation, Workspace workspace) {
-        if (stackValidationRequest.getCredentialId() != null) {
+        if (stackValidation.getCredential() != null) {
+            return;
+        } else if (stackValidationRequest.getCredentialId() != null) {
             Credential credential = credentialService.get(stackValidationRequest.getCredentialId(), workspace);
             stackValidation.setCredential(credential);
         } else if (stackValidationRequest.getCredentialName() != null) {

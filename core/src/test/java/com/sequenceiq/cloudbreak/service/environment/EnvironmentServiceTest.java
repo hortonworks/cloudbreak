@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.service.environment;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.eq;
@@ -11,11 +13,15 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -27,10 +33,13 @@ import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentDetachRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.response.DetailedEnvironmentResponse;
+import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
+import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.environment.EnvironmentCreationValidator;
 import com.sequenceiq.cloudbreak.converter.environment.EnvironmentToDetailedEnvironmentResponseConverter;
+import com.sequenceiq.cloudbreak.converter.environment.RegionConverter;
 import com.sequenceiq.cloudbreak.converter.users.WorkspaceToWorkspaceResourceResponseConverter;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
@@ -43,8 +52,10 @@ import com.sequenceiq.cloudbreak.repository.environment.EnvironmentRepository;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
+import com.sequenceiq.cloudbreak.service.platform.PlatformParameterService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
+import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
@@ -87,6 +98,15 @@ public class EnvironmentServiceTest {
     @Mock
     private EnvironmentRepository environmentRepository;
 
+    @Mock
+    private CloudParameterCache cloudParameterCache;
+
+    @Mock
+    private PlatformParameterService platformParameterService;
+
+    @Mock
+    private RegionConverter regionConverter;
+
     @InjectMocks
     private EnvironmentService environmentService;
 
@@ -104,14 +124,13 @@ public class EnvironmentServiceTest {
         when(ldapConfigService.findByNamesInWorkspace(anySet(), anyLong())).thenReturn(Collections.emptySet());
         when(rdsConfigService.findByNamesInWorkspace(anySet(), anyLong())).thenReturn(Collections.emptySet());
         when(proxyConfigService.findByNamesInWorkspace(anySet(), anyLong())).thenReturn(Collections.emptySet());
-        when(environmentCreationValidator.validate(any())).thenReturn(ValidationResult.builder().build());
+        when(environmentCreationValidator.validate(any(), any(), anyBoolean())).thenReturn(ValidationResult.builder().build());
         when(workspaceService.get(anyLong(), any())).thenReturn(workspace);
         when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(new CloudbreakUser("", "", ""));
         when(userService.getOrCreate(any())).thenReturn(new User());
         when(conversionService.convert(any(Environment.class), eq(DetailedEnvironmentResponse.class))).thenReturn(new DetailedEnvironmentResponse());
         when(workspaceService.get(anyLong(), any())).thenReturn(workspace);
         when(workspaceService.retrieveForUser(any())).thenReturn(Set.of(workspace));
-
     }
 
     @Test
@@ -124,6 +143,7 @@ public class EnvironmentServiceTest {
         credentialRequest.setName("IgnoredCredRequestName");
         environmentRequest.setCredential(credentialRequest);
 
+        when(cloudParameterCache.areRegionsSupported(any())).thenReturn(false);
         when(conversionService.convert(any(EnvironmentRequest.class), eq(Environment.class))).thenReturn(new Environment());
         when(environmentRepository.save(any(Environment.class))).thenReturn(new Environment());
         when(credentialService.getByNameForWorkspaceId(CREDENTIAL_NAME, WORKSPACE_ID)).thenReturn(new Credential());
@@ -142,6 +162,7 @@ public class EnvironmentServiceTest {
         credentialRequest.setName("CredRequestName");
         environmentRequest.setCredential(credentialRequest);
 
+        when(cloudParameterCache.areRegionsSupported(any())).thenReturn(false);
         when(conversionService.convert(any(EnvironmentRequest.class), eq(Environment.class))).thenReturn(new Environment());
         when(environmentRepository.save(any(Environment.class))).thenReturn(new Environment());
         when(credentialService.createForLoggedInUser(any(), anyLong())).thenReturn(new Credential());
@@ -150,6 +171,42 @@ public class EnvironmentServiceTest {
         DetailedEnvironmentResponse response = environmentService.createForLoggedInUser(environmentRequest, WORKSPACE_ID);
 
         assertNotNull(response);
+    }
+
+    @Test
+    public void testCreateWithRegions() {
+        // GIVEN
+        EnvironmentRequest environmentRequest = new EnvironmentRequest();
+        environmentRequest.setName(ENVIRONMENT_NAME);
+
+        environmentRequest.setCredentialName(CREDENTIAL_NAME);
+        CredentialRequest credentialRequest = new CredentialRequest();
+        credentialRequest.setName("IgnoredCredRequestName");
+        environmentRequest.setCredential(credentialRequest);
+        environmentRequest.setRegions(Set.of("region1", "region2"));
+
+        when(conversionService.convert(any(EnvironmentRequest.class), eq(Environment.class))).thenReturn(new Environment());
+        ArgumentCaptor<Environment> envCaptor = ArgumentCaptor.forClass(Environment.class);
+        when(environmentRepository.save(envCaptor.capture())).thenReturn(new Environment());
+        when(credentialService.getByNameForWorkspaceId(CREDENTIAL_NAME, WORKSPACE_ID)).thenReturn(new Credential());
+
+        CloudRegions cloudRegions = new CloudRegions();
+        cloudRegions.setCloudRegions(Map.of(Region.region("region1"), List.of(), Region.region("region2"), List.of()));
+        cloudRegions.setDisplayNames(Map.of(Region.region("region1"), "display1", Region.region("region2"), "display2"));
+        when(cloudParameterCache.areRegionsSupported(any())).thenReturn(true);
+        when(platformParameterService.getRegionsByCredential(any())).thenReturn(cloudRegions);
+        // WHEN
+        DetailedEnvironmentResponse response = environmentService.createForLoggedInUser(environmentRequest, WORKSPACE_ID);
+        // THEN
+        assertNotNull(response);
+        Set<com.sequenceiq.cloudbreak.domain.environment.Region> regions = envCaptor.getValue().getRegionSet();
+        assertEquals(2, regions.size());
+        List<com.sequenceiq.cloudbreak.domain.environment.Region> orderedRegions =
+                regions.stream().sorted((r1, r2) -> r1.getName().compareTo(r2.getName())).collect(Collectors.toList());
+        assertEquals("region1", orderedRegions.get(0).getName());
+        assertEquals("display1", orderedRegions.get(0).getDisplayName());
+        assertEquals("region2", orderedRegions.get(1).getName());
+        assertEquals("display2", orderedRegions.get(1).getDisplayName());
     }
 
     @Test
