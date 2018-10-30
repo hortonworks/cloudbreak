@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.controller.validation.environment;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -21,6 +22,8 @@ import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.domain.environment.Region;
+import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
@@ -43,7 +46,7 @@ public class ClusterCreationEnvironmentValidatorTest {
     private ClusterCreationEnvironmentValidator underTest;
 
     @Test
-    public void testValidateShouldBeSuccessWhenStackRegionIsValidAndEnvironmentsResourcesAreNotGiven() {
+    public void testValidateShouldBeSuccessWhenStackRegionIsValidAndEnvironmentsResourcesAreNotGiven() throws IOException {
         // GIVEN
         Stack stack = getStack();
         ClusterRequest clusterRequest = new ClusterRequest();
@@ -54,7 +57,7 @@ public class ClusterCreationEnvironmentValidatorTest {
     }
 
     @Test
-    public void testValidateShouldBeSuccessWhenNoEnvironmentProvided() {
+    public void testValidateShouldBeSuccessWhenNoEnvironmentProvided() throws IOException {
         // GIVEN
         Stack stack = getStack();
         stack.setEnvironment(null);
@@ -84,7 +87,7 @@ public class ClusterCreationEnvironmentValidatorTest {
     }
 
     @Test
-    public void testValidateShouldBeSuccessWhenResourcesAreInTheSameEnvironmentOrGlobals() {
+    public void testValidateShouldBeSuccessWhenResourcesAreInTheSameEnvironmentOrGlobals() throws IOException {
         // GIVEN
         Stack stack = getStack();
         ClusterRequest clusterRequest = new ClusterRequest();
@@ -113,7 +116,7 @@ public class ClusterCreationEnvironmentValidatorTest {
     }
 
     @Test
-    public void testValidateShouldBeFailedWhenStackRegionIsInvalidAndEnvironmentsResourcesAreNotInGoodEnvironment() {
+    public void testValidateShouldBeFailedWhenStackRegionIsInvalidAndEnvironmentsResourcesAreNotInGoodEnvironment() throws IOException {
         // GIVEN
         Stack stack = getStack();
         stack.setRegion("region3");
@@ -155,7 +158,7 @@ public class ClusterCreationEnvironmentValidatorTest {
     }
 
     @Test
-    public void testValidateShouldBeFailedWhenStackEnvIsNullButEnvironmentsResourcesAreNotGlobals() {
+    public void testValidateShouldBeFailedWhenStackEnvIsNullButEnvironmentsResourcesAreNotGlobals() throws IOException {
         // GIVEN
         Stack stack = getStack();
         stack.setEnvironment(null);
@@ -196,7 +199,7 @@ public class ClusterCreationEnvironmentValidatorTest {
     }
 
     @Test
-    public void testValidateShouldBeFailedWhenLdapConfigGivenWithIdIsNotInGoodEnvironment() {
+    public void testValidateShouldBeFailedWhenLdapConfigGivenWithIdIsNotInGoodEnvironment() throws IOException {
         // GIVEN
         Stack stack = getStack();
         ClusterRequest clusterRequest = new ClusterRequest();
@@ -213,7 +216,7 @@ public class ClusterCreationEnvironmentValidatorTest {
     }
 
     @Test
-    public void testValidateShouldBeFailedWhenLdapConfigGivenWithRequestIsNotInGoodEnvironment() {
+    public void testValidateShouldBeFailedWhenLdapConfigGivenWithRequestIsNotInGoodEnvironment() throws IOException {
         // GIVEN
         Stack stack = getStack();
         ClusterRequest clusterRequest = new ClusterRequest();
@@ -230,7 +233,7 @@ public class ClusterCreationEnvironmentValidatorTest {
                 actualResult.getErrors().get(0));
     }
 
-    private Stack getStack() {
+    private Stack getStack() throws IOException {
         Stack stack = new Stack();
         stack.setRegion("region1");
         Workspace workspace = new Workspace();
@@ -238,7 +241,11 @@ public class ClusterCreationEnvironmentValidatorTest {
         stack.setWorkspace(workspace);
         EnvironmentView environmentView = new EnvironmentView();
         environmentView.setName("env1");
-        environmentView.setRegionsSet(Sets.newHashSet("region1", "region2"));
+        Region region1 = new Region();
+        region1.setName("region1");
+        Region region2 = new Region();
+        region2.setName("region2");
+        environmentView.setRegions(new Json(Set.of(region1, region2)));
         stack.setEnvironment(environmentView);
         return stack;
     }

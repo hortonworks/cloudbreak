@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.TreeNode;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -54,6 +55,14 @@ public class JsonUtil {
             return Optional.of(MAPPER.readValue(content, valueType));
         } catch (IOException e) {
             return Optional.empty();
+        }
+    }
+
+    public static <T> T jsonToType(String content, TypeReference<T> typeReference) {
+        try {
+            return MAPPER.readValue(content, typeReference);
+        } catch (IOException e) {
+            throw new IllegalArgumentException("cannot convert to " + typeReference.getType(), e);
         }
     }
 

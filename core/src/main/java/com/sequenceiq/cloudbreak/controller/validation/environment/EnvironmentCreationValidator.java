@@ -4,45 +4,26 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentRequest;
-import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
-import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.ValidationResultBuilder;
-import com.sequenceiq.cloudbreak.controller.validation.Validator;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
-import com.sequenceiq.cloudbreak.domain.PlatformResourceRequest;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.environment.Environment;
-import com.sequenceiq.cloudbreak.service.platform.PlatformParameterService;
-import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
-
-import reactor.fn.tuple.Tuple2;
+import com.sequenceiq.cloudbreak.domain.environment.Region;
 
 @Component
-public class EnvironmentCreationValidator implements Validator<Tuple2<Environment, EnvironmentRequest>> {
-
-    @Inject
-    private PlatformParameterService platformParameterService;
-
-    @Inject
-    private CloudParameterCache cloudParameterCache;
-
-    @Override
-    public ValidationResult validate(Tuple2<Environment, EnvironmentRequest> subject) {
-        Environment environment = subject.t1;
-        EnvironmentRequest request = subject.t2;
+public class EnvironmentCreationValidator {
+    public ValidationResult validate(Environment environment, EnvironmentRequest request, boolean regionsSupported) {
         ValidationResultBuilder resultBuilder = ValidationResult.builder();
         validateLdapConfigs(environment, request, resultBuilder);
         validateProxyConfigs(environment, request, resultBuilder);
         validateRdsConfigs(environment, request, resultBuilder);
-        validateRegions(request.getRegions(), environment.getCredential(), resultBuilder);
+        validateRegions(request.getRegions(), environment, regionsSupported, resultBuilder);
         return resultBuilder.build();
     }
 
@@ -76,34 +57,30 @@ public class EnvironmentCreationValidator implements Validator<Tuple2<Environmen
         }
     }
 
-    private void validateRegions(Set<String> requestedRegions, Credential credential, ValidationResultBuilder resultBuilder) {
+    private void validateRegions(Set<String> requestedRegions, Environment environment, boolean regionsSupported, ValidationResultBuilder resultBuilder) {
+        Credential credential = environment.getCredential();
+        Set<Region> existingRegions = environment.getRegionSet();
         String cloudPlatform = credential.cloudPlatform();
-        if (cloudParameterCache.areRegionsSupported(cloudPlatform)) {
-            validateRegionsWhereSupported(requestedRegions, credential, resultBuilder, cloudPlatform);
+        if (regionsSupported) {
+            validateRegionsWhereSupported(requestedRegions, existingRegions, resultBuilder, cloudPlatform);
         } else if (!requestedRegions.isEmpty()) {
-            resultBuilder.error(String.format("Regions are not supporeted on cloudprovider: [%s].", cloudPlatform));
+            resultBuilder.error(String.format("Region are not supporeted on cloudprovider: [%s].", cloudPlatform));
         }
     }
 
-    private void validateRegionsWhereSupported(Set<String> requestedRegions, Credential credential, ValidationResultBuilder resultBuilder,
+    private void validateRegionsWhereSupported(Set<String> requestedRegions, Set<Region> existingRegions, ValidationResultBuilder resultBuilder,
             String cloudPlatform) {
         if (requestedRegions.isEmpty()) {
-            resultBuilder.error(String.format("Regions are mandatory on cloudprovider: [%s]", cloudPlatform));
+            resultBuilder.error(String.format("Region are mandatory on cloudprovider: [%s]", cloudPlatform));
         } else {
-            PlatformResourceRequest platformResourceRequest = new PlatformResourceRequest();
-            platformResourceRequest.setCredential(credential);
-            platformResourceRequest.setCloudPlatform(cloudPlatform);
-            // TODO: no idea where to get it from: platformResourceRequest.setPlatformVariant();
-            CloudRegions regions = platformParameterService.getRegionsByCredential(platformResourceRequest);
-            Set<String> existingRegions = regions.getCloudRegions().keySet()
-                    .stream().map(Region::getRegionName).collect(Collectors.toSet());
+            Set<String> existingRegionNames = existingRegions.stream().map(Region::getName).collect(Collectors.toSet());
             requestedRegions = new HashSet<>(requestedRegions);
-            requestedRegions.removeAll(existingRegions);
+            requestedRegions.removeAll(existingRegionNames);
             if (!requestedRegions.isEmpty()) {
                 resultBuilder.error(String.format("The following regions does not exist in your cloud provider: [%s]. "
                                 + "Existing regions are: [%s]",
                         requestedRegions.stream().collect(Collectors.joining(", ")),
-                        existingRegions.stream().collect(Collectors.joining(", "))
+                        existingRegionNames.stream().collect(Collectors.joining(", "))
                 ));
             }
         }

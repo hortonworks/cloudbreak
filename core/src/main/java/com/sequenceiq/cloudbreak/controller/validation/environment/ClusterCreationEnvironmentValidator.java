@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.environment.EnvironmentAwareResource;
+import com.sequenceiq.cloudbreak.domain.environment.Region;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
@@ -35,9 +36,10 @@ public class ClusterCreationEnvironmentValidator {
     public ValidationResult validate(ClusterRequest clusterRequest, Stack stack) {
         ValidationResult.ValidationResultBuilder resultBuilder = ValidationResult.builder();
         EnvironmentView stackEnv = stack.getEnvironment();
-        if (stackEnv != null && !CollectionUtils.isEmpty(stackEnv.getRegionsSet()) && !stackEnv.getRegionsSet().contains(stack.getRegion())) {
+        if (stackEnv != null && !CollectionUtils.isEmpty(stackEnv.getRegionSet())
+                && stackEnv.getRegionSet().stream().noneMatch(region -> region.getName().equals(stack.getRegion()))) {
             resultBuilder.error(String.format("[%s] region is not enabled in [%s] environment. Enabled environments: [%s]", stack.getRegion(),
-                    stackEnv.getName(), stackEnv.getRegionsSet().stream().collect(Collectors.joining(","))));
+                    stackEnv.getName(), stackEnv.getRegionSet().stream().map(Region::getName).sorted().collect(Collectors.joining(","))));
         }
         Long workspaceId = stack.getWorkspace().getId();
         validateLdapConfig(workspaceId, clusterRequest, stackEnv, resultBuilder);

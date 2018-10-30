@@ -26,7 +26,6 @@ public class EnvironmentRequestToEnvironmentConverter extends AbstractConversion
         environment.setWorkspace(workspaceService.getByIdForCurrentUser(workspaceId));
         environment.setName(source.getName());
         environment.setDescription(source.getDescription());
-        environment.setRegionsSet(source.getRegions());
         return environment;
     }
 }

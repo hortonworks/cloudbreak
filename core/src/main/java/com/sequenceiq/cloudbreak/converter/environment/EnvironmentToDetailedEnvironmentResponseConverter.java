@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.converter.environment;
 
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -16,6 +18,8 @@ import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 
 @Component
 public class EnvironmentToDetailedEnvironmentResponseConverter extends AbstractConversionServiceAwareConverter<Environment, DetailedEnvironmentResponse> {
+    @Inject
+    private RegionConverter regionConverter;
 
     @Override
     public DetailedEnvironmentResponse convert(Environment source) {
@@ -23,7 +27,7 @@ public class EnvironmentToDetailedEnvironmentResponseConverter extends AbstractC
         response.setId(source.getId());
         response.setName(source.getName());
         response.setDescription(source.getDescription());
-        response.setRegions(source.getRegionsSet());
+        response.setRegions(regionConverter.convertRegions(source.getRegionSet()));
         response.setCloudPlatform(source.getCloudPlatform());
         response.setCredentialName(source.getCredential().getName());
         response.setWorkspace(getConversionService().convert(source.getWorkspace(), WorkspaceResourceResponse.class));
