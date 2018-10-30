@@ -47,7 +47,6 @@ public class ProxyConfigMapperImpl implements ProxyConfigMapper {
         proxyConfigResponse.setServerHost( proxyConfigRequest.getServerHost() );
         proxyConfigResponse.setServerPort( proxyConfigRequest.getServerPort() );
         proxyConfigResponse.setProtocol( proxyConfigRequest.getProtocol() );
-        proxyConfigResponse.setUserName( proxyConfigRequest.getUserName() );
         proxyConfigResponse.setDescription( proxyConfigRequest.getDescription() );
         proxyConfigResponse.setId( proxyConfigRequest.getId() );
         proxyConfigResponse.setWorkspace( workspaceToWorkspaceResourceResponse( proxyConfigRequest.getWorkspace() ) );

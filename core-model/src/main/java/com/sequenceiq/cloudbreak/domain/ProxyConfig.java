@@ -6,7 +6,6 @@ import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -20,8 +19,8 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import com.sequenceiq.cloudbreak.aspect.vault.VaultValue;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
-import com.sequenceiq.cloudbreak.domain.converter.EncryptionConverter;
 import com.sequenceiq.cloudbreak.domain.environment.EnvironmentAwareResource;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
@@ -54,11 +53,10 @@ public class ProxyConfig implements ProvisionEntity, EnvironmentAwareResource {
     @Column(nullable = false)
     private String protocol;
 
-    @Column
+    @VaultValue
     private String userName;
 
-    @Column
-    @Convert(converter = EncryptionConverter.class)
+    @VaultValue
     private String password;
 
     @ManyToOne
