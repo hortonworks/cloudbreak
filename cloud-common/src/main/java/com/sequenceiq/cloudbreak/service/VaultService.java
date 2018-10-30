@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.vault;
+package com.sequenceiq.cloudbreak.service;
 
 import java.security.InvalidKeyException;
 import java.util.Collections;
@@ -36,13 +36,16 @@ public class VaultService {
     }
 
     public String resolveSingleValue(String path) {
+        if (path == null) {
+            return null;
+        }
         long start = System.currentTimeMillis();
         VaultResponse response = template.read(path);
         LOGGER.debug("Vault read took {} ms", System.currentTimeMillis() - start);
         if (response != null && response.getData() != null) {
             return String.valueOf(response.getData().get("secret"));
         }
-        return "";
+        return path;
     }
 
     public void deleteSecret(String path) {

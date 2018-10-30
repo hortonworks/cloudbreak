@@ -1,27 +1,36 @@
 package com.sequenceiq.cloudbreak.blueprint.kerberos;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
 import java.io.IOException;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
+import com.sequenceiq.cloudbreak.service.VaultService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class KerberosDetailServiceTest {
 
     private static final String TEST_DEFAULT_HOST = "test.host.com:88";
 
+    @InjectMocks
     private KerberosDetailService underTest;
+
+    @Mock
+    private VaultService vaultService;
 
     private KerberosConfig config;
 
     @Before
     public void setUp() {
-        underTest = new KerberosDetailService();
         config = new KerberosConfig();
     }
 
@@ -96,7 +105,8 @@ public class KerberosDetailServiceTest {
 
     @Test
     public void testAmbariManagedKerberosFalse() throws IOException {
-        config.setDescriptor("{\"kerberos-env\":{\"properties\":{\"install_packages\":false}}}");
+        config.setDescriptor("secret/descriptor");
+        when(vaultService.resolveSingleValue(any())).thenReturn("{\"kerberos-env\":{\"properties\":{\"install_packages\":false}}}");
         Assert.assertFalse(underTest.isAmbariManagedKerberosPackages(config));
     }
 }
