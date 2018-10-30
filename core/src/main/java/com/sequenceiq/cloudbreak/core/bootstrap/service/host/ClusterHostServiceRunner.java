@@ -209,8 +209,8 @@ public class ClusterHostServiceRunner {
                 putIfNotNull(kerberosPillarConf, properties.get("admin_server_host"), "adminUrl");
                 putIfNotNull(kerberosPillarConf, properties.get("realm"), "realm");
             }
-            putIfNotNull(kerberosPillarConf, cluster.getUserName(), "clusterUser");
-            putIfNotNull(kerberosPillarConf, cluster.getPassword(), "clusterPassword");
+            putIfNotNull(kerberosPillarConf, vaultService.resolveSingleValue(cluster.getCloudbreakAmbariUser()), "clusterUser");
+            putIfNotNull(kerberosPillarConf, vaultService.resolveSingleValue(cluster.getCloudbreakAmbariPassword()), "clusterPassword");
             servicePillar.put("kerberos", new SaltPillarProperties("/kerberos/init.sls", singletonMap("kerberos", kerberosPillarConf)));
         }
         servicePillar.put("discovery", new SaltPillarProperties("/discovery/init.sls", singletonMap("platform", stack.cloudPlatform())));
@@ -404,6 +404,7 @@ public class ClusterHostServiceRunner {
 
     private void saveLdapPillar(LdapConfig ldapConfig, Map<String, SaltPillarProperties> servicePillar) {
         if (ldapConfig != null) {
+            ldapConfig.setBindDn(vaultService.resolveSingleValue(ldapConfig.getBindDn()));
             ldapConfig.setBindPassword(vaultService.resolveSingleValue(ldapConfig.getBindPassword()));
             servicePillar.put("ldap", new SaltPillarProperties("/gateway/ldap.sls", singletonMap("ldap", ldapConfig)));
         }
