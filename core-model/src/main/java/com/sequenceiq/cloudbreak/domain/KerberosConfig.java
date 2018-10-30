@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.domain;
 
 import javax.persistence.Column;
-import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -10,7 +9,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 
-import com.sequenceiq.cloudbreak.domain.converter.EncryptionConverter;
+import com.sequenceiq.cloudbreak.aspect.vault.VaultValue;
 import com.sequenceiq.cloudbreak.type.KerberosType;
 
 @Entity
@@ -24,35 +23,32 @@ public class KerberosConfig implements ProvisionEntity {
     @Enumerated(EnumType.STRING)
     private KerberosType type;
 
-    @Convert(converter = EncryptionConverter.class)
     @Column(name = "kerberosmasterkey")
+    @VaultValue
     private String masterKey;
 
-    @Convert(converter = EncryptionConverter.class)
     @Column(name = "kerberosadmin")
+    @VaultValue
     private String admin;
 
-    @Convert(converter = EncryptionConverter.class)
     @Column(name = "kerberospassword")
+    @VaultValue
     private String password;
 
-    @Convert(converter = EncryptionConverter.class)
     @Column(name = "kerberosurl")
     private String url;
 
-    @Convert(converter = EncryptionConverter.class)
     @Column(name = "kdcadminurl")
     private String adminUrl;
 
-    @Convert(converter = EncryptionConverter.class)
     @Column(name = "kerberosrealm")
     private String realm;
 
     @Column(name = "kerberostcpallowed")
     private Boolean tcpAllowed;
 
-    @Convert(converter = EncryptionConverter.class)
     @Column(name = "kerberosprincipal")
+    @VaultValue
     private String principal;
 
     @Column(name = "kerberosldapurl")
@@ -61,12 +57,12 @@ public class KerberosConfig implements ProvisionEntity {
     @Column(name = "kerberoscontainerdn")
     private String containerDn;
 
-    @Convert(converter = EncryptionConverter.class)
     @Column(name = "kerberosdescriptor", columnDefinition = "TEXT")
+    @VaultValue
     private String descriptor;
 
-    @Convert(converter = EncryptionConverter.class)
     @Column(name = "krb5conf", columnDefinition = "TEXT")
+    @VaultValue
     private String krb5Conf;
 
     public Long getId() {
@@ -133,7 +129,7 @@ public class KerberosConfig implements ProvisionEntity {
         this.realm = realm;
     }
 
-    public Boolean getTcpAllowed() {
+    public Boolean isTcpAllowed() {
         return tcpAllowed;
     }
 

@@ -71,7 +71,7 @@ import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.vault.VaultService;
+import com.sequenceiq.cloudbreak.service.VaultService;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 import com.sequenceiq.cloudbreak.util.StackUtil;
@@ -196,10 +196,10 @@ public class ClusterHostServiceRunner {
         if (cluster.isSecure() && kerberosDetailService.isAmbariManagedKerberosPackages(cluster.getKerberosConfig())) {
             Map<String, String> kerberosPillarConf = new HashMap<>();
             KerberosConfig kerberosConfig = cluster.getKerberosConfig();
-            putIfNotNull(kerberosPillarConf, kerberosConfig.getMasterKey(), "masterKey");
-            putIfNotNull(kerberosPillarConf, kerberosConfig.getAdmin(), "user");
-            putIfNotNull(kerberosPillarConf, kerberosConfig.getPassword(), "password");
-            if (StringUtils.isEmpty(kerberosConfig.getDescriptor())) {
+            putIfNotNull(kerberosPillarConf, vaultService.resolveSingleValue(kerberosConfig.getMasterKey()), "masterKey");
+            putIfNotNull(kerberosPillarConf, vaultService.resolveSingleValue(kerberosConfig.getAdmin()), "user");
+            putIfNotNull(kerberosPillarConf, vaultService.resolveSingleValue(kerberosConfig.getPassword()), "password");
+            if (StringUtils.isEmpty(vaultService.resolveSingleValue(kerberosConfig.getDescriptor()))) {
                 putIfNotNull(kerberosPillarConf, kerberosConfig.getUrl(), "url");
                 putIfNotNull(kerberosPillarConf, kerberosDetailService.resolveHostForKdcAdmin(kerberosConfig, kerberosConfig.getUrl()), "adminUrl");
                 putIfNotNull(kerberosPillarConf, kerberosConfig.getRealm(), "realm");
