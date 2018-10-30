@@ -53,6 +53,9 @@ public class RdsConfigService extends AbstractEnvironmentAwareService<RDSConfig>
     @Inject
     private TransactionService transactionService;
 
+    @Inject
+    private VaultService vaultService;
+
     @Override
     public RDSConfig attachToEnvironments(String resourceName, Set<String> environments, @NotNull Long workspaceId) {
         try {
@@ -168,10 +171,18 @@ public class RdsConfigService extends AbstractEnvironmentAwareService<RDSConfig>
     public String testRdsConnection(String existingRDSConfigName, Workspace workspace) {
         try {
             RDSConfig config = getByNameForWorkspace(existingRDSConfigName, workspace);
-            return testRdsConnection(config);
+            return testRdsConnection(resolveVaultValues(config));
         } catch (AccessDeniedException | NotFoundException e) {
             return "access is denied";
         }
+    }
+
+    public RDSConfig resolveVaultValues(RDSConfig config) {
+        String username = vaultService.resolveSingleValue(config.getConnectionUserName());
+        String password = vaultService.resolveSingleValue(config.getConnectionPassword());
+        config.setConnectionUserName(username);
+        config.setConnectionPassword(password);
+        return config;
     }
 
     public String testRdsConnection(RDSConfig rdsConfig) {
