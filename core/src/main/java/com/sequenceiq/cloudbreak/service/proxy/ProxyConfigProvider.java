@@ -13,8 +13,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
-import com.sequenceiq.cloudbreak.service.TransactionService;
-import com.sequenceiq.cloudbreak.service.vault.VaultService;
+import com.sequenceiq.cloudbreak.service.VaultService;
 
 @Service
 public class ProxyConfigProvider {
@@ -22,9 +21,6 @@ public class ProxyConfigProvider {
     public static final String PROXY_KEY = "proxy";
 
     public static final String PROXY_SLS_PATH = "/proxy/proxy.sls";
-
-    @Inject
-    private TransactionService transactionService;
 
     @Inject
     private VaultService vaultService;

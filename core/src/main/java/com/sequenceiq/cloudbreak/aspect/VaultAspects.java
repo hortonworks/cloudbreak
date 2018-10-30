@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.aspect.vault.VaultValue;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
-import com.sequenceiq.cloudbreak.service.vault.VaultService;
+import com.sequenceiq.cloudbreak.service.VaultService;
 
 @Component
 @Aspect

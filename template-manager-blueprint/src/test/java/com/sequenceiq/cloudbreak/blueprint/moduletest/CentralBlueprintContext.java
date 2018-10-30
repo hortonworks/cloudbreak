@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.blueprint.moduletest;
 
+import static org.mockito.Mockito.mock;
+
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -10,17 +12,20 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.vault.core.VaultOperations;
+import org.springframework.vault.core.VaultTemplate;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintUpdater;
-import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptor;
 import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptors;
 import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.json.JsonHelper;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
+import com.sequenceiq.cloudbreak.service.VaultService;
+import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
@@ -35,7 +40,7 @@ public class CentralBlueprintContext {
     }
 
     @Configuration
-    @ComponentScan({ "com.sequenceiq.cloudbreak.blueprint", "com.sequenceiq.cloudbreak.template" })
+    @ComponentScan({"com.sequenceiq.cloudbreak.blueprint", "com.sequenceiq.cloudbreak.template"})
     public static class SpringConfig {
 
         @Inject
@@ -68,6 +73,16 @@ public class CentralBlueprintContext {
         @Bean
         public CloudbreakResourceReaderService cloudbreakResourceReaderService() {
             return new CloudbreakResourceReaderService();
+        }
+
+        @Bean
+        public VaultService vaultService() {
+            return new VaultService();
+        }
+
+        @Bean
+        public VaultOperations vaultOperations() {
+            return mock(VaultTemplate.class);
         }
 
         @Bean

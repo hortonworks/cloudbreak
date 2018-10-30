@@ -16,7 +16,7 @@ import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.vault.VaultService;
+import com.sequenceiq.cloudbreak.service.VaultService;
 
 @Service
 public class AmbariViewProvider {

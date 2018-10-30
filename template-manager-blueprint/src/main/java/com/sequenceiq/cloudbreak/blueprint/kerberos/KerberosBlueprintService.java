@@ -11,6 +11,7 @@ import org.springframework.util.StringUtils;
 
 import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintComponentConfigProvider;
+import com.sequenceiq.cloudbreak.service.VaultService;
 import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
@@ -34,6 +35,9 @@ public class KerberosBlueprintService implements BlueprintComponentConfigProvide
     @Inject
     private KerberosDetailService kerberosDetailService;
 
+    @Inject
+    private VaultService vaultService;
+
     @Override
     public BlueprintTextProcessor customTextManipulation(TemplatePreparationObject source, BlueprintTextProcessor blueprintProcessor) {
         KerberosConfig kerberosConfig = source.getKerberosConfig().orElse(null);
@@ -43,10 +47,10 @@ public class KerberosBlueprintService implements BlueprintComponentConfigProvide
             String domain = gatewayHost.substring(gatewayHost.indexOf('.') + 1);
             extendBlueprintWithKerberos(blueprintProcessor, kerberosConfig, gatewayHost, domain, propagationPort);
             if (StringUtils.hasLength(kerberosConfig.getDescriptor())) {
-                blueprintProcessor.replaceConfiguration("kerberos-env", kerberosConfig.getDescriptor());
+                blueprintProcessor.replaceConfiguration("kerberos-env", vaultService.resolveSingleValue(kerberosConfig.getDescriptor()));
             }
             if (StringUtils.hasLength(kerberosConfig.getKrb5Conf())) {
-                blueprintProcessor.replaceConfiguration("krb5-conf", kerberosConfig.getKrb5Conf());
+                blueprintProcessor.replaceConfiguration("krb5-conf", vaultService.resolveSingleValue(kerberosConfig.getKrb5Conf()));
             }
         } else {
             extendBlueprintWithKerberos(blueprintProcessor, kerberosConfig, source.getGeneralClusterConfigs().getAmbariIp(), REALM, DOMAIN, null);
@@ -79,7 +83,7 @@ public class KerberosBlueprintService implements BlueprintComponentConfigProvide
                 .put("container_dn", containerDn == null ? "" : containerDn)
                 .build();
         return extendBlueprintWithKerberos(blueprintText, kerberosEnv, kerberosDetailService.getDomains(domain),
-                !kerberosConfig.getTcpAllowed(), propagationPort, false);
+                !kerberosConfig.isTcpAllowed(), propagationPort, false);
     }
 
     public BlueprintTextProcessor extendBlueprintWithKerberos(BlueprintTextProcessor blueprint, Map<String, String> kerberosEnv, String domains,
