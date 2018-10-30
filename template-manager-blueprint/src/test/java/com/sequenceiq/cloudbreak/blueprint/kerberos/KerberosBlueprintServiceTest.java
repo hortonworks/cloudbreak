@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.blueprint.kerberos;
 
+import static org.mockito.Mockito.when;
+
 import java.io.IOException;
 import java.util.Optional;
 
@@ -19,6 +21,7 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.service.VaultService;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
@@ -34,6 +37,9 @@ public class KerberosBlueprintServiceTest {
 
     @Mock
     private TemplatePreparationObject templatePreparationObject;
+
+    @Mock
+    private VaultService vaultService;
 
     @Spy
     private KerberosDetailService kerberosDetailService;
@@ -93,17 +99,23 @@ public class KerberosBlueprintServiceTest {
 
         Blueprint blueprint = TestUtil.blueprint("name", blueprintText);
         Stack stack = TestUtil.stack();
+        String descriptorPath = "secret/descriptor";
+        String krb5Path = "secret/krb5conf";
         KerberosConfig kerberosConfig = new KerberosConfig();
-        kerberosConfig.setDescriptor("{\"kerberos-env\":{\"properties\":{\"install_packages\":false,\"realm\":\"REALM.BP\",\"kdc_type\":\"mit-kdc\","
-            + "\"kdc_hosts\":\"kdc_host.bp\",\"admin_server_host\":\"admin_server_host.bp\",\"encryption_types\":\"enc_types.bp\",\"ldap_url\":\"\","
-            + "\"container_dn\":\"\"}}}");
-        kerberosConfig.setKrb5Conf("{\"krb5-conf\":{\"properties\":{\"domains\":\".domains.bp\",\"manage_krb5_conf\":\"true\",\"content\":\"content.bp\"}}}");
+        kerberosConfig.setDescriptor(descriptorPath);
+        kerberosConfig.setKrb5Conf(krb5Path);
         kerberosConfig.setTcpAllowed(true);
         Cluster cluster = TestUtil.cluster(blueprint, stack, 1L, kerberosConfig);
         TemplatePreparationObject object = Builder.builder()
                 .withKerberosConfig(cluster.getKerberosConfig())
                 .withGeneralClusterConfigs(BlueprintTestUtil.generalClusterConfigs())
                 .build();
+        when(vaultService.resolveSingleValue(descriptorPath)).thenReturn("{\"kerberos-env\":{\"properties\":"
+                + "{\"install_packages\":false,\"realm\":\"REALM.BP\",\"kdc_type\":\"mit-kdc\","
+                + "\"kdc_hosts\":\"kdc_host.bp\",\"admin_server_host\":\"admin_server_host.bp\",\"encryption_types\":\"enc_types.bp\",\"ldap_url\":\"\","
+                + "\"container_dn\":\"\"}}}");
+        when(vaultService.resolveSingleValue(krb5Path)).thenReturn("{\"krb5-conf\":{\"properties\":{\"domains\":\".domains.bp\","
+                + "\"manage_krb5_conf\":\"true\",\"content\":\"content.bp\"}}}");
 
         BlueprintTextProcessor b = new BlueprintTextProcessor(blueprint.getBlueprintText());
         String actualBlueprint = underTest.customTextManipulation(object, b).asText();

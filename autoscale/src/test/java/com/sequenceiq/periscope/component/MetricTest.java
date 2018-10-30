@@ -56,6 +56,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.vault.core.VaultTemplate;
 
 import com.sequenceiq.cloudbreak.api.endpoint.autoscale.AutoscaleEndpoint;
 import com.sequenceiq.cloudbreak.api.model.Status;
@@ -189,6 +190,9 @@ public class MetricTest {
 
     @MockBean
     private AutoscaleEndpoint autoscaleEndpoint;
+
+    @MockBean
+    private VaultTemplate vaultTemplate;
 
     @Inject
     private ClusterRepository clusterRepository;
