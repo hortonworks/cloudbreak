@@ -380,6 +380,11 @@ public class OfflineStateGenerator {
         }
 
         @Override
+        public Long countAliveOnesByWorkspaceAndEnvironment(Long workspaceId, Long environmentId) {
+            return null;
+        }
+
+        @Override
         public Long countActiveByAccount(String account) {
             return null;
         }

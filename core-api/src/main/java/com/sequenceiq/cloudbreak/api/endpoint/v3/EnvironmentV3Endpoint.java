@@ -4,13 +4,13 @@ import java.util.Set;
 
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentAttachRequest;
@@ -40,10 +40,16 @@ public interface EnvironmentV3Endpoint {
     @GET
     @Path("/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @QueryParam("")
     @ApiOperation(value = EnvironmentOpDescription.GET, produces = ContentType.JSON, notes = Notes.ENVIRONMENT_NOTES,
             nickname = "get")
     DetailedEnvironmentResponse get(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String environmentName);
+
+    @DELETE
+    @Path("/{name}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = EnvironmentOpDescription.DELETE, produces = ContentType.JSON, notes = Notes.ENVIRONMENT_NOTES,
+            nickname = "delete")
+    DetailedEnvironmentResponse delete(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String environmentName);
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
