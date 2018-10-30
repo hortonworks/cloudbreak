@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.service.vault.VaultService;
+import com.sequenceiq.cloudbreak.service.VaultService;
 
 @Service
 public class AmbariSecurityConfigProvider {

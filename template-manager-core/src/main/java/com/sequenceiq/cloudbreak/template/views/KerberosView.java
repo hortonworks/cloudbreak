@@ -5,46 +5,46 @@ import com.sequenceiq.cloudbreak.type.KerberosType;
 
 public class KerberosView {
 
-    private KerberosType type;
+    private final KerberosType type;
 
-    private String masterKey;
+    private final String masterKey;
 
-    private String admin;
+    private final String admin;
 
-    private String password;
+    private final String password;
 
-    private String url;
+    private final String url;
 
-    private String adminUrl;
+    private final String adminUrl;
 
-    private String realm;
+    private final String realm;
 
-    private Boolean tcpAllowed;
+    private final Boolean tcpAllowed;
 
-    private String principal;
+    private final String principal;
 
-    private String ldapUrl;
+    private final String ldapUrl;
 
-    private String containerDn;
+    private final String containerDn;
 
-    private String descriptor;
+    private final String descriptor;
 
-    private String krb5Conf;
+    private final String krb5Conf;
 
-    public KerberosView(KerberosConfig kerberosConfig) {
-        this.type = kerberosConfig.getType();
-        this.masterKey = kerberosConfig.getMasterKey();
-        this.admin = kerberosConfig.getAdmin();
-        this.password = kerberosConfig.getPassword();
-        this.url = kerberosConfig.getUrl();
-        this.adminUrl = kerberosConfig.getAdminUrl();
-        this.realm = kerberosConfig.getRealm();
-        this.tcpAllowed = kerberosConfig.getTcpAllowed();
-        this.principal = kerberosConfig.getPrincipal();
-        this.ldapUrl = kerberosConfig.getLdapUrl();
-        this.containerDn = kerberosConfig.getContainerDn();
-        this.descriptor = kerberosConfig.getDescriptor();
-        this.krb5Conf = kerberosConfig.getKrb5Conf();
+    public KerberosView(KerberosConfig kerberosConfig, String masterKey, String admin, String password, String principal, String descriptor, String krb5Conf) {
+        this.masterKey = masterKey;
+        this.admin = admin;
+        this.password = password;
+        this.descriptor = descriptor;
+        this.krb5Conf = krb5Conf;
+        this.principal = principal;
+        type = kerberosConfig.getType();
+        url = kerberosConfig.getUrl();
+        adminUrl = kerberosConfig.getAdminUrl();
+        realm = kerberosConfig.getRealm();
+        tcpAllowed = kerberosConfig.isTcpAllowed();
+        ldapUrl = kerberosConfig.getLdapUrl();
+        containerDn = kerberosConfig.getContainerDn();
     }
 
     public KerberosType getType() {
@@ -75,7 +75,7 @@ public class KerberosView {
         return realm;
     }
 
-    public Boolean getTcpAllowed() {
+    public Boolean isTcpAllowed() {
         return tcpAllowed;
     }
 
