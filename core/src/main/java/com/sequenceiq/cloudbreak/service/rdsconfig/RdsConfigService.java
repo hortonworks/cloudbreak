@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecution
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.environment.AbstractEnvironmentAwareService;
+import com.sequenceiq.cloudbreak.service.vault.VaultService;
 import com.sequenceiq.cloudbreak.util.NameUtil;
 
 @Service
@@ -51,6 +52,9 @@ public class RdsConfigService extends AbstractEnvironmentAwareService<RDSConfig>
 
     @Inject
     private TransactionService transactionService;
+
+    @Inject
+    private VaultService vaultService;
 
     @Override
     public RDSConfig attachToEnvironments(String resourceName, Set<String> environments, @NotNull Long workspaceId) {
@@ -176,10 +180,18 @@ public class RdsConfigService extends AbstractEnvironmentAwareService<RDSConfig>
     public String testRdsConnection(String existingRDSConfigName, Workspace workspace) {
         try {
             RDSConfig config = getByNameForWorkspace(existingRDSConfigName, workspace);
-            return testRdsConnection(config);
+            return testRdsConnection(resolveVaultValues(config));
         } catch (AccessDeniedException | NotFoundException e) {
             return "access is denied";
         }
+    }
+
+    public RDSConfig resolveVaultValues(RDSConfig config) {
+        String username = vaultService.resolveSingleValue(config.getConnectionUserName());
+        String password = vaultService.resolveSingleValue(config.getConnectionPassword());
+        config.setConnectionUserName(username);
+        config.setConnectionPassword(password);
+        return config;
     }
 
     public String testRdsConnection(RDSConfig rdsConfig) {
