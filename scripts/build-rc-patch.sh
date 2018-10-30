@@ -26,7 +26,7 @@ fi;
 git tag -a $VERSION -m "$VERSION"
 git push origin $VERSION
 
-./gradlew -Penv=jenkins -b build.gradle build uploadArchives -Pversion=$VERSION --info --stacktrace --parallel -x checkstyleMain -x checkstyleTest -x findbugsMain -x findbugsTest
+./gradlew -Penv=jenkins -b build.gradle build uploadArchives -Pversion=$VERSION --info --stacktrace --parallel -x checkstyleMain -x checkstyleTest -x spotbugsMain -x spotbugsTest
 
 echo "Computed next rc version: $VERSION"
 echo VERSION=$VERSION > $WORKSPACE/version
