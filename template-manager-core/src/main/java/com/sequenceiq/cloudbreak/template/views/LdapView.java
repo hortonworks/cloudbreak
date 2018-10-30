@@ -42,7 +42,7 @@ public class LdapView {
 
     private int port;
 
-    public LdapView(@Nonnull LdapConfig ldapConfig, @Nonnull String bindPassword) {
+    public LdapView(@Nonnull LdapConfig ldapConfig, @Nonnull String bindDn, @Nonnull String bindPassword) {
         protocol = ldapConfig.getProtocol().toLowerCase();
         host = ldapConfig.getServerHost();
         connectionURL = protocol + "://" + ldapConfig.getServerHost();
@@ -50,7 +50,6 @@ public class LdapView {
             port = ldapConfig.getServerPort();
             connectionURL = connectionURL.toLowerCase() + ':' + ldapConfig.getServerPort();
         }
-        bindDn = ldapConfig.getBindDn();
         directoryType = ldapConfig.getDirectoryType();
         userSearchBase = ldapConfig.getUserSearchBase();
         userNameAttribute = ldapConfig.getUserNameAttribute();
@@ -62,6 +61,7 @@ public class LdapView {
         domain = ldapConfig.getDomain();
         userDnPattern = ldapConfig.getUserDnPattern();
         adminGroup = ldapConfig.getAdminGroup();
+        this.bindDn = bindDn;
         this.bindPassword = bindPassword;
     }
 
