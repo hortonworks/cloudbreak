@@ -16,7 +16,6 @@ import org.apache.commons.codec.binary.Base64;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
-import com.sequenceiq.cloudbreak.domain.converter.EncryptionConverter;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 
@@ -47,7 +46,6 @@ public class InstanceMetaData implements ProvisionEntity {
 
     private String discoveryFQDN;
 
-    @Convert(converter = EncryptionConverter.class)
     @Column(columnDefinition = "TEXT")
     private String serverCert;
 
