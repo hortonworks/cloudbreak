@@ -14,6 +14,7 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.powermock.reflect.Whitebox;
 import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
@@ -45,6 +46,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
     @Before
     public void setUp() {
         underTest = new ClusterRequestToClusterConverter();
+        Whitebox.setInternalState(underTest, "ambariUserName", "cloudbreak");
         MockitoAnnotations.initMocks(this);
         when(authenticatedUserService.getCbUser()).thenReturn(mock(IdentityUser.class));
         when(fileSystemConfigService.getPrivateFileSystem(any(String.class), any(IdentityUser.class))).thenReturn(mock(FileSystem.class));
