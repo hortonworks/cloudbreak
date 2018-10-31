@@ -6,7 +6,8 @@
 generate_repo_from_vdf_script:
   file.managed:
     - name: /opt/salt/generate-repo-for-os-from-vdf.sh
-    - source: salt://gateway/scripts/generate-repo-for-os-from-vdf.sh
+    - source: salt://gateway/scripts/generate-repo-for-os-from-vdf.sh.j2
+    - template: jinja
     - skip_verify: True
     - makedirs: True
     - mode: 755
