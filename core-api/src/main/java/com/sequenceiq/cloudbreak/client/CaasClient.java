@@ -9,6 +9,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 
 public class CaasClient {
@@ -27,6 +28,7 @@ public class CaasClient {
         this.configKey = configKey;
     }
 
+    @Cacheable(cacheNames = "caasUserCache")
     public CaasUser getUserInfo(String dpsJwtToken) {
         WebTarget caasWebTarget = getCaasWebTarget();
         WebTarget userInfoWebTarget = caasWebTarget.path("/oidc/userinfo");
