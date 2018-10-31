@@ -121,7 +121,6 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
         convertRdsIds(clusterResponse, rdsConfigs);
         String ambariIp = stackUtil.extractAmbariIp(source.getStack());
         clusterResponse.setAmbariServerIp(ambariIp);
-        clusterResponse.setUserName(source.getUserName());
         clusterResponse.setExecutorType(source.getExecutorType());
         clusterResponse.setDescription(source.getDescription() == null ? "" : source.getDescription());
         clusterResponse.setHostGroups(convertHostGroupsToJson(source.getHostGroups()));

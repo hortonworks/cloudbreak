@@ -105,6 +105,7 @@ import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
+import com.sequenceiq.cloudbreak.service.VaultService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariRepositoryVersionService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
@@ -211,6 +212,9 @@ public class ClusterService {
 
     @Inject
     private AmbariRepositoryVersionService ambariRepositoryVersionService;
+
+    @Inject
+    private VaultService vaultService;
 
     public Cluster create(Stack stack, Cluster cluster, List<ClusterComponent> components, User user) throws TransactionExecutionException {
         LOGGER.info("Cluster requested [BlueprintId: {}]", cluster.getBlueprint().getId());
@@ -453,8 +457,8 @@ public class ClusterService {
     public void updateUserNamePassword(Long stackId, UserNamePasswordJson userNamePasswordJson) {
         Stack stack = stackService.getById(stackId);
         Cluster cluster = stack.getCluster();
-        String oldUserName = cluster.getUserName();
-        String oldPassword = cluster.getPassword();
+        String oldUserName = vaultService.resolveSingleValue(cluster.getUserName());
+        String oldPassword = vaultService.resolveSingleValue(cluster.getPassword());
         String newUserName = userNamePasswordJson.getUserName();
         String newPassword = userNamePasswordJson.getPassword();
         if (!newUserName.equals(oldUserName)) {
