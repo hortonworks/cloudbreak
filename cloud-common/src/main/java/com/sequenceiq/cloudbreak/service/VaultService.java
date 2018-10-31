@@ -39,11 +39,17 @@ public class VaultService {
         if (path == null) {
             return null;
         }
-        long start = System.currentTimeMillis();
-        VaultResponse response = template.read(path);
-        LOGGER.debug("Vault read took {} ms", System.currentTimeMillis() - start);
-        if (response != null && response.getData() != null) {
-            return String.valueOf(response.getData().get("secret"));
+        try {
+            long start = System.currentTimeMillis();
+            VaultResponse response = template.read(path);
+            LOGGER.debug("Vault read took {} ms", System.currentTimeMillis() - start);
+            if (response != null && response.getData() != null) {
+                return String.valueOf(response.getData().get("secret"));
+            }
+        } catch (IllegalArgumentException ie) {
+            LOGGER.info("Failed to fetch the secret, because it's an invalid path. Return the path.");
+        } catch (Exception e) {
+            LOGGER.error("Failed to fetch the secret", e);
         }
         return path;
     }
