@@ -52,8 +52,7 @@ public class StructuredFlowEventFactory {
 
     public StructuredFlowEvent createStucturedFlowEvent(Long stackId, FlowDetails flowDetails, Boolean detailed, Exception exception) {
         Stack stack = stackService.getByIdWithTransaction(stackId);
-        OperationDetails operationDetails = new OperationDetails(FLOW, "stacks", stackId, stack.getName(),
-                stack.getCreator().getUserId(), stack.getCreator().getUserName(), cloudbreakNodeConfig.getId(), cbVersion,
+        OperationDetails operationDetails = new OperationDetails(FLOW, "stacks", stackId, stack.getName(), cloudbreakNodeConfig.getId(), cbVersion,
                 stack.getWorkspace().getId(), stack.getCreator().getUserId(), stack.getCreator().getUserName());
         StackDetails stackDetails = null;
         ClusterDetails clusterDetails = null;
@@ -105,9 +104,8 @@ public class StructuredFlowEventFactory {
             LOGGER.info("Access denied in structured notification event creation, user: {}, stack: {}", userName, stackId, e);
         }
 
-        OperationDetails operationDetails = new OperationDetails(NOTIFICATION, "stacks", stackId, stackName,
-                stack.getCreator().getUserId(), stack.getCreator().getUserName(), cloudbreakNodeConfig.getInstanceUUID(), cbVersion,
-                stack.getWorkspace().getId(), userId, userName);
+        OperationDetails operationDetails = new OperationDetails(NOTIFICATION, "stacks", stackId, stackName, cloudbreakNodeConfig.getInstanceUUID(),
+                cbVersion, stack.getWorkspace().getId(), userId, userName);
         return new StructuredNotificationEvent(operationDetails, notificationDetails);
     }
 }

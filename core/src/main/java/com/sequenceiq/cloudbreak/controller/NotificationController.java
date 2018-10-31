@@ -43,7 +43,7 @@ public abstract class NotificationController {
         Long orgId = restRequestThreadLocalService.getRequestedWorkspaceId();
         CloudbreakEventsJson notification = new CloudbreakEventsJson();
         notification.setEventTimestamp(new Date().getTime());
-        notification.setUserIdV3(userService.getOrCreate(cloudbreakUser).getUserId());
+        notification.setUserId(userService.getOrCreate(cloudbreakUser).getUserId());
         notification.setWorkspaceId(orgId);
         notification.setEventType(resourceEvent.name());
         notification.setEventMessage(messagesService.getMessage(resourceEvent.getMessage()));

@@ -21,7 +21,7 @@ public class StructuredNotificationEventToCloudbreakEventJsonConverter
         cloudbreakEvent.setEventType(notificationDetails.getNotificationType());
         cloudbreakEvent.setEventTimestamp(operationDetails.getTimestamp());
         cloudbreakEvent.setEventMessage(notificationDetails.getNotification());
-        cloudbreakEvent.setUserIdV3(operationDetails.getUserIdV3());
+        cloudbreakEvent.setUserId(operationDetails.getUserId());
         cloudbreakEvent.setWorkspaceId(operationDetails.getWorkspaceId());
         cloudbreakEvent.setCloud(notificationDetails.getCloud());
         cloudbreakEvent.setRegion(notificationDetails.getRegion());

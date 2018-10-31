@@ -15,7 +15,7 @@ public class ModelDescriptions {
     public static final String CREATED = "creation time of the resource in long";
     public static final String AMBARI_SERVER = "ambari server address";
     public static final String WORKSPACE_OF_THE_RESOURCE = "workspace of the resource";
-    public static final String USER_ID_V3 = "User ID in the new authorization model";
+    public static final String USER_ID = "User ID in the new authorization model";
     public static final String WORKSPACE_ID = "Workspace ID of the resource";
     public static final String PREINSTALLED = "Denotes that the image is prewarmed or base image.";
     public static final String ENVIRONMENTS = "Environments of the resource";

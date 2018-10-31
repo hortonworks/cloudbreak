@@ -21,10 +21,6 @@ public class OperationDetails implements Serializable {
 
     private Long timestamp;
 
-    private String userIdV3;
-
-    private String userNameV3;
-
     private String userId;
 
     private String userName;
@@ -38,22 +34,19 @@ public class OperationDetails implements Serializable {
     public OperationDetails() {
     }
 
-    public OperationDetails(StructuredEventType eventType, String resourceType, Long resourceId, String resourceName, String userIdV3,
-            String userNameV3, String cloudbreakId, String cloudbreakVersion, Long workspaceId, String userId, String userName) {
-        this(Calendar.getInstance().getTimeInMillis(), eventType, resourceType, resourceId, resourceName, userIdV3,
-                userNameV3, cloudbreakId, cloudbreakVersion, workspaceId, userId, userName);
+    public OperationDetails(StructuredEventType eventType, String resourceType, Long resourceId, String resourceName, String cloudbreakId,
+            String cloudbreakVersion, Long workspaceId, String userId, String userName) {
+        this(Calendar.getInstance().getTimeInMillis(), eventType, resourceType, resourceId, resourceName, cloudbreakId, cloudbreakVersion, workspaceId, userId,
+                userName);
     }
 
-    public OperationDetails(Long timestamp, StructuredEventType eventType, String resourceType, Long resourceId,
-            String resourceName, String userIdV3, String userNameV3, String cloudbreakId,
+    public OperationDetails(Long timestamp, StructuredEventType eventType, String resourceType, Long resourceId, String resourceName, String cloudbreakId,
             String cloudbreakVersion, Long workspaceId, String userId, String userName) {
         this.timestamp = timestamp;
         this.eventType = eventType;
         this.resourceId = resourceId;
         this.resourceName = resourceName;
         this.resourceType = resourceType;
-        this.userIdV3 = userIdV3;
-        this.userNameV3 = userNameV3;
         this.cloudbreakId = cloudbreakId;
         this.cloudbreakVersion = cloudbreakVersion;
         this.workspaceId = workspaceId;
@@ -105,14 +98,6 @@ public class OperationDetails implements Serializable {
         return ZonedDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneOffset.UTC);
     }
 
-    public String getUserIdV3() {
-        return userIdV3;
-    }
-
-    public void setUserIdV3(String userIdV3) {
-        this.userIdV3 = userIdV3;
-    }
-
     public String getCloudbreakId() {
         return cloudbreakId;
     }
@@ -127,14 +112,6 @@ public class OperationDetails implements Serializable {
 
     public void setCloudbreakVersion(String cloudbreakVersion) {
         this.cloudbreakVersion = cloudbreakVersion;
-    }
-
-    public String getUserNameV3() {
-        return userNameV3;
-    }
-
-    public void setUserNameV3(String userNameV3) {
-        this.userNameV3 = userNameV3;
     }
 
     public Long getWorkspaceId() {

@@ -22,8 +22,8 @@ public class CloudbreakEventsJson implements JsonEntity {
     @ApiModelProperty(EventModelDescription.MESSAGE)
     private String eventMessage;
 
-    @ApiModelProperty(ModelDescriptions.USER_ID_V3)
-    private String userIdV3;
+    @ApiModelProperty(ModelDescriptions.USER_ID)
+    private String userId;
 
     @ApiModelProperty(ModelDescriptions.CLOUD_PLATFORM)
     private String cloud;
@@ -99,12 +99,12 @@ public class CloudbreakEventsJson implements JsonEntity {
         this.eventMessage = eventMessage;
     }
 
-    public String getUserIdV3() {
-        return userIdV3;
+    public String getUserId() {
+        return userId;
     }
 
-    public void setUserIdV3(String userIdV3) {
-        this.userIdV3 = userIdV3;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public String getCloud() {
