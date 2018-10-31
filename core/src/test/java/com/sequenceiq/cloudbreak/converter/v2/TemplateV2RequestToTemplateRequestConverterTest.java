@@ -21,9 +21,9 @@ import org.springframework.core.convert.ConversionService;
 import com.sequenceiq.cloudbreak.api.model.CustomInstanceType;
 import com.sequenceiq.cloudbreak.api.model.TemplateRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.TemplateV2Request;
+import com.sequenceiq.cloudbreak.api.model.v2.template.AwsEncryption;
 import com.sequenceiq.cloudbreak.api.model.v2.template.AwsParameters;
 import com.sequenceiq.cloudbreak.api.model.v2.template.AzureParameters;
-import com.sequenceiq.cloudbreak.api.model.v2.template.AwsEncryption;
 import com.sequenceiq.cloudbreak.api.model.v2.template.EncryptionType;
 import com.sequenceiq.cloudbreak.api.model.v2.template.GcpEncryption;
 import com.sequenceiq.cloudbreak.api.model.v2.template.GcpParameters;
@@ -56,7 +56,7 @@ public class TemplateV2RequestToTemplateRequestConverterTest {
     private ConversionService conversionService;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         Mockito.reset(conversionService);
     }
 
