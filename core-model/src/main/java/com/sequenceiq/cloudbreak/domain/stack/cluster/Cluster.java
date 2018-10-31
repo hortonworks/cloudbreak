@@ -50,7 +50,6 @@ import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.domain.converter.EncryptionConverter;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -104,12 +103,12 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
 
     private String ambariIp;
 
-    @Convert(converter = EncryptionConverter.class)
     @Column(nullable = false)
+    @VaultValue
     private String userName;
 
-    @Convert(converter = EncryptionConverter.class)
     @Column(nullable = false)
+    @VaultValue
     private String password;
 
     @VaultValue
