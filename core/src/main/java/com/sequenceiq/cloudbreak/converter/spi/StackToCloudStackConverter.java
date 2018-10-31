@@ -26,7 +26,6 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.blueprint.VolumeUtils;
-import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationsViewProvider;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -54,8 +53,10 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.repository.SecurityRuleRepository;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
+import com.sequenceiq.cloudbreak.service.VaultService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
+import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationsViewProvider;
 
 @Component
 public class StackToCloudStackConverter {
@@ -79,6 +80,9 @@ public class StackToCloudStackConverter {
 
     @Inject
     private InstanceMetadataToImageIdConverter instanceMetadataToImageIdConverter;
+
+    @Inject
+    private VaultService vaultService;
 
     @Autowired
     @Qualifier("conversionService")
@@ -152,7 +156,8 @@ public class StackToCloudStackConverter {
     InstanceTemplate buildInstanceTemplate(Template template, String name, Long privateId, InstanceStatus status, String instanceImageId) {
         Json attributesJson = template.getAttributes();
         Map<String, Object> attributes = Optional.ofNullable(attributesJson).map(Json::getMap).orElseGet(HashMap::new);
-        Map<String, Object> secretAttributes = Optional.ofNullable(template.getSecretAttributes()).map(Json::getMap).orElseGet(HashMap::new);
+        Json fromVault = template.getSecretAttributes() == null ? null : new Json(vaultService.resolveSingleValue(template.getSecretAttributes()));
+        Map<String, Object> secretAttributes = Optional.ofNullable(fromVault).map(Json::getMap).orElseGet(HashMap::new);
 
         Map<String, Object> fields = new HashMap<>();
         fields.putAll(attributes);

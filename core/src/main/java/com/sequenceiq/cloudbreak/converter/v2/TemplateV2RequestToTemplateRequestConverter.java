@@ -41,7 +41,9 @@ public class TemplateV2RequestToTemplateRequestConverter extends AbstractConvers
             template.getParameters().putAll(getConversionService().convert(source.getAzureParameters(), Map.class));
         } else if (source.getGcpParameters() != null) {
             GcpParameters gcpParameters = Optional.ofNullable(source.getGcpParameters()).orElse(new GcpParameters());
-            template.getSecretParameters().putAll(getConversionService().convert(gcpParameters, Map.class));
+            if (template.getSecretParameters() == null) {
+                template.setSecretParameters(getConversionService().convert(gcpParameters, Map.class));
+            }
         } else if (source.getOpenStackParameters() != null) {
             template.getParameters().putAll(getConversionService().convert(source.getOpenStackParameters(), Map.class));
         } else if (source.getYarnParameters() != null) {

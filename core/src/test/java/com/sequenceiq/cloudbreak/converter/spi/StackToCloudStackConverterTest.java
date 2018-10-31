@@ -30,7 +30,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.core.convert.ConversionService;
 
-import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationsViewProvider;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -53,8 +52,10 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.repository.SecurityRuleRepository;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
+import com.sequenceiq.cloudbreak.service.VaultService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
+import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationsViewProvider;
 
 public class StackToCloudStackConverterTest {
 
@@ -110,6 +111,9 @@ public class StackToCloudStackConverterTest {
 
     @Mock
     private InstanceMetadataToImageIdConverter instanceMetadataToImageIdConverter;
+
+    @Mock
+    private VaultService vaultService;
 
     @Before
     public void setUp() {
@@ -726,7 +730,8 @@ public class StackToCloudStackConverterTest {
         Template template = new Template();
         template.setVolumeCount(0);
         template.setAttributes(new Json(Map.of("someAttr", "value")));
-        template.setSecretAttributes(new Json(Map.of("otherAttr", "value")));
+        template.setSecretAttributes("secret/uuid");
+        when(vaultService.resolveSingleValue("secret/uuid")).thenReturn(new Json(Map.of("otherAttr", "value")).getValue());
 
         InstanceTemplate instanceTemplate = underTest.buildInstanceTemplate(
                 template, "name", 0L, InstanceStatus.CREATE_REQUESTED, "instanceImageId");
