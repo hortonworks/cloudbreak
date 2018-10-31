@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
+import static com.sequenceiq.cloudbreak.cloud.model.Coordinate.coordinate;
 import static com.sequenceiq.cloudbreak.cloud.model.DisplayName.displayName;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static java.util.Collections.singletonList;
@@ -78,11 +79,12 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSshKey;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.ConfigSpecification;
+import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
 import com.sequenceiq.cloudbreak.cloud.model.DisplayName;
 import com.sequenceiq.cloudbreak.cloud.model.PropertySpecification;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
-import com.sequenceiq.cloudbreak.cloud.model.RegionDisplayNameSpecification;
-import com.sequenceiq.cloudbreak.cloud.model.RegionDisplayNameSpecifications;
+import com.sequenceiq.cloudbreak.cloud.model.RegionCoordinateSpecification;
+import com.sequenceiq.cloudbreak.cloud.model.RegionCoordinateSpecifications;
 import com.sequenceiq.cloudbreak.cloud.model.VmSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
@@ -123,13 +125,16 @@ public class AwsPlatformResources implements PlatformResources {
 
     private Map<Region, DisplayName> regionDisplayNames = new HashMap<>();
 
+    private Map<Region, Coordinate> regionCoordinates = new HashMap<>();
+
     private final Map<Region, Set<VmType>> vmTypes = new HashMap<>();
 
     private final Map<Region, VmType> defaultVmTypes = new HashMap<>();
 
     @PostConstruct
     public void init() {
-        regionDisplayNames = readRegionDisplayNames(resourceDefinition("zone-displaynames"));
+        regionDisplayNames = readRegionDisplayNames(resourceDefinition("zone-coordinates"));
+        regionCoordinates = readRegionCoordinates(resourceDefinition("zone-coordinates"));
         readVmTypes();
     }
 
@@ -205,15 +210,31 @@ public class AwsPlatformResources implements PlatformResources {
     private Map<Region, DisplayName> readRegionDisplayNames(String displayNames) {
         Map<Region, DisplayName> regionDisplayNames = new HashMap<>();
         try {
-            RegionDisplayNameSpecifications regionDisplayNameSpecifications = JsonUtil.readValue(displayNames, RegionDisplayNameSpecifications.class);
-            for (RegionDisplayNameSpecification regionDisplayNameSpecification : regionDisplayNameSpecifications.getItems()) {
-                regionDisplayNames.put(region(regionDisplayNameSpecification.getName()),
-                        displayName(regionDisplayNameSpecification.getDisplayName()));
+            RegionCoordinateSpecifications regionCoordinateSpecifications = JsonUtil.readValue(displayNames, RegionCoordinateSpecifications.class);
+            for (RegionCoordinateSpecification regionCoordinateSpecification : regionCoordinateSpecifications.getItems()) {
+                regionDisplayNames.put(region(regionCoordinateSpecification.getName()),
+                        displayName(regionCoordinateSpecification.getDisplayName()));
             }
         } catch (IOException ignored) {
             return regionDisplayNames;
         }
         return regionDisplayNames;
+    }
+
+    private Map<Region, Coordinate> readRegionCoordinates(String displayNames) {
+        Map<Region, Coordinate> regionCoordinates = new HashMap<>();
+        try {
+            RegionCoordinateSpecifications regionCoordinateSpecifications = JsonUtil.readValue(displayNames, RegionCoordinateSpecifications.class);
+            for (RegionCoordinateSpecification regionCoordinateSpecification : regionCoordinateSpecifications.getItems()) {
+                regionCoordinates.put(region(regionCoordinateSpecification.getName()),
+                        coordinate(regionCoordinateSpecification.getLongitude(),
+                                regionCoordinateSpecification.getLatitude(),
+                                regionCoordinateSpecification.getDisplayName()));
+            }
+        } catch (IOException ignored) {
+            return regionCoordinates;
+        }
+        return regionCoordinates;
     }
 
     @Override
@@ -321,6 +342,7 @@ public class AwsPlatformResources implements PlatformResources {
         AmazonEC2Client ec2Client = awsClient.createAccess(cloudCredential);
         Map<Region, List<AvailabilityZone>> regionListMap = new HashMap<>();
         Map<Region, String> displayNames = new HashMap<>();
+        Map<Region, Coordinate> coordinates = new HashMap<>();
 
         DescribeRegionsRequest describeRegionsRequest = new DescribeRegionsRequest();
         DescribeRegionsResult describeRegionsResult = ec2Client.describeRegions(describeRegionsRequest);
@@ -346,18 +368,33 @@ public class AwsPlatformResources implements PlatformResources {
                     tmpAz.add(availabilityZone(availabilityZone.getZoneName()));
                 }
                 regionListMap.put(region(awsRegion.getRegionName()), tmpAz);
-                DisplayName displayName = regionDisplayNames.get(region(awsRegion.getRegionName()));
-                if (displayName == null || Strings.isNullOrEmpty(displayName.value())) {
-                    displayNames.put(region(awsRegion.getRegionName()), awsRegion.getRegionName());
-                } else {
-                    displayNames.put(region(awsRegion.getRegionName()), displayName.value());
-                }
+                addDisplayName(displayNames, awsRegion);
+                addCoordinate(coordinates, awsRegion);
             }
         }
         if (region != null && !Strings.isNullOrEmpty(region.value())) {
             defaultRegion = region.value();
         }
-        return new CloudRegions(regionListMap, displayNames, defaultRegion);
+        return new CloudRegions(regionListMap, displayNames, coordinates, defaultRegion);
+    }
+
+    public void addDisplayName(Map<Region, String> displayNames, com.amazonaws.services.ec2.model.Region awsRegion) {
+        DisplayName displayName = regionDisplayNames.get(region(awsRegion.getRegionName()));
+        if (displayName == null || Strings.isNullOrEmpty(displayName.value())) {
+            displayNames.put(region(awsRegion.getRegionName()), awsRegion.getRegionName());
+        } else {
+            displayNames.put(region(awsRegion.getRegionName()), displayName.value());
+        }
+    }
+
+    public void addCoordinate(Map<Region, Coordinate> coordinates, com.amazonaws.services.ec2.model.Region awsRegion) {
+        Coordinate coordinate = regionCoordinates.get(region(awsRegion.getRegionName()));
+        if (coordinate == null || coordinate.getLongitude() == null || coordinate.getLatitude() == null) {
+            LOGGER.warn("Unregistered region with location coordinates on aws side: {} using default California", awsRegion.getRegionName());
+            coordinates.put(region(awsRegion.getRegionName()), Coordinate.defaultCoordinate());
+        } else {
+            coordinates.put(region(awsRegion.getRegionName()), coordinate);
+        }
     }
 
     @Override

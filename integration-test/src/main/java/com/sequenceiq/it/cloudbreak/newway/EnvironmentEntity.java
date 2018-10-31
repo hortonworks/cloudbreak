@@ -4,6 +4,7 @@ import java.util.Set;
 
 import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentRequest;
+import com.sequenceiq.cloudbreak.api.model.environment.request.LocationRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.response.DetailedEnvironmentResponse;
 import com.sequenceiq.cloudbreak.api.model.environment.response.SimpleEnvironmentResponse;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
@@ -67,6 +68,13 @@ public class EnvironmentEntity extends AbstractCloudbreakEntity<EnvironmentReque
 
     public EnvironmentEntity withRegions(Set<String> region) {
         getRequest().setRegions(region);
+        return this;
+    }
+
+    public EnvironmentEntity withLocation(String location) {
+        LocationRequest locationRequest = new LocationRequest();
+        locationRequest.setLocationName(location);
+        getRequest().setLocation(locationRequest);
         return this;
     }
 

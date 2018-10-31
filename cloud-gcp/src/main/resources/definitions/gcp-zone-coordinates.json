@@ -1,0 +1,112 @@
+{
+  "items": [
+    {
+      "name": "asia-east1",
+      "displayName": "Changhua County, Taiwan",
+      "latitude": "24.07340008",
+      "longitude": "120.5134086"
+    },
+    {
+      "name": "asia-east2",
+      "displayName": "Hong Kong",
+      "latitude": "22.3049809",
+      "longitude": "114.1850093"
+    },
+    {
+      "name": "australia-southeast1",
+      "displayName": "Sydney, Australia",
+      "latitude": "-33.92001097",
+      "longitude": "151.1851798"
+    },
+    {
+      "name": "europe-west2",
+      "displayName": "London, England, UK",
+      "latitude": "51.49999473",
+      "longitude": "-0.116721844"
+    },
+    {
+      "name": "europe-west3",
+      "displayName": "Frankfurt, Germany",
+      "latitude": "50.09997683",
+      "longitude": "8.67501542"
+    },
+    {
+      "name": "europe-west4",
+      "displayName": "Eemshaven, Netherlands",
+      "latitude": "53.442331564",
+      "longitude": "6.825330032"
+    },
+    {
+      "name": "us-west2",
+      "displayName": "Los Angeles, California, USA",
+      "latitude": "33.98997825",
+      "longitude": "-118.1799805"
+    },
+    {
+      "name": "southamerica-east1",
+      "displayName": "São Paulo, Brazil",
+      "latitude": "-23.55867959",
+      "longitude": "-46.62501998"
+    },
+    {
+      "name": "asia-southeast1",
+      "displayName": "Jurong West, Singapore",
+      "latitude": "1.34039",
+      "longitude": "103.70899"
+    },
+    {
+      "name": "us-central1",
+      "displayName": "Council Bluffs, Iowa, USA",
+      "latitude": "41.26227338",
+      "longitude": "-95.86080021"
+    },
+    {
+      "name": "europe-west1",
+      "displayName": "St. Ghislain, Belgium",
+      "latitude": "50.44911",
+      "longitude": "3.81838"
+    },
+    {
+      "name": "europe-north1",
+      "displayName": "Hamina, Finland",
+      "latitude": "60.56934",
+      "longitude": "27.18783"
+    },
+    {
+      "name": "us-west1",
+      "displayName": "The Dalles, Oregon, USA",
+      "latitude": "45.61734",
+      "longitude": "-121.17952"
+    },
+    {
+      "name": "northamerica-northeast1",
+      "displayName": "Montréal, Québec, Canada",
+      "latitude": "45.49999921",
+      "longitude": "-73.58329696"
+    },
+    {
+      "name": "us-east4",
+      "displayName": "Ashburn, Northern Virginia, USA",
+      "latitude": "39.04376",
+      "longitude": "-77.48744"
+    },
+    {
+      "name": "asia-south1",
+      "displayName": "Mumbai, India",
+      "latitude": "19.01699038",
+      "longitude": "72.8569893"
+    },
+    {
+      "name": "us-east1",
+      "displayName": "Moncks Corner, South Carolina, USA",
+      "latitude": "33.19600",
+      "longitude": "-80.01314"
+    },
+    {
+      "name": "asia-northeast1",
+      "displayName": "Tokyo, Japan",
+      "latitude": "35.68501691",
+      "longitude": "139.7514074"
+    }
+  ]
+}

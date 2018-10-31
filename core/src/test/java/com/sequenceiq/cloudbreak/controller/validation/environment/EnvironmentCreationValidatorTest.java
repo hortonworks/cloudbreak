@@ -15,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentRequest;
+import com.sequenceiq.cloudbreak.api.model.environment.request.LocationRequest;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
@@ -64,6 +65,9 @@ public class EnvironmentCreationValidatorTest {
         environmentRequest.setProxyConfigs(Set.of("proxy1", "proxy2"));
         environmentRequest.setRdsConfigs(Set.of("rds1", "rds2", "rds3"));
         environmentRequest.setRegions(Set.of("region1", "region2", "region3"));
+        LocationRequest locationRequest = new LocationRequest();
+        locationRequest.setLocationName("region1");
+        environmentRequest.setLocation(locationRequest);
 
         ValidationResult result = environmentCreationValidator.validate(environment, environmentRequest, true);
 
@@ -89,6 +93,9 @@ public class EnvironmentCreationValidatorTest {
         environmentRequest.setProxyConfigs(Collections.emptySet());
         environmentRequest.setRdsConfigs(Collections.emptySet());
         environmentRequest.setRegions(Set.of("region1", "region2", "region3"));
+        LocationRequest locationRequest = new LocationRequest();
+        locationRequest.setLocationName("region1");
+        environmentRequest.setLocation(locationRequest);
         // WHEN
         ValidationResult result = environmentCreationValidator.validate(environment, environmentRequest, false);
         // THEN
@@ -112,6 +119,12 @@ public class EnvironmentCreationValidatorTest {
         environmentRequest.setProxyConfigs(Collections.emptySet());
         environmentRequest.setRdsConfigs(Collections.emptySet());
         environmentRequest.setRegions(Collections.emptySet());
+        LocationRequest locationRequest = new LocationRequest();
+        locationRequest.setLocationName("region1");
+        locationRequest.setLatitude(1.1);
+        locationRequest.setLongitude(-1.1);
+        environmentRequest.setLocation(locationRequest);
+
         // WHEN
         ValidationResult result = environmentCreationValidator.validate(environment, environmentRequest, true);
         // THEN
@@ -150,13 +163,18 @@ public class EnvironmentCreationValidatorTest {
         Region region2 = new Region();
         region2.setName("region2");
         environment.setRegions(new Json(Set.of(region1, region2)));
+        environment.setLocation("region1");
+        environment.setLatitude(1.1);
+        environment.setLongitude(-1.1);
 
         EnvironmentRequest environmentRequest = new EnvironmentRequest();
         environmentRequest.setLdapConfigs(Set.of("ldap1"));
         environmentRequest.setProxyConfigs(Set.of("proxy1"));
         environmentRequest.setRdsConfigs(Set.of("rds1", "rds2"));
         environmentRequest.setRegions(Set.of("region1", "region2"));
-
+        LocationRequest locationRequest = new LocationRequest();
+        locationRequest.setLocationName("region1");
+        environmentRequest.setLocation(locationRequest);
         // WHEN
         ValidationResult result = environmentCreationValidator.validate(environment, environmentRequest, true);
         // THEN
@@ -188,12 +206,21 @@ public class EnvironmentCreationValidatorTest {
         environment.setLdapConfigs(Set.of(ldapConfig));
         environment.setProxyConfigs(Set.of(proxyConfig));
         environment.setRdsConfigs(Set.of(rdsConfig1, rdsConfig2));
+        environment.setLocation("region1");
+        environment.setLatitude(1.1);
+        environment.setLongitude(-1.1);
 
         EnvironmentRequest environmentRequest = new EnvironmentRequest();
         environmentRequest.setLdapConfigs(Set.of("ldap1"));
         environmentRequest.setProxyConfigs(Set.of("proxy1"));
         environmentRequest.setRdsConfigs(Set.of("rds1", "rds2"));
         environmentRequest.setRegions(Collections.emptySet());
+        LocationRequest locationRequest = new LocationRequest();
+        locationRequest.setLocationName("region1");
+        locationRequest.setLatitude(1.1);
+        locationRequest.setLongitude(-1.1);
+        environmentRequest.setLocation(locationRequest);
+
         // WHEN
         ValidationResult result = environmentCreationValidator.validate(environment, environmentRequest, false);
         // THEN

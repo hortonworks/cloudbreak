@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.model.environment.response.DetailedEnvironmentResponse;
+import com.sequenceiq.cloudbreak.api.model.environment.response.LocationResponse;
 import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
@@ -38,6 +39,7 @@ public class EnvironmentToDetailedEnvironmentResponseConverter extends AbstractC
         if (!CollectionUtils.isEmpty(source.getWorkloadClusters())) {
             response.setWorkloadClusters(source.getWorkloadClusters().stream().map(StackApiView::getName).collect(Collectors.toSet()));
         }
+        response.setLocation(getConversionService().convert(source, LocationResponse.class));
         return response;
     }
 }

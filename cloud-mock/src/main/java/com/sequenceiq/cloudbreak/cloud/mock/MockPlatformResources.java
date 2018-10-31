@@ -1,9 +1,12 @@
 package com.sequenceiq.cloudbreak.cloud.mock;
 
+import static com.sequenceiq.cloudbreak.cloud.model.Coordinate.coordinate;
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
+import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,6 +16,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
@@ -31,12 +35,17 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroups;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
+import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
+import com.sequenceiq.cloudbreak.cloud.model.RegionCoordinateSpecification;
+import com.sequenceiq.cloudbreak.cloud.model.RegionCoordinateSpecifications;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
+import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Service
 public class MockPlatformResources implements PlatformResources {
@@ -88,7 +97,12 @@ public class MockPlatformResources implements PlatformResources {
 
     private Map<String, VmType> defaultVmTypes = new HashMap<>();
 
+    private Map<Region, Coordinate> regionCoordinates = new HashMap<>();
+
     private final Map<Region, String> regionDisplayNames = new HashMap<>();
+
+    @Inject
+    private CloudbreakResourceReaderService cloudbreakResourceReaderService;
 
     @PostConstruct
     public void init() {
@@ -97,6 +111,27 @@ public class MockPlatformResources implements PlatformResources {
         defaultRegion = getDefaultRegion().getRegionName();
         defaultVmType = vmTypes.get(vmTypes.keySet().iterator().next()).iterator().next();
         defaultVmTypes = readDefaultVmTypes();
+        regionCoordinates = readRegionCoordinates(resourceDefinition("zone-coordinates"));
+    }
+
+    public String resourceDefinition(String resource) {
+        return cloudbreakResourceReaderService.resourceDefinition("mock", resource);
+    }
+
+    private Map<Region, Coordinate> readRegionCoordinates(String displayNames) {
+        Map<Region, Coordinate> regionCoordinates = new HashMap<>();
+        try {
+            RegionCoordinateSpecifications regionCoordinateSpecifications = JsonUtil.readValue(displayNames, RegionCoordinateSpecifications.class);
+            for (RegionCoordinateSpecification regionCoordinateSpecification : regionCoordinateSpecifications.getItems()) {
+                regionCoordinates.put(region(regionCoordinateSpecification.getName()),
+                        coordinate(regionCoordinateSpecification.getLongitude(),
+                                regionCoordinateSpecification.getLatitude(),
+                                regionCoordinateSpecification.getDisplayName()));
+            }
+        } catch (IOException ignored) {
+            return regionCoordinates;
+        }
+        return regionCoordinates;
     }
 
     private Map<String, VmType> readDefaultVmTypes() {
@@ -155,7 +190,7 @@ public class MockPlatformResources implements PlatformResources {
     @Override
     @Cacheable(cacheNames = "cloudResourceRegionCache", key = "#cloudCredential?.id")
     public CloudRegions regions(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
-        return new CloudRegions(regions, regionDisplayNames, defaultRegion);
+        return new CloudRegions(regions, regionDisplayNames, regionCoordinates, defaultRegion);
     }
 
     @Override

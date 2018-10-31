@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.cloud.openstack.common;
 
+import static com.sequenceiq.cloudbreak.cloud.model.Coordinate.coordinate;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.MAGNETIC;
 import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.values;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -12,6 +14,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.annotation.PostConstruct;
 
 import javax.inject.Inject;
 
@@ -45,7 +48,10 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroups;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSshKey;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
+import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
+import com.sequenceiq.cloudbreak.cloud.model.RegionCoordinateSpecification;
+import com.sequenceiq.cloudbreak.cloud.model.RegionCoordinateSpecifications;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta.VmTypeMetaBuilder;
@@ -54,10 +60,11 @@ import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.cloud.model.generic.StringType;
 import com.sequenceiq.cloudbreak.cloud.openstack.auth.OpenStackClient;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.KeystoneCredentialView;
+import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Service
 public class OpenStackPlatformResources implements PlatformResources {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackPlatformResources.class);
 
     @Value("${cb.openstack.default.minimum.volume.size:10}")
@@ -74,6 +81,36 @@ public class OpenStackPlatformResources implements PlatformResources {
 
     @Inject
     private OpenStackClient openStackClient;
+
+    @Inject
+    private CloudbreakResourceReaderService cloudbreakResourceReaderService;
+
+    private Map<Region, Coordinate> regionCoordinates = new HashMap<>();
+
+    @PostConstruct
+    public void init() {
+        regionCoordinates = readRegionCoordinates(resourceDefinition("zone-coordinates"));
+    }
+
+    public String resourceDefinition(String resource) {
+        return cloudbreakResourceReaderService.resourceDefinition("openstack", resource);
+    }
+
+    private Map<Region, Coordinate> readRegionCoordinates(String displayNames) {
+        Map<Region, Coordinate> regionCoordinates = new HashMap<>();
+        try {
+            RegionCoordinateSpecifications regionCoordinateSpecifications = JsonUtil.readValue(displayNames, RegionCoordinateSpecifications.class);
+            for (RegionCoordinateSpecification regionCoordinateSpecification : regionCoordinateSpecifications.getItems()) {
+                regionCoordinates.put(region(regionCoordinateSpecification.getName()),
+                        coordinate(regionCoordinateSpecification.getLongitude(),
+                                regionCoordinateSpecification.getLatitude(),
+                                regionCoordinateSpecification.getDisplayName()));
+            }
+        } catch (IOException ignored) {
+            return regionCoordinates;
+        }
+        return regionCoordinates;
+    }
 
     @Override
     public CloudNetworks networks(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
@@ -176,7 +213,7 @@ public class OpenStackPlatformResources implements PlatformResources {
         if (!cloudRegions.keySet().isEmpty()) {
             defaultRegion = ((StringType) cloudRegions.keySet().toArray()[0]).value();
         }
-        CloudRegions regions = new CloudRegions(cloudRegions, displayNames, defaultRegion);
+        CloudRegions regions = new CloudRegions(cloudRegions, displayNames, regionCoordinates, defaultRegion);
         LOGGER.info("openstack regions result: {}", regions);
         return regions;
     }

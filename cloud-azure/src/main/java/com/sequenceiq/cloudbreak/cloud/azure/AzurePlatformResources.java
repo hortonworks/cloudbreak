@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import static com.sequenceiq.cloudbreak.cloud.model.Coordinate.coordinate;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.MAGNETIC;
 import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.values;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,8 +15,11 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -40,20 +45,26 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroup;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroups;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
+import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
+import com.sequenceiq.cloudbreak.cloud.model.RegionCoordinateSpecification;
+import com.sequenceiq.cloudbreak.cloud.model.RegionCoordinateSpecifications;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta.VmTypeMetaBuilder;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
+import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Service
 public class AzurePlatformResources implements PlatformResources {
-
     public static final int DEFAULT_MINIMUM_VOLUME_SIZE = 10;
 
     public static final int DEFAULT_MAXIMUM_VOLUME_SIZE = 1023;
 
     public static final int DEFAULT_MINIMUM_VOLUME_COUNT = 1;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AzurePlatformResources.class);
 
     private static final float NO_MB_PER_GB = 1024f;
 
@@ -65,6 +76,36 @@ public class AzurePlatformResources implements PlatformResources {
 
     @Inject
     private AzureClientService azureClientService;
+
+    @Inject
+    private CloudbreakResourceReaderService cloudbreakResourceReaderService;
+
+    private Map<Region, Coordinate> regionCoordinates = new HashMap<>();
+
+    @PostConstruct
+    public void init() {
+        regionCoordinates = readRegionCoordinates(resourceDefinition("zone-coordinates"));
+    }
+
+    public String resourceDefinition(String resource) {
+        return cloudbreakResourceReaderService.resourceDefinition("azure", resource);
+    }
+
+    private Map<Region, Coordinate> readRegionCoordinates(String displayNames) {
+        Map<Region, Coordinate> regionCoordinates = new HashMap<>();
+        try {
+            RegionCoordinateSpecifications regionCoordinateSpecifications = JsonUtil.readValue(displayNames, RegionCoordinateSpecifications.class);
+            for (RegionCoordinateSpecification regionCoordinateSpecification : regionCoordinateSpecifications.getItems()) {
+                regionCoordinates.put(region(regionCoordinateSpecification.getName()),
+                        coordinate(regionCoordinateSpecification.getLongitude(),
+                                regionCoordinateSpecification.getLatitude(),
+                                regionCoordinateSpecification.getName()));
+            }
+        } catch (IOException ignored) {
+            return regionCoordinates;
+        }
+        return regionCoordinates;
+    }
 
     @Override
     public CloudNetworks networks(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
@@ -125,15 +166,25 @@ public class AzurePlatformResources implements PlatformResources {
         AzureClient client = azureClientService.getClient(cloudCredential);
         Map<Region, List<AvailabilityZone>> cloudRegions = new HashMap<>();
         Map<Region, String> displayNames = new HashMap<>();
+        Map<Region, Coordinate> coordinates = new HashMap<>();
+
         String defaultRegion = armZoneParameterDefault;
         for (com.microsoft.azure.management.resources.fluentcore.arm.Region azureRegion : client.getRegion(region)) {
             cloudRegions.put(region(azureRegion.label()), new ArrayList<>());
             displayNames.put(region(azureRegion.label()), azureRegion.label());
+
+            Coordinate coordinate = regionCoordinates.get(region(azureRegion.label()));
+            if (coordinate == null || coordinate.getLongitude() == null || coordinate.getLatitude() == null) {
+                LOGGER.warn("Unregistered region with location coordinates on azure side: {} using default California", azureRegion.label());
+                coordinates.put(region(azureRegion.label()), Coordinate.defaultCoordinate());
+            } else {
+                coordinates.put(region(azureRegion.label()), coordinate);
+            }
         }
         if (region != null && !Strings.isNullOrEmpty(region.value())) {
             defaultRegion = region.value();
         }
-        return new CloudRegions(cloudRegions, displayNames, defaultRegion);
+        return new CloudRegions(cloudRegions, displayNames, coordinates, defaultRegion);
     }
 
     @Override

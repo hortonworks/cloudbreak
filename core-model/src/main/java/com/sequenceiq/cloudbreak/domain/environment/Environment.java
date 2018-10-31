@@ -62,6 +62,15 @@ public class Environment implements WorkspaceAwareResource {
     @Column(columnDefinition = "TEXT", nullable = false)
     private Json regions;
 
+    @Column(nullable = false)
+    private String location;
+
+    @Column(nullable = false)
+    private Double longitude;
+
+    @Column(nullable = false)
+    private Double latitude;
+
     @ManyToMany(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
     @JoinTable(name = "env_ldap", joinColumns = @JoinColumn(name = "envid"), inverseJoinColumns = @JoinColumn(name = "ldapid"))
     private Set<LdapConfig> ldapConfigs = new HashSet<>();
@@ -182,5 +191,29 @@ public class Environment implements WorkspaceAwareResource {
 
     public void setCloudPlatform(String cloudPlatform) {
         this.cloudPlatform = cloudPlatform;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public Double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
+    }
+
+    public Double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
     }
 }
