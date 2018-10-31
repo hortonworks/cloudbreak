@@ -62,7 +62,7 @@ public class TemplateRequestToTemplateConverterTest {
         assertNotNull(result.getAttributes());
         assertEquals(new Json(parameters), result.getAttributes());
         assertNotNull(result.getSecretAttributes());
-        assertEquals(new Json(secretParameters), result.getSecretAttributes());
+        assertEquals(new Json(secretParameters).getValue(), result.getSecretAttributes());
         assertEquals(topology, result.getTopology());
     }
 
@@ -105,7 +105,7 @@ public class TemplateRequestToTemplateConverterTest {
                 "someAttr", "value");
         assertEquals(new Json(attributeMap).getMap(), result.getAttributes().getMap());
         assertNotNull(result.getSecretAttributes());
-        assertEquals(new Json(secretParameters).getMap(), result.getSecretAttributes().getMap());
+        assertEquals(new Json(secretParameters).getMap(), new Json(result.getSecretAttributes()).getMap());
         assertEquals(topology, result.getTopology());
     }
 }
