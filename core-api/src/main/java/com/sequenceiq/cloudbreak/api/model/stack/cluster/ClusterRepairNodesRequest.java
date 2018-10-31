@@ -10,7 +10,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
-public class ClusterRepairNodeRequest {
+public class ClusterRepairNodesRequest {
 
     @ApiModelProperty(RepairClusterNodeRequest.DELETE_VOLUMES)
     private boolean deleteVolumes;
