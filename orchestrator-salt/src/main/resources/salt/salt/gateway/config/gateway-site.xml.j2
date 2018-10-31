@@ -52,6 +52,17 @@ limitations under the License.
         <value>true</value>
         <description>Boolean flag indicating whether the Hadoop cluster protected by Gateway is secured with Kerberos</description>
     </property>
+
+    <property>
+      <name>java.security.auth.login.config</name>
+      <value>/etc/knox/conf/krb5JAASLogin.conf</value>
+    </property>
+
+    <property>
+      <name>java.security.krb5.conf</name>
+      <value>/etc/krb5.conf</value>
+    </property>
+
     {% else %}
     <property>
         <name>gateway.hadoop.kerberos.secured</name>
@@ -59,18 +70,6 @@ limitations under the License.
         <description>Boolean flag indicating whether the Hadoop cluster protected by Gateway is secured with Kerberos</description>
     </property>
     {% endif %}
-
-    <property>
-        <name>java.security.krb5.conf</name>
-        <value>/var/lib/ambari-server/resources/scripts/krb5.conf</value>
-        <description>Absolute path to krb5.conf file</description>
-    </property>
-
-    <property>
-        <name>java.security.auth.login.config</name>
-        <value>/etc/ambari-server/conf/krb5JAASLogin.conf</value>
-        <description>Absolute path to JASS login config file</description>
-    </property>
 
     <property>
         <name>sun.security.krb5.debug</name>
