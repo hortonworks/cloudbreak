@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -35,19 +36,16 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.PollingResult;
+import com.sequenceiq.cloudbreak.service.VaultService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AmbariClusterSecurityServiceTest {
 
     @Rule
     public final ExpectedException thrown = ExpectedException.none();
-
-    @Mock
-    private StackService stackService;
 
     @Mock
     private ClusterService clusterService;
@@ -73,8 +71,16 @@ public class AmbariClusterSecurityServiceTest {
     @Mock
     private AmbariPollingServiceProvider ambariPollingServiceProvider;
 
+    @Mock
+    private VaultService vaultService;
+
     @InjectMocks
     private final AmbariClusterSecurityService underTest = new AmbariClusterSecurityService();
+
+    @Before
+    public void init() {
+        when(vaultService.resolveSingleValue("admin")).thenReturn("admin");
+    }
 
     @Test
     public void testApiReplaceUserNamePasswordWhenEverythingWorks() throws CloudbreakException {
@@ -151,6 +157,7 @@ public class AmbariClusterSecurityServiceTest {
         stack.setCluster(cluster);
         AmbariClient ambariClient = Mockito.mock(AmbariClient.class);
 
+        when(vaultService.resolveSingleValue("admin1")).thenReturn("admin1");
         when(clientFactory.getDefaultAmbariClient(stack)).thenReturn(ambariClient);
         when(ambariSecurityConfigProvider.getAmbariUserName(cluster)).thenReturn("cloudbreak");
         when(ambariSecurityConfigProvider.getAmbariPassword(cluster)).thenReturn("cloudbreak123");
@@ -205,6 +212,7 @@ public class AmbariClusterSecurityServiceTest {
         stack.setCluster(cluster);
         AmbariClient ambariClient = Mockito.mock(AmbariClient.class);
 
+        when(vaultService.resolveSingleValue("admin1")).thenReturn("admin1");
         when(clientFactory.getDefaultAmbariClient(stack)).thenReturn(ambariClient);
         when(ambariSecurityConfigProvider.getAmbariUserName(cluster)).thenReturn("cloudbreak");
         when(ambariSecurityConfigProvider.getAmbariPassword(cluster)).thenReturn("cloudbreak123");
@@ -304,7 +312,7 @@ public class AmbariClusterSecurityServiceTest {
         when(ambariOperationService.waitForOperations(stack, ambariClient, operationRequests, PREPARE_DEKERBERIZING))
                 .thenThrow(new AmbariConnectionException(failed));
         when(cloudbreakMessagesService.getMessage(AMBARI_CLUSTER_PREPARE_DEKERBERIZING_ERROR.code()))
-        .thenReturn("The de-registration of Kerberos principals couldn't be done, reason: " + failed);
+                .thenReturn("The de-registration of Kerberos principals couldn't be done, reason: " + failed);
 
         thrown.expect(AmbariOperationFailedException.class);
         thrown.expectMessage("The de-registration of Kerberos principals couldn't be done, reason: " + failed);

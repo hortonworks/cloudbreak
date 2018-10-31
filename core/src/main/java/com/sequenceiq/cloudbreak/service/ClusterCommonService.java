@@ -74,6 +74,9 @@ public class ClusterCommonService {
     @Inject
     private CloudbreakMessagesService messagesService;
 
+    @Inject
+    private VaultService vaultService;
+
     public Response put(Long stackId, UpdateClusterJson updateJson, User user, Workspace workspace) {
         Stack stack = stackService.getById(stackId);
         MDCBuilder.buildMdcContext(stack);
@@ -169,7 +172,7 @@ public class ClusterCommonService {
                     "Stack '%s' is currently in '%s' state. PUT requests to a cluster can only be made if the underlying stack is 'AVAILABLE'.", stackId,
                     stack.getStatus()));
         }
-        if (!userNamePasswordJson.getOldPassword().equals(stack.getCluster().getPassword())) {
+        if (!userNamePasswordJson.getOldPassword().equals(vaultService.resolveSingleValue(stack.getCluster().getPassword()))) {
             throw new BadRequestException(String.format(
                     "Cluster actual password does not match in the request, please pass the real password on Stack '%s' with status '%s'.", stackId,
                     stack.getStatus()));

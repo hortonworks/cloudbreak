@@ -18,20 +18,20 @@ public class AmbariSecurityConfigProvider {
 
     public String getAmbariUserName(Cluster cluster) {
         if (Strings.isNullOrEmpty(cluster.getCloudbreakAmbariUser())) {
-            return cluster.getUserName();
+            return vaultService.resolveSingleValue(cluster.getUserName());
         }
         return vaultService.resolveSingleValue(cluster.getCloudbreakAmbariUser());
     }
 
     public String getAmbariPassword(Cluster cluster) {
         if (Strings.isNullOrEmpty(cluster.getCloudbreakAmbariPassword())) {
-            return cluster.getPassword();
+            return vaultService.resolveSingleValue(cluster.getPassword());
         }
         return vaultService.resolveSingleValue(cluster.getCloudbreakAmbariPassword());
     }
 
     public String getAmbariUserProvidedPassword(Cluster cluster) {
-        return cluster.getPassword();
+        return cluster.getPassword() == null ? null : vaultService.resolveSingleValue(cluster.getPassword());
     }
 
     public String getAmbariSecurityMasterKey(Cluster cluster) {
