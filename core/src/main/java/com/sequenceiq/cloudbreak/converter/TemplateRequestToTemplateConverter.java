@@ -58,7 +58,7 @@ public class TemplateRequestToTemplateConverter extends AbstractConversionServic
         }
 
         Optional.ofNullable(parameters).map(toJson()).ifPresent(template::setAttributes);
-        Optional.ofNullable(source.getSecretParameters()).map(toJson()).ifPresent(template::setSecretAttributes);
+        Optional.ofNullable(source.getSecretParameters()).map(toJson()).map(Json::getValue).ifPresent(template::setSecretAttributes);
 
         if (source.getTopologyId() != null) {
             template.setTopology(topologyService.get(source.getTopologyId()));
