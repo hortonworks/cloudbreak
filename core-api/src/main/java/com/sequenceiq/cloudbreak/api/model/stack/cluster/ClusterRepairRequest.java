@@ -16,7 +16,7 @@ public class ClusterRepairRequest {
     private List<String> hostGroups;
 
     @ApiModelProperty(value = RepairClusterRequest.NODES)
-    private List<ClusterRepairNodeRequest> nodes;
+    private ClusterRepairNodesRequest nodes;
 
     @ApiModelProperty(RepairClusterRequest.REMOVE_ONLY)
     private boolean removeOnly;
@@ -37,11 +37,11 @@ public class ClusterRepairRequest {
         this.removeOnly = removeOnly;
     }
 
-    public List<ClusterRepairNodeRequest> getNodes() {
+    public ClusterRepairNodesRequest getNodes() {
         return nodes;
     }
 
-    public void setNodes(List<ClusterRepairNodeRequest> nodes) {
+    public void setNodes(ClusterRepairNodesRequest nodes) {
         this.nodes = nodes;
     }
 }
