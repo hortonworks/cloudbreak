@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.model.RegionResponse;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
+import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 
 @Component
@@ -42,10 +43,17 @@ public class PlatformRegionsToRegionResponseConverter extends AbstractConversion
             displayNames.put(regionStringEntry.getKey().value(), regionStringEntry.getValue());
         }
 
+        Set<String> locations = new HashSet<>();
+        for (Entry<Region, Coordinate> coordinateEntry : source.getCoordinates().entrySet()) {
+            locations.add(coordinateEntry.getKey().getRegionName());
+            displayNames.put(coordinateEntry.getKey().getRegionName(), coordinateEntry.getValue().getDisplayName());
+        }
+
         json.setRegions(regions);
         json.setAvailabilityZones(availabilityZones);
         json.setDefaultRegion(source.getDefaultRegion());
         json.setDisplayNames(displayNames);
+        json.setLocations(locations);
         return json;
     }
 }

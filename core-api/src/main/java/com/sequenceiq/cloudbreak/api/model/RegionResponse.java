@@ -2,11 +2,13 @@ package com.sequenceiq.cloudbreak.api.model;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ConnectorModelDescription;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -19,8 +21,12 @@ public class RegionResponse extends CompactRegionResponse {
     @ApiModelProperty(ConnectorModelDescription.DEFAULT_REGIOS)
     private String defaultRegion;
 
+    @ApiModelProperty(ModelDescriptions.ConnectorModelDescription.REGION_LOCATIONS)
+    private Set<String> locations;
+
     public RegionResponse() {
         availabilityZones = new HashMap<>();
+        locations = new HashSet<>();
     }
 
     @JsonProperty("regions")
@@ -47,5 +53,13 @@ public class RegionResponse extends CompactRegionResponse {
 
     public void setDefaultRegion(String defaultRegions) {
         defaultRegion = defaultRegions;
+    }
+
+    public Set<String> getLocations() {
+        return locations;
+    }
+
+    public void setLocations(Set<String> locations) {
+        this.locations = locations;
     }
 }

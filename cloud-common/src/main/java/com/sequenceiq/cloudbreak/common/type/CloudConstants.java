@@ -13,6 +13,8 @@ public class CloudConstants {
 
     public static final String CUMULUS_YARN = "CUMULUS_YARN";
 
+    public static final String MOCK = "MOCK";
+
     private CloudConstants() {
     }
 }

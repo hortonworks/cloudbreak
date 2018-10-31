@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.model;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class CloudRegions {
 
@@ -10,14 +11,18 @@ public class CloudRegions {
 
     private Map<Region, String> displayNames = new HashMap<>();
 
+    private Map<Region, Coordinate> coordinates = new HashMap<>();
+
     private String defaultRegion;
 
     public CloudRegions() {
     }
 
-    public CloudRegions(Map<Region, List<AvailabilityZone>> cloudRegions, Map<Region, String> displayNames, String defaultRegion) {
+    public CloudRegions(Map<Region, List<AvailabilityZone>> cloudRegions, Map<Region, String> displayNames, Map<Region, Coordinate> coordinates,
+            String defaultRegion) {
         this.cloudRegions = cloudRegions;
         this.displayNames = displayNames;
+        this.coordinates = coordinates;
         this.defaultRegion = defaultRegion;
     }
 
@@ -43,6 +48,21 @@ public class CloudRegions {
 
     public void setDefaultRegion(String defaultRegion) {
         this.defaultRegion = defaultRegion;
+    }
+
+    public Map<Region, Coordinate> getCoordinates() {
+        return coordinates;
+    }
+
+    public void setCoordinates(Map<Region, Coordinate> coordinates) {
+        this.coordinates = coordinates;
+    }
+
+    public String locationNames() {
+        return coordinates.keySet()
+                .stream()
+                .map(Region::getRegionName)
+                .collect(Collectors.joining(", "));
     }
 
     @Override

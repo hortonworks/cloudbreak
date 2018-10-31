@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.environment;
 
+import static com.sequenceiq.cloudbreak.cloud.model.Coordinate.coordinate;
+import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -39,9 +41,9 @@ import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentChangeCredentialRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentDetachRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentRequest;
+import com.sequenceiq.cloudbreak.api.model.environment.request.LocationRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.response.DetailedEnvironmentResponse;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
-import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
@@ -160,12 +162,21 @@ public class EnvironmentServiceTest {
         CredentialRequest credentialRequest = new CredentialRequest();
         credentialRequest.setName("IgnoredCredRequestName");
         environmentRequest.setCredential(credentialRequest);
+        LocationRequest locationRequest = new LocationRequest();
+        locationRequest.setLocationName("region1");
+        environmentRequest.setLocation(locationRequest);
 
         when(cloudParameterCache.areRegionsSupported(any())).thenReturn(false);
         when(conversionService.convert(any(EnvironmentRequest.class), eq(Environment.class))).thenReturn(new Environment());
         when(environmentRepository.save(any(Environment.class))).thenReturn(new Environment());
         when(environmentCredentialOperationService.getCredentialFromRequest(any(), anyLong())).thenReturn(new Credential());
-
+        CloudRegions cloudRegions = new CloudRegions();
+        cloudRegions.setCloudRegions(Map.of(region("region1"), List.of(), region("region2"), List.of()));
+        cloudRegions.setDisplayNames(Map.of(region("region1"), "display1", region("region2"), "display2"));
+        cloudRegions.setCoordinates(Map.of(
+                region("region1"), coordinate("1", "2", "region1"),
+                region("region2"), coordinate("1", "2", "region2")));
+        when(platformParameterService.getRegionsByCredential(any())).thenReturn(cloudRegions);
         DetailedEnvironmentResponse response = environmentService.createForLoggedInUser(environmentRequest, WORKSPACE_ID);
 
         assertNotNull(response);
@@ -179,12 +190,21 @@ public class EnvironmentServiceTest {
         CredentialRequest credentialRequest = new CredentialRequest();
         credentialRequest.setName("CredRequestName");
         environmentRequest.setCredential(credentialRequest);
+        LocationRequest locationRequest = new LocationRequest();
+        locationRequest.setLocationName("region1");
+        environmentRequest.setLocation(locationRequest);
 
         when(cloudParameterCache.areRegionsSupported(any())).thenReturn(false);
         when(conversionService.convert(any(EnvironmentRequest.class), eq(Environment.class))).thenReturn(new Environment());
         when(environmentRepository.save(any(Environment.class))).thenReturn(new Environment());
         when(environmentCredentialOperationService.getCredentialFromRequest(any(), anyLong())).thenReturn(new Credential());
-
+        CloudRegions cloudRegions = new CloudRegions();
+        cloudRegions.setCloudRegions(Map.of(region("region1"), List.of(), region("region2"), List.of()));
+        cloudRegions.setDisplayNames(Map.of(region("region1"), "display1", region("region2"), "display2"));
+        cloudRegions.setCoordinates(Map.of(
+                region("region1"), coordinate("1", "2", "region1"),
+                region("region2"), coordinate("1", "2", "region2")));
+        when(platformParameterService.getRegionsByCredential(any())).thenReturn(cloudRegions);
         DetailedEnvironmentResponse response = environmentService.createForLoggedInUser(environmentRequest, WORKSPACE_ID);
 
         assertNotNull(response);
@@ -201,6 +221,9 @@ public class EnvironmentServiceTest {
         credentialRequest.setName("IgnoredCredRequestName");
         environmentRequest.setCredential(credentialRequest);
         environmentRequest.setRegions(Set.of("region1", "region2"));
+        LocationRequest locationRequest = new LocationRequest();
+        locationRequest.setLocationName("region1");
+        environmentRequest.setLocation(locationRequest);
 
         when(conversionService.convert(any(EnvironmentRequest.class), eq(Environment.class))).thenReturn(new Environment());
         ArgumentCaptor<Environment> envCaptor = ArgumentCaptor.forClass(Environment.class);
@@ -208,10 +231,13 @@ public class EnvironmentServiceTest {
         when(environmentCredentialOperationService.getCredentialFromRequest(any(), anyLong())).thenReturn(new Credential());
 
         CloudRegions cloudRegions = new CloudRegions();
-        cloudRegions.setCloudRegions(Map.of(Region.region("region1"), List.of(), Region.region("region2"), List.of()));
-        cloudRegions.setDisplayNames(Map.of(Region.region("region1"), "display1", Region.region("region2"), "display2"));
-        when(cloudParameterCache.areRegionsSupported(any())).thenReturn(true);
+        cloudRegions.setCloudRegions(Map.of(region("region1"), List.of(), region("region2"), List.of()));
+        cloudRegions.setDisplayNames(Map.of(region("region1"), "display1", region("region2"), "display2"));
+        cloudRegions.setCoordinates(Map.of(
+                region("region1"), coordinate("1", "2", "region1"),
+                region("region2"), coordinate("1", "2", "region2")));
         when(platformParameterService.getRegionsByCredential(any())).thenReturn(cloudRegions);
+        when(cloudParameterCache.areRegionsSupported(any())).thenReturn(true);
         // WHEN
         DetailedEnvironmentResponse response = environmentService.createForLoggedInUser(environmentRequest, WORKSPACE_ID);
         // THEN

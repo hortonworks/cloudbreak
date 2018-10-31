@@ -4,6 +4,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.model.environment.response.LocationResponse;
 import com.sequenceiq.cloudbreak.api.model.environment.response.SimpleEnvironmentResponse;
 import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
@@ -23,6 +24,7 @@ public class EnvironmentToSimpleEnvironmentResponseConverter extends AbstractCon
         response.setRegions(regionConverter.convertRegions(source.getRegionSet()));
         response.setCloudPlatform(source.getCloudPlatform());
         response.setWorkspace(getConversionService().convert(source.getWorkspace(), WorkspaceResourceResponse.class));
+        response.setLocation(getConversionService().convert(source, LocationResponse.class));
         return response;
     }
 }

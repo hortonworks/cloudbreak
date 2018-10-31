@@ -293,6 +293,7 @@ public class ModelDescriptions {
         public static final String VIRTUAL_MACHINES_PER_ZONES = "virtual machines per zones";
         public static final String REGIONS = "regions";
         public static final String REGION_DISPLAYNAMES = "regions with displayNames";
+        public static final String REGION_LOCATIONS = "regions with location data";
         public static final String AVAILABILITY_ZONES = "availability zones";
         public static final String DEFAULT_REGIOS = "default regions";
     }
@@ -608,6 +609,9 @@ public class ModelDescriptions {
         public static final String RDS_CONFIGS = "Name of the RDS configurations to be attached to the environment.";
         public static final String LDAP_CONFIGS = "Name of the LDAP configurations to be attached to the environment.";
         public static final String REGIONS = "Regions of the environment.";
+        public static final String LOCATION = "Location of the environment.";
+        public static final String LONGITUDE = "Location longitude of the environment.";
+        public static final String LATITUDE = "Location latitude of the environment.";
     }
 
     public static class EnvironmentResponseModelDescription {
@@ -619,5 +623,6 @@ public class ModelDescriptions {
         public static final String WORKLOAD_CLUSTER_NAMES = "Name of the workload clusters created in the environment.";
         public static final String REGIONS = "Regions of the environment.";
         public static final String CLOUD_PLATFORM = "Cloud platform of the environment.";
+        public static final String LOCATION = "Location of the environment.";
     }
 }

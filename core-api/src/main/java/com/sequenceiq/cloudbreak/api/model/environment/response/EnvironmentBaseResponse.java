@@ -28,6 +28,9 @@ public abstract class EnvironmentBaseResponse {
     @ApiModelProperty(EnvironmentResponseModelDescription.CREDENTIAL_NAME)
     private String credentialName;
 
+    @ApiModelProperty(EnvironmentResponseModelDescription.LOCATION)
+    private LocationResponse location;
+
     private WorkspaceResourceResponse workspace;
 
     public Long getId() {
@@ -86,4 +89,11 @@ public abstract class EnvironmentBaseResponse {
         this.credentialName = credentialName;
     }
 
+    public LocationResponse getLocation() {
+        return location;
+    }
+
+    public void setLocation(LocationResponse location) {
+        this.location = location;
+    }
 }

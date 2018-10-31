@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentRequest;
+import com.sequenceiq.cloudbreak.api.model.environment.request.LocationRequest;
+import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.cloudbreak.domain.Credential;
@@ -25,6 +27,7 @@ public class EnvironmentCreationValidator {
         validateProxyConfigs(environment, request, resultBuilder);
         validateRdsConfigs(environment, request, resultBuilder);
         validateRegions(request.getRegions(), environment, regionsSupported, resultBuilder);
+        validateLocation(request.getLocation(), request.getRegions(), environment, resultBuilder);
         return resultBuilder.build();
     }
 
@@ -66,6 +69,16 @@ public class EnvironmentCreationValidator {
             validateRegionsWhereSupported(requestedRegions, existingRegions, resultBuilder, cloudPlatform);
         } else if (!requestedRegions.isEmpty()) {
             resultBuilder.error(String.format("Region are not supporeted on cloudprovider: [%s].", cloudPlatform));
+        }
+    }
+
+    private void validateLocation(LocationRequest location, Set<String> requestedRegions, Environment environment, ValidationResultBuilder resultBuilder) {
+        String cloudPlatform = environment.getCredential().cloudPlatform();
+        if (!requestedRegions.contains(location.getLocationName())
+                && !requestedRegions.isEmpty()) {
+            if (!cloudPlatform.equalsIgnoreCase(CloudConstants.OPENSTACK) && !cloudPlatform.equalsIgnoreCase(CloudConstants.MOCK)) {
+                resultBuilder.error(String.format("Location is not one of the region: [%s].", location.getLocationName()));
+            }
         }
     }
 

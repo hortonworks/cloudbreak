@@ -33,6 +33,15 @@ public class EnvironmentView extends CompactView {
     @JoinColumn(nullable = false)
     private Credential credential;
 
+    @Column(nullable = false)
+    private String location;
+
+    @Column(nullable = false)
+    private Double longitude;
+
+    @Column(nullable = false)
+    private Double latitude;
+
     public Json getRegions() {
         return regions;
     }
@@ -59,6 +68,30 @@ public class EnvironmentView extends CompactView {
 
     public void setCredential(Credential credential) {
         this.credential = credential;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public Double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
+    }
+
+    public Double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
     }
 
     @Override

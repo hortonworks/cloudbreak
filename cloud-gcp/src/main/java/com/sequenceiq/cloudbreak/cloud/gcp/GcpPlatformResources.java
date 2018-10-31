@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.gcp;
 
+import static com.sequenceiq.cloudbreak.cloud.model.Coordinate.coordinate;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 
 import java.io.IOException;
@@ -16,6 +17,7 @@ import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import javax.annotation.PostConstruct;
 
 import javax.inject.Inject;
 
@@ -57,10 +59,15 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroup;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroups;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
+import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
+import com.sequenceiq.cloudbreak.cloud.model.RegionCoordinateSpecification;
+import com.sequenceiq.cloudbreak.cloud.model.RegionCoordinateSpecifications;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta.VmTypeMetaBuilder;
+import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Service
 public class GcpPlatformResources implements PlatformResources {
@@ -79,6 +86,36 @@ public class GcpPlatformResources implements PlatformResources {
 
     @Inject
     private GcpPlatformParameters gcpPlatformParameters;
+
+    @Inject
+    private CloudbreakResourceReaderService cloudbreakResourceReaderService;
+
+    private Map<Region, Coordinate> regionCoordinates = new HashMap<>();
+
+    @PostConstruct
+    public void init() {
+        regionCoordinates = readRegionCoordinates(resourceDefinition("zone-coordinates"));
+    }
+
+    public String resourceDefinition(String resource) {
+        return cloudbreakResourceReaderService.resourceDefinition("gcp", resource);
+    }
+
+    private Map<Region, Coordinate> readRegionCoordinates(String displayNames) {
+        Map<Region, Coordinate> regionCoordinates = new HashMap<>();
+        try {
+            RegionCoordinateSpecifications regionCoordinateSpecifications = JsonUtil.readValue(displayNames, RegionCoordinateSpecifications.class);
+            for (RegionCoordinateSpecification regionCoordinateSpecification : regionCoordinateSpecifications.getItems()) {
+                regionCoordinates.put(region(regionCoordinateSpecification.getName()),
+                        coordinate(regionCoordinateSpecification.getLongitude(),
+                                regionCoordinateSpecification.getLatitude(),
+                                regionCoordinateSpecification.getDisplayName()));
+            }
+        } catch (IOException ignored) {
+            return regionCoordinates;
+        }
+        return regionCoordinates;
+    }
 
     @Override
     public CloudNetworks networks(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception {
@@ -153,6 +190,8 @@ public class GcpPlatformResources implements PlatformResources {
 
         Map<Region, List<AvailabilityZone>> regionListMap = new HashMap<>();
         Map<Region, String> displayNames = new HashMap<>();
+        Map<Region, Coordinate> coordinates = new HashMap<>();
+
         String defaultRegion = gcpZoneParameterDefault;
         RegionList regionList = compute.regions().list(projectId).execute();
         for (com.google.api.services.compute.model.Region gcpRegion : regionList.getItems()) {
@@ -166,12 +205,23 @@ public class GcpPlatformResources implements PlatformResources {
                 }
                 regionListMap.put(region(gcpRegion.getName()), availabilityZones);
                 displayNames.put(region(gcpRegion.getName()), displayName(gcpRegion.getName()));
+                addCoordinate(coordinates, gcpRegion);
             }
         }
         if (region != null && !Strings.isNullOrEmpty(region.value())) {
             defaultRegion = region.value();
         }
-        return new CloudRegions(regionListMap, displayNames, defaultRegion);
+        return new CloudRegions(regionListMap, displayNames, coordinates, defaultRegion);
+    }
+
+    public void addCoordinate(Map<Region, Coordinate> coordinates, com.google.api.services.compute.model.Region gcpRegion) {
+        Coordinate coordinate = regionCoordinates.get(region(gcpRegion.getName()));
+        if (coordinate == null || coordinate.getLongitude() == null || coordinate.getLatitude() == null) {
+            LOGGER.warn("Unregistered region with location coordinates on gcp side: {} using default California", gcpRegion.getName());
+            coordinates.put(region(gcpRegion.getName()), Coordinate.defaultCoordinate());
+        } else {
+            coordinates.put(region(gcpRegion.getName()), coordinate);
+        }
     }
 
     private String displayName(String word) {
