@@ -54,6 +54,9 @@ public class StackApiViewToStackViewResponseConverter extends AbstractConversion
         stackViewResponse.setStatus(source.getStatus());
         stackViewResponse.setCreated(source.getCreated());
         addFlexSubscription(source, stackViewResponse);
+        if (source.getEnvironment() != null) {
+            stackViewResponse.setEnvironment(source.getEnvironment().getName());
+        }
         return stackViewResponse;
     }
 

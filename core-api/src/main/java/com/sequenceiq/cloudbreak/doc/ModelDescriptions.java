@@ -188,7 +188,7 @@ public class ModelDescriptions {
         public static final String GENERAL_SETTINGS = "general configuration parameters for a cluster (e.g. 'name', 'credentialname')";
         public static final String PLACEMENT_SETTINGS = "placement configuration parameters for a cluster (e.g. 'region', 'availabilityZone')";
         public static final String SHARED_SERVICE_REQUEST = "Shared service request";
-        public static final String ENVIRONMENT = "environment where the stack will be created";
+        public static final String ENVIRONMENT = "environment which the stack is assigned to";
     }
 
     public static class ClusterModelDescription {

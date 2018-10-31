@@ -62,6 +62,9 @@ public class StackApiView extends CompactViewWithOwner {
 
     private Long datalakeId;
 
+    @ManyToOne
+    private EnvironmentView environment;
+
     @Override
     public WorkspaceResource getResource() {
         return WorkspaceResource.STACK;
@@ -157,5 +160,13 @@ public class StackApiView extends CompactViewWithOwner {
 
     public Status getStatus() {
         return stackStatus != null ? stackStatus.getStatus() : null;
+    }
+
+    public EnvironmentView getEnvironment() {
+        return environment;
+    }
+
+    public void setEnvironment(EnvironmentView environment) {
+        this.environment = environment;
     }
 }
