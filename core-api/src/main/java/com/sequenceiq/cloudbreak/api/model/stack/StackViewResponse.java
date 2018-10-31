@@ -54,6 +54,9 @@ public class StackViewResponse {
     @ApiModelProperty(StackModelDescription.FLEX_SUBSCRIPTION)
     private FlexSubscriptionResponse flexSubscription;
 
+    @ApiModelProperty(StackModelDescription.ENVIRONMENT)
+    private String environment;
+
     public Long getId() {
         return id;
     }
@@ -156,5 +159,13 @@ public class StackViewResponse {
 
     public void setFlexSubscription(FlexSubscriptionResponse flexSubscription) {
         this.flexSubscription = flexSubscription;
+    }
+
+    public String getEnvironment() {
+        return environment;
+    }
+
+    public void setEnvironment(String environment) {
+        this.environment = environment;
     }
 }
