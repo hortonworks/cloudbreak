@@ -22,10 +22,11 @@ import (
 
 const availabilitySet = "availabilitySet"
 
-var stackHeader []string = []string{"Name", "Description", "CloudPlatform", "StackStatus", "ClusterStatus"}
+var stackHeader []string = []string{"Name", "Description", "CloudPlatform", "Environment", "StackStatus", "ClusterStatus"}
 
 type stackOut struct {
 	common.CloudResourceOut
+	Environment   string `json:"Environment" yaml:"Environment"`
 	StackStatus   string `json:"StackStatus" yaml:"StackStatus"`
 	ClusterStatus string `json:"ClusterStatus" yaml:"ClusterStatus"`
 }
@@ -36,6 +37,7 @@ type stackOutDescribe struct {
 
 func (s *stackOut) DataAsStringArray() []string {
 	arr := s.CloudResourceOut.DataAsStringArray()
+	arr = append(arr, s.Environment)
 	arr = append(arr, s.StackStatus)
 	arr = append(arr, s.ClusterStatus)
 	return arr
@@ -125,6 +127,7 @@ func assembleStackRequest(c *cli.Context) *model.StackV2Request {
 func convertViewResponseToStack(s *model.StackViewResponse) *stackOut {
 	return &stackOut{
 		common.CloudResourceOut{*s.Name, utils.SafeStringConvert(s.Cluster.Description), credential.GetPlatformName(s.Credential)},
+		s.Environment,
 		s.Status,
 		s.Cluster.Status,
 	}
@@ -133,6 +136,7 @@ func convertViewResponseToStack(s *model.StackViewResponse) *stackOut {
 func convertResponseToStack(s *model.StackResponse) *stackOut {
 	return &stackOut{
 		common.CloudResourceOut{*s.Name, s.Cluster.Description, credential.GetPlatformName(s.Credential)},
+		s.Environment,
 		s.Status,
 		s.Cluster.Status,
 	}

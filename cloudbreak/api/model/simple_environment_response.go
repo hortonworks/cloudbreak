@@ -10,7 +10,6 @@ import (
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
-	"github.com/go-openapi/validate"
 )
 
 // SimpleEnvironmentResponse simple environment response
@@ -34,8 +33,7 @@ type SimpleEnvironmentResponse struct {
 	Name string `json:"name,omitempty"`
 
 	// Regions of the environment.
-	// Unique: true
-	Regions []string `json:"regions"`
+	Regions *CompactRegionResponse `json:"regions,omitempty"`
 
 	// workspace
 	Workspace *WorkspaceResourceResponse `json:"workspace,omitempty"`
@@ -81,8 +79,14 @@ func (m *SimpleEnvironmentResponse) validateRegions(formats strfmt.Registry) err
 		return nil
 	}
 
-	if err := validate.UniqueItems("regions", "body", m.Regions); err != nil {
-		return err
+	if m.Regions != nil {
+
+		if err := m.Regions.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("regions")
+			}
+			return err
+		}
 	}
 
 	return nil

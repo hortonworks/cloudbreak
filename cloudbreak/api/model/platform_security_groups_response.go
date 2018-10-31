@@ -48,6 +48,10 @@ func (m *PlatformSecurityGroupsResponse) validateSecurityGroups(formats strfmt.R
 
 		for i := 0; i < len(m.SecurityGroups[k]); i++ {
 
+			if swag.IsZero(m.SecurityGroups[k][i]) {
+				continue
+			}
+
 		}
 
 	}

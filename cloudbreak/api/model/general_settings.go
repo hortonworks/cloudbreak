@@ -21,7 +21,7 @@ type GeneralSettings struct {
 	// credential resource name for the stack
 	CredentialName string `json:"credentialName,omitempty"`
 
-	// environment where the stack will be created
+	// environment which the stack is assigned to
 	EnvironmentName string `json:"environmentName,omitempty"`
 
 	// name of the stack

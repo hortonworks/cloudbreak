@@ -48,6 +48,10 @@ func (m *PlatformNetworksResponse) validateNetworks(formats strfmt.Registry) err
 
 		for i := 0; i < len(m.Networks[k]); i++ {
 
+			if swag.IsZero(m.Networks[k][i]) {
+				continue
+			}
+
 		}
 
 	}

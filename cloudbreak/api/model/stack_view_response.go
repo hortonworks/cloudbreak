@@ -32,6 +32,9 @@ type StackViewResponse struct {
 	// stack related credential
 	Credential *CredentialResponse `json:"credential,omitempty"`
 
+	// environment which the stack is assigned to
+	Environment string `json:"environment,omitempty"`
+
 	// the related flex subscription
 	FlexSubscription *FlexSubscriptionResponse `json:"flexSubscription,omitempty"`
 
@@ -68,6 +71,8 @@ type StackViewResponse struct {
 /* polymorph StackViewResponse created false */
 
 /* polymorph StackViewResponse credential false */
+
+/* polymorph StackViewResponse environment false */
 
 /* polymorph StackViewResponse flexSubscription false */
 

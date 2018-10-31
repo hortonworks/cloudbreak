@@ -48,6 +48,10 @@ func (m *PlatformIPPoolsResponse) validateIppools(formats strfmt.Registry) error
 
 		for i := 0; i < len(m.Ippools[k]); i++ {
 
+			if swag.IsZero(m.Ippools[k][i]) {
+				continue
+			}
+
 		}
 
 	}

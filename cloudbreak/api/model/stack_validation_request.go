@@ -38,7 +38,7 @@ type StackValidationRequest struct {
 	// credential resource name for the stack
 	CredentialName string `json:"credentialName,omitempty"`
 
-	// environment where the stack will be created
+	// environment which the stack is assigned to
 	Environment string `json:"environment,omitempty"`
 
 	// cluster related filesystem

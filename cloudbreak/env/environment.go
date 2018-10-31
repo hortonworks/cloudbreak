@@ -112,7 +112,7 @@ func listEnvironmentsImpl(envClient environmentClient, writer func([]string, []u
 			Name:          e.Name,
 			Description:   e.Description,
 			CloudPlatform: e.CloudPlatform,
-			Regions:       e.Regions,
+			Regions:       getRegionNames(e.Regions),
 		}
 		tableRows = append(tableRows, row)
 	}
@@ -228,7 +228,7 @@ func convertResponseToTableOutput(env *model.DetailedEnvironmentResponse) *envir
 			Name:          env.Name,
 			Description:   env.Description,
 			CloudPlatform: env.CloudPlatform,
-			Regions:       env.Regions,
+			Regions:       getRegionNames(env.Regions),
 		},
 		ID: strconv.FormatInt(env.ID, 10),
 	}
@@ -240,11 +240,19 @@ func convertResponseToJsonOutput(env *model.DetailedEnvironmentResponse) *enviro
 			Name:          env.Name,
 			Description:   env.Description,
 			CloudPlatform: env.CloudPlatform,
-			Regions:       env.Regions,
+			Regions:       getRegionNames(env.Regions),
 		},
 		LdapConfigs:  env.LdapConfigs,
 		ProxyConfigs: env.ProxyConfigs,
 		RdsConfigs:   env.RdsConfigs,
 		ID:           strconv.FormatInt(env.ID, 10),
 	}
+}
+
+func getRegionNames(region *model.CompactRegionResponse) []string {
+	regions := []string{}
+	for _, v := range region.DisplayNames {
+		regions = append(regions, v)
+	}
+	return regions
 }

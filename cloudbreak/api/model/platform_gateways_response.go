@@ -1,7 +1,7 @@
 package model
 
 import (
-	"github.com/go-openapi/strfmt"
+	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
@@ -47,6 +47,10 @@ func (m *PlatformGatewaysResponse) validateGateways(formats strfmt.Registry) err
 		}
 
 		for i := 0; i < len(m.Gateways[k]); i++ {
+
+			if swag.IsZero(m.Gateways[k][i]) {
+				continue
+			}
 
 		}
 

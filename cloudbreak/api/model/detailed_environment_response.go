@@ -46,8 +46,7 @@ type DetailedEnvironmentResponse struct {
 	RdsConfigs []string `json:"rdsConfigs"`
 
 	// Regions of the environment.
-	// Unique: true
-	Regions []string `json:"regions"`
+	Regions *CompactRegionResponse `json:"regions,omitempty"`
 
 	// Name of the workload clusters created in the environment.
 	// Unique: true
@@ -164,8 +163,14 @@ func (m *DetailedEnvironmentResponse) validateRegions(formats strfmt.Registry) e
 		return nil
 	}
 
-	if err := validate.UniqueItems("regions", "body", m.Regions); err != nil {
-		return err
+	if m.Regions != nil {
+
+		if err := m.Regions.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("regions")
+			}
+			return err
+		}
 	}
 
 	return nil

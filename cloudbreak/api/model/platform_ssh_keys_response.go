@@ -48,6 +48,10 @@ func (m *PlatformSSHKeysResponse) validateSSHKeys(formats strfmt.Registry) error
 
 		for i := 0; i < len(m.SSHKeys[k]); i++ {
 
+			if swag.IsZero(m.SSHKeys[k][i]) {
+				continue
+			}
+
 		}
 
 	}
