@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.api.model;
 
+import java.util.Map;
+
 import javax.validation.constraints.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -24,6 +26,9 @@ public class TemplateRequest extends TemplateBase {
     @ApiModelProperty(TemplateModelDescription.VOLUME_SIZE)
     private Integer volumeSize;
 
+    @ApiModelProperty(TemplateModelDescription.SECRET_PARAMETERS)
+    private Map<String, Object> secretParameters;
+
     public Integer getVolumeSize() {
         return volumeSize;
     }
@@ -46,5 +51,13 @@ public class TemplateRequest extends TemplateBase {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Map<String, Object> getSecretParameters() {
+        return secretParameters;
+    }
+
+    public void setSecretParameters(Map<String, Object> secretParameters) {
+        this.secretParameters = secretParameters;
     }
 }

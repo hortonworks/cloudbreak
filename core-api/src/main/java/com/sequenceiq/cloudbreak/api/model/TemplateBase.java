@@ -21,9 +21,6 @@ public abstract class TemplateBase implements JsonEntity {
     @ApiModelProperty(TemplateModelDescription.PARAMETERS)
     private Map<String, Object> parameters = new HashMap<>();
 
-    @ApiModelProperty(TemplateModelDescription.SECRET_PARAMETERS)
-    private Map<String, Object> secretParameters = new HashMap<>();
-
     @Size(max = 1000)
     @ApiModelProperty(ModelDescriptions.DESCRIPTION)
     private String description;
@@ -65,14 +62,6 @@ public abstract class TemplateBase implements JsonEntity {
 
     public void setParameters(Map<String, Object> parameters) {
         this.parameters = parameters;
-    }
-
-    public Map<String, Object> getSecretParameters() {
-        return secretParameters;
-    }
-
-    public void setSecretParameters(Map<String, Object> secretParameters) {
-        this.secretParameters = secretParameters;
     }
 
     public String getVolumeType() {

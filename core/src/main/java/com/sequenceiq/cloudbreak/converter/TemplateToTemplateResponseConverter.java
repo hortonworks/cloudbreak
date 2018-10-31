@@ -2,13 +2,15 @@ package com.sequenceiq.cloudbreak.converter;
 
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AWS;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AZURE;
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.CUMULUS_YARN;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.GCP;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.OPENSTACK;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.YARN;
-import static com.sequenceiq.cloudbreak.common.type.CloudConstants.CUMULUS_YARN;
+import static java.util.Optional.ofNullable;
 
 import java.util.Map;
-import java.util.Optional;
+
+import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
@@ -21,9 +23,14 @@ import com.sequenceiq.cloudbreak.api.model.v2.template.OpenStackParameters;
 import com.sequenceiq.cloudbreak.api.model.v2.template.YarnParameters;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.service.VaultService;
 
 @Component
 public class TemplateToTemplateResponseConverter extends AbstractConversionServiceAwareConverter<Template, TemplateResponse> {
+
+    @Inject
+    private VaultService vaultService;
+
     @Override
     public TemplateResponse convert(Template source) {
         TemplateResponse templateJson = new TemplateResponse();
@@ -37,12 +44,9 @@ public class TemplateToTemplateResponseConverter extends AbstractConversionServi
         Json attributes = source.getAttributes();
         if (attributes != null) {
             Map<String, Object> atributesMap = attributes.getMap();
+            ofNullable(source.getSecretAttributes()).ifPresent(attr -> atributesMap.putAll(new Json(vaultService.resolveSingleValue(attr)).getMap()));
+            setParameterByPlatform(templateJson, atributesMap);
             templateJson.setParameters(atributesMap);
-
-            Optional.ofNullable(source.getSecretAttributes()).ifPresent(attr -> atributesMap.putAll(attr.getMap()));
-            Map<String, Object> map = atributesMap;
-
-            setParameterByPlatform(templateJson, atributesMap, map);
         }
         templateJson.setCloudPlatform(source.cloudPlatform());
         templateJson.setDescription(source.getDescription() == null ? "" : source.getDescription());
@@ -52,8 +56,8 @@ public class TemplateToTemplateResponseConverter extends AbstractConversionServi
         return templateJson;
     }
 
-    private void setParameterByPlatform(TemplateResponse templateJson, Map<String, Object> atributesMap, Map<String, Object> map) {
-        Object platformType = map.get(BaseTemplateParameter.PLATFORM_TYPE);
+    private void setParameterByPlatform(TemplateResponse templateJson, Map<String, Object> atributesMap) {
+        Object platformType = atributesMap.get(BaseTemplateParameter.PLATFORM_TYPE);
         if (platformType != null) {
             switch (platformType.toString()) {
                 case AWS:
