@@ -18,7 +18,16 @@ fi
 
 echo "Using vdf url $VDF_URL"
 
-wget $VDF_URL --output-document=vdf.xml
+{% if pillar['proxy'] is defined and pillar['proxy']['host'] is defined and pillar['proxy']['port'] is defined and pillar['proxy']['protocol'] is defined %}
+{% if 'user' in pillar['proxy'] %}
+curl -x {{ pillar['proxy']['protocol'] }}://{{ pillar['proxy']['user'] }}:{{ pillar['proxy']['password'] }}@{{ pillar['proxy']['host'] }}:{{ pillar['proxy']['port'] }} $VDF_URL -o vdf.xml
+{% else %}
+curl -x {{ pillar['proxy']['protocol'] }}://{{ pillar['proxy']['host'] }}:{{ pillar['proxy']['port'] }} $VDF_URL -o vdf.xml
+{% endif%}
+{% else %}
+curl $VDF_URL -o vdf.xml
+{% endif%}
+
 
 function getRepoBaseUrl()
 {
