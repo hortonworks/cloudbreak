@@ -22,7 +22,6 @@ import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
 import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.converter.BlueprintRequestToBlueprintConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.BlueprintInputParameters;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 
 @Service
@@ -62,9 +61,6 @@ public class DefaultBlueprintCache {
                     bp.setTags(new Json(tagParameters));
                     JsonNode description = jsonNode.get("description");
                     bp.setDescription(description == null ? split[0] : description.asText(split[0]));
-                    JsonNode inputs = jsonNode.get("inputs");
-                    BlueprintInputParameters inputParameters = new BlueprintInputParameters(blueprintUtils.prepareInputs(inputs));
-                    bp.setInputParameters(new Json(inputParameters));
                     defaultBlueprints.put(bp.getName(), bp);
                 }
             } catch (IOException e) {

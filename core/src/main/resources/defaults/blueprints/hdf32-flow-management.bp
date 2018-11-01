@@ -1,5 +1,4 @@
 {
-  "inputs": [],
   "description": "Useful for data-flow management with Apache NiFi and Apache NiFi Registry",
   "blueprint": {
     "Blueprints": {
