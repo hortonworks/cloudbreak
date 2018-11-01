@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -19,6 +20,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.powermock.reflect.Whitebox;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.ambari.client.services.ClusterService;
 import com.sequenceiq.cloudbreak.TestUtil;
@@ -44,12 +46,13 @@ public class AmbariClusterTemplateGeneratorTest {
     @Mock
     private ClusterService ambariClient;
 
-    @Mock
-    private VaultService vaultService;
+    private final VaultService vaultService = mock(VaultService.class);
 
     @Before
     public void init() {
-        Whitebox.setInternalState(underTest, "ambariSecurityConfigProvider", new AmbariSecurityConfigProvider());
+        AmbariSecurityConfigProvider ambariSecurityConfigProvider = new AmbariSecurityConfigProvider();
+        ReflectionTestUtils.setField(ambariSecurityConfigProvider, "vaultService", vaultService);
+        Whitebox.setInternalState(underTest, "ambariSecurityConfigProvider", ambariSecurityConfigProvider);
     }
 
     @Test
@@ -57,6 +60,7 @@ public class AmbariClusterTemplateGeneratorTest {
         // GIVEN
         Cluster cluster = TestUtil.cluster();
         cluster.setPassword("UserProvidedPassword");
+        when(vaultService.resolveSingleValue(any())).thenReturn("UserProvidedPassword");
 
         // WHEN
         underTest.generateClusterTemplate(cluster, new HashMap<>(), ambariClient);
@@ -78,6 +82,7 @@ public class AmbariClusterTemplateGeneratorTest {
         cluster.setKerberosConfig(kerberosConfig);
         given(kerberosDetailService.resolvePrincipalForKerberos(any())).willReturn("principal");
         when(vaultService.resolveSingleValue("KerberosPassword")).thenReturn("KerberosPassword");
+        when(vaultService.resolveSingleValue("UserProvidedPassword")).thenReturn("UserProvidedPassword");
 
         // WHEN
         underTest.generateClusterTemplate(cluster, new HashMap<>(), ambariClient);
