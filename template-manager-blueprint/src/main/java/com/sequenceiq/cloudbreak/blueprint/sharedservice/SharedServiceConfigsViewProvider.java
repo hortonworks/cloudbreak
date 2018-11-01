@@ -9,12 +9,14 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
-import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.service.VaultService;
+import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
+import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
 
 @Component
@@ -28,6 +30,9 @@ public class SharedServiceConfigsViewProvider {
     @Inject
     private BlueprintUtils blueprintUtils;
 
+    @Inject
+    private VaultService vaultService;
+
     public SharedServiceConfigsView createSharedServiceConfigs(Blueprint blueprint, String ambariPassword, Stack dataLakeStack) {
         SharedServiceConfigsView sharedServiceConfigsView = new SharedServiceConfigsView();
         if (dataLakeStack != null) {
@@ -35,8 +40,7 @@ public class SharedServiceConfigsViewProvider {
             Map<String, Map<String, String>> configurationEntries = blueprintTextProcessor.getConfigurationEntries();
             Map<String, String> rangerAdminConfigs = configurationEntries.getOrDefault("ranger-admin-site", new HashMap<>());
             String rangerPort = rangerAdminConfigs.getOrDefault("ranger.service.http.port", DEFAULT_RANGER_PORT);
-
-            sharedServiceConfigsView.setRangerAdminPassword(dataLakeStack.getCluster().getPassword());
+            sharedServiceConfigsView.setRangerAdminPassword(vaultService.resolveSingleValue(dataLakeStack.getCluster().getPassword()));
             sharedServiceConfigsView.setAttachedCluster(true);
             sharedServiceConfigsView.setDatalakeCluster(false);
             sharedServiceConfigsView.setDatalakeAmbariIp(dataLakeStack.getAmbariIp());
@@ -60,7 +64,8 @@ public class SharedServiceConfigsViewProvider {
     }
 
     public SharedServiceConfigsView createSharedServiceConfigs(Stack source, Stack dataLakeStack) {
-        return createSharedServiceConfigs(source.getCluster().getBlueprint(), source.getCluster().getPassword(), dataLakeStack);
+        Cluster cluster = source.getCluster();
+        return createSharedServiceConfigs(cluster.getBlueprint(), vaultService.resolveSingleValue(cluster.getPassword()), dataLakeStack);
     }
 
     private Set<String> prepareComponents(String blueprintText) {

@@ -7,10 +7,8 @@ import static com.sequenceiq.cloudbreak.api.model.RecipeType.PRE_TERMINATION;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.Map;
 import java.util.Set;
 
-import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -20,13 +18,9 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.RecipeType;
-import com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.blueprint.SmartsenseConfigurationLocator;
-import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationsViewProvider;
-import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurator;
-import com.sequenceiq.cloudbreak.blueprint.smartsense.SmartSenseConfigProvider;
 import com.sequenceiq.cloudbreak.common.model.recipe.RecipeScript;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
@@ -37,6 +31,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.service.VaultService;
 import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
@@ -51,9 +46,6 @@ public class RecipeEngine {
     @Inject
     private OrchestratorTypeResolver orchestratorTypeResolver;
 
-    @Resource
-    private Map<FileSystemType, FileSystemConfigurator> fileSystemConfigurators;
-
     @Inject
     private RecipeBuilder recipeBuilder;
 
@@ -64,16 +56,13 @@ public class RecipeEngine {
     private BlueprintProcessorFactory blueprintProcessorFactory;
 
     @Inject
-    private SmartSenseConfigProvider smartSenseConfigProvider;
-
-    @Inject
     private SmartsenseConfigurationLocator smartsenseConfigurationLocator;
 
     @Inject
     private SmartSenseSubscriptionService smartSenseSubscriptionService;
 
     @Inject
-    private FileSystemConfigurationsViewProvider fileSystemConfigurationsViewProvider;
+    private VaultService vaultService;
 
     public void uploadRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
         Orchestrator orchestrator = stack.getOrchestrator();
@@ -186,7 +175,8 @@ public class RecipeEngine {
             String blueprintText = cluster.getBlueprint().getBlueprintText();
             for (HostGroup hostGroup : hostGroups) {
                 if (isComponentPresent(blueprintText, "NAMENODE", hostGroup)) {
-                    String script = FileReaderUtils.readFileFromClasspath("scripts/hdfs-home.sh").replaceAll("\\$USER", cluster.getUserName());
+                    String userName = vaultService.resolveSingleValue(cluster.getUserName());
+                    String script = FileReaderUtils.readFileFromClasspath("scripts/hdfs-home.sh").replaceAll("\\$USER", userName);
                     RecipeScript recipeScript = new RecipeScript(script, POST_CLUSTER_INSTALL);
                     Recipe recipe = recipeBuilder.buildRecipes("hdfs-home", Collections.singletonList(recipeScript)).get(0);
                     hostGroup.addRecipe(recipe);
@@ -205,9 +195,9 @@ public class RecipeEngine {
             for (HostGroup hostGroup : hostGroups) {
                 if (isComponentPresent(blueprintText, "ATLAS_SERVER", hostGroup)) {
                     String script = FileReaderUtils.readFileFromClasspath("scripts/prepare-s3-symlinks.sh")
-                            .replaceAll("\\$AMBARI_USER", cluster.getUserName())
+                            .replaceAll("\\$AMBARI_USER", vaultService.resolveSingleValue(cluster.getUserName()))
                             .replaceAll("\\$AMBARI_IP", getAmbariPrivateIp(stack))
-                            .replaceAll("\\$AMBARI_PASSWORD", cluster.getPassword())
+                            .replaceAll("\\$AMBARI_PASSWORD", vaultService.resolveSingleValue(cluster.getPassword()))
                             .replaceAll("\\$CLUSTER_NAME", cluster.getName());
                     RecipeScript recipeScript = new RecipeScript(script, RecipeType.POST_CLUSTER_INSTALL);
                     Recipe recipe = recipeBuilder.buildRecipes("prepare-s3-symlinks", Collections.singletonList(recipeScript)).get(0);
