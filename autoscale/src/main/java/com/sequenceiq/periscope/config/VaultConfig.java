@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.conf;
+package com.sequenceiq.periscope.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
@@ -8,15 +8,15 @@ import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.config.AbstractVaultConfiguration;
 
 @Configuration
-class VaultConf extends AbstractVaultConfiguration {
+public class VaultConfig extends AbstractVaultConfiguration {
 
-    @Value("${cb.vault.addr:vault.service.consul}")
+    @Value("${periscope.vault.addr:vault.service.consul}")
     private String address;
 
-    @Value("${cb.vault.port:8200}")
+    @Value("${periscope.vault.port:8200}")
     private int port;
 
-    @Value("${cb.vault.root.token:}")
+    @Value("${periscope.vault.root.token:}")
     private String rootToken;
 
     @Override
