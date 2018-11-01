@@ -16,7 +16,6 @@ import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ClusterV1Endpoint;
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
-import com.sequenceiq.cloudbreak.api.model.ConfigsRequest;
 import com.sequenceiq.cloudbreak.api.model.ConfigsResponse;
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRepairRequest;
@@ -136,8 +135,8 @@ public class ClusterV1Controller implements ClusterV1Endpoint {
     }
 
     @Override
-    public ConfigsResponse getConfigs(Long stackId, ConfigsRequest requests) throws Exception {
-        return clusterService.retrieveOutputs(stackId, requests.getRequests());
+    public ConfigsResponse getConfigs(Long stackId) {
+        return clusterService.retrieveOutputs(stackId);
     }
 
     @Override

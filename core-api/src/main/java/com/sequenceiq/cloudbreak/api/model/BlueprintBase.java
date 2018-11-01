@@ -1,9 +1,7 @@
 package com.sequenceiq.cloudbreak.api.model;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import javax.validation.constraints.Size;
 
@@ -28,9 +26,6 @@ public abstract class BlueprintBase implements JsonEntity {
     @Size(max = 1000)
     @ApiModelProperty(ModelDescriptions.DESCRIPTION)
     private String description;
-
-    @ApiModelProperty(BlueprintModelDescription.INPUTS)
-    private Set<BlueprintParameterJson> inputs = new HashSet<>();
 
     @ApiModelProperty(BlueprintModelDescription.TAGS)
     private Map<String, Object> tags = new HashMap<>();
@@ -59,11 +54,4 @@ public abstract class BlueprintBase implements JsonEntity {
         this.description = description;
     }
 
-    public Set<BlueprintParameterJson> getInputs() {
-        return inputs;
-    }
-
-    public void setInputs(Set<BlueprintParameterJson> inputs) {
-        this.inputs = inputs;
-    }
 }
