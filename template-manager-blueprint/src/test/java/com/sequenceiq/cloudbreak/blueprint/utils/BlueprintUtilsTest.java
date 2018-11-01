@@ -8,7 +8,6 @@ import static org.mockito.Mockito.when;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Rule;
@@ -20,7 +19,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.sequenceiq.cloudbreak.domain.BlueprintParameter;
 import com.sequenceiq.cloudbreak.json.JsonHelper;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
@@ -123,14 +121,6 @@ public class BlueprintUtilsTest {
 
         String[] split = blueprintStrings.split("=");
         assertTrue(underTest.isBlueprintNamePreConfigured(blueprintStrings, split));
-    }
-
-    @Test
-    public void testPrepareInputsWhenTheInputConfigIsCorrectShouldReturnWithParsedInput() throws IOException {
-        JsonNode inputs = JsonUtil.readTree("{}");
-        List<BlueprintParameter> blueprintParameters = underTest.prepareInputs(inputs);
-
-        Assert.assertNotNull(blueprintParameters);
     }
 
     @Test
