@@ -65,11 +65,13 @@ import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterResponse;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.service.CrudRepositoryLookupService;
 import com.sequenceiq.cloudbreak.service.TransactionExecutorService;
+import com.sequenceiq.cloudbreak.service.VaultService;
 import com.sequenceiq.periscope.PeriscopeApplication;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterRequest;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.config.DatabaseConfig;
 import com.sequenceiq.periscope.config.DatabaseMigrationConfig;
+import com.sequenceiq.periscope.config.VaultConfig;
 import com.sequenceiq.periscope.controller.AutoScaleClusterV1Controller;
 import com.sequenceiq.periscope.controller.AutoScaleClusterV2Controller;
 import com.sequenceiq.periscope.domain.Ambari;
@@ -469,7 +471,8 @@ public class MetricTest {
                             DatabaseConfig.class,
                             DatabaseMigrationConfig.class,
                             PeriscopeApplication.class,
-                            MetricService.class
+                            MetricService.class,
+                            VaultConfig.class
                     }
             ),
                     @Filter(type = FilterType.REGEX, pattern = "com.sequenceiq.periscope.modul.rejected.*")}
@@ -517,6 +520,9 @@ public class MetricTest {
 
         @MockBean
         private Scheduler scheduler;
+
+        @MockBean
+        private VaultService vaultService;
 
         @SpyBean
         private MetricService metricService;
