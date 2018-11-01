@@ -16,7 +16,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
-import com.sequenceiq.cloudbreak.api.model.ConfigsRequest;
 import com.sequenceiq.cloudbreak.api.model.ConfigsResponse;
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRepairRequest;
@@ -87,7 +86,7 @@ public interface ClusterV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ClusterOpDescription.GET_CLUSTER_PROPERTIES, produces = ContentType.JSON, notes = Notes.CLUSTER_NOTES,
             nickname = "getConfigsCluster")
-    ConfigsResponse getConfigs(@PathParam("id") Long stackId, ConfigsRequest requests) throws Exception;
+    ConfigsResponse getConfigs(@PathParam("id") Long stackId) throws Exception;
 
     @POST
     @Path("{id}/cluster/upgrade")

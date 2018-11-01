@@ -1,13 +1,9 @@
 package com.sequenceiq.cloudbreak.blueprint.utils;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 import javax.inject.Inject;
@@ -17,7 +13,6 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.BlueprintParameter;
 import com.sequenceiq.cloudbreak.json.JsonHelper;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
@@ -68,17 +63,6 @@ public class BlueprintUtils {
 
     public boolean isBlueprintNamePreConfigured(String blueprintStrings, String[] split) {
         return !blueprintStrings.isEmpty() && (split.length == 2 || split.length == 1) && !split[0].isEmpty();
-    }
-
-    public List<BlueprintParameter> prepareInputs(JsonNode inputs) throws com.fasterxml.jackson.core.JsonProcessingException {
-        Set<BlueprintParameter> blueprintParameters = new HashSet<>();
-        if (inputs != null && inputs.isArray()) {
-            for (JsonNode objNode : inputs) {
-                BlueprintParameter blueprintParameter = JsonUtil.treeToValue(objNode, BlueprintParameter.class);
-                blueprintParameters.add(blueprintParameter);
-            }
-        }
-        return new ArrayList<>(blueprintParameters);
     }
 
     public Map<String, Object> prepareTags(JsonNode tags) throws com.fasterxml.jackson.core.JsonProcessingException {

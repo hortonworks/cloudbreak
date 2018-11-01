@@ -1,5 +1,4 @@
 {
-  "inputs": [],
   "description": "Useful for messaging management with Apache Kafka and Schema Registry",
   "blueprint":
   {

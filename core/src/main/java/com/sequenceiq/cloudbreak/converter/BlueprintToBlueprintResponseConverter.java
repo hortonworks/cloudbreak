@@ -1,21 +1,11 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.BlueprintParameterJson;
 import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.BlueprintInputParameters;
-import com.sequenceiq.cloudbreak.domain.BlueprintParameter;
-import com.sequenceiq.cloudbreak.domain.json.Json;
 
 @Component
 public class BlueprintToBlueprintResponseConverter extends AbstractConversionServiceAwareConverter<Blueprint, BlueprintResponse> {
@@ -31,28 +21,8 @@ public class BlueprintToBlueprintResponseConverter extends AbstractConversionSer
         blueprintJson.setHostGroupCount(entity.getHostGroupCount());
         blueprintJson.setStatus(entity.getStatus());
         blueprintJson.setTags(entity.getTags().getMap());
-        try {
-            blueprintJson.setInputs(convertInputParameters(entity.getInputParameters()));
-        } catch (IOException e) {
-            LOGGER.error(String.format("Blueprint's (%s, id:%s) input parameters could not be converted to JSON.", entity.getName(), entity.getId()), e);
-        }
         blueprintJson.setAmbariBlueprint(entity.getBlueprintText());
         return blueprintJson;
     }
 
-    private Set<BlueprintParameterJson> convertInputParameters(Json inputParameters) throws IOException {
-        Set<BlueprintParameterJson> result = new HashSet<>();
-        if (inputParameters != null && StringUtils.isNoneEmpty(inputParameters.getValue())) {
-            BlueprintInputParameters inputParametersObj = inputParameters.get(BlueprintInputParameters.class);
-            List<BlueprintParameter> parameters = inputParametersObj.getParameters();
-            for (BlueprintParameter record : parameters) {
-                BlueprintParameterJson json = new BlueprintParameterJson();
-                json.setDescription(record.getDescription());
-                json.setName(record.getName());
-                json.setReferenceConfiguration(record.getReferenceConfiguration());
-                result.add(json);
-            }
-        }
-        return result;
-    }
 }
