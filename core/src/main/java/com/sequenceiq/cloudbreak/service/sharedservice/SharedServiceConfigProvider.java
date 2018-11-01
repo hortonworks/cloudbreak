@@ -13,7 +13,6 @@ import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -22,7 +21,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.api.model.BlueprintParameterJson;
 import com.sequenceiq.cloudbreak.api.model.ConfigsResponse;
 import com.sequenceiq.cloudbreak.api.model.ConnectedClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
@@ -31,13 +29,11 @@ import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintParameterQueryService
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.BlueprintInputParameters;
-import com.sequenceiq.cloudbreak.domain.BlueprintParameter;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariClientFactory;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -93,22 +89,6 @@ public class SharedServiceConfigProvider {
         return Optional.empty();
     }
 
-    public Set<BlueprintParameterJson> getBlueprintParameterJsons(Blueprint blueprint) throws IOException {
-        Set<BlueprintParameterJson> requests = new HashSet<>();
-        Json blueprintAttributes = blueprint.getInputParameters();
-        if (blueprintAttributes != null && StringUtils.isNoneEmpty(blueprintAttributes.getValue())) {
-            BlueprintInputParameters inputParametersObj = blueprintAttributes.get(BlueprintInputParameters.class);
-            for (BlueprintParameter blueprintParameter : inputParametersObj.getParameters()) {
-                BlueprintParameterJson blueprintParameterJson = new BlueprintParameterJson();
-                blueprintParameterJson.setName(blueprintParameter.getName());
-                blueprintParameterJson.setReferenceConfiguration(blueprintParameter.getReferenceConfiguration());
-                blueprintParameterJson.setDescription(blueprintParameter.getDescription());
-                requests.add(blueprintParameterJson);
-            }
-        }
-        return requests;
-    }
-
     public Stack updateStackinputs(StackInputs stackInputs, Stack stack) throws BadRequestException {
         try {
             stack.setInputs(new Json(stackInputs));
@@ -119,19 +99,14 @@ public class SharedServiceConfigProvider {
         return stack;
     }
 
-    public ConfigsResponse retrieveOutputs(Stack datalake, Blueprint blueprint, String stackName) throws IOException {
+    public ConfigsResponse retrieveOutputs(Stack datalake, Blueprint blueprint, String stackName) {
         AmbariClient ambariClient = ambariClientFactory.getAmbariClient(datalake, datalake.getCluster());
-
         Set<String> datalakeProperties = centralBlueprintParameterQueryService.queryDatalakeParameters(blueprint.getBlueprintText());
-        for (BlueprintParameterJson request : getBlueprintParameterJsons(blueprint)) {
-            datalakeProperties.add(request.getReferenceConfiguration());
-        }
         addDatalakeRequiredProperties(datalakeProperties);
         Map<String, Object> results = new HashMap<>();
         if (datalake.getAmbariIp() != null) {
             Map<String, String> configs = ambariClient.getConfigValuesByConfigIds(Lists.newArrayList(datalakeProperties));
             results.putAll(configs);
-
         }
         ConfigsResponse configsResponse = new ConfigsResponse();
         configsResponse.setInputs(new HashSet<>());

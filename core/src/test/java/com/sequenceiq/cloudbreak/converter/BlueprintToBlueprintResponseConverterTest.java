@@ -6,7 +6,6 @@ import org.junit.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.api.model.BlueprintParameterJson;
 import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.json.Json;
@@ -109,8 +108,6 @@ public class BlueprintToBlueprintResponseConverterTest extends AbstractEntityCon
         Assert.assertEquals(source.getStatus(), result.getStatus());
         Assert.assertNotNull(result.getTags());
         Assert.assertTrue(result.getTags().isEmpty());
-        Assert.assertNotNull(result.getInputs());
-        Assert.assertTrue(result.getInputs().isEmpty());
         Assert.assertEquals(source.getBlueprintText(), result.getAmbariBlueprint());
     }
 
@@ -130,52 +127,7 @@ public class BlueprintToBlueprintResponseConverterTest extends AbstractEntityCon
         Assert.assertEquals(source.getStatus(), result.getStatus());
         Assert.assertNotNull(result.getTags());
         Assert.assertTrue(result.getTags().isEmpty());
-        Assert.assertNotNull(result.getInputs());
-        Assert.assertTrue(result.getInputs().isEmpty());
         Assert.assertEquals(source.getBlueprintText(), result.getAmbariBlueprint());
-    }
-
-    @Test
-    public void testConvertWhenInputParametersContainsValidDataThenItShouldBeInTheResponse() {
-        Blueprint source = createSource();
-        String nameKey = "name";
-        String nameValue = "some name";
-        String descriptionKey = "description";
-        String descriptionValue = "some description";
-        String referenceConfigurationKey = "referenceConfiguration";
-        String referenceConfigurationValue = "some data";
-        source.setInputParameters(JSON_TO_STRING.convertToEntityAttribute(String.format("{\"parameters\":[{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\"}]}",
-                nameKey, nameValue, descriptionKey, descriptionValue, referenceConfigurationKey, referenceConfigurationValue)));
-
-        BlueprintResponse result = underTest.convert(source);
-
-        Assert.assertFalse(result.getInputs().isEmpty());
-        Assert.assertEquals(1L, result.getInputs().size());
-        for (BlueprintParameterJson blueprintParameterJson : result.getInputs()) {
-            Assert.assertEquals(nameValue, blueprintParameterJson.getName());
-            Assert.assertEquals(descriptionValue, blueprintParameterJson.getDescription());
-            Assert.assertEquals(referenceConfigurationValue, blueprintParameterJson.getReferenceConfiguration());
-        }
-    }
-
-    @Test
-    public void testConvertWhenEntityInputParameterContainsEmptyValueWichIsNotSuitableToConvertToBlueprintInputParametersThenInputsInResultShouldBeEmpty() {
-        Blueprint source = createSource();
-        source.setInputParameters(JSON_TO_STRING.convertToEntityAttribute("{}"));
-
-        BlueprintResponse result = underTest.convert(source);
-
-        Assert.assertTrue(result.getInputs().isEmpty());
-    }
-
-    @Test
-    public void testConvertWhenEntityInputParameterContainsValueWichIsNotSuitableToConvertToBlueprintInputParametersThenInputsInResultShouldBeEmpty() {
-        Blueprint source = createSource();
-        source.setInputParameters(JSON_TO_STRING.convertToEntityAttribute("{\"some key which should not be here\":\"whatever\"}"));
-
-        BlueprintResponse result = underTest.convert(source);
-
-        Assert.assertTrue(result.getInputs().isEmpty());
     }
 
     @Override

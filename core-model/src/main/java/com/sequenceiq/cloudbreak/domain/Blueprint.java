@@ -16,7 +16,6 @@ import javax.persistence.UniqueConstraint;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.converter.EncryptionConverter;
-import com.sequenceiq.cloudbreak.domain.json.EncryptedJsonToString;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
@@ -52,10 +51,6 @@ public class Blueprint implements ProvisionEntity, WorkspaceAwareResource {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private ResourceStatus status;
-
-    @Convert(converter = EncryptedJsonToString.class)
-    @Column(columnDefinition = "TEXT")
-    private Json inputParameters;
 
     @Convert(converter = JsonToString.class)
     @Column(columnDefinition = "TEXT")
@@ -146,14 +141,6 @@ public class Blueprint implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setStatus(ResourceStatus status) {
         this.status = status;
-    }
-
-    public Json getInputParameters() {
-        return inputParameters;
-    }
-
-    public void setInputParameters(Json inputParameters) {
-        this.inputParameters = inputParameters;
     }
 
     public Workspace getWorkspace() {
