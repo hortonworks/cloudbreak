@@ -1,5 +1,4 @@
 {
-  "inputs": [],
   "description": "Useful for ETL data processing with Hive and Spark",
   "blueprint": {
     "Blueprints": {

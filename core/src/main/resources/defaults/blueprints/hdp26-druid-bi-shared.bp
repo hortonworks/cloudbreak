@@ -1,26 +1,4 @@
 {
-  "inputs": [
-    {
-      "name":"REMOTE_CLUSTER_NAME",
-      "referenceConfiguration":"cluster_name"
-    },
-    {
-      "name":"SOLR_ZOOKEPERS_URL",
-      "referenceConfiguration":"ranger.audit.solr.zookeepers"
-    },
-    {
-      "name":"ADMIN_USERNAME",
-      "referenceConfiguration":"admin_username"
-    },
-    {
-      "name":"RANGER_ADMIN_USERNAME",
-      "referenceConfiguration":"ranger_admin_username"
-    },
-    {
-      "name":"S3_BUCKET",
-      "referenceConfiguration":"s3.bucket"
-    }
-  ],
   "description": "Technical preview of Druid",
   "blueprint": {
     "Blueprints": {
