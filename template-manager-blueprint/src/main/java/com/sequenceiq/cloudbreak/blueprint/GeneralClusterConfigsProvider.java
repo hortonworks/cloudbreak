@@ -12,12 +12,13 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
-import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.service.VaultService;
+import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
+import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 
 @Service
 public class GeneralClusterConfigsProvider {
@@ -29,12 +30,15 @@ public class GeneralClusterConfigsProvider {
     @Inject
     private BlueprintProcessorFactory blueprintProcessorFactory;
 
+    @Inject
+    private VaultService vaultService;
+
     public GeneralClusterConfigs generalClusterConfigs(Stack stack, Cluster cluster, CloudbreakUser cloudbreakUser) {
         boolean gatewayInstanceMetadataPresented = false;
         boolean instanceMetadataPresented = false;
         if (stack.getInstanceGroups() != null && !stack.getInstanceGroups().isEmpty()) {
             List<InstanceMetaData> gatewayInstanceMetadata = stack.getGatewayInstanceMetadata();
-            gatewayInstanceMetadataPresented = gatewayInstanceMetadata.size() > 0
+            gatewayInstanceMetadataPresented = !gatewayInstanceMetadata.isEmpty()
                     && stack.getCluster().getGateway() != null
                     && stack.getCluster().getGateway().isGatewayEnabled();
             instanceMetadataPresented = true;
@@ -45,11 +49,11 @@ public class GeneralClusterConfigsProvider {
         generalClusterConfigs.setInstanceGroupsPresented(instanceMetadataPresented);
         generalClusterConfigs.setGatewayInstanceMetadataPresented(gatewayInstanceMetadataPresented);
         generalClusterConfigs.setClusterName(cluster.getName());
-        generalClusterConfigs.setPassword(cluster.getPassword());
         generalClusterConfigs.setExecutorType(cluster.getExecutorType());
         generalClusterConfigs.setStackName(stack.getName());
         generalClusterConfigs.setUuid(stack.getUuid());
-        generalClusterConfigs.setUserName(cluster.getUserName());
+        generalClusterConfigs.setUserName(vaultService.resolveSingleValue(cluster.getUserName()));
+        generalClusterConfigs.setPassword(vaultService.resolveSingleValue(cluster.getPassword()));
         generalClusterConfigs.setNodeCount(stack.getFullNodeCount());
         generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.ofNullable(stack.getPrimaryGatewayInstance().getDiscoveryFQDN()));
         generalClusterConfigs.setKafkaReplicationFactor(
