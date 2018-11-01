@@ -1,8 +1,6 @@
 package com.sequenceiq.cloudbreak.converter;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Nullable;
@@ -15,7 +13,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.api.model.BlueprintParameterJson;
 import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
@@ -23,8 +20,6 @@ import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.util.URLUtils;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.BlueprintInputParameters;
-import com.sequenceiq.cloudbreak.domain.BlueprintParameter;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.json.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.json.JsonHelper;
@@ -65,8 +60,6 @@ public class BlueprintRequestToBlueprintConverter extends AbstractConversionServ
         blueprint.setName(getNameByItsAvailability(json.getName()));
         blueprint.setDescription(json.getDescription());
         blueprint.setStatus(ResourceStatus.USER_MANAGED);
-
-        prepareBlueprintInputs(json, blueprint);
         setAmbariNameAndHostGrouCount(blueprint);
         blueprint.setTags(createJsonFromTagsMap(json.getTags()));
 
@@ -107,23 +100,6 @@ public class BlueprintRequestToBlueprintConverter extends AbstractConversionServ
             return new Json(tags);
         } catch (JsonProcessingException e) {
             throw new BadRequestException("Invalid tag(s) in the Blueprint: Unable to parse JSON.", e);
-        }
-    }
-
-    private void prepareBlueprintInputs(BlueprintRequest json, Blueprint blueprint) {
-        List<BlueprintParameter> blueprintParameterList = new ArrayList<>(json.getInputs().size());
-        for (BlueprintParameterJson blueprintParameterJson : json.getInputs()) {
-            BlueprintParameter blueprintParameter = new BlueprintParameter();
-            blueprintParameter.setReferenceConfiguration(blueprintParameterJson.getReferenceConfiguration());
-            blueprintParameter.setDescription(blueprintParameterJson.getDescription());
-            blueprintParameter.setName(blueprintParameterJson.getName());
-            blueprintParameterList.add(blueprintParameter);
-        }
-        BlueprintInputParameters inputParameters = new BlueprintInputParameters(blueprintParameterList);
-        try {
-            blueprint.setInputParameters(new Json(inputParameters));
-        } catch (JsonProcessingException e) {
-            throw new BadRequestException(JSON_PARSE_EXCEPTION_MESSAGE, e);
         }
     }
 

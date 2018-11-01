@@ -1,5 +1,4 @@
 {
-  "inputs": [],
   "description": "Useful for data science with Spark and Zeppelin",
   "blueprint": {
     "Blueprints": {
