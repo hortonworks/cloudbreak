@@ -2,28 +2,35 @@ package com.sequenceiq.cloudbreak.template.filesystem.gcs;
 
 import static com.sequenceiq.cloudbreak.api.model.ExecutionType.ALL_NODES;
 import static com.sequenceiq.cloudbreak.api.model.ExecutionType.ONE_NODE;
-import static com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType.GCS;
 import static com.sequenceiq.cloudbreak.api.model.RecipeType.POST_AMBARI_START;
 import static com.sequenceiq.cloudbreak.api.model.RecipeType.POST_CLUSTER_INSTALL;
+import static com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType.GCS;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType;
+import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.service.VaultService;
 import com.sequenceiq.cloudbreak.template.filesystem.AbstractFileSystemConfigurator;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemScriptConfig;
-import com.sequenceiq.cloudbreak.domain.Credential;
 
 @Component
 public class GcsFileSystemConfigurator extends AbstractFileSystemConfigurator<GcsFileSystemConfigurationsView> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GcsFileSystemConfigurator.class);
+
+    @Inject
+    private VaultService vaultService;
 
     @Override
     protected List<FileSystemScriptConfig> getScriptConfigs(Credential credential) {
@@ -36,7 +43,8 @@ public class GcsFileSystemConfigurator extends AbstractFileSystemConfigurator<Gc
     }
 
     private String getPrivateKey(Credential credential) {
-        Object serviceAccountPrivateKey = credential.getAttributes().getMap().get("serviceAccountPrivateKey");
+        Json attibutesFromVault = new Json(vaultService.resolveSingleValue(credential.getAttributes()));
+        Object serviceAccountPrivateKey = attibutesFromVault.getMap().get("serviceAccountPrivateKey");
         if (serviceAccountPrivateKey == null) {
             LOGGER.warn("ServiceAccountPrivateKey isn't set.");
             return "";

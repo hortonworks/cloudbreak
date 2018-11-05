@@ -41,7 +41,6 @@ import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintMigrationService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.credential.CredentialMigrationService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.flowlog.FlowLogService;
 import com.sequenceiq.cloudbreak.service.ha.HeartbeatService;
@@ -95,9 +94,6 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
     private AmbariDatabaseToRdsConfigMigrationService ambariDatabaseToRdsConfigMigrationService;
 
     @Inject
-    private CredentialMigrationService credentialMigrationService;
-
-    @Inject
     private TransactionService transactionService;
 
     @Inject
@@ -123,7 +119,6 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
             LOGGER.error("Unable to start node properly", e);
         }
         ambariDatabaseToRdsConfigMigrationService.migrateAmbariDatabaseClusterComponentsToRdsConfig();
-        credentialMigrationService.migrateGcpCredentials();
         blueprintMigrationService.migrateBlueprints();
     }
 
