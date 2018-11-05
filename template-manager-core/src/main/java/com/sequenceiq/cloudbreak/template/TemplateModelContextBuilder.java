@@ -94,8 +94,8 @@ public class TemplateModelContextBuilder {
         return this;
     }
 
-    public TemplateModelContextBuilder withGateway(Gateway gatewayConfig) {
-        gateway = Optional.ofNullable(gatewayConfig == null ? null : new GatewayView(gatewayConfig));
+    public TemplateModelContextBuilder withGateway(Gateway gatewayConfig, String signKey) {
+        gateway = Optional.ofNullable(gatewayConfig == null ? null : new GatewayView(gatewayConfig, signKey));
         return this;
     }
 
