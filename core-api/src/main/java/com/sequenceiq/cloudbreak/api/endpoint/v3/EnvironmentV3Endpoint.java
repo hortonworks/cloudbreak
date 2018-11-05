@@ -35,34 +35,34 @@ public interface EnvironmentV3Endpoint {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.CREATE, produces = ContentType.JSON, notes = Notes.ENVIRONMENT_NOTES,
-            nickname = "create")
+            nickname = "createEnvironment")
     DetailedEnvironmentResponse create(@PathParam("workspaceId") Long workspaceId, @Valid EnvironmentRequest request);
 
     @GET
     @Path("/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.GET, produces = ContentType.JSON, notes = Notes.ENVIRONMENT_NOTES,
-            nickname = "get")
+            nickname = "getEnvironment")
     DetailedEnvironmentResponse get(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String environmentName);
 
     @DELETE
     @Path("/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.DELETE, produces = ContentType.JSON, notes = Notes.ENVIRONMENT_NOTES,
-            nickname = "delete")
+            nickname = "deleteEnvironment")
     DetailedEnvironmentResponse delete(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String environmentName);
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.LIST, produces = ContentType.JSON, notes = Notes.ENVIRONMENT_NOTES,
-            nickname = "list")
+            nickname = "listEnvironment")
     Set<SimpleEnvironmentResponse> list(@PathParam("workspaceId") Long workspaceId);
 
     @PUT
     @Path("/{name}/attach")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.ATTACH_RESOURCES, produces = ContentType.JSON, notes = Notes.ENVIRONMENT_NOTES,
-            nickname = "attachResources")
+            nickname = "attachResourcesToEnvironment")
     DetailedEnvironmentResponse attachResources(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String environmentName,
             @Valid EnvironmentAttachRequest request);
 
@@ -70,7 +70,7 @@ public interface EnvironmentV3Endpoint {
     @Path("/{name}/detach")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.DETACH_RESOURCES, produces = ContentType.JSON, notes = Notes.ENVIRONMENT_NOTES,
-            nickname = "detachResources")
+            nickname = "detachResourcesFromEnvironment")
     DetailedEnvironmentResponse detachResources(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String environmentName,
             @Valid EnvironmentDetachRequest request);
 
@@ -78,7 +78,7 @@ public interface EnvironmentV3Endpoint {
     @Path("/{name}/changeCredential")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.CHANGE_CREDENTIAL, produces = ContentType.JSON, notes = Notes.ENVIRONMENT_NOTES,
-            nickname = "changeCredential")
+            nickname = "changeCredentialInEnvironment")
     DetailedEnvironmentResponse changeCredential(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String environmentName,
             EnvironmentChangeCredentialRequest request);
 }
