@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.periscope.api.endpoint.v2.AutoScaleClusterV2Endpoint;
-import com.sequenceiq.periscope.api.model.AutoscaleClusterRequest;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterResponse;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterState;
 import com.sequenceiq.periscope.api.model.StateJson;
@@ -24,12 +23,6 @@ public class AutoScaleClusterV2Controller implements AutoScaleClusterV2Endpoint 
 
     @Inject
     private ClusterService clusterService;
-
-    @Override
-    public AutoscaleClusterResponse modifyByCloudbreakCluster(AutoscaleClusterRequest ambariServer, Long stackId) {
-        Cluster cluster = clusterService.findOneByStackId(stackId);
-        return autoScaleClusterCommonService.modifyCluster(ambariServer, cluster.getId());
-    }
 
     @Override
     public AutoscaleClusterResponse getByCloudbreakCluster(Long stackId) {
