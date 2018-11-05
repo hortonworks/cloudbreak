@@ -350,9 +350,9 @@ public class ClusterHostServiceRunner {
             gateway.put("ssoprovider", clusterGateway.getSsoProvider());
             gateway.put("signpub", clusterGateway.getSignPub());
             gateway.put("signcert", clusterGateway.getSignCert());
-            gateway.put("signkey", clusterGateway.getSignKey());
+            gateway.put("signkey", vaultService.resolveSingleValue(clusterGateway.getSignKey()));
             gateway.put("tokencert", clusterGateway.getTokenCert());
-            gateway.put("mastersecret", clusterGateway.getKnoxMasterSecret());
+            gateway.put("mastersecret", vaultService.resolveSingleValue(clusterGateway.getKnoxMasterSecret()));
             List<Map<String, Object>> topologies = getTopologies(clusterGateway);
             gateway.put("topologies", topologies);
             if (cluster.getBlueprint() != null) {

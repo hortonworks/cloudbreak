@@ -24,7 +24,6 @@ import com.sequenceiq.cloudbreak.api.model.GatewayType;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.SSOType;
 import com.sequenceiq.cloudbreak.aspect.vault.VaultValue;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
-import com.sequenceiq.cloudbreak.domain.converter.EncryptionConverter;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -66,7 +65,7 @@ public class Gateway implements ProvisionEntity {
 
     private String ssoProvider;
 
-    @Convert(converter = EncryptionConverter.class)
+    @VaultValue
     private String signKey;
 
     private String signPub;

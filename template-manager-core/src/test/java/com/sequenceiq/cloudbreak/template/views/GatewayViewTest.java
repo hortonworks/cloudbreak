@@ -13,7 +13,7 @@ public class GatewayViewTest {
 
     @Test
     public void testInitializeGatewayView() throws JsonProcessingException {
-        GatewayView gatewayView = new GatewayView(TestUtil.gatewayEnabled());
+        GatewayView gatewayView = new GatewayView(TestUtil.gatewayEnabled(), "/cb/secret/signkey");
 
         Assert.assertEquals("/path", gatewayView.getPath());
         Assert.assertEquals("simple", gatewayView.getSsoProvider());

@@ -244,7 +244,7 @@ class BlueprintModulTestModelProvider {
                 .withBlueprintView(generalBlueprintView(testFile.getFileContent(), "2.6", "HDP"))
                 .withRdsConfigs(Sets.newHashSet(rdsConfig(RdsType.BEACON)))
                 .withLdapConfig(ldapConfig(), "cn=admin,dc=example,dc=org", "admin")
-                .withGateway(gatewayEnabled())
+                .withGateway(gatewayEnabled(), "/cb/secret/signkey")
                 .withGeneralClusterConfigs(configs)
                 .build();
     }
@@ -257,7 +257,7 @@ class BlueprintModulTestModelProvider {
                 .withBlueprintView(generalBlueprintView(testFile.getFileContent(), "2.6", "HDP"))
                 .withRdsConfigs(Sets.newHashSet(rdsConfig(RdsType.BEACON)))
                 .withLdapConfig(adConfig(), "cn=admin,dc=example,dc=org", "admin")
-                .withGateway(gatewayEnabled())
+                .withGateway(gatewayEnabled(), "/cb/secret/signkey")
                 .withGeneralClusterConfigs(configs)
                 .build();
     }
