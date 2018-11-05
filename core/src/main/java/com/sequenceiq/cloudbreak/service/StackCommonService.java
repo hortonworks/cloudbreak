@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.common.StackEndpoint;
@@ -300,6 +301,7 @@ public class StackCommonService implements StackEndpoint {
         return new GeneratedBlueprintResponse(blueprintText);
     }
 
+    @PreAuthorize("#oauth2.hasScope('cloudbreak.autoscale')")
     public CertificateResponse getCertificate(Long stackId) {
         return tlsSecurityService.getCertificates(stackId);
     }

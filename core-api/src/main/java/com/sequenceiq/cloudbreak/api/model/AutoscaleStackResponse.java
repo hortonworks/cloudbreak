@@ -39,10 +39,10 @@ public class AutoscaleStackResponse {
     private String ambariServerIp;
 
     @ApiModelProperty(StackModelDescription.USERNAME)
-    private String userName;
+    private String userNamePath;
 
     @ApiModelProperty(StackModelDescription.PASSWORD)
-    private String password;
+    private String passwordPath;
 
     @ApiModelProperty(StackModelDescription.STACK_STATUS)
     private Status status;
@@ -101,20 +101,20 @@ public class AutoscaleStackResponse {
         this.ambariServerIp = ambariServerIp;
     }
 
-    public String getUserName() {
-        return userName;
+    public String getUserNamePath() {
+        return userNamePath;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public void setUserNamePath(String userNamePath) {
+        this.userNamePath = userNamePath;
     }
 
-    public String getPassword() {
-        return password;
+    public String getPasswordPath() {
+        return passwordPath;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setPasswordPath(String passwordPath) {
+        this.passwordPath = passwordPath;
     }
 
     public Status getStatus() {
