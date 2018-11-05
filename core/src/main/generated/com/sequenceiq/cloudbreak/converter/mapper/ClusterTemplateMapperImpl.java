@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
     value = "org.mapstruct.ap.MappingProcessor"
 )
 @Component
-public class ClusterTemplateMapperImpl implements ClusterTemplateMapper {
+public class ClusterTemplateMapperImpl extends ClusterTemplateMapper {
 
     @Override
     public ClusterTemplate mapRequestToEntity(ClusterTemplateRequest clusterTemplateRequest) {

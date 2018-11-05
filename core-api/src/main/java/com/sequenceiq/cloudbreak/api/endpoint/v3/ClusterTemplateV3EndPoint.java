@@ -65,5 +65,5 @@ public interface ClusterTemplateV3EndPoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.ClusterTemplateOpDescription.DELETE_BY_NAME_IN_WORKSPACE, produces = JSON, notes = TEMPLATE_NOTES,
             nickname = "deleteClusterTemplateInWorkspace")
-    ClusterTemplateResponse deleteInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
+    void deleteInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 }
