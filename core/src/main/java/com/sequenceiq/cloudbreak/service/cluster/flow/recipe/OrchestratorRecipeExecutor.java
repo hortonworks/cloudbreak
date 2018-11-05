@@ -190,8 +190,7 @@ class OrchestratorRecipeExecutor {
             for (RecipeModel recipeModel : hostGroupListEntry.getValue()) {
                 GeneratedRecipe generatedRecipe = new GeneratedRecipe();
                 generatedRecipe.setHostGroup(hostGroupListEntry.getKey());
-                generatedRecipe.setExtendedRecipe(recipeModel.getGeneratedScript());
-                generatedRecipe.setOriginalRecipe(recipeModel.getScript());
+                generatedRecipe.setExtendedRecipeText(recipeModel.getGeneratedScript());
                 generatedRecipeService.save(generatedRecipe);
             }
         }
