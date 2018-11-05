@@ -69,7 +69,7 @@ public class CredentialPrerequisiteService {
     }
 
     public Credential decorateCredential(Credential credential, String userId) {
-        Map<String, Object> newAttributes = credential.getAttributes().getMap();
+        Map<String, Object> newAttributes = new Json(credential.getAttributes()).getMap();
         if (StringUtils.isNoneEmpty(String.valueOf(newAttributes.get(ROLE_ARN_PARAMTER_KEY)))) {
             Optional<UserPreferences> userPreferencesOptional = userPreferencesService.getByUserId(userId);
             if (userPreferencesOptional.isPresent() && StringUtils.isNoneEmpty(userPreferencesOptional.get().getExternalId())) {
@@ -83,7 +83,7 @@ public class CredentialPrerequisiteService {
 
     private void saveNewAttributesToCredential(Credential credential, Map<String, Object> newAttributes) {
         try {
-            credential.setAttributes(new Json(newAttributes));
+            credential.setAttributes(new Json(newAttributes).getValue());
         } catch (IOException ex) {
             LOGGER.error("New prerequisite attributes could not be added to the credential.", ex);
             throw new OperationException(ex);
