@@ -43,7 +43,7 @@ public class TemplateProcessorTest {
         String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/bp-mustache-test.bp");
 
         Cluster cluster = cluster();
-        BlueprintStackInfo blueprintStackInfo =  new BlueprintStackInfo("hdp", "2.4");
+        BlueprintStackInfo blueprintStackInfo = new BlueprintStackInfo("hdp", "2.4");
         GeneralClusterConfigs generalClusterConfigs = generalClusterConfigs();
         generalClusterConfigs.setClusterName("dummyCluster");
         generalClusterConfigs.setStackName("dummyCluster");
@@ -53,7 +53,7 @@ public class TemplateProcessorTest {
 
         TemplatePreparationObject templatePreparationObject = Builder.builder()
                 .withRdsConfigs(cluster.getRdsConfigs())
-                .withGateway(cluster.getGateway())
+                .withGateway(cluster.getGateway(), "/cb/secret/signkey")
                 .withLdapConfig(cluster.getLdapConfig(), "cn=admin,dc=example,dc=org", "admin<>char")
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withBlueprintView(new BlueprintView(testBlueprint, blueprintStackInfo.getVersion(), blueprintStackInfo.getType()))
@@ -75,7 +75,7 @@ public class TemplateProcessorTest {
         String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/bp-mustache-tricky-test.bp");
 
         Cluster cluster = cluster();
-        BlueprintStackInfo blueprintStackInfo =  new BlueprintStackInfo("hdp", "2.4");
+        BlueprintStackInfo blueprintStackInfo = new BlueprintStackInfo("hdp", "2.4");
         GeneralClusterConfigs generalClusterConfigs = generalClusterConfigs();
         generalClusterConfigs.setClusterName("dummyCluster");
         generalClusterConfigs.setStackName("dummyCluster");
@@ -95,7 +95,7 @@ public class TemplateProcessorTest {
 
         TemplatePreparationObject templatePreparationObject = Builder.builder()
                 .withRdsConfigs(cluster.getRdsConfigs())
-                .withGateway(cluster.getGateway())
+                .withGateway(cluster.getGateway(), "/cb/secret/signkey")
                 .withLdapConfig(cluster.getLdapConfig(), "cn=admin,dc=example,dc=org", "admin<>char")
                 .withFixInputs(properties)
                 .withGeneralClusterConfigs(generalClusterConfigs)
@@ -117,7 +117,7 @@ public class TemplateProcessorTest {
         String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/bp-mustache-test.bp");
 
         Cluster cluster = cluster();
-        BlueprintStackInfo blueprintStackInfo =  new BlueprintStackInfo("hdp", "2.4");
+        BlueprintStackInfo blueprintStackInfo = new BlueprintStackInfo("hdp", "2.4");
         GeneralClusterConfigs generalClusterConfigs = generalClusterConfigs();
         generalClusterConfigs.setClusterName("dummyCluster");
         generalClusterConfigs.setStackName("dummyCluster");
@@ -130,7 +130,7 @@ public class TemplateProcessorTest {
 
         TemplatePreparationObject templatePreparationObject = Builder.builder()
                 .withRdsConfigs(cluster.getRdsConfigs())
-                .withGateway(cluster.getGateway())
+                .withGateway(cluster.getGateway(), "/cb/secret/signkey")
                 .withLdapConfig(cluster.getLdapConfig(), "cn=admin,dc=example,dc=org", "admin<>char")
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withFixInputs(properties)
@@ -148,11 +148,11 @@ public class TemplateProcessorTest {
         String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/bp-mustache-test.bp");
 
         Cluster cluster = cluster();
-        BlueprintStackInfo blueprintStackInfo =  new BlueprintStackInfo("hdp", "2.4");
+        BlueprintStackInfo blueprintStackInfo = new BlueprintStackInfo("hdp", "2.4");
 
         TemplatePreparationObject templatePreparationObject = Builder.builder()
                 .withRdsConfigs(cluster.getRdsConfigs())
-                .withGateway(cluster.getGateway())
+                .withGateway(cluster.getGateway(), "/cb/secret/signkey")
                 .withLdapConfig(cluster.getLdapConfig(), "cn=admin,dc=example,dc=org", "admin<>char")
                 .withGeneralClusterConfigs(generalClusterConfigs())
                 .withBlueprintView(new BlueprintView(testBlueprint, blueprintStackInfo.getVersion(), blueprintStackInfo.getType()))
@@ -173,11 +173,11 @@ public class TemplateProcessorTest {
         String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/bp-mustache-test.bp");
 
         Cluster cluster = cluster();
-        BlueprintStackInfo blueprintStackInfo =  new BlueprintStackInfo("hdp", "2.4");
+        BlueprintStackInfo blueprintStackInfo = new BlueprintStackInfo("hdp", "2.4");
 
         TemplatePreparationObject templatePreparationObject = Builder.builder()
                 .withRdsConfigs(cluster.getRdsConfigs())
-                .withGateway(cluster.getGateway())
+                .withGateway(cluster.getGateway(), "/cb/secret/signkey")
                 .withLdapConfig(cluster.getLdapConfig(), "cn=admin,dc=example,dc=org", "admin<>char")
                 .withGeneralClusterConfigs(generalClusterConfigs())
                 .withBlueprintView(new BlueprintView(testBlueprint, blueprintStackInfo.getVersion(), blueprintStackInfo.getType()))
@@ -198,11 +198,11 @@ public class TemplateProcessorTest {
         String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/bp-mustache-test.bp");
 
         Cluster cluster = cluster();
-        BlueprintStackInfo blueprintStackInfo =  new BlueprintStackInfo("hdp", "2.4");
+        BlueprintStackInfo blueprintStackInfo = new BlueprintStackInfo("hdp", "2.4");
 
         TemplatePreparationObject templatePreparationObject = Builder.builder()
                 .withRdsConfigs(cluster.getRdsConfigs())
-                .withGateway(cluster.getGateway())
+                .withGateway(cluster.getGateway(), "/cb/secret/signkey")
                 .withLdapConfig(cluster.getLdapConfig(), "cn=admin,dc=example,dc=org", "admin<>char")
                 .withGeneralClusterConfigs(generalClusterConfigs())
                 .withBlueprintView(new BlueprintView(testBlueprint, blueprintStackInfo.getVersion(), blueprintStackInfo.getType()))
@@ -221,7 +221,7 @@ public class TemplateProcessorTest {
         String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/bp-mustache-test.bp");
         Cluster cluster = cluster();
         cluster.getRdsConfigs().add(rdsConfig("customRds"));
-        BlueprintStackInfo blueprintStackInfo =  new BlueprintStackInfo("hdp", "2.4");
+        BlueprintStackInfo blueprintStackInfo = new BlueprintStackInfo("hdp", "2.4");
 
         TemplatePreparationObject templatePreparationObject = Builder.builder()
                 .withBlueprintView(new BlueprintView(testBlueprint, blueprintStackInfo.getVersion(), blueprintStackInfo.getType()))
