@@ -8,17 +8,11 @@ public class RecipeModel {
 
     private final RecipeType recipeType;
 
-    private final String script;
-
-    private final String originalScript;
-
     private final String generatedScript;
 
-    public RecipeModel(String name, RecipeType recipeType, String script, String originalScript, String generatedScript) {
+    public RecipeModel(String name, RecipeType recipeType, String generatedScript) {
         this.name = name;
         this.recipeType = recipeType;
-        this.script = script;
-        this.originalScript = originalScript;
         this.generatedScript = generatedScript;
     }
 
@@ -30,14 +24,6 @@ public class RecipeModel {
         return recipeType;
     }
 
-    public String getScript() {
-        return script;
-    }
-
-    public String getOriginalScript() {
-        return originalScript;
-    }
-
     public String getGeneratedScript() {
         return generatedScript;
     }
@@ -46,8 +32,6 @@ public class RecipeModel {
     public String toString() {
         StringBuilder sb = new StringBuilder("RecipeModel{");
         sb.append(", name='").append(name).append('\'');
-        sb.append(", script=").append(script);
-        sb.append(", originalScript=").append(originalScript);
         sb.append(", generatedScript=").append(generatedScript);
         sb.append(", recipeType=").append(recipeType);
         sb.append('}');
