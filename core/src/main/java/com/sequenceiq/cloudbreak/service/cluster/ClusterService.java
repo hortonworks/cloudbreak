@@ -92,6 +92,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.json.JsonHelper;
 import com.sequenceiq.cloudbreak.repository.ConstraintRepository;
+import com.sequenceiq.cloudbreak.repository.GatewayRepository;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.KerberosConfigRepository;
@@ -135,6 +136,9 @@ public class ClusterService {
 
     @Inject
     private ClusterRepository clusterRepository;
+
+    @Inject
+    private GatewayRepository gatewayRepository;
 
     @Inject
     private FileSystemConfigService fileSystemConfigService;
@@ -271,11 +275,13 @@ public class ClusterService {
     }
 
     private Cluster saveClusterAndComponent(Cluster cluster, List<ClusterComponent> components, String stackName) {
-        long start;
         Cluster savedCluster;
         try {
-            start = System.currentTimeMillis();
+            long start = System.currentTimeMillis();
             savedCluster = clusterRepository.save(cluster);
+            if (savedCluster.getGateway() != null) {
+                gatewayRepository.save(savedCluster.getGateway());
+            }
             LOGGER.info("Cluster object saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
             clusterComponentConfigProvider.store(components, savedCluster);
         } catch (DataIntegrityViolationException ex) {
