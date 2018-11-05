@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.domain;
 
 import javax.persistence.Column;
-import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -14,8 +13,8 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import com.sequenceiq.cloudbreak.api.model.RecipeType;
+import com.sequenceiq.cloudbreak.aspect.vault.VaultValue;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
-import com.sequenceiq.cloudbreak.domain.converter.EncryptionConverter;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
 
@@ -39,8 +38,8 @@ public class Recipe implements ProvisionEntity, WorkspaceAwareResource {
     @Column(nullable = false)
     private String uri;
 
-    @Convert(converter = EncryptionConverter.class)
     @Column(nullable = false)
+    @VaultValue
     private String content;
 
     private String account;
