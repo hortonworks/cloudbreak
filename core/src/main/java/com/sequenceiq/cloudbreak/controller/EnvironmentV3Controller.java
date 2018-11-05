@@ -13,6 +13,7 @@ import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v3.EnvironmentV3Endpoint;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentAttachRequest;
+import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentChangeCredentialRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentDetachRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.response.DetailedEnvironmentResponse;
@@ -71,5 +72,10 @@ public class EnvironmentV3Controller implements EnvironmentV3Endpoint {
     @Override
     public DetailedEnvironmentResponse detachResources(Long workspaceId, String environmentName, @Valid EnvironmentDetachRequest request) {
         return environmentService.detachResources(environmentName, request, workspaceId);
+    }
+
+    @Override
+    public DetailedEnvironmentResponse changeCredential(Long workspaceId, String environmentName, EnvironmentChangeCredentialRequest request) {
+        return environmentService.changeCredential(environmentName, workspaceId, request);
     }
 }

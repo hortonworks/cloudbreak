@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.domain.environment.Region;
 
 @Component
 public class EnvironmentCreationValidator {
+
     public ValidationResult validate(Environment environment, EnvironmentRequest request, boolean regionsSupported) {
         ValidationResultBuilder resultBuilder = ValidationResult.builder();
         validateLdapConfigs(environment, request, resultBuilder);

@@ -189,7 +189,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
         }
     }
 
-    private boolean isOtherFlowRunning(Long stackId) {
+    public boolean isOtherFlowRunning(Long stackId) {
         Set<String> flowIds = flowLogRepository.findAllRunningNonTerminationFlowIdsByStackId(stackId);
         return !flowIds.isEmpty();
     }

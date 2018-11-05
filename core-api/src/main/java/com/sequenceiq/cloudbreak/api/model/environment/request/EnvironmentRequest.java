@@ -14,7 +14,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
-public class EnvironmentRequest extends EnvironmentBaseRequest {
+public class EnvironmentRequest extends EnvironmentBaseRequest implements CredentialAwareEnvRequest {
 
     @Size(max = 100, min = 5, message = "The length of the environments's name has to be in range of 5 to 100")
     @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
@@ -51,18 +51,22 @@ public class EnvironmentRequest extends EnvironmentBaseRequest {
         this.description = description;
     }
 
+    @Override
     public String getCredentialName() {
         return credentialName;
     }
 
+    @Override
     public void setCredentialName(String credentialName) {
         this.credentialName = credentialName;
     }
 
+    @Override
     public CredentialRequest getCredential() {
         return credential;
     }
 
+    @Override
     public void setCredential(CredentialRequest credential) {
         this.credential = credential;
     }
