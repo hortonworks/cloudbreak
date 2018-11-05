@@ -18,7 +18,7 @@ public class ExtendedCloudCredentialToCredentialConverter {
         credential.setCloudPlatform(extendedCloudCredential.getCloudPlatform());
         try {
             Json json = new Json(extendedCloudCredential.getParameters());
-            credential.setAttributes(json);
+            credential.setAttributes(json.getValue());
         } catch (JsonProcessingException e) {
             throw new IllegalStateException(e);
         }

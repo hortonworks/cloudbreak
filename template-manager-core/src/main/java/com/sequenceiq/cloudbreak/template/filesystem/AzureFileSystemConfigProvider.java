@@ -3,16 +3,20 @@ package com.sequenceiq.cloudbreak.template.filesystem;
 
 import static com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsView.TENANT_ID;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import com.sequenceiq.cloudbreak.template.filesystem.adls.AdlsFileSystemConfigurationsView;
-import com.sequenceiq.cloudbreak.template.filesystem.wasb.WasbFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Resource;
+import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.service.VaultService;
+import com.sequenceiq.cloudbreak.template.filesystem.adls.AdlsFileSystemConfigurationsView;
+import com.sequenceiq.cloudbreak.template.filesystem.wasb.WasbFileSystemConfigurationsView;
 
 @Component
 public class AzureFileSystemConfigProvider {
@@ -25,6 +29,9 @@ public class AzureFileSystemConfigProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureFileSystemConfigProvider.class);
 
+    @Inject
+    private VaultService vaultService;
+
     @Value("${info.app.version:}")
     private String cbVersion;
 
@@ -35,14 +42,15 @@ public class AzureFileSystemConfigProvider {
         if (fsConfiguration instanceof AdlsFileSystemConfigurationsView) {
             String adlsTrackingTag = (cbVersion != null) ? ADLS_TRACKING_CLUSTERNAME_VALUE + '-' + cbVersion : ADLS_TRACKING_CLUSTERNAME_VALUE;
             AdlsFileSystemConfigurationsView fileSystemConfigurationsView = (AdlsFileSystemConfigurationsView) fsConfiguration;
+            Json attributesFromVault = new Json(vaultService.resolveSingleValue(credential.getAttributes()));
             if (StringUtils.isEmpty(fileSystemConfigurationsView.getClientId())) {
-                String credentialString = String.valueOf(credential.getAttributes().getMap().get(CREDENTIAL_SECRET_KEY));
-                String clientId = String.valueOf(credential.getAttributes().getMap().get(ACCESS_KEY));
+                String credentialString = String.valueOf(attributesFromVault.getMap().get(CREDENTIAL_SECRET_KEY));
+                String clientId = String.valueOf(attributesFromVault.getMap().get(ACCESS_KEY));
                 fileSystemConfigurationsView.setCredential(credentialString);
                 fileSystemConfigurationsView.setClientId(clientId);
             }
             if (StringUtils.isEmpty(fileSystemConfigurationsView.getTenantId())) {
-                String tenantId = String.valueOf(credential.getAttributes().getMap().get(TENANT_ID));
+                String tenantId = String.valueOf(attributesFromVault.getMap().get(TENANT_ID));
                 fileSystemConfigurationsView.setTenantId(tenantId);
             }
             fileSystemConfigurationsView.setAdlsTrackingClusterNameKey(uuid);
