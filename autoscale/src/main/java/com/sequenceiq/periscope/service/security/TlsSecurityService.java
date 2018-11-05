@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.CertificateResponse;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
+import com.sequenceiq.cloudbreak.service.VaultService;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.SecurityConfig;
 import com.sequenceiq.periscope.model.TlsConfiguration;
@@ -23,24 +24,26 @@ public class TlsSecurityService {
     @Inject
     private SecurityConfigRepository securityConfigRepository;
 
+    @Inject
+    private VaultService vaultService;
+
     public SecurityConfig prepareSecurityConfig(Long stackId) {
         CertificateResponse response = cloudbreakClient.autoscaleEndpoint().getCertificate(stackId);
-        byte[] serverCert = Base64.encode(response.getServerCert());
-        byte[] clientKey = Base64.encode(response.getClientKey());
-        byte[] clientCert = Base64.encode(response.getClientCert());
-        return new SecurityConfig(new String(clientKey), new String(clientCert), new String(serverCert));
+        return new SecurityConfig(response.getClientKeyPath(), response.getClientCertPath(), response.getServerCert());
     }
 
     public TlsConfiguration getConfiguration(Cluster cluster) {
         SecurityConfig securityConfig = cluster.getSecurityConfig();
-        if (securityConfig != null) {
-            return new TlsConfiguration(securityConfig.getClientKeyDecoded(), securityConfig.getClientCertDecoded(), securityConfig.getServerCertDecoded());
+        if (securityConfig == null) {
+            securityConfig = getSecurityConfigSilently(cluster);
         }
-        securityConfig = getSecurityConfigSilently(cluster);
         if (securityConfig == null) {
             securityConfig = prepareSecurityConfig(cluster.getStackId());
         }
-        return new TlsConfiguration(securityConfig.getClientKeyDecoded(), securityConfig.getClientCertDecoded(), securityConfig.getServerCertDecoded());
+        String clientKey = new String(Base64.decode(vaultService.resolveSingleValue(securityConfig.getClientKey())));
+        String clientCert = new String(Base64.decode(vaultService.resolveSingleValue(securityConfig.getClientCert())));
+        String serverCert = new String(Base64.decode(securityConfig.getServerCert()));
+        return new TlsConfiguration(clientKey, clientCert, serverCert);
     }
 
     private SecurityConfig getSecurityConfigSilently(Cluster cluster) {
