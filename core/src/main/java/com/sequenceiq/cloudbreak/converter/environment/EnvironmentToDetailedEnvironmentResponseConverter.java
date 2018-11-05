@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 
 @Component
 public class EnvironmentToDetailedEnvironmentResponseConverter extends AbstractConversionServiceAwareConverter<Environment, DetailedEnvironmentResponse> {
+
     @Inject
     private RegionConverter regionConverter;
 

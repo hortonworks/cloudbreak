@@ -462,5 +462,6 @@ public class OperationDescriptions {
         public static final String DETACH_RESOURCES = "Detach resources from an environment.";
         public static final String LIST = "List all environments in the workspace.";
         public static final String DELETE = "Delete an environment. Only possible if no cluster is running in the environment.";
+        public static final String CHANGE_CREDENTIAL = "Changes the credential of the environment and the clusters in the environment.";
     }
 }

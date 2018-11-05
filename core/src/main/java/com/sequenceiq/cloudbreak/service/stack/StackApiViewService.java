@@ -9,10 +9,14 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.stack.StackViewResponse;
+import com.sequenceiq.cloudbreak.core.flow2.Flow2Handler;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.repository.StackApiViewRepository;
 import com.sequenceiq.cloudbreak.service.TransactionService;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
 
 @Service
 public class StackApiViewService {
@@ -24,15 +28,34 @@ public class StackApiViewService {
     private TransactionService transactionService;
 
     @Inject
+    private Flow2Handler flow2Handler;
+
+    @Inject
     @Qualifier("conversionService")
     private ConversionService conversionService;
+
+    public boolean canChangeCredential(StackApiView stackApiView) {
+        if (stackApiView.getStatus() != null) {
+            if (stackApiView.getStatus() == Status.AVAILABLE) {
+                if (flow2Handler.isOtherFlowRunning(stackApiView.getId())) {
+                    return false;
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public StackApiView save(StackApiView stackApiView) {
+        return stackApiViewRepository.save(stackApiView);
+    }
 
     public Set<StackViewResponse> retrieveStackViewsByWorkspaceId(Long workspaceId) {
         try {
             return transactionService.required(() ->
                     convertStackViews(stackApiViewRepository.findByWorkspaceId(workspaceId)));
-        } catch (TransactionService.TransactionExecutionException e) {
-            throw new TransactionService.TransactionRuntimeExecutionException(e);
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
         }
     }
 

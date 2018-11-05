@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.domain.environment;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -63,19 +64,19 @@ public class Environment implements WorkspaceAwareResource {
 
     @ManyToMany(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
     @JoinTable(name = "env_ldap", joinColumns = @JoinColumn(name = "envid"), inverseJoinColumns = @JoinColumn(name = "ldapid"))
-    private Set<LdapConfig> ldapConfigs;
+    private Set<LdapConfig> ldapConfigs = new HashSet<>();
 
     @ManyToMany(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
     @JoinTable(name = "env_proxy", joinColumns = @JoinColumn(name = "envid"), inverseJoinColumns = @JoinColumn(name = "proxyid"))
-    private Set<ProxyConfig> proxyConfigs;
+    private Set<ProxyConfig> proxyConfigs = new HashSet<>();
 
     @ManyToMany(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
     @JoinTable(name = "env_rds", joinColumns = @JoinColumn(name = "envid"), inverseJoinColumns = @JoinColumn(name = "rdsid"))
-    private Set<RDSConfig> rdsConfigs;
+    private Set<RDSConfig> rdsConfigs = new HashSet<>();
 
     @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "environment_id")
-    private Set<StackApiView> workloadClusters;
+    private Set<StackApiView> workloadClusters = new HashSet<>();
 
     @Override
     public Long getId() {

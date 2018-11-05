@@ -17,6 +17,7 @@ import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentAttachRequest;
+import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentChangeCredentialRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentDetachRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.response.DetailedEnvironmentResponse;
@@ -24,7 +25,6 @@ import com.sequenceiq.cloudbreak.api.model.environment.response.SimpleEnvironmen
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.environment.EnvironmentAttachValidator;
 import com.sequenceiq.cloudbreak.controller.validation.environment.EnvironmentCreationValidator;
@@ -36,16 +36,20 @@ import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.environment.Environment;
 import com.sequenceiq.cloudbreak.domain.environment.Region;
 import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.repository.environment.EnvironmentRepository;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
-import com.sequenceiq.cloudbreak.service.credential.CredentialService;
+import com.sequenceiq.cloudbreak.service.TransactionService;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.platform.PlatformParameterService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
+import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Service
 public class EnvironmentService extends AbstractWorkspaceAwareResourceService<Environment> {
@@ -60,7 +64,7 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
     private ProxyConfigService proxyConfigService;
 
     @Inject
-    private CredentialService credentialService;
+    private EnvironmentCredentialOperationService environmentCredentialOperationService;
 
     @Inject
     private EnvironmentCreationValidator environmentCreationValidator;
@@ -73,6 +77,12 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
 
     @Inject
     private StackService stackService;
+
+    @Inject
+    private StackApiViewService stackApiViewService;
+
+    @Inject
+    private TransactionService transactionService;
 
     @Inject
     private EnvironmentRepository environmentRepository;
@@ -117,7 +127,9 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
         environment.setLdapConfigs(ldapConfigService.findByNamesInWorkspace(request.getLdapConfigs(), workspaceId));
         environment.setProxyConfigs(proxyConfigService.findByNamesInWorkspace(request.getProxyConfigs(), workspaceId));
         environment.setRdsConfigs(rdsConfigService.findByNamesInWorkspace(request.getRdsConfigs(), workspaceId));
-        setCredential(request, environment, workspaceId);
+        Credential credential = environmentCredentialOperationService.getCredentialFromRequest(request, workspaceId);
+        environment.setCredential(credential);
+        environment.setCloudPlatform(credential.cloudPlatform());
         boolean regionsSupported = cloudParameterCache.areRegionsSupported(environment.getCloudPlatform());
         setRegions(environment, request, regionsSupported);
         ValidationResult validationResult = environmentCreationValidator.validate(environment, request, regionsSupported);
@@ -153,23 +165,6 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
         } catch (JsonProcessingException e) {
             throw new BadRequestException(e.getMessage());
         }
-    }
-
-    private void setCredential(EnvironmentRequest request, Environment environment, Long workspaceId) {
-        Credential credential;
-        if (!StringUtils.isEmpty(request.getCredentialName())) {
-            try {
-                credential = credentialService.getByNameForWorkspaceId(request.getCredentialName(), workspaceId);
-            } catch (NotFoundException e) {
-                throw new BadRequestException(String.format("No credential found with name [%s] in the workspace.",
-                        request.getCredentialName()), e);
-            }
-        } else {
-            Credential converted = conversionService.convert(request.getCredential(), Credential.class);
-            credential = credentialService.createForLoggedInUser(converted, workspaceId);
-        }
-        environment.setCredential(credential);
-        environment.setCloudPlatform(credential.cloudPlatform());
     }
 
     public DetailedEnvironmentResponse attachResources(String environmentName, EnvironmentAttachRequest request, Long workspaceId) {
@@ -209,6 +204,32 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
         environment.getRdsConfigs().removeAll(rdssToRemove);
         environment = environmentRepository.save(environment);
         return conversionService.convert(environment, DetailedEnvironmentResponse.class);
+    }
+
+    public DetailedEnvironmentResponse changeCredential(String environmentName, Long workspaceId, EnvironmentChangeCredentialRequest request) {
+        try {
+            return transactionService.required(() -> {
+                Environment environment = getByNameForWorkspaceId(environmentName, workspaceId);
+                Credential credential = environmentCredentialOperationService.validatePlatformAndGetCredential(request, environment, workspaceId);
+                Set<StackApiView> stacksCannotBeChanged = environment.getWorkloadClusters().stream()
+                        .filter(stackApiView -> !stackApiViewService.canChangeCredential(stackApiView))
+                        .collect(Collectors.toSet());
+                if (stacksCannotBeChanged.isEmpty()) {
+                    environment.setCredential(credential);
+                    environment.getWorkloadClusters().forEach(stackApiView -> {
+                        stackApiView.setCredential(credential);
+                        stackApiViewService.save(stackApiView);
+                    });
+                    return conversionService.convert(environmentRepository.save(environment), DetailedEnvironmentResponse.class);
+                } else {
+                    throw new BadRequestException(String.format("Credential cannot be changed due to clusters with ongoing operation "
+                            + "or not being in AVAILABLE state. Clusters: [%s].", stacksCannotBeChanged.stream()
+                            .map(StackApiView::getName).collect(Collectors.joining(", "))));
+                }
+            });
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
+        }
     }
 
     @Override

@@ -14,6 +14,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentAttachRequest;
+import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentChangeCredentialRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentDetachRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.response.DetailedEnvironmentResponse;
@@ -72,4 +73,12 @@ public interface EnvironmentV3Endpoint {
             nickname = "detachResources")
     DetailedEnvironmentResponse detachResources(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String environmentName,
             @Valid EnvironmentDetachRequest request);
+
+    @PUT
+    @Path("/{name}/changeCredential")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = EnvironmentOpDescription.CHANGE_CREDENTIAL, produces = ContentType.JSON, notes = Notes.ENVIRONMENT_NOTES,
+            nickname = "changeCredential")
+    DetailedEnvironmentResponse changeCredential(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String environmentName,
+            EnvironmentChangeCredentialRequest request);
 }

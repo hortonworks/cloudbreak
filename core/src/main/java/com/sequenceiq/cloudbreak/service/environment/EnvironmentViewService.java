@@ -32,12 +32,12 @@ public class EnvironmentViewService extends AbstractWorkspaceAwareResourceServic
 
     @Override
     protected void prepareDeletion(EnvironmentView resource) {
-
+        throw new UnsupportedOperationException();
     }
 
     @Override
     protected void prepareCreation(EnvironmentView resource) {
-
+        throw new UnsupportedOperationException();
     }
 
     @Override
