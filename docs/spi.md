@@ -1,4 +1,4 @@
-#Service Provider Interface (SPI)
+# Service Provider Interface (SPI)
 
 Cloudbreak already supports multiple cloud platforms and provides an easy way to integrate a new provider trough [Cloudbreak's Service Provider Interface (SPI)](https://github.com/hortonworks/cloudbreak/tree/master/cloud-api), a plugin mechanism that enables seamless integration of any cloud provider. The SPI plugin mechanism has been used to integrate all currently supported providers with Cloudbreak. Consequently, if you use SPI to integrate a new provider, the integration will be seamless.
  
@@ -9,7 +9,7 @@ Cloudbreak already supports multiple cloud platforms and provides an easy way to
 
 The SPI interface is event-based, it scales well, and is decoupled from Cloudbreak. The core of Cloudbreak uses [EventBus](http://projectreactor.io/) to communicate with the providers, but the complexity of event handling is hidden from the provider implementation.
 
-##Resource Management
+## Resource Management
 
 Cloud providers support two kinds of deployment and resource management methods:
 
@@ -18,7 +18,7 @@ Cloud providers support two kinds of deployment and resource management methods:
 
 Cloudbreak's SPI supports both of these methods. It provides a well-defined interfaces, abstract classes, and helper classes, scheduling and polling of resources to aid the integration and to avoid any boilerplate code in the module of cloud provider.
 
-###Template Based Deployments
+### Template Based Deployments
 
 Providers with template-based deployments like [AWS CloudFormation](https://aws.amazon.com/cloudformation/), [Azure ARM](https://azure.microsoft.com/en-us/documentation/articles/resource-group-overview/#) or [OpenStack Heat](https://wiki.openstack.org/wiki/Heat) have the ability to create and manage a collection of related cloud resources, provisioning and updating them in an orderly and predictable fashion. 
 
@@ -48,7 +48,7 @@ dependencies {
 
 The entry point for the provider is the  [CloudConnector](https://github.com/hortonworks/cloudbreak/blob/master/cloud-api/src/main/java/com/sequenceiq/cloudbreak/cloud/CloudConnector.java) interface and every interface that needs to be implemented is reachable trough this interface.
 
-###Individual Resource Based Deployments
+### Individual Resource Based Deployments
 
 There are providers such as GCP that do not support suitable templating mechanism, and customisable providers such as OpenStack where the Heat Orchestration (templating) component is optional and individual resources need to be handled separately. 
 
@@ -76,7 +76,7 @@ dependencies {
 }
 ```
 
-##Variants
+## Variants
 
 OpenStack is highly modular. It allows you to install different components, for example for volume storage or networking (Nova networking, Neutron, etc.). Or, in some scenarios, some components such as Heat may not installed at all.
 
