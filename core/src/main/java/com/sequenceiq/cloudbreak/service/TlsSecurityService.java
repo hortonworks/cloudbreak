@@ -4,6 +4,7 @@ import static org.apache.commons.codec.binary.Base64.decodeBase64;
 
 import java.security.KeyPair;
 import java.security.cert.X509Certificate;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -117,25 +118,20 @@ public class TlsSecurityService {
         if (securityConfig == null) {
             return new HttpClientConfig(apiAddress);
         } else {
+            String serverCert = gateway.getServerCert() == null ? null : new String(decodeBase64(gateway.getServerCert()));
             String clientCertB64 = vaultService.resolveSingleValue(securityConfig.getClientCert());
             String clientKeyB64 = vaultService.resolveSingleValue(securityConfig.getClientKey());
-            return new HttpClientConfig(apiAddress, gateway.getServerCert(),
+            return new HttpClientConfig(apiAddress, serverCert,
                     new String(decodeBase64(clientCertB64)), new String(decodeBase64(clientKeyB64)));
         }
     }
 
     public CertificateResponse getCertificates(Long stackId) {
-        SecurityConfig securityConfig = securityConfigRepository.findOneByStackId(stackId);
-        if (securityConfig == null) {
-            throw new NotFoundException("Security config doesn't exist.");
-        }
-        String serverCert = instanceMetaDataRepository.getServerCertByStackId(stackId);
-        if (serverCert == null) {
-            throw new NotFoundException("Server certificate was not found.");
-        }
-        String clientCertB64 = vaultService.resolveSingleValue(securityConfig.getClientCert());
-        String clientKeyB64 = vaultService.resolveSingleValue(securityConfig.getClientKey());
-        return new CertificateResponse(decodeBase64(serverCert), decodeBase64(clientKeyB64), decodeBase64(clientCertB64));
+        SecurityConfig securityConfig = Optional.ofNullable(securityConfigRepository.findOneByStackId(stackId))
+                .orElseThrow(() -> new NotFoundException("Security config doesn't exist."));
+        String serverCert = Optional.ofNullable(instanceMetaDataRepository.getServerCertByStackId(stackId))
+                .orElseThrow(() -> new NotFoundException("Server certificate was not found."));
+        return new CertificateResponse(serverCert, securityConfig.getClientKey(), securityConfig.getClientCert());
     }
 
 }
