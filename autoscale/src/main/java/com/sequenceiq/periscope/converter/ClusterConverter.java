@@ -7,6 +7,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.service.VaultService;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterResponse;
 import com.sequenceiq.periscope.api.model.MetricAlertResponse;
 import com.sequenceiq.periscope.api.model.PrometheusAlertResponse;
@@ -26,12 +27,15 @@ public class ClusterConverter extends AbstractConverter<AutoscaleClusterResponse
     @Inject
     private PrometheusAlertResponseConverter prometheusAlertResponseConverter;
 
+    @Inject
+    private VaultService vaultService;
+
     @Override
     public AutoscaleClusterResponse convert(Cluster source) {
         AutoscaleClusterResponse json = new AutoscaleClusterResponse(
                 source.getHost(),
                 source.getPort(),
-                source.getAmbariUser(),
+                vaultService.resolveSingleValue(source.getAmbariUser()),
                 source.getStackId(),
                 source.isAutoscalingEnabled(),
                 source.getId(),
