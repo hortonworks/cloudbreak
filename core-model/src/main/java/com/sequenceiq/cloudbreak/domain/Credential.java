@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.domain;
 
 import javax.persistence.Column;
-import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -11,9 +10,8 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import com.sequenceiq.cloudbreak.aspect.vault.VaultValue;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
-import com.sequenceiq.cloudbreak.domain.json.EncryptedJsonToString;
-import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
 
@@ -42,9 +40,9 @@ public class Credential implements ProvisionEntity, WorkspaceAwareResource {
     @Column(nullable = false)
     private String cloudPlatform;
 
-    @Convert(converter = EncryptedJsonToString.class)
+    @VaultValue
     @Column(columnDefinition = "TEXT")
-    private Json attributes;
+    private String attributes;
 
     @ManyToOne
     private Topology topology;
@@ -108,11 +106,11 @@ public class Credential implements ProvisionEntity, WorkspaceAwareResource {
         this.cloudPlatform = cloudPlatform;
     }
 
-    public Json getAttributes() {
+    public String getAttributes() {
         return attributes;
     }
 
-    public void setAttributes(Json attributes) {
+    public void setAttributes(String attributes) {
         this.attributes = attributes;
     }
 

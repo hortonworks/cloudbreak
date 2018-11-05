@@ -28,7 +28,6 @@ import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.ParametersValidator;
-import com.sequenceiq.cloudbreak.controller.validation.StackSensitiveDataPropagator;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.State;
 import com.sequenceiq.cloudbreak.controller.validation.Validator;
@@ -77,9 +76,6 @@ public class StackCreatorService {
 
     @Inject
     private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
-
-    @Inject
-    private StackSensitiveDataPropagator stackSensitiveDataPropagator;
 
     @Inject
     private ClusterCreationSetupService clusterCreationService;
@@ -146,7 +142,6 @@ public class StackCreatorService {
                 MDCBuilder.buildMdcContext(stack);
 
                 start = System.currentTimeMillis();
-                stack = stackSensitiveDataPropagator.propagate(stackRequest, stack, workspace);
                 LOGGER.info("Stack propagated with sensitive data in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
                 start = System.currentTimeMillis();
