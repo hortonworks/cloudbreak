@@ -447,33 +447,33 @@ public class HandlebarTemplateTest {
     public static Map<String, Object> ldapConfigWhenLdapPresentedThenShouldReturnWithLdapConfig() {
         return new TemplateModelContextBuilder()
                 .withLdap(new LdapView(ldapConfig(), "cn=admin,dc=example,dc=org", "admin"))
-                .withGateway(TestUtil.gatewayEnabled())
+                .withGateway(TestUtil.gatewayEnabled(), "/cb/secret/signkey")
                 .build();
     }
 
     public static Map<String, Object> ldapConfigWhenLdapPresentedThenShouldReturnWithAdConfig() {
         return new TemplateModelContextBuilder()
                 .withLdap(new LdapView(adConfig(), "cn=admin,dc=example,dc=org", "admin"))
-                .withGateway(TestUtil.gatewayEnabled())
+                .withGateway(TestUtil.gatewayEnabled(), "/cb/secret/signkey")
                 .build();
     }
 
     public static Map<String, Object> enabledGateway() {
         return new TemplateModelContextBuilder()
-                .withGateway(TestUtil.gatewayEnabled())
+                .withGateway(TestUtil.gatewayEnabled(), "/cb/secret/signkey")
                 .build();
     }
 
     public static Map<String, Object> enabledGatewayWithoutSSOAndWithRanger() {
         return new TemplateModelContextBuilder()
-                .withGateway(TestUtil.gatewayEnabledWithoutSSOAndWithRanger())
+                .withGateway(TestUtil.gatewayEnabledWithoutSSOAndWithRanger(), "/cb/secret/signkey")
                 .withComponents(Sets.newHashSet("RANGER_ADMIN"))
                 .build();
     }
 
     public static Map<String, Object> enabledGatewayWithRanger() {
         return new TemplateModelContextBuilder()
-                .withGateway(TestUtil.gatewayEnabled())
+                .withGateway(TestUtil.gatewayEnabled(), "/cb/secret/signkey")
                 .withComponents(Sets.newHashSet("RANGER_ADMIN"))
                 .build();
     }

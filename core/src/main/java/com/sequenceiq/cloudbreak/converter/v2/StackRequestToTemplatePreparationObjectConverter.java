@@ -27,23 +27,23 @@ import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.service.VaultService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
 import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
-import com.sequenceiq.cloudbreak.service.VaultService;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
@@ -138,11 +138,15 @@ public class StackRequestToTemplatePreparationObjectConverter extends AbstractCo
                 bindDn = vaultService.resolveSingleValue(ldapConfig.getBindDn());
                 bindPassword = vaultService.resolveSingleValue(ldapConfig.getBindPassword());
             }
+            String gatewaySignKey = null;
+            if (gateway != null) {
+                gatewaySignKey = vaultService.resolveSingleValue(gateway.getSignKey());
+            }
             Builder builder = Builder.builder()
                     .withFlexSubscription(flexSubscription.orElse(null))
                     .withRdsConfigs(rdsConfigs)
                     .withHostgroupViews(hostgroupViews)
-                    .withGateway(gateway)
+                    .withGateway(gateway, gatewaySignKey)
                     .withBlueprintView(blueprintView)
                     .withStackRepoDetailsHdpVersion(blueprintStackInfo.getVersion())
                     .withFileSystemConfigurationView(fileSystemConfigurationView)

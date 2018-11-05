@@ -228,8 +228,8 @@ public class TemplatePreparationObject {
             return this;
         }
 
-        public Builder withGateway(Gateway gateway) {
-            gatewayView = gateway != null ? new GatewayView(gateway) : null;
+        public Builder withGateway(Gateway gateway, String signKey) {
+            gatewayView = gateway != null ? new GatewayView(gateway, signKey) : null;
             return this;
         }
 
