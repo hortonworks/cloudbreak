@@ -9,32 +9,32 @@ import io.swagger.annotations.ApiModelProperty;
 public class CertificateResponse {
 
     @ApiModelProperty(StackModelDescription.CERTIFICATE)
-    private byte[] serverCert;
+    private String serverCert;
 
     @ApiModelProperty(StackModelDescription.CLIENT_KEY)
-    private byte[] clientKey;
+    private String clientKeyPath;
 
     @ApiModelProperty(StackModelDescription.CLIENT_CERT)
-    private byte[] clientCert;
+    private String clientCertPath;
 
     public CertificateResponse() {
     }
 
-    public CertificateResponse(byte[] serverCert, byte[] clientKey, byte[] clientCert) {
+    public CertificateResponse(String serverCert, String clientKeyPath, String clientCertPath) {
         this.serverCert = serverCert;
-        this.clientKey = clientKey;
-        this.clientCert = clientCert;
+        this.clientKeyPath = clientKeyPath;
+        this.clientCertPath = clientCertPath;
     }
 
-    public byte[] getServerCert() {
+    public String getServerCert() {
         return serverCert;
     }
 
-    public byte[] getClientKey() {
-        return clientKey;
+    public String getClientKeyPath() {
+        return clientKeyPath;
     }
 
-    public byte[] getClientCert() {
-        return clientCert;
+    public String getClientCertPath() {
+        return clientCertPath;
     }
 }

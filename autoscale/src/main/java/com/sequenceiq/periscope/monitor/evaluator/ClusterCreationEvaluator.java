@@ -124,7 +124,7 @@ public class ClusterCreationEvaluator extends EvaluatorExecutor {
         String host = stack.getAmbariServerIp();
         String gatewayPort = String.valueOf(stack.getGatewayPort());
         SecurityConfig securityConfig = tlsSecurityService.prepareSecurityConfig(stack.getStackId());
-        return new AmbariStack(new Ambari(host, gatewayPort, stack.getUserName(), stack.getPassword()), stack.getStackId(), securityConfig);
+        return new AmbariStack(new Ambari(host, gatewayPort, stack.getUserNamePath(), stack.getPasswordPath()), stack.getStackId(), securityConfig);
     }
 
     private void ambariHealthCheck(PeriscopeUser user, AmbariStack ambariStack) {
