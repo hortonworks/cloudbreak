@@ -12,7 +12,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.core.VaultTemplate;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -81,7 +80,7 @@ public class CentralBlueprintContext {
         }
 
         @Bean
-        public VaultOperations vaultOperations() {
+        public VaultTemplate vaultTemplate() {
             return mock(VaultTemplate.class);
         }
 

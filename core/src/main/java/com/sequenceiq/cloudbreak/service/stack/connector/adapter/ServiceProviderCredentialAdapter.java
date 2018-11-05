@@ -115,10 +115,10 @@ public class ServiceProviderCredentialAdapter {
         String smartSenseId = String.valueOf(cloudCredentialResponse.getParameters().get(SMART_SENSE_ID));
         if (StringUtils.isNoneEmpty(smartSenseId)) {
             try {
-                Json attributes = credential.getAttributes();
+                Json attributes = new Json(credential.getAttributes());
                 Map<String, Object> newAttributes = attributes.getMap();
                 newAttributes.put(SMART_SENSE_ID, smartSenseId);
-                credential.setAttributes(new Json(newAttributes));
+                credential.setAttributes(new Json(newAttributes).getValue());
             } catch (IOException e) {
                 LOGGER.error("SmartSense id could not be added to the credential as attribute.", e);
             }
@@ -126,7 +126,7 @@ public class ServiceProviderCredentialAdapter {
     }
 
     private void mergeCloudProviderParameters(Credential credential, CloudCredential cloudCredentialResponse, Set<String> skippedKeys) {
-        Json attributes = credential.getAttributes();
+        Json attributes = new Json(credential.getAttributes());
         Map<String, Object> newAttributes = attributes.getMap();
         boolean newAttributesAdded = false;
         for (Map.Entry<String, Object> cloudParam : cloudCredentialResponse.getParameters().entrySet()) {
@@ -137,7 +137,7 @@ public class ServiceProviderCredentialAdapter {
         }
         if (newAttributesAdded) {
             try {
-                credential.setAttributes(new Json(newAttributes));
+                credential.setAttributes(new Json(newAttributes).getValue());
             } catch (IOException ex) {
                 LOGGER.error("New cloudprovider attributes could not be added to the credential.", ex);
                 throw new OperationException(ex);

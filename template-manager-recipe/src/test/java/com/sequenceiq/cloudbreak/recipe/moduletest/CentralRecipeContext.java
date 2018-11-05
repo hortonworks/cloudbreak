@@ -6,16 +6,19 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.vault.core.VaultTemplate;
 
 import com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.json.JsonHelper;
 import com.sequenceiq.cloudbreak.recipe.CentralRecipeUpdater;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
+import com.sequenceiq.cloudbreak.service.VaultService;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurator;
 
 @ContextConfiguration
@@ -52,6 +55,16 @@ public class CentralRecipeContext {
         @Bean
         public freemarker.template.Configuration configurationProvider() {
             return new freemarker.template.Configuration();
+        }
+
+        @Bean
+        public VaultService vaultService() {
+            return Mockito.mock(VaultService.class);
+        }
+
+        @Bean
+        public VaultTemplate vaultTemplate() {
+            return Mockito.mock(VaultTemplate.class);
         }
 
         @Bean
