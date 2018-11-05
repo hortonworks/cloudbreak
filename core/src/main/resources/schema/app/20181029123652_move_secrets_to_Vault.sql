@@ -27,8 +27,12 @@ CREATE TABLE IF NOT EXISTS saltsecurityconfig
    PRIMARY KEY (id)
 );
 CREATE SEQUENCE IF NOT EXISTS saltsecurityconfig_id_seq START WITH 1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;
-ALTER TABLE securityconfig ADD COLUMN saltsecurityconfig_id BIGINT;
+ALTER TABLE securityconfig ADD COLUMN IF NOT EXISTS saltsecurityconfig_id BIGINT;
+ALTER TABLE securityconfig DROP CONSTRAINT IF EXISTS fk_securityconfig_saltsecurityconfig_id;
 ALTER TABLE securityconfig ADD CONSTRAINT fk_securityconfig_saltsecurityconfig_id FOREIGN KEY (saltsecurityconfig_id) REFERENCES saltsecurityconfig(id);
+
+ALTER TABLE generatedrecipe RENAME COLUMN extendedrecipe to extendedrecipetext;
+ALTER TABLE generatedrecipe DROP COLUMN IF EXISTS originalrecipe;
 
 -- //@UNDO
 -- SQL to undo the change goes here.
@@ -50,3 +54,6 @@ ALTER TABLE gateway DROP COLUMN IF EXISTS knoxmastersecret;
 
 DROP TABLE IF EXISTS saltsecurityconfig;
 DROP SEQUENCE IF EXISTS saltsecurityconfig_id_seq;
+
+ALTER TABLE generatedrecipe RENAME COLUMN extendedrecipetext to extendedrecipe;
+ALTER TABLE generatedrecipe ADD COLUMN IF NOT EXISTS originalrecipe text;
