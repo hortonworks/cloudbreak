@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.domain.json;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -39,11 +39,11 @@ public class Json implements Serializable {
     public Map<String, Object> getMap() {
         try {
             if (value == null) {
-                return Collections.emptyMap();
+                return new HashMap<>();
             }
             return get(Map.class);
         } catch (IOException ignored) {
-            return Collections.emptyMap();
+            return new HashMap<>();
         }
     }
 
