@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -54,6 +55,7 @@ import com.sequenceiq.cloudbreak.service.StackUnderOperationService;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
+import com.sequenceiq.cloudbreak.service.VaultService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.decorator.StackDecorator;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
@@ -118,6 +120,9 @@ public class StackCreatorService {
 
     @Inject
     private CredentialService credentialService;
+
+    @Inject
+    private VaultService vaultService;
 
     public StackResponse createStack(CloudbreakUser cloudbreakUser, User user, Workspace workspace, StackRequest stackRequest) {
         ValidationResult validationResult = stackRequestValidator.validate(stackRequest);
@@ -280,7 +285,8 @@ public class StackCreatorService {
         ClusterTemplate clusterTemplate = clusterTemplateService.getByNameForWorkspace(templateName, workspace);
         validateTemplateAndCredentialCloudPlatform(request, workspace, clusterTemplate);
         try {
-            StackV2Request stackV2Request = clusterTemplate.getTemplate().get(StackV2Request.class);
+            String template = vaultService.resolveSingleValue(clusterTemplate.getTemplate());
+            StackV2Request stackV2Request = new Json(template).get(StackV2Request.class);
             stackV2Request.setGeneral(request.getGeneral());
             stackV2Request.setStackAuthentication(request.getStackAuthentication());
             if (stackV2Request.getCluster() != null && stackV2Request.getCluster().getAmbari() != null) {
