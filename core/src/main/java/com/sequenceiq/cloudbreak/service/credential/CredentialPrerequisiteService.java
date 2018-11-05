@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.service.credential;
 
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -69,7 +72,8 @@ public class CredentialPrerequisiteService {
     }
 
     public Credential decorateCredential(Credential credential, String userId) {
-        Map<String, Object> newAttributes = new Json(credential.getAttributes()).getMap();
+        String attributes = credential.getAttributes();
+        Map<String, Object> newAttributes = isEmpty(attributes) ? new HashMap<>() : new Json(attributes).getMap();
         if (StringUtils.isNoneEmpty(String.valueOf(newAttributes.get(ROLE_ARN_PARAMTER_KEY)))) {
             Optional<UserPreferences> userPreferencesOptional = userPreferencesService.getByUserId(userId);
             if (userPreferencesOptional.isPresent() && StringUtils.isNoneEmpty(userPreferencesOptional.get().getExternalId())) {
