@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt;
 
 import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.SALT;
+import static com.sequenceiq.cloudbreak.common.type.RecipeExecutionPhase.convert;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -429,7 +430,7 @@ public class SaltOrchestrator implements HostOrchestrator {
 
             for (List<RecipeModel> recipeList : recipes.values()) {
                 for (RecipeModel model : recipeList) {
-                    uploadRecipe(sc, gatewayTargets, exitModel, model.getName(), model.getScript(), RecipeExecutionPhase.convert(model.getRecipeType()));
+                    uploadRecipe(sc, gatewayTargets, exitModel, model.getName(), model.getGeneratedScript(), convert(model.getRecipeType()));
                 }
             }
         } catch (Exception e) {
