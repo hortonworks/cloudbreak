@@ -67,7 +67,6 @@ import com.sequenceiq.cloudbreak.service.CrudRepositoryLookupService;
 import com.sequenceiq.cloudbreak.service.TransactionExecutorService;
 import com.sequenceiq.cloudbreak.service.VaultService;
 import com.sequenceiq.periscope.PeriscopeApplication;
-import com.sequenceiq.periscope.api.model.AutoscaleClusterRequest;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.config.DatabaseConfig;
 import com.sequenceiq.periscope.config.DatabaseMigrationConfig;
@@ -239,29 +238,6 @@ public class MetricTest {
     }
 
     @Test
-    public void testMetricsWhenAddActiveCluster() {
-        when(cloudbreakClient.autoscaleEndpoint()).thenReturn(autoscaleEndpoint);
-        when(autoscaleEndpoint.get(eq(STACK_ID))).thenReturn(getStackResponse(AVAILABLE, AVAILABLE));
-        when(authenticatedUserService.getPeriscopeUser()).thenReturn(getOwnerUser());
-        when(clusterRepository.save(any())).thenAnswer(this::saveCluster);
-        when(historyRepository.save(any())).then(returnsFirstArg());
-        when(clusterRepository.countByStateAndAutoscalingEnabledAndPeriscopeNodeId(eq(ClusterState.RUNNING), eq(true), anyString()))
-                .thenReturn(1);
-        when(clusterRepository.countByStateAndAutoscalingEnabledAndPeriscopeNodeId(eq(ClusterState.SUSPENDED), eq(true), anyString()))
-                .thenReturn(0);
-
-        autoScaleClusterV1Controller.addCluster(getCreateAutoscaleClusterRequest());
-
-        MultiValueMap<String, String> metrics = responseToMap(readMetricsEndpoint());
-        assertEquals(1.0, Double.parseDouble(metrics.get(toReportedMetricName(PERISCOPE_METRICS_CLUSTER_STATE_ACTIVE, false)).get(0)), DELTA);
-        assertEquals(0.0, Double.parseDouble(metrics.get(toReportedMetricName(PERISCOPE_METRICS_CLUSTER_STATE_SUSPENDED, false)).get(0)), DELTA);
-        InOrder inOrder = Mockito.inOrder(clusterRepository);
-        inOrder.verify(clusterRepository).save(argThat(Cluster::isRunning));
-        inOrder.verify(clusterRepository).countByStateAndAutoscalingEnabledAndPeriscopeNodeId(eq(ClusterState.RUNNING), eq(true), anyString());
-        inOrder.verify(clusterRepository).countByStateAndAutoscalingEnabledAndPeriscopeNodeId(eq(ClusterState.SUSPENDED), eq(true), anyString());
-    }
-
-    @Test
     public void testMetricsWhenSuspendActiveCluster() {
         metricService.submitGauge(MetricType.CLUSTER_STATE_ACTIVE, 1);
         metricService.submitGauge(MetricType.CLUSTER_STATE_SUSPENDED, 0);
@@ -401,10 +377,6 @@ public class MetricTest {
         cluster.setUser(getOwnerUser());
         cluster.setId(CLUSTER_ID);
         return cluster;
-    }
-
-    private AutoscaleClusterRequest getCreateAutoscaleClusterRequest() {
-        return new AutoscaleClusterRequest("host", "port", USER_A_ID, "pass", STACK_ID, true);
     }
 
     private PeriscopeUser getOwnerUser() {

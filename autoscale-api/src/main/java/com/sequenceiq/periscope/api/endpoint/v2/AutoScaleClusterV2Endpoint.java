@@ -3,18 +3,15 @@ package com.sequenceiq.periscope.api.endpoint.v2;
 import static com.sequenceiq.periscope.doc.ApiDescription.CLUSTERS_DESCRIPTION;
 import static com.sequenceiq.periscope.doc.ApiDescription.JSON;
 
-import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.sequenceiq.periscope.api.model.AutoscaleClusterRequest;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterResponse;
 import com.sequenceiq.periscope.doc.ApiDescription.ClusterNotes;
 import com.sequenceiq.periscope.doc.ApiDescription.ClusterOpDescription;
@@ -26,12 +23,6 @@ import io.swagger.annotations.ApiOperation;
 @Consumes(MediaType.APPLICATION_JSON)
 @Api(value = "/v2/clusters", description = CLUSTERS_DESCRIPTION, protocols = "http,https")
 public interface AutoScaleClusterV2Endpoint {
-
-    @PUT
-    @Path("{cbClusterId}")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ClusterOpDescription.CLUSTER_PUT, produces = JSON, notes = ClusterNotes.NOTES)
-    AutoscaleClusterResponse modifyByCloudbreakCluster(@Valid AutoscaleClusterRequest ambariServer, @PathParam("cbClusterId") Long stackId);
 
     @GET
     @Path("{cbClusterId}")

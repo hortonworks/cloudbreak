@@ -9,16 +9,12 @@ import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConvert
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
-import com.sequenceiq.cloudbreak.service.VaultService;
 
 @Component
 public class StackToAutoscaleStackResponseJsonConverter extends AbstractConversionServiceAwareConverter<Stack, AutoscaleStackResponse> {
 
     @Inject
     private GatewayConfigService gatewayConfigService;
-
-    @Inject
-    private VaultService vaultService;
 
     @Override
     public AutoscaleStackResponse convert(Stack source) {
@@ -35,8 +31,8 @@ public class StackToAutoscaleStackResponseJsonConverter extends AbstractConversi
             Cluster cluster = source.getCluster();
             String gatewayIp = gatewayConfigService.getPrimaryGatewayIp(source);
             result.setAmbariServerIp(gatewayIp);
-            result.setUserName(vaultService.resolveSingleValue(cluster.getCloudbreakAmbariUser()));
-            result.setPassword(vaultService.resolveSingleValue(cluster.getCloudbreakAmbariPassword()));
+            result.setUserNamePath(cluster.getCloudbreakAmbariUser());
+            result.setPasswordPath(cluster.getCloudbreakAmbariPassword());
             result.setClusterStatus(cluster.getStatus());
         }
         return result;
