@@ -23,8 +23,8 @@ public class CredentialToCloudCredentialConverter {
         if (credential == null) {
             return null;
         }
-        Json attributesFromVault = new Json(vaultService.resolveSingleValue(credential.getAttributes()));
-        Map<String, Object> fields = attributesFromVault.getMap();
+        Json attr = credential.getId() == null ? new Json(credential.getAttributes()) : new Json(vaultService.resolveSingleValue(credential.getAttributes()));
+        Map<String, Object> fields = attr.getMap();
         fields.put(CREDENTIAL_ID, credential.getId());
         return new CloudCredential(credential.getId(), credential.getName(), fields);
     }
