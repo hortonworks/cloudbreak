@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.flowlog;
 
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -98,5 +99,10 @@ public class FlowLogService {
         StateStatus stateStatus = failureEvent ? StateStatus.FAILED : StateStatus.SUCCESSFUL;
         FlowLog lastFlowLog = flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(flowId);
         flowLogRepository.updateLastLogStatusInFlow(lastFlowLog.getId(), stateStatus);
+    }
+
+    public boolean isOtherFlowRunning(Long stackId) {
+        Set<String> flowIds = flowLogRepository.findAllRunningNonTerminationFlowIdsByStackId(stackId);
+        return !flowIds.isEmpty();
     }
 }

@@ -172,7 +172,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
     private boolean isFlowAcceptable(String key, Payload payload) {
         if (payload instanceof Acceptable && ((Acceptable) payload).accepted() != null) {
             Acceptable acceptable = (Acceptable) payload;
-            if (!ALLOWED_PARALLEL_FLOWS.contains(key) && isOtherFlowRunning(payload.getStackId())) {
+            if (!ALLOWED_PARALLEL_FLOWS.contains(key) && flowLogService.isOtherFlowRunning(payload.getStackId())) {
                 acceptable.accepted().accept(Boolean.FALSE);
                 return false;
             }
@@ -187,11 +187,6 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                 acceptable.accepted().accept(Boolean.TRUE);
             }
         }
-    }
-
-    public boolean isOtherFlowRunning(Long stackId) {
-        Set<String> flowIds = flowLogRepository.findAllRunningNonTerminationFlowIdsByStackId(stackId);
-        return !flowIds.isEmpty();
     }
 
     private void cancelRunningFlows(Long stackId) throws TransactionExecutionException {

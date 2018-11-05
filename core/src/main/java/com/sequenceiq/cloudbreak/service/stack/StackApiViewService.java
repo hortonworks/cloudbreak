@@ -11,12 +11,12 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.stack.StackViewResponse;
-import com.sequenceiq.cloudbreak.core.flow2.Flow2Handler;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.repository.StackApiViewRepository;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
+import com.sequenceiq.cloudbreak.service.flowlog.FlowLogService;
 
 @Service
 public class StackApiViewService {
@@ -28,7 +28,7 @@ public class StackApiViewService {
     private TransactionService transactionService;
 
     @Inject
-    private Flow2Handler flow2Handler;
+    private FlowLogService flowLogService;
 
     @Inject
     @Qualifier("conversionService")
@@ -37,7 +37,7 @@ public class StackApiViewService {
     public boolean canChangeCredential(StackApiView stackApiView) {
         if (stackApiView.getStatus() != null) {
             if (stackApiView.getStatus() == Status.AVAILABLE) {
-                if (flow2Handler.isOtherFlowRunning(stackApiView.getId())) {
+                if (flowLogService.isOtherFlowRunning(stackApiView.getId())) {
                     return false;
                 }
                 return true;

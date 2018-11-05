@@ -13,15 +13,15 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.model.Status;
-import com.sequenceiq.cloudbreak.core.flow2.Flow2Handler;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.domain.view.StackStatusView;
+import com.sequenceiq.cloudbreak.service.flowlog.FlowLogService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StackApiViewServiceTest {
 
     @Mock
-    private Flow2Handler flow2Handler;
+    private FlowLogService flowLogService;
 
     @InjectMocks
     private StackApiViewService stackApiViewService;
@@ -56,7 +56,7 @@ public class StackApiViewServiceTest {
         StackStatusView stackStatusView = Mockito.mock(StackStatusView.class);
         when(stackStatusView.getStatus()).thenReturn(Status.AVAILABLE);
         stackApiView.setStackStatus(stackStatusView);
-        when(flow2Handler.isOtherFlowRunning(stackId)).thenReturn(true);
+        when(flowLogService.isOtherFlowRunning(stackId)).thenReturn(true);
 
         boolean result = stackApiViewService.canChangeCredential(stackApiView);
 
@@ -71,7 +71,7 @@ public class StackApiViewServiceTest {
         StackStatusView stackStatusView = Mockito.mock(StackStatusView.class);
         when(stackStatusView.getStatus()).thenReturn(Status.AVAILABLE);
         stackApiView.setStackStatus(stackStatusView);
-        when(flow2Handler.isOtherFlowRunning(stackId)).thenReturn(false);
+        when(flowLogService.isOtherFlowRunning(stackId)).thenReturn(false);
 
         boolean result = stackApiViewService.canChangeCredential(stackApiView);
 
