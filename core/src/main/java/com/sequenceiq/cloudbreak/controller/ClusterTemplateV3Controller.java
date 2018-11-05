@@ -80,7 +80,7 @@ public class ClusterTemplateV3Controller extends NotificationController implemen
     }
 
     @Override
-    public ClusterTemplateResponse deleteInWorkspace(Long workspaceId, String name) {
-        return clusterTemplateMapper.mapEntityToResponse(clusterTemplateService.deleteByNameFromWorkspace(name, workspaceId));
+    public void deleteInWorkspace(Long workspaceId, String name) {
+        clusterTemplateService.deleteByNameFromWorkspace(name, workspaceId);
     }
 }
