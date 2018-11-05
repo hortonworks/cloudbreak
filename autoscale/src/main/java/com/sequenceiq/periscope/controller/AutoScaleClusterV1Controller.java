@@ -7,9 +7,8 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.periscope.api.endpoint.v1.AutoScaleClusterV1Endpoint;
-import com.sequenceiq.periscope.api.model.AutoscaleClusterState;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterResponse;
-import com.sequenceiq.periscope.api.model.AutoscaleClusterRequest;
+import com.sequenceiq.periscope.api.model.AutoscaleClusterState;
 import com.sequenceiq.periscope.api.model.StateJson;
 
 @Component
@@ -17,16 +16,6 @@ public class AutoScaleClusterV1Controller implements AutoScaleClusterV1Endpoint 
 
     @Inject
     private AutoScaleClusterCommonService autoScaleClusterCommonService;
-
-    @Override
-    public AutoscaleClusterResponse addCluster(AutoscaleClusterRequest ambariServer) {
-        return autoScaleClusterCommonService.addCluster(ambariServer);
-    }
-
-    @Override
-    public AutoscaleClusterResponse modifyCluster(AutoscaleClusterRequest ambariServer, Long clusterId) {
-        return autoScaleClusterCommonService.modifyCluster(ambariServer, clusterId);
-    }
 
     @Override
     public List<AutoscaleClusterResponse> getClusters() {

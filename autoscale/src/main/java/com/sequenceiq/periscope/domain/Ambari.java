@@ -1,14 +1,11 @@
 package com.sequenceiq.periscope.domain;
 
 import javax.persistence.Column;
-import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
-
-import com.sequenceiq.cloudbreak.domain.converter.EncryptionConverter;
 
 @Entity
 public class Ambari {
@@ -24,11 +21,9 @@ public class Ambari {
     @Column(name = "ambari_port")
     private String port;
 
-    @Convert(converter = EncryptionConverter.class)
     @Column(name = "ambari_user")
     private String user;
 
-    @Convert(converter = EncryptionConverter.class)
     @Column(name = "ambari_pass")
     private String pass;
 
