@@ -70,9 +70,9 @@ public class RecipeExecutionFailureCollectorTest {
         worker.setName("worker");
         worker.setRecipes(Sets.newHashSet(failingRecipe1, failingRecipe2));
 
-        RecipeModel failingRecipeModel1 = new RecipeModel("failingRecipe1", POST_AMBARI_START, "", "", "");
-        RecipeModel failingRecipeModel2 = new RecipeModel("failingRecipe2", PRE_AMBARI_START, "", "", "");
-        RecipeModel goodRecipeModel = new RecipeModel("goodRecipe", POST_AMBARI_START, "", "", "");
+        RecipeModel failingRecipeModel1 = new RecipeModel("failingRecipe1", POST_AMBARI_START, "");
+        RecipeModel failingRecipeModel2 = new RecipeModel("failingRecipe2", PRE_AMBARI_START, "");
+        RecipeModel goodRecipeModel = new RecipeModel("goodRecipe", POST_AMBARI_START, "");
 
         Map<HostGroup, List<RecipeModel>> hostgroupToRecipeMap = new HashMap<>();
 
