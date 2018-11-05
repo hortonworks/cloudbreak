@@ -37,22 +37,18 @@ public class GatewayView {
 
     private final Map<String, Json> gatewayTopologies;
 
-    public GatewayView(@Nonnull Gateway gateway) {
+    public GatewayView(@Nonnull Gateway gateway, String signKey) {
         gatewayType = gateway.getGatewayType();
         path = gateway.getPath();
-        if (CollectionUtils.isEmpty(gateway.getTopologies())) {
-            gatewayTopologies = Collections.emptyMap();
-        } else {
-            gatewayTopologies = gateway.getTopologies().stream()
-                    .collect(Collectors.toMap(GatewayTopology::getTopologyName, GatewayTopology::getExposedServices));
-        }
+        gatewayTopologies = CollectionUtils.isEmpty(gateway.getTopologies()) ? Collections.emptyMap() : gateway.getTopologies().stream()
+                .collect(Collectors.toMap(GatewayTopology::getTopologyName, GatewayTopology::getExposedServices));
         ssoType = gateway.getSsoType();
         ssoConfigured = SSOType.SSO_PROVIDER.equals(gateway.getSsoType());
         ssoProvider = gateway.getSsoProvider();
-        signKey = gateway.getSignKey();
         signPub = gateway.getSignPub();
         signCert = gateway.getSignCert();
         tokenCert = gateway.getTokenCert();
+        this.signKey = signKey;
     }
 
     public GatewayType getGatewayType() {
