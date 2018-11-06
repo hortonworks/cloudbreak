@@ -29,12 +29,10 @@ public class CredentialRequestToCredentialConverter extends AbstractConversionSe
         credentialValidator.validateCredentialCloudPlatform(source.getCloudPlatform());
         String cloudPlatform = source.getCloudPlatform();
         credential.setCloudPlatform(cloudPlatform);
-        if (!source.getParameters().isEmpty()) {
-            try {
-                credential.setAttributes(new Json(source.getParameters()).getValue());
-            } catch (JsonProcessingException ignored) {
-                throw new BadRequestException("Invalid parameters");
-            }
+        try {
+            credential.setAttributes(new Json(source.getParameters()).getValue());
+        } catch (JsonProcessingException ignored) {
+            throw new BadRequestException("Invalid parameters");
         }
         if (source.getTopologyId() != null) {
             credential.setTopology(topologyService.get(source.getTopologyId()));
