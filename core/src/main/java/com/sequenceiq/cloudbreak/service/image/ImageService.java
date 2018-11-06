@@ -120,8 +120,9 @@ public class ImageService {
             String clusterType = ImageCatalogService.UNDEFINED;
             String clusterVersion = ImageCatalogService.UNDEFINED;
             if (blueprint != null) {
+                String blueprintText = vaultService.resolveSingleValue(blueprint.getBlueprintText());
                 try {
-                    JsonNode root = JsonUtil.readTree(blueprint.getBlueprintText());
+                    JsonNode root = JsonUtil.readTree(blueprintText);
                     clusterType = blueprintUtils.getBlueprintStackName(root);
                     clusterVersion = blueprintUtils.getBlueprintStackVersion(root);
                 } catch (IOException ex) {

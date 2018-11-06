@@ -126,10 +126,11 @@ public class StackRequestToTemplatePreparationObjectConverter extends AbstractCo
             BaseFileSystemConfigurationsView fileSystemConfigurationView = getFileSystemConfigurationView(source, credential);
             Set<RDSConfig> rdsConfigs = getRdsConfigs(source, workspace);
             Blueprint blueprint = getBlueprint(source, workspace);
-            BlueprintStackInfo blueprintStackInfo = stackInfoService.blueprintStackInfo(blueprint.getBlueprintText());
+            String blueprintText = blueprint.getBlueprintText();
+            BlueprintStackInfo blueprintStackInfo = stackInfoService.blueprintStackInfo(blueprintText);
             Set<HostgroupView> hostgroupViews = getHostgroupViews(source);
             Gateway gateway = source.getCluster().getAmbari().getGateway() == null ? null : getConversionService().convert(source, Gateway.class);
-            BlueprintView blueprintView = new BlueprintView(blueprint.getBlueprintText(), blueprintStackInfo.getVersion(), blueprintStackInfo.getType());
+            BlueprintView blueprintView = new BlueprintView(blueprintText, blueprintStackInfo.getVersion(), blueprintStackInfo.getType());
             GeneralClusterConfigs generalClusterConfigs = generalClusterConfigsProvider.generalClusterConfigs(source, user,
                     restRequestThreadLocalService.getCloudbreakUser().getUsername());
             String bindDn = null;
