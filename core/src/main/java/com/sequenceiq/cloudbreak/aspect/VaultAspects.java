@@ -77,7 +77,7 @@ public class VaultAspects {
                             String resourceType = entity.getClass().getSimpleName().toLowerCase();
                             String resourceId = UUID.randomUUID().toString();
                             String fieldName = field.getName().toLowerCase();
-                            String path = String.format("%s/cb/%s/%s/%s", VaultService.SECRET_PATH, resourceType, fieldName, resourceId);
+                            String path = String.format("cb/%s/%s/%s", resourceType, fieldName, resourceId);
                             vaultService.addFieldToSecret(path, value);
                             LOGGER.debug("Field: '{}' is saved at path: {}", field.getName(), path);
                             field.set(entity, path);

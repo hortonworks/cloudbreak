@@ -7,6 +7,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.vault.core.VaultTemplate;
@@ -22,6 +23,9 @@ public class VaultService {
     @Inject
     private VaultTemplate template;
 
+    @Value("${cb.vault.kv.path:}")
+    private String kvPath;
+
     /**
      * Stores a secret in Vault's key-value store.
      *
@@ -30,14 +34,15 @@ public class VaultService {
      * @throws Exception is thrown in case the key-value path is already contains a secret
      */
     public void addFieldToSecret(String path, String value) throws Exception {
+        String fullPath = kvPath + '/' + path;
         long start = System.currentTimeMillis();
-        VaultResponse response = template.read(path);
+        VaultResponse response = template.read(fullPath);
         LOGGER.debug("Vault read took {} ms", System.currentTimeMillis() - start);
         if (response != null && response.getData() != null) {
-            throw new InvalidKeyException(String.format("Path: %s already exists!", path));
+            throw new InvalidKeyException(String.format("Path: %s already exists!", fullPath));
         }
         start = System.currentTimeMillis();
-        template.write(path, Collections.singletonMap("secret", value));
+        template.write(fullPath, Collections.singletonMap("secret", value));
         LOGGER.debug("Vault write took {} ms", System.currentTimeMillis() - start);
     }
 
@@ -76,6 +81,6 @@ public class VaultService {
     }
 
     public boolean isSecretPath(String value) {
-        return value.startsWith(SECRET_PATH);
+        return value.startsWith(kvPath);
     }
 }
