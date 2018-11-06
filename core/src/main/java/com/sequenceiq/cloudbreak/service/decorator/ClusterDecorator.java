@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupRequest;
+import com.sequenceiq.cloudbreak.service.VaultService;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
@@ -81,6 +82,9 @@ public class ClusterDecorator {
     @Inject
     private AmbariHaComponentFilter ambariHaComponentFilter;
 
+    @Inject
+    private VaultService vaultService;
+
     public Cluster decorate(@Nonnull Cluster cluster, @Nonnull ClusterRequest request, Blueprint blueprint, User user, Workspace workspace,
             @Nonnull Stack stack) {
         prepareBlueprint(cluster, request, workspace, stack, Optional.ofNullable(blueprint), user);
@@ -109,8 +113,7 @@ public class ClusterDecorator {
         }
     }
 
-    private void prepareBlueprint(Cluster subject, ClusterRequest request, Workspace workspace, Stack stack,
-            Optional<Blueprint> blueprint, User user) {
+    private void prepareBlueprint(Cluster subject, ClusterRequest request, Workspace workspace, Stack stack, Optional<Blueprint> blueprint, User user) {
         if (blueprint.isPresent()) {
             subject.setBlueprint(blueprint.get());
         } else {
@@ -132,7 +135,8 @@ public class ClusterDecorator {
 
     // because KNOX does not support them
     private void removeHaComponentsFromGatewayTopologies(Cluster subject) {
-        Set<String> haComponents = ambariHaComponentFilter.getHaComponents(new BlueprintTextProcessor(subject.getBlueprint().getBlueprintText()));
+        String blueprintText = vaultService.resolveSingleValue(subject.getBlueprint().getBlueprintText());
+        Set<String> haComponents = ambariHaComponentFilter.getHaComponents(new BlueprintTextProcessor(blueprintText));
         Set<String> haKnoxServices = ExposedService.filterSupportedKnoxServices().stream()
                 .filter(es -> haComponents.contains(es.getServiceName())
                         && !ExposedService.RANGER.getServiceName().equalsIgnoreCase(es.getServiceName()))
