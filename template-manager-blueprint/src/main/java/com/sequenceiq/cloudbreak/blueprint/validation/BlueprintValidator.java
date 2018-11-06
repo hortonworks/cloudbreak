@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.service.VaultService;
 
 @Component
 public class BlueprintValidator {
@@ -31,6 +32,9 @@ public class BlueprintValidator {
 
     @Inject
     private StackServiceComponentDescriptors stackServiceComponentDescs;
+
+    @Inject
+    private VaultService vaultService;
 
     public void validateBlueprintForStack(Blueprint blueprint, Set<HostGroup> hostGroups, Collection<InstanceGroup> instanceGroups)
             throws BlueprintValidationException {
@@ -58,7 +62,8 @@ public class BlueprintValidator {
     }
 
     private JsonNode createJsonTree(Blueprint blueprint) throws IOException {
-        return objectMapper.readTree(blueprint.getBlueprintText());
+        String blueprintText = vaultService.resolveSingleValue(blueprint.getBlueprintText());
+        return objectMapper.readTree(blueprintText);
     }
 
     private void validateHostGroups(JsonNode hostGroupsNode, Collection<HostGroup> hostGroups, Collection<InstanceGroup> instanceGroups) {

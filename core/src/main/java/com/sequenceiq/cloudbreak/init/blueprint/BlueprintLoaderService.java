@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.service.VaultService;
 
 @Service
 public class BlueprintLoaderService {
@@ -27,6 +28,9 @@ public class BlueprintLoaderService {
 
     @Inject
     private DefaultBlueprintCache defaultBlueprintCache;
+
+    @Inject
+    private VaultService vaultService;
 
     public boolean addingDefaultBlueprintsAreNecessaryForTheUser(Collection<Blueprint> blueprints) {
         Map<String, Blueprint> defaultBlueprints = defaultBlueprintCache.defaultBlueprints();
@@ -95,7 +99,7 @@ public class BlueprintLoaderService {
         for (Blueprint blueprintFromDatabase : blueprints) {
             Blueprint newBlueprint = defaultBlueprints.get(blueprintFromDatabase.getName());
             if (defaultBlueprintExistInTheCache(newBlueprint)
-                    && (defaultBlueprintContainsNewTexts(blueprintFromDatabase, newBlueprint)
+                    && (defaultBlueprintSameAsNewTexts(blueprintFromDatabase, newBlueprint)
                     || defaultBlueprintContainsNewDescription(blueprintFromDatabase, newBlueprint))) {
                 LOGGER.info("Default Blueprint '{}' needs to modify for the '{}' workspace because the validation text changed.",
                         blueprintFromDatabase.getName(), workspace.getId());
@@ -108,7 +112,8 @@ public class BlueprintLoaderService {
 
     private Blueprint prepareBlueprint(Blueprint blueprintFromDatabase, Blueprint newBlueprint, Workspace workspace) {
         setupBlueprint(blueprintFromDatabase, workspace);
-        blueprintFromDatabase.setBlueprintText(newBlueprint.getBlueprintText());
+        String blueprintText = vaultService.resolveSingleValue(newBlueprint.getBlueprintText());
+        blueprintFromDatabase.setBlueprintText(blueprintText);
         blueprintFromDatabase.setDescription(newBlueprint.getDescription());
         blueprintFromDatabase.setHostGroupCount(newBlueprint.getHostGroupCount());
         blueprintFromDatabase.setAmbariName(newBlueprint.getAmbariName());
@@ -150,8 +155,10 @@ public class BlueprintLoaderService {
         return DEFAULT.equals(bp.getStatus());
     }
 
-    private boolean defaultBlueprintContainsNewTexts(Blueprint bp, Blueprint blueprint) {
-        return !bp.getBlueprintText().equals(blueprint.getBlueprintText());
+    private boolean defaultBlueprintSameAsNewTexts(Blueprint bp1, Blueprint bp2) {
+        String bp1Text = vaultService.resolveSingleValue(bp1.getBlueprintText());
+        String bp2Text = vaultService.resolveSingleValue(bp2.getBlueprintText());
+        return !bp1Text.equals(bp2Text);
     }
 
     private boolean defaultBlueprintContainsNewDescription(Blueprint bp, Blueprint blueprint) {
@@ -165,7 +172,7 @@ public class BlueprintLoaderService {
     private boolean mustUpdateTheExistingBlueprint(Blueprint blueprintFromDatabase, Blueprint defaultBlueprint) {
         return isDefaultBlueprint(blueprintFromDatabase)
                 && defaultBlueprintExistInTheCache(defaultBlueprint)
-                && (defaultBlueprintContainsNewTexts(blueprintFromDatabase, defaultBlueprint)
+                && (defaultBlueprintSameAsNewTexts(blueprintFromDatabase, defaultBlueprint)
                 || defaultBlueprintContainsNewDescription(blueprintFromDatabase, defaultBlueprint));
     }
 

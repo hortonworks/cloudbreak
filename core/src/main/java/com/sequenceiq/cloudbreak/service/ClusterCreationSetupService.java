@@ -135,6 +135,9 @@ public class ClusterCreationSetupService {
     @Inject
     private ClusterCreationEnvironmentValidator environmentValidator;
 
+    @Inject
+    private VaultService vaultService;
+
     public void validate(ClusterRequest request, Stack stack, User user, Workspace workspace) {
         validate(request, null, stack, user, workspace);
     }
@@ -274,7 +277,8 @@ public class ClusterCreationSetupService {
             AmbariRepoDetailsJson ambariRepoDetailsJson, Optional<Component> stackImageComponent, Cluster cluster) throws IOException {
         Json json;
         if (!stackAmbariRepoConfig.isPresent()) {
-            JsonNode bluePrintJson = JsonUtil.readTree(cluster.getBlueprint().getBlueprintText());
+            String blueprintText = vaultService.resolveSingleValue(cluster.getBlueprint().getBlueprintText());
+            JsonNode bluePrintJson = JsonUtil.readTree(blueprintText);
             String stackVersion = blueprintUtils.getBlueprintStackVersion(bluePrintJson);
             String stackName = blueprintUtils.getBlueprintStackName(bluePrintJson);
             AmbariRepo ambariRepo = ambariRepoDetailsJson != null
@@ -406,13 +410,16 @@ public class ClusterCreationSetupService {
     private JsonNode getBlueprintJsonNode(Blueprint blueprint, ClusterRequest request, Workspace workspace) throws IOException {
         JsonNode root;
         if (blueprint != null) {
-            root = JsonUtil.readTree(blueprint.getBlueprintText());
+            String blueprintText = vaultService.resolveSingleValue(blueprint.getBlueprintText());
+            root = JsonUtil.readTree(blueprintText);
         } else {
             // Backward compatibility to V1 cluster API
             if (request.getBlueprintId() != null) {
                 root = JsonUtil.readTree(blueprintService.get(request.getBlueprintId()).getBlueprintText());
             } else if (request.getBlueprintName() != null) {
-                root = JsonUtil.readTree(blueprintService.getByNameForWorkspace(request.getBlueprintName(), workspace).getBlueprintText());
+                blueprint = blueprintService.getByNameForWorkspace(request.getBlueprintName(), workspace);
+                String blueprintText = vaultService.resolveSingleValue(blueprint.getBlueprintText());
+                root = JsonUtil.readTree(blueprintText);
             } else {
                 root = JsonUtil.readTree(request.getBlueprint().getAmbariBlueprint());
             }

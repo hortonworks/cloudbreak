@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.decorator;
 
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -29,6 +30,7 @@ import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.AmbariHaComponentFilter;
+import com.sequenceiq.cloudbreak.service.VaultService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
@@ -92,9 +94,13 @@ public class ClusterDecoratorTest {
     @Mock
     private User user;
 
+    @Mock
+    private VaultService vaultService;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        when(vaultService.resolveSingleValue(anyString())).then(it -> it.getArgument(0));
     }
 
     @Test
