@@ -2,14 +2,39 @@ packages_install:
   pkg.installed:
     - refresh: False
     - pkgs:
+{% if grains['os_family'] == 'Debian' %}
+      - sssd-ad
+      - realmd
+      - sssd-tools
+      - sssd
+      - libnss-sss
+      - libpam-sss
+      - adcli
+      - packagekit
+      - policykit-1
+      - samba-common-bin
+      - samba-libs
+      - samba-dsdb-modules
+      - krb5-user
+{% elif grains['os_family'] == 'Suse' %}
+      - krb5-client
+      - samba-client
+      - sssd
+      - sssd-ad
+{% else %}
       - sssd
       - realmd
       - krb5-workstation
       - samba-common-tools
+{% endif %}
 
 join_domain:
   cmd.run:
+{% if grains['os_family'] == 'Debian' %}
+    - name: echo $BINDPW | realm --verbose join --install=/ --user={{salt['pillar.get']('sssd-ad:username')}} {{salt['pillar.get']('sssd-ad:domain')}}
+{% else %}
     - name: echo $BINDPW | realm --verbose join --user={{salt['pillar.get']('sssd-ad:username')}} {{salt['pillar.get']('sssd-ad:domain')}}
+{% endif %}
     - unless: realm list | grep -qi {{salt['pillar.get']('sssd-ad:domain')}}
     - env:
       - BINDPW: {{salt['pillar.get']('sssd-ad:password')}}
@@ -25,6 +50,7 @@ restart-sssd-if-reconfigured:
   file.managed:
     - source: salt://sssd/template/sssd-ad.j2
     - template: jinja
+    - mode: 700
 
 restart-sshd-if-reconfigured:
   service.running:
