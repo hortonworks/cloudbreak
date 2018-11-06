@@ -7,12 +7,15 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.support.VaultResponse;
 
 @Service
 public class VaultService {
+
+    public static final String SECRET_PATH = "secret";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VaultService.class);
 
@@ -45,9 +48,12 @@ public class VaultService {
      * @param path Key-value path in Vault
      * @return Secret content or null if the secret path is not found.
      */
+    @Cacheable(cacheNames = "vaultCache")
     public String resolveSingleValue(String path) {
         if (path == null) {
             return null;
+        } else if (!isSecretPath(path)) {
+            return path;
         }
         long start = System.currentTimeMillis();
         VaultResponse response = template.read(path);
@@ -69,4 +75,7 @@ public class VaultService {
         LOGGER.debug("Vault delete took {} ms", System.currentTimeMillis() - start);
     }
 
+    public boolean isSecretPath(String value) {
+        return value.startsWith(SECRET_PATH);
+    }
 }

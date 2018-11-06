@@ -940,8 +940,9 @@ public class ClusterService {
 
     private void validateComponentsCategory(Stack stack, String hostGroup) {
         Blueprint blueprint = stack.getCluster().getBlueprint();
+        String blueprintText = vaultService.resolveSingleValue(blueprint.getBlueprintText());
         try {
-            JsonNode root = JsonUtil.readTree(blueprint.getBlueprintText());
+            JsonNode root = JsonUtil.readTree(blueprintText);
             String blueprintName = root.path("Blueprints").path("blueprint_name").asText();
             AmbariClient ambariClient = getAmbariClient(stack);
             Map<String, String> categories = ambariClient.getComponentsCategory(blueprintName, hostGroup);

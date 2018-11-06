@@ -67,9 +67,10 @@ public class RecipeEngine {
     public void uploadRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
         Orchestrator orchestrator = stack.getOrchestrator();
         if (recipesSupportedOnOrchestrator(orchestrator)) {
-            addHDFSRecipe(stack, hostGroups);
-            addSmartSenseRecipe(stack, hostGroups);
-            addS3SymlinkRecipe(stack, hostGroups);
+            String blueprintText = vaultService.resolveSingleValue(stack.getCluster().getBlueprint().getBlueprintText());
+            addHDFSRecipe(stack, blueprintText, hostGroups);
+            addSmartSenseRecipe(stack, blueprintText, hostGroups);
+            addS3SymlinkRecipe(stack, blueprintText, hostGroups);
             addContainerExecutorScripts(stack, hostGroups);
             boolean recipesFound = recipesFound(hostGroups);
             if (recipesFound) {
@@ -169,10 +170,9 @@ public class RecipeEngine {
         return false;
     }
 
-    private void addHDFSRecipe(Stack stack, Set<HostGroup> hostGroups) {
+    private void addHDFSRecipe(Stack stack, String blueprintText, Set<HostGroup> hostGroups) {
         try {
             Cluster cluster = stack.getCluster();
-            String blueprintText = cluster.getBlueprint().getBlueprintText();
             for (HostGroup hostGroup : hostGroups) {
                 if (isComponentPresent(blueprintText, "NAMENODE", hostGroup)) {
                     String userName = vaultService.resolveSingleValue(cluster.getUserName());
@@ -188,10 +188,9 @@ public class RecipeEngine {
         }
     }
 
-    private void addS3SymlinkRecipe(Stack stack, Set<HostGroup> hostGroups) {
+    private void addS3SymlinkRecipe(Stack stack, String blueprintText, Set<HostGroup> hostGroups) {
         try {
             Cluster cluster = stack.getCluster();
-            String blueprintText = cluster.getBlueprint().getBlueprintText();
             for (HostGroup hostGroup : hostGroups) {
                 if (isComponentPresent(blueprintText, "ATLAS_SERVER", hostGroup)) {
                     String script = FileReaderUtils.readFileFromClasspath("scripts/prepare-s3-symlinks.sh")
@@ -221,10 +220,9 @@ public class RecipeEngine {
         return result;
     }
 
-    private void addSmartSenseRecipe(Stack stack, Set<HostGroup> hostGroups) {
+    private void addSmartSenseRecipe(Stack stack, String blueprintText, Set<HostGroup> hostGroups) {
         try {
             Cluster cluster = stack.getCluster();
-            String blueprintText = cluster.getBlueprint().getBlueprintText();
             if (smartsenseConfigurationLocator.smartsenseConfigurable(smartSenseSubscriptionService.getDefault())) {
                 for (HostGroup hostGroup : hostGroups) {
                     if (isComponentPresent(blueprintText, "HST_AGENT", hostGroup)) {

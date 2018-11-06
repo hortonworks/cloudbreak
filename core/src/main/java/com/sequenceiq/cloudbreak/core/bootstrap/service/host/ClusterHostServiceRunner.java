@@ -220,7 +220,8 @@ public class ClusterHostServiceRunner {
         AmbariRepo ambariRepo = clusterComponentConfigProvider.getAmbariRepo(cluster.getId());
         if (ambariRepo != null) {
             Map<String, Object> ambariRepoMap = ambariRepo.asMap();
-            Json blueprint = new Json(cluster.getBlueprint().getBlueprintText());
+            String blueprintText = vaultService.resolveSingleValue(cluster.getBlueprint().getBlueprintText());
+            Json blueprint = new Json(blueprintText);
             ambariRepoMap.put("stack_version", blueprint.getValue("Blueprints.stack_version"));
             ambariRepoMap.put("stack_type", blueprint.getValue("Blueprints.stack_name").toString().toLowerCase());
             servicePillar.put("ambari-repo", new SaltPillarProperties("/ambari/repo.sls", singletonMap("ambari", singletonMap("repo", ambariRepoMap))));
@@ -311,7 +312,8 @@ public class ClusterHostServiceRunner {
         if (datalakeId != null) {
             StackView dataLakeStack = getStackView(datalakeId);
             Cluster dataLakeCluster = clusterService.findOneWithLists(dataLakeStack.getClusterView().getId());
-            BlueprintTextProcessor blueprintTextProcessor = blueprintProcessorFactory.get(dataLakeCluster.getBlueprint().getBlueprintText());
+            String blueprintText = vaultService.resolveSingleValue(dataLakeCluster.getBlueprint().getBlueprintText());
+            BlueprintTextProcessor blueprintTextProcessor = blueprintProcessorFactory.get(blueprintText);
 
             Set<String> groupNames = blueprintTextProcessor.getHostGroupsWithComponent("RANGER_ADMIN");
             List<HostGroup> groups = dataLakeCluster.getHostGroups().stream().filter(hg -> groupNames.contains(hg.getName())).collect(Collectors.toList());
