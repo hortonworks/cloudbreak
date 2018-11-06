@@ -54,6 +54,9 @@ public class StackViewResponse {
     @ApiModelProperty(StackModelDescription.FLEX_SUBSCRIPTION)
     private FlexSubscriptionResponse flexSubscription;
 
+    @ApiModelProperty(StackModelDescription.USER)
+    private UserViewResponse user;
+
     @ApiModelProperty(StackModelDescription.ENVIRONMENT)
     private String environment;
 
@@ -167,5 +170,13 @@ public class StackViewResponse {
 
     public void setEnvironment(String environment) {
         this.environment = environment;
+    }
+
+    public UserViewResponse getUser() {
+        return user;
+    }
+
+    public void setUser(UserViewResponse user) {
+        this.user = user;
     }
 }

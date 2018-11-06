@@ -176,6 +176,7 @@ public class ModelDescriptions {
         public static final String CLUSTER = "cluster object on stack";
         public static final String CLUSTER_REQUEST = "cluster request object on stack";
         public static final String FLEX_SUBSCRIPTION = "the related flex subscription";
+        public static final String USER = "the related user";
         public static final String NODE_COUNT = "node count of the stack";
         public static final String HARDWARE_INFO_RESPONSE = "hardware information where pairing hostmetadata with instancemetadata";
         public static final String USAGES = "usage information for a specific stack";
