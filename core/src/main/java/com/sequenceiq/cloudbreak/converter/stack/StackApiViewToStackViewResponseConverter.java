@@ -13,6 +13,7 @@ import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
 import com.sequenceiq.cloudbreak.api.model.FlexSubscriptionResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.StackViewResponse;
+import com.sequenceiq.cloudbreak.api.model.stack.UserViewResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterViewResponse;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
@@ -54,6 +55,7 @@ public class StackApiViewToStackViewResponseConverter extends AbstractConversion
         stackViewResponse.setStatus(source.getStatus());
         stackViewResponse.setCreated(source.getCreated());
         addFlexSubscription(source, stackViewResponse);
+        addUser(source, stackViewResponse);
         if (source.getEnvironment() != null) {
             stackViewResponse.setEnvironment(source.getEnvironment().getName());
         }
@@ -93,6 +95,17 @@ public class StackApiViewToStackViewResponseConverter extends AbstractConversion
                 stackJson.setFlexSubscription(flexSubscription);
             } catch (Exception ex) {
                 LOGGER.warn("Flex subscription could not be added to stack response.", ex);
+            }
+        }
+    }
+
+    private void addUser(StackApiView source, StackViewResponse stackJson) {
+        if (source.getUserView() != null) {
+            try {
+                UserViewResponse userViewResponse = getConversionService().convert(source.getUserView(), UserViewResponse.class);
+                stackJson.setUser(userViewResponse);
+            } catch (Exception ex) {
+                LOGGER.warn("User could not be added to stack response.", ex);
             }
         }
     }

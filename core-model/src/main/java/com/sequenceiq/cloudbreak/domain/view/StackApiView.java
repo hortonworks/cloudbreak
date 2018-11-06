@@ -63,6 +63,10 @@ public class StackApiView extends CompactViewWithOwner {
     private Long datalakeId;
 
     @ManyToOne
+    @JoinColumn(name = "createdBy")
+    private UserView userView;
+
+    @ManyToOne
     private EnvironmentView environment;
 
     @Override
@@ -168,5 +172,13 @@ public class StackApiView extends CompactViewWithOwner {
 
     public void setEnvironment(EnvironmentView environment) {
         this.environment = environment;
+    }
+
+    public UserView getUserView() {
+        return userView;
+    }
+
+    public void setUserView(UserView userView) {
+        this.userView = userView;
     }
 }
