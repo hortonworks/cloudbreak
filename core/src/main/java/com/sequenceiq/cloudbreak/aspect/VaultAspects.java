@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.aspect;
 
 import java.lang.reflect.Field;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -34,30 +36,58 @@ public class VaultAspects {
     public void onRepositoryDelete() {
     }
 
+    @Pointcut("execution(public * com.sequenceiq.cloudbreak.repository.*.saveAll(..)) ")
+    public void onRepositorySaveAll() {
+    }
+
+    @Pointcut("execution(public void com.sequenceiq.cloudbreak.repository.*.deleteAll(..)) ")
+    public void onRepositoryDeleteAll() {
+    }
+
     @Around("onRepositorySave()")
     public Object saveToVault(ProceedingJoinPoint proceedingJoinPoint) throws CloudbreakException {
-        Object entity = proceedingJoinPoint.getArgs()[0];
-        try {
-            for (Field field : entity.getClass().getDeclaredFields()) {
-                if (field.isAnnotationPresent(VaultValue.class)) {
-                    LOGGER.info("Found VaultValue annotation on {}", field);
-                    field.setAccessible(true);
-                    String secretPath = "secret";
-                    String value = (String) field.get(entity);
-                    if (value != null && !value.startsWith(secretPath)) {
-                        String resourceType = entity.getClass().getSimpleName().toLowerCase();
-                        String resourceId = UUID.randomUUID().toString();
-                        String fieldName = field.getName().toLowerCase();
-                        String path = String.format("%s/cb/%s/%s/%s", secretPath, resourceType, fieldName, resourceId);
-                        vaultService.addFieldToSecret(path, value);
-                        LOGGER.info("Field: '{}' is saved at path: {}", field.getName(), path);
-                        field.set(entity, path);
+        return proceedSave(proceedingJoinPoint);
+    }
+
+    @Around("onRepositoryDelete()")
+    public Object removeFromVault(ProceedingJoinPoint proceedingJoinPoint) throws CloudbreakException {
+        return proceedDelete(proceedingJoinPoint);
+    }
+
+    @Around("onRepositorySaveAll()")
+    public Object saveAllToVault(ProceedingJoinPoint proceedingJoinPoint) throws CloudbreakException {
+        return proceedSave(proceedingJoinPoint);
+    }
+
+    @Around("onRepositoryDeleteAll()")
+    public Object removeAllFromVault(ProceedingJoinPoint proceedingJoinPoint) throws CloudbreakException {
+        return proceedDelete(proceedingJoinPoint);
+    }
+
+    private Object proceedSave(ProceedingJoinPoint proceedingJoinPoint) throws CloudbreakException {
+        Collection<Object> entities = convertFirstArgToCollection(proceedingJoinPoint);
+        for (Object entity : entities) {
+            try {
+                for (Field field : entity.getClass().getDeclaredFields()) {
+                    if (field.isAnnotationPresent(VaultValue.class)) {
+                        LOGGER.debug("Found VaultValue annotation on {}", field);
+                        field.setAccessible(true);
+                        String value = (String) field.get(entity);
+                        if (value != null && !vaultService.isSecretPath(value)) {
+                            String resourceType = entity.getClass().getSimpleName().toLowerCase();
+                            String resourceId = UUID.randomUUID().toString();
+                            String fieldName = field.getName().toLowerCase();
+                            String path = String.format("%s/cb/%s/%s/%s", VaultService.SECRET_PATH, resourceType, fieldName, resourceId);
+                            vaultService.addFieldToSecret(path, value);
+                            LOGGER.debug("Field: '{}' is saved at path: {}", field.getName(), path);
+                            field.set(entity, path);
+                        }
                     }
                 }
+            } catch (Exception e) {
+                LOGGER.warn("Looks like something went wrong with Vault. Data is not encrypted!", e);
+                throw new CloudbreakException(e);
             }
-        } catch (Exception e) {
-            LOGGER.warn("Looks like something went wrong with Vault. Data is not encrypted!", e);
-            throw new CloudbreakException(e);
         }
 
         Object proceed;
@@ -70,22 +100,23 @@ public class VaultAspects {
         return proceed;
     }
 
-    @Around("onRepositoryDelete()")
-    public Object removeFromVault(ProceedingJoinPoint proceedingJoinPoint) throws CloudbreakException {
-        Object entity = proceedingJoinPoint.getArgs()[0];
-        try {
-            for (Field field : entity.getClass().getDeclaredFields()) {
-                if (field.isAnnotationPresent(VaultValue.class)) {
-                    LOGGER.info("Found VaultValue annotation on {}", field);
-                    field.setAccessible(true);
-                    String path = (String) field.get(entity);
-                    vaultService.deleteSecret(path);
-                    LOGGER.info("Secret deleted at path: {}", path);
+    private Object proceedDelete(ProceedingJoinPoint proceedingJoinPoint) throws CloudbreakException {
+        Collection<Object> entities = convertFirstArgToCollection(proceedingJoinPoint);
+        for (Object entity : entities) {
+            try {
+                for (Field field : entity.getClass().getDeclaredFields()) {
+                    if (field.isAnnotationPresent(VaultValue.class)) {
+                        LOGGER.debug("Found VaultValue annotation on {}", field);
+                        field.setAccessible(true);
+                        String path = (String) field.get(entity);
+                        vaultService.deleteSecret(path);
+                        LOGGER.debug("Secret deleted at path: {}", path);
+                    }
                 }
+            } catch (Exception e) {
+                LOGGER.warn("Looks like something went wrong with Vault. Secret is not deleted!", e);
+                throw new CloudbreakException(e);
             }
-        } catch (Exception e) {
-            LOGGER.warn("Looks like something went wrong with Vault. Secret is not deleted!", e);
-            throw new CloudbreakException(e);
         }
 
         Object proceed;
@@ -98,4 +129,8 @@ public class VaultAspects {
         return proceed;
     }
 
+    private Collection<Object> convertFirstArgToCollection(ProceedingJoinPoint proceedingJoinPoint) {
+        Object arg = proceedingJoinPoint.getArgs()[0];
+        return arg instanceof Collection ? (Collection<Object>) arg : Collections.singleton(arg);
+    }
 }
