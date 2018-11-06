@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.service.VaultService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BlueprintValidatorTest {
@@ -70,12 +71,16 @@ public class BlueprintValidatorTest {
     @Mock
     private ObjectMapper objectMapper;
 
+    @Mock
+    private VaultService vaultService;
+
     @InjectMocks
     private BlueprintValidator underTest;
 
     @Before
     public void setUp() {
         setupStackServiceComponentDescriptors();
+        BDDMockito.given(vaultService.resolveSingleValue(ArgumentMatchers.anyString())).willReturn(BLUEPRINT_STRING);
     }
 
     @Test
@@ -85,6 +90,7 @@ public class BlueprintValidatorTest {
         Set<InstanceGroup> instanceGroups = createInstanceGroups();
         Set<HostGroup> hostGroups = createHostGroups(instanceGroups);
         IOException expectedException = new IOException("");
+        BDDMockito.given(vaultService.resolveSingleValue(ArgumentMatchers.anyString())).willReturn("");
         BDDMockito.given(objectMapper.readTree(ArgumentMatchers.anyString())).willThrow(expectedException);
         thrown.expect(BlueprintValidationException.class);
         thrown.expectMessage("Blueprint [null] can not be parsed from JSON.");

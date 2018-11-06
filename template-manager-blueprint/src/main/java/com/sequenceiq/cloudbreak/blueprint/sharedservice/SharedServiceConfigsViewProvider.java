@@ -36,7 +36,8 @@ public class SharedServiceConfigsViewProvider {
     public SharedServiceConfigsView createSharedServiceConfigs(Blueprint blueprint, String ambariPassword, Stack dataLakeStack) {
         SharedServiceConfigsView sharedServiceConfigsView = new SharedServiceConfigsView();
         if (dataLakeStack != null) {
-            BlueprintTextProcessor blueprintTextProcessor = blueprintProcessorFactory.get(dataLakeStack.getCluster().getBlueprint().getBlueprintText());
+            String blueprintText = vaultService.resolveSingleValue(dataLakeStack.getCluster().getBlueprint().getBlueprintText());
+            BlueprintTextProcessor blueprintTextProcessor = blueprintProcessorFactory.get(blueprintText);
             Map<String, Map<String, String>> configurationEntries = blueprintTextProcessor.getConfigurationEntries();
             Map<String, String> rangerAdminConfigs = configurationEntries.getOrDefault("ranger-admin-site", new HashMap<>());
             String rangerPort = rangerAdminConfigs.getOrDefault("ranger.service.http.port", DEFAULT_RANGER_PORT);
@@ -46,7 +47,7 @@ public class SharedServiceConfigsViewProvider {
             sharedServiceConfigsView.setDatalakeAmbariIp(dataLakeStack.getAmbariIp());
             sharedServiceConfigsView.setDatalakeAmbariFqdn(dataLakeStack.getGatewayInstanceMetadata().isEmpty()
                     ? dataLakeStack.getAmbariIp() : dataLakeStack.getGatewayInstanceMetadata().iterator().next().getDiscoveryFQDN());
-            sharedServiceConfigsView.setDatalakeComponents(prepareComponents(dataLakeStack.getCluster().getBlueprint().getBlueprintText()));
+            sharedServiceConfigsView.setDatalakeComponents(prepareComponents(blueprintText));
             sharedServiceConfigsView.setRangerAdminPort(rangerPort);
         } else if (blueprintUtils.isSharedServiceReadyBlueprint(blueprint)) {
             sharedServiceConfigsView.setRangerAdminPassword(ambariPassword);

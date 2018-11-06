@@ -36,9 +36,6 @@ public class AmbariSecurityConfigProvider {
 
     public String getAmbariSecurityMasterKey(Cluster cluster) {
         String securityMasterKey = cluster.getAmbariSecurityMasterKey();
-        if (Strings.isNullOrEmpty(securityMasterKey)) {
-            securityMasterKey = DEFAULT_AMBARI_SECURITY_MASTER_KEY;
-        }
-        return vaultService.resolveSingleValue(securityMasterKey);
+        return Strings.isNullOrEmpty(securityMasterKey) ? DEFAULT_AMBARI_SECURITY_MASTER_KEY : vaultService.resolveSingleValue(securityMasterKey);
     }
 }

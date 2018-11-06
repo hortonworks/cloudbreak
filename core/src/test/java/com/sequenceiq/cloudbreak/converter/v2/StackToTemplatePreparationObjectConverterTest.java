@@ -7,6 +7,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -308,6 +309,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         HdfConfigs expected = mock(HdfConfigs.class);
         Set<HostGroup> hostGroups = new LinkedHashSet<>();
         when(hdfConfigProvider.createHdfConfig(hostGroups, groupInstances, TEST_BLUEPRINT_TEXT)).thenReturn(expected);
+        when(vaultService.resolveSingleValue(anyString())).thenReturn(TEST_BLUEPRINT_TEXT);
 
         TemplatePreparationObject result = underTest.convert(source);
 
@@ -329,7 +331,7 @@ public class StackToTemplatePreparationObjectConverterTest {
     public void testConvertWhenProvidingStackAndBlueprintStackInfoThenExpectedBlueprintViewShouldBeStored() {
         String type = "HDF";
         String version = "2.6";
-        BlueprintView expected = new BlueprintView(cluster, blueprintStackInfo);
+        BlueprintView expected = new BlueprintView(blueprintStackInfo, cluster.getBlueprint().getBlueprintText());
         when(blueprintStackInfo.getType()).thenReturn(type);
         when(blueprintStackInfo.getVersion()).thenReturn(version);
         when(blueprintViewProvider.getBlueprintView(blueprint)).thenReturn(expected);
