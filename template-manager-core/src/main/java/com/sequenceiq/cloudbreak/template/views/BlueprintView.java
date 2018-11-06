@@ -5,10 +5,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
-import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.template.model.BlueprintStackInfo;
+import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 
 public class BlueprintView {
 
@@ -27,11 +26,11 @@ public class BlueprintView {
         components = prepareComponents(blueprintText);
     }
 
-    public BlueprintView(Cluster cluster, BlueprintStackInfo blueprintStackInfo) {
-        blueprintText = cluster.getBlueprint().getBlueprintText();
+    public BlueprintView(BlueprintStackInfo blueprintStackInfo, String blueprintText) {
+        this.blueprintText = blueprintText;
         type = blueprintStackInfo.getType();
         version = blueprintStackInfo.getVersion();
-        components = prepareComponents(cluster.getBlueprint().getBlueprintText());
+        components = prepareComponents(blueprintText);
     }
 
     private Set<String> prepareComponents(String blueprintText) {

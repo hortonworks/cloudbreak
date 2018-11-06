@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
+import com.sequenceiq.cloudbreak.service.VaultService;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -37,6 +38,9 @@ public class HiveRdsConfigProvider extends AbstractRdsConfigProvider {
     @Inject
     private BlueprintProcessorFactory blueprintProcessorFactory;
 
+    @Inject
+    private VaultService vaultService;
+
     /**
      *  For 2.4 compatibility we also need some extra field to be in the pillar so it will look like this:
      *
@@ -60,7 +64,8 @@ public class HiveRdsConfigProvider extends AbstractRdsConfigProvider {
     }
 
     private boolean isRdsConfigNeedForHiveMetastore(Blueprint blueprint) {
-        BlueprintTextProcessor blueprintProcessor = blueprintProcessorFactory.get(blueprint.getBlueprintText());
+        String blueprintText = vaultService.resolveSingleValue(blueprint.getBlueprintText());
+        BlueprintTextProcessor blueprintProcessor = blueprintProcessorFactory.get(blueprintText);
         return blueprintProcessor.componentExistsInBlueprint("HIVE_METASTORE")
                 && !blueprintProcessor.componentExistsInBlueprint("MYSQL_SERVER")
                 && !blueprintProcessor.isAllConfigurationExistsInPathUnderConfigurationNode(createPathListFromConfingurations(PATH, CONFIGURATIONS));
