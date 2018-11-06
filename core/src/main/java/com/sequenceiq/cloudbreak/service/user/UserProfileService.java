@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.repository.UserProfileRepository;
+import com.sequenceiq.cloudbreak.service.VaultService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 
@@ -45,6 +46,9 @@ public class UserProfileService {
 
     @Inject
     private UserService userService;
+
+    @Inject
+    private VaultService vaultService;
 
     public UserProfile getOrCreate(String account, String owner, User user) {
         return getOrCreate(account, owner, null, user);
@@ -97,7 +101,7 @@ public class UserProfileService {
 
     private void addUiProperties(UserProfile userProfile) {
         try {
-            userProfile.setUiProperties(new Json(new HashMap<>()));
+            userProfile.setUiProperties(new Json(new HashMap<>()).getValue());
         } catch (JsonProcessingException ignored) {
             userProfile.setUiProperties(null);
         }
@@ -117,19 +121,19 @@ public class UserProfileService {
             ImageCatalog imageCatalog = imageCatalogService.get(workspaceId, request.getImageCatalogName());
             userProfile.setImageCatalog(imageCatalog);
         }
+        String oldVaultPath = userProfile.getUiProperties();
+        String uiPropertiesFromVault = vaultService.resolveSingleValue(userProfile.getUiProperties());
+        Map<String, Object> map = new Json(uiPropertiesFromVault).getMap();
         for (Entry<String, Object> uiStringObjectEntry : request.getUiProperties().entrySet()) {
-            Map<String, Object> map = userProfile.getUiProperties().getMap();
-            if (map == null || map.isEmpty()) {
-                map = new HashMap<>();
-            }
             map.put(uiStringObjectEntry.getKey(), uiStringObjectEntry.getValue());
-            try {
-                userProfile.setUiProperties(new Json(map));
-            } catch (JsonProcessingException ignored) {
-                throw new BadRequestException("The modification of the ui properties was unsuccesfull.");
-            }
+        }
+        try {
+            userProfile.setUiProperties(new Json(map).getValue());
+        } catch (JsonProcessingException ignored) {
+            throw new BadRequestException("The modification of the ui properties was unsuccesfull.");
         }
         userProfileRepository.save(userProfile);
+        vaultService.deleteSecret(oldVaultPath);
     }
 
     private void storeDefaultCredential(UserProfile userProfile, Credential credential, Workspace workspace) {
