@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.domain;
 import java.util.Set;
 
 import javax.persistence.Column;
-import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -15,8 +14,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import com.sequenceiq.cloudbreak.domain.json.EncryptedJsonToString;
-import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.aspect.vault.VaultValue;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 
 @Entity
@@ -40,9 +38,9 @@ public class UserProfile {
     @Column
     private String userName;
 
-    @Convert(converter = EncryptedJsonToString.class)
+    @VaultValue
     @Column(columnDefinition = "TEXT")
-    private Json uiProperties;
+    private String uiProperties;
 
     @OneToOne
     private User user;
@@ -82,11 +80,11 @@ public class UserProfile {
         this.userName = userName;
     }
 
-    public Json getUiProperties() {
+    public String getUiProperties() {
         return uiProperties;
     }
 
-    public void setUiProperties(Json uiProperties) {
+    public void setUiProperties(String uiProperties) {
         this.uiProperties = uiProperties;
     }
 
