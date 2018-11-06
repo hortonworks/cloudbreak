@@ -9,6 +9,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -89,6 +90,9 @@ public class ServiceEndpointCollectorTest {
     @Mock
     private Workspace workspace;
 
+    @Mock
+    private VaultService vaultService;
+
     @Before
     public void setup() {
         when(exposedServiceListValidator.validate(any())).thenReturn(ValidationResult.builder().build());
@@ -156,6 +160,7 @@ public class ServiceEndpointCollectorTest {
         topology2.setGateway(cluster.getGateway());
         cluster.getGateway().setTopologies(Sets.newHashSet(topology1, topology2));
         cluster.getGateway().setGatewayType(GatewayType.INDIVIDUAL);
+        when(vaultService.resolveSingleValue(anyString())).thenReturn(cluster.getBlueprint().getBlueprintText());
 
         Map<String, Collection<ClusterExposedServiceResponse>> clusterExposedServicesMap =
                 underTest.prepareClusterExposedServices(cluster, "10.0.0.1");

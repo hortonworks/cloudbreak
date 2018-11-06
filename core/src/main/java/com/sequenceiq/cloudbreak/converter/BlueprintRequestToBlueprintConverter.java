@@ -56,26 +56,27 @@ public class BlueprintRequestToBlueprintConverter extends AbstractConversionServ
             blueprint.setBlueprintText(json.getAmbariBlueprint());
         }
         validateBlueprint(blueprint.getBlueprintText());
-        validateBlueprintStackVersion(blueprint);
+        JsonNode blueprintJson;
+        try {
+            blueprintJson = JsonUtil.readTree(blueprint.getBlueprintText());
+            validateBlueprintStackVersion(blueprintJson);
+            setAmbariNameAndHostGrouCount(blueprint, blueprintJson);
+        } catch (IOException e) {
+            throw new BadRequestException(JSON_PARSE_EXCEPTION_MESSAGE, e);
+        }
         blueprint.setName(getNameByItsAvailability(json.getName()));
         blueprint.setDescription(json.getDescription());
         blueprint.setStatus(ResourceStatus.USER_MANAGED);
-        setAmbariNameAndHostGrouCount(blueprint);
         blueprint.setTags(createJsonFromTagsMap(json.getTags()));
 
         return blueprint;
     }
 
-    private void validateBlueprintStackVersion(Blueprint blueprint) {
-        try {
-            JsonNode root = JsonUtil.readTree(blueprint.getBlueprintText());
-            String stackVersion = blueprintUtils.getBlueprintStackVersion(root);
-            if (StringUtils.isBlank(stackVersion) || !stackVersion.matches("[0-9]+\\.[0-9]+")) {
-                throw new BadRequestException(String.format("Stack version [%s] is not valid. Valid stack version is in MAJOR.MINOR format eg.: 2.6",
-                        stackVersion));
-            }
-        } catch (IOException e) {
-            throw new BadRequestException(JSON_PARSE_EXCEPTION_MESSAGE, e);
+    private void validateBlueprintStackVersion(JsonNode blueprintJson) {
+        String stackVersion = blueprintUtils.getBlueprintStackVersion(blueprintJson);
+        if (StringUtils.isBlank(stackVersion) || !stackVersion.matches("[0-9]+\\.[0-9]+")) {
+            throw new BadRequestException(String.format("Stack version [%s] is not valid. Valid stack version is in MAJOR.MINOR format eg.: 2.6",
+                    stackVersion));
         }
     }
 
@@ -83,16 +84,11 @@ public class BlueprintRequestToBlueprintConverter extends AbstractConversionServ
         return Strings.isNullOrEmpty(name) ? missingResourceNameGenerator.generateName(APIResourceType.BLUEPRINT) : name;
     }
 
-    private void setAmbariNameAndHostGrouCount(Blueprint blueprint) {
-        try {
-            JsonNode root = JsonUtil.readTree(blueprint.getBlueprintText());
-            blueprint.setAmbariName(blueprintUtils.getBlueprintName(root));
-            blueprint.setHostGroupCount(blueprintUtils.countHostGroups(root));
-            blueprint.setStackType(blueprintUtils.getBlueprintStackName(root));
-            blueprint.setStackVersion(blueprintUtils.getBlueprintStackVersion(root));
-        } catch (IOException e) {
-            throw new BadRequestException(JSON_PARSE_EXCEPTION_MESSAGE, e);
-        }
+    private void setAmbariNameAndHostGrouCount(Blueprint blueprint, JsonNode blueprintJson) {
+        blueprint.setAmbariName(blueprintUtils.getBlueprintName(blueprintJson));
+        blueprint.setHostGroupCount(blueprintUtils.countHostGroups(blueprintJson));
+        blueprint.setStackType(blueprintUtils.getBlueprintStackName(blueprintJson));
+        blueprint.setStackVersion(blueprintUtils.getBlueprintStackVersion(blueprintJson));
     }
 
     private Json createJsonFromTagsMap(Map<String, Object> tags) {

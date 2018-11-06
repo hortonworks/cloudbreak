@@ -56,8 +56,9 @@ public class GeneralClusterConfigsProvider {
         generalClusterConfigs.setPassword(vaultService.resolveSingleValue(cluster.getPassword()));
         generalClusterConfigs.setNodeCount(stack.getFullNodeCount());
         generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.ofNullable(stack.getPrimaryGatewayInstance().getDiscoveryFQDN()));
+        String blueprintText = vaultService.resolveSingleValue(cluster.getBlueprint().getBlueprintText());
         generalClusterConfigs.setKafkaReplicationFactor(
-                getKafkaReplicationFactor(cluster.getBlueprint().getBlueprintText()) >= DEFAULT_REPLICATION_FACTOR ? DEFAULT_REPLICATION_FACTOR : 1);
+                getKafkaReplicationFactor(blueprintText) >= DEFAULT_REPLICATION_FACTOR ? DEFAULT_REPLICATION_FACTOR : 1);
 
         return generalClusterConfigs;
     }

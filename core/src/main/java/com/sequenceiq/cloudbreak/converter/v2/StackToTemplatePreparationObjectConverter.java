@@ -102,7 +102,8 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
             StackRepoDetails hdpRepo = clusterComponentConfigProvider.getHDPRepo(cluster.getId());
             String stackRepoDetailsHdpVersion = hdpRepo != null ? hdpRepo.getHdpVersion() : null;
             Map<String, List<InstanceMetaData>> groupInstances = instanceGroupMetadataCollector.collectMetadata(source);
-            HdfConfigs hdfConfigs = hdfConfigProvider.createHdfConfig(cluster.getHostGroups(), groupInstances, cluster.getBlueprint().getBlueprintText());
+            String blueprintText = vaultService.resolveSingleValue(cluster.getBlueprint().getBlueprintText());
+            HdfConfigs hdfConfigs = hdfConfigProvider.createHdfConfig(cluster.getHostGroups(), groupInstances, blueprintText);
             BaseFileSystemConfigurationsView fileSystemConfigurationView = getFileSystemConfigurationView(source, fileSystem);
             CloudbreakUser cloudbreakUser = cachedUserDetailsService.getDetails(cluster.getOwner(), UserFilterField.USERID);
             Stack dataLakeStack = getDataLakeStack(source);
