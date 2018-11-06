@@ -70,6 +70,12 @@ cb:
     cert.file: database.crt
     ssl: false
 
+  vault:
+    addr: vault.service.consul
+    port: 8200
+    ssl.enabled: false
+    kv.path: "secret"
+
   aws:
     spotinstances.enabled: true
     hostkey.verify: false
