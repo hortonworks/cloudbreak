@@ -16,17 +16,17 @@ import (
 	"github.com/hortonworks/cb-cli/cloudbreak/api/model"
 )
 
-// CreateReader is a Reader for the Create structure.
-type CreateReader struct {
+// GetEnvironmentReader is a Reader for the GetEnvironment structure.
+type GetEnvironmentReader struct {
 	formats strfmt.Registry
 }
 
 // ReadResponse reads a server response into the received o.
-func (o *CreateReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
+func (o *GetEnvironmentReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
 
 	case 200:
-		result := NewCreateOK()
+		result := NewGetEnvironmentOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -37,24 +37,24 @@ func (o *CreateReader) ReadResponse(response runtime.ClientResponse, consumer ru
 	}
 }
 
-// NewCreateOK creates a CreateOK with default headers values
-func NewCreateOK() *CreateOK {
-	return &CreateOK{}
+// NewGetEnvironmentOK creates a GetEnvironmentOK with default headers values
+func NewGetEnvironmentOK() *GetEnvironmentOK {
+	return &GetEnvironmentOK{}
 }
 
-/*CreateOK handles this case with default header values.
+/*GetEnvironmentOK handles this case with default header values.
 
 successful operation
 */
-type CreateOK struct {
+type GetEnvironmentOK struct {
 	Payload *model.DetailedEnvironmentResponse
 }
 
-func (o *CreateOK) Error() string {
-	return fmt.Sprintf("[POST /v3/{workspaceId}/environments][%d] createOK  %+v", 200, o.Payload)
+func (o *GetEnvironmentOK) Error() string {
+	return fmt.Sprintf("[GET /v3/{workspaceId}/environments/{name}][%d] getEnvironmentOK  %+v", 200, o.Payload)
 }
 
-func (o *CreateOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+func (o *GetEnvironmentOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(model.DetailedEnvironmentResponse)
 

@@ -27,6 +27,10 @@ type RegionResponse struct {
 	// regions with displayNames
 	DisplayNames map[string]string `json:"displayNames,omitempty"`
 
+	// regions with location data
+	// Unique: true
+	Locations []string `json:"locations"`
+
 	// regions
 	// Unique: true
 	Regions []string `json:"regions"`
@@ -38,6 +42,8 @@ type RegionResponse struct {
 
 /* polymorph RegionResponse displayNames false */
 
+/* polymorph RegionResponse locations false */
+
 /* polymorph RegionResponse regions false */
 
 // Validate validates this region response
@@ -45,6 +51,11 @@ func (m *RegionResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAvailabilityZones(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateLocations(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -68,6 +79,19 @@ func (m *RegionResponse) validateAvailabilityZones(formats strfmt.Registry) erro
 
 	if swag.IsZero(m.AvailabilityZones) { // not required
 		return nil
+	}
+
+	return nil
+}
+
+func (m *RegionResponse) validateLocations(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Locations) { // not required
+		return nil
+	}
+
+	if err := validate.UniqueItems("locations", "body", m.Locations); err != nil {
+		return err
 	}
 
 	return nil

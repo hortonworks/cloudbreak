@@ -11,6 +11,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/cb-cli/cloudbreak/api/client/v1util"
+	"strconv"
 )
 
 var r *rand.Rand
@@ -115,4 +116,8 @@ func SafeStringTypeAssert(value interface{}) string {
 		return strValue
 	}
 	return ""
+}
+
+func FloatToString(float float64) string {
+	return strconv.FormatFloat(float, 'f', -1, 64)
 }

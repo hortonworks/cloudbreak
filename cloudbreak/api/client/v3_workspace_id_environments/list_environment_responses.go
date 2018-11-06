@@ -16,17 +16,17 @@ import (
 	"github.com/hortonworks/cb-cli/cloudbreak/api/model"
 )
 
-// ListReader is a Reader for the List structure.
-type ListReader struct {
+// ListEnvironmentReader is a Reader for the ListEnvironment structure.
+type ListEnvironmentReader struct {
 	formats strfmt.Registry
 }
 
 // ReadResponse reads a server response into the received o.
-func (o *ListReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
+func (o *ListEnvironmentReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
 
 	case 200:
-		result := NewListOK()
+		result := NewListEnvironmentOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -37,24 +37,24 @@ func (o *ListReader) ReadResponse(response runtime.ClientResponse, consumer runt
 	}
 }
 
-// NewListOK creates a ListOK with default headers values
-func NewListOK() *ListOK {
-	return &ListOK{}
+// NewListEnvironmentOK creates a ListEnvironmentOK with default headers values
+func NewListEnvironmentOK() *ListEnvironmentOK {
+	return &ListEnvironmentOK{}
 }
 
-/*ListOK handles this case with default header values.
+/*ListEnvironmentOK handles this case with default header values.
 
 successful operation
 */
-type ListOK struct {
+type ListEnvironmentOK struct {
 	Payload []*model.SimpleEnvironmentResponse
 }
 
-func (o *ListOK) Error() string {
-	return fmt.Sprintf("[GET /v3/{workspaceId}/environments][%d] listOK  %+v", 200, o.Payload)
+func (o *ListEnvironmentOK) Error() string {
+	return fmt.Sprintf("[GET /v3/{workspaceId}/environments][%d] listEnvironmentOK  %+v", 200, o.Payload)
 }
 
-func (o *ListOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+func (o *ListEnvironmentOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	// response payload
 	if err := consumer.Consume(response.Body(), &o.Payload); err != nil && err != io.EOF {

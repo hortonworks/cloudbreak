@@ -6,8 +6,6 @@ package model
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	"strconv"
-
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
@@ -24,8 +22,8 @@ type ClusterRepairRequest struct {
 	// Required: true
 	HostGroups []string `json:"hostGroups"`
 
-	// List of nested objects consisting of deleteVolumes flag and a list of node IDs which will be repaired specifically. The existing disk volumes on the nodes will be re-created if the deleteVolumes flag is true.
-	Nodes []*ClusterRepairNodeRequest `json:"nodes"`
+	// Object consisting of deleteVolumes flag and a list of node IDs which will be repaired specifically. The existing disk volumes on the nodes will be re-created if the deleteVolumes flag is true.
+	Nodes *ClusterRepairNodesRequest `json:"nodes,omitempty"`
 
 	// If true, the failed nodes will only be removed, otherwise the failed nodes will be removed and new nodes will be started.
 	RemoveOnly *bool `json:"removeOnly,omitempty"`
@@ -72,22 +70,14 @@ func (m *ClusterRepairRequest) validateNodes(formats strfmt.Registry) error {
 		return nil
 	}
 
-	for i := 0; i < len(m.Nodes); i++ {
+	if m.Nodes != nil {
 
-		if swag.IsZero(m.Nodes[i]) { // not required
-			continue
-		}
-
-		if m.Nodes[i] != nil {
-
-			if err := m.Nodes[i].Validate(formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("nodes" + "." + strconv.Itoa(i))
-				}
-				return err
+		if err := m.Nodes.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("nodes")
 			}
+			return err
 		}
-
 	}
 
 	return nil

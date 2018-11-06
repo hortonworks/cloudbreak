@@ -29,6 +29,9 @@ type SimpleEnvironmentResponse struct {
 	// id of the resource
 	ID int64 `json:"id,omitempty"`
 
+	// Location of the environment.
+	Location *LocationResponse `json:"location,omitempty"`
+
 	// name of the resource
 	Name string `json:"name,omitempty"`
 
@@ -47,6 +50,8 @@ type SimpleEnvironmentResponse struct {
 
 /* polymorph SimpleEnvironmentResponse id false */
 
+/* polymorph SimpleEnvironmentResponse location false */
+
 /* polymorph SimpleEnvironmentResponse name false */
 
 /* polymorph SimpleEnvironmentResponse regions false */
@@ -56,6 +61,11 @@ type SimpleEnvironmentResponse struct {
 // Validate validates this simple environment response
 func (m *SimpleEnvironmentResponse) Validate(formats strfmt.Registry) error {
 	var res []error
+
+	if err := m.validateLocation(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
 
 	if err := m.validateRegions(formats); err != nil {
 		// prop
@@ -70,6 +80,25 @@ func (m *SimpleEnvironmentResponse) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *SimpleEnvironmentResponse) validateLocation(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Location) { // not required
+		return nil
+	}
+
+	if m.Location != nil {
+
+		if err := m.Location.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("location")
+			}
+			return err
+		}
+	}
+
 	return nil
 }
 

@@ -947,6 +947,27 @@ var (
 			Usage: "names of environments in which the created resource should be attached during the creation",
 		},
 	}
+	FlEnvironmentLocationName = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "location-name",
+			Usage: "location name of the environment. must be one of the regions",
+		},
+	}
+	FlEnvironmentLongitudeOptional = Float64Flag{
+		RequiredFlag: OPTIONAL,
+		Float64Flag: cli.Float64Flag{
+			Name:  "longitude",
+			Usage: "longitude of the environment's location. must be specified if the location is made-up and not supported on the cloud provider",
+		},
+	}
+	FlEnvironmentLatitudeOptional = Float64Flag{
+		RequiredFlag: OPTIONAL,
+		Float64Flag: cli.Float64Flag{
+			Name:  "latitude",
+			Usage: "latitude of the environment's location. must be specified if the location is made-up and not supported on the cloud provider",
+		},
+	}
 )
 
 type RequiredFlag struct {
@@ -965,6 +986,11 @@ type BoolFlag struct {
 
 type IntFlag struct {
 	cli.IntFlag
+	RequiredFlag
+}
+
+type Float64Flag struct {
+	cli.Float64Flag
 	RequiredFlag
 }
 

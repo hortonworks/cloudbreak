@@ -16,17 +16,17 @@ import (
 	"github.com/hortonworks/cb-cli/cloudbreak/api/model"
 )
 
-// DetachResourcesReader is a Reader for the DetachResources structure.
-type DetachResourcesReader struct {
+// CreateEnvironmentReader is a Reader for the CreateEnvironment structure.
+type CreateEnvironmentReader struct {
 	formats strfmt.Registry
 }
 
 // ReadResponse reads a server response into the received o.
-func (o *DetachResourcesReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
+func (o *CreateEnvironmentReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
 
 	case 200:
-		result := NewDetachResourcesOK()
+		result := NewCreateEnvironmentOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -37,24 +37,24 @@ func (o *DetachResourcesReader) ReadResponse(response runtime.ClientResponse, co
 	}
 }
 
-// NewDetachResourcesOK creates a DetachResourcesOK with default headers values
-func NewDetachResourcesOK() *DetachResourcesOK {
-	return &DetachResourcesOK{}
+// NewCreateEnvironmentOK creates a CreateEnvironmentOK with default headers values
+func NewCreateEnvironmentOK() *CreateEnvironmentOK {
+	return &CreateEnvironmentOK{}
 }
 
-/*DetachResourcesOK handles this case with default header values.
+/*CreateEnvironmentOK handles this case with default header values.
 
 successful operation
 */
-type DetachResourcesOK struct {
+type CreateEnvironmentOK struct {
 	Payload *model.DetailedEnvironmentResponse
 }
 
-func (o *DetachResourcesOK) Error() string {
-	return fmt.Sprintf("[PUT /v3/{workspaceId}/environments/{name}/detach][%d] detachResourcesOK  %+v", 200, o.Payload)
+func (o *CreateEnvironmentOK) Error() string {
+	return fmt.Sprintf("[POST /v3/{workspaceId}/environments][%d] createEnvironmentOK  %+v", 200, o.Payload)
 }
 
-func (o *DetachResourcesOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+func (o *CreateEnvironmentOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(model.DetailedEnvironmentResponse)
 

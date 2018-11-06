@@ -12,10 +12,10 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// ClusterRepairNodeRequest cluster repair node request
-// swagger:model ClusterRepairNodeRequest
+// ClusterRepairNodesRequest cluster repair nodes request
+// swagger:model ClusterRepairNodesRequest
 
-type ClusterRepairNodeRequest struct {
+type ClusterRepairNodesRequest struct {
 
 	// If true, delete volumes, otherwise reattaches them to a newly created node instance.
 	DeleteVolumes *bool `json:"deleteVolumes,omitempty"`
@@ -24,12 +24,12 @@ type ClusterRepairNodeRequest struct {
 	Ids []string `json:"ids"`
 }
 
-/* polymorph ClusterRepairNodeRequest deleteVolumes false */
+/* polymorph ClusterRepairNodesRequest deleteVolumes false */
 
-/* polymorph ClusterRepairNodeRequest ids false */
+/* polymorph ClusterRepairNodesRequest ids false */
 
-// Validate validates this cluster repair node request
-func (m *ClusterRepairNodeRequest) Validate(formats strfmt.Registry) error {
+// Validate validates this cluster repair nodes request
+func (m *ClusterRepairNodesRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateIds(formats); err != nil {
@@ -43,7 +43,7 @@ func (m *ClusterRepairNodeRequest) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *ClusterRepairNodeRequest) validateIds(formats strfmt.Registry) error {
+func (m *ClusterRepairNodesRequest) validateIds(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Ids) { // not required
 		return nil
@@ -53,7 +53,7 @@ func (m *ClusterRepairNodeRequest) validateIds(formats strfmt.Registry) error {
 }
 
 // MarshalBinary interface implementation
-func (m *ClusterRepairNodeRequest) MarshalBinary() ([]byte, error) {
+func (m *ClusterRepairNodesRequest) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -61,8 +61,8 @@ func (m *ClusterRepairNodeRequest) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *ClusterRepairNodeRequest) UnmarshalBinary(b []byte) error {
-	var res ClusterRepairNodeRequest
+func (m *ClusterRepairNodesRequest) UnmarshalBinary(b []byte) error {
+	var res ClusterRepairNodesRequest
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

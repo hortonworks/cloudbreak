@@ -25,182 +25,212 @@ type Client struct {
 }
 
 /*
-AttachResources attaches resources to an environment
+AttachResourcesToEnvironment attaches resources to an environment
 
 Environment consists of a credential and various other resources and enables users to quickly create clusters in given regions in a given cloud provider.
 */
-func (a *Client) AttachResources(params *AttachResourcesParams) (*AttachResourcesOK, error) {
+func (a *Client) AttachResourcesToEnvironment(params *AttachResourcesToEnvironmentParams) (*AttachResourcesToEnvironmentOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewAttachResourcesParams()
+		params = NewAttachResourcesToEnvironmentParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "attachResources",
+		ID:                 "attachResourcesToEnvironment",
 		Method:             "PUT",
 		PathPattern:        "/v3/{workspaceId}/environments/{name}/attach",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &AttachResourcesReader{formats: a.formats},
+		Reader:             &AttachResourcesToEnvironmentReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*AttachResourcesOK), nil
+	return result.(*AttachResourcesToEnvironmentOK), nil
 
 }
 
 /*
-Create creates an environment
+ChangeCredentialInEnvironment changes the credential of the environment and the clusters in the environment
 
 Environment consists of a credential and various other resources and enables users to quickly create clusters in given regions in a given cloud provider.
 */
-func (a *Client) Create(params *CreateParams) (*CreateOK, error) {
+func (a *Client) ChangeCredentialInEnvironment(params *ChangeCredentialInEnvironmentParams) (*ChangeCredentialInEnvironmentOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewCreateParams()
+		params = NewChangeCredentialInEnvironmentParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "create",
+		ID:                 "changeCredentialInEnvironment",
+		Method:             "PUT",
+		PathPattern:        "/v3/{workspaceId}/environments/{name}/changeCredential",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &ChangeCredentialInEnvironmentReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*ChangeCredentialInEnvironmentOK), nil
+
+}
+
+/*
+CreateEnvironment creates an environment
+
+Environment consists of a credential and various other resources and enables users to quickly create clusters in given regions in a given cloud provider.
+*/
+func (a *Client) CreateEnvironment(params *CreateEnvironmentParams) (*CreateEnvironmentOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewCreateEnvironmentParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "createEnvironment",
 		Method:             "POST",
 		PathPattern:        "/v3/{workspaceId}/environments",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &CreateReader{formats: a.formats},
+		Reader:             &CreateEnvironmentReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*CreateOK), nil
+	return result.(*CreateEnvironmentOK), nil
 
 }
 
 /*
-Delete deletes an environment only possible if no cluster is running in the environment
+DeleteEnvironment deletes an environment only possible if no cluster is running in the environment
 
 Environment consists of a credential and various other resources and enables users to quickly create clusters in given regions in a given cloud provider.
 */
-func (a *Client) Delete(params *DeleteParams) (*DeleteOK, error) {
+func (a *Client) DeleteEnvironment(params *DeleteEnvironmentParams) (*DeleteEnvironmentOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewDeleteParams()
+		params = NewDeleteEnvironmentParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "delete",
+		ID:                 "deleteEnvironment",
 		Method:             "DELETE",
 		PathPattern:        "/v3/{workspaceId}/environments/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &DeleteReader{formats: a.formats},
+		Reader:             &DeleteEnvironmentReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*DeleteOK), nil
+	return result.(*DeleteEnvironmentOK), nil
 
 }
 
 /*
-DetachResources detaches resources from an environment
+DetachResourcesFromEnvironment detaches resources from an environment
 
 Environment consists of a credential and various other resources and enables users to quickly create clusters in given regions in a given cloud provider.
 */
-func (a *Client) DetachResources(params *DetachResourcesParams) (*DetachResourcesOK, error) {
+func (a *Client) DetachResourcesFromEnvironment(params *DetachResourcesFromEnvironmentParams) (*DetachResourcesFromEnvironmentOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewDetachResourcesParams()
+		params = NewDetachResourcesFromEnvironmentParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "detachResources",
+		ID:                 "detachResourcesFromEnvironment",
 		Method:             "PUT",
 		PathPattern:        "/v3/{workspaceId}/environments/{name}/detach",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &DetachResourcesReader{formats: a.formats},
+		Reader:             &DetachResourcesFromEnvironmentReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*DetachResourcesOK), nil
+	return result.(*DetachResourcesFromEnvironmentOK), nil
 
 }
 
 /*
-Get gets an environment
+GetEnvironment gets an environment
 
 Environment consists of a credential and various other resources and enables users to quickly create clusters in given regions in a given cloud provider.
 */
-func (a *Client) Get(params *GetParams) (*GetOK, error) {
+func (a *Client) GetEnvironment(params *GetEnvironmentParams) (*GetEnvironmentOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetParams()
+		params = NewGetEnvironmentParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "get",
+		ID:                 "getEnvironment",
 		Method:             "GET",
 		PathPattern:        "/v3/{workspaceId}/environments/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetReader{formats: a.formats},
+		Reader:             &GetEnvironmentReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetOK), nil
+	return result.(*GetEnvironmentOK), nil
 
 }
 
 /*
-List lists all environments in the workspace
+ListEnvironment lists all environments in the workspace
 
 Environment consists of a credential and various other resources and enables users to quickly create clusters in given regions in a given cloud provider.
 */
-func (a *Client) List(params *ListParams) (*ListOK, error) {
+func (a *Client) ListEnvironment(params *ListEnvironmentParams) (*ListEnvironmentOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewListParams()
+		params = NewListEnvironmentParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "list",
+		ID:                 "listEnvironment",
 		Method:             "GET",
 		PathPattern:        "/v3/{workspaceId}/environments",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &ListReader{formats: a.formats},
+		Reader:             &ListEnvironmentReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*ListOK), nil
+	return result.(*ListEnvironmentOK), nil
 
 }
 

@@ -34,6 +34,9 @@ type DetailedEnvironmentResponse struct {
 	// Unique: true
 	LdapConfigs []string `json:"ldapConfigs"`
 
+	// Location of the environment.
+	Location *LocationResponse `json:"location,omitempty"`
+
 	// name of the resource
 	Name string `json:"name,omitempty"`
 
@@ -66,6 +69,8 @@ type DetailedEnvironmentResponse struct {
 
 /* polymorph DetailedEnvironmentResponse ldapConfigs false */
 
+/* polymorph DetailedEnvironmentResponse location false */
+
 /* polymorph DetailedEnvironmentResponse name false */
 
 /* polymorph DetailedEnvironmentResponse proxyConfigs false */
@@ -83,6 +88,11 @@ func (m *DetailedEnvironmentResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateLdapConfigs(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateLocation(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -126,6 +136,25 @@ func (m *DetailedEnvironmentResponse) validateLdapConfigs(formats strfmt.Registr
 
 	if err := validate.UniqueItems("ldapConfigs", "body", m.LdapConfigs); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *DetailedEnvironmentResponse) validateLocation(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Location) { // not required
+		return nil
+	}
+
+	if m.Location != nil {
+
+		if err := m.Location.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("location")
+			}
+			return err
+		}
 	}
 
 	return nil

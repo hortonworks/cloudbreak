@@ -33,6 +33,10 @@ type EnvironmentRequest struct {
 	// Unique: true
 	LdapConfigs []string `json:"ldapConfigs"`
 
+	// Location of the environment.
+	// Required: true
+	Location *LocationRequest `json:"location"`
+
 	// name of the resource
 	// Required: true
 	// Max Length: 100
@@ -61,6 +65,8 @@ type EnvironmentRequest struct {
 
 /* polymorph EnvironmentRequest ldapConfigs false */
 
+/* polymorph EnvironmentRequest location false */
+
 /* polymorph EnvironmentRequest name false */
 
 /* polymorph EnvironmentRequest proxyConfigs false */
@@ -84,6 +90,11 @@ func (m *EnvironmentRequest) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateLdapConfigs(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateLocation(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -158,6 +169,25 @@ func (m *EnvironmentRequest) validateLdapConfigs(formats strfmt.Registry) error 
 
 	if err := validate.UniqueItems("ldapConfigs", "body", m.LdapConfigs); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *EnvironmentRequest) validateLocation(formats strfmt.Registry) error {
+
+	if err := validate.Required("location", "body", m.Location); err != nil {
+		return err
+	}
+
+	if m.Location != nil {
+
+		if err := m.Location.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("location")
+			}
+			return err
+		}
 	}
 
 	return nil

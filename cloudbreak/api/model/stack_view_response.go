@@ -62,6 +62,9 @@ type StackViewResponse struct {
 
 	// status of the stack
 	Status string `json:"status,omitempty"`
+
+	// the related user
+	User *UserViewResponse `json:"user,omitempty"`
 }
 
 /* polymorph StackViewResponse cloudPlatform false */
@@ -92,6 +95,8 @@ type StackViewResponse struct {
 
 /* polymorph StackViewResponse status false */
 
+/* polymorph StackViewResponse user false */
+
 // Validate validates this stack view response
 func (m *StackViewResponse) Validate(formats strfmt.Registry) error {
 	var res []error
@@ -117,6 +122,11 @@ func (m *StackViewResponse) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateStatus(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateUser(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -267,6 +277,25 @@ func (m *StackViewResponse) validateStatus(formats strfmt.Registry) error {
 	// value enum
 	if err := m.validateStatusEnum("status", "body", m.Status); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *StackViewResponse) validateUser(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.User) { // not required
+		return nil
+	}
+
+	if m.User != nil {
+
+		if err := m.User.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("user")
+			}
+			return err
+		}
 	}
 
 	return nil

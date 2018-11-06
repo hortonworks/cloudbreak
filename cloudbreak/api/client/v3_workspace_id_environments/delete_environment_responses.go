@@ -16,17 +16,17 @@ import (
 	"github.com/hortonworks/cb-cli/cloudbreak/api/model"
 )
 
-// GetReader is a Reader for the Get structure.
-type GetReader struct {
+// DeleteEnvironmentReader is a Reader for the DeleteEnvironment structure.
+type DeleteEnvironmentReader struct {
 	formats strfmt.Registry
 }
 
 // ReadResponse reads a server response into the received o.
-func (o *GetReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
+func (o *DeleteEnvironmentReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
 
 	case 200:
-		result := NewGetOK()
+		result := NewDeleteEnvironmentOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -37,24 +37,24 @@ func (o *GetReader) ReadResponse(response runtime.ClientResponse, consumer runti
 	}
 }
 
-// NewGetOK creates a GetOK with default headers values
-func NewGetOK() *GetOK {
-	return &GetOK{}
+// NewDeleteEnvironmentOK creates a DeleteEnvironmentOK with default headers values
+func NewDeleteEnvironmentOK() *DeleteEnvironmentOK {
+	return &DeleteEnvironmentOK{}
 }
 
-/*GetOK handles this case with default header values.
+/*DeleteEnvironmentOK handles this case with default header values.
 
 successful operation
 */
-type GetOK struct {
+type DeleteEnvironmentOK struct {
 	Payload *model.DetailedEnvironmentResponse
 }
 
-func (o *GetOK) Error() string {
-	return fmt.Sprintf("[GET /v3/{workspaceId}/environments/{name}][%d] getOK  %+v", 200, o.Payload)
+func (o *DeleteEnvironmentOK) Error() string {
+	return fmt.Sprintf("[DELETE /v3/{workspaceId}/environments/{name}][%d] deleteEnvironmentOK  %+v", 200, o.Payload)
 }
 
-func (o *GetOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+func (o *DeleteEnvironmentOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(model.DetailedEnvironmentResponse)
 

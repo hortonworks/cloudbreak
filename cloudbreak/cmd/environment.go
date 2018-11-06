@@ -16,12 +16,14 @@ func init() {
 				Name:  "create",
 				Usage: "creates a new Environment",
 				Flags: fl.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(fl.FlEnvironmentCredential, fl.FlEnvironmentRegions,
-					fl.FlEnvironmentLdapsOptional, fl.FlEnvironmentProxiesOptional, fl.FlEnvironmentRdsesOptional).AddAuthenticationFlags().Build(),
+					fl.FlEnvironmentLdapsOptional, fl.FlEnvironmentProxiesOptional, fl.FlEnvironmentRdsesOptional, fl.FlEnvironmentLocationName,
+					fl.FlEnvironmentLongitudeOptional, fl.FlEnvironmentLatitudeOptional).AddAuthenticationFlags().Build(),
 				Before: cf.CheckConfigAndCommandFlags,
 				Action: env.CreateEnvironment,
 				BashComplete: func(c *cli.Context) {
 					for _, f := range fl.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(fl.FlEnvironmentCredential, fl.FlEnvironmentRegions,
-						fl.FlEnvironmentLdapsOptional, fl.FlEnvironmentProxiesOptional, fl.FlEnvironmentRdsesOptional).AddAuthenticationFlags().Build() {
+						fl.FlEnvironmentLdapsOptional, fl.FlEnvironmentProxiesOptional, fl.FlEnvironmentRdsesOptional, fl.FlEnvironmentLocationName,
+						fl.FlEnvironmentLongitudeOptional, fl.FlEnvironmentLatitudeOptional).AddAuthenticationFlags().Build() {
 						fl.PrintFlagCompletion(f)
 					}
 				},
@@ -86,6 +88,18 @@ func init() {
 				BashComplete: func(c *cli.Context) {
 					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlEnvironmentLdapsOptional, fl.FlEnvironmentProxiesOptional,
 						fl.FlEnvironmentRdsesOptional).AddOutputFlag().AddAuthenticationFlags().Build() {
+						fl.PrintFlagCompletion(f)
+					}
+				},
+			},
+			{
+				Name:   "change-cred",
+				Usage:  "change the credential of an environment. also changes the credential of the clusters in the environment.",
+				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlCredential).AddOutputFlag().AddAuthenticationFlags().Build(),
+				Before: cf.CheckConfigAndCommandFlags,
+				Action: env.ChangeCredential,
+				BashComplete: func(c *cli.Context) {
+					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlCredential).AddOutputFlag().AddAuthenticationFlags().Build() {
 						fl.PrintFlagCompletion(f)
 					}
 				},
