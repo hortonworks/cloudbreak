@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.converter.spi;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,7 +28,7 @@ public class CredentialToCloudCredentialConverter {
         }
         Map<String, Object> fields;
         if (credential.getId() == null) {
-            fields = isBlank(credential.getAttributes()) ? new HashMap<>() : new Json(credential.getAttributes()).getMap();
+            fields = isEmpty(credential.getAttributes()) ? new HashMap<>() : new Json(credential.getAttributes()).getMap();
         } else {
             fields = new Json(vaultService.resolveSingleValue(credential.getAttributes())).getMap();
         }
