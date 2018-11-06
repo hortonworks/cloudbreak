@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.repository.UserProfileRepository;
+import com.sequenceiq.cloudbreak.service.VaultService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 
 public class UserProfileServiceTest {
@@ -33,6 +34,9 @@ public class UserProfileServiceTest {
 
     @Mock
     private UserProfileRepository userProfileRepository;
+
+    @Mock
+    private VaultService vaultService;
 
     @Mock
     private UserService userService;
