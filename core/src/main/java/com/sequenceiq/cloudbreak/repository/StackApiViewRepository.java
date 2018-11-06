@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByReturnValue;
 import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByWorkspaceId;
 import com.sequenceiq.cloudbreak.aspect.workspace.WorkspaceResourceType;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
+import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.EntityType;
@@ -31,4 +32,8 @@ public interface StackApiViewRepository extends WorkspaceResourceRepository<Stac
     @CheckPermissionsByWorkspaceId
     @Query("SELECT s FROM StackApiView s WHERE s.workspace.id= :id AND s.stackStatus.status <> 'DELETE_COMPLETED'")
     Set<StackApiView> findByWorkspaceId(@Param("id") Long id);
+
+    @CheckPermissionsByWorkspaceId
+    @Query("SELECT s FROM StackApiView s WHERE s.workspace.id= :id AND :environment in e AND s.stackStatus.status <> 'DELETE_COMPLETED'")
+    Set<StackApiView> findAllByWorkspaceIdAndEnvironments(@Param("id") Long id, @Param("environment") EnvironmentView environment);
 }

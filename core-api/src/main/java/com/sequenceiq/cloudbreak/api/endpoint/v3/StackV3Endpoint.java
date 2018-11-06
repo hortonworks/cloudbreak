@@ -48,7 +48,8 @@ public interface StackV3Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.LIST_BY_WORKSPACE, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
             nickname = "listStacksByWorkspace")
-    Set<StackViewResponse> listByWorkspace(@PathParam("workspaceId") Long workspaceId);
+    Set<StackViewResponse> listByWorkspace(@PathParam("workspaceId") Long workspaceId, @QueryParam("environment") String environment,
+            @QueryParam("onlyDatalakes") boolean onlyDatalakes);
 
     @GET
     @Path("{name}")
