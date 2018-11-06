@@ -1,6 +1,10 @@
 package env
 
 import (
+	"strconv"
+	"strings"
+	"time"
+
 	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/cb-cli/cloudbreak/api/client/v3_workspace_id_environments"
 	"github.com/hortonworks/cb-cli/cloudbreak/api/model"
@@ -8,9 +12,6 @@ import (
 	"github.com/hortonworks/cb-cli/cloudbreak/oauth"
 	"github.com/hortonworks/cb-cli/utils"
 	"github.com/urfave/cli"
-	"strconv"
-	"strings"
-	"time"
 )
 
 var EnvironmentHeader = []string{"Name", "Description", "CloudPlatform", "Credential", "Regions", "LocationName", "Longitude", "Latitude"}

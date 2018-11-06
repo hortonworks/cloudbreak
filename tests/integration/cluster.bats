@@ -89,7 +89,7 @@ load ../utils/mock_parameters
 
 @test "Check cluster repair SUCCESS" {
   skip "The repairClusterV2 endpoint should be added to cb-mock. Waiting for the new cb-mock implementation."
-  OUTPUT=$(repair-cluster --name "${OS_CLUSTER_NAME}" --host-groups worker 2>&1 | tail -n 2 | head -n 1)
+  OUTPUT=$(repair-cluster host-groups --name "${OS_CLUSTER_NAME}" --host-groups worker 2>&1 | tail -n 2 | head -n 1)
 
   [[ "${OUTPUT}" == *"stack repaired, name: openstack-cluster"* ]]
   [[ "${OUTPUT}" != *"error"* ]]
@@ -97,7 +97,7 @@ load ../utils/mock_parameters
 
 @test "Check cluster repair FAILED" {
   skip "The repairClusterV2 endpoint should be added to cb-mock. Waiting for the new cb-mock implementation."
-  OUTPUT=$(repair-cluster --name azstatus --host-groups worker 2>&1 | tail -n 4 | head -n 1)
+  OUTPUT=$(repair-cluster host-groups --name azstatus --host-groups worker 2>&1 | tail -n 4 | head -n 1)
 
   [[ "${OUTPUT}" == *"status code: 404, message: Stack 'azstatus' not found"* ]]
   [[ "${OUTPUT}" == *"error"* ]]

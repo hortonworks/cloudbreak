@@ -827,6 +827,20 @@ var (
 			Usage: "comma separated list of hostgroups where the failed nodes will be repaired",
 		},
 	}
+	FlNodes = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "nodes",
+			Usage: "comma separated list of nodes that will be repaired",
+		},
+	}
+	FlDeleteVolumes = BoolFlag{
+		RequiredFlag: OPTIONAL,
+		BoolFlag: cli.BoolFlag{
+			Name:  "delete-volumes",
+			Usage: "volumes of failed nodes will be deleted, otherwise reattaches them to newly created node instances.",
+		},
+	}
 	FlRemoveOnly = BoolFlag{
 		RequiredFlag: OPTIONAL,
 		BoolFlag: cli.BoolFlag{

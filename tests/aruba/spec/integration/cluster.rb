@@ -97,7 +97,7 @@ RSpec.describe 'Cluster test cases', :type => :aruba do
 
       it "Cluster - Repair - Success" do 
     with_environment 'DEBUG' => '1' do
-      result = cb.cluster.repair.name("asdfg").host_groups("test").build(false)
+      result = cb.cluster.repair.host_groups.name("asdfg").host_groups("test").build(false)
       expect(result.exit_status).to eql 0
       expect(result.stderr).to include("stack repaired")          
     end

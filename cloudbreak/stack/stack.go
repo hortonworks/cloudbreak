@@ -3,13 +3,14 @@ package stack
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/hortonworks/cb-cli/cloudbreak/common"
-	"github.com/hortonworks/cb-cli/cloudbreak/credential"
-	"github.com/hortonworks/cb-cli/cloudbreak/oauth"
 	"os"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/hortonworks/cb-cli/cloudbreak/common"
+	"github.com/hortonworks/cb-cli/cloudbreak/credential"
+	"github.com/hortonworks/cb-cli/cloudbreak/oauth"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/cb-cli/cloudbreak/api/client/v3_workspace_id_stacks"
@@ -244,20 +245,36 @@ func SyncStack(c *cli.Context) {
 	log.Infof("[SyncStack] stack synced, name: %s", name)
 }
 
-func RepairStack(c *cli.Context) {
+func RepairStackHostGroups(c *cli.Context) {
 	defer utils.TimeTrack(time.Now(), "repair stack")
 
-	cbClient := CloudbreakStack(*oauth.NewCloudbreakHTTPClientFromContext(c))
-	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
-	name := c.String(fl.FlName.Name)
-	log.Infof("[RepairStack] repairing stack, id: %s", name)
-
+	var request model.ClusterRepairRequest
 	hostGroups := strings.Split(c.String(fl.FlHostGroups.Name), ",")
-	removeOnly := c.Bool(fl.FlRemoveOnly.Name)
+	request.HostGroups = hostGroups
+	log.Infof("[RepairStack] repairing stack hostgroups: %s", hostGroups)
+	repairStackCommon(c, request)
+}
+
+func RepairStackNodes(c *cli.Context) {
+	defer utils.TimeTrack(time.Now(), "repair stack")
 
 	var request model.ClusterRepairRequest
-	request.HostGroups = hostGroups
+	deleteVolumes := c.Bool(fl.FlDeleteVolumes.Name)
+	nodes := strings.Split(c.String(fl.FlNodes.Name), ",")
+	request.Nodes = &model.ClusterRepairNodesRequest{DeleteVolumes: &deleteVolumes, Ids: nodes}
+
+	log.Infof("[RepairStackNodes] repairing stack nodes, deleteVolumes: %t, ids: %s", deleteVolumes, nodes)
+
+	repairStackCommon(c, request)
+}
+
+func repairStackCommon(c *cli.Context, request model.ClusterRepairRequest) {
+	cbClient := CloudbreakStack(*oauth.NewCloudbreakHTTPClientFromContext(c))
+	removeOnly := c.Bool(fl.FlRemoveOnly.Name)
 	request.RemoveOnly = &removeOnly
+	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
+	name := c.String(fl.FlName.Name)
+	log.Infof("[RepairStack] repairing stack, id: %s, removeOnly: %t, workspaceId: %d", name, removeOnly, workspaceID)
 
 	err := cbClient.Cloudbreak.V3WorkspaceIDStacks.RepairClusterV3(v3_workspace_id_stacks.NewRepairClusterV3Params().WithWorkspaceID(workspaceID).WithName(name).WithBody(&request))
 	if err != nil {

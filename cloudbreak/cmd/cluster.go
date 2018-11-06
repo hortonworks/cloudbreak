@@ -329,15 +329,34 @@ func init() {
 				},
 			},
 			{
-				Name:   "repair",
-				Usage:  "repairs a cluster",
-				Before: cf.CheckConfigAndCommandFlags,
-				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlHostGroups, fl.FlRemoveOnly, fl.FlWaitOptional).AddAuthenticationFlags().AddOutputFlag().Build(),
-				Action: stack.RepairStack,
-				BashComplete: func(c *cli.Context) {
-					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlHostGroups, fl.FlRemoveOnly, fl.FlWaitOptional).AddAuthenticationFlags().AddOutputFlag().Build() {
-						fl.PrintFlagCompletion(f)
-					}
+				Name:        "repair",
+				Usage:       "repairs a cluster",
+				Description: "repairs a cluster",
+				Subcommands: []cli.Command{
+					{
+						Name:   "host-groups",
+						Usage:  "repairs host-groups of a cluster",
+						Before: cf.CheckConfigAndCommandFlags,
+						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlHostGroups, fl.FlRemoveOnly, fl.FlWaitOptional).AddAuthenticationFlags().AddOutputFlag().Build(),
+						Action: stack.RepairStackHostGroups,
+						BashComplete: func(c *cli.Context) {
+							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlHostGroups, fl.FlRemoveOnly, fl.FlWaitOptional).AddAuthenticationFlags().AddOutputFlag().Build() {
+								fl.PrintFlagCompletion(f)
+							}
+						},
+					},
+					{
+						Name:   "nodes",
+						Usage:  "repairs nodes of a cluster",
+						Before: cf.CheckConfigAndCommandFlags,
+						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlNodes, fl.FlDeleteVolumes, fl.FlRemoveOnly, fl.FlWaitOptional).AddAuthenticationFlags().AddOutputFlag().Build(),
+						Action: stack.RepairStackNodes,
+						BashComplete: func(c *cli.Context) {
+							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlNodes, fl.FlDeleteVolumes, fl.FlRemoveOnly, fl.FlWaitOptional).AddAuthenticationFlags().AddOutputFlag().Build() {
+								fl.PrintFlagCompletion(f)
+							}
+						},
+					},
 				},
 			},
 			{
