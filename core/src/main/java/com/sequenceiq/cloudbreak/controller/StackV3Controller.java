@@ -67,8 +67,8 @@ public class StackV3Controller extends NotificationController implements StackV3
     private WorkspaceService workspaceService;
 
     @Override
-    public Set<StackViewResponse> listByWorkspace(Long workspaceId) {
-        return stackCommonService.retrieveStacksByWorkspaceId(workspaceId);
+    public Set<StackViewResponse> listByWorkspace(Long workspaceId, String environment, boolean onlyDatalakes) {
+        return stackCommonService.retrieveStacksByWorkspaceId(workspaceId, environment, onlyDatalakes);
     }
 
     @Override

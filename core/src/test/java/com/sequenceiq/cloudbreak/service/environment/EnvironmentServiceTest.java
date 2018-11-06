@@ -38,16 +38,23 @@ import org.springframework.core.convert.ConversionService;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
+import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentChangeCredentialRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentDetachRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.LocationRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.response.DetailedEnvironmentResponse;
+import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
+import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigResponse;
+import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigResponse;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.environment.EnvironmentCreationValidator;
+import com.sequenceiq.cloudbreak.converter.LdapConfigToLdapConfigResponseConverter;
+import com.sequenceiq.cloudbreak.converter.ProxyConfigToProxyConfigResponseConverter;
+import com.sequenceiq.cloudbreak.converter.RDSConfigToRDSConfigResponseConverter;
 import com.sequenceiq.cloudbreak.converter.environment.EnvironmentToDetailedEnvironmentResponseConverter;
 import com.sequenceiq.cloudbreak.converter.environment.RegionConverter;
 import com.sequenceiq.cloudbreak.domain.Credential;
@@ -134,6 +141,15 @@ public class EnvironmentServiceTest {
 
     @InjectMocks
     private EnvironmentToDetailedEnvironmentResponseConverter environmentConverter;
+
+    @InjectMocks
+    private LdapConfigToLdapConfigResponseConverter ldapConfigResponseConverter;
+
+    @InjectMocks
+    private ProxyConfigToProxyConfigResponseConverter proxyConfigResponseConverter;
+
+    @InjectMocks
+    private RDSConfigToRDSConfigResponseConverter rdsConfigResponseConverter;
 
     @Before
     public void setup() throws TransactionExecutionException {
@@ -280,9 +296,11 @@ public class EnvironmentServiceTest {
         RDSConfig rds1 = new RDSConfig();
         rds1.setId(1L);
         rds1.setName(rdsName1);
+        rds1.setDatabaseEngine(DatabaseVendor.POSTGRES);
         RDSConfig rds2 = new RDSConfig();
         rds2.setId(2L);
         rds2.setName(rdsName2);
+        rds2.setDatabaseEngine(DatabaseVendor.POSTGRES);
         environment.setRdsConfigs(Sets.newHashSet(rds1, rds2));
 
         Credential credential = new Credential();
@@ -295,6 +313,12 @@ public class EnvironmentServiceTest {
                 .thenAnswer((Answer<Environment>) invocation -> (Environment) invocation.getArgument(0));
         when(conversionService.convert(any(Environment.class), eq(DetailedEnvironmentResponse.class)))
                 .thenAnswer((Answer<DetailedEnvironmentResponse>) invocation -> environmentConverter.convert((Environment) invocation.getArgument(0)));
+        when(conversionService.convert(any(LdapConfig.class), eq(LdapConfigResponse.class)))
+                .thenAnswer((Answer<LdapConfigResponse>) invocation -> ldapConfigResponseConverter.convert((LdapConfig) invocation.getArgument(0)));
+        when(conversionService.convert(any(ProxyConfig.class), eq(ProxyConfigResponse.class)))
+                .thenAnswer((Answer<ProxyConfigResponse>) invocation -> proxyConfigResponseConverter.convert((ProxyConfig) invocation.getArgument(0)));
+        when(conversionService.convert(any(RDSConfig.class), eq(RDSConfigResponse.class)))
+                .thenAnswer((Answer<RDSConfigResponse>) invocation -> rdsConfigResponseConverter.convert((RDSConfig) invocation.getArgument(0)));
 
         EnvironmentDetachRequest detachRequest = new EnvironmentDetachRequest();
         detachRequest.getLdapConfigs().add(ldapName1);
@@ -304,13 +328,13 @@ public class EnvironmentServiceTest {
 
         DetailedEnvironmentResponse detachResponse = environmentService.detachResources(ENVIRONMENT_NAME, detachRequest, WORKSPACE_ID);
 
-        assertFalse(detachResponse.getLdapConfigs().contains(notAttachedLdap));
-        assertFalse(detachResponse.getLdapConfigs().contains(ldapName1));
-        assertFalse(detachResponse.getProxyConfigs().contains(proxyName1));
-        assertFalse(detachResponse.getRdsConfigs().contains(rdsName1));
-        assertTrue(detachResponse.getLdapConfigs().contains(ldapName2));
-        assertTrue(detachResponse.getProxyConfigs().contains(proxyName2));
-        assertTrue(detachResponse.getRdsConfigs().contains(rdsName2));
+        assertFalse(detachResponse.getLdapConfigs().stream().map(o -> o.getName()).collect(Collectors.toSet()).contains(notAttachedLdap));
+        assertFalse(detachResponse.getLdapConfigs().stream().map(o -> o.getName()).collect(Collectors.toSet()).contains(ldapName1));
+        assertFalse(detachResponse.getProxyConfigs().stream().map(o -> o.getName()).collect(Collectors.toSet()).contains(proxyName1));
+        assertFalse(detachResponse.getRdsConfigs().stream().map(o -> o.getName()).collect(Collectors.toSet()).contains(rdsName1));
+        assertTrue(detachResponse.getLdapConfigs().stream().map(o -> o.getName()).collect(Collectors.toSet()).contains(ldapName2));
+        assertTrue(detachResponse.getProxyConfigs().stream().map(o -> o.getName()).collect(Collectors.toSet()).contains(proxyName2));
+        assertTrue(detachResponse.getRdsConfigs().stream().map(o -> o.getName()).collect(Collectors.toSet()).contains(rdsName2));
     }
 
     @Test

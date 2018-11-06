@@ -275,7 +275,7 @@ public class StackEntity extends AbstractCloudbreakEntity<StackV2Request, StackR
     @Override
     public List<StackResponse> getAll(CloudbreakClient client) {
         StackV3Endpoint stackV3Endpoint = client.getCloudbreakClient().stackV3Endpoint();
-        return stackV3Endpoint.listByWorkspace(client.getWorkspaceId()).stream()
+        return stackV3Endpoint.listByWorkspace(client.getWorkspaceId(), null, false).stream()
                 .map(s -> {
                     StackResponse stackResponse = new StackResponse();
                     stackResponse.setName(s.getName());

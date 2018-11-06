@@ -56,7 +56,8 @@ public class StackV3Action {
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         Log.log(" get all stack");
-        stackEntity.setResponses(toStackResponseSet(client, workspaceId, client.getCloudbreakClient().stackV3Endpoint().listByWorkspace(workspaceId)));
+        stackEntity.setResponses(toStackResponseSet(client, workspaceId, client.getCloudbreakClient().stackV3Endpoint()
+                .listByWorkspace(workspaceId, null, false)));
     }
 
     private static Set<StackResponse> toStackResponseSet(CloudbreakClient client, Long workspaceId, Set<StackViewResponse> stacks) {

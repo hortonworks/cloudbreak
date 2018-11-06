@@ -177,8 +177,8 @@ public class StackCommonService implements StackEndpoint {
         stackService.delete(name, restRequestThreadLocalService.getRequestedWorkspaceId(), forced, deleteDependencies, user);
     }
 
-    public Set<StackViewResponse> retrieveStacksByWorkspaceId(Long workspaceId) {
-        return stackApiViewService.retrieveStackViewsByWorkspaceId(workspaceId);
+    public Set<StackViewResponse> retrieveStacksByWorkspaceId(Long workspaceId, String environment, boolean onlyDatalakes) {
+        return stackApiViewService.retrieveStackViewsByWorkspaceId(workspaceId, environment, onlyDatalakes);
     }
 
     public StackResponse findStackByNameAndWorkspaceId(String name, Long workspaceId, @QueryParam("entry") Set<String> entries) {
