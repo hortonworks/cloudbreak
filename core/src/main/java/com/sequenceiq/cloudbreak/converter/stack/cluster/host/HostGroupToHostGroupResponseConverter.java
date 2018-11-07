@@ -21,13 +21,13 @@ import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.GeneratedRecipe;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
-import com.sequenceiq.cloudbreak.service.VaultService;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 
 @Component
 public class HostGroupToHostGroupResponseConverter extends AbstractConversionServiceAwareConverter<HostGroup, HostGroupResponse> {
 
     @Inject
-    private VaultService vaultService;
+    private SecretService secretService;
 
     @Override
     public HostGroupResponse convert(HostGroup source) {
@@ -46,7 +46,7 @@ public class HostGroupToHostGroupResponseConverter extends AbstractConversionSer
     private Set<String> getExtendedRecipes(Set<GeneratedRecipe> generatedRecipes) {
         Set<String> extendedRecipes = new HashSet<>();
         for (GeneratedRecipe generatedRecipe : generatedRecipes) {
-            String recipeText = vaultService.resolveSingleValue(generatedRecipe.getExtendedRecipeText());
+            String recipeText = secretService.get(generatedRecipe.getExtendedRecipeText());
             String encodeRecipe = new String(Base64.encodeBase64(anonymize(recipeText).getBytes()));
             extendedRecipes.add(encodeRecipe);
         }

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.proxy.ApplicationProxyConfig;
-import com.sequenceiq.cloudbreak.service.VaultService;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.model.TlsConfiguration;
 import com.sequenceiq.periscope.service.security.TlsSecurityService;
@@ -26,11 +26,11 @@ public class AmbariClientProvider {
     private ApplicationProxyConfig proxyConfig;
 
     @Inject
-    private VaultService vaultService;
+    private SecretService secretService;
 
     public AmbariClient createAmbariClient(Cluster cluster) {
-        String ambariUser = vaultService.resolveSingleValue(cluster.getAmbariUser());
-        String ambariPass = vaultService.resolveSingleValue(cluster.getAmbariPass());
+        String ambariUser = secretService.get(cluster.getAmbariUser());
+        String ambariPass = secretService.get(cluster.getAmbariPass());
         if (cluster.getStackId() != null) {
             TlsConfiguration tlsConfig = tlsSecurityService.getConfiguration(cluster);
             if (proxyConfig.isUseProxyForClusterConnection()) {

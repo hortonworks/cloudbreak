@@ -16,13 +16,13 @@ import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
-import com.sequenceiq.cloudbreak.service.VaultService;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 
 @Mapper(componentModel = "spring")
 public abstract class ClusterTemplateMapper {
 
     @Inject
-    private VaultService vaultService;
+    private SecretService secretService;
 
     @Mappings({
             @Mapping(target = "owner", ignore = true),
@@ -46,7 +46,7 @@ public abstract class ClusterTemplateMapper {
 
     public StackV2Request mapJsonToStackV2Request(String templatePath) {
         try {
-            String templateContent = vaultService.resolveSingleValue(templatePath);
+            String templateContent = secretService.get(templatePath);
             return new Json(templateContent).get(StackV2Request.class);
         } catch (IOException e) {
             throw new BadRequestException("Couldn't convert json to StackV2Request", e);

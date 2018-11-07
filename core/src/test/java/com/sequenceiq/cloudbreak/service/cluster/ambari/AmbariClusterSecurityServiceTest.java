@@ -36,7 +36,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.PollingResult;
-import com.sequenceiq.cloudbreak.service.VaultService;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
@@ -72,14 +72,14 @@ public class AmbariClusterSecurityServiceTest {
     private AmbariPollingServiceProvider ambariPollingServiceProvider;
 
     @Mock
-    private VaultService vaultService;
+    private SecretService secretService;
 
     @InjectMocks
     private final AmbariClusterSecurityService underTest = new AmbariClusterSecurityService();
 
     @Before
     public void init() {
-        when(vaultService.resolveSingleValue("admin")).thenReturn("admin");
+        when(secretService.get("admin")).thenReturn("admin");
     }
 
     @Test
@@ -157,7 +157,7 @@ public class AmbariClusterSecurityServiceTest {
         stack.setCluster(cluster);
         AmbariClient ambariClient = Mockito.mock(AmbariClient.class);
 
-        when(vaultService.resolveSingleValue("admin1")).thenReturn("admin1");
+        when(secretService.get("admin1")).thenReturn("admin1");
         when(clientFactory.getDefaultAmbariClient(stack)).thenReturn(ambariClient);
         when(ambariSecurityConfigProvider.getAmbariUserName(cluster)).thenReturn("cloudbreak");
         when(ambariSecurityConfigProvider.getAmbariPassword(cluster)).thenReturn("cloudbreak123");
@@ -212,7 +212,7 @@ public class AmbariClusterSecurityServiceTest {
         stack.setCluster(cluster);
         AmbariClient ambariClient = Mockito.mock(AmbariClient.class);
 
-        when(vaultService.resolveSingleValue("admin1")).thenReturn("admin1");
+        when(secretService.get("admin1")).thenReturn("admin1");
         when(clientFactory.getDefaultAmbariClient(stack)).thenReturn(ambariClient);
         when(ambariSecurityConfigProvider.getAmbariUserName(cluster)).thenReturn("cloudbreak");
         when(ambariSecurityConfigProvider.getAmbariPassword(cluster)).thenReturn("cloudbreak123");

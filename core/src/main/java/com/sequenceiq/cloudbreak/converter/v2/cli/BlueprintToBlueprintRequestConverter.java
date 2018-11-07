@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.service.VaultService;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 
 @Component
 public class BlueprintToBlueprintRequestConverter
@@ -18,14 +18,14 @@ public class BlueprintToBlueprintRequestConverter
     private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintToBlueprintRequestConverter.class);
 
     @Inject
-    private VaultService vaultService;
+    private SecretService secretService;
 
     @Override
     public BlueprintRequest convert(Blueprint source) {
         BlueprintRequest blueprintRequest = new BlueprintRequest();
         blueprintRequest.setName("");
         blueprintRequest.setDescription(source.getDescription());
-        blueprintRequest.setAmbariBlueprint(vaultService.resolveSingleValue(source.getBlueprintText()));
+        blueprintRequest.setAmbariBlueprint(secretService.get(source.getBlueprintText()));
         return blueprintRequest;
     }
 

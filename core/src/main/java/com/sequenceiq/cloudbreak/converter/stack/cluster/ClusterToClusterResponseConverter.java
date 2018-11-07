@@ -54,7 +54,7 @@ import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.VaultService;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Component
@@ -97,7 +97,7 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
     private StackService stackService;
 
     @Inject
-    private VaultService vaultService;
+    private SecretService secretService;
 
     @Value("${cb.disable.show.blueprint:false}")
     private boolean disableShowBlueprint;
@@ -158,7 +158,7 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
 
     private <R extends ClusterResponse> void setExtendedBlueprintText(Cluster source, R clusterResponse) {
         if (StringUtils.isNoneEmpty(source.getExtendedBlueprintText()) && !disableShowBlueprint) {
-            String fromVault = vaultService.resolveSingleValue(source.getExtendedBlueprintText());
+            String fromVault = secretService.get(source.getExtendedBlueprintText());
             clusterResponse.setExtendedBlueprintText(anonymize(fromVault));
         }
     }
@@ -183,7 +183,7 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
 
     private void convertCustomQueue(Cluster source, ClusterResponse clusterResponse) {
         if (source.getAttributes() != null) {
-            Json fromVault = new Json(vaultService.resolveSingleValue(source.getAttributes()));
+            Json fromVault = new Json(secretService.get(source.getAttributes()));
             Map<String, Object> attributes = fromVault.getMap();
             Object customQueue = attributes.get(CUSTOM_QUEUE.name());
             if (customQueue != null) {
@@ -240,7 +240,7 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
             clusterResponse.setLdapConfigId(source.getLdapConfig().getId());
         }
         if (source.getAttributes() != null) {
-            Json fromVault = new Json(vaultService.resolveSingleValue(source.getAttributes()));
+            Json fromVault = new Json(secretService.get(source.getAttributes()));
             clusterResponse.setAttributes(fromVault.getMap());
         }
     }
