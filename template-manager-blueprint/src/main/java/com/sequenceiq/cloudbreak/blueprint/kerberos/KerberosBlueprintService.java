@@ -11,7 +11,7 @@ import org.springframework.util.StringUtils;
 
 import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintComponentConfigProvider;
-import com.sequenceiq.cloudbreak.service.VaultService;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
@@ -36,7 +36,7 @@ public class KerberosBlueprintService implements BlueprintComponentConfigProvide
     private KerberosDetailService kerberosDetailService;
 
     @Inject
-    private VaultService vaultService;
+    private SecretService secretService;
 
     @Override
     public BlueprintTextProcessor customTextManipulation(TemplatePreparationObject source, BlueprintTextProcessor blueprintProcessor) {
@@ -47,10 +47,10 @@ public class KerberosBlueprintService implements BlueprintComponentConfigProvide
             String domain = gatewayHost.substring(gatewayHost.indexOf('.') + 1);
             extendBlueprintWithKerberos(blueprintProcessor, kerberosConfig, gatewayHost, domain, propagationPort);
             if (StringUtils.hasLength(kerberosConfig.getDescriptor())) {
-                blueprintProcessor.replaceConfiguration("kerberos-env", vaultService.resolveSingleValue(kerberosConfig.getDescriptor()));
+                blueprintProcessor.replaceConfiguration("kerberos-env", secretService.get(kerberosConfig.getDescriptor()));
             }
             if (StringUtils.hasLength(kerberosConfig.getKrb5Conf())) {
-                blueprintProcessor.replaceConfiguration("krb5-conf", vaultService.resolveSingleValue(kerberosConfig.getKrb5Conf()));
+                blueprintProcessor.replaceConfiguration("krb5-conf", secretService.get(kerberosConfig.getKrb5Conf()));
             }
         } else {
             extendBlueprintWithKerberos(blueprintProcessor, kerberosConfig, source.getGeneralClusterConfigs().getAmbariIp(), REALM, DOMAIN, null);

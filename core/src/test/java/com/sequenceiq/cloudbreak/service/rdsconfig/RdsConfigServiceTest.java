@@ -42,7 +42,7 @@ import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.RdsConfigRepository;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
-import com.sequenceiq.cloudbreak.service.VaultService;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
@@ -72,7 +72,7 @@ public class RdsConfigServiceTest {
     private TransactionService transactionService;
 
     @Mock
-    private VaultService vaultService;
+    private SecretService secretService;
 
     @Captor
     private ArgumentCaptor<RDSConfig> rdsConfigCaptor;

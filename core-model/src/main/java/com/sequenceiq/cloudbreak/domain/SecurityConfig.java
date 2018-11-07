@@ -10,7 +10,7 @@ import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 
-import com.sequenceiq.cloudbreak.aspect.vault.VaultValue;
+import com.sequenceiq.cloudbreak.aspect.vault.SecretValue;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 
 @Entity
@@ -21,10 +21,10 @@ public class SecurityConfig implements ProvisionEntity {
     @SequenceGenerator(name = "securityconfig_generator", sequenceName = "securityconfig_id_seq", allocationSize = 1)
     private Long id;
 
-    @VaultValue
+    @SecretValue
     private String clientKey;
 
-    @VaultValue
+    @SecretValue
     private String clientCert;
 
     @OneToOne(fetch = FetchType.LAZY)

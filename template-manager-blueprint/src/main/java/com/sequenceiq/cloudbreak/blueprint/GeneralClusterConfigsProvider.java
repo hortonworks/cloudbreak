@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
-import com.sequenceiq.cloudbreak.service.VaultService;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 
@@ -31,7 +31,7 @@ public class GeneralClusterConfigsProvider {
     private BlueprintProcessorFactory blueprintProcessorFactory;
 
     @Inject
-    private VaultService vaultService;
+    private SecretService secretService;
 
     public GeneralClusterConfigs generalClusterConfigs(Stack stack, Cluster cluster, CloudbreakUser cloudbreakUser) {
         boolean gatewayInstanceMetadataPresented = false;
@@ -52,11 +52,11 @@ public class GeneralClusterConfigsProvider {
         generalClusterConfigs.setExecutorType(cluster.getExecutorType());
         generalClusterConfigs.setStackName(stack.getName());
         generalClusterConfigs.setUuid(stack.getUuid());
-        generalClusterConfigs.setUserName(vaultService.resolveSingleValue(cluster.getUserName()));
-        generalClusterConfigs.setPassword(vaultService.resolveSingleValue(cluster.getPassword()));
+        generalClusterConfigs.setUserName(secretService.get(cluster.getUserName()));
+        generalClusterConfigs.setPassword(secretService.get(cluster.getPassword()));
         generalClusterConfigs.setNodeCount(stack.getFullNodeCount());
         generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.ofNullable(stack.getPrimaryGatewayInstance().getDiscoveryFQDN()));
-        String blueprintText = vaultService.resolveSingleValue(cluster.getBlueprint().getBlueprintText());
+        String blueprintText = secretService.get(cluster.getBlueprint().getBlueprintText());
         generalClusterConfigs.setKafkaReplicationFactor(
                 getKafkaReplicationFactor(blueprintText) >= DEFAULT_REPLICATION_FACTOR ? DEFAULT_REPLICATION_FACTOR : 1);
 

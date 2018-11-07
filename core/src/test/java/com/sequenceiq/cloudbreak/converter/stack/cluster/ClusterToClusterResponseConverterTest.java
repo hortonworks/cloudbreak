@@ -67,7 +67,7 @@ import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariViewProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.VaultService;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
 public class ClusterToClusterResponseConverterTest extends AbstractEntityConverterTest<Cluster> {
@@ -133,7 +133,7 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
     private ServiceEndpointCollector serviceEndpointCollector;
 
     @Mock
-    private VaultService vaultService;
+    private SecretService secretService;
 
     private StackServiceComponentDescriptor stackServiceComponentDescriptor;
 
@@ -146,7 +146,7 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
         given(stackService.findClustersConnectedToDatalake(anyLong())).willReturn(new HashSet<>());
         given(conversionService.convert(any(Workspace.class), eq(WorkspaceResourceResponse.class)))
                 .willReturn(new WorkspaceResourceResponse());
-        when(vaultService.resolveSingleValue(anyString())).then(returnsFirstArg());
+        when(secretService.get(anyString())).then(returnsFirstArg());
         stackServiceComponentDescriptor = createStackServiceComponentDescriptor();
     }
 

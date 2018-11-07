@@ -13,7 +13,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import com.sequenceiq.cloudbreak.api.model.RecipeType;
-import com.sequenceiq.cloudbreak.aspect.vault.VaultValue;
+import com.sequenceiq.cloudbreak.aspect.vault.SecretValue;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
@@ -39,7 +39,7 @@ public class Recipe implements ProvisionEntity, WorkspaceAwareResource {
     private String uri;
 
     @Column(nullable = false)
-    @VaultValue
+    @SecretValue
     private String content;
 
     private String account;

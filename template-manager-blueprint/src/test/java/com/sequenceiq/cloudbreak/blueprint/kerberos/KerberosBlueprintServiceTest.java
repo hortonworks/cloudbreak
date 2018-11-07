@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.service.VaultService;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
@@ -39,7 +39,7 @@ public class KerberosBlueprintServiceTest {
     private TemplatePreparationObject templatePreparationObject;
 
     @Mock
-    private VaultService vaultService;
+    private SecretService secretService;
 
     @Spy
     private KerberosDetailService kerberosDetailService;
@@ -110,11 +110,11 @@ public class KerberosBlueprintServiceTest {
                 .withKerberosConfig(cluster.getKerberosConfig())
                 .withGeneralClusterConfigs(BlueprintTestUtil.generalClusterConfigs())
                 .build();
-        when(vaultService.resolveSingleValue(descriptorPath)).thenReturn("{\"kerberos-env\":{\"properties\":"
+        when(secretService.get(descriptorPath)).thenReturn("{\"kerberos-env\":{\"properties\":"
                 + "{\"install_packages\":false,\"realm\":\"REALM.BP\",\"kdc_type\":\"mit-kdc\","
                 + "\"kdc_hosts\":\"kdc_host.bp\",\"admin_server_host\":\"admin_server_host.bp\",\"encryption_types\":\"enc_types.bp\",\"ldap_url\":\"\","
                 + "\"container_dn\":\"\"}}}");
-        when(vaultService.resolveSingleValue(krb5Path)).thenReturn("{\"krb5-conf\":{\"properties\":{\"domains\":\".domains.bp\","
+        when(secretService.get(krb5Path)).thenReturn("{\"krb5-conf\":{\"properties\":{\"domains\":\".domains.bp\","
                 + "\"manage_krb5_conf\":\"true\",\"content\":\"content.bp\"}}}");
 
         BlueprintTextProcessor b = new BlueprintTextProcessor(blueprint.getBlueprintText());
