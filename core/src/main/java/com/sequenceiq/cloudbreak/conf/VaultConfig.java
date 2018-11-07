@@ -5,6 +5,7 @@ import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.ProxySelector;
+import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
@@ -35,6 +36,8 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.authentication.ClientAuthentication;
+import org.springframework.vault.authentication.KubernetesAuthentication;
+import org.springframework.vault.authentication.KubernetesAuthenticationOptions;
 import org.springframework.vault.authentication.TokenAuthentication;
 import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.config.AbstractVaultConfiguration;
@@ -43,6 +46,7 @@ import org.springframework.vault.support.SslConfiguration;
 import org.springframework.vault.support.SslConfiguration.KeyStoreConfiguration;
 
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @Configuration
 public class VaultConfig extends AbstractVaultConfiguration {
@@ -50,6 +54,8 @@ public class VaultConfig extends AbstractVaultConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(VaultConfig.class);
 
     private static final char[] EMPTY_ARRAY = new char[0];
+
+    private static final String AUTH_TYPE_K8S = "kubernetes";
 
     @Value("${cb.vault.addr:}")
     private String address;
@@ -62,6 +68,18 @@ public class VaultConfig extends AbstractVaultConfiguration {
 
     @Value("${cb.vault.ssl.enabled:}")
     private Boolean sslEnabled;
+
+    @Value("${cb.vault.auth.type:}")
+    private String authType;
+
+    @Value("${cb.vault.auth.kubernetes.mount.path:}")
+    private String kubernetesMountPath;
+
+    @Value("${cb.vault.auth.kubernetes.login.role:}")
+    private String kubernetesLoginRole;
+
+    @Value("${cb.vault.auth.kubernetes.service.account.token.path:}")
+    private String kubernetesSATokenPath;
 
     @Value("${https.proxyUser:}")
     private String httpsProxyUser;
@@ -78,7 +96,23 @@ public class VaultConfig extends AbstractVaultConfiguration {
 
     @Override
     public ClientAuthentication clientAuthentication() {
-        return new TokenAuthentication(rootToken);
+        if (AUTH_TYPE_K8S.equalsIgnoreCase(authType)) {
+            LOGGER.info("Kubernetes based Vault auth is configured");
+            try {
+                String token = FileReaderUtils.readFileFromPath(Paths.get(kubernetesSATokenPath));
+                KubernetesAuthenticationOptions k8sOptions = KubernetesAuthenticationOptions.builder()
+                        .jwtSupplier(() -> token)
+                        .role(kubernetesLoginRole)
+                        .path(kubernetesMountPath)
+                        .build();
+                return new KubernetesAuthentication(k8sOptions, restOperations());
+            } catch (IOException e) {
+                throw new CloudbreakServiceException("Failed to read the Kubernetes service account token", e);
+            }
+        } else {
+            LOGGER.info("Token based Vault auth is configured");
+            return new TokenAuthentication(rootToken);
+        }
     }
 
     @Override
