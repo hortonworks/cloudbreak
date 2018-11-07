@@ -20,6 +20,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
+import com.sequenceiq.cloudbreak.type.KerberosType;
 import com.sequenceiq.it.cloudbreak.newway.Blueprint;
 import com.sequenceiq.it.cloudbreak.newway.BlueprintEntity;
 import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
@@ -202,6 +203,7 @@ public class KerberosTest extends AbstractIntegrationTest {
                 request.setMasterKey("masterKey");
                 request.setAdmin("kerberosAdmin");
                 request.setPassword("kerberosPassw0rd");
+                request.setType(KerberosType.CB_MANAGED);
                 return request;
             }
         },
@@ -242,6 +244,7 @@ public class KerberosTest extends AbstractIntegrationTest {
                 request.setRealm("realm");
                 request.setLdapUrl("otherurl.com");
                 request.setContainerDn("{}");
+                request.setType(KerberosType.EXISTING_AD);
                 return request;
             }
         },
@@ -271,6 +274,7 @@ public class KerberosTest extends AbstractIntegrationTest {
                 request.setUrl("kerberosproviderurl.com");
                 request.setAdminUrl("kerberosadminurl.com");
                 request.setRealm("kerbRealm");
+                request.setType(KerberosType.EXISTING_MIT);
                 return request;
             }
         },
@@ -302,6 +306,7 @@ public class KerberosTest extends AbstractIntegrationTest {
                 request.setDescriptor("{\"kerberos-env\":{\"properties\":{\"kdc_type\":\"mit-kdc\",\"kdc_hosts\":\"kdc-host-value\",\"admin_server_host\":"
                         + "\"admin-server-host-value\",\"realm\":\"realm-value\"}}}");
                 request.setKrb5Conf("{}");
+                request.setType(KerberosType.CUSTOM);
                 return request;
             }
         };

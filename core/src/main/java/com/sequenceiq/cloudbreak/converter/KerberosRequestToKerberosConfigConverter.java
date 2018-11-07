@@ -6,14 +6,13 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
-import com.sequenceiq.cloudbreak.type.KerberosType;
 
 @Component
 public class KerberosRequestToKerberosConfigConverter extends AbstractConversionServiceAwareConverter<KerberosRequest, KerberosConfig> {
     @Override
     public KerberosConfig convert(KerberosRequest source) {
         KerberosConfig kerberosConfig = new KerberosConfig();
-        kerberosConfig.setType(KerberosType.valueOf(source));
+        kerberosConfig.setType(source.getType());
         kerberosConfig.setMasterKey(source.getMasterKey());
         kerberosConfig.setAdmin(source.getAdmin());
         kerberosConfig.setPassword(source.getPassword());
