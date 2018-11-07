@@ -33,7 +33,7 @@ public class SecretService {
     /**
      * Stores a secret in Secret's key-value store.
      *
-     * @param key  Path where the secret will be stored
+     * @param key   Path where the secret will be stored
      * @param value Secret content
      * @throws Exception is thrown in case the key-value key is already contains a secret
      */
