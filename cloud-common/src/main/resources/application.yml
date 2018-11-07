@@ -75,6 +75,12 @@ cb:
     port: 8200
     ssl.enabled: false
     kv.path: "secret"
+    auth:
+      type: "token"
+      kubernetes:
+        service.account.token.path: /var/run/secrets/kubernetes.io/serviceaccount/token
+        mount.path: "dps-dev"
+        login.role: "cloudbreak.default"
 
   aws:
     spotinstances.enabled: true
