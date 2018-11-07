@@ -31,7 +31,7 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.PlatformResourceRequest;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
-import com.sequenceiq.cloudbreak.service.VaultService;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 
 @Service
@@ -54,7 +54,7 @@ public class CloudResourceAdvisor {
     private DefaultRootVolumeSizeProvider defaultRootVolumeSizeProvider;
 
     @Inject
-    private VaultService vaultService;
+    private SecretService secretService;
 
     public PlatformRecommendation createForBlueprint(String blueprintName, Long blueprintId, PlatformResourceRequest resourceRequest, User user,
             Workspace workspace) {
@@ -67,7 +67,7 @@ public class CloudResourceAdvisor {
                 blueprintId, blueprintName, cloudPlatform, region);
 
         Blueprint blueprint = getBlueprint(blueprintName, blueprintId, user, workspace);
-        String blueprintText = vaultService.resolveSingleValue(blueprint.getBlueprintText());
+        String blueprintText = secretService.get(blueprint.getBlueprintText());
         Map<String, Set<String>> componentsByHostGroup = blueprintProcessorFactory.get(blueprintText).getComponentsByHostGroup();
         componentsByHostGroup
                 .forEach((hGName, components) -> hostGroupContainsMasterComp.put(hGName, isThereMasterComponents(components)));

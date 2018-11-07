@@ -30,7 +30,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
-import com.sequenceiq.cloudbreak.service.VaultService;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.InstanceGroupMetadataCollector;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
@@ -90,7 +90,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
     private BlueprintViewProvider blueprintViewProvider;
 
     @Inject
-    private VaultService vaultService;
+    private SecretService secretService;
 
     @Override
     public TemplatePreparationObject convert(Stack source) {
@@ -102,7 +102,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
             StackRepoDetails hdpRepo = clusterComponentConfigProvider.getHDPRepo(cluster.getId());
             String stackRepoDetailsHdpVersion = hdpRepo != null ? hdpRepo.getHdpVersion() : null;
             Map<String, List<InstanceMetaData>> groupInstances = instanceGroupMetadataCollector.collectMetadata(source);
-            String blueprintText = vaultService.resolveSingleValue(cluster.getBlueprint().getBlueprintText());
+            String blueprintText = secretService.get(cluster.getBlueprint().getBlueprintText());
             HdfConfigs hdfConfigs = hdfConfigProvider.createHdfConfig(cluster.getHostGroups(), groupInstances, blueprintText);
             BaseFileSystemConfigurationsView fileSystemConfigurationView = getFileSystemConfigurationView(source, fileSystem);
             CloudbreakUser cloudbreakUser = cachedUserDetailsService.getDetails(cluster.getOwner(), UserFilterField.USERID);
@@ -113,13 +113,13 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
             String bindDn = null;
             String bindPassword = null;
             if (ldapConfig != null) {
-                bindDn = vaultService.resolveSingleValue(ldapConfig.getBindDn());
-                bindPassword = vaultService.resolveSingleValue(ldapConfig.getBindPassword());
+                bindDn = secretService.get(ldapConfig.getBindDn());
+                bindPassword = secretService.get(ldapConfig.getBindPassword());
             }
             Gateway gateway = cluster.getGateway();
             String gatewaySignKey = null;
             if (gateway != null) {
-                gatewaySignKey = vaultService.resolveSingleValue(gateway.getSignKey());
+                gatewaySignKey = secretService.get(gateway.getSignKey());
             }
             return Builder.builder()
                     .withFlexSubscription(source.getFlexSubscription())

@@ -15,7 +15,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.aspect.vault.VaultValue;
+import com.sequenceiq.cloudbreak.aspect.vault.SecretValue;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
@@ -35,7 +35,7 @@ public class ClusterTemplate implements WorkspaceAwareResource, Serializable {
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String description;
 
-    @VaultValue
+    @SecretValue
     private String template;
 
     @ManyToOne

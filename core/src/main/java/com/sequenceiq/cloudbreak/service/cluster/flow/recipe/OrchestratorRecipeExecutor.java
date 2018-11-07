@@ -39,7 +39,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.RecipeModel;
 import com.sequenceiq.cloudbreak.recipe.CentralRecipeUpdater;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
-import com.sequenceiq.cloudbreak.service.VaultService;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeExecutionFailureCollector.RecipeExecutionFailure;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
@@ -87,7 +87,7 @@ class OrchestratorRecipeExecutor {
     private ConversionService conversionService;
 
     @Inject
-    private VaultService vaultService;
+    private SecretService secretService;
 
     public void uploadRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
         HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
@@ -203,7 +203,7 @@ class OrchestratorRecipeExecutor {
     private List<RecipeModel> convert(Stack stack, Set<Recipe> recipes) {
         List<RecipeModel> result = new ArrayList<>();
         for (Recipe recipe : recipes) {
-            String recipeContent = recipe.getId() == null ? recipe.getContent() : vaultService.resolveSingleValue(recipe.getContent());
+            String recipeContent = recipe.getId() == null ? recipe.getContent() : secretService.get(recipe.getContent());
             String decodedContent = new String(Base64.decodeBase64(recipeContent));
             TemplatePreparationObject templatePreparationObject = conversionService.convert(stack, TemplatePreparationObject.class);
             String generatedRecipeText = centralRecipeUpdater.getRecipeText(templatePreparationObject, decodedContent);

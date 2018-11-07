@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
-import com.sequenceiq.cloudbreak.service.VaultService;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.template.views.GatewayView;
 
 @Service
@@ -31,14 +31,14 @@ public class AmbariSSOService {
     private GatewayConfigService gatewayConfigService;
 
     @Inject
-    private VaultService vaultService;
+    private SecretService secretService;
 
     public void setupSSO(Stack stack, Cluster cluster) {
         AmbariClient ambariClient = clientFactory.getAmbariClient(stack, cluster);
         Gateway gateway = cluster.getGateway();
         if (cluster.hasGateway() && SSOType.SSO_PROVIDER == cluster.getGateway().getSsoType()) {
             LOGGER.info("Setup gateway on Ambari API for stack: {}", stack.getId());
-            GatewayView gatewayView = new GatewayView(gateway, vaultService.resolveSingleValue(gateway.getSignKey()));
+            GatewayView gatewayView = new GatewayView(gateway, secretService.get(gateway.getSignKey()));
             GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
             Map<String, Object> ssoConfigs = new HashMap<>();
             ssoConfigs.put("ambari.sso.provider.url", "https://" + primaryGatewayConfig.getPublicAddress() + ":8443" + gatewayView.getSsoProvider());

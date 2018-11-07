@@ -18,7 +18,8 @@ import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.json.JsonHelper;
 import com.sequenceiq.cloudbreak.recipe.CentralRecipeUpdater;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
-import com.sequenceiq.cloudbreak.service.VaultService;
+import com.sequenceiq.cloudbreak.service.secret.SecretEngine;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurator;
 
 @ContextConfiguration
@@ -58,8 +59,13 @@ public class CentralRecipeContext {
         }
 
         @Bean
-        public VaultService vaultService() {
-            return Mockito.mock(VaultService.class);
+        public SecretEngine secretEngine() {
+            return Mockito.mock(SecretEngine.class);
+        }
+
+        @Bean
+        public SecretService secretService() {
+            return Mockito.mock(SecretService.class);
         }
 
         @Bean

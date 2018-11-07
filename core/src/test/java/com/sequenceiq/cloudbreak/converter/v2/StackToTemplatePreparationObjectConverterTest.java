@@ -54,10 +54,10 @@ import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.InstanceGroupMetadataCollector;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.CachedUserDetailsService;
-import com.sequenceiq.cloudbreak.service.VaultService;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationProvider;
@@ -151,7 +151,7 @@ public class StackToTemplatePreparationObjectConverterTest {
     private BlueprintViewProvider blueprintViewProvider;
 
     @Mock
-    private VaultService vaultService;
+    private SecretService secretService;
 
     @Before
     public void setUp() throws IOException {
@@ -170,7 +170,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(source.getInputs()).thenReturn(stackInputs);
         when(stackInputs.get(StackInputs.class)).thenReturn(null);
         when(stackInfoService.blueprintStackInfo(TEST_BLUEPRINT_TEXT)).thenReturn(blueprintStackInfo);
-        when(vaultService.resolveSingleValue(any())).thenReturn("admin<>");
+        when(secretService.get(any())).thenReturn("admin<>");
     }
 
     @Test
@@ -309,7 +309,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         HdfConfigs expected = mock(HdfConfigs.class);
         Set<HostGroup> hostGroups = new LinkedHashSet<>();
         when(hdfConfigProvider.createHdfConfig(hostGroups, groupInstances, TEST_BLUEPRINT_TEXT)).thenReturn(expected);
-        when(vaultService.resolveSingleValue(anyString())).thenReturn(TEST_BLUEPRINT_TEXT);
+        when(secretService.get(anyString())).thenReturn(TEST_BLUEPRINT_TEXT);
 
         TemplatePreparationObject result = underTest.convert(source);
 

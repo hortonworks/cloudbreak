@@ -43,7 +43,7 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.environment.EnvironmentViewRepository;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
-import com.sequenceiq.cloudbreak.service.VaultService;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.notification.Notification;
@@ -99,7 +99,7 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
     private EnvironmentViewRepository environmentViewRepository;
 
     @Inject
-    private VaultService vaultService;
+    private SecretService secretService;
 
     public Set<Credential> listAvailablesByWorkspaceId(Long workspaceId) {
         return credentialRepository.findActiveForWorkspaceFilterByPlatforms(workspaceId, accountPreferencesService.enabledPlatforms());
@@ -127,7 +127,7 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
         credential.setId(original.getId());
         credential.setWorkspace(workspaceService.get(workspaceId, user));
         Credential updated = super.create(credentialAdapter.init(credential, workspaceId, user.getUserId()), workspaceId, user);
-        vaultService.deleteSecret(original.getAttributes());
+        secretService.delete(original.getAttributes());
         sendCredentialNotification(credential, ResourceEvent.CREDENTIAL_MODIFIED);
         return updated;
     }

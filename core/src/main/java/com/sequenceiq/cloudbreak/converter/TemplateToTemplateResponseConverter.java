@@ -23,13 +23,13 @@ import com.sequenceiq.cloudbreak.api.model.v2.template.OpenStackParameters;
 import com.sequenceiq.cloudbreak.api.model.v2.template.YarnParameters;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.service.VaultService;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 
 @Component
 public class TemplateToTemplateResponseConverter extends AbstractConversionServiceAwareConverter<Template, TemplateResponse> {
 
     @Inject
-    private VaultService vaultService;
+    private SecretService secretService;
 
     @Override
     public TemplateResponse convert(Template source) {
@@ -44,7 +44,7 @@ public class TemplateToTemplateResponseConverter extends AbstractConversionServi
         Json attributes = source.getAttributes();
         if (attributes != null) {
             Map<String, Object> atributesMap = attributes.getMap();
-            ofNullable(source.getSecretAttributes()).ifPresent(attr -> atributesMap.putAll(new Json(vaultService.resolveSingleValue(attr)).getMap()));
+            ofNullable(source.getSecretAttributes()).ifPresent(attr -> atributesMap.putAll(new Json(secretService.get(attr)).getMap()));
             setParameterByPlatform(templateJson, atributesMap);
             templateJson.setParameters(atributesMap);
         }
