@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
 import com.sequenceiq.cloudbreak.api.model.RecoveryMode;
+import com.sequenceiq.cloudbreak.type.KerberosType;
 import com.sequenceiq.it.IntegrationTestContext;
 
 public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
@@ -77,6 +78,7 @@ public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
             kerberosRequest.setAdmin(kerberosAdmin);
             kerberosRequest.setPassword(kerberosPassword);
             kerberosRequest.setMasterKey(kerberosMasterKey);
+            kerberosRequest.setType(KerberosType.CB_MANAGED);
             clusterRequest.setKerberos(kerberosRequest);
         }
 

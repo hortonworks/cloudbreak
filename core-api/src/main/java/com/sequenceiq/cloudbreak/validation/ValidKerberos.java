@@ -15,10 +15,9 @@ import javax.validation.Payload;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ValidKerberos {
 
-    String message() default "Kerberos configuration contains inconsistent parameters";
+    String message() default "Kerberos configuration contains inconsistent parameters or there are missing values";
 
     Class<?>[] groups() default { };
 
     Class<? extends Payload>[] payload() default { };
-
 }

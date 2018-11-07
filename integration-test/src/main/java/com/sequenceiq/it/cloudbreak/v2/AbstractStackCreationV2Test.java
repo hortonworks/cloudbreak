@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.PlacementSettings;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
+import com.sequenceiq.cloudbreak.type.KerberosType;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.AbstractCloudbreakIntegrationTest;
 import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
@@ -115,6 +116,7 @@ public class AbstractStackCreationV2Test extends AbstractCloudbreakIntegrationTe
             kerberosRequest.setMasterKey(kerberosMasterKey);
             kerberosRequest.setAdmin(kerberosAdmin);
             kerberosRequest.setPassword(kerberosPassword);
+            kerberosRequest.setType(KerberosType.CB_MANAGED);
             ambariV2Request.setKerberos(kerberosRequest);
         }
     }

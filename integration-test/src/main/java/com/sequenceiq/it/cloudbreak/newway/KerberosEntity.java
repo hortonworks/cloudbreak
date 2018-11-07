@@ -4,6 +4,7 @@ import java.util.function.Function;
 
 import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
 import com.sequenceiq.cloudbreak.api.model.KerberosResponse;
+import com.sequenceiq.cloudbreak.type.KerberosType;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
@@ -22,6 +23,7 @@ public class KerberosEntity extends AbstractCloudbreakEntity<KerberosRequest, Ke
     KerberosEntity(String newId) {
         super(newId);
         request = new KerberosRequest();
+        request.setType(KerberosType.CB_MANAGED);
     }
 
     KerberosEntity() {

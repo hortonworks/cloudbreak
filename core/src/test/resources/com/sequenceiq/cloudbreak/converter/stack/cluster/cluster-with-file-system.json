@@ -10,7 +10,8 @@
   "kerberos" : {
     "masterKey": "masterkey",
     "admin" : "admin",
-    "password" : "passw"
+    "password" : "passw",
+    "type" : "CB_MANAGED"
   },
   "gateway" : {
     "enableKnoxGateway": "false"

@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
+import com.sequenceiq.cloudbreak.type.KerberosType;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.AbstractCloudbreakIntegrationTest;
 import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
@@ -86,6 +87,7 @@ public class MockClusterCreationWithSaltSuccessTest extends AbstractCloudbreakIn
             kerberosRequest.setAdmin(kerberosAdmin);
             kerberosRequest.setPassword(kerberosPassword);
             kerberosRequest.setMasterKey(kerberosMasterKey);
+            kerberosRequest.setType(KerberosType.CB_MANAGED);
             clusterRequest.setKerberos(kerberosRequest);
         }
 

@@ -12,6 +12,7 @@ public class KerberosConfigToKerberosRequestConverter extends AbstractConversion
     @Override
     public KerberosRequest convert(KerberosConfig source) {
         KerberosRequest config = new KerberosRequest();
+        config.setType(source.getType());
         config.setTcpAllowed(source.getTcpAllowed());
         config.setPassword("");
         switch (source.getType()) {
