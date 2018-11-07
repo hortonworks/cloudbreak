@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
 import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
 import com.sequenceiq.cloudbreak.domain.Recipe;
-import com.sequenceiq.cloudbreak.service.VaultService;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RecipeToRecipeResponseConverterTest extends AbstractEntityConverterTest<Recipe> {
@@ -24,7 +24,7 @@ public class RecipeToRecipeResponseConverterTest extends AbstractEntityConverter
     private ConversionService conversionService;
 
     @Mock
-    private VaultService vaultService;
+    private SecretService secretService;
 
     @InjectMocks
     private RecipeToRecipeResponseConverter underTest;
@@ -35,7 +35,7 @@ public class RecipeToRecipeResponseConverterTest extends AbstractEntityConverter
         // WHEN
         Recipe recipe = getSource();
         when(conversionService.convert(recipe.getWorkspace(), WorkspaceResourceResponse.class)).thenReturn(new WorkspaceResourceResponse());
-        when(vaultService.resolveSingleValue(any())).thenReturn(recipe.getContent());
+        when(secretService.get(any())).thenReturn(recipe.getContent());
         RecipeResponse result = underTest.convert(recipe);
         // THEN
         assertAllFieldsNotNull(result, Lists.newArrayList("id", "plugins"));

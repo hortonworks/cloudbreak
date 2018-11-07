@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.SecurityConfigRepository;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 
 @Component
@@ -35,7 +36,7 @@ public class TlsSecurityService {
     private InstanceMetaDataRepository instanceMetaDataRepository;
 
     @Inject
-    private VaultService vaultService;
+    private SecretService secretService;
 
     public SecurityConfig generateSecurityKeys() {
         SecurityConfig securityConfig = new SecurityConfig();
@@ -92,7 +93,7 @@ public class TlsSecurityService {
         String connectionIp = getGatewayIp(securityConfig, gatewayInstance);
         HttpClientConfig conf = buildTLSClientConfig(stackId, connectionIp, gatewayInstance);
         SaltSecurityConfig saltSecurityConfig = securityConfig.getSaltSecurityConfig();
-        String saltSignPrivateKeyB64 = vaultService.resolveSingleValue(saltSecurityConfig.getSaltSignPrivateKey());
+        String saltSignPrivateKeyB64 = secretService.get(saltSecurityConfig.getSaltSignPrivateKey());
         return new GatewayConfig(connectionIp, gatewayInstance.getPublicIpWrapper(), gatewayInstance.getPrivateIp(), gatewayInstance.getDiscoveryFQDN(),
                 gatewayPort, conf.getServerCert(), conf.getClientCert(), conf.getClientKey(),
                 saltClientConfig.getSaltPassword(), saltClientConfig.getSaltBootPassword(), saltClientConfig.getSignatureKeyPem(),
@@ -119,8 +120,8 @@ public class TlsSecurityService {
             return new HttpClientConfig(apiAddress);
         } else {
             String serverCert = gateway.getServerCert() == null ? null : new String(decodeBase64(gateway.getServerCert()));
-            String clientCertB64 = vaultService.resolveSingleValue(securityConfig.getClientCert());
-            String clientKeyB64 = vaultService.resolveSingleValue(securityConfig.getClientKey());
+            String clientCertB64 = secretService.get(securityConfig.getClientCert());
+            String clientKeyB64 = secretService.get(securityConfig.getClientKey());
             return new HttpClientConfig(apiAddress, serverCert,
                     new String(decodeBase64(clientCertB64)), new String(decodeBase64(clientKeyB64)));
         }

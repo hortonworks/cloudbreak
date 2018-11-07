@@ -38,6 +38,7 @@ import com.sequenceiq.cloudbreak.api.model.ExposedServiceResponse;
 import com.sequenceiq.cloudbreak.api.model.GatewayType;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayTopologyJson;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptors;
@@ -91,7 +92,7 @@ public class ServiceEndpointCollectorTest {
     private Workspace workspace;
 
     @Mock
-    private VaultService vaultService;
+    private SecretService secretService;
 
     @Before
     public void setup() {
@@ -160,7 +161,7 @@ public class ServiceEndpointCollectorTest {
         topology2.setGateway(cluster.getGateway());
         cluster.getGateway().setTopologies(Sets.newHashSet(topology1, topology2));
         cluster.getGateway().setGatewayType(GatewayType.INDIVIDUAL);
-        when(vaultService.resolveSingleValue(anyString())).thenReturn(cluster.getBlueprint().getBlueprintText());
+        when(secretService.get(anyString())).thenReturn(cluster.getBlueprint().getBlueprintText());
 
         Map<String, Collection<ClusterExposedServiceResponse>> clusterExposedServicesMap =
                 underTest.prepareClusterExposedServices(cluster, "10.0.0.1");

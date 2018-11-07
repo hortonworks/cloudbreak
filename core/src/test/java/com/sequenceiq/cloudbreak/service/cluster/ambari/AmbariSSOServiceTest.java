@@ -26,7 +26,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
-import com.sequenceiq.cloudbreak.service.VaultService;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AmbariSSOServiceTest {
@@ -41,7 +41,7 @@ public class AmbariSSOServiceTest {
     private GatewayConfigService gatewayConfigService;
 
     @Mock
-    private VaultService vaultService;
+    private SecretService secretService;
 
     @Captor
     private ArgumentCaptor<Map<String, Object>> captor;

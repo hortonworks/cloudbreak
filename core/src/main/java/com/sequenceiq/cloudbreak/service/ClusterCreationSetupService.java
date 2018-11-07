@@ -71,6 +71,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariRepositoryVersionService;
 import com.sequenceiq.cloudbreak.service.decorator.ClusterDecorator;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Service
@@ -136,7 +137,7 @@ public class ClusterCreationSetupService {
     private ClusterCreationEnvironmentValidator environmentValidator;
 
     @Inject
-    private VaultService vaultService;
+    private SecretService secretService;
 
     public void validate(ClusterRequest request, Stack stack, User user, Workspace workspace) {
         validate(request, null, stack, user, workspace);
@@ -277,7 +278,7 @@ public class ClusterCreationSetupService {
             AmbariRepoDetailsJson ambariRepoDetailsJson, Optional<Component> stackImageComponent, Cluster cluster) throws IOException {
         Json json;
         if (!stackAmbariRepoConfig.isPresent()) {
-            String blueprintText = vaultService.resolveSingleValue(cluster.getBlueprint().getBlueprintText());
+            String blueprintText = secretService.get(cluster.getBlueprint().getBlueprintText());
             JsonNode bluePrintJson = JsonUtil.readTree(blueprintText);
             String stackVersion = blueprintUtils.getBlueprintStackVersion(bluePrintJson);
             String stackName = blueprintUtils.getBlueprintStackName(bluePrintJson);
@@ -410,7 +411,7 @@ public class ClusterCreationSetupService {
     private JsonNode getBlueprintJsonNode(Blueprint blueprint, ClusterRequest request, Workspace workspace) throws IOException {
         JsonNode root;
         if (blueprint != null) {
-            String blueprintText = vaultService.resolveSingleValue(blueprint.getBlueprintText());
+            String blueprintText = secretService.get(blueprint.getBlueprintText());
             root = JsonUtil.readTree(blueprintText);
         } else {
             // Backward compatibility to V1 cluster API
@@ -418,7 +419,7 @@ public class ClusterCreationSetupService {
                 root = JsonUtil.readTree(blueprintService.get(request.getBlueprintId()).getBlueprintText());
             } else if (request.getBlueprintName() != null) {
                 blueprint = blueprintService.getByNameForWorkspace(request.getBlueprintName(), workspace);
-                String blueprintText = vaultService.resolveSingleValue(blueprint.getBlueprintText());
+                String blueprintText = secretService.get(blueprint.getBlueprintText());
                 root = JsonUtil.readTree(blueprintText);
             } else {
                 root = JsonUtil.readTree(request.getBlueprint().getAmbariBlueprint());

@@ -23,7 +23,7 @@ import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.VaultService;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AmbariViewProviderTest {
@@ -35,14 +35,14 @@ public class AmbariViewProviderTest {
     private ClusterService clusterService;
 
     @Mock
-    private VaultService vaultService;
+    private SecretService secretService;
 
     @InjectMocks
     private final AmbariViewProvider underTest = new AmbariViewProvider();
 
     @Before
     public void setUp() {
-        when(vaultService.resolveSingleValue(anyString())).then(returnsFirstArg());
+        when(secretService.get(anyString())).then(returnsFirstArg());
     }
 
     @Test

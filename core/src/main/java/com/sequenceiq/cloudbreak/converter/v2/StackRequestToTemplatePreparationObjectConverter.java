@@ -33,7 +33,7 @@ import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.VaultService;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
@@ -111,7 +111,7 @@ public class StackRequestToTemplatePreparationObjectConverter extends AbstractCo
     private WorkspaceService workspaceService;
 
     @Inject
-    private VaultService vaultService;
+    private SecretService secretService;
 
     @Override
     public TemplatePreparationObject convert(StackV2Request source) {
@@ -136,12 +136,12 @@ public class StackRequestToTemplatePreparationObjectConverter extends AbstractCo
             String bindDn = null;
             String bindPassword = null;
             if (ldapConfig != null) {
-                bindDn = vaultService.resolveSingleValue(ldapConfig.getBindDn());
-                bindPassword = vaultService.resolveSingleValue(ldapConfig.getBindPassword());
+                bindDn = secretService.get(ldapConfig.getBindDn());
+                bindPassword = secretService.get(ldapConfig.getBindPassword());
             }
             String gatewaySignKey = null;
             if (gateway != null) {
-                gatewaySignKey = vaultService.resolveSingleValue(gateway.getSignKey());
+                gatewaySignKey = secretService.get(gateway.getSignKey());
             }
             Builder builder = Builder.builder()
                     .withFlexSubscription(flexSubscription.orElse(null))

@@ -40,7 +40,7 @@ import javax.persistence.UniqueConstraint;
 import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.Status;
-import com.sequenceiq.cloudbreak.aspect.vault.VaultValue;
+import com.sequenceiq.cloudbreak.aspect.vault.SecretValue;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Container;
@@ -104,17 +104,17 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
     private String ambariIp;
 
     @Column(nullable = false)
-    @VaultValue
+    @SecretValue
     private String userName;
 
     @Column(nullable = false)
-    @VaultValue
+    @SecretValue
     private String password;
 
-    @VaultValue
+    @SecretValue
     private String cloudbreakAmbariUser;
 
-    @VaultValue
+    @SecretValue
     private String cloudbreakAmbariPassword;
 
     @Column(nullable = false)
@@ -126,7 +126,7 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
     @Column(nullable = false)
     private Boolean topologyValidation = Boolean.TRUE;
 
-    @VaultValue
+    @SecretValue
     @Column(length = 1000000, columnDefinition = "TEXT", nullable = false)
     private String extendedBlueprintText;
 
@@ -155,7 +155,7 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
     @ManyToOne
     private LdapConfig ldapConfig;
 
-    @VaultValue
+    @SecretValue
     @Column(columnDefinition = "TEXT")
     private String attributes;
 
@@ -165,7 +165,7 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
 
     private String uptime;
 
-    @VaultValue
+    @SecretValue
     private String ambariSecurityMasterKey;
 
     @ManyToOne

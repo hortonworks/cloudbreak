@@ -42,8 +42,8 @@ import com.sequenceiq.cloudbreak.repository.BlueprintViewRepository;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.VaultService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigQueryObject;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigQueryObject.Builder;
@@ -86,7 +86,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     private RestRequestThreadLocalService restRequestThreadLocalService;
 
     @Inject
-    private VaultService vaultService;
+    private SecretService secretService;
 
     public Blueprint get(Long id) {
         return blueprintRepository.findById(id).orElseThrow(notFound("Blueprint", id));
@@ -108,7 +108,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
                     }
                 }
             }
-            String blueprintText = vaultService.resolveSingleValue(blueprint.getBlueprintText());
+            String blueprintText = secretService.get(blueprint.getBlueprintText());
             String extendedBlueprint = blueprintProcessorFactory.get(blueprintText)
                     .extendBlueprintGlobalConfiguration(SiteConfigurations.fromMap(configs), false).asText();
             LOGGER.info("Extended blueprint result: {}", extendedBlueprint);
@@ -229,14 +229,14 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
 
     public Set<String> queryCustomParameters(String name, Workspace workspace) {
         Blueprint blueprint = getByNameForWorkspace(name, workspace);
-        String blueprintText = vaultService.resolveSingleValue(blueprint.getBlueprintText());
+        String blueprintText = secretService.get(blueprint.getBlueprintText());
         return centralBlueprintParameterQueryService.queryCustomParameters(blueprintText);
     }
 
     public Set<ConfigQueryEntry> queryFileSystemParameters(String blueprintName, String clusterName,
             String storageName, String fileSystemType, String accountName, boolean attachedCluster, Workspace workspace) {
         Blueprint blueprint = getByNameForWorkspace(blueprintName, workspace);
-        String blueprintText = vaultService.resolveSingleValue(blueprint.getBlueprintText());
+        String blueprintText = secretService.get(blueprint.getBlueprintText());
         FileSystemConfigQueryObject fileSystemConfigQueryObject = Builder.builder()
                 .withClusterName(clusterName)
                 .withStorageName(storageName)

@@ -22,7 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.model.GatewayType;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.SSOType;
-import com.sequenceiq.cloudbreak.aspect.vault.VaultValue;
+import com.sequenceiq.cloudbreak.aspect.vault.SecretValue;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
@@ -56,7 +56,7 @@ public class Gateway implements ProvisionEntity {
     @Column(columnDefinition = "TEXT")
     private Json exposedServices;
 
-    @VaultValue
+    @SecretValue
     private String knoxMasterSecret;
 
     @Column(nullable = false)
@@ -65,7 +65,7 @@ public class Gateway implements ProvisionEntity {
 
     private String ssoProvider;
 
-    @VaultValue
+    @SecretValue
     private String signKey;
 
     private String signPub;
