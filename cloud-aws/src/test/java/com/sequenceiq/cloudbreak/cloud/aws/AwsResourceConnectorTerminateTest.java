@@ -19,6 +19,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
+import com.sequenceiq.cloudbreak.cloud.aws.context.AwsContextBuilder;
 import com.sequenceiq.cloudbreak.cloud.aws.encryption.EncryptedImageCopyService;
 import com.sequenceiq.cloudbreak.cloud.aws.encryption.EncryptedSnapshotService;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.AwsBackoffSyncPollingScheduler;
@@ -33,6 +34,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
+import com.sequenceiq.cloudbreak.cloud.template.compute.ComputeResourceService;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.service.Retry;
 
@@ -81,6 +83,12 @@ public class AwsResourceConnectorTerminateTest {
 
     @Mock
     private AwsBackoffSyncPollingScheduler scheduler;
+
+    @Mock
+    private AwsContextBuilder contextBuilder;
+
+    @Mock
+    private ComputeResourceService computeResourceService;
 
     @Test
     public void testTerminateShouldNotCleanupEncryptedResourcesWhenNoResourcesExist() {

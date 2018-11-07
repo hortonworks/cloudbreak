@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.SSOType;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.blueprint.kerberos.KerberosDetailService;
+import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
@@ -71,6 +72,7 @@ import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 import com.sequenceiq.cloudbreak.util.StackUtil;
@@ -137,6 +139,9 @@ public class ClusterHostServiceRunner {
 
     @Inject
     private AmbariRepositoryVersionService ambariRepositoryVersionService;
+
+    @Inject
+    private ServiceProviderConnectorAdapter connector;
 
     public void runAmbariServices(Stack stack, Cluster cluster) {
         try {
@@ -209,6 +214,7 @@ public class ClusterHostServiceRunner {
             putIfNotNull(kerberosPillarConf, cluster.getPassword(), "clusterPassword");
             servicePillar.put("kerberos", new SaltPillarProperties("/kerberos/init.sls", singletonMap("kerberos", kerberosPillarConf)));
         }
+        servicePillar.put("disk", new SaltPillarProperties("/disk/disk.sls", singletonMap("disk", diskMountParameters(stack))));
         servicePillar.put("discovery", new SaltPillarProperties("/discovery/init.sls", singletonMap("platform", stack.cloudPlatform())));
         servicePillar.put("metadata", new SaltPillarProperties("/metadata/init.sls",
                 singletonMap("cluster", singletonMap("name", stack.getCluster().getName()))));
@@ -253,6 +259,16 @@ public class ClusterHostServiceRunner {
         decoratePillarWithJdbcConnectors(cluster, servicePillar);
 
         return new SaltConfig(servicePillar, createGrainProperties(gatewayConfigs));
+    }
+
+    private Map<String, String> diskMountParameters(Stack stack) {
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("cloudPlatform", stack.cloudPlatform());
+
+        PlatformParameters platformParameters = connector.getPlatformParameters(stack);
+        parameters.put("platformDiskStartLabel", platformParameters.scriptParams().getStartLabel().toString());
+        parameters.put("platformDiskPrefix", platformParameters.scriptParams().getDiskPrefix());
+        return parameters;
     }
 
     private void saveSssdAdPillar(Cluster cluster, Map<String, SaltPillarProperties> servicePillar) {

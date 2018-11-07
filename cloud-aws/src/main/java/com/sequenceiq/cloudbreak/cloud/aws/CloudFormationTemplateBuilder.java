@@ -43,16 +43,13 @@ public class CloudFormationTemplateBuilder {
         boolean multigw = context.stack.getGroups().stream().filter(g -> g.getType() == InstanceGroupType.GATEWAY).count() > 1;
         for (Group group : context.stack.getGroups()) {
             AwsInstanceView awsInstanceView = new AwsInstanceView(group.getReferenceInstanceConfiguration().getTemplate());
-            String snapshotId = context.snapshotId.get(group.getName());
             String encryptedAMI = context.encryptedAMIByGroupName.get(group.getName());
             AwsGroupView groupView = new AwsGroupView(
                     group.getInstancesSize(),
                     group.getType().name(),
                     awsInstanceView.getFlavor(),
                     group.getName(),
-                    awsInstanceView.getVolumes().size(),
                     awsInstanceView.isEncryptedVolumes(),
-                    awsInstanceView.getVolumeSize(),
                     group.getRootVolumeSize(),
                     awsInstanceView.getVolumeType(),
                     awsInstanceView.getSpotPrice(),
@@ -61,7 +58,6 @@ public class CloudFormationTemplateBuilder {
                     getSubnetIds(context.existingSubnetIds, i, group, multigw),
                     awsInstanceView.isKmsEnabled(),
                     awsInstanceView.getKmsKey(),
-                    snapshotId,
                     encryptedAMI);
             awsGroupViews.add(groupView);
             if (group.getType() == InstanceGroupType.GATEWAY) {
@@ -135,8 +131,6 @@ public class CloudFormationTemplateBuilder {
 
         private String defaultSubnet;
 
-        private Map<String, String> snapshotId = new HashMap<>();
-
         private Map<String, String> encryptedAMIByGroupName = new HashMap<>();
 
         public ModelContext withAuthenticatedContext(AuthenticatedContext ac) {
@@ -191,11 +185,6 @@ public class CloudFormationTemplateBuilder {
 
         public ModelContext withDefaultSubnet(String subnet) {
             defaultSubnet = subnet;
-            return this;
-        }
-
-        public ModelContext withSnapshotId(Map<String, String> snapshotId) {
-            this.snapshotId = snapshotId;
             return this;
         }
 

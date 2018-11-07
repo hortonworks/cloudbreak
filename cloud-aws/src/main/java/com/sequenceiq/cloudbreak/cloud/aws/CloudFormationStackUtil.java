@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.cloud.aws;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -23,9 +25,12 @@ import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.model.Group;
 
 @Service
 public class CloudFormationStackUtil {
+
+    private static final String INSTANCE_LIFECYCLE_IN_SERVICE = "InService";
 
     @Value("${cb.max.aws.resource.name.length:}")
     private int maxResourceNameLength;
@@ -61,6 +66,18 @@ public class CloudFormationStackUtil {
                 .splitToList(ac.getCloudContext().getName()).get(0), ac.getCloudContext().getId());
     }
 
+    public Map<Group, List<String>> getInstanceIdsByGroups(AmazonAutoScalingRetryClient amazonASClient, Map<String, Group> groupNameMapping) {
+        DescribeAutoScalingGroupsResult result = amazonASClient
+                .describeAutoScalingGroups(new DescribeAutoScalingGroupsRequest().withAutoScalingGroupNames(groupNameMapping.keySet()));
+        return result.getAutoScalingGroups().stream()
+                .collect(Collectors.toMap(
+                        ag -> groupNameMapping.get(ag.getAutoScalingGroupName()),
+                        ag -> ag.getInstances().stream()
+                                .filter(instance -> INSTANCE_LIFECYCLE_IN_SERVICE.equals(instance.getLifecycleState()))
+                                .map(Instance::getInstanceId)
+                                .collect(Collectors.toList())));
+    }
+
     public List<String> getInstanceIds(AmazonAutoScalingRetryClient amazonASClient, String asGroupName) {
         DescribeAutoScalingGroupsResult describeAutoScalingGroupsResult = amazonASClient
                 .describeAutoScalingGroups(new DescribeAutoScalingGroupsRequest().withAutoScalingGroupNames(asGroupName));
@@ -68,7 +85,7 @@ public class CloudFormationStackUtil {
         if (!describeAutoScalingGroupsResult.getAutoScalingGroups().isEmpty()
                 && describeAutoScalingGroupsResult.getAutoScalingGroups().get(0).getInstances() != null) {
             for (Instance instance : describeAutoScalingGroupsResult.getAutoScalingGroups().get(0).getInstances()) {
-                if ("InService".equals(instance.getLifecycleState())) {
+                if (INSTANCE_LIFECYCLE_IN_SERVICE.equals(instance.getLifecycleState())) {
                     instanceIds.add(instance.getInstanceId());
                 }
             }

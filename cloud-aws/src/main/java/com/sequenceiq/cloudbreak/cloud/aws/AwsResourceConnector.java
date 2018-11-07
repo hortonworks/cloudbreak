@@ -20,9 +20,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
@@ -81,14 +83,16 @@ import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationTemplateBuilder.ModelContext;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
-import com.sequenceiq.cloudbreak.cloud.aws.scheduler.AwsBackoffSyncPollingScheduler;
+import com.sequenceiq.cloudbreak.cloud.aws.context.AwsContextBuilder;
 import com.sequenceiq.cloudbreak.cloud.aws.encryption.EncryptedImageCopyService;
 import com.sequenceiq.cloudbreak.cloud.aws.encryption.EncryptedSnapshotService;
+import com.sequenceiq.cloudbreak.cloud.aws.scheduler.AwsBackoffSyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.aws.task.AwsPollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceProfileView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -97,13 +101,17 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
+import com.sequenceiq.cloudbreak.cloud.template.compute.ComputeResourceService;
+import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper;
 import com.sequenceiq.cloudbreak.common.type.CommonResourceType;
+import com.sequenceiq.cloudbreak.common.type.CommonStatus;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.cloudbreak.service.Retry.ActionWentFailException;
@@ -181,6 +189,12 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
     @Inject
     private CloudResourceHelper cloudResourceHelper;
 
+    @Inject
+    private AwsContextBuilder contextBuilder;
+
+    @Inject
+    private ComputeResourceService computeResourceService;
+
     @Override
     public List<CloudResourceStatus> launch(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier resourceNotifier,
             AdjustmentType adjustmentType, Long threshold) throws Exception {
@@ -208,7 +222,6 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
                     .withAuthenticatedContext(ac)
                     .withStack(stack)
                     .withExistingVpc(existingVPC)
-                    .withSnapshotId(getEbsSnapshotIdIfNeeded(ac, stack, resourceNotifier))
                     .withExistingIGW(awsNetworkView.isExistingIGW())
                     .withExistingSubnetCidr(existingSubnet ? getExistingSubnetCidr(ac, stack) : null)
                     .withExistingSubnetIds(existingSubnet ? awsNetworkView.getSubnetList() : null)
@@ -223,6 +236,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
             cfRetryClient.createStack(createCreateStackRequest(ac, stack, cFStackName, subnet, cfTemplate));
         }
         LOGGER.info("CloudFormation stack creation request sent with stack name: '{}' for stack: '{}'", cFStackName, ac.getCloudContext().getId());
+
         AmazonCloudFormationClient cfClient = awsClient.createCloudFormationClient(credentialView, regionName);
         AmazonAutoScalingClient asClient = awsClient.createAutoScalingClient(credentialView, regionName);
         PollTask<Boolean> task = awsPollTaskFactory.newAwsCreateStackStatusCheckerTask(ac, cfClient, asClient, CREATE_COMPLETE, CREATE_FAILED, ERROR_STATUSES,
@@ -235,8 +249,91 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
 
         AmazonAutoScalingRetryClient amazonASClient = awsClient.createAutoScalingRetryClient(credentialView, regionName);
         saveGeneratedSubnet(ac, stack, cFStackName, cfRetryClient, resourceNotifier);
-        List<CloudResource> cloudResources = getCloudResources(ac, stack, cFStackName, cfRetryClient, amazonEC2Client, amazonASClient, mapPublicIpOnLaunch);
-        return check(ac, cloudResources);
+
+        suspendAutoscalingGoupsWhenNewInstancesAreReady(ac, stack);
+
+        List<CloudResource> instances = getInstanceCloudResources(ac, cfRetryClient, amazonASClient, stack.getGroups());
+
+        if (mapPublicIpOnLaunch) {
+            associatePublicIpsToGatewayInstances(stack, cFStackName, cfRetryClient, amazonEC2Client, instances);
+        }
+
+        buildComputeResourcesForLaunch(ac, stack, adjustmentType, threshold, instances);
+        return check(ac, instances);
+    }
+
+    private void associatePublicIpsToGatewayInstances(CloudStack stack, String cFStackName, AmazonCloudFormationRetryClient cfRetryClient,
+            AmazonEC2Client amazonEC2Client, List<CloudResource> instances) {
+        Map<String, String> eipAllocationIds = getElasticIpAllocationIds(cFStackName, cfRetryClient);
+        List<Group> gateways = getGatewayGroups(stack.getGroups());
+        Map<String, List<String>> gatewayGroupInstanceMapping = instances.stream()
+                .filter(instance -> gateways.stream().anyMatch(gw -> gw.getName().equals(instance.getGroup())))
+                .collect(Collectors.toMap(
+                        CloudResource::getGroup,
+                        instance -> List.of(instance.getInstanceId()),
+                        (listOne, listTwo) -> Stream.concat(listOne.stream(), listTwo.stream()).collect(Collectors.toList())));
+        for (Group gateway : gateways) {
+            List<String> eips = getEipsForGatewayGroup(eipAllocationIds, gateway);
+            List<String> instanceIds = gatewayGroupInstanceMapping.get(gateway.getName());
+            associateElasticIpsToInstances(amazonEC2Client, eips, instanceIds);
+        }
+    }
+
+    private void suspendAutoscalingGoupsWhenNewInstancesAreReady(AuthenticatedContext ac, CloudStack stack) {
+        AmazonCloudFormationRetryClient cloudFormationClient = awsClient.createCloudFormationRetryClient(new AwsCredentialView(ac.getCloudCredential()),
+                ac.getCloudContext().getLocation().getRegion().value());
+        scheduleStatusChecks(stack, ac, cloudFormationClient);
+        suspendAutoScaling(ac, stack);
+    }
+
+    private List<CloudResourceStatus> buildComputeResourcesForLaunch(AuthenticatedContext ac, CloudStack stack, AdjustmentType adjustmentType, Long threshold,
+            List<CloudResource> instances) {
+        CloudContext cloudContext = ac.getCloudContext();
+        ResourceBuilderContext context = contextBuilder.contextInit(cloudContext, ac, stack.getNetwork(), null, true);
+
+        addInstancesToContext(instances, context, stack.getGroups());
+        return computeResourceService.buildResourcesForLaunch(context, ac, stack, adjustmentType, threshold);
+    }
+
+    private void addInstancesToContext(List<CloudResource> instances, ResourceBuilderContext context, List<Group> groups) {
+        groups.forEach(group -> {
+            List<Long> ids = group.getInstances().stream()
+                    .filter(instance -> Objects.isNull(instance.getInstanceId()))
+                    .map(CloudInstance::getTemplate).map(InstanceTemplate::getPrivateId).collect(Collectors.toList());
+            List<CloudResource> groupInstances = instances.stream().filter(inst -> inst.getGroup().equals(group.getName())).collect(Collectors.toList());
+            for (int i = 0; i < ids.size(); i++) {
+                context.addComputeResources(ids.get(i), List.of(groupInstances.get(i)));
+            }
+        });
+    }
+
+    private List<CloudResourceStatus> buildComputeResourcesForUpscale(AuthenticatedContext ac, CloudStack stack, List<Group> scaledGroups,
+            List<CloudResource> instances) {
+        CloudContext cloudContext = ac.getCloudContext();
+        ResourceBuilderContext context = contextBuilder.contextInit(cloudContext, ac, stack.getNetwork(), null, true);
+
+        List<Group> groupsWithNewInstances = scaledGroups.stream().map(group -> {
+            List<CloudInstance> newInstances = group.getInstances().stream()
+                    .filter(instance -> Objects.isNull(instance.getInstanceId())).collect(Collectors.toList());
+
+            return new Group(group.getName(), group.getType(), newInstances, group.getSecurity(), null, group.getParameters(),
+                    group.getInstanceAuthentication(), group.getLoginUserName(), group.getPublicKey(), group.getRootVolumeSize());
+        }).collect(Collectors.toList());
+
+        List<CloudResource> newInstances = instances.stream().filter(instance -> {
+            Group group = scaledGroups.stream().filter(scaledGroup -> scaledGroup.getName().equals(instance.getGroup())).findFirst().get();
+            return group.getInstances().stream().noneMatch(inst -> instance.getInstanceId().equals(inst.getInstanceId()));
+        }).collect(Collectors.toList());
+
+        addInstancesToContext(newInstances, context, groupsWithNewInstances);
+        return computeResourceService.buildResourcesForUpscale(context, ac, stack, groupsWithNewInstances);
+    }
+
+    private List<CloudResourceStatus> deleteComputeResources(AuthenticatedContext ac, CloudStack stack, List<CloudResource> cloudResources) {
+        CloudContext cloudContext = ac.getCloudContext();
+        ResourceBuilderContext context = contextBuilder.contextInit(cloudContext, ac, stack.getNetwork(), null, true);
+
+        return computeResourceService.deleteResources(context, ac, cloudResources, false);
     }
 
     private void createKeyPair(AuthenticatedContext ac, CloudStack stack) {
@@ -281,23 +378,29 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
                 .withParameters(getStackParameters(ac, stack, cFStackName, subnet));
     }
 
-    private List<CloudResource> getCloudResources(AuthenticatedContext ac, CloudStack stack, String cFStackName, AmazonCloudFormationRetryClient client,
-            AmazonEC2 amazonEC2Client, AmazonAutoScalingRetryClient amazonASClient, boolean mapPublicIpOnLaunch) {
-        List<CloudResource> cloudResources = new ArrayList<>();
-        AmazonCloudFormationRetryClient cloudFormationClient = awsClient.createCloudFormationRetryClient(new AwsCredentialView(ac.getCloudCredential()),
-                ac.getCloudContext().getLocation().getRegion().value());
-        scheduleStatusChecks(stack, ac, cloudFormationClient);
-        suspendAutoScaling(ac, stack);
-        if (mapPublicIpOnLaunch) {
-            Map<String, String> eipAllocationIds = getElasticIpAllocationIds(cFStackName, client);
-            List<Group> gateways = getGatewayGroups(stack.getGroups());
-            for (Group gateway : gateways) {
-                List<String> eips = getEipsForGatewayGroup(eipAllocationIds, gateway);
-                List<String> instanceIds = getInstancesForGroup(ac, amazonASClient, client, gateway);
-                associateElasticIpsToInstances(amazonEC2Client, eips, instanceIds);
-            }
-        }
-        return cloudResources;
+    private List<CloudResource> getInstanceCloudResources(AuthenticatedContext ac, AmazonCloudFormationRetryClient client,
+            AmazonAutoScalingRetryClient amazonASClient, List<Group> groups) {
+        Map<String, Group> groupNameMapping = groups.stream()
+                .collect(Collectors.toMap(
+                        group -> cfStackUtil.getAutoscalingGroupName(ac, client, group.getName()),
+                        group -> group
+                ));
+
+        Map<Group, List<String>> idsByGroups = cfStackUtil.getInstanceIdsByGroups(amazonASClient, groupNameMapping);
+        return idsByGroups.entrySet().stream()
+                .flatMap(entry -> {
+                    Group group = entry.getKey();
+                    return entry.getValue().stream()
+                            .map(id -> CloudResource.builder()
+                                    .type(ResourceType.AWS_INSTANCE)
+                                    .instanceId(id)
+                                    .name(id)
+                                    .group(group.getName())
+                                    .status(CommonStatus.CREATED)
+                                    .persistent(false)
+                                    .build());
+                })
+                .collect(Collectors.toList());
     }
 
     private void saveGeneratedSubnet(AuthenticatedContext ac, CloudStack stack, String cFStackName, AmazonCloudFormationRetryClient client,
@@ -489,6 +592,8 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
         AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());
         String regionName = ac.getCloudContext().getLocation().getRegion().value();
         if (resources != null && !resources.isEmpty()) {
+            deleteComputeResources(ac, stack, resources);
+
             AmazonCloudFormationRetryClient cfRetryClient = awsClient.createCloudFormationRetryClient(credentialView, regionName);
             CloudResource stackResource = getCloudFormationStackResource(resources);
             AmazonEC2Client amazonEC2Client = awsClient.createAccess(credentialView, regionName);
@@ -669,20 +774,33 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
         scheduleStatusChecks(stack, ac, cloudFormationClient);
         suspendAutoScaling(ac, stack);
 
+        List<CloudResource> instances = getInstanceCloudResources(ac, cloudFormationClient, amazonASClient, scaledGroups);
+
         boolean mapPublicIpOnLaunch = isMapPublicOnLaunch(new AwsNetworkView(stack.getNetwork()), amazonEC2Client);
         List<Group> gateways = getGatewayGroups(scaledGroups);
+        Map<String, List<String>> gatewayGroupInstanceMapping = instances.stream()
+                .filter(instance -> gateways.stream().anyMatch(gw -> gw.getName().equals(instance.getGroup())))
+                .filter(instance -> {
+                    Group gateway = gateways.stream().filter(gw -> gw.getName().equals(instance.getGroup())).findFirst().get();
+                    return gateway.getInstances().stream().noneMatch(inst -> instance.getInstanceId().equals(inst.getInstanceId()));
+                })
+                .collect(Collectors.toMap(
+                        CloudResource::getGroup,
+                        instance -> List.of(instance.getInstanceId()),
+                        (listOne, listTwo) -> Stream.concat(listOne.stream(), listTwo.stream()).collect(Collectors.toList())));
         if (mapPublicIpOnLaunch && !gateways.isEmpty()) {
             String cFStackName = getCloudFormationStackResource(resources).getName();
             Map<String, String> eipAllocationIds = getElasticIpAllocationIds(cFStackName, cloudFormationClient);
             for (Group gateway : gateways) {
                 List<String> eips = getEipsForGatewayGroup(eipAllocationIds, gateway);
                 List<String> freeEips = getFreeIps(eips, amazonEC2Client);
-                List<String> instanceIds = getInstancesForGroup(ac, amazonASClient, cloudFormationClient, gateway);
-                List<String> newInstances = instanceIds.stream().filter(
-                        iid -> gateway.getInstances().stream().noneMatch(inst -> iid.equals(inst.getInstanceId()))).collect(Collectors.toList());
+                List<String> newInstances = gatewayGroupInstanceMapping.get(gateway.getName());
                 associateElasticIpsToInstances(amazonEC2Client, freeEips, newInstances);
             }
         }
+
+        buildComputeResourcesForUpscale(ac, stack, scaledGroups, instances);
+
         return singletonList(new CloudResourceStatus(getCloudFormationStackResource(resources), ResourceStatus.UPDATED));
     }
 
@@ -700,6 +818,12 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
             for (CloudInstance vm : vms) {
                 instanceIds.add(vm.getInstanceId());
             }
+
+            List<CloudResource> resourcesToDownscale = resources.stream()
+                    .filter(resource -> instanceIds.contains(resource.getInstanceId()))
+                    .collect(Collectors.toList());
+            deleteComputeResources(auth, stack, resourcesToDownscale);
+
             String asGroupName = cfStackUtil.getAutoscalingGroupName(auth, vms.get(0).getTemplate().getGroupName(),
                     auth.getCloudContext().getLocation().getRegion().value());
             DetachInstancesRequest detachInstancesRequest = new DetachInstancesRequest().withAutoScalingGroupName(asGroupName).withInstanceIds(instanceIds)
