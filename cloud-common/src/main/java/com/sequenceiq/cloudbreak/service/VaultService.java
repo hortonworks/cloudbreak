@@ -1,7 +1,10 @@
 package com.sequenceiq.cloudbreak.service;
 
 import java.security.InvalidKeyException;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -16,15 +19,17 @@ import org.springframework.vault.support.VaultResponse;
 @Service
 public class VaultService {
 
-    public static final String SECRET_PATH = "secret";
-
     private static final Logger LOGGER = LoggerFactory.getLogger(VaultService.class);
 
     @Inject
     private VaultTemplate template;
 
-    @Value("${cb.vault.kv.path:}")
+    @Value("#{'${cb.vault.kv.path}/cb/'}")
     private String kvPath;
+
+    public String getPath(Object... parts) {
+        return String.format("%s%s/%s", kvPath, Arrays.stream(parts).map(Object::toString).collect(Collectors.joining("/")), UUID.randomUUID());
+    }
 
     /**
      * Stores a secret in Vault's key-value store.
@@ -34,15 +39,14 @@ public class VaultService {
      * @throws Exception is thrown in case the key-value path is already contains a secret
      */
     public void addFieldToSecret(String path, String value) throws Exception {
-        String fullPath = kvPath + '/' + path;
         long start = System.currentTimeMillis();
-        VaultResponse response = template.read(fullPath);
+        VaultResponse response = template.read(path);
         LOGGER.debug("Vault read took {} ms", System.currentTimeMillis() - start);
         if (response != null && response.getData() != null) {
-            throw new InvalidKeyException(String.format("Path: %s already exists!", fullPath));
+            throw new InvalidKeyException(String.format("Path: %s already exists!", path));
         }
         start = System.currentTimeMillis();
-        template.write(fullPath, Collections.singletonMap("secret", value));
+        template.write(path, Collections.singletonMap("secret", value));
         LOGGER.debug("Vault write took {} ms", System.currentTimeMillis() - start);
     }
 
