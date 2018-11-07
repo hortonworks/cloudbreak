@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.PollingResult;
-import com.sequenceiq.cloudbreak.service.VaultService;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.api.ClusterSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationService;
@@ -62,7 +62,7 @@ public class AmbariClusterSecurityService implements ClusterSecurityService {
     private AmbariSecurityConfigProvider ambariSecurityConfigProvider;
 
     @Inject
-    private VaultService vaultService;
+    private SecretService secretService;
 
     @Override
     public void prepareSecurity(Stack stack) {
@@ -124,8 +124,8 @@ public class AmbariClusterSecurityService implements ClusterSecurityService {
     @Override
     public void replaceUserNamePassword(Stack stack, String newUserName, String newPassword) throws CloudbreakException {
         Cluster cluster = stack.getCluster();
-        String userName = vaultService.resolveSingleValue(cluster.getUserName());
-        String password = vaultService.resolveSingleValue(cluster.getPassword());
+        String userName = secretService.get(cluster.getUserName());
+        String password = secretService.get(cluster.getPassword());
         AmbariClient ambariClient = clientFactory.getAmbariClient(stack, userName, password);
         ambariClient = ambariUserHandler.createAmbariUser(newUserName, newPassword, stack, ambariClient);
         ambariClient.deleteUser(userName);
@@ -134,8 +134,8 @@ public class AmbariClusterSecurityService implements ClusterSecurityService {
     @Override
     public void updateUserNamePassword(Stack stack, String newPassword) throws CloudbreakException {
         Cluster cluster = clusterService.getById(stack.getCluster().getId());
-        String userName = vaultService.resolveSingleValue(cluster.getUserName());
-        String password = vaultService.resolveSingleValue(cluster.getPassword());
+        String userName = secretService.get(cluster.getUserName());
+        String password = secretService.get(cluster.getPassword());
         AmbariClient client = clientFactory.getAmbariClient(stack, userName, password);
         ambariUserHandler.changeAmbariPassword(userName, password, newPassword, stack, client);
     }
@@ -148,8 +148,8 @@ public class AmbariClusterSecurityService implements ClusterSecurityService {
         String cloudbreakUserName = ambariSecurityConfigProvider.getAmbariUserName(cluster);
         String cloudbreakPassword = ambariSecurityConfigProvider.getAmbariPassword(cluster);
         ambariUserHandler.createAmbariUser(cloudbreakUserName, cloudbreakPassword, stack, client);
-        String userName = vaultService.resolveSingleValue(cluster.getUserName());
-        String password = vaultService.resolveSingleValue(cluster.getPassword());
+        String userName = secretService.get(cluster.getUserName());
+        String password = secretService.get(cluster.getPassword());
         if (ADMIN.equals(userName)) {
             if (!ADMIN.equals(password)) {
                 ambariUserHandler.changeAmbariPassword(ADMIN, ADMIN, password, stack, client);

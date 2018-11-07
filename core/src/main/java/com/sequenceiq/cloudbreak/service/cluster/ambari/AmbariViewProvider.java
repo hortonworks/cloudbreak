@@ -16,7 +16,7 @@ import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.VaultService;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 
 @Service
 public class AmbariViewProvider {
@@ -26,14 +26,14 @@ public class AmbariViewProvider {
     private ClusterService clusterService;
 
     @Inject
-    private VaultService vaultService;
+    private SecretService secretService;
 
     public Cluster provideViewInformation(AmbariClient ambariClient, Cluster cluster) {
         try {
             LOGGER.info("Provide view definitions.");
             List<String> viewDefinitions = (List<String>) ambariClient.getViewDefinitions();
 
-            Map<String, Object> obj = new Json(vaultService.resolveSingleValue(cluster.getAttributes())).getMap();
+            Map<String, Object> obj = new Json(secretService.get(cluster.getAttributes())).getMap();
             if (obj == null || obj.isEmpty()) {
                 obj = new HashMap<>();
             }

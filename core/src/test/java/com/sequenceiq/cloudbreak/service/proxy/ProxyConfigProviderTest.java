@@ -20,7 +20,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
-import com.sequenceiq.cloudbreak.service.VaultService;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ProxyConfigProviderTest {
@@ -29,7 +29,7 @@ public class ProxyConfigProviderTest {
     private ProxyConfigProvider proxyConfigProvider;
 
     @Mock
-    private VaultService vaultService;
+    private SecretService secretService;
 
     private Cluster cluster;
 
@@ -82,8 +82,8 @@ public class ProxyConfigProviderTest {
         ProxyConfig proxyConfig = new ProxyConfig();
         proxyConfig.setUserName("user");
         proxyConfig.setPassword("pass");
-        when(vaultService.resolveSingleValue("user")).thenReturn("user");
-        when(vaultService.resolveSingleValue("pass")).thenReturn("pass");
+        when(secretService.get("user")).thenReturn("user");
+        when(secretService.get("pass")).thenReturn("pass");
         Map<String, Object> properties = testProxyCore(proxyConfig);
         assertTrue(StringUtils.isNotBlank((CharSequence) properties.get("user")));
         assertTrue(StringUtils.isNotBlank((CharSequence) properties.get("password")));

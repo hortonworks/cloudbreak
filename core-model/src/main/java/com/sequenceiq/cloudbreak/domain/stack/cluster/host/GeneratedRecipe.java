@@ -8,7 +8,7 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 
-import com.sequenceiq.cloudbreak.aspect.vault.VaultValue;
+import com.sequenceiq.cloudbreak.aspect.vault.SecretValue;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 
 @Entity
@@ -20,7 +20,7 @@ public class GeneratedRecipe implements ProvisionEntity {
     private Long id;
 
     @Column(columnDefinition = "TEXT", nullable = false)
-    @VaultValue
+    @SecretValue
     private String extendedRecipeText;
 
     @ManyToOne

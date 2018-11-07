@@ -26,7 +26,7 @@ import com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer;
 import com.sequenceiq.cloudbreak.orchestrator.model.ContainerConfig;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
-import com.sequenceiq.cloudbreak.service.VaultService;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 
 @Service
 public class ContainerConfigService {
@@ -40,7 +40,7 @@ public class ContainerConfigService {
     private ContainerOrchestratorResolver containerOrchestratorResolver;
 
     @Inject
-    private VaultService vaultService;
+    private SecretService secretService;
 
     public ContainerConfig get(Stack stack, DockerContainer dc) {
         try {
@@ -101,7 +101,7 @@ public class ContainerConfigService {
     }
 
     private Optional<String> getCustomQueue(Stack stack) {
-        Json fromVault = new Json(vaultService.resolveSingleValue(stack.getCluster().getAttributes()));
+        Json fromVault = new Json(secretService.get(stack.getCluster().getAttributes()));
         return Optional.ofNullable((String) fromVault.getMap().get(CUSTOM_QUEUE.name()));
     }
 

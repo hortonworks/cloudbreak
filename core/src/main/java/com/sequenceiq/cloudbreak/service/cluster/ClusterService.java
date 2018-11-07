@@ -109,7 +109,6 @@ import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
-import com.sequenceiq.cloudbreak.service.VaultService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariRepositoryVersionService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
@@ -118,6 +117,7 @@ import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.AmbariClientExceptionUtil;
@@ -224,7 +224,7 @@ public class ClusterService {
     private ResourceRepository resourceRepository;
 
     @Inject
-    private VaultService vaultService;
+    private SecretService secretService;
 
     public Cluster create(Stack stack, Cluster cluster, List<ClusterComponent> components, User user) throws TransactionExecutionException {
         LOGGER.info("Cluster requested [BlueprintId: {}]", cluster.getBlueprint().getId());
@@ -469,8 +469,8 @@ public class ClusterService {
     public void updateUserNamePassword(Long stackId, UserNamePasswordJson userNamePasswordJson) {
         Stack stack = stackService.getById(stackId);
         Cluster cluster = stack.getCluster();
-        String oldUserName = vaultService.resolveSingleValue(cluster.getUserName());
-        String oldPassword = vaultService.resolveSingleValue(cluster.getPassword());
+        String oldUserName = secretService.get(cluster.getUserName());
+        String oldPassword = secretService.get(cluster.getPassword());
         String newUserName = userNamePasswordJson.getUserName();
         String newPassword = userNamePasswordJson.getPassword();
         if (!newUserName.equals(oldUserName)) {
@@ -1002,7 +1002,7 @@ public class ClusterService {
 
     private void validateComponentsCategory(Stack stack, String hostGroup) {
         Blueprint blueprint = stack.getCluster().getBlueprint();
-        String blueprintText = vaultService.resolveSingleValue(blueprint.getBlueprintText());
+        String blueprintText = secretService.get(blueprint.getBlueprintText());
         try {
             JsonNode root = JsonUtil.readTree(blueprintText);
             String blueprintName = root.path("Blueprints").path("blueprint_name").asText();

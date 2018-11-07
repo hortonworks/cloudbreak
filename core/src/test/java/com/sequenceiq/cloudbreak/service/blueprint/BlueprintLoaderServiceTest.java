@@ -24,7 +24,7 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.init.blueprint.BlueprintLoaderService;
 import com.sequenceiq.cloudbreak.init.blueprint.DefaultBlueprintCache;
-import com.sequenceiq.cloudbreak.service.VaultService;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BlueprintLoaderServiceTest {
@@ -61,11 +61,11 @@ public class BlueprintLoaderServiceTest {
     private Workspace workspace;
 
     @Mock
-    private VaultService vaultService;
+    private SecretService secretService;
 
     @Before
     public void setup() {
-        when(vaultService.resolveSingleValue(anyString())).thenAnswer(it -> it.getArgument(0));
+        when(secretService.get(anyString())).thenAnswer(it -> it.getArgument(0));
     }
 
     @Test

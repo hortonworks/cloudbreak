@@ -19,7 +19,7 @@ import com.sequenceiq.cloudbreak.FileReaderUtil;
 import com.sequenceiq.cloudbreak.api.model.ExposedService;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.BlueprintPortConfigCollector.PortConfig;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.service.VaultService;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BlueprintPortConfigCollectorTest {
@@ -34,11 +34,11 @@ public class BlueprintPortConfigCollectorTest {
     private BlueprintPortConfigCollector underTest;
 
     @Mock
-    private VaultService vaultService;
+    private SecretService secretService;
 
     @Before
     public void setup() {
-        when(vaultService.resolveSingleValue(anyString())).thenAnswer(it -> it.getArgument(0));
+        when(secretService.get(anyString())).thenAnswer(it -> it.getArgument(0));
         List<PortConfig> blueprintServicePorts = new ArrayList<>();
         blueprintServicePorts.add(new PortConfig("HIVE_SERVER", "hive-site", "hive.server2.thrift.http.port", null));
         blueprintServicePorts.add(new PortConfig("ZEPPELIN", "zeppelin-config", "zeppelin.server.port", null));

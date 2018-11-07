@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.service.VaultService;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 
 @Service
@@ -28,12 +28,12 @@ public class ComponentLocatorService {
     private HostGroupService hostGroupService;
 
     @Inject
-    private VaultService vaultService;
+    private SecretService secretService;
 
     public Map<String, List<String>> getComponentLocation(Cluster cluster, Collection<String> componentNames) {
         Map<String, List<String>> result = new HashMap<>();
         for (HostGroup hg : hostGroupService.getByCluster(cluster.getId())) {
-            String blueprintTex = vaultService.resolveSingleValue(cluster.getBlueprint().getBlueprintText());
+            String blueprintTex = secretService.get(cluster.getBlueprint().getBlueprintText());
             Set<String> hgComponents = blueprintProcessorFactory.get(blueprintTex).getComponentsInHostGroup(hg.getName());
             hgComponents.retainAll(componentNames);
 

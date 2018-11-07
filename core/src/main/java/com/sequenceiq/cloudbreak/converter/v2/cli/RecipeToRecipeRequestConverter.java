@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.Recipe;
-import com.sequenceiq.cloudbreak.service.VaultService;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 
 @Component
 public class RecipeToRecipeRequestConverter
@@ -18,7 +18,7 @@ public class RecipeToRecipeRequestConverter
     private static final Logger LOGGER = LoggerFactory.getLogger(RecipeToRecipeRequestConverter.class);
 
     @Inject
-    private VaultService vaultService;
+    private SecretService secretService;
 
     @Override
     public RecipeRequest convert(Recipe source) {
@@ -26,7 +26,7 @@ public class RecipeToRecipeRequestConverter
         recipeRequest.setName("");
         recipeRequest.setDescription(source.getDescription());
         recipeRequest.setRecipeType(source.getRecipeType());
-        recipeRequest.setContent(vaultService.resolveSingleValue(source.getContent()));
+        recipeRequest.setContent(secretService.get(source.getContent()));
         return recipeRequest;
     }
 
