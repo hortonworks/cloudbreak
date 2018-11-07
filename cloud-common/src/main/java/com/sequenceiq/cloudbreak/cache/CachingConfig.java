@@ -20,6 +20,7 @@ import org.springframework.cache.interceptor.CacheResolver;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.cache.interceptor.SimpleCacheErrorHandler;
 import org.springframework.cache.interceptor.SimpleCacheResolver;
+import org.springframework.cache.interceptor.SimpleKey;
 import org.springframework.cache.interceptor.SimpleKeyGenerator;
 import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.Bean;
@@ -73,6 +74,9 @@ public class CachingConfig implements CachingConfigurer {
         @Override
         public Object generate(Object target, Method method, Object... params) {
             if (params.length == 1) {
+                if (params[0] == null) {
+                    return SimpleKey.EMPTY;
+                }
                 CacheDefinition cacheDefinition = classCacheDefinitionMap.get(params[0].getClass());
                 if (cacheDefinition != null) {
                     return cacheDefinition.generateKey(target, method, params);
