@@ -23,7 +23,7 @@ import javax.persistence.UniqueConstraint;
 
 import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.aspect.vault.VaultValue;
+import com.sequenceiq.cloudbreak.aspect.vault.SecretValue;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.environment.EnvironmentAwareResource;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -52,11 +52,11 @@ public class RDSConfig implements ProvisionEntity, EnvironmentAwareResource {
     @Column(nullable = false)
     private String connectionDriver;
 
-    @VaultValue
+    @SecretValue
     @Column(nullable = false)
     private String connectionUserName;
 
-    @VaultValue
+    @SecretValue
     @Column(nullable = false)
     private String connectionPassword;
 

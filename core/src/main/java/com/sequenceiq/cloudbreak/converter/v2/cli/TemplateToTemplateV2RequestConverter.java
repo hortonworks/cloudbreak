@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.api.model.v2.template.KeyEncryptionMethod;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.service.VaultService;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 
 @Component
 public class TemplateToTemplateV2RequestConverter extends AbstractConversionServiceAwareConverter<Template, TemplateV2Request> {
@@ -27,14 +27,14 @@ public class TemplateToTemplateV2RequestConverter extends AbstractConversionServ
     private static final String KEY_FIELD = "key";
 
     @Inject
-    private VaultService vaultService;
+    private SecretService secretService;
 
     @Override
     public TemplateV2Request convert(Template source) {
         TemplateV2Request templateV2Request = new TemplateV2Request();
 
         Map<String, Object> parameters = source.getAttributes().getMap();
-        ofNullable(source.getSecretAttributes()).ifPresent(attr -> parameters.putAll(new Json(vaultService.resolveSingleValue(attr)).getMap()));
+        ofNullable(source.getSecretAttributes()).ifPresent(attr -> parameters.putAll(new Json(secretService.get(attr)).getMap()));
         if (parameters.containsKey(KEY_ENCRYPTION_METHOD_FIELD)
                 && !KeyEncryptionMethod.KMS.name().equalsIgnoreCase((String) parameters.get(KEY_ENCRYPTION_METHOD_FIELD))) {
             parameters.remove(KEY_FIELD);

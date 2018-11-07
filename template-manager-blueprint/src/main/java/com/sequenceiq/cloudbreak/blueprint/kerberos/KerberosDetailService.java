@@ -15,7 +15,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
-import com.sequenceiq.cloudbreak.service.VaultService;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Service
@@ -26,7 +26,7 @@ public class KerberosDetailService {
     private final Gson gson = new Gson();
 
     @Inject
-    private VaultService vaultService;
+    private SecretService secretService;
 
     public String resolveTypeForKerberos(@Nonnull KerberosConfig kerberosConfig) {
         if (!Strings.isNullOrEmpty(kerberosConfig.getContainerDn()) && !Strings.isNullOrEmpty(kerberosConfig.getLdapUrl())) {
@@ -62,8 +62,8 @@ public class KerberosDetailService {
     }
 
     public String resolvePrincipalForKerberos(@Nonnull KerberosConfig kerberosConfig) {
-        return Strings.isNullOrEmpty(kerberosConfig.getPrincipal()) ? vaultService.resolveSingleValue(kerberosConfig.getAdmin()) + PRINCIPAL
-                : vaultService.resolveSingleValue(kerberosConfig.getPrincipal());
+        return Strings.isNullOrEmpty(kerberosConfig.getPrincipal()) ? secretService.get(kerberosConfig.getAdmin()) + PRINCIPAL
+                : secretService.get(kerberosConfig.getPrincipal());
     }
 
     public boolean isAmbariManagedKerberosPackages(@Nonnull KerberosConfig kerberosConfig) throws IOException {
@@ -71,7 +71,7 @@ public class KerberosDetailService {
             return true;
         }
         try {
-            JsonNode node = JsonUtil.readTree(vaultService.resolveSingleValue(kerberosConfig.getDescriptor()))
+            JsonNode node = JsonUtil.readTree(secretService.get(kerberosConfig.getDescriptor()))
                     .get("kerberos-env").get("properties").get("install_packages");
             return node.asBoolean();
         } catch (NullPointerException ignored) {
@@ -81,7 +81,7 @@ public class KerberosDetailService {
 
     public Map<String, Object> getKerberosEnvProperties(@Nonnull KerberosConfig kerberosConfig) {
         Map<String, Object> kerberosEnv = (Map<String, Object>) gson
-                .fromJson(vaultService.resolveSingleValue(kerberosConfig.getDescriptor()), Map.class).get("kerberos-env");
+                .fromJson(secretService.get(kerberosConfig.getDescriptor()), Map.class).get("kerberos-env");
         return (Map<String, Object>) kerberosEnv.get("properties");
     }
 }

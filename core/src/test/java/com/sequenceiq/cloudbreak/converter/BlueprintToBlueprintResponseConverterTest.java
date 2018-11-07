@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
-import com.sequenceiq.cloudbreak.service.VaultService;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BlueprintToBlueprintResponseConverterTest extends AbstractEntityConverterTest<Blueprint> {
@@ -28,11 +28,11 @@ public class BlueprintToBlueprintResponseConverterTest extends AbstractEntityCon
     private BlueprintToBlueprintResponseConverter underTest;
 
     @Mock
-    private VaultService vaultService;
+    private SecretService secretService;
 
     @Before
     public void setUp() {
-        when(vaultService.resolveSingleValue(anyString())).thenAnswer(it -> it.getArgument(0));
+        when(secretService.get(anyString())).thenAnswer(it -> it.getArgument(0));
     }
 
     @Test

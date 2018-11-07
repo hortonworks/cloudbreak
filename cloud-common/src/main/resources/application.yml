@@ -70,11 +70,15 @@ cb:
     cert.file: database.crt
     ssl: false
 
+  secret:
+    application: cb
+    engine: "com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine"
+
   vault:
     addr: vault.service.consul
     port: 8200
     ssl.enabled: false
-    kv.path: "secret"
+    kv.engine.path: secret
     auth:
       type: "token"
       kubernetes:

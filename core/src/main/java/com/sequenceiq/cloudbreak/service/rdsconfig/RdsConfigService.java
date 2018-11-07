@@ -33,7 +33,7 @@ import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecution
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.environment.AbstractEnvironmentAwareService;
-import com.sequenceiq.cloudbreak.service.VaultService;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.util.NameUtil;
 
 @Service
@@ -54,7 +54,7 @@ public class RdsConfigService extends AbstractEnvironmentAwareService<RDSConfig>
     private TransactionService transactionService;
 
     @Inject
-    private VaultService vaultService;
+    private SecretService secretService;
 
     @Override
     public RDSConfig attachToEnvironments(String resourceName, Set<String> environments, @NotNull Long workspaceId) {
@@ -187,8 +187,8 @@ public class RdsConfigService extends AbstractEnvironmentAwareService<RDSConfig>
     }
 
     public RDSConfig resolveVaultValues(RDSConfig config) {
-        String username = vaultService.resolveSingleValue(config.getConnectionUserName());
-        String password = vaultService.resolveSingleValue(config.getConnectionPassword());
+        String username = secretService.get(config.getConnectionUserName());
+        String password = secretService.get(config.getConnectionPassword());
         config.setConnectionUserName(username);
         config.setConnectionPassword(password);
         return config;

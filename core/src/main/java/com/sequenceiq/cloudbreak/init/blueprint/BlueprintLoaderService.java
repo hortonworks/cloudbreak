@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.service.VaultService;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 
 @Service
 public class BlueprintLoaderService {
@@ -30,7 +30,7 @@ public class BlueprintLoaderService {
     private DefaultBlueprintCache defaultBlueprintCache;
 
     @Inject
-    private VaultService vaultService;
+    private SecretService secretService;
 
     public boolean addingDefaultBlueprintsAreNecessaryForTheUser(Collection<Blueprint> blueprints) {
         Map<String, Blueprint> defaultBlueprints = defaultBlueprintCache.defaultBlueprints();
@@ -112,7 +112,7 @@ public class BlueprintLoaderService {
 
     private Blueprint prepareBlueprint(Blueprint blueprintFromDatabase, Blueprint newBlueprint, Workspace workspace) {
         setupBlueprint(blueprintFromDatabase, workspace);
-        String blueprintText = vaultService.resolveSingleValue(newBlueprint.getBlueprintText());
+        String blueprintText = secretService.get(newBlueprint.getBlueprintText());
         blueprintFromDatabase.setBlueprintText(blueprintText);
         blueprintFromDatabase.setDescription(newBlueprint.getDescription());
         blueprintFromDatabase.setHostGroupCount(newBlueprint.getHostGroupCount());
@@ -156,8 +156,8 @@ public class BlueprintLoaderService {
     }
 
     private boolean defaultBlueprintSameAsNewTexts(Blueprint bp1, Blueprint bp2) {
-        String bp1Text = vaultService.resolveSingleValue(bp1.getBlueprintText());
-        String bp2Text = vaultService.resolveSingleValue(bp2.getBlueprintText());
+        String bp1Text = secretService.get(bp1.getBlueprintText());
+        String bp2Text = secretService.get(bp2.getBlueprintText());
         return !bp1Text.equals(bp2Text);
     }
 

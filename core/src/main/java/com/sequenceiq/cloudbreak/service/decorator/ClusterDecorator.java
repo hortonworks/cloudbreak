@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupRequest;
-import com.sequenceiq.cloudbreak.service.VaultService;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
@@ -83,7 +83,7 @@ public class ClusterDecorator {
     private AmbariHaComponentFilter ambariHaComponentFilter;
 
     @Inject
-    private VaultService vaultService;
+    private SecretService secretService;
 
     public Cluster decorate(@Nonnull Cluster cluster, @Nonnull ClusterRequest request, Blueprint blueprint, User user, Workspace workspace,
             @Nonnull Stack stack) {
@@ -135,7 +135,7 @@ public class ClusterDecorator {
 
     // because KNOX does not support them
     private void removeHaComponentsFromGatewayTopologies(Cluster subject) {
-        String blueprintText = vaultService.resolveSingleValue(subject.getBlueprint().getBlueprintText());
+        String blueprintText = secretService.get(subject.getBlueprint().getBlueprintText());
         Set<String> haComponents = ambariHaComponentFilter.getHaComponents(new BlueprintTextProcessor(blueprintText));
         Set<String> haKnoxServices = ExposedService.filterSupportedKnoxServices().stream()
                 .filter(es -> haComponents.contains(es.getServiceName())

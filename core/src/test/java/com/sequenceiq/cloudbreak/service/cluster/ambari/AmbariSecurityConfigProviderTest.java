@@ -16,7 +16,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.service.VaultService;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AmbariSecurityConfigProviderTest {
@@ -28,11 +28,11 @@ public class AmbariSecurityConfigProviderTest {
     private final AmbariSecurityConfigProvider underTest = new AmbariSecurityConfigProvider();
 
     @Mock
-    private VaultService vaultService;
+    private SecretService secretService;
 
     @Before
     public void init() {
-        when(vaultService.resolveSingleValue(anyString())).then(returnsFirstArg());
+        when(secretService.get(anyString())).then(returnsFirstArg());
     }
 
     @Test

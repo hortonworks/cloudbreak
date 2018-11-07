@@ -53,7 +53,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.repository.SecurityRuleRepository;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
-import com.sequenceiq.cloudbreak.service.VaultService;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationsViewProvider;
@@ -82,7 +82,7 @@ public class StackToCloudStackConverter {
     private InstanceMetadataToImageIdConverter instanceMetadataToImageIdConverter;
 
     @Inject
-    private VaultService vaultService;
+    private SecretService secretService;
 
     @Autowired
     @Qualifier("conversionService")
@@ -156,7 +156,7 @@ public class StackToCloudStackConverter {
     InstanceTemplate buildInstanceTemplate(Template template, String name, Long privateId, InstanceStatus status, String instanceImageId) {
         Json attributesJson = template.getAttributes();
         Map<String, Object> attributes = Optional.ofNullable(attributesJson).map(Json::getMap).orElseGet(HashMap::new);
-        Json fromVault = template.getSecretAttributes() == null ? null : new Json(vaultService.resolveSingleValue(template.getSecretAttributes()));
+        Json fromVault = template.getSecretAttributes() == null ? null : new Json(secretService.get(template.getSecretAttributes()));
         Map<String, Object> secretAttributes = Optional.ofNullable(fromVault).map(Json::getMap).orElseGet(HashMap::new);
 
         Map<String, Object> fields = new HashMap<>();

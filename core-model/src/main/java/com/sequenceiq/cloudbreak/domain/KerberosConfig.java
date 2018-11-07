@@ -9,7 +9,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 
-import com.sequenceiq.cloudbreak.aspect.vault.VaultValue;
+import com.sequenceiq.cloudbreak.aspect.vault.SecretValue;
 import com.sequenceiq.cloudbreak.type.KerberosType;
 
 @Entity
@@ -24,15 +24,15 @@ public class KerberosConfig implements ProvisionEntity {
     private KerberosType type;
 
     @Column(name = "kerberosmasterkey")
-    @VaultValue
+    @SecretValue
     private String masterKey;
 
     @Column(name = "kerberosadmin")
-    @VaultValue
+    @SecretValue
     private String admin;
 
     @Column(name = "kerberospassword")
-    @VaultValue
+    @SecretValue
     private String password;
 
     @Column(name = "kerberosurl")
@@ -48,7 +48,7 @@ public class KerberosConfig implements ProvisionEntity {
     private Boolean tcpAllowed;
 
     @Column(name = "kerberosprincipal")
-    @VaultValue
+    @SecretValue
     private String principal;
 
     @Column(name = "kerberosldapurl")
@@ -58,11 +58,11 @@ public class KerberosConfig implements ProvisionEntity {
     private String containerDn;
 
     @Column(name = "kerberosdescriptor", columnDefinition = "TEXT")
-    @VaultValue
+    @SecretValue
     private String descriptor;
 
     @Column(name = "krb5conf", columnDefinition = "TEXT")
-    @VaultValue
+    @SecretValue
     private String krb5Conf;
 
     public Long getId() {

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.CertificateResponse;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
-import com.sequenceiq.cloudbreak.service.VaultService;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.SecurityConfig;
 import com.sequenceiq.periscope.model.TlsConfiguration;
@@ -25,7 +25,7 @@ public class TlsSecurityService {
     private SecurityConfigRepository securityConfigRepository;
 
     @Inject
-    private VaultService vaultService;
+    private SecretService secretService;
 
     public SecurityConfig prepareSecurityConfig(Long stackId) {
         CertificateResponse response = cloudbreakClient.autoscaleEndpoint().getCertificate(stackId);
@@ -40,8 +40,8 @@ public class TlsSecurityService {
         if (securityConfig == null) {
             securityConfig = prepareSecurityConfig(cluster.getStackId());
         }
-        String clientKey = new String(Base64.decode(vaultService.resolveSingleValue(securityConfig.getClientKey())));
-        String clientCert = new String(Base64.decode(vaultService.resolveSingleValue(securityConfig.getClientCert())));
+        String clientKey = new String(Base64.decode(secretService.get(securityConfig.getClientKey())));
+        String clientCert = new String(Base64.decode(secretService.get(securityConfig.getClientCert())));
         String serverCert = new String(Base64.decode(securityConfig.getServerCert()));
         return new TlsConfiguration(clientKey, clientCert, serverCert);
     }

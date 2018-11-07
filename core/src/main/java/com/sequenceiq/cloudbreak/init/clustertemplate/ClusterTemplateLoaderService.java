@@ -19,7 +19,7 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.service.VaultService;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 
 @Service
 public class ClusterTemplateLoaderService {
@@ -29,7 +29,7 @@ public class ClusterTemplateLoaderService {
     private DefaultClusterTemplateCache defaultClusterTemplateCache;
 
     @Inject
-    private VaultService vaultService;
+    private SecretService secretService;
 
     public boolean isDefaultClusterTemplateUpdateNecessaryForUser(Collection<ClusterTemplate> clusterTemplates) {
         Map<String, ClusterTemplate> defaultTemplates = defaultClusterTemplateCache.defaultClusterTemplates();
@@ -58,7 +58,7 @@ public class ClusterTemplateLoaderService {
     }
 
     private boolean isTemplatesContentDifferent(ClusterTemplate clusterTemplate, ClusterTemplate defaultTemplate) {
-        String templateContent = vaultService.resolveSingleValue(clusterTemplate.getTemplate());
+        String templateContent = secretService.get(clusterTemplate.getTemplate());
         return !templateContent.equals(defaultTemplate.getTemplate())
                 || !clusterTemplate.getDescription().equals(defaultTemplate.getDescription())
                 || !clusterTemplate.getCloudPlatform().equals(defaultTemplate.getCloudPlatform());

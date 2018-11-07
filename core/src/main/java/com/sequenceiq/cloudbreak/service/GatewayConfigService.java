@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 
 @Service
 public class GatewayConfigService {
@@ -23,7 +24,7 @@ public class GatewayConfigService {
     private TlsSecurityService tlsSecurityService;
 
     @Inject
-    private VaultService vaultService;
+    private SecretService secretService;
 
     public List<GatewayConfig> getAllGatewayConfigs(Stack stack) {
         List<GatewayConfig> result = new ArrayList<>();
@@ -61,9 +62,9 @@ public class GatewayConfigService {
     private SaltClientConfig getSaltClientConfig(Stack stack) {
         SecurityConfig securityConfig = stack.getSecurityConfig();
         SaltSecurityConfig saltSecurityConfig = securityConfig.getSaltSecurityConfig();
-        String privateKey = vaultService.resolveSingleValue(saltSecurityConfig.getSaltBootSignPrivateKey());
-        String saltBootPassword = vaultService.resolveSingleValue(saltSecurityConfig.getSaltBootPassword());
-        String saltPassword = vaultService.resolveSingleValue(saltSecurityConfig.getSaltPassword());
+        String privateKey = secretService.get(saltSecurityConfig.getSaltBootSignPrivateKey());
+        String saltBootPassword = secretService.get(saltSecurityConfig.getSaltBootPassword());
+        String saltPassword = secretService.get(saltSecurityConfig.getSaltPassword());
         return new SaltClientConfig(saltPassword, saltBootPassword, new String(Base64.decodeBase64(privateKey)));
     }
 }

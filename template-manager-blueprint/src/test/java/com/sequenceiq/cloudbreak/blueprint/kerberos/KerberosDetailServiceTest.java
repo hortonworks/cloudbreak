@@ -14,7 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
-import com.sequenceiq.cloudbreak.service.VaultService;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class KerberosDetailServiceTest {
@@ -25,7 +25,7 @@ public class KerberosDetailServiceTest {
     private KerberosDetailService underTest;
 
     @Mock
-    private VaultService vaultService;
+    private SecretService secretService;
 
     private KerberosConfig config;
 
@@ -106,7 +106,7 @@ public class KerberosDetailServiceTest {
     @Test
     public void testAmbariManagedKerberosFalse() throws IOException {
         config.setDescriptor("secret/descriptor");
-        when(vaultService.resolveSingleValue(any())).thenReturn("{\"kerberos-env\":{\"properties\":{\"install_packages\":false}}}");
+        when(secretService.get(any())).thenReturn("{\"kerberos-env\":{\"properties\":{\"install_packages\":false}}}");
         Assert.assertFalse(underTest.isAmbariManagedKerberosPackages(config));
     }
 }
