@@ -33,7 +33,7 @@ public class VaultService {
      * @param value Secret content
      * @throws Exception is thrown in case the key-value path is already contains a secret
      */
-    public void addFieldToSecret(String path, String value) throws Exception {
+    public String addFieldToSecret(String path, String value) throws Exception {
         String fullPath = kvPath + '/' + path;
         long start = System.currentTimeMillis();
         VaultResponse response = template.read(fullPath);
@@ -44,6 +44,7 @@ public class VaultService {
         start = System.currentTimeMillis();
         template.write(fullPath, Collections.singletonMap("secret", value));
         LOGGER.debug("Vault write took {} ms", System.currentTimeMillis() - start);
+        return fullPath;
     }
 
     /**
