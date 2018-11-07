@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.aspect;
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -74,10 +73,7 @@ public class VaultAspects {
                         field.setAccessible(true);
                         String value = (String) field.get(entity);
                         if (value != null && !vaultService.isSecretPath(value)) {
-                            String resourceType = entity.getClass().getSimpleName().toLowerCase();
-                            String resourceId = UUID.randomUUID().toString();
-                            String fieldName = field.getName().toLowerCase();
-                            String path = String.format("cb/%s/%s/%s", resourceType, fieldName, resourceId);
+                            String path = vaultService.getPath(entity.getClass().getSimpleName().toLowerCase(), field.getName());
                             vaultService.addFieldToSecret(path, value);
                             LOGGER.debug("Field: '{}' is saved at path: {}", field.getName(), path);
                             field.set(entity, path);
