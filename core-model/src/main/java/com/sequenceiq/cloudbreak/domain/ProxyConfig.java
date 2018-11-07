@@ -19,7 +19,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import com.sequenceiq.cloudbreak.aspect.vault.VaultValue;
+import com.sequenceiq.cloudbreak.aspect.vault.SecretValue;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.environment.EnvironmentAwareResource;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
@@ -53,10 +53,10 @@ public class ProxyConfig implements ProvisionEntity, EnvironmentAwareResource {
     @Column(nullable = false)
     private String protocol;
 
-    @VaultValue
+    @SecretValue
     private String userName;
 
-    @VaultValue
+    @SecretValue
     private String password;
 
     @ManyToOne

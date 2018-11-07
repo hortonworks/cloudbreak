@@ -34,7 +34,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.service.VaultService;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariClientFactory;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -56,7 +56,7 @@ public class SharedServiceConfigProvider {
     private CentralBlueprintParameterQueryService centralBlueprintParameterQueryService;
 
     @Inject
-    private VaultService vaultService;
+    private SecretService secretService;
 
     public Cluster configureCluster(@Nonnull Cluster requestedCluster, ConnectedClusterRequest connectedClusterRequest, User user, Workspace workspace) {
         Objects.requireNonNull(requestedCluster);
@@ -105,7 +105,7 @@ public class SharedServiceConfigProvider {
 
     public ConfigsResponse retrieveOutputs(Stack datalake, Blueprint blueprint, String stackName) {
         AmbariClient ambariClient = ambariClientFactory.getAmbariClient(datalake, datalake.getCluster());
-        String blueprintText = vaultService.resolveSingleValue(blueprint.getBlueprintText());
+        String blueprintText = secretService.get(blueprint.getBlueprintText());
         Set<String> datalakeProperties = centralBlueprintParameterQueryService.queryDatalakeParameters(blueprintText);
         addDatalakeRequiredProperties(datalakeProperties);
         Map<String, Object> results = new HashMap<>();

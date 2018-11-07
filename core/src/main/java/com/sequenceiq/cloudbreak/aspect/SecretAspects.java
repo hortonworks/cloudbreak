@@ -15,18 +15,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.aspect.vault.VaultValue;
+import com.sequenceiq.cloudbreak.aspect.vault.SecretValue;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
-import com.sequenceiq.cloudbreak.service.VaultService;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 
 @Component
 @Aspect
-public class VaultAspects {
+public class SecretAspects {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(VaultAspects.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SecretAspects.class);
 
     @Inject
-    private VaultService vaultService;
+    private SecretService secretService;
 
     @Pointcut("execution(public * com.sequenceiq.cloudbreak.repository.*.save(..)) ")
     public void onRepositorySave() {
@@ -69,16 +69,16 @@ public class VaultAspects {
         for (Object entity : entities) {
             try {
                 for (Field field : entity.getClass().getDeclaredFields()) {
-                    if (field.isAnnotationPresent(VaultValue.class)) {
-                        LOGGER.debug("Found VaultValue annotation on {}", field);
+                    if (field.isAnnotationPresent(SecretValue.class)) {
+                        LOGGER.debug("Found SecretValue annotation on {}", field);
                         field.setAccessible(true);
                         String value = (String) field.get(entity);
-                        if (value != null && !vaultService.isSecretPath(value)) {
+                        if (value != null && !secretService.isSecret(value)) {
                             String resourceType = entity.getClass().getSimpleName().toLowerCase();
                             String resourceId = UUID.randomUUID().toString();
                             String fieldName = field.getName().toLowerCase();
-                            String path = String.format("cb/%s/%s/%s", resourceType, fieldName, resourceId);
-                            path = vaultService.addFieldToSecret(path, value);
+                            String path = String.format("%s/%s/%s", resourceType, fieldName, resourceId);
+                            path = secretService.put(path, value);
                             LOGGER.debug("Field: '{}' is saved at path: {}", field.getName(), path);
                             field.set(entity, path);
                         }
@@ -105,11 +105,11 @@ public class VaultAspects {
         for (Object entity : entities) {
             try {
                 for (Field field : entity.getClass().getDeclaredFields()) {
-                    if (field.isAnnotationPresent(VaultValue.class)) {
-                        LOGGER.debug("Found VaultValue annotation on {}", field);
+                    if (field.isAnnotationPresent(SecretValue.class)) {
+                        LOGGER.debug("Found SecretValue annotation on {}", field);
                         field.setAccessible(true);
                         String path = (String) field.get(entity);
-                        vaultService.deleteSecret(path);
+                        secretService.delete(path);
                         LOGGER.debug("Secret deleted at path: {}", path);
                     }
                 }

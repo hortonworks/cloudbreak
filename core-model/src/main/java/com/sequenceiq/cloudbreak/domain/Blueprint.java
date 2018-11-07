@@ -14,7 +14,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.aspect.vault.VaultValue;
+import com.sequenceiq.cloudbreak.aspect.vault.SecretValue;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
@@ -34,7 +34,7 @@ public class Blueprint implements ProvisionEntity, WorkspaceAwareResource {
     private String name;
 
     @Column(nullable = false)
-    @VaultValue
+    @SecretValue
     private String blueprintText;
 
     private String ambariName;

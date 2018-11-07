@@ -65,7 +65,7 @@ import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterResponse;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.service.CrudRepositoryLookupService;
 import com.sequenceiq.cloudbreak.service.TransactionExecutorService;
-import com.sequenceiq.cloudbreak.service.VaultService;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.periscope.PeriscopeApplication;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.config.DatabaseConfig;
@@ -494,7 +494,7 @@ public class MetricTest {
         private Scheduler scheduler;
 
         @MockBean
-        private VaultService vaultService;
+        private SecretService secretService;
 
         @SpyBean
         private MetricService metricService;

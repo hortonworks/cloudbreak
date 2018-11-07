@@ -30,7 +30,7 @@ import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.AmbariHaComponentFilter;
-import com.sequenceiq.cloudbreak.service.VaultService;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
@@ -95,12 +95,12 @@ public class ClusterDecoratorTest {
     private User user;
 
     @Mock
-    private VaultService vaultService;
+    private SecretService secretService;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        when(vaultService.resolveSingleValue(anyString())).then(it -> it.getArgument(0));
+        when(secretService.get(anyString())).then(it -> it.getArgument(0));
     }
 
     @Test

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.service.VaultService;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 
 @Component
 public class BlueprintToBlueprintResponseConverter extends AbstractConversionServiceAwareConverter<Blueprint, BlueprintResponse> {
@@ -16,7 +16,7 @@ public class BlueprintToBlueprintResponseConverter extends AbstractConversionSer
     private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintToBlueprintResponseConverter.class);
 
     @Inject
-    private VaultService vaultService;
+    private SecretService secretService;
 
     @Override
     public BlueprintResponse convert(Blueprint entity) {
@@ -27,7 +27,7 @@ public class BlueprintToBlueprintResponseConverter extends AbstractConversionSer
         blueprintJson.setHostGroupCount(entity.getHostGroupCount());
         blueprintJson.setStatus(entity.getStatus());
         blueprintJson.setTags(entity.getTags().getMap());
-        blueprintJson.setAmbariBlueprint(vaultService.resolveSingleValue(entity.getBlueprintText()));
+        blueprintJson.setAmbariBlueprint(secretService.get(entity.getBlueprintText()));
         return blueprintJson;
     }
 

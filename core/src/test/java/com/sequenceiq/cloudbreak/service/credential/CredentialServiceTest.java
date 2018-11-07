@@ -40,7 +40,7 @@ import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.environment.EnvironmentViewRepository;
-import com.sequenceiq.cloudbreak.service.VaultService;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
@@ -107,7 +107,7 @@ public class CredentialServiceTest {
     private EnvironmentViewRepository environmentViewRepository;
 
     @Mock
-    private VaultService vaultService;
+    private SecretService secretService;
 
     @InjectMocks
     private final CredentialService credentialService = new CredentialService();

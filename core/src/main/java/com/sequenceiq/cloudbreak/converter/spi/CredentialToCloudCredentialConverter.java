@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.service.VaultService;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 
 @Component
 public class CredentialToCloudCredentialConverter {
@@ -20,7 +20,7 @@ public class CredentialToCloudCredentialConverter {
     private static final String CREDENTIAL_ID = "id";
 
     @Inject
-    private VaultService vaultService;
+    private SecretService secretService;
 
     public CloudCredential convert(Credential credential) {
         if (credential == null) {
@@ -30,7 +30,7 @@ public class CredentialToCloudCredentialConverter {
         if (credential.getId() == null) {
             fields = isEmpty(credential.getAttributes()) ? new HashMap<>() : new Json(credential.getAttributes()).getMap();
         } else {
-            fields = new Json(vaultService.resolveSingleValue(credential.getAttributes())).getMap();
+            fields = new Json(secretService.get(credential.getAttributes())).getMap();
         }
         fields.put(CREDENTIAL_ID, credential.getId());
         return new CloudCredential(credential.getId(), credential.getName(), fields);

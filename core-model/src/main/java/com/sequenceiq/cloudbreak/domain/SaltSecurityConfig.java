@@ -8,7 +8,7 @@ import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 
-import com.sequenceiq.cloudbreak.aspect.vault.VaultValue;
+import com.sequenceiq.cloudbreak.aspect.vault.SecretValue;
 
 @Entity
 public class SaltSecurityConfig implements ProvisionEntity {
@@ -18,22 +18,22 @@ public class SaltSecurityConfig implements ProvisionEntity {
     @SequenceGenerator(name = "saltsecurityconfig_generator", sequenceName = "saltsecurityconfig_id_seq", allocationSize = 1)
     private Long id;
 
-    @VaultValue
+    @SecretValue
     private String saltPassword;
 
     @Column(columnDefinition = "TEXT")
     private String saltSignPublicKey;
 
-    @VaultValue
+    @SecretValue
     private String saltSignPrivateKey;
 
-    @VaultValue
+    @SecretValue
     private String saltBootPassword;
 
     @Column(columnDefinition = "TEXT")
     private String saltBootSignPublicKey;
 
-    @VaultValue
+    @SecretValue
     private String saltBootSignPrivateKey;
 
     @OneToOne(mappedBy = "saltSecurityConfig")
