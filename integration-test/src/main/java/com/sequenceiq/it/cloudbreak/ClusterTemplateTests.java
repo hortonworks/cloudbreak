@@ -1,14 +1,13 @@
 package com.sequenceiq.it.cloudbreak;
 
-import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
-import com.sequenceiq.it.cloudbreak.newway.ClusterTemplate;
-import com.sequenceiq.it.cloudbreak.newway.TestParameter;
-import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
-import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
-import com.sequenceiq.it.cloudbreak.newway.cloud.OpenstackCloudProvider;
-import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.util.LongStringGeneratorUtil;
+import java.io.IOException;
+import java.util.Objects;
+
+import javax.inject.Inject;
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.ForbiddenException;
+import javax.ws.rs.core.Response;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StreamUtils;
@@ -20,12 +19,14 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import javax.inject.Inject;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.ForbiddenException;
-import javax.ws.rs.core.Response;
-import java.io.IOException;
-import java.util.Objects;
+import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
+import com.sequenceiq.it.cloudbreak.newway.ClusterTemplate;
+import com.sequenceiq.it.cloudbreak.newway.TestParameter;
+import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
+import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
+import com.sequenceiq.it.cloudbreak.newway.cloud.OpenstackCloudProvider;
+import com.sequenceiq.it.util.LongStringGeneratorUtil;
 
 public class ClusterTemplateTests extends CloudbreakTest {
 
@@ -82,7 +83,7 @@ public class ClusterTemplateTests extends CloudbreakTest {
     }
 
     @Test(expectedExceptions = BadRequestException.class, priority = 2, dataProvider = "templatename", groups = "templates")
-    public void testCreateInvalidNameClusterTemplate(TestContext testContext, String templateName) throws Exception {
+    public void testCreateInvalidNameClusterTemplate(String templateName) throws Exception {
         LOGGER.info("testing cluster template execution for: {}", templateName);
 
         given(CloudbreakClient.created());
@@ -188,12 +189,12 @@ public class ClusterTemplateTests extends CloudbreakTest {
     @DataProvider(name = "templatename")
     public Object[][] providerClusterTemplateName() {
         return new Object[][]{
-                {Objects.requireNonNull(applicationContext).getBean(TestContext.class), SPECIAL_CT_NAME},
-                {Objects.requireNonNull(applicationContext).getBean(TestContext.class), String.format(ILLEGAL_CT_NAME, ";")},
-                {Objects.requireNonNull(applicationContext).getBean(TestContext.class), String.format(ILLEGAL_CT_NAME, "%")},
-                {Objects.requireNonNull(applicationContext).getBean(TestContext.class), String.format(ILLEGAL_CT_NAME, "/")},
-                {Objects.requireNonNull(applicationContext).getBean(TestContext.class), INVALID_SHORT_CT_NAME},
-                {Objects.requireNonNull(applicationContext).getBean(TestContext.class), longStringGeneratorUtil.stringGenerator(101)}
+                {SPECIAL_CT_NAME},
+                {String.format(ILLEGAL_CT_NAME, ";")},
+                {String.format(ILLEGAL_CT_NAME, "%")},
+                {String.format(ILLEGAL_CT_NAME, "/")},
+                {INVALID_SHORT_CT_NAME},
+                {longStringGeneratorUtil.stringGenerator(101)}
         };
     }
 
