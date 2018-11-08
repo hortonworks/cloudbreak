@@ -4,10 +4,8 @@ import static com.sequenceiq.cloudbreak.cloud.azure.task.interactivelogin.AzureI
 import static com.sequenceiq.cloudbreak.cloud.azure.task.interactivelogin.AzureInteractiveLoginStatusCheckerTask.GRAPH_WINDOWS;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.UUID;
 
+import javax.inject.Inject;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
@@ -17,15 +15,18 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status.Family;
 
+import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureApplicationCreationView;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureCredentialAppCreationCommand;
+import com.sequenceiq.cloudbreak.cloud.retry.RetryException;
 
 /**
  * Created by perdos on 10/18/16.
@@ -33,20 +34,29 @@ import com.google.gson.JsonPrimitive;
 @Service
 public class ApplicationCreator {
 
-    public static final int CREDENTIAL_END_YEAR = 3;
-
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationCreator.class);
 
-    public String createApplication(String accessToken, String tenantId, String secret) throws InteractiveLoginException {
-        Response response = createApplicationWithGraph(accessToken, tenantId, secret);
+    @Inject
+    private AzureCredentialAppCreationCommand appCreationCommand;
+
+    public AzureApplication createApplication(String accessToken, String tenantId, String deploymentAddress) throws InteractiveLoginException {
+
+        Client client = ClientBuilder.newClient();
+        WebTarget resource = client.target(GRAPH_WINDOWS + tenantId);
+        Builder request = resource.path("/applications").queryParam("api-version", GRAPH_API_VERSION).request();
+        request.accept(MediaType.APPLICATION_JSON);
+        request.header("Authorization", "Bearer " + accessToken);
+        AzureApplicationCreationView appCreationView = appCreationCommand.generateJSON(deploymentAddress);
+        Response response = request.post(Entity.entity(appCreationView.getAppCreationRequestPayload(), MediaType.APPLICATION_JSON));
 
         if (response.getStatusInfo().getFamily() == Family.SUCCESSFUL) {
             String application = response.readEntity(String.class);
             try {
                 JsonNode applicationJson = new ObjectMapper().readTree(application);
                 String appId = applicationJson.get("appId").asText();
-                LOGGER.debug("Application created with appId: " + appId);
-                return appId;
+                String objectId = applicationJson.get("objectId").asText();
+                LOGGER.info("Application created with appId: " + appId);
+                return new AzureApplication(appId, objectId, appCreationView);
             } catch (IOException e) {
                 throw new IllegalStateException(e);
             }
@@ -62,34 +72,17 @@ public class ApplicationCreator {
 
     }
 
-    private Response createApplicationWithGraph(String accessToken, String tenantId, String secret) {
+    @Retryable(value = RetryException.class, maxAttempts = 10, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
+    public void waitApplicationCreated(String accessToken, String tenantId, String objectId) {
+        LOGGER.info("Checking the existence of the application: '{}'", objectId);
         Client client = ClientBuilder.newClient();
         WebTarget resource = client.target(GRAPH_WINDOWS + tenantId);
-        Builder request = resource.path("/applications").queryParam("api-version", GRAPH_API_VERSION).request();
+        Builder request = resource.path("/applications/" + objectId).queryParam("api-version", GRAPH_API_VERSION).request();
         request.accept(MediaType.APPLICATION_JSON);
-
-        long timeStamp = new Date().getTime();
-
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("availableToOtherTenants", false);
-        jsonObject.addProperty("displayName", "hwx-cloud-" + timeStamp);
-        jsonObject.addProperty("homepage", "http://hwx-cloud-" + timeStamp);
-
-        JsonArray identifierUris = new JsonArray();
-        identifierUris.add(new JsonPrimitive("http://hwx-cloud-" + timeStamp));
-        jsonObject.add("identifierUris", identifierUris);
-
-        JsonArray passwordCredentials = new JsonArray();
-        JsonObject password = new JsonObject();
-        password.addProperty("keyId", UUID.randomUUID().toString());
-        password.addProperty("value", secret);
-        password.addProperty("startDate", LocalDateTime.now().minusDays(1).toString());
-        password.addProperty("endDate", LocalDateTime.now().plusYears(CREDENTIAL_END_YEAR).toString());
-        passwordCredentials.add(password);
-
-        jsonObject.add("passwordCredentials", passwordCredentials);
-
         request.header("Authorization", "Bearer " + accessToken);
-        return request.post(Entity.entity(jsonObject.toString(), MediaType.APPLICATION_JSON));
+        Response response = request.get();
+        if (response.getStatus() != HttpStatus.SC_OK) {
+            throw new RetryException("App with objectId (" + objectId + ") hasn't been created yet");
+        }
     }
 }

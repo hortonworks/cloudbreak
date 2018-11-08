@@ -12,11 +12,13 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
-import com.sequenceiq.cloudbreak.api.model.v3.credential.CredentialPrerequisites;
 import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
 import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
+import com.sequenceiq.cloudbreak.api.model.v3.credential.CredentialPrerequisites;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
@@ -77,5 +79,26 @@ public interface CredentialV3Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = CredentialOpDescription.GET_PREREQUISTIES_BY_CLOUD_PROVIDER, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES,
             nickname = "getPrerequisitesForCloudPlatform")
-    CredentialPrerequisites getPrerequisitesForCloudPlatform(@PathParam("workspaceId") Long workspaceId, @PathParam("cloudPlatform") String platform);
+    CredentialPrerequisites getPrerequisitesForCloudPlatform(@PathParam("workspaceId") Long workspaceId, @PathParam("cloudPlatform") String platform,
+            @QueryParam("deploymentAddress") String deploymentAddress);
+
+    @GET
+    @Path("codegrantflow/init")
+    @ApiOperation(value = CredentialOpDescription.INIT_CODE_GRANT_FLOW, notes = Notes.CREDENTIAL_NOTES,
+            nickname = "initCodeGrantFlowBasedCredentialInWorkspace")
+    Response initCodeGrantFlow(@PathParam("workspaceId") Long workspaceId, @Valid CredentialRequest credentialRequest);
+
+    @GET
+    @Path("codegrantflow/init/{name}")
+    @ApiOperation(value = CredentialOpDescription.INIT_CODE_GRANT_FLOW_ON_EXISTING, notes = Notes.CREDENTIAL_NOTES,
+            nickname = "initCodeGrantFlowOnExistingCredentialInWorkspace")
+    Response initCodeGrantFlowOnExisting(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
+
+    @GET
+    @Path("codegrantflow/authorization/{cloudPlatform}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = CredentialOpDescription.AUTHORIZE_CODE_GRANT_FLOW, produces = ContentType.JSON,
+            nickname = "authorizeCodeGrantFlowBasedCredentialInWorkspace", notes = "Authorize code grant flow based credential creation.")
+    CredentialResponse authorizeCodeGrantFlow(@PathParam("workspaceId") Long workspaceId, @PathParam("cloudPlatform") String platform,
+            @QueryParam("code") String code, @QueryParam("state") String state);
 }

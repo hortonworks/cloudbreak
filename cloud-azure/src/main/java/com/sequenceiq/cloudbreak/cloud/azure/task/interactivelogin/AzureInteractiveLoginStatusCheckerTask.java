@@ -4,7 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.azure.AzureInteractiveLogin.MANAGE
 import static com.sequenceiq.cloudbreak.cloud.azure.AzureInteractiveLogin.XPLAT_CLI_CLIENT_ID;
 
 import java.io.IOException;
-import java.util.UUID;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.ws.rs.client.ClientBuilder;
@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.azure.management.graphrbac.implementation.ServicePrincipalInner;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureTenant;
 import com.sequenceiq.cloudbreak.cloud.azure.context.AzureInteractiveLoginStatusCheckerContext;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -45,7 +46,7 @@ public class AzureInteractiveLoginStatusCheckerTask extends PollBooleanStateTask
 
     public static final String AZURE_MANAGEMENT = "https://management.azure.com/";
 
-    private static final String LOGIN_MICROSOFTONLINE = "https://login.microsoftonline.com/";
+    public static final String LOGIN_MICROSOFTONLINE = "https://login.microsoftonline.com/";
 
     private static final String LOGIN_MICROSOFTONLINE_OAUTH2 = LOGIN_MICROSOFTONLINE + "common/oauth2";
 
@@ -61,9 +62,6 @@ public class AzureInteractiveLoginStatusCheckerTask extends PollBooleanStateTask
 
     @Inject
     private ApplicationCreator applicationCreator;
-
-    @Inject
-    private AzureRoleManager azureRoleManager;
 
     @Inject
     private PrincipalCreator principalCreator;
@@ -92,16 +90,18 @@ public class AzureInteractiveLoginStatusCheckerTask extends PollBooleanStateTask
                 AzureCredentialView armCredentialView = new AzureCredentialView(extendedCloudCredential);
 
                 try {
-                    String graphApiAccessToken = createResourceToken(refreshToken, armCredentialView.getTenantId(), GRAPH_WINDOWS);
-                    String managementApiToken = createResourceToken(refreshToken, armCredentialView.getTenantId(), MANAGEMENT_CORE_WINDOWS);
+                    String tenantId = armCredentialView.getTenantId();
+                    String graphApiAccessToken = createResourceToken(refreshToken, tenantId, GRAPH_WINDOWS);
+                    String managementApiToken = createResourceToken(refreshToken, tenantId, MANAGEMENT_CORE_WINDOWS);
                     subscriptionChecker.checkSubscription(armCredentialView.getSubscriptionId(), managementApiToken);
-                    tenantChecker.checkTenant(armCredentialView.getTenantId(), managementApiToken);
-
-                    String secretKey = UUID.randomUUID().toString();
-                    String appId = applicationCreator.createApplication(graphApiAccessToken, armCredentialView.getTenantId(), secretKey);
+                    List<AzureTenant> tenants = tenantChecker.getTenants(managementApiToken);
+                    tenantChecker.checkTenant(tenantId, tenants);
+                    String deploymentAddress = armCredentialView.getDeploymentAddress();
+                    AzureApplication application = applicationCreator.createApplication(graphApiAccessToken, tenantId, deploymentAddress);
                     sendStatusMessage(extendedCloudCredential, "Cloudbreak application created");
-                    ServicePrincipalInner sp = principalCreator.createServicePrincipal(graphApiAccessToken, appId, armCredentialView.getTenantId());
-                    String principalObjectId = sp.objectId();
+                    applicationCreator.waitApplicationCreated(graphApiAccessToken, tenantId, application.getObjectId());
+                    ServicePrincipalInner sp = principalCreator.createServicePrincipal(graphApiAccessToken, application.getAppId(), tenantId);
+                    principalCreator.waitPrincipalCreated(graphApiAccessToken, sp.objectId(), tenantId, application);
                     String notification = new StringBuilder("Principal created for application!")
                             .append(" Name: ")
                             .append(sp.displayName())
@@ -109,19 +109,14 @@ public class AzureInteractiveLoginStatusCheckerTask extends PollBooleanStateTask
                             .append(sp.appId())
                             .toString();
                     sendStatusMessage(extendedCloudCredential, notification);
-                    String roleName = armCredentialView.getRoleName();
-                    String roleType = armCredentialView.getRoleType();
-                    String roleId = azureRoleManager.handleRoleOperations(managementApiToken, armCredentialView.getSubscriptionId(), roleName, roleType);
-                    azureRoleManager.assignRole(managementApiToken, armCredentialView.getSubscriptionId(), roleId, principalObjectId);
-                    sendStatusMessage(extendedCloudCredential, "Role assigned for principal");
 
-                    extendedCloudCredential.putParameter("accessKey", appId);
-                    extendedCloudCredential.putParameter("secretKey", secretKey);
+                    extendedCloudCredential.putParameter("accessKey", application.getAppId());
+                    extendedCloudCredential.putParameter("secretKey", application.getAzureApplicationCreationView().getAppSecret());
                     extendedCloudCredential.putParameter("spDisplayName", sp.displayName());
 
                     armInteractiveLoginStatusCheckerContext.getCredentialNotifier().createCredential(getAuthenticatedContext().getCloudContext(),
                             extendedCloudCredential);
-                } catch (InteractiveLoginException | InteractiveLoginUnrecoverableException e) {
+                } catch (InteractiveLoginException e) {
                     LOGGER.info("Interactive login failed", e);
                     sendErrorStatusMessage(extendedCloudCredential, e.getMessage());
                 }

@@ -82,7 +82,7 @@ public class AwsCredentialConnector implements CredentialConnector {
     }
 
     @Override
-    public CredentialPrerequisites getPrerequisites(CloudContext cloudContext, String externalId) {
+    public CredentialPrerequisites getPrerequisites(CloudContext cloudContext, String externalId, String deploymentAddress) {
         AwsCredentialPrerequisites awsPrerequisites = new AwsCredentialPrerequisites(externalId, awsPlatformParameters.getCredentialPoliciesJson());
         return new CredentialPrerequisites(cloudContext.getPlatform().value(), accountId, awsPrerequisites);
     }

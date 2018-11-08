@@ -34,6 +34,9 @@ public class OperationDescriptions {
         public static final String DELETE_PRIVATE_BY_NAME = "delete private credential by name";
         public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private credential by name";
         public static final String INTERACTIVE_LOGIN = "interactive login";
+        public static final String INIT_CODE_GRANT_FLOW = "start a credential creation with Oauth2 Authorization Code Grant flow";
+        public static final String INIT_CODE_GRANT_FLOW_ON_EXISTING = "Reinitialize Oauth2 Authorization Code Grant flow on an existing credential";
+        public static final String AUTHORIZE_CODE_GRANT_FLOW = "Authorize Oauth2 Authorization Code Grant flow";
         public static final String DELETE_BY_ID = "delete credential by id";
         public static final String LIST_BY_WORKSPACE = "list credentials for the given workspace";
         public static final String GET_BY_NAME_IN_WORKSPACE = "get credential by name in workspace";

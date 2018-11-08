@@ -23,10 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Strings;
 import com.microsoft.aad.adal4j.AuthenticationException;
-import com.microsoft.azure.AzureEnvironment;
 import com.microsoft.azure.PagedList;
-import com.microsoft.azure.credentials.ApplicationTokenCredentials;
-import com.microsoft.azure.credentials.AzureTokenCredentials;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.AvailabilitySet;
 import com.microsoft.azure.management.compute.OperatingSystemStateTypes;
@@ -67,7 +64,6 @@ import com.microsoft.azure.storage.blob.CloudBlockBlob;
 import com.microsoft.azure.storage.blob.CloudPageBlob;
 import com.microsoft.azure.storage.blob.CopyState;
 import com.microsoft.azure.storage.blob.ListBlobItem;
-import com.microsoft.rest.LogLevel;
 import com.sequenceiq.cloudbreak.client.ProviderAuthenticationFailedException;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -75,39 +71,17 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
-import okhttp3.JavaNetAuthenticator;
-
 public class AzureClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureClient.class);
 
-    private Azure azure;
+    private final Azure azure;
 
-    private final String tenantId;
+    private final AzureClientCredentials azureClientCredentials;
 
-    private final String clientId;
-
-    private final String secretKey;
-
-    private final String subscriptionId;
-
-    public AzureClient(String tenantId, String clientId, String secretKey, String subscriptionId, LogLevel logLevel) {
-        this.tenantId = tenantId;
-        this.clientId = clientId;
-        this.secretKey = secretKey;
-        this.subscriptionId = subscriptionId;
-        connect(logLevel);
-    }
-
-    private void connect(LogLevel logLevel) {
-        AzureTokenCredentials creds = new ApplicationTokenCredentials(clientId, tenantId, secretKey, AzureEnvironment.AZURE)
-                .withDefaultSubscriptionId(subscriptionId);
-        azure = Azure
-                .configure()
-                .withProxyAuthenticator(new JavaNetAuthenticator())
-                .withLogLevel(logLevel)
-                .authenticate(creds)
-                .withSubscription(subscriptionId);
+    public AzureClient(AzureClientCredentials azureClientCredentials) {
+        this.azureClientCredentials = azureClientCredentials;
+        this.azure = azureClientCredentials.getAzure();
     }
 
     private <T> T handleAuthException(Supplier<T> function) {
@@ -132,6 +106,10 @@ public class AzureClient {
                 throw e;
             }
         }
+    }
+
+    public Optional<String> getRefreshToken() {
+        return azureClientCredentials.getRefreshToken();
     }
 
     public ResourceGroup getResourceGroup(String name) {

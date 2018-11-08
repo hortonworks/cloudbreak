@@ -42,4 +42,31 @@ public class AzureCredentialView {
         return cloudCredential.getParameter("roleType", String.class);
     }
 
+    public Boolean getCodeGrantFlow() {
+        return cloudCredential.getParameter("codeGrantFlow", Boolean.class);
+    }
+
+    public String getAppLoginUrl() {
+        return cloudCredential.getParameter("appLoginUrl", String.class);
+    }
+
+    public String getCodeGrantFlowState() {
+        return cloudCredential.getParameter("codeGrantFlowState", String.class);
+    }
+
+    public String getAuthorizationCode() {
+        return cloudCredential.getParameter("authorizationCode", String.class);
+    }
+
+    public String getRefreshToken() {
+        return cloudCredential.getParameter("refreshToken", String.class);
+    }
+
+    public String getAppReplyUrl() {
+        return cloudCredential.getParameter("appReplyUrl", String.class);
+    }
+
+    public String getDeploymentAddress() {
+        return cloudCredential.getParameter("deploymentAddress", String.class);
+    }
 }

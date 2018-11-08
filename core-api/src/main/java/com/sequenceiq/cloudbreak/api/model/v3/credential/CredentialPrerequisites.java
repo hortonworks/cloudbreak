@@ -21,10 +21,18 @@ public class CredentialPrerequisites implements JsonEntity {
     @ApiModelProperty(value = CredentialModelDescription.AWS_CREDENTIAL_PREREQUISITES, required = true)
     private AwsCredentialPrerequisites aws;
 
+    @ApiModelProperty(value = CredentialModelDescription.AZURE_CREDENTIAL_PREREQUISITES, required = true)
+    private AzureCredentialPrerequisites azure;
+
     public CredentialPrerequisites(String cloudPlatform, String accountId, AwsCredentialPrerequisites aws) {
         this.cloudPlatform = cloudPlatform;
         this.accountId = accountId;
         this.aws = aws;
+    }
+
+    public CredentialPrerequisites(String cloudPlatform, AzureCredentialPrerequisites azure) {
+        this.cloudPlatform = cloudPlatform;
+        this.azure = azure;
     }
 
     public String getCloudPlatform() {
@@ -37,5 +45,9 @@ public class CredentialPrerequisites implements JsonEntity {
 
     public AwsCredentialPrerequisites getAws() {
         return aws;
+    }
+
+    public AzureCredentialPrerequisites getAzure() {
+        return azure;
     }
 }

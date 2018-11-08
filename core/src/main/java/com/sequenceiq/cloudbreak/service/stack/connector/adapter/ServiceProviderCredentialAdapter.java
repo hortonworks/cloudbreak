@@ -17,6 +17,8 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationRequest;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationResult;
+import com.sequenceiq.cloudbreak.cloud.event.credential.InitCodeGrantFlowRequest;
+import com.sequenceiq.cloudbreak.cloud.event.credential.InitCodeGrantFlowResponse;
 import com.sequenceiq.cloudbreak.cloud.event.credential.InteractiveLoginRequest;
 import com.sequenceiq.cloudbreak.cloud.event.credential.InteractiveLoginResult;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
@@ -54,7 +56,10 @@ public class ServiceProviderCredentialAdapter {
     @Inject
     private CredentialPrerequisiteService credentialPrerequisiteService;
 
-    public Credential init(Credential credential, Long workspaceId, String userId) {
+    @Inject
+    private RequestProvider requestProvider;
+
+    public Credential verify(Credential credential, Long workspaceId, String userId) {
         credential = credentialPrerequisiteService.decorateCredential(credential, userId);
         CloudContext cloudContext = new CloudContext(credential.getId(), credential.getName(), credential.cloudPlatform(), userId, workspaceId);
         CloudCredential cloudCredential = credentialConverter.convert(credential);
@@ -110,6 +115,31 @@ public class ServiceProviderCredentialAdapter {
         return credential;
     }
 
+    public Credential initCodeGrantFlow(Credential credential, Long workspaceId, String userId) {
+        CloudContext cloudContext = new CloudContext(credential.getId(), credential.getName(),
+                credential.cloudPlatform(), userId, workspaceId);
+        CloudCredential cloudCredential = credentialConverter.convert(credential);
+        InitCodeGrantFlowRequest request = requestProvider.getInitCodeGrantFlowRequest(cloudContext, cloudCredential);
+        LOGGER.info("Triggering event: {}", request);
+        eventBus.notify(request.selector(), eventFactory.createEvent(request));
+        try {
+            InitCodeGrantFlowResponse res = request.await();
+            LOGGER.info("Result: {}", res);
+            if (res.getStatus() != EventStatus.OK) {
+                String message = "Authorization code grant based credential creation couldn't be initialized: ";
+                LOGGER.error(message, res.getErrorDetails());
+                throw new BadRequestException(message + res.getErrorDetails(), res.getErrorDetails());
+            }
+            Map<String, String> codeGrantFlowInitParams = res.getCodeGrantFlowInitParams();
+            codeGrantFlowInitParams.forEach(cloudCredential::putParameter);
+            mergeCloudProviderParameters(credential, cloudCredential, Collections.singleton(SMART_SENSE_ID));
+            return credential;
+        } catch (InterruptedException e) {
+            LOGGER.error("Error while executing initialization of authorization code grant based credential creation:", e);
+            throw new OperationException(e);
+        }
+    }
+
     private void mergeSmartSenseAttributeIfExists(Credential credential, CloudCredential cloudCredentialResponse) {
         String smartSenseId = String.valueOf(cloudCredentialResponse.getParameters().get(SMART_SENSE_ID));
         if (StringUtils.isNoneEmpty(smartSenseId)) {
@@ -125,13 +155,20 @@ public class ServiceProviderCredentialAdapter {
     }
 
     private void mergeCloudProviderParameters(Credential credential, CloudCredential cloudCredentialResponse, Set<String> skippedKeys) {
+        mergeCloudProviderParameters(credential, cloudCredentialResponse, skippedKeys, true);
+    }
+
+    private void mergeCloudProviderParameters(Credential credential, CloudCredential cloudCredentialResponse, Set<String> skippedKeys,
+            boolean overrideParameters) {
         Json attributes = new Json(credential.getAttributes());
         Map<String, Object> newAttributes = attributes.getMap();
         boolean newAttributesAdded = false;
         for (Map.Entry<String, Object> cloudParam : cloudCredentialResponse.getParameters().entrySet()) {
-            if (!skippedKeys.contains(cloudParam.getKey()) && newAttributes.get(cloudParam.getKey()) == null && cloudParam.getValue() != null) {
-                newAttributes.put(cloudParam.getKey(), cloudParam.getValue());
-                newAttributesAdded = true;
+            if (!skippedKeys.contains(cloudParam.getKey()) && cloudParam.getValue() != null) {
+                if (overrideParameters || newAttributes.get(cloudParam.getKey()) == null) {
+                    newAttributes.put(cloudParam.getKey(), cloudParam.getValue());
+                    newAttributesAdded = true;
+                }
             }
         }
         if (newAttributesAdded) {

@@ -2,8 +2,11 @@ package com.sequenceiq.cloudbreak.cloud.azure.task.interactivelogin;
 
 import static com.sequenceiq.cloudbreak.cloud.azure.task.interactivelogin.AzureInteractiveLoginStatusCheckerTask.GRAPH_API_VERSION;
 import static com.sequenceiq.cloudbreak.cloud.azure.task.interactivelogin.AzureInteractiveLoginStatusCheckerTask.GRAPH_WINDOWS;
+import static com.sequenceiq.cloudbreak.cloud.azure.task.interactivelogin.AzureInteractiveLoginStatusCheckerTask.LOGIN_MICROSOFTONLINE;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -11,9 +14,11 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status.Family;
 
+import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.retry.annotation.Backoff;
@@ -24,6 +29,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonObject;
 import com.microsoft.azure.management.graphrbac.implementation.ServicePrincipalInner;
+import com.sequenceiq.cloudbreak.cloud.retry.RetryException;
 
 /**
  * Created by perdos on 10/18/16.
@@ -74,5 +80,43 @@ public class PrincipalCreator {
 
         request.header("Authorization", "Bearer " + accessToken);
         return request.post(Entity.entity(jsonObject.toString(), MediaType.APPLICATION_JSON));
+    }
+
+    @Retryable(value = RetryException.class, maxAttempts = 20, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
+    public void waitPrincipalCreated(String accessToken, String objectId, String tenantId, AzureApplication app) {
+        LOGGER.info("Checking the availability of the service principal: '{}'", objectId);
+        Client client = ClientBuilder.newClient();
+        checkTheExistenceOnGraph(accessToken, objectId, tenantId, client);
+        checkTheAvailabilityWithResourceLogin(objectId, tenantId, app, client);
+    }
+
+    private void checkTheExistenceOnGraph(String accessToken, String objectId, String tenantId, Client client) {
+        WebTarget resource = client.target(GRAPH_WINDOWS + tenantId);
+        Builder request = resource.path("servicePrincipals/" + objectId).queryParam("api-version", GRAPH_API_VERSION).request();
+        request.accept(MediaType.APPLICATION_JSON);
+        request.header("Authorization", "Bearer " + accessToken);
+        Response response = request.get();
+
+        if (response.getStatus() != HttpStatus.SC_OK) {
+            throw new RetryException("Principal with objectId (" + objectId + ") hasn't been created yet");
+        }
+    }
+
+    private void checkTheAvailabilityWithResourceLogin(String objectId, String tenantId, AzureApplication app, Client client) {
+        WebTarget loginResource = client.target(LOGIN_MICROSOFTONLINE + tenantId);
+        Map<String, String> formData = new HashMap<>();
+        formData.put("grant_type", "client_credentials");
+        formData.put("client_id", app.getAppId());
+        formData.put("client_secret", app.getAzureApplicationCreationView().getAppSecret());
+        formData.put("resource", app.getAzureApplicationCreationView().getAppIdentifierURI());
+        Response loginResponse = loginResource.path("/oauth2/token")
+                .request()
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Content-Type", "application/x-www-form-urlencoded")
+                .post(Entity.form(new MultivaluedHashMap<>(formData)));
+
+        if (loginResponse.getStatus() != HttpStatus.SC_OK) {
+            throw new RetryException("Principal with objectId (" + objectId + ") hasn't been available yet");
+        }
     }
 }
