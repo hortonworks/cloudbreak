@@ -49,7 +49,6 @@ import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TlsSetupService;
-import com.sequenceiq.cloudbreak.service.usages.UsageService;
 
 @Service
 public class StackUpscaleService {
@@ -76,9 +75,6 @@ public class StackUpscaleService {
 
     @Inject
     private StackToCloudStackConverter cloudStackConverter;
-
-    @Inject
-    private UsageService usageService;
 
     @Inject
     private TlsSetupService tlsSetupService;
@@ -131,7 +127,6 @@ public class StackUpscaleService {
             eventService.fireCloudbreakEvent(stack.getId(), BillingStatus.BILLING_CHANGED.name(),
                     flowMessageService.message(Msg.STACK_METADATA_SETUP_BILLING_CHANGED));
             flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_METADATA_EXTEND, AVAILABLE.name());
-            usageService.scaleUsagesForStack(stack.getId(), instanceGroupName, nodeCount);
 
             return upscaleCandidateAddresses;
         });

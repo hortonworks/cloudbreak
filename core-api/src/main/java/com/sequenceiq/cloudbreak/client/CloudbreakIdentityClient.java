@@ -48,7 +48,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v1.SettingsEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.SmartSenseSubscriptionEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.StackV1Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.SubscriptionEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.UsageEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.UserEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.UtilEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v2.ConnectorV2Endpoint;
@@ -88,7 +87,6 @@ public class CloudbreakIdentityClient {
             BlueprintV3Endpoint.class,
             EventEndpoint.class,
             EventV3Endpoint.class,
-            UsageEndpoint.class,
             ClusterV1Endpoint.class,
             ClusterTemplateV3EndPoint.class,
             CredentialEndpoint.class,
@@ -205,10 +203,6 @@ public class CloudbreakIdentityClient {
 
     public EventV3Endpoint eventV3Endpoint() {
         return getEndpoint(EventV3Endpoint.class);
-    }
-
-    public UsageEndpoint usageEndpoint() {
-        return getEndpoint(UsageEndpoint.class);
     }
 
     public ClusterV1Endpoint clusterEndpoint() {

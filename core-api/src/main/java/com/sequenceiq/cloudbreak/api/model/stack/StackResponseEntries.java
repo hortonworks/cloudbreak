@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.api.model.stack;
 public enum StackResponseEntries {
 
     HARDWARE_INFO("hardware_info"),
-    USAGES("usages"),
     EVENTS("events");
 
     private final String entryName;
