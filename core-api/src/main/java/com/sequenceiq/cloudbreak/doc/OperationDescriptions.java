@@ -20,39 +20,6 @@ public class OperationDescriptions {
         public static final String DELETE_BY_NAME_IN_WORKSPACE = "delete blueprint by name in workspace";
     }
 
-    public static class TemplateOpDescription {
-        public static final String POST_PRIVATE = "create template as private resource";
-        public static final String POST_PUBLIC = "create template as public resource";
-        public static final String GET_PRIVATE = "retrieve private templates";
-        public static final String GET_PUBLIC = "retrieve public and private (owned) templates";
-        public static final String GET_PRIVATE_BY_NAME = "retrieve a private template by name";
-        public static final String GET_PUBLIC_BY_NAME = "retrieve a public or private (owned) template by name";
-        public static final String GET_BY_ID = "retrieve template by id";
-        public static final String DELETE_PRIVATE_BY_NAME = "delete private template by name";
-        public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private template by name";
-        public static final String DELETE_BY_ID = "delete template by id";
-    }
-
-    public static class ConstraintOpDescription {
-        public static final String POST_PRIVATE = "create constraint template as private resource";
-        public static final String POST_PUBLIC = "create constraint template as public resource";
-        public static final String GET_PRIVATE = "retrieve private constraint templates";
-        public static final String GET_PUBLIC = "retrieve public and private (owned) constraint templates";
-        public static final String GET_PRIVATE_BY_NAME = "retrieve a private constraint template by name";
-        public static final String GET_PUBLIC_BY_NAME = "retrieve a public or private (owned) constraint template by name";
-        public static final String GET_BY_ID = "retrieve constraint template by id";
-        public static final String DELETE_PRIVATE_BY_NAME = "delete private constraint template by name";
-        public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private constraint template by name";
-        public static final String DELETE_BY_ID = "delete constraint template by id";
-    }
-
-    public static class TopologyOpDesctiption {
-        public static final String GET_BY_ID = "retrieve topology by id";
-        public static final String GET_PUBLIC = "retrieve topoligies";
-        public static final String POST_PUBLIC = "create topology as public resource";
-        public static final String DELETE_BY_ID = "delete topology by id";
-    }
-
     public static class CredentialOpDescription {
         public static final String POST_PRIVATE = "create credential as private resource";
         public static final String PUT_PRIVATE = "modify private credential resource";
@@ -185,33 +152,12 @@ public class OperationDescriptions {
         public static final String UPDATE_USERS = "updates the users' permissions in the given workspace";
     }
 
-    public static class UsagesOpDescription {
-        public static final String GET_ALL = "retrieve usages by filter parameters";
-        public static final String GET_PUBLIC = "retrieve public and private (owned) usages by filter parameters";
-        public static final String GET_PRIVATE = "retrieve private usages by filter parameters";
-        public static final String GET_FLEX_DAILY = "retrieve Flex related daily usages";
-        public static final String GET_FLEX_LATEST = "retrieve Flex related latest usages, usages for the given day";
-    }
-
     public static class EventOpDescription {
         public static final String GET_BY_TIMESTAMP = "retrieve events by timestamp (long)";
         public static final String GET_BY_ID = "retrieve events by stackid (long)";
         public static final String GET_BY_NAME = "retrieve events by name";
         public static final String GET_EVENTS_BY_NAME = "retrieve events by name";
         public static final String GET_EVENTS_ZIP_BY_NAME = "retrieve events in zip by name";
-    }
-
-    public static class NetworkOpDescription {
-        public static final String POST_PRIVATE = "create network as private resource";
-        public static final String POST_PUBLIC = "create network as public resource";
-        public static final String GET_PRIVATE = "retrieve private networks";
-        public static final String GET_PUBLIC = "retrieve public and private (owned) networks";
-        public static final String GET_PRIVATE_BY_NAME = "retrieve a private network by name";
-        public static final String GET_PUBLIC_BY_NAME = "retrieve a public or private (owned) network by name";
-        public static final String GET_BY_ID = "retrieve network by id";
-        public static final String DELETE_PRIVATE_BY_NAME = "delete private network by name";
-        public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private network by name";
-        public static final String DELETE_BY_ID = "delete network by id";
     }
 
     public static class UserOpDescription {
@@ -222,19 +168,6 @@ public class OperationDescriptions {
         public static final String GET_TENANT_USERS = "retrieve all users in the tenant";
         public static final String USER_GET_PROFILE_IN_WORKSPACE = "user related profile in workspace";
         public static final String USER_PUT_PROFILE_IN_WORKSPACE = "modify user related profile in workspace";
-    }
-
-    public static class SecurityGroupOpDescription {
-        public static final String POST_PRIVATE = "create security group as private resource";
-        public static final String POST_PUBLIC = "create security group as public resource";
-        public static final String GET_PRIVATE = "retrieve private security groups";
-        public static final String GET_PUBLIC = "retrieve public and private (owned) security groups";
-        public static final String GET_PRIVATE_BY_NAME = "retrieve a private security group by name";
-        public static final String GET_PUBLIC_BY_NAME = "retrieve a public or private (owned) security group by name";
-        public static final String GET_BY_ID = "retrieve security group by id";
-        public static final String DELETE_PRIVATE_BY_NAME = "delete private security group by name";
-        public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private security group by name";
-        public static final String DELETE_BY_ID = "delete security group by id";
     }
 
     public static class AccountPreferencesDescription {

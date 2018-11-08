@@ -32,8 +32,6 @@ import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
-import com.sequenceiq.cloudbreak.service.usages.UsageService;
-import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Service
 public class StackStartStopService {
@@ -50,12 +48,6 @@ public class StackStartStopService {
 
     @Inject
     private MetadataSetupService metadatSetupService;
-
-    @Inject
-    private UsageService usageService;
-
-    @Inject
-    private StackUtil stackUtil;
 
     public void startStackStart(StackStartStopContext context) {
         Stack stack = context.getStack();
@@ -77,7 +69,6 @@ public class StackStartStopService {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STARTED, "Cluster infrastructure started successfully.");
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_STARTED, AVAILABLE.name());
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_BILLING_STARTED, BillingStatus.BILLING_STARTED.name());
-        usageService.startUsagesForStack(stack);
     }
 
     public void handleStackStartError(StackView stack, StackFailureEvent payload) {
@@ -100,7 +91,6 @@ public class StackStartStopService {
 
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_STOPPED, STOPPED.name());
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_BILLING_STOPPED, BillingStatus.BILLING_STOPPED.name());
-        usageService.stopUsagesForStack(stack);
     }
 
     public void handleStackStopError(StackView stack, StackFailureEvent payload) {

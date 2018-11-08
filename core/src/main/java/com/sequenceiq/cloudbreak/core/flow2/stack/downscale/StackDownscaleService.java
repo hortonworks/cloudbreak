@@ -28,7 +28,6 @@ import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
-import com.sequenceiq.cloudbreak.service.usages.UsageService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Service
@@ -43,9 +42,6 @@ public class StackDownscaleService {
 
     @Inject
     private StackScalingService stackScalingService;
-
-    @Inject
-    private UsageService usageService;
 
     @Inject
     private StackService stackService;
@@ -70,7 +66,7 @@ public class StackDownscaleService {
             throws TransactionExecutionException {
         Stack stack = context.getStack();
         InstanceGroup g = stack.getInstanceGroupByInstanceGroupName(instanceGroupName);
-        Integer nodeCount = stackScalingService.updateRemovedResourcesState(stack, instanceIds, g);
+        stackScalingService.updateRemovedResourcesState(stack, instanceIds, g);
         List<String> fqdns = stack.getInstanceGroups()
                 .stream().filter(ig -> ig.getGroupName().equals(instanceGroupName))
                 .flatMap(instanceGroup -> instanceGroup.getInstanceMetaDataSet().stream())
@@ -80,7 +76,6 @@ public class StackDownscaleService {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.DOWNSCALE_COMPLETED,
                 String.format("Downscale of the cluster infrastructure finished successfully. Terminated node(s): %s", fqdns));
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_DOWNSCALE_SUCCESS, AVAILABLE.name(), fqdns);
-        usageService.scaleUsagesForStack(stack.getId(), instanceGroupName, nodeCount);
     }
 
     public void handleStackDownscaleError(StackFailureContext context, Exception errorDetails) {
