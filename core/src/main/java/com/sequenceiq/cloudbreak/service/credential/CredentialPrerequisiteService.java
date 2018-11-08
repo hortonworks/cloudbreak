@@ -49,10 +49,10 @@ public class CredentialPrerequisiteService {
     @Inject
     private UserPreferencesService userPreferencesService;
 
-    public CredentialPrerequisites getPrerequisites(User user, Workspace workspace, String cloudPlatform) {
+    public CredentialPrerequisites getPrerequisites(User user, Workspace workspace, String cloudPlatform, String deploymentAddress) {
         CloudContext cloudContext = new CloudContext(null, null, cloudPlatform, user.getUserId(), workspace.getId());
         UserPreferences userPreferences = userPreferencesService.getWithExternalId(user);
-        CredentialPrerequisitesRequest request = new CredentialPrerequisitesRequest(cloudContext, userPreferences.getExternalId());
+        CredentialPrerequisitesRequest request = new CredentialPrerequisitesRequest(cloudContext, userPreferences.getExternalId(), deploymentAddress);
         LOGGER.debug("Triggering event: {}", request);
         eventBus.notify(request.selector(), eventFactory.createEvent(request));
         String message = String.format("Failed to get prerequisites for platform '%s': ", cloudPlatform);

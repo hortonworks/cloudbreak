@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.net.util.SubnetUtils;
 import org.slf4j.Logger;
@@ -385,12 +384,11 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
                 deallocateVirtualMachine(client, resourceGroupName, instanceId);
                 deleteVirtualMachine(client, resourceGroupName, instanceId);
                 if (instanceResources != null) {
-                    deleteNetworkInterfaces(client, resourceGroupName,
-                            CollectionUtils.emptyIfNull((Collection<String>) instanceResources.get(NETWORK_INTERFACES_NAMES)));
-                    deletePublicIps(client, resourceGroupName, CollectionUtils.emptyIfNull((Collection<String>) instanceResources.get(PUBLIC_ADDRESS_NAME)));
-                    deleteDisk(CollectionUtils.emptyIfNull((Collection<String>) instanceResources.get(STORAGE_PROFILE_DISK_NAMES)), client, resourceGroupName,
+                    deleteNetworkInterfaces(client, resourceGroupName, emptyIfNull(instanceResources.get(NETWORK_INTERFACES_NAMES)));
+                    deletePublicIps(client, resourceGroupName, emptyIfNull(instanceResources.get(PUBLIC_ADDRESS_NAME)));
+                    deleteDisk(emptyIfNull(instanceResources.get(STORAGE_PROFILE_DISK_NAMES)), client, resourceGroupName,
                             (String) instanceResources.get(ATTACHED_DISK_STORAGE_NAME), diskContainer);
-                    deleteManagedDisks(CollectionUtils.emptyIfNull((Collection<String>) instanceResources.get(MANAGED_DISK_IDS)), client);
+                    deleteManagedDisks(emptyIfNull(instanceResources.get(MANAGED_DISK_IDS)), client);
                     if (azureStorage.getArmAttachedStorageOption(stack.getParameters()) == ArmAttachedStorageOption.PER_VM) {
                         azureStorage.deleteStorage(client, (String) instanceResources.get(ATTACHED_DISK_STORAGE_NAME), resourceGroupName);
                     }
@@ -528,6 +526,10 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
 
     private String getNameFromConnectionString(String connection) {
         return connection.split("/")[connection.split("/").length - 1];
+    }
+
+    private Collection<String> emptyIfNull(Object collection) {
+        return collection == null ? Collections.emptySet() : (Collection<String>) collection;
     }
 
 }

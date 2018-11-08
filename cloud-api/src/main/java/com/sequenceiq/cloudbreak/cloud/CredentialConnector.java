@@ -8,6 +8,7 @@ import com.sequenceiq.cloudbreak.api.model.v3.credential.CredentialPrerequisites
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.credential.CredentialNotifier;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 
@@ -59,9 +60,20 @@ public interface CredentialConnector {
      * @param externalId that should be added as prerequisites
      * @return the necessary prerequisites for credential creation
      */
-    default CredentialPrerequisites getPrerequisites(CloudContext cloudContext, String externalId) {
+    default CredentialPrerequisites getPrerequisites(CloudContext cloudContext, String externalId, String deploymentAddress) {
         String message = String.format("There is no prerequisites for '%s' cloud platform!", cloudContext.getPlatform().value());
         throw new UnsupportedOperationException(message);
     }
 
+    /**
+     * Get the necessary information that is necessary to start an authorization code grant based credential creation flow.
+     *
+     * @param cloudContext the cloud context that holds the cloud related information
+     * @param cloudCredential the cloud credential that holds the credential creation related information
+     * @return the necessary information for a code grant flow based credential creation
+     */
+    default Map<String, String> initCodeGrantFlow(CloudContext cloudContext, CloudCredential cloudCredential) {
+        String message = String.format("There is no prerequisites for '%s' cloud platform!", cloudContext.getPlatform().value());
+        throw new UnsupportedOperationException(message);
+    }
 }

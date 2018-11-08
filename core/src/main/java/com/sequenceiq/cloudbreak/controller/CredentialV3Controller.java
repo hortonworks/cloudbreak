@@ -8,6 +8,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
+import javax.ws.rs.core.Response;
 
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Controller;
@@ -89,9 +90,31 @@ public class CredentialV3Controller extends NotificationController implements Cr
     }
 
     @Override
-    public CredentialPrerequisites getPrerequisitesForCloudPlatform(Long workspaceId, String platform) {
+    public CredentialPrerequisites getPrerequisitesForCloudPlatform(Long workspaceId, String platform, String deploymentAddress) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
-        return credentialService.getPrerequisites(user, workspace, platform);
+        return credentialService.getPrerequisites(user, workspace, platform, deploymentAddress);
+    }
+
+    @Override
+    public Response initCodeGrantFlow(Long workspaceId, CredentialRequest credentialRequest) {
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
+        String loginURL = credentialService.initCodeGrantFlow(workspaceId, conversionService.convert(credentialRequest, Credential.class), user);
+        return Response.status(Response.Status.FOUND).header("Referrer-Policy", "origin-when-cross-origin").header("Location", loginURL).build();
+    }
+
+    @Override
+    public Response initCodeGrantFlowOnExisting(Long workspaceId, String name) {
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
+        String loginURL = credentialService.initCodeGrantFlow(workspaceId, name, user);
+        return Response.status(Response.Status.FOUND).header("Referrer-Policy", "origin-when-cross-origin").header("Location", loginURL).build();
+    }
+
+    @Override
+    public CredentialResponse authorizeCodeGrantFlow(Long workspaceId, String platform, String code, String state) {
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
+        Credential credential = credentialService.authorizeCodeGrantFlow(code, state, workspaceId, user, platform);
+        notify(ResourceEvent.CREDENTIAL_CREATED);
+        return conversionService.convert(credential, CredentialResponse.class);
     }
 }
