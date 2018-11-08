@@ -71,6 +71,16 @@ public class BlueprintSegmentProcessor {
             resultBlueprint.set(blueprintProcessorFactory.get(resultBlueprint.get()).addSettingsEntryStringToBlueprint(serviceContent, false).asText());
 
         });
+
+        Map<ServiceName, TemplateFiles> kerberosDescriptorMap = blueprintSegmentReader.collectAllKerberosDescriptorFile();
+        LOGGER.info("The collected entries are for kerberosDescriptorMap: {}", kerberosDescriptorMap);
+        collectContents(kerberosDescriptorMap, resultBlueprint.get(), file -> {
+            LOGGER.info("The actual file is: {}", file);
+            String kerberosDescriptorServiceContent = prepareContent(file, source, customProperties);
+            LOGGER.debug("The generated content is: {}", kerberosDescriptorServiceContent);
+            resultBlueprint.set(blueprintProcessorFactory.get(resultBlueprint.get())
+                    .addKerberosDescriptorEntryStringToBlueprint(kerberosDescriptorServiceContent, false).asText());
+        });
         return resultBlueprint.get();
     }
 

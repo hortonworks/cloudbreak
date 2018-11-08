@@ -17,6 +17,8 @@ import java.util.stream.StreamSupport;
 
 import javax.annotation.Nonnull;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -31,6 +33,8 @@ import com.sequenceiq.cloudbreak.template.processor.configuration.HostgroupConfi
 import com.sequenceiq.cloudbreak.template.processor.configuration.SiteConfiguration;
 import com.sequenceiq.cloudbreak.template.processor.configuration.SiteConfigurations;
 import com.sequenceiq.cloudbreak.template.processor.configuration.SiteSettingsConfigurations;
+import com.sequenceiq.cloudbreak.template.processor.kerberos.KerberosDescriptorService;
+import com.sequenceiq.cloudbreak.template.processor.kerberos.KerberosServiceConfiguration;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 public class BlueprintTextProcessor {
@@ -40,6 +44,10 @@ public class BlueprintTextProcessor {
     private static final String SETTINGS_NODE = "settings";
 
     private static final String SECURITY_NODE = "security";
+
+    private static final String KERBEROS_DESCRIPTOR_NODE = "kerberos_descriptor";
+
+    private static final String SERVICES_NODE = "services";
 
     private static final String PROPERTIES_NODE = "properties";
 
@@ -52,6 +60,8 @@ public class BlueprintTextProcessor {
     private static final String STACK_VERSION = "stack_version";
 
     private static final String STACK_NAME = "stack_name";
+
+    private static final String NAME_NODE = "name";
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -184,10 +194,10 @@ public class BlueprintTextProcessor {
         Iterator<JsonNode> hostGroups = hostGroupsNode.elements();
         while (hostGroups.hasNext()) {
             JsonNode hostGroupNode = hostGroups.next();
-            if (hostGroup.equals(hostGroupNode.path("name").textValue())) {
+            if (hostGroup.equals(hostGroupNode.path(NAME_NODE).textValue())) {
                 Iterator<JsonNode> components = hostGroupNode.path(COMPONENTS_NODE).elements();
                 while (components.hasNext()) {
-                    services.add(components.next().path("name").textValue());
+                    services.add(components.next().path(NAME_NODE).textValue());
                 }
                 break;
             }
@@ -249,9 +259,64 @@ public class BlueprintTextProcessor {
 
     private ObjectNode getHostgroup(ArrayNode hostgroups, String name) {
         try (Stream<JsonNode> jns = StreamSupport.stream(hostgroups.spliterator(), false)) {
-            return (ObjectNode) jns.filter(jsonNode -> jsonNode.get("name").textValue().equals(name)).distinct().findFirst()
+            return (ObjectNode) jns.filter(jsonNode -> jsonNode.get(NAME_NODE).textValue().equals(name)).distinct().findFirst()
                     .orElseThrow(() -> new BlueprintProcessingException(String.format("There is no such host group as \"%s\"", name)));
         }
+    }
+
+    private BlueprintTextProcessor extendBlueprintKerberosDescriptor(KerberosDescriptorService service, boolean forced) {
+        if (service != null) {
+            ObjectNode blueprintNode = addObjectNodeIfMissing(blueprint, BLUEPRINTS);
+            ObjectNode securityNode = addObjectNodeIfMissing(blueprintNode, SECURITY_NODE);
+            ObjectNode kerberosDescriptorNode = addObjectNodeIfMissing(securityNode, KERBEROS_DESCRIPTOR_NODE);
+            ArrayNode servicesNode = addArrayNodeIfMissing(kerberosDescriptorNode, SERVICES_NODE);
+            ObjectNode serviceNode = findServiceNodeByNameIfPresent(service, servicesNode);
+            if (serviceNode == null) {
+                serviceNode = servicesNode.addObject();
+                serviceNode.put(NAME_NODE, service.getName());
+            }
+            ArrayNode configurationsNode = addArrayNodeIfMissing(serviceNode, CONFIGURATIONS_NODE);
+            for (Map.Entry<String, KerberosServiceConfiguration> entry : service.getConfigurations().entrySet()) {
+                ObjectNode configNode = (ObjectNode) configurationsNode.findValue(entry.getKey());
+                if (configNode == null) {
+                    configNode = configurationsNode.addObject();
+                    ObjectNode configNodeWithChildren = configNode.putObject(entry.getKey());
+                    putAll(configNodeWithChildren, entry.getValue().getConfigurations());
+                } else {
+                    putAllObjects(configNode, entry.getValue().getConfigurations(), forced);
+                }
+            }
+        }
+        return this;
+    }
+
+    private ObjectNode findServiceNodeByNameIfPresent(KerberosDescriptorService service, ArrayNode servicesNode) {
+        ObjectNode serviceNode = null;
+        for (Iterator<JsonNode> serviceElementIterator = servicesNode.elements(); serviceElementIterator.hasNext();) {
+            JsonNode serviceElement = serviceElementIterator.next();
+            JsonNode nameNode = serviceElement.findValue(NAME_NODE);
+            if (!nameNode.isMissingNode() && nameNode.textValue().equals(service.getName())) {
+                serviceNode = (ObjectNode) serviceElement;
+                break;
+            }
+        }
+        return serviceNode;
+    }
+
+    private ObjectNode addObjectNodeIfMissing(ObjectNode parent, String path) {
+        JsonNode node = parent.path(path);
+        if (node.isMissingNode()) {
+            return parent.putObject(path);
+        }
+        return (ObjectNode) node;
+    }
+
+    private ArrayNode addArrayNodeIfMissing(ObjectNode parent, String path) {
+        JsonNode node = parent.path(path);
+        if (node.isMissingNode()) {
+            return parent.putArray(path);
+        }
+        return (ArrayNode) node;
     }
 
     public BlueprintTextProcessor extendBlueprintGlobalConfiguration(SiteConfigurations globalConfig, boolean forced) {
@@ -347,7 +412,7 @@ public class BlueprintTextProcessor {
                 if (found != null) {
                     foundNum += 1;
                 }
-                if ("name".equals(key) && !conf.getProperties().get(key).equals(found.asText())) {
+                if (NAME_NODE.equals(key) && !conf.getProperties().get(key).equals(found.asText())) {
                     foundNum = 0;
                     continue;
                 }
@@ -411,9 +476,9 @@ public class BlueprintTextProcessor {
         for (JsonNode hostGroup : hostGroups) {
             JsonNode components = hostGroup.path(COMPONENTS_NODE);
             for (JsonNode c : components) {
-                String name = c.path("name").asText();
+                String name = c.path(NAME_NODE).asText();
                 if (name.equalsIgnoreCase(component)) {
-                    result.add(hostGroup.path("name").asText());
+                    result.add(hostGroup.path(NAME_NODE).asText());
                 }
             }
         }
@@ -427,9 +492,9 @@ public class BlueprintTextProcessor {
             JsonNode components = hostGroupNode.path(COMPONENTS_NODE);
             Set<String> componentNames = new HashSet<>();
             for (JsonNode componentNode : components) {
-                componentNames.add(componentNode.path("name").asText());
+                componentNames.add(componentNode.path(NAME_NODE).asText());
             }
-            result.put(hostGroupNode.path("name").asText(), componentNames);
+            result.put(hostGroupNode.path(NAME_NODE).asText(), componentNames);
         }
         return result;
     }
@@ -442,6 +507,40 @@ public class BlueprintTextProcessor {
     public BlueprintTextProcessor addConfigEntryStringToBlueprint(String config, boolean forced) {
         SiteConfigurations configs = convertTextToConfiguration(config);
         return extendBlueprintGlobalConfiguration(configs, forced);
+    }
+
+    public BlueprintTextProcessor addKerberosDescriptorEntryStringToBlueprint(String config, boolean forced) {
+        KerberosDescriptorService service = convertTextToKerberosDescriptorService(config);
+        return extendBlueprintKerberosDescriptor(service, forced);
+    }
+
+    private KerberosDescriptorService convertTextToKerberosDescriptorService(String config) {
+        try {
+            ObjectNode root = (ObjectNode) JsonUtil.readTreeByArray(config);
+            JsonNode name = root.findValue(NAME_NODE);
+            if (name != null && StringUtils.isNotBlank(name.textValue())) {
+                KerberosDescriptorService kerberosDescriptorService = new KerberosDescriptorService(name.textValue());
+                ArrayNode configurations = (ArrayNode) root.findValue("configurations");
+                for (JsonNode configuration : configurations) {
+                    for (Iterator<Map.Entry<String, JsonNode>> configEntry = configuration.fields(); configEntry.hasNext();) {
+                        Map.Entry<String, JsonNode> next = configEntry.next();
+                        Map<String, String> configProps = new HashMap<>();
+                        for (Iterator<Map.Entry<String, JsonNode>> props = next.getValue().fields(); props.hasNext();) {
+                            Map.Entry<String, JsonNode> entry = props.next();
+                            configProps.put(entry.getKey(), entry.getValue().textValue());
+                        }
+                        if (!configProps.isEmpty()) {
+                            kerberosDescriptorService.getConfigurations().put(next.getKey(), new KerberosServiceConfiguration(configProps));
+                        }
+                    }
+                }
+                return kerberosDescriptorService;
+            } else {
+                return null;
+            }
+        } catch (IOException e) {
+            throw new BlueprintProcessingException("Failed to parse configuration ('" + config + "').", e);
+        }
     }
 
     private SiteSettingsConfigurations convertTextToSettings(String config) {
@@ -540,7 +639,7 @@ public class BlueprintTextProcessor {
             JsonNode hostGroupNode = hostGroups.next();
             Iterator<JsonNode> components = hostGroupNode.path(COMPONENTS_NODE).elements();
             while (components.hasNext()) {
-                if (component.equals(components.next().path("name").textValue())) {
+                if (component.equals(components.next().path(NAME_NODE).textValue())) {
                     components.remove();
                 }
             }
@@ -571,7 +670,7 @@ public class BlueprintTextProcessor {
         Iterator<JsonNode> hostGroups = hostGroupsNode.elements();
         while (hostGroups.hasNext()) {
             JsonNode hostGroupNode = hostGroups.next();
-            String hostGroupName = hostGroupNode.path("name").textValue();
+            String hostGroupName = hostGroupNode.path(NAME_NODE).textValue();
             if (hostGroupNames.contains(hostGroupName) && !componentExistsInHostgroup(component, hostGroupNode)) {
                 ArrayNode components = getArrayFromJsonNodeByPath(hostGroupNode, COMPONENTS_NODE);
                 components.addPOJO(new BlueprintTextProcessor.ComponentElement(component));
@@ -585,7 +684,7 @@ public class BlueprintTextProcessor {
         Iterator<JsonNode> hostGroups = hostGroupsNode.elements();
         while (hostGroups.hasNext()) {
             JsonNode hostGroupNode = hostGroups.next();
-            String hostGroupName = hostGroupNode.path("name").textValue();
+            String hostGroupName = hostGroupNode.path(NAME_NODE).textValue();
             if (addToHostgroup.test(hostGroupName) && !componentExistsInHostgroup(component, hostGroupNode)) {
                 ArrayNode components = getArrayFromJsonNodeByPath(hostGroupNode, COMPONENTS_NODE);
                 components.addPOJO(new BlueprintTextProcessor.ComponentElement(component));
@@ -608,7 +707,7 @@ public class BlueprintTextProcessor {
         boolean componentExists = false;
         Iterator<JsonNode> components = hostGroupNode.path(COMPONENTS_NODE).elements();
         while (components.hasNext()) {
-            if (component.equals(components.next().path("name").textValue())) {
+            if (component.equals(components.next().path(NAME_NODE).textValue())) {
                 componentExists = true;
                 break;
             }

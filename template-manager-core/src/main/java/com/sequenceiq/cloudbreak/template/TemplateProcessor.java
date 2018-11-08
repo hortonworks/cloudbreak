@@ -54,6 +54,7 @@ public class TemplateProcessor {
         source.getFixInputs().putAll(customProperties);
         return new TemplateModelContextBuilder()
                 .withLdap(source.getLdapConfig().orElse(null))
+                .withKerberos(source.getKerberosConfig().orElse(null))
                 .withSharedServiceConfigs(source.getSharedServiceConfigs().orElse(null))
                 .withComponents(source.getBlueprintView().getComponents())
                 .withGateway(source.getGatewayView())
