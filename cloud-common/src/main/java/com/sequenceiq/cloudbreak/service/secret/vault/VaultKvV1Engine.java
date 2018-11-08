@@ -32,19 +32,14 @@ public class VaultKvV1Engine implements SecretEngine {
 
     @Override
     public boolean isExists(String path) {
-        if (!isSecret(path)) {
-            path = appPath + path;
-        }
-        VaultResponse response = template.read(path);
+        String fullPath = appPath + path;
+        VaultResponse response = template.read(fullPath);
         return response != null && response.getData() != null;
     }
 
     @Override
     @Cacheable(cacheNames = "vaultCache")
     public String get(@NotNull String path) {
-        if (!isSecret(path)) {
-            return path;
-        }
         VaultResponse response = template.read(path);
         if (response != null && response.getData() != null) {
             return String.valueOf(response.getData().get("secret"));

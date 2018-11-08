@@ -97,13 +97,13 @@ public class BlueprintLoaderService {
         LOGGER.info("Updating default blueprints which are contains text modifications.");
         Map<String, Blueprint> defaultBlueprints = defaultBlueprintCache.defaultBlueprints();
         for (Blueprint blueprintFromDatabase : blueprints) {
-            Blueprint newBlueprint = defaultBlueprints.get(blueprintFromDatabase.getName());
-            if (defaultBlueprintExistInTheCache(newBlueprint)
-                    && (defaultBlueprintSameAsNewTexts(blueprintFromDatabase, newBlueprint)
-                    || defaultBlueprintContainsNewDescription(blueprintFromDatabase, newBlueprint))) {
+            Blueprint defaultBlueprint = defaultBlueprints.get(blueprintFromDatabase.getName());
+            if (defaultBlueprintExistInTheCache(defaultBlueprint)
+                    && (defaultBlueprintSameAsNewTexts(blueprintFromDatabase, defaultBlueprint.getBlueprintText())
+                    || defaultBlueprintContainsNewDescription(blueprintFromDatabase, defaultBlueprint))) {
                 LOGGER.info("Default Blueprint '{}' needs to modify for the '{}' workspace because the validation text changed.",
                         blueprintFromDatabase.getName(), workspace.getId());
-                resultList.add(prepareBlueprint(blueprintFromDatabase, newBlueprint, workspace));
+                resultList.add(prepareBlueprint(blueprintFromDatabase, defaultBlueprint, workspace));
             }
         }
         LOGGER.info("Finished to Update default blueprints which are contains text modifications.");
@@ -155,10 +155,9 @@ public class BlueprintLoaderService {
         return DEFAULT.equals(bp.getStatus());
     }
 
-    private boolean defaultBlueprintSameAsNewTexts(Blueprint bp1, Blueprint bp2) {
-        String bp1Text = secretService.get(bp1.getBlueprintText());
-        String bp2Text = secretService.get(bp2.getBlueprintText());
-        return !bp1Text.equals(bp2Text);
+    private boolean defaultBlueprintSameAsNewTexts(Blueprint blueprintFromDatabase, String defaultBlueprintText) {
+        String blueprintText = secretService.get(blueprintFromDatabase.getBlueprintText());
+        return !blueprintText.equals(defaultBlueprintText);
     }
 
     private boolean defaultBlueprintContainsNewDescription(Blueprint bp, Blueprint blueprint) {
@@ -172,7 +171,7 @@ public class BlueprintLoaderService {
     private boolean mustUpdateTheExistingBlueprint(Blueprint blueprintFromDatabase, Blueprint defaultBlueprint) {
         return isDefaultBlueprint(blueprintFromDatabase)
                 && defaultBlueprintExistInTheCache(defaultBlueprint)
-                && (defaultBlueprintSameAsNewTexts(blueprintFromDatabase, defaultBlueprint)
+                && (defaultBlueprintSameAsNewTexts(blueprintFromDatabase, defaultBlueprint.getBlueprintText())
                 || defaultBlueprintContainsNewDescription(blueprintFromDatabase, defaultBlueprint));
     }
 

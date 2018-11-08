@@ -22,7 +22,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import com.sequenceiq.cloudbreak.api.model.DirectoryType;
-import com.sequenceiq.cloudbreak.aspect.vault.SecretValue;
+import com.sequenceiq.cloudbreak.aspect.secret.SecretValue;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.environment.EnvironmentAwareResource;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
