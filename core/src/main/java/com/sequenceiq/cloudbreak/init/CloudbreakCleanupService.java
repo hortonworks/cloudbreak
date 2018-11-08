@@ -45,7 +45,6 @@ import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.flowlog.FlowLogService;
 import com.sequenceiq.cloudbreak.service.ha.HeartbeatService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.usages.UsageService;
 
 @Component
 public class CloudbreakCleanupService implements ApplicationListener<ContextRefreshedEvent> {
@@ -80,9 +79,6 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
     private ReactorFlowManager flowManager;
 
     @Inject
-    private UsageService usageService;
-
-    @Inject
     private Flow2Handler flow2Handler;
 
     @Inject
@@ -101,7 +97,6 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
             List<Long> stackIdsUnderOperation = restartOrUpdateUnassignedDisruptedFlows();
             stackIdsUnderOperation.addAll(restartMyAssignedDisruptedFlows());
             stackIdsUnderOperation.addAll(excludeStacksByFlowAssignment());
-            usageService.fixUsages();
             List<Stack> stacksToSync = resetStackStatus(stackIdsUnderOperation);
             List<Cluster> clustersToSync = resetClusterStatus(stacksToSync, stackIdsUnderOperation);
             triggerSyncs(stacksToSync, clustersToSync);
