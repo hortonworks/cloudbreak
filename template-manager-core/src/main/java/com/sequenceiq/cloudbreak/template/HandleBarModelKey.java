@@ -7,6 +7,7 @@ public enum HandleBarModelKey {
 
     COMPONENTS("components"),
     LDAP("ldap"),
+    KERBEROS("kerberos"),
     GATEWAY("gateway"),
     RDS("rds"),
     FILESYSTEMCONFIGS("fileSystemConfigs"),

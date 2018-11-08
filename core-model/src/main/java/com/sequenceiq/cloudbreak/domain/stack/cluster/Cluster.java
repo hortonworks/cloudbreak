@@ -37,8 +37,6 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import org.apache.commons.lang3.StringUtils;
-
 import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.Status;
@@ -61,6 +59,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
+import com.sequenceiq.cloudbreak.type.KerberosType;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name"}))
@@ -550,7 +549,7 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
     }
 
     public boolean isAdJoinable() {
-        return isSecure() && kerberosConfig != null && StringUtils.isNotBlank(kerberosConfig.getLdapUrl());
+        return isSecure() && kerberosConfig != null && kerberosConfig.getType() == KerberosType.EXISTING_AD;
     }
 
     @Override

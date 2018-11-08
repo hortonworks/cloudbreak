@@ -1,0 +1,10 @@
+{
+    "name": "YARN",
+    "configurations": [
+      {
+        "capacity-scheduler": {
+          "yarn.scheduler.capacity.root.default.acl_submit_applications": "*"
+        },
+      }
+    ]
+}

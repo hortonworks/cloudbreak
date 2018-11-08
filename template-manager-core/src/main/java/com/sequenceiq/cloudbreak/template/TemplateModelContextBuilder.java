@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
@@ -30,6 +31,8 @@ public class TemplateModelContextBuilder {
     private final Map<String, BaseFileSystemConfigurationsView> fileSystemConfig = new HashMap<>();
 
     private Optional<LdapView> ldap = Optional.empty();
+
+    private Optional<KerberosConfig> kerberos = Optional.empty();
 
     private Optional<GatewayView> gateway = Optional.empty();
 
@@ -78,6 +81,11 @@ public class TemplateModelContextBuilder {
 
     public TemplateModelContextBuilder withLdap(LdapView ldapView) {
         ldap = Optional.ofNullable(ldapView);
+        return this;
+    }
+
+    public TemplateModelContextBuilder withKerberos(KerberosConfig kerberosConfig) {
+        kerberos = Optional.ofNullable(kerberosConfig);
         return this;
     }
 
@@ -141,6 +149,7 @@ public class TemplateModelContextBuilder {
         Map<String, Object> blueprintTemplateModelContext = new HashMap<>();
         blueprintTemplateModelContext.put(HandleBarModelKey.COMPONENTS.modelKey(), components);
         blueprintTemplateModelContext.put(HandleBarModelKey.LDAP.modelKey(), ldap.orElse(null));
+        blueprintTemplateModelContext.put(HandleBarModelKey.KERBEROS.modelKey(), kerberos.orElse(null));
         blueprintTemplateModelContext.put(HandleBarModelKey.GATEWAY.modelKey(), gateway.orElse(null));
         blueprintTemplateModelContext.put(HandleBarModelKey.RDS.modelKey(), rds);
         blueprintTemplateModelContext.put(HandleBarModelKey.FILESYSTEMCONFIGS.modelKey(), ModelConverterUtils.convert(fileSystemConfig));
