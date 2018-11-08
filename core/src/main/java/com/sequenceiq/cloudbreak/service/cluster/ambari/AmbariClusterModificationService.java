@@ -185,7 +185,8 @@ public class AmbariClusterModificationService implements ClusterModificationServ
             List<Map<String, String>> hostGroupAssociation = hostGroupAssociationBuilder.buildHostGroupAssociation(hostGroup);
             Map<String, String> hostsWithRackInfo = hostGroupAssociation.stream()
                     .filter(associationMap -> hosts.stream().anyMatch(host -> host.equals(associationMap.get(FQDN))))
-                    .collect(Collectors.toMap(association -> association.get(FQDN), association -> association.get("rack")));
+                    .collect(Collectors.toMap(association -> association.get(FQDN), association ->
+                            association.get("rack") != null ? association.get("rack") : "/default-rack"));
             int upscaleRequestCode = ambariClient.addHostsAndRackInfoWithBlueprint(blueprintName, hostGroup.getName(), hostsWithRackInfo);
             String ambariServerVersion = ambariClient.ambariServerVersion();
             if (!ambariRepositoryVersionService.isVersionNewerOrEqualThanLimited(() -> ambariServerVersion, AMBARI_VERSION_2_7_0_0)) {
