@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.aspect.vault;
+package com.sequenceiq.cloudbreak.aspect.secret;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
