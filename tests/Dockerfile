@@ -19,7 +19,7 @@ RUN apk --no-cache --update add \
     build-base \
     libc-dev \
     linux-headers \
-    openssl1.0-dev \
+    libressl-dev \
     libxml2-dev \
     libgcrypt-dev \
     libxslt-dev \
