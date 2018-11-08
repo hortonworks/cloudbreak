@@ -10,13 +10,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 @Service
 public class SecretService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SecretService.class);
 
-    @Value("${cb.secret.engine:}")
+    @Value("${secret.engine:}")
     private String engineClass;
 
     @Inject
@@ -26,8 +27,10 @@ public class SecretService {
 
     @PostConstruct
     public void init() {
-        secretEngine = engines.stream().filter(e -> e.getClass().getCanonicalName().startsWith(engineClass + "$$")).findFirst()
+        if (StringUtils.hasLength(engineClass)) {
+            secretEngine = engines.stream().filter(e -> e.getClass().getCanonicalName().startsWith(engineClass + "$$")).findFirst()
                 .orElseThrow(() -> new RuntimeException(String.format("Selected secret engine (%s) is not found, please check cb.secret.engine", engineClass)));
+        }
     }
 
     /**

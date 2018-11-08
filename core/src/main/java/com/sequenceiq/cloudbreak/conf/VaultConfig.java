@@ -57,28 +57,28 @@ public class VaultConfig extends AbstractVaultConfiguration {
 
     private static final String AUTH_TYPE_K8S = "kubernetes";
 
-    @Value("${cb.vault.addr:}")
+    @Value("${vault.addr:}")
     private String address;
 
-    @Value("${cb.vault.port:}")
+    @Value("${vault.port:}")
     private int port;
 
-    @Value("${cb.vault.root.token:}")
+    @Value("${vault.root.token:}")
     private String rootToken;
 
-    @Value("${cb.vault.ssl.enabled:}")
+    @Value("${vault.ssl.enabled:}")
     private Boolean sslEnabled;
 
-    @Value("${cb.vault.auth.type:}")
+    @Value("${vault.auth.type:}")
     private String authType;
 
-    @Value("${cb.vault.auth.kubernetes.mount.path:}")
+    @Value("${vault.auth.kubernetes.mount.path:}")
     private String kubernetesMountPath;
 
-    @Value("${cb.vault.auth.kubernetes.login.role:}")
+    @Value("${vault.auth.kubernetes.login.role:}")
     private String kubernetesLoginRole;
 
-    @Value("${cb.vault.auth.kubernetes.service.account.token.path:}")
+    @Value("${vault.auth.kubernetes.service.account.token.path:}")
     private String kubernetesSATokenPath;
 
     @Value("${https.proxyUser:}")
