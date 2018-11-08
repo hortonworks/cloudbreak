@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cache;
+package com.sequenceiq.cloudbreak.conf;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -25,6 +25,8 @@ import org.springframework.cache.interceptor.SimpleKeyGenerator;
 import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import com.sequenceiq.cloudbreak.cache.CacheDefinition;
 
 @Configuration
 @EnableCaching
