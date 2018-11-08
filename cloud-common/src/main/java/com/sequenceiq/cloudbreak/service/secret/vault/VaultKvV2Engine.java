@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.service.secret.SecretEngine;
 @Component("VaultKvV2Engine")
 public class VaultKvV2Engine implements SecretEngine {
 
-    @Value("#{'${cb.secret.application:}/'}")
+    @Value("#{'${secret.application:}/'}")
     private String appPath;
 
     @Value("${vault.kv.engine.path:}")
@@ -36,19 +36,14 @@ public class VaultKvV2Engine implements SecretEngine {
 
     @Override
     public boolean isExists(String path) {
-        if (!isSecret(path)) {
-            path = appPath + path;
-        }
-        Versioned<Map<String, Object>> response = template.opsForVersionedKeyValue(enginePath).get(path);
+        String fullPath = appPath + path;
+        Versioned<Map<String, Object>> response = template.opsForVersionedKeyValue(enginePath).get(fullPath);
         return response != null && response.getData() != null;
     }
 
     @Override
     @Cacheable(cacheNames = "vaultCache")
     public String get(@NotNull String path) {
-        if (!isSecret(path)) {
-            return path;
-        }
         Versioned<Map<String, Object>> response = template.opsForVersionedKeyValue(enginePath).get(path);
         if (response != null && response.getData() != null) {
             return String.valueOf(response.getData().get("secret"));

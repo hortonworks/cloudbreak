@@ -15,7 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.aspect.vault.SecretValue;
+import com.sequenceiq.cloudbreak.aspect.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.secret.SecretService;
 
@@ -45,22 +45,22 @@ public class SecretAspects {
     }
 
     @Around("onRepositorySave()")
-    public Object saveToVault(ProceedingJoinPoint proceedingJoinPoint) throws CloudbreakException {
+    public Object saveToSecretStore(ProceedingJoinPoint proceedingJoinPoint) throws CloudbreakException {
         return proceedSave(proceedingJoinPoint);
     }
 
     @Around("onRepositoryDelete()")
-    public Object removeFromVault(ProceedingJoinPoint proceedingJoinPoint) throws CloudbreakException {
+    public Object removeFromSecretStore(ProceedingJoinPoint proceedingJoinPoint) throws CloudbreakException {
         return proceedDelete(proceedingJoinPoint);
     }
 
     @Around("onRepositorySaveAll()")
-    public Object saveAllToVault(ProceedingJoinPoint proceedingJoinPoint) throws CloudbreakException {
+    public Object saveAllToSecretStore(ProceedingJoinPoint proceedingJoinPoint) throws CloudbreakException {
         return proceedSave(proceedingJoinPoint);
     }
 
     @Around("onRepositoryDeleteAll()")
-    public Object removeAllFromVault(ProceedingJoinPoint proceedingJoinPoint) throws CloudbreakException {
+    public Object removeAllFromSecretStore(ProceedingJoinPoint proceedingJoinPoint) throws CloudbreakException {
         return proceedDelete(proceedingJoinPoint);
     }
 
@@ -85,7 +85,7 @@ public class SecretAspects {
                     }
                 }
             } catch (Exception e) {
-                LOGGER.warn("Looks like something went wrong with Vault. Data is not encrypted!", e);
+                LOGGER.warn("Looks like something went wrong with Secret Store. Data is not encrypted!", e);
                 throw new CloudbreakException(e);
             }
         }
@@ -114,7 +114,7 @@ public class SecretAspects {
                     }
                 }
             } catch (Exception e) {
-                LOGGER.warn("Looks like something went wrong with Vault. Secret is not deleted!", e);
+                LOGGER.warn("Looks like something went wrong with Secret store. Secret is not deleted!", e);
                 throw new CloudbreakException(e);
             }
         }
