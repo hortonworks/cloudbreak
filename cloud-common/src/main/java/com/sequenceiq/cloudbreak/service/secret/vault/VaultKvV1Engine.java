@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.service.secret.SecretEngine;
 @Component("VaultKvV1Engine")
 public class VaultKvV1Engine implements SecretEngine {
 
-    @Value("#{'${cb.vault.kv.engine.path:}/${cb.secret.application:}/'}")
+    @Value("#{'${vault.kv.engine.path:}/${secret.application:}/'}")
     private String appPath;
 
     @Inject

@@ -10,13 +10,13 @@ import org.springframework.vault.config.AbstractVaultConfiguration;
 @Configuration
 public class VaultConfig extends AbstractVaultConfiguration {
 
-    @Value("${periscope.vault.addr:vault.service.consul}")
+    @Value("${vault.addr:vault.service.consul}")
     private String address;
 
-    @Value("${periscope.vault.port:8200}")
+    @Value("${vault.port:8200}")
     private int port;
 
-    @Value("${periscope.vault.root.token:}")
+    @Value("${vault.root.token:}")
     private String rootToken;
 
     @Override
