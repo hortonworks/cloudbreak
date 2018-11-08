@@ -243,6 +243,11 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
         if (credential == null) {
             throw new NotFoundException("Credential not found.");
         }
+        checkStacksForDeletion(credential);
+        checkEnvironmentsForDeletion(credential);
+    }
+
+    private void checkStacksForDeletion(Credential credential) {
         Set<Stack> stacksForCredential = stackRepository.findByCredential(credential);
         if (!stacksForCredential.isEmpty()) {
             String clusters;
@@ -260,10 +265,13 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
             }
             throw new BadRequestException(String.format(message, credential.getName(), clusters));
         }
+    }
+
+    private void checkEnvironmentsForDeletion(Credential credential) {
         Set<EnvironmentView> environments = environmentViewRepository.findAllByCredentialId(credential.getId());
         if (!environments.isEmpty()) {
             String environmentList = environments.stream().map(EnvironmentView::getName).collect(Collectors.joining(", "));
-            String message = "The following environments are using the '%s' credential: [%s]. Please remove them before deleting the credential.";
+            String message = "Credential '%s' cannot be deleted because the following environments are using it: [%s].";
             throw new BadRequestException(String.format(message, credential.getName(), environmentList));
         }
     }

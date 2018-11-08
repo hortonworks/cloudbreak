@@ -140,11 +140,11 @@ public class RdsConfigServiceTest {
     }
 
     private void mockClusterServiceWithEmptyList() {
-        when(clusterService.findAllClustersByRDSConfig(anyLong())).thenReturn(Collections.emptySet());
+        when(clusterService.findByRdsConfig(anyLong())).thenReturn(Collections.emptySet());
     }
 
     private void mockClusterServiceWithSingletonList() {
-        when(clusterService.findAllClustersByRDSConfig(anyLong())).thenReturn(Collections.singleton(new Cluster()));
+        when(clusterService.findByRdsConfig(anyLong())).thenReturn(Collections.singleton(new Cluster()));
     }
 
     private void mockClusterServiceWithList() {
@@ -152,7 +152,7 @@ public class RdsConfigServiceTest {
         cluster1.setName("ClusterWithRDS");
         Cluster cluster2 = new Cluster();
         cluster2.setName("ClusterWithRDS");
-        when(clusterService.findAllClustersByRDSConfig(anyLong())).thenReturn(Sets.newHashSet(cluster1, cluster2));
+        when(clusterService.findByRdsConfig(anyLong())).thenReturn(Sets.newHashSet(cluster1, cluster2));
     }
 
     @Test

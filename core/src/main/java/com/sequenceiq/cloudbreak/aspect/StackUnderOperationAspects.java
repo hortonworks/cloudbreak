@@ -22,7 +22,7 @@ public class StackUnderOperationAspects {
     public void interceptStackMethod() {
     }
 
-    @Pointcut("execution(public * com.sequenceiq.cloudbreak.repository.ClusterRepository+.*(..))")
+    @Pointcut("execution(public * com.sequenceiq.cloudbreak.repository.cluster.ClusterRepository+.*(..))")
     public void interceptClusterMethod() {
     }
 

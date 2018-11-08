@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.repository.ClusterRepository;
+import com.sequenceiq.cloudbreak.repository.cluster.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;

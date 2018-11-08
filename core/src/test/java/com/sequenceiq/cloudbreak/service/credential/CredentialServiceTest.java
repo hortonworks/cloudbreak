@@ -17,7 +17,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -329,7 +328,7 @@ public class CredentialServiceTest {
         } catch (BadRequestException ex) {
             String msg = String.format(String.format("There is a cluster associated with credential config '%s'. Please remove before deleting the credential. "
                     + "The following cluster is using this credential: [%s]", TEST_CREDENTIAL_NAME, stackName));
-            Assert.assertEquals(msg, ex.getMessage());
+            assertEquals(msg, ex.getMessage());
         }
 
         verify(stackRepository, times(1)).findByCredential(testCredential);
@@ -353,7 +352,7 @@ public class CredentialServiceTest {
         } catch (BadRequestException ex) {
             String msg = String.format("There are clusters associated with credential config '%s'. Please remove these before deleting the credential. "
                     + "The following clusters are using this credential: [%s]", TEST_CREDENTIAL_NAME, String.format("%s, %s", stack1Name, stack2Name));
-            Assert.assertEquals(msg, ex.getMessage());
+            assertEquals(msg, ex.getMessage());
         }
 
         verify(stackRepository, times(1)).findByCredential(testCredential);
@@ -385,9 +384,9 @@ public class CredentialServiceTest {
         try {
             credentialService.delete(TEST_CREDENTIAL_NAME, workspace);
         } catch (BadRequestException ex) {
-            String msg = String.format("The following environments are using the '%s' credential: [%s]. Please remove them before deleting the credential.",
+            String msg = String.format("Credential '%s' cannot be deleted because the following environments are using it: [%s].",
                 TEST_CREDENTIAL_NAME, envs.stream().map(EnvironmentView::getName).collect(Collectors.joining(", ")));
-            Assert.assertEquals(msg, ex.getMessage());
+            assertEquals(msg, ex.getMessage());
         }
         // THEN
         verify(stackRepository, times(1)).findByCredential(credential);

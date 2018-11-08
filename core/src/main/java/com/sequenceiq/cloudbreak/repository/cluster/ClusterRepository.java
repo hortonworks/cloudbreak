@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.repository;
+package com.sequenceiq.cloudbreak.repository.cluster;
 
 import java.util.Collection;
 import java.util.List;
@@ -50,19 +50,31 @@ public interface ClusterRepository extends WorkspaceResourceRepository<Cluster, 
     List<Cluster> findAllClustersForConstraintTemplate(@Param("id") Long id);
 
     @CheckPermissionsByReturnValue
-    @Query("SELECT c FROM Cluster c inner join c.rdsConfigs rc WHERE rc.id= :id")
-    Set<Cluster> findAllClustersByRDSConfig(@Param("id") Long rdsConfigId);
-
-    @CheckPermissionsByReturnValue
     @Query("SELECT c FROM Cluster c LEFT JOIN FETCH c.stack WHERE c.workspace = null")
     Set<Cluster> findAllWithNoWorkspace();
-
-    @CheckPermissionsByReturnValue
-    List<Cluster> findByLdapConfig(LdapConfig ldapConfig);
 
     @CheckPermissionsByReturnValue
     Set<Cluster> findByBlueprint(Blueprint blueprint);
 
     @CheckPermissionsByReturnValue
+    Set<Cluster> findByLdapConfig(LdapConfig ldapConfig);
+
+    @CheckPermissionsByReturnValue
+    @Query("SELECT c FROM Cluster c WHERE c.environment.id = :environmentId AND c.ldapConfig = :ldapConfig")
+    Set<Cluster> findByLdapConfigAndEnvironment(@Param("ldapConfig") LdapConfig ldapConfig, @Param("environmentId") Long environmentId);
+
+    @CheckPermissionsByReturnValue
     Set<Cluster> findByProxyConfig(ProxyConfig proxyConfig);
+
+    @CheckPermissionsByReturnValue
+    @Query("SELECT c FROM Cluster c WHERE c.environment.id = :environmentId AND c.proxyConfig = :proxyConfig")
+    Set<Cluster> findByProxyConfigAndEnvironment(@Param("proxyConfig") ProxyConfig proxyConfig, @Param("environmentId") Long environmentId);
+
+    @CheckPermissionsByReturnValue
+    @Query("SELECT c FROM Cluster c INNER JOIN c.rdsConfigs rc WHERE rc.id= :id")
+    Set<Cluster> findByRdsConfig(@Param("id") Long rdsConfigId);
+
+    @CheckPermissionsByReturnValue
+    @Query("SELECT c FROM Cluster c INNER JOIN c.rdsConfigs rc WHERE c.environment.id = :environmentId AND rc.id= :id")
+    Set<Cluster> findByRdsConfigAndEnvironment(@Param("id") Long rdsConfigId, @Param("environmentId") Long environmentId);
 }

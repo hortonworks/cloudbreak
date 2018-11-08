@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.environment;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -9,11 +10,14 @@ import javax.inject.Named;
 import javax.validation.constraints.NotNull;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.util.CollectionUtils;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
+import com.sequenceiq.cloudbreak.controller.validation.environment.ResourceDetachValidator;
 import com.sequenceiq.cloudbreak.domain.environment.EnvironmentAwareResource;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.repository.environment.EnvironmentResourceRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
@@ -24,13 +28,19 @@ public abstract class AbstractEnvironmentAwareService<T extends EnvironmentAware
     private EnvironmentViewService environmentViewService;
 
     @Inject
+    private EnvironmentService environmentService;
+
+    @Inject
+    private ResourceDetachValidator resourceDetachValidator;
+
+    @Inject
     @Named("conversionService")
     private ConversionService conversionService;
 
     public T createInEnvironment(T resource, Set<String> environments, @NotNull Long workspaceId) {
-        Set<EnvironmentView> environmentViews = environmentViewService.findByNamesInWorkspace(environments, workspaceId);
-        validateAttachDetach(environmentViews, environments, "created");
-        resource.setEnvironments(environmentViews);
+        Set<EnvironmentView> environmentsInWorkspace = environmentViewService.findByNamesInWorkspace(environments, workspaceId);
+        validateEnvironments(environmentsInWorkspace, environments, "created");
+        resource.setEnvironments(environmentsInWorkspace);
         return createForLoggedInUser(resource, workspaceId);
     }
 
@@ -39,11 +49,11 @@ public abstract class AbstractEnvironmentAwareService<T extends EnvironmentAware
     }
 
     public T attachToEnvironments(String resourceName, Set<String> environments, @NotNull Long workspaceId) {
-        Set<EnvironmentView> environmentViews = environmentViewService.findByNamesInWorkspace(environments, workspaceId);
-        validateAttachDetach(environmentViews, environments, "attached");
+        Set<EnvironmentView> environmentsInWorkspace = environmentViewService.findByNamesInWorkspace(environments, workspaceId);
+        validateEnvironments(environmentsInWorkspace, environments, "attached");
         T resource = getByNameForWorkspaceId(resourceName, workspaceId);
-        resource.getEnvironments().removeAll(environmentViews);
-        resource.getEnvironments().addAll(environmentViews);
+        resource.getEnvironments().removeAll(environmentsInWorkspace);
+        resource.getEnvironments().addAll(environmentsInWorkspace);
         return repository().save(resource);
     }
 
@@ -52,10 +62,11 @@ public abstract class AbstractEnvironmentAwareService<T extends EnvironmentAware
     }
 
     public T detachFromEnvironments(String resourceName, Set<String> environments, @NotNull Long workspaceId) {
-        Set<EnvironmentView> environmentViews = environmentViewService.findByNamesInWorkspace(environments, workspaceId);
-        validateAttachDetach(environmentViews, environments, "detached");
+        Set<EnvironmentView> environmentsInWorkspace = environmentViewService.findByNamesInWorkspace(environments, workspaceId);
+        validateEnvironments(environmentsInWorkspace, environments, "detached");
         T resource = getByNameForWorkspaceId(resourceName, workspaceId);
-        resource.getEnvironments().removeAll(environmentViews);
+        checkClustersForDetach(resource, environmentsInWorkspace);
+        resource.getEnvironments().removeAll(environmentsInWorkspace);
         return repository().save(resource);
     }
 
@@ -87,11 +98,35 @@ public abstract class AbstractEnvironmentAwareService<T extends EnvironmentAware
         return resources;
     }
 
-    protected abstract EnvironmentResourceRepository<T, Long> repository();
+    @Override
+    protected void prepareDeletion(T resource) {
+        checkClustersForDeletion(resource);
+    }
 
-    private void validateAttachDetach(Set<EnvironmentView> environmentViews, Set<String> environments, String messageEnding) {
-        if (environmentViews.size() < environments.size()) {
-            Set<String> existingEnvNames = environmentViews.stream().map(EnvironmentView::getName)
+    protected void checkClustersForDeletion(T resource) {
+        Set<Cluster> clustersWithThisProxy = getClustersUsingResource(resource);
+        if (!clustersWithThisProxy.isEmpty()) {
+            String clusters = clustersWithThisProxy
+                    .stream()
+                    .map(Cluster::getName)
+                    .collect(Collectors.joining(", "));
+            throw new BadRequestException(String.format(resource().getReadableName() + " '%s' cannot be deleted"
+                    + " because there are clusters associated with it: [%s].", resource.getName(), clusters));
+        }
+    }
+
+    protected void checkClustersForDetach(T resource, Set<EnvironmentView> envsInWorkspace) {
+        Map<EnvironmentView, Set<Cluster>> envsToClusters = envsInWorkspace.stream()
+                .collect(Collectors.toMap(env -> env, env -> getClustersUsingResourceInEnvironment(resource, env.getId())));
+        ValidationResult validationResult = resourceDetachValidator.validate(resource, envsToClusters);
+        if (validationResult.hasError()) {
+            throw new BadRequestException(validationResult.getFormattedErrors());
+        }
+    }
+
+    private void validateEnvironments(Set<EnvironmentView> environmentsInWorkspace, Set<String> environments, String messageEnding) {
+        if (environmentsInWorkspace.size() < environments.size()) {
+            Set<String> existingEnvNames = environmentsInWorkspace.stream().map(EnvironmentView::getName)
                     .collect(Collectors.toSet());
             Set<String> requestedEnvironments = new HashSet<>(environments);
             requestedEnvironments.removeAll(existingEnvNames);
@@ -102,6 +137,12 @@ public abstract class AbstractEnvironmentAwareService<T extends EnvironmentAware
             );
         }
     }
+
+    protected abstract EnvironmentResourceRepository<T, Long> repository();
+
+    public abstract Set<Cluster> getClustersUsingResource(T resource);
+
+    public abstract Set<Cluster> getClustersUsingResourceInEnvironment(T resource, Long environmentId);
 
     public EnvironmentViewService environmentViewService() {
         return environmentViewService;

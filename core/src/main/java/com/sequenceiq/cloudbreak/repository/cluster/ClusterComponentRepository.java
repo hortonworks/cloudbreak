@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.repository;
+package com.sequenceiq.cloudbreak.repository.cluster;
 
 import java.util.Set;
 

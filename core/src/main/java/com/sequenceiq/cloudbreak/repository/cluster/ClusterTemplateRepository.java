@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.repository;
+package com.sequenceiq.cloudbreak.repository.cluster;
 
 import static com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action.READ;
 

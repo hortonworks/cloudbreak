@@ -18,6 +18,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.environment.EnvironmentAwareResource;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.environment.EnvironmentResourceRepository;
@@ -189,12 +190,23 @@ public class AbstractEnvironmentAwareServiceTest {
     }
 
     private static class TestResourceService extends AbstractEnvironmentAwareService<TestResource> {
+
         @Inject
         private EnvironmentResourceRepository repository;
 
         @Override
         protected EnvironmentResourceRepository repository() {
             return repository;
+        }
+
+        @Override
+        public Set<Cluster> getClustersUsingResource(TestResource resource) {
+            return null;
+        }
+
+        @Override
+        public Set<Cluster> getClustersUsingResourceInEnvironment(TestResource resource, Long environmentId) {
+            return null;
         }
 
         @Override

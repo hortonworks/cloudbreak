@@ -35,7 +35,7 @@ import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
-import com.sequenceiq.cloudbreak.repository.ClusterRepository;
+import com.sequenceiq.cloudbreak.repository.cluster.ClusterRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.TransactionService;

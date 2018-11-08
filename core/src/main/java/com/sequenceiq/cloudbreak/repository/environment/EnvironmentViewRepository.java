@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.service.EntityType;
 @Transactional(TxType.REQUIRED)
 @WorkspaceResourceType(resource = WorkspaceResource.ENVIRONMENT)
 public interface EnvironmentViewRepository extends WorkspaceResourceRepository<EnvironmentView, Long> {
+
     @CheckPermissionsByWorkspaceId(action = READ, workspaceIdIndex = 1)
     Set<EnvironmentView> findAllByNameInAndWorkspaceId(Collection<String> names, Long workspaceId);
 

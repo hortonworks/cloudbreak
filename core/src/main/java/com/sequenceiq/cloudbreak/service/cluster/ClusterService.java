@@ -92,11 +92,11 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.json.JsonHelper;
-import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.ConstraintRepository;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.KerberosConfigRepository;
+import com.sequenceiq.cloudbreak.repository.cluster.ClusterRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
@@ -220,6 +220,7 @@ public class ClusterService {
         }
         return transactionService.required(() -> {
             cluster.setWorkspace(stack.getWorkspace());
+            cluster.setEnvironment(stack.getEnvironment());
 
             long start = System.currentTimeMillis();
             if (clusterRepository.findByNameAndWorkspace(cluster.getName(), stack.getWorkspace()) != null) {
@@ -1049,24 +1050,36 @@ public class ClusterService {
         return clusterRepository.findOneWithLists(id);
     }
 
-    public Set<Cluster> findAllClustersByRDSConfig(Long rdsConfigId) {
-        return clusterRepository.findAllClustersByRDSConfig(rdsConfigId);
-    }
-
-    public Set<Cluster> findByProxyConfig(ProxyConfig proxyConfig) {
-        return clusterRepository.findByProxyConfig(proxyConfig);
-    }
-
-    public List<Cluster> findByLdapConfigWithoutAuth(LdapConfig ldapConfig) {
-        return clusterRepository.findByLdapConfig(ldapConfig);
-    }
-
     public Optional<Cluster> findById(Long clusterId) {
         return clusterRepository.findById(clusterId);
     }
 
     public List<Cluster> findAllClustersForConstraintTemplate(Long constraintTemplateId) {
         return clusterRepository.findAllClustersForConstraintTemplate(constraintTemplateId);
+    }
+
+    public Set<Cluster> findByLdapConfig(LdapConfig ldapConfig) {
+        return clusterRepository.findByLdapConfig(ldapConfig);
+    }
+
+    public Set<Cluster> findAllClustersByLdapConfigInEnvironment(LdapConfig ldapConfig, Long environmentId) {
+        return clusterRepository.findByLdapConfigAndEnvironment(ldapConfig, environmentId);
+    }
+
+    public Set<Cluster> findByProxyConfig(ProxyConfig proxyConfig) {
+        return clusterRepository.findByProxyConfig(proxyConfig);
+    }
+
+    public Set<Cluster> findAllClustersByProxyConfigInEnvironment(ProxyConfig proxyConfig, Long environmentId) {
+        return clusterRepository.findByProxyConfigAndEnvironment(proxyConfig, environmentId);
+    }
+
+    public Set<Cluster> findByRdsConfig(Long rdsConfigId) {
+        return clusterRepository.findByRdsConfig(rdsConfigId);
+    }
+
+    public Set<Cluster> findAllClustersByRdsConfigInEnvironment(RDSConfig rdsConfig, Long environmentId) {
+        return clusterRepository.findByRdsConfigAndEnvironment(rdsConfig.getId(), environmentId);
     }
 
     public void updateAmbariRepoDetails(Long clusterId, AmbariStackDetailsJson ambariStackDetails) {

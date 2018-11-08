@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.init.clustertemplate.ClusterTemplateLoaderService;
-import com.sequenceiq.cloudbreak.repository.ClusterTemplateRepository;
+import com.sequenceiq.cloudbreak.repository.cluster.ClusterTemplateRepository;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;

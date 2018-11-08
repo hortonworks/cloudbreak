@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
 
 @MappedSuperclass
 public abstract class CompactView implements ProvisionEntity, WorkspaceAwareResource {
+
     @ManyToOne
     private Workspace workspace;
 

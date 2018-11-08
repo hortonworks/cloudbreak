@@ -2,11 +2,8 @@ package com.sequenceiq.cloudbreak.service.rdsconfig;
 
 import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -33,6 +30,7 @@ import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecution
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.environment.AbstractEnvironmentAwareService;
+import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
 import com.sequenceiq.cloudbreak.util.NameUtil;
 
 @Service
@@ -45,6 +43,9 @@ public class RdsConfigService extends AbstractEnvironmentAwareService<RDSConfig>
 
     @Inject
     private ClusterService clusterService;
+
+    @Inject
+    private StackApiViewService stackApiViewService;
 
     @Inject
     private RdsConnectionValidator rdsConnectionValidator;
@@ -121,25 +122,6 @@ public class RdsConfigService extends AbstractEnvironmentAwareService<RDSConfig>
         rdsConfigs.stream().filter(rdsConfig -> ResourceStatus.DEFAULT == rdsConfig.getStatus()).forEach(this::setStatusToDeleted);
     }
 
-    private void checkRdsConfigNotAssociated(RDSConfig rdsConfig) {
-        LOGGER.info("Deleting rds configuration with name: {}", rdsConfig.getName());
-        List<Cluster> clustersWithProvidedRds = new ArrayList<>(clusterService.findAllClustersByRDSConfig(rdsConfig.getId()));
-        if (!clustersWithProvidedRds.isEmpty()) {
-            if (clustersWithProvidedRds.size() > 1) {
-                String clusters = clustersWithProvidedRds
-                        .stream()
-                        .map(Cluster::getName)
-                        .collect(Collectors.joining(", "));
-                throw new BadRequestException(String.format(
-                        "There are clusters associated with RDS config '%s'. Please remove these before deleting the RDS configuration. "
-                                + "The following clusters are using this RDS: [%s]", rdsConfig.getName(), clusters));
-            } else {
-                throw new BadRequestException(String.format("There is a cluster ['%s'] which uses RDS config '%s'. Please remove this "
-                        + "cluster before deleting the RDS", clustersWithProvidedRds.get(0).getName(), rdsConfig.getName()));
-            }
-        }
-    }
-
     private void setStatusToDeleted(RDSConfig rdsConfig) {
         rdsConfig.setName(NameUtil.postfixWithTimestamp(rdsConfig.getName()));
         rdsConfig.setStatus(ResourceStatus.DEFAULT_DELETED);
@@ -156,16 +138,26 @@ public class RdsConfigService extends AbstractEnvironmentAwareService<RDSConfig>
     }
 
     @Override
+    public Set<Cluster> getClustersUsingResource(RDSConfig rdsConfig) {
+        return clusterService.findByRdsConfig(rdsConfig.getId());
+    }
+
+    @Override
+    public Set<Cluster> getClustersUsingResourceInEnvironment(RDSConfig rdsConfig, Long environmentId) {
+        return clusterService.findAllClustersByRdsConfigInEnvironment(rdsConfig, environmentId);
+    }
+
+    @Override
     public WorkspaceResource resource() {
         return WorkspaceResource.RDS;
     }
 
     @Override
-    protected void prepareDeletion(RDSConfig resource) {
-        checkRdsConfigNotAssociated(resource);
-        if (!ResourceStatus.USER_MANAGED.equals(resource.getStatus())) {
-            setStatusToDeleted(resource);
-            throw new BadRequestException(String.format("RDS config '%s' is not usr managed", resource.getName()));
+    protected void prepareDeletion(RDSConfig rdsConfig) {
+        checkClustersForDeletion(rdsConfig);
+        if (!ResourceStatus.USER_MANAGED.equals(rdsConfig.getStatus())) {
+            setStatusToDeleted(rdsConfig);
+            throw new BadRequestException(String.format("RDS config '%s' is not user managed", rdsConfig.getName()));
         }
     }
 

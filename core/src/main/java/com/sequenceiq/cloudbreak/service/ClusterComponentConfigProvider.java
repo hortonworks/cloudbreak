@@ -20,8 +20,8 @@ import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
-import com.sequenceiq.cloudbreak.repository.ClusterComponentRepository;
-import com.sequenceiq.cloudbreak.repository.ClusterComponentViewRepository;
+import com.sequenceiq.cloudbreak.repository.cluster.ClusterComponentRepository;
+import com.sequenceiq.cloudbreak.repository.cluster.ClusterComponentViewRepository;
 
 @Service
 public class ClusterComponentConfigProvider {
