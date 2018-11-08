@@ -19,6 +19,9 @@ public class CredentialResponse extends CredentialBase {
     @ApiModelProperty
     private WorkspaceResourceResponse workspace;
 
+    @ApiModelProperty(ModelDescriptions.CredentialModelDescription.PARAMETERS_PATH)
+    private String parametersPath;
+
     @JsonProperty("public")
     public boolean isPublicInAccount() {
         return publicInAccount;
@@ -43,5 +46,13 @@ public class CredentialResponse extends CredentialBase {
 
     public void setWorkspace(WorkspaceResourceResponse workspace) {
         this.workspace = workspace;
+    }
+
+    public void setParametersPath(String parametersPath) {
+        this.parametersPath = parametersPath;
+    }
+
+    public String getParametersPath() {
+        return parametersPath;
     }
 }
