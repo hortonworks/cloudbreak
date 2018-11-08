@@ -48,9 +48,9 @@ public class EnvironmentToDetailedEnvironmentResponseConverter extends AbstractC
                         .stream()
                         .map(rdsConfig -> getConversionService().convert(rdsConfig, RDSConfigResponse.class))
                         .collect(Collectors.toSet()));
-        if (!CollectionUtils.isEmpty(source.getWorkloadClusters())) {
+        if (!CollectionUtils.isEmpty(source.getWorkloadStacks())) {
             response.setWorkloadClusters(
-                    source.getWorkloadClusters()
+                    source.getWorkloadStacks()
                     .stream()
                     .map(workload -> getConversionService().convert(workload, StackViewResponse.class))
                     .collect(Collectors.toSet()));

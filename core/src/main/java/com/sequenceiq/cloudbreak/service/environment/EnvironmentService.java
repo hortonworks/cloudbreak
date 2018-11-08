@@ -11,9 +11,11 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.validation.constraints.NotNull;
 
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -31,6 +33,7 @@ import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.environment.EnvironmentAttachValidator;
 import com.sequenceiq.cloudbreak.controller.validation.environment.EnvironmentCreationValidator;
+import com.sequenceiq.cloudbreak.controller.validation.environment.EnvironmentDetachValidator;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.PlatformResourceRequest;
@@ -39,6 +42,7 @@ import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.environment.Environment;
 import com.sequenceiq.cloudbreak.domain.environment.Region;
 import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.repository.environment.EnvironmentRepository;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
@@ -100,6 +104,9 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
     @Inject
     private CloudParameterCache cloudParameterCache;
 
+    @Inject
+    private EnvironmentDetachValidator environmentDetachValidator;
+
     public Set<SimpleEnvironmentResponse> listByWorkspaceId(Long workspaceId) {
         return environmentViewService.findAllByWorkspaceId(workspaceId).stream()
                 .map(env -> conversionService.convert(env, SimpleEnvironmentResponse.class))
@@ -108,6 +115,10 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
 
     public DetailedEnvironmentResponse get(String environmentName, Long workspaceId) {
         return conversionService.convert(getByNameForWorkspaceId(environmentName, workspaceId), DetailedEnvironmentResponse.class);
+    }
+
+    public Set<Environment> findByNamesInWorkspace(Set<String> names, @NotNull Long workspaceId) {
+        return CollectionUtils.isEmpty(names) ? new HashSet<>() : environmentRepository.findAllByNameInAndWorkspaceId(names, workspaceId);
     }
 
     @Override
@@ -215,17 +226,44 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
 
     public DetailedEnvironmentResponse detachResources(String environmentName, EnvironmentDetachRequest request, Long workspaceId) {
         Environment environment = getByNameForWorkspaceId(environmentName, workspaceId);
-        Set<LdapConfig> ldapsToRemove = environment.getLdapConfigs().stream()
+        ValidationResult validationResult = validateAndDetachLdaps(request, environment);
+        validationResult = validateAndDetachProxies(request, environment, validationResult);
+        validationResult = validateAndDetachRdss(request, environment, validationResult);
+        if (validationResult.hasError()) {
+            throw new BadRequestException(validationResult.getFormattedErrors());
+        }
+        Environment saved = environmentRepository.save(environment);
+        return conversionService.convert(saved, DetailedEnvironmentResponse.class);
+    }
+
+    private ValidationResult validateAndDetachLdaps(EnvironmentDetachRequest request, Environment environment) {
+        Set<LdapConfig> ldapsToDetach = environment.getLdapConfigs().stream()
                 .filter(ldap -> request.getLdapConfigs().contains(ldap.getName())).collect(Collectors.toSet());
-        environment.getLdapConfigs().removeAll(ldapsToRemove);
-        Set<ProxyConfig> proxiesToRemove = environment.getProxyConfigs().stream()
+        Map<LdapConfig, Set<Cluster>> ldapsToClusters = ldapsToDetach.stream()
+                .collect(Collectors.toMap(ldap -> ldap, ldap -> ldapConfigService.getClustersUsingResourceInEnvironment(ldap, environment.getId())));
+        ValidationResult validationResult = environmentDetachValidator.validate(environment, ldapsToClusters);
+        environment.getLdapConfigs().removeAll(ldapsToDetach);
+        return validationResult;
+    }
+
+    private ValidationResult validateAndDetachProxies(EnvironmentDetachRequest request, Environment environment, ValidationResult validationResult) {
+        Set<ProxyConfig> proxiesToDetach = environment.getProxyConfigs().stream()
                 .filter(proxy -> request.getProxyConfigs().contains(proxy.getName())).collect(Collectors.toSet());
-        environment.getProxyConfigs().removeAll(proxiesToRemove);
-        Set<RDSConfig> rdssToRemove = environment.getRdsConfigs().stream()
+        Map<ProxyConfig, Set<Cluster>> proxiesToClusters = proxiesToDetach.stream()
+                .collect(Collectors.toMap(proxy -> proxy, proxy -> proxyConfigService.getClustersUsingResourceInEnvironment(proxy, environment.getId())));
+        validationResult = environmentDetachValidator.validate(environment, proxiesToClusters).merge(validationResult);
+        environment.getProxyConfigs().removeAll(proxiesToDetach);
+        return validationResult;
+    }
+
+    private ValidationResult validateAndDetachRdss(EnvironmentDetachRequest request, Environment environment, ValidationResult validationResult) {
+        Set<RDSConfig> rdssToDetach = environment.getRdsConfigs().stream()
                 .filter(rds -> request.getRdsConfigs().contains(rds.getName())).collect(Collectors.toSet());
-        environment.getRdsConfigs().removeAll(rdssToRemove);
-        environment = environmentRepository.save(environment);
-        return conversionService.convert(environment, DetailedEnvironmentResponse.class);
+        Map<RDSConfig, Set<Cluster>> rdssToClusters = rdssToDetach.stream()
+                .collect(Collectors.toMap(rds -> rds, rds -> rdsConfigService.getClustersUsingResourceInEnvironment(rds, environment.getId())));
+        validationResult = environmentDetachValidator.validate(environment, rdssToClusters).merge(validationResult);
+        environment.getRdsConfigs().removeAll(rdssToDetach);
+        return validationResult;
     }
 
     public DetailedEnvironmentResponse changeCredential(String environmentName, Long workspaceId, EnvironmentChangeCredentialRequest request) {
@@ -233,12 +271,12 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
             return transactionService.required(() -> {
                 Environment environment = getByNameForWorkspaceId(environmentName, workspaceId);
                 Credential credential = environmentCredentialOperationService.validatePlatformAndGetCredential(request, environment, workspaceId);
-                Set<StackApiView> stacksCannotBeChanged = environment.getWorkloadClusters().stream()
+                Set<StackApiView> stacksCannotBeChanged = environment.getWorkloadStacks().stream()
                         .filter(stackApiView -> !stackApiViewService.canChangeCredential(stackApiView))
                         .collect(Collectors.toSet());
                 if (stacksCannotBeChanged.isEmpty()) {
                     environment.setCredential(credential);
-                    environment.getWorkloadClusters().forEach(stackApiView -> {
+                    environment.getWorkloadStacks().forEach(stackApiView -> {
                         stackApiView.setCredential(credential);
                         stackApiViewService.save(stackApiView);
                     });

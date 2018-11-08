@@ -26,7 +26,9 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
@@ -52,6 +54,7 @@ import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.environment.EnvironmentCreationValidator;
+import com.sequenceiq.cloudbreak.controller.validation.environment.EnvironmentDetachValidator;
 import com.sequenceiq.cloudbreak.converter.LdapConfigToLdapConfigResponseConverter;
 import com.sequenceiq.cloudbreak.converter.ProxyConfigToProxyConfigResponseConverter;
 import com.sequenceiq.cloudbreak.converter.RDSConfigToRDSConfigResponseConverter;
@@ -62,6 +65,7 @@ import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.environment.Environment;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
@@ -83,9 +87,14 @@ public class EnvironmentServiceTest {
 
     private static final Long WORKSPACE_ID = 1L;
 
+    private static final Long ENVIRONMENT_ID = 1L;
+
     private static final String CREDENTIAL_NAME = "cred1";
 
     private static final String ENVIRONMENT_NAME = "EnvName";
+
+    @Rule
+    public final ExpectedException exceptionRule = ExpectedException.none();
 
     @Mock
     private UserService userService;
@@ -129,6 +138,9 @@ public class EnvironmentServiceTest {
     @Mock
     private TransactionService transactionService;
 
+    @Spy
+    private EnvironmentDetachValidator environmentDetachValidator = new EnvironmentDetachValidator();
+
     private ArgumentCaptor<StackApiView> stackApiViewCaptor = ArgumentCaptor.forClass(StackApiView.class);
 
     @InjectMocks
@@ -167,6 +179,7 @@ public class EnvironmentServiceTest {
         when(workspaceService.get(anyLong(), any())).thenReturn(workspace);
         when(workspaceService.retrieveForUser(any())).thenReturn(Set.of(workspace));
         assertNotNull(regionConverter);
+        assertNotNull(environmentDetachValidator);
     }
 
     @Test
@@ -303,22 +316,12 @@ public class EnvironmentServiceTest {
         rds2.setDatabaseEngine(DatabaseVendor.POSTGRES);
         environment.setRdsConfigs(Sets.newHashSet(rds1, rds2));
 
-        Credential credential = new Credential();
-        credential.setName("credential1");
-        environment.setCredential(credential);
-        environment.setWorkloadClusters(new HashSet<>());
+        setCredential(environment);
 
         when(environmentRepository.findByNameAndWorkspaceId(ENVIRONMENT_NAME, WORKSPACE_ID)).thenReturn(environment);
         when(environmentRepository.save(any(Environment.class)))
                 .thenAnswer((Answer<Environment>) invocation -> (Environment) invocation.getArgument(0));
-        when(conversionService.convert(any(Environment.class), eq(DetailedEnvironmentResponse.class)))
-                .thenAnswer((Answer<DetailedEnvironmentResponse>) invocation -> environmentConverter.convert((Environment) invocation.getArgument(0)));
-        when(conversionService.convert(any(LdapConfig.class), eq(LdapConfigResponse.class)))
-                .thenAnswer((Answer<LdapConfigResponse>) invocation -> ldapConfigResponseConverter.convert((LdapConfig) invocation.getArgument(0)));
-        when(conversionService.convert(any(ProxyConfig.class), eq(ProxyConfigResponse.class)))
-                .thenAnswer((Answer<ProxyConfigResponse>) invocation -> proxyConfigResponseConverter.convert((ProxyConfig) invocation.getArgument(0)));
-        when(conversionService.convert(any(RDSConfig.class), eq(RDSConfigResponse.class)))
-                .thenAnswer((Answer<RDSConfigResponse>) invocation -> rdsConfigResponseConverter.convert((RDSConfig) invocation.getArgument(0)));
+        mockConverters();
 
         EnvironmentDetachRequest detachRequest = new EnvironmentDetachRequest();
         detachRequest.getLdapConfigs().add(ldapName1);
@@ -352,7 +355,7 @@ public class EnvironmentServiceTest {
         StackApiView stackApiView2 = new StackApiView();
         workloadClusters.add(stackApiView1);
         workloadClusters.add(stackApiView2);
-        environment.setWorkloadClusters(workloadClusters);
+        environment.setWorkloadStacks(workloadClusters);
         String credentialName2 = "credential2";
         Credential credential2 = new Credential();
         credential2.setName(credentialName2);
@@ -389,7 +392,7 @@ public class EnvironmentServiceTest {
         StackApiView stackApiView2 = new StackApiView();
         workloadClusters.add(stackApiView1);
         workloadClusters.add(stackApiView2);
-        environment.setWorkloadClusters(workloadClusters);
+        environment.setWorkloadStacks(workloadClusters);
         String credentialName2 = "credential2";
         Credential credential2 = new Credential();
         credential2.setName(credentialName2);
@@ -418,7 +421,7 @@ public class EnvironmentServiceTest {
         StackApiView stackApiView2 = new StackApiView();
         workloadClusters.add(stackApiView1);
         workloadClusters.add(stackApiView2);
-        environment.setWorkloadClusters(workloadClusters);
+        environment.setWorkloadStacks(workloadClusters);
         when(environmentCredentialOperationService.validatePlatformAndGetCredential(any(), any(), anyLong()))
                 .thenThrow(new BadRequestException(""));
 
@@ -426,5 +429,172 @@ public class EnvironmentServiceTest {
         request.setCredentialName("credential2");
 
         environmentService.changeCredential(ENVIRONMENT_NAME, WORKSPACE_ID, request);
+    }
+
+    @Test
+    public void testDetachHappyPath() {
+        Environment environment = new Environment();
+        environment.setName(ENVIRONMENT_NAME);
+        setCredential(environment);
+
+        LdapConfig ldap1 = new LdapConfig();
+        ldap1.setId(1L);
+        String ldapName1 = "ldap1";
+        ldap1.setName(ldapName1);
+
+        LdapConfig ldap2 = new LdapConfig();
+        ldap2.setId(2L);
+        String ldapName2 = "ldap2";
+        ldap2.setName(ldapName2);
+
+        LdapConfig ldap3 = new LdapConfig();
+        ldap3.setId(3L);
+        String ldapName3 = "ldap3";
+        ldap3.setName(ldapName3);
+
+        ProxyConfig proxy1 = new ProxyConfig();
+        proxy1.setId(1L);
+        String proxyName1 = "proxy1";
+        proxy1.setName(proxyName1);
+
+        ProxyConfig proxy2 = new ProxyConfig();
+        proxy2.setId(2L);
+        String proxyName2 = "proxy2";
+        proxy2.setName(proxyName2);
+
+        RDSConfig rds1 = new RDSConfig();
+        rds1.setId(1L);
+        String rdsName1 = "rds1";
+        rds1.setName(rdsName1);
+        rds1.setDatabaseEngine(DatabaseVendor.POSTGRES);
+
+        RDSConfig rds2 = new RDSConfig();
+        rds2.setId(2L);
+        String rdsName2 = "rds2";
+        rds2.setName(rdsName2);
+        rds2.setDatabaseEngine(DatabaseVendor.POSTGRES);
+
+        environment.setLdapConfigs(Sets.newHashSet(ldap1, ldap2, ldap3));
+        environment.setProxyConfigs(Sets.newHashSet(proxy1, proxy2));
+        environment.setRdsConfigs(Sets.newHashSet(rds1, rds2));
+
+        EnvironmentDetachRequest request = new EnvironmentDetachRequest();
+        request.setLdapConfigs(Sets.newHashSet(ldapName1, ldapName2));
+        request.setProxyConfigs(Sets.newHashSet(proxyName1));
+        request.setRdsConfigs(Sets.newHashSet(rdsName1));
+
+        when(environmentRepository.findByNameAndWorkspaceId(ENVIRONMENT_NAME, WORKSPACE_ID)).thenReturn(environment);
+        when(environmentRepository.save(any(Environment.class)))
+                .thenAnswer((Answer<Environment>) invocation -> (Environment) invocation.getArgument(0));
+        mockConverters();
+
+        DetailedEnvironmentResponse result = environmentService.detachResources(ENVIRONMENT_NAME, request, WORKSPACE_ID);
+
+        assertEquals(1, result.getLdapConfigs().size());
+        assertEquals(1, result.getProxyConfigs().size());
+        assertEquals(1, result.getRdsConfigs().size());
+        assertEquals(ldapName3, result.getLdapConfigs().iterator().next().getName());
+        assertEquals(proxyName2, result.getProxyConfigs().iterator().next().getName());
+        assertEquals(rdsName2, result.getRdsConfigs().iterator().next().getName());
+    }
+
+    @Test
+    public void testDetachWithUsedResources() {
+        Environment environment = new Environment();
+        environment.setId(ENVIRONMENT_ID);
+        environment.setName(ENVIRONMENT_NAME);
+        setCredential(environment);
+
+        LdapConfig ldap1 = new LdapConfig();
+        ldap1.setId(1L);
+        String ldapName1 = "ldap1";
+        ldap1.setName(ldapName1);
+
+        LdapConfig ldap2 = new LdapConfig();
+        ldap2.setId(2L);
+        String ldapName2 = "ldap2";
+        ldap2.setName(ldapName2);
+
+        LdapConfig ldap3 = new LdapConfig();
+        ldap3.setId(3L);
+        String ldapName3 = "ldap3";
+        ldap3.setName(ldapName3);
+
+        ProxyConfig proxy1 = new ProxyConfig();
+        proxy1.setId(1L);
+        String proxyName1 = "proxy1";
+        proxy1.setName(proxyName1);
+
+        ProxyConfig proxy2 = new ProxyConfig();
+        proxy2.setId(2L);
+        String proxyName2 = "proxy2";
+        proxy2.setName(proxyName2);
+
+        RDSConfig rds1 = new RDSConfig();
+        rds1.setId(1L);
+        String rdsName1 = "rds1";
+        rds1.setName(rdsName1);
+        rds1.setDatabaseEngine(DatabaseVendor.POSTGRES);
+
+        RDSConfig rds2 = new RDSConfig();
+        rds2.setId(2L);
+        String rdsName2 = "rds2";
+        rds2.setName(rdsName2);
+        rds2.setDatabaseEngine(DatabaseVendor.POSTGRES);
+
+        Cluster cluster1 = new Cluster();
+        cluster1.setId(1L);
+        String clusterName1 = "cluster1";
+        cluster1.setName(clusterName1);
+
+        Cluster cluster2 = new Cluster();
+        cluster2.setId(2L);
+        String clusterName2 = "cluster2";
+        cluster2.setName(clusterName2);
+
+        environment.setLdapConfigs(Sets.newHashSet(ldap1, ldap2, ldap3));
+        environment.setProxyConfigs(Sets.newHashSet(proxy1, proxy2));
+        environment.setRdsConfigs(Sets.newHashSet(rds1, rds2));
+
+        EnvironmentDetachRequest request = new EnvironmentDetachRequest();
+        request.setLdapConfigs(Sets.newHashSet(ldapName1, ldapName2));
+        request.setProxyConfigs(Sets.newHashSet(proxyName1));
+        request.setRdsConfigs(Sets.newHashSet(rdsName1));
+
+        when(environmentRepository.findByNameAndWorkspaceId(ENVIRONMENT_NAME, WORKSPACE_ID)).thenReturn(environment);
+        when(ldapConfigService.getClustersUsingResourceInEnvironment(ldap1, ENVIRONMENT_ID)).thenReturn(Sets.newHashSet(cluster1));
+        when(ldapConfigService.getClustersUsingResourceInEnvironment(ldap2, ENVIRONMENT_ID)).thenReturn(Sets.newHashSet(cluster1, cluster2));
+        when(proxyConfigService.getClustersUsingResourceInEnvironment(proxy1, ENVIRONMENT_ID)).thenReturn(Sets.newHashSet(cluster1));
+        when(rdsConfigService.getClustersUsingResourceInEnvironment(rds1, ENVIRONMENT_ID)).thenReturn(Sets.newHashSet(cluster1));
+
+        exceptionRule.expect(BadRequestException.class);
+        exceptionRule.expectMessage(String.format("RDS config '%s' cannot be detached from environment 'EnvName' "
+                + "because it is used by the following cluster(s): [%s]", rdsName1, clusterName1));
+        exceptionRule.expectMessage(String.format("Proxy config '%s' cannot be detached from environment 'EnvName' "
+                + "because it is used by the following cluster(s): [%s]", proxyName1, clusterName1));
+        exceptionRule.expectMessage(String.format("LDAP config '%s' cannot be detached from environment 'EnvName' "
+                + "because it is used by the following cluster(s): [%s]", ldapName1, clusterName1));
+        exceptionRule.expectMessage(String.format("LDAP config '%s' cannot be detached from environment 'EnvName' "
+                + "because it is used by the following cluster(s): [%s, %s]", ldapName2, clusterName1, clusterName2));
+
+        environmentService.detachResources(ENVIRONMENT_NAME, request, WORKSPACE_ID);
+    }
+
+    private void setCredential(Environment environment) {
+        Credential credential = new Credential();
+        credential.setName("credential1");
+        environment.setCredential(credential);
+        environment.setWorkloadStacks(new HashSet<>());
+    }
+
+    private void mockConverters() {
+        when(conversionService.convert(any(Environment.class), eq(DetailedEnvironmentResponse.class)))
+                .thenAnswer((Answer<DetailedEnvironmentResponse>) invocation -> environmentConverter.convert((Environment) invocation.getArgument(0)));
+        when(conversionService.convert(any(LdapConfig.class), eq(LdapConfigResponse.class)))
+                .thenAnswer((Answer<LdapConfigResponse>) invocation -> ldapConfigResponseConverter.convert((LdapConfig) invocation.getArgument(0)));
+        when(conversionService.convert(any(ProxyConfig.class), eq(ProxyConfigResponse.class)))
+                .thenAnswer((Answer<ProxyConfigResponse>) invocation -> proxyConfigResponseConverter.convert((ProxyConfig) invocation.getArgument(0)));
+        when(conversionService.convert(any(RDSConfig.class), eq(RDSConfigResponse.class)))
+                .thenAnswer((Answer<RDSConfigResponse>) invocation -> rdsConfigResponseConverter.convert((RDSConfig) invocation.getArgument(0)));
     }
 }

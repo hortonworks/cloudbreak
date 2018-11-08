@@ -58,6 +58,7 @@ import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
+import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
 
@@ -173,6 +174,17 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
 
     @ManyToOne
     private Workspace workspace;
+
+    @ManyToOne
+    private EnvironmentView environment;
+
+    public EnvironmentView getEnvironment() {
+        return environment;
+    }
+
+    public void setEnvironment(EnvironmentView environment) {
+        this.environment = environment;
+    }
 
     public boolean hasGateway() {
         return gateway != null && gateway.isGatewayEnabled();

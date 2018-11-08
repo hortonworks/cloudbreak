@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.ldap;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
@@ -9,7 +10,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 
 import org.junit.Before;
@@ -19,12 +19,14 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.springframework.core.convert.ConversionService;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.validation.environment.ResourceDetachValidator;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
@@ -75,6 +77,9 @@ public class LdapConfigServiceTest {
     @Mock
     private ClusterService clusterService;
 
+    @Spy
+    private ResourceDetachValidator resourceDetachValidator = new ResourceDetachValidator();
+
     @InjectMocks
     private LdapConfigService underTest;
 
@@ -101,12 +106,14 @@ public class LdapConfigServiceTest {
         when(workspaceService.retrieveForUser(user)).thenReturn(Set.of(workspace));
         when(ldapConfigRepository.save(any(LdapConfig.class)))
                 .thenAnswer((Answer<LdapConfig>) invocation -> (LdapConfig) invocation.getArgument(0));
+        assertNotNull(resourceDetachValidator);
     }
 
     private void initLdapConfig() {
         ldapConfig = new LdapConfig();
         ldapConfig.setName(LDAP_1);
         ldapConfig.setId(1L);
+        ldapConfig.setWorkspace(workspace);
     }
 
     @Test
@@ -184,7 +191,7 @@ public class LdapConfigServiceTest {
     @Test
     public void testDelete() {
         when(ldapConfigRepository.findByNameAndWorkspaceId(LDAP_1, WORKSPACE_ID)).thenReturn(ldapConfig);
-        when(clusterService.findByLdapConfigWithoutAuth(ldapConfig)).thenReturn(Collections.emptyList());
+        when(clusterService.findByLdapConfig(ldapConfig)).thenReturn(Collections.emptySet());
 
         underTest.deleteByNameFromWorkspace(ldapConfig.getName(), WORKSPACE_ID);
 
@@ -197,11 +204,11 @@ public class LdapConfigServiceTest {
         cluster.setId(1L);
         cluster.setName("cluster1");
         when(ldapConfigRepository.findByNameAndWorkspaceId(LDAP_1, WORKSPACE_ID)).thenReturn(ldapConfig);
-        when(clusterService.findByLdapConfigWithoutAuth(ldapConfig)).thenReturn(List.of(cluster));
+        when(clusterService.findByLdapConfig(ldapConfig)).thenReturn(Set.of(cluster));
 
         exceptionRule.expect(BadRequestException.class);
-        exceptionRule.expectMessage(String.format("There is a cluster ['%s'] which uses LDAP config '%s'.",
-                cluster.getName(), ldapConfig.getName()));
+        exceptionRule.expectMessage(String.format("LDAP config '%s' cannot be deleted because there are clusters associated with it: [%s].",
+                ldapConfig.getName(), cluster.getName()));
 
         underTest.deleteByNameFromWorkspace(ldapConfig.getName(), WORKSPACE_ID);
 
@@ -219,15 +226,105 @@ public class LdapConfigServiceTest {
         String clusterName2 = "cluster2";
         cluster2.setName(clusterName2);
         when(ldapConfigRepository.findByNameAndWorkspaceId(LDAP_1, WORKSPACE_ID)).thenReturn(ldapConfig);
-        when(clusterService.findByLdapConfigWithoutAuth(ldapConfig)).thenReturn(List.of(cluster1, cluster2));
+        when(clusterService.findByLdapConfig(ldapConfig)).thenReturn(Set.of(cluster1, cluster2));
 
         exceptionRule.expect(BadRequestException.class);
-        exceptionRule.expectMessage(String.format("There are clusters associated with LDAP config '%s'.", ldapConfig.getName()));
+        exceptionRule.expectMessage(String.format("LDAP config '%s' cannot be deleted because there are clusters associated with it: [%s, %s].",
+                ldapConfig.getName(), clusterName1, clusterName2));
         exceptionRule.expectMessage(clusterName1);
         exceptionRule.expectMessage(clusterName2);
 
         underTest.deleteByNameFromWorkspace(ldapConfig.getName(), WORKSPACE_ID);
 
         verify(ldapConfigRepository, never()).delete(any());
+    }
+
+    @Test
+    public void testDetachHappyPath() {
+        EnvironmentView env1 = new EnvironmentView();
+        Long envId1 = 1L;
+        env1.setId(envId1);
+        String envName1 = "env1";
+        env1.setName(envName1);
+
+        EnvironmentView env2 = new EnvironmentView();
+        Long envId2 = 2L;
+        env2.setId(envId2);
+        String envName2 = "env2";
+        env2.setName(envName2);
+
+        Set<String> envNames = Sets.newHashSet(envName1, envName2);
+        Set<EnvironmentView> environments = Sets.newHashSet(env1, env2);
+
+        EnvironmentView env3 = new EnvironmentView();
+        Long envId3 = 3L;
+        env3.setId(envId3);
+        String envName3 = "env3";
+        env3.setName(envName3);
+
+        ldapConfig.setEnvironments(Sets.newHashSet(env1, env2, env3));
+
+        when(environmentViewService.findByNamesInWorkspace(envNames, WORKSPACE_ID)).thenReturn(environments);
+        when(ldapConfigRepository.findByNameAndWorkspaceId(ldapConfig.getName(), WORKSPACE_ID)).thenReturn(ldapConfig);
+        when(clusterService.findAllClustersByLdapConfigInEnvironment(ldapConfig, envId1)).thenReturn(Collections.emptySet());
+        when(clusterService.findAllClustersByLdapConfigInEnvironment(ldapConfig, envId2)).thenReturn(Collections.emptySet());
+
+        LdapConfig result = underTest.detachFromEnvironments(LDAP_1, envNames, WORKSPACE_ID);
+        assertEquals(1, result.getEnvironments().size());
+        assertTrue(result.getEnvironments().contains(env3));
+    }
+
+    @Test
+    public void testDetachWithLdapIsUsedByClustersInEnvironments() {
+        EnvironmentView env1 = new EnvironmentView();
+        Long envId1 = 1L;
+        env1.setId(envId1);
+        String envName1 = "env1";
+        env1.setName(envName1);
+
+        EnvironmentView env2 = new EnvironmentView();
+        Long envId2 = 2L;
+        env2.setId(envId2);
+        String envName2 = "env2";
+        env2.setName(envName2);
+        Set<String> envNames = Sets.newHashSet(envName1, envName2);
+        Set<EnvironmentView> environments = Sets.newHashSet(env1, env2);
+
+        Cluster env1Cluster1 = new Cluster();
+        env1Cluster1.setId(1L);
+        String env1Cluster1Name = "env1Cluster1";
+        env1Cluster1.setName(env1Cluster1Name);
+        env1Cluster1.setEnvironment(env1);
+
+        Cluster env1Cluster2 = new Cluster();
+        env1Cluster2.setId(2L);
+        String env1Cluster2Name = "env1Cluster2";
+        env1Cluster2.setName(env1Cluster2Name);
+        env1Cluster2.setEnvironment(env1);
+
+        Cluster env2Cluster1 = new Cluster();
+        env2Cluster1.setId(3L);
+        String env2Cluster1Name = "env2Cluster1";
+        env2Cluster1.setName(env2Cluster1Name);
+        env2Cluster1.setEnvironment(env2);
+
+        Cluster env2Cluster2 = new Cluster();
+        env2Cluster2.setId(4L);
+        String env2Cluster2Name = "env2Cluster2";
+        env2Cluster2.setName(env2Cluster2Name);
+        env2Cluster2.setEnvironment(env2);
+
+        when(environmentViewService.findByNamesInWorkspace(envNames, WORKSPACE_ID)).thenReturn(environments);
+        when(ldapConfigRepository.findByNameAndWorkspaceId(ldapConfig.getName(), WORKSPACE_ID)).thenReturn(ldapConfig);
+        when(clusterService.findAllClustersByLdapConfigInEnvironment(ldapConfig, envId1)).thenReturn(Sets.newHashSet(env1Cluster1, env1Cluster2));
+        when(clusterService.findAllClustersByLdapConfigInEnvironment(ldapConfig, envId2)).thenReturn(Sets.newHashSet(env2Cluster1, env2Cluster2));
+
+        exceptionRule.expect(BadRequestException.class);
+        exceptionRule.expectMessage(String.format("%s '%s' cannot be detached from environment '%s' because it is used by the following cluster(s): [%s, %s]",
+                ldapConfig.getResource().getReadableName(), ldapConfig.getName(), envName1, env1Cluster1Name, env1Cluster2Name));
+        exceptionRule.expectMessage(String.format("%s '%s' cannot be detached from environment '%s' because it is used by the following cluster(s): [%s, %s]",
+                ldapConfig.getResource().getReadableName(), ldapConfig.getName(), envName2, env2Cluster1Name, env2Cluster2Name));
+
+        underTest.detachFromEnvironments(LDAP_1, envNames, WORKSPACE_ID);
     }
 }

@@ -23,6 +23,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 @SuppressFBWarnings("UWF_UNWRITTEN_FIELD")
 @Table(name = "Cluster")
 public class ClusterApiView extends CompactViewWithOwner {
+
     @OneToOne(fetch = FetchType.LAZY)
     private StackApiView stack;
 
@@ -45,9 +46,20 @@ public class ClusterApiView extends CompactViewWithOwner {
     @Enumerated(EnumType.STRING)
     private Status status;
 
+    @ManyToOne
+    private EnvironmentView environment;
+
     @Override
     public WorkspaceResource getResource() {
         return WorkspaceResource.STACK;
+    }
+
+    public EnvironmentView getEnvironment() {
+        return environment;
+    }
+
+    public void setEnvironment(EnvironmentView environment) {
+        this.environment = environment;
     }
 
     public StackApiView getStack() {

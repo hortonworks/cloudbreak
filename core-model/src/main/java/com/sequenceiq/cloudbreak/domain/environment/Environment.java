@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
+import com.sequenceiq.cloudbreak.domain.view.ClusterApiView;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
@@ -85,7 +86,11 @@ public class Environment implements WorkspaceAwareResource {
 
     @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "environment_id")
-    private Set<StackApiView> workloadClusters = new HashSet<>();
+    private Set<StackApiView> workloadStacks = new HashSet<>();
+
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinColumn(name = "environment_id")
+    private Set<ClusterApiView> workloadClusters = new HashSet<>();
 
     @Override
     public Long getId() {
@@ -167,11 +172,19 @@ public class Environment implements WorkspaceAwareResource {
         this.rdsConfigs = rdsConfigs;
     }
 
-    public Set<StackApiView> getWorkloadClusters() {
+    public Set<StackApiView> getWorkloadStacks() {
+        return workloadStacks;
+    }
+
+    public void setWorkloadStacks(Set<StackApiView> workloadStacks) {
+        this.workloadStacks = workloadStacks;
+    }
+
+    public Set<ClusterApiView> getWorkloadClusters() {
         return workloadClusters;
     }
 
-    public void setWorkloadClusters(Set<StackApiView> workloadClusters) {
+    public void setWorkloadClusters(Set<ClusterApiView> workloadClusters) {
         this.workloadClusters = workloadClusters;
     }
 

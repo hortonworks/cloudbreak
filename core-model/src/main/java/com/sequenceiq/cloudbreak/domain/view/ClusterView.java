@@ -19,6 +19,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 @SuppressFBWarnings("UWF_UNWRITTEN_FIELD")
 @Table(name = "Cluster")
 public class ClusterView extends CompactViewWithOwner {
+
     @OneToOne(fetch = FetchType.LAZY)
     private StackView stack;
 
