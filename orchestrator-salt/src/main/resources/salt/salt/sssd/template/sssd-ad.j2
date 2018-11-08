@@ -19,6 +19,7 @@ krb5_realm = {{ pillar['sssd-ad']['domainuppercase'] }}
 realmd_tags = manages-system joined-with-samba
 cache_credentials = True
 id_provider = ad
+krb5_ccname_template = FILE:/tmp/krb5cc_%U
 krb5_store_password_if_offline = True
 default_shell = /bin/bash
 ldap_id_mapping = True
