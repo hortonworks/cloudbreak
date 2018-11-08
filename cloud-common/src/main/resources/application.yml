@@ -24,11 +24,29 @@ spring:
     prefer-file-system-access: false
   datasource:
     maxActive: 30
+
 rest:
   debug: false
+
 cert:
   validation: true
   ignorePreValidation: false
+
+secret:
+  application: cb
+  engine: "com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine"
+
+vault:
+  addr: vault.service.consul
+  port: 8200
+  ssl.enabled: false
+  kv.engine.path: secret
+  auth:
+    type: "token"
+    kubernetes:
+      service.account.token.path: /var/run/secrets/kubernetes.io/serviceaccount/token
+      mount.path: "dps-dev"
+      login.role: "cloudbreak.default"
 
 cb:
   uaa.startup.timeout.sec: 300
@@ -69,22 +87,6 @@ cb:
     schema: public
     cert.file: database.crt
     ssl: false
-
-  secret:
-    application: cb
-    engine: "com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine"
-
-  vault:
-    addr: vault.service.consul
-    port: 8200
-    ssl.enabled: false
-    kv.engine.path: secret
-    auth:
-      type: "token"
-      kubernetes:
-        service.account.token.path: /var/run/secrets/kubernetes.io/serviceaccount/token
-        mount.path: "dps-dev"
-        login.role: "cloudbreak.default"
 
   aws:
     spotinstances.enabled: true

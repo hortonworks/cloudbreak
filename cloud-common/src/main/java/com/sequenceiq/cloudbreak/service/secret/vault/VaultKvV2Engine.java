@@ -21,7 +21,7 @@ public class VaultKvV2Engine implements SecretEngine {
     @Value("#{'${cb.secret.application:}/'}")
     private String appPath;
 
-    @Value("${cb.vault.kv.engine.path:}")
+    @Value("${vault.kv.engine.path:}")
     private String enginePath;
 
     @Inject
