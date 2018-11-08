@@ -169,4 +169,48 @@ public class AmbariClusterModificationServiceTest {
         verify(ambariClient, times(1)).addHostsAndRackInfoWithBlueprint(eq(cluster.getBlueprint().getName()), eq(hostGroup.getName()), eq(rackMap));
         verify(ambariClient, never()).updateRack("host1", "myrack");
     }
+
+    @Test
+    public void testRackUpdateIfRackIsNull() throws CloudbreakException, HttpResponseException {
+        Stack stack = TestUtil.stack();
+        Cluster cluster = TestUtil.cluster();
+        stack.setCluster(cluster);
+
+        AmbariClient ambariClient = mock(AmbariClient.class);
+        when(ambariClient.ambariServerVersion()).thenReturn("2.7.1.0");
+        when(ambariClient.getClusterHosts()).thenReturn(cluster.getHostGroups().stream()
+                .flatMap(hostGroup -> hostGroup.getHostNames().stream())
+                .collect(Collectors.toList()));
+        when(clientFactory.getAmbariClient(any(), any())).thenReturn(ambariClient);
+
+        ImmutablePair<PollingResult, Exception> pair = new ImmutablePair<>(PollingResult.SUCCESS, null);
+        when(ambariOperationService.waitForOperations(eq(stack), eq(ambariClient), any(), eq(UPSCALE_AMBARI_PROGRESS_STATE))).thenReturn(pair);
+
+        HostGroup hostGroup = cluster.getHostGroups().iterator().next();
+
+        HostMetadata firstHostMetadata = mock(HostMetadata.class);
+        when(firstHostMetadata.getHostName()).thenReturn("host1");
+        HostMetadata secondHostMetadata = mock(HostMetadata.class);
+        when(secondHostMetadata.getHostName()).thenReturn("host2");
+        List<HostMetadata> hostMetadataList = Arrays.asList(firstHostMetadata, secondHostMetadata);
+
+        List<Map<String, String>> hostListForAssociation = new ArrayList<>();
+        Map<String, String> host1Map = new HashMap<>();
+        host1Map.put(FQDN, "host1");
+        hostListForAssociation.add(host1Map);
+        Map<String, String> host2Map = new HashMap<>();
+        host2Map.put(FQDN, "host2");
+        hostListForAssociation.add(host2Map);
+
+        when(hostGroupAssociationBuilder.buildHostGroupAssociation(hostGroup)).thenReturn(hostListForAssociation);
+
+        ambariClusterModificationService.upscaleCluster(stack, hostGroup, hostMetadataList);
+
+        Map<String, String> rackMap = new HashMap<>();
+        rackMap.put("host1", "/default-rack");
+        rackMap.put("host2", "/default-rack");
+
+        verify(ambariClient, times(1)).addHostsAndRackInfoWithBlueprint(eq(cluster.getBlueprint().getName()), eq(hostGroup.getName()), eq(rackMap));
+        verify(ambariClient, never()).updateRack("host1", "myrack");
+    }
 }
