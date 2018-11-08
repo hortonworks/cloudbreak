@@ -148,7 +148,7 @@ responses.getPlatformSecurityGroups= responseObject(securitygroups, OK);
 responses.createManagementPackInWorkspace = responseObject(mpacks, OK);
 responses.postPrivateManagementPack = responseObject(mpacks, OK);
 responses.getWorkspaces = responseObject(workspaces, OK);
-responses.list = responseObject(environments, OK)
+responses.listEnvironment = responseObject(environments, OK)
 
 responses.postRepositoryConfigsValidation= responseObject({
   "utilsBaseURL" : true,

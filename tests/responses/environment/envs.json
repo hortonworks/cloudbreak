@@ -1,34 +1,50 @@
 [
   {
-    "Name": "mock-unemployed-good",
-    "Description": "test credential",
-    "CloudPlatform": "MOCK",
-    "Regions": [
-      "Europe"
-    ]
+    "id": 15,
+    "name": "test1",
+    "description": "",
+    "regions": {
+      "displayNames": {
+        "RegionOne": "RegionOne"
+      },
+      "values": [
+        "RegionOne"
+      ]
+    },
+    "cloudPlatform": "OPENSTACK",
+    "credentialName": "testcred",
+    "location": {
+      "locationName": "Ireland (North Europe)",
+      "latitude": 53.33306114,
+      "longitude": -6.248905682
+    },
+    "workspace": {
+      "id": 34,
+      "name": "cloudbreak-cli@hortonworks.com"
+    }
   },
   {
-    "Name": "mock-moving-misery",
-    "Description": "anyad",
-    "CloudPlatform": "MOCK",
-    "Regions": [
-      "Europe"
-    ]
-  },
-  {
-    "Name": "kiskutya",
-    "Description": "",
-    "CloudPlatform": "OPENSTACK",
-    "Regions": [
-      "RegionOne"
-    ]
-  },
-  {
-    "Name": "mock-resident-peace",
-    "Description": "test credential",
-    "CloudPlatform": "MOCK",
-    "Regions": [
-      "Europe"
-    ]
-  }
+    "id": 16,
+    "name": "test2",
+    "description": "",
+    "regions": {
+      "displayNames": {
+        "RegionOne": "RegionOne"
+      },
+      "values": [
+        "RegionOne"
+      ]
+    },
+    "cloudPlatform": "OPENSTACK",
+    "credentialName": "testcred",
+    "location": {
+      "locationName": "Ireland (North Europe)",
+      "latitude": 53.33306114,
+      "longitude": -6.248905682
+    },
+    "workspace": {
+      "id": 34,
+      "name": "cloudbreak-cli@hortonworks.com"
+    }
+  }  
 ]

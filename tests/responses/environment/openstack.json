@@ -1,15 +1,28 @@
 {
-    "id": 2,
-    "name": "openstack",
-    "description": "For openstack",
-    "regions": ["RegionOne"],
-    "cloudPlatform": "OPENSTACK",
-    "workspace": {
-        "id": 1,
-        "name": "mock@hortonworks.com"
+  "id": 15,
+  "name": "test1",
+  "description": "",
+  "regions": {
+    "displayNames": {
+      "RegionOne": "RegionOne"
     },
-    "credentialName": "mock-openstack",
-    "proxyConfigs": [],
-    "ldapConfigs": [],
-    "rdsConfigs": []
+    "values": [
+      "RegionOne"
+    ]
+  },
+  "cloudPlatform": "OPENSTACK",
+  "credentialName": "testcred",
+  "location": {
+    "locationName": "Ireland (North Europe)",
+    "latitude": 53.33306114,
+    "longitude": -6.248905682
+  },
+  "workspace": {
+    "id": 34,
+    "name": "cloudbreak-cli@hortonworks.com"
+  },
+  "proxyConfigs": [],
+  "ldapConfigs": [],
+  "rdsConfigs": [],
+  "workloadClusters": []
 }
