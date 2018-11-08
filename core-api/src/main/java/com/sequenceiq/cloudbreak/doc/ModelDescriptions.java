@@ -172,7 +172,6 @@ public class ModelDescriptions {
         public static final String FLEX_SUBSCRIPTION = "the related flex subscription";
         public static final String NODE_COUNT = "node count of the stack";
         public static final String HARDWARE_INFO_RESPONSE = "hardware information where pairing hostmetadata with instancemetadata";
-        public static final String USAGES = "usage information for a specific stack";
         public static final String EVENTS = "related events for a cloudbreak stack";
         public static final String CUSTOM_DOMAIN = "custom domain name for the nodes in the stack";
         public static final String CUSTOM_HOSTNAME = "custom hostname for nodes in the stack";
@@ -425,22 +424,6 @@ public class ModelDescriptions {
 
     public static class FailurePolicyModelDescription {
         public static final String THRESHOLD = "threshold of failure policy";
-    }
-
-    public static class UsageModelDescription {
-        public static final String PROVIDER = "cloud provider of the stack";
-        public static final String COSTS = "computed costs of instance usage";
-        public static final String DAY = "the day the usage of resources happened";
-        public static final String INSTANCE_HOURS = "hours since the instance is running";
-        public static final String INSTANCE_TYPE = "type of instance";
-        public static final String INSTANCE_GROUP = "group name of instance";
-        public static final String BLUEPRINT_ID = "id of the blueprint";
-        public static final String BLUEPRINT_NAME = "name of the blueprint";
-        public static final String DURATION = "time since the instances are running in millisec";
-        public static final String INSTANCE_NUMBER = "number of instances running";
-        public static final String PEAK = "maximum number of instances running";
-        public static final String FLEX_ID = "flex subscription id";
-        public static final String STACK_UUID = "unique id of the cluster";
     }
 
     public static class EventModelDescription {

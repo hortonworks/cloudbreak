@@ -11,7 +11,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.api.model.CloudbreakDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
-import com.sequenceiq.cloudbreak.api.model.CloudbreakUsageJson;
 import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
 import com.sequenceiq.cloudbreak.api.model.FailurePolicyResponse;
 import com.sequenceiq.cloudbreak.api.model.FlexSubscriptionResponse;
@@ -98,9 +97,6 @@ public class StackResponse extends StackBase {
 
     @ApiModelProperty(StackModelDescription.EVENTS)
     private List<CloudbreakEventsJson> cloudbreakEvents = new ArrayList<>();
-
-    @ApiModelProperty(StackModelDescription.USAGES)
-    private List<CloudbreakUsageJson> cloudbreakUsages = new ArrayList<>();
 
     @ApiModelProperty(ModelDescriptions.WORKSPACE_OF_THE_RESOURCE)
     private WorkspaceResourceResponse workspace;
@@ -264,14 +260,6 @@ public class StackResponse extends StackBase {
 
     public void setCloudbreakEvents(List<CloudbreakEventsJson> cloudbreakEvents) {
         this.cloudbreakEvents = cloudbreakEvents;
-    }
-
-    public List<CloudbreakUsageJson> getCloudbreakUsages() {
-        return cloudbreakUsages;
-    }
-
-    public void setCloudbreakUsages(List<CloudbreakUsageJson> cloudbreakUsages) {
-        this.cloudbreakUsages = cloudbreakUsages;
     }
 
     public StackAuthenticationResponse getStackAuthentication() {

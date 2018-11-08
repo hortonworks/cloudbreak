@@ -22,7 +22,6 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TerminationService;
-import com.sequenceiq.cloudbreak.service.usages.UsageService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Service
@@ -45,9 +44,6 @@ public class StackTerminationService {
     private StackUpdater stackUpdater;
 
     @Inject
-    private UsageService usageService;
-
-    @Inject
     private DependecyDeletionService dependecyDeletionService;
 
     @Inject
@@ -64,7 +60,6 @@ public class StackTerminationService {
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_DELETE_COMPLETED, DELETE_COMPLETED.name());
         clusterService.updateClusterStatusByStackId(stack.getId(), DELETE_COMPLETED);
         clusterService.cleanupKerberosCredential(stack.getCluster());
-        usageService.closeUsagesForStack(stack.getId());
         if (deleteDependencies) {
             dependecyDeletionService.deleteDependencies(stack);
         }

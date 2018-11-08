@@ -42,7 +42,6 @@ import com.sequenceiq.cloudbreak.api.model.v2.WorkspaceStatus;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
@@ -617,37 +616,6 @@ public class TestUtil {
 
     public static Blueprint blueprint() {
         return blueprint("multi-node-yarn");
-    }
-
-    public static List<CloudbreakUsage> generateAzureCloudbreakUsages(int count) {
-        List<CloudbreakUsage> cloudbreakUsages = new ArrayList<>();
-        for (int i = 0; i < count; i++) {
-            cloudbreakUsages.add(gcpCloudbreakUsage((long) i));
-        }
-        return cloudbreakUsages;
-    }
-
-    public static CloudbreakUsage gcpCloudbreakUsage(Long id) {
-        CloudbreakUsage cloudbreakUsage = new CloudbreakUsage();
-        cloudbreakUsage.setId(id);
-        cloudbreakUsage.setInstanceGroup("master");
-        cloudbreakUsage.setAccount("account");
-        cloudbreakUsage.setCosts(2.0D);
-        cloudbreakUsage.setDay(new Date());
-        cloudbreakUsage.setInstanceHours(1L);
-        cloudbreakUsage.setInstanceType("xlarge");
-        cloudbreakUsage.setOwner("owner");
-        cloudbreakUsage.setProvider(GCP);
-        cloudbreakUsage.setRegion("Central US");
-        cloudbreakUsage.setStackName("usagestack");
-        cloudbreakUsage.setStackId(1L);
-        cloudbreakUsage.setBlueprintId(1L);
-        cloudbreakUsage.setBlueprintName("blueprint");
-        cloudbreakUsage.setInstanceNum(6);
-        cloudbreakUsage.setPeak(10);
-        cloudbreakUsage.setFlexId("FLEX-1234567");
-        cloudbreakUsage.setStackUuid("23423-sdfasdf-23423-2345");
-        return cloudbreakUsage;
     }
 
     public static FailurePolicy failurePolicy() {
