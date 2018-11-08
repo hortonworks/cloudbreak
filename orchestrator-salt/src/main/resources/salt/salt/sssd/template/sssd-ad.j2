@@ -8,12 +8,12 @@ entry_cache_nowait_percentage = 75
 debug_level = 5
 
 [sssd]
-domains = {{ pillar['sssd-ad']['domain'] }}
+domains = {{ pillar['sssd-ad']['domainuppercase'] }}
 config_file_version = 2
 services = nss, pam
-default_domain_suffix = {{ pillar['sssd-ad']['domain'] }}
+default_domain_suffix = {{ pillar['sssd-ad']['domainuppercase'] }}
 
-[domain/{{ pillar['sssd-ad']['domain'] }}]
+[domain/{{ pillar['sssd-ad']['domainuppercase'] }}]
 ad_domain = {{ pillar['sssd-ad']['domain'] }}
 krb5_realm = {{ pillar['sssd-ad']['domainuppercase'] }}
 realmd_tags = manages-system joined-with-samba
