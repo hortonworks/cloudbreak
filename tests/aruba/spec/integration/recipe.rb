@@ -13,7 +13,7 @@ RSpec.describe 'Recipe test cases', :type => :aruba do
   include_context "mock shared vars"
 
   it "Recipe - Create from url - All recipe types" do
-    with_environment 'DEBUG' => '1' do
+    with_environment 'DEBUG' => '1' do  
       @recipe_types.each  do |type|
         r_name = "cli-" + type
         result = cb.recipe.create.from_url.name(r_name).execution_type(type).url(@recipe_url).build(false)
