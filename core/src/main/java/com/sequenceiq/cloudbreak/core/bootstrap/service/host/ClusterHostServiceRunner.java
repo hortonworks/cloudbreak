@@ -62,7 +62,6 @@ import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.SmartSenseCredentialConfigService;
-import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariRepositoryVersionService;
@@ -139,9 +138,6 @@ public class ClusterHostServiceRunner {
     @Inject
     private AmbariRepositoryVersionService ambariRepositoryVersionService;
 
-    @Inject
-    private SecretService secretService;
-
     public void runAmbariServices(Stack stack, Cluster cluster) {
         try {
             Set<Node> nodes = stackUtil.collectNodes(stack);
@@ -196,10 +192,10 @@ public class ClusterHostServiceRunner {
         if (cluster.isSecure() && kerberosDetailService.isAmbariManagedKerberosPackages(cluster.getKerberosConfig())) {
             Map<String, String> kerberosPillarConf = new HashMap<>();
             KerberosConfig kerberosConfig = cluster.getKerberosConfig();
-            putIfNotNull(kerberosPillarConf, secretService.get(kerberosConfig.getMasterKey()), "masterKey");
-            putIfNotNull(kerberosPillarConf, secretService.get(kerberosConfig.getAdmin()), "user");
-            putIfNotNull(kerberosPillarConf, secretService.get(kerberosConfig.getPassword()), "password");
-            if (StringUtils.isEmpty(secretService.get(kerberosConfig.getDescriptor()))) {
+            putIfNotNull(kerberosPillarConf, kerberosConfig.getMasterKey().getRaw(), "masterKey");
+            putIfNotNull(kerberosPillarConf, kerberosConfig.getAdmin().getRaw(), "user");
+            putIfNotNull(kerberosPillarConf, kerberosConfig.getPassword().getRaw(), "password");
+            if (StringUtils.isEmpty(kerberosConfig.getDescriptor().getRaw())) {
                 putIfNotNull(kerberosPillarConf, kerberosConfig.getUrl(), "url");
                 putIfNotNull(kerberosPillarConf, kerberosDetailService.resolveHostForKdcAdmin(kerberosConfig, kerberosConfig.getUrl()), "adminUrl");
                 putIfNotNull(kerberosPillarConf, kerberosConfig.getRealm(), "realm");
@@ -209,8 +205,8 @@ public class ClusterHostServiceRunner {
                 putIfNotNull(kerberosPillarConf, properties.get("admin_server_host"), "adminUrl");
                 putIfNotNull(kerberosPillarConf, properties.get("realm"), "realm");
             }
-            putIfNotNull(kerberosPillarConf, secretService.get(cluster.getCloudbreakAmbariUser()), "clusterUser");
-            putIfNotNull(kerberosPillarConf, secretService.get(cluster.getCloudbreakAmbariPassword()), "clusterPassword");
+            putIfNotNull(kerberosPillarConf, cluster.getCloudbreakAmbariUser().getRaw(), "clusterUser");
+            putIfNotNull(kerberosPillarConf, cluster.getCloudbreakAmbariPassword().getRaw(), "clusterPassword");
             servicePillar.put("kerberos", new SaltPillarProperties("/kerberos/init.sls", singletonMap("kerberos", kerberosPillarConf)));
         }
         servicePillar.put("discovery", new SaltPillarProperties("/discovery/init.sls", singletonMap("platform", stack.cloudPlatform())));
@@ -220,7 +216,7 @@ public class ClusterHostServiceRunner {
         AmbariRepo ambariRepo = clusterComponentConfigProvider.getAmbariRepo(cluster.getId());
         if (ambariRepo != null) {
             Map<String, Object> ambariRepoMap = ambariRepo.asMap();
-            String blueprintText = secretService.get(cluster.getBlueprint().getBlueprintText());
+            String blueprintText = cluster.getBlueprint().getBlueprintText().getRaw();
             Json blueprint = new Json(blueprintText);
             ambariRepoMap.put("stack_version", blueprint.getValue("Blueprints.stack_version"));
             ambariRepoMap.put("stack_type", blueprint.getValue("Blueprints.stack_name").toString().toLowerCase());
@@ -312,7 +308,7 @@ public class ClusterHostServiceRunner {
         if (datalakeId != null) {
             StackView dataLakeStack = getStackView(datalakeId);
             Cluster dataLakeCluster = clusterService.findOneWithLists(dataLakeStack.getClusterView().getId());
-            String blueprintText = secretService.get(dataLakeCluster.getBlueprint().getBlueprintText());
+            String blueprintText = dataLakeCluster.getBlueprint().getBlueprintText().getRaw();
             BlueprintTextProcessor blueprintTextProcessor = blueprintProcessorFactory.get(blueprintText);
 
             Set<String> groupNames = blueprintTextProcessor.getHostGroupsWithComponent("RANGER_ADMIN");
@@ -339,8 +335,8 @@ public class ClusterHostServiceRunner {
     private void saveGatewayPillar(GatewayConfig gatewayConfig, Cluster cluster, Map<String, SaltPillarProperties> servicePillar) throws IOException {
         Map<String, Object> gateway = new HashMap<>();
         gateway.put("address", gatewayConfig.getPublicAddress());
-        gateway.put("username", secretService.get(cluster.getUserName()));
-        gateway.put("password", secretService.get(cluster.getPassword()));
+        gateway.put("username", cluster.getUserName().getRaw());
+        gateway.put("password", cluster.getPassword().getRaw());
 
         // for cloudbreak upgradeability
         gateway.put("ssotype", SSOType.NONE);
@@ -352,9 +348,9 @@ public class ClusterHostServiceRunner {
             gateway.put("ssoprovider", clusterGateway.getSsoProvider());
             gateway.put("signpub", clusterGateway.getSignPub());
             gateway.put("signcert", clusterGateway.getSignCert());
-            gateway.put("signkey", secretService.get(clusterGateway.getSignKey()));
+            gateway.put("signkey", clusterGateway.getSignKey().getRaw());
             gateway.put("tokencert", clusterGateway.getTokenCert());
-            gateway.put("mastersecret", secretService.get(clusterGateway.getKnoxMasterSecret()));
+            gateway.put("mastersecret", clusterGateway.getKnoxMasterSecret().getRaw());
             List<Map<String, Object>> topologies = getTopologies(clusterGateway);
             gateway.put("topologies", topologies);
             if (cluster.getBlueprint() != null) {
@@ -406,8 +402,8 @@ public class ClusterHostServiceRunner {
 
     private void saveLdapPillar(LdapConfig ldapConfig, Map<String, SaltPillarProperties> servicePillar) {
         if (ldapConfig != null) {
-            ldapConfig.setBindDn(secretService.get(ldapConfig.getBindDn()));
-            ldapConfig.setBindPassword(secretService.get(ldapConfig.getBindPassword()));
+            ldapConfig.setBindDn(ldapConfig.getBindDn().getRaw());
+            ldapConfig.setBindPassword(ldapConfig.getBindPassword().getRaw());
             servicePillar.put("ldap", new SaltPillarProperties("/gateway/ldap.sls", singletonMap("ldap", ldapConfig)));
         }
     }

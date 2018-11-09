@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.domain.stack.cluster.host;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -10,6 +11,8 @@ import javax.persistence.SequenceGenerator;
 
 import com.sequenceiq.cloudbreak.aspect.secret.SecretValue;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
+import com.sequenceiq.cloudbreak.domain.Secret;
+import com.sequenceiq.cloudbreak.domain.SecretToString;
 
 @Entity
 public class GeneratedRecipe implements ProvisionEntity {
@@ -19,18 +22,23 @@ public class GeneratedRecipe implements ProvisionEntity {
     @SequenceGenerator(name = "generatedrecipe_generator", sequenceName = "generatedrecipe_id_seq", allocationSize = 1)
     private Long id;
 
-    @Column(columnDefinition = "TEXT", nullable = false)
+    @Column(nullable = false)
+    @Convert(converter = SecretToString.class)
     @SecretValue
-    private String extendedRecipeText;
+    private Secret extendedRecipeText = Secret.EMPTY;
 
     @ManyToOne
     private HostGroup hostGroup;
 
-    public String getExtendedRecipeText() {
+    public Secret getExtendedRecipeText() {
         return extendedRecipeText;
     }
 
     public void setExtendedRecipeText(String extendedRecipeText) {
+        this.extendedRecipeText = new Secret(extendedRecipeText);
+    }
+
+    public void setExtendedRecipeText(Secret extendedRecipeText) {
         this.extendedRecipeText = extendedRecipeText;
     }
 

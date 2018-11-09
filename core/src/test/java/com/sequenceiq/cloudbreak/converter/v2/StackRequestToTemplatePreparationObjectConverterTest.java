@@ -49,6 +49,7 @@ import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.domain.Secret;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
@@ -60,7 +61,6 @@ import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
 import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
-import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
@@ -169,9 +169,6 @@ public class StackRequestToTemplatePreparationObjectConverterTest {
     @Mock
     private WorkspaceService workspaceService;
 
-    @Mock
-    private SecretService secretService;
-
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -182,7 +179,7 @@ public class StackRequestToTemplatePreparationObjectConverterTest {
         when(cluster.getAmbari()).thenReturn(ambari);
         when(ambari.getBlueprintId()).thenReturn(BLUEPRINT_ID);
         when(blueprintService.get(BLUEPRINT_ID)).thenReturn(blueprint);
-        when(blueprint.getBlueprintText()).thenReturn(TEST_BLUEPRINT_TEXT);
+        when(blueprint.getBlueprintText()).thenReturn(new Secret(TEST_BLUEPRINT_TEXT));
         when(stackInfoService.blueprintStackInfo(TEST_BLUEPRINT_TEXT)).thenReturn(blueprintStackInfo);
         when(userService.getOrCreate(eq(cloudbreakUser))).thenReturn(user);
         when(cloudbreakUser.getUsername()).thenReturn("test@hortonworks.com");

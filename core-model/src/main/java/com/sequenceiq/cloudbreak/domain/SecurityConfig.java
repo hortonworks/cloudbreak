@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.domain;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -21,11 +22,13 @@ public class SecurityConfig implements ProvisionEntity {
     @SequenceGenerator(name = "securityconfig_generator", sequenceName = "securityconfig_id_seq", allocationSize = 1)
     private Long id;
 
+    @Convert(converter = SecretToString.class)
     @SecretValue
-    private String clientKey;
+    private Secret clientKey = Secret.EMPTY;
 
+    @Convert(converter = SecretToString.class)
     @SecretValue
-    private String clientCert;
+    private Secret clientCert = Secret.EMPTY;
 
     @OneToOne(fetch = FetchType.LAZY)
     private Stack stack;
@@ -45,18 +48,26 @@ public class SecurityConfig implements ProvisionEntity {
     }
 
     public void setClientKey(String clientKey) {
+        this.clientKey = new Secret(clientKey);
+    }
+
+    public void setClientKey(Secret clientKey) {
         this.clientKey = clientKey;
     }
 
-    public String getClientKey() {
+    public Secret getClientKey() {
         return clientKey;
     }
 
-    public String getClientCert() {
+    public Secret getClientCert() {
         return clientCert;
     }
 
     public void setClientCert(String clientCert) {
+        this.clientCert = new Secret(clientCert);
+    }
+
+    public void setClientCert(Secret clientCert) {
         this.clientCert = clientCert;
     }
 

@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.converter.stack.cluster;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
@@ -67,7 +66,6 @@ import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariViewProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
 public class ClusterToClusterResponseConverterTest extends AbstractEntityConverterTest<Cluster> {
@@ -132,9 +130,6 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
     @Mock
     private ServiceEndpointCollector serviceEndpointCollector;
 
-    @Mock
-    private SecretService secretService;
-
     private StackServiceComponentDescriptor stackServiceComponentDescriptor;
 
     @Before
@@ -146,7 +141,6 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
         given(stackService.findClustersConnectedToDatalake(anyLong())).willReturn(new HashSet<>());
         given(conversionService.convert(any(Workspace.class), eq(WorkspaceResourceResponse.class)))
                 .willReturn(new WorkspaceResourceResponse());
-        when(secretService.get(anyString())).then(returnsFirstArg());
         stackServiceComponentDescriptor = createStackServiceComponentDescriptor();
     }
 

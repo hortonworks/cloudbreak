@@ -17,7 +17,6 @@ import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
 import com.sequenceiq.cloudbreak.controller.validation.credential.CredentialValidator;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.service.stack.resource.definition.credential.CredentialDefinitionService;
 import com.sequenceiq.cloudbreak.service.topology.TopologyService;
 
@@ -36,9 +35,6 @@ public class CredentialToCredentialResponseConverter extends AbstractConversionS
     @Inject
     private CredentialDefinitionService credentialDefinitionService;
 
-    @Inject
-    private SecretService secretService;
-
     @Override
     public CredentialResponse convert(Credential source) {
         CredentialResponse credentialJson = new CredentialResponse();
@@ -47,11 +43,11 @@ public class CredentialToCredentialResponseConverter extends AbstractConversionS
         credentialJson.setCloudPlatform(source.cloudPlatform());
         credentialJson.setName(source.getName());
         if (source.getAttributes() != null) {
-            Json secretAttributes = new Json(secretService.get(source.getAttributes()));
+            Json secretAttributes = new Json(source.getAttributes().getRaw());
             Map<String, Object> parameters = credentialDefinitionService.removeSensitives(platform(source.cloudPlatform()), secretAttributes.getMap());
             convertValuesToBooleanIfNecessary(parameters);
             credentialJson.setParameters(parameters);
-            credentialJson.setParametersPath(source.getAttributes());
+            credentialJson.setParametersPath(source.getAttributes().getRaw());
         }
         credentialJson.setDescription(source.getDescription() == null ? "" : source.getDescription());
         if (source.getTopology() != null) {

@@ -16,14 +16,10 @@ package org.apache.cb.yarn.service.api.impl;
 import org.apache.cb.yarn.service.api.ApiException;
 import org.apache.cb.yarn.service.api.records.Component;
 import org.apache.cb.yarn.service.api.records.Service;
-import org.apache.cb.yarn.service.api.records.ServiceStatus;
 import org.junit.Test;
 import org.junit.Ignore;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * API tests for DefaultApi

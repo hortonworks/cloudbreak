@@ -21,14 +21,15 @@ import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
+import com.sequenceiq.cloudbreak.domain.Secret;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.UserProfileRepository;
-import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 
 @Service
 public class UserProfileService {
@@ -103,7 +104,7 @@ public class UserProfileService {
         try {
             userProfile.setUiProperties(new Json(new HashMap<>()).getValue());
         } catch (JsonProcessingException ignored) {
-            userProfile.setUiProperties(null);
+            userProfile.setUiProperties(new Secret(null));
         }
     }
 
@@ -121,8 +122,8 @@ public class UserProfileService {
             ImageCatalog imageCatalog = imageCatalogService.get(workspaceId, request.getImageCatalogName());
             userProfile.setImageCatalog(imageCatalog);
         }
-        String oldVaultPath = userProfile.getUiProperties();
-        String uiPropertiesFromVault = secretService.get(userProfile.getUiProperties());
+        String oldVaultPath = userProfile.getUiProperties().getSecret();
+        String uiPropertiesFromVault = userProfile.getUiProperties().getRaw();
         Map<String, Object> map = new Json(uiPropertiesFromVault).getMap();
         for (Entry<String, Object> uiStringObjectEntry : request.getUiProperties().entrySet()) {
             map.put(uiStringObjectEntry.getKey(), uiStringObjectEntry.getValue());

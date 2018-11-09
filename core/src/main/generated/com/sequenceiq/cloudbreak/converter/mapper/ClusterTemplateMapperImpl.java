@@ -22,11 +22,11 @@ public class ClusterTemplateMapperImpl extends ClusterTemplateMapper {
 
         ClusterTemplate clusterTemplate = new ClusterTemplate();
 
-        clusterTemplate.setTemplate( mapStackV2RequestToJson( clusterTemplateRequest.getTemplate() ) );
         clusterTemplate.setName( clusterTemplateRequest.getName() );
         clusterTemplate.setDescription( clusterTemplateRequest.getDescription() );
         clusterTemplate.setCloudPlatform( clusterTemplateRequest.getCloudPlatform() );
 
+        clusterTemplate.setTemplate( new com.sequenceiq.cloudbreak.domain.Secret(mapStackV2RequestToJson(clusterTemplateRequest.getTemplate())) );
         clusterTemplate.setStatus( com.sequenceiq.cloudbreak.api.model.ResourceStatus.USER_MANAGED );
 
         return clusterTemplate;

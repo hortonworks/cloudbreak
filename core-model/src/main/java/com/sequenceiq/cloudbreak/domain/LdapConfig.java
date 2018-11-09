@@ -6,6 +6,7 @@ import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -57,12 +58,14 @@ public class LdapConfig implements ProvisionEntity, EnvironmentAwareResource {
     private String protocol;
 
     @Column(nullable = false)
+    @Convert(converter = SecretToString.class)
     @SecretValue
-    private String bindDn;
+    private Secret bindDn = Secret.EMPTY;
 
     @Column(nullable = false)
+    @Convert(converter = SecretToString.class)
     @SecretValue
-    private String bindPassword;
+    private Secret bindPassword = Secret.EMPTY;
 
     @Enumerated(EnumType.STRING)
     private DirectoryType directoryType;
@@ -185,19 +188,27 @@ public class LdapConfig implements ProvisionEntity, EnvironmentAwareResource {
         this.protocol = protocol;
     }
 
-    public String getBindDn() {
+    public Secret getBindDn() {
         return bindDn;
     }
 
     public void setBindDn(String bindDn) {
+        this.bindDn = new Secret(bindDn);
+    }
+
+    public void setBindDn(Secret bindDn) {
         this.bindDn = bindDn;
     }
 
-    public String getBindPassword() {
+    public Secret getBindPassword() {
         return bindPassword;
     }
 
     public void setBindPassword(String bindPassword) {
+        this.bindPassword = new Secret(bindPassword);
+    }
+
+    public void setBindPassword(Secret bindPassword) {
         this.bindPassword = bindPassword;
     }
 
