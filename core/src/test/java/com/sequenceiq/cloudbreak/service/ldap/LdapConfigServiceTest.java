@@ -229,8 +229,7 @@ public class LdapConfigServiceTest {
         when(clusterService.findByLdapConfig(ldapConfig)).thenReturn(Set.of(cluster1, cluster2));
 
         exceptionRule.expect(BadRequestException.class);
-        exceptionRule.expectMessage(String.format("LDAP config '%s' cannot be deleted because there are clusters associated with it: [%s, %s].",
-                ldapConfig.getName(), clusterName1, clusterName2));
+        exceptionRule.expectMessage(String.format("LDAP config '%s' cannot be deleted because there are clusters associated with it: ", ldapConfig.getName()));
         exceptionRule.expectMessage(clusterName1);
         exceptionRule.expectMessage(clusterName2);
 

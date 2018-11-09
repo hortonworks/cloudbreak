@@ -5,7 +5,6 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.model.environment.response.DetailedEnvironmentResponse;
 import com.sequenceiq.cloudbreak.api.model.environment.response.LocationResponse;
@@ -48,13 +47,18 @@ public class EnvironmentToDetailedEnvironmentResponseConverter extends AbstractC
                         .stream()
                         .map(rdsConfig -> getConversionService().convert(rdsConfig, RDSConfigResponse.class))
                         .collect(Collectors.toSet()));
-        if (!CollectionUtils.isEmpty(source.getWorkloadStacks())) {
-            response.setWorkloadClusters(
-                    source.getWorkloadStacks()
-                    .stream()
-                    .map(workload -> getConversionService().convert(workload, StackViewResponse.class))
-                    .collect(Collectors.toSet()));
-        }
+        response.setWorkloadClusters(
+                source.getStacks()
+                        .stream()
+                        .filter(workload -> workload.getDatalakeId() == null)
+                        .map(workload -> getConversionService().convert(workload, StackViewResponse.class))
+                        .collect(Collectors.toSet()));
+        response.setDatalakeClusters(
+                source.getStacks()
+                        .stream()
+                        .filter(workload -> workload.getDatalakeId() != null)
+                        .map(workload -> getConversionService().convert(workload, StackViewResponse.class))
+                        .collect(Collectors.toSet()));
         response.setLocation(getConversionService().convert(source, LocationResponse.class));
         return response;
     }

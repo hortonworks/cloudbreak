@@ -14,17 +14,20 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
-    @ApiModelProperty(EnvironmentResponseModelDescription.PROXY_CONFIG_NAMES)
+    @ApiModelProperty(EnvironmentResponseModelDescription.PROXY_CONFIGS)
     private Set<ProxyConfigResponse> proxyConfigs = new HashSet<>();
 
-    @ApiModelProperty(EnvironmentResponseModelDescription.LDAP_CONFIGS_NAMES)
+    @ApiModelProperty(EnvironmentResponseModelDescription.LDAP_CONFIGS)
     private Set<LdapConfigResponse> ldapConfigs = new HashSet<>();
 
-    @ApiModelProperty(EnvironmentResponseModelDescription.RDS_CONFIG_NAMES)
+    @ApiModelProperty(EnvironmentResponseModelDescription.RDS_CONFIGS)
     private Set<RDSConfigResponse> rdsConfigs = new HashSet<>();
 
-    @ApiModelProperty(EnvironmentResponseModelDescription.WORKLOAD_CLUSTER_NAMES)
+    @ApiModelProperty(EnvironmentResponseModelDescription.WORKLOAD_CLUSTERS)
     private Set<StackViewResponse> workloadClusters = new HashSet<>();
+
+    @ApiModelProperty(EnvironmentResponseModelDescription.DATALAKE_CLUSTERS)
+    private Set<StackViewResponse> datalakeClusters = new HashSet<>();
 
     public Set<ProxyConfigResponse> getProxyConfigs() {
         return proxyConfigs;
@@ -56,5 +59,13 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
 
     public void setWorkloadClusters(Set<StackViewResponse> workloadClusters) {
         this.workloadClusters = workloadClusters;
+    }
+
+    public Set<StackViewResponse> getDatalakeClusters() {
+        return datalakeClusters;
+    }
+
+    public void setDatalakeClusters(Set<StackViewResponse> datalakeClusters) {
+        this.datalakeClusters = datalakeClusters;
     }
 }
