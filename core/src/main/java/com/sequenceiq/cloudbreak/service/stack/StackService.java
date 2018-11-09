@@ -815,6 +815,14 @@ public class StackService {
         return count == null ? 0L : count;
     }
 
+    public Set<String> findDatalakeStackNamesByWorkspaceAndEnvironment(Long workspaceId, Long envId) {
+        return stackRepository.findDatalakeStackNamesByWorkspaceAndEnvironment(workspaceId, envId);
+    }
+
+    public Set<String> findWorkloadStackNamesByWorkspaceAndEnvironment(Long workspaceId, Long envId) {
+        return stackRepository.findWorkloadStackNamesByWorkspaceAndEnvironment(workspaceId, envId);
+    }
+
     private void validateScalingAdjustment(InstanceGroupAdjustmentJson instanceGroupAdjustmentJson, Stack stack) {
         if (0 == instanceGroupAdjustmentJson.getScalingAdjustment()) {
             throw new BadRequestException(String.format("Requested scaling adjustment on stack '%s' is 0. Nothing to do.", stack.getName()));

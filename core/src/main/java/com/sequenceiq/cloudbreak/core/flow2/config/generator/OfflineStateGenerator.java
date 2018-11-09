@@ -405,6 +405,16 @@ public class OfflineStateGenerator {
         }
 
         @Override
+        public Set<String> findDatalakeStackNamesByWorkspaceAndEnvironment(Long workspaceId, Long envId) {
+            return null;
+        }
+
+        @Override
+        public Set<String> findWorkloadStackNamesByWorkspaceAndEnvironment(Long workspaceId, Long envId) {
+            return null;
+        }
+
+        @Override
         public <S extends Stack> S save(S entity) {
             return entity;
         }

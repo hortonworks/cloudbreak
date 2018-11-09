@@ -13,17 +13,17 @@ import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.aspect.DisableHasPermission;
+import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByReturnValue;
 import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByWorkspace;
 import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByWorkspaceId;
-import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByReturnValue;
 import com.sequenceiq.cloudbreak.aspect.workspace.DisableCheckPermissions;
 import com.sequenceiq.cloudbreak.aspect.workspace.WorkspaceResourceType;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.domain.Network;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.EntityType;
 
@@ -148,4 +148,14 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     @DisableCheckPermissions
     @Query("SELECT COUNT(s) FROM Stack s WHERE s.environment.id = :envId AND s.datalakeId IS NOT NULL AND s.stackStatus.status <> 'DELETE_COMPLETED'")
     Long countDatalakeStacksInEnvironment(@Param("envId") Long environmentId);
+
+    @CheckPermissionsByWorkspaceId
+    @Query("SELECT s.name FROM Stack s WHERE s.workspace.id = :workspaceId AND s.environment.id = :envId "
+            + "AND s.datalakeId IS NOT NULL AND s.stackStatus.status <> 'DELETE_COMPLETED'")
+    Set<String> findDatalakeStackNamesByWorkspaceAndEnvironment(@Param("workspaceId") Long workspaceId, @Param("envId") Long envId);
+
+    @CheckPermissionsByWorkspaceId
+    @Query("SELECT s.name FROM Stack s WHERE s.workspace.id = :workspaceId AND s.environment.id = :envId "
+            + "AND s.datalakeId IS NULL AND s.stackStatus.status <> 'DELETE_COMPLETED'")
+    Set<String> findWorkloadStackNamesByWorkspaceAndEnvironment(@Param("workspaceId") Long workspaceId, @Param("envId") Long envId);
 }

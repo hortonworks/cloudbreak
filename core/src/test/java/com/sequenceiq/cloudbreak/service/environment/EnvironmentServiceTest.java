@@ -355,7 +355,7 @@ public class EnvironmentServiceTest {
         StackApiView stackApiView2 = new StackApiView();
         workloadClusters.add(stackApiView1);
         workloadClusters.add(stackApiView2);
-        environment.setWorkloadStacks(workloadClusters);
+        environment.setStacks(workloadClusters);
         String credentialName2 = "credential2";
         Credential credential2 = new Credential();
         credential2.setName(credentialName2);
@@ -392,7 +392,7 @@ public class EnvironmentServiceTest {
         StackApiView stackApiView2 = new StackApiView();
         workloadClusters.add(stackApiView1);
         workloadClusters.add(stackApiView2);
-        environment.setWorkloadStacks(workloadClusters);
+        environment.setStacks(workloadClusters);
         String credentialName2 = "credential2";
         Credential credential2 = new Credential();
         credential2.setName(credentialName2);
@@ -421,7 +421,7 @@ public class EnvironmentServiceTest {
         StackApiView stackApiView2 = new StackApiView();
         workloadClusters.add(stackApiView1);
         workloadClusters.add(stackApiView2);
-        environment.setWorkloadStacks(workloadClusters);
+        environment.setStacks(workloadClusters);
         when(environmentCredentialOperationService.validatePlatformAndGetCredential(any(), any(), anyLong()))
                 .thenThrow(new BadRequestException(""));
 
@@ -584,7 +584,7 @@ public class EnvironmentServiceTest {
         Credential credential = new Credential();
         credential.setName("credential1");
         environment.setCredential(credential);
-        environment.setWorkloadStacks(new HashSet<>());
+        environment.setStacks(new HashSet<>());
     }
 
     private void mockConverters() {
