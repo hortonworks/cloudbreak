@@ -44,6 +44,7 @@ import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
@@ -55,6 +56,7 @@ import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 import com.sequenceiq.cloudbreak.service.stack.StackParameterService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
 
 @Service
@@ -110,10 +112,11 @@ public class StackDecorator {
     @Inject
     private EnvironmentViewService environmentViewService;
 
+    @Inject
+    private StackService stackService;
+
     public Stack decorate(@Nonnull Stack subject, @Nonnull StackRequest request, User user, Workspace workspace) {
-        if (!StringUtils.isEmpty(request.getEnvironment())) {
-            subject.setEnvironment(environmentViewService.getByNameForWorkspace(request.getEnvironment(), workspace));
-        }
+        setEnvironment(subject, request, workspace);
 
         String stackName = request.getName();
         long start = System.currentTimeMillis();
@@ -167,6 +170,19 @@ public class StackDecorator {
             LOGGER.info("Validation of shared services requirements has been finished in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
         }
         return subject;
+    }
+
+    private void setEnvironment(@Nonnull Stack subject, @Nonnull StackRequest request, Workspace workspace) {
+        if (!StringUtils.isEmpty(request.getEnvironment())) {
+            EnvironmentView environment = environmentViewService.getByNameForWorkspace(request.getEnvironment(), workspace);
+            if (subject.getDatalakeId() != null) {
+                Long datalakesInEnv = stackService.countDatalakeStacksInEnvironment(environment.getId());
+                if (datalakesInEnv >= 1L) {
+                    throw new BadRequestException("Only 1 datalake cluster / environment is allowed.");
+                }
+            }
+            subject.setEnvironment(environment);
+        }
     }
 
     private void checkSharedServiceStackRequirements(StackRequest request, User user, Workspace workspace) {
