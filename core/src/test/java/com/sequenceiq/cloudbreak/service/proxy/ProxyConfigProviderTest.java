@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,22 +13,17 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
-import com.sequenceiq.cloudbreak.service.secret.SecretService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ProxyConfigProviderTest {
 
     @InjectMocks
     private ProxyConfigProvider proxyConfigProvider;
-
-    @Mock
-    private SecretService secretService;
 
     private Cluster cluster;
 
@@ -82,8 +76,6 @@ public class ProxyConfigProviderTest {
         ProxyConfig proxyConfig = new ProxyConfig();
         proxyConfig.setUserName("user");
         proxyConfig.setPassword("pass");
-        when(secretService.get("user")).thenReturn("user");
-        when(secretService.get("pass")).thenReturn("pass");
         Map<String, Object> properties = testProxyCore(proxyConfig);
         assertTrue(StringUtils.isNotBlank((CharSequence) properties.get("user")));
         assertTrue(StringUtils.isNotBlank((CharSequence) properties.get("password")));

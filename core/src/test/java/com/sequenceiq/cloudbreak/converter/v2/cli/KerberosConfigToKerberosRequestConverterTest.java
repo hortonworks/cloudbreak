@@ -18,7 +18,7 @@ public class KerberosConfigToKerberosRequestConverterTest extends AbstractConver
         KerberosConfig config = TestUtil.kerberosConfig();
         KerberosRequest request = underTest.convert(config);
         assertAllFieldsNotNull(request, Lists.newArrayList("url", "adminUrl", "realm", "ldapUrl", "containerDn", "descriptor", "krb5Conf",
-                "principal"));
+                "principal", "admin"));
     }
 
     @Test

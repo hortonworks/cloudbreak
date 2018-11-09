@@ -60,7 +60,6 @@ import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.decorator.StackDecorator;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
-import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.template.ClusterTemplateService;
@@ -121,9 +120,6 @@ public class StackCreatorService {
 
     @Inject
     private BlueprintService blueprintService;
-
-    @Inject
-    private SecretService secretService;
 
     public StackResponse createStack(CloudbreakUser cloudbreakUser, User user, Workspace workspace, StackRequest stackRequest) {
         ValidationResult validationResult = stackRequestValidator.validate(stackRequest);
@@ -292,7 +288,7 @@ public class StackCreatorService {
         ClusterTemplate clusterTemplate = clusterTemplateService.getByNameForWorkspace(templateName, workspace);
         validateTemplateAndCredentialCloudPlatform(request, workspace, clusterTemplate);
         try {
-            String template = secretService.get(clusterTemplate.getTemplate());
+            String template = clusterTemplate.getTemplate().getRaw();
             StackV2Request stackV2Request = new Json(template).get(StackV2Request.class);
             stackV2Request.setGeneral(request.getGeneral());
             stackV2Request.setStackAuthentication(request.getStackAuthentication());

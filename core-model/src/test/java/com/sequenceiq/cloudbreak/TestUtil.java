@@ -417,7 +417,6 @@ public class TestUtil {
         try {
             cluster.setAttributes(new Json(map).getValue());
         } catch (JsonProcessingException ignored) {
-            cluster.setAttributes(null);
         }
 
         if (kerberosConfig != null) {

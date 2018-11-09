@@ -3,8 +3,6 @@ package com.sequenceiq.cloudbreak.template.filesystem;
 
 import static com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsView.TENANT_ID;
 
-import javax.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,7 +12,6 @@ import org.springframework.util.StringUtils;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.template.filesystem.adls.AdlsFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.wasb.WasbFileSystemConfigurationsView;
 
@@ -29,9 +26,6 @@ public class AzureFileSystemConfigProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureFileSystemConfigProvider.class);
 
-    @Inject
-    private SecretService secretService;
-
     @Value("${info.app.version:}")
     private String cbVersion;
 
@@ -42,7 +36,7 @@ public class AzureFileSystemConfigProvider {
         if (fsConfiguration instanceof AdlsFileSystemConfigurationsView) {
             String adlsTrackingTag = (cbVersion != null) ? ADLS_TRACKING_CLUSTERNAME_VALUE + '-' + cbVersion : ADLS_TRACKING_CLUSTERNAME_VALUE;
             AdlsFileSystemConfigurationsView fileSystemConfigurationsView = (AdlsFileSystemConfigurationsView) fsConfiguration;
-            Json attributesFromVault = new Json(secretService.get(credential.getAttributes()));
+            Json attributesFromVault = new Json(credential.getAttributes().getRaw());
             if (StringUtils.isEmpty(fileSystemConfigurationsView.getClientId())) {
                 String credentialString = String.valueOf(attributesFromVault.getMap().get(CREDENTIAL_SECRET_KEY));
                 String clientId = String.valueOf(attributesFromVault.getMap().get(ACCESS_KEY));

@@ -126,7 +126,7 @@ public class ServiceProviderCredentialAdapter {
     }
 
     private void mergeCloudProviderParameters(Credential credential, CloudCredential cloudCredentialResponse, Set<String> skippedKeys) {
-        Json attributes = new Json(credential.getAttributes());
+        Json attributes = new Json(credential.getAttributes().getRaw());
         Map<String, Object> newAttributes = attributes.getMap();
         boolean newAttributesAdded = false;
         for (Map.Entry<String, Object> cloudParam : cloudCredentialResponse.getParameters().entrySet()) {

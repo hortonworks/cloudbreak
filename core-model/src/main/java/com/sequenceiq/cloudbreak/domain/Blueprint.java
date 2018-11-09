@@ -34,8 +34,9 @@ public class Blueprint implements ProvisionEntity, WorkspaceAwareResource {
     private String name;
 
     @Column(nullable = false)
+    @Convert(converter = SecretToString.class)
     @SecretValue
-    private String blueprintText;
+    private Secret blueprintText = Secret.EMPTY;
 
     private String ambariName;
 
@@ -95,11 +96,15 @@ public class Blueprint implements ProvisionEntity, WorkspaceAwareResource {
         this.id = id;
     }
 
-    public String getBlueprintText() {
+    public Secret getBlueprintText() {
         return blueprintText;
     }
 
     public void setBlueprintText(String blueprintText) {
+        this.blueprintText = new Secret(blueprintText);
+    }
+
+    public void setBlueprintText(Secret blueprintText) {
         this.blueprintText = blueprintText;
     }
 

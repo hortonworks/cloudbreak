@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import javax.annotation.Nonnull;
-import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
@@ -15,7 +14,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
-import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Service
@@ -24,9 +22,6 @@ public class KerberosDetailService {
     private static final String PRINCIPAL = "/admin";
 
     private final Gson gson = new Gson();
-
-    @Inject
-    private SecretService secretService;
 
     public String resolveTypeForKerberos(@Nonnull KerberosConfig kerberosConfig) {
         if (!Strings.isNullOrEmpty(kerberosConfig.getContainerDn()) && !Strings.isNullOrEmpty(kerberosConfig.getLdapUrl())) {
@@ -62,16 +57,16 @@ public class KerberosDetailService {
     }
 
     public String resolvePrincipalForKerberos(@Nonnull KerberosConfig kerberosConfig) {
-        return Strings.isNullOrEmpty(kerberosConfig.getPrincipal()) ? secretService.get(kerberosConfig.getAdmin()) + PRINCIPAL
-                : secretService.get(kerberosConfig.getPrincipal());
+        return Strings.isNullOrEmpty(kerberosConfig.getPrincipal().getRaw()) ? kerberosConfig.getAdmin().getRaw() + PRINCIPAL
+                : kerberosConfig.getPrincipal().getRaw();
     }
 
     public boolean isAmbariManagedKerberosPackages(@Nonnull KerberosConfig kerberosConfig) throws IOException {
-        if (isEmpty(kerberosConfig.getDescriptor())) {
+        if (isEmpty(kerberosConfig.getDescriptor().getRaw())) {
             return true;
         }
         try {
-            JsonNode node = JsonUtil.readTree(secretService.get(kerberosConfig.getDescriptor()))
+            JsonNode node = JsonUtil.readTree(kerberosConfig.getDescriptor().getRaw())
                     .get("kerberos-env").get("properties").get("install_packages");
             return node.asBoolean();
         } catch (NullPointerException ignored) {
@@ -81,7 +76,7 @@ public class KerberosDetailService {
 
     public Map<String, Object> getKerberosEnvProperties(@Nonnull KerberosConfig kerberosConfig) {
         Map<String, Object> kerberosEnv = (Map<String, Object>) gson
-                .fromJson(secretService.get(kerberosConfig.getDescriptor()), Map.class).get("kerberos-env");
+                .fromJson(kerberosConfig.getDescriptor().getRaw(), Map.class).get("kerberos-env");
         return (Map<String, Object>) kerberosEnv.get("properties");
     }
 }
