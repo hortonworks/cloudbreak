@@ -57,7 +57,7 @@ vault:
   addr: vault.service.consul
   port: 8200
   ssl.enabled: false
-  kv.engine.path: secret
+  kv.engine.v2.path: secret
   auth:
     type: "token"
     kubernetes:
