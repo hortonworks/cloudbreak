@@ -3,11 +3,11 @@ package com.sequenceiq.cloudbreak.service.secret;
 public interface SecretEngine {
     String put(String key, String value);
 
-    boolean isExists(String key);
+    boolean isExists(String secret);
 
-    String get(String key);
+    String get(String secret);
 
-    void delete(String key);
+    void delete(String secret);
 
-    boolean isSecret(String value);
+    boolean isSecret(String secret);
 }

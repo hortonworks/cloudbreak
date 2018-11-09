@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.secret;
 
 import java.security.InvalidKeyException;
 import java.util.List;
+import java.util.Objects;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -23,12 +24,12 @@ public class SecretService {
     @Inject
     private List<SecretEngine> engines;
 
-    private SecretEngine secretEngine;
+    private SecretEngine persistentEngine;
 
     @PostConstruct
     public void init() {
         if (StringUtils.hasLength(engineClass)) {
-            secretEngine = engines.stream().filter(e -> e.getClass().getCanonicalName().startsWith(engineClass + "$$")).findFirst()
+            persistentEngine = engines.stream().filter(e -> e.getClass().getCanonicalName().startsWith(engineClass + "$$")).findFirst()
                 .orElseThrow(() -> new RuntimeException(String.format("Selected secret engine (%s) is not found, please check cb.secret.engine", engineClass)));
         }
     }
@@ -42,30 +43,31 @@ public class SecretService {
      */
     public String put(String key, String value) throws Exception {
         long start = System.currentTimeMillis();
-        boolean exists = secretEngine.isExists(key);
+        boolean exists = persistentEngine.isExists(key);
         LOGGER.debug("Secret read took {} ms", System.currentTimeMillis() - start);
         if (exists) {
-            throw new InvalidKeyException(String.format("Path: %s already exists!", key));
+            throw new InvalidKeyException(String.format("Key: %s already exists!", key));
         }
         start = System.currentTimeMillis();
-        String finalPath = secretEngine.put(key, value);
+        String secret = persistentEngine.put(key, value);
         LOGGER.debug("Secret write took {} ms", System.currentTimeMillis() - start);
-        return finalPath;
+        return secret;
     }
 
     /**
      * Fetches the secret from Secret's store. If the secret is not found then null is returned.
-     * If the key is null then null is returned.
+     * If the secret is null then null is returned.
      *
-     * @param key Key-value key in Secret
-     * @return Secret content or null if the secret key is not found.
+     * @param secret Key-value secret in Secret
+     * @return Secret content or null if the secret secret is not found.
      */
-    public String get(String key) {
-        if (key == null) {
+    public String get(String secret) {
+        if (secret == null) {
             return null;
         }
         long start = System.currentTimeMillis();
-        String response = secretEngine.get(key);
+        String response = engines.stream().filter(e -> e.isSecret(secret)).map(e -> e.get(secret))
+                .filter(Objects::nonNull).findFirst().orElse(null);
         LOGGER.debug("Secret read took {} ms", System.currentTimeMillis() - start);
         return response;
     }
@@ -73,20 +75,20 @@ public class SecretService {
     /**
      * Deletes a secret from Secrets's store.
      *
-     * @param key Key-value key in Secret
+     * @param secret Key-value secret in Secret
      */
-    public void delete(String key) {
+    public void delete(String secret) {
         long start = System.currentTimeMillis();
-        secretEngine.delete(key);
+        engines.stream().filter(e -> e.isSecret(secret)).forEach(e -> e.delete(secret));
         LOGGER.debug("Secret delete took {} ms", System.currentTimeMillis() - start);
     }
 
     /**
-     * Determines the value is a secret location or not
+     * Determines the secret is a secret location or not
      *
-     * @param value Key-value key in Secret
+     * @param secret Key-value key in Secret
      */
-    public boolean isSecret(String value) {
-        return secretEngine.isSecret(value);
+    public boolean isSecret(String secret) {
+        return engines.stream().anyMatch(e -> e.isSecret(secret));
     }
 }
