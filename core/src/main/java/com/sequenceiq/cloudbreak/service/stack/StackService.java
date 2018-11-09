@@ -769,6 +769,10 @@ public class StackService {
                 .findFirst();
     }
 
+    public Long countDatalakeStacksInEnvironment(Long environmentId) {
+        return stackRepository.countDatalakeStacksInEnvironment(environmentId);
+    }
+
     public void validateStack(StackValidation stackValidation, boolean validateBlueprint) {
         if (stackValidation.getNetwork() != null) {
             networkConfigurationValidator.validateNetworkForStack(stackValidation.getNetwork(), stackValidation.getInstanceGroups());

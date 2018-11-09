@@ -144,4 +144,8 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     @DisableCheckPermissions
     @Query("SELECT s.workspace.id FROM Stack s where s.id = :id")
     Long findWorkspaceIdById(@Param("id") Long id);
+
+    @DisableCheckPermissions
+    @Query("SELECT COUNT(s) FROM Stack s WHERE s.environment.id = :envId AND s.datalakeId IS NOT NULL AND s.stackStatus.status <> 'DELETE_COMPLETED'")
+    Long countDatalakeStacksInEnvironment(@Param("envId") Long environmentId);
 }

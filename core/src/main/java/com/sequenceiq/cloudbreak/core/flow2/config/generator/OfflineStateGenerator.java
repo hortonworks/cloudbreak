@@ -400,6 +400,11 @@ public class OfflineStateGenerator {
         }
 
         @Override
+        public Long countDatalakeStacksInEnvironment(Long environmentId) {
+            return null;
+        }
+
+        @Override
         public <S extends Stack> S save(S entity) {
             return entity;
         }
