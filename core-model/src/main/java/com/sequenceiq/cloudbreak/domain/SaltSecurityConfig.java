@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.domain;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -18,23 +19,27 @@ public class SaltSecurityConfig implements ProvisionEntity {
     @SequenceGenerator(name = "saltsecurityconfig_generator", sequenceName = "saltsecurityconfig_id_seq", allocationSize = 1)
     private Long id;
 
+    @Convert(converter = SecretToString.class)
     @SecretValue
-    private String saltPassword;
+    private Secret saltPassword = Secret.EMPTY;
 
     @Column(columnDefinition = "TEXT")
     private String saltSignPublicKey;
 
+    @Convert(converter = SecretToString.class)
     @SecretValue
-    private String saltSignPrivateKey;
+    private Secret saltSignPrivateKey = Secret.EMPTY;
 
+    @Convert(converter = SecretToString.class)
     @SecretValue
-    private String saltBootPassword;
+    private Secret saltBootPassword = Secret.EMPTY;
 
     @Column(columnDefinition = "TEXT")
     private String saltBootSignPublicKey;
 
+    @Convert(converter = SecretToString.class)
     @SecretValue
-    private String saltBootSignPrivateKey;
+    private Secret saltBootSignPrivateKey = Secret.EMPTY;
 
     @OneToOne(mappedBy = "saltSecurityConfig")
     private SecurityConfig securityConfig;
@@ -63,27 +68,39 @@ public class SaltSecurityConfig implements ProvisionEntity {
         this.saltBootSignPublicKey = saltBootSignPublicKey;
     }
 
-    public String getSaltBootSignPrivateKey() {
+    public Secret getSaltBootSignPrivateKey() {
         return saltBootSignPrivateKey;
     }
 
     public void setSaltBootSignPrivateKey(String saltBootSignPrivateKey) {
+        this.saltBootSignPrivateKey = new Secret(saltBootSignPrivateKey);
+    }
+
+    public void setSaltBootSignPrivateKey(Secret saltBootSignPrivateKey) {
         this.saltBootSignPrivateKey = saltBootSignPrivateKey;
     }
 
-    public String getSaltPassword() {
+    public Secret getSaltPassword() {
         return saltPassword;
     }
 
     public void setSaltPassword(String saltPassword) {
+        this.saltPassword = new Secret(saltPassword);
+    }
+
+    public void setSaltPassword(Secret saltPassword) {
         this.saltPassword = saltPassword;
     }
 
-    public String getSaltBootPassword() {
+    public Secret getSaltBootPassword() {
         return saltBootPassword;
     }
 
     public void setSaltBootPassword(String saltBootPassword) {
+        this.saltBootPassword = new Secret(saltBootPassword);
+    }
+
+    public void setSaltBootPassword(Secret saltBootPassword) {
         this.saltBootPassword = saltBootPassword;
     }
 
@@ -92,6 +109,10 @@ public class SaltSecurityConfig implements ProvisionEntity {
     }
 
     public void setSaltSignPrivateKey(String saltSignPrivateKey) {
+        this.saltSignPrivateKey = new Secret(saltSignPrivateKey);
+    }
+
+    public void setSaltSignPrivateKey(Secret saltSignPrivateKey) {
         this.saltSignPrivateKey = saltSignPrivateKey;
     }
 
@@ -99,7 +120,7 @@ public class SaltSecurityConfig implements ProvisionEntity {
         return saltSignPublicKey;
     }
 
-    public String getSaltSignPrivateKey() {
+    public Secret getSaltSignPrivateKey() {
         return saltSignPrivateKey;
     }
 }

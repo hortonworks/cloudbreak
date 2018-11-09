@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.service.blueprint;
 
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +18,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
-import com.sequenceiq.cloudbreak.service.secret.SecretService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BlueprintMigrationServiceTest {
@@ -33,9 +29,6 @@ public class BlueprintMigrationServiceTest {
 
     @Mock
     private BlueprintUtils blueprintUtils;
-
-    @Mock
-    private SecretService secretService;
 
     @Test
     public void testMigrateBlueprintsShouldMigrateStackTypeAndVersion() throws IOException {
@@ -57,7 +50,6 @@ public class BlueprintMigrationServiceTest {
                 .thenReturn("2.6")
                 .thenReturn("");
         ArgumentCaptor<Iterable<Blueprint>> savedBlueprintsIterable = ArgumentCaptor.forClass(Iterable.class);
-        when(secretService.get(anyString())).thenAnswer(it -> it.getArgument(0));
         // WHEN
         underTest.migrateBlueprints();
         // THEN
@@ -89,7 +81,6 @@ public class BlueprintMigrationServiceTest {
                 .thenReturn("2.6")
                 .thenReturn("3.2");
         ArgumentCaptor<Iterable<Blueprint>> savedBlueprintsIterable = ArgumentCaptor.forClass(Iterable.class);
-        when(secretService.get(anyString())).thenReturn(blueprintJson);
         // WHEN
         underTest.migrateBlueprints();
         // THEN

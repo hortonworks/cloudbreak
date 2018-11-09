@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.domain.stack.cluster;
 import java.io.Serializable;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -17,6 +18,8 @@ import javax.persistence.UniqueConstraint;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.aspect.secret.SecretValue;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
+import com.sequenceiq.cloudbreak.domain.Secret;
+import com.sequenceiq.cloudbreak.domain.SecretToString;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
 
@@ -35,8 +38,9 @@ public class ClusterTemplate implements WorkspaceAwareResource, Serializable {
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String description;
 
+    @Convert(converter = SecretToString.class)
     @SecretValue
-    private String template;
+    private Secret template = Secret.EMPTY;
 
     @ManyToOne
     private Workspace workspace;
@@ -48,11 +52,11 @@ public class ClusterTemplate implements WorkspaceAwareResource, Serializable {
     @Column(nullable = false)
     private String cloudPlatform;
 
-    public String getTemplate() {
+    public Secret getTemplate() {
         return template;
     }
 
-    public void setTemplate(String template) {
+    public void setTemplate(Secret template) {
         this.template = template;
     }
 

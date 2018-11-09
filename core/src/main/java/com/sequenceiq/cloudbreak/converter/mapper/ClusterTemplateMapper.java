@@ -3,8 +3,6 @@ package com.sequenceiq.cloudbreak.converter.mapper;
 import java.io.IOException;
 import java.util.Set;
 
-import javax.inject.Inject;
-
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
@@ -14,21 +12,20 @@ import com.sequenceiq.cloudbreak.api.model.template.ClusterTemplateRequest;
 import com.sequenceiq.cloudbreak.api.model.template.ClusterTemplateResponse;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.domain.Secret;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
-import com.sequenceiq.cloudbreak.service.secret.SecretService;
 
 @Mapper(componentModel = "spring")
 public abstract class ClusterTemplateMapper {
-
-    @Inject
-    private SecretService secretService;
 
     @Mappings({
             @Mapping(target = "owner", ignore = true),
             @Mapping(target = "id", ignore = true),
             @Mapping(target = "workspace", ignore = true),
-            @Mapping(target = "status", expression = "java(com.sequenceiq.cloudbreak.api.model.ResourceStatus.USER_MANAGED)")
+            @Mapping(target = "status", expression = "java(com.sequenceiq.cloudbreak.api.model.ResourceStatus.USER_MANAGED)"),
+            @Mapping(target = "template",
+                    expression = "java(new com.sequenceiq.cloudbreak.domain.Secret(mapStackV2RequestToJson(clusterTemplateRequest.getTemplate())))")
     })
     public abstract ClusterTemplate mapRequestToEntity(ClusterTemplateRequest clusterTemplateRequest);
 
@@ -44,9 +41,9 @@ public abstract class ClusterTemplateMapper {
         }
     }
 
-    public StackV2Request mapJsonToStackV2Request(String templatePath) {
+    public StackV2Request mapJsonToStackV2Request(Secret templateSecret) {
         try {
-            String templateContent = secretService.get(templatePath);
+            String templateContent = templateSecret.getRaw();
             return new Json(templateContent).get(StackV2Request.class);
         } catch (IOException e) {
             throw new BadRequestException("Couldn't convert json to StackV2Request", e);

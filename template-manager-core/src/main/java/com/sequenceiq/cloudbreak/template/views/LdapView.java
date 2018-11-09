@@ -36,18 +36,18 @@ public class LdapView {
 
     private final String userDnPattern;
 
-    private final String host;
+    private final String serverHost;
 
     private String connectionURL;
 
-    private int port;
+    private int serverPort;
 
     public LdapView(@Nonnull LdapConfig ldapConfig, @Nonnull String bindDn, @Nonnull String bindPassword) {
         protocol = ldapConfig.getProtocol().toLowerCase();
-        host = ldapConfig.getServerHost();
+        serverHost = ldapConfig.getServerHost();
         connectionURL = protocol + "://" + ldapConfig.getServerHost();
         if (ldapConfig.getServerPort() != null) {
-            port = ldapConfig.getServerPort();
+            serverPort = ldapConfig.getServerPort();
             connectionURL = connectionURL.toLowerCase() + ':' + ldapConfig.getServerPort();
         }
         directoryType = ldapConfig.getDirectoryType();
@@ -65,12 +65,12 @@ public class LdapView {
         this.bindPassword = bindPassword;
     }
 
-    public String getHost() {
-        return host;
+    public String getServerHost() {
+        return serverHost;
     }
 
-    public int getPort() {
-        return port;
+    public int getServerPort() {
+        return serverPort;
     }
 
     public boolean isSecure() {

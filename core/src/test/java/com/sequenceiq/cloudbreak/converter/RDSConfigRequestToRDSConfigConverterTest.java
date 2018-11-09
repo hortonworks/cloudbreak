@@ -104,8 +104,8 @@ public class RDSConfigRequestToRDSConfigConverterTest {
 
         RDSConfig rdsConfig = underTest.convert(rdsConfigRequest);
 
-        Assert.assertEquals(rdsConfigRequest.getConnectionPassword(), rdsConfig.getConnectionPassword());
-        Assert.assertEquals(rdsConfigRequest.getConnectionUserName(), rdsConfig.getConnectionUserName());
+        Assert.assertEquals(rdsConfigRequest.getConnectionPassword(), rdsConfig.getConnectionPassword().getRaw());
+        Assert.assertEquals(rdsConfigRequest.getConnectionUserName(), rdsConfig.getConnectionUserName().getRaw());
         Assert.assertEquals(rdsConfigRequest.getConnectionURL(), rdsConfig.getConnectionURL());
         Assert.assertEquals(rdsConfigRequest.getType(), rdsConfig.getType());
         Assert.assertEquals(NAME, rdsConfig.getName());
@@ -125,8 +125,8 @@ public class RDSConfigRequestToRDSConfigConverterTest {
     }
 
     private void assertResult(RDSConfigRequest rdsConfigRequest, RDSConfig rdsConfig, DatabaseVendor databaseVendor) {
-        Assert.assertEquals(rdsConfigRequest.getConnectionPassword(), rdsConfig.getConnectionPassword());
-        Assert.assertEquals(rdsConfigRequest.getConnectionUserName(), rdsConfig.getConnectionUserName());
+        Assert.assertEquals(rdsConfigRequest.getConnectionPassword(), rdsConfig.getConnectionPassword().getRaw());
+        Assert.assertEquals(rdsConfigRequest.getConnectionUserName(), rdsConfig.getConnectionUserName().getRaw());
         Assert.assertEquals(rdsConfigRequest.getConnectionURL(), rdsConfig.getConnectionURL());
         Assert.assertEquals(rdsConfigRequest.getType(), rdsConfig.getType());
         Assert.assertEquals(rdsConfigRequest.getName(), rdsConfig.getName());

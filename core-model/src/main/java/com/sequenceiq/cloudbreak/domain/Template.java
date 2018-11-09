@@ -69,9 +69,9 @@ public class Template implements ProvisionEntity {
     @Column(columnDefinition = "TEXT")
     private Json attributes;
 
-    @Column(columnDefinition = "TEXT")
+    @Convert(converter = SecretToString.class)
     @SecretValue
-    private String secretAttributes;
+    private Secret secretAttributes = Secret.EMPTY;
 
     @ManyToOne
     private Workspace workspace;
@@ -192,11 +192,15 @@ public class Template implements ProvisionEntity {
         this.attributes = attributes;
     }
 
-    public String getSecretAttributes() {
+    public Secret getSecretAttributes() {
         return secretAttributes;
     }
 
     public void setSecretAttributes(String secretAttributes) {
+        this.secretAttributes = new Secret(secretAttributes);
+    }
+
+    public void setSecretAttributes(Secret secretAttributes) {
         this.secretAttributes = secretAttributes;
     }
 

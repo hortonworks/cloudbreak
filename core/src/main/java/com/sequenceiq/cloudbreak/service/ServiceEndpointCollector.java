@@ -28,7 +28,6 @@ import com.sequenceiq.cloudbreak.api.model.ExposedServiceResponse;
 import com.sequenceiq.cloudbreak.api.model.GatewayType;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.SSOType;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
-import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.cloud.VersionComparator;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -54,9 +53,6 @@ public class ServiceEndpointCollector {
 
     @Inject
     private AmbariHaComponentFilter ambariHaComponentFilter;
-
-    @Inject
-    private SecretService secretService;
 
     public Collection<ExposedServiceResponse> getKnoxServices(String blueprintName, Workspace workspace) {
         Blueprint blueprint = blueprintService.getByNameForWorkspace(blueprintName, workspace);
@@ -89,7 +85,7 @@ public class ServiceEndpointCollector {
 
     public Map<String, Collection<ClusterExposedServiceResponse>> prepareClusterExposedServices(Cluster cluster, String ambariIp) {
         if (cluster.getBlueprint() != null) {
-            String blueprintText = secretService.get(cluster.getBlueprint().getBlueprintText());
+            String blueprintText = cluster.getBlueprint().getBlueprintText().getRaw();
             if (StringUtils.isNotEmpty(blueprintText)) {
                 BlueprintTextProcessor blueprintTextProcessor = new BlueprintProcessorFactory().get(blueprintText);
                 Collection<ExposedService> knownExposedServices = getExposedServices(blueprintTextProcessor, Collections.emptySet());
@@ -142,7 +138,7 @@ public class ServiceEndpointCollector {
     }
 
     private Collection<ExposedServiceResponse> getKnoxServices(Blueprint blueprint) {
-        String blueprintText = secretService.get(blueprint.getBlueprintText());
+        String blueprintText = blueprint.getBlueprintText().getRaw();
         BlueprintTextProcessor blueprintTextProcessor = blueprintProcessorFactory.get(blueprintText);
         Set<String> haComponents = ambariHaComponentFilter.getHaComponents(blueprintTextProcessor);
         haComponents.remove(ExposedService.RANGER.getServiceName());

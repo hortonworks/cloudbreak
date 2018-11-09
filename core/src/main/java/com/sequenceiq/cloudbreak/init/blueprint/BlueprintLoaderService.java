@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.service.secret.SecretService;
 
 @Service
 public class BlueprintLoaderService {
@@ -28,9 +27,6 @@ public class BlueprintLoaderService {
 
     @Inject
     private DefaultBlueprintCache defaultBlueprintCache;
-
-    @Inject
-    private SecretService secretService;
 
     public boolean addingDefaultBlueprintsAreNecessaryForTheUser(Collection<Blueprint> blueprints) {
         Map<String, Blueprint> defaultBlueprints = defaultBlueprintCache.defaultBlueprints();
@@ -99,7 +95,7 @@ public class BlueprintLoaderService {
         for (Blueprint blueprintFromDatabase : blueprints) {
             Blueprint defaultBlueprint = defaultBlueprints.get(blueprintFromDatabase.getName());
             if (defaultBlueprintExistInTheCache(defaultBlueprint)
-                    && (defaultBlueprintNotSameAsNewTexts(blueprintFromDatabase, defaultBlueprint.getBlueprintText())
+                    && (defaultBlueprintNotSameAsNewTexts(blueprintFromDatabase, defaultBlueprint.getBlueprintText().getRaw())
                     || defaultBlueprintContainsNewDescription(blueprintFromDatabase, defaultBlueprint))) {
                 LOGGER.info("Default Blueprint '{}' needs to modify for the '{}' workspace because the validation text changed.",
                         blueprintFromDatabase.getName(), workspace.getId());
@@ -155,7 +151,7 @@ public class BlueprintLoaderService {
     }
 
     private boolean defaultBlueprintNotSameAsNewTexts(Blueprint blueprintFromDatabase, String defaultBlueprintText) {
-        String blueprintText = secretService.get(blueprintFromDatabase.getBlueprintText());
+        String blueprintText = blueprintFromDatabase.getBlueprintText().getRaw();
         return blueprintText == null || !blueprintText.equals(defaultBlueprintText);
     }
 
@@ -170,7 +166,7 @@ public class BlueprintLoaderService {
     private boolean mustUpdateTheExistingBlueprint(Blueprint blueprintFromDatabase, Blueprint defaultBlueprint) {
         return isDefaultBlueprint(blueprintFromDatabase)
                 && defaultBlueprintExistInTheCache(defaultBlueprint)
-                && (defaultBlueprintNotSameAsNewTexts(blueprintFromDatabase, defaultBlueprint.getBlueprintText())
+                && (defaultBlueprintNotSameAsNewTexts(blueprintFromDatabase, defaultBlueprint.getBlueprintText().getRaw())
                 || defaultBlueprintContainsNewDescription(blueprintFromDatabase, defaultBlueprint));
     }
 

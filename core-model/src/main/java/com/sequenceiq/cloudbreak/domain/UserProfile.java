@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.domain;
 import java.util.Set;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -38,9 +39,9 @@ public class UserProfile {
     @Column
     private String userName;
 
+    @Convert(converter = SecretToString.class)
     @SecretValue
-    @Column(columnDefinition = "TEXT")
-    private String uiProperties;
+    private Secret uiProperties = Secret.EMPTY;
 
     @OneToOne
     private User user;
@@ -80,11 +81,15 @@ public class UserProfile {
         this.userName = userName;
     }
 
-    public String getUiProperties() {
+    public Secret getUiProperties() {
         return uiProperties;
     }
 
     public void setUiProperties(String uiProperties) {
+        this.uiProperties = new Secret(uiProperties);
+    }
+
+    public void setUiProperties(Secret uiProperties) {
         this.uiProperties = uiProperties;
     }
 

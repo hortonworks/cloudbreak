@@ -47,10 +47,10 @@ public class CentralBlueprintUpdaterTest {
 
     @Before
     public void before() {
-        testBlueprint = TestUtil.blueprint().getBlueprintText();
+        testBlueprint = TestUtil.blueprint().getBlueprintText().getRaw();
 
         object = TemplatePreparationObject.Builder.builder()
-                .withBlueprintView(new BlueprintView(TestUtil.blueprint().getBlueprintText(), "HDP", "2.6"))
+                .withBlueprintView(new BlueprintView(TestUtil.blueprint().getBlueprintText().getRaw(), "HDP", "2.6"))
                 .build();
     }
 

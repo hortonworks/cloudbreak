@@ -21,11 +21,11 @@ import com.sequenceiq.cloudbreak.api.model.users.UserProfileRequest;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.UserProfileRepository;
-import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
+import com.sequenceiq.cloudbreak.service.secret.SecretService;
 
 public class UserProfileServiceTest {
 
@@ -36,10 +36,10 @@ public class UserProfileServiceTest {
     private UserProfileRepository userProfileRepository;
 
     @Mock
-    private SecretService secretService;
+    private UserService userService;
 
     @Mock
-    private UserService userService;
+    private SecretService secretService;
 
     @InjectMocks
     private UserProfileService userProfileService;

@@ -7,23 +7,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.inject.Inject;
-
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.ExposedService;
-import com.sequenceiq.cloudbreak.service.secret.SecretService;
-import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 
 @Component
 @ConfigurationProperties
 public class BlueprintPortConfigCollector {
-
-    @Inject
-    private SecretService secretService;
 
     // injected by Spring using the setter, but setting a default value here in case config were missing
     private List<PortConfig> blueprintServicePorts = new ArrayList<>();
@@ -36,7 +30,7 @@ public class BlueprintPortConfigCollector {
     }
 
     private void collectConfiguredPorts(Blueprint blueprint, Map<String, Integer> collectedPorts) {
-        String blueprintText = secretService.get(blueprint.getBlueprintText());
+        String blueprintText = blueprint.getBlueprintText().getRaw();
         Map<String, Map<String, String>> configurations = new BlueprintTextProcessor(blueprintText).getConfigurationEntries();
         blueprintServicePorts.forEach(portConfig -> {
             Optional<Integer> configuredPort = getConfiguredPortForService(portConfig, configurations);
