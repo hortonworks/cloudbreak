@@ -11,8 +11,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -20,7 +18,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.template.filesystem.AbstractFileSystemConfigurator;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemScriptConfig;
 
@@ -28,9 +25,6 @@ import com.sequenceiq.cloudbreak.template.filesystem.FileSystemScriptConfig;
 public class GcsFileSystemConfigurator extends AbstractFileSystemConfigurator<GcsFileSystemConfigurationsView> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GcsFileSystemConfigurator.class);
-
-    @Inject
-    private SecretService secretService;
 
     @Override
     protected List<FileSystemScriptConfig> getScriptConfigs(Credential credential) {
@@ -43,7 +37,7 @@ public class GcsFileSystemConfigurator extends AbstractFileSystemConfigurator<Gc
     }
 
     private String getPrivateKey(Credential credential) {
-        Json attibutesFromVault = new Json(secretService.get(credential.getAttributes()));
+        Json attibutesFromVault = new Json(credential.getAttributes().getRaw());
         Object serviceAccountPrivateKey = attibutesFromVault.getMap().get("serviceAccountPrivateKey");
         if (serviceAccountPrivateKey == null) {
             LOGGER.warn("ServiceAccountPrivateKey isn't set.");

@@ -6,6 +6,7 @@ import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -53,11 +54,13 @@ public class ProxyConfig implements ProvisionEntity, EnvironmentAwareResource {
     @Column(nullable = false)
     private String protocol;
 
+    @Convert(converter = SecretToString.class)
     @SecretValue
-    private String userName;
+    private Secret userName = Secret.EMPTY;
 
+    @Convert(converter = SecretToString.class)
     @SecretValue
-    private String password;
+    private Secret password = Secret.EMPTY;
 
     @ManyToOne
     private Workspace workspace;
@@ -122,19 +125,27 @@ public class ProxyConfig implements ProvisionEntity, EnvironmentAwareResource {
         this.protocol = protocol;
     }
 
-    public String getUserName() {
+    public Secret getUserName() {
         return userName;
     }
 
     public void setUserName(String userName) {
+        this.userName = new Secret(userName);
+    }
+
+    public void setUserName(Secret userName) {
         this.userName = userName;
     }
 
-    public String getPassword() {
+    public Secret getPassword() {
         return password;
     }
 
     public void setPassword(String password) {
+        this.password = new Secret(password);
+    }
+
+    public void setPassword(Secret password) {
         this.password = password;
     }
 

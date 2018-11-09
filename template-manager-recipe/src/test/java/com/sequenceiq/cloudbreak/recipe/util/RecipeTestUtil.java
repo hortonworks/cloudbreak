@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.recipe.util;
 
+import static com.sequenceiq.cloudbreak.TestUtil.ldapConfig;
+
 import java.util.Optional;
 
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
@@ -8,8 +10,6 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.LdapView;
-
-import static com.sequenceiq.cloudbreak.TestUtil.ldapConfig;
 
 public class RecipeTestUtil {
 
@@ -44,8 +44,8 @@ public class RecipeTestUtil {
         generalClusterConfigs.setExecutorType(cluster.getExecutorType());
         generalClusterConfigs.setStackName(cluster.getName());
         generalClusterConfigs.setUuid("111-222-333-444");
-        generalClusterConfigs.setUserName(cluster.getUserName());
-        generalClusterConfigs.setPassword(cluster.getPassword());
+        generalClusterConfigs.setUserName(cluster.getUserName().getRaw());
+        generalClusterConfigs.setPassword(cluster.getPassword().getRaw());
         generalClusterConfigs.setNodeCount(1);
         generalClusterConfigs.setIdentityUserEmail(IDENTITY_USER_EMAIL);
         generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.of("fqdn.loal.com"));

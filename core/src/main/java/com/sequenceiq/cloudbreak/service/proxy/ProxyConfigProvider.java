@@ -5,15 +5,12 @@ import static java.util.Collections.singletonMap;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
-import com.sequenceiq.cloudbreak.service.secret.SecretService;
 
 @Service
 public class ProxyConfigProvider {
@@ -22,9 +19,6 @@ public class ProxyConfigProvider {
 
     public static final String PROXY_SLS_PATH = "/proxy/proxy.sls";
 
-    @Inject
-    private SecretService secretService;
-
     public void decoratePillarWithProxyDataIfNeeded(Map<String, SaltPillarProperties> servicePillar, Cluster cluster) {
         ProxyConfig proxyConfig = cluster.getProxyConfig();
         if (proxyConfig != null) {
@@ -32,9 +26,9 @@ public class ProxyConfigProvider {
             proxy.put("host", proxyConfig.getServerHost());
             proxy.put("port", proxyConfig.getServerPort());
             proxy.put("protocol", proxyConfig.getProtocol());
-            if (StringUtils.isNotBlank(proxyConfig.getUserName()) && StringUtils.isNotBlank(proxyConfig.getPassword())) {
-                proxy.put("user", secretService.get(proxyConfig.getUserName()));
-                proxy.put("password", secretService.get(proxyConfig.getPassword()));
+            if (StringUtils.isNotBlank(proxyConfig.getUserName().getRaw()) && StringUtils.isNotBlank(proxyConfig.getPassword().getRaw())) {
+                proxy.put("user", proxyConfig.getUserName().getRaw());
+                proxy.put("password", proxyConfig.getPassword().getRaw());
             }
             servicePillar.put(PROXY_KEY, new SaltPillarProperties(PROXY_SLS_PATH, singletonMap(PROXY_KEY, proxy)));
         }

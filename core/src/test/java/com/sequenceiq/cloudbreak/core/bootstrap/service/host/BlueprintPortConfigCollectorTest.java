@@ -1,8 +1,6 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service.host;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,18 +8,12 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.FileReaderUtil;
 import com.sequenceiq.cloudbreak.api.model.ExposedService;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.BlueprintPortConfigCollector.PortConfig;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.service.secret.SecretService;
 
-@RunWith(MockitoJUnitRunner.class)
 public class BlueprintPortConfigCollectorTest {
 
     private static final int HIVE_PORT = 123;
@@ -30,15 +22,10 @@ public class BlueprintPortConfigCollectorTest {
 
     private static final int YARN_PORT = 321;
 
-    @InjectMocks
-    private BlueprintPortConfigCollector underTest;
-
-    @Mock
-    private SecretService secretService;
+    private BlueprintPortConfigCollector underTest = new BlueprintPortConfigCollector();
 
     @Before
     public void setup() {
-        when(secretService.get(anyString())).thenAnswer(it -> it.getArgument(0));
         List<PortConfig> blueprintServicePorts = new ArrayList<>();
         blueprintServicePorts.add(new PortConfig("HIVE_SERVER", "hive-site", "hive.server2.thrift.http.port", null));
         blueprintServicePorts.add(new PortConfig("ZEPPELIN", "zeppelin-config", "zeppelin.server.port", null));

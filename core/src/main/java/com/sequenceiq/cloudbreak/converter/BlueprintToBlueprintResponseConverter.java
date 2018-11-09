@@ -1,22 +1,16 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import javax.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.service.secret.SecretService;
 
 @Component
 public class BlueprintToBlueprintResponseConverter extends AbstractConversionServiceAwareConverter<Blueprint, BlueprintResponse> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintToBlueprintResponseConverter.class);
-
-    @Inject
-    private SecretService secretService;
 
     @Override
     public BlueprintResponse convert(Blueprint entity) {
@@ -27,7 +21,7 @@ public class BlueprintToBlueprintResponseConverter extends AbstractConversionSer
         blueprintJson.setHostGroupCount(entity.getHostGroupCount());
         blueprintJson.setStatus(entity.getStatus());
         blueprintJson.setTags(entity.getTags().getMap());
-        blueprintJson.setAmbariBlueprint(secretService.get(entity.getBlueprintText()));
+        blueprintJson.setAmbariBlueprint(entity.getBlueprintText().getRaw());
         return blueprintJson;
     }
 

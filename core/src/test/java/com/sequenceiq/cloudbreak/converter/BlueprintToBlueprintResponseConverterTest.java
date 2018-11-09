@@ -1,15 +1,7 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
-
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.TestUtil;
@@ -17,23 +9,12 @@ import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
-import com.sequenceiq.cloudbreak.service.secret.SecretService;
 
-@RunWith(MockitoJUnitRunner.class)
 public class BlueprintToBlueprintResponseConverterTest extends AbstractEntityConverterTest<Blueprint> {
 
     private static final JsonToString JSON_TO_STRING = new JsonToString();
 
-    @InjectMocks
-    private BlueprintToBlueprintResponseConverter underTest;
-
-    @Mock
-    private SecretService secretService;
-
-    @Before
-    public void setUp() {
-        when(secretService.get(anyString())).thenAnswer(it -> it.getArgument(0));
-    }
+    private BlueprintToBlueprintResponseConverter underTest = new BlueprintToBlueprintResponseConverter();
 
     @Test
     public void testConvert() {
@@ -121,7 +102,7 @@ public class BlueprintToBlueprintResponseConverterTest extends AbstractEntityCon
         Assert.assertEquals(source.getStatus(), result.getStatus());
         Assert.assertNotNull(result.getTags());
         Assert.assertTrue(result.getTags().isEmpty());
-        Assert.assertEquals(source.getBlueprintText(), result.getAmbariBlueprint());
+        Assert.assertEquals(source.getBlueprintText().getRaw(), result.getAmbariBlueprint());
     }
 
     @Test
@@ -140,7 +121,7 @@ public class BlueprintToBlueprintResponseConverterTest extends AbstractEntityCon
         Assert.assertEquals(source.getStatus(), result.getStatus());
         Assert.assertNotNull(result.getTags());
         Assert.assertTrue(result.getTags().isEmpty());
-        Assert.assertEquals(source.getBlueprintText(), result.getAmbariBlueprint());
+        Assert.assertEquals(source.getBlueprintText().getRaw(), result.getAmbariBlueprint());
     }
 
     @Override

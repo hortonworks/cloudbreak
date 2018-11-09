@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.aspect;
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -16,6 +17,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.aspect.secret.SecretValue;
+import com.sequenceiq.cloudbreak.domain.Secret;
+import com.sequenceiq.cloudbreak.domain.SecretProxy;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.secret.SecretService;
 
@@ -45,22 +48,22 @@ public class SecretAspects {
     }
 
     @Around("onRepositorySave()")
-    public Object saveToSecretStore(ProceedingJoinPoint proceedingJoinPoint) throws CloudbreakException {
+    public Object proceedOnRepositorySave(ProceedingJoinPoint proceedingJoinPoint) throws CloudbreakException {
         return proceedSave(proceedingJoinPoint);
     }
 
     @Around("onRepositoryDelete()")
-    public Object removeFromSecretStore(ProceedingJoinPoint proceedingJoinPoint) throws CloudbreakException {
+    public Object proceedOnRepositoryDelete(ProceedingJoinPoint proceedingJoinPoint) throws CloudbreakException {
         return proceedDelete(proceedingJoinPoint);
     }
 
     @Around("onRepositorySaveAll()")
-    public Object saveAllToSecretStore(ProceedingJoinPoint proceedingJoinPoint) throws CloudbreakException {
+    public Object proceedOnRepositorySaveAll(ProceedingJoinPoint proceedingJoinPoint) throws CloudbreakException {
         return proceedSave(proceedingJoinPoint);
     }
 
     @Around("onRepositoryDeleteAll()")
-    public Object removeAllFromSecretStore(ProceedingJoinPoint proceedingJoinPoint) throws CloudbreakException {
+    public Object proceedOnRepositoryDeleteAll(ProceedingJoinPoint proceedingJoinPoint) throws CloudbreakException {
         return proceedDelete(proceedingJoinPoint);
     }
 
@@ -72,15 +75,15 @@ public class SecretAspects {
                     if (field.isAnnotationPresent(SecretValue.class)) {
                         LOGGER.debug("Found SecretValue annotation on {}", field);
                         field.setAccessible(true);
-                        String value = (String) field.get(entity);
-                        if (value != null && !secretService.isSecret(value)) {
+                        Secret value = (Secret) field.get(entity);
+                        if (value != null && Secret.EMPTY != value && value.getSecret() == null) {
                             String resourceType = entity.getClass().getSimpleName().toLowerCase();
                             String resourceId = UUID.randomUUID().toString();
                             String fieldName = field.getName().toLowerCase();
                             String path = String.format("%s/%s/%s", resourceType, fieldName, resourceId);
-                            path = secretService.put(path, value);
+                            String secret = secretService.put(path, value.getRaw());
                             LOGGER.debug("Field: '{}' is saved at path: {}", field.getName(), path);
-                            field.set(entity, path);
+                            field.set(entity, new Secret(null, secret));
                         }
                     }
                 }
@@ -93,10 +96,12 @@ public class SecretAspects {
         Object proceed;
         try {
             proceed = proceedingJoinPoint.proceed();
+            replaceSecretFieldsToProxy(proceed);
         } catch (Throwable throwable) {
             LOGGER.error("Failed to invoke repository save", throwable);
             throw new CloudbreakException(throwable);
         }
+
         return proceed;
     }
 
@@ -108,8 +113,8 @@ public class SecretAspects {
                     if (field.isAnnotationPresent(SecretValue.class)) {
                         LOGGER.debug("Found SecretValue annotation on {}", field);
                         field.setAccessible(true);
-                        String path = (String) field.get(entity);
-                        secretService.delete(path);
+                        Secret path = (Secret) field.get(entity);
+                        secretService.delete(path.getSecret());
                         LOGGER.debug("Secret deleted at path: {}", path);
                     }
                 }
@@ -133,4 +138,26 @@ public class SecretAspects {
         Object arg = proceedingJoinPoint.getArgs()[0];
         return arg instanceof Collection ? (Collection<Object>) arg : Collections.singleton(arg);
     }
+
+    //CHECKSTYLE:OFF
+    private void replaceSecretFieldsToProxy(Object proceed) throws IllegalAccessException {
+        Collection<Object> entities = proceed instanceof Collection ? (Collection<Object>) proceed : Collections.singleton(proceed);
+        for (Object entity : entities) {
+            if (entity instanceof Optional) {
+                entity = ((Optional) entity).orElse(null);
+            }
+            if (entity == null) {
+                continue;
+            }
+            for (Field field : entity.getClass().getDeclaredFields()) {
+                if (field.isAnnotationPresent(SecretValue.class)) {
+                    LOGGER.debug("Found SecretValue annotation on {}", field);
+                    field.setAccessible(true);
+                    Secret value = (Secret) field.get(entity);
+                    field.set(entity, new SecretProxy(secretService, value.getSecret()));
+                }
+            }
+        }
+    }
+    //CHECKSTYLE:ON
 }

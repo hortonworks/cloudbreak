@@ -9,7 +9,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -38,8 +37,6 @@ import com.sequenceiq.cloudbreak.api.model.ExposedServiceResponse;
 import com.sequenceiq.cloudbreak.api.model.GatewayType;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayTopologyJson;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
-import com.sequenceiq.cloudbreak.service.secret.SecretService;
-import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptors;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
@@ -48,13 +45,14 @@ import com.sequenceiq.cloudbreak.converter.stack.cluster.gateway.GatewayTopology
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -90,9 +88,6 @@ public class ServiceEndpointCollectorTest {
 
     @Mock
     private Workspace workspace;
-
-    @Mock
-    private SecretService secretService;
 
     @Before
     public void setup() {
@@ -161,7 +156,6 @@ public class ServiceEndpointCollectorTest {
         topology2.setGateway(cluster.getGateway());
         cluster.getGateway().setTopologies(Sets.newHashSet(topology1, topology2));
         cluster.getGateway().setGatewayType(GatewayType.INDIVIDUAL);
-        when(secretService.get(anyString())).thenReturn(cluster.getBlueprint().getBlueprintText());
 
         Map<String, Collection<ClusterExposedServiceResponse>> clusterExposedServicesMap =
                 underTest.prepareClusterExposedServices(cluster, "10.0.0.1");

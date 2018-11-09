@@ -16,7 +16,6 @@ import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConvert
 import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 
 @Component
@@ -28,9 +27,6 @@ public class UserProfileToUserProfileResponseConverter extends AbstractConversio
 
     @Inject
     private RestRequestThreadLocalService restRequestThreadLocalService;
-
-    @Inject
-    private SecretService secretService;
 
     @Override
     public UserProfileResponse convert(UserProfile entity) {
@@ -56,7 +52,7 @@ public class UserProfileToUserProfileResponseConverter extends AbstractConversio
             userProfileResponse.setImageCatalog(getConversionService()
                     .convert(imageCatalogService.getCloudbreakDefaultImageCatalog(), ImageCatalogShortResponse.class));
         }
-        Json propertiesFromVault = new Json(secretService.get(entity.getUiProperties()));
+        Json propertiesFromVault = new Json(entity.getUiProperties().getRaw());
         Map<String, Object> map = propertiesFromVault.getMap();
         userProfileResponse.setUiProperties(map == null ? new HashMap<>() : map);
         return userProfileResponse;

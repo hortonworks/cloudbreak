@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.service.cluster.ambari;
 
-import static org.mockito.AdditionalAnswers.returnsFirstArg;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -9,7 +7,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -23,7 +20,6 @@ import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.secret.SecretService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AmbariViewProviderTest {
@@ -34,16 +30,8 @@ public class AmbariViewProviderTest {
     @Mock
     private ClusterService clusterService;
 
-    @Mock
-    private SecretService secretService;
-
     @InjectMocks
     private final AmbariViewProvider underTest = new AmbariViewProvider();
-
-    @Before
-    public void setUp() {
-        when(secretService.get(anyString())).then(returnsFirstArg());
-    }
 
     @Test
     public void testProvideViewInformationWhenEverythingWorksFine() {

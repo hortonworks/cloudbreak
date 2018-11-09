@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.domain;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -24,16 +25,19 @@ public class KerberosConfig implements ProvisionEntity {
     private KerberosType type;
 
     @Column(name = "kerberosmasterkey")
+    @Convert(converter = SecretToString.class)
     @SecretValue
-    private String masterKey;
+    private Secret masterKey = Secret.EMPTY;
 
     @Column(name = "kerberosadmin")
+    @Convert(converter = SecretToString.class)
     @SecretValue
-    private String admin;
+    private Secret admin = Secret.EMPTY;
 
     @Column(name = "kerberospassword")
+    @Convert(converter = SecretToString.class)
     @SecretValue
-    private String password;
+    private Secret password = Secret.EMPTY;
 
     @Column(name = "kerberosurl")
     private String url;
@@ -48,8 +52,9 @@ public class KerberosConfig implements ProvisionEntity {
     private Boolean tcpAllowed;
 
     @Column(name = "kerberosprincipal")
+    @Convert(converter = SecretToString.class)
     @SecretValue
-    private String principal;
+    private Secret principal = Secret.EMPTY;
 
     @Column(name = "kerberosldapurl")
     private String ldapUrl;
@@ -57,13 +62,15 @@ public class KerberosConfig implements ProvisionEntity {
     @Column(name = "kerberoscontainerdn")
     private String containerDn;
 
-    @Column(name = "kerberosdescriptor", columnDefinition = "TEXT")
+    @Column(name = "kerberosdescriptor")
+    @Convert(converter = SecretToString.class)
     @SecretValue
-    private String descriptor;
+    private Secret descriptor = Secret.EMPTY;
 
-    @Column(name = "krb5conf", columnDefinition = "TEXT")
+    @Column(name = "krb5conf")
+    @Convert(converter = SecretToString.class)
     @SecretValue
-    private String krb5Conf;
+    private Secret krb5Conf = Secret.EMPTY;
 
     public Long getId() {
         return id;
@@ -81,27 +88,39 @@ public class KerberosConfig implements ProvisionEntity {
         this.type = type;
     }
 
-    public String getMasterKey() {
+    public Secret getMasterKey() {
         return masterKey;
     }
 
     public void setMasterKey(String masterKey) {
+        this.masterKey = new Secret(masterKey);
+    }
+
+    public void setMasterKey(Secret masterKey) {
         this.masterKey = masterKey;
     }
 
-    public String getAdmin() {
+    public Secret getAdmin() {
         return admin;
     }
 
     public void setAdmin(String admin) {
+        this.admin = new Secret(admin);
+    }
+
+    public void setAdmin(Secret admin) {
         this.admin = admin;
     }
 
-    public String getPassword() {
+    public Secret getPassword() {
         return password;
     }
 
     public void setPassword(String password) {
+        this.password = new Secret(password);
+    }
+
+    public void setPassword(Secret password) {
         this.password = password;
     }
 
@@ -137,11 +156,15 @@ public class KerberosConfig implements ProvisionEntity {
         this.tcpAllowed = tcpAllowed;
     }
 
-    public String getPrincipal() {
+    public Secret getPrincipal() {
         return principal;
     }
 
     public void setPrincipal(String principal) {
+        this.principal = new Secret(principal);
+    }
+
+    public void setPrincipal(Secret principal) {
         this.principal = principal;
     }
 
@@ -161,19 +184,27 @@ public class KerberosConfig implements ProvisionEntity {
         this.containerDn = containerDn;
     }
 
-    public String getDescriptor() {
+    public Secret getDescriptor() {
         return descriptor;
     }
 
     public void setDescriptor(String descriptor) {
+        this.descriptor = new Secret(descriptor);
+    }
+
+    public void setDescriptor(Secret descriptor) {
         this.descriptor = descriptor;
     }
 
-    public String getKrb5Conf() {
+    public Secret getKrb5Conf() {
         return krb5Conf;
     }
 
     public void setKrb5Conf(String krb5Conf) {
+        this.krb5Conf = new Secret(krb5Conf);
+    }
+
+    public void setKrb5Conf(Secret krb5Conf) {
         this.krb5Conf = krb5Conf;
     }
 }

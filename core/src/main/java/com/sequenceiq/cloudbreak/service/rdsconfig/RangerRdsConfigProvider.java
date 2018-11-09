@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 
 @Component
@@ -30,13 +29,10 @@ public class RangerRdsConfigProvider extends AbstractRdsConfigProvider {
     private String rangerDbPort;
 
     @Inject
-    private SecretService secretService;
-
-    @Inject
     private BlueprintProcessorFactory blueprintProcessorFactory;
 
     private boolean isRdsConfigNeedForRangerAdmin(Blueprint blueprint) {
-        String blueprintText = secretService.get(blueprint.getBlueprintText());
+        String blueprintText = blueprint.getBlueprintText().getRaw();
         BlueprintTextProcessor blueprintProcessor = blueprintProcessorFactory.get(blueprintText);
         return blueprintProcessor.componentExistsInBlueprint("RANGER_ADMIN")
                 && !blueprintProcessor.componentExistsInBlueprint("MYSQL_SERVER")

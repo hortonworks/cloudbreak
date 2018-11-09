@@ -1,44 +1,25 @@
 package com.sequenceiq.cloudbreak.service.cluster.ambari;
 
-import static org.mockito.AdditionalAnswers.returnsFirstArg;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
-
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.TestUtil;
+import com.sequenceiq.cloudbreak.domain.Secret;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.service.secret.SecretService;
 
-@RunWith(MockitoJUnitRunner.class)
 public class AmbariSecurityConfigProviderTest {
 
     @Rule
     public final ExpectedException thrown = ExpectedException.none();
 
-    @InjectMocks
     private final AmbariSecurityConfigProvider underTest = new AmbariSecurityConfigProvider();
-
-    @Mock
-    private SecretService secretService;
-
-    @Before
-    public void init() {
-        when(secretService.get(anyString())).then(returnsFirstArg());
-    }
 
     @Test
     public void testGetAmbariUserNameWhenCloudbreakAmbariUserNameIsNullThenShouldReturnUserName() {
         Cluster cluster = TestUtil.cluster();
-        cluster.setCloudbreakAmbariUser(null);
+        cluster.setCloudbreakAmbariUser(new Secret(null));
         cluster.setUserName("admin");
 
         String ambariUserName = underTest.getAmbariUserName(cluster);
@@ -60,7 +41,7 @@ public class AmbariSecurityConfigProviderTest {
     @Test
     public void testGetAmbariPasswordNameWhenCloudbreakAmbariPasswordIsNullThenShouldReturnPassword() {
         Cluster cluster = TestUtil.cluster();
-        cluster.setCloudbreakAmbariPassword(null);
+        cluster.setCloudbreakAmbariPassword(new Secret(null));
         cluster.setPassword("admin");
 
         String ambariPassword = underTest.getAmbariPassword(cluster);
@@ -82,7 +63,7 @@ public class AmbariSecurityConfigProviderTest {
     @Test
     public void testGetAmbariSecurityMasterKeyWhenAmbariSecurityMasterKeyIsNullThenShouldReturnBigData() {
         Cluster cluster = TestUtil.cluster();
-        cluster.setAmbariSecurityMasterKey(null);
+        cluster.setAmbariSecurityMasterKey(new Secret(null));
 
         String ambariSecurityMasterKey = underTest.getAmbariSecurityMasterKey(cluster);
 

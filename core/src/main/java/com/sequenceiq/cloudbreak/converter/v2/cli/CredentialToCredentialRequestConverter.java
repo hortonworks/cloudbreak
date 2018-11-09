@@ -28,7 +28,7 @@ public class CredentialToCredentialRequestConverter
         credentialRequest.setDescription(source.getDescription());
         credentialValidator.validateCredentialCloudPlatform(source.cloudPlatform());
         credentialRequest.setCloudPlatform(source.cloudPlatform());
-        credentialRequest.setParameters(cleanMap(new Json(source.getAttributes()).getMap()));
+        credentialRequest.setParameters(cleanMap(new Json(source.getAttributes().getRaw()).getMap()));
         return credentialRequest;
     }
 }
