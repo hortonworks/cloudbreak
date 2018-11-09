@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.domain;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -39,8 +40,9 @@ public class Recipe implements ProvisionEntity, WorkspaceAwareResource {
     private String uri;
 
     @Column(nullable = false)
+    @Convert(converter = SecretToString.class)
     @SecretValue
-    private String content;
+    private Secret content = Secret.EMPTY;
 
     private String account;
 
@@ -90,11 +92,15 @@ public class Recipe implements ProvisionEntity, WorkspaceAwareResource {
         this.uri = uri;
     }
 
-    public String getContent() {
+    public Secret getContent() {
         return content;
     }
 
     public void setContent(String content) {
+        this.content = new Secret(content);
+    }
+
+    public void setContent(Secret content) {
         this.content = content;
     }
 

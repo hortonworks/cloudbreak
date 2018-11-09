@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.api.model.stack.StackScaleRequestV2;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupAdjustmentJson;
-import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
@@ -25,16 +24,13 @@ public class StackScaleRequestV2ToUpdateClusterRequestConverter extends Abstract
     @Inject
     private ClusterService clusterService;
 
-    @Inject
-    private SecretService secretService;
-
     @Override
     public UpdateClusterJson convert(StackScaleRequestV2 source) {
         UpdateClusterJson updateStackJson = new UpdateClusterJson();
         Cluster oneByStackId = clusterService.findOneByStackId(source.getStackId());
         HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(oneByStackId.getId(), source.getGroup());
         if (hostGroup != null) {
-            String blueprintText = secretService.get(oneByStackId.getBlueprint().getBlueprintText());
+            String blueprintText = oneByStackId.getBlueprint().getBlueprintText().getRaw();
             boolean dataNodeComponentInHostGroup = new BlueprintTextProcessor(blueprintText).componentExistsInHostGroup("DATANODE", hostGroup.getName());
             HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
             hostGroupAdjustmentJson.setWithStackUpdate(true);

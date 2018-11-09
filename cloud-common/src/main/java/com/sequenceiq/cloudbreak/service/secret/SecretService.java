@@ -69,7 +69,7 @@ public class SecretService {
         String response = engines.stream().filter(e -> e.isSecret(secret)).map(e -> e.get(secret))
                 .filter(Objects::nonNull).findFirst().orElse(null);
         LOGGER.debug("Secret read took {} ms", System.currentTimeMillis() - start);
-        return response;
+        return "null".equals(response) ? null : response;
     }
 
     /**

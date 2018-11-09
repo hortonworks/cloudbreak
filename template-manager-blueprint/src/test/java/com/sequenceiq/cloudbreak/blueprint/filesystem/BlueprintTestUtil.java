@@ -41,8 +41,8 @@ public class BlueprintTestUtil {
         generalClusterConfigs.setExecutorType(cluster.getExecutorType());
         generalClusterConfigs.setStackName(cluster.getName());
         generalClusterConfigs.setUuid("111-222-333-444");
-        generalClusterConfigs.setUserName(cluster.getUserName());
-        generalClusterConfigs.setPassword(cluster.getPassword());
+        generalClusterConfigs.setUserName(cluster.getUserName().getRaw());
+        generalClusterConfigs.setPassword(cluster.getPassword().getRaw());
         generalClusterConfigs.setNodeCount(1);
         generalClusterConfigs.setIdentityUserEmail(IDENTITY_USER_EMAIL);
         generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.of("fqdn.loal.com"));

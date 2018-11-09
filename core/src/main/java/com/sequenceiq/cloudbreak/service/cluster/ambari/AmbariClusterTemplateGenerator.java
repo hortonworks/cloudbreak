@@ -12,7 +12,6 @@ import com.sequenceiq.cloudbreak.blueprint.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
-import com.sequenceiq.cloudbreak.service.secret.SecretService;
 
 @Service
 public class AmbariClusterTemplateGenerator {
@@ -28,9 +27,6 @@ public class AmbariClusterTemplateGenerator {
     @Inject
     private AmbariRepositoryVersionService ambariRepositoryVersionService;
 
-    @Inject
-    private SecretService secretService;
-
     String generateClusterTemplate(Cluster cluster, Map<String, List<Map<String, String>>> hostGroupMappings,
             ClusterService ambariClient) throws CloudbreakException {
         String blueprintName = cluster.getBlueprint().getAmbariName();
@@ -43,7 +39,7 @@ public class AmbariClusterTemplateGenerator {
             String principal = kerberosDetailService.resolvePrincipalForKerberos(kerberosConfig);
             clusterTemplate = ambariClient.createClusterJson(blueprintName, hostGroupMappings,
                     ambariSecurityConfigProvider.getAmbariUserProvidedPassword(cluster), configStrategy,
-                    principal, secretService.get(kerberosConfig.getPassword()), KEY_TYPE, false, repositoryVersion);
+                    principal, kerberosConfig.getPassword().getRaw(), KEY_TYPE, false, repositoryVersion);
         } else {
             clusterTemplate = ambariClient.createClusterJson(blueprintName, hostGroupMappings,
                     ambariSecurityConfigProvider.getAmbariUserProvidedPassword(cluster), configStrategy,

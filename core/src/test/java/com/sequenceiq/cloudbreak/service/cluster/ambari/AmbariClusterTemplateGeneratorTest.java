@@ -6,10 +6,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 
@@ -20,7 +18,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.powermock.reflect.Whitebox;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.ambari.client.services.ClusterService;
 import com.sequenceiq.cloudbreak.TestUtil;
@@ -29,7 +26,6 @@ import com.sequenceiq.cloudbreak.blueprint.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
-import com.sequenceiq.cloudbreak.service.secret.SecretService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AmbariClusterTemplateGeneratorTest {
@@ -46,12 +42,9 @@ public class AmbariClusterTemplateGeneratorTest {
     @Mock
     private ClusterService ambariClient;
 
-    private final SecretService secretService = mock(SecretService.class);
-
     @Before
     public void init() {
         AmbariSecurityConfigProvider ambariSecurityConfigProvider = new AmbariSecurityConfigProvider();
-        ReflectionTestUtils.setField(ambariSecurityConfigProvider, "secretService", secretService);
         Whitebox.setInternalState(underTest, "ambariSecurityConfigProvider", ambariSecurityConfigProvider);
     }
 
@@ -60,7 +53,6 @@ public class AmbariClusterTemplateGeneratorTest {
         // GIVEN
         Cluster cluster = TestUtil.cluster();
         cluster.setPassword("UserProvidedPassword");
-        when(secretService.get(any())).thenReturn("UserProvidedPassword");
 
         // WHEN
         underTest.generateClusterTemplate(cluster, new HashMap<>(), ambariClient);
@@ -81,8 +73,6 @@ public class AmbariClusterTemplateGeneratorTest {
         kerberosConfig.setPassword("KerberosPassword");
         cluster.setKerberosConfig(kerberosConfig);
         given(kerberosDetailService.resolvePrincipalForKerberos(any())).willReturn("principal");
-        when(secretService.get("KerberosPassword")).thenReturn("KerberosPassword");
-        when(secretService.get("UserProvidedPassword")).thenReturn("UserProvidedPassword");
 
         // WHEN
         underTest.generateClusterTemplate(cluster, new HashMap<>(), ambariClient);

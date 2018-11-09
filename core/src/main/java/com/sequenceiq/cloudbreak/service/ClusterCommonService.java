@@ -40,7 +40,6 @@ import com.sequenceiq.cloudbreak.service.decorator.HostGroupDecorator;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Service
@@ -74,9 +73,6 @@ public class ClusterCommonService {
 
     @Inject
     private CloudbreakMessagesService messagesService;
-
-    @Inject
-    private SecretService secretService;
 
     public Response put(Long stackId, UpdateClusterJson updateJson, User user, Workspace workspace) {
         Stack stack = stackService.getById(stackId);
@@ -173,7 +169,7 @@ public class ClusterCommonService {
                     "Stack '%s' is currently in '%s' state. PUT requests to a cluster can only be made if the underlying stack is 'AVAILABLE'.", stackId,
                     stack.getStatus()));
         }
-        if (!userNamePasswordJson.getOldPassword().equals(secretService.get(stack.getCluster().getPassword()))) {
+        if (!userNamePasswordJson.getOldPassword().equals(stack.getCluster().getPassword().getRaw())) {
             throw new BadRequestException(String.format(
                     "Cluster actual password does not match in the request, please pass the real password on Stack '%s' with status '%s'.", stackId,
                     stack.getStatus()));

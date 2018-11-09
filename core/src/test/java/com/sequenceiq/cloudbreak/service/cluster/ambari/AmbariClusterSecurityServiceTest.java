@@ -18,7 +18,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -36,7 +35,6 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.PollingResult;
-import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
@@ -71,16 +69,8 @@ public class AmbariClusterSecurityServiceTest {
     @Mock
     private AmbariPollingServiceProvider ambariPollingServiceProvider;
 
-    @Mock
-    private SecretService secretService;
-
     @InjectMocks
     private final AmbariClusterSecurityService underTest = new AmbariClusterSecurityService();
-
-    @Before
-    public void init() {
-        when(secretService.get("admin")).thenReturn("admin");
-    }
 
     @Test
     public void testApiReplaceUserNamePasswordWhenEverythingWorks() throws CloudbreakException {
@@ -92,15 +82,15 @@ public class AmbariClusterSecurityServiceTest {
         String newUserName = "admin";
         String newPassword = "newadmin";
 
-        when(clientFactory.getAmbariClient(stack, cluster.getUserName(), cluster.getPassword())).thenReturn(ambariClient);
+        when(clientFactory.getAmbariClient(stack, cluster.getUserName().getRaw(), cluster.getPassword().getRaw())).thenReturn(ambariClient);
         when(ambariUserHandler.createAmbariUser(newUserName, newPassword, stack, ambariClient)).thenReturn(ambariClient);
-        when(ambariClient.deleteUser(cluster.getUserName())).thenReturn(ambariClient);
+        when(ambariClient.deleteUser(cluster.getUserName().getRaw())).thenReturn(ambariClient);
 
         underTest.replaceUserNamePassword(stack, newUserName, newPassword);
 
-        verify(clientFactory, times(1)).getAmbariClient(stack, cluster.getUserName(), cluster.getPassword());
+        verify(clientFactory, times(1)).getAmbariClient(stack, cluster.getUserName().getRaw(), cluster.getPassword().getRaw());
         verify(ambariUserHandler, times(1)).createAmbariUser(newUserName, newPassword, stack, ambariClient);
-        verify(ambariClient, times(1)).deleteUser(cluster.getUserName());
+        verify(ambariClient, times(1)).deleteUser(cluster.getUserName().getRaw());
     }
 
     @Test
@@ -113,14 +103,16 @@ public class AmbariClusterSecurityServiceTest {
         String newPassword = "newadmin";
 
         when(clusterService.getById(stack.getCluster().getId())).thenReturn(cluster);
-        when(clientFactory.getAmbariClient(stack, cluster.getUserName(), cluster.getPassword())).thenReturn(ambariClient);
-        when(ambariUserHandler.changeAmbariPassword(cluster.getUserName(), cluster.getPassword(), newPassword, stack, ambariClient)).thenReturn(ambariClient);
+        when(clientFactory.getAmbariClient(stack, cluster.getUserName().getRaw(), cluster.getPassword().getRaw())).thenReturn(ambariClient);
+        when(ambariUserHandler.changeAmbariPassword(cluster.getUserName().getRaw(), cluster.getPassword().getRaw(), newPassword, stack, ambariClient))
+                .thenReturn(ambariClient);
 
         underTest.updateUserNamePassword(stack, newPassword);
 
-        verify(clientFactory, times(1)).getAmbariClient(stack, cluster.getUserName(), cluster.getPassword());
+        verify(clientFactory, times(1)).getAmbariClient(stack, cluster.getUserName().getRaw(), cluster.getPassword().getRaw());
         verify(clusterService, times(1)).getById(stack.getCluster().getId());
-        verify(ambariUserHandler, times(1)).changeAmbariPassword(cluster.getUserName(), cluster.getPassword(), newPassword, stack, ambariClient);
+        verify(ambariUserHandler, times(1))
+                .changeAmbariPassword(cluster.getUserName().getRaw(), cluster.getPassword().getRaw(), newPassword, stack, ambariClient);
     }
 
     @Test
@@ -134,8 +126,8 @@ public class AmbariClusterSecurityServiceTest {
         String newPassword = "newadmin";
 
         when(clusterService.getById(stack.getCluster().getId())).thenReturn(cluster);
-        when(clientFactory.getAmbariClient(stack, cluster.getUserName(), cluster.getPassword())).thenReturn(ambariClient);
-        when(ambariUserHandler.changeAmbariPassword(cluster.getUserName(), cluster.getPassword(), newPassword, stack, ambariClient))
+        when(clientFactory.getAmbariClient(stack, cluster.getUserName().getRaw(), cluster.getPassword().getRaw())).thenReturn(ambariClient);
+        when(ambariUserHandler.changeAmbariPassword(cluster.getUserName().getRaw(), cluster.getPassword().getRaw(), newPassword, stack, ambariClient))
                 .thenThrow(new CloudbreakException("test1"));
 
         thrown.expect(CloudbreakException.class);
@@ -143,9 +135,10 @@ public class AmbariClusterSecurityServiceTest {
 
         underTest.updateUserNamePassword(stack, newPassword);
 
-        verify(clientFactory, times(1)).getAmbariClient(stack, cluster.getUserName(), cluster.getPassword());
+        verify(clientFactory, times(1)).getAmbariClient(stack, cluster.getUserName().getRaw(), cluster.getPassword().getRaw());
         verify(clusterService, times(1)).getById(stack.getCluster().getId());
-        verify(ambariUserHandler, times(1)).changeAmbariPassword(cluster.getUserName(), cluster.getPassword(), newPassword, stack, ambariClient);
+        verify(ambariUserHandler, times(1))
+                .changeAmbariPassword(cluster.getUserName().getRaw(), cluster.getPassword().getRaw(), newPassword, stack, ambariClient);
     }
 
     @Test
@@ -157,12 +150,11 @@ public class AmbariClusterSecurityServiceTest {
         stack.setCluster(cluster);
         AmbariClient ambariClient = Mockito.mock(AmbariClient.class);
 
-        when(secretService.get("admin1")).thenReturn("admin1");
         when(clientFactory.getDefaultAmbariClient(stack)).thenReturn(ambariClient);
         when(ambariSecurityConfigProvider.getAmbariUserName(cluster)).thenReturn("cloudbreak");
         when(ambariSecurityConfigProvider.getAmbariPassword(cluster)).thenReturn("cloudbreak123");
         when(ambariUserHandler.createAmbariUser("cloudbreak", "cloudbreak123", stack, ambariClient)).thenReturn(ambariClient);
-        when(ambariUserHandler.createAmbariUser(cluster.getUserName(), cluster.getPassword(), stack, ambariClient)).thenReturn(ambariClient);
+        when(ambariUserHandler.createAmbariUser(cluster.getUserName().getRaw(), cluster.getPassword().getRaw(), stack, ambariClient)).thenReturn(ambariClient);
         when(ambariClient.deleteUser("admin")).thenReturn(ambariClient);
 
         underTest.changeOriginalAmbariCredentialsAndCreateCloudbreakUser(stack);
@@ -171,7 +163,8 @@ public class AmbariClusterSecurityServiceTest {
         verify(ambariSecurityConfigProvider, times(1)).getAmbariUserName(stack.getCluster());
         verify(ambariSecurityConfigProvider, times(1)).getAmbariPassword(stack.getCluster());
         verify(ambariUserHandler, times(1)).createAmbariUser("cloudbreak", "cloudbreak123", stack, ambariClient);
-        verify(ambariUserHandler, times(1)).createAmbariUser(cluster.getUserName(), cluster.getPassword(), stack, ambariClient);
+        verify(ambariUserHandler, times(1))
+                .createAmbariUser(cluster.getUserName().getRaw(), cluster.getPassword().getRaw(), stack, ambariClient);
         verify(ambariClient, times(1)).deleteUser("admin");
         verify(ambariUserHandler, times(0)).changeAmbariPassword(anyString(), anyString(), anyString(), nullable(Stack.class), nullable(AmbariClient.class));
 
@@ -212,7 +205,6 @@ public class AmbariClusterSecurityServiceTest {
         stack.setCluster(cluster);
         AmbariClient ambariClient = Mockito.mock(AmbariClient.class);
 
-        when(secretService.get("admin1")).thenReturn("admin1");
         when(clientFactory.getDefaultAmbariClient(stack)).thenReturn(ambariClient);
         when(ambariSecurityConfigProvider.getAmbariUserName(cluster)).thenReturn("cloudbreak");
         when(ambariSecurityConfigProvider.getAmbariPassword(cluster)).thenReturn("cloudbreak123");
@@ -225,7 +217,8 @@ public class AmbariClusterSecurityServiceTest {
         verify(ambariSecurityConfigProvider, times(1)).getAmbariPassword(stack.getCluster());
         verify(ambariUserHandler, times(1)).createAmbariUser("cloudbreak", "cloudbreak123", stack, ambariClient);
         verify(ambariClient, times(0)).deleteUser("admin");
-        verify(ambariUserHandler, times(1)).changeAmbariPassword("admin", "admin", cluster.getPassword(), stack, ambariClient);
+        verify(ambariUserHandler, times(1))
+                .changeAmbariPassword("admin", "admin", cluster.getPassword().getRaw(), stack, ambariClient);
     }
 
     @Test

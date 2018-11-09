@@ -57,8 +57,8 @@ public class RdsConnectionValidator {
 
     private Properties connectionProperties(RDSConfig rdsConfig) {
         Properties connectionProps = new Properties();
-        connectionProps.setProperty("user", rdsConfig.getConnectionUserName());
-        connectionProps.setProperty("password", rdsConfig.getConnectionPassword());
+        connectionProps.setProperty("user", rdsConfig.getConnectionUserName().getRaw());
+        connectionProps.setProperty("password", rdsConfig.getConnectionPassword().getRaw());
         return connectionProps;
     }
 

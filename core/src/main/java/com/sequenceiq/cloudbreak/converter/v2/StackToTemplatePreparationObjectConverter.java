@@ -30,7 +30,6 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
-import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.InstanceGroupMetadataCollector;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
@@ -89,9 +88,6 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
     @Inject
     private BlueprintViewProvider blueprintViewProvider;
 
-    @Inject
-    private SecretService secretService;
-
     @Override
     public TemplatePreparationObject convert(Stack source) {
         try {
@@ -102,7 +98,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
             StackRepoDetails hdpRepo = clusterComponentConfigProvider.getHDPRepo(cluster.getId());
             String stackRepoDetailsHdpVersion = hdpRepo != null ? hdpRepo.getHdpVersion() : null;
             Map<String, List<InstanceMetaData>> groupInstances = instanceGroupMetadataCollector.collectMetadata(source);
-            String blueprintText = secretService.get(cluster.getBlueprint().getBlueprintText());
+            String blueprintText = cluster.getBlueprint().getBlueprintText().getRaw();
             HdfConfigs hdfConfigs = hdfConfigProvider.createHdfConfig(cluster.getHostGroups(), groupInstances, blueprintText);
             BaseFileSystemConfigurationsView fileSystemConfigurationView = getFileSystemConfigurationView(source, fileSystem);
             CloudbreakUser cloudbreakUser = cachedUserDetailsService.getDetails(cluster.getOwner(), UserFilterField.USERID);
@@ -113,13 +109,13 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
             String bindDn = null;
             String bindPassword = null;
             if (ldapConfig != null) {
-                bindDn = secretService.get(ldapConfig.getBindDn());
-                bindPassword = secretService.get(ldapConfig.getBindPassword());
+                bindDn = ldapConfig.getBindDn().getRaw();
+                bindPassword = ldapConfig.getBindPassword().getRaw();
             }
             Gateway gateway = cluster.getGateway();
             String gatewaySignKey = null;
             if (gateway != null) {
-                gatewaySignKey = secretService.get(gateway.getSignKey());
+                gatewaySignKey = gateway.getSignKey().getRaw();
             }
             return Builder.builder()
                     .withFlexSubscription(source.getFlexSubscription())

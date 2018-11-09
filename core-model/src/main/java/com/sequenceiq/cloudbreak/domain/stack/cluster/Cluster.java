@@ -50,6 +50,8 @@ import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.domain.Secret;
+import com.sequenceiq.cloudbreak.domain.SecretToString;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -104,18 +106,22 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
     private String ambariIp;
 
     @Column(nullable = false)
+    @Convert(converter = SecretToString.class)
     @SecretValue
-    private String userName;
+    private Secret userName = Secret.EMPTY;
 
     @Column(nullable = false)
+    @Convert(converter = SecretToString.class)
     @SecretValue
-    private String password;
+    private Secret password = Secret.EMPTY;
 
+    @Convert(converter = SecretToString.class)
     @SecretValue
-    private String cloudbreakAmbariUser;
+    private Secret cloudbreakAmbariUser = Secret.EMPTY;
 
+    @Convert(converter = SecretToString.class)
     @SecretValue
-    private String cloudbreakAmbariPassword;
+    private Secret cloudbreakAmbariPassword = Secret.EMPTY;
 
     @Column(nullable = false)
     private Boolean secure;
@@ -126,9 +132,10 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
     @Column(nullable = false)
     private Boolean topologyValidation = Boolean.TRUE;
 
+    @Convert(converter = SecretToString.class)
     @SecretValue
-    @Column(length = 1000000, columnDefinition = "TEXT", nullable = false)
-    private String extendedBlueprintText;
+    @Column(nullable = false)
+    private Secret extendedBlueprintText = Secret.EMPTY;
 
     @OneToOne(mappedBy = "cluster", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
     private Gateway gateway;
@@ -155,9 +162,9 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
     @ManyToOne
     private LdapConfig ldapConfig;
 
+    @Convert(converter = SecretToString.class)
     @SecretValue
-    @Column(columnDefinition = "TEXT")
-    private String attributes;
+    private Secret attributes = Secret.EMPTY;
 
     @Convert(converter = JsonToString.class)
     @Column(columnDefinition = "TEXT")
@@ -165,8 +172,9 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
 
     private String uptime;
 
+    @Convert(converter = SecretToString.class)
     @SecretValue
-    private String ambariSecurityMasterKey;
+    private Secret ambariSecurityMasterKey = Secret.EMPTY;
 
     @ManyToOne
     private ProxyConfig proxyConfig;
@@ -325,19 +333,27 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
         this.fileSystem = fileSystem;
     }
 
-    public String getUserName() {
+    public Secret getUserName() {
         return userName;
     }
 
     public void setUserName(String userName) {
+        this.userName = new Secret(userName);
+    }
+
+    public void setUserName(Secret userName) {
         this.userName = userName;
     }
 
-    public String getPassword() {
+    public Secret getPassword() {
         return password;
     }
 
     public void setPassword(String password) {
+        this.password = new Secret(password);
+    }
+
+    public void setPassword(Secret password) {
         this.password = password;
     }
 
@@ -413,11 +429,15 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
                 || DELETE_IN_PROGRESS.equals(status);
     }
 
-    public String getAttributes() {
+    public Secret getAttributes() {
         return attributes;
     }
 
     public void setAttributes(String attributes) {
+        this.attributes = new Secret(attributes);
+    }
+
+    public void setAttributes(Secret attributes) {
         this.attributes = attributes;
     }
 
@@ -445,19 +465,27 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
         this.ldapConfig = ldapConfig;
     }
 
-    public String getCloudbreakAmbariUser() {
+    public Secret getCloudbreakAmbariUser() {
         return cloudbreakAmbariUser;
     }
 
     public void setCloudbreakAmbariUser(String cloudbreakAmbariUser) {
+        this.cloudbreakAmbariUser = new Secret(cloudbreakAmbariUser);
+    }
+
+    public void setCloudbreakAmbariUser(Secret cloudbreakAmbariUser) {
         this.cloudbreakAmbariUser = cloudbreakAmbariUser;
     }
 
-    public String getCloudbreakAmbariPassword() {
+    public Secret getCloudbreakAmbariPassword() {
         return cloudbreakAmbariPassword;
     }
 
     public void setCloudbreakAmbariPassword(String cloudbreakAmbariPassword) {
+        this.cloudbreakAmbariPassword = new Secret(cloudbreakAmbariPassword);
+    }
+
+    public void setCloudbreakAmbariPassword(Secret cloudbreakAmbariPassword) {
         this.cloudbreakAmbariPassword = cloudbreakAmbariPassword;
     }
 
@@ -509,11 +537,15 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
         this.uptime = uptime;
     }
 
-    public String getAmbariSecurityMasterKey() {
+    public Secret getAmbariSecurityMasterKey() {
         return ambariSecurityMasterKey;
     }
 
     public void setAmbariSecurityMasterKey(String ambariSecurityMasterKey) {
+        this.ambariSecurityMasterKey = new Secret(ambariSecurityMasterKey);
+    }
+
+    public void setAmbariSecurityMasterKey(Secret ambariSecurityMasterKey) {
         this.ambariSecurityMasterKey = ambariSecurityMasterKey;
     }
 
@@ -525,11 +557,15 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
         this.proxyConfig = proxyConfig;
     }
 
-    public String getExtendedBlueprintText() {
+    public Secret getExtendedBlueprintText() {
         return extendedBlueprintText;
     }
 
     public void setExtendedBlueprintText(String extendedBlueprintText) {
+        this.extendedBlueprintText = new Secret(extendedBlueprintText);
+    }
+
+    public void setExtendedBlueprintText(Secret extendedBlueprintText) {
         this.extendedBlueprintText = extendedBlueprintText;
     }
 

@@ -79,6 +79,7 @@ import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.domain.Secret;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -105,7 +106,6 @@ import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
-import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariRepositoryVersionService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
@@ -215,9 +215,6 @@ public class ClusterService {
 
     @Inject
     private AmbariRepositoryVersionService ambariRepositoryVersionService;
-
-    @Inject
-    private SecretService secretService;
 
     public Cluster create(Stack stack, Cluster cluster, List<ClusterComponent> components, User user) throws TransactionExecutionException {
         LOGGER.info("Cluster requested [BlueprintId: {}]", cluster.getBlueprint().getId());
@@ -462,8 +459,8 @@ public class ClusterService {
     public void updateUserNamePassword(Long stackId, UserNamePasswordJson userNamePasswordJson) {
         Stack stack = stackService.getById(stackId);
         Cluster cluster = stack.getCluster();
-        String oldUserName = secretService.get(cluster.getUserName());
-        String oldPassword = secretService.get(cluster.getPassword());
+        String oldUserName = cluster.getUserName().getRaw();
+        String oldPassword = cluster.getPassword().getRaw();
         String newUserName = userNamePasswordJson.getUserName();
         String newPassword = userNamePasswordJson.getPassword();
         if (!newUserName.equals(oldUserName)) {
@@ -746,8 +743,8 @@ public class ClusterService {
     public void cleanupKerberosCredential(Cluster cluster) {
         if (cluster != null && cluster.isSecure() && cluster.getKerberosConfig() != null) {
             KerberosConfig kerberosConfig = cluster.getKerberosConfig();
-            kerberosConfig.setPassword(null);
-            kerberosConfig.setPrincipal(null);
+            kerberosConfig.setPassword(new Secret(null));
+            kerberosConfig.setPrincipal(new Secret(null));
 
             kerberosConfigRepository.save(kerberosConfig);
         }
@@ -940,7 +937,7 @@ public class ClusterService {
 
     private void validateComponentsCategory(Stack stack, String hostGroup) {
         Blueprint blueprint = stack.getCluster().getBlueprint();
-        String blueprintText = secretService.get(blueprint.getBlueprintText());
+        String blueprintText = blueprint.getBlueprintText().getRaw();
         try {
             JsonNode root = JsonUtil.readTree(blueprintText);
             String blueprintName = root.path("Blueprints").path("blueprint_name").asText();

@@ -11,13 +11,12 @@ import org.springframework.util.StringUtils;
 
 import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintComponentConfigProvider;
-import com.sequenceiq.cloudbreak.service.secret.SecretService;
-import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
+import com.sequenceiq.cloudbreak.domain.KerberosConfig;
+import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
+import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.template.processor.configuration.SiteConfigurations;
-import com.sequenceiq.cloudbreak.domain.KerberosConfig;
-import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @Service
@@ -35,9 +34,6 @@ public class KerberosBlueprintService implements BlueprintComponentConfigProvide
     @Inject
     private KerberosDetailService kerberosDetailService;
 
-    @Inject
-    private SecretService secretService;
-
     @Override
     public BlueprintTextProcessor customTextManipulation(TemplatePreparationObject source, BlueprintTextProcessor blueprintProcessor) {
         KerberosConfig kerberosConfig = source.getKerberosConfig().orElse(null);
@@ -46,11 +42,11 @@ public class KerberosBlueprintService implements BlueprintComponentConfigProvide
             String gatewayHost = source.getGeneralClusterConfigs().getPrimaryGatewayInstanceDiscoveryFQDN().orElse(null);
             String domain = gatewayHost.substring(gatewayHost.indexOf('.') + 1);
             extendBlueprintWithKerberos(blueprintProcessor, kerberosConfig, gatewayHost, domain, propagationPort);
-            if (StringUtils.hasLength(kerberosConfig.getDescriptor())) {
-                blueprintProcessor.replaceConfiguration("kerberos-env", secretService.get(kerberosConfig.getDescriptor()));
+            if (StringUtils.hasLength(kerberosConfig.getDescriptor().getRaw())) {
+                blueprintProcessor.replaceConfiguration("kerberos-env", kerberosConfig.getDescriptor().getRaw());
             }
-            if (StringUtils.hasLength(kerberosConfig.getKrb5Conf())) {
-                blueprintProcessor.replaceConfiguration("krb5-conf", secretService.get(kerberosConfig.getKrb5Conf()));
+            if (StringUtils.hasLength(kerberosConfig.getKrb5Conf().getRaw())) {
+                blueprintProcessor.replaceConfiguration("krb5-conf", kerberosConfig.getKrb5Conf().getRaw());
             }
         } else {
             extendBlueprintWithKerberos(blueprintProcessor, kerberosConfig, source.getGeneralClusterConfigs().getAmbariIp(), REALM, DOMAIN, null);

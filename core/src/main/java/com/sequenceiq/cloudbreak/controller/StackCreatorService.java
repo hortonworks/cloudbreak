@@ -54,7 +54,6 @@ import com.sequenceiq.cloudbreak.service.StackUnderOperationService;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
-import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.decorator.StackDecorator;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
@@ -116,9 +115,6 @@ public class StackCreatorService {
 
     @Inject
     private CredentialService credentialService;
-
-    @Inject
-    private SecretService secretService;
 
     public StackResponse createStack(CloudbreakUser cloudbreakUser, User user, Workspace workspace, StackRequest stackRequest) {
         ValidationResult validationResult = stackRequestValidator.validate(stackRequest);
@@ -280,7 +276,7 @@ public class StackCreatorService {
         ClusterTemplate clusterTemplate = clusterTemplateService.getByNameForWorkspace(templateName, workspace);
         validateTemplateAndCredentialCloudPlatform(request, workspace, clusterTemplate);
         try {
-            String template = secretService.get(clusterTemplate.getTemplate());
+            String template = clusterTemplate.getTemplate().getRaw();
             StackV2Request stackV2Request = new Json(template).get(StackV2Request.class);
             stackV2Request.setGeneral(request.getGeneral());
             stackV2Request.setStackAuthentication(request.getStackAuthentication());

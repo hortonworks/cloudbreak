@@ -24,6 +24,8 @@ import com.sequenceiq.cloudbreak.api.model.GatewayType;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.SSOType;
 import com.sequenceiq.cloudbreak.aspect.secret.SecretValue;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
+import com.sequenceiq.cloudbreak.domain.Secret;
+import com.sequenceiq.cloudbreak.domain.SecretToString;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -56,8 +58,9 @@ public class Gateway implements ProvisionEntity {
     @Column(columnDefinition = "TEXT")
     private Json exposedServices;
 
+    @Convert(converter = SecretToString.class)
     @SecretValue
-    private String knoxMasterSecret;
+    private Secret knoxMasterSecret = Secret.EMPTY;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
@@ -65,8 +68,9 @@ public class Gateway implements ProvisionEntity {
 
     private String ssoProvider;
 
+    @Convert(converter = SecretToString.class)
     @SecretValue
-    private String signKey;
+    private Secret signKey = Secret.EMPTY;
 
     private String signPub;
 
@@ -142,11 +146,15 @@ public class Gateway implements ProvisionEntity {
         this.ssoProvider = ssoProvider;
     }
 
-    public String getSignKey() {
+    public Secret getSignKey() {
         return signKey;
     }
 
     public void setSignKey(String signKey) {
+        this.signKey = new Secret(signKey);
+    }
+
+    public void setSignKey(Secret signKey) {
         this.signKey = signKey;
     }
 
@@ -174,11 +182,15 @@ public class Gateway implements ProvisionEntity {
         this.tokenCert = tokenCert;
     }
 
-    public String getKnoxMasterSecret() {
+    public Secret getKnoxMasterSecret() {
         return knoxMasterSecret;
     }
 
     public void setKnoxMasterSecret(String knoxMasterSecret) {
+        this.knoxMasterSecret = new Secret(knoxMasterSecret);
+    }
+
+    public void setKnoxMasterSecret(Secret knoxMasterSecret) {
         this.knoxMasterSecret = knoxMasterSecret;
     }
 
