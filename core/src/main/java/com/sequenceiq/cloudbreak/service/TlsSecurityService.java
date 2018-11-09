@@ -23,7 +23,6 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.SecurityConfigRepository;
-import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 
 @Component
@@ -34,9 +33,6 @@ public class TlsSecurityService {
 
     @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
-
-    @Inject
-    private SecretService secretService;
 
     public SecurityConfig generateSecurityKeys() {
         SecurityConfig securityConfig = new SecurityConfig();
@@ -93,7 +89,7 @@ public class TlsSecurityService {
         String connectionIp = getGatewayIp(securityConfig, gatewayInstance);
         HttpClientConfig conf = buildTLSClientConfig(stackId, connectionIp, gatewayInstance);
         SaltSecurityConfig saltSecurityConfig = securityConfig.getSaltSecurityConfig();
-        String saltSignPrivateKeyB64 = secretService.get(saltSecurityConfig.getSaltSignPrivateKey());
+        String saltSignPrivateKeyB64 = saltSecurityConfig.getSaltSignPrivateKey().getRaw();
         return new GatewayConfig(connectionIp, gatewayInstance.getPublicIpWrapper(), gatewayInstance.getPrivateIp(), gatewayInstance.getDiscoveryFQDN(),
                 gatewayPort, conf.getServerCert(), conf.getClientCert(), conf.getClientKey(),
                 saltClientConfig.getSaltPassword(), saltClientConfig.getSaltBootPassword(), saltClientConfig.getSignatureKeyPem(),
@@ -120,8 +116,8 @@ public class TlsSecurityService {
             return new HttpClientConfig(apiAddress);
         } else {
             String serverCert = gateway.getServerCert() == null ? null : new String(decodeBase64(gateway.getServerCert()));
-            String clientCertB64 = secretService.get(securityConfig.getClientCert());
-            String clientKeyB64 = secretService.get(securityConfig.getClientKey());
+            String clientCertB64 = securityConfig.getClientCert().getRaw();
+            String clientKeyB64 = securityConfig.getClientKey().getRaw();
             return new HttpClientConfig(apiAddress, serverCert,
                     new String(decodeBase64(clientCertB64)), new String(decodeBase64(clientKeyB64)));
         }
@@ -132,7 +128,7 @@ public class TlsSecurityService {
                 .orElseThrow(() -> new NotFoundException("Security config doesn't exist."));
         String serverCert = Optional.ofNullable(instanceMetaDataRepository.getServerCertByStackId(stackId))
                 .orElseThrow(() -> new NotFoundException("Server certificate was not found."));
-        return new CertificateResponse(serverCert, securityConfig.getClientKey(), securityConfig.getClientCert());
+        return new CertificateResponse(serverCert, securityConfig.getClientKey().getSecret(), securityConfig.getClientCert().getSecret());
     }
 
 }

@@ -99,7 +99,7 @@ public class BlueprintRequestToBlueprintConverterTest extends AbstractJsonConver
 
         Blueprint result = underTest.convert(request);
 
-        Assert.assertEquals(request.getAmbariBlueprint(), result.getBlueprintText());
+        Assert.assertEquals(request.getAmbariBlueprint(), result.getBlueprintText().getRaw());
         Assert.assertEquals("HDP", result.getStackType());
         Assert.assertEquals("2.3", result.getStackVersion());
     }

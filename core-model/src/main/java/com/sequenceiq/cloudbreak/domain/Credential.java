@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.domain;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -40,9 +41,9 @@ public class Credential implements ProvisionEntity, WorkspaceAwareResource {
     @Column(nullable = false)
     private String cloudPlatform;
 
+    @Convert(converter = SecretToString.class)
     @SecretValue
-    @Column(columnDefinition = "TEXT")
-    private String attributes;
+    private Secret attributes = Secret.EMPTY;
 
     @ManyToOne
     private Topology topology;
@@ -106,11 +107,15 @@ public class Credential implements ProvisionEntity, WorkspaceAwareResource {
         this.cloudPlatform = cloudPlatform;
     }
 
-    public String getAttributes() {
+    public Secret getAttributes() {
         return attributes;
     }
 
     public void setAttributes(String attributes) {
+        this.attributes = new Secret(attributes);
+    }
+
+    public void setAttributes(Secret attributes) {
         this.attributes = attributes;
     }
 

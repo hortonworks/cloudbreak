@@ -5,22 +5,16 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.service.secret.SecretService;
 
 @Component
 public class CredentialToCloudCredentialConverter {
 
     private static final String CREDENTIAL_ID = "id";
-
-    @Inject
-    private SecretService secretService;
 
     public CloudCredential convert(Credential credential) {
         if (credential == null) {
@@ -28,9 +22,9 @@ public class CredentialToCloudCredentialConverter {
         }
         Map<String, Object> fields;
         if (credential.getId() == null) {
-            fields = isEmpty(credential.getAttributes()) ? new HashMap<>() : new Json(credential.getAttributes()).getMap();
+            fields = isEmpty(credential.getAttributes().getRaw()) ? new HashMap<>() : new Json(credential.getAttributes().getRaw()).getMap();
         } else {
-            fields = new Json(secretService.get(credential.getAttributes())).getMap();
+            fields = new Json(credential.getAttributes().getRaw()).getMap();
         }
         fields.put(CREDENTIAL_ID, credential.getId());
         return new CloudCredential(credential.getId(), credential.getName(), fields);

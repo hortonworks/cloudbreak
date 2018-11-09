@@ -13,7 +13,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
-import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Component
@@ -26,16 +25,13 @@ public class BlueprintMigrationService {
     @Inject
     private BlueprintUtils blueprintUtils;
 
-    @Inject
-    private SecretService secretService;
-
     public void migrateBlueprints() {
         Iterable<Blueprint> blueprints = blueprintRepository.findAll();
         List<Blueprint> updatedBlueprints = new ArrayList<>();
         for (Blueprint bp : blueprints) {
             if (StringUtils.isEmpty(bp.getStackType()) || StringUtils.isEmpty(bp.getStackVersion())) {
                 try {
-                    JsonNode root = JsonUtil.readTree(secretService.get(bp.getBlueprintText()));
+                    JsonNode root = JsonUtil.readTree(bp.getBlueprintText().getRaw());
                     String stackName = blueprintUtils.getBlueprintStackName(root);
                     bp.setStackType(StringUtils.isEmpty(stackName) ? UNKNOWN : stackName);
                     String stackVersion = blueprintUtils.getBlueprintStackVersion(root);

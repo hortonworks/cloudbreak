@@ -6,6 +6,7 @@ import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -52,13 +53,15 @@ public class RDSConfig implements ProvisionEntity, EnvironmentAwareResource {
     @Column(nullable = false)
     private String connectionDriver;
 
+    @Convert(converter = SecretToString.class)
     @SecretValue
     @Column(nullable = false)
-    private String connectionUserName;
+    private Secret connectionUserName = Secret.EMPTY;
 
+    @Convert(converter = SecretToString.class)
     @SecretValue
     @Column(nullable = false)
-    private String connectionPassword;
+    private Secret connectionPassword = Secret.EMPTY;
 
     private Long creationDate;
 
@@ -121,19 +124,27 @@ public class RDSConfig implements ProvisionEntity, EnvironmentAwareResource {
         this.databaseEngine = databaseEngine;
     }
 
-    public String getConnectionUserName() {
+    public Secret getConnectionUserName() {
         return connectionUserName;
     }
 
     public void setConnectionUserName(String connectionUserName) {
+        this.connectionUserName = new Secret(connectionUserName);
+    }
+
+    public void setConnectionUserName(Secret connectionUserName) {
         this.connectionUserName = connectionUserName;
     }
 
-    public String getConnectionPassword() {
+    public Secret getConnectionPassword() {
         return connectionPassword;
     }
 
     public void setConnectionPassword(String connectionPassword) {
+        this.connectionPassword = new Secret(connectionPassword);
+    }
+
+    public void setConnectionPassword(Secret connectionPassword) {
         this.connectionPassword = connectionPassword;
     }
 

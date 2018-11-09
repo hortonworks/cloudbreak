@@ -33,7 +33,6 @@ import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
@@ -110,9 +109,6 @@ public class StackRequestToTemplatePreparationObjectConverter extends AbstractCo
     @Inject
     private WorkspaceService workspaceService;
 
-    @Inject
-    private SecretService secretService;
-
     @Override
     public TemplatePreparationObject convert(StackV2Request source) {
         try {
@@ -126,7 +122,7 @@ public class StackRequestToTemplatePreparationObjectConverter extends AbstractCo
             BaseFileSystemConfigurationsView fileSystemConfigurationView = getFileSystemConfigurationView(source, credential);
             Set<RDSConfig> rdsConfigs = getRdsConfigs(source, workspace);
             Blueprint blueprint = getBlueprint(source, workspace);
-            String blueprintText = blueprint.getBlueprintText();
+            String blueprintText = blueprint.getBlueprintText().getRaw();
             BlueprintStackInfo blueprintStackInfo = stackInfoService.blueprintStackInfo(blueprintText);
             Set<HostgroupView> hostgroupViews = getHostgroupViews(source);
             Gateway gateway = source.getCluster().getAmbari().getGateway() == null ? null : getConversionService().convert(source, Gateway.class);
@@ -136,12 +132,12 @@ public class StackRequestToTemplatePreparationObjectConverter extends AbstractCo
             String bindDn = null;
             String bindPassword = null;
             if (ldapConfig != null) {
-                bindDn = secretService.get(ldapConfig.getBindDn());
-                bindPassword = secretService.get(ldapConfig.getBindPassword());
+                bindDn = ldapConfig.getBindDn().getRaw();
+                bindPassword = ldapConfig.getBindPassword().getRaw();
             }
             String gatewaySignKey = null;
             if (gateway != null) {
-                gatewaySignKey = secretService.get(gateway.getSignKey());
+                gatewaySignKey = gateway.getSignKey().getRaw();
             }
             Builder builder = Builder.builder()
                     .withFlexSubscription(flexSubscription.orElse(null))

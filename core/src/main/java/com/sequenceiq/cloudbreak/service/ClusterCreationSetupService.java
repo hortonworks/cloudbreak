@@ -71,7 +71,6 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariRepositoryVersionService;
 import com.sequenceiq.cloudbreak.service.decorator.ClusterDecorator;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
-import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Service
@@ -135,9 +134,6 @@ public class ClusterCreationSetupService {
 
     @Inject
     private ClusterCreationEnvironmentValidator environmentValidator;
-
-    @Inject
-    private SecretService secretService;
 
     public void validate(ClusterRequest request, Stack stack, User user, Workspace workspace) {
         validate(request, null, stack, user, workspace);
@@ -278,7 +274,7 @@ public class ClusterCreationSetupService {
             AmbariRepoDetailsJson ambariRepoDetailsJson, Optional<Component> stackImageComponent, Cluster cluster) throws IOException {
         Json json;
         if (!stackAmbariRepoConfig.isPresent()) {
-            String blueprintText = secretService.get(cluster.getBlueprint().getBlueprintText());
+            String blueprintText = cluster.getBlueprint().getBlueprintText().getRaw();
             JsonNode bluePrintJson = JsonUtil.readTree(blueprintText);
             String stackVersion = blueprintUtils.getBlueprintStackVersion(bluePrintJson);
             String stackName = blueprintUtils.getBlueprintStackName(bluePrintJson);
@@ -411,15 +407,15 @@ public class ClusterCreationSetupService {
     private JsonNode getBlueprintJsonNode(Blueprint blueprint, ClusterRequest request, Workspace workspace) throws IOException {
         JsonNode root;
         if (blueprint != null) {
-            String blueprintText = secretService.get(blueprint.getBlueprintText());
+            String blueprintText = blueprint.getBlueprintText().getRaw();
             root = JsonUtil.readTree(blueprintText);
         } else {
             // Backward compatibility to V1 cluster API
             if (request.getBlueprintId() != null) {
-                root = JsonUtil.readTree(blueprintService.get(request.getBlueprintId()).getBlueprintText());
+                root = JsonUtil.readTree(blueprintService.get(request.getBlueprintId()).getBlueprintText().getRaw());
             } else if (request.getBlueprintName() != null) {
                 blueprint = blueprintService.getByNameForWorkspace(request.getBlueprintName(), workspace);
-                String blueprintText = secretService.get(blueprint.getBlueprintText());
+                String blueprintText = blueprint.getBlueprintText().getRaw();
                 root = JsonUtil.readTree(blueprintText);
             } else {
                 root = JsonUtil.readTree(request.getBlueprint().getAmbariBlueprint());

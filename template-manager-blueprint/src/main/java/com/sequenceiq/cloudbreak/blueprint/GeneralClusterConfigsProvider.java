@@ -16,7 +16,6 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
-import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 
@@ -29,9 +28,6 @@ public class GeneralClusterConfigsProvider {
 
     @Inject
     private BlueprintProcessorFactory blueprintProcessorFactory;
-
-    @Inject
-    private SecretService secretService;
 
     public GeneralClusterConfigs generalClusterConfigs(Stack stack, Cluster cluster, CloudbreakUser cloudbreakUser) {
         boolean gatewayInstanceMetadataPresented = false;
@@ -52,11 +48,11 @@ public class GeneralClusterConfigsProvider {
         generalClusterConfigs.setExecutorType(cluster.getExecutorType());
         generalClusterConfigs.setStackName(stack.getName());
         generalClusterConfigs.setUuid(stack.getUuid());
-        generalClusterConfigs.setUserName(secretService.get(cluster.getUserName()));
-        generalClusterConfigs.setPassword(secretService.get(cluster.getPassword()));
+        generalClusterConfigs.setUserName(cluster.getUserName().getRaw());
+        generalClusterConfigs.setPassword(cluster.getPassword().getRaw());
         generalClusterConfigs.setNodeCount(stack.getFullNodeCount());
         generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.ofNullable(stack.getPrimaryGatewayInstance().getDiscoveryFQDN()));
-        String blueprintText = secretService.get(cluster.getBlueprint().getBlueprintText());
+        String blueprintText = cluster.getBlueprint().getBlueprintText().getRaw();
         generalClusterConfigs.setKafkaReplicationFactor(
                 getKafkaReplicationFactor(blueprintText) >= DEFAULT_REPLICATION_FACTOR ? DEFAULT_REPLICATION_FACTOR : 1);
 

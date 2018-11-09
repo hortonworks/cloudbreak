@@ -46,7 +46,6 @@ import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
-import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Service
@@ -72,9 +71,6 @@ public class ImageService {
     @Inject
     private BlueprintUtils blueprintUtils;
 
-    @Inject
-    private SecretService secretService;
-
     public Image getImage(Long stackId) throws CloudbreakImageNotFoundException {
         return componentConfigProvider.getImage(stackId);
     }
@@ -86,11 +82,11 @@ public class ImageService {
             String region = stack.getRegion();
             SecurityConfig securityConfig = stack.getSecurityConfig();
             SaltSecurityConfig saltSecurityConfig = securityConfig.getSaltSecurityConfig();
-            String cbPrivKey = secretService.get(saltSecurityConfig.getSaltBootSignPrivateKey());
+            String cbPrivKey = saltSecurityConfig.getSaltBootSignPrivateKey().getRaw();
             byte[] cbSshKeyDer = PkiUtil.getPublicKeyDer(new String(Base64.decodeBase64(cbPrivKey)));
             String sshUser = stack.getStackAuthentication().getLoginUserName();
-            String cbCert = secretService.get(securityConfig.getClientCert());
-            String saltBootPassword = secretService.get(saltSecurityConfig.getSaltBootPassword());
+            String cbCert = securityConfig.getClientCert().getRaw();
+            String saltBootPassword = saltSecurityConfig.getSaltBootPassword().getRaw();
             Map<InstanceGroupType, String> userData = userDataBuilder.buildUserData(platform, cbSshKeyDer, sshUser, params, saltBootPassword, cbCert);
 
             LOGGER.info("Determined image from catalog: {}", imgFromCatalog);
@@ -120,7 +116,7 @@ public class ImageService {
             String clusterType = ImageCatalogService.UNDEFINED;
             String clusterVersion = ImageCatalogService.UNDEFINED;
             if (blueprint != null) {
-                String blueprintText = secretService.get(blueprint.getBlueprintText());
+                String blueprintText = blueprint.getBlueprintText().getRaw();
                 try {
                     JsonNode root = JsonUtil.readTree(blueprintText);
                     clusterType = blueprintUtils.getBlueprintStackName(root);

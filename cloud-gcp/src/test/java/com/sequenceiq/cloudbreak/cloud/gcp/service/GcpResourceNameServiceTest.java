@@ -14,7 +14,7 @@ public class GcpResourceNameServiceTest {
 
     private ResourceNameService subject;
 
-        @Before
+    @Before
     public void setUp() {
         subject = new GcpResourceNameService();
         ReflectionTestUtils.setField(subject, "maxResourceNameLength", Integer.parseInt(MAX_RESOURCE_NAME_LENGTH));
