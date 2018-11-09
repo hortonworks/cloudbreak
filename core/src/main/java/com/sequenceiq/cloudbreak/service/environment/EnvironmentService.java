@@ -110,11 +110,22 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
     public Set<SimpleEnvironmentResponse> listByWorkspaceId(Long workspaceId) {
         return environmentViewService.findAllByWorkspaceId(workspaceId).stream()
                 .map(env -> conversionService.convert(env, SimpleEnvironmentResponse.class))
+                .peek(env -> {
+                    Set<String> datalakeNames = stackService.findDatalakeStackNamesByWorkspaceAndEnvironment(workspaceId, env.getId());
+                    env.setDatalakeClusterNames(datalakeNames);
+                    Set<String> workloadNames = stackService.findWorkloadStackNamesByWorkspaceAndEnvironment(workspaceId, env.getId());
+                    env.setWorkloadClusterNames(workloadNames);
+                })
                 .collect(Collectors.toSet());
     }
 
     public DetailedEnvironmentResponse get(String environmentName, Long workspaceId) {
-        return conversionService.convert(getByNameForWorkspaceId(environmentName, workspaceId), DetailedEnvironmentResponse.class);
+        try {
+            return transactionService.required(() ->
+                    conversionService.convert(getByNameForWorkspaceId(environmentName, workspaceId), DetailedEnvironmentResponse.class));
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
+        }
     }
 
     public Set<Environment> findByNamesInWorkspace(Set<String> names, @NotNull Long workspaceId) {
@@ -271,12 +282,12 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
             return transactionService.required(() -> {
                 Environment environment = getByNameForWorkspaceId(environmentName, workspaceId);
                 Credential credential = environmentCredentialOperationService.validatePlatformAndGetCredential(request, environment, workspaceId);
-                Set<StackApiView> stacksCannotBeChanged = environment.getWorkloadStacks().stream()
+                Set<StackApiView> stacksCannotBeChanged = environment.getStacks().stream()
                         .filter(stackApiView -> !stackApiViewService.canChangeCredential(stackApiView))
                         .collect(Collectors.toSet());
                 if (stacksCannotBeChanged.isEmpty()) {
                     environment.setCredential(credential);
-                    environment.getWorkloadStacks().forEach(stackApiView -> {
+                    environment.getStacks().forEach(stackApiView -> {
                         stackApiView.setCredential(credential);
                         stackApiViewService.save(stackApiView);
                     });

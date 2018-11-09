@@ -86,11 +86,11 @@ public class Environment implements WorkspaceAwareResource {
 
     @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "environment_id")
-    private Set<StackApiView> workloadStacks = new HashSet<>();
+    private Set<StackApiView> stacks = new HashSet<>();
 
     @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "environment_id")
-    private Set<ClusterApiView> workloadClusters = new HashSet<>();
+    private Set<ClusterApiView> clusters = new HashSet<>();
 
     @Override
     public Long getId() {
@@ -145,7 +145,8 @@ public class Environment implements WorkspaceAwareResource {
     }
 
     public Set<Region> getRegionSet() {
-        return regions == null ? Set.of() : JsonUtil.jsonToType(regions.getValue(), new TypeReference<Set<Region>>() { });
+        return regions == null ? Set.of() : JsonUtil.jsonToType(regions.getValue(), new TypeReference<Set<Region>>() {
+        });
     }
 
     public Set<LdapConfig> getLdapConfigs() {
@@ -172,20 +173,20 @@ public class Environment implements WorkspaceAwareResource {
         this.rdsConfigs = rdsConfigs;
     }
 
-    public Set<StackApiView> getWorkloadStacks() {
-        return workloadStacks;
+    public Set<StackApiView> getStacks() {
+        return stacks;
     }
 
-    public void setWorkloadStacks(Set<StackApiView> workloadStacks) {
-        this.workloadStacks = workloadStacks;
+    public void setStacks(Set<StackApiView> stacks) {
+        this.stacks = stacks;
     }
 
-    public Set<ClusterApiView> getWorkloadClusters() {
-        return workloadClusters;
+    public Set<ClusterApiView> getClusters() {
+        return clusters;
     }
 
-    public void setWorkloadClusters(Set<ClusterApiView> workloadClusters) {
-        this.workloadClusters = workloadClusters;
+    public void setClusters(Set<ClusterApiView> clusters) {
+        this.clusters = clusters;
     }
 
     @Override

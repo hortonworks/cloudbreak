@@ -618,12 +618,15 @@ public class ModelDescriptions {
     public static class EnvironmentResponseModelDescription {
         public static final String CREDENTIAL_NAME = "Name of the credential of the environment.";
         public static final String CREDENTIAL = "Credential of the environment.";
-        public static final String PROXY_CONFIG_NAMES = "Name of the proxy configurations in the environment.";
-        public static final String RDS_CONFIG_NAMES = "Name of the RDS configurations in the environment.";
-        public static final String LDAP_CONFIGS_NAMES = "Name of the LDAP configurations in the environment.";
-        public static final String WORKLOAD_CLUSTER_NAMES = "Name of the workload clusters created in the environment.";
+        public static final String PROXY_CONFIGS = "Proxy configurations in the environment.";
+        public static final String RDS_CONFIGS = "RDS configurations in the environment.";
+        public static final String LDAP_CONFIGS = "LDAP configurations in the environment.";
         public static final String REGIONS = "Regions of the environment.";
         public static final String CLOUD_PLATFORM = "Cloud platform of the environment.";
         public static final String LOCATION = "Location of the environment.";
+        public static final String WORKLOAD_CLUSTERS = "Workload clusters created in the environment.";
+        public static final String WORKLOAD_CLUSTER_NAMES = "Names of the workload clusters created in the environment.";
+        public static final String DATALAKE_CLUSTERS = "Datalake clusters created in the environment.";
+        public static final String DATALAKE_CLUSTER_NAMES = "Names of the datalake clusters created in the environment.";
     }
 }
