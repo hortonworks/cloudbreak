@@ -24,8 +24,8 @@ public class RecipeTests extends CloudbreakTest {
 
     private static final String VALID_RECIPE_DESCRIPTION = "recipe for API E2E tests";
 
-    private static final String VALID_RECIPE_URI = "https://github.com/hortonworks/cloudbreak/blob/master/integration-test/src/main/resources"
-            + "/recipes/post-install.sh";
+    private static final String VALID_RECIPE_URI = "https://raw.githubusercontent.com/hortonworks/cloudbreak/master/"
+            + "integration-test/src/main/resources/recipes/post-install.sh";
 
     private static final String VALID_RECIPE_SCRIPT = "echo test";
 
