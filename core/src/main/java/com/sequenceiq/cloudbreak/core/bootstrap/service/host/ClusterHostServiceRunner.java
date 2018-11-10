@@ -72,6 +72,7 @@ import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
+import com.sequenceiq.cloudbreak.template.views.LdapView;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
@@ -402,9 +403,8 @@ public class ClusterHostServiceRunner {
 
     private void saveLdapPillar(LdapConfig ldapConfig, Map<String, SaltPillarProperties> servicePillar) {
         if (ldapConfig != null) {
-            ldapConfig.setBindDn(ldapConfig.getBindDn().getRaw());
-            ldapConfig.setBindPassword(ldapConfig.getBindPassword().getRaw());
-            servicePillar.put("ldap", new SaltPillarProperties("/gateway/ldap.sls", singletonMap("ldap", ldapConfig)));
+            LdapView ldapView = new LdapView(ldapConfig, ldapConfig.getBindDn().getRaw(), ldapConfig.getBindPassword().getRaw());
+            servicePillar.put("ldap", new SaltPillarProperties("/gateway/ldap.sls", singletonMap("ldap", ldapView)));
         }
     }
 

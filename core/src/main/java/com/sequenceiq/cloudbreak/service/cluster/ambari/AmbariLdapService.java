@@ -41,10 +41,10 @@ public class AmbariLdapService {
             LdapView ldapView = new LdapView(ldapConfig, bindDn, bindPassword);
             Map<String, Object> ldapConfigs = new HashMap<>();
             ldapConfigs.put("ambari.ldap.authentication.enabled", true);
-            ldapConfigs.put("ambari.ldap.connectivity.server.host", ldapView.getHost());
-            ldapConfigs.put("ambari.ldap.connectivity.server.port", ldapView.getPort());
-            ldapConfigs.put("ambari.ldap.connectivity.secondary.server.host", ldapView.getHost());
-            ldapConfigs.put("ambari.ldap.connectivity.secondary.server.port", ldapView.getPort());
+            ldapConfigs.put("ambari.ldap.connectivity.server.host", ldapView.getServerHost());
+            ldapConfigs.put("ambari.ldap.connectivity.server.port", ldapView.getServerPort());
+            ldapConfigs.put("ambari.ldap.connectivity.secondary.server.host", ldapView.getServerHost());
+            ldapConfigs.put("ambari.ldap.connectivity.secondary.server.port", ldapView.getServerPort());
             ldapConfigs.put("ambari.ldap.connectivity.use_ssl", ldapView.isSecure());
             ldapConfigs.put("ambari.ldap.attributes.dn_attr", ldapView.getUserDnPattern());
             ldapConfigs.put("ambari.ldap.attributes.user.object_class", ldapView.getUserObjectClass());
