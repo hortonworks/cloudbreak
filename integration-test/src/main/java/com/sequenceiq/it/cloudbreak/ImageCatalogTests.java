@@ -133,7 +133,9 @@ public class ImageCatalogTests extends CloudbreakTest {
                 "check imagecatalog is created when name was used and deleted before");
     }
 
-    @Test(expectedExceptions = BadRequestException.class)
+    // TODO: if this test and the test of cluster creation are run parallel, wrong image id is found by image finder.
+    // Find a UUID from this catalog and run with the original catalog (cloudbreak-default)
+    @Test(expectedExceptions = BadRequestException.class, enabled = false)
     public void testDeleteCbDefaultImageCatalog() throws Exception {
         given(CloudbreakClient.isCreated());
         given(ImageCatalog.request()
@@ -142,7 +144,9 @@ public class ImageCatalogTests extends CloudbreakTest {
         when(ImageCatalog.delete(), "try to delete cb default image catalog");
     }
 
-    @Test
+    // TODO: if this test and the test of cluster creation are run parallel, wrong image id is found by image finder.
+    // Find a UUID from this catalog and run with the original catalog (cloudbreak-default)
+    @Test(enabled = false)
     public void testSetNewDefaultImageCatalog() throws Exception {
         given(CloudbreakClient.isCreated());
         given(ImageCatalog.request()
@@ -159,7 +163,9 @@ public class ImageCatalogTests extends CloudbreakTest {
                 }),  "check imagecatalog is created and set as default");
     }
 
-    @Test
+    // TODO: if this test and the test of cluster creation are run parallel, wrong image id is found by image finder.
+    // Find a UUID from this catalog and run with the original catalog (cloudbreak-default)
+    @Test(enabled = false)
     public void testSetImageCatalogBackAsNotDefault() throws  Exception {
         given(CloudbreakClient.isCreated());
 
