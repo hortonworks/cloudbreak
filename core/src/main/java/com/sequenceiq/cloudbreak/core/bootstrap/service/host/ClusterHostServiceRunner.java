@@ -260,10 +260,10 @@ public class ClusterHostServiceRunner {
         if (cluster.isAdJoinable()) {
             KerberosConfig kerberosConfig = cluster.getKerberosConfig();
             Map<String, Object> sssdConnfig = new HashMap<>();
-            sssdConnfig.put("username", kerberosConfig.getPrincipal());
+            sssdConnfig.put("username", kerberosConfig.getPrincipal().getRaw());
             sssdConnfig.put("domainuppercase", kerberosConfig.getRealm().toUpperCase());
             sssdConnfig.put("domain", kerberosConfig.getRealm().toLowerCase());
-            sssdConnfig.put("password", kerberosConfig.getPassword());
+            sssdConnfig.put("password", kerberosConfig.getPassword().getRaw());
             servicePillar.put("sssd-ad", new SaltPillarProperties("/sssd/ad.sls", singletonMap("sssd-ad", sssdConnfig)));
         }
     }
