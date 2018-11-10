@@ -21,7 +21,7 @@ public class CheckPermissionsAspects {
     @Inject
     private PermissionCheckerService permissionCheckerService;
 
-    @Pointcut("execution(public * com.sequenceiq.cloudbreak.repository.*.*(..)) ")
+    @Pointcut("execution(public * com.sequenceiq.cloudbreak.repository..*.*(..)) ")
     public void allRepositories() {
     }
 
