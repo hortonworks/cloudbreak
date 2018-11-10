@@ -47,7 +47,8 @@ type KerberosResponse struct {
 	TCPAllowed *bool `json:"tcpAllowed,omitempty"`
 
 	// type
-	Type string `json:"type,omitempty"`
+	// Required: true
+	Type *string `json:"type"`
 
 	// kerberos KDC server URL
 	URL string `json:"url,omitempty"`
@@ -143,12 +144,12 @@ func (m *KerberosResponse) validateTypeEnum(path, location string, value string)
 
 func (m *KerberosResponse) validateType(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.Type) { // not required
-		return nil
+	if err := validate.Required("type", "body", m.Type); err != nil {
+		return err
 	}
 
 	// value enum
-	if err := m.validateTypeEnum("type", "body", m.Type); err != nil {
+	if err := m.validateTypeEnum("type", "body", *m.Type); err != nil {
 		return err
 	}
 

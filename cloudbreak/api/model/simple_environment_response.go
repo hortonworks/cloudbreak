@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 )
 
 // SimpleEnvironmentResponse simple environment response
@@ -22,6 +23,10 @@ type SimpleEnvironmentResponse struct {
 
 	// Name of the credential of the environment.
 	CredentialName string `json:"credentialName,omitempty"`
+
+	// Names of the datalake clusters created in the environment.
+	// Unique: true
+	DatalakeClusterNames []string `json:"datalakeClusterNames"`
 
 	// description of the resource
 	Description string `json:"description,omitempty"`
@@ -38,6 +43,10 @@ type SimpleEnvironmentResponse struct {
 	// Regions of the environment.
 	Regions *CompactRegionResponse `json:"regions,omitempty"`
 
+	// Names of the workload clusters created in the environment.
+	// Unique: true
+	WorkloadClusterNames []string `json:"workloadClusterNames"`
+
 	// workspace
 	Workspace *WorkspaceResourceResponse `json:"workspace,omitempty"`
 }
@@ -45,6 +54,8 @@ type SimpleEnvironmentResponse struct {
 /* polymorph SimpleEnvironmentResponse cloudPlatform false */
 
 /* polymorph SimpleEnvironmentResponse credentialName false */
+
+/* polymorph SimpleEnvironmentResponse datalakeClusterNames false */
 
 /* polymorph SimpleEnvironmentResponse description false */
 
@@ -56,11 +67,18 @@ type SimpleEnvironmentResponse struct {
 
 /* polymorph SimpleEnvironmentResponse regions false */
 
+/* polymorph SimpleEnvironmentResponse workloadClusterNames false */
+
 /* polymorph SimpleEnvironmentResponse workspace false */
 
 // Validate validates this simple environment response
 func (m *SimpleEnvironmentResponse) Validate(formats strfmt.Registry) error {
 	var res []error
+
+	if err := m.validateDatalakeClusterNames(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
 
 	if err := m.validateLocation(formats); err != nil {
 		// prop
@@ -68,6 +86,11 @@ func (m *SimpleEnvironmentResponse) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateRegions(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateWorkloadClusterNames(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -80,6 +103,19 @@ func (m *SimpleEnvironmentResponse) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *SimpleEnvironmentResponse) validateDatalakeClusterNames(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.DatalakeClusterNames) { // not required
+		return nil
+	}
+
+	if err := validate.UniqueItems("datalakeClusterNames", "body", m.DatalakeClusterNames); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -116,6 +152,19 @@ func (m *SimpleEnvironmentResponse) validateRegions(formats strfmt.Registry) err
 			}
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (m *SimpleEnvironmentResponse) validateWorkloadClusterNames(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.WorkloadClusterNames) { // not required
+		return nil
+	}
+
+	if err := validate.UniqueItems("workloadClusterNames", "body", m.WorkloadClusterNames); err != nil {
+		return err
 	}
 
 	return nil

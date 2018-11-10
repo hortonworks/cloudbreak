@@ -6,6 +6,8 @@ package model
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"strconv"
+
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
@@ -24,15 +26,19 @@ type DetailedEnvironmentResponse struct {
 	// Name of the credential of the environment.
 	CredentialName string `json:"credentialName,omitempty"`
 
+	// Datalake clusters created in the environment.
+	// Unique: true
+	DatalakeClusters []*StackViewResponse `json:"datalakeClusters"`
+
 	// description of the resource
 	Description string `json:"description,omitempty"`
 
 	// id of the resource
 	ID int64 `json:"id,omitempty"`
 
-	// Name of the LDAP configurations in the environment.
+	// LDAP configurations in the environment.
 	// Unique: true
-	LdapConfigs []string `json:"ldapConfigs"`
+	LdapConfigs []*LdapConfigResponse `json:"ldapConfigs"`
 
 	// Location of the environment.
 	Location *LocationResponse `json:"location,omitempty"`
@@ -40,20 +46,20 @@ type DetailedEnvironmentResponse struct {
 	// name of the resource
 	Name string `json:"name,omitempty"`
 
-	// Name of the proxy configurations in the environment.
+	// Proxy configurations in the environment.
 	// Unique: true
-	ProxyConfigs []string `json:"proxyConfigs"`
+	ProxyConfigs []*ProxyConfigResponse `json:"proxyConfigs"`
 
-	// Name of the RDS configurations in the environment.
+	// RDS configurations in the environment.
 	// Unique: true
-	RdsConfigs []string `json:"rdsConfigs"`
+	RdsConfigs []*RDSConfigResponse `json:"rdsConfigs"`
 
 	// Regions of the environment.
 	Regions *CompactRegionResponse `json:"regions,omitempty"`
 
-	// Name of the workload clusters created in the environment.
+	// Workload clusters created in the environment.
 	// Unique: true
-	WorkloadClusters []string `json:"workloadClusters"`
+	WorkloadClusters []*StackViewResponse `json:"workloadClusters"`
 
 	// workspace
 	Workspace *WorkspaceResourceResponse `json:"workspace,omitempty"`
@@ -62,6 +68,8 @@ type DetailedEnvironmentResponse struct {
 /* polymorph DetailedEnvironmentResponse cloudPlatform false */
 
 /* polymorph DetailedEnvironmentResponse credentialName false */
+
+/* polymorph DetailedEnvironmentResponse datalakeClusters false */
 
 /* polymorph DetailedEnvironmentResponse description false */
 
@@ -86,6 +94,11 @@ type DetailedEnvironmentResponse struct {
 // Validate validates this detailed environment response
 func (m *DetailedEnvironmentResponse) Validate(formats strfmt.Registry) error {
 	var res []error
+
+	if err := m.validateDatalakeClusters(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
 
 	if err := m.validateLdapConfigs(formats); err != nil {
 		// prop
@@ -128,6 +141,37 @@ func (m *DetailedEnvironmentResponse) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
+func (m *DetailedEnvironmentResponse) validateDatalakeClusters(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.DatalakeClusters) { // not required
+		return nil
+	}
+
+	if err := validate.UniqueItems("datalakeClusters", "body", m.DatalakeClusters); err != nil {
+		return err
+	}
+
+	for i := 0; i < len(m.DatalakeClusters); i++ {
+
+		if swag.IsZero(m.DatalakeClusters[i]) { // not required
+			continue
+		}
+
+		if m.DatalakeClusters[i] != nil {
+
+			if err := m.DatalakeClusters[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("datalakeClusters" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
 func (m *DetailedEnvironmentResponse) validateLdapConfigs(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.LdapConfigs) { // not required
@@ -136,6 +180,24 @@ func (m *DetailedEnvironmentResponse) validateLdapConfigs(formats strfmt.Registr
 
 	if err := validate.UniqueItems("ldapConfigs", "body", m.LdapConfigs); err != nil {
 		return err
+	}
+
+	for i := 0; i < len(m.LdapConfigs); i++ {
+
+		if swag.IsZero(m.LdapConfigs[i]) { // not required
+			continue
+		}
+
+		if m.LdapConfigs[i] != nil {
+
+			if err := m.LdapConfigs[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("ldapConfigs" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
 	}
 
 	return nil
@@ -170,6 +232,24 @@ func (m *DetailedEnvironmentResponse) validateProxyConfigs(formats strfmt.Regist
 		return err
 	}
 
+	for i := 0; i < len(m.ProxyConfigs); i++ {
+
+		if swag.IsZero(m.ProxyConfigs[i]) { // not required
+			continue
+		}
+
+		if m.ProxyConfigs[i] != nil {
+
+			if err := m.ProxyConfigs[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("proxyConfigs" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
 	return nil
 }
 
@@ -181,6 +261,24 @@ func (m *DetailedEnvironmentResponse) validateRdsConfigs(formats strfmt.Registry
 
 	if err := validate.UniqueItems("rdsConfigs", "body", m.RdsConfigs); err != nil {
 		return err
+	}
+
+	for i := 0; i < len(m.RdsConfigs); i++ {
+
+		if swag.IsZero(m.RdsConfigs[i]) { // not required
+			continue
+		}
+
+		if m.RdsConfigs[i] != nil {
+
+			if err := m.RdsConfigs[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("rdsConfigs" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
 	}
 
 	return nil
@@ -213,6 +311,24 @@ func (m *DetailedEnvironmentResponse) validateWorkloadClusters(formats strfmt.Re
 
 	if err := validate.UniqueItems("workloadClusters", "body", m.WorkloadClusters); err != nil {
 		return err
+	}
+
+	for i := 0; i < len(m.WorkloadClusters); i++ {
+
+		if swag.IsZero(m.WorkloadClusters[i]) { // not required
+			continue
+		}
+
+		if m.WorkloadClusters[i] != nil {
+
+			if err := m.WorkloadClusters[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("workloadClusters" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
 	}
 
 	return nil

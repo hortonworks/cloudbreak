@@ -287,17 +287,41 @@ func convertResponseToJsonOutput(env *model.DetailedEnvironmentResponse) *enviro
 			Longitude:     env.Location.Longitude,
 			Latitude:      env.Location.Latitude,
 		},
-		LdapConfigs:  env.LdapConfigs,
-		ProxyConfigs: env.ProxyConfigs,
-		RdsConfigs:   env.RdsConfigs,
+		LdapConfigs:  getLdapConfigNames(env.LdapConfigs),
+		ProxyConfigs: getProxyConfigNames(env.ProxyConfigs),
+		RdsConfigs:   getRdsConfigNames(env.RdsConfigs),
 		ID:           strconv.FormatInt(env.ID, 10),
 	}
 }
 
 func getRegionNames(region *model.CompactRegionResponse) []string {
-	regions := []string{}
+	var regions []string
 	for _, v := range region.DisplayNames {
 		regions = append(regions, v)
 	}
 	return regions
+}
+
+func getLdapConfigNames(configs []*model.LdapConfigResponse) []string {
+	var names []string
+	for _, l := range configs {
+		names = append(names, *l.Name)
+	}
+	return names
+}
+
+func getProxyConfigNames(configs []*model.ProxyConfigResponse) []string {
+	var names []string
+	for _, c := range configs {
+		names = append(names, *c.Name)
+	}
+	return names
+}
+
+func getRdsConfigNames(configs []*model.RDSConfigResponse) []string {
+	var names []string
+	for _, c := range configs {
+		names = append(names, *c.Name)
+	}
+	return names
 }

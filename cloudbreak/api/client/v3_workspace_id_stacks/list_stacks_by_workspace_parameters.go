@@ -63,6 +63,10 @@ for the list stacks by workspace operation typically these are written to a http
 */
 type ListStacksByWorkspaceParams struct {
 
+	/*Environment*/
+	Environment *string
+	/*OnlyDatalakes*/
+	OnlyDatalakes *bool
 	/*WorkspaceID*/
 	WorkspaceID int64
 
@@ -104,6 +108,28 @@ func (o *ListStacksByWorkspaceParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithEnvironment adds the environment to the list stacks by workspace params
+func (o *ListStacksByWorkspaceParams) WithEnvironment(environment *string) *ListStacksByWorkspaceParams {
+	o.SetEnvironment(environment)
+	return o
+}
+
+// SetEnvironment adds the environment to the list stacks by workspace params
+func (o *ListStacksByWorkspaceParams) SetEnvironment(environment *string) {
+	o.Environment = environment
+}
+
+// WithOnlyDatalakes adds the onlyDatalakes to the list stacks by workspace params
+func (o *ListStacksByWorkspaceParams) WithOnlyDatalakes(onlyDatalakes *bool) *ListStacksByWorkspaceParams {
+	o.SetOnlyDatalakes(onlyDatalakes)
+	return o
+}
+
+// SetOnlyDatalakes adds the onlyDatalakes to the list stacks by workspace params
+func (o *ListStacksByWorkspaceParams) SetOnlyDatalakes(onlyDatalakes *bool) {
+	o.OnlyDatalakes = onlyDatalakes
+}
+
 // WithWorkspaceID adds the workspaceID to the list stacks by workspace params
 func (o *ListStacksByWorkspaceParams) WithWorkspaceID(workspaceID int64) *ListStacksByWorkspaceParams {
 	o.SetWorkspaceID(workspaceID)
@@ -122,6 +148,38 @@ func (o *ListStacksByWorkspaceParams) WriteToRequest(r runtime.ClientRequest, re
 		return err
 	}
 	var res []error
+
+	if o.Environment != nil {
+
+		// query param environment
+		var qrEnvironment string
+		if o.Environment != nil {
+			qrEnvironment = *o.Environment
+		}
+		qEnvironment := qrEnvironment
+		if qEnvironment != "" {
+			if err := r.SetQueryParam("environment", qEnvironment); err != nil {
+				return err
+			}
+		}
+
+	}
+
+	if o.OnlyDatalakes != nil {
+
+		// query param onlyDatalakes
+		var qrOnlyDatalakes bool
+		if o.OnlyDatalakes != nil {
+			qrOnlyDatalakes = *o.OnlyDatalakes
+		}
+		qOnlyDatalakes := swag.FormatBool(qrOnlyDatalakes)
+		if qOnlyDatalakes != "" {
+			if err := r.SetQueryParam("onlyDatalakes", qOnlyDatalakes); err != nil {
+				return err
+			}
+		}
+
+	}
 
 	// path param workspaceId
 	if err := r.SetPathParam("workspaceId", swag.FormatInt64(o.WorkspaceID)); err != nil {

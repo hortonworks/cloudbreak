@@ -6,6 +6,8 @@ package model
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
+
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
@@ -57,6 +59,10 @@ type KerberosRequest struct {
 	// tcp allowed
 	TCPAllowed *bool `json:"tcpAllowed,omitempty"`
 
+	// type
+	// Required: true
+	Type *string `json:"type"`
+
 	// kerberos KDC server URL
 	URL string `json:"url,omitempty"`
 }
@@ -83,6 +89,8 @@ type KerberosRequest struct {
 
 /* polymorph KerberosRequest tcpAllowed false */
 
+/* polymorph KerberosRequest type false */
+
 /* polymorph KerberosRequest url false */
 
 // Validate validates this kerberos request
@@ -100,6 +108,11 @@ func (m *KerberosRequest) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validatePassword(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateType(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -155,6 +168,51 @@ func (m *KerberosRequest) validatePassword(formats strfmt.Registry) error {
 	}
 
 	if err := validate.MaxLength("password", "body", string(m.Password), 50); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+var kerberosRequestTypeTypePropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["CB_MANAGED","EXISTING_AD","EXISTING_MIT","CUSTOM"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		kerberosRequestTypeTypePropEnum = append(kerberosRequestTypeTypePropEnum, v)
+	}
+}
+
+const (
+	// KerberosRequestTypeCBMANAGED captures enum value "CB_MANAGED"
+	KerberosRequestTypeCBMANAGED string = "CB_MANAGED"
+	// KerberosRequestTypeEXISTINGAD captures enum value "EXISTING_AD"
+	KerberosRequestTypeEXISTINGAD string = "EXISTING_AD"
+	// KerberosRequestTypeEXISTINGMIT captures enum value "EXISTING_MIT"
+	KerberosRequestTypeEXISTINGMIT string = "EXISTING_MIT"
+	// KerberosRequestTypeCUSTOM captures enum value "CUSTOM"
+	KerberosRequestTypeCUSTOM string = "CUSTOM"
+)
+
+// prop value enum
+func (m *KerberosRequest) validateTypeEnum(path, location string, value string) error {
+	if err := validate.Enum(path, location, value, kerberosRequestTypeTypePropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *KerberosRequest) validateType(formats strfmt.Registry) error {
+
+	if err := validate.Required("type", "body", m.Type); err != nil {
+		return err
+	}
+
+	// value enum
+	if err := m.validateTypeEnum("type", "body", *m.Type); err != nil {
 		return err
 	}
 
