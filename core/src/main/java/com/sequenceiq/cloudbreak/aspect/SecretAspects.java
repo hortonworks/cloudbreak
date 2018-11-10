@@ -31,19 +31,19 @@ public class SecretAspects {
     @Inject
     private SecretService secretService;
 
-    @Pointcut("execution(public * com.sequenceiq.cloudbreak.repository.*.save(..)) ")
+    @Pointcut("execution(public * com.sequenceiq.cloudbreak.repository..*.save(..)) ")
     public void onRepositorySave() {
     }
 
-    @Pointcut("execution(public void com.sequenceiq.cloudbreak.repository.*.delete(..)) ")
+    @Pointcut("execution(public void com.sequenceiq.cloudbreak.repository..*.delete(..)) ")
     public void onRepositoryDelete() {
     }
 
-    @Pointcut("execution(public * com.sequenceiq.cloudbreak.repository.*.saveAll(..)) ")
+    @Pointcut("execution(public * com.sequenceiq.cloudbreak.repository..*.saveAll(..)) ")
     public void onRepositorySaveAll() {
     }
 
-    @Pointcut("execution(public void com.sequenceiq.cloudbreak.repository.*.deleteAll(..)) ")
+    @Pointcut("execution(public void com.sequenceiq.cloudbreak.repository..*.deleteAll(..)) ")
     public void onRepositoryDeleteAll() {
     }
 
@@ -76,7 +76,7 @@ public class SecretAspects {
                         LOGGER.debug("Found SecretValue annotation on {}", field);
                         field.setAccessible(true);
                         Secret value = (Secret) field.get(entity);
-                        if (value != null && Secret.EMPTY != value && value.getSecret() == null) {
+                        if (value != null && value.getRaw() != null && value.getSecret() == null) {
                             String resourceType = entity.getClass().getSimpleName().toLowerCase();
                             String resourceId = UUID.randomUUID().toString();
                             String fieldName = field.getName().toLowerCase();
