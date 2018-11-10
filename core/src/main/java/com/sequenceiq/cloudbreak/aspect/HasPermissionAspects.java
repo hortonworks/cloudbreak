@@ -19,7 +19,7 @@ public class HasPermissionAspects {
     @Inject
     private HasPermissionService hasPermissionService;
 
-    @Pointcut("execution(public * com.sequenceiq.cloudbreak.repository.*.*(..)) ")
+    @Pointcut("execution(public * com.sequenceiq.cloudbreak.repository..*.*(..)) ")
     public void allRepositories() {
     }
 
