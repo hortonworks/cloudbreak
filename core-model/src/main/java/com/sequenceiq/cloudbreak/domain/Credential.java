@@ -107,16 +107,16 @@ public class Credential implements ProvisionEntity, WorkspaceAwareResource {
         this.cloudPlatform = cloudPlatform;
     }
 
-    public Secret getAttributes() {
-        return attributes;
+    public String getAttributes() {
+        return attributes.getRaw();
+    }
+
+    public String getAttributesSecret() {
+        return attributes.getSecret();
     }
 
     public void setAttributes(String attributes) {
         this.attributes = new Secret(attributes);
-    }
-
-    public void setAttributes(Secret attributes) {
-        this.attributes = attributes;
     }
 
     public Topology getTopology() {

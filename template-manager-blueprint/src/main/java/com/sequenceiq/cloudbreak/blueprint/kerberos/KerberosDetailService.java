@@ -57,16 +57,16 @@ public class KerberosDetailService {
     }
 
     public String resolvePrincipalForKerberos(@Nonnull KerberosConfig kerberosConfig) {
-        return Strings.isNullOrEmpty(kerberosConfig.getPrincipal().getRaw()) ? kerberosConfig.getAdmin().getRaw() + PRINCIPAL
-                : kerberosConfig.getPrincipal().getRaw();
+        return Strings.isNullOrEmpty(kerberosConfig.getPrincipal()) ? kerberosConfig.getAdmin() + PRINCIPAL
+                : kerberosConfig.getPrincipal();
     }
 
     public boolean isAmbariManagedKerberosPackages(@Nonnull KerberosConfig kerberosConfig) throws IOException {
-        if (isEmpty(kerberosConfig.getDescriptor().getRaw())) {
+        if (isEmpty(kerberosConfig.getDescriptor())) {
             return true;
         }
         try {
-            JsonNode node = JsonUtil.readTree(kerberosConfig.getDescriptor().getRaw())
+            JsonNode node = JsonUtil.readTree(kerberosConfig.getDescriptor())
                     .get("kerberos-env").get("properties").get("install_packages");
             return node.asBoolean();
         } catch (NullPointerException ignored) {
@@ -76,7 +76,7 @@ public class KerberosDetailService {
 
     public Map<String, Object> getKerberosEnvProperties(@Nonnull KerberosConfig kerberosConfig) {
         Map<String, Object> kerberosEnv = (Map<String, Object>) gson
-                .fromJson(kerberosConfig.getDescriptor().getRaw(), Map.class).get("kerberos-env");
+                .fromJson(kerberosConfig.getDescriptor(), Map.class).get("kerberos-env");
         return (Map<String, Object>) kerberosEnv.get("properties");
     }
 }

@@ -49,7 +49,6 @@ import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.domain.Secret;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
@@ -179,7 +178,7 @@ public class StackRequestToTemplatePreparationObjectConverterTest {
         when(cluster.getAmbari()).thenReturn(ambari);
         when(ambari.getBlueprintId()).thenReturn(BLUEPRINT_ID);
         when(blueprintService.get(BLUEPRINT_ID)).thenReturn(blueprint);
-        when(blueprint.getBlueprintText()).thenReturn(new Secret(TEST_BLUEPRINT_TEXT));
+        when(blueprint.getBlueprintText()).thenReturn(TEST_BLUEPRINT_TEXT);
         when(stackInfoService.blueprintStackInfo(TEST_BLUEPRINT_TEXT)).thenReturn(blueprintStackInfo);
         when(userService.getOrCreate(eq(cloudbreakUser))).thenReturn(user);
         when(cloudbreakUser.getUsername()).thenReturn("test@hortonworks.com");

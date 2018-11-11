@@ -175,8 +175,8 @@ public class RdsConfigService extends AbstractEnvironmentAwareService<RDSConfig>
     }
 
     public RDSConfig resolveVaultValues(RDSConfig config) {
-        String username = config.getConnectionUserName().getRaw();
-        String password = config.getConnectionPassword().getRaw();
+        String username = config.getConnectionUserName();
+        String password = config.getConnectionPassword();
         config.setConnectionUserName(username);
         config.setConnectionPassword(password);
         return config;

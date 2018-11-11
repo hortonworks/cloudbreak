@@ -30,16 +30,12 @@ public class GeneratedRecipe implements ProvisionEntity {
     @ManyToOne
     private HostGroup hostGroup;
 
-    public Secret getExtendedRecipeText() {
-        return extendedRecipeText;
+    public String getExtendedRecipeText() {
+        return extendedRecipeText.getRaw();
     }
 
     public void setExtendedRecipeText(String extendedRecipeText) {
         this.extendedRecipeText = new Secret(extendedRecipeText);
-    }
-
-    public void setExtendedRecipeText(Secret extendedRecipeText) {
-        this.extendedRecipeText = extendedRecipeText;
     }
 
     public Long getId() {

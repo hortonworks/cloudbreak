@@ -28,10 +28,9 @@ public class ProxyConfigMapperImpl implements ProxyConfigMapper {
         proxyConfig.setServerHost( proxyConfigRequest.getServerHost() );
         proxyConfig.setServerPort( proxyConfigRequest.getServerPort() );
         proxyConfig.setProtocol( proxyConfigRequest.getProtocol() );
+        proxyConfig.setUserName( proxyConfigRequest.getUserName() );
+        proxyConfig.setPassword( proxyConfigRequest.getPassword() );
         proxyConfig.setDescription( proxyConfigRequest.getDescription() );
-
-        proxyConfig.setPassword( new com.sequenceiq.cloudbreak.domain.Secret(proxyConfigRequest.getPassword()) );
-        proxyConfig.setUserName( new com.sequenceiq.cloudbreak.domain.Secret(proxyConfigRequest.getUserName()) );
 
         return proxyConfig;
     }

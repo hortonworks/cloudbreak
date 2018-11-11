@@ -31,7 +31,7 @@ public class BlueprintMigrationService {
         for (Blueprint bp : blueprints) {
             if (StringUtils.isEmpty(bp.getStackType()) || StringUtils.isEmpty(bp.getStackVersion())) {
                 try {
-                    JsonNode root = JsonUtil.readTree(bp.getBlueprintText().getRaw());
+                    JsonNode root = JsonUtil.readTree(bp.getBlueprintText());
                     String stackName = blueprintUtils.getBlueprintStackName(root);
                     bp.setStackType(StringUtils.isEmpty(stackName) ? UNKNOWN : stackName);
                     String stackVersion = blueprintUtils.getBlueprintStackVersion(root);

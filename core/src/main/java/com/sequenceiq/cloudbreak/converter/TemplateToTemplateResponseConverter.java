@@ -38,7 +38,7 @@ public class TemplateToTemplateResponseConverter extends AbstractConversionServi
         Json attributes = source.getAttributes();
         if (attributes != null) {
             Map<String, Object> atributesMap = attributes.getMap();
-            ofNullable(source.getSecretAttributes()).ifPresent(attr -> atributesMap.putAll(new Json(attr.getRaw()).getMap()));
+            ofNullable(source.getSecretAttributes()).ifPresent(attr -> atributesMap.putAll(new Json(attr).getMap()));
             setParameterByPlatform(templateJson, atributesMap);
             templateJson.setParameters(atributesMap);
         }

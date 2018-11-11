@@ -274,7 +274,7 @@ public class ClusterCreationSetupService {
             AmbariRepoDetailsJson ambariRepoDetailsJson, Optional<Component> stackImageComponent, Cluster cluster) throws IOException {
         Json json;
         if (!stackAmbariRepoConfig.isPresent()) {
-            String blueprintText = cluster.getBlueprint().getBlueprintText().getRaw();
+            String blueprintText = cluster.getBlueprint().getBlueprintText();
             JsonNode bluePrintJson = JsonUtil.readTree(blueprintText);
             String stackVersion = blueprintUtils.getBlueprintStackVersion(bluePrintJson);
             String stackName = blueprintUtils.getBlueprintStackName(bluePrintJson);
@@ -407,15 +407,15 @@ public class ClusterCreationSetupService {
     private JsonNode getBlueprintJsonNode(Blueprint blueprint, ClusterRequest request, Workspace workspace) throws IOException {
         JsonNode root;
         if (blueprint != null) {
-            String blueprintText = blueprint.getBlueprintText().getRaw();
+            String blueprintText = blueprint.getBlueprintText();
             root = JsonUtil.readTree(blueprintText);
         } else {
             // Backward compatibility to V1 cluster API
             if (request.getBlueprintId() != null) {
-                root = JsonUtil.readTree(blueprintService.get(request.getBlueprintId()).getBlueprintText().getRaw());
+                root = JsonUtil.readTree(blueprintService.get(request.getBlueprintId()).getBlueprintText());
             } else if (request.getBlueprintName() != null) {
                 blueprint = blueprintService.getByNameForWorkspace(request.getBlueprintName(), workspace);
-                String blueprintText = blueprint.getBlueprintText().getRaw();
+                String blueprintText = blueprint.getBlueprintText();
                 root = JsonUtil.readTree(blueprintText);
             } else {
                 root = JsonUtil.readTree(request.getBlueprint().getAmbariBlueprint());

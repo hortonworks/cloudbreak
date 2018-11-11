@@ -12,7 +12,6 @@ import com.sequenceiq.cloudbreak.api.model.template.ClusterTemplateRequest;
 import com.sequenceiq.cloudbreak.api.model.template.ClusterTemplateResponse;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.domain.Secret;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
 
@@ -25,7 +24,7 @@ public abstract class ClusterTemplateMapper {
             @Mapping(target = "workspace", ignore = true),
             @Mapping(target = "status", expression = "java(com.sequenceiq.cloudbreak.api.model.ResourceStatus.USER_MANAGED)"),
             @Mapping(target = "template",
-                    expression = "java(new com.sequenceiq.cloudbreak.domain.Secret(mapStackV2RequestToJson(clusterTemplateRequest.getTemplate())))")
+                    expression = "java(mapStackV2RequestToJson(clusterTemplateRequest.getTemplate()))")
     })
     public abstract ClusterTemplate mapRequestToEntity(ClusterTemplateRequest clusterTemplateRequest);
 
@@ -41,9 +40,8 @@ public abstract class ClusterTemplateMapper {
         }
     }
 
-    public StackV2Request mapJsonToStackV2Request(Secret templateSecret) {
+    public StackV2Request mapJsonToStackV2Request(String templateContent) {
         try {
-            String templateContent = templateSecret.getRaw();
             return new Json(templateContent).get(StackV2Request.class);
         } catch (IOException e) {
             throw new BadRequestException("Couldn't convert json to StackV2Request", e);

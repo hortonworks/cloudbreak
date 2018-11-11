@@ -30,7 +30,7 @@ public class BlueprintPortConfigCollector {
     }
 
     private void collectConfiguredPorts(Blueprint blueprint, Map<String, Integer> collectedPorts) {
-        String blueprintText = blueprint.getBlueprintText().getRaw();
+        String blueprintText = blueprint.getBlueprintText();
         Map<String, Map<String, String>> configurations = new BlueprintTextProcessor(blueprintText).getConfigurationEntries();
         blueprintServicePorts.forEach(portConfig -> {
             Optional<Integer> configuredPort = getConfiguredPortForService(portConfig, configurations);

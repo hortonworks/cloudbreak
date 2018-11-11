@@ -88,40 +88,28 @@ public class KerberosConfig implements ProvisionEntity {
         this.type = type;
     }
 
-    public Secret getMasterKey() {
-        return masterKey;
+    public String getMasterKey() {
+        return masterKey.getRaw();
     }
 
     public void setMasterKey(String masterKey) {
         this.masterKey = new Secret(masterKey);
     }
 
-    public void setMasterKey(Secret masterKey) {
-        this.masterKey = masterKey;
-    }
-
-    public Secret getAdmin() {
-        return admin;
+    public String getAdmin() {
+        return admin.getRaw();
     }
 
     public void setAdmin(String admin) {
         this.admin = new Secret(admin);
     }
 
-    public void setAdmin(Secret admin) {
-        this.admin = admin;
-    }
-
-    public Secret getPassword() {
-        return password;
+    public String getPassword() {
+        return password.getRaw();
     }
 
     public void setPassword(String password) {
         this.password = new Secret(password);
-    }
-
-    public void setPassword(Secret password) {
-        this.password = password;
     }
 
     public String getUrl() {
@@ -156,16 +144,12 @@ public class KerberosConfig implements ProvisionEntity {
         this.tcpAllowed = tcpAllowed;
     }
 
-    public Secret getPrincipal() {
-        return principal;
+    public String getPrincipal() {
+        return principal.getRaw();
     }
 
     public void setPrincipal(String principal) {
         this.principal = new Secret(principal);
-    }
-
-    public void setPrincipal(Secret principal) {
-        this.principal = principal;
     }
 
     public String getLdapUrl() {
@@ -184,27 +168,19 @@ public class KerberosConfig implements ProvisionEntity {
         this.containerDn = containerDn;
     }
 
-    public Secret getDescriptor() {
-        return descriptor;
+    public String getDescriptor() {
+        return descriptor.getRaw();
     }
 
     public void setDescriptor(String descriptor) {
         this.descriptor = new Secret(descriptor);
     }
 
-    public void setDescriptor(Secret descriptor) {
-        this.descriptor = descriptor;
-    }
-
-    public Secret getKrb5Conf() {
-        return krb5Conf;
+    public String getKrb5Conf() {
+        return krb5Conf.getRaw();
     }
 
     public void setKrb5Conf(String krb5Conf) {
         this.krb5Conf = new Secret(krb5Conf);
-    }
-
-    public void setKrb5Conf(Secret krb5Conf) {
-        this.krb5Conf = krb5Conf;
     }
 }

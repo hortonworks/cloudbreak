@@ -153,8 +153,8 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
     }
 
     private <R extends ClusterResponse> void setExtendedBlueprintText(Cluster source, R clusterResponse) {
-        if (StringUtils.isNoneEmpty(source.getExtendedBlueprintText().getRaw()) && !disableShowBlueprint) {
-            String fromVault = source.getExtendedBlueprintText().getRaw();
+        if (StringUtils.isNoneEmpty(source.getExtendedBlueprintText()) && !disableShowBlueprint) {
+            String fromVault = source.getExtendedBlueprintText();
             clusterResponse.setExtendedBlueprintText(anonymize(fromVault));
         }
     }
@@ -179,7 +179,7 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
 
     private void convertCustomQueue(Cluster source, ClusterResponse clusterResponse) {
         if (source.getAttributes() != null) {
-            Json fromVault = new Json(source.getAttributes().getRaw());
+            Json fromVault = new Json(source.getAttributes());
             Map<String, Object> attributes = fromVault.getMap();
             Object customQueue = attributes.get(CUSTOM_QUEUE.name());
             if (customQueue != null) {
@@ -236,7 +236,7 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
             clusterResponse.setLdapConfigId(source.getLdapConfig().getId());
         }
         if (source.getAttributes() != null) {
-            Json fromVault = new Json(source.getAttributes().getRaw());
+            Json fromVault = new Json(source.getAttributes());
             clusterResponse.setAttributes(fromVault.getMap());
         }
     }

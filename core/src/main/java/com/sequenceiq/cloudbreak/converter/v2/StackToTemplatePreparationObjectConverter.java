@@ -98,7 +98,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
             StackRepoDetails hdpRepo = clusterComponentConfigProvider.getHDPRepo(cluster.getId());
             String stackRepoDetailsHdpVersion = hdpRepo != null ? hdpRepo.getHdpVersion() : null;
             Map<String, List<InstanceMetaData>> groupInstances = instanceGroupMetadataCollector.collectMetadata(source);
-            String blueprintText = cluster.getBlueprint().getBlueprintText().getRaw();
+            String blueprintText = cluster.getBlueprint().getBlueprintText();
             HdfConfigs hdfConfigs = hdfConfigProvider.createHdfConfig(cluster.getHostGroups(), groupInstances, blueprintText);
             BaseFileSystemConfigurationsView fileSystemConfigurationView = getFileSystemConfigurationView(source, fileSystem);
             CloudbreakUser cloudbreakUser = cachedUserDetailsService.getDetails(cluster.getOwner(), UserFilterField.USERID);
@@ -109,13 +109,13 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
             String bindDn = null;
             String bindPassword = null;
             if (ldapConfig != null) {
-                bindDn = ldapConfig.getBindDn().getRaw();
-                bindPassword = ldapConfig.getBindPassword().getRaw();
+                bindDn = ldapConfig.getBindDn();
+                bindPassword = ldapConfig.getBindPassword();
             }
             Gateway gateway = cluster.getGateway();
             String gatewaySignKey = null;
             if (gateway != null) {
-                gatewaySignKey = gateway.getSignKey().getRaw();
+                gatewaySignKey = gateway.getSignKey();
             }
             return Builder.builder()
                     .withFlexSubscription(source.getFlexSubscription())

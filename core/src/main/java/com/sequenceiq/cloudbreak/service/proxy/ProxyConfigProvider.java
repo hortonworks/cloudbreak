@@ -26,9 +26,9 @@ public class ProxyConfigProvider {
             proxy.put("host", proxyConfig.getServerHost());
             proxy.put("port", proxyConfig.getServerPort());
             proxy.put("protocol", proxyConfig.getProtocol());
-            if (StringUtils.isNotBlank(proxyConfig.getUserName().getRaw()) && StringUtils.isNotBlank(proxyConfig.getPassword().getRaw())) {
-                proxy.put("user", proxyConfig.getUserName().getRaw());
-                proxy.put("password", proxyConfig.getPassword().getRaw());
+            if (StringUtils.isNotBlank(proxyConfig.getUserName()) && StringUtils.isNotBlank(proxyConfig.getPassword())) {
+                proxy.put("user", proxyConfig.getUserName());
+                proxy.put("password", proxyConfig.getPassword());
             }
             servicePillar.put(PROXY_KEY, new SaltPillarProperties(PROXY_SLS_PATH, singletonMap(PROXY_KEY, proxy)));
         }

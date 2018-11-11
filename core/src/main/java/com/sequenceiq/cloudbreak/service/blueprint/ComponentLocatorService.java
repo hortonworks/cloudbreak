@@ -29,7 +29,7 @@ public class ComponentLocatorService {
     public Map<String, List<String>> getComponentLocation(Cluster cluster, Collection<String> componentNames) {
         Map<String, List<String>> result = new HashMap<>();
         for (HostGroup hg : hostGroupService.getByCluster(cluster.getId())) {
-            String blueprintTex = cluster.getBlueprint().getBlueprintText().getRaw();
+            String blueprintTex = cluster.getBlueprint().getBlueprintText();
             Set<String> hgComponents = blueprintProcessorFactory.get(blueprintTex).getComponentsInHostGroup(hg.getName());
             hgComponents.retainAll(componentNames);
 

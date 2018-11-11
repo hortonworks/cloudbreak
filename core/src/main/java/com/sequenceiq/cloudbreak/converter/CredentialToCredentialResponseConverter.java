@@ -43,11 +43,11 @@ public class CredentialToCredentialResponseConverter extends AbstractConversionS
         credentialJson.setCloudPlatform(source.cloudPlatform());
         credentialJson.setName(source.getName());
         if (source.getAttributes() != null) {
-            Json secretAttributes = new Json(source.getAttributes().getRaw());
+            Json secretAttributes = new Json(source.getAttributes());
             Map<String, Object> parameters = credentialDefinitionService.removeSensitives(platform(source.cloudPlatform()), secretAttributes.getMap());
             convertValuesToBooleanIfNecessary(parameters);
             credentialJson.setParameters(parameters);
-            credentialJson.setParametersPath(source.getAttributes().getRaw());
+            credentialJson.setParametersPath(source.getAttributes());
         }
         credentialJson.setDescription(source.getDescription() == null ? "" : source.getDescription());
         if (source.getTopology() != null) {

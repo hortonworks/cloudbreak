@@ -92,16 +92,16 @@ public class Recipe implements ProvisionEntity, WorkspaceAwareResource {
         this.uri = uri;
     }
 
-    public Secret getContent() {
-        return content;
+    public String getContent() {
+        return content.getRaw();
+    }
+
+    public String getContentSecret() {
+        return content.getSecret();
     }
 
     public void setContent(String content) {
         this.content = new Secret(content);
-    }
-
-    public void setContent(Secret content) {
-        this.content = content;
     }
 
     public String getAccount() {

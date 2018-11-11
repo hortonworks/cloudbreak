@@ -41,7 +41,6 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.Postg
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
-import com.sequenceiq.cloudbreak.domain.Secret;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -159,7 +158,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(clusterComponentConfigProvider.getHDPRepo(TEST_CLUSTER_ID)).thenReturn(stackRepoDetails);
         when(instanceGroupMetadataCollector.collectMetadata(source)).thenReturn(groupInstances);
         when(cluster.getBlueprint()).thenReturn(blueprint);
-        when(blueprint.getBlueprintText()).thenReturn(new Secret(TEST_BLUEPRINT_TEXT));
+        when(blueprint.getBlueprintText()).thenReturn(TEST_BLUEPRINT_TEXT);
         when(blueprint.getOwner()).thenReturn(CLUSTER_OWNER);
         when(cluster.getOwner()).thenReturn(CLUSTER_OWNER);
         when(cachedUserDetailsService.getDetails(CLUSTER_OWNER, UserFilterField.USERID)).thenReturn(user);
@@ -193,7 +192,7 @@ public class StackToTemplatePreparationObjectConverterTest {
     @Test
     public void testConvertWhenClusterGivesGatewayThenNotNullShouldBeStored() {
         Gateway gateway = mock(Gateway.class);
-        when(gateway.getSignKey()).thenReturn(Secret.EMPTY);
+        when(gateway.getSignKey()).thenReturn(null);
         when(cluster.getGateway()).thenReturn(gateway);
 
         TemplatePreparationObject result = underTest.convert(source);
@@ -326,7 +325,7 @@ public class StackToTemplatePreparationObjectConverterTest {
     public void testConvertWhenProvidingStackAndBlueprintStackInfoThenExpectedBlueprintViewShouldBeStored() {
         String type = "HDF";
         String version = "2.6";
-        BlueprintView expected = new BlueprintView(blueprintStackInfo, cluster.getBlueprint().getBlueprintText().getRaw());
+        BlueprintView expected = new BlueprintView(blueprintStackInfo, cluster.getBlueprint().getBlueprintText());
         when(blueprintStackInfo.getType()).thenReturn(type);
         when(blueprintStackInfo.getVersion()).thenReturn(version);
         when(blueprintViewProvider.getBlueprintView(blueprint)).thenReturn(expected);

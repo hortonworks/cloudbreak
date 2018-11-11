@@ -55,20 +55,24 @@ public class SecurityConfig implements ProvisionEntity {
         this.clientKey = clientKey;
     }
 
-    public Secret getClientKey() {
-        return clientKey;
+    public String getClientKey() {
+        return clientKey.getRaw();
     }
 
-    public Secret getClientCert() {
-        return clientCert;
+    public String getClientKeySecret() {
+        return clientKey.getSecret();
+    }
+
+    public String getClientCert() {
+        return clientCert.getRaw();
+    }
+
+    public String getClientCertSecret() {
+        return clientCert.getSecret();
     }
 
     public void setClientCert(String clientCert) {
         this.clientCert = new Secret(clientCert);
-    }
-
-    public void setClientCert(Secret clientCert) {
-        this.clientCert = clientCert;
     }
 
     public Stack getStack() {

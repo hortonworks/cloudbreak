@@ -82,11 +82,11 @@ public class ImageService {
             String region = stack.getRegion();
             SecurityConfig securityConfig = stack.getSecurityConfig();
             SaltSecurityConfig saltSecurityConfig = securityConfig.getSaltSecurityConfig();
-            String cbPrivKey = saltSecurityConfig.getSaltBootSignPrivateKey().getRaw();
+            String cbPrivKey = saltSecurityConfig.getSaltBootSignPrivateKey();
             byte[] cbSshKeyDer = PkiUtil.getPublicKeyDer(new String(Base64.decodeBase64(cbPrivKey)));
             String sshUser = stack.getStackAuthentication().getLoginUserName();
-            String cbCert = securityConfig.getClientCert().getRaw();
-            String saltBootPassword = saltSecurityConfig.getSaltBootPassword().getRaw();
+            String cbCert = securityConfig.getClientCert();
+            String saltBootPassword = saltSecurityConfig.getSaltBootPassword();
             Map<InstanceGroupType, String> userData = userDataBuilder.buildUserData(platform, cbSshKeyDer, sshUser, params, saltBootPassword, cbCert);
 
             LOGGER.info("Determined image from catalog: {}", imgFromCatalog);
@@ -116,7 +116,7 @@ public class ImageService {
             String clusterType = ImageCatalogService.UNDEFINED;
             String clusterVersion = ImageCatalogService.UNDEFINED;
             if (blueprint != null) {
-                String blueprintText = blueprint.getBlueprintText().getRaw();
+                String blueprintText = blueprint.getBlueprintText();
                 try {
                     JsonNode root = JsonUtil.readTree(blueprintText);
                     clusterType = blueprintUtils.getBlueprintStackName(root);

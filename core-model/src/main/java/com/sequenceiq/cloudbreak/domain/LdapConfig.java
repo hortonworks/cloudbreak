@@ -108,8 +108,8 @@ public class LdapConfig implements ProvisionEntity, EnvironmentAwareResource {
         copy.setServerHost(serverHost);
         copy.setServerPort(serverPort);
         copy.setProtocol(protocol);
-        copy.setBindDn(bindDn);
-        copy.setBindPassword(bindPassword);
+        copy.bindDn = bindDn;
+        copy.bindPassword = bindPassword;
         copy.setDirectoryType(directoryType);
         copy.setUserSearchBase(userSearchBase);
         copy.setUserDnPattern(userDnPattern);
@@ -188,28 +188,20 @@ public class LdapConfig implements ProvisionEntity, EnvironmentAwareResource {
         this.protocol = protocol;
     }
 
-    public Secret getBindDn() {
-        return bindDn;
+    public String getBindDn() {
+        return bindDn.getRaw();
     }
 
     public void setBindDn(String bindDn) {
         this.bindDn = new Secret(bindDn);
     }
 
-    public void setBindDn(Secret bindDn) {
-        this.bindDn = bindDn;
-    }
-
-    public Secret getBindPassword() {
-        return bindPassword;
+    public String getBindPassword() {
+        return bindPassword.getRaw();
     }
 
     public void setBindPassword(String bindPassword) {
         this.bindPassword = new Secret(bindPassword);
-    }
-
-    public void setBindPassword(Secret bindPassword) {
-        this.bindPassword = bindPassword;
     }
 
     public DirectoryType getDirectoryType() {
