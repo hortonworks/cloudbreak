@@ -101,7 +101,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
                     }
                 }
             }
-            String blueprintText = blueprint.getBlueprintText().getRaw();
+            String blueprintText = blueprint.getBlueprintText();
             String extendedBlueprint = blueprintProcessorFactory.get(blueprintText)
                     .extendBlueprintGlobalConfiguration(SiteConfigurations.fromMap(configs), false).asText();
             LOGGER.info("Extended blueprint result: {}", extendedBlueprint);
@@ -218,14 +218,14 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
 
     public Set<String> queryCustomParameters(String name, Workspace workspace) {
         Blueprint blueprint = getByNameForWorkspace(name, workspace);
-        String blueprintText = blueprint.getBlueprintText().getRaw();
+        String blueprintText = blueprint.getBlueprintText();
         return centralBlueprintParameterQueryService.queryCustomParameters(blueprintText);
     }
 
     public Set<ConfigQueryEntry> queryFileSystemParameters(String blueprintName, String clusterName,
             String storageName, String fileSystemType, String accountName, boolean attachedCluster, Workspace workspace) {
         Blueprint blueprint = getByNameForWorkspace(blueprintName, workspace);
-        String blueprintText = blueprint.getBlueprintText().getRaw();
+        String blueprintText = blueprint.getBlueprintText();
         FileSystemConfigQueryObject fileSystemConfigQueryObject = Builder.builder()
                 .withClusterName(clusterName)
                 .withStorageName(storageName)

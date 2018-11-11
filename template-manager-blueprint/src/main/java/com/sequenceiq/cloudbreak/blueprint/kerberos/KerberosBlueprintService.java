@@ -42,11 +42,11 @@ public class KerberosBlueprintService implements BlueprintComponentConfigProvide
             String gatewayHost = source.getGeneralClusterConfigs().getPrimaryGatewayInstanceDiscoveryFQDN().orElse(null);
             String domain = gatewayHost.substring(gatewayHost.indexOf('.') + 1);
             extendBlueprintWithKerberos(blueprintProcessor, kerberosConfig, gatewayHost, domain, propagationPort);
-            if (StringUtils.hasLength(kerberosConfig.getDescriptor().getRaw())) {
-                blueprintProcessor.replaceConfiguration("kerberos-env", kerberosConfig.getDescriptor().getRaw());
+            if (StringUtils.hasLength(kerberosConfig.getDescriptor())) {
+                blueprintProcessor.replaceConfiguration("kerberos-env", kerberosConfig.getDescriptor());
             }
-            if (StringUtils.hasLength(kerberosConfig.getKrb5Conf().getRaw())) {
-                blueprintProcessor.replaceConfiguration("krb5-conf", kerberosConfig.getKrb5Conf().getRaw());
+            if (StringUtils.hasLength(kerberosConfig.getKrb5Conf())) {
+                blueprintProcessor.replaceConfiguration("krb5-conf", kerberosConfig.getKrb5Conf());
             }
         } else {
             extendBlueprintWithKerberos(blueprintProcessor, kerberosConfig, source.getGeneralClusterConfigs().getAmbariIp(), REALM, DOMAIN, null);

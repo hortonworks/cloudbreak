@@ -45,8 +45,8 @@ public class RdsView {
 
     public RdsView(RDSConfig rdsConfig) {
         connectionURL = rdsConfig.getConnectionURL();
-        connectionUserName = rdsConfig.getConnectionUserName().getRaw();
-        connectionPassword = rdsConfig.getConnectionPassword().getRaw();
+        connectionUserName = rdsConfig.getConnectionUserName();
+        connectionPassword = rdsConfig.getConnectionPassword();
         rdsViewDialect = createDialect(rdsConfig);
         String[] split = connectionURL.split(rdsViewDialect.jdbcPrefixSplitter());
         subprotocol = getSubprotocol(split);

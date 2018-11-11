@@ -21,7 +21,7 @@ public class BlueprintToBlueprintResponseConverter extends AbstractConversionSer
         blueprintJson.setHostGroupCount(entity.getHostGroupCount());
         blueprintJson.setStatus(entity.getStatus());
         blueprintJson.setTags(entity.getTags().getMap());
-        blueprintJson.setAmbariBlueprint(entity.getBlueprintText().getRaw());
+        blueprintJson.setAmbariBlueprint(entity.getBlueprintText());
         return blueprintJson;
     }
 

@@ -36,7 +36,7 @@ public class AzureFileSystemConfigProvider {
         if (fsConfiguration instanceof AdlsFileSystemConfigurationsView) {
             String adlsTrackingTag = (cbVersion != null) ? ADLS_TRACKING_CLUSTERNAME_VALUE + '-' + cbVersion : ADLS_TRACKING_CLUSTERNAME_VALUE;
             AdlsFileSystemConfigurationsView fileSystemConfigurationsView = (AdlsFileSystemConfigurationsView) fsConfiguration;
-            Json attributesFromVault = new Json(credential.getAttributes().getRaw());
+            Json attributesFromVault = new Json(credential.getAttributes());
             if (StringUtils.isEmpty(fileSystemConfigurationsView.getClientId())) {
                 String credentialString = String.valueOf(attributesFromVault.getMap().get(CREDENTIAL_SECRET_KEY));
                 String clientId = String.valueOf(attributesFromVault.getMap().get(ACCESS_KEY));

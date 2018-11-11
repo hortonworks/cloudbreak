@@ -63,7 +63,7 @@ public class RecipeEngine {
     public void uploadRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
         Orchestrator orchestrator = stack.getOrchestrator();
         if (recipesSupportedOnOrchestrator(orchestrator)) {
-            String blueprintText = stack.getCluster().getBlueprint().getBlueprintText().getRaw();
+            String blueprintText = stack.getCluster().getBlueprint().getBlueprintText();
             addHDFSRecipe(stack, blueprintText, hostGroups);
             addSmartSenseRecipe(stack, blueprintText, hostGroups);
             addS3SymlinkRecipe(stack, blueprintText, hostGroups);
@@ -171,7 +171,7 @@ public class RecipeEngine {
             Cluster cluster = stack.getCluster();
             for (HostGroup hostGroup : hostGroups) {
                 if (isComponentPresent(blueprintText, "NAMENODE", hostGroup)) {
-                    String userName = cluster.getUserName().getRaw();
+                    String userName = cluster.getUserName();
                     String script = FileReaderUtils.readFileFromClasspath("scripts/hdfs-home.sh").replaceAll("\\$USER", userName);
                     RecipeScript recipeScript = new RecipeScript(script, POST_CLUSTER_INSTALL);
                     Recipe recipe = recipeBuilder.buildRecipes("hdfs-home", Collections.singletonList(recipeScript)).get(0);
@@ -190,9 +190,9 @@ public class RecipeEngine {
             for (HostGroup hostGroup : hostGroups) {
                 if (isComponentPresent(blueprintText, "ATLAS_SERVER", hostGroup)) {
                     String script = FileReaderUtils.readFileFromClasspath("scripts/prepare-s3-symlinks.sh")
-                            .replaceAll("\\$AMBARI_USER", cluster.getUserName().getRaw())
+                            .replaceAll("\\$AMBARI_USER", cluster.getUserName())
                             .replaceAll("\\$AMBARI_IP", getAmbariPrivateIp(stack))
-                            .replaceAll("\\$AMBARI_PASSWORD", cluster.getPassword().getRaw())
+                            .replaceAll("\\$AMBARI_PASSWORD", cluster.getPassword())
                             .replaceAll("\\$CLUSTER_NAME", cluster.getName());
                     RecipeScript recipeScript = new RecipeScript(script, RecipeType.POST_CLUSTER_INSTALL);
                     Recipe recipe = recipeBuilder.buildRecipes("prepare-s3-symlinks", Collections.singletonList(recipeScript)).get(0);

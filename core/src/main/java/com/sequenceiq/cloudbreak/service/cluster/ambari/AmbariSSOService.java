@@ -34,7 +34,7 @@ public class AmbariSSOService {
         Gateway gateway = cluster.getGateway();
         if (cluster.hasGateway() && SSOType.SSO_PROVIDER == cluster.getGateway().getSsoType()) {
             LOGGER.info("Setup gateway on Ambari API for stack: {}", stack.getId());
-            GatewayView gatewayView = new GatewayView(gateway, gateway.getSignKey().getRaw());
+            GatewayView gatewayView = new GatewayView(gateway, gateway.getSignKey());
             GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
             Map<String, Object> ssoConfigs = new HashMap<>();
             ssoConfigs.put("ambari.sso.provider.url", "https://" + primaryGatewayConfig.getPublicAddress() + ":8443" + gatewayView.getSsoProvider());

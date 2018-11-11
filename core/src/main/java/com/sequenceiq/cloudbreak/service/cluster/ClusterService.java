@@ -79,7 +79,6 @@ import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.domain.Secret;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -459,8 +458,8 @@ public class ClusterService {
     public void updateUserNamePassword(Long stackId, UserNamePasswordJson userNamePasswordJson) {
         Stack stack = stackService.getById(stackId);
         Cluster cluster = stack.getCluster();
-        String oldUserName = cluster.getUserName().getRaw();
-        String oldPassword = cluster.getPassword().getRaw();
+        String oldUserName = cluster.getUserName();
+        String oldPassword = cluster.getPassword();
         String newUserName = userNamePasswordJson.getUserName();
         String newPassword = userNamePasswordJson.getPassword();
         if (!newUserName.equals(oldUserName)) {
@@ -743,8 +742,8 @@ public class ClusterService {
     public void cleanupKerberosCredential(Cluster cluster) {
         if (cluster != null && cluster.isSecure() && cluster.getKerberosConfig() != null) {
             KerberosConfig kerberosConfig = cluster.getKerberosConfig();
-            kerberosConfig.setPassword(new Secret(null));
-            kerberosConfig.setPrincipal(new Secret(null));
+            kerberosConfig.setPassword(null);
+            kerberosConfig.setPrincipal(null);
 
             kerberosConfigRepository.save(kerberosConfig);
         }
@@ -937,7 +936,7 @@ public class ClusterService {
 
     private void validateComponentsCategory(Stack stack, String hostGroup) {
         Blueprint blueprint = stack.getCluster().getBlueprint();
-        String blueprintText = blueprint.getBlueprintText().getRaw();
+        String blueprintText = blueprint.getBlueprintText();
         try {
             JsonNode root = JsonUtil.readTree(blueprintText);
             String blueprintName = root.path("Blueprints").path("blueprint_name").asText();

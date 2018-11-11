@@ -72,7 +72,7 @@ public class CredentialPrerequisiteService {
     }
 
     public Credential decorateCredential(Credential credential, String userId) {
-        String attributes = credential.getAttributes().getRaw();
+        String attributes = credential.getAttributes();
         Map<String, Object> newAttributes = isEmpty(attributes) ? new HashMap<>() : new Json(attributes).getMap();
         if (StringUtils.isNoneEmpty(String.valueOf(newAttributes.get(ROLE_ARN_PARAMTER_KEY)))) {
             Optional<UserPreferences> userPreferencesOptional = userPreferencesService.getByUserId(userId);

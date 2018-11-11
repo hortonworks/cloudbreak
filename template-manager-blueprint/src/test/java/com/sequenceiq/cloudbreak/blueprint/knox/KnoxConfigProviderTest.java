@@ -35,7 +35,7 @@ public class KnoxConfigProviderTest {
         Blueprint blueprint = TestUtil.blueprint("name", baseBlueprint);
         TemplatePreparationObject object = buildPreparationObjectWithGateway();
 
-        BlueprintTextProcessor b = new BlueprintTextProcessor(blueprint.getBlueprintText().getRaw());
+        BlueprintTextProcessor b = new BlueprintTextProcessor(blueprint.getBlueprintText());
         String actualBlueprint = configProvider.customTextManipulation(object, b).asText();
 
         JsonNode expectedNode = JsonUtil.readTree(expectedBlueprint);

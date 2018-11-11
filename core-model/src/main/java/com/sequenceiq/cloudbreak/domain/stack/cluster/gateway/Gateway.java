@@ -87,7 +87,7 @@ public class Gateway implements ProvisionEntity {
         gateway.setTopologies(topologies.stream().map(GatewayTopology::copy).collect(Collectors.toSet()));
         gateway.setTokenCert(tokenCert);
         gateway.setSignCert(signCert);
-        gateway.setSignKey(signKey);
+        gateway.signKey = signKey;
         gateway.setPath(path);
         gateway.setGatewayType(gatewayType);
         gateway.setSsoType(ssoType);
@@ -146,16 +146,12 @@ public class Gateway implements ProvisionEntity {
         this.ssoProvider = ssoProvider;
     }
 
-    public Secret getSignKey() {
-        return signKey;
+    public String getSignKey() {
+        return signKey.getRaw();
     }
 
     public void setSignKey(String signKey) {
         this.signKey = new Secret(signKey);
-    }
-
-    public void setSignKey(Secret signKey) {
-        this.signKey = signKey;
     }
 
     public String getSignCert() {
@@ -182,16 +178,12 @@ public class Gateway implements ProvisionEntity {
         this.tokenCert = tokenCert;
     }
 
-    public Secret getKnoxMasterSecret() {
-        return knoxMasterSecret;
+    public String getKnoxMasterSecret() {
+        return knoxMasterSecret.getRaw();
     }
 
     public void setKnoxMasterSecret(String knoxMasterSecret) {
         this.knoxMasterSecret = new Secret(knoxMasterSecret);
-    }
-
-    public void setKnoxMasterSecret(Secret knoxMasterSecret) {
-        this.knoxMasterSecret = knoxMasterSecret;
     }
 
     public Set<GatewayTopology> getTopologies() {

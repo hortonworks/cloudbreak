@@ -276,7 +276,7 @@ public class StackCreatorService {
         ClusterTemplate clusterTemplate = clusterTemplateService.getByNameForWorkspace(templateName, workspace);
         validateTemplateAndCredentialCloudPlatform(request, workspace, clusterTemplate);
         try {
-            String template = clusterTemplate.getTemplate().getRaw();
+            String template = clusterTemplate.getTemplate();
             StackV2Request stackV2Request = new Json(template).get(StackV2Request.class);
             stackV2Request.setGeneral(request.getGeneral());
             stackV2Request.setStackAuthentication(request.getStackAuthentication());

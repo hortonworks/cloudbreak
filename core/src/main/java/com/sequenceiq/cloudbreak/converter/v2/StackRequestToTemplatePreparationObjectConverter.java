@@ -122,7 +122,7 @@ public class StackRequestToTemplatePreparationObjectConverter extends AbstractCo
             BaseFileSystemConfigurationsView fileSystemConfigurationView = getFileSystemConfigurationView(source, credential);
             Set<RDSConfig> rdsConfigs = getRdsConfigs(source, workspace);
             Blueprint blueprint = getBlueprint(source, workspace);
-            String blueprintText = blueprint.getBlueprintText().getRaw();
+            String blueprintText = blueprint.getBlueprintText();
             BlueprintStackInfo blueprintStackInfo = stackInfoService.blueprintStackInfo(blueprintText);
             Set<HostgroupView> hostgroupViews = getHostgroupViews(source);
             Gateway gateway = source.getCluster().getAmbari().getGateway() == null ? null : getConversionService().convert(source, Gateway.class);
@@ -132,12 +132,12 @@ public class StackRequestToTemplatePreparationObjectConverter extends AbstractCo
             String bindDn = null;
             String bindPassword = null;
             if (ldapConfig != null) {
-                bindDn = ldapConfig.getBindDn().getRaw();
-                bindPassword = ldapConfig.getBindPassword().getRaw();
+                bindDn = ldapConfig.getBindDn();
+                bindPassword = ldapConfig.getBindPassword();
             }
             String gatewaySignKey = null;
             if (gateway != null) {
-                gatewaySignKey = gateway.getSignKey().getRaw();
+                gatewaySignKey = gateway.getSignKey();
             }
             Builder builder = Builder.builder()
                     .withFlexSubscription(flexSubscription.orElse(null))

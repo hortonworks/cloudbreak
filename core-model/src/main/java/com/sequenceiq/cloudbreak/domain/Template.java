@@ -192,16 +192,12 @@ public class Template implements ProvisionEntity {
         this.attributes = attributes;
     }
 
-    public Secret getSecretAttributes() {
-        return secretAttributes;
+    public String getSecretAttributes() {
+        return secretAttributes.getRaw();
     }
 
     public void setSecretAttributes(String secretAttributes) {
         this.secretAttributes = new Secret(secretAttributes);
-    }
-
-    public void setSecretAttributes(Secret secretAttributes) {
-        this.secretAttributes = secretAttributes;
     }
 
     public Topology getTopology() {

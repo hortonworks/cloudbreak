@@ -101,7 +101,7 @@ public class SharedServiceConfigProvider {
 
     public ConfigsResponse retrieveOutputs(Stack datalake, Blueprint blueprint, String stackName) {
         AmbariClient ambariClient = ambariClientFactory.getAmbariClient(datalake, datalake.getCluster());
-        String blueprintText = blueprint.getBlueprintText().getRaw();
+        String blueprintText = blueprint.getBlueprintText();
         Set<String> datalakeProperties = centralBlueprintParameterQueryService.queryDatalakeParameters(blueprintText);
         addDatalakeRequiredProperties(datalakeProperties);
         Map<String, Object> results = new HashMap<>();

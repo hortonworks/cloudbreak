@@ -39,7 +39,7 @@ public class AmbariClusterTemplateGenerator {
             String principal = kerberosDetailService.resolvePrincipalForKerberos(kerberosConfig);
             clusterTemplate = ambariClient.createClusterJson(blueprintName, hostGroupMappings,
                     ambariSecurityConfigProvider.getAmbariUserProvidedPassword(cluster), configStrategy,
-                    principal, kerberosConfig.getPassword().getRaw(), KEY_TYPE, false, repositoryVersion);
+                    principal, kerberosConfig.getPassword(), KEY_TYPE, false, repositoryVersion);
         } else {
             clusterTemplate = ambariClient.createClusterJson(blueprintName, hostGroupMappings,
                     ambariSecurityConfigProvider.getAmbariUserProvidedPassword(cluster), configStrategy,

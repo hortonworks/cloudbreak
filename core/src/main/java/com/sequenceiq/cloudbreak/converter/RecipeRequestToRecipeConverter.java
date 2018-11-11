@@ -42,7 +42,7 @@ public class RecipeRequestToRecipeConverter extends AbstractConversionServiceAwa
         recipe.setRecipeType(source.getRecipeType());
         recipe.setContent(source.getContent());
         recipe.setUri(source.getUri());
-        if (recipe.getUri() != null && recipe.getContent().getRaw() == null) {
+        if (recipe.getUri() != null && recipe.getContent() == null) {
             recipe.setContent(fetchScriptContent(recipe.getUri()));
         }
         return recipe;
