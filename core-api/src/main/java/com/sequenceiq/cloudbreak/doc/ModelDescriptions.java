@@ -40,7 +40,6 @@ public class ModelDescriptions {
 
     public static class CredentialModelDescription {
         public static final String PARAMETERS = "cloud specific parameters for credential";
-        public static final String PARAMETERS_PATH = "cloud specific sensitive parameters for credential";
         public static final String ACCOUNT_IDENTIFIER = "provider specific identifier of the account/subscription/project that is used by Cloudbreak";
         public static final String AWS_CREDENTIAL_PREREQUISITES = "AWS specific credential prerequisites.";
         public static final String AWS_EXTERNAL_ID = "AWS specific identifier for role based credential creation - "
