@@ -29,8 +29,7 @@ RSpec.describe 'Proxy test cases', :type => :aruba do
         Name: /.*/,
         Host: /.*/,  
         Port: /.*/,
-        Protocol: /.*/,
-        User: /.*/
+        Protocol: /.*/
        )
     end        
   end

@@ -18,18 +18,18 @@ import (
 type CertificateResponse struct {
 
 	// client certificate used by the gateway
-	ClientCert []strfmt.Base64 `json:"clientCert"`
+	ClientCertPath string `json:"clientCertPath,omitempty"`
 
 	// client key used by the gateway
-	ClientKey []strfmt.Base64 `json:"clientKey"`
+	ClientKeyPath string `json:"clientKeyPath,omitempty"`
 
 	// server certificate used by the gateway
-	ServerCert []strfmt.Base64 `json:"serverCert"`
+	ServerCert string `json:"serverCert,omitempty"`
 }
 
-/* polymorph CertificateResponse clientCert false */
+/* polymorph CertificateResponse clientCertPath false */
 
-/* polymorph CertificateResponse clientKey false */
+/* polymorph CertificateResponse clientKeyPath false */
 
 /* polymorph CertificateResponse serverCert false */
 
@@ -37,51 +37,9 @@ type CertificateResponse struct {
 func (m *CertificateResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateClientCert(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateClientKey(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateServerCert(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-func (m *CertificateResponse) validateClientCert(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.ClientCert) { // not required
-		return nil
-	}
-
-	return nil
-}
-
-func (m *CertificateResponse) validateClientKey(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.ClientKey) { // not required
-		return nil
-	}
-
-	return nil
-}
-
-func (m *CertificateResponse) validateServerCert(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.ServerCert) { // not required
-		return nil
-	}
-
 	return nil
 }
 

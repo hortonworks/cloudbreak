@@ -55,9 +55,6 @@ type ProxyConfigResponse struct {
 	// Minimum: 1
 	ServerPort *int32 `json:"serverPort"`
 
-	// Username to use for basic authentication
-	UserName string `json:"userName,omitempty"`
-
 	// workspace of the resource
 	Workspace *WorkspaceResourceResponse `json:"workspace,omitempty"`
 }
@@ -75,8 +72,6 @@ type ProxyConfigResponse struct {
 /* polymorph ProxyConfigResponse serverHost false */
 
 /* polymorph ProxyConfigResponse serverPort false */
-
-/* polymorph ProxyConfigResponse userName false */
 
 /* polymorph ProxyConfigResponse workspace false */
 

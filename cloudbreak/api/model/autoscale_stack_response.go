@@ -46,7 +46,7 @@ type AutoscaleStackResponse struct {
 	Owner string `json:"owner,omitempty"`
 
 	// ambari password
-	Password string `json:"password,omitempty"`
+	PasswordPath string `json:"passwordPath,omitempty"`
 
 	// id of the stack
 	StackID int64 `json:"stackId,omitempty"`
@@ -55,7 +55,7 @@ type AutoscaleStackResponse struct {
 	Status string `json:"status,omitempty"`
 
 	// ambari username
-	UserName string `json:"userName,omitempty"`
+	UserNamePath string `json:"userNamePath,omitempty"`
 }
 
 /* polymorph AutoscaleStackResponse account false */
@@ -72,13 +72,13 @@ type AutoscaleStackResponse struct {
 
 /* polymorph AutoscaleStackResponse owner false */
 
-/* polymorph AutoscaleStackResponse password false */
+/* polymorph AutoscaleStackResponse passwordPath false */
 
 /* polymorph AutoscaleStackResponse stackId false */
 
 /* polymorph AutoscaleStackResponse status false */
 
-/* polymorph AutoscaleStackResponse userName false */
+/* polymorph AutoscaleStackResponse userNamePath false */
 
 // Validate validates this autoscale stack response
 func (m *AutoscaleStackResponse) Validate(formats strfmt.Registry) error {

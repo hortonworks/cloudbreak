@@ -89,13 +89,13 @@ DeleteClusterTemplateInWorkspace deletes cluster template by name in workspace
 
 A template gives developers and systems administrators an easy way to create and manage a collection of cloud infrastructure related resources, maintaining and updating them in an orderly and predictable fashion. Templates are cloud specific - and on top of the infrastructural setup they collect the information such as the used machine images, the datacenter location, instance types, and can capture and control region-specific infrastructure variations. We support heterogenous clusters - this one Hadoop cluster can be built by combining different templates.
 */
-func (a *Client) DeleteClusterTemplateInWorkspace(params *DeleteClusterTemplateInWorkspaceParams) (*DeleteClusterTemplateInWorkspaceOK, error) {
+func (a *Client) DeleteClusterTemplateInWorkspace(params *DeleteClusterTemplateInWorkspaceParams) error {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewDeleteClusterTemplateInWorkspaceParams()
 	}
 
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	_, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "deleteClusterTemplateInWorkspace",
 		Method:             "DELETE",
 		PathPattern:        "/v3/{workspaceId}/clustertemplate/{name}",
@@ -108,9 +108,9 @@ func (a *Client) DeleteClusterTemplateInWorkspace(params *DeleteClusterTemplateI
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return result.(*DeleteClusterTemplateInWorkspaceOK), nil
+	return nil
 
 }
 

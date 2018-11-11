@@ -31,12 +31,6 @@ type KerberosResponse struct {
 	// container dn
 	ContainerDn string `json:"containerDn,omitempty"`
 
-	// descriptor
-	Descriptor string `json:"descriptor,omitempty"`
-
-	// krb5 conf
-	Krb5Conf string `json:"krb5Conf,omitempty"`
-
 	// ldap Url
 	LdapURL string `json:"ldapUrl,omitempty"`
 
@@ -59,10 +53,6 @@ type KerberosResponse struct {
 /* polymorph KerberosResponse adminUrl false */
 
 /* polymorph KerberosResponse containerDn false */
-
-/* polymorph KerberosResponse descriptor false */
-
-/* polymorph KerberosResponse krb5Conf false */
 
 /* polymorph KerberosResponse ldapUrl false */
 

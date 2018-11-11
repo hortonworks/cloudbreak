@@ -87,7 +87,6 @@ func createBlueprintImpl(client blueprintClient, name string, description string
 		Name:            &name,
 		Description:     &description,
 		AmbariBlueprint: base64.StdEncoding.EncodeToString(ambariBlueprint),
-		Inputs:          make([]*model.BlueprintParameter, 0),
 		Tags:            tags,
 	}
 	var blueprint *model.BlueprintResponse

@@ -7,13 +7,10 @@ package v3_workspace_id_clustertemplate
 
 import (
 	"fmt"
-	"io"
 
 	"github.com/go-openapi/runtime"
 
 	strfmt "github.com/go-openapi/strfmt"
-
-	"github.com/hortonworks/cb-cli/cloudbreak/api/model"
 )
 
 // DeleteClusterTemplateInWorkspaceReader is a Reader for the DeleteClusterTemplateInWorkspace structure.
@@ -23,45 +20,43 @@ type DeleteClusterTemplateInWorkspaceReader struct {
 
 // ReadResponse reads a server response into the received o.
 func (o *DeleteClusterTemplateInWorkspaceReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
-	switch response.Code() {
 
-	case 200:
-		result := NewDeleteClusterTemplateInWorkspaceOK()
-		if err := result.readResponse(response, consumer, o.formats); err != nil {
-			return nil, err
-		}
+	result := NewDeleteClusterTemplateInWorkspaceDefault(response.Code())
+	if err := result.readResponse(response, consumer, o.formats); err != nil {
+		return nil, err
+	}
+	if response.Code()/100 == 2 {
 		return result, nil
+	}
+	return nil, result
 
-	default:
-		return nil, runtime.NewAPIError("unknown error", response, response.Code())
+}
+
+// NewDeleteClusterTemplateInWorkspaceDefault creates a DeleteClusterTemplateInWorkspaceDefault with default headers values
+func NewDeleteClusterTemplateInWorkspaceDefault(code int) *DeleteClusterTemplateInWorkspaceDefault {
+	return &DeleteClusterTemplateInWorkspaceDefault{
+		_statusCode: code,
 	}
 }
 
-// NewDeleteClusterTemplateInWorkspaceOK creates a DeleteClusterTemplateInWorkspaceOK with default headers values
-func NewDeleteClusterTemplateInWorkspaceOK() *DeleteClusterTemplateInWorkspaceOK {
-	return &DeleteClusterTemplateInWorkspaceOK{}
-}
-
-/*DeleteClusterTemplateInWorkspaceOK handles this case with default header values.
+/*DeleteClusterTemplateInWorkspaceDefault handles this case with default header values.
 
 successful operation
 */
-type DeleteClusterTemplateInWorkspaceOK struct {
-	Payload *model.ClusterTemplateResponse
+type DeleteClusterTemplateInWorkspaceDefault struct {
+	_statusCode int
 }
 
-func (o *DeleteClusterTemplateInWorkspaceOK) Error() string {
-	return fmt.Sprintf("[DELETE /v3/{workspaceId}/clustertemplate/{name}][%d] deleteClusterTemplateInWorkspaceOK  %+v", 200, o.Payload)
+// Code gets the status code for the delete cluster template in workspace default response
+func (o *DeleteClusterTemplateInWorkspaceDefault) Code() int {
+	return o._statusCode
 }
 
-func (o *DeleteClusterTemplateInWorkspaceOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+func (o *DeleteClusterTemplateInWorkspaceDefault) Error() string {
+	return fmt.Sprintf("[DELETE /v3/{workspaceId}/clustertemplate/{name}][%d] deleteClusterTemplateInWorkspace default ", o._statusCode)
+}
 
-	o.Payload = new(model.ClusterTemplateResponse)
-
-	// response payload
-	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
-		return err
-	}
+func (o *DeleteClusterTemplateInWorkspaceDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	return nil
 }

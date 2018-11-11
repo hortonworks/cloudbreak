@@ -17,8 +17,6 @@ import (
 	"github.com/go-openapi/swag"
 
 	strfmt "github.com/go-openapi/strfmt"
-
-	"github.com/hortonworks/cb-cli/cloudbreak/api/model"
 )
 
 // NewGetConfigsClusterParams creates a new GetConfigsClusterParams object
@@ -65,8 +63,6 @@ for the get configs cluster operation typically these are written to a http.Requ
 */
 type GetConfigsClusterParams struct {
 
-	/*Body*/
-	Body *model.ConfigsRequest
 	/*ID*/
 	ID int64
 
@@ -108,17 +104,6 @@ func (o *GetConfigsClusterParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
-// WithBody adds the body to the get configs cluster params
-func (o *GetConfigsClusterParams) WithBody(body *model.ConfigsRequest) *GetConfigsClusterParams {
-	o.SetBody(body)
-	return o
-}
-
-// SetBody adds the body to the get configs cluster params
-func (o *GetConfigsClusterParams) SetBody(body *model.ConfigsRequest) {
-	o.Body = body
-}
-
 // WithID adds the id to the get configs cluster params
 func (o *GetConfigsClusterParams) WithID(id int64) *GetConfigsClusterParams {
 	o.SetID(id)
@@ -137,14 +122,6 @@ func (o *GetConfigsClusterParams) WriteToRequest(r runtime.ClientRequest, reg st
 		return err
 	}
 	var res []error
-
-	if o.Body == nil {
-		o.Body = new(model.ConfigsRequest)
-	}
-
-	if err := r.SetBodyParam(o.Body); err != nil {
-		return err
-	}
 
 	// path param id
 	if err := r.SetPathParam("id", swag.FormatInt64(o.ID)); err != nil {

@@ -112,7 +112,6 @@ RSpec.describe 'Ldap test cases', :type => :aruba do
         expect(s).to include_json(
         Name: /.*/,
         Server: /.*/,  
-        BindDn: /.*/,
         UserSearchBase: /.*/,
         UserDnPattern: /.*/,
         UserNameAttribute: /.*/,

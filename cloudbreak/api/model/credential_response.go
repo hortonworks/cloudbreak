@@ -40,6 +40,9 @@ type CredentialResponse struct {
 	// cloud specific parameters for credential
 	Parameters map[string]interface{} `json:"parameters,omitempty"`
 
+	// cloud specific sensitive parameters for credential
+	ParametersPath string `json:"parametersPath,omitempty"`
+
 	// resource is visible in account
 	Public *bool `json:"public,omitempty"`
 
@@ -59,6 +62,8 @@ type CredentialResponse struct {
 /* polymorph CredentialResponse name false */
 
 /* polymorph CredentialResponse parameters false */
+
+/* polymorph CredentialResponse parametersPath false */
 
 /* polymorph CredentialResponse public false */
 

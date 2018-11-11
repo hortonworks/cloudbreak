@@ -19,19 +19,18 @@ type proxyClient interface {
 	ListProxyconfigsByWorkspace(params *proxyConfig.ListProxyconfigsByWorkspaceParams) (*proxyConfig.ListProxyconfigsByWorkspaceOK, error)
 }
 
-var ProxyHeader = []string{"Name", "Host", "Port", "Protocol", "User", "Environments"}
+var ProxyHeader = []string{"Name", "Host", "Port", "Protocol", "Environments"}
 
 type proxy struct {
 	Name         string `json:"Name" yaml:"Name"`
 	Host         string `json:"Host" yaml:"Host"`
 	Port         string `json:"Port" yaml:"Port"`
 	Protocol     string `json:"Protocol" yaml:"Protocol"`
-	User         string `json:"User" yaml:"User"`
 	Environments []string
 }
 
 func (p *proxy) DataAsStringArray() []string {
-	return []string{p.Name, p.Host, p.Port, p.Protocol, p.User, strings.Join(p.Environments, ",")}
+	return []string{p.Name, p.Host, p.Port, p.Protocol, strings.Join(p.Environments, ",")}
 }
 
 func CreateProxy(c *cli.Context) error {
@@ -138,7 +137,6 @@ func listProxiesImpl(proxyClient proxyClient, writer func([]string, []utils.Row)
 			Host:         *p.ServerHost,
 			Port:         strconv.Itoa(int(*p.ServerPort)),
 			Protocol:     *p.Protocol,
-			User:         p.UserName,
 			Environments: p.Environments,
 		}
 		tableRows = append(tableRows, row)

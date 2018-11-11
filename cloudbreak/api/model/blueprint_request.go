@@ -6,8 +6,6 @@ package model
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	"strconv"
-
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
@@ -27,10 +25,6 @@ type BlueprintRequest struct {
 	// Max Length: 1000
 	// Min Length: 0
 	Description *string `json:"description,omitempty"`
-
-	// input parameters of the blueprint
-	// Unique: true
-	Inputs []*BlueprintParameter `json:"inputs"`
 
 	// name of the resource
 	// Required: true
@@ -53,8 +47,6 @@ type BlueprintRequest struct {
 
 /* polymorph BlueprintRequest description false */
 
-/* polymorph BlueprintRequest inputs false */
-
 /* polymorph BlueprintRequest name false */
 
 /* polymorph BlueprintRequest properties false */
@@ -68,11 +60,6 @@ func (m *BlueprintRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateDescription(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateInputs(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -105,37 +92,6 @@ func (m *BlueprintRequest) validateDescription(formats strfmt.Registry) error {
 
 	if err := validate.MaxLength("description", "body", string(*m.Description), 1000); err != nil {
 		return err
-	}
-
-	return nil
-}
-
-func (m *BlueprintRequest) validateInputs(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Inputs) { // not required
-		return nil
-	}
-
-	if err := validate.UniqueItems("inputs", "body", m.Inputs); err != nil {
-		return err
-	}
-
-	for i := 0; i < len(m.Inputs); i++ {
-
-		if swag.IsZero(m.Inputs[i]) { // not required
-			continue
-		}
-
-		if m.Inputs[i] != nil {
-
-			if err := m.Inputs[i].Validate(formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("inputs" + "." + strconv.Itoa(i))
-				}
-				return err
-			}
-		}
-
 	}
 
 	return nil

@@ -61,9 +61,6 @@ type TemplateResponse struct {
 	// size of the root volume
 	RootVolumeSize int32 `json:"rootVolumeSize,omitempty"`
 
-	// cloud specific secret parameters for template
-	SecretParameters map[string]interface{} `json:"secretParameters,omitempty"`
-
 	// id of the topology the resource belongs to
 	TopologyID int64 `json:"topologyId,omitempty"`
 
@@ -107,8 +104,6 @@ type TemplateResponse struct {
 /* polymorph TemplateResponse public false */
 
 /* polymorph TemplateResponse rootVolumeSize false */
-
-/* polymorph TemplateResponse secretParameters false */
 
 /* polymorph TemplateResponse topologyId false */
 

@@ -23,10 +23,6 @@ type LdapConfigResponse struct {
 	// LDAP group for administrators
 	AdminGroup string `json:"adminGroup,omitempty"`
 
-	// bind distinguished name for connection test and group search (e.g. cn=admin,dc=example,dc=org)
-	// Required: true
-	BindDn *string `json:"bindDn"`
-
 	// description of the resource
 	// Max Length: 1000
 	// Min Length: 0
@@ -94,8 +90,6 @@ type LdapConfigResponse struct {
 
 /* polymorph LdapConfigResponse adminGroup false */
 
-/* polymorph LdapConfigResponse bindDn false */
-
 /* polymorph LdapConfigResponse description false */
 
 /* polymorph LdapConfigResponse directoryType false */
@@ -135,11 +129,6 @@ type LdapConfigResponse struct {
 // Validate validates this ldap config response
 func (m *LdapConfigResponse) Validate(formats strfmt.Registry) error {
 	var res []error
-
-	if err := m.validateBindDn(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
 
 	if err := m.validateDescription(formats); err != nil {
 		// prop
@@ -184,15 +173,6 @@ func (m *LdapConfigResponse) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-func (m *LdapConfigResponse) validateBindDn(formats strfmt.Registry) error {
-
-	if err := validate.Required("bindDn", "body", m.BindDn); err != nil {
-		return err
-	}
-
 	return nil
 }
 

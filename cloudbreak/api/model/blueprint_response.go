@@ -7,7 +7,6 @@ package model
 
 import (
 	"encoding/json"
-	"strconv"
 
 	strfmt "github.com/go-openapi/strfmt"
 
@@ -35,10 +34,6 @@ type BlueprintResponse struct {
 	// id of the resource
 	ID int64 `json:"id,omitempty"`
 
-	// input parameters of the blueprint
-	// Unique: true
-	Inputs []*BlueprintParameter `json:"inputs"`
-
 	// name of the resource
 	// Required: true
 	Name *string `json:"name"`
@@ -61,8 +56,6 @@ type BlueprintResponse struct {
 
 /* polymorph BlueprintResponse id false */
 
-/* polymorph BlueprintResponse inputs false */
-
 /* polymorph BlueprintResponse name false */
 
 /* polymorph BlueprintResponse public false */
@@ -76,11 +69,6 @@ func (m *BlueprintResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateDescription(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateInputs(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -113,37 +101,6 @@ func (m *BlueprintResponse) validateDescription(formats strfmt.Registry) error {
 
 	if err := validate.MaxLength("description", "body", string(*m.Description), 1000); err != nil {
 		return err
-	}
-
-	return nil
-}
-
-func (m *BlueprintResponse) validateInputs(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Inputs) { // not required
-		return nil
-	}
-
-	if err := validate.UniqueItems("inputs", "body", m.Inputs); err != nil {
-		return err
-	}
-
-	for i := 0; i < len(m.Inputs); i++ {
-
-		if swag.IsZero(m.Inputs[i]) { // not required
-			continue
-		}
-
-		if m.Inputs[i] != nil {
-
-			if err := m.Inputs[i].Validate(formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("inputs" + "." + strconv.Itoa(i))
-				}
-				return err
-			}
-		}
-
 	}
 
 	return nil

@@ -21,7 +21,7 @@ import (
 	ldaputils "gopkg.in/ldap.v2"
 )
 
-var LdapHeader = []string{"Name", "Server", "Domain", "BindDn", "DirectoryType",
+var LdapHeader = []string{"Name", "Server", "Domain", "DirectoryType",
 	"UserSearchBase", "UserDnPattern", "UserNameAttribute", "UserObjectClass",
 	"GroupMemberAttribute", "GroupNameAttribute", "GroupObjectClass", "GroupSearchBase", "Environments"}
 
@@ -29,7 +29,6 @@ type ldap struct {
 	Name                 string `json:"Name" yaml:"Name"`
 	Server               string `json:"Server" yaml:"Server"`
 	Domain               string `json:"Domain,omitempty" yaml:"Domain,omitempty"`
-	BindDn               string `json:"BindDn" yaml:"BindDn"`
 	DirectoryType        string `json:"DirectoryType" yaml:"DirectoryType"`
 	UserSearchBase       string `json:"UserSearchBase" yaml:"UserSearchBase"`
 	UserDnPattern        string `json:"UserDnPattern" yaml:"UserDnPattern"`
@@ -49,7 +48,7 @@ type ldapOutDescribe struct {
 }
 
 func (l *ldap) DataAsStringArray() []string {
-	return []string{l.Name, l.Server, l.Domain, l.BindDn, l.DirectoryType, l.UserSearchBase, l.UserDnPattern, l.UserNameAttribute,
+	return []string{l.Name, l.Server, l.Domain, l.DirectoryType, l.UserSearchBase, l.UserDnPattern, l.UserNameAttribute,
 		l.UserObjectClass, l.GroupMemberAttribute, l.GroupNameAttribute, l.GroupObjectClass, l.GroupSearchBase, strings.Join(l.Environments, ",")}
 }
 
@@ -185,7 +184,6 @@ func listLdapsImpl(ldapClient ldapClient, writer func([]string, []utils.Row), wo
 			Name:                 *l.Name,
 			Server:               server,
 			Domain:               l.Domain,
-			BindDn:               utils.SafeStringConvert(l.BindDn),
 			DirectoryType:        l.DirectoryType,
 			UserSearchBase:       utils.SafeStringConvert(l.UserSearchBase),
 			UserDnPattern:        utils.SafeStringConvert(l.UserDnPattern),
@@ -240,7 +238,6 @@ func DescribeLdap(c *cli.Context) {
 			Name:                 *l.Name,
 			Server:               server,
 			Domain:               l.Domain,
-			BindDn:               utils.SafeStringConvert(l.BindDn),
 			DirectoryType:        l.DirectoryType,
 			UserSearchBase:       utils.SafeStringConvert(l.UserSearchBase),
 			UserDnPattern:        utils.SafeStringConvert(l.UserDnPattern),
