@@ -20,7 +20,7 @@ public class RecipeToRecipeRequestConverter
         recipeRequest.setName("");
         recipeRequest.setDescription(source.getDescription());
         recipeRequest.setRecipeType(source.getRecipeType());
-        recipeRequest.setContent(source.getContent().getRaw());
+        recipeRequest.setContent(source.getContent());
         return recipeRequest;
     }
 

@@ -85,7 +85,7 @@ public class ServiceEndpointCollector {
 
     public Map<String, Collection<ClusterExposedServiceResponse>> prepareClusterExposedServices(Cluster cluster, String ambariIp) {
         if (cluster.getBlueprint() != null) {
-            String blueprintText = cluster.getBlueprint().getBlueprintText().getRaw();
+            String blueprintText = cluster.getBlueprint().getBlueprintText();
             if (StringUtils.isNotEmpty(blueprintText)) {
                 BlueprintTextProcessor blueprintTextProcessor = new BlueprintProcessorFactory().get(blueprintText);
                 Collection<ExposedService> knownExposedServices = getExposedServices(blueprintTextProcessor, Collections.emptySet());
@@ -138,7 +138,7 @@ public class ServiceEndpointCollector {
     }
 
     private Collection<ExposedServiceResponse> getKnoxServices(Blueprint blueprint) {
-        String blueprintText = blueprint.getBlueprintText().getRaw();
+        String blueprintText = blueprint.getBlueprintText();
         BlueprintTextProcessor blueprintTextProcessor = blueprintProcessorFactory.get(blueprintText);
         Set<String> haComponents = ambariHaComponentFilter.getHaComponents(blueprintTextProcessor);
         haComponents.remove(ExposedService.RANGER.getServiceName());

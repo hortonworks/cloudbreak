@@ -32,7 +32,6 @@ import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.validation.credential.CredentialValidator;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.Secret;
 import com.sequenceiq.cloudbreak.domain.Topology;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
@@ -218,7 +217,6 @@ public class CredentialServiceTest {
         Credential saved = mock(Credential.class);
         Credential original = mock(Credential.class);
         when(original.cloudPlatform()).thenReturn(TEST_CLOUD_PLATFORM);
-        when(original.getAttributes()).thenReturn(Secret.EMPTY);
         when(testCredential.cloudPlatform()).thenReturn(TEST_CLOUD_PLATFORM);
         doNothing().when(credentialValidator).validateCredentialCloudPlatform(anyString());
         when(credentialRepository.findActiveByNameAndWorkspaceIdFilterByPlatforms(TEST_CREDENTIAL_NAME, ORG_ID, CLOUD_PLATFORMS)).thenReturn(original);

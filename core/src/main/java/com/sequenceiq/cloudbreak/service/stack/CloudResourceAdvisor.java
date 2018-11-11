@@ -63,7 +63,7 @@ public class CloudResourceAdvisor {
                 blueprintId, blueprintName, cloudPlatform, region);
 
         Blueprint blueprint = getBlueprint(blueprintName, blueprintId, user, workspace);
-        String blueprintText = blueprint.getBlueprintText().getRaw();
+        String blueprintText = blueprint.getBlueprintText();
         Map<String, Set<String>> componentsByHostGroup = blueprintProcessorFactory.get(blueprintText).getComponentsByHostGroup();
         componentsByHostGroup
                 .forEach((hGName, components) -> hostGroupContainsMasterComp.put(hGName, isThereMasterComponents(components)));

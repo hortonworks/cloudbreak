@@ -54,8 +54,8 @@ public class ClusterTemplateLoaderService {
     }
 
     private boolean isTemplatesContentDifferent(ClusterTemplate clusterTemplate, ClusterTemplate defaultTemplate) {
-        String templateContent = clusterTemplate.getTemplate().getRaw();
-        return !templateContent.equals(defaultTemplate.getTemplate().getRaw())
+        String templateContent = clusterTemplate.getTemplate();
+        return !templateContent.equals(defaultTemplate.getTemplate())
                 || !clusterTemplate.getDescription().equals(defaultTemplate.getDescription())
                 || !clusterTemplate.getCloudPlatform().equals(defaultTemplate.getCloudPlatform());
     }

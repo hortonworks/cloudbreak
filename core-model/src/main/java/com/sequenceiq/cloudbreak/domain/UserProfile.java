@@ -81,16 +81,16 @@ public class UserProfile {
         this.userName = userName;
     }
 
-    public Secret getUiProperties() {
-        return uiProperties;
+    public String getUiProperties() {
+        return uiProperties.getRaw();
+    }
+
+    public String getUiPropertiesSecret() {
+        return uiProperties.getSecret();
     }
 
     public void setUiProperties(String uiProperties) {
         this.uiProperties = new Secret(uiProperties);
-    }
-
-    public void setUiProperties(Secret uiProperties) {
-        this.uiProperties = uiProperties;
     }
 
     public ImageCatalog getImageCatalog() {

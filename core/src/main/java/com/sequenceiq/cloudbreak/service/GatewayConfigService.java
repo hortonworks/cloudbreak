@@ -58,9 +58,9 @@ public class GatewayConfigService {
     private SaltClientConfig getSaltClientConfig(Stack stack) {
         SecurityConfig securityConfig = stack.getSecurityConfig();
         SaltSecurityConfig saltSecurityConfig = securityConfig.getSaltSecurityConfig();
-        String privateKey = saltSecurityConfig.getSaltBootSignPrivateKey().getRaw();
-        String saltBootPassword = saltSecurityConfig.getSaltBootPassword().getRaw();
-        String saltPassword = saltSecurityConfig.getSaltPassword().getRaw();
+        String privateKey = saltSecurityConfig.getSaltBootSignPrivateKey();
+        String saltBootPassword = saltSecurityConfig.getSaltBootPassword();
+        String saltPassword = saltSecurityConfig.getSaltPassword();
         return new SaltClientConfig(saltPassword, saltBootPassword, new String(Base64.decodeBase64(privateKey)));
     }
 }

@@ -58,7 +58,7 @@ public class BlueprintValidator {
     }
 
     private JsonNode createJsonTree(Blueprint blueprint) throws IOException {
-        String blueprintText = blueprint.getBlueprintText().getRaw();
+        String blueprintText = blueprint.getBlueprintText();
         return objectMapper.readTree(blueprintText);
     }
 

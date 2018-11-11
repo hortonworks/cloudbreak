@@ -97,7 +97,7 @@ public class ContainerConfigService {
     }
 
     private Optional<String> getCustomQueue(Stack stack) {
-        Json fromVault = new Json(stack.getCluster().getAttributes().getRaw());
+        Json fromVault = new Json(stack.getCluster().getAttributes());
         return Optional.ofNullable((String) fromVault.getMap().get(CUSTOM_QUEUE.name()));
     }
 

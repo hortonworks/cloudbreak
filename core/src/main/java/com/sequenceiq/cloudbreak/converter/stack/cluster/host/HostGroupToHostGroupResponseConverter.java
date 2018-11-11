@@ -40,7 +40,7 @@ public class HostGroupToHostGroupResponseConverter extends AbstractConversionSer
     private Set<String> getExtendedRecipes(Set<GeneratedRecipe> generatedRecipes) {
         Set<String> extendedRecipes = new HashSet<>();
         for (GeneratedRecipe generatedRecipe : generatedRecipes) {
-            String recipeText = generatedRecipe.getExtendedRecipeText().getRaw();
+            String recipeText = generatedRecipe.getExtendedRecipeText();
             String encodeRecipe = new String(Base64.encodeBase64(anonymize(recipeText).getBytes()));
             extendedRecipes.add(encodeRecipe);
         }

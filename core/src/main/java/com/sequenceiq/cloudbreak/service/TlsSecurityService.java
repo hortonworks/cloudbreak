@@ -89,7 +89,7 @@ public class TlsSecurityService {
         String connectionIp = getGatewayIp(securityConfig, gatewayInstance);
         HttpClientConfig conf = buildTLSClientConfig(stackId, connectionIp, gatewayInstance);
         SaltSecurityConfig saltSecurityConfig = securityConfig.getSaltSecurityConfig();
-        String saltSignPrivateKeyB64 = saltSecurityConfig.getSaltSignPrivateKey().getRaw();
+        String saltSignPrivateKeyB64 = saltSecurityConfig.getSaltSignPrivateKey();
         return new GatewayConfig(connectionIp, gatewayInstance.getPublicIpWrapper(), gatewayInstance.getPrivateIp(), gatewayInstance.getDiscoveryFQDN(),
                 gatewayPort, conf.getServerCert(), conf.getClientCert(), conf.getClientKey(),
                 saltClientConfig.getSaltPassword(), saltClientConfig.getSaltBootPassword(), saltClientConfig.getSignatureKeyPem(),
@@ -116,8 +116,8 @@ public class TlsSecurityService {
             return new HttpClientConfig(apiAddress);
         } else {
             String serverCert = gateway.getServerCert() == null ? null : new String(decodeBase64(gateway.getServerCert()));
-            String clientCertB64 = securityConfig.getClientCert().getRaw();
-            String clientKeyB64 = securityConfig.getClientKey().getRaw();
+            String clientCertB64 = securityConfig.getClientCert();
+            String clientKeyB64 = securityConfig.getClientKey();
             return new HttpClientConfig(apiAddress, serverCert,
                     new String(decodeBase64(clientCertB64)), new String(decodeBase64(clientKeyB64)));
         }
@@ -128,7 +128,7 @@ public class TlsSecurityService {
                 .orElseThrow(() -> new NotFoundException("Security config doesn't exist."));
         String serverCert = Optional.ofNullable(instanceMetaDataRepository.getServerCertByStackId(stackId))
                 .orElseThrow(() -> new NotFoundException("Server certificate was not found."));
-        return new CertificateResponse(serverCert, securityConfig.getClientKey().getSecret(), securityConfig.getClientCert().getSecret());
+        return new CertificateResponse(serverCert, securityConfig.getClientKeySecret(), securityConfig.getClientCertSecret());
     }
 
 }

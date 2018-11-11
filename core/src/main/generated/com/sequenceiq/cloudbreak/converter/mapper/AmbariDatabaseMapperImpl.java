@@ -22,19 +22,19 @@ public class AmbariDatabaseMapperImpl implements AmbariDatabaseMapper {
         RDSConfig rDSConfig = new RDSConfig();
 
         if ( ambariDatabaseDetailsJson != null ) {
+            rDSConfig.setConnectionUserName( ambariDatabaseDetailsJson.getUserName() );
             rDSConfig.setDatabaseEngine( ambariDatabaseDetailsJson.getVendor() );
             rDSConfig.setConnectionURL( mapConnectionUrl( ambariDatabaseDetailsJson ) );
+            rDSConfig.setConnectionPassword( ambariDatabaseDetailsJson.getPassword() );
         }
         if ( cluster != null ) {
             rDSConfig.setName( mapName( stack, cluster ) );
             rDSConfig.setAccount( cluster.getAccount() );
             rDSConfig.setOwner( cluster.getOwner() );
         }
-        rDSConfig.setConnectionUserName( new com.sequenceiq.cloudbreak.domain.Secret(ambariDatabaseDetailsJson.getUserName()) );
         rDSConfig.setCreationDate( new java.util.Date().getTime() );
         rDSConfig.setType( com.sequenceiq.cloudbreak.api.model.rds.RdsType.AMBARI.name() );
         rDSConfig.setConnectionDriver( "org.postgresql.Driver" );
-        rDSConfig.setConnectionPassword( new com.sequenceiq.cloudbreak.domain.Secret(ambariDatabaseDetailsJson.getPassword()) );
         rDSConfig.setStatus( com.sequenceiq.cloudbreak.api.model.ResourceStatus.USER_MANAGED );
 
         return rDSConfig;

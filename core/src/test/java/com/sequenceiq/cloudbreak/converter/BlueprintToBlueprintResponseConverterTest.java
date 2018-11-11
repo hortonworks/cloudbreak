@@ -102,7 +102,7 @@ public class BlueprintToBlueprintResponseConverterTest extends AbstractEntityCon
         Assert.assertEquals(source.getStatus(), result.getStatus());
         Assert.assertNotNull(result.getTags());
         Assert.assertTrue(result.getTags().isEmpty());
-        Assert.assertEquals(source.getBlueprintText().getRaw(), result.getAmbariBlueprint());
+        Assert.assertEquals(source.getBlueprintText(), result.getAmbariBlueprint());
     }
 
     @Test
@@ -121,7 +121,7 @@ public class BlueprintToBlueprintResponseConverterTest extends AbstractEntityCon
         Assert.assertEquals(source.getStatus(), result.getStatus());
         Assert.assertNotNull(result.getTags());
         Assert.assertTrue(result.getTags().isEmpty());
-        Assert.assertEquals(source.getBlueprintText().getRaw(), result.getAmbariBlueprint());
+        Assert.assertEquals(source.getBlueprintText(), result.getAmbariBlueprint());
     }
 
     @Override

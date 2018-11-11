@@ -15,7 +15,7 @@ public class RecipeToRecipeResponseConverter extends AbstractConversionServiceAw
         json.setName(recipe.getName());
         json.setDescription(recipe.getDescription());
         json.setRecipeType(recipe.getRecipeType());
-        json.setContent(recipe.getContent().getRaw());
+        json.setContent(recipe.getContent());
         json.setId(recipe.getId());
         json.setUri(recipe.getUri());
         WorkspaceResourceResponse workspace = getConversionService().convert(recipe.getWorkspace(), WorkspaceResourceResponse.class);

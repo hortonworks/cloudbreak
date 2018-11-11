@@ -18,9 +18,7 @@ public interface ProxyConfigMapper {
             @Mapping(target = "account", ignore = true),
             @Mapping(target = "id", ignore = true),
             @Mapping(target = "workspace", ignore = true),
-            @Mapping(target = "environments", ignore = true),
-            @Mapping(target = "userName", expression = "java(new com.sequenceiq.cloudbreak.domain.Secret(proxyConfigRequest.getUserName()))"),
-            @Mapping(target = "password", expression = "java(new com.sequenceiq.cloudbreak.domain.Secret(proxyConfigRequest.getPassword()))")
+            @Mapping(target = "environments", ignore = true)
     })
     ProxyConfig mapRequestToEntity(ProxyConfigRequest proxyConfigRequest);
 
