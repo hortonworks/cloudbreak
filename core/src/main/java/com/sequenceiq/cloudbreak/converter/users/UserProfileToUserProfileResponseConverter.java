@@ -52,7 +52,7 @@ public class UserProfileToUserProfileResponseConverter extends AbstractConversio
             userProfileResponse.setImageCatalog(getConversionService()
                     .convert(imageCatalogService.getCloudbreakDefaultImageCatalog(), ImageCatalogShortResponse.class));
         }
-        Json propertiesFromVault = new Json(entity.getUiProperties().getRaw());
+        Json propertiesFromVault = new Json(entity.getUiProperties());
         Map<String, Object> map = propertiesFromVault.getMap();
         userProfileResponse.setUiProperties(map == null ? new HashMap<>() : map);
         return userProfileResponse;

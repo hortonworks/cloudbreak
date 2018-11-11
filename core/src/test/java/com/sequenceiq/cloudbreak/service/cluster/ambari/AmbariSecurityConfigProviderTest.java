@@ -6,7 +6,6 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.domain.Secret;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 
 public class AmbariSecurityConfigProviderTest {
@@ -19,7 +18,7 @@ public class AmbariSecurityConfigProviderTest {
     @Test
     public void testGetAmbariUserNameWhenCloudbreakAmbariUserNameIsNullThenShouldReturnUserName() {
         Cluster cluster = TestUtil.cluster();
-        cluster.setCloudbreakAmbariUser(new Secret(null));
+        cluster.setCloudbreakAmbariUser(null);
         cluster.setUserName("admin");
 
         String ambariUserName = underTest.getAmbariUserName(cluster);
@@ -41,7 +40,7 @@ public class AmbariSecurityConfigProviderTest {
     @Test
     public void testGetAmbariPasswordNameWhenCloudbreakAmbariPasswordIsNullThenShouldReturnPassword() {
         Cluster cluster = TestUtil.cluster();
-        cluster.setCloudbreakAmbariPassword(new Secret(null));
+        cluster.setCloudbreakAmbariPassword(null);
         cluster.setPassword("admin");
 
         String ambariPassword = underTest.getAmbariPassword(cluster);
@@ -63,7 +62,7 @@ public class AmbariSecurityConfigProviderTest {
     @Test
     public void testGetAmbariSecurityMasterKeyWhenAmbariSecurityMasterKeyIsNullThenShouldReturnBigData() {
         Cluster cluster = TestUtil.cluster();
-        cluster.setAmbariSecurityMasterKey(new Secret(null));
+        cluster.setAmbariSecurityMasterKey(null);
 
         String ambariSecurityMasterKey = underTest.getAmbariSecurityMasterKey(cluster);
 

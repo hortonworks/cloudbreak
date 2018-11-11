@@ -68,40 +68,28 @@ public class SaltSecurityConfig implements ProvisionEntity {
         this.saltBootSignPublicKey = saltBootSignPublicKey;
     }
 
-    public Secret getSaltBootSignPrivateKey() {
-        return saltBootSignPrivateKey;
+    public String getSaltBootSignPrivateKey() {
+        return saltBootSignPrivateKey.getRaw();
     }
 
     public void setSaltBootSignPrivateKey(String saltBootSignPrivateKey) {
         this.saltBootSignPrivateKey = new Secret(saltBootSignPrivateKey);
     }
 
-    public void setSaltBootSignPrivateKey(Secret saltBootSignPrivateKey) {
-        this.saltBootSignPrivateKey = saltBootSignPrivateKey;
-    }
-
-    public Secret getSaltPassword() {
-        return saltPassword;
+    public String getSaltPassword() {
+        return saltPassword.getRaw();
     }
 
     public void setSaltPassword(String saltPassword) {
         this.saltPassword = new Secret(saltPassword);
     }
 
-    public void setSaltPassword(Secret saltPassword) {
-        this.saltPassword = saltPassword;
-    }
-
-    public Secret getSaltBootPassword() {
-        return saltBootPassword;
+    public String getSaltBootPassword() {
+        return saltBootPassword.getRaw();
     }
 
     public void setSaltBootPassword(String saltBootPassword) {
         this.saltBootPassword = new Secret(saltBootPassword);
-    }
-
-    public void setSaltBootPassword(Secret saltBootPassword) {
-        this.saltBootPassword = saltBootPassword;
     }
 
     public void setSaltSignPublicKey(String saltSignPublicKey) {
@@ -120,7 +108,7 @@ public class SaltSecurityConfig implements ProvisionEntity {
         return saltSignPublicKey;
     }
 
-    public Secret getSaltSignPrivateKey() {
-        return saltSignPrivateKey;
+    public String getSaltSignPrivateKey() {
+        return saltSignPrivateKey.getRaw();
     }
 }

@@ -124,28 +124,20 @@ public class RDSConfig implements ProvisionEntity, EnvironmentAwareResource {
         this.databaseEngine = databaseEngine;
     }
 
-    public Secret getConnectionUserName() {
-        return connectionUserName;
+    public String getConnectionUserName() {
+        return connectionUserName.getRaw();
     }
 
     public void setConnectionUserName(String connectionUserName) {
         this.connectionUserName = new Secret(connectionUserName);
     }
 
-    public void setConnectionUserName(Secret connectionUserName) {
-        this.connectionUserName = connectionUserName;
-    }
-
-    public Secret getConnectionPassword() {
-        return connectionPassword;
+    public String getConnectionPassword() {
+        return connectionPassword.getRaw();
     }
 
     public void setConnectionPassword(String connectionPassword) {
         this.connectionPassword = new Secret(connectionPassword);
-    }
-
-    public void setConnectionPassword(Secret connectionPassword) {
-        this.connectionPassword = connectionPassword;
     }
 
     public Long getCreationDate() {

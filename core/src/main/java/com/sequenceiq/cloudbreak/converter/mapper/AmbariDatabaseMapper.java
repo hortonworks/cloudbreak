@@ -21,6 +21,8 @@ public interface AmbariDatabaseMapper {
     @Mappings({
             @Mapping(source = "ambariDatabaseDetailsJson.vendor", target = "databaseEngine"),
             @Mapping(source = "cluster", target = "name", qualifiedByName = "name"),
+            @Mapping(source = "ambariDatabaseDetailsJson.userName", target = "connectionUserName"),
+            @Mapping(source = "ambariDatabaseDetailsJson.password", target = "connectionPassword"),
             @Mapping(source = "ambariDatabaseDetailsJson", target = "connectionURL", qualifiedByName = "connectionUrl"),
             @Mapping(target = "connectionDriver", constant = "org.postgresql.Driver"),
             @Mapping(target = "creationDate", expression = "java(new java.util.Date().getTime())"),
@@ -31,9 +33,7 @@ public interface AmbariDatabaseMapper {
             @Mapping(target = "type", expression = "java(com.sequenceiq.cloudbreak.api.model.rds.RdsType.AMBARI.name())"),
             @Mapping(target = "connectorJarUrl", ignore = true),
             @Mapping(target = "workspace", ignore = true),
-            @Mapping(target = "environments", ignore = true),
-            @Mapping(target = "connectionUserName", expression = "java(new com.sequenceiq.cloudbreak.domain.Secret(ambariDatabaseDetailsJson.getUserName()))"),
-            @Mapping(target = "connectionPassword", expression = "java(new com.sequenceiq.cloudbreak.domain.Secret(ambariDatabaseDetailsJson.getPassword()))")
+            @Mapping(target = "environments", ignore = true)
     })
     RDSConfig mapAmbariDatabaseDetailsJsonToRdsConfig(AmbariDatabaseDetailsJson ambariDatabaseDetailsJson, Cluster cluster, @Context Stack stack);
 

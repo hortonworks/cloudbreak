@@ -17,7 +17,7 @@ public class BlueprintViewProvider {
     private StackInfoService stackInfoService;
 
     public BlueprintView getBlueprintView(@Nonnull Blueprint blueprint) {
-        String blueprintText = blueprint.getBlueprintText().getRaw();
+        String blueprintText = blueprint.getBlueprintText();
         BlueprintStackInfo blueprintStackInfo = stackInfoService.blueprintStackInfo(blueprintText);
         return new BlueprintView(blueprintText, blueprintStackInfo.getVersion(), blueprintStackInfo.getType());
     }

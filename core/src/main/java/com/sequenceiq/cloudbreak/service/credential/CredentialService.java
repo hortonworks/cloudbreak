@@ -127,7 +127,7 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
         credential.setId(original.getId());
         credential.setWorkspace(workspaceService.get(workspaceId, user));
         Credential updated = super.create(credentialAdapter.init(credential, workspaceId, user.getUserId()), workspaceId, user);
-        secretService.delete(original.getAttributes().getSecret());
+        secretService.delete(original.getAttributesSecret());
         sendCredentialNotification(credential, ResourceEvent.CREDENTIAL_MODIFIED);
         return updated;
     }

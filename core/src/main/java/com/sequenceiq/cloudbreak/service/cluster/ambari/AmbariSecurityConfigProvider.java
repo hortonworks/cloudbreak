@@ -11,25 +11,25 @@ public class AmbariSecurityConfigProvider {
     private static final String DEFAULT_AMBARI_SECURITY_MASTER_KEY = "bigdata";
 
     public String getAmbariUserName(Cluster cluster) {
-        if (Strings.isNullOrEmpty(cluster.getCloudbreakAmbariUser().getRaw())) {
-            return cluster.getUserName().getRaw();
+        if (Strings.isNullOrEmpty(cluster.getCloudbreakAmbariUser())) {
+            return cluster.getUserName();
         }
-        return cluster.getCloudbreakAmbariUser().getRaw();
+        return cluster.getCloudbreakAmbariUser();
     }
 
     public String getAmbariPassword(Cluster cluster) {
-        if (Strings.isNullOrEmpty(cluster.getCloudbreakAmbariPassword().getRaw())) {
-            return cluster.getPassword().getRaw();
+        if (Strings.isNullOrEmpty(cluster.getCloudbreakAmbariPassword())) {
+            return cluster.getPassword();
         }
-        return cluster.getCloudbreakAmbariPassword().getRaw();
+        return cluster.getCloudbreakAmbariPassword();
     }
 
     public String getAmbariUserProvidedPassword(Cluster cluster) {
-        return cluster.getPassword() == null ? null : cluster.getPassword().getRaw();
+        return cluster.getPassword() == null ? null : cluster.getPassword();
     }
 
     public String getAmbariSecurityMasterKey(Cluster cluster) {
-        String securityMasterKey = cluster.getAmbariSecurityMasterKey().getRaw();
+        String securityMasterKey = cluster.getAmbariSecurityMasterKey();
         return Strings.isNullOrEmpty(securityMasterKey) ? DEFAULT_AMBARI_SECURITY_MASTER_KEY : securityMasterKey;
     }
 }

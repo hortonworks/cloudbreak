@@ -19,7 +19,7 @@ public class BlueprintToBlueprintDetailsConverter extends AbstractConversionServ
         blueprintDetails.setName(source.getName());
         blueprintDetails.setDescription(source.getDescription());
         blueprintDetails.setBlueprintName(source.getAmbariName());
-        blueprintDetails.setBlueprintJson(source.getBlueprintText().getRaw());
+        blueprintDetails.setBlueprintJson(source.getBlueprintText());
         return blueprintDetails;
     }
 }

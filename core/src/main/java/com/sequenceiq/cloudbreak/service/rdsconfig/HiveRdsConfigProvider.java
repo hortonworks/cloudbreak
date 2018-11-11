@@ -60,7 +60,7 @@ public class HiveRdsConfigProvider extends AbstractRdsConfigProvider {
     }
 
     private boolean isRdsConfigNeedForHiveMetastore(Blueprint blueprint) {
-        String blueprintText = blueprint.getBlueprintText().getRaw();
+        String blueprintText = blueprint.getBlueprintText();
         BlueprintTextProcessor blueprintProcessor = blueprintProcessorFactory.get(blueprintText);
         return blueprintProcessor.componentExistsInBlueprint("HIVE_METASTORE")
                 && !blueprintProcessor.componentExistsInBlueprint("MYSQL_SERVER")

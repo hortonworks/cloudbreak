@@ -22,9 +22,9 @@ public class CredentialToCloudCredentialConverter {
         }
         Map<String, Object> fields;
         if (credential.getId() == null) {
-            fields = isEmpty(credential.getAttributes().getRaw()) ? new HashMap<>() : new Json(credential.getAttributes().getRaw()).getMap();
+            fields = isEmpty(credential.getAttributes()) ? new HashMap<>() : new Json(credential.getAttributes()).getMap();
         } else {
-            fields = new Json(credential.getAttributes().getRaw()).getMap();
+            fields = new Json(credential.getAttributes()).getMap();
         }
         fields.put(CREDENTIAL_ID, credential.getId());
         return new CloudCredential(credential.getId(), credential.getName(), fields);

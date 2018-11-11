@@ -55,10 +55,10 @@ public class BlueprintRequestToBlueprintConverter extends AbstractConversionServ
         } else {
             blueprint.setBlueprintText(json.getAmbariBlueprint());
         }
-        validateBlueprint(blueprint.getBlueprintText().getRaw());
+        validateBlueprint(blueprint.getBlueprintText());
         JsonNode blueprintJson;
         try {
-            blueprintJson = JsonUtil.readTree(blueprint.getBlueprintText().getRaw());
+            blueprintJson = JsonUtil.readTree(blueprint.getBlueprintText());
             validateBlueprintStackVersion(blueprintJson);
             setAmbariNameAndHostGrouCount(blueprint, blueprintJson);
         } catch (IOException e) {
