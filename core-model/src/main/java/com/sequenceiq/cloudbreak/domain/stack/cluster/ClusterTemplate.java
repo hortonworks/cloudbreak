@@ -52,12 +52,12 @@ public class ClusterTemplate implements WorkspaceAwareResource, Serializable {
     @Column(nullable = false)
     private String cloudPlatform;
 
-    public Secret getTemplate() {
-        return template;
+    public String getTemplate() {
+        return template.getRaw();
     }
 
-    public void setTemplate(Secret template) {
-        this.template = template;
+    public void setTemplate(String template) {
+        this.template = new Secret(template);
     }
 
     @Override

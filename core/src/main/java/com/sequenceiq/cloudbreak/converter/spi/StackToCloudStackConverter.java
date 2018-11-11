@@ -152,7 +152,7 @@ public class StackToCloudStackConverter {
     InstanceTemplate buildInstanceTemplate(Template template, String name, Long privateId, InstanceStatus status, String instanceImageId) {
         Json attributesJson = template.getAttributes();
         Map<String, Object> attributes = Optional.ofNullable(attributesJson).map(Json::getMap).orElseGet(HashMap::new);
-        Json fromVault = template.getSecretAttributes() == null ? null : new Json(template.getSecretAttributes().getRaw());
+        Json fromVault = template.getSecretAttributes() == null ? null : new Json(template.getSecretAttributes());
         Map<String, Object> secretAttributes = Optional.ofNullable(fromVault).map(Json::getMap).orElseGet(HashMap::new);
 
         Map<String, Object> fields = new HashMap<>();

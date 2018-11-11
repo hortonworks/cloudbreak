@@ -32,7 +32,7 @@ public class RangerRdsConfigProvider extends AbstractRdsConfigProvider {
     private BlueprintProcessorFactory blueprintProcessorFactory;
 
     private boolean isRdsConfigNeedForRangerAdmin(Blueprint blueprint) {
-        String blueprintText = blueprint.getBlueprintText().getRaw();
+        String blueprintText = blueprint.getBlueprintText();
         BlueprintTextProcessor blueprintProcessor = blueprintProcessorFactory.get(blueprintText);
         return blueprintProcessor.componentExistsInBlueprint("RANGER_ADMIN")
                 && !blueprintProcessor.componentExistsInBlueprint("MYSQL_SERVER")

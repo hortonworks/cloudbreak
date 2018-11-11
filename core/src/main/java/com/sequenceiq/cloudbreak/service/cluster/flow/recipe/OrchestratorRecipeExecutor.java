@@ -199,8 +199,7 @@ class OrchestratorRecipeExecutor {
     private List<RecipeModel> convert(Stack stack, Set<Recipe> recipes) {
         List<RecipeModel> result = new ArrayList<>();
         for (Recipe recipe : recipes) {
-            String recipeContent = recipe.getContent().getRaw() != null ? recipe.getContent().getRaw() : recipe.getContent().getSecret();
-            String decodedContent = new String(Base64.decodeBase64(recipeContent));
+            String decodedContent = new String(Base64.decodeBase64(recipe.getContent()));
             TemplatePreparationObject templatePreparationObject = conversionService.convert(stack, TemplatePreparationObject.class);
             String generatedRecipeText = centralRecipeUpdater.getRecipeText(templatePreparationObject, decodedContent);
             RecipeModel recipeModel = new RecipeModel(recipe.getName(), recipe.getRecipeType(), generatedRecipeText);

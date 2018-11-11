@@ -120,8 +120,8 @@ public class AmbariClusterSecurityService implements ClusterSecurityService {
     @Override
     public void replaceUserNamePassword(Stack stack, String newUserName, String newPassword) throws CloudbreakException {
         Cluster cluster = stack.getCluster();
-        String userName = cluster.getUserName().getRaw();
-        String password = cluster.getPassword().getRaw();
+        String userName = cluster.getUserName();
+        String password = cluster.getPassword();
         AmbariClient ambariClient = clientFactory.getAmbariClient(stack, userName, password);
         ambariClient = ambariUserHandler.createAmbariUser(newUserName, newPassword, stack, ambariClient);
         ambariClient.deleteUser(userName);
@@ -130,8 +130,8 @@ public class AmbariClusterSecurityService implements ClusterSecurityService {
     @Override
     public void updateUserNamePassword(Stack stack, String newPassword) throws CloudbreakException {
         Cluster cluster = clusterService.getById(stack.getCluster().getId());
-        String userName = cluster.getUserName().getRaw();
-        String password = cluster.getPassword().getRaw();
+        String userName = cluster.getUserName();
+        String password = cluster.getPassword();
         AmbariClient client = clientFactory.getAmbariClient(stack, userName, password);
         ambariUserHandler.changeAmbariPassword(userName, password, newPassword, stack, client);
     }
@@ -144,8 +144,8 @@ public class AmbariClusterSecurityService implements ClusterSecurityService {
         String cloudbreakUserName = ambariSecurityConfigProvider.getAmbariUserName(cluster);
         String cloudbreakPassword = ambariSecurityConfigProvider.getAmbariPassword(cluster);
         ambariUserHandler.createAmbariUser(cloudbreakUserName, cloudbreakPassword, stack, client);
-        String userName = cluster.getUserName().getRaw();
-        String password = cluster.getPassword().getRaw();
+        String userName = cluster.getUserName();
+        String password = cluster.getPassword();
         if (ADMIN.equals(userName)) {
             if (!ADMIN.equals(password)) {
                 ambariUserHandler.changeAmbariPassword(ADMIN, ADMIN, password, stack, client);

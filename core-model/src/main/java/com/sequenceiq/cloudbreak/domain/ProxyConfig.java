@@ -125,28 +125,20 @@ public class ProxyConfig implements ProvisionEntity, EnvironmentAwareResource {
         this.protocol = protocol;
     }
 
-    public Secret getUserName() {
-        return userName;
+    public String getUserName() {
+        return userName.getRaw();
     }
 
     public void setUserName(String userName) {
         this.userName = new Secret(userName);
     }
 
-    public void setUserName(Secret userName) {
-        this.userName = userName;
-    }
-
-    public Secret getPassword() {
-        return password;
+    public String getPassword() {
+        return password.getRaw();
     }
 
     public void setPassword(String password) {
         this.password = new Secret(password);
-    }
-
-    public void setPassword(Secret password) {
-        this.password = password;
     }
 
     public String getDescription() {

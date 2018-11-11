@@ -96,16 +96,12 @@ public class Blueprint implements ProvisionEntity, WorkspaceAwareResource {
         this.id = id;
     }
 
-    public Secret getBlueprintText() {
-        return blueprintText;
+    public String getBlueprintText() {
+        return blueprintText.getRaw();
     }
 
     public void setBlueprintText(String blueprintText) {
         this.blueprintText = new Secret(blueprintText);
-    }
-
-    public void setBlueprintText(Secret blueprintText) {
-        this.blueprintText = blueprintText;
     }
 
     public String getAmbariName() {

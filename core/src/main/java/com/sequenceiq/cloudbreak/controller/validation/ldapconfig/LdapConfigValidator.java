@@ -24,8 +24,8 @@ public class LdapConfigValidator {
             validateLdapConnection(ldapConfig.getProtocol(),
                     ldapConfig.getServerHost(),
                     ldapConfig.getServerPort(),
-                    ldapConfig.getBindDn().getRaw(),
-                    ldapConfig.getBindPassword().getRaw());
+                    ldapConfig.getBindDn(),
+                    ldapConfig.getBindPassword());
         }
     }
 

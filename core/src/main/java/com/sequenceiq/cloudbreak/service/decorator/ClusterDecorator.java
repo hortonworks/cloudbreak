@@ -131,7 +131,7 @@ public class ClusterDecorator {
 
     // because KNOX does not support them
     private void removeHaComponentsFromGatewayTopologies(Cluster subject) {
-        String blueprintText = subject.getBlueprint().getBlueprintText().getRaw();
+        String blueprintText = subject.getBlueprint().getBlueprintText();
         Set<String> haComponents = ambariHaComponentFilter.getHaComponents(new BlueprintTextProcessor(blueprintText));
         Set<String> haKnoxServices = ExposedService.filterSupportedKnoxServices().stream()
                 .filter(es -> haComponents.contains(es.getServiceName())

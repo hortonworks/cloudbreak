@@ -28,7 +28,7 @@ public class TemplateToTemplateV2RequestConverter extends AbstractConversionServ
         TemplateV2Request templateV2Request = new TemplateV2Request();
 
         Map<String, Object> parameters = source.getAttributes().getMap();
-        ofNullable(source.getSecretAttributes()).ifPresent(attr -> parameters.putAll(new Json(attr.getRaw()).getMap()));
+        ofNullable(source.getSecretAttributes()).ifPresent(attr -> parameters.putAll(new Json(attr).getMap()));
         if (parameters.containsKey(KEY_ENCRYPTION_METHOD_FIELD)
                 && !KeyEncryptionMethod.KMS.name().equalsIgnoreCase((String) parameters.get(KEY_ENCRYPTION_METHOD_FIELD))) {
             parameters.remove(KEY_FIELD);

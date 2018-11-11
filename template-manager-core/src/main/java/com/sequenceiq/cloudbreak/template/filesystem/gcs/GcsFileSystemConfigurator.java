@@ -37,7 +37,7 @@ public class GcsFileSystemConfigurator extends AbstractFileSystemConfigurator<Gc
     }
 
     private String getPrivateKey(Credential credential) {
-        Json attibutesFromVault = new Json(credential.getAttributes().getRaw());
+        Json attibutesFromVault = new Json(credential.getAttributes());
         Object serviceAccountPrivateKey = attibutesFromVault.getMap().get("serviceAccountPrivateKey");
         if (serviceAccountPrivateKey == null) {
             LOGGER.warn("ServiceAccountPrivateKey isn't set.");

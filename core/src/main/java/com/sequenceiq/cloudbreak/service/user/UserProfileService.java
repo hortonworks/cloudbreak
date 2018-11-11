@@ -21,7 +21,6 @@ import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
-import com.sequenceiq.cloudbreak.domain.Secret;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
@@ -104,7 +103,7 @@ public class UserProfileService {
         try {
             userProfile.setUiProperties(new Json(new HashMap<>()).getValue());
         } catch (JsonProcessingException ignored) {
-            userProfile.setUiProperties(new Secret(null));
+            userProfile.setUiProperties(null);
         }
     }
 
@@ -122,8 +121,8 @@ public class UserProfileService {
             ImageCatalog imageCatalog = imageCatalogService.get(workspaceId, request.getImageCatalogName());
             userProfile.setImageCatalog(imageCatalog);
         }
-        String oldVaultPath = userProfile.getUiProperties().getSecret();
-        String uiPropertiesFromVault = userProfile.getUiProperties().getRaw();
+        String oldVaultSecret = userProfile.getUiPropertiesSecret();
+        String uiPropertiesFromVault = userProfile.getUiProperties();
         Map<String, Object> map = new Json(uiPropertiesFromVault).getMap();
         for (Entry<String, Object> uiStringObjectEntry : request.getUiProperties().entrySet()) {
             map.put(uiStringObjectEntry.getKey(), uiStringObjectEntry.getValue());
@@ -134,7 +133,7 @@ public class UserProfileService {
             throw new BadRequestException("The modification of the ui properties was unsuccesfull.");
         }
         userProfileRepository.save(userProfile);
-        secretService.delete(oldVaultPath);
+        secretService.delete(oldVaultSecret);
     }
 
     private void storeDefaultCredential(UserProfile userProfile, Credential credential, Workspace workspace) {

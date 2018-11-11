@@ -48,11 +48,11 @@ public class GeneralClusterConfigsProvider {
         generalClusterConfigs.setExecutorType(cluster.getExecutorType());
         generalClusterConfigs.setStackName(stack.getName());
         generalClusterConfigs.setUuid(stack.getUuid());
-        generalClusterConfigs.setUserName(cluster.getUserName().getRaw());
-        generalClusterConfigs.setPassword(cluster.getPassword().getRaw());
+        generalClusterConfigs.setUserName(cluster.getUserName());
+        generalClusterConfigs.setPassword(cluster.getPassword());
         generalClusterConfigs.setNodeCount(stack.getFullNodeCount());
         generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.ofNullable(stack.getPrimaryGatewayInstance().getDiscoveryFQDN()));
-        String blueprintText = cluster.getBlueprint().getBlueprintText().getRaw();
+        String blueprintText = cluster.getBlueprint().getBlueprintText();
         generalClusterConfigs.setKafkaReplicationFactor(
                 getKafkaReplicationFactor(blueprintText) >= DEFAULT_REPLICATION_FACTOR ? DEFAULT_REPLICATION_FACTOR : 1);
 

@@ -333,28 +333,20 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
         this.fileSystem = fileSystem;
     }
 
-    public Secret getUserName() {
-        return userName;
+    public String getUserName() {
+        return userName.getRaw();
     }
 
     public void setUserName(String userName) {
         this.userName = new Secret(userName);
     }
 
-    public void setUserName(Secret userName) {
-        this.userName = userName;
-    }
-
-    public Secret getPassword() {
-        return password;
+    public String getPassword() {
+        return password.getRaw();
     }
 
     public void setPassword(String password) {
         this.password = new Secret(password);
-    }
-
-    public void setPassword(Secret password) {
-        this.password = password;
     }
 
     public String getAmbariIp() {
@@ -429,16 +421,12 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
                 || DELETE_IN_PROGRESS.equals(status);
     }
 
-    public Secret getAttributes() {
-        return attributes;
+    public String getAttributes() {
+        return attributes.getRaw();
     }
 
     public void setAttributes(String attributes) {
         this.attributes = new Secret(attributes);
-    }
-
-    public void setAttributes(Secret attributes) {
-        this.attributes = attributes;
     }
 
     public Gateway getGateway() {
@@ -465,28 +453,20 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
         this.ldapConfig = ldapConfig;
     }
 
-    public Secret getCloudbreakAmbariUser() {
-        return cloudbreakAmbariUser;
+    public String getCloudbreakAmbariUser() {
+        return cloudbreakAmbariUser.getRaw();
     }
 
     public void setCloudbreakAmbariUser(String cloudbreakAmbariUser) {
         this.cloudbreakAmbariUser = new Secret(cloudbreakAmbariUser);
     }
 
-    public void setCloudbreakAmbariUser(Secret cloudbreakAmbariUser) {
-        this.cloudbreakAmbariUser = cloudbreakAmbariUser;
-    }
-
-    public Secret getCloudbreakAmbariPassword() {
-        return cloudbreakAmbariPassword;
+    public String getCloudbreakAmbariPassword() {
+        return cloudbreakAmbariPassword.getRaw();
     }
 
     public void setCloudbreakAmbariPassword(String cloudbreakAmbariPassword) {
         this.cloudbreakAmbariPassword = new Secret(cloudbreakAmbariPassword);
-    }
-
-    public void setCloudbreakAmbariPassword(Secret cloudbreakAmbariPassword) {
-        this.cloudbreakAmbariPassword = cloudbreakAmbariPassword;
     }
 
     public KerberosConfig getKerberosConfig() {
@@ -537,16 +517,12 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
         this.uptime = uptime;
     }
 
-    public Secret getAmbariSecurityMasterKey() {
-        return ambariSecurityMasterKey;
+    public String getAmbariSecurityMasterKey() {
+        return ambariSecurityMasterKey.getRaw();
     }
 
     public void setAmbariSecurityMasterKey(String ambariSecurityMasterKey) {
         this.ambariSecurityMasterKey = new Secret(ambariSecurityMasterKey);
-    }
-
-    public void setAmbariSecurityMasterKey(Secret ambariSecurityMasterKey) {
-        this.ambariSecurityMasterKey = ambariSecurityMasterKey;
     }
 
     public ProxyConfig getProxyConfig() {
@@ -557,16 +533,12 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
         this.proxyConfig = proxyConfig;
     }
 
-    public Secret getExtendedBlueprintText() {
-        return extendedBlueprintText;
+    public String getExtendedBlueprintText() {
+        return extendedBlueprintText.getRaw();
     }
 
     public void setExtendedBlueprintText(String extendedBlueprintText) {
         this.extendedBlueprintText = new Secret(extendedBlueprintText);
-    }
-
-    public void setExtendedBlueprintText(Secret extendedBlueprintText) {
-        this.extendedBlueprintText = extendedBlueprintText;
     }
 
     @Override

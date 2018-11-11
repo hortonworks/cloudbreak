@@ -19,7 +19,7 @@ public class BlueprintToBlueprintRequestConverter
         BlueprintRequest blueprintRequest = new BlueprintRequest();
         blueprintRequest.setName("");
         blueprintRequest.setDescription(source.getDescription());
-        blueprintRequest.setAmbariBlueprint(source.getBlueprintText().getRaw());
+        blueprintRequest.setAmbariBlueprint(source.getBlueprintText());
         return blueprintRequest;
     }
 
