@@ -91,10 +91,6 @@ public class ClusterCreationService {
         clusterService.updateClusterStatusByStackId(stackView.getId(), AVAILABLE);
         stackUpdater.updateStackStatus(stackView.getId(), DetailedStackStatus.AVAILABLE, "Cluster creation finished.");
         flowMessageService.fireEventAndLog(stackView.getId(), Msg.AMBARI_CLUSTER_BUILT, AVAILABLE.name(), ambariIp);
-
-        Cluster cluster = clusterService.getById(stackView.getClusterView().getId());
-
-        clusterService.cleanupKerberosCredential(cluster);
     }
 
     public void handleClusterCreationFailure(StackView stackView, Exception exception) {

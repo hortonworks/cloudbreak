@@ -75,6 +75,12 @@ public class KerberosConfig implements ProvisionEntity {
     @Column(name = "verifykdctrust")
     private Boolean verifyKdcTrust;
 
+    @Column(name = "domain")
+    private String domain;
+
+    @Column(name = "nameservers")
+    private String nameServers;
+
     public Long getId() {
         return id;
     }
@@ -217,5 +223,21 @@ public class KerberosConfig implements ProvisionEntity {
 
     public Boolean getVerifyKdcTrust() {
         return verifyKdcTrust;
+    }
+
+    public String getDomain() {
+        return domain;
+    }
+
+    public void setDomain(String domain) {
+        this.domain = domain;
+    }
+
+    public String getNameServers() {
+        return nameServers;
+    }
+
+    public void setNameServers(String nameServers) {
+        this.nameServers = nameServers;
     }
 }

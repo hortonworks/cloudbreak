@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
@@ -31,13 +32,23 @@ public class PreTerminationStateExecutor {
     @Inject
     private StackUtil stackUtil;
 
-    public void leaveAdDomain(Stack stack) throws CloudbreakException {
-        if (stack.getCluster().isAdJoinable()) {
+    public void runPreteraminationTasks(Stack stack) throws CloudbreakException {
+        leaveDomains(stack);
+    }
+
+    private void leaveDomains(Stack stack) throws CloudbreakException {
+        Cluster cluster = stack.getCluster();
+        if (cluster.isAdJoinable() || cluster.isIpaJoinable()) {
             try {
                 HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
                 GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
-                hostOrchestrator.leaveAdDomain(gatewayConfig, stackUtil.collectNodes(stack), clusterDeletionBasedModel(stack.getId(),
-                        stack.getCluster().getId()));
+                if (cluster.isAdJoinable()) {
+                    hostOrchestrator.leaveDomain(gatewayConfig, stackUtil.collectNodes(stack), "ad_member", "ad_leave",
+                            clusterDeletionBasedModel(stack.getId(), cluster.getId()));
+                } else if (cluster.isIpaJoinable()) {
+                    hostOrchestrator.leaveDomain(gatewayConfig, stackUtil.collectNodes(stack), "ipa_member", "ipa_leave",
+                            clusterDeletionBasedModel(stack.getId(), cluster.getId()));
+                }
             } catch (CloudbreakOrchestratorFailedException e) {
                 Set<Map.Entry<String, Collection<String>>> entries = e.getNodesWithErrors().asMap().entrySet();
                 String errors;

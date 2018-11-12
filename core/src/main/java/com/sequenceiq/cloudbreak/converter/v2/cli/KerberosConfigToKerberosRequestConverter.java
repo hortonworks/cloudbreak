@@ -15,6 +15,8 @@ public class KerberosConfigToKerberosRequestConverter extends AbstractConversion
         config.setType(source.getType());
         config.setTcpAllowed(source.isTcpAllowed());
         config.setPassword("");
+        config.setDomain(source.getDomain());
+        config.setNameServers(source.getNameServers());
         switch (source.getType()) {
             case CB_MANAGED:
                 config.setMasterKey("");
@@ -30,6 +32,12 @@ public class KerberosConfigToKerberosRequestConverter extends AbstractConversion
                 break;
             case EXISTING_MIT:
                 config.setPrincipal("");
+                config.setUrl(source.getUrl());
+                config.setAdminUrl(source.getAdminUrl());
+                config.setRealm(source.getRealm());
+                break;
+            case EXISTING_FREEIPA:
+                config.setPrincipal(source.getPrincipal());
                 config.setUrl(source.getUrl());
                 config.setAdminUrl(source.getAdminUrl());
                 config.setRealm(source.getRealm());

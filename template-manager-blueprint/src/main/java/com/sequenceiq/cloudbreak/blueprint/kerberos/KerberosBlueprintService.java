@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.template.processor.configuration.SiteConfigurations;
+import com.sequenceiq.cloudbreak.type.KerberosType;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @Service
@@ -69,21 +70,24 @@ public class KerberosBlueprintService implements BlueprintComponentConfigProvide
         String ldapUrl = kerberosDetailService.resolveLdapUrlForKerberos(kerberosConfig);
         String containerDn = kerberosDetailService.resolveContainerDnForKerberos(kerberosConfig);
 
-        Map<String, String> kerberosEnv = ImmutableMap.<String, String>builder()
+        ImmutableMap.Builder<String, String> builder = ImmutableMap.<String, String>builder()
                 .put("realm", realm)
                 .put("kdc_type", kdcType)
                 .put("kdc_hosts", kdcHosts)
                 .put("admin_server_host", kdcAdminHost)
                 .put("encryption_types", "aes des3-cbc-sha1 rc4 des-cbc-md5")
                 .put("ldap_url", ldapUrl == null ? "" : ldapUrl)
-                .put("container_dn", containerDn == null ? "" : containerDn)
-                .build();
+                .put("container_dn", containerDn == null ? "" : containerDn);
+        if (kerberosConfig.getType() == KerberosType.EXISTING_FREEIPA) {
+            builder.put("case_insensitive_username_rules", "true");
+        }
+        Map<String, String> kerberosEnv = builder.build();
         return extendBlueprintWithKerberos(blueprintText, kerberosEnv, kerberosDetailService.getDomains(domain),
-                !kerberosConfig.isTcpAllowed(), propagationPort, false);
+                !kerberosConfig.isTcpAllowed(), propagationPort, kerberosConfig.getType(), false);
     }
 
     public BlueprintTextProcessor extendBlueprintWithKerberos(BlueprintTextProcessor blueprint, Map<String, String> kerberosEnv, String domains,
-            Boolean useUdp, Integer kpropPort,
+            Boolean useUdp, Integer kpropPort, KerberosType kerberosType,
             boolean forced) {
         try {
             String krb5Config = FileReaderUtils.readFileFromClasspath("kerberos/krb5-conf-template.conf");
@@ -98,7 +102,11 @@ public class KerberosBlueprintService implements BlueprintComponentConfigProvide
             SiteConfigurations configs = SiteConfigurations.getEmptyConfiguration();
             Map<String, String> krb5Conf = new HashMap<>();
             krb5Conf.put("domains", domains);
-            krb5Conf.put("manage_krb5_conf", "true");
+            if (kerberosType != KerberosType.EXISTING_AD && kerberosType != KerberosType.EXISTING_FREEIPA) {
+                krb5Conf.put("manage_krb5_conf", "true");
+            } else {
+                krb5Conf.put("manage_krb5_conf", "false");
+            }
             if (!useUdp || kpropPort != null) {
                 krb5Conf.put("content", krb5Config.toString());
             }

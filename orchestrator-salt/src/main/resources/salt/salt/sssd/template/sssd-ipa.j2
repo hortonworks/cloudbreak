@@ -1,0 +1,21 @@
+[sssd]
+services = nss, pam, sudo, ssh
+domains = {{ pillar['sssd-ipa']['realm'] }}
+default_domain_suffix = {{ pillar['sssd-ipa']['realm'] }}
+
+[nss]
+homedir_substring = /home
+
+[domain/{{ pillar['sssd-ipa']['realm'] }}]
+cache_credentials = True
+krb5_store_password_if_offline = True
+krb5_realm = {{ pillar['sssd-ipa']['realm'] }}
+ipa_domain = {{ pillar['sssd-ipa']['domain'] }}
+krb5_ccname_template = FILE:/tmp/krb5cc_%U
+id_provider = ipa
+auth_provider = ipa
+access_provider = ipa
+chpass_provider = ipa
+ipa_server = {{ pillar['sssd-ipa']['server'] }}
+ldap_tls_cacert = /etc/ipa/ca.crt
+ipa_hostname={{ salt['grains.get']('fqdn') }}

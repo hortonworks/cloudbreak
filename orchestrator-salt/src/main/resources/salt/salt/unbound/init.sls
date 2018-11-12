@@ -14,10 +14,10 @@
     - source: salt://unbound/dhcp/google_hostname.sh
     - mode: 744
 
-/etc/unbound/conf.d/98-default.conf:
+/etc/unbound/conf.d/60-domain-dns.conf:
   file.managed:
     - makedirs: True
-    - source: salt://unbound/config/98-default.conf
+    - source: salt://unbound/config/60-domain-dns.conf
     - template: jinja
 
 include_access_config:
@@ -42,7 +42,7 @@ reload_unbound:
     - name: pkill -HUP unbound
     - watch:
       - file: /etc/unbound/conf.d/00-cluster.conf
-      - file: /etc/unbound/conf.d/98-default.conf
+      - file: /etc/unbound/conf.d/60-domain-dns.conf
 
 unbound:
   service.running:

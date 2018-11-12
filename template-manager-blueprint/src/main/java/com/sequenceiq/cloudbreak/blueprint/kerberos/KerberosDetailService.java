@@ -24,10 +24,14 @@ public class KerberosDetailService {
     private final Gson gson = new Gson();
 
     public String resolveTypeForKerberos(@Nonnull KerberosConfig kerberosConfig) {
-        if (!Strings.isNullOrEmpty(kerberosConfig.getContainerDn()) && !Strings.isNullOrEmpty(kerberosConfig.getLdapUrl())) {
-            return "active-directory";
+        switch (kerberosConfig.getType()) {
+            case EXISTING_AD:
+                return "active-directory";
+            case EXISTING_FREEIPA:
+                return "ipa";
+            default:
+                return "mit-kdc";
         }
-        return "mit-kdc";
     }
 
     public String resolveHostForKerberos(@Nonnull KerberosConfig kerberosConfig, String defaultHost) {

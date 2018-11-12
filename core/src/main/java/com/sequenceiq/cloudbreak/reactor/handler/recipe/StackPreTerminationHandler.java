@@ -53,7 +53,7 @@ public class StackPreTerminationHandler implements ReactorEventHandler<StackPreT
             if (cluster != null) {
                 Set<HostGroup> hostGroups = hostGroupService.getByCluster(cluster.getId());
                 recipeEngine.executePreTerminationRecipes(stack, hostGroups);
-                preTerminationStateExecutor.leaveAdDomain(stack);
+                preTerminationStateExecutor.runPreteraminationTasks(stack);
             }
         } catch (Exception ex) {
             LOGGER.error("Pre-termination failed: {}", ex.getMessage(), ex);

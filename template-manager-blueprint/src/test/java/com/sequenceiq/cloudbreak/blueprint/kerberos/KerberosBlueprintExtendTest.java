@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
+import com.sequenceiq.cloudbreak.type.KerberosType;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
@@ -46,7 +47,8 @@ public class KerberosBlueprintExtendTest {
         String expected = FileReaderUtils.readFileFromClasspath("extend-blueprint/multi-node-hdfs-yarn-kerb-forced.json");
 
         BlueprintTextProcessor b = new BlueprintTextProcessor(json);
-        String result = underTest.extendBlueprintWithKerberos(b, KERBEROS_ENV, "node.dc1.consul,node.consul", true, null, false).asText();
+        String result = underTest.extendBlueprintWithKerberos(b, KERBEROS_ENV, "node.dc1.consul,node.consul", true, null,
+                KerberosType.EXISTING_MIT, false).asText();
 
         JsonNode expectedNode = JsonUtil.readTree(expected);
         JsonNode resultNode = JsonUtil.readTree(result);
@@ -59,7 +61,8 @@ public class KerberosBlueprintExtendTest {
         String expected = FileReaderUtils.readFileFromClasspath("extend-blueprint/multi-node-hdfs-yarn-kerb.json");
 
         BlueprintTextProcessor b = new BlueprintTextProcessor(json);
-        String result = underTest.extendBlueprintWithKerberos(b, KERBEROS_ENV, "node.dc1.consul,node.consul", true, null, false).asText();
+        String result = underTest.extendBlueprintWithKerberos(b, KERBEROS_ENV, "node.dc1.consul,node.consul", true, null,
+                KerberosType.EXISTING_MIT, false).asText();
 
         JsonNode expectedNode = JsonUtil.readTree(expected);
         JsonNode resultNode = JsonUtil.readTree(result);
@@ -72,7 +75,8 @@ public class KerberosBlueprintExtendTest {
         String expected = FileReaderUtils.readFileFromClasspath("extend-blueprint/multi-node-hdfs-yarn-kerb-forced.json");
 
         BlueprintTextProcessor b = new BlueprintTextProcessor(json);
-        String result = underTest.extendBlueprintWithKerberos(b, KERBEROS_ENV, "node.dc1.consul,node.consul", true, null, true).asText();
+        String result = underTest.extendBlueprintWithKerberos(b, KERBEROS_ENV, "node.dc1.consul,node.consul", true, null,
+                KerberosType.EXISTING_MIT, true).asText();
 
         JsonNode expectedNode = JsonUtil.readTree(expected);
         JsonNode resultNode = JsonUtil.readTree(result);
@@ -85,7 +89,8 @@ public class KerberosBlueprintExtendTest {
         String expected = FileReaderUtils.readFileFromClasspath("extend-blueprint/multi-node-hdfs-yarn-default-kerb_descriptor_fixed.json");
 
         BlueprintTextProcessor b = new BlueprintTextProcessor(json);
-        String result = underTest.extendBlueprintWithKerberos(b, KERBEROS_ENV, "node.dc1.consul,node.consul", false, null, false).asText();
+        String result = underTest.extendBlueprintWithKerberos(b, KERBEROS_ENV, "node.dc1.consul,node.consul", false, null,
+                KerberosType.EXISTING_MIT, false).asText();
 
         JsonNode expectedNode = JsonUtil.readTree(expected);
         JsonNode resultNode = JsonUtil.readTree(result);
@@ -98,7 +103,8 @@ public class KerberosBlueprintExtendTest {
         String expected = FileReaderUtils.readFileFromClasspath("extend-blueprint/multi-node-hdfs-yarn-default-kerb_descriptor_forced_fixed.json");
 
         BlueprintTextProcessor b = new BlueprintTextProcessor(json);
-        String result = underTest.extendBlueprintWithKerberos(b, KERBEROS_ENV, "node.dc1.consul,node.consul", false, null, true).asText();
+        String result = underTest.extendBlueprintWithKerberos(b, KERBEROS_ENV, "node.dc1.consul,node.consul", false, null,
+                KerberosType.EXISTING_MIT, true).asText();
 
         JsonNode expectedNode = JsonUtil.readTree(expected);
         JsonNode resultNode = JsonUtil.readTree(result);
