@@ -18,7 +18,7 @@ public @interface MutuallyExclusiveNotNull {
 
     String[] fieldNames();
 
-    String message() default "{MutuallyExclusiveNotNull.message}";
+    String message() default "Only one field should be not null.";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
 

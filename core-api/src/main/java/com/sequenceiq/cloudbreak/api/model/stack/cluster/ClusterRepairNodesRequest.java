@@ -15,8 +15,8 @@ public class ClusterRepairNodesRequest {
     @ApiModelProperty(RepairClusterNodeRequest.DELETE_VOLUMES)
     private boolean deleteVolumes;
 
-    @NotEmpty
     @ApiModelProperty(RepairClusterNodeRequest.IDS)
+    @NotEmpty(message = "Node ID list must not be empty")
     private List<String> ids;
 
     public boolean isDeleteVolumes() {

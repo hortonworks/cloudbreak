@@ -66,9 +66,11 @@ import com.sequenceiq.cloudbreak.cloud.model.component.ManagementPackComponent;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
+import com.sequenceiq.cloudbreak.common.model.VolumeSetResourceAttributes;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
+import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.converter.scheduler.StatusToPollGroupConverter;
@@ -80,6 +82,7 @@ import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -96,6 +99,7 @@ import com.sequenceiq.cloudbreak.repository.ConstraintRepository;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.KerberosConfigRepository;
+import com.sequenceiq.cloudbreak.repository.ResourceRepository;
 import com.sequenceiq.cloudbreak.repository.cluster.ClusterRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
@@ -211,6 +215,9 @@ public class ClusterService {
 
     @Inject
     private AmbariRepositoryVersionService ambariRepositoryVersionService;
+
+    @Inject
+    private ResourceRepository resourceRepository;
 
     public Cluster create(Stack stack, Cluster cluster, List<ClusterComponent> components, User user) throws TransactionExecutionException {
         LOGGER.info("Cluster requested [BlueprintId: {}]", cluster.getBlueprint().getId());
@@ -529,37 +536,62 @@ public class ClusterService {
     }
 
     public void repairCluster(Long stackId, List<String> repairedHostGroups, boolean removeOnly) {
-        Map<String, List<String>> failedNodeMap = new HashMap<>();
+        repairClusterInternal(true, stackId, repairedHostGroups, null, false, removeOnly);
+    }
+
+    public void repairCluster(Long stackId, List<String> nodeIds, boolean deleteVolumes, boolean removeOnly) {
+        repairClusterInternal(false, stackId, null, nodeIds, deleteVolumes, removeOnly);
+    }
+
+    private void repairClusterInternal(boolean hostGroupMode, Long stackId, List<String> repairedHostGroups,
+            List<String> nodeIds, boolean deleteVolumes, boolean removeOnly) {
+        Map<String, List<String>> hostGroupToNodesMap = new HashMap<>();
         try {
-            Stack stack = transactionService.required(() -> {
+            transactionService.required(() -> {
                 Stack inTransactionStack = stackService.get(stackId);
                 Cluster cluster = inTransactionStack.getCluster();
+                Set<String> instanceHostNames = getInstanceHostNames(hostGroupMode, inTransactionStack, nodeIds);
                 Set<HostGroup> hostGroups = hostGroupService.getByCluster(cluster.getId());
                 for (HostGroup hg : hostGroups) {
-                    List<String> failedNodes = new ArrayList<>();
-                    if (repairedHostGroups.contains(hg.getName()) && hg.getRecoveryMode() == RecoveryMode.MANUAL) {
+                    List<String> nodesToRepair = new ArrayList<>();
+                    if (hg.getRecoveryMode() == RecoveryMode.MANUAL && (!hostGroupMode || repairedHostGroups.contains(hg.getName()))) {
                         for (HostMetadata hmd : hg.getHostMetadata()) {
-                            if (hmd.getHostMetadataState() == HostMetadataState.UNHEALTHY) {
+                            if (hostGroupMode ? hmd.getHostMetadataState() == HostMetadataState.UNHEALTHY : instanceHostNames.contains(hmd.getHostName())) {
                                 validateRepair(inTransactionStack, hmd);
-                                if (!failedNodeMap.containsKey(hg.getName())) {
-                                    failedNodeMap.put(hg.getName(), failedNodes);
-                                }
-                                failedNodes.add(hmd.getHostName());
+                                hostGroupToNodesMap.putIfAbsent(hg.getName(), nodesToRepair);
+                                nodesToRepair.add(hmd.getHostName());
                             }
                         }
                     }
                 }
+                if (!hostGroupMode) {
+                    updateNodeVolumeSetsDeleteVolumesFlag(stackId, nodeIds, deleteVolumes);
+                }
                 return inTransactionStack;
             });
-            if (!failedNodeMap.isEmpty()) {
-                flowManager.triggerClusterRepairFlow(stackId, failedNodeMap, removeOnly);
-                String recoveryMessage = cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_MANUALRECOVERY_REQUESTED.code(),
-                        Collections.singletonList(repairedHostGroups));
-                LOGGER.info(recoveryMessage);
-                eventService.fireCloudbreakEvent(stack.getId(), "RECOVERY", recoveryMessage);
-            }
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
+        }
+        triggerRepair(stackId, hostGroupToNodesMap, removeOnly, repairedHostGroups);
+    }
+
+    private Set<String> getInstanceHostNames(boolean hostGroupMode, Stack stack, List<String> nodeIds) {
+        if (hostGroupMode) {
+            return Set.of();
+        }
+        Set<String> instanceHostNames = stack.getInstanceMetaDataAsList()
+                .stream()
+                .filter(md -> nodeIds.contains(md.getInstanceId()))
+                .map(InstanceMetaData::getDiscoveryFQDN)
+                .collect(Collectors.toSet());
+        validateRepairNodeIdRequest(nodeIds, instanceHostNames);
+        return instanceHostNames;
+    }
+
+    private void validateRepairNodeIdRequest(List<String> nodeIds, Set<String> instanceHostNames) {
+        long distinctNodeIdCount = nodeIds.stream().distinct().count();
+        if (distinctNodeIdCount != instanceHostNames.size()) {
+            throw new BadRequestException(String.format("Node ID list is not valid: [%s]", String.join(", ", nodeIds)));
         }
     }
 
@@ -569,6 +601,36 @@ public class ClusterService {
         }
         if (isGateway(hostMetadata) && withEmbeddedAmbariDB(stack.getCluster())) {
             throw new BadRequestException("Ambari server failure with embedded database cannot be repaired!");
+        }
+    }
+
+    private void updateNodeVolumeSetsDeleteVolumesFlag(Long stackId, List<String> nodeIds, boolean deleteVolumes) {
+        nodeIds.forEach(id -> {
+            List<Resource> volumeSets = resourceRepository.findAllByStackIdAndInstanceIdAndType(stackId, id, ResourceType.AWS_VOLUMESET);
+            volumeSets.forEach(v -> updateDeleteVolumesFlag(deleteVolumes, v));
+            resourceRepository.saveAll(volumeSets);
+        });
+    }
+
+    private void updateDeleteVolumesFlag(boolean deleteVolumes, Resource volumeSet) {
+        Json attributesJson = null;
+        try {
+            attributesJson = volumeSet.getAttributes();
+            VolumeSetResourceAttributes attributes = attributesJson.get(VolumeSetResourceAttributes.class);
+            attributes.setDeleteOnTermination(deleteVolumes);
+            volumeSet.setAttributes(new Json(attributes));
+        } catch (IOException e) {
+            LOGGER.warn("Could not read/update volume set attributes: " + attributesJson.getValue(), e);
+        }
+    }
+
+    private void triggerRepair(Long stackId, Map<String, List<String>> failedNodeMap, boolean removeOnly, List<String> recoveryMessageArgument) {
+        if (!failedNodeMap.isEmpty()) {
+            flowManager.triggerClusterRepairFlow(stackId, failedNodeMap, removeOnly);
+            String recoveryMessage = cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_MANUALRECOVERY_REQUESTED.code(),
+                    Collections.singletonList(recoveryMessageArgument));
+            LOGGER.info(recoveryMessage);
+            eventService.fireCloudbreakEvent(stackId, "RECOVERY", recoveryMessage);
         }
     }
 
