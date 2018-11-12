@@ -3,9 +3,12 @@ package com.sequenceiq.cloudbreak.util;
 import java.io.IOException;
 import java.io.StringWriter;
 
+import org.springframework.stereotype.Service;
+
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 
+@Service
 public class FreeMarkerTemplateUtils {
 
     private FreeMarkerTemplateUtils() { }
@@ -21,7 +24,7 @@ public class FreeMarkerTemplateUtils {
      * @throws IOException if the template wasn't found or couldn't be read
      * @throws freemarker.template.TemplateException if rendering failed
      */
-    public static String processTemplateIntoString(Template template, Object model)
+    public String processTemplateIntoString(Template template, Object model)
             throws IOException, TemplateException {
         StringWriter result = new StringWriter();
         template.process(model, result);

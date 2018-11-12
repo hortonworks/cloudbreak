@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.aws;
+package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
@@ -28,6 +28,10 @@ import com.amazonaws.services.ec2.model.DescribeVpcsResult;
 import com.amazonaws.services.ec2.model.Vpc;
 import com.google.common.net.InetAddresses;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
+import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.AwsTagPreparationService;
+import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
+import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationTemplateBuilder;
 import com.sequenceiq.cloudbreak.cloud.aws.task.AwsPollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -42,7 +46,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AwsResourceConnectorTest {
+public class AwsNetworkServiceTest {
 
     private static final int ROOT_VOLUME_SIZE = 50;
 
@@ -50,7 +54,7 @@ public class AwsResourceConnectorTest {
     public final ExpectedException thrown = ExpectedException.none();
 
     @InjectMocks
-    private AwsResourceConnector underTest;
+    private AwsNetworkService underTest;
 
     @Mock
     private AwsClient awsClient;

@@ -1,0 +1,4 @@
+disk:
+    cloudPlatform:
+    platformDiskStartLabel:
+    platformDiskPrefix:

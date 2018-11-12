@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.aws.client;
 
-import java.util.function.Supplier;
-
-import com.amazonaws.SdkClientException;
 import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsResult;
@@ -17,9 +14,8 @@ import com.amazonaws.services.autoscaling.model.SuspendProcessesResult;
 import com.amazonaws.services.autoscaling.model.UpdateAutoScalingGroupRequest;
 import com.amazonaws.services.autoscaling.model.UpdateAutoScalingGroupResult;
 import com.sequenceiq.cloudbreak.service.Retry;
-import com.sequenceiq.cloudbreak.service.Retry.ActionWentFailException;
 
-public class AmazonAutoScalingRetryClient {
+public class AmazonAutoScalingRetryClient extends AmazonRetryClient {
 
     private final AmazonAutoScalingClient client;
 
@@ -32,17 +28,6 @@ public class AmazonAutoScalingRetryClient {
 
     public SuspendProcessesResult suspendProcesses(SuspendProcessesRequest request) {
         return retry.testWith2SecDelayMax15Times(() -> mapThrottlingError(() -> client.suspendProcesses(request)));
-    }
-
-    private <T> T mapThrottlingError(Supplier<T> supplier) {
-        try {
-            return supplier.get();
-        } catch (SdkClientException e) {
-            if (e.getMessage().contains("Rate exceeded")) {
-                throw new ActionWentFailException(e.getMessage());
-            }
-            throw e;
-        }
     }
 
     public ResumeProcessesResult resumeProcesses(ResumeProcessesRequest request) {

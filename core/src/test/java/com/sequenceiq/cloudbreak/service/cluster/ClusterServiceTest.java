@@ -154,7 +154,8 @@ public class ClusterServiceTest {
 
 
         Resource volumeSet = new Resource();
-        VolumeSetResourceAttributes attributes = new VolumeSetResourceAttributes();
+        VolumeSetResourceAttributes attributes = new VolumeSetResourceAttributes("eu-west-1", 100, "standard",
+                null, "", List.of());
         attributes.setDeleteOnTermination(null);
         volumeSet.setAttributes(new Json(attributes));
         when(resourceRepository.findAllByStackIdAndInstanceIdAndType(eq(1L), eq("instanceId1"), eq(ResourceType.AWS_VOLUMESET))).thenReturn(List.of(volumeSet));

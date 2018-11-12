@@ -91,13 +91,13 @@ public class DecommissionHandler implements ReactorEventHandler<DecommissionRequ
 
     private Set<String> getHostNamesForPrivateIds(DecommissionRequest request, Stack stack) {
         return request.getPrivateIds().stream().map(privateId -> {
-                    Optional<InstanceMetaData> instanceMetadata = stackService.getInstanceMetadata(stack.getInstanceMetaDataAsList(), privateId);
-                    if (instanceMetadata.isPresent()) {
-                        return instanceMetadata.get().getDiscoveryFQDN();
-                    } else {
-                        return null;
-                    }
-                }).filter(StringUtils::isNotEmpty).collect(Collectors.toSet());
+            Optional<InstanceMetaData> instanceMetadata = stackService.getInstanceMetadata(stack.getInstanceMetaDataAsList(), privateId);
+            if (instanceMetadata.isPresent()) {
+                return instanceMetadata.get().getDiscoveryFQDN();
+            } else {
+                return null;
+            }
+        }).filter(StringUtils::isNotEmpty).collect(Collectors.toSet());
     }
 
     private void executePreTerminationRecipes(Stack stack, String hostGroupName, Set<String> hostNames) {

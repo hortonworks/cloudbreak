@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.service.image;
 
-import static com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils.processTemplateIntoString;
-
 import java.io.IOException;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -19,6 +17,7 @@ import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
+import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
@@ -33,6 +32,9 @@ public class UserDataBuilder {
 
     @Inject
     private Configuration freemarkerConfiguration;
+
+    @Inject
+    private FreeMarkerTemplateUtils freeMarkerTemplateUtils;
 
     Map<InstanceGroupType, String> buildUserData(Platform cloudPlatform, byte[] cbSshKeyDer, String sshUser,
         PlatformParameters parameters, String saltBootPassword, String cbCert) {
@@ -63,7 +65,7 @@ public class UserDataBuilder {
 
     private String build(Map<String, Object> model) {
         try {
-            return processTemplateIntoString(freemarkerConfiguration.getTemplate("init/init.ftl", "UTF-8"), model);
+            return freeMarkerTemplateUtils.processTemplateIntoString(freemarkerConfiguration.getTemplate("init/init.ftl", "UTF-8"), model);
         } catch (IOException | TemplateException e) {
             LOGGER.error(e.getMessage(), e);
             throw new CloudConnectorException("Failed to process init script freemarker template", e);

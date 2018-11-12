@@ -27,6 +27,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -39,6 +40,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -61,6 +63,7 @@ import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.model.component.ManagementPackComponent;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
@@ -326,7 +329,33 @@ public class ClusterService {
             throw new BadRequestException("Clusters is already deleted.");
         }
         LOGGER.info("Cluster delete requested.");
+        markVolumesForDeletion(stack);
         flowManager.triggerClusterTermination(stackId, withStackDelete, deleteDependencies);
+    }
+
+    private void markVolumesForDeletion(Stack stack) {
+        if (!"AWS".equals(stack.getPlatformVariant())) {
+            return;
+        }
+
+        LOGGER.debug("Mark volumes for delete on termination in case of active repair flow.");
+        try {
+            transactionService.required(() -> {
+                List<Resource> resources = stack.getResourcesByType(ResourceType.AWS_ENCRYPTED_VOLUME);
+                Consumer<Resource> volumeTerminationSetter = resource -> {
+                    try {
+                        VolumeSetAttributes volumeSetAttributes = resource.getAttributes().get(VolumeSetAttributes.class);
+                        volumeSetAttributes.setDeleteOnTermination(Boolean.TRUE);
+                    } catch (IOException e) {
+                        LOGGER.error("Failed to parse volume set attributes");
+                    }
+                };
+                resources.forEach(volumeTerminationSetter);
+                return resourceRepository.saveAll(resources);
+            });
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
+        }
     }
 
     public Cluster retrieveClusterByStackIdWithoutAuth(Long stackId) {
@@ -563,7 +592,7 @@ public class ClusterService {
                     List<String> nodesToRepair = new ArrayList<>();
                     if (hg.getRecoveryMode() == RecoveryMode.MANUAL && (!hostGroupMode || repairedHostGroups.contains(hg.getName()))) {
                         for (HostMetadata hmd : hg.getHostMetadata()) {
-                            if (hostGroupMode ? hmd.getHostMetadataState() == HostMetadataState.UNHEALTHY : instanceHostNames.contains(hmd.getHostName())) {
+                            if (isRepairNeededForHost(hostGroupMode, instanceHostNames, hmd)) {
                                 validateRepair(inTransactionStack, hmd);
                                 hostGroupToNodesMap.putIfAbsent(hg.getName(), nodesToRepair);
                                 nodesToRepair.add(hmd.getHostName());
@@ -579,7 +608,12 @@ public class ClusterService {
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }
-        triggerRepair(stackId, hostGroupToNodesMap, removeOnly, repairedHostGroups);
+        List<String> repairedEntities = CollectionUtils.isEmpty(repairedHostGroups) ? nodeIds : repairedHostGroups;
+        triggerRepair(stackId, hostGroupToNodesMap, removeOnly, repairedEntities);
+    }
+
+    private boolean isRepairNeededForHost(boolean hostGroupMode, Set<String> instanceHostNames, HostMetadata hmd) {
+        return hostGroupMode ? hmd.getHostMetadataState() == HostMetadataState.UNHEALTHY : instanceHostNames.contains(hmd.getHostName());
     }
 
     private Set<String> getInstanceHostNames(boolean hostGroupMode, Stack stack, List<String> nodeIds) {

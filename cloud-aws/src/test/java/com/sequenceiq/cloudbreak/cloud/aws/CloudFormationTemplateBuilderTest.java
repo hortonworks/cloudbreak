@@ -1,11 +1,13 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
+import static com.sequenceiq.cloudbreak.cloud.aws.TestConstants.LATEST_AWS_CLOUD_FORMATION_TEMPLATE_PATH;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -53,6 +55,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.cloudbreak.common.type.CloudbreakResourceType;
+import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 import freemarker.template.Configuration;
@@ -64,14 +67,15 @@ public class CloudFormationTemplateBuilderTest {
 
     private static final Long WORKSPACE_ID = 1L;
 
-    private static final String LATEST_AWS_CLOUD_FORMATION_TEMPLATE_PATH = "templates/aws-cf-stack.ftl";
-
     private static final String CIDR = "10.0.0.0/16";
 
     private static final int ROOT_VOLUME_SIZE = 17;
 
     @Mock
     private DefaultCostTaggingService defaultCostTaggingService;
+
+    @Mock
+    private FreeMarkerTemplateUtils freeMarkerTemplateUtils;
 
     @InjectMocks
     private final CloudFormationTemplateBuilder cloudFormationTemplateBuilder = new CloudFormationTemplateBuilder();
@@ -123,6 +127,8 @@ public class CloudFormationTemplateBuilderTest {
         factoryBean.afterPropertiesSet();
         Configuration configuration = factoryBean.getObject();
         ReflectionTestUtils.setField(cloudFormationTemplateBuilder, "freemarkerConfiguration", configuration);
+
+        when(freeMarkerTemplateUtils.processTemplateIntoString(any(), any())).thenCallRealMethod();
 
         awsCloudFormationTemplate = configuration.getTemplate(templatePath, "UTF-8").toString();
         authenticatedContext = authenticatedContext();

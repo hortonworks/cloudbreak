@@ -334,26 +334,6 @@
               "VolumeType" : "gp2"
             }
           }
-		  <#assign seq = ["b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]>
-			<#list seq as x>
-			<#if x_index = group.volumeCount><#break></#if>
-  		  ,{
-          	"DeviceName" : "/dev/xvd${x}",
-          	<#if group.volumeType == "ephemeral">
-            "VirtualName" : "ephemeral${x_index}"
-            <#else>
-            "Ebs" : {
-            <#if group.ebsEncrypted == true>
-              "Encrypted" : true,
-            <#else>
-              "Encrypted" : false,
-            </#if>
-              "VolumeSize" : ${group.volumeSize},
-              "VolumeType" : "${group.volumeType}"
-            }
-            </#if>
-      	  }
-			</#list>
       	],
         "ImageId"        : { "Ref" : "AMI" },
         <#if group.cloudSecurityId??>
