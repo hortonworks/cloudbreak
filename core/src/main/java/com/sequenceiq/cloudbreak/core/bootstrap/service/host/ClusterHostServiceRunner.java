@@ -24,6 +24,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.ExposedService;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
@@ -194,7 +195,7 @@ public class ClusterHostServiceRunner {
     private SaltConfig createSaltConfig(Stack stack, Cluster cluster, GatewayConfig primaryGatewayConfig, Iterable<GatewayConfig> gatewayConfigs)
             throws IOException, CloudbreakOrchestratorException {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
-        saveDatalakeNameservers(stack, servicePillar);
+        saveCustomNameservers(cluster.isSecure(), cluster.getKerberosConfig(), servicePillar);
         saveSharedRangerService(stack, servicePillar);
         if (cluster.isSecure() && kerberosDetailService.isAmbariManagedKerberosPackages(cluster.getKerberosConfig())) {
             Map<String, String> kerberosPillarConf = new HashMap<>();
@@ -246,6 +247,7 @@ public class ClusterHostServiceRunner {
             saveLdapPillar(ldapConfig, servicePillar);
         }
         saveSssdAdPillar(cluster, servicePillar);
+        saveSssdIpaPillar(cluster, servicePillar);
         saveDockerPillar(cluster.getExecutorType(), servicePillar);
         saveHDPPillar(cluster.getId(), servicePillar);
         saveLdapsAdPillar(cluster, servicePillar);
@@ -299,6 +301,19 @@ public class ClusterHostServiceRunner {
         return parameters;
     }
 
+    private void saveSssdIpaPillar(Cluster cluster, Map<String, SaltPillarProperties> servicePillar) {
+        if (cluster.isIpaJoinable()) {
+            KerberosConfig kerberosConfig = cluster.getKerberosConfig();
+            Map<String, Object> sssdConnfig = new HashMap<>();
+            sssdConnfig.put("principal", kerberosConfig.getPrincipal());
+            sssdConnfig.put("realm", kerberosConfig.getRealm().toUpperCase());
+            sssdConnfig.put("domain", kerberosConfig.getDomain());
+            sssdConnfig.put("password", kerberosConfig.getPassword());
+            sssdConnfig.put("server", kerberosConfig.getUrl());
+            servicePillar.put("sssd-ipa", new SaltPillarProperties("/sssd/ipa.sls", singletonMap("sssd-ipa", sssdConnfig)));
+        }
+    }
+
     private void decoratePillarWithAmbariDatabase(Cluster cluster, Map<String, SaltPillarProperties> servicePillar)
             throws CloudbreakOrchestratorFailedException {
         RDSConfig ambariRdsConfig = rdsConfigService.findByClusterIdAndType(cluster.getId(), RdsType.AMBARI);
@@ -319,18 +334,11 @@ public class ClusterHostServiceRunner {
         return grainProperties;
     }
 
-    /**
-     * In order to be able to connect an ephemeral cluster to a datalake, the ephemeral cluster needs to know some of the datalake nameservers to resolve
-     * the custom hostnames.
-     */
-    private void saveDatalakeNameservers(Stack stack, Map<String, SaltPillarProperties> servicePillar) {
-        Long datalakeId = stack.getDatalakeId();
-        if (datalakeId != null) {
-            Stack dataLakeStack = stackService.getByIdWithListsInTransaction(datalakeId);
-            String datalakeDomain = dataLakeStack.getGatewayInstanceMetadata().get(0).getDomain();
-            List<String> ipList = dataLakeStack.getGatewayInstanceMetadata().stream().map(InstanceMetaData::getPrivateIp).collect(Collectors.toList());
+    private void saveCustomNameservers(boolean secure, KerberosConfig kerberosConfig, Map<String, SaltPillarProperties> servicePillar) {
+        if (secure && kerberosConfig != null && StringUtils.isNotBlank(kerberosConfig.getDomain()) && StringUtils.isNotBlank(kerberosConfig.getNameServers())) {
+            List<String> ipList = Lists.newArrayList(kerberosConfig.getNameServers().split(","));
             servicePillar.put("forwarder-zones", new SaltPillarProperties("/unbound/forwarders.sls",
-                    singletonMap("forwarder-zones", singletonMap(datalakeDomain, singletonMap("nameservers", ipList)))));
+                    singletonMap("forwarder-zones", singletonMap(kerberosConfig.getDomain(), singletonMap("nameservers", ipList)))));
         }
     }
 

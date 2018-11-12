@@ -169,6 +169,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             Set<String> all = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
 
             setAdMemberRoleIfNeeded(allNodes, saltConfig, exitModel, sc, all);
+            setIpaMemberRoleIfNeeded(allNodes, saltConfig, exitModel, sc, all);
 
             // knox
             if (primaryGateway.getKnoxGatewayEnabled()) {
@@ -218,6 +219,13 @@ public class SaltOrchestrator implements HostOrchestrator {
             throws ExecutionException, InterruptedException {
         if (saltConfig.getServicePillarConfig().containsKey("sssd-ad")) {
             runSaltCommand(sc, new GrainAddRunner(all, allNodes, "ad_member"), exitModel);
+        }
+    }
+
+    private void setIpaMemberRoleIfNeeded(Set<Node> allNodes, SaltConfig saltConfig, ExitCriteriaModel exitModel, SaltConnector sc, Set<String> all)
+            throws ExecutionException, InterruptedException {
+        if (saltConfig.getServicePillarConfig().containsKey("sssd-ipa")) {
+            runSaltCommand(sc, new GrainAddRunner(all, allNodes, "ipa_member"), exitModel);
         }
     }
 
@@ -504,12 +512,12 @@ public class SaltOrchestrator implements HostOrchestrator {
         executeRecipes(gatewayConfig, allNodes, exitCriteriaModel, RecipeExecutionPhase.PRE_TERMINATION);
     }
 
-    public void leaveAdDomain(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
+    public void leaveDomain(GatewayConfig gatewayConfig, Set<Node> allNodes, String roleToRemove, String roleToAdd, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorFailedException {
         try (SaltConnector sc = new SaltConnector(gatewayConfig, restDebug)) {
             Set<String> targets = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
-            runSaltCommand(sc, new GrainAddRunner(targets, allNodes, "roles", "ad_leave", CompoundType.IP), exitCriteriaModel);
-            runSaltCommand(sc, new GrainRemoveRunner(targets, allNodes, "roles", "ad_member", CompoundType.IP), exitCriteriaModel);
+            runSaltCommand(sc, new GrainAddRunner(targets, allNodes, "roles", roleToAdd, CompoundType.IP), exitCriteriaModel);
+            runSaltCommand(sc, new GrainRemoveRunner(targets, allNodes, "roles", roleToRemove, CompoundType.IP), exitCriteriaModel);
             Set<String> all = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
             runSaltCommand(sc, new SyncGrainsRunner(all, allNodes), exitCriteriaModel);
             runNewService(sc, new HighStateRunner(all, allNodes), exitCriteriaModel, maxRetryRecipe, true);

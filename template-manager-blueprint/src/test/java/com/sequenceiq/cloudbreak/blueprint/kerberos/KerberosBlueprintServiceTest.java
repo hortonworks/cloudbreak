@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
+import com.sequenceiq.cloudbreak.type.KerberosType;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
@@ -101,6 +102,7 @@ public class KerberosBlueprintServiceTest {
         kerberosConfig.setKrb5Conf("{\"krb5-conf\":{\"properties\":{\"domains\":\".domains.bp\","
                 + "\"manage_krb5_conf\":\"true\",\"content\":\"content.bp\"}}}");
         kerberosConfig.setTcpAllowed(true);
+        kerberosConfig.setType(KerberosType.EXISTING_MIT);
         Cluster cluster = TestUtil.cluster(blueprint, stack, 1L, kerberosConfig);
         TemplatePreparationObject object = Builder.builder()
                 .withKerberosConfig(cluster.getKerberosConfig())
@@ -131,6 +133,7 @@ public class KerberosBlueprintServiceTest {
         kerberosConfig.setLdapUrl("ldapUrl.conf");
         kerberosConfig.setContainerDn("containerDn.conf");
         kerberosConfig.setTcpAllowed(true);
+        kerberosConfig.setType(KerberosType.EXISTING_AD);
         Stack stack = TestUtil.stack();
 
         GeneralClusterConfigs generalClusterConfigs = BlueprintTestUtil.generalClusterConfigs();

@@ -18,7 +18,7 @@ public class KerberosConfigToKerberosRequestConverterTest extends AbstractConver
         KerberosConfig config = TestUtil.kerberosConfig();
         KerberosRequest request = underTest.convert(config);
         assertAllFieldsNotNull(request, Lists.newArrayList("url", "adminUrl", "realm", "ldapUrl", "containerDn", "descriptor", "krb5Conf",
-                "principal", "admin"));
+                "principal", "domain", "nameServers", "admin"));
     }
 
     @Test
@@ -32,6 +32,8 @@ public class KerberosConfigToKerberosRequestConverterTest extends AbstractConver
         config.setRealm("");
         config.setLdapUrl("");
         config.setContainerDn("");
+        config.setDomain("");
+        config.setNameServers("");
         config.setTcpAllowed(true);
         KerberosRequest request = underTest.convert(config);
         assertAllFieldsNotNull(request, Lists.newArrayList("admin", "descriptor", "krb5Conf", "masterKey"));
@@ -46,6 +48,8 @@ public class KerberosConfigToKerberosRequestConverterTest extends AbstractConver
         config.setUrl("");
         config.setAdminUrl("");
         config.setRealm("");
+        config.setDomain("");
+        config.setNameServers("");
         config.setTcpAllowed(true);
         KerberosRequest request = underTest.convert(config);
         assertAllFieldsNotNull(request, Lists.newArrayList("admin", "ldapUrl", "containerDn", "descriptor", "krb5Conf", "masterKey"));
@@ -59,6 +63,8 @@ public class KerberosConfigToKerberosRequestConverterTest extends AbstractConver
         config.setPrincipal("");
         config.setDescriptor("");
         config.setKrb5Conf("");
+        config.setDomain("");
+        config.setNameServers("");
         config.setTcpAllowed(true);
         KerberosRequest request = underTest.convert(config);
         assertAllFieldsNotNull(request, Lists.newArrayList("admin", "url", "adminUrl", "realm", "ldapUrl", "containerDn", "masterKey", "principal"));

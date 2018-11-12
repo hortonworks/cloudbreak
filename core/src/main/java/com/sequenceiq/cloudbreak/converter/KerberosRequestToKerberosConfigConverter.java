@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.converter;
 
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
@@ -26,6 +27,12 @@ public class KerberosRequestToKerberosConfigConverter extends AbstractConversion
         kerberosConfig.setContainerDn(source.getContainerDn());
         kerberosConfig.setDescriptor(source.getDescriptor());
         kerberosConfig.setKrb5Conf(source.getKrb5Conf());
+        if (StringUtils.isNotBlank(source.getDomain())) {
+            kerberosConfig.setDomain(source.getDomain());
+        } else if (StringUtils.isNotBlank(source.getRealm())) {
+            kerberosConfig.setDomain(source.getRealm().toLowerCase());
+        }
+        kerberosConfig.setNameServers(source.getNameServers());
         return kerberosConfig;
     }
 }

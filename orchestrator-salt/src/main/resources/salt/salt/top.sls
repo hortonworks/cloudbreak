@@ -15,6 +15,10 @@ base:
     - match: compound
     - sssd.ad
 
+  'G@roles:ipa_member and G@os_family:RedHat':
+    - match: compound
+    - sssd.ipa
+
   'roles:kerberos_server_master':
     - match: grain
     - kerberos.master
@@ -106,4 +110,8 @@ base:
 
   'G@roles:ad_leave and G@os_family:RedHat':
     - match: compound
-    - sssd.ad-leave 
+    - sssd.ad-leave
+
+  'G@roles:ipa_leave and G@os_family:RedHat':
+    - match: compound
+    - sssd.ipa-leave

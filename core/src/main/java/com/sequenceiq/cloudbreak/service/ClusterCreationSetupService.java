@@ -184,6 +184,9 @@ public class ClusterCreationSetupService {
         start = System.currentTimeMillis();
 
         cluster = clusterDecorator.decorate(cluster, request, blueprint, user, stack.getWorkspace(), stack);
+
+        decorateStackWithCustomDomainIfAdOrIpaJoinable(stack, cluster);
+
         LOGGER.info("Cluster object decorated in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
         start = System.currentTimeMillis();
@@ -212,6 +215,12 @@ public class ClusterCreationSetupService {
         LOGGER.info("Cluster object creation took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
         return savedCluster;
+    }
+
+    private void decorateStackWithCustomDomainIfAdOrIpaJoinable(Stack stack, Cluster cluster) {
+        if (cluster.isSecure() && cluster.getKerberosConfig() != null && StringUtils.isNotBlank(cluster.getKerberosConfig().getDomain())) {
+            stack.setCustomDomain(cluster.getKerberosConfig().getDomain());
+        }
     }
 
     private void checkRepositories(ClusterComponent ambariRepoComponent, ClusterComponent stackRepoComponent, Component imageComponent, boolean strictCheck)

@@ -1,4 +1,3 @@
-export COMPOSE_TLS_VERSION=TLSv1_2
 export CB_DB_ROOT_PATH=/var/lib/boot2docker/it-test
 export DOCKER_TAG_CLOUDBREAK=dev
 export CB_JAVA_OPTS="-Dcaas.url=caas-mock.service.consul:10080 -Xmx4G -Drest.debug=true -Dmock.spi.endpoint=https://test.service.consul:9443"

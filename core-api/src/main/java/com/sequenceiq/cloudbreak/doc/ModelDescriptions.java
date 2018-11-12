@@ -134,6 +134,8 @@ public class ModelDescriptions {
         public static final String KERBEROS_PRINCIPAL = "kerberos principal";
         public static final String DESCRIPTOR = "Ambari kerberos descriptor";
         public static final String KRB_5_CONF = "Ambari kerberos krb5.conf template";
+        public static final String KERBEROS_DOMAIN = "cluster instances will set this as the domain part of their hostname";
+        public static final String KERBEROS_NAMESERVERS = "comma separated list of nameservers' IP address which will be used by cluster instances";
         public static final String PARAMETERS = "additional cloud specific parameters for stack";
         public static final String INPUTS = "dynamic properties";
         public static final String FAILURE_ACTION = "action on failure";

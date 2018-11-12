@@ -19,6 +19,10 @@ base:
     - match: compound
     - sssd.ad
 
+  'G@roles:ipa_member or G@roles:ad_leave':
+    - match: compound
+    - sssd.ipa
+
   'roles:gateway':
     - match: grain
     - gateway.init

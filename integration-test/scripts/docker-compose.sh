@@ -2,8 +2,6 @@
 
 set -x
 
-export COMPOSE_TLS_VERSION=TLSv1_2
-
 : ${INTEGCB_LOCATION?"integcb location"}
 
 echo -e "\n\033[1;96m--- Kill running cbd containers\033[0m\n"
