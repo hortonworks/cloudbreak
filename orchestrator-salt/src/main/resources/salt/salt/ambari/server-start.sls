@@ -17,6 +17,27 @@ execute-ambari-server-init:
     - name: /opt/ambari-server/ambari-server-init.sh 2>&1 | tee -a /var/log/ambari-server-init.log && exit ${PIPESTATUS[0]}
     - unless: test -f /var/ambari-init-executed
 
+
+{% if not ambari.is_local_ldap and ambari.ldap.certificate is defined and ambari.ldap.certificate is not none %}
+
+/opt/ambari-server/setup-truststore.sh:
+  file.managed:
+    - makedirs: True
+    - source: salt://ambari/scripts/setup-truststore.sh
+    - template: jinja
+    - context:
+      ldap: {{ ambari.ldap }}
+      ldaps: {{ ambari.ldaps }}
+    - mode: 744
+
+setup-truststore:
+  cmd.run:
+    - name: /opt/ambari-server/setup-truststore.sh
+    - shell: /bin/bash
+    - unless: test -f /var/setup_truststore_success
+
+{% endif %}
+
 {% if ambari.is_systemd %}
 
 /etc/systemd/system/ambari-server.service:

@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -240,11 +241,13 @@ public class ClusterHostServiceRunner {
         saveSssdAdPillar(cluster, servicePillar);
         saveDockerPillar(cluster.getExecutorType(), servicePillar);
         saveHDPPillar(cluster.getId(), servicePillar);
+        saveLdapsAdPillar(cluster, servicePillar);
         Map<String, Object> credentials = new HashMap<>();
         credentials.put("username", ambariSecurityConfigProvider.getAmbariUserName(stack.getCluster()));
         credentials.put("password", ambariSecurityConfigProvider.getAmbariPassword(stack.getCluster()));
         credentials.put("securityMasterKey", ambariSecurityConfigProvider.getAmbariSecurityMasterKey(cluster));
         servicePillar.put("ambari-credentials", new SaltPillarProperties("/ambari/credentials.sls", singletonMap("ambari", credentials)));
+
         if (smartSenseCredentialConfigService.areCredentialsSpecified()) {
             Map<String, Object> smartSenseCredentials = smartSenseCredentialConfigService.getCredentials();
             servicePillar.put("smartsense-credentials", new SaltPillarProperties("/smartsense/credentials.sls", smartSenseCredentials));
@@ -266,6 +269,16 @@ public class ClusterHostServiceRunner {
             sssdConnfig.put("domain", kerberosConfig.getRealm().toLowerCase());
             sssdConnfig.put("password", kerberosConfig.getPassword());
             servicePillar.put("sssd-ad", new SaltPillarProperties("/sssd/ad.sls", singletonMap("sssd-ad", sssdConnfig)));
+        }
+    }
+
+    private void saveLdapsAdPillar(Cluster cluster, Map<String, SaltPillarProperties> servicePillar) {
+        if (Objects.nonNull(cluster.getLdapConfig()) && Objects.nonNull(cluster.getLdapConfig().getCertificate())) {
+            Map<String, Object> ldapsProperties = new HashMap<>();
+            ldapsProperties.put("certPath", ambariSecurityConfigProvider.getCertPath());
+            ldapsProperties.put("keystorePassword", ambariSecurityConfigProvider.getKeystorePassword());
+            ldapsProperties.put("keystorePath", ambariSecurityConfigProvider.getKeystorePath());
+            servicePillar.put("ldaps-ad", new SaltPillarProperties("/ambari/ldaps.sls", singletonMap("ambari", singletonMap("ldaps", ldapsProperties))));
         }
     }
 

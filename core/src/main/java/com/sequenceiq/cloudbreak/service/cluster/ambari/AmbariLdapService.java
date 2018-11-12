@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster.ambari;
 
+import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariRepositoryVersionService.AMBARI_VERSION_2_7_100_0;
 import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariRepositoryVersionService.AMBARI_VERSION_2_7_2_0;
 
 import java.util.HashMap;
@@ -60,6 +61,9 @@ public class AmbariLdapService {
             ldapConfigs.put("ambari.ldap.connectivity.anonymous_bind", false);
             if (ambariRepositoryVersionService.isVersionNewerOrEqualThanLimited(ambariRepo::getVersion, AMBARI_VERSION_2_7_2_0)) {
                 ldapConfigs.put("ambari.ldap.advanced.collision_behavior", "convert");
+                if (ambariRepositoryVersionService.isVersionNewerOrEqualThanLimited(ambariRepo::getVersion, AMBARI_VERSION_2_7_100_0)) {
+                    ldapConfigs.put("ambari.ldap.advanced.disable_endpoint_identification", true);
+                }
             } else {
                 ldapConfigs.put("ambari.ldap.advance.collision_behavior", "convert");
             }

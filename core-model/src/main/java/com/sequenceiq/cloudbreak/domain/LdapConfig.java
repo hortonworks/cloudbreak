@@ -91,6 +91,8 @@ public class LdapConfig implements ProvisionEntity, EnvironmentAwareResource {
 
     private String adminGroup;
 
+    private String certificate;
+
     @ManyToOne
     private Workspace workspace;
 
@@ -121,6 +123,7 @@ public class LdapConfig implements ProvisionEntity, EnvironmentAwareResource {
         copy.setGroupMemberAttribute(groupMemberAttribute);
         copy.setDomain(domain);
         copy.setAdminGroup(adminGroup);
+        copy.setCertificate(certificate);
         return copy;
     }
 
@@ -290,6 +293,14 @@ public class LdapConfig implements ProvisionEntity, EnvironmentAwareResource {
 
     public void setUserDnPattern(String userDnPattern) {
         this.userDnPattern = userDnPattern;
+    }
+
+    public String getCertificate() {
+        return certificate;
+    }
+
+    public void setCertificate(String certificate) {
+        this.certificate = certificate;
     }
 
     @Override

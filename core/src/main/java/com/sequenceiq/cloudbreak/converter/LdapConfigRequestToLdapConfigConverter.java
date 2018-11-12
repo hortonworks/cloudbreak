@@ -42,6 +42,7 @@ public class LdapConfigRequestToLdapConfigConverter extends AbstractConversionSe
         config.setGroupNameAttribute(json.getGroupNameAttribute() != null ? json.getGroupNameAttribute() : "cn");
         config.setGroupMemberAttribute(json.getGroupMemberAttribute() != null ? json.getGroupMemberAttribute() : "member");
         config.setAdminGroup(json.getAdminGroup());
+        config.setCertificate(json.getCertificate());
         return config;
     }
 }
