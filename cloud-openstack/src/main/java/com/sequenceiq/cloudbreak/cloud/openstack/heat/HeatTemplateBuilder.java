@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.openstack.heat;
 
-import static com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils.processTemplateIntoString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
 
@@ -30,6 +29,7 @@ import com.sequenceiq.cloudbreak.cloud.openstack.view.NeutronNetworkView;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.NovaInstanceView;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.OpenStackGroupView;
 import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
+import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -52,6 +52,9 @@ public class HeatTemplateBuilder {
     @Inject
     private DefaultCostTaggingService defaultCostTaggingService;
 
+    @Inject
+    private FreeMarkerTemplateUtils freeMarkerTemplateUtils;
+
     public String build(ModelContext modelContext) {
         try {
             List<NovaInstanceView> novaInstances = new OpenStackGroupView(modelContext.stackName, modelContext.groups, modelContext.tags).getFlatNovaView();
@@ -70,7 +73,7 @@ public class HeatTemplateBuilder {
                 model.put("availability_zone", az.value());
             }
             Template template = new Template(openStackHeatTemplatePath, modelContext.templateString, freemarkerConfiguration);
-            String generatedTemplate = processTemplateIntoString(template, model);
+            String generatedTemplate = freeMarkerTemplateUtils.processTemplateIntoString(template, model);
             LOGGER.debug("Generated Heat template: {}", generatedTemplate);
             return generatedTemplate;
         } catch (IOException | TemplateException e) {

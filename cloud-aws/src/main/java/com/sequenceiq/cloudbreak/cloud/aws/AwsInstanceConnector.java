@@ -43,7 +43,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 @Service
 public class AwsInstanceConnector implements InstanceConnector {
 
-    static final String INSTANCE_NOT_FOUND_ERROR_CODE = "InvalidInstanceID.NotFound";
+    public static final String INSTANCE_NOT_FOUND_ERROR_CODE = "InvalidInstanceID.NotFound";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsInstanceConnector.class);
 

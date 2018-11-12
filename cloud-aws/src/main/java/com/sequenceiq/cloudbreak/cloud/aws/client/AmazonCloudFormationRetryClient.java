@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.aws.client;
 
-import java.util.function.Supplier;
-
-import com.amazonaws.SdkClientException;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.cloudformation.model.CreateStackRequest;
 import com.amazonaws.services.cloudformation.model.CreateStackResult;
@@ -13,9 +10,8 @@ import com.amazonaws.services.cloudformation.model.DescribeStackResourceResult;
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStacksResult;
 import com.sequenceiq.cloudbreak.service.Retry;
-import com.sequenceiq.cloudbreak.service.Retry.ActionWentFailException;
 
-public class AmazonCloudFormationRetryClient {
+public class AmazonCloudFormationRetryClient extends AmazonRetryClient {
 
     private final AmazonCloudFormationClient client;
 
@@ -28,17 +24,6 @@ public class AmazonCloudFormationRetryClient {
 
     public DescribeStacksResult describeStacks(DescribeStacksRequest request) {
         return retry.testWith2SecDelayMax15Times(() -> mapThrottlingError(() -> client.describeStacks(request)));
-    }
-
-    private <T> T mapThrottlingError(Supplier<T> supplier) {
-        try {
-            return supplier.get();
-        } catch (SdkClientException e) {
-            if (e.getMessage().contains("Rate exceeded")) {
-                throw new ActionWentFailException(e.getMessage());
-            }
-            throw e;
-        }
     }
 
     public CreateStackResult createStack(CreateStackRequest request) {

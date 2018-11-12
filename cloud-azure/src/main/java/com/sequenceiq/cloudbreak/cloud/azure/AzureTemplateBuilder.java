@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
-import static com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils.processTemplateIntoString;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,6 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
+import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -53,6 +52,9 @@ public class AzureTemplateBuilder {
 
     @Inject
     private DefaultCostTaggingService defaultCostTaggingService;
+
+    @Inject
+    private FreeMarkerTemplateUtils freeMarkerTemplateUtils;
 
     public String build(String stackName, String customImageId, AzureCredentialView armCredentialView, AzureStackView armStack, CloudContext cloudContext,
             CloudStack cloudStack) {
@@ -92,7 +94,7 @@ public class AzureTemplateBuilder {
             model.put("noFirewallRules", azureUtils.isNoSecurityGroups(network));
             model.put("userDefinedTags", cloudStack.getTags());
             model.putAll(defaultCostTaggingService.prepareAllTagsForTemplate());
-            String generatedTemplate = processTemplateIntoString(getTemplate(cloudStack), model);
+            String generatedTemplate = freeMarkerTemplateUtils.processTemplateIntoString(getTemplate(cloudStack), model);
             LOGGER.debug("Generated Arm template: {}", generatedTemplate);
             return generatedTemplate;
         } catch (IOException | TemplateException e) {
@@ -102,7 +104,7 @@ public class AzureTemplateBuilder {
 
     public String buildParameters(CloudCredential credential, Network network, Image image) {
         try {
-            return processTemplateIntoString(freemarkerConfiguration.getTemplate(armTemplateParametersPath, "UTF-8"), new HashMap<>());
+            return freeMarkerTemplateUtils.processTemplateIntoString(freemarkerConfiguration.getTemplate(armTemplateParametersPath, "UTF-8"), new HashMap<>());
         } catch (IOException | TemplateException e) {
             throw new CloudConnectorException("Failed to process the Arm TemplateParameterBuilder", e);
         }

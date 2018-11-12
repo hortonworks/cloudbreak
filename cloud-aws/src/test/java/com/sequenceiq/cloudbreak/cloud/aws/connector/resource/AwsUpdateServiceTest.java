@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.aws;
+package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
@@ -13,6 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import com.sequenceiq.cloudbreak.cloud.aws.AwsImageUpdateService;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
@@ -20,7 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
-public class AwsResourceConnectorUpdateResourceTest {
+public class AwsUpdateServiceTest {
 
     @Mock
     private AwsImageUpdateService awsImageUpdateService;
@@ -32,7 +33,7 @@ public class AwsResourceConnectorUpdateResourceTest {
     private AuthenticatedContext ac;
 
     @InjectMocks
-    private AwsResourceConnector underTest;
+    private AwsUpdateService underTest;
 
     @Before
     public void setUp() {

@@ -1,6 +1,7 @@
-package com.sequenceiq.cloudbreak.cloud.aws;
+package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -18,7 +19,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.ec2.AmazonEC2Client;
+import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
+import com.sequenceiq.cloudbreak.cloud.aws.context.AwsContextBuilder;
 import com.sequenceiq.cloudbreak.cloud.aws.encryption.EncryptedImageCopyService;
 import com.sequenceiq.cloudbreak.cloud.aws.encryption.EncryptedSnapshotService;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.AwsBackoffSyncPollingScheduler;
@@ -33,11 +37,12 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
+import com.sequenceiq.cloudbreak.cloud.template.compute.ComputeResourceService;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.service.Retry;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AwsResourceConnectorTerminateTest {
+public class AwsTerminateServiceTest {
 
     private static final String USER_ID = "horton@hortonworks.com";
 
@@ -47,7 +52,7 @@ public class AwsResourceConnectorTerminateTest {
     public final ExpectedException thrown = ExpectedException.none();
 
     @InjectMocks
-    private AwsResourceConnector underTest;
+    private AwsTerminateService underTest;
 
     @Mock
     private AwsClient awsClient;
@@ -82,6 +87,24 @@ public class AwsResourceConnectorTerminateTest {
     @Mock
     private AwsBackoffSyncPollingScheduler scheduler;
 
+    @Mock
+    private AwsContextBuilder contextBuilder;
+
+    @Mock
+    private ComputeResourceService computeResourceService;
+
+    @Mock
+    private CloudFormationStackUtil cfStackUtil;
+
+    @Mock
+    private AwsElasticIpService awsElasticIpService;
+
+    @Mock
+    private AwsComputeResourceService awsComputeResourceService;
+
+    @Mock
+    private AwsResourceConnector awsResourceConnector;
+
     @Test
     public void testTerminateShouldNotCleanupEncryptedResourcesWhenNoResourcesExist() {
 
@@ -107,9 +130,9 @@ public class AwsResourceConnectorTerminateTest {
 
     @Test
     public void testTerminateShouldCleanupEncryptedResourcesWhenCloudformationStackDoesNotExist() throws Exception {
-        when(awsClient.createCloudFormationClient(any(), any())).thenReturn(cloudFormationClient);
         when(awsClient.createCloudFormationRetryClient(any(), any())).thenReturn(cloudFormationRetryClient);
         when(awsClient.createAccess(any(), any())).thenReturn(ec2Client);
+        when(cfStackUtil.getCloudFormationStackResource(any())).thenReturn(null);
 
         List<CloudResource> resources = List.of(new Builder().name("ami-87654321").type(ResourceType.AWS_ENCRYPTED_AMI).build(),
                 new Builder().name("snap-1234567812345678").type(ResourceType.AWS_SNAPSHOT).build(),
@@ -128,6 +151,9 @@ public class AwsResourceConnectorTerminateTest {
         when(awsClient.createCloudFormationRetryClient(any(), any())).thenReturn(cloudFormationRetryClient);
         when(awsClient.createAccess(any(), any())).thenReturn(ec2Client);
         when(awsPollTaskFactory.newAwsTerminateStackStatusCheckerTask(any(), any(), any(), any(), any(), any())).thenReturn(awsTerminateStackStatusCheckerTask);
+        CloudResource cfStackResource = mock(CloudResource.class);
+        when(cfStackResource.getName()).thenReturn("stackName");
+        when(cfStackUtil.getCloudFormationStackResource(any())).thenReturn(cfStackResource);
 
         List<CloudResource> resources = List.of(new Builder().name("ami-87654321").type(ResourceType.AWS_ENCRYPTED_AMI).build(),
                 new Builder().name("snap-1234567812345678").type(ResourceType.AWS_SNAPSHOT).build(),

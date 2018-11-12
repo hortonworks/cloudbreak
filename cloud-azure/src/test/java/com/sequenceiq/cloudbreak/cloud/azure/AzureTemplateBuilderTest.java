@@ -29,6 +29,7 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
@@ -61,6 +62,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.cloudbreak.common.type.CloudbreakResourceType;
+import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 import com.sequenceiq.cloudbreak.util.Version;
 
 import freemarker.template.Configuration;
@@ -93,6 +95,9 @@ public class AzureTemplateBuilderTest {
 
     @Mock
     private DefaultCostTaggingService defaultCostTaggingService;
+
+    @Spy
+    private FreeMarkerTemplateUtils freeMarkerTemplateUtils;
 
     @InjectMocks
     private final AzureTemplateBuilder azureTemplateBuilder = new AzureTemplateBuilder();

@@ -29,6 +29,7 @@ import org.junit.runners.Parameterized.Parameters;
 import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
@@ -53,6 +54,7 @@ import com.sequenceiq.cloudbreak.cloud.openstack.heat.HeatTemplateBuilder.ModelC
 import com.sequenceiq.cloudbreak.cloud.openstack.view.NeutronNetworkView;
 import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.cloudbreak.common.type.CloudbreakResourceType;
+import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
@@ -68,6 +70,9 @@ public class HeatTemplateBuilderTest {
 
     @Mock
     private DefaultCostTaggingService defaultCostTaggingService;
+
+    @Spy
+    private FreeMarkerTemplateUtils freeMarkerTemplateUtils;
 
     @InjectMocks
     private final HeatTemplateBuilder heatTemplateBuilder = new HeatTemplateBuilder();
