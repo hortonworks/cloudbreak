@@ -23,6 +23,9 @@ type LdapConfigResponse struct {
 	// LDAP group for administrators
 	AdminGroup string `json:"adminGroup,omitempty"`
 
+	// Self-signed certificate of LDAPS server
+	Certificate string `json:"certificate,omitempty"`
+
 	// description of the resource
 	// Max Length: 1000
 	// Min Length: 0
@@ -89,6 +92,8 @@ type LdapConfigResponse struct {
 }
 
 /* polymorph LdapConfigResponse adminGroup false */
+
+/* polymorph LdapConfigResponse certificate false */
 
 /* polymorph LdapConfigResponse description false */
 

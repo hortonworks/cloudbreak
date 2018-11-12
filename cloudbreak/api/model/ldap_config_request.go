@@ -31,6 +31,9 @@ type LdapConfigRequest struct {
 	// Required: true
 	BindPassword *string `json:"bindPassword"`
 
+	// Self-signed certificate of LDAPS server
+	Certificate string `json:"certificate,omitempty"`
+
 	// description of the resource
 	// Max Length: 1000
 	// Min Length: 0
@@ -98,6 +101,8 @@ type LdapConfigRequest struct {
 /* polymorph LdapConfigRequest bindDn false */
 
 /* polymorph LdapConfigRequest bindPassword false */
+
+/* polymorph LdapConfigRequest certificate false */
 
 /* polymorph LdapConfigRequest description false */
 

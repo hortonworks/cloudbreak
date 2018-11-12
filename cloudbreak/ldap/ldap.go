@@ -1,8 +1,10 @@
 package ldap
 
 import (
-	"github.com/hortonworks/cb-cli/cloudbreak/oauth"
+	"encoding/base64"
 	"time"
+
+	"github.com/hortonworks/cb-cli/cloudbreak/oauth"
 
 	"crypto/tls"
 	"errors"
@@ -23,7 +25,7 @@ import (
 
 var LdapHeader = []string{"Name", "Server", "Domain", "DirectoryType",
 	"UserSearchBase", "UserDnPattern", "UserNameAttribute", "UserObjectClass",
-	"GroupMemberAttribute", "GroupNameAttribute", "GroupObjectClass", "GroupSearchBase", "Environments"}
+	"GroupMemberAttribute", "GroupNameAttribute", "GroupObjectClass", "GroupSearchBase", "Certificate", "Environments"}
 
 type ldap struct {
 	Name                 string `json:"Name" yaml:"Name"`
@@ -39,6 +41,7 @@ type ldap struct {
 	GroupObjectClass     string `json:"GroupObjectClass,omitempty" yaml:"GroupObjectClass,omitempty"`
 	GroupSearchBase      string `json:"GroupSearchBase,omitempty" yaml:"GroupSearchBase,omitempty"`
 	AdminGroup           string `json:"AdminGroup,omitempty" yaml:"AdminGroup,omitempty"`
+	Certificate          string `json:"Certificate,omitempty" yaml:"Certificate,omitempty"`
 	Environments         []string
 }
 
@@ -101,7 +104,11 @@ func CreateLDAP(c *cli.Context) error {
 	groupNameAttribute := c.String(fl.FlLdapGroupNameAttribute.Name)
 	groupObjectClass := c.String(fl.FlLdapGroupObjectClass.Name)
 	adminGroup := c.String(fl.FlLdapAdminGroup.Name)
-
+	certificateLocation := c.String(fl.FlLdapCertificate.Name)
+	certificate := ""
+	if certificateLocation != "" {
+		certificate = base64.StdEncoding.EncodeToString(utils.ReadFile(certificateLocation))
+	}
 	server := c.String(fl.FlLdapServer.Name)
 
 	environments := utils.DelimitedStringToArray(c.String(fl.FlEnvironmentsOptional.Name), ",")
@@ -119,12 +126,12 @@ func CreateLDAP(c *cli.Context) error {
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
 
 	return createLDAPImpl(cbClient.Cloudbreak.V3WorkspaceIDLdapconfigs, int32(serverPort), workspaceID, name, server, protocol, domain, bindDn, bindPassword, directoryType,
-		userSearchBase, userDnPattern, userNameAttribute, userObjectClass, groupSearchBase, groupMemberAttribute, groupNameAttribute, groupObjectClass, adminGroup, environments)
+		userSearchBase, userDnPattern, userNameAttribute, userObjectClass, groupSearchBase, groupMemberAttribute, groupNameAttribute, groupObjectClass, adminGroup, certificate, environments)
 }
 
 func createLDAPImpl(ldapClient ldapClient, port int32, workspaceID int64, name, server, protocol, domain, bindDn, bindPassword, directoryType,
 	userSearchBase, userDnPattern, userNameAttribute, userObjectClass, groupSearchBase, groupMemberAttribute, groupNameAttribute,
-	groupObjectClass, adminGroup string, environments []string) error {
+	groupObjectClass, adminGroup, certificate string, environments []string) error {
 	defer utils.TimeTrack(time.Now(), "create ldap")
 
 	host := server[strings.LastIndex(server, "/")+1 : strings.LastIndex(server, ":")]
@@ -146,6 +153,7 @@ func createLDAPImpl(ldapClient ldapClient, port int32, workspaceID int64, name, 
 		GroupObjectClass:     groupObjectClass,
 		GroupSearchBase:      groupSearchBase,
 		AdminGroup:           adminGroup,
+		Certificate:          certificate,
 		Environments:         environments,
 	}
 
@@ -194,6 +202,7 @@ func listLdapsImpl(ldapClient ldapClient, writer func([]string, []utils.Row), wo
 			GroupObjectClass:     l.GroupObjectClass,
 			GroupSearchBase:      l.GroupSearchBase,
 			AdminGroup:           l.AdminGroup,
+			Certificate:          l.Certificate,
 			Environments:         l.Environments,
 		}
 		tableRows = append(tableRows, row)
@@ -248,6 +257,7 @@ func DescribeLdap(c *cli.Context) {
 			GroupObjectClass:     l.GroupObjectClass,
 			GroupSearchBase:      l.GroupSearchBase,
 			AdminGroup:           l.AdminGroup,
+			Certificate:          l.Certificate,
 			Environments:         l.Environments,
 		},
 		strconv.FormatInt(l.ID, 10)})

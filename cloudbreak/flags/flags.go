@@ -406,6 +406,13 @@ var (
 			Usage: "set ldaps if the ldap is secured with SSL",
 		},
 	}
+	FlLdapCertificate = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name:  "ldaps-cert-file",
+			Usage: "location of the certificate file to be imported in case of LDAPS",
+		},
+	}
 	FlLdapDomain = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
