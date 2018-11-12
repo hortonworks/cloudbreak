@@ -6,7 +6,6 @@ buildscript {
     mavenCentral()
     mavenLocal()
     jcenter()
-    maven { url "http://maven.sequenceiq.com/releases" }
   }
   dependencies {
     classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
