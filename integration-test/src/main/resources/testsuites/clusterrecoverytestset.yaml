@@ -9,11 +9,11 @@ listeners:
   - com.sequenceiq.it.cloudbreak.newway.listener.FirstLastTestExecutionBehaviour
   - com.sequenceiq.it.cloudbreak.newway.listener.StructuredEventsReporterOnFailingCluster
 tests:
-  - name: "openstack manual recovery"
+  - name: "AWS manual recovery"
     preserveOrder: true
     parameters:
-      clusterName: openstack-datasci-manrec
-      provider: openstack
+      clusterName: aws-e2e-test-cluster
+      provider: aws
       blueprintName: "Data Science: Apache Spark 2, Apache Zeppelin"
       image: hdp
       instancegroupName: worker
@@ -24,11 +24,26 @@ tests:
         - testCreateNewRegularCluster
         - testManualRecovery
         - testTerminateCluster
-  - name: "openstack auto recovery"
+  - name: "AWS manual unconditional recovery with node IDs"
     preserveOrder: true
     parameters:
-      clusterName: openstack-datasci-autorec
-      provider: openstack
+      clusterName: aws-e2e-test-cluster
+      provider: aws
+      blueprintName: "Data Science: Apache Spark 2, Apache Zeppelin"
+      image: hdp
+      instancegroupName: worker
+      workerInstanceCount: 5
+    classes:
+    - name: com.sequenceiq.it.cloudbreak.RecoveryTests
+      includedMethods:
+      - testCreateNewRegularCluster
+      - testManualRecoveryWithNodeIds
+      - testTerminateCluster
+  - name: "AWS auto recovery"
+    preserveOrder: true
+    parameters:
+      clusterName: aws-e2e-test-cluster
+      provider: aws
       blueprintName: "Data Science: Apache Spark 2, Apache Zeppelin"
       image: hdp
       instancegroupName: worker

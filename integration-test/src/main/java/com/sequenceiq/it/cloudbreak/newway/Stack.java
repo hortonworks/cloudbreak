@@ -19,10 +19,6 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import com.sequenceiq.it.cloudbreak.newway.action.StackDeleteAction;
-import com.sequenceiq.it.cloudbreak.newway.action.StackStartAction;
-import com.sequenceiq.it.cloudbreak.newway.action.StackStopAction;
-import com.sequenceiq.it.cloudbreak.newway.action.StackSyncPutAction;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +34,11 @@ import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.SshService;
 import com.sequenceiq.it.cloudbreak.SshUtil;
 import com.sequenceiq.it.cloudbreak.newway.action.ActionV2;
+import com.sequenceiq.it.cloudbreak.newway.action.StackDeleteAction;
 import com.sequenceiq.it.cloudbreak.newway.action.StackPostAction;
+import com.sequenceiq.it.cloudbreak.newway.action.StackStartAction;
+import com.sequenceiq.it.cloudbreak.newway.action.StackStopAction;
+import com.sequenceiq.it.cloudbreak.newway.action.StackSyncPutAction;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.v3.CloudbreakV3Util;
 import com.sequenceiq.it.cloudbreak.newway.v3.StackPostV3Strategy;
@@ -346,6 +346,10 @@ public class Stack extends StackEntity {
 
     public static Action<Stack> repair(String hostgroupName) {
         return new Action<>(getTestContextStack(), new RepairNodeStrategy(hostgroupName));
+    }
+
+    public static Action<Stack> repairNodes(List<String> nodeIds) {
+        return new Action<>(getTestContextStack(), new RepairNodeWithIdStrategy(nodeIds));
     }
 
     public static ActionV2<StackEntity> stopV2() {
