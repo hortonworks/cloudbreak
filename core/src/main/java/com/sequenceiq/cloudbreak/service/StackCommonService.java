@@ -269,7 +269,12 @@ public class StackCommonService implements StackEndpoint {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(workspaceId, WorkspaceResource.STACK, Action.WRITE, user);
         Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
-        clusterService.repairCluster(stack.getId(), clusterRepairRequest.getHostGroups(), clusterRepairRequest.isRemoveOnly());
+        if (clusterRepairRequest.getHostGroups() != null) {
+            clusterService.repairCluster(stack.getId(), clusterRepairRequest.getHostGroups(), clusterRepairRequest.isRemoveOnly());
+        } else {
+            clusterService.repairCluster(stack.getId(), clusterRepairRequest.getNodes().getIds(),
+                    clusterRepairRequest.getNodes().isDeleteVolumes(), clusterRepairRequest.isRemoveOnly());
+        }
     }
 
     public void retryInWorkspace(String name, Long workspaceId) {

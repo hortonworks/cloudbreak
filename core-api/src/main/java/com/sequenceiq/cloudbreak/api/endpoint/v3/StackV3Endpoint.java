@@ -124,7 +124,7 @@ public interface StackV3Endpoint {
     @ApiOperation(value = StackOpDescription.REPAIR_CLUSTER_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.CLUSTER_REPAIR_NOTES,
             nickname = "repairClusterV3")
     Response repairClusterInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            ClusterRepairRequest clusterRepairRequest);
+            @Valid ClusterRepairRequest clusterRepairRequest);
 
     // deleteCluster // v1
     @DELETE
