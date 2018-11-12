@@ -10,13 +10,13 @@ RSpec.shared_context "e2e shared vars", :a => :b do
 
   @recipe_types = Array["pre-ambari-start", "pre-termination","post-ambari-start", "post-cluster-install"]
   @recipe_name = "cli-recipe-url"
-  @recipe_url = "https://rawgit.com/hortonworks/cb-cli/master/tests/recipes/post-install.sh"
+  @recipe_url = "https://rawgit.com/hortonworks/cb-cli/master/tests/aruba/recipes/echo.sh"
   @recipe_file = "../../scripts/recipe.sh"
 
   @default_blueprint_name = "'EDW-ETL: Apache Hive, Apache Spark 2'"
   @blueprint_name_url = "cli-bp-url"
   @blueprint_name_file = "cli-bp-file"
-  @blueprint_url = "https://rawgit.com/hortonworks/cb-cli/master/tests/blueprints/test.bp"
+  @blueprint_url = "https://rawgit.com/hortonworks/cb-cli/master/tests/aruba/blueprints/test.bp"
   @blueprint_file = "../../blueprints/test.bp"
 
   @image_catalog_name = "cli-cat"
