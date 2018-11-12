@@ -457,12 +457,20 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
         return cloudbreakAmbariUser.getRaw();
     }
 
+    public String getCloudbreakAmbariUserSecret() {
+        return cloudbreakAmbariUser.getSecret();
+    }
+
     public void setCloudbreakAmbariUser(String cloudbreakAmbariUser) {
         this.cloudbreakAmbariUser = new Secret(cloudbreakAmbariUser);
     }
 
     public String getCloudbreakAmbariPassword() {
         return cloudbreakAmbariPassword.getRaw();
+    }
+
+    public String getCloudbreakAmbariPasswordSecret() {
+        return cloudbreakAmbariPassword.getSecret();
     }
 
     public void setCloudbreakAmbariPassword(String cloudbreakAmbariPassword) {
