@@ -17,6 +17,9 @@ management:
     prometheus:
       enabled: true
 
+info:
+  app:
+    capabilities: gov_cloud
 
 spring:
   freemarker:
