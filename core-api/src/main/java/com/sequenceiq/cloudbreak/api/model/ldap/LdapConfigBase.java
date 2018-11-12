@@ -8,10 +8,14 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.sequenceiq.cloudbreak.api.model.DirectoryType;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.LdapConfigModelDescription;
+import com.sequenceiq.cloudbreak.structuredevent.json.Base64Deserializer;
+import com.sequenceiq.cloudbreak.structuredevent.json.Base64Serializer;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -74,6 +78,11 @@ public abstract class LdapConfigBase implements JsonEntity {
 
     @ApiModelProperty(LdapConfigModelDescription.ADMIN_GROUP)
     private String adminGroup;
+
+    @ApiModelProperty(LdapConfigModelDescription.CERTIFICATE)
+    @JsonSerialize(using = Base64Serializer.class)
+    @JsonDeserialize(using = Base64Deserializer.class)
+    private String certificate;
 
     @ApiModelProperty(ModelDescriptions.ENVIRONMENTS)
     private Set<String> environments = new HashSet<>();
@@ -204,6 +213,14 @@ public abstract class LdapConfigBase implements JsonEntity {
 
     public void setUserDnPattern(String userDnPattern) {
         this.userDnPattern = userDnPattern;
+    }
+
+    public String getCertificate() {
+        return certificate;
+    }
+
+    public void setCertificate(String certificate) {
+        this.certificate = certificate;
     }
 
     public Set<String> getEnvironments() {

@@ -31,6 +31,7 @@ public class LdapConfigToLdapConfigResponseConverter extends AbstractConversionS
         json.setGroupNameAttribute(config.getGroupNameAttribute());
         json.setGroupMemberAttribute(config.getGroupMemberAttribute());
         json.setAdminGroup(config.getAdminGroup());
+        json.setCertificate(config.getCertificate());
         json.setEnvironments(config.getEnvironments().stream().map(CompactView::getName).collect(Collectors.toSet()));
         return json;
     }

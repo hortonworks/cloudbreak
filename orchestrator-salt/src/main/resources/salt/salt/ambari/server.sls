@@ -161,6 +161,31 @@ setup_ldap_in_ambari_properties:
     - context:
       ldap: {{ ambari.ldap }}
 
+{% if ambari.ldap.certificate is defined and ambari.ldap.certificate is not none %}
+
+{{ ambari.ldaps.certPath }}:
+  file.managed:
+    - contents_pillar: ldap:certificate
+    - makedirs: True
+
+/opt/ambari-server/import-certificate.sh:
+  file.managed:
+    - makedirs: True
+    - source: salt://ambari/scripts/import-certificate.sh
+    - template: jinja
+    - context:
+      ldap: {{ ambari.ldap }}
+      ldaps: {{ ambari.ldaps }}
+    - mode: 744
+
+import-certificate:
+  cmd.run:
+    - name: /opt/ambari-server/import-certificate.sh
+    - shell: /bin/bash
+    - unless: test -f /var/import-certificate_success
+
+{% endif %}
+
 {% else %}
 
 /opt/ambari-server/setup-ldap.sh:

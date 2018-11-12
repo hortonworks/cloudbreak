@@ -46,6 +46,8 @@ public class AmbariRepositoryVersionService {
 
     public static final Versioned AMBARI_VERSION_2_7_2_0 = () -> "2.7.2.0";
 
+    public static final Versioned AMBARI_VERSION_2_7_100_0 = () -> "2.7.100.0-0";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariRepositoryVersionService.class);
 
     @Inject

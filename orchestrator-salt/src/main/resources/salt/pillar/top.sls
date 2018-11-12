@@ -39,6 +39,7 @@ base:
     - match: grain
     - ambari.database
     - ambari.credentials
+    - ambari.ldaps
     - grafana.repo
     - gateway.init
     - gateway.ldap

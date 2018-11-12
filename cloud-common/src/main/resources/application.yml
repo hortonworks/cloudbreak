@@ -217,6 +217,10 @@ cb:
       port: 5432
       user: ambari
       db: ambari
+    ldaps:
+      certPath: /etc/ambari-server/cert
+      keystorePath: /var/lib/ambari-server/keys
+      keystorePassword: mypass
 
   hdp:
     entries:

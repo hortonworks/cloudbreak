@@ -533,6 +533,7 @@ public class TestUtil {
         config.setGroupNameAttribute("cn");
         config.setGroupMemberAttribute("member");
         config.setAdminGroup("ambariadmins");
+        config.setCertificate("-----BEGIN CERTIFICATE-----certificate-----END CERTIFICATE-----");
         return config;
     }
 

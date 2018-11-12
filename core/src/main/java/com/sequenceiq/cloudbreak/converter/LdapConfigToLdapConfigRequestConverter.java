@@ -33,6 +33,7 @@ public class LdapConfigToLdapConfigRequestConverter extends AbstractConversionSe
         ldapConfigRequest.setUserNameAttribute(source.getUserNameAttribute());
         ldapConfigRequest.setUserObjectClass(source.getUserObjectClass());
         ldapConfigRequest.setUserSearchBase(source.getUserSearchBase());
+        ldapConfigRequest.setCertificate(source.getCertificate());
         return ldapConfigRequest;
     }
 }
