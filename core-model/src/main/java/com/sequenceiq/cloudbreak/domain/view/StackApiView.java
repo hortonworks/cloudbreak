@@ -7,6 +7,8 @@ import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
@@ -20,6 +22,7 @@ import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
+import com.sequenceiq.cloudbreak.domain.stack.StackType;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -61,6 +64,9 @@ public class StackApiView extends CompactViewWithOwner {
     private Long created;
 
     private Long datalakeId;
+
+    @Enumerated(EnumType.STRING)
+    private StackType type = StackType.WORKLOAD;
 
     @ManyToOne
     @JoinColumn(name = "createdBy")
@@ -180,5 +186,13 @@ public class StackApiView extends CompactViewWithOwner {
 
     public void setUserView(UserView userView) {
         this.userView = userView;
+    }
+
+    public StackType getType() {
+        return type;
+    }
+
+    public void setType(StackType type) {
+        this.type = type;
     }
 }

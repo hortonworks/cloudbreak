@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.StackType;
 import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
@@ -54,6 +55,7 @@ import com.sequenceiq.cloudbreak.service.StackUnderOperationService;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.decorator.StackDecorator;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
@@ -119,6 +121,9 @@ public class StackCreatorService {
     @Inject
     private CredentialService credentialService;
 
+    @Inject
+    private BlueprintService blueprintService;
+
     public StackResponse createStack(CloudbreakUser cloudbreakUser, User user, Workspace workspace, StackRequest stackRequest) {
         ValidationResult validationResult = stackRequestValidator.validate(stackRequest);
         if (validationResult.getState() == State.ERROR) {
@@ -171,6 +176,7 @@ public class StackCreatorService {
                     LOGGER.info("Stack validation object has been created in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
                     blueprint = stackValidation.getBlueprint();
+                    setStackType(stack, blueprint);
 
                     start = System.currentTimeMillis();
                     stackService.validateStack(stackValidation, stackRequest.getClusterRequest().getValidateBlueprint());
@@ -236,6 +242,12 @@ public class StackCreatorService {
         LOGGER.info("Stack provision triggered in {} ms for stack {}", System.currentTimeMillis() - start, savedStack.getName());
 
         return response;
+    }
+
+    private void setStackType(Stack stack, Blueprint blueprint) {
+        if (blueprintService.isDatalakeBlueprint(blueprint)) {
+            stack.setType(StackType.DATALAKE);
+        }
     }
 
     private void fillInstanceMetadata(Stack stack) {

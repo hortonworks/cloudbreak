@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.domain.workspace;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -24,7 +23,7 @@ public class Tenant implements ProvisionEntity {
     @SequenceGenerator(name = "tenant_generator", sequenceName = "tenant_id_seq", allocationSize = 1)
     private Long id;
 
-    @Basic(optional = false)
+    @Column(nullable = false)
     private String name;
 
     @Column(length = 1000000, columnDefinition = "TEXT")

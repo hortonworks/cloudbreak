@@ -1,5 +1,33 @@
 package com.sequenceiq.cloudbreak.controller.validation.stack;
 
+import static com.sequenceiq.cloudbreak.api.model.rds.RdsType.HIVE;
+import static com.sequenceiq.cloudbreak.api.model.rds.RdsType.RANGER;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
 import com.sequenceiq.cloudbreak.api.model.TemplateRequest;
@@ -15,37 +43,9 @@ import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.State;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateRequestValidator;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.slf4j.LoggerFactory;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import static com.sequenceiq.cloudbreak.api.model.rds.RdsType.HIVE;
-import static com.sequenceiq.cloudbreak.api.model.rds.RdsType.RANGER;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StackRequestValidatorTest extends StackRequestValidatorTestBase {
@@ -63,8 +63,6 @@ public class StackRequestValidatorTest extends StackRequestValidatorTestBase {
     private static final String TEST_RANGER_NAME = "ranger";
 
     private static final String TEST_BP_NAME = "testBpName";
-
-    private static final String SHARED_SERVICE_READY_BP_TAG = "shared_services_ready";
 
     private static final String RDS_ERROR_MESSAGE_FORMAT = "For a Datalake cluster (since you have selected a datalake ready blueprint) "
             + "you should provide at least one %s rds/database configuration to the Cluster request";
@@ -88,9 +86,6 @@ public class StackRequestValidatorTest extends StackRequestValidatorTestBase {
     private Blueprint blueprint;
 
     @Mock
-    private Json blueprintJson;
-
-    @Mock
     private RdsConfigService rdsConfigService;
 
     public StackRequestValidatorTest() {
@@ -100,8 +95,6 @@ public class StackRequestValidatorTest extends StackRequestValidatorTestBase {
     @Before
     public void setUp() {
         when(blueprintService.getByNameForWorkspaceId(anyString(), eq(WORKSPACE_ID))).thenReturn(blueprint);
-        when(blueprint.getTags()).thenReturn(blueprintJson);
-        when(blueprintJson.getMap()).thenReturn(Collections.emptyMap());
         when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(WORKSPACE_ID);
     }
 
@@ -174,7 +167,7 @@ public class StackRequestValidatorTest extends StackRequestValidatorTestBase {
 
     @Test
     public void testWhenBlueprintIsSharedServiceReadyAndThereIsOnlyHiveRdsWithNameThenErrorComes() {
-        when(blueprintJson.getMap()).thenReturn(Map.of(SHARED_SERVICE_READY_BP_TAG, true));
+        when(blueprintService.isDatalakeBlueprint(any())).thenReturn(true);
         StackRequest request = stackRequest();
         request.getClusterRequest().setRdsConfigNames(Set.of(TEST_HIVE_NAME));
         request.getClusterRequest().setRdsConfigJsons(Collections.emptySet());
@@ -196,7 +189,7 @@ public class StackRequestValidatorTest extends StackRequestValidatorTestBase {
 
     @Test
     public void testWhenBlueprintIsSharedServiceReadyAndThereIsOnlyRangerRdsWithNameThenErrorComes() {
-        when(blueprintJson.getMap()).thenReturn(Map.of(SHARED_SERVICE_READY_BP_TAG, true));
+        when(blueprintService.isDatalakeBlueprint(any())).thenReturn(true);
         StackRequest request = stackRequest();
         request.getClusterRequest().setRdsConfigNames(Set.of(TEST_RANGER_NAME));
         request.getClusterRequest().setRdsConfigJsons(Collections.emptySet());
@@ -218,7 +211,7 @@ public class StackRequestValidatorTest extends StackRequestValidatorTestBase {
 
     @Test
     public void testWhenBlueprintIsSharedServiceReadyAndThereAreRangerAndHiveRdsWithNameButLdapDoesntThenErrorComes() {
-        when(blueprintJson.getMap()).thenReturn(Map.of(SHARED_SERVICE_READY_BP_TAG, true));
+        when(blueprintService.isDatalakeBlueprint(any())).thenReturn(true);
         StackRequest request = stackRequest();
         request.getClusterRequest().setRdsConfigNames(Set.of(TEST_RANGER_NAME, TEST_HIVE_NAME));
         request.getClusterRequest().setRdsConfigJsons(Collections.emptySet());
@@ -243,7 +236,7 @@ public class StackRequestValidatorTest extends StackRequestValidatorTestBase {
 
     @Test
     public void testWhenBlueprintIsSharedServiceReadyAndThereAreRangerAndHiveRdsWithNameAndLdapWithNameThenEverythingIsFine() {
-        when(blueprintJson.getMap()).thenReturn(Map.of(SHARED_SERVICE_READY_BP_TAG, true));
+        when(blueprintService.isDatalakeBlueprint(any())).thenReturn(true);
         StackRequest request = stackRequest();
         request.getClusterRequest().setRdsConfigNames(Set.of(TEST_RANGER_NAME, TEST_HIVE_NAME));
         request.getClusterRequest().setRdsConfigJsons(Collections.emptySet());
@@ -266,7 +259,7 @@ public class StackRequestValidatorTest extends StackRequestValidatorTestBase {
 
     @Test
     public void testWhenBlueprintIsSharedServiceReadyAndThereAreRangerAndHiveRdsWithNameAndLdapWithIdThenEverythingIsFine() {
-        when(blueprintJson.getMap()).thenReturn(Map.of(SHARED_SERVICE_READY_BP_TAG, true));
+        when(blueprintService.isDatalakeBlueprint(any())).thenReturn(true);
         StackRequest request = stackRequest();
         request.getClusterRequest().setRdsConfigNames(Set.of(TEST_RANGER_NAME, TEST_HIVE_NAME));
         request.getClusterRequest().setRdsConfigJsons(Collections.emptySet());
@@ -289,7 +282,7 @@ public class StackRequestValidatorTest extends StackRequestValidatorTestBase {
 
     @Test
     public void testWhenBlueprintIsSharedServiceReadyAndThereAreRangerAndHiveRdsWithNameAndLdapWithRequestThenEverythingIsFine() {
-        when(blueprintJson.getMap()).thenReturn(Map.of(SHARED_SERVICE_READY_BP_TAG, true));
+        when(blueprintService.isDatalakeBlueprint(any())).thenReturn(true);
         StackRequest request = stackRequest();
         request.getClusterRequest().setRdsConfigNames(Set.of(TEST_RANGER_NAME, TEST_HIVE_NAME));
         request.getClusterRequest().setRdsConfigJsons(Collections.emptySet());
@@ -312,7 +305,7 @@ public class StackRequestValidatorTest extends StackRequestValidatorTestBase {
 
     @Test
     public void testWhenBlueprintIsSharedServiceReadyAndThereAreRangerAndHiveRdsWithBothIdAndLdapWithNameThenEverythingIsFine() {
-        when(blueprintJson.getMap()).thenReturn(Map.of(SHARED_SERVICE_READY_BP_TAG, true));
+        when(blueprintService.isDatalakeBlueprint(any())).thenReturn(true);
         StackRequest request = stackRequest();
         request.getClusterRequest().setRdsConfigIds(Set.of(TEST_RANGER_ID, TEST_HIVE_ID));
         request.getClusterRequest().setRdsConfigJsons(Collections.emptySet());
@@ -335,7 +328,7 @@ public class StackRequestValidatorTest extends StackRequestValidatorTestBase {
 
     @Test
     public void testWhenBlueprintIsSharedServiceReadyAndThereAreRangerAndHiveRdsWithBothRequestAndLdapWithNameThenEverythingIsFine() {
-        when(blueprintJson.getMap()).thenReturn(Map.of(SHARED_SERVICE_READY_BP_TAG, true));
+        when(blueprintService.isDatalakeBlueprint(any())).thenReturn(true);
         StackRequest request = stackRequest();
         request.getClusterRequest().setRdsConfigJsons(Set.of(rdsConfigRequest(HIVE), rdsConfigRequest(RANGER)));
         request.getClusterRequest().setRdsConfigIds(Collections.emptySet());
@@ -354,7 +347,7 @@ public class StackRequestValidatorTest extends StackRequestValidatorTestBase {
 
     @Test
     public void testWhenBlueprintIsSharedServiceReadyAndThereAreRangerAndHiveRdsWithNameAndIdAndLdapWithNameThenEverythingIsFine() {
-        when(blueprintJson.getMap()).thenReturn(Map.of(SHARED_SERVICE_READY_BP_TAG, true));
+        when(blueprintService.isDatalakeBlueprint(any())).thenReturn(true);
         StackRequest request = stackRequest();
         request.getClusterRequest().setRdsConfigNames(Set.of(TEST_HIVE_NAME));
         request.getClusterRequest().setRdsConfigIds(Set.of(TEST_RANGER_ID));
@@ -377,7 +370,7 @@ public class StackRequestValidatorTest extends StackRequestValidatorTestBase {
 
     @Test
     public void testWhenBlueprintIsSharedServiceReadyAndThereAreRangerAndHiveRdsWithIdAndNameAndLdapWithNameThenEverythingIsFine() {
-        when(blueprintJson.getMap()).thenReturn(Map.of(SHARED_SERVICE_READY_BP_TAG, true));
+        when(blueprintService.isDatalakeBlueprint(any())).thenReturn(true);
         StackRequest request = stackRequest();
         request.getClusterRequest().setRdsConfigNames(Set.of(TEST_RANGER_NAME));
         request.getClusterRequest().setRdsConfigIds(Set.of(TEST_HIVE_ID));
@@ -400,7 +393,7 @@ public class StackRequestValidatorTest extends StackRequestValidatorTestBase {
 
     @Test
     public void testWhenBlueprintIsSharedServiceReadyAndThereAreRangerAndHiveRdsWithNameAndRequestAndLdapWithNameThenEverythingIsFine() {
-        when(blueprintJson.getMap()).thenReturn(Map.of(SHARED_SERVICE_READY_BP_TAG, true));
+        when(blueprintService.isDatalakeBlueprint(any())).thenReturn(true);
         StackRequest request = stackRequest();
         request.getClusterRequest().setRdsConfigNames(Set.of(TEST_HIVE_NAME));
         request.getClusterRequest().setRdsConfigIds(Collections.emptySet());
@@ -421,7 +414,7 @@ public class StackRequestValidatorTest extends StackRequestValidatorTestBase {
 
     @Test
     public void testWhenBlueprintIsSharedServiceReadyAndThereAreRangerAndHiveRdsWithRequestAndNameAndLdapWithNameThenEverythingIsFine() {
-        when(blueprintJson.getMap()).thenReturn(Map.of(SHARED_SERVICE_READY_BP_TAG, true));
+        when(blueprintService.isDatalakeBlueprint(any())).thenReturn(true);
         StackRequest request = stackRequest();
         request.getClusterRequest().setRdsConfigNames(Set.of(TEST_RANGER_NAME));
         request.getClusterRequest().setRdsConfigIds(Collections.emptySet());
@@ -442,7 +435,7 @@ public class StackRequestValidatorTest extends StackRequestValidatorTestBase {
 
     @Test
     public void testWhenBlueprintIsSharedServiceReadyAndThereAreRangerAndHiveRdsWithRequestAndIdAndLdapWithNameThenEverythingIsFine() {
-        when(blueprintJson.getMap()).thenReturn(Map.of(SHARED_SERVICE_READY_BP_TAG, true));
+        when(blueprintService.isDatalakeBlueprint(any())).thenReturn(true);
         StackRequest request = stackRequest();
         request.getClusterRequest().setRdsConfigNames(Collections.emptySet());
         request.getClusterRequest().setRdsConfigIds(Set.of(TEST_RANGER_ID));
@@ -463,7 +456,7 @@ public class StackRequestValidatorTest extends StackRequestValidatorTestBase {
 
     @Test
     public void testWhenBlueprintIsSharedServiceReadyAndThereIsNoLdapAndRdsConfigGivenThenErrorComes() {
-        when(blueprintJson.getMap()).thenReturn(Map.of(SHARED_SERVICE_READY_BP_TAG, true));
+        when(blueprintService.isDatalakeBlueprint(any())).thenReturn(true);
         StackRequest request = stackRequest();
         request.getClusterRequest().setRdsConfigNames(Collections.emptySet());
         request.getClusterRequest().setRdsConfigIds(Collections.emptySet());
@@ -556,5 +549,4 @@ public class StackRequestValidatorTest extends StackRequestValidatorTestBase {
         request.setType(type.name());
         return request;
     }
-
 }

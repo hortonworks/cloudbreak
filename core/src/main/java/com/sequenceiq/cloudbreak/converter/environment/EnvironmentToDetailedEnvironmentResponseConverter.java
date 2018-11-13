@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.api.model.stack.StackViewResponse;
 import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.environment.Environment;
+import com.sequenceiq.cloudbreak.domain.stack.StackType;
 
 @Component
 public class EnvironmentToDetailedEnvironmentResponseConverter extends AbstractConversionServiceAwareConverter<Environment, DetailedEnvironmentResponse> {
@@ -50,14 +51,14 @@ public class EnvironmentToDetailedEnvironmentResponseConverter extends AbstractC
         response.setWorkloadClusters(
                 source.getStacks()
                         .stream()
-                        .filter(workload -> workload.getDatalakeId() == null)
+                        .filter(stack -> stack.getType() == StackType.WORKLOAD)
                         .map(workload -> getConversionService().convert(workload, StackViewResponse.class))
                         .collect(Collectors.toSet()));
         response.setDatalakeClusters(
                 source.getStacks()
                         .stream()
-                        .filter(workload -> workload.getDatalakeId() != null)
-                        .map(workload -> getConversionService().convert(workload, StackViewResponse.class))
+                        .filter(stack -> stack.getType() == StackType.DATALAKE)
+                        .map(stack -> getConversionService().convert(stack, StackViewResponse.class))
                         .collect(Collectors.toSet()));
         response.setLocation(getConversionService().convert(source, LocationResponse.class));
         return response;
