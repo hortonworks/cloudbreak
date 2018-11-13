@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -278,6 +279,15 @@ public class StackService {
         return stackRepository.findEphemeralClusters(stackId);
     }
 
+    public Stack findDatalakeConnectedToStack(Stack workloadClusterStack) {
+        Stack datalake = null;
+        Long datalakeId = workloadClusterStack.getDatalakeId();
+        if (Objects.nonNull(datalakeId) && datalakeId != 0L) {
+            datalake = getById(datalakeId);
+        }
+        return datalake;
+    }
+
     public Stack getByIdWithLists(Long id) {
         Stack retStack = stackRepository.findOneWithLists(id);
         if (retStack == null) {
@@ -450,8 +460,6 @@ public class StackService {
 
             start = System.currentTimeMillis();
             Stack savedStack = stackRepository.save(stack);
-
-
             LOGGER.info("Stackrepository save took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
             start = System.currentTimeMillis();

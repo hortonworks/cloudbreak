@@ -63,7 +63,6 @@ public class StackTerminationService {
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_BILLING_TERMINATED, BillingStatus.BILLING_TERMINATED.name());
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_DELETE_COMPLETED, DELETE_COMPLETED.name());
         clusterService.updateClusterStatusByStackId(stack.getId(), DELETE_COMPLETED);
-        clusterService.cleanupKerberosCredential(stack.getCluster());
         usageService.closeUsagesForStack(stack.getId());
         if (deleteDependencies) {
             dependecyDeletionService.deleteDependencies(stack);

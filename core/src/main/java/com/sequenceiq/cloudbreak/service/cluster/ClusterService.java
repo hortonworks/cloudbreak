@@ -229,12 +229,16 @@ public class ClusterService {
     @Inject
     private SecretService secretService;
 
+    @Inject
+    private KerberosConfigProvider kerberosConfigProvider;
+
     public Cluster create(Stack stack, Cluster cluster, List<ClusterComponent> components, User user) throws TransactionExecutionException {
         LOGGER.info("Cluster requested [BlueprintId: {}]", cluster.getBlueprint().getId());
         String stackName = stack.getName();
         if (stack.getCluster() != null) {
             throw new BadRequestException(String.format("A cluster is already created on this stack! [cluster: '%s']", stack.getCluster().getName()));
         }
+        Stack datalake = stackService.findDatalakeConnectedToStack(stack);
         return transactionService.required(() -> {
             cluster.setWorkspace(stack.getWorkspace());
             cluster.setEnvironment(stack.getEnvironment());
@@ -268,6 +272,8 @@ public class ClusterService {
             start = System.currentTimeMillis();
             gateWayUtil.generateSignKeys(cluster.getGateway());
             LOGGER.info("Sign key generated in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
+            kerberosConfigProvider.setKerberosConfigForWorkloadCluster(cluster, datalake);
 
             Cluster savedCluster;
             savedCluster = saveClusterAndComponent(cluster, components, stackName);
@@ -829,21 +835,6 @@ public class ClusterService {
         if (instanceMetaData != null) {
             instanceMetaData.setInstanceStatus(InstanceStatus.REGISTERED);
             instanceMetadataRepository.save(instanceMetaData);
-        }
-    }
-
-    public void cleanupKerberosCredential(Long clusterId) {
-        Cluster cluster = getCluster(clusterId);
-        cleanupKerberosCredential(cluster);
-    }
-
-    public void cleanupKerberosCredential(Cluster cluster) {
-        if (cluster != null && cluster.isSecure() && cluster.getKerberosConfig() != null) {
-            KerberosConfig kerberosConfig = cluster.getKerberosConfig();
-            kerberosConfig.setPassword(null);
-            kerberosConfig.setPrincipal(null);
-
-            kerberosConfigRepository.save(kerberosConfig);
         }
     }
 

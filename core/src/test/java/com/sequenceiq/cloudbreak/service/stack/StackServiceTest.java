@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -65,6 +67,8 @@ import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 public class StackServiceTest {
 
     private static final Long STACK_ID = 1L;
+
+    private static final Long DATALAKE_STACK_ID = 2L;
 
     private static final Long WORKSPACE_ID = 1L;
 
@@ -812,5 +816,21 @@ public class StackServiceTest {
 
             verify(stackUpdater, times(0)).updateStackStatus(eq(Long.MAX_VALUE), eq(DetailedStackStatus.PROVISION_FAILED), anyString());
         }
+    }
+
+    @Test
+    public void testFindDatalakeConnectedToStackExists() {
+        Stack datalake = mock(Stack.class);
+        Stack workload = mock(Stack.class);
+        when(workload.getDatalakeId()).thenReturn(DATALAKE_STACK_ID);
+        when(stackRepository.findById(DATALAKE_STACK_ID)).thenReturn(Optional.of(datalake));
+        assertEquals(datalake, underTest.findDatalakeConnectedToStack(workload));
+    }
+
+    @Test
+    public void testFindDatalakeConnectedToStackNotExists() {
+        Stack workload = mock(Stack.class);
+        when(workload.getDatalakeId()).thenReturn(null);
+        assertNull(underTest.findDatalakeConnectedToStack(workload));
     }
 }
