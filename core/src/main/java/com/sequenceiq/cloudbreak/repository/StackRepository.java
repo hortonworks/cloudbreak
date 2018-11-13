@@ -151,11 +151,11 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
 
     @CheckPermissionsByWorkspaceId
     @Query("SELECT s.name FROM Stack s WHERE s.workspace.id = :workspaceId AND s.environment.id = :envId "
-            + "AND s.datalakeId IS NOT NULL AND s.stackStatus.status <> 'DELETE_COMPLETED'")
+            + "AND s.type = 'DATALAKE' AND s.stackStatus.status <> 'DELETE_COMPLETED'")
     Set<String> findDatalakeStackNamesByWorkspaceAndEnvironment(@Param("workspaceId") Long workspaceId, @Param("envId") Long envId);
 
     @CheckPermissionsByWorkspaceId
     @Query("SELECT s.name FROM Stack s WHERE s.workspace.id = :workspaceId AND s.environment.id = :envId "
-            + "AND s.datalakeId IS NULL AND s.stackStatus.status <> 'DELETE_COMPLETED'")
+            + "AND s.type = 'WORKLOAD' AND s.stackStatus.status <> 'DELETE_COMPLETED'")
     Set<String> findWorkloadStackNamesByWorkspaceAndEnvironment(@Param("workspaceId") Long workspaceId, @Param("envId") Long envId);
 }

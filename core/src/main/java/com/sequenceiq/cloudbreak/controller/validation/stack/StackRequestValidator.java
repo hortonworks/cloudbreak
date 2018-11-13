@@ -9,11 +9,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
-import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -21,7 +16,9 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.model.EncryptionKeyConfigJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformEncryptionKeysResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformResourceRequestJson;
+import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupBase;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupBase;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupRequest;
@@ -31,15 +28,18 @@ import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.cloudbreak.controller.validation.Validator;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateRequestValidator;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
 @Component
 public class StackRequestValidator implements Validator<StackRequest> {
@@ -194,7 +194,7 @@ public class StackRequestValidator implements Validator<StackRequest> {
     private void checkResourceRequirementsIfBlueprintIsDatalakeReady(StackRequest stackRequest, ValidationResultBuilder validationBuilder) {
         Blueprint blueprint = blueprintService.getByNameForWorkspaceId(stackRequest.getClusterRequest()
                 .getBlueprintName(), restRequestThreadLocalService.getRequestedWorkspaceId());
-        boolean sharedServiceReadyBlueprint = Optional.ofNullable((Boolean) blueprint.getTags().getMap().get("shared_services_ready")).orElse(false);
+        boolean sharedServiceReadyBlueprint = blueprintService.isDatalakeBlueprint(blueprint);
         if (sharedServiceReadyBlueprint) {
             Set<RdsType> rdsTypes = getGivenRdsTypes(stackRequest.getClusterRequest());
             String rdsErrorMessageFormat = "For a Datalake cluster (since you have selected a datalake ready blueprint) you should provide at least one %s "

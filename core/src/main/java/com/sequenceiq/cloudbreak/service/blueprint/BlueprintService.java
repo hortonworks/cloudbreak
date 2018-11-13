@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -28,17 +29,13 @@ import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintParameterQueryService;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.template.processor.configuration.SiteConfigurations;
-import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigQueryObject;
-import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigQueryObject.Builder;
-import com.sequenceiq.cloudbreak.template.filesystem.query.ConfigQueryEntry;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.view.BlueprintView;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.view.BlueprintView;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.init.blueprint.BlueprintLoaderService;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.repository.BlueprintViewRepository;
@@ -47,6 +44,10 @@ import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigQueryObject;
+import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigQueryObject.Builder;
+import com.sequenceiq.cloudbreak.template.filesystem.query.ConfigQueryEntry;
+import com.sequenceiq.cloudbreak.template.processor.configuration.SiteConfigurations;
 import com.sequenceiq.cloudbreak.util.NameUtil;
 
 @Service
@@ -56,6 +57,8 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
 
     private static final Set<Status> DELETED_CLUSTER_STATUSES
             = Set.of(PRE_DELETE_IN_PROGRESS, DELETE_IN_PROGRESS, DELETE_FAILED, DELETE_COMPLETED);
+
+    private static final String SHARED_SERVICES_READY = "shared_services_ready";
 
     @Inject
     private BlueprintRepository blueprintRepository;
@@ -146,6 +149,10 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
             LOGGER.info("Blueprint modifications finished based on the defaults for '{}' workspace.", workspace.getId());
         }
         return blueprints;
+    }
+
+    public boolean isDatalakeBlueprint(Blueprint blueprint) {
+        return Optional.ofNullable((Boolean) blueprint.getTags().getMap().get(SHARED_SERVICES_READY)).orElse(false);
     }
 
     private Iterable<Blueprint> saveDefaultsWithReadRight(Iterable<Blueprint> blueprints, Workspace workspace) {
