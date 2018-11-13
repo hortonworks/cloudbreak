@@ -43,7 +43,6 @@ import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.metrics.MetricService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.startup.WorkspaceMigrationRunner;
 
 @Service
 public class HeartbeatService {
@@ -94,9 +93,6 @@ public class HeartbeatService {
 
     @Inject
     private TransactionService transactionService;
-
-    @Inject
-    private WorkspaceMigrationRunner workspaceMigrationRunner;
 
     @Scheduled(cron = "${cb.ha.heartbeat.rate:0/30 * * * * *}")
     public void heartbeat() {
@@ -154,7 +150,7 @@ public class HeartbeatService {
     }
 
     private boolean shouldRun() {
-        return workspaceMigrationRunner.isFinished() && cloudbreakNodeConfig.isNodeIdSpecified();
+        return cloudbreakNodeConfig.isNodeIdSpecified();
     }
 
     public List<CloudbreakNode> distributeFlows() throws TransactionExecutionException {
