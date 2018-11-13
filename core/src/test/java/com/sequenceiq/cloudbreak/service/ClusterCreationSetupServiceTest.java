@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -33,6 +34,7 @@ import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDPInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultStackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
@@ -168,5 +170,22 @@ public class ClusterCreationSetupServiceTest {
         underTest.prepare(clusterRequest, stack, blueprint, user, workspace);
 
         assertNull(stack.getCustomDomain());
+    }
+
+    @Test
+    public void testIncorrectKerberosSettingForDatalakeCluster() {
+        clusterRequest.setKerberos(null);
+        clusterRequest.setEnableSecurity(true);
+
+        assertThrows(BadRequestException.class, () -> underTest.validate(clusterRequest, stack, user, workspace));
+    }
+
+    @Test
+    public void testIncorrectKerberosSettingForWorkloadCluster() {
+        stack.setDatalakeId(null);
+        clusterRequest.setKerberos(null);
+        clusterRequest.setEnableSecurity(true);
+
+        assertThrows(BadRequestException.class, () -> underTest.validate(clusterRequest, stack, user, workspace));
     }
 }

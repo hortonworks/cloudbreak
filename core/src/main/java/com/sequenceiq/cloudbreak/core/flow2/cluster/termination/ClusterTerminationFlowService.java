@@ -52,7 +52,6 @@ public class ClusterTerminationFlowService {
         StackView stackView = context.getStack();
         ClusterView clusterView = context.getClusterView();
         if (clusterView != null) {
-            clusterService.cleanupKerberosCredential(clusterView.getId());
             clusterService.updateClusterStatusByStackId(stackView.getId(), DELETE_COMPLETED);
             InMemoryStateStore.deleteCluster(clusterView.getId());
             stackUpdater.updateStackStatus(stackView.getId(), DetailedStackStatus.AVAILABLE);
