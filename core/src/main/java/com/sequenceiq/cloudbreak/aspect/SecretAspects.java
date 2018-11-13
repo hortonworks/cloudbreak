@@ -19,6 +19,9 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.aspect.secret.SecretValue;
 import com.sequenceiq.cloudbreak.domain.Secret;
 import com.sequenceiq.cloudbreak.domain.SecretProxy;
+import com.sequenceiq.cloudbreak.domain.workspace.Tenant;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.secret.SecretService;
 
@@ -70,17 +73,18 @@ public class SecretAspects {
     private Object proceedSave(ProceedingJoinPoint proceedingJoinPoint) throws CloudbreakException {
         Collection<Object> entities = convertFirstArgToCollection(proceedingJoinPoint);
         for (Object entity : entities) {
+            String tenant = null;
             try {
                 for (Field field : entity.getClass().getDeclaredFields()) {
                     if (field.isAnnotationPresent(SecretValue.class)) {
                         LOGGER.debug("Found SecretValue annotation on {}", field);
+                        tenant = Optional.ofNullable(tenant).orElseGet(() -> findTenant(entity));
                         field.setAccessible(true);
                         Secret value = (Secret) field.get(entity);
                         if (value != null && value.getRaw() != null && value.getSecret() == null) {
-                            String resourceType = entity.getClass().getSimpleName().toLowerCase();
-                            String resourceId = UUID.randomUUID().toString();
-                            String fieldName = field.getName().toLowerCase();
-                            String path = String.format("%s/%s/%s", resourceType, fieldName, resourceId);
+                            String path = String.format("shared/%s/%s/%s/%s-%s", tenant,
+                                    entity.getClass().getSimpleName().toLowerCase(), field.getName().toLowerCase(),
+                                    UUID.randomUUID().toString(), Integer.toHexString(entity.hashCode()));
                             String secret = secretService.put(path, value.getRaw());
                             LOGGER.debug("Field: '{}' is saved at path: {}", field.getName(), path);
                             field.set(entity, new Secret(null, secret));
@@ -137,6 +141,16 @@ public class SecretAspects {
     private Collection<Object> convertFirstArgToCollection(ProceedingJoinPoint proceedingJoinPoint) {
         Object arg = proceedingJoinPoint.getArgs()[0];
         return arg instanceof Collection ? (Collection<Object>) arg : Collections.singleton(arg);
+    }
+
+    private String findTenant(Object entity) {
+        return Optional.ofNullable(entity)
+                .filter(e -> e instanceof WorkspaceAwareResource)
+                .map(e -> (WorkspaceAwareResource) e)
+                .map(WorkspaceAwareResource::getWorkspace)
+                .map(Workspace::getTenant)
+                .map(Tenant::getName)
+                .orElse(Tenant.DEFAULT_NAME);
     }
 
     //CHECKSTYLE:OFF
