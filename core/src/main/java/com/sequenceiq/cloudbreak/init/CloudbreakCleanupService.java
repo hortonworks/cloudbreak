@@ -44,10 +44,8 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.flowlog.FlowLogService;
 import com.sequenceiq.cloudbreak.service.ha.HeartbeatService;
-import com.sequenceiq.cloudbreak.service.rdsconfig.AmbariDatabaseToRdsConfigMigrationService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.usages.UsageService;
-import com.sequenceiq.cloudbreak.startup.WorkspaceMigrationRunner;
 
 @Component
 public class CloudbreakCleanupService implements ApplicationListener<ContextRefreshedEvent> {
@@ -91,20 +89,13 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
     private HeartbeatService heartbeatService;
 
     @Inject
-    private AmbariDatabaseToRdsConfigMigrationService ambariDatabaseToRdsConfigMigrationService;
-
-    @Inject
     private TransactionService transactionService;
-
-    @Inject
-    private WorkspaceMigrationRunner workspaceMigrationRunner;
 
     @Inject
     private BlueprintMigrationService blueprintMigrationService;
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
-        workspaceMigrationRunner.run();
         heartbeatService.heartbeat();
         try {
             List<Long> stackIdsUnderOperation = restartOrUpdateUnassignedDisruptedFlows();
@@ -118,7 +109,6 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
         } catch (TransactionExecutionException e) {
             LOGGER.error("Unable to start node properly", e);
         }
-        ambariDatabaseToRdsConfigMigrationService.migrateAmbariDatabaseClusterComponentsToRdsConfig();
         blueprintMigrationService.migrateBlueprints();
     }
 

@@ -16,7 +16,6 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.notification.Notification;
 import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.startup.WorkspaceMigrationRunner;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Component
@@ -35,21 +34,16 @@ public class UptimeNotifier {
     @Inject
     private StackUtil stackUtil;
 
-    @Inject
-    private WorkspaceMigrationRunner workspaceMigrationRunner;
-
     @Scheduled(fixedDelay = 60000)
     public void sendUptime() {
-        if (workspaceMigrationRunner.isFinished()) {
-            EnumSet<Status> statuses = EnumSet.complementOf(EnumSet.of(Status.DELETE_COMPLETED));
-            List<Cluster> clusters = clusterService.findByStatuses(statuses);
-            for (Cluster cluster : clusters) {
-                Stack stack = stackService.getForCluster(cluster.getId());
-                if (stack != null && !stack.isDeleteCompleted()) {
-                    Long uptime = stackUtil.getUptimeForCluster(cluster, cluster.isAvailable());
-                    Notification<CloudbreakEventsJson> notification = createUptimeNotification(stack, uptime);
-                    notificationSender.send(notification);
-                }
+        EnumSet<Status> statuses = EnumSet.complementOf(EnumSet.of(Status.DELETE_COMPLETED));
+        List<Cluster> clusters = clusterService.findByStatuses(statuses);
+        for (Cluster cluster : clusters) {
+            Stack stack = stackService.getForCluster(cluster.getId());
+            if (stack != null && !stack.isDeleteCompleted()) {
+                Long uptime = stackUtil.getUptimeForCluster(cluster, cluster.isAvailable());
+                Notification<CloudbreakEventsJson> notification = createUptimeNotification(stack, uptime);
+                notificationSender.send(notification);
             }
         }
     }
