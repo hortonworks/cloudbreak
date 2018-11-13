@@ -97,7 +97,7 @@ public class UserService {
                 User user = new User();
                 user.setUserId(cloudbreakUser.getUsername());
 
-                Tenant tenant = tenantRepository.findByName("DEFAULT");
+                Tenant tenant = tenantRepository.findByName(Tenant.DEFAULT_NAME);
                 user.setTenant(tenant);
                 user.setTenantPermissionSet(Collections.emptySet());
                 user = userRepository.save(user);

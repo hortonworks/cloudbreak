@@ -113,7 +113,7 @@ public class UserAndWorkspaceMigrator {
 
     private Workspace getOrCreateOrphanedResourcesWorkspace() throws TransactionExecutionException {
         return transactionService.required(() -> {
-            Tenant tenant = tenantRepository.findByName("DEFAULT");
+            Tenant tenant = tenantRepository.findByName(Tenant.DEFAULT_NAME);
             Workspace orphanedResources = workspaceRepository.getByName(ORPHANED_RESOURCES, tenant);
             if (orphanedResources == null) {
                 orphanedResources = new Workspace();

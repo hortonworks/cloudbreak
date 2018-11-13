@@ -18,6 +18,8 @@ import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 @Entity
 public class Tenant implements ProvisionEntity {
 
+    public static final String DEFAULT_NAME = "DEFAULT";
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "tenant_generator")
     @SequenceGenerator(name = "tenant_generator", sequenceName = "tenant_id_seq", allocationSize = 1)
