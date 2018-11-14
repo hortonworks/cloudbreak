@@ -36,7 +36,7 @@ cert:
   ignorePreValidation: false
 
 secret:
-  application: cb
+  application: cb/shared
   engine: "com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine"
 
 vault:
