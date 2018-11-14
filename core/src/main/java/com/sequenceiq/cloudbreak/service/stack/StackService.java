@@ -259,11 +259,6 @@ public class StackService {
     }
 
     @PreAuthorize("#oauth2.hasScope('cloudbreak.autoscale')")
-    public Stack getForAutoscale(Long id) {
-        return getByIdWithTransaction(id);
-    }
-
-    @PreAuthorize("#oauth2.hasScope('cloudbreak.autoscale')")
     public Long getWorkspaceId(Long stackId) {
         return stackRepository.findWorkspaceIdById(stackId);
     }

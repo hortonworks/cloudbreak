@@ -10,9 +10,11 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
+import com.sequenceiq.cloudbreak.api.model.SecretResponse;
 import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
 import com.sequenceiq.cloudbreak.controller.validation.credential.CredentialValidator;
 import com.sequenceiq.cloudbreak.domain.Credential;
@@ -35,6 +37,9 @@ public class CredentialToCredentialResponseConverter extends AbstractConversionS
     @Inject
     private CredentialDefinitionService credentialDefinitionService;
 
+    @Inject
+    private ConversionService conversionService;
+
     @Override
     public CredentialResponse convert(Credential source) {
         CredentialResponse credentialJson = new CredentialResponse();
@@ -47,6 +52,7 @@ public class CredentialToCredentialResponseConverter extends AbstractConversionS
             Map<String, Object> parameters = credentialDefinitionService.removeSensitives(platform(source.cloudPlatform()), secretAttributes.getMap());
             convertValuesToBooleanIfNecessary(parameters);
             credentialJson.setParameters(parameters);
+            credentialJson.setAttributes(conversionService.convert(source.getAttributesSecret(), SecretResponse.class));
         }
         credentialJson.setDescription(source.getDescription() == null ? "" : source.getDescription());
         if (source.getTopology() != null) {

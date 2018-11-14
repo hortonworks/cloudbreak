@@ -14,6 +14,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.support.Versioned;
 
+import com.sequenceiq.cloudbreak.api.model.SecretResponse;
+
 @Component("VaultKvV2Engine")
 public class VaultKvV2Engine extends AbstractVautEngine<VaultKvV2Engine> {
 
@@ -54,6 +56,13 @@ public class VaultKvV2Engine extends AbstractVautEngine<VaultKvV2Engine> {
     @CacheEvict(cacheNames = "vaultCache", allEntries = true)
     public void delete(String secret) {
         Optional.ofNullable(convertToVaultSecret(secret)).ifPresent(s -> template.opsForVersionedKeyValue(s.getEnginePath()).delete(s.getPath()));
+    }
+
+    @Override
+    public SecretResponse convertToExternal(String secret) {
+        return Optional.ofNullable(convertToVaultSecret(secret))
+                .map(s -> new SecretResponse(s.getEnginePath(), s.getPath()))
+                .orElse(null);
     }
 
     @Override

@@ -36,6 +36,7 @@ import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.ClusterExposedServiceResponse;
 import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
+import com.sequenceiq.cloudbreak.api.model.SecretResponse;
 import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigJson;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
@@ -150,8 +151,12 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
         mockAll();
         getSource().setConfigStrategy(ConfigStrategy.NEVER_APPLY);
         given(stackUtil.extractAmbariIp(any(Stack.class))).willReturn("10.0.0.1");
+        Cluster source = getSource();
+        TestUtil.setSecretField(Cluster.class, "cloudbreakAmbariUser", source, "user", "secret/path");
+        TestUtil.setSecretField(Cluster.class, "cloudbreakAmbariPassword", source, "pass", "secret/path");
+        when(conversionService.convert(any(String.class), any())).thenAnswer(invocation -> new SecretResponse(null, invocation.getArgument(0)));
         // WHEN
-        ClusterResponse result = underTest.convert(getSource());
+        ClusterResponse result = underTest.convert(source);
         // THEN
         assertEquals(1L, (long) result.getId());
         assertAllFieldsNotNull(result, Lists.newArrayList("cluster", "userName", "ambariStackDetails", "rdsConfigId", "blueprintCustomProperties",

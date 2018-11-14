@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.autoscale.AutoscaleEndpoint;
 import com.sequenceiq.cloudbreak.api.model.AmbariAddressJson;
-import com.sequenceiq.cloudbreak.api.model.AutoscaleClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.AutoscaleStackResponse;
 import com.sequenceiq.cloudbreak.api.model.CertificateResponse;
 import com.sequenceiq.cloudbreak.api.model.FailureReport;
@@ -101,14 +100,6 @@ public class AutoscaleController implements AutoscaleEndpoint {
     @Override
     public StackResponse get(Long id) {
         return stackCommonService.get(id, Collections.emptySet());
-    }
-
-    @Override
-    public AutoscaleClusterResponse getForAutoscale(Long stackId) {
-        Stack stack = stackService.getForAutoscale(stackId);
-        AutoscaleClusterResponse cluster = clusterService.retrieveClusterForCurrentUser(stackId, AutoscaleClusterResponse.class);
-        String clusterJson = clusterService.getClusterJson(stack.getAmbariIp(), stackId);
-        return clusterService.getClusterResponse(cluster, clusterJson);
     }
 
     @Override

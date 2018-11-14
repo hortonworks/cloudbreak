@@ -16,6 +16,9 @@ public class CredentialResponse extends CredentialBase {
     @ApiModelProperty(ModelDescriptions.PUBLIC_IN_ACCOUNT)
     private boolean publicInAccount = true;
 
+    @ApiModelProperty(ModelDescriptions.ATTRIBUTES)
+    private SecretResponse attributes;
+
     @ApiModelProperty
     private WorkspaceResourceResponse workspace;
 
@@ -29,12 +32,20 @@ public class CredentialResponse extends CredentialBase {
         return id;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public void setPublicInAccount(boolean publicInAccount) {
         this.publicInAccount = publicInAccount;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public SecretResponse getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(SecretResponse attributes) {
+        this.attributes = attributes;
     }
 
     public WorkspaceResourceResponse getWorkspace() {
