@@ -25,6 +25,7 @@ import javax.inject.Inject;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -201,6 +202,7 @@ public class AmbariAgentHealthMonitorModulTest extends RejectedThreadContext {
 
     }
 
+    @Ignore
     @Test
     public void testWhenThreadPoolRejectedAndCountMoreThanOne() {
         Cluster cluster1 = cluster(1L);
