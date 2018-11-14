@@ -3,10 +3,14 @@ package com.sequenceiq.cloudbreak.converter;
 import java.util.HashSet;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.model.SecretResponse;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -15,7 +19,11 @@ import com.sequenceiq.cloudbreak.domain.view.CompactView;
 
 @Component
 public class RDSConfigToRDSConfigResponseConverter extends AbstractConversionServiceAwareConverter<RDSConfig, RDSConfigResponse> {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(RDSConfigToRDSConfigResponseConverter.class);
+
+    @Inject
+    private ConversionService conversionService;
 
     @Override
     public RDSConfigResponse convert(RDSConfig source) {
@@ -25,6 +33,8 @@ public class RDSConfigToRDSConfigResponseConverter extends AbstractConversionSer
         json.setConnectionURL(source.getConnectionURL());
         json.setDatabaseEngine(source.getDatabaseEngine().name());
         json.setConnectionDriver(source.getConnectionDriver());
+        json.setConnectionUserName(conversionService.convert(source.getConnectionUserNameSecret(), SecretResponse.class));
+        json.setConnectionPassword(conversionService.convert(source.getConnectionPasswordSecret(), SecretResponse.class));
         json.setDatabaseEngineDisplayName(source.getDatabaseEngine().displayName());
         json.setConnectorJarUrl(source.getConnectorJarUrl());
         json.setCreationDate(source.getCreationDate());

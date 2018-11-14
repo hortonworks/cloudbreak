@@ -128,12 +128,20 @@ public class RDSConfig implements ProvisionEntity, EnvironmentAwareResource {
         return connectionUserName.getRaw();
     }
 
+    public String getConnectionUserNameSecret() {
+        return connectionUserName.getSecret();
+    }
+
     public void setConnectionUserName(String connectionUserName) {
         this.connectionUserName = new Secret(connectionUserName);
     }
 
     public String getConnectionPassword() {
         return connectionPassword.getRaw();
+    }
+
+    public String getConnectionPasswordSecret() {
+        return connectionPassword.getSecret();
     }
 
     public void setConnectionPassword(String connectionPassword) {

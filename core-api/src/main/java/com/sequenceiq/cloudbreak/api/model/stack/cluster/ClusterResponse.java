@@ -79,9 +79,6 @@ public class ClusterResponse implements JsonEntity {
     @ApiModelProperty(StackModelDescription.AMBARI_URL)
     private String ambariServerUrl;
 
-    @ApiModelProperty(StackModelDescription.USERNAME)
-    private String userName;
-
     @ApiModelProperty(ClusterModelDescription.SECURE)
     private boolean secure;
 
@@ -272,14 +269,6 @@ public class ClusterResponse implements JsonEntity {
 
     public void setRdsConfigId(Set<Long> rdsConfigIds) {
         this.rdsConfigIds = rdsConfigIds;
-    }
-
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
     }
 
     public Map<String, Collection<ClusterExposedServiceResponse>> getClusterExposedServicesForTopologies() {

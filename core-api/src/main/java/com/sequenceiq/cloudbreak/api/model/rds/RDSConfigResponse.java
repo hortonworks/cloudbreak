@@ -2,8 +2,10 @@ package com.sequenceiq.cloudbreak.api.model.rds;
 
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.api.model.SecretResponse;
 import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.RDSConfig;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.RDSConfigModelDescription;
 
 import io.swagger.annotations.ApiModel;
@@ -24,17 +26,23 @@ public class RDSConfigResponse extends RDSConfigJson {
     @ApiModelProperty(RDSConfigModelDescription.CLUSTER_NAMES)
     private Set<String> clusterNames;
 
-    @ApiModelProperty(value = ModelDescriptions.RDSConfig.STACK_VERSION)
+    @ApiModelProperty(value = RDSConfig.STACK_VERSION)
     private String stackVersion;
 
-    @ApiModelProperty(value = ModelDescriptions.RDSConfig.DB_ENGINE, required = true)
+    @ApiModelProperty(value = RDSConfig.DB_ENGINE, required = true)
     private String databaseEngine;
 
-    @ApiModelProperty(value = ModelDescriptions.RDSConfig.CONNECTION_DRIVER_NAME, required = true)
+    @ApiModelProperty(value = RDSConfig.CONNECTION_DRIVER_NAME, required = true)
     private String connectionDriver;
 
-    @ApiModelProperty(value = ModelDescriptions.RDSConfig.DB_ENGINE_DISPLAYNAME, required = true)
+    @ApiModelProperty(value = RDSConfig.DB_ENGINE_DISPLAYNAME, required = true)
     private String databaseEngineDisplayName;
+
+    @ApiModelProperty(value = RDSConfig.USERNAME)
+    private SecretResponse connectionUserName;
+
+    @ApiModelProperty(value = RDSConfig.PASSWORD)
+    private SecretResponse connectionPassword;
 
     @ApiModelProperty(ModelDescriptions.WORKSPACE_OF_THE_RESOURCE)
     private WorkspaceResourceResponse workspace;
@@ -101,6 +109,22 @@ public class RDSConfigResponse extends RDSConfigJson {
 
     public void setDatabaseEngineDisplayName(String databaseEngineDisplayName) {
         this.databaseEngineDisplayName = databaseEngineDisplayName;
+    }
+
+    public SecretResponse getConnectionUserName() {
+        return connectionUserName;
+    }
+
+    public void setConnectionUserName(SecretResponse connectionUserName) {
+        this.connectionUserName = connectionUserName;
+    }
+
+    public SecretResponse getConnectionPassword() {
+        return connectionPassword;
+    }
+
+    public void setConnectionPassword(SecretResponse connectionPassword) {
+        this.connectionPassword = connectionPassword;
     }
 
     public WorkspaceResourceResponse getWorkspace() {

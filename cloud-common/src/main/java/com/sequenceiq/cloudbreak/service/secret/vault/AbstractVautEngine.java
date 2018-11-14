@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.service.secret.SecretEngine;
 
 abstract class AbstractVautEngine<E> implements SecretEngine {
 
-    private Gson gson = new Gson();
+    private final Gson gson = new Gson();
 
     @Override
     public boolean isSecret(String secret) {

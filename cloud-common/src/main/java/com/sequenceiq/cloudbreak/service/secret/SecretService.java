@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import com.sequenceiq.cloudbreak.api.model.SecretResponse;
+
 @Service
 public class SecretService {
 
@@ -66,8 +68,12 @@ public class SecretService {
             return null;
         }
         long start = System.currentTimeMillis();
-        String response = engines.stream().filter(e -> e.isSecret(secret)).map(e -> e.get(secret))
-                .filter(Objects::nonNull).findFirst().orElse(null);
+        String response = engines.stream()
+                .filter(e -> e.isSecret(secret))
+                .findFirst()
+                .map(e -> e.get(secret))
+                .filter(Objects::nonNull)
+                .orElse(null);
         LOGGER.debug("Secret read took {} ms", System.currentTimeMillis() - start);
         return "null".equals(response) ? null : response;
     }
@@ -79,7 +85,9 @@ public class SecretService {
      */
     public void delete(String secret) {
         long start = System.currentTimeMillis();
-        engines.stream().filter(e -> e.isSecret(secret)).forEach(e -> e.delete(secret));
+        engines.stream()
+                .filter(e -> e.isSecret(secret))
+                .forEach(e -> e.delete(secret));
         LOGGER.debug("Secret delete took {} ms", System.currentTimeMillis() - start);
     }
 
@@ -90,5 +98,19 @@ public class SecretService {
      */
     public boolean isSecret(String secret) {
         return engines.stream().anyMatch(e -> e.isSecret(secret));
+    }
+
+    /**
+     * Converts secret to external for API
+     *
+     * @param secret internal secret
+     * @return public external secret JSON
+     */
+    public SecretResponse convertToExternal(String secret) {
+        return engines.stream()
+                .filter(e -> e.isSecret(secret))
+                .findFirst()
+                .map(e -> e.convertToExternal(secret))
+                .orElse(null);
     }
 }

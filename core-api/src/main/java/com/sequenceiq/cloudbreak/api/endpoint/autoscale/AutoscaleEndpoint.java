@@ -14,7 +14,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import com.sequenceiq.cloudbreak.api.model.AmbariAddressJson;
-import com.sequenceiq.cloudbreak.api.model.AutoscaleClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.AutoscaleStackResponse;
 import com.sequenceiq.cloudbreak.api.model.CertificateResponse;
 import com.sequenceiq.cloudbreak.api.model.FailureReport;
@@ -72,13 +71,6 @@ public interface AutoscaleEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.GET_BY_ID, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "getStackForAutoscale")
     StackResponse get(@PathParam("id") Long id);
-
-    @GET
-    @Path("/stack/{id}/cluster/full")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ClusterOpDescription.GET_BY_STACK_ID, produces = ContentType.JSON, notes = Notes.CLUSTER_NOTES,
-            nickname = "getFullClusterForAutoscale")
-    AutoscaleClusterResponse getForAutoscale(@PathParam("id") Long id);
 
     @GET
     @Path("/stack/{id}/authorize/{owner}/{permission}")

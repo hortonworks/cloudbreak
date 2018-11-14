@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AWS;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.GCP;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.OPENSTACK;
 
+import java.lang.reflect.Field;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -20,6 +21,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.ReflectionUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
@@ -53,6 +55,7 @@ import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.Resource;
+import com.sequenceiq.cloudbreak.domain.Secret;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
@@ -519,8 +522,8 @@ public class TestUtil {
         config.setUserSearchBase("cn=users,dc=example,dc=org");
         config.setUserDnPattern("cn={0},cn=users,dc=example,dc=org");
         config.setGroupSearchBase("cn=groups,dc=example,dc=org");
-        config.setBindDn("cn=admin,dc=example,dc=org");
-        config.setBindPassword("admin");
+        setSecretField(LdapConfig.class, "bindDn", config, "cn=admin,dc=example,dc=org", "secret/path");
+        setSecretField(LdapConfig.class, "bindPassword", config, "admin", "secret/path");
         config.setServerHost("localhost");
         config.setUserNameAttribute("cn=admin,dc=example,dc=org");
         config.setDomain("ad.hdc.com");
@@ -809,5 +812,14 @@ public class TestUtil {
 
     public static Long generateUniqueId() {
         return uniqueId.incrementAndGet();
+    }
+
+    public static void setSecretField(Class<?> clazz, String fieldName, Object target, String raw, String secret) {
+        Field field = ReflectionUtils.findField(clazz, fieldName);
+        field.setAccessible(true);
+        try {
+            field.set(target, new Secret(raw, secret));
+        } catch (IllegalAccessException ignore) {
+        }
     }
 }

@@ -87,7 +87,7 @@ public class SecretAspects {
                                     UUID.randomUUID().toString(), Integer.toHexString(entity.hashCode()));
                             String secret = secretService.put(path, value.getRaw());
                             LOGGER.debug("Field: '{}' is saved at path: {}", field.getName(), path);
-                            field.set(entity, new Secret(null, secret));
+                            field.set(entity, new SecretProxy(secretService, secret));
                         }
                     }
                 }
@@ -100,7 +100,6 @@ public class SecretAspects {
         Object proceed;
         try {
             proceed = proceedingJoinPoint.proceed();
-            replaceSecretFieldsToProxy(proceed);
         } catch (Throwable throwable) {
             LOGGER.error("Failed to invoke repository save", throwable);
             throw new CloudbreakException(throwable);
@@ -152,26 +151,4 @@ public class SecretAspects {
                 .map(Tenant::getName)
                 .orElse(Tenant.DEFAULT_NAME);
     }
-
-    //CHECKSTYLE:OFF
-    private void replaceSecretFieldsToProxy(Object proceed) throws IllegalAccessException {
-        Collection<Object> entities = proceed instanceof Collection ? (Collection<Object>) proceed : Collections.singleton(proceed);
-        for (Object entity : entities) {
-            if (entity instanceof Optional) {
-                entity = ((Optional) entity).orElse(null);
-            }
-            if (entity == null) {
-                continue;
-            }
-            for (Field field : entity.getClass().getDeclaredFields()) {
-                if (field.isAnnotationPresent(SecretValue.class)) {
-                    LOGGER.debug("Found SecretValue annotation on {}", field);
-                    field.setAccessible(true);
-                    Secret value = (Secret) field.get(entity);
-                    field.set(entity, new SecretProxy(secretService, value.getSecret()));
-                }
-            }
-        }
-    }
-    //CHECKSTYLE:ON
 }

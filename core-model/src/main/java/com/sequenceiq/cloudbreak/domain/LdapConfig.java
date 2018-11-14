@@ -195,12 +195,20 @@ public class LdapConfig implements ProvisionEntity, EnvironmentAwareResource {
         return bindDn.getRaw();
     }
 
+    public String getBindDnSecret() {
+        return bindDn.getSecret();
+    }
+
     public void setBindDn(String bindDn) {
         this.bindDn = new Secret(bindDn);
     }
 
     public String getBindPassword() {
         return bindPassword.getRaw();
+    }
+
+    public String getBindPasswordSecret() {
+        return bindPassword.getSecret();
     }
 
     public void setBindPassword(String bindPassword) {

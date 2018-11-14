@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.secret;
 
+import com.sequenceiq.cloudbreak.api.model.SecretResponse;
+
 public interface SecretEngine {
     String put(String key, String value);
 
@@ -10,4 +12,6 @@ public interface SecretEngine {
     void delete(String secret);
 
     boolean isSecret(String secret);
+
+    SecretResponse convertToExternal(String secret);
 }
