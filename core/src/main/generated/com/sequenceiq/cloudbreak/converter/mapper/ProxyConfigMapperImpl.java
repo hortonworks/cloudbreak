@@ -36,20 +36,23 @@ public class ProxyConfigMapperImpl implements ProxyConfigMapper {
     }
 
     @Override
-    public ProxyConfigResponse mapEntityToResponse(ProxyConfig proxyConfigRequest) {
-        if ( proxyConfigRequest == null ) {
+    public ProxyConfigResponse mapEntityToResponse(ProxyConfig proxyConfig) {
+        if ( proxyConfig == null ) {
             return null;
         }
 
         ProxyConfigResponse proxyConfigResponse = new ProxyConfigResponse();
 
-        proxyConfigResponse.setName( proxyConfigRequest.getName() );
-        proxyConfigResponse.setServerHost( proxyConfigRequest.getServerHost() );
-        proxyConfigResponse.setServerPort( proxyConfigRequest.getServerPort() );
-        proxyConfigResponse.setProtocol( proxyConfigRequest.getProtocol() );
-        proxyConfigResponse.setDescription( proxyConfigRequest.getDescription() );
-        proxyConfigResponse.setId( proxyConfigRequest.getId() );
-        proxyConfigResponse.setWorkspace( workspaceToWorkspaceResourceResponse( proxyConfigRequest.getWorkspace() ) );
+        proxyConfigResponse.setName( proxyConfig.getName() );
+        proxyConfigResponse.setServerHost( proxyConfig.getServerHost() );
+        proxyConfigResponse.setServerPort( proxyConfig.getServerPort() );
+        proxyConfigResponse.setProtocol( proxyConfig.getProtocol() );
+        proxyConfigResponse.setDescription( proxyConfig.getDescription() );
+        proxyConfigResponse.setId( proxyConfig.getId() );
+        proxyConfigResponse.setWorkspace( workspaceToWorkspaceResourceResponse( proxyConfig.getWorkspace() ) );
+
+        proxyConfigResponse.setPassword( proxyConfig.getPasswordSecret() );
+        proxyConfigResponse.setUserName( proxyConfig.getUserName() );
 
         return proxyConfigResponse;
     }

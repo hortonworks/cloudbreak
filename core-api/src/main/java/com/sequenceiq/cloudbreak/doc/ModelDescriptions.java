@@ -6,6 +6,7 @@ public class ModelDescriptions {
     public static final String NAME = "name of the resource";
     public static final String DESCRIPTION = "description of the resource";
     public static final String PUBLIC_IN_ACCOUNT = "resource is visible in account";
+    public static final String ATTRIBUTES = "provider specific attributes of the credential";
     public static final String CLOUD_PLATFORM = "type of cloud provider";
     public static final String OWNER = "id of the resource owner that is provided by OAuth provider";
     public static final String ACCOUNT = "account id of the resource owner that is provided by OAuth provider";

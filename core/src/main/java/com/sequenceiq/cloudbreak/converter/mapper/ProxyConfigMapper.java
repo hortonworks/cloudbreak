@@ -22,8 +22,12 @@ public interface ProxyConfigMapper {
     })
     ProxyConfig mapRequestToEntity(ProxyConfigRequest proxyConfigRequest);
 
-    @Mappings(@Mapping(target = "environments", ignore = true))
-    ProxyConfigResponse mapEntityToResponse(ProxyConfig proxyConfigRequest);
+    @Mappings({
+            @Mapping(target = "userName", expression = "java(proxyConfig.getUserName())"),
+            @Mapping(target = "password", expression = "java(proxyConfig.getPasswordSecret())"),
+            @Mapping(target = "environments", ignore = true)
+    })
+    ProxyConfigResponse mapEntityToResponse(ProxyConfig proxyConfig);
 
     Set<ProxyConfigResponse> mapEntityToResponse(Set<ProxyConfig> proxyConfigRequest);
 }

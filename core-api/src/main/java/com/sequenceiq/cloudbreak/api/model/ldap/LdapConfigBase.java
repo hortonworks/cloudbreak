@@ -41,6 +41,14 @@ public abstract class LdapConfigBase implements JsonEntity {
     private String protocol = "ldap";
 
     @NotNull
+    @ApiModelProperty(value = LdapConfigModelDescription.BIND_DN, required = true)
+    private String bindDn;
+
+    @NotNull
+    @ApiModelProperty(value = LdapConfigModelDescription.BIND_PASSWORD, required = true)
+    private String bindPassword;
+
+    @NotNull
     @ApiModelProperty(value = LdapConfigModelDescription.USER_SEARCH_BASE, required = true)
     private String userSearchBase;
 
@@ -113,6 +121,22 @@ public abstract class LdapConfigBase implements JsonEntity {
 
     public void setProtocol(String protocol) {
         this.protocol = protocol;
+    }
+
+    public String getBindDn() {
+        return bindDn;
+    }
+
+    public void setBindDn(String bindDn) {
+        this.bindDn = bindDn;
+    }
+
+    public String getBindPassword() {
+        return bindPassword;
+    }
+
+    public void setBindPassword(String bindPassword) {
+        this.bindPassword = bindPassword;
     }
 
     public String getUserSearchBase() {

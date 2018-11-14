@@ -32,6 +32,14 @@ public abstract class RDSConfigJson implements JsonEntity {
     @ApiModelProperty(RDSConfig.CONNECTOR_JAR_URL)
     private String connectorJarUrl;
 
+    @NotNull
+    @ApiModelProperty(value = RDSConfig.USERNAME, required = true)
+    private String connectionUserName;
+
+    @NotNull
+    @ApiModelProperty(value = RDSConfig.PASSWORD, required = true)
+    private String connectionPassword;
+
     @ApiModelProperty(ModelDescriptions.ENVIRONMENTS)
     private Set<String> environments = new HashSet<>();
 
@@ -65,6 +73,22 @@ public abstract class RDSConfigJson implements JsonEntity {
 
     public void setConnectorJarUrl(String connectorJarUrl) {
         this.connectorJarUrl = connectorJarUrl;
+    }
+
+    public String getConnectionUserName() {
+        return connectionUserName;
+    }
+
+    public void setConnectionUserName(String connectionUserName) {
+        this.connectionUserName = connectionUserName;
+    }
+
+    public String getConnectionPassword() {
+        return connectionPassword;
+    }
+
+    public void setConnectionPassword(String connectionPassword) {
+        this.connectionPassword = connectionPassword;
     }
 
     public Set<String> getEnvironments() {

@@ -12,8 +12,8 @@ public class ClusterToAutoscaleClusterResponseJsonConverter extends AbstractConv
     @Override
     public AutoscaleClusterResponse convert(Cluster source) {
         AutoscaleClusterResponse response = getConversionService().convert(source, AutoscaleClusterResponse.class);
-        response.setPassword(source.getCloudbreakAmbariPassword());
-        response.setUserName(source.getCloudbreakAmbariUser());
+        response.setUserName(source.getCloudbreakAmbariUserSecret());
+        response.setPassword(source.getCloudbreakAmbariPasswordSecret());
         return response;
     }
 }

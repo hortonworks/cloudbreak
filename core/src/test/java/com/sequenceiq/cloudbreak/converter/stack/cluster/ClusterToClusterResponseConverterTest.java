@@ -150,8 +150,11 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
         mockAll();
         getSource().setConfigStrategy(ConfigStrategy.NEVER_APPLY);
         given(stackUtil.extractAmbariIp(any(Stack.class))).willReturn("10.0.0.1");
+        Cluster source = getSource();
+        TestUtil.setSecretField(Cluster.class, "cloudbreakAmbariUser", source, "user", "secret/path");
+        TestUtil.setSecretField(Cluster.class, "cloudbreakAmbariPassword", source, "pass", "secret/path");
         // WHEN
-        ClusterResponse result = underTest.convert(getSource());
+        ClusterResponse result = underTest.convert(source);
         // THEN
         assertEquals(1L, (long) result.getId());
         assertAllFieldsNotNull(result, Lists.newArrayList("cluster", "userName", "ambariStackDetails", "rdsConfigId", "blueprintCustomProperties",

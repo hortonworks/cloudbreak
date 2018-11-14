@@ -20,6 +20,8 @@ public class ProxyConfigToProxyConfigResponseConverter extends AbstractConversio
         response.setWorkspace(getConversionService().convert(source.getWorkspace(), WorkspaceResourceResponse.class));
         response.setDescription(source.getDescription());
         response.setProtocol(source.getProtocol());
+        response.setUserName(source.getUserName());
+        response.setPassword(source.getPasswordSecret());
         response.setServerHost(source.getServerHost());
         response.setServerPort(source.getServerPort());
         response.setEnvironments(source.getEnvironments().stream()

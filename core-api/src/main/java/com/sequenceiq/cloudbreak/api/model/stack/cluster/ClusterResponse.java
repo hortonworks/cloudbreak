@@ -82,6 +82,9 @@ public class ClusterResponse implements JsonEntity {
     @ApiModelProperty(StackModelDescription.USERNAME)
     private String userName;
 
+    @ApiModelProperty(StackModelDescription.PASSWORD)
+    private String password;
+
     @ApiModelProperty(ClusterModelDescription.SECURE)
     private boolean secure;
 
@@ -280,6 +283,14 @@ public class ClusterResponse implements JsonEntity {
 
     public void setUserName(String userName) {
         this.userName = userName;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public Map<String, Collection<ClusterExposedServiceResponse>> getClusterExposedServicesForTopologies() {
