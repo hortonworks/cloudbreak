@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -19,13 +18,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Splitter;
-import com.microsoft.azure.management.network.NetworkSecurityGroup;
-import com.microsoft.azure.management.network.NetworkSecurityRule;
 import com.microsoft.azure.management.network.Subnet;
 import com.microsoft.azure.management.resources.Deployment;
 import com.microsoft.azure.management.resources.DeploymentOperation;
 import com.microsoft.azure.management.resources.DeploymentOperations;
-import com.microsoft.azure.management.resources.fluentcore.arm.models.HasId;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.status.AzureStackStatus;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -42,30 +38,15 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Component
 public class AzureUtils {
-
-    public static final int NOT_FOUND = 404;
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(AzureUtils.class);
-
     private static final String RG_NAME = "resourceGroupName";
 
     private static final String NETWORK_ID = "networkId";
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(AzureUtils.class);
+
     private static final String NO_PUBLIC_IP = "noPublicIp";
 
     private static final String NO_FIREWALL_RULES = "noFirewallRules";
-
-    private static final int PORT_22 = 22;
-
-    private static final int PORT_443 = 443;
-
-    private static final int PORT_RANGE_NUM = 2;
-
-    private static final int RG_PART = 4;
-
-    private static final int ID_SEGMENTS = 9;
-
-    private static final int SEC_GROUP_PART = 8;
 
     private static final int HOST_GROUP_LENGTH = 3;
 
@@ -190,7 +171,7 @@ public class AzureUtils {
         return Arrays.asList(network.getStringParameter(CloudInstance.SUBNET_ID).split(","));
     }
 
-    public void validateSubnetRules(AzureClient client, Network network) {
+    public void validateSubnet(AzureClient client, Network network) {
         if (isExistingNetwork(network)) {
             String resourceGroupName = getCustomResourceGroupName(network);
             String networkId = getCustomNetworkId(network);
@@ -202,10 +183,6 @@ public class AzureUtils {
                         throw new CloudConnectorException(
                                 String.format("Subnet [%s] does not found with resourceGroupName [%s] and network [%s]", subnetId, resourceGroupName, networkId)
                         );
-                    }
-                    NetworkSecurityGroup networkSecurityGroup = subnet.getNetworkSecurityGroup();
-                    if (networkSecurityGroup != null) {
-                        validateSecurityGroup(client, networkSecurityGroup);
                     }
                 } catch (RuntimeException e) {
                     throw new CloudConnectorException("Subnet validation failed, cause: " + e.getMessage(), e);
@@ -231,63 +208,4 @@ public class AzureUtils {
             }
         }
     }
-
-    private void validateSecurityGroup(AzureClient client, HasId networkSecurityGroup) {
-        String securityGroupId = networkSecurityGroup.id();
-        String[] parts = securityGroupId.split("/");
-        if (parts.length != ID_SEGMENTS) {
-            LOGGER.info("Cannot get the security group's properties, id: {}", securityGroupId);
-            return;
-        }
-        try {
-            NetworkSecurityGroup securityGroup = client.getSecurityGroupProperties(parts[RG_PART], parts[SEC_GROUP_PART]);
-            LOGGER.info("Retrieved security group properties: {}", securityGroup);
-            Map<String, NetworkSecurityRule> securityRules = securityGroup.securityRules();
-            boolean port22Found = false;
-            boolean port443Found = false;
-
-            for (NetworkSecurityRule securityRule : securityRules.values()) {
-                if (isValidInboundRule(securityRule)) {
-                    String destinationPortRange = securityRule.destinationPortRange();
-                    if ("*".equals(destinationPortRange)) {
-                        return;
-                    }
-                    String[] range = destinationPortRange.split("-");
-                    port443Found = port443Found || isPortFound(PORT_443, range);
-                    port22Found = port22Found || isPortFound(PORT_22, range);
-                    if (port22Found && port443Found) {
-                        return;
-                    }
-                }
-            }
-        } catch (RuntimeException e) {
-            throw new CloudConnectorException("Validating security group failed.", e);
-        }
-        throw new CloudConnectorException("The specified subnet's security group does not allow traffic for port 22 and/or 443");
-    }
-
-    private boolean isValidInboundRule(NetworkSecurityRule securityRule) {
-        String protocol = securityRule.protocol().toString().toLowerCase();
-        String access = securityRule.access().toString().toLowerCase();
-        String direction = securityRule.direction().toString().toLowerCase();
-        return "inbound".equals(direction)
-                && ("tcp".equals(protocol) || "*".equals(protocol))
-                && "allow".equals(access);
-    }
-
-    private boolean isPortFound(int port, String[] destinationPortRange) {
-        if (destinationPortRange.length == PORT_RANGE_NUM) {
-            return isPortInRange(port, destinationPortRange);
-        }
-        return isPortMatch(port, destinationPortRange[0]);
-    }
-
-    private boolean isPortInRange(int port, String[] range) {
-        return Integer.parseInt(range[0]) <= port && Integer.parseInt(range[1]) >= port;
-    }
-
-    private boolean isPortMatch(int port, String destinationPortRange) {
-        return port == Integer.parseInt(destinationPortRange);
-    }
-
 }
