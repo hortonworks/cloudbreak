@@ -82,7 +82,7 @@ public class SecretAspects {
                         field.setAccessible(true);
                         Secret value = (Secret) field.get(entity);
                         if (value != null && value.getRaw() != null && value.getSecret() == null) {
-                            String path = String.format("shared/%s/%s/%s/%s-%s", tenant,
+                            String path = String.format("%s/%s/%s/%s-%s", tenant,
                                     entity.getClass().getSimpleName().toLowerCase(), field.getName().toLowerCase(),
                                     UUID.randomUUID().toString(), Integer.toHexString(entity.hashCode()));
                             String secret = secretService.put(path, value.getRaw());
