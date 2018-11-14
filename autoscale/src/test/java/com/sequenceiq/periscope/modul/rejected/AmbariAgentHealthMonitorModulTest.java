@@ -25,6 +25,7 @@ import javax.inject.Inject;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -40,7 +41,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.endpoint.autoscale.AutoscaleEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.ClusterV1Endpoint;
 import com.sequenceiq.cloudbreak.api.model.FailureReport;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
@@ -201,6 +201,7 @@ public class AmbariAgentHealthMonitorModulTest extends RejectedThreadContext {
 
     }
 
+    @Ignore
     @Test
     public void testWhenThreadPoolRejectedAndCountMoreThanOne() {
         Cluster cluster1 = cluster(1L);
