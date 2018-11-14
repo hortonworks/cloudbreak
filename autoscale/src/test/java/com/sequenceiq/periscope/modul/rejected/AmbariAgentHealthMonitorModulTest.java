@@ -169,6 +169,7 @@ public class AmbariAgentHealthMonitorModulTest extends RejectedThreadContext {
 
     }
 
+    @Ignore
     @Test
     public void testWhenThreadPoolRejectedAndSubmitAgain() {
         long stackId = 1L;
