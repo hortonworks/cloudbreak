@@ -1,5 +1,8 @@
 package com.sequenceiq.periscope.config;
 
+import static java.util.concurrent.TimeUnit.MINUTES;
+import static java.util.concurrent.TimeUnit.SECONDS;
+
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.SQLException;
@@ -44,6 +47,15 @@ public class DatabaseConfig {
     @Value("${periscope.db.env.poolsize:10}")
     private int poolSize;
 
+    @Value("${periscope.db.env.connectiontimeout:30}")
+    private long connectionTimeout;
+
+    @Value("${periscope.db.env.minidle:2}")
+    private int minimumIdle;
+
+    @Value("${periscope.db.env.idletimeout:10}")
+    private long idleTimeout;
+
     @Value("${periscope.db.env.schema:" + DatabaseUtil.DEFAULT_SCHEMA_NAME + '}')
     private String dbSchemaName;
 
@@ -82,6 +94,9 @@ public class DatabaseConfig {
         config.setUsername(dbUser);
         config.setPassword(dbPassword);
         config.setMaximumPoolSize(poolSize);
+        config.setMinimumIdle(minimumIdle);
+        config.setConnectionTimeout(SECONDS.toMillis(connectionTimeout));
+        config.setIdleTimeout(MINUTES.toMillis(idleTimeout));
         return new HikariDataSource(config);
     }
 
