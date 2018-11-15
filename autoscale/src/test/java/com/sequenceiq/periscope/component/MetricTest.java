@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.persistence.EntityManagerFactory;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InOrder;
@@ -98,6 +99,7 @@ import com.zaxxer.hikari.HikariDataSource;
 
 import springfox.documentation.swagger.web.SwaggerResourcesProvider;
 
+@Ignore
 @SpringBootTest(classes = MetricTest.TestConfig.class, webEnvironment = WebEnvironment.RANDOM_PORT)
 @RunWith(SpringRunner.class)
 @TestPropertySource(properties = {
