@@ -15,12 +15,12 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
-import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
 public class WorkspaceConfiguratorFilter extends OncePerRequestFilter {
 
@@ -28,7 +28,7 @@ public class WorkspaceConfiguratorFilter extends OncePerRequestFilter {
 
     private final Pattern v3ResourcePattern = Pattern.compile(".*\\/v3\\/(\\d*)\\/.*");
 
-    private final RestRequestThreadLocalService restRequestThreadLocalService;
+    private final CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     private final WorkspaceService workspaceService;
 
@@ -36,7 +36,7 @@ public class WorkspaceConfiguratorFilter extends OncePerRequestFilter {
 
     private final AuthenticatedUserService authenticatedUserService;
 
-    public WorkspaceConfiguratorFilter(RestRequestThreadLocalService restRequestThreadLocalService, WorkspaceService workspaceService,
+    public WorkspaceConfiguratorFilter(CloudbreakRestRequestThreadLocalService restRequestThreadLocalService, WorkspaceService workspaceService,
             UserService userService, AuthenticatedUserService authenticatedUserService) {
         this.restRequestThreadLocalService = restRequestThreadLocalService;
         this.workspaceService = workspaceService;

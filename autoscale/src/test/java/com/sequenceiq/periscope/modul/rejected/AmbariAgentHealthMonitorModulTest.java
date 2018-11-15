@@ -42,11 +42,10 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.endpoint.autoscale.AutoscaleEndpoint;
 import com.sequenceiq.cloudbreak.api.model.FailureReport;
-import com.sequenceiq.cloudbreak.client.CloudbreakClient;
+import com.sequenceiq.cloudbreak.client.CloudbreakIdentityClient;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.domain.Cluster;
-import com.sequenceiq.periscope.domain.PeriscopeUser;
 import com.sequenceiq.periscope.model.RejectedThread;
 import com.sequenceiq.periscope.modul.rejected.RejectedThreadContext.SpringConfig;
 import com.sequenceiq.periscope.monitor.AmbariAgentHealthMonitor;
@@ -92,7 +91,7 @@ public class AmbariAgentHealthMonitorModulTest extends RejectedThreadContext {
     private JobDetail jobDetail;
 
     @Mock
-    private CloudbreakClient cloudbreakClient;
+    private CloudbreakIdentityClient cloudbreakClient;
 
     private TestContextManager testContextManager;
 
@@ -119,7 +118,6 @@ public class AmbariAgentHealthMonitorModulTest extends RejectedThreadContext {
         long stackId = 0L;
         cluster.setId(clusterId);
         cluster.setStackId(stackId);
-        cluster.setUser(new PeriscopeUser());
 
         when(jobDetail.getKey()).thenReturn(JobKey.jobKey("test-heart-beat-critical"));
         when(clusterService.findById(clusterId)).thenReturn(cluster);
@@ -244,7 +242,6 @@ public class AmbariAgentHealthMonitorModulTest extends RejectedThreadContext {
         Cluster cluster = new Cluster();
         cluster.setId(stackId);
         cluster.setStackId(stackId);
-        cluster.setUser(new PeriscopeUser());
         return cluster;
     }
 

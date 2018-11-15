@@ -115,4 +115,5 @@ public class CaasUser {
     public void setPicture(String picture) {
         this.picture = picture;
     }
+
 }

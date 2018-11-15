@@ -1,8 +1,5 @@
 package com.sequenceiq.it.cloudbreak.newway.config;
 
-import static com.sequenceiq.it.cloudbreak.newway.CloudbreakTest.SECOND_PASSWORD;
-import static com.sequenceiq.it.cloudbreak.newway.CloudbreakTest.SECOND_USER;
-
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -29,7 +26,7 @@ public class CloudbreakServer {
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakServer.class);
 
     private static final String WARNING_TEXT = "Following variables must be set whether as environment variables or (test) application.yaml: "
-            + "INTEGRATIONTEST_CLOUDBREAK_SERVER INTEGRATIONTEST_UAA_SERVER INTEGRATIONTEST_UAA_USER INTEGRATIONTEST_UAA_PASSWORD";
+            + "INTEGRATIONTEST_CLOUDBREAK_SERVER INTEGRATIONTEST_CAAS_TOKEN";
 
     @Value("${integrationtest.cloudbreak.server}")
     private String server;
@@ -37,22 +34,16 @@ public class CloudbreakServer {
     @Value("${server.contextPath:/cb}")
     private String cbRootContextPath;
 
-    @Value("${integrationtest.uaa.server}")
-    private String uaaServer;
+    @Value("${integrationtest.caas.token:}")
+    private String refreshToken;
 
-    @Value("${integrationtest.uaa.user}")
-    private String defaultUaaUser;
+    @Value("${integrationtest.caas.protocol:}")
+    private String caasProtocol;
 
-    @Value("${integrationtest.uaa.password}")
-    private String defaultUaaPassword;
+    @Value("${integrationtest.caas.address:}")
+    private String caasAddress;
 
-    @Value("${integrationtest.uaa.secondUser:}")
-    private String secondUaaUser;
-
-    @Value("${integrationtest.uaa.secondPassword:}")
-    private String secondUaaPassword;
-
-    @Value("${integrationtest.cb.profile:}")
+    @Value("${integrationtest.caas.profile:}")
     private String profile;
 
     @Inject
@@ -63,11 +54,6 @@ public class CloudbreakServer {
 
         String userHome = System.getProperty("user.home");
         Path cbProfileLocation = Paths.get(userHome, ".cb", "config");
-
-        String server = this.server;
-        String uaaServer = this.uaaServer;
-        String defaultUaaUser = this.defaultUaaUser;
-        String defaultUaaPassword = this.defaultUaaPassword;
 
         if (Files.exists(cbProfileLocation)) {
             byte[] encoded = Files.readAllBytes(Paths.get(userHome, ".cb", "config"));
@@ -90,19 +76,21 @@ public class CloudbreakServer {
                         + "-Dintegrationtest.cb.profile should be added with exited profile");
             } else {
                 if (StringUtils.isEmpty(server)) {
-                    server = prof.get("server");
-                    if ("localhost".equals(usedProfile) && !StringUtils.isEmpty(server)) {
-                        uaaServer = "http://" + server + ":8089";
+                    if (prof.get("server").contains("http")) {
+                        server = prof.get("server");
                     } else {
-                        uaaServer = "https://" + server;
+                        server = "https://" + prof.get("server");
                     }
-                    server = "https://" + server;
                 }
-                if (StringUtils.isEmpty(defaultUaaPassword)) {
-                    defaultUaaPassword = prof.get("password");
+                if (StringUtils.isEmpty(refreshToken)) {
+                    refreshToken = prof.get("refreshtoken");
                 }
-                if (StringUtils.isEmpty(defaultUaaUser)) {
-                    defaultUaaUser = prof.get("username");
+                String[] cloudbreakServerSplit = server.split("://");
+                if (StringUtils.isEmpty(caasProtocol)) {
+                    caasProtocol = cloudbreakServerSplit[0];
+                }
+                if (StringUtils.isEmpty(caasAddress)) {
+                    caasAddress = cloudbreakServerSplit[1];
                 }
             }
         } else {
@@ -111,22 +99,14 @@ public class CloudbreakServer {
 
         checkNonEmpty(server);
         checkNonEmpty(cbRootContextPath);
-        checkNonEmpty(uaaServer);
-        checkNonEmpty(defaultUaaUser);
-        checkNonEmpty(defaultUaaPassword);
+        checkNonEmpty(refreshToken);
+        checkNonEmpty(caasProtocol);
+        checkNonEmpty(caasAddress);
 
         testParameter.put(CloudbreakTest.CLOUDBREAK_SERVER_ROOT, server + cbRootContextPath);
-        testParameter.put(CloudbreakTest.IDENTITY_URL, uaaServer);
-        testParameter.put(CloudbreakTest.USER, defaultUaaUser);
-        testParameter.put(CloudbreakTest.PASSWORD, defaultUaaPassword);
-
-        if (!StringUtils.isEmpty(secondUaaUser)) {
-            if (StringUtils.isEmpty(secondUaaPassword)) {
-                throw new IllegalStateException("Second user password must not be empty!");
-            }
-            testParameter.put(SECOND_USER, secondUaaUser);
-            testParameter.put(SECOND_PASSWORD, secondUaaPassword);
-        }
+        testParameter.put(CloudbreakTest.CAAS_PROTOCOL, caasProtocol);
+        testParameter.put(CloudbreakTest.CAAS_ADDRESS, caasAddress);
+        testParameter.put(CloudbreakTest.REFRESH_TOKEN, refreshToken);
     }
 
     private void checkNonEmpty(String value) {

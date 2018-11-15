@@ -45,13 +45,13 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateService;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
-import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
+import com.sequenceiq.cloudbreak.service.account.PreferencesService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserProfileHandler;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
@@ -87,7 +87,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     private UserProfileHandler userProfileHandler;
 
     @Inject
-    private AccountPreferencesService accountPreferencesService;
+    private PreferencesService preferencesService;
 
     @Inject
     private StackService stackService;
@@ -112,8 +112,8 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         return imageCatalogs;
     }
 
-    public StatedImages getImagesOsFiltered(String provider, String os, CloudbreakUser cloudbreakUser, User user) throws CloudbreakImageCatalogException {
-        StatedImages images = getImages(getDefaultImageCatalog(cloudbreakUser, user), provider, cbVersion);
+    public StatedImages getImagesOsFiltered(String provider, String os, User user) throws CloudbreakImageCatalogException {
+        StatedImages images = getImages(getDefaultImageCatalog(user), provider, cbVersion);
         if (!StringUtils.isEmpty(os)) {
             Images rawImages = images.getImages();
             List<Image> baseImages = filterImagesByOs(rawImages.getBaseImages(), os);
@@ -127,7 +127,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
 
     public StatedImage getLatestBaseImageDefaultPreferred(String platform, String os, CloudbreakUser cloudbreakUser, User user)
             throws CloudbreakImageCatalogException, CloudbreakImageNotFoundException {
-        StatedImages statedImages = getImagesOsFiltered(platform, os, cloudbreakUser, user);
+        StatedImages statedImages = getImagesOsFiltered(platform, os, user);
         Optional<Image> defaultBaseImage = getLatestBaseImageDefaultPreferred(statedImages, os);
         if (defaultBaseImage.isPresent()) {
             return statedImage(defaultBaseImage.get(), statedImages.getImageCatalogUrl(), statedImages.getImageCatalogName());
@@ -147,7 +147,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     public StatedImage getPrewarmImageDefaultPreferred(String platform, String clusterType, String clusterVersion, String os, CloudbreakUser cloudbreakUser,
             User user)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        StatedImages statedImages = getImagesOsFiltered(platform, os, cloudbreakUser, user);
+        StatedImages statedImages = getImagesOsFiltered(platform, os, user);
         List<Image> images = getImagesForClusterType(statedImages, clusterType);
         Optional<Image> selectedImage = Optional.empty();
         if (!CollectionUtils.isEmpty(images)) {
@@ -219,7 +219,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         }
         ImageCatalog imageCatalog = get(workspaceId, name);
         imageCatalog.setArchived(true);
-        setImageCatalogAsDefault(null, cloudbreakUser, user);
+        setImageCatalogAsDefault(null, user);
         imageCatalog.setName(generateArchiveName(name));
         imageCatalogRepository.save(imageCatalog);
         userProfileHandler.destroyProfileImageCatalogPreparation(imageCatalog);
@@ -233,13 +233,13 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
 
     public ImageCatalog setAsDefault(Long workspaceId, String name, CloudbreakUser cloudbreakUser, User user) {
 
-        removeDefaultFlag(cloudbreakUser, user);
+        removeDefaultFlag(user);
 
         if (!isEnvDefault(name)) {
             ImageCatalog imageCatalog = get(workspaceId, name);
             checkImageCatalog(imageCatalog, name);
 
-            setImageCatalogAsDefault(imageCatalog, cloudbreakUser, user);
+            setImageCatalogAsDefault(imageCatalog, user);
 
             return imageCatalog;
         }
@@ -250,8 +250,8 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         return CLOUDBREAK_DEFAULT_CATALOG_NAME.equals(name);
     }
 
-    private void setImageCatalogAsDefault(ImageCatalog imageCatalog, CloudbreakUser cloudbreakUser, User user) {
-        UserProfile userProfile = getUserProfile(cloudbreakUser, user);
+    private void setImageCatalogAsDefault(ImageCatalog imageCatalog, User user) {
+        UserProfile userProfile = getUserProfile(user);
         userProfile.setImageCatalog(imageCatalog);
         userProfileService.save(userProfile);
     }
@@ -348,7 +348,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
 
     private void validateRequestPlatforms(Set<String> platforms) throws CloudbreakImageCatalogException {
         Set<String> collect = platforms.stream()
-                .filter(requestedPlatform -> accountPreferencesService.enabledPlatforms().stream()
+                .filter(requestedPlatform -> preferencesService.enabledPlatforms().stream()
                         .filter(enabledPlatform -> enabledPlatform.equalsIgnoreCase(requestedPlatform))
                         .collect(Collectors.toSet()).isEmpty())
                 .collect(Collectors.toSet());
@@ -360,7 +360,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
 
     public Images propagateImagesIfRequested(Long workspaceId, String name, boolean withImages) {
         if (withImages) {
-            Set<String> platforms = accountPreferencesService.enabledPlatforms();
+            Set<String> platforms = preferencesService.enabledPlatforms();
             try {
                 return getImages(workspaceId, name, platforms).getImages();
             } catch (CloudbreakImageCatalogException e) {
@@ -461,17 +461,17 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
                 .orElse(0);
     }
 
-    private void removeDefaultFlag(CloudbreakUser cloudbreakUser, User user) {
-        ImageCatalog imageCatalog = getDefaultImageCatalog(cloudbreakUser, user);
+    private void removeDefaultFlag(User user) {
+        ImageCatalog imageCatalog = getDefaultImageCatalog(user);
         if (imageCatalog.getName() != null && !CLOUDBREAK_DEFAULT_CATALOG_NAME.equalsIgnoreCase(imageCatalog.getName())) {
-            setImageCatalogAsDefault(null, cloudbreakUser, user);
+            setImageCatalogAsDefault(null, user);
             imageCatalogRepository.save(imageCatalog);
         }
     }
 
     @Nonnull
-    private ImageCatalog getDefaultImageCatalog(CloudbreakUser cloudbreakUser, User user) {
-        ImageCatalog imageCatalog = getUserProfile(cloudbreakUser, user).getImageCatalog();
+    private ImageCatalog getDefaultImageCatalog(User user) {
+        ImageCatalog imageCatalog = getUserProfile(user).getImageCatalog();
         if (imageCatalog == null) {
             imageCatalog = new ImageCatalog();
             imageCatalog.setImageCatalogUrl(defaultCatalogUrl);
@@ -481,15 +481,15 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     }
 
     public String getDefaultImageCatalogName(CloudbreakUser cloudbreakUser, User user) {
-        return getDefaultImageCatalog(cloudbreakUser, user).getName();
+        return getDefaultImageCatalog(user).getName();
     }
 
-    public String getImageDefaultCatalogUrl(CloudbreakUser cloudbreakUser, User user) {
-        return getDefaultImageCatalog(cloudbreakUser, user).getImageCatalogUrl();
+    public String getImageDefaultCatalogUrl(User user) {
+        return getDefaultImageCatalog(user).getImageCatalogUrl();
     }
 
-    private UserProfile getUserProfile(CloudbreakUser cloudbreakUser, User user) {
-        return userProfileService.getOrCreate(cloudbreakUser.getAccount(), cloudbreakUser.getUserId(), user);
+    private UserProfile getUserProfile(User user) {
+        return userProfileService.getOrCreate(user);
     }
 
     private static Predicate<Image> isMatchingOs(String os) {

@@ -44,10 +44,6 @@ public class LdapConfig implements ProvisionEntity, EnvironmentAwareResource {
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String description;
 
-    private String account;
-
-    private String owner;
-
     @Column(nullable = false)
     private String serverHost;
 
@@ -105,8 +101,6 @@ public class LdapConfig implements ProvisionEntity, EnvironmentAwareResource {
         copy.setId(id);
         copy.setName(name);
         copy.setDescription(description);
-        copy.setAccount(account);
-        copy.setOwner(owner);
         copy.setServerHost(serverHost);
         copy.setServerPort(serverPort);
         copy.setProtocol(protocol);
@@ -149,22 +143,6 @@ public class LdapConfig implements ProvisionEntity, EnvironmentAwareResource {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public String getAccount() {
-        return account;
-    }
-
-    public void setAccount(String account) {
-        this.account = account;
-    }
-
-    public String getOwner() {
-        return owner;
-    }
-
-    public void setOwner(String owner) {
-        this.owner = owner;
     }
 
     public String getServerHost() {

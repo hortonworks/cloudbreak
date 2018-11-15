@@ -295,7 +295,7 @@ public class StackImageUpdateActionsTest {
     @Test
     public void finishAction() {
         CloudPlatformResult payload = new CloudPlatformResult(new CloudPlatformRequest(
-                new CloudContext(1L, "asdf", "Asdf", "Asdf", USER_ID, WORKSPACE_ID), null));
+                new CloudContext(1L, "asdf", "Asdf", USER_ID, WORKSPACE_ID), null));
         when(stateContext.getMessageHeader(HEADERS.DATA.name())).thenReturn(payload);
         when(state.getId()).thenReturn(StackImageUpdateState.STACK_IMAGE_UPDATE_FINISHED);
 
@@ -311,7 +311,7 @@ public class StackImageUpdateActionsTest {
                 new StackFailureEvent(StackImageUpdateEvent.STACK_IMAGE_UPDATE_FAILED_EVENT.event(), 1L, new CloudbreakServiceException("test"));
         when(stateContext.getMessageHeader(HEADERS.DATA.name())).thenReturn(payload);
         when(state.getId()).thenReturn(StackImageUpdateState.STACK_IMAGE_UPDATE_FAILED_STATE);
-        when(stackService.getViewByIdWithoutAuth(anyLong())).thenReturn(new StackView(1L, null, null, null, null));
+        when(stackService.getViewByIdWithoutAuth(anyLong())).thenReturn(new StackView(1L, null, null, null));
         when(runningFlows.get(anyString())).thenReturn(flow);
 
         handleImageUpdateFailureAction.execute(stateContext);

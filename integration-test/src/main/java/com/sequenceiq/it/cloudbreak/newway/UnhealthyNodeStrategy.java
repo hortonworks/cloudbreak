@@ -38,11 +38,10 @@ public class UnhealthyNodeStrategy implements Strategy {
 
     private ProxyCloudbreakClient getAutoscaleProxyCloudbreakClient(IntegrationTestContext integrationTestContext) {
         return new ProxyCloudbreakClient(
-                    integrationTestContext.getContextParam(CloudbreakTest.CLOUDBREAK_SERVER_ROOT),
-                    integrationTestContext.getContextParam(CloudbreakTest.IDENTITY_URL),
-                    integrationTestContext.getContextParam(CloudbreakTest.AUTOSCALE_SECRET),
-                    integrationTestContext.getContextParam(CloudbreakTest.AUTOSCALE_CLIENTID),
-                    new ConfigKey(false, true, true));
-
+                integrationTestContext.getContextParam(CloudbreakTest.CLOUDBREAK_SERVER_ROOT),
+                integrationTestContext.getContextParam(CloudbreakTest.CAAS_PROTOCOL),
+                integrationTestContext.getContextParam(CloudbreakTest.CAAS_ADDRESS),
+                integrationTestContext.getContextParam(CloudbreakTest.REFRESH_TOKEN),
+                new ConfigKey(false, true, true));
     }
 }

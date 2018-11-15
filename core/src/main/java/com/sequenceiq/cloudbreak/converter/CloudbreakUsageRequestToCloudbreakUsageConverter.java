@@ -10,8 +10,6 @@ public class CloudbreakUsageRequestToCloudbreakUsageConverter extends AbstractCo
     @Override
     public CloudbreakUsage convert(CloudbreakUsageJson json) {
         CloudbreakUsage entity = new CloudbreakUsage();
-        entity.setOwner(json.getOwner());
-        entity.setAccount(json.getAccount());
         entity.setProvider(json.getProvider());
         entity.setRegion(json.getRegion());
         entity.setAvailabilityZone(json.getAvailabilityZone());

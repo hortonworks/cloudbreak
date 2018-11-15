@@ -23,10 +23,6 @@ public class ImageCatalog implements ProvisionEntity, WorkspaceAwareResource {
     @SequenceGenerator(name = "imagecatalog_generator", sequenceName = "imagecatalog_id_seq", allocationSize = 1)
     private Long id;
 
-    private String owner;
-
-    private String account;
-
     @Column(nullable = false)
     private String name;
 
@@ -45,22 +41,6 @@ public class ImageCatalog implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getOwner() {
-        return owner;
-    }
-
-    public void setOwner(String owner) {
-        this.owner = owner;
-    }
-
-    public String getAccount() {
-        return account;
-    }
-
-    public void setAccount(String account) {
-        this.account = account;
     }
 
     public void setName(String name) {

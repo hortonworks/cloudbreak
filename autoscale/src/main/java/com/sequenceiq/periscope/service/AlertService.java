@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.ambari.client.services.CommonService;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.periscope.api.model.AlertRuleDefinitionEntry;
 import com.sequenceiq.periscope.aspects.AmbariRequestLogging;
 import com.sequenceiq.periscope.domain.BaseAlert;
@@ -26,7 +27,6 @@ import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.MetricAlert;
 import com.sequenceiq.periscope.domain.PrometheusAlert;
 import com.sequenceiq.periscope.domain.TimeAlert;
-import com.sequenceiq.periscope.log.MDCBuilder;
 import com.sequenceiq.periscope.repository.MetricAlertRepository;
 import com.sequenceiq.periscope.repository.PrometheusAlertRepository;
 import com.sequenceiq.periscope.repository.TimeAlertRepository;

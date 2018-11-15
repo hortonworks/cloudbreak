@@ -47,7 +47,7 @@ public class ImageToImageJsonConverter extends AbstractConversionServiceAwareCon
         if (Strings.isNullOrEmpty(source.getImageCatalogUrl())) {
             CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
             User user = userService.getOrCreate(cloudbreakUser);
-            imageJson.setImageCatalogUrl(imageCatalogService.getImageDefaultCatalogUrl(cloudbreakUser, user));
+            imageJson.setImageCatalogUrl(imageCatalogService.getImageDefaultCatalogUrl(user));
         } else {
             imageJson.setImageCatalogUrl(source.getImageCatalogUrl());
         }

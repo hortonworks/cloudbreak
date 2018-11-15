@@ -45,7 +45,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentViewService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
@@ -82,7 +82,7 @@ public class StackV2RequestToStackRequestConverterTest {
     private SharedServiceConfigProvider sharedServiceConfigProvider;
 
     @Mock
-    private RestRequestThreadLocalService restRequestThreadLocalService;
+    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     @Mock
     private UserService userService;
@@ -314,7 +314,6 @@ public class StackV2RequestToStackRequestConverterTest {
     @Test
     public void testConvertWhenOwnerIsNullThenAuthenticatedUserServiceShouldProvideTheValue() {
         StackV2Request source = createStackV2Request();
-        source.setOwner(null);
 
         underTest.convert(source);
 
@@ -325,7 +324,6 @@ public class StackV2RequestToStackRequestConverterTest {
     @Test
     public void testConvertWhenOwnerIsEmptyThenAuthenticatedUserServiceShouldProvideTheValue() {
         StackV2Request source = createStackV2Request();
-        source.setOwner("");
 
         underTest.convert(source);
 
@@ -346,7 +344,6 @@ public class StackV2RequestToStackRequestConverterTest {
     @Test
     public void testConvertWhenAccountIsNullThenAuthenticatedUserServiceShouldProvideTheValue() {
         StackV2Request source = createStackV2Request();
-        source.setAccount(null);
 
         underTest.convert(source);
 
@@ -357,7 +354,6 @@ public class StackV2RequestToStackRequestConverterTest {
     @Test
     public void testConvertWhenAccountIsEmptyThenAuthenticatedUserServiceShouldProvideTheValue() {
         StackV2Request source = createStackV2Request();
-        source.setAccount("");
 
         underTest.convert(source);
 
@@ -378,12 +374,10 @@ public class StackV2RequestToStackRequestConverterTest {
     @Test
     public void testConvertWhenOwnerEmailIsNullThenAuthenticatedUserServiceShouldProvideTheValue() {
         StackV2Request source = createStackV2Request();
-        source.setOwnerEmail(null);
         when(cbUser.getUsername()).thenReturn(TEST_OWNER_EMAIL);
 
-        StackRequest result = underTest.convert(source);
+        underTest.convert(source);
 
-        Assert.assertEquals(TEST_OWNER_EMAIL, result.getOwnerEmail());
         verify(restRequestThreadLocalService, times(1)).getCloudbreakUser();
         verify(conversionService, times(1)).convert(any(), any());
     }
@@ -391,12 +385,10 @@ public class StackV2RequestToStackRequestConverterTest {
     @Test
     public void testConvertWhenOwnerEmailIsEmptyThenAuthenticatedUserServiceShouldProvideTheValue() {
         StackV2Request source = createStackV2Request();
-        source.setOwnerEmail("");
         when(cbUser.getUsername()).thenReturn(TEST_OWNER_EMAIL);
 
-        StackRequest result = underTest.convert(source);
+        underTest.convert(source);
 
-        Assert.assertEquals(TEST_OWNER_EMAIL, result.getOwnerEmail());
         verify(restRequestThreadLocalService, times(1)).getCloudbreakUser();
         verify(conversionService, times(1)).convert(any(), any());
     }
@@ -404,11 +396,9 @@ public class StackV2RequestToStackRequestConverterTest {
     @Test
     public void testConvertWhenOwnerEmailIsNotEmptyThenTheProvidedValueShouldBeSet() {
         StackV2Request source = createStackV2Request();
-        source.setOwnerEmail(TEST_OWNER_EMAIL);
 
-        StackRequest result = underTest.convert(source);
+        underTest.convert(source);
 
-        Assert.assertEquals(TEST_OWNER_EMAIL, result.getOwnerEmail());
         verify(restRequestThreadLocalService, times(1)).getCloudbreakUser();
         verify(conversionService, times(1)).convert(any(), any());
     }
@@ -544,7 +534,6 @@ public class StackV2RequestToStackRequestConverterTest {
 
     private void makeCbUserReturnNullsAsUsedFields() {
         when(cbUser.getUserId()).thenReturn(null);
-        when(cbUser.getAccount()).thenReturn(null);
         when(cbUser.getUsername()).thenReturn(null);
     }
 

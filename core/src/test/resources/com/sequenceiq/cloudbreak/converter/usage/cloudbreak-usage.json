@@ -1,6 +1,4 @@
 {
-  "owner": "ownerId",
-  "account": "accountId",
   "provider": "AWS",
   "region": "us-east-1",
   "availabilityZone": "us-east-1b",

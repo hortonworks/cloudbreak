@@ -21,9 +21,6 @@ public class StackViewResponse {
     @ApiModelProperty(value = StackModelDescription.STACK_NAME, required = true)
     private String name;
 
-    @ApiModelProperty(ModelDescriptions.OWNER)
-    private String owner;
-
     @ApiModelProperty(ModelDescriptions.CLOUD_PLATFORM)
     private String cloudPlatform;
 
@@ -66,14 +63,6 @@ public class StackViewResponse {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getOwner() {
-        return owner;
-    }
-
-    public void setOwner(String owner) {
-        this.owner = owner;
     }
 
     public ClusterViewResponse getCluster() {

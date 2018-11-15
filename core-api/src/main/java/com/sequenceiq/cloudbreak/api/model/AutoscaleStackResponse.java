@@ -5,7 +5,6 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 
@@ -16,6 +15,15 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AutoscaleStackResponse {
 
+    @ApiModelProperty(StackModelDescription.TENANANT)
+    private String tenant;
+
+    @ApiModelProperty(StackModelDescription.WORKSPACE_ID)
+    private Long workspaceId;
+
+    @ApiModelProperty(StackModelDescription.USER_ID)
+    private String userId;
+
     @ApiModelProperty(StackModelDescription.STACK_ID)
     private Long stackId;
 
@@ -25,12 +33,6 @@ public class AutoscaleStackResponse {
     @NotNull
     @ApiModelProperty(value = StackModelDescription.STACK_NAME, required = true)
     private String name;
-
-    @ApiModelProperty(ModelDescriptions.OWNER)
-    private String owner;
-
-    @ApiModelProperty(ModelDescriptions.ACCOUNT)
-    private String account;
 
     @ApiModelProperty(StackModelDescription.GATEWAY_PORT)
     private Integer gatewayPort;
@@ -53,6 +55,30 @@ public class AutoscaleStackResponse {
     @ApiModelProperty(StackModelDescription.CREATED)
     private Long created;
 
+    public String getTenant() {
+        return tenant;
+    }
+
+    public void setTenant(String tenant) {
+        this.tenant = tenant;
+    }
+
+    public Long getWorkspaceId() {
+        return workspaceId;
+    }
+
+    public void setWorkspaceId(Long workspaceId) {
+        this.workspaceId = workspaceId;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
     public Long getStackId() {
         return stackId;
     }
@@ -67,22 +93,6 @@ public class AutoscaleStackResponse {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getOwner() {
-        return owner;
-    }
-
-    public void setOwner(String owner) {
-        this.owner = owner;
-    }
-
-    public String getAccount() {
-        return account;
-    }
-
-    public void setAccount(String account) {
-        this.account = account;
     }
 
     public Integer getGatewayPort() {

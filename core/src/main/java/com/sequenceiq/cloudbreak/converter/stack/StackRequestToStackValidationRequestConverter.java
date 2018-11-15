@@ -37,7 +37,6 @@ public class StackRequestToStackValidationRequestConverter extends AbstractConve
         if (!Strings.isNullOrEmpty(source.getCredentialName())) {
             stackValidationRequest.setCredentialName(source.getCredentialName());
         }
-        stackValidationRequest.setAccount(source.getAccount());
         stackValidationRequest.setBlueprintName(clusterRequest.getBlueprintName());
         stackValidationRequest.setFileSystem(source.getClusterRequest().getFileSystem());
         stackValidationRequest.setHostGroups(source.getClusterRequest().getHostGroups());

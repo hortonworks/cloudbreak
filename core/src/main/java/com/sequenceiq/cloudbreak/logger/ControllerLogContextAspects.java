@@ -68,8 +68,8 @@ public class ControllerLogContextAspects {
         String resourceType = controllerClassName.substring(0, controllerClassName.indexOf("Controller"));
         result.put(LoggerContextKey.RESOURCE_TYPE.toString(), resourceType);
         CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
-        String owner = cloudbreakUser != null ? userService.getOrCreate(cloudbreakUser).getUserId() : "undefined";
-        result.put(LoggerContextKey.OWNER_ID.toString(), owner);
+        String userName = cloudbreakUser != null ? userService.getOrCreate(cloudbreakUser).getUserName() : "undefined";
+        result.put(LoggerContextKey.USER.toString(), userName);
         return result;
     }
 }

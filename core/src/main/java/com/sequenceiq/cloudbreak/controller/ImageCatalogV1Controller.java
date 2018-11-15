@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.StackImageFilterService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
@@ -46,7 +46,7 @@ public class ImageCatalogV1Controller implements ImageCatalogV1Endpoint {
     private WorkspaceService workspaceService;
 
     @Inject
-    private RestRequestThreadLocalService restRequestThreadLocalService;
+    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     @Inject
     private UserService userService;
@@ -70,7 +70,7 @@ public class ImageCatalogV1Controller implements ImageCatalogV1Endpoint {
     public ImagesResponse getImagesByProvider(String platform) throws Exception {
         CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
         User user = userService.getOrCreate(cloudbreakUser);
-        Images images = imageCatalogService.getImagesOsFiltered(platform, null, cloudbreakUser, user).getImages();
+        Images images = imageCatalogService.getImagesOsFiltered(platform, null, user).getImages();
         return conversionService.convert(images, ImagesResponse.class);
     }
 

@@ -15,10 +15,6 @@ public class UserProfileResponse {
 
     private ImageCatalogShortResponse imageCatalog;
 
-    private String owner;
-
-    private String account;
-
     private String username;
 
     private Map<String, Object> uiProperties = new HashMap<>();
@@ -29,22 +25,6 @@ public class UserProfileResponse {
 
     public void setCredential(CredentialResponse credential) {
         this.credential = credential;
-    }
-
-    public String getOwner() {
-        return owner;
-    }
-
-    public void setOwner(String owner) {
-        this.owner = owner;
-    }
-
-    public String getAccount() {
-        return account;
-    }
-
-    public void setAccount(String account) {
-        this.account = account;
     }
 
     public Map<String, Object> getUiProperties() {

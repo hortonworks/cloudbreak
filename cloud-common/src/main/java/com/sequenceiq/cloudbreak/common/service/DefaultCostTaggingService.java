@@ -7,7 +7,6 @@ import static com.sequenceiq.cloudbreak.common.type.CloudbreakResourceType.NETWO
 import static com.sequenceiq.cloudbreak.common.type.CloudbreakResourceType.SECURITY;
 import static com.sequenceiq.cloudbreak.common.type.CloudbreakResourceType.STORAGE;
 import static com.sequenceiq.cloudbreak.common.type.CloudbreakResourceType.TEMPLATE;
-import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.CB_ACOUNT_NAME;
 import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.CB_CREATION_TIMESTAMP;
 import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.CB_USER_NAME;
 import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.CB_VERSION;
@@ -22,6 +21,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.type.CloudbreakResourceType;
 import com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag;
@@ -72,13 +72,12 @@ public class DefaultCostTaggingService {
         return result;
     }
 
-    public Map<String, String> prepareDefaultTags(String account, String owner, Map<String, String> sourceMap, String platform) {
+    public Map<String, String> prepareDefaultTags(CloudbreakUser cbUser, Map<String, String> sourceMap, String platform) {
         Map<String, String> result = new HashMap<>();
-        result.put(transform(CB_ACOUNT_NAME.key(), platform), transform(account, platform));
-        result.put(transform(CB_USER_NAME.key(), platform), transform(owner, platform));
+        result.put(transform(CB_USER_NAME.key(), platform), transform(cbUser.getUsername(), platform));
         result.put(transform(CB_VERSION.key(), platform), transform(cbVersion, platform));
         if (sourceMap == null || Strings.isNullOrEmpty(sourceMap.get(transform(OWNER.key(), platform)))) {
-            result.put(transform(OWNER.key(), platform), transform(owner, platform));
+            result.put(transform(OWNER.key(), platform), transform(cbUser.getUsername(), platform));
         }
         result.put(transform(CB_CREATION_TIMESTAMP.key(), platform), transform(String.valueOf(clock.getCurrentInstant().getEpochSecond()), platform));
         return result;

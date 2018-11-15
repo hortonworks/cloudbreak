@@ -35,10 +35,6 @@ public class FlexSubscription implements ProvisionEntity, WorkspaceAwareResource
     @ManyToOne
     private SmartSenseSubscription smartSenseSubscription;
 
-    private String owner;
-
-    private String account;
-
     private boolean isDefault;
 
     private boolean usedForController;
@@ -91,22 +87,6 @@ public class FlexSubscription implements ProvisionEntity, WorkspaceAwareResource
         this.smartSenseSubscription = smartSenseSubscription;
     }
 
-    public String getOwner() {
-        return owner;
-    }
-
-    public void setOwner(String owner) {
-        this.owner = owner;
-    }
-
-    public String getAccount() {
-        return account;
-    }
-
-    public void setAccount(String account) {
-        this.account = account;
-    }
-
     public boolean isDefault() {
         return isDefault;
     }
@@ -128,8 +108,6 @@ public class FlexSubscription implements ProvisionEntity, WorkspaceAwareResource
         return "FlexSubscription{" + "id=" + id
                 + ", name='" + name + '\''
                 + ", subscriptionId='" + subscriptionId + '\''
-                + ", smartSenseSubscription='" + smartSenseSubscription + '\''
-                + ", owner='" + owner + '\''
-                + ", account='" + account + '}';
+                + ", smartSenseSubscription='" + smartSenseSubscription + '}';
     }
 }

@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.client;
 
+import static javax.ws.rs.client.Entity.entity;
+
+import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
@@ -9,6 +12,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 
 public class CaasClient {
@@ -27,6 +31,15 @@ public class CaasClient {
         this.configKey = configKey;
     }
 
+    public String getCaasProtocol() {
+        return caasProtocol;
+    }
+
+    public String getCaasDomain() {
+        return caasDomain;
+    }
+
+    @Cacheable(cacheNames = "caasUserCache")
     public CaasUser getUserInfo(String dpsJwtToken) {
         WebTarget caasWebTarget = getCaasWebTarget();
         WebTarget userInfoWebTarget = caasWebTarget.path("/oidc/userinfo");
@@ -41,9 +54,18 @@ public class CaasClient {
     public IntrospectResponse introSpect(String dpsJwtToken) {
         WebTarget caasWebTarget = getCaasWebTarget();
         WebTarget introspectWebTarget = caasWebTarget.path("/oidc/introspect");
-        return introspectWebTarget.request()
-                .accept(MediaType.APPLICATION_JSON_TYPE)
-                .post(Entity.json(new IntrospectRequest(dpsJwtToken)), IntrospectResponse.class);
+        try {
+            return introspectWebTarget.request()
+                    .accept(MediaType.APPLICATION_JSON_TYPE)
+                    .post(Entity.json(new IntrospectRequest(dpsJwtToken)), IntrospectResponse.class);
+        } catch (ForbiddenException e) {
+            throw new InvalidTokenException("Token is not valid", e);
+        }
+    }
+
+    public String getAccessToken(TokenRequest refreshToken) {
+        return getCaasWebTarget().path("/oidc/token")
+                .request().post(entity(refreshToken, MediaType.APPLICATION_JSON_TYPE)).readEntity(TokenResponse.class).getAccessToken();
     }
 
     private WebTarget getCaasWebTarget() {
@@ -54,4 +76,5 @@ public class CaasClient {
             throw new InvalidTokenException("CAAS isn't configured");
         }
     }
+
 }

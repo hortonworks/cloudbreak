@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -16,14 +15,13 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.Topology;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.NameUtil;
@@ -42,23 +40,13 @@ public class TemplateService {
     @Inject
     private StackService stackService;
 
-    public Set<Template> retrievePrivateTemplates(CloudbreakUser user) {
-        return templateRepository.findForUser(user.getUserId());
-    }
-
-    public Set<Template> retrieveAccountTemplates(CloudbreakUser user) {
-        return templateRepository.findForUser(user.getUserId(), user.getAccount());
-    }
-
     public Template get(Long id) {
         return templateRepository.findById(id).orElseThrow(notFound("Template", id));
     }
 
-    public Template create(String owner, String account, User user, Template template, Workspace workspace) {
+    public Template create(User user, Template template, Workspace workspace) {
         LOGGER.debug("Creating template: [User: '{}']", user.getUserId());
 
-        template.setOwner(owner);
-        template.setAccount(account);
         template.setWorkspace(workspace);
 
         Template savedTemplate;
@@ -69,28 +57,6 @@ public class TemplateService {
             throw new BadRequestException(msg, ex);
         }
         return savedTemplate;
-    }
-
-    public void delete(Long templateId, CloudbreakUser user) {
-        Template template = Optional.ofNullable(templateRepository.findByIdInAccount(templateId, user.getAccount()))
-                .orElseThrow(notFound("Template", templateId));
-        delete(template);
-    }
-
-    public Template getPrivateTemplate(String name, CloudbreakUser user) {
-        return Optional.ofNullable(templateRepository.findByNameInUser(name, user.getUserId()))
-                .orElseThrow(notFound("Template", name));
-    }
-
-    public Template getPublicTemplate(String name, CloudbreakUser user) {
-        return Optional.ofNullable(templateRepository.findOneByName(name, user.getAccount()))
-                .orElseThrow(notFound("Template", name));
-    }
-
-    public void delete(String templateName, CloudbreakUser user) {
-        Template template = Optional.ofNullable(templateRepository.findByNameInAccount(templateName, user.getAccount(), user.getUserId()))
-                .orElseThrow(notFound("Template", templateName));
-        delete(template);
     }
 
     public void delete(Template template) {

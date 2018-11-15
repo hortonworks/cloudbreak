@@ -8,12 +8,15 @@ public class CloudbreakUser {
 
     private final String username;
 
-    private final String account;
+    private final String email;
 
-    public CloudbreakUser(String userId, String username, String account) {
+    private final String tenant;
+
+    public CloudbreakUser(String userId, String username, String email, String tenant) {
         this.userId = userId;
         this.username = username;
-        this.account = account;
+        this.email = email;
+        this.tenant = tenant;
     }
 
     public String getUserId() {
@@ -24,8 +27,12 @@ public class CloudbreakUser {
         return username;
     }
 
-    public String getAccount() {
-        return account;
+    public String getEmail() {
+        return email;
+    }
+
+    public String getTenant() {
+        return tenant;
     }
 
     @Override
@@ -36,11 +43,11 @@ public class CloudbreakUser {
             return false;
         }
         CloudbreakUser iu = (CloudbreakUser) o;
-        return Objects.equals(userId, iu.userId) && Objects.equals(account, iu.account);
+        return Objects.equals(userId, iu.userId) && Objects.equals(tenant, iu.tenant);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(userId, account);
+        return Objects.hash(userId, tenant);
     }
 }

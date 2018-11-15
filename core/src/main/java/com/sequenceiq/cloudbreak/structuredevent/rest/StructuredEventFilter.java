@@ -51,12 +51,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
 import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
-import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredEventClient;
@@ -108,7 +107,7 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
     private UserService userService;
 
     @Inject
-    private RestRequestThreadLocalService restRequestThreadLocalService;
+    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     @Inject
     @Named("structuredEventClient")
@@ -204,19 +203,12 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
         restCall.setRestResponse(restResponse);
         restCall.setDuration(System.currentTimeMillis() - requestTime);
         CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
-        User user = null;
         if (cloudbreakUser == null) {
             String serviceId = authenticatedUserService.getServiceAccountId();
-            cloudbreakUser = new CloudbreakUser(serviceId, serviceId, serviceId);
-        } else {
-            try {
-                user = userService.getOrCreate(cloudbreakUser);
-            } catch (RuntimeException ex) {
-                LOGGER.error("Unable to find user", ex);
-            }
+            cloudbreakUser = new CloudbreakUser(serviceId, serviceId, serviceId, serviceId);
         }
         Long workspaceId = restRequestThreadLocalService.getRequestedWorkspaceId();
-        structuredEventClient.sendStructuredEvent(new StructuredRestCallEvent(createOperationDetails(restParams, requestTime, workspaceId, user, cloudbreakUser),
+        structuredEventClient.sendStructuredEvent(new StructuredRestCallEvent(createOperationDetails(restParams, requestTime, workspaceId, cloudbreakUser),
                 restCall));
     }
 
@@ -284,8 +276,7 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
         return !"GET".equals(requestContext.getMethod());
     }
 
-    private OperationDetails createOperationDetails(Map<String, String> restParams, Long requestTime,
-            Long workspaceId, User currentUser, CloudbreakUser cloudbreakUser) {
+    private OperationDetails createOperationDetails(Map<String, String> restParams, Long requestTime, Long workspaceId, CloudbreakUser cloudbreakUser) {
         String resourceType = null;
         String resourceId = null;
         String resourceName = null;
@@ -295,8 +286,7 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
             resourceName = restParams.get(RESOURCE_NAME);
         }
         return new OperationDetails(requestTime, REST, resourceType, StringUtils.isNotEmpty(resourceId) ? Long.valueOf(resourceId) : null, resourceName,
-                currentUser != null ? currentUser.getUserId() : "", currentUser != null ? currentUser.getUserName() : "",
-                cloudbreakNodeConfig.getId(), cbVersion, workspaceId, cloudbreakUser != null ? cloudbreakUser.getAccount() : "",
+                cloudbreakNodeConfig.getId(), cbVersion, workspaceId,
                 cloudbreakUser != null ? cloudbreakUser.getUserId() : "", cloudbreakUser != null ? cloudbreakUser.getUsername() : "");
     }
 

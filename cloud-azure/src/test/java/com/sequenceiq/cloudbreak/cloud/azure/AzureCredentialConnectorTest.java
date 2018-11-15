@@ -41,7 +41,7 @@ public class AzureCredentialConnectorTest {
     public void testInteractiveLoginIsEnabled() {
         when(azureInteractiveLogin.login(any(CloudContext.class), any(ExtendedCloudCredential.class),
                 any(CredentialNotifier.class))).thenReturn(Maps.newHashMap());
-        CloudContext cloudContext = new CloudContext(1L, "test", "test", "test", USER_ID, WORKSPACE_ID);
+        CloudContext cloudContext = new CloudContext(1L, "test", "test", USER_ID, WORKSPACE_ID);
         ExtendedCloudCredential extendedCloudCredential = new ExtendedCloudCredential(null, null, null,
                 null, null, USER_ID, WORKSPACE_ID);
         underTest.interactiveLogin(cloudContext, extendedCloudCredential, credentialSender);

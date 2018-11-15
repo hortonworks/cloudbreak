@@ -21,6 +21,7 @@ jobs:
           root: .
           paths:
             - core/build/libs/cloudbreak.jar
+            - mock-caas/build/libs/mock-caas.jar
             - integration-test/build/libs/cloudbreak-integration-test.jar
 
   code-quality-check-checkstyle-test:
@@ -144,7 +145,7 @@ jobs:
           name: Save test results
           command: |
             mkdir -p ~/junit/
-            cp integration-test/test-output/junitreports/* ~/junit/
+            cp -r integration-test/test-output/* ~/junit/
           when: always
       - run:
           name: cleanup

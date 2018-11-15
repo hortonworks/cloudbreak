@@ -1,3 +1,12 @@
+mock-caas:
+  ports:
+    - 10080:8080
+  volumes:
+  - ../mock-caas/build/libs/mock-caas.jar:/mock-caas.jar
+  command: java -jar /mock-caas.jar
+  image: openjdk:10-jdk
+  environment:
+    - SERVICE_NAME=caas-mock
 test:
   dns:
   ports:
@@ -12,12 +21,10 @@ test:
     - SERVICE_2020_NAME=test
     - SERVICE_9443_NAME=test
     - SERVICE_7654_NAME=test
-    - INTEGRATIONTEST_UAA_SERVER=http://identity.service.consul:8089
+    - INTEGRATIONTEST_CAAS_ADDRESS=caas-mock.service.consul:10080
+    - INTEGRATIONTEST_CAAS_PROTOCOL=${INTEGRATIONTEST_CAAS_PROTOCOL}
+    - INTEGRATIONTEST_CAAS_TOKEN=${INTEGRATIONTEST_CAAS_TOKEN}
     - INTEGRATIONTEST_CLOUDBREAK_SERVER=http://cloudbreak.service.consul:8080
-    - INTEGRATIONTEST_UAA_USER=admin@example.com
-    - INTEGRATIONTEST_UAA_PASSWORD=cloudbreak
-    - INTEGRATIONTEST_UAA_AUTOSCALE_CLIENTID
-    - INTEGRATIONTEST_UAA_AUTOSCALE_CLIENTSECRET
     - CLOUDBREAK_URL=cloudbreak.service.consul:8080
     - SPRING_CONFIG_LOCATION=classpath:/application.yml,/it/it-application.yml
     - INTEGRATIONTEST_SUITEFILES

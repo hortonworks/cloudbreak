@@ -26,4 +26,5 @@ include 'template-manager-blueprint'
 include 'template-manager-recipe'
 
 rootProject.name = 'cloudbreak'
+include 'mock-caas'
 

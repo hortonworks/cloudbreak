@@ -41,10 +41,6 @@ public class ProxyConfig implements ProvisionEntity, EnvironmentAwareResource {
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String description;
 
-    private String owner;
-
-    private String account;
-
     @Column(nullable = false)
     private String serverHost;
 
@@ -83,22 +79,6 @@ public class ProxyConfig implements ProvisionEntity, EnvironmentAwareResource {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getOwner() {
-        return owner;
-    }
-
-    public void setOwner(String owner) {
-        this.owner = owner;
-    }
-
-    public String getAccount() {
-        return account;
-    }
-
-    public void setAccount(String account) {
-        this.account = account;
     }
 
     public String getServerHost() {

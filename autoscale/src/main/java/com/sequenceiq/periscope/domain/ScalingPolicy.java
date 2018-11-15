@@ -19,7 +19,7 @@ import com.sequenceiq.periscope.api.model.AdjustmentType;
         @NamedQuery(name = "ScalingPolicy.findByCluster", query = "SELECT c FROM ScalingPolicy c WHERE c.alert.cluster.id= :clusterId AND c.id= :policyId"),
         @NamedQuery(name = "ScalingPolicy.findAllByCluster", query = "SELECT c FROM ScalingPolicy c WHERE c.alert.cluster.id= :id")
 })
-public class ScalingPolicy {
+public class ScalingPolicy implements Clustered {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "policy_generator")
@@ -91,5 +91,10 @@ public class ScalingPolicy {
 
     public long getAlertId() {
         return alert.getId();
+    }
+
+    @Override
+    public Cluster getCluster() {
+        return alert.getCluster();
     }
 }

@@ -201,7 +201,7 @@ public class GcpCredentialConnectorTest {
     }
 
     private CloudContext createCloudContext() {
-        return new CloudContext(1L, "name", "platform", "owner", USER_ID, WORKSPACE_ID);
+        return new CloudContext(1L, "name", "platform", USER_ID, WORKSPACE_ID);
     }
 
     private CloudCredential createCloudCredential() {

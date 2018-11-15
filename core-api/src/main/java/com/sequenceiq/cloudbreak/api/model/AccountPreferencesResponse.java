@@ -6,7 +6,7 @@ import java.util.Set;
 import io.swagger.annotations.ApiModel;
 
 @ApiModel("AccountPreferencesResponse")
-public class AccountPreferencesResponse extends AccountPreferencesBase {
+public class AccountPreferencesResponse {
 
     private Set<SupportedExternalDatabaseServiceEntryResponse> supportedExternalDatabases = new HashSet<>();
 

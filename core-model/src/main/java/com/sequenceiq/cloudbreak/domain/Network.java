@@ -54,10 +54,6 @@ public class Network implements ProvisionEntity, WorkspaceAwareResource {
     @ManyToOne
     private Workspace workspace;
 
-    private String owner;
-
-    private String account;
-
     public Workspace getWorkspace() {
         return workspace;
     }
@@ -133,22 +129,5 @@ public class Network implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setTopology(Topology topology) {
         this.topology = topology;
-    }
-
-    @Override
-    public String getOwner() {
-        return owner;
-    }
-
-    public String getAccount() {
-        return account;
-    }
-
-    public void setOwner(String owner) {
-        this.owner = owner;
-    }
-
-    public void setAccount(String account) {
-        this.account = account;
     }
 }

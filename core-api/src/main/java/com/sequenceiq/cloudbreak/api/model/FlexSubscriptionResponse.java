@@ -14,12 +14,6 @@ public class FlexSubscriptionResponse extends FlexSubscriptionRequest {
     @ApiModelProperty(value = ModelDescriptions.ID, readOnly = true)
     private Long id;
 
-    @ApiModelProperty(value = ModelDescriptions.OWNER, readOnly = true)
-    private String owner;
-
-    @ApiModelProperty(value = ModelDescriptions.ACCOUNT, readOnly = true)
-    private String account;
-
     @ApiModelProperty(value = ModelDescriptions.PUBLIC_IN_ACCOUNT, readOnly = true)
     private boolean publicInAccount = true;
 
@@ -32,22 +26,6 @@ public class FlexSubscriptionResponse extends FlexSubscriptionRequest {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getOwner() {
-        return owner;
-    }
-
-    public void setOwner(String owner) {
-        this.owner = owner;
-    }
-
-    public String getAccount() {
-        return account;
-    }
-
-    public void setAccount(String account) {
-        this.account = account;
     }
 
     public boolean isPublicInAccount() {

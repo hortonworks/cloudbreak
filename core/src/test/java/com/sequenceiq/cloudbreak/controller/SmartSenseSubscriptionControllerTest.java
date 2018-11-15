@@ -89,8 +89,6 @@ public class SmartSenseSubscriptionControllerTest {
     private SmartSenseSubscription createSmartSenseSubscription() {
         SmartSenseSubscription subscription = new SmartSenseSubscription();
         subscription.setSubscriptionId("A-99900000-C-00000000");
-        subscription.setAccount("account id");
-        subscription.setOwner("user id");
         return subscription;
     }
 

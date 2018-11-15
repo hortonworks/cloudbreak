@@ -43,12 +43,6 @@ public class StructuredEventEntity implements WorkspaceAwareResource {
     @Column(nullable = false)
     private Long timestamp;
 
-    private String account;
-
-    // inconsistent name, the authorization cannot find the "userId" field
-    @Column(name = "userid")
-    private String owner;
-
     @Convert(converter = JsonToString.class)
     @Column(columnDefinition = "TEXT")
     private Json structuredEventJson;
@@ -98,22 +92,6 @@ public class StructuredEventEntity implements WorkspaceAwareResource {
 
     public void setTimestamp(Long timestamp) {
         this.timestamp = timestamp;
-    }
-
-    public String getAccount() {
-        return account;
-    }
-
-    public void setAccount(String account) {
-        this.account = account;
-    }
-
-    public String getOwner() {
-        return owner;
-    }
-
-    public void setOwner(String owner) {
-        this.owner = owner;
     }
 
     public Json getStructuredEventJson() {

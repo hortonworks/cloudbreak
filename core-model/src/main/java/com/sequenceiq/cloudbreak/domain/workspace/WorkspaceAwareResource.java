@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.domain.workspace;
 
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 
-public interface WorkspaceAwareResource {
+public interface WorkspaceAwareResource extends TenantAwareResource {
 
     Long getId();
 
@@ -15,5 +15,8 @@ public interface WorkspaceAwareResource {
 
     WorkspaceResource getResource();
 
-    String getOwner();
+    @Override
+    default Tenant getTenant() {
+        return getWorkspace().getTenant();
+    }
 }

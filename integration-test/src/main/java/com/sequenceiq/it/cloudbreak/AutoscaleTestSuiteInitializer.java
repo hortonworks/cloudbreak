@@ -27,6 +27,12 @@ public class AutoscaleTestSuiteInitializer extends AbstractTestNGSpringContextTe
     @Value("${integrationtest.periscope.server}")
     private String defaultPeriscopeServer;
 
+    @Value("${integrationtest.caas.protocol}")
+    private String defaultCaasProtocol;
+
+    @Value("${integrationtest.caas.address}")
+    private String defaultCaasAddress;
+
     @Value("${server.contextPath:/as}")
     private String autoscaleRootContextPath;
 
@@ -45,17 +51,16 @@ public class AutoscaleTestSuiteInitializer extends AbstractTestNGSpringContextTe
 
     @BeforeSuite(dependsOnMethods = "initContext")
     @Parameters("periscopeServer")
-    public void initCloudbreakSuite(@Optional("") String periscopeServer) {
+    public void initCloudbreakSuite(@Optional("") String periscopeServer, @Optional("") String caasProtocol, @Optional("") String caasAddress) {
         periscopeServer = StringUtils.hasLength(periscopeServer) ? periscopeServer : defaultPeriscopeServer;
-        String identity = itContext.getContextParam(IntegrationTestContext.IDENTITY_URL);
-        String user = itContext.getContextParam(IntegrationTestContext.AUTH_USER);
-        String password = itContext.getContextParam(IntegrationTestContext.AUTH_PASSWORD);
+        caasProtocol = StringUtils.hasLength(caasProtocol) ? caasProtocol : defaultCaasProtocol;
+        caasAddress = StringUtils.hasLength(caasAddress) ? caasAddress : defaultCaasAddress;
+        String refreshToken = itContext.getContextParam(IntegrationTestContext.REFRESH_TOKEN);
 
-        AutoscaleClient autoscaleClient = new AutoscaleClientBuilder(periscopeServer + autoscaleRootContextPath,
-                        identity, "cloudbreak_shell")
+        AutoscaleClient autoscaleClient = new AutoscaleClientBuilder(periscopeServer + autoscaleRootContextPath, caasProtocol, caasAddress)
                 .withCertificateValidation(false)
                 .withDebug(true)
-                .withCredential(user, password)
+                .withCredential(refreshToken)
                 .withIgnorePreValidation(false)
                 .build();
 

@@ -171,6 +171,7 @@ To launch the Cloudbreak application execute the `com.sequenceiq.cloudbreak.Clou
 -Dspring.cloud.consul.host=YOUR_IP
 -Dserver.port=9091
 -Dcb.schema.migration.auto=true
+-Dcaas.url=YOUR_IP:10080
 -Dvault.addr=YOUR_IP
 -Dvault.root.token=<TOKEN_FROM_PROFILE_FILE>
 ```
@@ -204,6 +205,7 @@ After having imported cloudbreak repo root you can launch Periscope application 
 -Dperiscope.db.port.5432.tcp.port=5432
 -Dperiscope.cloudbreak.url=http://YOUR_IP:8080
 -Dserver.port=8085
+-Dcaas.url=YOUR_IP:10080
 -Dvault.addr=YOUR_IP
 -Dvault.root.token=<TOKEN_FROM_PROFILE_FILE>
 ````
@@ -223,6 +225,7 @@ To run Cloudbreak from command line, you have to list the JVM parameters from ab
 -Dcb.db.port.5432.tcp.port=5432 \
 -Dcb.identity.server.url=http://YOUR_IP:8089 \
 -Dserver.port=9091 \
+-Dcaas.url=YOUR_IP:10080
 -Dvault.addr=YOUR_IP
 -Dvault.root.token=<TOKEN_FROM_PROFILE_FILE>
 -Dspring.config.location=$(pwd)/cloud-common/src/main/resources/application.yml"
@@ -245,6 +248,7 @@ To run periscope from command line you have to run the below gradle command with
 -Dperiscope.db.port.5432.tcp.port=5432 \
 -Dperiscope.cloudbreak.url=http://YOUR_IP:8080 \
 -Dserver.port=8085 \
+-Dcaas.url=YOUR_IP:10080
 -Dvault.addr=YOUR_IP
 -Dvault.root.token=<TOKEN_FROM_PROFILE_FILE>
 -Dspring.config.location=$(pwd)/autoscale/src/main/resources/application.yml"

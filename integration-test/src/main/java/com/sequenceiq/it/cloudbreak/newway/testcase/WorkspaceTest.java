@@ -1,5 +1,15 @@
 package com.sequenceiq.it.cloudbreak.newway.testcase;
 
+import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.key;
+
+import javax.ws.rs.ForbiddenException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
 import com.sequenceiq.it.cloudbreak.newway.Blueprint;
 import com.sequenceiq.it.cloudbreak.newway.BlueprintEntity;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
@@ -16,15 +26,6 @@ import com.sequenceiq.it.cloudbreak.newway.RecipeEntity;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
-import javax.ws.rs.ForbiddenException;
-
-import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.key;
 
 public class WorkspaceTest extends AbstractIntegrationTest {
 
@@ -47,6 +48,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
         createSecondUser(testContext);
         createDefaultCredential(testContext);
         createDefaultImageCatalog(testContext);
+        initializeDefaultBlueprints(testContext);
     }
 
     @AfterMethod(alwaysRun = true)
@@ -60,7 +62,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
                 .given(StackEntity.class)
                 .when(Stack.postV2())
                 .await(STACK_AVAILABLE)
-                .when(Stack::getByName, key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECOND_USER).withLogError(false))
+                .when(Stack::getByName, key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
                 .except(ForbiddenException.class, key(FORBIDDEN_KEY))
                 .validate();
     }
@@ -69,7 +71,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
     public void testCreateACredentialAndGetOtherUser(TestContext testContext) {
         testContext
                 .given(CredentialEntity.class)
-                .when(Credential::getByName, key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECOND_USER).withLogError(false))
+                .when(Credential::getByName, key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
                 .except(ForbiddenException.class, key(FORBIDDEN_KEY))
                 .validate();
     }
@@ -79,7 +81,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
         testContext
                 .given(BlueprintEntity.class).withAmbariBlueprint(BLUEPRINT_TEXT)
                 .when(Blueprint.postV2())
-                .when(Blueprint::getByName, key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECOND_USER).withLogError(false))
+                .when(Blueprint::getByName, key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
                 .except(ForbiddenException.class, key(FORBIDDEN_KEY))
                 .validate();
     }
@@ -89,7 +91,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
         testContext
                 .given(RecipeEntity.class)
                 .when(Recipe.postV2())
-                .when(Recipe::getByName, key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECOND_USER).withLogError(false))
+                .when(Recipe::getByName, key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
                 .except(ForbiddenException.class, key(FORBIDDEN_KEY))
                 .validate();
     }
@@ -99,7 +101,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
         testContext
                 .given(LdapConfigEntity.class)
                 .when(LdapConfig.postV2())
-                .when(LdapConfig::getByName, key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECOND_USER).withLogError(false))
+                .when(LdapConfig::getByName, key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
                 .except(ForbiddenException.class, key(FORBIDDEN_KEY))
                 .validate();
     }
@@ -109,7 +111,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
         testContext
                 .given(ImageCatalogEntity.class)
                 .when(ImageCatalog.postV2())
-                .when(ImageCatalog::getByNameAndImages, key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECOND_USER).withLogError(false))
+                .when(ImageCatalog::getByNameAndImages, key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
                 .except(ForbiddenException.class, key(FORBIDDEN_KEY))
                 .validate();
     }
@@ -119,7 +121,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
         testContext
                 .given(ImageCatalogEntity.class)
                 .when(ImageCatalog.postV2())
-                .when(ImageCatalog::getByNameWithoutImages, key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECOND_USER).withLogError(false))
+                .when(ImageCatalog::getByNameWithoutImages, key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
                 .except(ForbiddenException.class, key(FORBIDDEN_KEY))
                 .validate();
     }
@@ -129,7 +131,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
         testContext
                 .given(ProxyConfigEntity.class)
                 .when(ProxyConfig.postV2())
-                .when(ProxyConfig::getByName, key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECOND_USER).withLogError(false))
+                .when(ProxyConfig::getByName, key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
                 .except(ForbiddenException.class, key(FORBIDDEN_KEY))
                 .validate();
     }

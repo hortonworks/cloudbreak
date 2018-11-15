@@ -1,7 +1,5 @@
 package com.sequenceiq.periscope.service;
 
-import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
-
 import java.util.Set;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.locks.Lock;
@@ -16,7 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.AutoscaleStackResponse;
 import com.sequenceiq.cloudbreak.api.model.Status;
-import com.sequenceiq.cloudbreak.client.CloudbreakClient;
+import com.sequenceiq.cloudbreak.client.CloudbreakIdentityClient;
 import com.sequenceiq.periscope.monitor.context.ClusterCreationEvaluatorContext;
 import com.sequenceiq.periscope.monitor.evaluator.ClusterCreationEvaluator;
 import com.sequenceiq.periscope.monitor.executor.ExecutorServiceWithRegistry;
@@ -44,28 +42,19 @@ public class StackCollectorService {
     public void collectStackDetails() {
         if (LOCK.tryLock()) {
             try {
-                CloudbreakClient cloudbreakClient = cloudbreakClientConfiguration.cloudbreakClient();
+                CloudbreakIdentityClient cloudbreakClient = cloudbreakClientConfiguration.cloudbreakClient();
                 Set<AutoscaleStackResponse> allStacks = cloudbreakClient.autoscaleEndpoint().getAllForAutoscale();
                 for (AutoscaleStackResponse stack : allStacks) {
                     Status clusterStatus = stack.getClusterStatus();
-                    if (AVAILABLE.equals(clusterStatus)) {
-                        if (stack.getAmbariServerIp() != null) {
-                            try {
-                                LOGGER.info("Evaluate cluster management for stack: {} (ID:{})", stack.getName(), stack.getStackId());
-                                ClusterCreationEvaluator clusterCreationEvaluator = applicationContext.getBean(ClusterCreationEvaluator.class);
-                                clusterCreationEvaluator.setContext(new ClusterCreationEvaluatorContext(stack));
-                                executorServiceWithRegistry.submitIfAbsent(clusterCreationEvaluator, stack.getStackId());
-                                LOGGER.info("Succesfully submitted, the stack id: {}.", stack.getStackId());
-                                rejectedThreadService.remove(stack);
-                            } catch (RejectedExecutionException ignore) {
+                    try {
+                        LOGGER.info("Evaluate cluster management for stack: {} (ID:{})", stack.getName(), stack.getStackId());
+                        ClusterCreationEvaluator clusterCreationEvaluator = applicationContext.getBean(ClusterCreationEvaluator.class);
+                        clusterCreationEvaluator.setContext(new ClusterCreationEvaluatorContext(stack));
+                        executorServiceWithRegistry.submitIfAbsent(clusterCreationEvaluator, stack.getStackId());
+                        LOGGER.info("Succesfully submitted, the stack id: {}.", stack.getStackId());
+                        rejectedThreadService.remove(stack);
+                    } catch (RejectedExecutionException ignore) {
 
-                            }
-                        } else {
-                            LOGGER.info("Could not find Ambari for stack: {} (ID:{})", stack.getName(), stack.getStackId());
-                        }
-                    } else {
-                        LOGGER.info("Do not create or update cluster while the Cloudbreak cluster {} (ID:{}) is in '{}' state instead of 'AVAILABLE'!",
-                                stack.getName(), stack.getStackId(), stack.getClusterStatus());
                     }
                 }
             } catch (Exception ex) {

@@ -173,7 +173,7 @@ public class EnvironmentServiceTest {
         when(proxyConfigService.findByNamesInWorkspace(anySet(), anyLong())).thenReturn(Collections.emptySet());
         when(environmentCreationValidator.validate(any(), any(), anyBoolean())).thenReturn(ValidationResult.builder().build());
         when(workspaceService.get(anyLong(), any())).thenReturn(workspace);
-        when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(new CloudbreakUser("", "", ""));
+        when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(new CloudbreakUser("", "", "", ""));
         when(userService.getOrCreate(any())).thenReturn(new User());
         when(conversionService.convert(any(Environment.class), eq(DetailedEnvironmentResponse.class))).thenReturn(new DetailedEnvironmentResponse());
         when(workspaceService.get(anyLong(), any())).thenReturn(workspace);

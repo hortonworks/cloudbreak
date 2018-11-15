@@ -32,10 +32,6 @@ public class ConstraintTemplate implements ProvisionEntity, WorkspaceAwareResour
     @Column(length = 1000, columnDefinition = "TEXT")
     private String description;
 
-    private String owner;
-
-    private String account;
-
     @Column(nullable = false)
     private Double cpu;
 
@@ -95,22 +91,6 @@ public class ConstraintTemplate implements ProvisionEntity, WorkspaceAwareResour
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public String getOwner() {
-        return owner;
-    }
-
-    public void setOwner(String owner) {
-        this.owner = owner;
-    }
-
-    public String getAccount() {
-        return account;
-    }
-
-    public void setAccount(String account) {
-        this.account = account;
     }
 
     public Double getCpu() {
