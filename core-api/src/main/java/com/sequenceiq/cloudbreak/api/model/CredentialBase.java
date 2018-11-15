@@ -81,10 +81,9 @@ public abstract class CredentialBase implements JsonEntity {
         return "CredentialBase{"
                 + "name='" + name + '\''
                 + ", cloudPlatform='" + cloudPlatform + '\''
-                + ", parameters=" + parameters
+                + ", parameters=***"
                 + ", description='" + description + '\''
                 + ", topologyId=" + topologyId
                 + '}';
     }
-
 }
