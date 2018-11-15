@@ -4,6 +4,7 @@ import java.util.concurrent.ExecutionException;
 
 import javax.inject.Inject;
 
+import org.apache.kafka.common.errors.InvalidTopicException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -39,15 +40,22 @@ public class KafkaStructuredEventHandler<T extends StructuredEvent> implements R
 
     @Override
     public void accept(Event<T> structuredEvent) {
+        String topicByType = getTopicNameForEvent(structuredEvent);
         try {
             ListenableFuture<SendResult<String, String>> sendResultFuture =
-                    kafkaTemplate.send(structuredEventSenderConfig.getStructuredEventsTopic(), objectMapper.writeValueAsString(structuredEvent.getData()));
+                    kafkaTemplate.send(topicByType, objectMapper.writeValueAsString(structuredEvent.getData()));
             SendResult<String, String> sendResult = sendResultFuture.get();
-            LOGGER.trace("Structured event sent to kafka: {}", sendResult.getProducerRecord());
+            LOGGER.trace("Structured event sent to kafka with topic {}: {}", topicByType, sendResult.getProducerRecord());
+        } catch (InvalidTopicException e) {
+            LOGGER.error("Structured event invalid topic name {}", topicByType, e);
         } catch (JsonProcessingException e) {
             LOGGER.error("Structured event json processing error", e);
         } catch (InterruptedException | ExecutionException e) {
             LOGGER.error("Error happened in message sending to kafka", e);
         }
+    }
+
+    private String getTopicNameForEvent(Event<T> event) {
+        return "cb" + event.getData().getType();
     }
 }
