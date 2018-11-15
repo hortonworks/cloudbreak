@@ -18,6 +18,6 @@ public class AzureSubnetValidator implements Validator {
     @Override
     public void validate(AuthenticatedContext ac, CloudStack cloudStack) {
         AzureClient client = ac.getParameter(AzureClient.class);
-        azureUtils.validateSubnetRules(client, cloudStack.getNetwork());
+        azureUtils.validateSubnet(client, cloudStack.getNetwork());
     }
 }
