@@ -234,7 +234,7 @@ public class StackCreationService {
         notification.setEventType("IMAGE_COPY_STATE");
         notification.setEventTimestamp(new Date().getTime());
         notification.setEventMessage(String.valueOf(result.getStatusProgressValue()));
-        notification.setUserIdV3(stack.getCreator().getUserId());
+        notification.setUserId(stack.getCreator().getUserId());
         notification.setWorkspaceId(stack.getWorkspace().getId());
         notification.setCloud(stack.cloudPlatform());
         notification.setRegion(stack.getRegion());

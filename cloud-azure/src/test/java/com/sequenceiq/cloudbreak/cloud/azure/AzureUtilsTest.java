@@ -46,7 +46,7 @@ public class AzureUtilsTest {
     public void shouldAdjustResourceNameLengthIfItsTooLong() {
         //GIVEN
         CloudContext context = new CloudContext(7899L, "thisisaverylongazureresourcenamewhichneedstobeshortened", "dummy1",
-                "dummy2", USER_ID, WORKSPACE_ID);
+                USER_ID, WORKSPACE_ID);
 
         //WHEN
         String testResult = underTest.getStackName(context);

@@ -42,7 +42,6 @@ public class StackApiViewToStackViewResponseConverter extends AbstractConversion
         StackViewResponse stackViewResponse = new StackViewResponse();
         stackViewResponse.setId(source.getId());
         stackViewResponse.setName(source.getName());
-        stackViewResponse.setOwner(source.getOwner());
         stackViewResponse.setCredential(getConversionService().convert(source.getCredential(), CredentialResponse.class));
         stackViewResponse.setParameters(Maps.newHashMap(source.getParameters()));
         if (source.getCluster() != null) {

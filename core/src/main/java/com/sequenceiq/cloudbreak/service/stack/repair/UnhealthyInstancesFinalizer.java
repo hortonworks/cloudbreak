@@ -41,7 +41,7 @@ public class UnhealthyInstancesFinalizer {
     public Set<String> finalizeUnhealthyInstances(Stack stack, Iterable<InstanceMetaData> candidateUnhealthyInstances) {
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(),
-                stack.getOwner(), stack.getPlatformVariant(), location, stack.getCreator().getUserId(), stack.getWorkspace().getId());
+                stack.getPlatformVariant(), location, stack.getCreator().getUserId(), stack.getWorkspace().getId());
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         List<CloudInstance> cloudInstances = cloudInstanceConverter.convert(candidateUnhealthyInstances);
 

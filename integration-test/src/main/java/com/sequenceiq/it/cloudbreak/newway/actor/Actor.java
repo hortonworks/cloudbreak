@@ -8,15 +8,15 @@ import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 public interface Actor {
 
     static CloudbreakUser defaultUser(TestParameter testParameter) {
-        return new CloudbreakUser(testParameter.get(CloudbreakTest.USER), testParameter.get(CloudbreakTest.PASSWORD));
+        return new CloudbreakUser(testParameter.get(CloudbreakTest.REFRESH_TOKEN));
     }
 
     static CloudbreakUser secondUser(TestParameter testParameter) {
-        String username = testParameter.get(CloudbreakTest.SECOND_USER);
-        if (StringUtils.isEmpty(username)) {
-            throw new IllegalStateException("Add a second user to the test: integrationtest.uaa.secondUser and integrationtest.uaa.secondPassword or with -D");
+        String secondaryRefreshToken = testParameter.get(CloudbreakTest.SECONDARY_REFRESH_TOKEN);
+        if (StringUtils.isEmpty(secondaryRefreshToken)) {
+            throw new IllegalStateException("Add a secondary token to the test: integrationtest.cb.secondarytoken");
         }
-        return new CloudbreakUser(username, testParameter.get(CloudbreakTest.PASSWORD));
+        return new CloudbreakUser(testParameter.get(CloudbreakTest.SECONDARY_REFRESH_TOKEN));
     }
 
     CloudbreakUser acting(TestParameter testParameter);

@@ -8,8 +8,6 @@ public class ModelDescriptions {
     public static final String PUBLIC_IN_ACCOUNT = "resource is visible in account";
     public static final String ATTRIBUTES = "provider specific attributes of the credential";
     public static final String CLOUD_PLATFORM = "type of cloud provider";
-    public static final String OWNER = "id of the resource owner that is provided by OAuth provider";
-    public static final String ACCOUNT = "account id of the resource owner that is provided by OAuth provider";
     public static final String TOPOLOGY_ID = "id of the topology the resource belongs to";
     public static final String REQUESTS = "request object";
     public static final String RESPONSE = "response object";
@@ -18,7 +16,7 @@ public class ModelDescriptions {
     public static final String CREATED = "creation time of the resource in long";
     public static final String AMBARI_SERVER = "ambari server address";
     public static final String WORKSPACE_OF_THE_RESOURCE = "workspace of the resource";
-    public static final String USER_ID_V3 = "User ID in the new authorization model";
+    public static final String USER_ID = "User ID in the new authorization model";
     public static final String WORKSPACE_ID = "Workspace ID of the resource";
     public static final String PREINSTALLED = "Denotes that the image is prewarmed or base image.";
     public static final String ENVIRONMENTS = "Environments of the resource";
@@ -112,6 +110,9 @@ public class ModelDescriptions {
     }
 
     public static class StackModelDescription {
+        public static final String TENANANT = "name of the tenant";
+        public static final String WORKSPACE_ID = "id of the workspace";
+        public static final String USER_ID = "id of the user";
         public static final String STACK_ID = "id of the stack";
         public static final String CUSTOM = "Custom parameters as a json";
         public static final String ENTRIES = "Entries parameters as a json";

@@ -8,8 +8,8 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.CertificateResponse;
-import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.service.secret.SecretService;
+import com.sequenceiq.cloudbreak.client.CloudbreakIdentityClient;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.SecurityConfig;
 import com.sequenceiq.periscope.model.TlsConfiguration;
@@ -19,7 +19,7 @@ import com.sequenceiq.periscope.repository.SecurityConfigRepository;
 public class TlsSecurityService {
 
     @Inject
-    private CloudbreakClient cloudbreakClient;
+    private CloudbreakIdentityClient cloudbreakClient;
 
     @Inject
     private SecurityConfigRepository securityConfigRepository;

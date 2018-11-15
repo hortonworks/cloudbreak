@@ -55,10 +55,6 @@ public class SecurityGroup implements ProvisionEntity, WorkspaceAwareResource {
     @ManyToOne
     private Workspace workspace;
 
-    private String owner;
-
-    private String account;
-
     public Workspace getWorkspace() {
         return workspace;
     }
@@ -130,22 +126,5 @@ public class SecurityGroup implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setCloudPlatform(String cloudPlatform) {
         this.cloudPlatform = cloudPlatform;
-    }
-
-    public void setOwner(String owner) {
-        this.owner = owner;
-    }
-
-    public void setAccount(String account) {
-        this.account = account;
-    }
-
-    @Override
-    public String getOwner() {
-        return owner;
-    }
-
-    public String getAccount() {
-        return account;
     }
 }

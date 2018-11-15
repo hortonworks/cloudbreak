@@ -9,6 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterResponse;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterState;
 import com.sequenceiq.periscope.api.model.ScalingStatus;
@@ -16,10 +18,7 @@ import com.sequenceiq.periscope.api.model.StateJson;
 import com.sequenceiq.periscope.converter.ClusterConverter;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.History;
-import com.sequenceiq.periscope.domain.PeriscopeUser;
-import com.sequenceiq.periscope.log.MDCBuilder;
 import com.sequenceiq.periscope.notification.HttpNotificationSender;
-import com.sequenceiq.periscope.service.AuthenticatedUserService;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.HistoryService;
 
@@ -31,9 +30,6 @@ public class AutoScaleClusterCommonService {
     private ClusterConverter clusterConverter;
 
     @Inject
-    private AuthenticatedUserService authenticatedUserService;
-
-    @Inject
     private ClusterService clusterService;
 
     @Inject
@@ -42,36 +38,33 @@ public class AutoScaleClusterCommonService {
     @Inject
     private HttpNotificationSender notificationSender;
 
+    @Inject
+    private RestRequestThreadLocalService restRequestThreadLocalService;
+
     public List<AutoscaleClusterResponse> getClusters() {
-        PeriscopeUser user = authenticatedUserService.getPeriscopeUser();
-        MDCBuilder.buildUserMdcContext(user);
-        List<Cluster> clusters = clusterService.findAllByUser(user);
+        List<Cluster> clusters = clusterService.findAllByUser(restRequestThreadLocalService.getCloudbreakUser());
         return clusterConverter.convertAllToJson(clusters);
     }
 
     public AutoscaleClusterResponse getCluster(Long clusterId) {
-        PeriscopeUser user = authenticatedUserService.getPeriscopeUser();
-        MDCBuilder.buildMdcContext(user, clusterId);
+        MDCBuilder.buildMdcContext(clusterId, "", "CLUSTER");
         return createClusterJsonResponse(clusterService.findById(clusterId));
     }
 
     public void deleteCluster(Long clusterId) {
-        PeriscopeUser user = authenticatedUserService.getPeriscopeUser();
-        MDCBuilder.buildMdcContext(user, clusterId);
+        MDCBuilder.buildMdcContext(clusterId, "", "CLUSTER");
         clusterService.removeById(clusterId);
     }
 
     public AutoscaleClusterResponse setState(Long clusterId, StateJson stateJson) {
-        PeriscopeUser user = authenticatedUserService.getPeriscopeUser();
-        MDCBuilder.buildMdcContext(user, clusterId);
+        MDCBuilder.buildMdcContext(clusterId, "", "CLUSTER");
         Cluster cluster = clusterService.setState(clusterId, stateJson.getState());
         createHistoryAndNotification(cluster);
         return createClusterJsonResponse(cluster);
     }
 
     public AutoscaleClusterResponse setAutoscaleState(Long clusterId, AutoscaleClusterState autoscaleState) {
-        PeriscopeUser user = authenticatedUserService.getPeriscopeUser();
-        MDCBuilder.buildMdcContext(user, clusterId);
+        MDCBuilder.buildMdcContext(clusterId, "", "CLUSTER");
         Cluster cluster = clusterService.setAutoscaleState(clusterId, autoscaleState.isEnableAutoscaling());
         createHistoryAndNotification(cluster);
         return createClusterJsonResponse(cluster);
@@ -86,6 +79,6 @@ public class AutoScaleClusterCommonService {
         history = cluster.isAutoscalingEnabled()
                 ? historyService.createEntry(ScalingStatus.ENABLED, "Autoscaling has been enabled for the cluster.", 0, cluster)
                 : historyService.createEntry(ScalingStatus.DISABLED, "Autoscaling has been disabled for the cluster.", 0, cluster);
-        notificationSender.send(history);
+        notificationSender.send(cluster, history);
     }
 }

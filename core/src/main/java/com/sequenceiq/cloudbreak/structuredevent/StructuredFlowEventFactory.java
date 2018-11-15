@@ -52,9 +52,8 @@ public class StructuredFlowEventFactory {
 
     public StructuredFlowEvent createStucturedFlowEvent(Long stackId, FlowDetails flowDetails, Boolean detailed, Exception exception) {
         Stack stack = stackService.getByIdWithTransaction(stackId);
-        OperationDetails operationDetails = new OperationDetails(FLOW, "stacks", stackId, stack.getName(),
-                stack.getCreator().getUserId(), stack.getCreator().getUserName(), cloudbreakNodeConfig.getId(), cbVersion,
-                stack.getWorkspace().getId(), stack.getAccount(), stack.getOwner(), stack.getCreator().getUserId());
+        OperationDetails operationDetails = new OperationDetails(FLOW, "stacks", stackId, stack.getName(), cloudbreakNodeConfig.getId(), cbVersion,
+                stack.getWorkspace().getId(), stack.getCreator().getUserId(), stack.getCreator().getUserName());
         StackDetails stackDetails = null;
         ClusterDetails clusterDetails = null;
         BlueprintDetails blueprintDetails = null;
@@ -78,10 +77,9 @@ public class StructuredFlowEventFactory {
         notificationDetails.setStackId(stackId);
 
         Stack stack = stackService.getByIdWithTransaction(stackId);
-        String account = stack.getAccount();
         String stackName = stack.getName();
-        String userId = stack.getOwner();
-        String userName = stack.getCreator().getUserId();
+        String userName = stack.getCreator().getUserName();
+        String userId = stack.getCreator().getUserId();
 
         try {
             notificationDetails.setCloud(stack.cloudPlatform());
@@ -106,9 +104,8 @@ public class StructuredFlowEventFactory {
             LOGGER.info("Access denied in structured notification event creation, user: {}, stack: {}", userName, stackId, e);
         }
 
-        OperationDetails operationDetails = new OperationDetails(NOTIFICATION, "stacks", stackId, stackName,
-                stack.getCreator().getUserId(), stack.getCreator().getUserName(), cloudbreakNodeConfig.getInstanceUUID(), cbVersion,
-                stack.getWorkspace().getId(), account, userId, userName);
+        OperationDetails operationDetails = new OperationDetails(NOTIFICATION, "stacks", stackId, stackName, cloudbreakNodeConfig.getInstanceUUID(),
+                cbVersion, stack.getWorkspace().getId(), userId, userName);
         return new StructuredNotificationEvent(operationDetails, notificationDetails);
     }
 }

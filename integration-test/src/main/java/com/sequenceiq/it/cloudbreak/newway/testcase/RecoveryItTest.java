@@ -1,18 +1,19 @@
 package com.sequenceiq.it.cloudbreak.newway.testcase;
 
+import static com.sequenceiq.cloudbreak.common.type.HostMetadataState.HEALTHY;
+import static com.sequenceiq.cloudbreak.common.type.HostMetadataState.UNHEALTHY;
+import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.WORKER;
+
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.InstanceGroupEntity;
 import com.sequenceiq.it.spark.StatefulRoute;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
-import static com.sequenceiq.cloudbreak.common.type.HostMetadataState.HEALTHY;
-import static com.sequenceiq.cloudbreak.common.type.HostMetadataState.UNHEALTHY;
-import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.WORKER;
 
 public class RecoveryItTest extends AbstractIntegrationTest {
 
@@ -29,6 +30,7 @@ public class RecoveryItTest extends AbstractIntegrationTest {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         createDefaultImageCatalog(testContext);
+        initializeDefaultBlueprints(testContext);
     }
 
     @AfterMethod(alwaysRun = true)

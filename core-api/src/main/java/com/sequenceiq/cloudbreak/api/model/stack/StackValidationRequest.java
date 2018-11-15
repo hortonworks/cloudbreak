@@ -61,12 +61,6 @@ public class StackValidationRequest implements JsonEntity {
     @ApiModelProperty(StackModelDescription.FILESYSTEM)
     private FileSystemRequest fileSystem;
 
-    @ApiModelProperty(hidden = true)
-    private String owner;
-
-    @ApiModelProperty(hidden = true)
-    private String account;
-
     public Set<HostGroupRequest> getHostGroups() {
         return hostGroups;
     }
@@ -169,21 +163,5 @@ public class StackValidationRequest implements JsonEntity {
 
     public void setCredentialName(String credentialName) {
         this.credentialName = credentialName;
-    }
-
-    public String getOwner() {
-        return owner;
-    }
-
-    public void setOwner(String owner) {
-        this.owner = owner;
-    }
-
-    public String getAccount() {
-        return account;
-    }
-
-    public void setAccount(String account) {
-        this.account = account;
     }
 }

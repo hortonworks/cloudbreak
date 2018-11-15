@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.blueprint.GeneralClusterConfigsProvider;
 import com.sequenceiq.cloudbreak.blueprint.sharedservice.SharedServiceConfigsViewProvider;
 import com.sequenceiq.cloudbreak.blueprint.utils.StackInfoService;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -31,8 +32,8 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
@@ -104,7 +105,7 @@ public class StackRequestToTemplatePreparationObjectConverter extends AbstractCo
     private UserService userService;
 
     @Inject
-    private RestRequestThreadLocalService restRequestThreadLocalService;
+    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     @Inject
     private WorkspaceService workspaceService;
@@ -112,7 +113,8 @@ public class StackRequestToTemplatePreparationObjectConverter extends AbstractCo
     @Override
     public TemplatePreparationObject convert(StackV2Request source) {
         try {
-            User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
+            CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
+            User user = userService.getOrCreate(cloudbreakUser);
             Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
             Credential credential = credentialService.getByNameForWorkspace(source.getGeneral().getCredentialName(), workspace);
             Optional<FlexSubscription> flexSubscription = getFlexSubscription(source);
@@ -126,9 +128,8 @@ public class StackRequestToTemplatePreparationObjectConverter extends AbstractCo
             BlueprintStackInfo blueprintStackInfo = stackInfoService.blueprintStackInfo(blueprintText);
             Set<HostgroupView> hostgroupViews = getHostgroupViews(source);
             Gateway gateway = source.getCluster().getAmbari().getGateway() == null ? null : getConversionService().convert(source, Gateway.class);
-            BlueprintView blueprintView = new BlueprintView(blueprintText, blueprintStackInfo.getVersion(), blueprintStackInfo.getType());
-            GeneralClusterConfigs generalClusterConfigs = generalClusterConfigsProvider.generalClusterConfigs(source, user,
-                    restRequestThreadLocalService.getCloudbreakUser().getUsername());
+            BlueprintView blueprintView = new BlueprintView(blueprint.getBlueprintText(), blueprintStackInfo.getVersion(), blueprintStackInfo.getType());
+            GeneralClusterConfigs generalClusterConfigs = generalClusterConfigsProvider.generalClusterConfigs(source, user, cloudbreakUser.getEmail());
             String bindDn = null;
             String bindPassword = null;
             if (ldapConfig != null) {

@@ -39,7 +39,7 @@ public class ClusterProxyDecoratorTest {
     @Mock
     private User user;
 
-    private final CloudbreakUser cloudbreakUser = new CloudbreakUser("test", "test", "test");
+    private final CloudbreakUser cloudbreakUser = new CloudbreakUser("test", "test", "test", "test");
 
     private Cluster cluster;
 

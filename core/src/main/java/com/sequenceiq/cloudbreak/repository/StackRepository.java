@@ -105,8 +105,10 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.cluster LEFT JOIN FETCH s.credential LEFT JOIN FETCH s.network LEFT JOIN FETCH s.orchestrator "
             + "LEFT JOIN FETCH s.stackStatus LEFT JOIN FETCH s.securityConfig LEFT JOIN FETCH s.failurePolicy LEFT JOIN FETCH"
             + " s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData WHERE s.stackStatus.status <> 'DELETE_COMPLETED' "
-            + "AND s.stackStatus.status <> 'DELETE_IN_PROGRESS'")
-    Set<Stack> findAliveOnes();
+            + "AND s.stackStatus.status <> 'DELETE_IN_PROGRESS' "
+            + "AND s.cluster.ambariIp IS NOT NULL "
+            + "AND s.cluster.status = 'AVAILABLE' ")
+    Set<Stack> findAliveOnesWithAmbari();
 
     @DisableCheckPermissions
     Long countByFlexSubscription(FlexSubscription flexSubscription);
@@ -134,14 +136,6 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     Long countAliveOnesByWorkspaceAndEnvironment(@Param("workspaceId") Long workspaceId, @Param("environmentId") Long environmentId);
 
     @DisableCheckPermissions
-    @Query("SELECT COUNT(s) FROM Stack s WHERE s.account = :account AND s.stackStatus.status <> 'DELETE_COMPLETED'")
-    Long countActiveByAccount(@Param("account") String account);
-
-    @DisableCheckPermissions
-    @Query("SELECT COUNT(s) FROM Stack s WHERE s.owner = :owner AND s.stackStatus.status <> 'DELETE_COMPLETED'")
-    Long countActiveByOwner(@Param("owner") String owner);
-
-    @DisableCheckPermissions
     @Query("SELECT s.workspace.id FROM Stack s where s.id = :id")
     Long findWorkspaceIdById(@Param("id") Long id);
 
@@ -158,4 +152,8 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     @Query("SELECT s.name FROM Stack s WHERE s.workspace.id = :workspaceId AND s.environment.id = :envId "
             + "AND s.type = 'WORKLOAD' AND s.stackStatus.status <> 'DELETE_COMPLETED'")
     Set<String> findWorkloadStackNamesByWorkspaceAndEnvironment(@Param("workspaceId") Long workspaceId, @Param("envId") Long envId);
+
+    @DisableCheckPermissions
+    @Query("SELECT s.workspace FROM Stack s where s.id = :id")
+    Workspace findWorkspaceById(@Param("id") Long id);
 }

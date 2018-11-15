@@ -39,9 +39,10 @@ import com.sequenceiq.cloudbreak.controller.validation.template.TemplateRequestV
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBase {
@@ -65,7 +66,16 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
     private StackRequest subject;
 
     @Mock
-    private RestRequestThreadLocalService restRequestThreadLocalService;
+    private TemplateRequest templateRequest;
+
+    @Mock
+    private InstanceGroupRequest instanceGroupRequest;
+
+    @Mock
+    private WorkspaceService workspaceService;
+
+    @Mock
+    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     @Mock
     private ClusterRequest clusterRequest;

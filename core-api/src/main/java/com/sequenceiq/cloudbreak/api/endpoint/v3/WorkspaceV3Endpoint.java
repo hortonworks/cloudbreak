@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v3;
 
 import java.util.Set;
-import java.util.SortedSet;
 
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
@@ -15,9 +14,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.model.users.ChangeWorkspaceUsersJson;
+import com.sequenceiq.cloudbreak.api.model.users.UserResponseJson;
 import com.sequenceiq.cloudbreak.api.model.users.WorkspaceRequest;
 import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResponse;
-import com.sequenceiq.cloudbreak.api.model.users.UserResponseJson;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
@@ -41,7 +40,7 @@ public interface WorkspaceV3Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = WorkspaceOpDescription.GET, produces = ContentType.JSON, notes = Notes.WORKSPACE_NOTES,
             nickname = "getWorkspaces")
-    SortedSet<WorkspaceResponse> getAll();
+    Set<WorkspaceResponse> getAll();
 
     @GET
     @Path("name/{name}")
@@ -62,27 +61,27 @@ public interface WorkspaceV3Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = WorkspaceOpDescription.CHANGE_USERS, produces = ContentType.JSON, notes = Notes.WORKSPACE_NOTES,
             nickname = "changeWorkspaceUsers")
-    SortedSet<UserResponseJson> changeUsers(@PathParam("name") String workspaceName, @Valid Set<ChangeWorkspaceUsersJson> changeWorkspaceUsersJson);
+    Set<UserResponseJson> changeUsers(@PathParam("name") String workspaceName, @Valid Set<ChangeWorkspaceUsersJson> changeWorkspaceUsersJson);
 
     @PUT
     @Path("name/{name}/removeUsers")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = WorkspaceOpDescription.REMOVE_USERS, produces = ContentType.JSON, notes = Notes.WORKSPACE_NOTES,
             nickname = "removeWorkspaceUsers")
-    SortedSet<UserResponseJson> removeUsers(@PathParam("name") String workspaceName, @Valid Set<String> userIds);
+    Set<UserResponseJson> removeUsers(@PathParam("name") String workspaceName, @Valid Set<String> userIds);
 
     @PUT
     @Path("name/{name}/addUsers")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = WorkspaceOpDescription.ADD_USERS, produces = ContentType.JSON, notes = Notes.WORKSPACE_NOTES,
             nickname = "addWorkspaceUsers")
-    SortedSet<UserResponseJson> addUsers(@PathParam("name") String workspaceName, @Valid Set<ChangeWorkspaceUsersJson> addWorkspaceUsersJson);
+    Set<UserResponseJson> addUsers(@PathParam("name") String workspaceName, @Valid Set<ChangeWorkspaceUsersJson> addWorkspaceUsersJson);
 
     @PUT
     @Path("name/{name}/updateUsers")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = WorkspaceOpDescription.UPDATE_USERS, produces = ContentType.JSON, notes = Notes.WORKSPACE_NOTES,
             nickname = "updateWorkspaceUsers")
-    SortedSet<UserResponseJson> updateUsers(@PathParam("name") String workspaceName, @Valid Set<ChangeWorkspaceUsersJson> updateWorkspaceUsersJson);
+    Set<UserResponseJson> updateUsers(@PathParam("name") String workspaceName, @Valid Set<ChangeWorkspaceUsersJson> updateWorkspaceUsersJson);
 
 }

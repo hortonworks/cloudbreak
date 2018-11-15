@@ -17,7 +17,7 @@ public abstract class RestUrlParser {
 
     public static final String RESOURCE_EVENT = "RESOURCE_EVENT";
 
-    public static final String WORKSPACE_ID = "WORKSPACE_ID";
+    public static final String WORKSPACE_ID = "WORKSPACE";
 
     public String getUrl(ContainerRequestContext requestContext) {
         return requestContext.getUriInfo().getPath();

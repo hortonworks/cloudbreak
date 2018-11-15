@@ -65,6 +65,12 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
     @Value("${integrationtest.ambari.defaultAmbariPort}")
     private String defaultAmbariPort;
 
+    @Value("${integrationtest.caas.protocol:}")
+    private String caasProtocol;
+
+    @Value("${integrationtest.caas.address:}")
+    private String caasAddress;
+
     @Value("${server.contextPath:/cb}")
     private String cbRootContextPath;
 
@@ -99,16 +105,25 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
             @Optional("") String stackName, @Optional("") String networkName, @Optional("") String securityGroupName) {
         cloudbreakServer = StringUtils.hasLength(cloudbreakServer) ? cloudbreakServer : defaultCloudbreakServer;
         String cbServerRoot = cloudbreakServer + cbRootContextPath;
+        String refreshToken = itContext.getContextParam(IntegrationTestContext.REFRESH_TOKEN);
         itContext.putContextParam(CloudbreakITContextConstants.SKIP_REMAINING_SUITETEST_AFTER_ONE_FAILED, skipRemainingSuiteTestsAfterOneFailed);
         itContext.putContextParam(CloudbreakITContextConstants.CLOUDBREAK_SERVER, cloudbreakServer);
         itContext.putContextParam(CloudbreakITContextConstants.CLOUDBREAK_SERVER_ROOT, cbServerRoot);
         itContext.putContextParam(CloudbreakITContextConstants.CLOUDPROVIDER, cloudProvider);
-        String identity = itContext.getContextParam(IntegrationTestContext.IDENTITY_URL);
-        String user = itContext.getContextParam(IntegrationTestContext.AUTH_USER);
-        String password = itContext.getContextParam(IntegrationTestContext.AUTH_PASSWORD);
 
-        CloudbreakClient cloudbreakClient = new CloudbreakClientBuilder(cbServerRoot, identity, "cloudbreak_shell")
-                .withCertificateValidation(false).withIgnorePreValidation(true).withDebug(true).withCredential(user, password).build();
+        String[] cloudbreakServerSplit = cloudbreakServer.split("://");
+        if (StringUtils.isEmpty(caasProtocol)) {
+            caasProtocol = cloudbreakServerSplit[0];
+        }
+        if (StringUtils.isEmpty(caasAddress)) {
+            caasAddress = cloudbreakServerSplit[1];
+        }
+
+        itContext.putContextParam(CloudbreakITContextConstants.CAAS_PROTOCOL, caasProtocol);
+        itContext.putContextParam(CloudbreakITContextConstants.CAAS_ADDRESS, caasAddress);
+
+        CloudbreakClient cloudbreakClient = new CloudbreakClientBuilder(cbServerRoot, caasProtocol, caasAddress)
+                .withCertificateValidation(false).withIgnorePreValidation(true).withDebug(true).withCredential(refreshToken).build();
         itContext.putContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, cloudbreakClient);
         if (cleanUpBeforeStart) {
             cleanUpService.deleteTestStacksAndResources(cloudbreakClient);

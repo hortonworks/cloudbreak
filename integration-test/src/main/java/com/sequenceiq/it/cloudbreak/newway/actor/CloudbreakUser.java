@@ -2,20 +2,13 @@ package com.sequenceiq.it.cloudbreak.newway.actor;
 
 public class CloudbreakUser {
 
-    private String username;
+    private final String token;
 
-    private String password;
-
-    public CloudbreakUser(String username, String password) {
-        this.username = username;
-        this.password = password;
+    public CloudbreakUser(String token) {
+        this.token = token;
     }
 
-    public String getUsername() {
-        return username;
-    }
-
-    public String getPassword() {
-        return password;
+    public String getToken() {
+        return token;
     }
 }

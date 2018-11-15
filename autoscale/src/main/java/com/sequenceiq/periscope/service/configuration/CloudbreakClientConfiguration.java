@@ -6,8 +6,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.sequenceiq.cloudbreak.client.CloudbreakClient;
-import com.sequenceiq.cloudbreak.client.CloudbreakClient.CloudbreakClientBuilder;
+import com.sequenceiq.cloudbreak.client.CloudbreakIdentityClient;
+import com.sequenceiq.cloudbreak.client.CloudbreakIdentityClient.CloudbreakIdentityClientBuilder;
 
 @Configuration
 public class CloudbreakClientConfiguration {
@@ -30,7 +30,7 @@ public class CloudbreakClientConfiguration {
     private String secret;
 
     @Bean
-    public CloudbreakClient cloudbreakClient() {
-        return new CloudbreakClientBuilder(cloudbreakUrl + cbRootContextPath, identityServerUrl, clientId).withSecret(secret).build();
+    public CloudbreakIdentityClient cloudbreakClient() {
+        return new CloudbreakIdentityClientBuilder(cloudbreakUrl + cbRootContextPath, identityServerUrl, clientId).withSecret(secret).build();
     }
 }

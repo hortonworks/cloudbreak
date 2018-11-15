@@ -345,7 +345,7 @@ public class OfflineStateGenerator {
         }
 
         @Override
-        public Set<Stack> findAliveOnes() {
+        public Set<Stack> findAliveOnesWithAmbari() {
             return null;
         }
 
@@ -385,17 +385,12 @@ public class OfflineStateGenerator {
         }
 
         @Override
-        public Long countActiveByAccount(String account) {
-            return null;
-        }
-
-        @Override
-        public Long countActiveByOwner(String owner) {
-            return null;
-        }
-
-        @Override
         public Long findWorkspaceIdById(Long id) {
+            return null;
+        }
+
+        @Override
+        public Workspace findWorkspaceById(Long id) {
             return null;
         }
 

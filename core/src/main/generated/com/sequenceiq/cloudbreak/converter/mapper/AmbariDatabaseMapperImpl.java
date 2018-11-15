@@ -29,8 +29,6 @@ public class AmbariDatabaseMapperImpl implements AmbariDatabaseMapper {
         }
         if ( cluster != null ) {
             rDSConfig.setName( mapName( stack, cluster ) );
-            rDSConfig.setAccount( cluster.getAccount() );
-            rDSConfig.setOwner( cluster.getOwner() );
         }
         rDSConfig.setCreationDate( new java.util.Date().getTime() );
         rDSConfig.setType( com.sequenceiq.cloudbreak.api.model.rds.RdsType.AMBARI.name() );

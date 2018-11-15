@@ -35,12 +35,6 @@ public class StackResponse extends StackBase {
     @ApiModelProperty(StackModelDescription.STACK_ID)
     private Long id;
 
-    @ApiModelProperty(ModelDescriptions.OWNER)
-    private String owner;
-
-    @ApiModelProperty(ModelDescriptions.ACCOUNT)
-    private String account;
-
     @ApiModelProperty(ModelDescriptions.PUBLIC_IN_ACCOUNT)
     private boolean publicInAccount = true;
 
@@ -102,14 +96,6 @@ public class StackResponse extends StackBase {
     @ApiModelProperty(ModelDescriptions.WORKSPACE_OF_THE_RESOURCE)
     private WorkspaceResourceResponse workspace;
 
-    public String getAccount() {
-        return account;
-    }
-
-    public void setAccount(String account) {
-        this.account = account;
-    }
-
     public ClusterResponse getCluster() {
         return cluster;
     }
@@ -132,14 +118,6 @@ public class StackResponse extends StackBase {
 
     public void setInstanceGroups(List<InstanceGroupResponse> instanceGroups) {
         this.instanceGroups = instanceGroups;
-    }
-
-    public String getOwner() {
-        return owner;
-    }
-
-    public void setOwner(String owner) {
-        this.owner = owner;
     }
 
     @JsonProperty("public")

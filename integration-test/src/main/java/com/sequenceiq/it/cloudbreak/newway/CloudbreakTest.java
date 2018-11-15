@@ -22,6 +22,8 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.BeforeTest;
 
+import com.sequenceiq.cloudbreak.api.model.users.UserProfileResponse;
+import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResponse;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.logsearch.LogSearchProps;
 import com.sequenceiq.it.cloudbreak.newway.logsearch.LogSearchUtil;
@@ -30,21 +32,15 @@ import com.sequenceiq.it.cloudbreak.newway.logsearch.LogSearchUtil;
 public class CloudbreakTest extends GherkinTest {
     public static final String CLOUDBREAK_SERVER_ROOT = "CLOUDBREAK_SERVER_ROOT";
 
-    public static final String IDENTITY_URL = "IDENTITY_URL";
+    public static final String CAAS_PROTOCOL = "CAAS_PROTOCOL";
 
-    public static final String USER = "USER";
+    public static final String CAAS_ADDRESS = "CAAS_ADDRESS";
 
-    public static final String PASSWORD = "PASSWORD";
+    public static final String REFRESH_TOKEN = "REFRESH_TOKEN";
 
-    public static final String SECOND_USER = "SECOND_USER";
+    public static final String SECONDARY_REFRESH_TOKEN = "SECONDARY_REFRESH_TOKEN";
 
-    public static final String SECOND_PASSWORD = "SECOND_PASSWORD";
-
-    public static final String AUTOSCALE_CLIENTID = "AUTOSCALE_CLIENTID";
-
-    public static final String AUTOSCALE_SECRET = "AUTOSCALE_SECRET";
-
-    public static final String WORKSPACE_ID = "ORGANIZATION_ID";
+    public static final String WORKSPACE_ID = "WORKSPACE_ID";
 
     public static final String LOG_SEARCH_QUERY_TYPES = "LOG_SEARCH_QUERY_TYPES";
 
@@ -58,20 +54,17 @@ public class CloudbreakTest extends GherkinTest {
     @Value("${server.contextPath:/cb}")
     private String cbRootContextPath;
 
-    @Value("${integrationtest.uaa.server}")
-    private String uaaServer;
+    @Value("${integrationtest.caas.token}")
+    private String refreshToken;
 
-    @Value("${integrationtest.uaa.user}")
-    private String defaultUaaUser;
+    @Value("${integrationtest.caas.secondarytoken:}")
+    private String secondaryRefreshToken;
 
-    @Value("${integrationtest.uaa.password}")
-    private String defaultUaaPassword;
+    @Value("${integrationtest.caas.protocol:}")
+    private String caasProtocol;
 
-    @Value("${integrationtest.uaa.autoscale.clientId:periscope}")
-    private String autoscaleUaaClientId;
-
-    @Value("${integrationtest.uaa.autoscale.clientSecret}")
-    private String autoscaleUaaClientSecret;
+    @Value("${integrationtest.caas.address:}")
+    private String caasAddress;
 
     @Inject
     private Environment environment;
@@ -92,29 +85,48 @@ public class CloudbreakTest extends GherkinTest {
 
         LOGGER.info("CloudbreakTest default values ::: ");
         IntegrationTestContext testContext = getItContext();
+        String[] cloudbreakServerSplit = server.split("://");
+        if (StringUtils.isEmpty(caasProtocol)) {
+            caasProtocol = cloudbreakServerSplit[0];
+        }
+        if (StringUtils.isEmpty(caasAddress)) {
+            caasAddress = cloudbreakServerSplit[1];
+        }
+        if (StringUtils.isEmpty(refreshToken)) {
+            throw new NullPointerException("INTEGRATIONTEST_CAAS_TOKEN should be set");
+        }
         testContext.putContextParam(CLOUDBREAK_SERVER_ROOT, server + cbRootContextPath);
-        testContext.putContextParam(IDENTITY_URL, uaaServer);
-        testContext.putContextParam(USER, defaultUaaUser);
-        testContext.putContextParam(PASSWORD, defaultUaaPassword);
-        testContext.putContextParam(AUTOSCALE_CLIENTID, autoscaleUaaClientId);
-        testContext.putContextParam(AUTOSCALE_SECRET, autoscaleUaaClientSecret);
+        testContext.putContextParam(CAAS_PROTOCOL, caasProtocol);
+        testContext.putContextParam(CAAS_ADDRESS, caasAddress);
+        testContext.putContextParam(REFRESH_TOKEN, refreshToken);
+        testContext.putContextParam(SECONDARY_REFRESH_TOKEN, secondaryRefreshToken);
         testContext.putContextParam(LOG_SEARCH_QUERY_TYPES, logSearchProps.getQueryTypes());
         testContext.putContextParam(LOG_SEARCH_URL_PREFIX, logSearchProps.getUrl());
 
-        LogSearchUtil.addQueryModelForLogSearchUrlToContext(testContext, LogSearchUtil.LOG_SEARCH_CBOWNER_ID,
-                LogSearchUtil.LOG_SEARCH_CBOWNER_QUERY_TYPE, defaultUaaUser);
-
         testParameter.put("INTEGRATIONTEST_CLOUDBREAK_SERVER", server + cbRootContextPath);
-        testParameter.put("INTEGRATIONTEST_UAA_SERVER", uaaServer);
-        testParameter.put("INTEGRATIONTEST_UAA_USER", defaultUaaUser);
-        testParameter.put("INTEGRATIONTEST_UAA_PASSWORD", defaultUaaPassword);
 
         try {
             CloudbreakClient client = CloudbreakClient.created();
             client.create(testContext);
-            testContext.putContextParam(WORKSPACE_ID,
-                    client.getCloudbreakClient().workspaceV3Endpoint().getByName(defaultUaaUser).getId());
-        } catch (Exception ignored) {
+
+            UserProfileResponse profile = CloudbreakClient.getSingletonCloudbreakClient().userEndpoint().getProfile();
+            LogSearchUtil.addQueryModelForLogSearchUrlToContext(testContext, LogSearchUtil.LOG_SEARCH_CBOWNER_ID,
+                    LogSearchUtil.LOG_SEARCH_CBOWNER_QUERY_TYPE, profile.getUsername());
+
+            setWorkspaceByUserProfile(testContext, profile);
+        } catch (Exception exception) {
+            LOGGER.info("CloudbreakClient error", exception);
+        }
+    }
+
+    private void setWorkspaceByUserProfile(IntegrationTestContext testContext, UserProfileResponse profile) {
+        WorkspaceResponse workspace = CloudbreakClient.getSingletonCloudbreakClient()
+                .workspaceV3Endpoint().getByName(profile.getUsername());
+        if (workspace != null) {
+            LOGGER.info("put WORKSPACE_ID to context: {}", workspace.getId());
+            testContext.putContextParam(WORKSPACE_ID, workspace.getId());
+        } else {
+            throw new IllegalStateException("Can not find default workspace for user: " + profile.getUsername());
         }
     }
 

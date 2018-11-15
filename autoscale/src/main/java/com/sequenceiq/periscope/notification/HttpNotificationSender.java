@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
+import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.History;
 import com.sequenceiq.periscope.domain.Subscription;
 import com.sequenceiq.periscope.repository.SubscriptionRepository;
@@ -27,16 +28,16 @@ public class HttpNotificationSender {
 
     private final Client restClient = RestClientUtil.get(new ConfigKey(false, false, false));
 
-    public void send(History history) {
-        send(convertHistory(history));
+    public void send(Cluster cluster, History history) {
+        send(convertHistory(cluster, history));
     }
 
-    private Notification convertHistory(History history) {
+    private Notification convertHistory(Cluster cluster, History history) {
         Notification n = new Notification();
         n.setEventType("PERISCOPE_HISTORY");
         n.setHistoryRecord(history);
         n.setEventTimestamp(new Date());
-        n.setOwner(history.getUser());
+        n.setWorkspaceId(cluster.getClusterPertain().getWorkspaceId());
         return n;
     }
 

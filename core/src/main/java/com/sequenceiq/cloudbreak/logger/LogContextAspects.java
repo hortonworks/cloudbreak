@@ -84,7 +84,7 @@ public class LogContextAspects {
             MDCBuilder.addFlowIdToMdcContext(flowId);
             String trackingId = eventMdcContext != null ? eventMdcContext.get(LoggerContextKey.TRACKING_ID.toString()) : null;
             MDCBuilder.addTrackingIdToMdcContext(trackingId);
-            MDCBuilder.buildMdcContext(stringValue(cloudContext.getId()), stringValue(cloudContext.getName()), stringValue(cloudContext.getOwner()), "STACK");
+            MDCBuilder.buildMdcContext(stringValue(cloudContext.getId()), stringValue(cloudContext.getName()), "STACK");
         } else {
             MDCBuilder.buildMdcContextFromMap(eventMdcContext);
         }

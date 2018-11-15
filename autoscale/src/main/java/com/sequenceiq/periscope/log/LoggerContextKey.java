@@ -2,7 +2,6 @@ package com.sequenceiq.periscope.log;
 
 public enum LoggerContextKey {
 
-    OWNER_ID("owner"),
     RESOURCE_ID("resourceId"),
     CB_STACK_ID("cbStack");
 

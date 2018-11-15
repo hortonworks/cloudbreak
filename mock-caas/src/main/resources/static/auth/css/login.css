@@ -1,0 +1,92 @@
+html, 
+body,
+body > div {
+    height: 100%;
+}
+.login-wrapper{
+	display: block;
+	display: flex;
+	align-items: center;
+	height: 100%;
+	min-width: 1260px;
+}
+.left-col,
+.right-col {
+	display: inline-block;
+	height: 334px;
+}
+
+.left-col {
+	background: #3fae2a url('images/pattern.png');
+	position: relative;
+	text-align: right;
+	padding-left: 100px;
+	padding-right: 100px;
+}
+
+.right-col {
+	padding: 49px 90px;
+	background: rgb(102, 102, 102);
+	color: #fff;
+	flex-grow: 1;
+    padding-left: 100px;
+    position: relative;
+}
+
+.group-title {
+	margin-bottom: 20px;
+}
+
+.right-col .field-group {
+	width: 300px;
+	margin: 15px 0;
+}
+
+.right-col .field-group label {
+	font-weight: 300;
+}
+.field-group .dropdown {
+	width: 100%;
+}
+
+.hwk-logo,
+.product-logo {
+	display: inline-block;
+}
+
+.hwk-logo {
+	background: url('images/logo.png') no-repeat;
+	width: 205px;
+	height: 82px;
+}
+
+.product-logo {
+	color: #fff;
+	border-left: 1px solid #fff;
+	margin-left: 20px;
+	padding-left: 100px;
+	margin-top: 80px;
+	padding-top: 24px; 
+	padding-bottom: 24px; 
+	vertical-align: -25px;
+}
+
+.right-col .action-group {
+	margin-top: 40px;
+	margin-bottom: 7px;
+}
+
+.error{
+    position: absolute;
+    color: white;
+    background-color: rgb(202, 52, 52);
+    padding: 6px;
+    border-radius: 5px;
+    font-weight: 100;
+    border: 1px solid #e27d7d;
+    font-size: 12px;
+    bottom: 96px;
+}
+.error:empty{
+    display: none;
+}

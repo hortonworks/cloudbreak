@@ -88,7 +88,7 @@ public class WorkspaceService {
     }
 
     public Workspace getDefaultWorkspaceForUser(User user) {
-        return workspaceRepository.getByName(user.getUserId(), user.getTenant());
+        return workspaceRepository.getByName(user.getUserName(), user.getTenant());
     }
 
     public Optional<Workspace> getByName(String name, User user) {

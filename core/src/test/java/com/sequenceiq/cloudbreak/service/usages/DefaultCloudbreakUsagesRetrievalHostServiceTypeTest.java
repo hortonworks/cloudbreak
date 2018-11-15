@@ -53,7 +53,6 @@ public class DefaultCloudbreakUsagesRetrievalHostServiceTypeTest {
                 .setFilterEndDate(DUMMY_END_DATE).setAccount(DUMMY_ACCOUNT).setSince(DUMMY_SINCE)
                 .setOwner(DUMMY_OWNER).setRegion(DUMMY_REGION).setCloud(DUMMY_CLOUD).build();
         usage = new CloudbreakUsage();
-        usage.setAccount(DUMMY_ACCOUNT);
         MockitoAnnotations.initMocks(this);
     }
 

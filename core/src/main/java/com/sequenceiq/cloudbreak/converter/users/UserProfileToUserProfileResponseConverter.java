@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.api.model.users.UserProfileResponse;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 
 @Component
@@ -26,13 +26,11 @@ public class UserProfileToUserProfileResponseConverter extends AbstractConversio
     private ImageCatalogService imageCatalogService;
 
     @Inject
-    private RestRequestThreadLocalService restRequestThreadLocalService;
+    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     @Override
     public UserProfileResponse convert(UserProfile entity) {
         UserProfileResponse userProfileResponse = new UserProfileResponse();
-        userProfileResponse.setAccount(entity.getAccount());
-        userProfileResponse.setOwner(entity.getOwner());
         userProfileResponse.setUsername(entity.getUserName());
         if (!entity.getDefaultCredentials().isEmpty()) {
             entity.getDefaultCredentials()

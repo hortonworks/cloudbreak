@@ -37,7 +37,7 @@ public class StackParameterService {
         Credential credential = stack.getCredential();
         if (credential != null) {
             CloudContext cloudContext = new CloudContext(null, name, credential.cloudPlatform(),
-                    credential.getOwner(), stack.getCreator().getUserId(), stack.getWorkspace().getId());
+                    stack.getCreator().getUserId(), stack.getWorkspace().getId());
 
             GetStackParamValidationRequest getStackParamValidationRequest = new GetStackParamValidationRequest(cloudContext);
             eventBus.notify(getStackParamValidationRequest.selector(), eventFactory.createEvent(getStackParamValidationRequest));

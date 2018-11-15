@@ -101,11 +101,6 @@ public class ClusterTemplate implements WorkspaceAwareResource, Serializable {
         return WorkspaceResource.CLUSTER_TEMPLATE;
     }
 
-    @Override
-    public String getOwner() {
-        return null;
-    }
-
     public ResourceStatus getStatus() {
         return status;
     }

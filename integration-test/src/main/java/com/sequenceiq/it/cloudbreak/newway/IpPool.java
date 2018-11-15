@@ -48,11 +48,6 @@ public class IpPool extends Entity {
         this.response = response;
     }
 
-    public IpPool withAccount(String account) {
-        request.setAccount(account);
-        return this;
-    }
-
     public IpPool withAvailabilityZone(String availabilityZone) {
         request.setAvailabilityZone(availabilityZone);
         return this;
@@ -70,11 +65,6 @@ public class IpPool extends Entity {
 
     public IpPool withFilters(Map<String, String> filter) {
         request.setFilters(filter);
-        return this;
-    }
-
-    public IpPool withOwner(String owner) {
-        request.setOwner(owner);
         return this;
     }
 

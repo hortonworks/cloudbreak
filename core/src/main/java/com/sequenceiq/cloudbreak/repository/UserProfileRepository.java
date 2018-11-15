@@ -19,9 +19,6 @@ public interface UserProfileRepository extends BaseRepository<UserProfile, Long>
     @Query("SELECT b FROM UserProfile b LEFT JOIN FETCH b.user WHERE b.user.id= :userId")
     UserProfile findOneByUser(@Param("userId") Long userId);
 
-    @Query("SELECT b FROM UserProfile b WHERE b.owner= :owner and b.account= :account")
-    UserProfile findOneByOwnerAndAccount(@Param("account") String account, @Param("owner") String owner);
-
     @Query("SELECT b FROM UserProfile b JOIN b.defaultCredentials c WHERE c.id = :credentialId")
     Set<UserProfile> findOneByCredentialId(@Param("credentialId") Long credentialId);
 

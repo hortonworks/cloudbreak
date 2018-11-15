@@ -131,47 +131,30 @@ public class CloudbreakClient {
 
     private static final String TOKEN_KEY = "TOKEN";
 
-    private static final double TOKEN_EXPIRATION_FACTOR = 0.9;
-
     private final Logger logger = LoggerFactory.getLogger(CloudbreakClient.class);
 
     private final ExpiringMap<String, String> tokenCache;
 
     private final Client client;
 
-    private final IdentityClient identityClient;
+    private final CaasClient caasClient;
 
     private final String cloudbreakAddress;
-
-    private String user;
-
-    private String password;
-
-    private String secret;
 
     private WebTarget webTarget;
 
     private EndpointWrapperHolder endpointWrapperHolder;
 
-    protected CloudbreakClient(String cloudbreakAddress, String identityServerAddress, String user, String password, String clientId, ConfigKey configKey) {
-        client = RestClientUtil.get(configKey);
-        this.cloudbreakAddress = cloudbreakAddress;
-        identityClient = new IdentityClient(identityServerAddress, clientId, configKey);
-        this.user = user;
-        this.password = password;
-        tokenCache = configTokenCache();
-        logger.info("CloudbreakClient has been created with user / pass. cloudbreak: {}, identity: {}, clientId: {}, configKey: {}", cloudbreakAddress,
-                identityServerAddress, clientId, configKey);
-    }
+    private String refreshToken;
 
-    protected CloudbreakClient(String cloudbreakAddress, String identityServerAddress, String secret, String clientId, ConfigKey configKey) {
+    protected CloudbreakClient(String cloudbreakAddress, String caasProtocol, String caasAddress, String refreshToken, ConfigKey configKey) {
         client = RestClientUtil.get(configKey);
         this.cloudbreakAddress = cloudbreakAddress;
-        identityClient = new IdentityClient(identityServerAddress, clientId, configKey);
-        this.secret = secret;
+        this.refreshToken = refreshToken;
+        caasClient = new CaasClient(caasProtocol, caasAddress, configKey);
         tokenCache = configTokenCache();
-        logger.info("CloudbreakClient has been created with a secret. cloudbreak: {}, identity: {}, clientId: {}, configKey: {}", cloudbreakAddress,
-                identityServerAddress, clientId, configKey);
+        logger.info("CloudbreakClient has been created with token. cloudbreak: {}, refreshToken: {}", cloudbreakAddress,
+                refreshToken, configKey);
     }
 
     public AccountPreferencesEndpoint accountPreferencesEndpoint() {
@@ -366,37 +349,35 @@ public class CloudbreakClient {
         return refreshIfNeededAndGet(clazz);
     }
 
-    private ExpiringMap<String, String> configTokenCache() {
-        return ExpiringMap.builder().variableExpiration().expirationPolicy(ExpirationPolicy.CREATED).build();
+    protected Client getClient() {
+        return client;
+    }
+
+    protected void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
     }
 
     protected synchronized <T> T refreshIfNeededAndGet(Class<T> clazz) {
         return refreshIfNeededAndGet(clazz, false);
     }
 
-    protected synchronized <T> T refreshIfNeededAndGet(@Nullable Class<T> clazz, boolean forced) {
-        String token = tokenCache.get(TOKEN_KEY);
-        if (token == null || endpointWrapperHolder == null) {
-            AccessToken accessToken;
-            accessToken = secret != null ? identityClient.getToken(secret) : identityClient.getToken(user, password);
-            token = accessToken.getToken();
-            int exp = (int) (accessToken.getExpiresIn() * TOKEN_EXPIRATION_FACTOR);
-            logger.info("Token has been renewed and expires in {} seconds", exp);
-            tokenCache.put(TOKEN_KEY, accessToken.getToken(), ExpirationPolicy.CREATED, exp, TimeUnit.SECONDS);
-            refreshEndpointWrapperHolder(token);
+    @SuppressWarnings("unchecked")
+    private <T> T refreshIfNeededAndGet(@Nullable Class<T> clazz, boolean forced) {
+        if (refreshToken != null) {
+            String accessToken = tokenCache.get(TOKEN_KEY);
+            if (forced || accessToken == null || endpointWrapperHolder == null) {
+                TokenRequest tokenRequest = new TokenRequest();
+                tokenRequest.setRefreshToken(refreshToken);
+                accessToken = caasClient.getAccessToken(tokenRequest);
+                tokenCache.put(TOKEN_KEY, accessToken, ExpirationPolicy.CREATED, 1, TimeUnit.MINUTES);
+                refreshEndpointWrapperHolder(accessToken);
+            }
+            return (T) getRequiredEndpoint(clazz).orElse(null);
         }
-        Optional<?> first = endpointWrapperHolder.endpoints.stream()
-                .filter(e -> e.endpointType.equals(clazz))
-                .map(e -> e.endPointProxy)
-                .findFirst();
-        if (first.isPresent()) {
-            return (T) first.get();
-        } else {
-            return null;
-        }
+        throw new TokenUnavailableException("No Refresh token provided for CloudbreakClient!");
     }
 
-    protected void refreshEndpointWrapperHolder(String token) {
+    private void refreshEndpointWrapperHolder(String token) {
         MultivaluedMap<String, Object> headers = new MultivaluedHashMap<>();
         headers.add("Authorization", "Bearer " + token);
         webTarget = client.target(cloudbreakAddress).path(CoreApi.API_ROOT_CONTEXT);
@@ -405,11 +386,23 @@ public class CloudbreakClient {
         logger.info("Endpoints have been renewed for CloudbreakClient");
     }
 
+    private  <T> Optional<?> getRequiredEndpoint(@Nullable Class<T> clazz) {
+        return endpointWrapperHolder.endpoints.stream()
+                .filter(e -> e.endpointType.equals(clazz))
+                .map(e -> e.endPointProxy)
+                .findFirst();
+    }
+
+    private ExpiringMap<String, String> configTokenCache() {
+        return ExpiringMap.builder().variableExpiration().expirationPolicy(ExpirationPolicy.CREATED).build();
+    }
+
     private <C> Pair<Class<C>, C> newEndpoint(Class<C> resourceInterface, MultivaluedMap<String, Object> headers) {
         return new ImmutablePair<>(resourceInterface,
                 WebResourceFactory.newResource(resourceInterface, webTarget, false, headers, Collections.emptyList(), EMPTY_FORM));
     }
 
+    @SuppressWarnings("unchecked")
     private class EndpointWrapperHolder {
         private final List<EndpointWrapper<?>> endpoints = new ArrayList<>();
 
@@ -453,6 +446,7 @@ public class CloudbreakClient {
 
         private C endpoint;
 
+        @SuppressWarnings("unchecked")
         private EndpointWrapper(Class<C> endpointType) {
             this.endpointType = endpointType;
             endPointProxy = (C) Proxy.newProxyInstance(endpointType.getClassLoader(), new Class[]{endpointType}, invocationHandler);
@@ -463,15 +457,11 @@ public class CloudbreakClient {
 
         private final String cloudbreakAddress;
 
-        private final String identityServerAddress;
+        private String token;
 
-        private final String clientId;
+        private String caasProtocol;
 
-        private String user;
-
-        private String password;
-
-        private String secret;
+        private String caasAddress;
 
         private boolean debug;
 
@@ -479,20 +469,14 @@ public class CloudbreakClient {
 
         private boolean ignorePreValidation;
 
-        public CloudbreakClientBuilder(String cloudbreakAddress, String identityServerAddress, String clientId) {
+        public CloudbreakClientBuilder(String cloudbreakAddress, String caasProtocol, String caasAddress) {
             this.cloudbreakAddress = cloudbreakAddress;
-            this.identityServerAddress = identityServerAddress;
-            this.clientId = clientId;
+            this.caasProtocol = caasProtocol;
+            this.caasAddress = caasAddress;
         }
 
-        public CloudbreakClientBuilder withCredential(String user, String password) {
-            this.user = user;
-            this.password = password;
-            return this;
-        }
-
-        public CloudbreakClientBuilder withSecret(String secret) {
-            this.secret = secret;
+        public CloudbreakClientBuilder withCredential(String token) {
+            this.token = token;
             return this;
         }
 
@@ -513,8 +497,7 @@ public class CloudbreakClient {
 
         public CloudbreakClient build() {
             ConfigKey configKey = new ConfigKey(secure, debug, ignorePreValidation);
-            return secret != null ? new CloudbreakClient(cloudbreakAddress, identityServerAddress, secret, clientId, configKey)
-                    : new CloudbreakClient(cloudbreakAddress, identityServerAddress, user, password, clientId, configKey);
+            return new CloudbreakClient(cloudbreakAddress, caasProtocol, caasAddress, token, configKey);
         }
     }
 }

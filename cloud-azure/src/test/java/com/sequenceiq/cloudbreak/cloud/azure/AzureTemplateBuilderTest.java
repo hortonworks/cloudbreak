@@ -174,7 +174,7 @@ public class AzureTemplateBuilderTest {
                 new PortDefinition[]{new PortDefinition("22", "22"), new PortDefinition("443", "443")}, "tcp"));
         security = new Security(rules, emptyList());
         image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "", "default", "default-id", new HashMap<>());
-        cloudContext = new CloudContext(7899L, "thisisaverylongazureresourcenamewhichneedstobeshortened", "dummy1", "dummy2", "test",
+        cloudContext = new CloudContext(7899L, "thisisaverylongazureresourcenamewhichneedstobeshortened", "dummy1", "test",
                 Location.location(Region.region("EU"), new AvailabilityZone("availabilityZone")), USER_ID, WORKSPACE_ID);
         azureCredentialView = new AzureCredentialView(cloudCredential());
         azureStorageView = new AzureStorageView(azureCredentialView, cloudContext, azureStorage, null);

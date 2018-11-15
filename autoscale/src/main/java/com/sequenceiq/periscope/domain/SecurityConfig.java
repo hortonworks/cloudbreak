@@ -12,7 +12,7 @@ import javax.persistence.SequenceGenerator;
 
 @Entity
 @NamedQueries(@NamedQuery(name = "SecurityConfig.findByClusterId", query = "SELECT s FROM SecurityConfig s WHERE s.cluster.id= :id"))
-public class SecurityConfig {
+public class SecurityConfig implements Clustered {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "securityconfig_generator")

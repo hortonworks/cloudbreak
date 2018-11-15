@@ -88,23 +88,7 @@ public class SmartSenseSubscriptionService {
     }
 
     private Optional<SmartSenseSubscription> obtainSmartSenseSubscription(CloudbreakUser cbUser) {
-        Optional<SmartSenseSubscription> subscription = getByAccountAndOwnerSilently(cbUser);
-        if (subscription.isPresent()) {
-            upgradeDefaultSmartSenseSubscription(subscription.get());
-        } else {
-            LOGGER.info("Unable to find subscription for user.");
-            subscription = Optional.ofNullable(createSubscriptionFromIdentityUser(cbUser));
-        }
-        return subscription;
-    }
-
-    private Optional<SmartSenseSubscription> getByAccountAndOwnerSilently(CloudbreakUser cbUser) {
-        try {
-            return Optional.ofNullable(smartSenseSubscriptionRepository.findByAccountAndOwner(cbUser.getAccount(), cbUser.getUserId()));
-        } catch (AccessDeniedException ignore) {
-            return Optional.empty();
-        }
-
+        return Optional.ofNullable(createSubscriptionFromIdentityUser(cbUser));
     }
 
     private void upgradeDefaultSmartSenseSubscription(SmartSenseSubscription subscription) {
@@ -132,9 +116,6 @@ public class SmartSenseSubscriptionService {
             LOGGER.info("Generating default SmartSense subscription");
             newSubscription = new SmartSenseSubscription();
             newSubscription.setSubscriptionId(defaultSmartsenseId);
-            newSubscription.setAccount(cbUser.getAccount());
-            newSubscription.setOwner(cbUser.getUserId());
-            smartSenseSubscriptionRepository.save(newSubscription);
         }
         return newSubscription;
     }

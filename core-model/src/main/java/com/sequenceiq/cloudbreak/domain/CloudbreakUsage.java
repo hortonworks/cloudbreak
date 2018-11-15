@@ -24,10 +24,6 @@ public class CloudbreakUsage implements ProvisionEntity {
     @SequenceGenerator(name = "cloudbreakusage_generator", sequenceName = "cloudbreakusage_id_seq", allocationSize = 1)
     private Long id;
 
-    private String owner;
-
-    private String account;
-
     @Column(nullable = false)
     private Long stackId;
 
@@ -94,22 +90,6 @@ public class CloudbreakUsage implements ProvisionEntity {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getOwner() {
-        return owner;
-    }
-
-    public void setOwner(String owner) {
-        this.owner = owner;
-    }
-
-    public String getAccount() {
-        return account;
-    }
-
-    public void setAccount(String account) {
-        this.account = account;
     }
 
     public String getProvider() {
@@ -276,8 +256,6 @@ public class CloudbreakUsage implements ProvisionEntity {
     public String toString() {
         StringBuilder sb = new StringBuilder("CloudbreakUsage{");
         sb.append("id=").append(id);
-        sb.append(", owner='").append(owner).append('\'');
-        sb.append(", account='").append(account).append('\'');
         sb.append(", day=").append(day);
         sb.append(", provider='").append(provider).append('\'');
         sb.append(", region='").append(region).append('\'');

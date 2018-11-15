@@ -51,7 +51,8 @@ public class ScheduledLifetimeChecker {
 
     private void terminateStack(Stack stack) {
         if (!stack.isDeleteCompleted()) {
-            LOGGER.info("Trigger termination of stack: '{}', owner: '{}', account: '{}'.", stack.getName(), stack.getOwner(), stack.getAccount());
+            LOGGER.info("Trigger termination of stack: '{}', workspace: '{}', tenant: '{}'.",
+                    stack.getName(), stack.getWorkspace().getName(), stack.getWorkspace().getTenant().getName());
             flowManager.triggerTermination(stack.getId(), false, false);
         }
     }
@@ -60,7 +61,9 @@ public class ScheduledLifetimeChecker {
         long now = Calendar.getInstance().getTimeInMillis();
         long clusterRunningTime = now - created;
         if (clusterRunningTime > clusterTimeToLive) {
-            throw new AccountPreferencesValidationException("The maximum running time that is configured for the account is exceeded by the cluster!");
+            LOGGER.info("The maximum running time exceeded by the cluster! clusterRunningTime: {}, clusterTimeToLive: {}",
+                    clusterRunningTime, clusterTimeToLive);
+            throw new AccountPreferencesValidationException("The maximum running time exceeded by the cluster!");
         }
     }
 }

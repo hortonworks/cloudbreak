@@ -58,6 +58,7 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         createDefaultImageCatalog(testContext);
+        initializeDefaultBlueprints(testContext);
     }
 
     @AfterMethod(alwaysRun = true)

@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import static java.time.ZoneId.systemDefault;
-
-import java.time.LocalDate;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -15,9 +12,6 @@ import org.springframework.stereotype.Controller;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.UsageEndpoint;
 import com.sequenceiq.cloudbreak.api.model.CloudbreakUsageJson;
 import com.sequenceiq.cloudbreak.api.model.flex.CloudbreakFlexUsageJson;
-import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.domain.CbUsageFilterParameters;
-import com.sequenceiq.cloudbreak.domain.CbUsageFilterParameters.Builder;
 import com.sequenceiq.cloudbreak.facade.CloudbreakUsagesFacade;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 
@@ -39,9 +33,7 @@ public class CloudbreakUsageController implements UsageEndpoint {
             String accountId,
             String cloud,
             String zone) {
-        CbUsageFilterParameters params = new Builder().setAccount(accountId).setOwner(userId)
-                .setSince(since).setCloud(cloud).setRegion(zone).setFilterEndDate(filterEndDate).build();
-        return cloudbreakUsagesFacade.getUsagesFor(params);
+        throw new UnsupportedOperationException("This endpoint is not supported yet");
     }
 
     @Override
@@ -51,10 +43,7 @@ public class CloudbreakUsageController implements UsageEndpoint {
             String userId,
             String cloud,
             String zone) {
-        CloudbreakUser user = restRequestThreadLocalService.getCloudbreakUser();
-        CbUsageFilterParameters params = new Builder().setAccount(user.getAccount()).setOwner(userId)
-                .setSince(since).setCloud(cloud).setRegion(zone).setFilterEndDate(filterEndDate).build();
-        return cloudbreakUsagesFacade.getUsagesFor(params);
+        throw new UnsupportedOperationException("This endpoint is not supported yet");
     }
 
     @Override
@@ -63,43 +52,17 @@ public class CloudbreakUsageController implements UsageEndpoint {
             Long filterEndDate,
             String cloud,
             String zone) {
-        CloudbreakUser user = restRequestThreadLocalService.getCloudbreakUser();
-        CbUsageFilterParameters params = new Builder().setAccount(user.getAccount()).setOwner(user.getUserId())
-                .setSince(since).setCloud(cloud).setRegion(zone).setFilterEndDate(filterEndDate).build();
-        return cloudbreakUsagesFacade.getUsagesFor(params);
+        throw new UnsupportedOperationException("This endpoint is not supported yet");
     }
 
     @Override
     public CloudbreakFlexUsageJson getDailyFlexUsages() {
-        long fromDate = LocalDate.now()
-                .minusDays(1)
-                .atStartOfDay(systemDefault())
-                .toInstant()
-                .toEpochMilli();
-
-        long endDate = LocalDate.now()
-                .atStartOfDay(systemDefault())
-                .toInstant()
-                .toEpochMilli();
-
-        CbUsageFilterParameters cbUsageFilterParameters = new Builder()
-                .setSince(fromDate)
-                .setFilterEndDate(endDate)
-                .build();
-        return cloudbreakUsagesFacade.getFlexUsagesFor(cbUsageFilterParameters);
+        throw new UnsupportedOperationException("This endpoint is not supported yet");
     }
 
     @Override
     public CloudbreakFlexUsageJson getLatestFlexUsages() {
-        long fromDate = LocalDate.now()
-                .atStartOfDay(systemDefault())
-                .toInstant()
-                .toEpochMilli();
-
-        CbUsageFilterParameters cbUsageFilterParameters = new Builder()
-                .setSince(fromDate)
-                .build();
-        return cloudbreakUsagesFacade.getFlexUsagesFor(cbUsageFilterParameters);
+        throw new UnsupportedOperationException("This endpoint is not supported yet");
     }
 
 }

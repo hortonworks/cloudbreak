@@ -13,7 +13,7 @@ import javax.persistence.UniqueConstraint;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"account", "subscriptionId"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "subscriptionId"}))
 public class SmartSenseSubscription implements ProvisionEntity {
 
     @Id
@@ -23,10 +23,6 @@ public class SmartSenseSubscription implements ProvisionEntity {
 
     @Column(nullable = false)
     private String subscriptionId;
-
-    private String owner;
-
-    private String account;
 
     @ManyToOne
     private Workspace workspace;
@@ -55,27 +51,9 @@ public class SmartSenseSubscription implements ProvisionEntity {
         this.subscriptionId = subscriptionId;
     }
 
-    public String getOwner() {
-        return owner;
-    }
-
-    public void setOwner(String owner) {
-        this.owner = owner;
-    }
-
-    public String getAccount() {
-        return account;
-    }
-
-    public void setAccount(String account) {
-        this.account = account;
-    }
-
     @Override
     public String toString() {
         return "SmartSenseSubscription{" + "id=" + id
-                + ", subscriptionId='" + subscriptionId + '\''
-                + ", owner='" + owner + '\''
-                + ", account='" + account + '}';
+                + ", subscriptionId='" + subscriptionId + '}';
     }
 }

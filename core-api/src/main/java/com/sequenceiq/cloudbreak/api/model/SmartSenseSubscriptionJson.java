@@ -24,12 +24,6 @@ public class SmartSenseSubscriptionJson implements JsonEntity {
     @Pattern(regexp = ID_PATTERN, message = ID_FORMAT)
     private String subscriptionId;
 
-    @ApiModelProperty(value = ModelDescriptions.OWNER, readOnly = true)
-    private String owner;
-
-    @ApiModelProperty(value = ModelDescriptions.ACCOUNT, readOnly = true)
-    private String account;
-
     @ApiModelProperty(value = ModelDescriptions.PUBLIC_IN_ACCOUNT, readOnly = true)
     private boolean publicInAccount = true;
 
@@ -50,22 +44,6 @@ public class SmartSenseSubscriptionJson implements JsonEntity {
 
     public void setSubscriptionId(String subscriptionId) {
         this.subscriptionId = subscriptionId;
-    }
-
-    public String getOwner() {
-        return owner;
-    }
-
-    public void setOwner(String owner) {
-        this.owner = owner;
-    }
-
-    public String getAccount() {
-        return account;
-    }
-
-    public void setAccount(String account) {
-        this.account = account;
     }
 
     public boolean isPublicInAccount() {

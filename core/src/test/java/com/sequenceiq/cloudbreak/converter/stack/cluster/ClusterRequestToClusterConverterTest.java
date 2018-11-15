@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
-import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
 
 public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterTest<ClusterRequest> {
@@ -37,7 +37,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
     private FileSystemConfigService fileSystemConfigService;
 
     @Mock
-    private RestRequestThreadLocalService restRequestThreadLocalService;
+    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     @Before
     public void setUp() {

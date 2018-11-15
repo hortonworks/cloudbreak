@@ -64,9 +64,6 @@ public class History {
     @Enumerated(EnumType.STRING)
     private AdjustmentType adjustmentType;
 
-    @Column(name = "user_id")
-    private String user;
-
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private ScalingStatus scalingStatus;
@@ -131,7 +128,6 @@ public class History {
     public History withCluster(Cluster cluster) {
         clusterId = cluster.getId();
         cbStackId = cluster.getStackId();
-        user = cluster.getUser().getId();
         return this;
     }
 
@@ -139,7 +135,7 @@ public class History {
         return clusterId;
     }
 
-    public void setClusterId(int clusterId) {
+    public void setClusterId(long clusterId) {
         this.clusterId = clusterId;
     }
 
@@ -207,14 +203,6 @@ public class History {
         this.properties = properties;
     }
 
-    public String getUser() {
-        return user;
-    }
-
-    public void setUser(String user) {
-        this.user = user;
-    }
-
     public long getId() {
         return id;
     }
@@ -237,9 +225,5 @@ public class History {
 
     public void setHostGroup(String hostGroup) {
         this.hostGroup = hostGroup;
-    }
-
-    public void setClusterId(long clusterId) {
-        this.clusterId = clusterId;
     }
 }

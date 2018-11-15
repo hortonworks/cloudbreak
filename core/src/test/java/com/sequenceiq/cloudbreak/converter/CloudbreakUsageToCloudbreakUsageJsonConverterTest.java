@@ -4,8 +4,6 @@ import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AWS;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.GCP;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -17,9 +15,8 @@ import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.CloudbreakUsageJson;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
-import com.sequenceiq.cloudbreak.service.user.CachedUserDetailsService;
+import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 
 public class CloudbreakUsageToCloudbreakUsageJsonConverterTest extends AbstractEntityConverterTest<CloudbreakUsage> {
 
@@ -27,26 +24,24 @@ public class CloudbreakUsageToCloudbreakUsageJsonConverterTest extends AbstractE
     private CloudbreakUsageToCloudbreakUsageJsonConverter underTest;
 
     @Mock
-    private CachedUserDetailsService cachedUserDetailsService;
-
-    private CloudbreakUser user;
+    private RestRequestThreadLocalService restRequestThreadLocalService;
 
     @Before
     public void setUp() {
         underTest = new CloudbreakUsageToCloudbreakUsageJsonConverter();
-        user = createCbUser();
         MockitoAnnotations.initMocks(this);
     }
 
     @Test
     public void testConvert() {
         // GIVEN
-        given(cachedUserDetailsService.getDetails(anyString(), any(UserFilterField.class))).willReturn(user);
+        given(restRequestThreadLocalService.getCloudbreakUser()).willReturn(new CloudbreakUser("userId", "John Smith", "john.smith@example.com",
+                "tenant"));
         // WHEN
         CloudbreakUsageJson result = underTest.convert(getSource());
         // THEN
         assertEquals(GCP, result.getProvider());
-        assertEquals("john.smith@example.com", result.getUsername());
+        assertEquals("John Smith", result.getUsername());
         assertAllFieldsNotNull(result, Lists.newArrayList("availabilityZone", "duration"));
     }
 
@@ -55,12 +50,13 @@ public class CloudbreakUsageToCloudbreakUsageJsonConverterTest extends AbstractE
         // GIVEN
         getSource().setProvider(AWS);
         getSource().setRegion("us_east_1");
-        given(cachedUserDetailsService.getDetails(anyString(), any(UserFilterField.class))).willReturn(user);
+        given(restRequestThreadLocalService.getCloudbreakUser()).willReturn(new CloudbreakUser("userId", "John Smith", "john.smith@example.com",
+                "tenant"));
         // WHEN
         CloudbreakUsageJson result = underTest.convert(getSource());
         // THEN
         assertEquals(AWS, result.getProvider());
-        assertEquals("john.smith@example.com", result.getUsername());
+        assertEquals("John Smith", result.getUsername());
         assertAllFieldsNotNull(result, Lists.newArrayList("availabilityZone", "duration"));
     }
 
@@ -70,23 +66,19 @@ public class CloudbreakUsageToCloudbreakUsageJsonConverterTest extends AbstractE
         getSource().setProvider(GCP);
         getSource().setRegion("us_central1");
         getSource().setAvailabilityZone("us_central1_a");
-        given(cachedUserDetailsService.getDetails(anyString(), any(UserFilterField.class))).willReturn(user);
+        given(restRequestThreadLocalService.getCloudbreakUser()).willReturn(new CloudbreakUser("userId", "John Smith", "john.smith@example.com",
+                "tenant"));
         // WHEN
         CloudbreakUsageJson result = underTest.convert(getSource());
         // THEN
         assertEquals(GCP, result.getProvider());
-        assertEquals("john.smith@example.com", result.getUsername());
+        assertEquals("John Smith", result.getUsername());
         assertAllFieldsNotNull(result, Lists.newArrayList("availabilityZone", "duration"));
     }
 
     @Override
     public CloudbreakUsage createSource() {
         return TestUtil.gcpCloudbreakUsage(1L);
-    }
-
-    private CloudbreakUser createCbUser() {
-        return new CloudbreakUser("dummyUserId", "john.smith@example.com", "dummyAccount"
-        );
     }
 
 }

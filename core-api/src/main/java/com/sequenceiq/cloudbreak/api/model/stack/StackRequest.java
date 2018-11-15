@@ -69,15 +69,6 @@ public class StackRequest extends StackBase {
     @ApiModelProperty(StackModelDescription.CLUSTER_REQUEST)
     private ClusterRequest clusterRequest;
 
-    @ApiModelProperty(hidden = true)
-    private String owner;
-
-    @ApiModelProperty(hidden = true)
-    private String account;
-
-    @ApiModelProperty(hidden = true)
-    private String ownerEmail;
-
     public StackRequest() {
     }
 
@@ -161,22 +152,6 @@ public class StackRequest extends StackBase {
         this.clusterRequest = clusterRequest;
     }
 
-    public String getOwner() {
-        return owner;
-    }
-
-    public void setOwner(String owner) {
-        this.owner = owner;
-    }
-
-    public String getAccount() {
-        return account;
-    }
-
-    public void setAccount(String account) {
-        this.account = account;
-    }
-
     public StackAuthenticationRequest getStackAuthentication() {
         return stackAuthentication;
     }
@@ -191,14 +166,6 @@ public class StackRequest extends StackBase {
 
     public void setCredentialName(String credentialName) {
         this.credentialName = credentialName;
-    }
-
-    public String getOwnerEmail() {
-        return ownerEmail;
-    }
-
-    public void setOwnerEmail(String ownerEmail) {
-        this.ownerEmail = ownerEmail;
     }
 
     public Long getClusterToAttach() {

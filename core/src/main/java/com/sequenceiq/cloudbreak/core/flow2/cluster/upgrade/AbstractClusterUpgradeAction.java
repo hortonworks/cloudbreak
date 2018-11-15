@@ -27,7 +27,7 @@ public abstract class AbstractClusterUpgradeAction<P extends Payload>
     @Override
     protected ClusterViewContext createFlowContext(String flowId, StateContext<ClusterUpgradeState, ClusterUpgradeEvent> stateContext, P payload) {
         StackView stack = stackService.getViewByIdWithoutAuth(payload.getStackId());
-        MDCBuilder.buildMdcContext(stack.getId().toString(), stack.getName(), stack.getOwner(), "CLUSTER");
+        MDCBuilder.buildMdcContext(stack.getId().toString(), stack.getName(), "CLUSTER");
         return new ClusterViewContext(flowId, stack);
     }
 

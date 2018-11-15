@@ -81,15 +81,6 @@ public class StackV2Request implements JsonEntity {
     @ApiModelProperty(StackModelDescription.CLUSTER_REQUEST)
     private ClusterV2Request cluster;
 
-    @ApiModelProperty(hidden = true)
-    private String owner;
-
-    @ApiModelProperty(hidden = true)
-    private String account;
-
-    @ApiModelProperty(hidden = true)
-    private String ownerEmail;
-
     @ApiModelProperty(StackModelDescription.GATEWAY_PORT)
     @Min(value = 1025, message = "Port should be between 1025 and 65535")
     @Max(value = 65535, message = "Port should be between 1025 and 65535")
@@ -125,22 +116,6 @@ public class StackV2Request implements JsonEntity {
 
     public void setCluster(ClusterV2Request cluster) {
         this.cluster = cluster;
-    }
-
-    public String getOwner() {
-        return owner;
-    }
-
-    public void setOwner(String owner) {
-        this.owner = owner;
-    }
-
-    public String getAccount() {
-        return account;
-    }
-
-    public void setAccount(String account) {
-        this.account = account;
     }
 
     public StackAuthenticationRequest getStackAuthentication() {
@@ -229,14 +204,6 @@ public class StackV2Request implements JsonEntity {
 
     public void setPlacement(PlacementSettings placement) {
         this.placement = placement;
-    }
-
-    public String getOwnerEmail() {
-        return ownerEmail;
-    }
-
-    public void setOwnerEmail(String ownerEmail) {
-        this.ownerEmail = ownerEmail;
     }
 
     public Map<String, Object> getInputs() {

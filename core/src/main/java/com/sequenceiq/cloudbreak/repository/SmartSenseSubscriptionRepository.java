@@ -11,7 +11,4 @@ import com.sequenceiq.cloudbreak.service.EntityType;
 @HasPermission
 public interface SmartSenseSubscriptionRepository extends BaseRepository<SmartSenseSubscription, Long> {
 
-    SmartSenseSubscription findBySubscriptionIdAndAccount(String subscription, String account);
-
-    SmartSenseSubscription findByAccountAndOwner(String account, String owner);
 }

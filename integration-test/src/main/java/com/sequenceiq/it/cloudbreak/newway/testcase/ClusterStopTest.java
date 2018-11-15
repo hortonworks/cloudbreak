@@ -39,6 +39,7 @@ public class ClusterStopTest extends AbstractIntegrationTest {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         createDefaultImageCatalog(testContext);
+        initializeDefaultBlueprints(testContext);
     }
 
     @AfterMethod(alwaysRun = true)

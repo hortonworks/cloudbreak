@@ -17,14 +17,9 @@ import com.sequenceiq.it.config.IntegrationTestConfiguration;
 
 @ContextConfiguration(classes = IntegrationTestConfiguration.class, initializers = ConfigFileApplicationContextInitializer.class)
 public class TestSuiteInitializer extends AbstractTestNGSpringContextTests {
-    @Value("${integrationtest.uaa.server}")
-    private String defaultUaaServer;
 
-    @Value("${integrationtest.uaa.user}")
-    private String defaultUaaUser;
-
-    @Value("${integrationtest.uaa.password}")
-    private String defaultUaaPassword;
+    @Value("${integrationtest.caas.token}")
+    private String defaultRefreshToken;
 
     @Inject
     private SuiteContext suiteContext;
@@ -45,15 +40,11 @@ public class TestSuiteInitializer extends AbstractTestNGSpringContextTests {
     }
 
     @BeforeSuite(dependsOnMethods = "initSuiteMap", groups = "suiteInit")
-    @Parameters({ "uaaServer", "uaaUser", "uaaPassword" })
-    public void initTestSuite(@Optional("") String uaaServer, @Optional("") String uaaUser, @Optional("") String uaaPassword) {
-        uaaServer = getString(uaaServer, defaultUaaServer);
-        uaaUser = getString(uaaUser, defaultUaaUser);
-        uaaPassword = getString(uaaPassword, defaultUaaPassword);
+    @Parameters({ "refreshToken" })
+    public void initTestSuite(@Optional("") String refreshToken) {
+        refreshToken = getString(refreshToken, defaultRefreshToken);
 
-        itContext.putContextParam(IntegrationTestContext.IDENTITY_URL, uaaServer);
-        itContext.putContextParam(IntegrationTestContext.AUTH_USER, uaaUser);
-        itContext.putContextParam(IntegrationTestContext.AUTH_PASSWORD, uaaPassword);
+        itContext.putContextParam(IntegrationTestContext.REFRESH_TOKEN, refreshToken);
     }
 
     private String getString(String paramValue, String defaultValue) {

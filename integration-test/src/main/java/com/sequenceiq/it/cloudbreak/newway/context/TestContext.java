@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -21,6 +22,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.util.StringUtils;
 
+import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResponse;
+import com.sequenceiq.cloudbreak.api.model.v2.WorkspaceStatus;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
@@ -169,19 +172,20 @@ public class TestContext implements ApplicationContextAware {
     public TestContext as(Actor actor) {
         checkShutdown();
         CloudbreakUser acting = actor.acting(testParameter);
-        if (clients.get(acting.getUsername()) == null) {
+        if (clients.get(acting.getToken()) == null) {
             CloudbreakClient cloudbreakClient = CloudbreakClient.createProxyCloudbreakClient(testParameter, acting);
-            clients.put(acting.getUsername(), cloudbreakClient);
-            Long workspaceId = cloudbreakClient.getCloudbreakClient()
-                    .workspaceV3Endpoint()
-                    .getByName(acting.getUsername()).getId();
-            cloudbreakClient.setWorkspaceId(workspaceId);
+            clients.put(acting.getToken(), cloudbreakClient);
+            Optional<WorkspaceResponse> workspace = cloudbreakClient.getCloudbreakClient()
+                    .workspaceV3Endpoint().getAll().stream()
+                    .filter(ws -> WorkspaceStatus.ACTIVE == ws.getStatus())
+                    .findFirst();
+            workspace.ifPresent(workspaceResponse -> cloudbreakClient.setWorkspaceId(workspaceResponse.getId()));
         }
         return this;
     }
 
     private String getDefaultUser() {
-        return testParameter.get(CloudbreakTest.USER);
+        return testParameter.get(CloudbreakTest.REFRESH_TOKEN);
     }
 
     public <O extends CloudbreakEntity> O init(Class<O> clss) {

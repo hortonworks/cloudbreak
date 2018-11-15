@@ -2,7 +2,10 @@ package com.sequenceiq.cloudbreak.client;
 
 public class IntrospectRequest {
 
-    private final String token;
+    private String token;
+
+    public IntrospectRequest() {
+    }
 
     public IntrospectRequest(String token) {
         this.token = token;
