@@ -172,7 +172,7 @@ public class StackCreatorService {
                     LOGGER.info("Stack validation object has been created in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
                     blueprint = stackValidation.getBlueprint();
-                    setStackType(stack, blueprint);
+                    setStackTypeAndValidateDatalake(stack, blueprint);
 
                     start = System.currentTimeMillis();
                     stackService.validateStack(stackValidation, stackRequest.getClusterRequest().getValidateBlueprint());
@@ -240,9 +240,15 @@ public class StackCreatorService {
         return response;
     }
 
-    private void setStackType(Stack stack, Blueprint blueprint) {
+    private void setStackTypeAndValidateDatalake(Stack stack, Blueprint blueprint) {
         if (blueprintService.isDatalakeBlueprint(blueprint)) {
             stack.setType(StackType.DATALAKE);
+            if (stack.getEnvironment() != null) {
+                Long datalakesInEnv = stackService.countDatalakeStacksInEnvironment(stack.getEnvironment().getId());
+                if (datalakesInEnv >= 1L) {
+                    throw new BadRequestException("Only 1 datalake cluster / environment is allowed.");
+                }
+            }
         }
     }
 
