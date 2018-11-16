@@ -175,12 +175,6 @@ public class StackDecorator {
     private void setEnvironment(@Nonnull Stack subject, @Nonnull StackRequest request, Workspace workspace) {
         if (!StringUtils.isEmpty(request.getEnvironment())) {
             EnvironmentView environment = environmentViewService.getByNameForWorkspace(request.getEnvironment(), workspace);
-            if (subject.getDatalakeId() != null) {
-                Long datalakesInEnv = stackService.countDatalakeStacksInEnvironment(environment.getId());
-                if (datalakesInEnv >= 1L) {
-                    throw new BadRequestException("Only 1 datalake cluster / environment is allowed.");
-                }
-            }
             subject.setEnvironment(environment);
         }
     }
