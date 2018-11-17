@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
-import com.sequenceiq.cloudbreak.common.type.MetricType;
+import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.AbstractClusterAction;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterViewContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;

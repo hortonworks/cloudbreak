@@ -14,12 +14,12 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.periscope.domain.MetricType;
-import com.sequenceiq.periscope.service.MetricService;
+import com.sequenceiq.periscope.service.PeriscopeMetricService;
 
 public class MetricUtilsTest {
 
     @Mock
-    private MetricService metricService;
+    private PeriscopeMetricService metricService;
 
     @InjectMocks
     private MetricUtils underTest;
@@ -41,10 +41,10 @@ public class MetricUtilsTest {
 
         underTest.submitThreadPoolExecutorParameters(threadPoolExecutor);
 
-        verify(metricService).submitGauge(MetricType.THREADPOOL_ACTIVE_THREADS, 8);
-        verify(metricService).submitGauge(MetricType.THREADPOOL_TASKS_COMPLETED, 7L);
-        verify(metricService).submitGauge(MetricType.THREADPOOL_QUEUE_SIZE, 6);
-        verify(metricService).submitGauge(MetricType.THREADPOOL_THREADS_TOTAL, 5);
+        verify(metricService).submit(MetricType.THREADPOOL_ACTIVE_THREADS, 8);
+        verify(metricService).submit(MetricType.THREADPOOL_TASKS_COMPLETED, 7L);
+        verify(metricService).submit(MetricType.THREADPOOL_QUEUE_SIZE, 6);
+        verify(metricService).submit(MetricType.THREADPOOL_THREADS_TOTAL, 5);
     }
 
 }

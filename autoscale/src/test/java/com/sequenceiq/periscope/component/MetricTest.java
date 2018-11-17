@@ -68,6 +68,7 @@ import com.sequenceiq.cloudbreak.conf.VaultConfig;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.CrudRepositoryLookupService;
 import com.sequenceiq.cloudbreak.service.TransactionExecutorService;
+import com.sequenceiq.cloudbreak.service.metrics.MetricService;
 import com.sequenceiq.periscope.PeriscopeApplication;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterRequest;
 import com.sequenceiq.periscope.api.model.ClusterState;
@@ -93,7 +94,7 @@ import com.sequenceiq.periscope.repository.SecurityConfigRepository;
 import com.sequenceiq.periscope.repository.SubscriptionRepository;
 import com.sequenceiq.periscope.repository.TimeAlertRepository;
 import com.sequenceiq.periscope.service.AutoscaleRestRequestThreadLocalService;
-import com.sequenceiq.periscope.service.MetricService;
+import com.sequenceiq.periscope.service.PeriscopeMetricService;
 import com.sequenceiq.periscope.service.ha.LeaderElectionService;
 import com.sequenceiq.periscope.service.ha.PeriscopeNodeConfig;
 import com.sequenceiq.periscope.service.security.CloudbreakAuthorizationService;
@@ -210,7 +211,7 @@ public class MetricTest {
     private HistoryRepository historyRepository;
 
     @Inject
-    private MetricService metricService;
+    private PeriscopeMetricService metricService;
 
     @Inject
     private LeaderElectionService leaderElectionService;
@@ -247,8 +248,8 @@ public class MetricTest {
 
     @Test
     public void testMetricsWhenSuspendActiveCluster() {
-        metricService.submitGauge(MetricType.CLUSTER_STATE_ACTIVE, 1);
-        metricService.submitGauge(MetricType.CLUSTER_STATE_SUSPENDED, 0);
+        metricService.submit(MetricType.CLUSTER_STATE_ACTIVE, 1);
+        metricService.submit(MetricType.CLUSTER_STATE_SUSPENDED, 0);
         when(clusterRepository.findByStackId(STACK_ID)).thenReturn(getACluster(ClusterState.RUNNING));
         when(clusterRepository.findById(CLUSTER_ID)).thenReturn(Optional.of(getACluster(ClusterState.RUNNING)));
         when(clusterRepository.save(any())).thenAnswer(this::saveCluster);
@@ -271,7 +272,7 @@ public class MetricTest {
 
     @Test
     public void testMetricsWhenRunSuspendedCluster() {
-        metricService.submitGauge(MetricType.CLUSTER_STATE_SUSPENDED, 1);
+        metricService.submit(MetricType.CLUSTER_STATE_SUSPENDED, 1);
         when(clusterRepository.findByStackId(STACK_ID)).thenReturn(getACluster(ClusterState.SUSPENDED));
         when(clusterRepository.findById(CLUSTER_ID)).thenReturn(Optional.of(getACluster(ClusterState.SUSPENDED)));
         when(clusterRepository.save(any())).thenAnswer(this::saveCluster);
@@ -294,7 +295,7 @@ public class MetricTest {
 
     @Test
     public void testMetricsWhenAutofailSuspendsCluster() throws InterruptedException {
-        metricService.submitGauge(MetricType.CLUSTER_STATE_ACTIVE, 2);
+        metricService.submit(MetricType.CLUSTER_STATE_ACTIVE, 2);
         when(clusterRepository.findById(CLUSTER_ID)).thenReturn(Optional.of(getACluster(ClusterState.RUNNING)));
         when(clusterRepository.save(any())).thenAnswer(this::saveCluster);
         when(clusterRepository.countByStateAndAutoscalingEnabledAndPeriscopeNodeId(eq(ClusterState.RUNNING), eq(true), anyString()))
@@ -324,7 +325,7 @@ public class MetricTest {
 
     @Test
     public void testDeleteActiveCluster() {
-        metricService.submitGauge(MetricType.CLUSTER_STATE_ACTIVE, 1);
+        metricService.submit(MetricType.CLUSTER_STATE_ACTIVE, 1);
         when(clusterRepository.findByStackId(STACK_ID)).thenReturn(getACluster(ClusterState.RUNNING));
         when(clusterRepository.findById(CLUSTER_ID)).thenReturn(Optional.of(getACluster(ClusterState.RUNNING)));
         when(clusterRepository.save(any())).thenAnswer(this::saveCluster);
@@ -347,7 +348,7 @@ public class MetricTest {
 
     @Test
     public void testLeaderElection() {
-        metricService.submitGauge(MetricType.LEADER, 0);
+        metricService.submit(MetricType.LEADER, 0);
         PeriscopeNode periscopeNode = new PeriscopeNode();
         when(periscopeNodeRepository.findById(periscopeNodeConfig.getId())).thenReturn(Optional.of(periscopeNode));
 

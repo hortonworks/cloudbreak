@@ -12,19 +12,19 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.periscope.service.MetricService;
+import com.sequenceiq.periscope.service.PeriscopeMetricService;
 
 @Service
 public class MetricUtils {
 
     @Inject
-    private MetricService metricService;
+    private PeriscopeMetricService metricService;
 
     public void submitThreadPoolExecutorParameters(ExecutorService executorService) {
         ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor) executorService;
-        metricService.submitGauge(THREADPOOL_THREADS_TOTAL, threadPoolExecutor.getCorePoolSize());
-        metricService.submitGauge(THREADPOOL_QUEUE_SIZE, threadPoolExecutor.getQueue().size());
-        metricService.submitGauge(THREADPOOL_TASKS_COMPLETED, threadPoolExecutor.getCompletedTaskCount());
-        metricService.submitGauge(THREADPOOL_ACTIVE_THREADS, threadPoolExecutor.getActiveCount());
+        metricService.submit(THREADPOOL_THREADS_TOTAL, threadPoolExecutor.getCorePoolSize());
+        metricService.submit(THREADPOOL_QUEUE_SIZE, threadPoolExecutor.getQueue().size());
+        metricService.submit(THREADPOOL_TASKS_COMPLETED, threadPoolExecutor.getCompletedTaskCount());
+        metricService.submit(THREADPOOL_ACTIVE_THREADS, threadPoolExecutor.getActiveCount());
     }
 }

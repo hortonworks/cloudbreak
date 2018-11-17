@@ -35,7 +35,7 @@ import com.sequenceiq.periscope.monitor.evaluator.CronTimeEvaluator;
 import com.sequenceiq.periscope.repository.ClusterRepository;
 import com.sequenceiq.periscope.repository.PeriscopeNodeRepository;
 import com.sequenceiq.periscope.service.DateTimeService;
-import com.sequenceiq.periscope.service.MetricService;
+import com.sequenceiq.periscope.service.PeriscopeMetricService;
 import com.sequenceiq.periscope.service.StackCollectorService;
 import com.sequenceiq.periscope.utils.TimeUtil;
 
@@ -76,7 +76,7 @@ public class LeaderElectionService {
     private DateTimeService dateTimeService;
 
     @Inject
-    private MetricService metricService;
+    private PeriscopeMetricService metricService;
 
     private Timer timer;
 
@@ -104,7 +104,7 @@ public class LeaderElectionService {
         if (periscopeNodeConfig.isNodeIdSpecified()) {
             long leaders = periscopeNodeRepository.countByLeaderIsTrueAndLastUpdatedIsGreaterThan(clock.getCurrentTime() - heartbeatThresholdRate);
             if (leaders == 0L) {
-                metricService.submitGauge(MetricType.LEADER, 0);
+                metricService.submit(MetricType.LEADER, 0);
                 LOGGER.info("There is no active leader available");
                 resetTimer();
                 try {
@@ -120,7 +120,7 @@ public class LeaderElectionService {
                     LOGGER.info("Failed to select node as leader, something went wrong. Message: {}", e.getMessage());
                     return;
                 }
-                metricService.submitGauge(MetricType.LEADER, 1);
+                metricService.submit(MetricType.LEADER, 1);
                 LOGGER.info("Selected {} as leader", periscopeNodeConfig.getId());
                 timer.schedule(new TimerTask() {
                     @Override
