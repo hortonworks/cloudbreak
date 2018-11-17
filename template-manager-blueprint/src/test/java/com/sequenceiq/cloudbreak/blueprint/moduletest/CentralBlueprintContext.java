@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescr
 import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.json.JsonHelper;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
+import com.sequenceiq.cloudbreak.service.metrics.MetricService;
 import com.sequenceiq.cloudbreak.service.secret.SecretEngine;
 import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurator;
@@ -84,6 +85,11 @@ public class CentralBlueprintContext {
         @Bean
         public SecretService secretService() {
             return Mockito.mock(SecretService.class);
+        }
+
+        @Bean
+        public MetricService metricService() {
+            return Mockito.mock(MetricService.class);
         }
 
         @Bean

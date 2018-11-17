@@ -1,6 +1,8 @@
-package com.sequenceiq.cloudbreak.common.type;
+package com.sequenceiq.cloudbreak.service.metrics;
 
-public enum MetricType {
+import com.sequenceiq.cloudbreak.common.type.metric.Metric;
+
+public enum MetricType implements Metric {
     STACK_CREATION_SUCCESSFUL("stack.creation.successful"),
     STACK_CREATION_FAILED("stack.creation.failed"),
     STACK_UPSCALE_SUCCESSFUL("stack.upscale.successful"),
@@ -31,6 +33,7 @@ public enum MetricType {
         this.metricName = metricName;
     }
 
+    @Override
     public String getMetricName() {
         return metricName;
     }

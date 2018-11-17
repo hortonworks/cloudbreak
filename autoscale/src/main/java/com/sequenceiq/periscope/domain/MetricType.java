@@ -1,6 +1,8 @@
 package com.sequenceiq.periscope.domain;
 
-public enum MetricType {
+import com.sequenceiq.cloudbreak.common.type.metric.Metric;
+
+public enum MetricType implements Metric {
 
     LEADER("node.leader"),
     CLUSTER_STATE_ACTIVE("cluster.state.active"),
@@ -25,8 +27,8 @@ public enum MetricType {
         this.metricName = metricName;
     }
 
+    @Override
     public String getMetricName() {
         return metricName;
     }
-
 }

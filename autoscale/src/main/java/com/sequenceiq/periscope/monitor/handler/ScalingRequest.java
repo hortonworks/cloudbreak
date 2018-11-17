@@ -23,7 +23,7 @@ import com.sequenceiq.periscope.domain.MetricType;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
 import com.sequenceiq.periscope.notification.HttpNotificationSender;
 import com.sequenceiq.periscope.service.HistoryService;
-import com.sequenceiq.periscope.service.MetricService;
+import com.sequenceiq.periscope.service.PeriscopeMetricService;
 
 @Component("ScalingRequest")
 @Scope("prototype")
@@ -54,7 +54,7 @@ public class ScalingRequest implements Runnable {
     private ScalingHardLimitsService scalingHardLimitsService;
 
     @Inject
-    private MetricService metricService;
+    private PeriscopeMetricService metricService;
 
     public ScalingRequest(Cluster cluster, ScalingPolicy policy, int totalNodes, int desiredNodeCount) {
         this.cluster = cluster;
@@ -79,7 +79,7 @@ public class ScalingRequest implements Runnable {
     }
 
     private void scaleUp(int scalingAdjustment, int totalNodes) {
-        metricService.incrementCounter(MetricType.CLUSTER_UPSCALE_TRIGGERED);
+        metricService.incrementMetricCounter(MetricType.CLUSTER_UPSCALE_TRIGGERED);
         if (scalingHardLimitsService.isViolatingMaxUpscaleStepInNodeCount(scalingAdjustment)) {
             LOGGER.info("Upscale requested for {} nodes. Upscaling with the maximum allowed of {} node(s)",
                     scalingAdjustment, scalingHardLimitsService.getMaxUpscaleStepInNodeCount());
@@ -103,19 +103,19 @@ public class ScalingRequest implements Runnable {
             cloudbreakClient.autoscaleEndpoint().putStack(stackId, cluster.getClusterPertain().getUserId(), updateStackJson);
             scalingStatus = ScalingStatus.SUCCESS;
             statusReason = "Upscale successfully triggered";
-            metricService.incrementCounter(MetricType.CLUSTER_UPSCALE_SUCCESSFUL);
+            metricService.incrementMetricCounter(MetricType.CLUSTER_UPSCALE_SUCCESSFUL);
         } catch (RuntimeException e) {
             scalingStatus = ScalingStatus.FAILED;
             statusReason = "Couldn't trigger upscaling due to: " + e.getMessage();
             LOGGER.error(statusReason, e);
-            metricService.incrementCounter(MetricType.CLUSTER_UPSCALE_FAILED);
+            metricService.incrementMetricCounter(MetricType.CLUSTER_UPSCALE_FAILED);
         } finally {
             createHistoryAndNotify(totalNodes, statusReason, scalingStatus);
         }
     }
 
     private void scaleDown(int scalingAdjustment, int totalNodes) {
-        metricService.incrementCounter(MetricType.CLUSTER_DOWNSCALE_TRIGGERED);
+        metricService.incrementMetricCounter(MetricType.CLUSTER_DOWNSCALE_TRIGGERED);
         String hostGroup = policy.getHostGroup();
         String ambari = cluster.getHost();
         AmbariAddressJson ambariAddressJson = new AmbariAddressJson();
@@ -134,10 +134,10 @@ public class ScalingRequest implements Runnable {
             cloudbreakClient.autoscaleEndpoint().putCluster(stackId, cluster.getClusterPertain().getUserId(), updateClusterJson);
             scalingStatus = ScalingStatus.SUCCESS;
             statusReason = "Downscale successfully triggered";
-            metricService.incrementCounter(MetricType.CLUSTER_DOWNSCALE_SUCCESSFUL);
+            metricService.incrementMetricCounter(MetricType.CLUSTER_DOWNSCALE_SUCCESSFUL);
         } catch (Exception e) {
             scalingStatus = ScalingStatus.FAILED;
-            metricService.incrementCounter(MetricType.CLUSTER_DOWNSCALE_FAILED);
+            metricService.incrementMetricCounter(MetricType.CLUSTER_DOWNSCALE_FAILED);
             statusReason = "Couldn't trigger downscaling due to: " + e.getMessage();
             LOGGER.error(statusReason, e);
         } finally {

@@ -20,10 +20,10 @@ import org.springframework.statemachine.action.Action;
 import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
-import com.sequenceiq.cloudbreak.common.type.MetricType;
+import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.core.flow2.MessageFactory.HEADERS;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.service.metrics.MetricService;
+import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
 
 import reactor.bus.EventBus;
 
@@ -40,7 +40,7 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
     private static final int MS_PER_SEC = 1000;
 
     @Inject
-    protected MetricService metricService;
+    protected CloudbreakMetricService metricService;
 
     @Inject
     private EventBus eventBus;
@@ -86,7 +86,7 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
                 long executionTime = execElapsed > flowElapsed ? execElapsed : flowElapsed;
                 LOGGER.info("Stack: {}, flow state: {}, phase: {}, execution time {} sec", payload.getStackId(),
                     flowStateName, execElapsed > flowElapsed ? "doExec" : "service", executionTime);
-                metricService.submit(MetricType.FLOW_STEP.getMetricName(), executionTime, Map.of("name", flowStateName.toLowerCase()));
+                metricService.submit(MetricType.FLOW_STEP, executionTime, Map.of("name", flowStateName.toLowerCase()));
             }
             variables.put(FLOW_STATE_NAME, context.getStateMachine().getState().getId());
             variables.put(FLOW_START_EXEC_TIME, System.currentTimeMillis());

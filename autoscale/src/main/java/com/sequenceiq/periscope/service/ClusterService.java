@@ -47,7 +47,7 @@ public class ClusterService {
     private PeriscopeNodeConfig periscopeNodeConfig;
 
     @Inject
-    private MetricService metricService;
+    private PeriscopeMetricService metricService;
 
     public Cluster create(AmbariStack stack, ClusterState clusterState, ClusterPertain clusterPertain) {
         return create(new Cluster(), clusterPertain, stack, clusterState);
@@ -198,9 +198,9 @@ public class ClusterService {
     }
 
     private void calculateClusterStateMetrics() {
-        metricService.submitGauge(MetricType.CLUSTER_STATE_ACTIVE,
+        metricService.submit(MetricType.CLUSTER_STATE_ACTIVE,
                 clusterRepository.countByStateAndAutoscalingEnabledAndPeriscopeNodeId(RUNNING, true, periscopeNodeConfig.getId()));
-        metricService.submitGauge(MetricType.CLUSTER_STATE_SUSPENDED,
+        metricService.submit(MetricType.CLUSTER_STATE_SUSPENDED,
                 clusterRepository.countByStateAndAutoscalingEnabledAndPeriscopeNodeId(SUSPENDED, true, periscopeNodeConfig.getId()));
     }
 }
