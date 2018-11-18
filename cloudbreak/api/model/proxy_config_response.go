@@ -37,6 +37,9 @@ type ProxyConfigResponse struct {
 	// Pattern: (^[a-z][-a-z0-9]*[a-z0-9]$)
 	Name *string `json:"name"`
 
+	// Password to use for basic authentication
+	Password *SecretResponse `json:"password,omitempty"`
+
 	// determines the protocol (http or https)
 	// Required: true
 	// Pattern: ^http(s)?$
@@ -55,6 +58,9 @@ type ProxyConfigResponse struct {
 	// Minimum: 1
 	ServerPort *int32 `json:"serverPort"`
 
+	// Username to use for basic authentication
+	UserName *SecretResponse `json:"userName,omitempty"`
+
 	// workspace of the resource
 	Workspace *WorkspaceResourceResponse `json:"workspace,omitempty"`
 }
@@ -67,11 +73,15 @@ type ProxyConfigResponse struct {
 
 /* polymorph ProxyConfigResponse name false */
 
+/* polymorph ProxyConfigResponse password false */
+
 /* polymorph ProxyConfigResponse protocol false */
 
 /* polymorph ProxyConfigResponse serverHost false */
 
 /* polymorph ProxyConfigResponse serverPort false */
+
+/* polymorph ProxyConfigResponse userName false */
 
 /* polymorph ProxyConfigResponse workspace false */
 
@@ -94,6 +104,11 @@ func (m *ProxyConfigResponse) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
+	if err := m.validatePassword(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
 	if err := m.validateProtocol(formats); err != nil {
 		// prop
 		res = append(res, err)
@@ -105,6 +120,11 @@ func (m *ProxyConfigResponse) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateServerPort(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateUserName(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -171,6 +191,25 @@ func (m *ProxyConfigResponse) validateName(formats strfmt.Registry) error {
 	return nil
 }
 
+func (m *ProxyConfigResponse) validatePassword(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Password) { // not required
+		return nil
+	}
+
+	if m.Password != nil {
+
+		if err := m.Password.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("password")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (m *ProxyConfigResponse) validateProtocol(formats strfmt.Registry) error {
 
 	if err := validate.Required("protocol", "body", m.Protocol); err != nil {
@@ -217,6 +256,25 @@ func (m *ProxyConfigResponse) validateServerPort(formats strfmt.Registry) error 
 
 	if err := validate.MaximumInt("serverPort", "body", int64(*m.ServerPort), 65535, false); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *ProxyConfigResponse) validateUserName(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.UserName) { // not required
+		return nil
+	}
+
+	if m.UserName != nil {
+
+		if err := m.UserName.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("userName")
+			}
+			return err
+		}
 	}
 
 	return nil

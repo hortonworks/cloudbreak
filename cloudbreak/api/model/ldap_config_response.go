@@ -23,6 +23,12 @@ type LdapConfigResponse struct {
 	// LDAP group for administrators
 	AdminGroup string `json:"adminGroup,omitempty"`
 
+	// bind distinguished name for connection test and group search (e.g. cn=admin,dc=example,dc=org)
+	BindDn *SecretResponse `json:"bindDn,omitempty"`
+
+	// password for the provided bind DN
+	BindPassword *SecretResponse `json:"bindPassword,omitempty"`
+
 	// Self-signed certificate of LDAPS server
 	Certificate string `json:"certificate,omitempty"`
 
@@ -93,6 +99,10 @@ type LdapConfigResponse struct {
 
 /* polymorph LdapConfigResponse adminGroup false */
 
+/* polymorph LdapConfigResponse bindDn false */
+
+/* polymorph LdapConfigResponse bindPassword false */
+
 /* polymorph LdapConfigResponse certificate false */
 
 /* polymorph LdapConfigResponse description false */
@@ -134,6 +144,16 @@ type LdapConfigResponse struct {
 // Validate validates this ldap config response
 func (m *LdapConfigResponse) Validate(formats strfmt.Registry) error {
 	var res []error
+
+	if err := m.validateBindDn(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateBindPassword(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
 
 	if err := m.validateDescription(formats); err != nil {
 		// prop
@@ -178,6 +198,44 @@ func (m *LdapConfigResponse) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *LdapConfigResponse) validateBindDn(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.BindDn) { // not required
+		return nil
+	}
+
+	if m.BindDn != nil {
+
+		if err := m.BindDn.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("bindDn")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *LdapConfigResponse) validateBindPassword(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.BindPassword) { // not required
+		return nil
+	}
+
+	if m.BindPassword != nil {
+
+		if err := m.BindPassword.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("bindPassword")
+			}
+			return err
+		}
+	}
+
 	return nil
 }
 

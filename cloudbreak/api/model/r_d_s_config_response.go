@@ -26,9 +26,15 @@ type RDSConfigResponse struct {
 	// Required: true
 	ConnectionDriver *string `json:"connectionDriver"`
 
+	// Password to use for the jdbc connection
+	ConnectionPassword *SecretResponse `json:"connectionPassword,omitempty"`
+
 	// JDBC connection URL in the form of jdbc:<db-type>://<address>:<port>/<db>
 	// Required: true
 	ConnectionURL *string `json:"connectionURL"`
+
+	// Username to use for the jdbc connection
+	ConnectionUserName *SecretResponse `json:"connectionUserName,omitempty"`
 
 	// URL that points to the jar of the connection driver(connector)
 	ConnectorJarURL string `json:"connectorJarUrl,omitempty"`
@@ -73,7 +79,11 @@ type RDSConfigResponse struct {
 
 /* polymorph RDSConfigResponse connectionDriver false */
 
+/* polymorph RDSConfigResponse connectionPassword false */
+
 /* polymorph RDSConfigResponse connectionURL false */
+
+/* polymorph RDSConfigResponse connectionUserName false */
 
 /* polymorph RDSConfigResponse connectorJarUrl false */
 
@@ -111,7 +121,17 @@ func (m *RDSConfigResponse) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
+	if err := m.validateConnectionPassword(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
 	if err := m.validateConnectionURL(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateConnectionUserName(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -174,10 +194,48 @@ func (m *RDSConfigResponse) validateConnectionDriver(formats strfmt.Registry) er
 	return nil
 }
 
+func (m *RDSConfigResponse) validateConnectionPassword(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ConnectionPassword) { // not required
+		return nil
+	}
+
+	if m.ConnectionPassword != nil {
+
+		if err := m.ConnectionPassword.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("connectionPassword")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (m *RDSConfigResponse) validateConnectionURL(formats strfmt.Registry) error {
 
 	if err := validate.Required("connectionURL", "body", m.ConnectionURL); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *RDSConfigResponse) validateConnectionUserName(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ConnectionUserName) { // not required
+		return nil
+	}
+
+	if m.ConnectionUserName != nil {
+
+		if err := m.ConnectionUserName.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("connectionUserName")
+			}
+			return err
+		}
 	}
 
 	return nil

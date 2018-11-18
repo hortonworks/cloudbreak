@@ -18,6 +18,9 @@ import (
 
 type CredentialResponse struct {
 
+	// provider specific attributes of the credential
+	Attributes *SecretResponse `json:"attributes,omitempty"`
+
 	// type of cloud provider
 	// Required: true
 	CloudPlatform *string `json:"cloudPlatform"`
@@ -40,9 +43,6 @@ type CredentialResponse struct {
 	// cloud specific parameters for credential
 	Parameters map[string]interface{} `json:"parameters,omitempty"`
 
-	// cloud specific sensitive parameters for credential
-	ParametersPath string `json:"parametersPath,omitempty"`
-
 	// resource is visible in account
 	Public *bool `json:"public,omitempty"`
 
@@ -52,6 +52,8 @@ type CredentialResponse struct {
 	// workspace
 	Workspace *WorkspaceResourceResponse `json:"workspace,omitempty"`
 }
+
+/* polymorph CredentialResponse attributes false */
 
 /* polymorph CredentialResponse cloudPlatform false */
 
@@ -63,8 +65,6 @@ type CredentialResponse struct {
 
 /* polymorph CredentialResponse parameters false */
 
-/* polymorph CredentialResponse parametersPath false */
-
 /* polymorph CredentialResponse public false */
 
 /* polymorph CredentialResponse topologyId false */
@@ -74,6 +74,11 @@ type CredentialResponse struct {
 // Validate validates this credential response
 func (m *CredentialResponse) Validate(formats strfmt.Registry) error {
 	var res []error
+
+	if err := m.validateAttributes(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
 
 	if err := m.validateCloudPlatform(formats); err != nil {
 		// prop
@@ -98,6 +103,25 @@ func (m *CredentialResponse) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *CredentialResponse) validateAttributes(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Attributes) { // not required
+		return nil
+	}
+
+	if m.Attributes != nil {
+
+		if err := m.Attributes.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("attributes")
+			}
+			return err
+		}
+	}
+
 	return nil
 }
 

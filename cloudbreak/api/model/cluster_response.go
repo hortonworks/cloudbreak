@@ -136,9 +136,6 @@ type ClusterResponse struct {
 	// duration - how long the cluster is running in milliseconds
 	Uptime int64 `json:"uptime,omitempty"`
 
-	// ambari username
-	UserName string `json:"userName,omitempty"`
-
 	// workspace of the resource
 	Workspace *WorkspaceResourceResponse `json:"workspace,omitempty"`
 }
@@ -216,8 +213,6 @@ type ClusterResponse struct {
 /* polymorph ClusterResponse statusReason false */
 
 /* polymorph ClusterResponse uptime false */
-
-/* polymorph ClusterResponse userName false */
 
 /* polymorph ClusterResponse workspace false */
 
