@@ -251,7 +251,6 @@
         "endpoint": "http://172.18.0.85:5000/v2.0",
         "selector": "cb-keystone-v2",
         "keystoneVersion": "cb-keystone-v2",
-        "userName": "demo",
         "tenantName": "demo"
       },
       "description": "",

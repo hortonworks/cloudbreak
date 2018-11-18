@@ -49,7 +49,6 @@
     "statusReason": null,
     "ambariServerIp": "52.16.174.228",
     "ambariServerUrl": "https://52.16.174.228/ambari/",
-    "userName": "admin",
     "secure": false,
     "hostGroups": [
       {

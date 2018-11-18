@@ -53,7 +53,6 @@
     "statusReason": null,
     "ambariServerIp": null,
     "ambariServerUrl": null,
-    "userName": "admin",
     "secure": false,
     "hostGroups": [
       {

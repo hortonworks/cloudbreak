@@ -52,7 +52,6 @@
     "statusReason": "",
     "ambariServerIp": "172.21.250.172",
     "ambariServerUrl": "https://172.21.250.172/ambari/",
-    "userName": "admin",
     "secure": false,
     "hostGroups": [
       {

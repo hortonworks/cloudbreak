@@ -5,7 +5,10 @@
     "serverHost": "qa-cloud.eng.hortonworks.com",
     "serverPort": 31000,
     "protocol": "https",
-    "userName": "inttest",
+    "userName": {
+      "enginePath": "secret",
+      "secretPath": "cb/shared/DEFAULT/proxyconfig/username/97a4d3dc-a98f-439f-9ac3-98cc19f68b35-1f"
+    },
     "id": 1
   }
 ]

@@ -44,7 +44,6 @@
     "statusReason": "",
     "ambariServerIp": "35.187.4.62",
     "ambariServerUrl": "https://35.187.4.62/ambari/",
-    "userName": "admin",
     "secure": false,
     "hostGroups": [
       {
