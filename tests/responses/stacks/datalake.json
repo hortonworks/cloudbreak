@@ -123,7 +123,10 @@
       "serverHost": "hwxad-7f9ecb4d75206b09.elb.eu-west-1.amazonaws.com",
       "serverPort": 389,
       "protocol": "LDAP",
-      "bindDn": "CN=Administrator,CN=Users,DC=ad,DC=hwx,DC=com",
+      "bindDn": {
+        "enginePath": "secret",
+        "secretPath": "cb/shared/DEFAULT/ldapconfig/binddn/97a4d3dc-a98f-439f-9ac3-98cc19f68b35-1f"
+      },
       "userSearchBase": "CN=Users,DC=ad,DC=hwx,DC=com",
       "userDnPattern": "cn={0},CN=Users,DC=ad,DC=hwx,DC=com",
       "groupSearchBase": "CN=Users,DC=ad,DC=hwx,DC=com",
