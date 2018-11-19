@@ -141,10 +141,10 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
         }
     }
 
-    public DetailedEnvironmentResponse delete(String environmentName, Long workspaceId) {
+    public SimpleEnvironmentResponse delete(String environmentName, Long workspaceId) {
         Environment environment = getByNameForWorkspaceId(environmentName, workspaceId);
         delete(environment);
-        return conversionService.convert(environment, DetailedEnvironmentResponse.class);
+        return conversionService.convert(environment, SimpleEnvironmentResponse.class);
     }
 
     public DetailedEnvironmentResponse createForLoggedInUser(EnvironmentRequest request, @Nonnull Long workspaceId) {

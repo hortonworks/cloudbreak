@@ -50,7 +50,7 @@ public interface EnvironmentV3Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.DELETE, produces = ContentType.JSON, notes = Notes.ENVIRONMENT_NOTES,
             nickname = "deleteEnvironment")
-    DetailedEnvironmentResponse delete(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String environmentName);
+    SimpleEnvironmentResponse delete(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String environmentName);
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
