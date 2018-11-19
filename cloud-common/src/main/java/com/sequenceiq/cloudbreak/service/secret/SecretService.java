@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.model.SecretResponse;
+import com.sequenceiq.cloudbreak.common.type.metric.MetricType;
+import com.sequenceiq.cloudbreak.service.metrics.MetricService;
 
 @Service
 public class SecretService {
@@ -22,6 +24,9 @@ public class SecretService {
 
     @Value("${secret.engine:}")
     private String engineClass;
+
+    @Inject
+    private MetricService metricService;
 
     @Inject
     private List<SecretEngine> engines;
@@ -46,13 +51,17 @@ public class SecretService {
     public String put(String key, String value) throws Exception {
         long start = System.currentTimeMillis();
         boolean exists = persistentEngine.isExists(key);
-        LOGGER.debug("Secret read took {} ms", System.currentTimeMillis() - start);
+        long duration = System.currentTimeMillis() - start;
+        metricService.submit(MetricType.VAULT_READ, duration);
+        LOGGER.debug("Secret read took {} ms", duration);
         if (exists) {
             throw new InvalidKeyException(String.format("Key: %s already exists!", key));
         }
         start = System.currentTimeMillis();
         String secret = persistentEngine.put(key, value);
-        LOGGER.debug("Secret write took {} ms", System.currentTimeMillis() - start);
+        duration = System.currentTimeMillis() - start;
+        metricService.submit(MetricType.VAULT_WRITE, duration);
+        LOGGER.debug("Secret write took {} ms", duration);
         return secret;
     }
 
@@ -74,7 +83,9 @@ public class SecretService {
                 .map(e -> e.get(secret))
                 .filter(Objects::nonNull)
                 .orElse(null);
-        LOGGER.debug("Secret read took {} ms", System.currentTimeMillis() - start);
+        long duration = System.currentTimeMillis() - start;
+        metricService.submit(MetricType.VAULT_READ, duration);
+        LOGGER.debug("Secret read took {} ms", duration);
         return "null".equals(response) ? null : response;
     }
 
@@ -88,7 +99,9 @@ public class SecretService {
         engines.stream()
                 .filter(e -> e.isSecret(secret))
                 .forEach(e -> e.delete(secret));
-        LOGGER.debug("Secret delete took {} ms", System.currentTimeMillis() - start);
+        long duration = System.currentTimeMillis() - start;
+        metricService.submit(MetricType.VAULT_READ, duration);
+        LOGGER.debug("Secret delete took {} ms", duration);
     }
 
     /**
