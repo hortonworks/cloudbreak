@@ -59,7 +59,7 @@ public class EnvironmentV3Controller implements EnvironmentV3Endpoint {
     }
 
     @Override
-    public DetailedEnvironmentResponse delete(Long workspaceId, String environmentName) {
+    public SimpleEnvironmentResponse delete(Long workspaceId, String environmentName) {
         return environmentService.delete(environmentName, workspaceId);
     }
 
@@ -68,7 +68,6 @@ public class EnvironmentV3Controller implements EnvironmentV3Endpoint {
         return environmentService.attachResources(environmentName, request, workspaceId);
     }
 
-    // TODO: finish
     @Override
     public DetailedEnvironmentResponse detachResources(Long workspaceId, String environmentName, @Valid EnvironmentDetachRequest request) {
         return environmentService.detachResources(environmentName, request, workspaceId);
