@@ -1,13 +1,5 @@
-IMAGE = hortonworks/cloudbreak-mock-caas
-VERSION ?= $(shell git  describe --tags --abbrev=0)
-BRANCH ?=$(shell git branch | grep \* | cut -d ' ' -f2)
-UNAME = $(shell uname)
-
-deps:
-	curl -Ls https://github.com/keyki/dockerhub-tag/releases/download/v0.2.1/dockerhub-tag_0.2.1_$(UNAME)_x86_64.tgz | tar -xzC /usr/local/bin
+export MAVEN_METADATA_URL = maven.sequenceiq.com/releases/com/sequenceiq/cloudbreak/maven-metadata.xml
+export DOCKER_IMAGE = hortonworks/cloudbreak-mock-caas
 
 dockerhub-tag:
-	dockerhub-tag set $(IMAGE) $(VERSION) $(VERSION) /mock-caas
-
-build-mock:
-	docker build -t hortonworks/cloudbreak-mock-caas:$(VERSION) .
+	./deploy.sh $(VERSION)
