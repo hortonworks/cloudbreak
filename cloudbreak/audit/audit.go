@@ -1,15 +1,16 @@
 package audit
 
 import (
-	"github.com/hortonworks/cb-cli/cloudbreak/oauth"
 	"strconv"
 	"time"
+
+	"github.com/hortonworks/cb-cli/cloudbreak/oauth"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/cb-cli/cloudbreak/api/client/v3_workspace_id_audits"
 	"github.com/hortonworks/cb-cli/cloudbreak/api/model"
 	fl "github.com/hortonworks/cb-cli/cloudbreak/flags"
-	"github.com/hortonworks/cb-cli/utils"
+	"github.com/hortonworks/cb-cli/dps-common/utils"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 )

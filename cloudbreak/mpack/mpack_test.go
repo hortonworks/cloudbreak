@@ -7,7 +7,7 @@ import (
 	"github.com/hortonworks/cb-cli/cloudbreak/api/client/v3_workspace_id_mpacks"
 	"github.com/hortonworks/cb-cli/cloudbreak/api/model"
 	"github.com/hortonworks/cb-cli/cloudbreak/types"
-	"github.com/hortonworks/cb-cli/utils"
+	"github.com/hortonworks/cb-cli/dps-common/utils"
 )
 
 type mockMpackClient struct {

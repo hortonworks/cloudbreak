@@ -9,7 +9,7 @@ import (
 	proxyConfig "github.com/hortonworks/cb-cli/cloudbreak/api/client/v3_workspace_id_proxyconfigs"
 	"github.com/hortonworks/cb-cli/cloudbreak/api/model"
 	fl "github.com/hortonworks/cb-cli/cloudbreak/flags"
-	"github.com/hortonworks/cb-cli/utils"
+	"github.com/hortonworks/cb-cli/dps-common/utils"
 	"github.com/urfave/cli"
 	"strings"
 )

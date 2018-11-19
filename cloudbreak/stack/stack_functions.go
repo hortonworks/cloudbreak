@@ -1,14 +1,15 @@
 package stack
 
 import (
-	"github.com/hortonworks/cb-cli/cloudbreak/oauth"
 	"strings"
 	"time"
+
+	"github.com/hortonworks/cb-cli/cloudbreak/oauth"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/cb-cli/cloudbreak/api/client/v3_workspace_id_stacks"
 	"github.com/hortonworks/cb-cli/cloudbreak/api/model"
-	"github.com/hortonworks/cb-cli/utils"
+	"github.com/hortonworks/cb-cli/dps-common/utils"
 )
 
 type status string

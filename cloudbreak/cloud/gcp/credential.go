@@ -4,7 +4,7 @@ import (
 	"encoding/base64"
 
 	fl "github.com/hortonworks/cb-cli/cloudbreak/flags"
-	"github.com/hortonworks/cb-cli/utils"
+	"github.com/hortonworks/cb-cli/dps-common/utils"
 )
 
 func (p *GcpProvider) GetCredentialParameters(stringFinder func(string) string) (map[string]interface{}, error) {

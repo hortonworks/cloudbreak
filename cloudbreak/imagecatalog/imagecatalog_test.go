@@ -9,7 +9,7 @@ import (
 	"github.com/hortonworks/cb-cli/cloudbreak/cloud"
 	_ "github.com/hortonworks/cb-cli/cloudbreak/cloud/aws"
 	"github.com/hortonworks/cb-cli/cloudbreak/types"
-	"github.com/hortonworks/cb-cli/utils"
+	"github.com/hortonworks/cb-cli/dps-common/utils"
 )
 
 type mockListImageCatalogsByWorkspaceClient struct {

@@ -76,6 +76,7 @@ test-regression() {
        --net=host \
        --name $TEST_CONTAINER_NAME \
        -v $(pwd)/aruba:/aruba \
+       -v $(pwd)/scripts/aruba-docker.sh:/entrypoint.sh \
        -v $(pwd)/responses:/responses \
        -v $(pwd)/requests:/requests \
        -v $(pwd)/../build/Linux:/usr/local/bin \

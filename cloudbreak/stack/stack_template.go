@@ -14,7 +14,7 @@ import (
 	"github.com/hortonworks/cb-cli/cloudbreak/cloud"
 	fl "github.com/hortonworks/cb-cli/cloudbreak/flags"
 	"github.com/hortonworks/cb-cli/cloudbreak/types"
-	"github.com/hortonworks/cb-cli/utils"
+	"github.com/hortonworks/cb-cli/dps-common/utils"
 	"github.com/urfave/cli"
 )
 
@@ -33,13 +33,13 @@ var maxCardinality = map[string]int{
 	"ALL": 3,
 }
 
-var getBlueprintClient = func(server, userName, password, authType string) blueprint.GetBlueprintInWorkspace {
-	cbClient := oauth.NewCloudbreakHTTPClient(server, userName, password, authType)
+var getBlueprintClient = func(server, refreshToken string) blueprint.GetBlueprintInWorkspace {
+	cbClient := oauth.NewCloudbreakHTTPClient(server, refreshToken)
 	return cbClient.Cloudbreak.V3WorkspaceIDBlueprints
 }
 
-var stackClient = func(server, userName, password, authType string) getStackInWorkspace {
-	cbClient := oauth.NewCloudbreakHTTPClient(server, userName, password, authType)
+var stackClient = func(server, refreshToken string) getStackInWorkspace {
+	cbClient := oauth.NewCloudbreakHTTPClient(server, refreshToken)
 	return cbClient.Cloudbreak.V3WorkspaceIDStacks
 }
 
@@ -119,7 +119,7 @@ func getStringPointer(skippedFields map[string]bool, fieldName string, defaultVa
 	return &defaultValue
 }
 
-func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string) string, boolFinder func(string) bool, int64Finder func(string) int64, getBlueprintClient func(string, string, string, string) blueprint.GetBlueprintInWorkspace, storageType cloud.CloudStorageType) *model.StackV2Request {
+func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string) string, boolFinder func(string) bool, int64Finder func(string) int64, getBlueprintClient func(string, string) blueprint.GetBlueprintInWorkspace, storageType cloud.CloudStorageType) *model.StackV2Request {
 	provider := cloud.GetProvider()
 	skippedFields := provider.SkippedFields()
 
@@ -147,7 +147,7 @@ func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string)
 	nodes := defaultNodes
 	if bpName := stringFinder(fl.FlBlueprintNameOptional.Name); len(bpName) != 0 {
 		workspace := int64Finder(fl.FlWorkspaceOptional.Name)
-		bpResp := blueprint.FetchBlueprint(workspace, bpName, getBlueprintClient(stringFinder(fl.FlServerOptional.Name), stringFinder(fl.FlUsername.Name), stringFinder(fl.FlPassword.Name), stringFinder(fl.FlAuthTypeOptional.Name)))
+		bpResp := blueprint.FetchBlueprint(workspace, bpName, getBlueprintClient(stringFinder(fl.FlServerOptional.Name), stringFinder(fl.FlRefreshTokenOptional.Name)))
 		bp, err := base64.StdEncoding.DecodeString(bpResp.AmbariBlueprint)
 		if err != nil {
 			utils.LogErrorAndExit(err)
@@ -170,7 +170,7 @@ func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string)
 }
 
 func generateAttachedTemplateImpl(stringFinder func(string) string, boolFinder func(string) bool, int64Finder func(string) int64, storageType cloud.CloudStorageType) error {
-	datalake := fetchStack(int64Finder(fl.FlWorkspaceOptional.Name), stringFinder(fl.FlWithSourceCluster.Name), stackClient(stringFinder(fl.FlServerOptional.Name), stringFinder(fl.FlUsername.Name), stringFinder(fl.FlPassword.Name), stringFinder(fl.FlAuthTypeOptional.Name)))
+	datalake := fetchStack(int64Finder(fl.FlWorkspaceOptional.Name), stringFinder(fl.FlWithSourceCluster.Name), stackClient(stringFinder(fl.FlServerOptional.Name), stringFinder(fl.FlRefreshTokenOptional.Name)))
 	isSharedServiceReady, _ := datalake.Cluster.Blueprint.Tags["shared_services_ready"].(bool)
 	if !isSharedServiceReady {
 		utils.LogErrorMessageAndExit("The source cluster must be a datalake")
@@ -462,7 +462,7 @@ func GenerateReinstallTemplate(c *cli.Context) {
 
 	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
 	stackName := c.String(fl.FlName.Name)
-	stackResp := fetchStack(workspaceID, stackName, stackClient(c.String(fl.FlServerOptional.Name), c.String(fl.FlUsername.Name), c.String(fl.FlPassword.Name), c.String(fl.FlAuthTypeOptional.Name)))
+	stackResp := fetchStack(workspaceID, stackName, stackClient(c.String(fl.FlServerOptional.Name), c.String(fl.FlRefreshTokenOptional.Name)))
 	provider, ok := cloud.CloudProviders[cloud.CloudType(stackResp.CloudPlatform)]
 	if !ok {
 		utils.LogErrorMessageAndExit("Not supported CloudProvider: " + stackResp.CloudPlatform)
@@ -470,7 +470,7 @@ func GenerateReinstallTemplate(c *cli.Context) {
 
 	bpName := c.String(fl.FlBlueprintNameOptional.Name)
 	workspace := c.Int64(fl.FlWorkspaceOptional.Name)
-	bpResp := blueprint.FetchBlueprint(workspace, bpName, getBlueprintClient(c.String(fl.FlServerOptional.Name), c.String(fl.FlUsername.Name), c.String(fl.FlPassword.Name), c.String(fl.FlAuthTypeOptional.Name)))
+	bpResp := blueprint.FetchBlueprint(workspace, bpName, getBlueprintClient(c.String(fl.FlServerOptional.Name), c.String(fl.FlRefreshTokenOptional.Name)))
 	bp, err := base64.StdEncoding.DecodeString(bpResp.AmbariBlueprint)
 	if err != nil {
 		utils.LogErrorAndExit(err)

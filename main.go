@@ -3,18 +3,19 @@ package main
 import (
 	"errors"
 	"fmt"
+	"os"
+	"sort"
+
 	log "github.com/Sirupsen/logrus"
 	cb "github.com/hortonworks/cb-cli/cloudbreak/cmd"
 	"github.com/hortonworks/cb-cli/cloudbreak/common"
 	fl "github.com/hortonworks/cb-cli/cloudbreak/flags"
 	"github.com/hortonworks/cb-cli/cmd"
+	"github.com/hortonworks/cb-cli/dps-common/utils"
 	"github.com/hortonworks/cb-cli/help"
 	"github.com/hortonworks/cb-cli/plugin"
-	"github.com/hortonworks/cb-cli/utils"
 	"github.com/urfave/cli"
 	"golang.org/x/crypto/ssh/terminal"
-	"os"
-	"sort"
 )
 
 func sortByName(commands []cli.Command) {

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/hortonworks/cb-cli/utils"
+	"github.com/hortonworks/cb-cli/dps-common/utils"
 	"github.com/urfave/cli"
 )
 
@@ -50,14 +50,6 @@ var (
 			EnvVar: "CB_PROFILE",
 		},
 	}
-	FlAuthTypeOptional = StringFlag{
-		RequiredFlag: OPTIONAL,
-		StringFlag: cli.StringFlag{
-			Name:   "auth-type",
-			Usage:  "authentication method to use, values: [oauth2, basic]",
-			EnvVar: "CB_AUTH_TYPE",
-		},
-	}
 	FlForceOptional = BoolFlag{
 		RequiredFlag: OPTIONAL,
 		BoolFlag: cli.BoolFlag{
@@ -79,30 +71,6 @@ var (
 			Name:   "server",
 			Usage:  "server address",
 			EnvVar: "CB_SERVER_ADDRESS",
-		},
-	}
-	FlUsername = StringFlag{
-		RequiredFlag: OPTIONAL,
-		StringFlag: cli.StringFlag{
-			Name:   "username",
-			Usage:  "user name (e-mail address)",
-			EnvVar: "CB_USER_NAME",
-		},
-	}
-	FlUsernameRequired = StringFlag{
-		RequiredFlag: REQUIRED,
-		StringFlag: cli.StringFlag{
-			Name:   "username",
-			Usage:  "user name (e-mail address)",
-			EnvVar: "CB_USER_NAME",
-		},
-	}
-	FlPassword = StringFlag{
-		RequiredFlag: OPTIONAL,
-		StringFlag: cli.StringFlag{
-			Name:   "password",
-			Usage:  "password",
-			EnvVar: "CB_PASSWORD",
 		},
 	}
 	FlName = StringFlag{
@@ -989,6 +957,13 @@ var (
 			Usage: "latitude of the environment's location. must be specified if the location is made-up and not supported on the cloud provider",
 		},
 	}
+	FlRefreshTokenOptional = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name:  "refreshtoken",
+			Usage: "caas refresh token",
+		},
+	}
 )
 
 type RequiredFlag struct {
@@ -1113,7 +1088,7 @@ func (fb *FlagBuilder) AddFlags(flags ...cli.Flag) *FlagBuilder {
 }
 
 func (fb *FlagBuilder) AddAuthenticationFlags() *FlagBuilder {
-	for _, f := range []cli.Flag{FlServerOptional, FlUsername, FlPassword, FlWorkspaceOptional, FlProfileOptional, FlAuthTypeOptional} {
+	for _, f := range []cli.Flag{FlServerOptional, FlWorkspaceOptional, FlProfileOptional, FlRefreshTokenOptional} {
 		fb.flags = append(fb.flags, f)
 	}
 	return fb
