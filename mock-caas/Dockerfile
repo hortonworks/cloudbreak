@@ -1,7 +1,15 @@
 FROM hortonworks/hwx_openjdk:10-jdk-slim
 MAINTAINER info@hortonworks.com
 
-# install the cloudbreak app
-COPY build/libs/mock-caas.jar /caas-mock/mock-caas.jar
+# REPO URL to download jar
+ARG REPO_URL=https://repo.hortonworks.com/content/repositories/releases
+ARG VERSION=''
 
-CMD java -jar /caas-mock/mock-caas.jar
+ENV VERSION ${VERSION}
+
+WORKDIR /
+
+# install the cloudbreak app
+ADD ${REPO_URL}/com/sequenceiq/mock-caas/$VERSION/mock-caas-$VERSION.jar /mock-caas.jar
+
+CMD java -jar /mock-caas.jar
