@@ -19,23 +19,32 @@ To see the available commands `cb -h`.
 NAME:
    Cloudbreak command line tool
 USAGE:
-   cb [global options] command [command options] [arguments...]
+   cb [global options] command [command options]
 
 VERSION:
-   snapshot-2017-11-28T14:44:42
+   snapshot-2018-11-19T19:59:11
 
 AUTHOR(S):
    Hortonworks
 
 COMMANDS:
-     blueprint   blueprint related operations
-     cloud       information about cloud provider resources
-     cluster     cluster related operations
-     configure   configure the server address and credentials used to communicate with this server
-     credential  credential related operations
-     ldap        ldap related operations
-     recipe      recipe related operations
-     help, h     Shows a list of commands or help for one command
+     audit         audit related operations
+     blueprint     blueprint related operations
+     cloud         information about cloud provider resources
+     cluster       cluster related operations
+     completion    prints the bash completion function
+     configure     configure the server address and credentials used to communicate with this server
+     credential    credential related operations
+     database      database management related operations
+     env           environment related operations
+     imagecatalog  imagecatalog related operations
+     ldap          ldap related operations
+     mpack         management pack related operations
+     proxy         proxy related operations
+     recipe        recipe related operations
+     user          user related operations
+     workspace     workspace related operations
+     help, h       Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
    --debug        debug mode [$DEBUG]
@@ -48,19 +57,19 @@ NAME:
    Cloudbreak command line tool
 
 USAGE:
-   Cloudbreak command line tool configure [command options] [arguments...]
+   Hortonworks Data Cloud command line tool configure [command options]
 
 DESCRIPTION:
-   it will save the provided server address and credential to ~/.cb/config
+   it will save the provided server address and credential to /Users/perdos/.cb/config
 
 REQUIRED OPTIONS:
-   --server value    server address [$CB_SERVER_ADDRESS]
-   --username value  user name (e-mail address) [$CB_USER_NAME]
+   --server value  server address [$CB_SERVER_ADDRESS]
 
 OPTIONS:
-   --password value  password [$CB_PASSWORD]
-   --profile value   selects a config profile to use [$CB_PROFILE]
-   --output value    supported formats: json, yaml, table (default: "json") [$CB_OUT_FORMAT]
+   --profile value       selects a config profile to use [$CB_PROFILE]
+   --workspace value     name of the workspace [$CB_WORKSPACE]
+   --refreshtoken value  caas refresh token
+   --output value        supported formats: json, yaml, table (default: "json") [$CB_OUT_FORMAT]
 ```
 
 ### Configure
@@ -69,12 +78,12 @@ A configuration entry contains the Cloudbreak server's address, the username and
 Multiple configuration profiles can be saved by specifying the `--profile` switch. The same switch can be used as a global flag to the other commands to use a specific profile.
 If the profile switch is omitted, the `default` profile is saved and used.
 ```
-cb configure --server https://ec2-52-29-224-64...compute.amazonaws.com --username your@email --password your-password --profile cloudbreak-staging
+cb configure --server https://ec2-52-29-224-64...compute.amazonaws.com --workspace your@email --profile cloudbreak-staging
 ```
 This will save the configuration into the user's home directory. To see its content: `cat ~/.cb/config`. If this config file is present you don't need to specify the connection flags anymore,
 otherwise you need to specify these flags to every command.
 ```
-cb cluster list --server https://ec2-52-29-224-64...compute.amazonaws.com --username your@email --password your-password
+cb cluster list --server https://ec2-52-29-224-64...compute.amazonaws.com --workspace your@email
 ```
 
 ### Create cluster

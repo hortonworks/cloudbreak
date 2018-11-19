@@ -19,7 +19,7 @@ fi
 token=$(curl -k $BASE_URL/oidc/authorize?username=$USERNAME_CLI\&tenant=hortonworks)
 
 echo "Configure CB CLI to Server: $BASE_URL User: $USERNAME_CLI"
-cb configure --server $BASE_URL --username $USERNAME_CLI --workspace $USERNAME_CLI
+cb configure --server $BASE_URL --workspace $USERNAME_CLI
 echo $token | cb cluster list
 
 echo "Running RSpec with "$CLI_TEST_FILES
