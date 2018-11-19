@@ -23,6 +23,7 @@ build-with-docker: download-cbd docker-build runtest
 
 download-jar-from-s3:
 	curl ${REPO_URL}/com/sequenceiq/cloudbreak/$(VERSION)/cloudbreak-$(VERSION).jar -o ../core/build/libs/cloudbreak.jar --create-dirs
+	curl ${REPO_URL}/com/sequenceiq/mock-caas/$(VERSION)/mock-caas-$(VERSION).jar -o ../mock-caas/build/libs/mock-caas.jar --create-dirs
 	curl ${REPO_URL}/com/sequenceiq/cloudbreak-integration-test/$(VERSION)/cloudbreak-integration-test-$(VERSION).jar -o ../integration-test/build/libs/cloudbreak-integration-test.jar --create-dirs
 
 download-cbd:
