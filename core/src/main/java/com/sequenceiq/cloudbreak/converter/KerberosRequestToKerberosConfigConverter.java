@@ -20,6 +20,7 @@ public class KerberosRequestToKerberosConfigConverter extends AbstractConversion
         kerberosConfig.setAdminUrl(Optional.ofNullable(source.getAdminUrl()).orElse(source.getUrl()));
         kerberosConfig.setRealm(source.getRealm());
         kerberosConfig.setTcpAllowed(source.getTcpAllowed());
+        kerberosConfig.setVerifyKdcTrust(source.getVerifyKdcTrust());
         kerberosConfig.setPrincipal(source.getPrincipal());
         kerberosConfig.setLdapUrl(source.getLdapUrl());
         kerberosConfig.setContainerDn(source.getContainerDn());

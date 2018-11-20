@@ -212,6 +212,7 @@ public class ClusterHostServiceRunner {
                 putIfNotNull(kerberosPillarConf, properties.get("admin_server_host"), "adminUrl");
                 putIfNotNull(kerberosPillarConf, properties.get("realm"), "realm");
             }
+            putIfNotNull(kerberosPillarConf, kerberosConfig.getVerifyKdcTrust().toString(), "verifyKdcTrust");
             putIfNotNull(kerberosPillarConf, cluster.getCloudbreakAmbariUser(), "clusterUser");
             putIfNotNull(kerberosPillarConf, cluster.getCloudbreakAmbariPassword(), "clusterPassword");
             servicePillar.put("kerberos", new SaltPillarProperties("/kerberos/init.sls", singletonMap("kerberos", kerberosPillarConf)));
