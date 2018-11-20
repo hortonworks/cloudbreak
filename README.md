@@ -60,7 +60,7 @@ USAGE:
    Hortonworks Data Cloud command line tool configure [command options]
 
 DESCRIPTION:
-   it will save the provided server address and credential to /Users/perdos/.cb/config
+   it will save the provided server address and credential to ~/.cb/config
 
 REQUIRED OPTIONS:
    --server value  server address [$CB_SERVER_ADDRESS]

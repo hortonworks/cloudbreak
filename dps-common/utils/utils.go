@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
@@ -27,6 +28,15 @@ func RandStr(n int) string {
 		b[i] = randbytes[rand.Intn(len(randbytes))]
 	}
 	return string(b)
+}
+
+func ConvertToURLAndEncode(urlString string) *url.URL {
+	u, err := url.Parse(urlString)
+	if err != nil {
+		LogErrorAndExit(err)
+	}
+	u.RawQuery = u.Query().Encode()
+	return u
 }
 
 func SafeInt32Convert(value *int32) int32 {

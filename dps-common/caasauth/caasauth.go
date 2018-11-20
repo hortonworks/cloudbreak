@@ -96,16 +96,8 @@ func NewCaasTransport(address, baseApiPath string) (*Transport, *TokenResponse) 
 	address, basePath := cutAndTrimAddress(address)
 
 	caasPath := fmt.Sprintf("https://%[1]s/oidc/authorize?scope=openid dps offline_access&response_type=code&client_id=6eda2bf3-95ce-499b-8e27-1c19c93bae12&redirect_uri=https://%[1]s/caas/cli&state=random-state&nonce=random-nonce", address+basePath)
-	u, e := url.Parse(caasPath)
-	if e != nil {
-		utils.LogErrorAndExit(e)
-	}
-	u.RawQuery = u.Query().Encode()
 	reader := bufio.NewReader(os.Stdin)
-	fmt.Println()
-	fmt.Println(u)
-	fmt.Println()
-	fmt.Print("Enter security code: ")
+	printLink(utils.ConvertToURLAndEncode(caasPath))
 	deviceCode, _ := reader.ReadString('\n')
 	deviceCode = strings.TrimSuffix(deviceCode, "\n")
 	tokenReq := newTokenRequest(deviceCode)
@@ -121,13 +113,19 @@ func NewCaasTransport(address, baseApiPath string) (*Transport, *TokenResponse) 
 	return cbTransport, tokens
 }
 
+func printLink(url *url.URL) {
+	fmt.Println()
+	fmt.Println(url)
+	fmt.Println()
+	fmt.Print("Enter security code: ")
+}
+
 func getCaasToken(identityUrl string, tokenReq interface{}) (*TokenResponse, error) {
 	reqBody, _ := json.Marshal(tokenReq)
 	req, err := http.NewRequest("POST", identityUrl, bytes.NewReader(reqBody))
 	if err != nil {
 		return nil, err
 	}
-	//req.Header.Add("Accept", "application/json")
 	req.Header.Add("Content-Type", "application/json")
 
 	c := &http.Client{
@@ -148,8 +146,14 @@ func getCaasToken(identityUrl string, tokenReq interface{}) (*TokenResponse, err
 	}
 
 	var tokenResp TokenResponse
-	body, _ := ioutil.ReadAll(resp.Body)
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
 	err = json.Unmarshal(body, &tokenResp)
+	if err != nil {
+		return nil, err
+	}
 
 	return &tokenResp, nil
 }
@@ -220,7 +224,7 @@ func (r *noContentSafeResponseReader) ReadResponse(response runtime.ClientRespon
 			return nil, &utils.RESTError{Response: errorMessage.String(), Code: response.Code()}
 		}
 	}
-	return resp, nil
+	return resp, err
 }
 
 type httpLogger struct {
