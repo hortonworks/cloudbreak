@@ -14,4 +14,6 @@ public interface SecretEngine {
     boolean isSecret(String secret);
 
     SecretResponse convertToExternal(String secret);
+
+    String scarifySecret(String secret);
 }

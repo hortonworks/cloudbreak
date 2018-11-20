@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.service.secret.vault;
 
 import java.util.Objects;
+import java.util.Optional;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.google.gson.Gson;
@@ -11,10 +14,23 @@ abstract class AbstractVautEngine<E> implements SecretEngine {
 
     private final Gson gson = new Gson();
 
+    private final Pattern uniqueId = Pattern.compile("(.*)/[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}-[a-fA-F0-9]{3,20}");
+
     @Override
     public boolean isSecret(String secret) {
         VaultSecret vaultSecret = convertToVaultSecret(secret);
         return vaultSecret != null && vaultSecret.getEngineClass().equals(clazz().getCanonicalName());
+    }
+
+    @Override
+    public String scarifySecret(String secret) {
+        VaultSecret vaultSecret = convertToVaultSecret(secret);
+        int cut = uniqueId.matcher(vaultSecret.getPath()).matches() ? 1 : 0;
+        return Optional.ofNullable(vaultSecret)
+                .map(s -> s.getPath().split("/"))
+                .map(ss -> Stream.of(ss).limit(ss.length - cut))
+                .map(st -> st.collect(Collectors.joining(".")))
+                .orElse(null);
     }
 
     protected VaultSecret convertToVaultSecret(String enginePath, String fullPath) {
