@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 
-@Service
+@Service("RestRequestThreadLocalService")
 public class AutoscaleRestRequestThreadLocalService implements RestRequestThreadLocalService {
 
     private static final ThreadLocal<CloudbreakUser> CLOUDBREAK_USER = new ThreadLocal<>();
