@@ -95,6 +95,10 @@ public class KerberosConfig implements ProvisionEntity {
         return masterKey.getRaw();
     }
 
+    public String getMasterKeySecret() {
+        return masterKey.getSecret();
+    }
+
     public void setMasterKey(String masterKey) {
         this.masterKey = new Secret(masterKey);
     }
@@ -103,12 +107,20 @@ public class KerberosConfig implements ProvisionEntity {
         return admin.getRaw();
     }
 
+    public String getAdminSecret() {
+        return admin.getSecret();
+    }
+
     public void setAdmin(String admin) {
         this.admin = new Secret(admin);
     }
 
     public String getPassword() {
         return password.getRaw();
+    }
+
+    public String getPasswordSecret() {
+        return password.getSecret();
     }
 
     public void setPassword(String password) {
@@ -151,6 +163,10 @@ public class KerberosConfig implements ProvisionEntity {
         return principal.getRaw();
     }
 
+    public String getPrincipalSecret() {
+        return principal.getSecret();
+    }
+
     public void setPrincipal(String principal) {
         this.principal = new Secret(principal);
     }
@@ -175,12 +191,20 @@ public class KerberosConfig implements ProvisionEntity {
         return descriptor.getRaw();
     }
 
+    public String getDescriptorSecret() {
+        return descriptor.getSecret();
+    }
+
     public void setDescriptor(String descriptor) {
         this.descriptor = new Secret(descriptor);
     }
 
     public String getKrb5Conf() {
         return krb5Conf.getRaw();
+    }
+
+    public String getKrb5ConfSecret() {
+        return krb5Conf.getSecret();
     }
 
     public void setKrb5Conf(String krb5Conf) {

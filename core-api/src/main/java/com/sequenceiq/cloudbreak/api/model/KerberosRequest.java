@@ -45,10 +45,12 @@ public class KerberosRequest extends KerberosBase {
 
     @RequiredKerberosField(types = CUSTOM)
     @ValidKerberosDescriptor
+    @ApiModelProperty(StackModelDescription.DESCRIPTOR)
     private String descriptor;
 
     @RequiredKerberosField(types = CUSTOM)
     @ValidJson(message = "The krb5 configuration must be a valid JSON")
+    @ApiModelProperty(StackModelDescription.KRB_5_CONF)
     private String krb5Conf;
 
     public String getMasterKey() {
