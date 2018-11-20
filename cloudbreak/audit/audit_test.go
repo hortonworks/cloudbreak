@@ -21,7 +21,6 @@ func (*mockAuditClient) GetAuditEventsInWorkspace(params *v3_workspace_id_audits
 			AuditID:  1,
 			Duration: 2,
 			Operation: &model.OperationDetails{
-				Account:           "seq1234567",
 				CloudbreakVersion: "2.8.0-rc.3-1-ge4975d5",
 				EventType:         "REST",
 				ResourceID:        1378,
@@ -43,7 +42,6 @@ func (*mockAuditClient) GetAuditEventByWorkspace(params *v3_workspace_id_audits.
 		AuditID:  1,
 		Duration: 2,
 		Operation: &model.OperationDetails{
-			Account:           "seq1234567",
 			CloudbreakVersion: "2.8.0-rc.3-1-ge4975d5",
 			EventType:         "REST",
 			ResourceID:        1378,
