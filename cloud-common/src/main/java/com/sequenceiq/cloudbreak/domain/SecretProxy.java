@@ -14,6 +14,6 @@ public class SecretProxy extends Secret {
     }
 
     public String getRaw() {
-        return secretService.get(super.getSecret());
+        return secretService.get(getSecret());
     }
 }

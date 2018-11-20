@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.secret;
 import java.security.InvalidKeyException;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -62,6 +63,7 @@ public class SecretService {
         duration = System.currentTimeMillis() - start;
         metricService.submit(MetricType.VAULT_WRITE, duration);
         LOGGER.debug("Secret write took {} ms", duration);
+        metricService.incrementMetricCounter(() -> "secret.write." + convertSecretToMetric(secret));
         return secret;
     }
 
@@ -76,10 +78,9 @@ public class SecretService {
         if (secret == null) {
             return null;
         }
+        metricService.incrementMetricCounter(() -> "secret.read." + convertSecretToMetric(secret));
         long start = System.currentTimeMillis();
-        String response = engines.stream()
-                .filter(e -> e.isSecret(secret))
-                .findFirst()
+        String response = getFirstEngineStream(secret)
                 .map(e -> e.get(secret))
                 .filter(Objects::nonNull)
                 .orElse(null);
@@ -89,12 +90,19 @@ public class SecretService {
         return "null".equals(response) ? null : response;
     }
 
+    private Optional<SecretEngine> getFirstEngineStream(String secret) {
+        return engines.stream()
+                .filter(e -> e.isSecret(secret))
+                .findFirst();
+    }
+
     /**
      * Deletes a secret from Secrets's store.
      *
      * @param secret Key-value secret in Secret
      */
     public void delete(String secret) {
+        metricService.incrementMetricCounter(() -> "secret.delete." + convertSecretToMetric(secret));
         long start = System.currentTimeMillis();
         engines.stream()
                 .filter(e -> e.isSecret(secret))
@@ -120,10 +128,14 @@ public class SecretService {
      * @return public external secret JSON
      */
     public SecretResponse convertToExternal(String secret) {
-        return engines.stream()
-                .filter(e -> e.isSecret(secret))
-                .findFirst()
+        return getFirstEngineStream(secret)
                 .map(e -> e.convertToExternal(secret))
+                .orElse(null);
+    }
+
+    private String convertSecretToMetric(String secret) {
+        return getFirstEngineStream(secret)
+                .map(e -> e.scarifySecret(secret))
                 .orElse(null);
     }
 }
