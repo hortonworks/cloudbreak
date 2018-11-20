@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.domain.SecretProxy;
 import com.sequenceiq.cloudbreak.domain.workspace.Tenant;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
+import com.sequenceiq.cloudbreak.service.Clock;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.secret.SecretService;
 
@@ -33,6 +34,9 @@ public class SecretAspects {
 
     @Inject
     private SecretService secretService;
+
+    @Inject
+    private Clock clock;
 
     @Pointcut("execution(public * com.sequenceiq.cloudbreak.repository..*.save(..)) ")
     public void onRepositorySave() {
@@ -84,7 +88,7 @@ public class SecretAspects {
                         if (value != null && value.getRaw() != null && value.getSecret() == null) {
                             String path = String.format("%s/%s/%s/%s-%s", tenant,
                                     entity.getClass().getSimpleName().toLowerCase(), field.getName().toLowerCase(),
-                                    UUID.randomUUID().toString(), Integer.toHexString(entity.hashCode()));
+                                    UUID.randomUUID().toString(), Long.toHexString(clock.getCurrentTime()));
                             String secret = secretService.put(path, value.getRaw());
                             LOGGER.debug("Field: '{}' is saved at path: {}", field.getName(), path);
                             field.set(entity, new SecretProxy(secretService, secret));
