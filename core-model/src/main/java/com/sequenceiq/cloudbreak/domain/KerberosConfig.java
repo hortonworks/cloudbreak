@@ -72,6 +72,9 @@ public class KerberosConfig implements ProvisionEntity {
     @SecretValue
     private Secret krb5Conf = Secret.EMPTY;
 
+    @Column(name = "verifykdctrust")
+    private Boolean verifyKdcTrust;
+
     public Long getId() {
         return id;
     }
@@ -182,5 +185,13 @@ public class KerberosConfig implements ProvisionEntity {
 
     public void setKrb5Conf(String krb5Conf) {
         this.krb5Conf = new Secret(krb5Conf);
+    }
+
+    public void setVerifyKdcTrust(Boolean verifyKdcTrust) {
+        this.verifyKdcTrust = verifyKdcTrust;
+    }
+
+    public Boolean getVerifyKdcTrust() {
+        return verifyKdcTrust;
     }
 }

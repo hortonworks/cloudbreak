@@ -192,6 +192,8 @@ public class ModelDescriptions {
         public static final String PLACEMENT_SETTINGS = "placement configuration parameters for a cluster (e.g. 'region', 'availabilityZone')";
         public static final String SHARED_SERVICE_REQUEST = "Shared service request";
         public static final String ENVIRONMENT = "environment which the stack is assigned to";
+        public static final String KERBEROS_KDC_VERIFY_KDC_TRUST = "Allows to select either a trusting SSL connection or a "
+                + "validating (non-trusting) SSL connection to KDC";
     }
 
     public static class ClusterModelDescription {

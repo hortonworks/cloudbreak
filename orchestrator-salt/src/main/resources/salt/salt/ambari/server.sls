@@ -21,6 +21,11 @@ provision_action_based_on_real_dependencies:
     - text: server.stage.command.execution_type=DEPENDENCY_ORDERED
     - unless: grep "server.stage.command.execution_type" /etc/ambari-server/conf/ambari.properties
 
+add_kerberos_verify_kdc_trust:
+  file.append:
+    - name: /etc/ambari-server/conf/ambari.properties
+    - text: kerberos.operation.verify.kdc.trust={{ salt['pillar.get']('kerberos:verifyKdcTrust') }}
+
 {% if ambari.ambari_database.ambariVendor == 'mysql' %}
 
 {% if grains['os'] == 'Amazon' or ( grains['os_family'] == 'RedHat' and grains['osmajorrelease'] | int == 6 )  %}

@@ -50,6 +50,9 @@ public abstract class KerberosBase implements JsonEntity {
     @NotNull
     private KerberosType type;
 
+    @ApiModelProperty(StackModelDescription.KERBEROS_KDC_VERIFY_KDC_TRUST)
+    private Boolean verifyKdcTrust = true;
+
     public KerberosType getType() {
         return type;
     }
@@ -114,4 +117,11 @@ public abstract class KerberosBase implements JsonEntity {
         this.tcpAllowed = tcpAllowed;
     }
 
+    public Boolean getVerifyKdcTrust() {
+        return verifyKdcTrust;
+    }
+
+    public void setVerifyKdcTrust(Boolean verifyKdcTrust) {
+        this.verifyKdcTrust = verifyKdcTrust;
+    }
 }

@@ -31,7 +31,10 @@ public class KerberosView {
 
     private final String krb5Conf;
 
-    public KerberosView(KerberosConfig kerberosConfig, String masterKey, String admin, String password, String principal, String descriptor, String krb5Conf) {
+    private final Boolean verifyKdcTrust;
+
+    public KerberosView(KerberosConfig kerberosConfig, String masterKey, String admin, String password,
+            String principal, String descriptor, String krb5Conf, Boolean verifyKdcTrust) {
         this.masterKey = masterKey;
         this.admin = admin;
         this.password = password;
@@ -45,6 +48,7 @@ public class KerberosView {
         tcpAllowed = kerberosConfig.isTcpAllowed();
         ldapUrl = kerberosConfig.getLdapUrl();
         containerDn = kerberosConfig.getContainerDn();
+        this.verifyKdcTrust = verifyKdcTrust;
     }
 
     public KerberosType getType() {
@@ -97,5 +101,9 @@ public class KerberosView {
 
     public String getKrb5Conf() {
         return krb5Conf;
+    }
+
+    public Boolean getVerifyKdcTrust() {
+        return verifyKdcTrust;
     }
 }
