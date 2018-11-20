@@ -1,11 +1,9 @@
 package com.sequenceiq.cloudbreak.api.model;
 
-import static com.sequenceiq.cloudbreak.type.KerberosType.CB_MANAGED;
 import static com.sequenceiq.cloudbreak.type.KerberosType.EXISTING_AD;
 import static com.sequenceiq.cloudbreak.type.KerberosType.EXISTING_MIT;
 
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -21,11 +19,6 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public abstract class KerberosBase implements JsonEntity {
-
-    @RequiredKerberosField(types = CB_MANAGED)
-    @ApiModelProperty(StackModelDescription.KERBEROS_ADMIN)
-    @Size(max = 15, min = 5, message = "The length of the Kerberos admin has to be in range of 5 to 15")
-    private String admin;
 
     @RequiredKerberosField(types = {EXISTING_AD, EXISTING_MIT})
     @ApiModelProperty(StackModelDescription.KERBEROS_KDC_URL)
@@ -56,14 +49,6 @@ public abstract class KerberosBase implements JsonEntity {
 
     public void setType(KerberosType type) {
         this.type = type;
-    }
-
-    public String getAdmin() {
-        return admin;
-    }
-
-    public void setAdmin(String admin) {
-        this.admin = admin;
     }
 
     public String getUrl() {

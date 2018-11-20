@@ -132,6 +132,8 @@ public class ModelDescriptions {
         public static final String KERBEROS_KDC_URL = "kerberos KDC server URL";
         public static final String KERBEROS_ADMIN_URL = "kerberos admin server URL";
         public static final String KERBEROS_PRINCIPAL = "kerberos principal";
+        public static final String DESCRIPTOR = "Ambari kerberos descriptor";
+        public static final String KRB_5_CONF = "Ambari kerberos krb5.conf template";
         public static final String PARAMETERS = "additional cloud specific parameters for stack";
         public static final String INPUTS = "dynamic properties";
         public static final String FAILURE_ACTION = "action on failure";
