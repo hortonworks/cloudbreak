@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.client;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class IntrospectResponse {
@@ -9,7 +10,8 @@ public class IntrospectResponse {
 
     private String sub;
 
-    private String aud;
+    @JsonProperty("tenant_name")
+    private String tenantName;
 
     private String iss;
 
@@ -31,12 +33,12 @@ public class IntrospectResponse {
         this.sub = sub;
     }
 
-    public String getAud() {
-        return aud;
+    public String getTenantName() {
+        return tenantName;
     }
 
-    public void setAud(String aud) {
-        this.aud = aud;
+    public void setTenantName(String tenantName) {
+        this.tenantName = tenantName;
     }
 
     public String getIss() {
