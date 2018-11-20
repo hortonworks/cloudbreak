@@ -68,6 +68,10 @@ stackOperationResponses = addResponseObject(stackOperationResponses,null, OK , "
 var stackReinstallResponses = responseObjectWithCondition({"message":"Stack 'aaaaa' not found"}, 404, "return params['name'].value === 'aaaaa';");
 stackReinstallResponses = addResponseObject(stackReinstallResponses,null, OK , "return params['name'].value !== 'aaaaa';");
 
+def stripArray(s)
+  s[1,s.length-2]
+end
+
 responses.getCloudbreakInfo= responseObject({ "app": { "name":"cloudbreak", "version":"MOCK" } }, OK);
 responses.getCloudbreakHealth= responseObject({ "status":"UP" }, OK);
 responses.getAccountPreferencesEndpoint= responseObject(acc, OK);
@@ -105,7 +109,7 @@ responses.postPrivateImageCatalog= responseObject(defimagec, OK);
 responses.getImageCatalogRequestFromName= responseObject(defimagec, OK);
 responses.listLdapsByWorkspace = responseObject(ldap, OK);
 responses.getLdapConfigInWorkspace = responseObject(ldap, OK);
-responses.createLdapConfigsInWorkspace = responseObject(ldap, OK);
+responses.createLdapConfigsInWorkspace = responseObject(strinpArray(ldap), OK);
 responses.postLdapConnectionTestInWorkspace = responseObject({ "connectionResult":"Failed to connect to LDAP server: hwxad-1a2bcd3e45678f90.elb.eu-west-1.amazonaws.com:123" }, OK);
 responses.getPrivatesLdap= responseObject(ldap, OK);
 responses.postPrivateLdap= responseObject(ldap, OK);
@@ -113,7 +117,7 @@ responses.getPrivateLdap= responseObject(ldap, OK);
 responses.getLdap= responseObject(ldap, OK);
 responses.listProxyconfigsByWorkspace = responseObject(proxy, OK);
 responses.getProxyconfigInWorkspace = responseObject(proxy, OK);
-responses.createProxyconfigInWorkspace = responseObject(proxy, OK);
+responses.createProxyconfigInWorkspace = responseObject(stripArray(proxy), OK);
 responses.getPrivatesProxyConfig= responseObject(proxy, OK);
 responses.postPrivateProxyConfig= responseObject(proxy, OK);
 responses.getPrivateProxyConfig= responseObject(proxy, OK);
@@ -146,7 +150,7 @@ responses.postPrivateStackV2= responseObject(openstack, OK);
 responses.getPrivateStackV2= responseObject(openstack, OK);
 responses.getStackV2= responseObject(openstack, OK);
 responses.getPlatformSecurityGroups= responseObject(securitygroups, OK);
-responses.createManagementPackInWorkspace = responseObject(mpacks, OK);
+responses.createManagementPackInWorkspace = responseObject(stripArray(mpacks), OK);
 responses.postPrivateManagementPack = responseObject(mpacks, OK);
 responses.getWorkspaces = responseObject(workspaces, OK);
 responses.listEnvironment = responseObject(environments, OK)
