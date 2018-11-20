@@ -1,0 +1,10 @@
+{
+ "name":"aaaaa",
+ "description":"",
+ "mpackUrl":"http://testonly",
+ "purge":false,
+ "purgeList":[],
+ "force":false,
+ "id":63,
+ "public":false
+}

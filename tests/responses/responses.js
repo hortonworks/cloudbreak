@@ -20,8 +20,10 @@ var cbdefimagec = require('./imagecatalogs/cloudbreak-default.json');
 var defimagec = require('./imagecatalogs/default-imagecatalog.json');
 var qaimages = require('./imagecatalogs/qa-images.json');
 var ldap = require('./ldapconfig/default-ldap.json');
+var ldapSingle = require('./ldapconfig/default-single-ldap.json');
 var networks = require('./networks/networks.json');
 var proxy = require('./proxyconfig/default-proxy.json');
+var proxySingle = require('./proxyconfig/default-single-proxy.json');
 var rds = require('./rdsconfig/default-rds.json');
 var rdsSingle = require('./rdsconfig/default-single-rds.json');
 var recipes = require('./recipes/recipes.json');
@@ -39,6 +41,7 @@ var templates = require('./templates/qa-templates.json');
 var profile = require('./users/default-profile.json');
 var matrix = require('./utilsmatrix.json');
 var mpacks = require('./mpacks/mpacks.json');
+var mpacksSingle = require('./mpacks/mpacks-single.json');
 var workspaces = require('./workspaces/workspaces.json');
 var environments = require('./environment/envs.json');
 
@@ -67,10 +70,6 @@ stackOperationResponses = addResponseObject(stackOperationResponses,null, OK , "
 
 var stackReinstallResponses = responseObjectWithCondition({"message":"Stack 'aaaaa' not found"}, 404, "return params['name'].value === 'aaaaa';");
 stackReinstallResponses = addResponseObject(stackReinstallResponses,null, OK , "return params['name'].value !== 'aaaaa';");
-
-def stripArray(s)
-  s[1,s.length-2]
-end
 
 responses.getCloudbreakInfo= responseObject({ "app": { "name":"cloudbreak", "version":"MOCK" } }, OK);
 responses.getCloudbreakHealth= responseObject({ "status":"UP" }, OK);
@@ -109,7 +108,7 @@ responses.postPrivateImageCatalog= responseObject(defimagec, OK);
 responses.getImageCatalogRequestFromName= responseObject(defimagec, OK);
 responses.listLdapsByWorkspace = responseObject(ldap, OK);
 responses.getLdapConfigInWorkspace = responseObject(ldap, OK);
-responses.createLdapConfigsInWorkspace = responseObject(strinpArray(ldap), OK);
+responses.createLdapConfigsInWorkspace = responseObject((ldapSingle, OK);
 responses.postLdapConnectionTestInWorkspace = responseObject({ "connectionResult":"Failed to connect to LDAP server: hwxad-1a2bcd3e45678f90.elb.eu-west-1.amazonaws.com:123" }, OK);
 responses.getPrivatesLdap= responseObject(ldap, OK);
 responses.postPrivateLdap= responseObject(ldap, OK);
@@ -117,7 +116,7 @@ responses.getPrivateLdap= responseObject(ldap, OK);
 responses.getLdap= responseObject(ldap, OK);
 responses.listProxyconfigsByWorkspace = responseObject(proxy, OK);
 responses.getProxyconfigInWorkspace = responseObject(proxy, OK);
-responses.createProxyconfigInWorkspace = responseObject(stripArray(proxy), OK);
+responses.createProxyconfigInWorkspace = responseObject(proxySingle, OK);
 responses.getPrivatesProxyConfig= responseObject(proxy, OK);
 responses.postPrivateProxyConfig= responseObject(proxy, OK);
 responses.getPrivateProxyConfig= responseObject(proxy, OK);
@@ -150,7 +149,7 @@ responses.postPrivateStackV2= responseObject(openstack, OK);
 responses.getPrivateStackV2= responseObject(openstack, OK);
 responses.getStackV2= responseObject(openstack, OK);
 responses.getPlatformSecurityGroups= responseObject(securitygroups, OK);
-responses.createManagementPackInWorkspace = responseObject(stripArray(mpacks), OK);
+responses.createManagementPackInWorkspace = responseObject(mpacksSingle, OK);
 responses.postPrivateManagementPack = responseObject(mpacks, OK);
 responses.getWorkspaces = responseObject(workspaces, OK);
 responses.listEnvironment = responseObject(environments, OK)
