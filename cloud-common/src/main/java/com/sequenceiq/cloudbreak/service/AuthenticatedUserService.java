@@ -44,12 +44,13 @@ public class AuthenticatedUserService {
         String tenant = "DEFAULT";
         try {
             Map<String, Object> claims = JsonUtil.readValue(decodedJwt.getClaims(), new MapTypeReference());
-            if (claims.get("aud") != null) {
-                tenant = claims.get("aud").toString();
+            if (claims.get("tenant_name") != null) {
+                tenant = claims.get("tenant_name").toString();
             }
         } catch (IOException e) {
             LOGGER.warn("can not get claims from token", e);
         }
+        LOGGER.debug("tenant_name claim from jwt token: {}", tenant);
         return tenant;
     }
 
