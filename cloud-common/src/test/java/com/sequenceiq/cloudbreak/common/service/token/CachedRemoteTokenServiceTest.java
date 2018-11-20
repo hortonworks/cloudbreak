@@ -42,7 +42,7 @@ public class CachedRemoteTokenServiceTest {
     @Test
     public void testLoadAuthenticationWithoutAudience() throws IOException {
         thrown.expect(InvalidTokenException.class);
-        thrown.expectMessage("No 'aud' claim in token");
+        thrown.expectMessage("No 'tenant_name' claim in token");
         CachedRemoteTokenService tokenService = new CachedRemoteTokenService("clientId", "clientSecret", "http://localhost:8089", caasClient, identityClient);
         tokenService.loadAuthentication(token);
     }
@@ -54,7 +54,7 @@ public class CachedRemoteTokenServiceTest {
         when(caasClient.getUserInfo(anyString())).thenReturn(caasUser);
         IntrospectResponse introspectResponse = new IntrospectResponse();
         introspectResponse.setActive(true);
-        introspectResponse.setAud("tenant");
+        introspectResponse.setTenantName("tenant");
         introspectResponse.setSub("admin@example.com");
         introspectResponse.setExp(System.currentTimeMillis() + 10000);
         when(caasClient.introSpect(anyString())).thenReturn(introspectResponse);
@@ -72,7 +72,7 @@ public class CachedRemoteTokenServiceTest {
         thrown.expectMessage("The specified JWT token is not active");
         IntrospectResponse introspectResponse = new IntrospectResponse();
         introspectResponse.setActive(false);
-        introspectResponse.setAud("tenant");
+        introspectResponse.setTenantName("tenant");
         introspectResponse.setSub("admin@example.com");
         introspectResponse.setExp(System.currentTimeMillis() + 10000);
         when(caasClient.introSpect(anyString())).thenReturn(introspectResponse);
