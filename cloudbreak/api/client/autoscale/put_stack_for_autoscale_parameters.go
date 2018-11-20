@@ -69,8 +69,8 @@ type PutStackForAutoscaleParams struct {
 	Body *model.UpdateStack
 	/*ID*/
 	ID int64
-	/*Owner*/
-	Owner string
+	/*UserID*/
+	UserID string
 
 	timeout    time.Duration
 	Context    context.Context
@@ -132,15 +132,15 @@ func (o *PutStackForAutoscaleParams) SetID(id int64) {
 	o.ID = id
 }
 
-// WithOwner adds the owner to the put stack for autoscale params
-func (o *PutStackForAutoscaleParams) WithOwner(owner string) *PutStackForAutoscaleParams {
-	o.SetOwner(owner)
+// WithUserID adds the userID to the put stack for autoscale params
+func (o *PutStackForAutoscaleParams) WithUserID(userID string) *PutStackForAutoscaleParams {
+	o.SetUserID(userID)
 	return o
 }
 
-// SetOwner adds the owner to the put stack for autoscale params
-func (o *PutStackForAutoscaleParams) SetOwner(owner string) {
-	o.Owner = owner
+// SetUserID adds the userId to the put stack for autoscale params
+func (o *PutStackForAutoscaleParams) SetUserID(userID string) {
+	o.UserID = userID
 }
 
 // WriteToRequest writes these params to a swagger request
@@ -164,8 +164,8 @@ func (o *PutStackForAutoscaleParams) WriteToRequest(r runtime.ClientRequest, reg
 		return err
 	}
 
-	// path param owner
-	if err := r.SetPathParam("owner", o.Owner); err != nil {
+	// path param userId
+	if err := r.SetPathParam("userId", o.UserID); err != nil {
 		return err
 	}
 

@@ -51,9 +51,6 @@ type StackViewResponse struct {
 	// node count of the stack
 	NodeCount int32 `json:"nodeCount,omitempty"`
 
-	// id of the resource owner that is provided by OAuth provider
-	Owner string `json:"owner,omitempty"`
-
 	// additional cloud specific parameters for stack
 	Parameters map[string]string `json:"parameters,omitempty"`
 
@@ -86,8 +83,6 @@ type StackViewResponse struct {
 /* polymorph StackViewResponse name false */
 
 /* polymorph StackViewResponse nodeCount false */
-
-/* polymorph StackViewResponse owner false */
 
 /* polymorph StackViewResponse parameters false */
 

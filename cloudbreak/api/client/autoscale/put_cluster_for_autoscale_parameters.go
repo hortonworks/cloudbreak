@@ -69,8 +69,8 @@ type PutClusterForAutoscaleParams struct {
 	Body *model.UpdateCluster
 	/*ID*/
 	ID int64
-	/*Owner*/
-	Owner string
+	/*UserID*/
+	UserID string
 
 	timeout    time.Duration
 	Context    context.Context
@@ -132,15 +132,15 @@ func (o *PutClusterForAutoscaleParams) SetID(id int64) {
 	o.ID = id
 }
 
-// WithOwner adds the owner to the put cluster for autoscale params
-func (o *PutClusterForAutoscaleParams) WithOwner(owner string) *PutClusterForAutoscaleParams {
-	o.SetOwner(owner)
+// WithUserID adds the userID to the put cluster for autoscale params
+func (o *PutClusterForAutoscaleParams) WithUserID(userID string) *PutClusterForAutoscaleParams {
+	o.SetUserID(userID)
 	return o
 }
 
-// SetOwner adds the owner to the put cluster for autoscale params
-func (o *PutClusterForAutoscaleParams) SetOwner(owner string) {
-	o.Owner = owner
+// SetUserID adds the userId to the put cluster for autoscale params
+func (o *PutClusterForAutoscaleParams) SetUserID(userID string) {
+	o.UserID = userID
 }
 
 // WriteToRequest writes these params to a swagger request
@@ -164,8 +164,8 @@ func (o *PutClusterForAutoscaleParams) WriteToRequest(r runtime.ClientRequest, r
 		return err
 	}
 
-	// path param owner
-	if err := r.SetPathParam("owner", o.Owner); err != nil {
+	// path param userId
+	if err := r.SetPathParam("userId", o.UserID); err != nil {
 		return err
 	}
 

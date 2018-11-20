@@ -17,9 +17,6 @@ import (
 
 type CloudbreakUsage struct {
 
-	// account id of the resource owner that is provided by OAuth provider
-	Account string `json:"account,omitempty"`
-
 	// availability zone of the stack
 	AvailabilityZone string `json:"availabilityZone,omitempty"`
 
@@ -53,9 +50,6 @@ type CloudbreakUsage struct {
 	// type of instance
 	InstanceType string `json:"instanceType,omitempty"`
 
-	// id of the resource owner that is provided by OAuth provider
-	Owner string `json:"owner,omitempty"`
-
 	// maximum number of instances running
 	Peak int32 `json:"peak,omitempty"`
 
@@ -78,8 +72,6 @@ type CloudbreakUsage struct {
 	Username string `json:"username,omitempty"`
 }
 
-/* polymorph CloudbreakUsage account false */
-
 /* polymorph CloudbreakUsage availabilityZone false */
 
 /* polymorph CloudbreakUsage blueprintId false */
@@ -101,8 +93,6 @@ type CloudbreakUsage struct {
 /* polymorph CloudbreakUsage instanceNum false */
 
 /* polymorph CloudbreakUsage instanceType false */
-
-/* polymorph CloudbreakUsage owner false */
 
 /* polymorph CloudbreakUsage peak false */
 

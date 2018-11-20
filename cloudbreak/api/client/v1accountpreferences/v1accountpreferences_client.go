@@ -114,66 +114,6 @@ func (a *Client) PlatformEnablement(params *PlatformEnablementParams) (*Platform
 
 }
 
-/*
-PostAccountPreferencesEndpoint posts account preferences of admin user
-
-Account related preferences that could be managed by the account admins and different restrictions could be added to Cloudbreak resources.
-*/
-func (a *Client) PostAccountPreferencesEndpoint(params *PostAccountPreferencesEndpointParams) (*PostAccountPreferencesEndpointOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewPostAccountPreferencesEndpointParams()
-	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "postAccountPreferencesEndpoint",
-		Method:             "POST",
-		PathPattern:        "/v1/accountpreferences",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &PostAccountPreferencesEndpointReader{formats: a.formats},
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*PostAccountPreferencesEndpointOK), nil
-
-}
-
-/*
-PutAccountPreferencesEndpoint updates account preferences of admin user
-
-Account related preferences that could be managed by the account admins and different restrictions could be added to Cloudbreak resources.
-*/
-func (a *Client) PutAccountPreferencesEndpoint(params *PutAccountPreferencesEndpointParams) (*PutAccountPreferencesEndpointOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewPutAccountPreferencesEndpointParams()
-	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "putAccountPreferencesEndpoint",
-		Method:             "PUT",
-		PathPattern:        "/v1/accountpreferences",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &PutAccountPreferencesEndpointReader{formats: a.formats},
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*PutAccountPreferencesEndpointOK), nil
-
-}
-
 // SetTransport changes the transport on the client
 func (a *Client) SetTransport(transport runtime.ClientTransport) {
 	a.transport = transport

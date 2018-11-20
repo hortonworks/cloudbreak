@@ -20,9 +20,6 @@ import (
 
 type AutoscaleStackResponse struct {
 
-	// account id of the resource owner that is provided by OAuth provider
-	Account string `json:"account,omitempty"`
-
 	// public ambari ip of the stack
 	AmbariServerIP string `json:"ambariServerIp,omitempty"`
 
@@ -42,9 +39,6 @@ type AutoscaleStackResponse struct {
 	// Pattern: (^[a-z][-a-z0-9]*[a-z0-9]$)
 	Name *string `json:"name"`
 
-	// id of the resource owner that is provided by OAuth provider
-	Owner string `json:"owner,omitempty"`
-
 	// ambari password
 	PasswordPath string `json:"passwordPath,omitempty"`
 
@@ -54,11 +48,18 @@ type AutoscaleStackResponse struct {
 	// status of the stack
 	Status string `json:"status,omitempty"`
 
+	// name of the tenant
+	Tenant string `json:"tenant,omitempty"`
+
+	// id of the user
+	UserID string `json:"userId,omitempty"`
+
 	// ambari username
 	UserNamePath string `json:"userNamePath,omitempty"`
-}
 
-/* polymorph AutoscaleStackResponse account false */
+	// id of the workspace
+	WorkspaceID int64 `json:"workspaceId,omitempty"`
+}
 
 /* polymorph AutoscaleStackResponse ambariServerIp false */
 
@@ -70,15 +71,19 @@ type AutoscaleStackResponse struct {
 
 /* polymorph AutoscaleStackResponse name false */
 
-/* polymorph AutoscaleStackResponse owner false */
-
 /* polymorph AutoscaleStackResponse passwordPath false */
 
 /* polymorph AutoscaleStackResponse stackId false */
 
 /* polymorph AutoscaleStackResponse status false */
 
+/* polymorph AutoscaleStackResponse tenant false */
+
+/* polymorph AutoscaleStackResponse userId false */
+
 /* polymorph AutoscaleStackResponse userNamePath false */
+
+/* polymorph AutoscaleStackResponse workspaceId false */
 
 // Validate validates this autoscale stack response
 func (m *AutoscaleStackResponse) Validate(formats strfmt.Registry) error {

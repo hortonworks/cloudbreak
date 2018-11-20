@@ -21,9 +21,6 @@ import (
 
 type StackResponse struct {
 
-	// account id of the resource owner that is provided by OAuth provider
-	Account string `json:"account,omitempty"`
-
 	// specific version of ambari
 	AmbariVersion string `json:"ambariVersion,omitempty"`
 
@@ -126,9 +123,6 @@ type StackResponse struct {
 	// the details of the container orchestrator api to use
 	Orchestrator *OrchestratorResponse `json:"orchestrator,omitempty"`
 
-	// id of the resource owner that is provided by OAuth provider
-	Owner string `json:"owner,omitempty"`
-
 	// additional cloud specific parameters for stack
 	Parameters map[string]string `json:"parameters,omitempty"`
 
@@ -156,8 +150,6 @@ type StackResponse struct {
 	// workspace of the resource
 	Workspace *WorkspaceResourceResponse `json:"workspace,omitempty"`
 }
-
-/* polymorph StackResponse account false */
 
 /* polymorph StackResponse ambariVersion false */
 
@@ -222,8 +214,6 @@ type StackResponse struct {
 /* polymorph StackResponse onFailureAction false */
 
 /* polymorph StackResponse orchestrator false */
-
-/* polymorph StackResponse owner false */
 
 /* polymorph StackResponse parameters false */
 

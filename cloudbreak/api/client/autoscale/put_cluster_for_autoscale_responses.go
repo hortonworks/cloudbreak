@@ -53,7 +53,7 @@ func (o *PutClusterForAutoscaleDefault) Code() int {
 }
 
 func (o *PutClusterForAutoscaleDefault) Error() string {
-	return fmt.Sprintf("[PUT /autoscale/stack/{id}/{owner}/cluster][%d] putClusterForAutoscale default ", o._statusCode)
+	return fmt.Sprintf("[PUT /autoscale/stack/{id}/{userId}/cluster][%d] putClusterForAutoscale default ", o._statusCode)
 }
 
 func (o *PutClusterForAutoscaleDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

@@ -65,10 +65,12 @@ type AuthorizeForAutoscaleParams struct {
 
 	/*ID*/
 	ID int64
-	/*Owner*/
-	Owner string
 	/*Permission*/
 	Permission string
+	/*Tenant*/
+	Tenant string
+	/*UserID*/
+	UserID string
 
 	timeout    time.Duration
 	Context    context.Context
@@ -119,17 +121,6 @@ func (o *AuthorizeForAutoscaleParams) SetID(id int64) {
 	o.ID = id
 }
 
-// WithOwner adds the owner to the authorize for autoscale params
-func (o *AuthorizeForAutoscaleParams) WithOwner(owner string) *AuthorizeForAutoscaleParams {
-	o.SetOwner(owner)
-	return o
-}
-
-// SetOwner adds the owner to the authorize for autoscale params
-func (o *AuthorizeForAutoscaleParams) SetOwner(owner string) {
-	o.Owner = owner
-}
-
 // WithPermission adds the permission to the authorize for autoscale params
 func (o *AuthorizeForAutoscaleParams) WithPermission(permission string) *AuthorizeForAutoscaleParams {
 	o.SetPermission(permission)
@@ -139,6 +130,28 @@ func (o *AuthorizeForAutoscaleParams) WithPermission(permission string) *Authori
 // SetPermission adds the permission to the authorize for autoscale params
 func (o *AuthorizeForAutoscaleParams) SetPermission(permission string) {
 	o.Permission = permission
+}
+
+// WithTenant adds the tenant to the authorize for autoscale params
+func (o *AuthorizeForAutoscaleParams) WithTenant(tenant string) *AuthorizeForAutoscaleParams {
+	o.SetTenant(tenant)
+	return o
+}
+
+// SetTenant adds the tenant to the authorize for autoscale params
+func (o *AuthorizeForAutoscaleParams) SetTenant(tenant string) {
+	o.Tenant = tenant
+}
+
+// WithUserID adds the userID to the authorize for autoscale params
+func (o *AuthorizeForAutoscaleParams) WithUserID(userID string) *AuthorizeForAutoscaleParams {
+	o.SetUserID(userID)
+	return o
+}
+
+// SetUserID adds the userId to the authorize for autoscale params
+func (o *AuthorizeForAutoscaleParams) SetUserID(userID string) {
+	o.UserID = userID
 }
 
 // WriteToRequest writes these params to a swagger request
@@ -154,13 +167,18 @@ func (o *AuthorizeForAutoscaleParams) WriteToRequest(r runtime.ClientRequest, re
 		return err
 	}
 
-	// path param owner
-	if err := r.SetPathParam("owner", o.Owner); err != nil {
+	// path param permission
+	if err := r.SetPathParam("permission", o.Permission); err != nil {
 		return err
 	}
 
-	// path param permission
-	if err := r.SetPathParam("permission", o.Permission); err != nil {
+	// path param tenant
+	if err := r.SetPathParam("tenant", o.Tenant); err != nil {
+		return err
+	}
+
+	// path param userId
+	if err := r.SetPathParam("userId", o.UserID); err != nil {
 		return err
 	}
 

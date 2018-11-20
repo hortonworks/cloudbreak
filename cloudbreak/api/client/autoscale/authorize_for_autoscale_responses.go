@@ -49,7 +49,7 @@ type AuthorizeForAutoscaleOK struct {
 }
 
 func (o *AuthorizeForAutoscaleOK) Error() string {
-	return fmt.Sprintf("[GET /autoscale/stack/{id}/authorize/{owner}/{permission}][%d] authorizeForAutoscaleOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /autoscale/stack/{id}/authorize/{userId}/{tenant}/{permission}][%d] authorizeForAutoscaleOK  %+v", 200, o.Payload)
 }
 
 func (o *AuthorizeForAutoscaleOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

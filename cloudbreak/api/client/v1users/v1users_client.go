@@ -55,36 +55,6 @@ func (a *Client) EvictCurrentUserDetails(params *EvictCurrentUserDetailsParams) 
 }
 
 /*
-EvictUserDetails removes user from cache by username
-
-Users can be invited under an account by the administrator, and all resources (e.g. resources, networks, blueprints, credentials, clusters) can be shared across account users
-*/
-func (a *Client) EvictUserDetails(params *EvictUserDetailsParams) (*EvictUserDetailsOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewEvictUserDetailsParams()
-	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "evictUserDetails",
-		Method:             "PUT",
-		PathPattern:        "/v1/users/{id}",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &EvictUserDetailsReader{formats: a.formats},
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*EvictUserDetailsOK), nil
-
-}
-
-/*
 GetAllUsers retrieves all users in the tenant
 
 Users can be invited under an account by the administrator, and all resources (e.g. resources, networks, blueprints, credentials, clusters) can be shared across account users

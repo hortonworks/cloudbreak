@@ -21,31 +21,16 @@ import (
 
 type AccountPreferencesResponse struct {
 
-	// default tags for the resources created
-	DefaultTags map[string]string `json:"defaultTags,omitempty"`
-
 	// feature switches
 	// Unique: true
 	FeatureSwitches []string `json:"featureSwitches"`
-
-	// list of the cloudplatforms visible on the UI
-	Platforms string `json:"platforms,omitempty"`
-
-	// smartsense enabled on the UI
-	SmartsenseEnabled *bool `json:"smartsenseEnabled,omitempty"`
 
 	// supported external databases
 	// Unique: true
 	SupportedExternalDatabases []*SupportedExternalDatabaseServiceEntryResponse `json:"supportedExternalDatabases"`
 }
 
-/* polymorph AccountPreferencesResponse defaultTags false */
-
 /* polymorph AccountPreferencesResponse featureSwitches false */
-
-/* polymorph AccountPreferencesResponse platforms false */
-
-/* polymorph AccountPreferencesResponse smartsenseEnabled false */
 
 /* polymorph AccountPreferencesResponse supportedExternalDatabases false */
 

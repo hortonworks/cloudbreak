@@ -47,7 +47,7 @@ func NewDeleteEnvironmentOK() *DeleteEnvironmentOK {
 successful operation
 */
 type DeleteEnvironmentOK struct {
-	Payload *model.DetailedEnvironmentResponse
+	Payload *model.SimpleEnvironmentResponse
 }
 
 func (o *DeleteEnvironmentOK) Error() string {
@@ -56,7 +56,7 @@ func (o *DeleteEnvironmentOK) Error() string {
 
 func (o *DeleteEnvironmentOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(model.DetailedEnvironmentResponse)
+	o.Payload = new(model.SimpleEnvironmentResponse)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

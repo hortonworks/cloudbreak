@@ -17,17 +17,11 @@ import (
 
 type UserProfileResponse struct {
 
-	// account
-	Account string `json:"account,omitempty"`
-
 	// credential
 	Credential *CredentialResponse `json:"credential,omitempty"`
 
 	// image catalog
 	ImageCatalog *ImageCatalogShortResponse `json:"imageCatalog,omitempty"`
-
-	// owner
-	Owner string `json:"owner,omitempty"`
 
 	// ui properties
 	UIProperties map[string]interface{} `json:"uiProperties,omitempty"`
@@ -36,13 +30,9 @@ type UserProfileResponse struct {
 	Username string `json:"username,omitempty"`
 }
 
-/* polymorph UserProfileResponse account false */
-
 /* polymorph UserProfileResponse credential false */
 
 /* polymorph UserProfileResponse imageCatalog false */
-
-/* polymorph UserProfileResponse owner false */
 
 /* polymorph UserProfileResponse uiProperties false */
 

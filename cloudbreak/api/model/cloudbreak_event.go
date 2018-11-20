@@ -20,9 +20,6 @@ import (
 
 type CloudbreakEvent struct {
 
-	// account id of the resource owner that is provided by OAuth provider
-	Account string `json:"account,omitempty"`
-
 	// availability zone of the stack
 	AvailabilityZone string `json:"availabilityZone,omitempty"`
 
@@ -59,9 +56,6 @@ type CloudbreakEvent struct {
 	// number of nodes
 	NodeCount int32 `json:"nodeCount,omitempty"`
 
-	// id of the resource owner that is provided by OAuth provider
-	Owner string `json:"owner,omitempty"`
-
 	// region of the stack
 	Region string `json:"region,omitempty"`
 
@@ -75,13 +69,11 @@ type CloudbreakEvent struct {
 	StackStatus string `json:"stackStatus,omitempty"`
 
 	// User ID in the new authorization model
-	UserIDV3 string `json:"userIdV3,omitempty"`
+	UserID string `json:"userId,omitempty"`
 
 	// Workspace ID of the resource
 	WorkspaceID int64 `json:"workspaceId,omitempty"`
 }
-
-/* polymorph CloudbreakEvent account false */
 
 /* polymorph CloudbreakEvent availabilityZone false */
 
@@ -107,8 +99,6 @@ type CloudbreakEvent struct {
 
 /* polymorph CloudbreakEvent nodeCount false */
 
-/* polymorph CloudbreakEvent owner false */
-
 /* polymorph CloudbreakEvent region false */
 
 /* polymorph CloudbreakEvent stackId false */
@@ -117,7 +107,7 @@ type CloudbreakEvent struct {
 
 /* polymorph CloudbreakEvent stackStatus false */
 
-/* polymorph CloudbreakEvent userIdV3 false */
+/* polymorph CloudbreakEvent userId false */
 
 /* polymorph CloudbreakEvent workspaceId false */
 

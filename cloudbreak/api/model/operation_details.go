@@ -20,9 +20,6 @@ import (
 
 type OperationDetails struct {
 
-	// account
-	Account string `json:"account,omitempty"`
-
 	// cloudbreak Id
 	CloudbreakID string `json:"cloudbreakId,omitempty"`
 
@@ -47,14 +44,8 @@ type OperationDetails struct {
 	// user Id
 	UserID string `json:"userId,omitempty"`
 
-	// user Id v3
-	UserIDV3 string `json:"userIdV3,omitempty"`
-
 	// user name
 	UserName string `json:"userName,omitempty"`
-
-	// user name v3
-	UserNameV3 string `json:"userNameV3,omitempty"`
 
 	// workspace Id
 	WorkspaceID int64 `json:"workspaceId,omitempty"`
@@ -62,8 +53,6 @@ type OperationDetails struct {
 	// zoned date time
 	ZonedDateTime strfmt.DateTime `json:"zonedDateTime,omitempty"`
 }
-
-/* polymorph OperationDetails account false */
 
 /* polymorph OperationDetails cloudbreakId false */
 
@@ -81,11 +70,7 @@ type OperationDetails struct {
 
 /* polymorph OperationDetails userId false */
 
-/* polymorph OperationDetails userIdV3 false */
-
 /* polymorph OperationDetails userName false */
-
-/* polymorph OperationDetails userNameV3 false */
 
 /* polymorph OperationDetails workspaceId false */
 

@@ -18,10 +18,6 @@ import (
 
 type FlexSubscriptionResponse struct {
 
-	// account id of the resource owner that is provided by OAuth provider
-	// Read Only: true
-	Account string `json:"account,omitempty"`
-
 	// id of the resource
 	// Read Only: true
 	ID int64 `json:"id,omitempty"`
@@ -29,10 +25,6 @@ type FlexSubscriptionResponse struct {
 	// name of the resource
 	// Required: true
 	Name *string `json:"name"`
-
-	// id of the resource owner that is provided by OAuth provider
-	// Read Only: true
-	Owner string `json:"owner,omitempty"`
 
 	// resource is visible in account
 	// Read Only: true
@@ -58,13 +50,9 @@ type FlexSubscriptionResponse struct {
 	UsedForController *bool `json:"usedForController,omitempty"`
 }
 
-/* polymorph FlexSubscriptionResponse account false */
-
 /* polymorph FlexSubscriptionResponse id false */
 
 /* polymorph FlexSubscriptionResponse name false */
-
-/* polymorph FlexSubscriptionResponse owner false */
 
 /* polymorph FlexSubscriptionResponse publicInAccount false */
 
