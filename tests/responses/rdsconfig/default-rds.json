@@ -3,14 +3,15 @@
     "name": "rds",
     "connectionURL": "jdbc:postgresql://inttest.cdn4ilznrlxv.eu-west-1.rds.amazonaws.com:5432/inttest",
     "type": "HIVE",
-    "connectorJarUrl": null,
+    "connectorJarUrl": "",
     "id": 1,
     "creationDate": 1523625110797,
     "publicInAccount": true,
     "clusterNames": [],
-    "stackVersion": null,
+    "stackVersion": "",
     "databaseEngine": "POSTGRES",
     "connectionDriver": "org.postgresql.Driver",
-    "databaseEngineDisplayName": "Postgres"
+    "databaseEngineDisplayName": "Postgres",
+    "environments": []
   }
 ]
