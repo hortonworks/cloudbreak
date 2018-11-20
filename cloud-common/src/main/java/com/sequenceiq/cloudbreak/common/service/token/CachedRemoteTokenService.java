@@ -89,11 +89,11 @@ public class CachedRemoteTokenService implements ResourceServerTokenServices {
     private OAuth2Authentication getSSOAuthentication(String accessToken, Map<String, String> claims) {
         try {
             String tenant;
-            if (claims.get("aud") != null) {
-                tenant = claims.get("aud");
+            if (claims.get("tenant_name") != null) {
+                tenant = claims.get("tenant_name");
                 LOGGER.info("tenant for the token is: {}", tenant);
             } else {
-                throw new InvalidTokenException("No 'aud' claim in token");
+                throw new InvalidTokenException("No 'tenant_name' claim in token");
             }
             IntrospectResponse introspectResponse = caasClient.introSpect(accessToken);
             if (!introspectResponse.isActive()) {

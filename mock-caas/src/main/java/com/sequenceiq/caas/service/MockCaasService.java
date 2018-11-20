@@ -57,8 +57,8 @@ public class MockCaasService {
                 CaasUser caasUser = new CaasUser();
                 caasUser.setName(introspectResponse.getSub());
                 caasUser.setPreferredUsername(introspectResponse.getSub());
-                caasUser.setTenantId(introspectResponse.getAud());
-                caasUser.setId(introspectResponse.getAud() + '#' + introspectResponse.getSub());
+                caasUser.setTenantId(introspectResponse.getTenantName());
+                caasUser.setId(introspectResponse.getTenantName() + '#' + introspectResponse.getSub());
                 LOGGER.info(format("Generated caas user: %s", jsonUtil.toJsonString(caasUser)));
                 return caasUser;
             }
@@ -127,7 +127,7 @@ public class MockCaasService {
     private TokenResponse getToken(String tenant, String user, boolean active) {
         IntrospectResponse payload = new IntrospectResponse();
         payload.setSub(user);
-        payload.setAud(tenant);
+        payload.setTenantName(tenant);
         payload.setIss(ISS_KNOX);
         payload.setActive(active);
         payload.setExp(Instant.now().plus(PLUS_QUANTITY, DAYS).toEpochMilli());
