@@ -43,7 +43,6 @@ var matrix = require('./utilsmatrix.json');
 var mpacks = require('./mpacks/mpacks.json');
 var mpacksSingle = require('./mpacks/mpacks-single.json');
 var workspaces = require('./workspaces/workspaces.json');
-var workspace = require('./workspaces/workspace.json');
 var environments = require('./environment/envs.json');
 
 const OK = 200;
@@ -152,7 +151,7 @@ responses.getStackV2= responseObject(openstack, OK);
 responses.getPlatformSecurityGroups= responseObject(securitygroups, OK);
 responses.createManagementPackInWorkspace = responseObject(mpacksSingle, OK);
 responses.postPrivateManagementPack = responseObject(mpacks, OK);
-responses.getWorkspaces = responseObject(workspace, OK);
+responses.getWorkspaces = responseObject(workspaces, OK);
 responses.listEnvironment = responseObject(environments, OK)
 
 responses.postRepositoryConfigsValidation= responseObject({

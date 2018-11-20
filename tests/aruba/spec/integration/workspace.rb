@@ -36,7 +36,7 @@ RSpec.describe 'Workspace test cases', :type => :aruba, :feature => "Workspaces"
 
   it "Workspace - Describe", :story => "Describe Workspaces", :severity => :normal, :testId => 2 do
     with_environment 'DEBUG' => '1' do
-      responseHash = MockHelper.getResponseHash("../../../responses/workspaces/workspaces.json")
+      responseHash = MockHelper.getResponseHash("../../../responses/workspaces/workspace.json")
 
       expectedEndpointResponse = TraceResponseBuilder.getWorkspaceByNameResponseFactory(responseHash)
       MockHelper.setupResponse("getWorkspaceByName", responseHash)

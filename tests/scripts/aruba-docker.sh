@@ -19,8 +19,7 @@ fi
 token=$(curl -k $BASE_URL/oidc/authorize?username=$USERNAME_CLI\&tenant=hortonworks)
 
 echo "Configure CB CLI to Server: $BASE_URL User: $USERNAME_CLI"
-cb configure --server $BASE_URL --workspace $USERNAME_CLI
-echo $token | cb cluster list
+echo $token | cb configure --server $BASE_URL --workspace $USERNAME_CLI
 
 echo "Running RSpec with "$CLI_TEST_FILES
 rspec -f RspecJunitFormatter -o test-result.xml -f h $CLI_TEST_FILES | tee test-result.html | ruby -n spec/common/integration_formatter.rb
