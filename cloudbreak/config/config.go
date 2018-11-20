@@ -101,9 +101,11 @@ func configRead(c *cli.Context) error {
 			set(fl.FlRefreshTokenOptional.Name, config.RefreshToken)
 		}
 	}
-	if len(workspace) == 0 && len(config.Workspace) != 0 {
-		workspaceID := ws.GetWorkspaceIdByName(c, config.Workspace)
-		set(fl.FlWorkspaceOptional.Name, strconv.FormatInt(workspaceID, 10))
+	if len(workspace) == 0 {
+		if len(config.Workspace) != 0 {
+			workspaceID := ws.GetWorkspaceIdByName(c, config.Workspace)
+			set(fl.FlWorkspaceOptional.Name, strconv.FormatInt(workspaceID, 10))
+		}
 	} else {
 		workspaceID := ws.GetWorkspaceIdByName(c, workspace)
 		set(fl.FlWorkspaceOptional.Name, strconv.FormatInt(workspaceID, 10))
