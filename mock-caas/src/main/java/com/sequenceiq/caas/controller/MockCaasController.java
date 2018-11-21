@@ -59,4 +59,8 @@ public class MockCaasController {
         mockCaasService.auth(httpServletRequest, httpServletResponse, tenant, userName, redirectUri, active);
     }
 
+    @GetMapping("/auth/out")
+    public void out(HttpServletResponse httpServletResponse) {
+        mockCaasService.out(httpServletResponse);
+    }
 }

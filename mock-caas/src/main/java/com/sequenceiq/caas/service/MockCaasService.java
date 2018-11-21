@@ -1,6 +1,5 @@
 package com.sequenceiq.caas.service;
 
-import static com.sequenceiq.caas.util.EncryptionUtil.getHmacKey;
 import static java.lang.String.format;
 import static java.time.temporal.ChronoUnit.DAYS;
 import static javax.servlet.http.HttpServletResponse.SC_FOUND;
@@ -36,7 +35,7 @@ public class MockCaasService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MockCaasService.class);
 
-    private static final MacSigner SIGNATURE_VERIFIER = new MacSigner(getHmacKey());
+    private static final MacSigner SIGNATURE_VERIFIER = new MacSigner("titok");
 
     private static final String LOCATION_HEADER_KEY = "Location";
 
@@ -76,6 +75,14 @@ public class MockCaasService {
             LOGGER.error("Exception in introspect call", e);
             throw new AccessDeniedException("Token is invalid", e);
         }
+    }
+
+    public void out(@Nonnull HttpServletResponse httpServletResponse) {
+        Cookie cookie = new Cookie(JWT_COOKIE_KEY, "");
+        cookie.setMaxAge(0);
+        httpServletResponse.addCookie(cookie);
+        httpServletResponse.setHeader(LOCATION_HEADER_KEY, "/");
+        httpServletResponse.setStatus(SC_FOUND);
     }
 
     public void auth(@Nonnull HttpServletRequest httpServletRequest, @Nonnull HttpServletResponse httpServletResponse, @Nonnull Optional<String> tenant,
