@@ -12,4 +12,4 @@ WORKDIR /
 # install the cloudbreak app
 ADD ${REPO_URL}/com/sequenceiq/mock-caas/$VERSION/mock-caas-$VERSION.jar /mock-caas.jar
 
-CMD java -jar /mock-caas.jar
+CMD (java -jar /mock-caas.jar) & JAVAPID=$!; trap "kill $JAVAPID; wait $JAVAPID" INT TERM; wait $JAVAPID
