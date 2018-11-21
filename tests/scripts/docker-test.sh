@@ -7,11 +7,13 @@
 : ${PASSWORD_CLI:=cloudbreak}
 : ${DOCKER_TAG:=latest}
 : ${CLI_TEST_FILES:=spec/integration/*.rb}
+: ${BLUEPRINT_URL:? required}
+: ${RECIPE_URL:? required}
 
-readonly TEST_CONTAINER_NAME=aruba-test-runner
+readonly TEST_CONTAINER_NAME=cli-test-runner
 
 image-tag() {
-    declare desc="Set Aruba Docker Image Tag based for CBD version [for Jenkins E2E]"
+    declare desc="Set CLI Docker Image Tag based for CBD version [for Jenkins E2E]"
 
     if [[ $TARGET_CBD_VERSION ]]; then
 	    export DOCKER_TAG=$TARGET_CBD_VERSION
@@ -75,7 +77,7 @@ test-regression() {
        --privileged \
        --net=host \
        --name $TEST_CONTAINER_NAME \
-       -v $(pwd)/aruba:/aruba \
+       -v $(pwd):/aruba \
        -v $(pwd)/scripts/aruba-docker.sh:/entrypoint.sh \
        -v $(pwd)/responses:/responses \
        -v $(pwd)/requests:/requests \
@@ -108,6 +110,8 @@ test-regression() {
        -e "INTEGRATIONTEST_PROXYCONFIG_PROXYUSER=$INTEGRATIONTEST_PROXYCONFIG_PROXYUSER" \
        -e "INTEGRATIONTEST_PROXYCONFIG_PROXYPASSWORD=$INTEGRATIONTEST_PROXYCONFIG_PROXYPASSWORD" \
        -e "CLI_TEST_FILES=$CLI_TEST_FILES" \
+       -e "BLUEPRINT_URL=$BLUEPRINT_URL" \
+       -e "RECIPE_URL=$RECIPE_URL" \
        hortonworks/cloud-cli-e2e:$DOCKER_TAG
     RESULT=$?
 }

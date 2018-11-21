@@ -9,14 +9,12 @@ echo "HOME path: "$HOME
 
 if [[ "${TARGET_CBD_VERSION}" != "MOCK" ]]; then
     echo "Get CB CLI for "$TARGET_CBD_VERSION
-    curl --verbose --show-error --location --insecure -C - https://s3-us-west-2.amazonaws.com/cb-cli/cb-cli_"${TARGET_CBD_VERSION}"_$(uname)_x86_64.tgz | tar -xvz --directory /usr/local/bin
-    if [[ $? -ne 0 ]]; then
-        wget --continue --no-check-certificate https://s3-us-west-2.amazonaws.com/cb-cli/cb-cli_"${TARGET_CBD_VERSION}"_$(uname)_x86_64.tgz -O - | tar -xvz --directory /usr/local/bin
-    fi
+    wget --continue --no-check-certificate https://s3-us-west-2.amazonaws.com/cb-cli/cb-cli_"${TARGET_CBD_VERSION}"_$(uname)_x86_64.tgz -O - | tar -xvz --directory /usr/local/bin
     echo "CB CLI version is: "$(cb -v)
 fi
 
-token=$(curl -k $BASE_URL/oidc/authorize?username=$USERNAME_CLI\&tenant=hortonworks)
+echo "Get CB Token for CLI"
+token=$(wget --continue --no-check-certificate $BASE_URL/oidc/authorize?username=$USERNAME_CLI\&tenant=hortonworks -O -)
 
 echo "Configure CB CLI to Server: $BASE_URL User: $USERNAME_CLI"
 echo $token | cb configure --server $BASE_URL --workspace $USERNAME_CLI

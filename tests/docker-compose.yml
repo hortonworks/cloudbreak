@@ -14,7 +14,9 @@ traefik:
         max-file: "5"
     image: traefik:v1.6.6-alpine
     restart: on-failure
-    command: --debug --web --InsecureSkipVerify=true         --defaultEntryPoints=http,https         --entryPoints='Name:http Address::80 Redirect.EntryPoint:https'         --entryPoints='Name:https Address::443 TLS:/certs/traefik/client.pem,/certs/traefik/client-key.pem'         --maxidleconnsperhost=100         --traefikLogsFile=/opt/traefik/log/traefik.log         --accessLogsFile=/opt/traefik/log/access.log         --docker         --consul --consul.endpoint=consul:8500 
+    command: --debug --web --InsecureSkipVerify=true         --defaultEntryPoints=http,https         --entryPoints='Name:http Address::80 Redirect.EntryPoint:https'         --entryPoints='Name:https Address::443 TLS:/certs/traefik/client.pem,/certs/traefik/client-key.pem'         --maxidleconnsperhost=100         --traefikLogsFile=/opt/traefik/log/traefik.log         --accessLogsFile=/opt/traefik/log/access.log         --docker         --consul --consul.endpoint=consul:8500
+    container_name: cbreak_traefik_1
+
 haveged:
     labels:
       - traefik.enable=false
@@ -23,6 +25,7 @@ haveged:
         max-size: "10M"
         max-file: "5"
     image: hortonworks/haveged:1.1.0
+    container_name: cbreak_haveged_1
 
 consul:
     labels:
@@ -44,6 +47,7 @@ consul:
         max-file: "5"
     image: gliderlabs/consul-server:0.5
     command: --bootstrap --advertise 172.17.0.1 -recursor 169.254.169.254
+    container_name: cbreak_consul_1
 
 registrator:
     labels:
@@ -58,6 +62,7 @@ registrator:
     links:
         - consul
     command: consul://consul:8500
+    container_name: cbreak_registrator_1
 
 caas-api:
     image: hortonworks/cloudbreak-mock-caas:$GIT_TAG
@@ -72,6 +77,7 @@ caas-api:
     - traefik.port=8080
     - traefik.backend=caas-backend
     - traefik.frontend.priority=5
+    container_name: cbreak_caas-api_1
 
 cloudbreak:
     labels:
@@ -86,11 +92,4 @@ cloudbreak:
       - ./swagger.json:/cbm/api/swagger.json
       - ./responses:/cbm/responses
     image: hortonworks/cloud-swagger-mock
-#test:
-#    volumes:
-#     - .:/work
-#     - ../build/Linux:/usr/local/bin
-#    working_dir: /work
-#    net: host
-#    image: afarsang/docker-bats-jq
-#    command: ./scripts/integration-test.sh 
+    container_name: cbreak_cloudbreak_1

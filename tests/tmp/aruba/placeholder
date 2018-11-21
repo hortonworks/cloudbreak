@@ -1,0 +1,3 @@
+This file is needed for CI runs, because of:
+"WARN: `aruba`'s working directory does not exist. Maybe you forgot to run `setup_aruba` before using it's API. This warning will be an error from 1.0.0
+ /usr/lib/ruby/gems/2.5.0/gems/childprocess-0.9.0/lib/childprocess/unix/fork_exec_process.rb:26:in `chdir': No such file or directory @ dir_s_chdir - /aruba/tmp/aruba (Errno::ENOENT)"
