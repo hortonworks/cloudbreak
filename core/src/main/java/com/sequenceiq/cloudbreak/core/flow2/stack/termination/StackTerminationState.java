@@ -5,10 +5,10 @@ import com.sequenceiq.cloudbreak.core.flow2.FlowState;
 
 enum StackTerminationState implements FlowState {
     INIT_STATE,
-    TERMINATION_FAILED_STATE(StackTerminationFailureAction.class),
-    TERMINATION_STATE(StackTerminationAction.class),
-    TERMINATION_FINISHED_STATE(StackTerminationFinishedAction.class),
     PRE_TERMINATION_STATE(StackPreTerminationAction.class),
+    TERMINATION_STATE(StackTerminationAction.class),
+    TERMINATION_FAILED_STATE(StackTerminationFailureAction.class),
+    TERMINATION_FINISHED_STATE(StackTerminationFinishedAction.class),
     FINAL_STATE;
 
     private Class<? extends AbstractAction<?, ?, ?, ?>> action;

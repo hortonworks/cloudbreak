@@ -13,8 +13,6 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCrea
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.INSTALL_CLUSTER_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.LDAP_SSO_CONFIGURATION_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.LDAP_SSO_CONFIGURATION_FINISHED_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.REGISTER_PROXY_FAILED_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.REGISTER_PROXY_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.START_AMBARI_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.START_AMBARI_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.START_AMBARI_SERVICES_FAILED_EVENT;
@@ -29,7 +27,6 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCrea
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.FINAL_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.INIT_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.INSTALLING_CLUSTER_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.REGISTER_PROXY_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.STARTING_AMBARI_SERVICES_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.STARTING_AMBARI_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.UPLOAD_RECIPES_STATE;
@@ -55,10 +52,8 @@ public class ClusterCreationFlowConfig extends AbstractFlowConfiguration<Cluster
                     .failureEvent(HOST_METADATASETUP_FAILED_EVENT)
             .from(UPLOAD_RECIPES_STATE).to(STARTING_AMBARI_SERVICES_STATE).event(UPLOAD_RECIPES_FINISHED_EVENT)
                     .failureEvent(UPLOAD_RECIPES_FAILED_EVENT)
-            .from(STARTING_AMBARI_SERVICES_STATE).to(REGISTER_PROXY_STATE).event(START_AMBARI_SERVICES_FINISHED_EVENT)
+            .from(STARTING_AMBARI_SERVICES_STATE).to(STARTING_AMBARI_STATE).event(START_AMBARI_SERVICES_FINISHED_EVENT)
                     .failureEvent(START_AMBARI_SERVICES_FAILED_EVENT)
-            .from(REGISTER_PROXY_STATE).to(STARTING_AMBARI_STATE).event(REGISTER_PROXY_FINISHED_EVENT)
-                    .failureEvent(REGISTER_PROXY_FAILED_EVENT)
             .from(STARTING_AMBARI_STATE).to(CONFIGURE_LDAP_SSO_STATE).event(START_AMBARI_FINISHED_EVENT)
                     .failureEvent(START_AMBARI_FAILED_EVENT)
             .from(CONFIGURE_LDAP_SSO_STATE).to(INSTALLING_CLUSTER_STATE).event(LDAP_SSO_CONFIGURATION_FINISHED_EVENT)
