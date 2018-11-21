@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.GeneratedRecipe;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
@@ -181,14 +182,15 @@ class OrchestratorRecipeExecutor {
     private Map<HostGroup, List<RecipeModel>> getHostgroupToRecipeMap(Stack stack, Set<HostGroup> hostGroups) {
         Map<HostGroup, List<RecipeModel>> recipeModels = hostGroups.stream().filter(hg -> !hg.getRecipes().isEmpty())
                 .collect(Collectors.toMap(h -> h, h -> convert(stack, h.getRecipes())));
-        prepareGeneratedRecipes(recipeModels);
+        prepareGeneratedRecipes(recipeModels, stack.getWorkspace());
         return recipeModels;
     }
 
-    private void prepareGeneratedRecipes(Map<HostGroup, List<RecipeModel>> recipeModels) {
+    private void prepareGeneratedRecipes(Map<HostGroup, List<RecipeModel>> recipeModels, Workspace workspace) {
         for (Entry<HostGroup, List<RecipeModel>> hostGroupListEntry : recipeModels.entrySet()) {
             for (RecipeModel recipeModel : hostGroupListEntry.getValue()) {
                 GeneratedRecipe generatedRecipe = new GeneratedRecipe();
+                generatedRecipe.setWorkspace(workspace);
                 generatedRecipe.setHostGroup(hostGroupListEntry.getKey());
                 generatedRecipe.setExtendedRecipeText(recipeModel.getGeneratedScript());
                 generatedRecipeService.save(generatedRecipe);

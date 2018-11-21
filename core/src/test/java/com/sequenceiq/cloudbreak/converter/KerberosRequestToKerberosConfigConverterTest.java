@@ -40,7 +40,7 @@ public class KerberosRequestToKerberosConfigConverterTest extends AbstractConver
     @Test
     public void testEveryFieldMapped() {
         KerberosConfig kerberosConfig = underTest.convert(request);
-        assertAllFieldsNotNull(kerberosConfig, Lists.newArrayList("id"));
+        assertAllFieldsNotNull(kerberosConfig, Lists.newArrayList("id", "workspace"));
         assertEquals(request.getAdminUrl(), kerberosConfig.getAdminUrl());
         assertEquals(request.getDomain(), kerberosConfig.getDomain());
     }

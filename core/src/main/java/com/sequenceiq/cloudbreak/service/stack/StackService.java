@@ -473,7 +473,7 @@ public class StackService {
             LOGGER.info("Instance metadatas saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
             start = System.currentTimeMillis();
-            SecurityConfig securityConfig = tlsSecurityService.generateSecurityKeys();
+            SecurityConfig securityConfig = tlsSecurityService.generateSecurityKeys(workspace);
             LOGGER.info("Generating security keys took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
             securityConfig.setStack(savedStack);

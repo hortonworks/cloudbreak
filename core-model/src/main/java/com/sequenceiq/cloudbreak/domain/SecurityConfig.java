@@ -8,15 +8,18 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 
 import com.sequenceiq.cloudbreak.aspect.secret.SecretValue;
+import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
 
 @Entity
-public class SecurityConfig implements ProvisionEntity {
-
+public class SecurityConfig implements ProvisionEntity, WorkspaceAwareResource {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "securityconfig_generator")
     @SequenceGenerator(name = "securityconfig_generator", sequenceName = "securityconfig_id_seq", allocationSize = 1)
@@ -39,8 +42,31 @@ public class SecurityConfig implements ProvisionEntity {
     @Column(nullable = false)
     private boolean usePrivateIpToTls;
 
+    @ManyToOne
+    private Workspace workspace;
+
     public Long getId() {
         return id;
+    }
+
+    @Override
+    public Workspace getWorkspace() {
+        return workspace;
+    }
+
+    @Override
+    public String getName() {
+        return getResource() + "-" + id;
+    }
+
+    @Override
+    public void setWorkspace(Workspace workspace) {
+        this.workspace = workspace;
+    }
+
+    @Override
+    public WorkspaceResource getResource() {
+        return WorkspaceResource.SECURITY_GROUP;
     }
 
     public void setId(Long id) {

@@ -6,13 +6,17 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 
 import com.sequenceiq.cloudbreak.aspect.secret.SecretValue;
+import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
 
 @Entity
-public class SaltSecurityConfig implements ProvisionEntity {
+public class SaltSecurityConfig implements ProvisionEntity, WorkspaceAwareResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "saltsecurityconfig_generator")
@@ -44,8 +48,31 @@ public class SaltSecurityConfig implements ProvisionEntity {
     @OneToOne(mappedBy = "saltSecurityConfig")
     private SecurityConfig securityConfig;
 
+    @ManyToOne
+    private Workspace workspace;
+
     public Long getId() {
         return id;
+    }
+
+    @Override
+    public Workspace getWorkspace() {
+        return workspace;
+    }
+
+    @Override
+    public String getName() {
+        return getResource() + "-" + id;
+    }
+
+    @Override
+    public void setWorkspace(Workspace workspace) {
+        this.workspace = workspace;
+    }
+
+    @Override
+    public WorkspaceResource getResource() {
+        return WorkspaceResource.SALT_SECURITY_CONFIG;
     }
 
     public void setId(Long id) {

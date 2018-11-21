@@ -20,10 +20,10 @@ import com.sequenceiq.cloudbreak.aspect.secret.SecretValue;
 import com.sequenceiq.cloudbreak.domain.Secret;
 import com.sequenceiq.cloudbreak.domain.SecretProxy;
 import com.sequenceiq.cloudbreak.domain.workspace.Tenant;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
+import com.sequenceiq.cloudbreak.domain.workspace.TenantAwareResource;
 import com.sequenceiq.cloudbreak.service.Clock;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.secret.SecretService;
 
 @Component
@@ -148,11 +148,11 @@ public class SecretAspects {
 
     private String findTenant(Object entity) {
         return Optional.ofNullable(entity)
-                .filter(e -> e instanceof WorkspaceAwareResource)
-                .map(e -> (WorkspaceAwareResource) e)
-                .map(WorkspaceAwareResource::getWorkspace)
-                .map(Workspace::getTenant)
+                .filter(e -> e instanceof TenantAwareResource)
+                .map(e -> (TenantAwareResource) e)
+                .map(TenantAwareResource::getTenant)
                 .map(Tenant::getName)
-                .orElse(Tenant.DEFAULT_NAME);
+                .orElseThrow(() -> new CloudbreakServiceException(
+                        entity.getClass().getSimpleName() + " must be a subclass of " + TenantAwareResource.class.getSimpleName()));
     }
 }

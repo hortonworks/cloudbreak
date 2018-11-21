@@ -10,12 +10,15 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 
 import com.sequenceiq.cloudbreak.aspect.secret.SecretValue;
+import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.Secret;
 import com.sequenceiq.cloudbreak.domain.SecretToString;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
 
 @Entity
-public class GeneratedRecipe implements ProvisionEntity {
+public class GeneratedRecipe implements ProvisionEntity, WorkspaceAwareResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "generatedrecipe_generator")
@@ -30,6 +33,9 @@ public class GeneratedRecipe implements ProvisionEntity {
     @ManyToOne
     private HostGroup hostGroup;
 
+    @ManyToOne
+    private Workspace workspace;
+
     public String getExtendedRecipeText() {
         return extendedRecipeText.getRaw();
     }
@@ -40,6 +46,26 @@ public class GeneratedRecipe implements ProvisionEntity {
 
     public Long getId() {
         return id;
+    }
+
+    @Override
+    public Workspace getWorkspace() {
+        return workspace;
+    }
+
+    @Override
+    public String getName() {
+        return getResource() + "-" + id;
+    }
+
+    @Override
+    public void setWorkspace(Workspace workspace) {
+        this.workspace = workspace;
+    }
+
+    @Override
+    public WorkspaceResource getResource() {
+        return WorkspaceResource.GENERATED_RECIPE;
     }
 
     public void setId(Long id) {
