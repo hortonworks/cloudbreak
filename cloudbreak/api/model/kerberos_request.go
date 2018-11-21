@@ -31,10 +31,13 @@ type KerberosRequest struct {
 	// container dn
 	ContainerDn string `json:"containerDn,omitempty"`
 
-	// descriptor
+	// Ambari kerberos descriptor
 	Descriptor string `json:"descriptor,omitempty"`
 
-	// krb5 conf
+	// cluster instances will set this as the domain part of their hostname
+	Domain string `json:"domain,omitempty"`
+
+	// Ambari kerberos krb5.conf template
 	Krb5Conf string `json:"krb5Conf,omitempty"`
 
 	// ldap Url
@@ -44,6 +47,10 @@ type KerberosRequest struct {
 	// Max Length: 50
 	// Min Length: 3
 	MasterKey string `json:"masterKey,omitempty"`
+
+	// comma separated list of nameservers' IP address which will be used by cluster instances
+	// Pattern: (^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(,((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))*$)
+	NameServers string `json:"nameServers,omitempty"`
 
 	// kerberos admin password
 	// Max Length: 50
@@ -65,6 +72,9 @@ type KerberosRequest struct {
 
 	// kerberos KDC server URL
 	URL string `json:"url,omitempty"`
+
+	// Allows to select either a trusting SSL connection or a validating (non-trusting) SSL connection to KDC
+	VerifyKdcTrust *bool `json:"verifyKdcTrust,omitempty"`
 }
 
 /* polymorph KerberosRequest admin false */
@@ -75,11 +85,15 @@ type KerberosRequest struct {
 
 /* polymorph KerberosRequest descriptor false */
 
+/* polymorph KerberosRequest domain false */
+
 /* polymorph KerberosRequest krb5Conf false */
 
 /* polymorph KerberosRequest ldapUrl false */
 
 /* polymorph KerberosRequest masterKey false */
+
+/* polymorph KerberosRequest nameServers false */
 
 /* polymorph KerberosRequest password false */
 
@@ -93,6 +107,8 @@ type KerberosRequest struct {
 
 /* polymorph KerberosRequest url false */
 
+/* polymorph KerberosRequest verifyKdcTrust false */
+
 // Validate validates this kerberos request
 func (m *KerberosRequest) Validate(formats strfmt.Registry) error {
 	var res []error
@@ -103,6 +119,11 @@ func (m *KerberosRequest) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateMasterKey(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateNameServers(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -157,6 +178,19 @@ func (m *KerberosRequest) validateMasterKey(formats strfmt.Registry) error {
 	return nil
 }
 
+func (m *KerberosRequest) validateNameServers(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.NameServers) { // not required
+		return nil
+	}
+
+	if err := validate.Pattern("nameServers", "body", string(m.NameServers), `(^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(,((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))*$)`); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (m *KerberosRequest) validatePassword(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Password) { // not required
@@ -178,7 +212,7 @@ var kerberosRequestTypeTypePropEnum []interface{}
 
 func init() {
 	var res []string
-	if err := json.Unmarshal([]byte(`["CB_MANAGED","EXISTING_AD","EXISTING_MIT","CUSTOM"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["CB_MANAGED","EXISTING_AD","EXISTING_MIT","EXISTING_FREEIPA","CUSTOM"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {
@@ -193,6 +227,8 @@ const (
 	KerberosRequestTypeEXISTINGAD string = "EXISTING_AD"
 	// KerberosRequestTypeEXISTINGMIT captures enum value "EXISTING_MIT"
 	KerberosRequestTypeEXISTINGMIT string = "EXISTING_MIT"
+	// KerberosRequestTypeEXISTINGFREEIPA captures enum value "EXISTING_FREEIPA"
+	KerberosRequestTypeEXISTINGFREEIPA string = "EXISTING_FREEIPA"
 	// KerberosRequestTypeCUSTOM captures enum value "CUSTOM"
 	KerberosRequestTypeCUSTOM string = "CUSTOM"
 )

@@ -21,9 +21,7 @@ import (
 type KerberosResponse struct {
 
 	// kerberos admin user
-	// Max Length: 15
-	// Min Length: 5
-	Admin string `json:"admin,omitempty"`
+	Admin *SecretResponse `json:"admin,omitempty"`
 
 	// kerberos admin server URL
 	AdminURL string `json:"adminUrl,omitempty"`
@@ -31,8 +29,30 @@ type KerberosResponse struct {
 	// container dn
 	ContainerDn string `json:"containerDn,omitempty"`
 
+	// Ambari kerberos descriptor
+	Descriptor *SecretResponse `json:"descriptor,omitempty"`
+
+	// cluster instances will set this as the domain part of their hostname
+	Domain string `json:"domain,omitempty"`
+
+	// Ambari kerberos krb5.conf template
+	Krb5Conf *SecretResponse `json:"krb5Conf,omitempty"`
+
 	// ldap Url
 	LdapURL string `json:"ldapUrl,omitempty"`
+
+	// kerberos master key
+	MasterKey *SecretResponse `json:"masterKey,omitempty"`
+
+	// comma separated list of nameservers' IP address which will be used by cluster instances
+	// Pattern: (^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(,((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))*$)
+	NameServers string `json:"nameServers,omitempty"`
+
+	// kerberos admin password
+	Password *SecretResponse `json:"password,omitempty"`
+
+	// kerberos principal
+	Principal *SecretResponse `json:"principal,omitempty"`
 
 	// realm
 	Realm string `json:"realm,omitempty"`
@@ -46,6 +66,9 @@ type KerberosResponse struct {
 
 	// kerberos KDC server URL
 	URL string `json:"url,omitempty"`
+
+	// Allows to select either a trusting SSL connection or a validating (non-trusting) SSL connection to KDC
+	VerifyKdcTrust *bool `json:"verifyKdcTrust,omitempty"`
 }
 
 /* polymorph KerberosResponse admin false */
@@ -54,7 +77,21 @@ type KerberosResponse struct {
 
 /* polymorph KerberosResponse containerDn false */
 
+/* polymorph KerberosResponse descriptor false */
+
+/* polymorph KerberosResponse domain false */
+
+/* polymorph KerberosResponse krb5Conf false */
+
 /* polymorph KerberosResponse ldapUrl false */
+
+/* polymorph KerberosResponse masterKey false */
+
+/* polymorph KerberosResponse nameServers false */
+
+/* polymorph KerberosResponse password false */
+
+/* polymorph KerberosResponse principal false */
 
 /* polymorph KerberosResponse realm false */
 
@@ -64,11 +101,43 @@ type KerberosResponse struct {
 
 /* polymorph KerberosResponse url false */
 
+/* polymorph KerberosResponse verifyKdcTrust false */
+
 // Validate validates this kerberos response
 func (m *KerberosResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAdmin(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateDescriptor(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateKrb5Conf(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateMasterKey(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateNameServers(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validatePassword(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validatePrincipal(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -90,12 +159,122 @@ func (m *KerberosResponse) validateAdmin(formats strfmt.Registry) error {
 		return nil
 	}
 
-	if err := validate.MinLength("admin", "body", string(m.Admin), 5); err != nil {
+	if m.Admin != nil {
+
+		if err := m.Admin.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("admin")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *KerberosResponse) validateDescriptor(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Descriptor) { // not required
+		return nil
+	}
+
+	if m.Descriptor != nil {
+
+		if err := m.Descriptor.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("descriptor")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *KerberosResponse) validateKrb5Conf(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Krb5Conf) { // not required
+		return nil
+	}
+
+	if m.Krb5Conf != nil {
+
+		if err := m.Krb5Conf.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("krb5Conf")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *KerberosResponse) validateMasterKey(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.MasterKey) { // not required
+		return nil
+	}
+
+	if m.MasterKey != nil {
+
+		if err := m.MasterKey.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("masterKey")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *KerberosResponse) validateNameServers(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.NameServers) { // not required
+		return nil
+	}
+
+	if err := validate.Pattern("nameServers", "body", string(m.NameServers), `(^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(,((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))*$)`); err != nil {
 		return err
 	}
 
-	if err := validate.MaxLength("admin", "body", string(m.Admin), 15); err != nil {
-		return err
+	return nil
+}
+
+func (m *KerberosResponse) validatePassword(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Password) { // not required
+		return nil
+	}
+
+	if m.Password != nil {
+
+		if err := m.Password.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("password")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *KerberosResponse) validatePrincipal(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Principal) { // not required
+		return nil
+	}
+
+	if m.Principal != nil {
+
+		if err := m.Principal.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("principal")
+			}
+			return err
+		}
 	}
 
 	return nil
@@ -105,7 +284,7 @@ var kerberosResponseTypeTypePropEnum []interface{}
 
 func init() {
 	var res []string
-	if err := json.Unmarshal([]byte(`["CB_MANAGED","EXISTING_AD","EXISTING_MIT","CUSTOM"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["CB_MANAGED","EXISTING_AD","EXISTING_MIT","EXISTING_FREEIPA","CUSTOM"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {
@@ -120,6 +299,8 @@ const (
 	KerberosResponseTypeEXISTINGAD string = "EXISTING_AD"
 	// KerberosResponseTypeEXISTINGMIT captures enum value "EXISTING_MIT"
 	KerberosResponseTypeEXISTINGMIT string = "EXISTING_MIT"
+	// KerberosResponseTypeEXISTINGFREEIPA captures enum value "EXISTING_FREEIPA"
+	KerberosResponseTypeEXISTINGFREEIPA string = "EXISTING_FREEIPA"
 	// KerberosResponseTypeCUSTOM captures enum value "CUSTOM"
 	KerberosResponseTypeCUSTOM string = "CUSTOM"
 )
