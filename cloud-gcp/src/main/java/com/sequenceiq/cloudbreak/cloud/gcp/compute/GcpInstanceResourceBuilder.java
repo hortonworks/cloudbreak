@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.compute;
 
+import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getCustomNetworkId;
+import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getSharedProjectId;
 import static java.util.Collections.singletonList;
+import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -48,6 +51,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
+import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudGcsView;
 import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
@@ -84,8 +88,6 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         InstanceTemplate template = group.getReferenceInstanceConfiguration().getTemplate();
         String projectId = context.getProjectId();
         Location location = context.getLocation();
-        boolean noPublicIp = context.getNoPublicIp();
-
         Compute compute = context.getCompute();
 
         List<CloudResource> computeResources = context.getComputeResources(privateId);
@@ -98,8 +100,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
                 projectId, location.getAvailabilityZone().value(), template.getFlavor()));
         instance.setName(buildableResource.get(0).getName());
         instance.setCanIpForward(Boolean.TRUE);
-        instance.setNetworkInterfaces(getNetworkInterface(context.getNetworkResources(), computeResources, location.getRegion(), group, compute, projectId,
-                noPublicIp));
+        instance.setNetworkInterfaces(getNetworkInterface(context, computeResources, group, cloudStack));
         instance.setDisks(listOfDisks);
         instance.setServiceAccounts(extractServiceAccounts(cloudStack));
         Scheduling scheduling = new Scheduling();
@@ -252,11 +253,17 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         return attachedDisk;
     }
 
-    private List<NetworkInterface> getNetworkInterface(Iterable<CloudResource> networkResources, Iterable<CloudResource> computeResources,
-            Region region, Group group, Compute compute, String projectId, boolean noPublicIp) throws IOException {
+    private List<NetworkInterface> getNetworkInterface(GcpContext context, Iterable<CloudResource> computeResources, Group group, CloudStack stack)
+            throws IOException {
+        boolean noPublicIp = context.getNoPublicIp();
+        String projectId = context.getProjectId();
+        Location location = context.getLocation();
+        Compute compute = context.getCompute();
+
         NetworkInterface networkInterface = new NetworkInterface();
-        List<CloudResource> subnet = filterResourcesByType(networkResources, ResourceType.GCP_SUBNET);
-        String networkName = subnet.isEmpty() ? filterResourcesByType(networkResources, ResourceType.GCP_NETWORK).get(0).getName() : subnet.get(0).getName();
+        List<CloudResource> subnet = filterResourcesByType(context.getNetworkResources(), ResourceType.GCP_SUBNET);
+        String networkName = subnet.isEmpty() ? filterResourcesByType(context.getNetworkResources(),
+                ResourceType.GCP_NETWORK).get(0).getName() : subnet.get(0).getName();
         networkInterface.setName(networkName);
 
         if (!noPublicIp) {
@@ -265,20 +272,35 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
             accessConfig.setType("ONE_TO_ONE_NAT");
             List<CloudResource> reservedIp = filterResourcesByType(computeResources, ResourceType.GCP_RESERVED_IP);
             if (InstanceGroupType.GATEWAY == group.getType() && !reservedIp.isEmpty()) {
-                Addresses.Get getReservedIp = compute.addresses().get(projectId, region.value(), reservedIp.get(0).getName());
+                Addresses.Get getReservedIp = compute.addresses().get(projectId, location.getRegion().value(), reservedIp.get(0).getName());
                 accessConfig.setNatIP(getReservedIp.execute().getAddress());
             }
             networkInterface.setAccessConfigs(singletonList(accessConfig));
         }
-
-        if (subnet.isEmpty()) {
-            networkInterface.setNetwork(
-                    String.format("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s", projectId, networkName));
-        } else {
-            networkInterface.setSubnetwork(
-                    String.format("https://www.googleapis.com/compute/v1/projects/%s/regions/%s/subnetworks/%s", projectId, region.value(), networkName));
-        }
+        prepareNetworkAndSubnet(projectId, location.getRegion(), stack.getNetwork(), networkInterface, subnet, networkName);
         return singletonList(networkInterface);
+    }
+
+    private void prepareNetworkAndSubnet(String projectId, Region region, Network network, NetworkInterface networkInterface,
+            List<CloudResource> subnet, String networkName) {
+        if (isNoneEmpty(getSharedProjectId(network))) {
+            networkInterface.setNetwork(getNetworkUrl(getSharedProjectId(network), getCustomNetworkId(network)));
+            networkInterface.setSubnetwork(getSubnetUrl(getSharedProjectId(network), region.value(), getCustomNetworkId(network)));
+        } else {
+            if (subnet.isEmpty()) {
+                networkInterface.setNetwork(getNetworkUrl(projectId, networkName));
+            } else {
+                networkInterface.setSubnetwork(getSubnetUrl(projectId, region.value(), networkName));
+            }
+        }
+    }
+
+    private String getSubnetUrl(String sharedProjectId, String value, String customNetworkId) {
+        return String.format("https://www.googleapis.com/compute/v1/projects/%s/regions/%s/subnetworks/%s", sharedProjectId, value, customNetworkId);
+    }
+
+    private String getNetworkUrl(String sharedProjectId, String customNetworkId) {
+        return String.format("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s", sharedProjectId, customNetworkId);
     }
 
     private List<CloudResource> filterResourcesByType(Iterable<CloudResource> resources, ResourceType resourceType) {
