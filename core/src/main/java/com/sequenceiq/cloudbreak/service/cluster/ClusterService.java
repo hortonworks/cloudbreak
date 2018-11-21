@@ -96,6 +96,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.json.JsonHelper;
 import com.sequenceiq.cloudbreak.repository.ConstraintRepository;
 import com.sequenceiq.cloudbreak.repository.GatewayRepository;
@@ -236,7 +237,7 @@ public class ClusterService {
             throw new BadRequestException(String.format("A cluster is already created on this stack! [cluster: '%s']", stack.getCluster().getName()));
         }
         return transactionService.required(() -> {
-            cluster.setWorkspace(stack.getWorkspace());
+            setWorkspace(cluster, stack.getWorkspace());
             cluster.setEnvironment(stack.getEnvironment());
 
             long start = System.currentTimeMillis();
@@ -280,6 +281,16 @@ public class ClusterService {
             }
             return savedCluster;
         });
+    }
+
+    private void setWorkspace(Cluster cluster, Workspace workspace) {
+        cluster.setWorkspace(workspace);
+        if (cluster.getGateway() != null) {
+            cluster.getGateway().setWorkspace(workspace);
+        }
+        if (cluster.getKerberosConfig() != null) {
+            cluster.getKerberosConfig().setWorkspace(workspace);
+        }
     }
 
     private Cluster saveClusterAndComponent(Cluster cluster, List<ClusterComponent> components, String stackName) {

@@ -771,7 +771,7 @@ public class StackServiceTest {
 
         when(stackRepository.save(stack)).thenReturn(stack);
 
-        when(tlsSecurityService.generateSecurityKeys()).thenReturn(securityConfig);
+        when(tlsSecurityService.generateSecurityKeys(any(Workspace.class))).thenReturn(securityConfig);
         when(connector.getPlatformParameters(stack)).thenReturn(parameters);
 
         expectedException.expectCause(org.hamcrest.Matchers.any(CloudbreakImageNotFoundException.class));
@@ -800,7 +800,7 @@ public class StackServiceTest {
 
         when(stackRepository.save(stack)).thenReturn(stack);
 
-        when(tlsSecurityService.generateSecurityKeys()).thenReturn(securityConfig);
+        when(tlsSecurityService.generateSecurityKeys(any(Workspace.class))).thenReturn(securityConfig);
         when(connector.getPlatformParameters(stack)).thenReturn(parameters);
 
         try {

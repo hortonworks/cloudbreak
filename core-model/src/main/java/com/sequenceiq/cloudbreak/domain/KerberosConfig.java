@@ -8,14 +8,17 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 
 import com.sequenceiq.cloudbreak.aspect.secret.SecretValue;
+import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
 import com.sequenceiq.cloudbreak.type.KerberosType;
 
 @Entity
-public class KerberosConfig implements ProvisionEntity {
-
+public class KerberosConfig implements ProvisionEntity, WorkspaceAwareResource {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "kerberosconfig_generator")
     @SequenceGenerator(name = "kerberosconfig_generator", sequenceName = "kerberosconfig_id_seq", allocationSize = 1)
@@ -81,8 +84,31 @@ public class KerberosConfig implements ProvisionEntity {
     @Column(name = "nameservers")
     private String nameServers;
 
+    @ManyToOne
+    private Workspace workspace;
+
     public Long getId() {
         return id;
+    }
+
+    @Override
+    public Workspace getWorkspace() {
+        return workspace;
+    }
+
+    @Override
+    public String getName() {
+        return getResource().getShortName() + "-" + id;
+    }
+
+    @Override
+    public void setWorkspace(Workspace workspace) {
+        this.workspace = workspace;
+    }
+
+    @Override
+    public WorkspaceResource getResource() {
+        return WorkspaceResource.KERBEROS_CONFIG;
     }
 
     public void setId(Long id) {

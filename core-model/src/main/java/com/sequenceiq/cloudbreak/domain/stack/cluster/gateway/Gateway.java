@@ -14,6 +14,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
@@ -23,15 +24,18 @@ import org.apache.commons.lang3.StringUtils;
 import com.sequenceiq.cloudbreak.api.model.GatewayType;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.SSOType;
 import com.sequenceiq.cloudbreak.aspect.secret.SecretValue;
+import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.Secret;
 import com.sequenceiq.cloudbreak.domain.SecretToString;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
 
 @Entity
-public class Gateway implements ProvisionEntity {
+public class Gateway implements ProvisionEntity, WorkspaceAwareResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "gateway_generator")
@@ -82,6 +86,9 @@ public class Gateway implements ProvisionEntity {
     // It is set to false by hibernate when loading old gateways created with previous CB versions
     private boolean enableGateway = true;
 
+    @ManyToOne
+    private Workspace workspace;
+
     public Gateway copy() {
         Gateway gateway = new Gateway();
         gateway.setTopologies(topologies.stream().map(GatewayTopology::copy).collect(Collectors.toSet()));
@@ -95,11 +102,32 @@ public class Gateway implements ProvisionEntity {
         gateway.setId(id);
         gateway.setSignPub(signPub);
         gateway.setSsoProvider(ssoProvider);
+        gateway.setWorkspace(workspace);
         return gateway;
     }
 
     public Long getId() {
         return id;
+    }
+
+    @Override
+    public Workspace getWorkspace() {
+        return workspace;
+    }
+
+    @Override
+    public String getName() {
+        return getResource().getShortName() + "-" + id;
+    }
+
+    @Override
+    public void setWorkspace(Workspace workspace) {
+        this.workspace = workspace;
+    }
+
+    @Override
+    public WorkspaceResource getResource() {
+        return WorkspaceResource.GATEWAY;
     }
 
     public void setId(Long id) {

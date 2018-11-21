@@ -20,7 +20,12 @@ public enum WorkspaceResource {
     CONSTRAINT_TEMPLATE("Constraint template", "constrainttemplate"),
     FILESYSTEM("File system", "filesystem"),
     CLUSTER_TEMPLATE("Cluster template", "clustertemplate"),
-    ENVIRONMENT("Environment", "env");
+    ENVIRONMENT("Environment", "env"),
+    GATEWAY("Gateway", "gateway"),
+    KERBEROS_CONFIG("Kerberos Config", "krbconf"),
+    GENERATED_RECIPE("Generated recipe", "generatedrecipe"),
+    SECURITY_CONFIG("Security Config", "securityconfig"),
+    SALT_SECURITY_CONFIG("Salt Security Config", "saltsecurityconfig");
 
     private final String readableName;
 

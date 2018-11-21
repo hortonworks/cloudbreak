@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.SaltSecurityConfig;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.SecurityConfigRepository;
@@ -34,9 +35,11 @@ public class TlsSecurityService {
     @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
 
-    public SecurityConfig generateSecurityKeys() {
+    public SecurityConfig generateSecurityKeys(Workspace workspace) {
         SecurityConfig securityConfig = new SecurityConfig();
+        securityConfig.setWorkspace(workspace);
         SaltSecurityConfig saltSecurityConfig = new SaltSecurityConfig();
+        saltSecurityConfig.setWorkspace(workspace);
         securityConfig.setSaltSecurityConfig(saltSecurityConfig);
         generateClientKeys(securityConfig);
         generateSaltBootSignKeypair(saltSecurityConfig);
