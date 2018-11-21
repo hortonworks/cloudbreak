@@ -39,13 +39,13 @@ RSpec.shared_context "mock shared vars", :a => :b do
 
     @default_blueprint_name = "'EDW-ETL: Apache Hive, Apache Spark 2'"
     @blueprint_name_file = "cli-bp-file"
-    @blueprint_url = "https://rawgit.com/hortonworks/cb-cli/master/tests/aruba/blueprints/test.bp"
+    @blueprint_url = ENV['BLUEPRINT_URL']
     @blueprint_file = "../../blueprints/test.bp"
 
     @recipe_types = Array["pre-ambari-start", "pre-termination","post-ambari-start", "post-cluster-install"]
     @recipe_name = "cli-recipe-url"
-    @recipe_url = "https://rawgit.com/hortonworks/cb-cli/master/tests/aruba/recipes/echo.sh"
-    @recipe_file = "../../scripts/recipe.sh"
+    @recipe_url = ENV['RECIPE_URL']
+    @recipe_file = "../../recipes/echo.sh"
 
     @ldap_name = "cli-ldap"
     @ldap_domain = "ad.hwx.com"
