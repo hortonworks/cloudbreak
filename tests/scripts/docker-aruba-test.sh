@@ -16,7 +16,7 @@ image-tag() {
     if [[ $TARGET_CBD_VERSION ]]; then
 	    export DOCKER_TAG=$TARGET_CBD_VERSION
     fi
-    if [[ $BRANCH || $(git rev-parse --abbrev-ref HEAD) == *"master"* ]]; then
+    if [[ $(git rev-parse --abbrev-ref HEAD) == *"master"* ]]; then
 	    export DOCKER_TAG=latest
     fi
 }
