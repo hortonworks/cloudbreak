@@ -202,6 +202,7 @@ public class AmbariAgentHealthMonitorModulTest extends RejectedThreadContext {
 
     }
 
+    @Ignore
     @Test
     public void testWhenThreadPoolRejectedAndCountMoreThanOne() {
         Cluster cluster1 = cluster(1L);
