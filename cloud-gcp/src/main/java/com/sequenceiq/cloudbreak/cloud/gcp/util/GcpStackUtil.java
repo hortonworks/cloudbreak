@@ -47,6 +47,8 @@ public final class GcpStackUtil {
 
     public static final String NETWORK_ID = "networkId";
 
+    public static final String SHARED_PROJECT_ID = "sharedProjectId";
+
     public static final String SUBNET_ID = "subnetId";
 
     public static final String SERVICE_ACCOUNT = "serviceAccountId";
@@ -269,6 +271,10 @@ public final class GcpStackUtil {
 
     public static String getSubnetId(Network network) {
         return network.getStringParameter(SUBNET_ID);
+    }
+
+    public static String getSharedProjectId(Network network) {
+        return network.getStringParameter(SHARED_PROJECT_ID);
     }
 
     public static Boolean noPublicIp(Network network) {

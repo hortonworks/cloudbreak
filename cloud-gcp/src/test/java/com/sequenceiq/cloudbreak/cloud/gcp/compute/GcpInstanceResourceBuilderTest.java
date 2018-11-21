@@ -52,6 +52,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
+import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.PortDefinition;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
@@ -133,7 +134,8 @@ public class GcpInstanceResourceBuilderTest {
         GcpResourceNameService resourceNameService = new GcpResourceNameService();
         ReflectionTestUtils.setField(resourceNameService, "maxResourceNameLength", 50);
         ReflectionTestUtils.setField(builder, "resourceNameService", resourceNameService);
-        cloudStack = new CloudStack(Collections.emptyList(), null, image, emptyMap(), emptyMap(), null,
+        Network network = new Network(null);
+        cloudStack = new CloudStack(Collections.emptyList(), network, image, emptyMap(), emptyMap(), null,
                 null, null, null, null);
     }
 
@@ -236,7 +238,7 @@ public class GcpInstanceResourceBuilderTest {
         CloudGcsView cloudGcsView = new CloudGcsView();
         cloudGcsView.setServiceAccountEmail(email);
 
-        CloudStack cloudStack = new CloudStack(Collections.emptyList(), null, image,
+        CloudStack cloudStack = new CloudStack(Collections.emptyList(), new Network(null), image,
                 emptyMap(), emptyMap(), null, null, null, null,
                 new SpiFileSystem("test", FileSystemType.GCS, false, cloudGcsView));
 
