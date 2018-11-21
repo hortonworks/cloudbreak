@@ -13,7 +13,6 @@ import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.InstanceMetadataUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.flow.status.AmbariClusterStatusUpdater;
-import com.sequenceiq.cloudbreak.service.proxy.ProxyRegistrator;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 import reactor.bus.Event;
@@ -34,9 +33,6 @@ public class ClusterSyncHandler implements ReactorEventHandler<ClusterSyncReques
     private EventBus eventBus;
 
     @Inject
-    private ProxyRegistrator proxyRegistrator;
-
-    @Inject
     private InstanceMetadataUpdater instanceMetadataUpdater;
 
     @Override
@@ -50,7 +46,6 @@ public class ClusterSyncHandler implements ReactorEventHandler<ClusterSyncReques
         ClusterSyncResult result;
         try {
             Stack stack = stackService.getByIdWithListsInTransaction(request.getStackId());
-            proxyRegistrator.registerIfNeed(stack);
             Cluster cluster = clusterService.retrieveClusterByStackIdWithoutAuth(request.getStackId());
             ambariClusterStatusUpdater.updateClusterStatus(stack, cluster);
             if (cluster.isAvailable() || cluster.isMaintenanceModeEnabled()) {
