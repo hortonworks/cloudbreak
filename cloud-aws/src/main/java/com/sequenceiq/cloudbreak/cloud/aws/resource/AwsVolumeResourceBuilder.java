@@ -26,12 +26,15 @@ import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.AmazonEC2Exception;
 import com.amazonaws.services.ec2.model.CreateVolumeRequest;
 import com.amazonaws.services.ec2.model.CreateVolumeResult;
+import com.amazonaws.services.ec2.model.DescribeSubnetsRequest;
+import com.amazonaws.services.ec2.model.DescribeSubnetsResult;
 import com.amazonaws.services.ec2.model.DescribeVolumesRequest;
 import com.amazonaws.services.ec2.model.DescribeVolumesResult;
 import com.amazonaws.services.ec2.model.EbsInstanceBlockDeviceSpecification;
 import com.amazonaws.services.ec2.model.InstanceBlockDeviceMappingSpecification;
 import com.amazonaws.services.ec2.model.ModifyInstanceAttributeRequest;
 import com.amazonaws.services.ec2.model.ModifyInstanceAttributeResult;
+import com.amazonaws.services.ec2.model.Subnet;
 import com.amazonaws.services.ec2.model.TagSpecification;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsTagPreparationService;
@@ -86,10 +89,12 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
                 .filter(resource -> ResourceType.AWS_VOLUMESET.equals(resource.getType()))
                 .findFirst();
 
-        return List.of(reattachableVolumeSet.orElseGet(createVolumeSet(privateId, auth, group)));
+        CloudResource subnet = context.getNetworkResources().stream()
+                .filter(cloudResource -> ResourceType.AWS_SUBNET.equals(cloudResource.getType())).findFirst().get();
+        return List.of(reattachableVolumeSet.orElseGet(createVolumeSet(privateId, auth, group, subnet)));
     }
 
-    private Supplier<CloudResource> createVolumeSet(long privateId, AuthenticatedContext auth, Group group) {
+    private Supplier<CloudResource> createVolumeSet(long privateId, AuthenticatedContext auth, Group group, CloudResource subnetResource) {
         return () -> {
             AwsResourceNameService resourceNameService = getResourceNameService();
 
@@ -99,6 +104,9 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
             String groupName = group.getName();
             CloudContext cloudContext = auth.getCloudContext();
             String stackName = cloudContext.getName();
+
+            String availabilityZone = getAvailabilityZoneFromSubnet(auth, subnetResource);
+
             return new Builder()
                     .persistent(true)
                     .type(resourceType())
@@ -108,13 +116,24 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
                     .params(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes.Builder()
                             .withVolumeSize(volumeTemplate.getSize())
                             .withVolumeType(volumeTemplate.getType())
-                            .withAvailabilityZone(auth.getCloudContext().getLocation().getAvailabilityZone().value())
+                            .withAvailabilityZone(availabilityZone)
                             .withDeleteOnTermination(Boolean.TRUE)
                             .withVolumes(template.getVolumes().stream().map(vol -> new VolumeSetAttributes.Volume(null, vol.getMount(), null, null))
                                     .collect(Collectors.toList()))
                             .build()))
                     .build();
         };
+    }
+
+    private String getAvailabilityZoneFromSubnet(AuthenticatedContext auth, CloudResource subnetResource) {
+        AmazonEC2Client amazonEC2Client = getAmazonEC2Client(auth);
+        DescribeSubnetsResult describeSubnetsResult = amazonEC2Client.describeSubnets(new DescribeSubnetsRequest()
+                .withSubnetIds(subnetResource.getName()));
+        return describeSubnetsResult.getSubnets().stream()
+                .filter(subnet -> subnetResource.getName().equals(subnet.getSubnetId()))
+                .map(Subnet::getAvailabilityZone)
+                .findFirst()
+                .orElse(auth.getCloudContext().getLocation().getAvailabilityZone().value());
     }
 
     @Override

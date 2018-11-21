@@ -44,6 +44,8 @@ import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.CreateVolumeResult;
 import com.amazonaws.services.ec2.model.DescribeImagesResult;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusResult;
+import com.amazonaws.services.ec2.model.DescribeSubnetsRequest;
+import com.amazonaws.services.ec2.model.DescribeSubnetsResult;
 import com.amazonaws.services.ec2.model.DescribeVolumesRequest;
 import com.amazonaws.services.ec2.model.DescribeVolumesResult;
 import com.amazonaws.services.ec2.model.InstanceState;
@@ -149,6 +151,7 @@ public class AwsLauchTest extends AwsComponentTest {
         setupDescribeInstanceStatusResponse();
         setupCreateVolumeResponse();
         setupDescribeVolumeResponse();
+        setupDescribeSubnetResponse();
 
         awsResourceConnector.launch(getAuthenticatedContext(), getStack(), persistenceNotifier, AdjustmentType.EXACT, Long.MAX_VALUE);
 
@@ -186,6 +189,20 @@ public class AwsLauchTest extends AwsComponentTest {
 
     private static int getNextVolumeId() {
         return volumeIndex++;
+    }
+
+    void setupDescribeSubnetResponse() {
+        when(amazonEC2Client.describeSubnets(any())).thenAnswer(
+                (Answer) invocation -> {
+                    DescribeSubnetsRequest request = (DescribeSubnetsRequest) invocation.getArgument(0);
+                    String subnetId = request.getSubnetIds().get(0);
+                    DescribeSubnetsResult result = new DescribeSubnetsResult()
+                            .withSubnets(new com.amazonaws.services.ec2.model.Subnet()
+                                    .withSubnetId(subnetId)
+                                    .withAvailabilityZone("eu-west-1c"));
+                    return result;
+                }
+        );
     }
 
     void setupDescribeVolumeResponse() {
