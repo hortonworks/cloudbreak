@@ -11,7 +11,7 @@
     "type": "worker",
     "flavor": "m5.xlarge",
     "cardinality": 3,
-    "volumeType": "EPHEMERAL",
+    "volumeType": "MAGNETIC",
     "volumeCount": 1,
     "volumeSizeGB": 100
   }
