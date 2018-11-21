@@ -88,7 +88,9 @@ public class AwsUpscaleService {
         List<Group> groupsWithNewInstances = getGroupsWithNewInstances(scaledGroups);
         List<CloudResource> newInstances = getNewInstances(scaledGroups, instances);
         List<CloudResource> reattachableVolumeSets = getReattachableVolumeSets(scaledGroups, resources);
-        awsComputeResourceService.buildComputeResourcesForUpscale(ac, stack, groupsWithNewInstances, newInstances, reattachableVolumeSets);
+        List<CloudResource> networkResources = resources.stream()
+                .filter(cloudResource -> ResourceType.AWS_SUBNET.equals(cloudResource.getType())).collect(Collectors.toList());
+        awsComputeResourceService.buildComputeResourcesForUpscale(ac, stack, groupsWithNewInstances, newInstances, reattachableVolumeSets, networkResources);
 
         return singletonList(new CloudResourceStatus(cfStackUtil.getCloudFormationStackResource(resources), ResourceStatus.UPDATED));
     }

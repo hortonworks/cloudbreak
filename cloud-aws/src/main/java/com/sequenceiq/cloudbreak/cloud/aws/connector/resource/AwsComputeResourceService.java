@@ -32,18 +32,20 @@ public class AwsComputeResourceService {
     private AwsContextService awsContextService;
 
     public List<CloudResourceStatus> buildComputeResourcesForLaunch(AuthenticatedContext ac, CloudStack stack, AdjustmentType adjustmentType, Long threshold,
-            List<CloudResource> instances) {
+            List<CloudResource> instances, List<CloudResource> networkResources) {
         CloudContext cloudContext = ac.getCloudContext();
         ResourceBuilderContext context = contextBuilder.contextInit(cloudContext, ac, stack.getNetwork(), null, true);
+        context.addNetworkResources(networkResources);
 
         awsContextService.addInstancesToContext(instances, context, stack.getGroups());
         return computeResourceService.buildResourcesForLaunch(context, ac, stack, adjustmentType, threshold);
     }
 
     public List<CloudResourceStatus> buildComputeResourcesForUpscale(AuthenticatedContext ac, CloudStack stack, List<Group> groupsWithNewInstances,
-            List<CloudResource> newInstances, List<CloudResource> reattachableVolumeSets) {
+            List<CloudResource> newInstances, List<CloudResource> reattachableVolumeSets, List<CloudResource> networkResources) {
         CloudContext cloudContext = ac.getCloudContext();
         ResourceBuilderContext context = contextBuilder.contextInit(cloudContext, ac, stack.getNetwork(), null, true);
+        context.addNetworkResources(networkResources);
 
         if (reattachableVolumeSets.isEmpty()) {
             awsContextService.addInstancesToContext(newInstances, context, groupsWithNewInstances);

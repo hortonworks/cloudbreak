@@ -156,7 +156,7 @@ public class AwsLaunchService {
             throw new CloudConnectorException(e.getMessage(), e);
         }
 
-        saveGeneratedSubnet(ac, stack, cFStackName, cfRetryClient, resourceNotifier);
+        List<CloudResource> networkResources = saveGeneratedSubnet(ac, stack, cFStackName, cfRetryClient, resourceNotifier);
         suspendAutoscalingGoupsWhenNewInstancesAreReady(ac, stack);
 
         AmazonAutoScalingRetryClient amazonASClient = awsClient.createAutoScalingRetryClient(credentialView, regionName);
@@ -166,7 +166,7 @@ public class AwsLaunchService {
             associatePublicIpsToGatewayInstances(stack, cFStackName, cfRetryClient, amazonEC2Client, instances);
         }
 
-        awsComputeResourceService.buildComputeResourcesForLaunch(ac, stack, adjustmentType, threshold, instances);
+        awsComputeResourceService.buildComputeResourcesForLaunch(ac, stack, adjustmentType, threshold, instances, networkResources);
         return awsResourceConnector.check(ac, instances);
     }
 
@@ -272,28 +272,35 @@ public class AwsLaunchService {
         return parameters;
     }
 
-    private void saveGeneratedSubnet(AuthenticatedContext ac, CloudStack stack, String cFStackName, AmazonCloudFormationRetryClient client,
+    private List<CloudResource> saveGeneratedSubnet(AuthenticatedContext ac, CloudStack stack, String cFStackName, AmazonCloudFormationRetryClient client,
             PersistenceNotifier resourceNotifier) {
+        List<CloudResource> resources = new ArrayList<>();
         AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork());
         if (awsNetworkView.isExistingVPC()) {
             String vpcId = awsNetworkView.getExistingVPC();
             CloudResource vpc = new CloudResource.Builder().type(ResourceType.AWS_VPC).name(vpcId).build();
             resourceNotifier.notifyAllocation(vpc, ac.getCloudContext());
+            resources.add(vpc);
         } else {
             String vpcId = getCreatedVpc(cFStackName, client);
             CloudResource vpc = new CloudResource.Builder().type(ResourceType.AWS_VPC).name(vpcId).build();
             resourceNotifier.notifyAllocation(vpc, ac.getCloudContext());
+            resources.add(vpc);
         }
 
         if (awsNetworkView.isExistingSubnet()) {
             String subnetId = awsNetworkView.getExistingSubnet();
             CloudResource subnet = new CloudResource.Builder().type(ResourceType.AWS_SUBNET).name(subnetId).build();
             resourceNotifier.notifyAllocation(subnet, ac.getCloudContext());
+            resources.add(subnet);
         } else {
             String subnetId = getCreatedSubnet(cFStackName, client);
             CloudResource subnet = new CloudResource.Builder().type(ResourceType.AWS_SUBNET).name(subnetId).build();
             resourceNotifier.notifyAllocation(subnet, ac.getCloudContext());
+            resources.add(subnet);
         }
+
+        return resources;
     }
 
     private String getCreatedVpc(String cFStackName, AmazonCloudFormationRetryClient client) {
