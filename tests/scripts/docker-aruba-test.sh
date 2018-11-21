@@ -7,6 +7,8 @@
 : ${PASSWORD_CLI:=cloudbreak}
 : ${DOCKER_TAG:=latest}
 : ${CLI_TEST_FILES:=spec/integration/*.rb}
+: ${BLUEPRINT_URL:? required}
+: ${RECIPE_URL:? required}
 
 readonly TEST_CONTAINER_NAME=aruba-test-runner
 
@@ -107,6 +109,8 @@ test-regression() {
        -e "INTEGRATIONTEST_PROXYCONFIG_PROXYUSER=$INTEGRATIONTEST_PROXYCONFIG_PROXYUSER" \
        -e "INTEGRATIONTEST_PROXYCONFIG_PROXYPASSWORD=$INTEGRATIONTEST_PROXYCONFIG_PROXYPASSWORD" \
        -e "CLI_TEST_FILES=$CLI_TEST_FILES" \
+       -e "BLUEPRINT_URL=$BLUEPRINT_URL" \
+       -e "RECIPE_URL=$RECIPE_URL" \
        hortonworks/cloud-cli-e2e:$DOCKER_TAG
     RESULT=$?
 }

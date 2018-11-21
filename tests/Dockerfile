@@ -13,13 +13,15 @@ RUN apk --no-cache --update add \
     openjdk8-jre-base \
     git \
     curl \
+    libressl \
+    libressl-dev \
+    dumb-init \
     tar \
     unzip \
     bash \
     build-base \
     libc-dev \
     linux-headers \
-    libressl-dev \
     libxml2-dev \
     libgcrypt-dev \
     libxslt-dev \
