@@ -12,6 +12,9 @@ vmResults["items"] = []
 
 vmMap = {}
 
+to_float = lambda s : float(s.replace(',', ''))
+to_int = lambda s : int(str(s).replace(',', ''))
+
 for vm in vms["items"]:
     vmMap[vm["sku"]] = vm
 
@@ -23,7 +26,7 @@ for term in terms["items"]:
     vm = vmMap[term["sku"]]
 
     vmAttributes = vm["attributes"]
-    if (vmAttributes["location"] != "US West (N. California)"):
+    if (vmAttributes["location"] != "US West (N. California)" and vmAttributes["location"] != "US East (N. Virginia)"):
         continue
 
     sku = vm["sku"]
@@ -32,7 +35,7 @@ for term in terms["items"]:
     item["value"] = vmAttributes["instanceType"]
     item["meta"]= {}
     item["meta"]["properties"] = {}
-    item["meta"]["properties"]["Memory"] = vmAttributes["memory"].split(' ')[0]
+    item["meta"]["properties"]["Memory"] = to_float(vmAttributes["memory"].split(' ')[0])
     item["meta"]["properties"]["Cpu"] = vmAttributes["vcpu"]
 
     priceDimensions = term["priceDimensions"]
@@ -85,10 +88,10 @@ for term in terms["items"]:
 
     item["meta"]["configs"].append({
        "volumeParameterType": "EPHEMERAL",
-       "minimumSize": minimumSize,
-       "maximumSize": maximumSize,
-       "minimumNumber": minimumNumber,
-       "maximumNumber": maximumNumber
+       "minimumSize": to_int(minimumSize),
+       "maximumSize": to_int(maximumSize),
+       "minimumNumber": to_int(minimumNumber),
+       "maximumNumber": to_int(maximumNumber)
     })
 
     vmResults["items"].append(item)
