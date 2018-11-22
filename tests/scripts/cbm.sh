@@ -1,14 +1,12 @@
 #!/usr/bin/env bash
 
 : ${GIT_VERSION:=latest}
-: ${GIT_TAG:=latest}
 : ${BASE_URL:=https://127.0.0.1}
 
 mock-image-tag() {
     declare desc="Set Cloudbreak Mock Docker image tag"
 
     echo "GitHub First Parent Tag is: ${GIT_VERSION}"
-    echo "GitHub Tag is: ${GIT_TAG}"
     echo "CircleCI Branch is: ${CIRCLE_BRANCH}"
     echo "CircleCI Tag is: ${CIRCLE_TAG}"
 
@@ -33,7 +31,7 @@ mock-start-logs() {
 mock-start() {
     declare desc="Start Cloudbreak Mock"
 
-    docker-compose -f docker-compose.yml -p cbreak up -d
+    docker-compose -f tmp/docker-compose.yml -p cbreak up -d
     sleep 30s
 }
 
