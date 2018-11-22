@@ -17,6 +17,7 @@ public class KerberosConfigToKerberosRequestConverter extends AbstractConversion
         config.setPassword("");
         config.setDomain(source.getDomain());
         config.setNameServers(source.getNameServers());
+        config.setVerifyKdcTrust(source.getVerifyKdcTrust());
         switch (source.getType()) {
             case CB_MANAGED:
                 config.setMasterKey("");

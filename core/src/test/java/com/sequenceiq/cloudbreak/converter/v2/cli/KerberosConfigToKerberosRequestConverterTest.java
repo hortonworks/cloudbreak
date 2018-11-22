@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.v2.cli;
 
+import static org.junit.Assert.assertFalse;
+
 import org.junit.Test;
 
 import com.google.common.collect.Lists;
@@ -35,6 +37,7 @@ public class KerberosConfigToKerberosRequestConverterTest extends AbstractConver
         config.setDomain("");
         config.setNameServers("");
         config.setTcpAllowed(true);
+        config.setVerifyKdcTrust(true);
         KerberosRequest request = underTest.convert(config);
         assertAllFieldsNotNull(request, Lists.newArrayList("admin", "descriptor", "krb5Conf", "masterKey"));
     }
@@ -51,6 +54,7 @@ public class KerberosConfigToKerberosRequestConverterTest extends AbstractConver
         config.setDomain("");
         config.setNameServers("");
         config.setTcpAllowed(true);
+        config.setVerifyKdcTrust(true);
         KerberosRequest request = underTest.convert(config);
         assertAllFieldsNotNull(request, Lists.newArrayList("admin", "ldapUrl", "containerDn", "descriptor", "krb5Conf", "masterKey"));
     }
@@ -66,7 +70,9 @@ public class KerberosConfigToKerberosRequestConverterTest extends AbstractConver
         config.setDomain("");
         config.setNameServers("");
         config.setTcpAllowed(true);
+        config.setVerifyKdcTrust(false);
         KerberosRequest request = underTest.convert(config);
         assertAllFieldsNotNull(request, Lists.newArrayList("admin", "url", "adminUrl", "realm", "ldapUrl", "containerDn", "masterKey", "principal"));
+        assertFalse(request.getVerifyKdcTrust());
     }
 }

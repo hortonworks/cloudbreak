@@ -439,6 +439,7 @@ public class TestUtil {
         kerberosConfig.setMasterKey("mk");
         kerberosConfig.setAdmin("admin");
         kerberosConfig.setPassword("passwd");
+        kerberosConfig.setVerifyKdcTrust(true);
         kerberosConfig.setTcpAllowed(true);
         return kerberosConfig;
     }
