@@ -26,6 +26,8 @@ public class VolumeSetAttributes {
 
     private List<Volume> volumes;
 
+    private String uuids;
+
     @JsonCreator
     public VolumeSetAttributes(@JsonProperty("availabilityZone") String availabilityZone, @JsonProperty("volumeSize") Integer volumeSize,
             @JsonProperty("volumeType") String volumeType, @JsonProperty("deleteOnTermination") Boolean deleteOnTermination,
@@ -86,23 +88,25 @@ public class VolumeSetAttributes {
         this.volumes = volumes;
     }
 
+    public void setUuids(String uuids) {
+        this.uuids = uuids;
+    }
+
+    public String getUuids() {
+        return uuids;
+    }
+
     @JsonAutoDetect(fieldVisibility = ANY, getterVisibility = NONE, setterVisibility = NONE)
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Volume {
 
         private String id;
 
-        private String mounthPath;
-
-        private String uuid;
-
         private String device;
 
-        public Volume(@JsonProperty("id") String id, @JsonProperty("mounthPath") String mounthPath, @JsonProperty("uuid") String uuid,
+        public Volume(@JsonProperty("id") String id,
                 @JsonProperty("device") String device) {
             this.id = id;
-            this.mounthPath = mounthPath;
-            this.uuid = uuid;
             this.device = device;
         }
 
@@ -112,22 +116,6 @@ public class VolumeSetAttributes {
 
         public void setId(String id) {
             this.id = id;
-        }
-
-        public String getMounthPath() {
-            return mounthPath;
-        }
-
-        public void setMounthPath(String mounthPath) {
-            this.mounthPath = mounthPath;
-        }
-
-        public String getUuid() {
-            return uuid;
-        }
-
-        public void setUuid(String uuid) {
-            this.uuid = uuid;
         }
 
         public void setDevice(String device) {

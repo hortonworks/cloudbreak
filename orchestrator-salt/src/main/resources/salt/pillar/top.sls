@@ -1,6 +1,5 @@
 base:
   '*':
-    - disk.disk
     - ambari.config
     - ambari.repo
     - ambari.gpl

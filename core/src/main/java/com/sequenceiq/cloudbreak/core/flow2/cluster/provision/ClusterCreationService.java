@@ -121,4 +121,9 @@ public class ClusterCreationService {
                     ? exception.getCause().getMessage() : exception.getMessage();
         }
     }
+
+    public void mountDisks(Stack stack) {
+        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.MOUNTING_DISKS);
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_DISK_MOUNT, UPDATE_IN_PROGRESS.name());
+    }
 }

@@ -27,6 +27,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.BootstrapMachin
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.BootstrapMachinesSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.HostMetadataSetupRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.HostMetadataSetupSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.MountDisksRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.MountDisksSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartAmbariServicesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartAmbariServicesSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UploadRecipesRequest;
@@ -70,11 +72,27 @@ public class ClusterCreationActions {
         };
     }
 
+    @Bean(name = "MOUNT_DISKS_STATE")
+    public Action<?, ?> collectingMountDisksAction() {
+        return new AbstractStackCreationAction<>(HostMetadataSetupSuccess.class) {
+            @Override
+            protected void doExecute(StackContext context, HostMetadataSetupSuccess payload, Map<Object, Object> variables) {
+                clusterCreationService.mountDisks(context.getStack());
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(StackContext context) {
+                return new MountDisksRequest(context.getStack().getId());
+            }
+        };
+    }
+
     @Bean(name = "UPLOAD_RECIPES_STATE")
     public Action<?, ?> uploadRecipesAction() {
-        return new AbstractClusterAction<>(HostMetadataSetupSuccess.class) {
+        return new AbstractClusterAction<>(MountDisksSuccess.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, HostMetadataSetupSuccess payload, Map<Object, Object> variables) {
+            protected void doExecute(ClusterViewContext context, MountDisksSuccess payload, Map<Object, Object> variables) {
                 sendEvent(context);
             }
 

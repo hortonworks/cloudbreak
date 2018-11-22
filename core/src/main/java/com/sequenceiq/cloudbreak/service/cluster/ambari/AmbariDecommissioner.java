@@ -367,7 +367,7 @@ public class AmbariDecommissioner {
                 String hostGroupName = hostGroup.getName();
                 List<HostMetadata> hostListForDecommission = hostFilterService.filterHostsForDecommission(cluster, removableHostsInHostGroup, hostGroupName);
                 boolean hostGroupContainsDatanode = hostGroupNodesAreDataNodes(blueprintMap, hostGroupName);
-                int replication = hostGroupContainsDatanode ?  getReplicationFactor(ambariClient, hostGroupName) : NO_REPLICATION;
+                int replication = hostGroupContainsDatanode ? getReplicationFactor(ambariClient, hostGroupName) : NO_REPLICATION;
                 if (hostListForDecommission.size() < removableHostsInHostGroup.size()) {
                     List<HostMetadata> notRecommendedRemovableNodes = removableHostsInHostGroup.stream()
                             .filter(hostMetadata -> !hostListForDecommission.contains(hostMetadata))
@@ -596,7 +596,7 @@ public class AmbariDecommissioner {
                 .map(VolumeSetAttributes::getDeleteOnTermination)
                 .orElse(Boolean.TRUE);
         COMPONENTS_NEED_TO_DECOMMISSION.keySet().forEach(component -> {
-            if (!decomissionVolumes && component.equals(DATANODE)) {
+            if (!decomissionVolumes) {
                 return;
             }
 

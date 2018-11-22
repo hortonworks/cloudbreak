@@ -1,7 +1,13 @@
 #!/usr/bin/env bash
-source mount-disks-common.sh
+source format-and-mount-common.sh
 
-SEMAPHORE_FILE=/var/cb-mount-executed
+# INPUT
+#   nothing
+#
+# OUTPUT
+#   SEMAPHORE file
+#   STDOUT: nothing
+
 
 main() {
     echo "$(date +%Y-%m-%d:%H:%M:%S) - semaphore file created" >> $SEMAPHORE_FILE

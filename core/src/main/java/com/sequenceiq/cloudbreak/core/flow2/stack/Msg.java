@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.stack;
 public enum Msg {
     STACK_INFRASTRUCTURE_BOOTSTRAP("stack.infrastructure.bootstrap"),
     STACK_INFRASTRUCTURE_METADATA_SETUP("stack.infrastructure.metadata.setup"),
+    STACK_INFRASTRUCTURE_DISK_MOUNT("stack.infrastructure.disk.mount"),
     STACK_INFRASTRUCTURE_STARTING("stack.infrastructure.starting"),
     STACK_INFRASTRUCTURE_STARTED("stack.infrastructure.started"),
     STACK_BILLING_STARTED("stack.billing.started"),
@@ -22,6 +23,7 @@ public enum Msg {
     STACK_METADATA_SETUP_BILLING_CHANGED("stack.metadata.setup.billing.changed"),
     STACK_BOOTSTRAP_NEW_NODES("stack.bootstrap.new.nodes"),
     STACK_UPSCALE_FINISHED("stack.upscale.finished"),
+    STACK_MOUNT_DISKS_ON_NEW_HOSTS("stack.mount.disks.on.new.hosts"),
     STACK_DOWNSCALE_INSTANCES("stack.downscale.instances"),
     STACK_DOWNSCALE_SUCCESS("stack.downscale.success"),
     STACK_DOWNSCALE_FAILED("stack.downscale.failed"),

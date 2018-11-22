@@ -28,6 +28,6 @@ public interface ResourceRepository extends DisabledBaseRepository<Resource, Lon
     List<Resource> findAllByStackId(@Param("stackId") long stackId);
 
     @Query("SELECT r FROM Resource r WHERE r.stack.id = :stackId AND r.instanceId = :instanceId AND r.resourceType = :type")
-    List<Resource> findAllByStackIdAndInstanceIdAndType(@Param("stackId") long stackId, @Param("instanceId") String instanceId,
+    Resource findByStackIdAndInstanceIdAndType(@Param("stackId") long stackId, @Param("instanceId") String instanceId,
             @Param("type") ResourceType type);
 }

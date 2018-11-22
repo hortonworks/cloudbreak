@@ -1,7 +1,6 @@
 base:
   '*':
     - pkg-mgr-proxy
-    - disk
     - unbound
     - java
     - metadata

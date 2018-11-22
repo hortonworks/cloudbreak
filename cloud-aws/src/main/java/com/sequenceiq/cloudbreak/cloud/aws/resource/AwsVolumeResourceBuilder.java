@@ -37,6 +37,7 @@ import com.amazonaws.services.ec2.model.ModifyInstanceAttributeResult;
 import com.amazonaws.services.ec2.model.Subnet;
 import com.amazonaws.services.ec2.model.TagSpecification;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.AwsPlatformParameters.AwsDiskType;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsTagPreparationService;
 import com.sequenceiq.cloudbreak.cloud.aws.context.AwsContext;
 import com.sequenceiq.cloudbreak.cloud.aws.encryption.EncryptedSnapshotService;
@@ -84,6 +85,10 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
     @Override
     public List<CloudResource> create(AwsContext context, long privateId, AuthenticatedContext auth, Group group, Image image) {
         LOGGER.info("Create volume resources");
+        String volumeType = getVolumeType(group);
+        if (AwsDiskType.Ephemeral.value().equalsIgnoreCase(volumeType)) {
+            return List.of();
+        }
         List<CloudResource> computeResources = context.getComputeResources(privateId);
         Optional<CloudResource> reattachableVolumeSet = computeResources.stream()
                 .filter(resource -> ResourceType.AWS_VOLUMESET.equals(resource.getType()))
@@ -92,6 +97,13 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
         CloudResource subnet = context.getNetworkResources().stream()
                 .filter(cloudResource -> ResourceType.AWS_SUBNET.equals(cloudResource.getType())).findFirst().get();
         return List.of(reattachableVolumeSet.orElseGet(createVolumeSet(privateId, auth, group, subnet)));
+    }
+
+    public String getVolumeType(Group group) {
+        CloudInstance instance = group.getReferenceInstanceConfiguration();
+        InstanceTemplate template = instance.getTemplate();
+        Volume volumeTemplate = template.getVolumes().iterator().next();
+        return volumeTemplate.getType();
     }
 
     private Supplier<CloudResource> createVolumeSet(long privateId, AuthenticatedContext auth, Group group, CloudResource subnetResource) {
@@ -118,7 +130,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
                             .withVolumeType(volumeTemplate.getType())
                             .withAvailabilityZone(availabilityZone)
                             .withDeleteOnTermination(Boolean.TRUE)
-                            .withVolumes(template.getVolumes().stream().map(vol -> new VolumeSetAttributes.Volume(null, vol.getMount(), null, null))
+                            .withVolumes(template.getVolumes().stream().map(vol -> new VolumeSetAttributes.Volume(null, null))
                                     .collect(Collectors.toList()))
                             .build()))
                     .build();
@@ -163,7 +175,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
                     .map(request -> intermediateBuilderExecutor.submit(() -> {
                         CreateVolumeResult result = client.createVolume(request);
                         String volumeId = result.getVolume().getVolumeId();
-                        volumeSetMap.get(resource.getName()).add(new VolumeSetAttributes.Volume(volumeId, null, null, generator.next()));
+                        volumeSetMap.get(resource.getName()).add(new VolumeSetAttributes.Volume(volumeId, generator.next()));
                     }))
                     .collect(Collectors.toList()));
         }

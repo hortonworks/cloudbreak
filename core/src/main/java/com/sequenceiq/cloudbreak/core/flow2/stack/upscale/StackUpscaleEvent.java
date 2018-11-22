@@ -9,6 +9,7 @@ import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.BootstrapNewNodesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ExtendHostMetadataResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.resource.MountDisksOnNewHostsResult;
 
 public enum StackUpscaleEvent implements FlowEvent {
     ADD_INSTANCES_EVENT("STACK_UPSCALE_TRIGGER_EVENT"),
@@ -31,6 +32,8 @@ public enum StackUpscaleEvent implements FlowEvent {
     EXTEND_HOST_METADATA_FINISHED_EVENT(EventSelectorUtil.selector(ExtendHostMetadataResult.class)),
     EXTEND_HOST_METADATA_FINISHED_FAILURE_EVENT("EXTEND_CONSUL_METADATA_FINISHED_FAILURE_EVENT"),
     EXTEND_HOST_METADATA_FAILURE_EVENT(EventSelectorUtil.failureSelector(ExtendHostMetadataResult.class)),
+    MOUNT_DISKS_ON_NEW_HOSTS_EVENT(EventSelectorUtil.selector(MountDisksOnNewHostsResult.class)),
+    MOUNT_DISKS_ON_NEW_HOSTS_FAILURE_EVENT(EventSelectorUtil.failureSelector(MountDisksOnNewHostsResult.class)),
     UPSCALE_FINALIZED_EVENT("UPSCALESTACKFINALIZED"),
     UPSCALE_FAIL_HANDLED_EVENT("UPSCALEFAILHANDLED");
 

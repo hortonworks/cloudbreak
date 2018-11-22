@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.orchestrator.model;
 
-import java.util.Set;
-
 public class Node {
     private final String privateIp;
 
@@ -13,10 +11,24 @@ public class Node {
 
     private String hostGroup;
 
-    private Set<String> dataVolumes;
+    private String dataVolumes;
+
+    private String serialIds;
+
+    private String fstab;
+
+    private String uuids;
 
     public Node(String privateIp, String publicIp, String fqdn, String hostGroup) {
         this(privateIp, publicIp, fqdn, null, hostGroup);
+    }
+
+    public Node(String privateIp, String publicIp, String fqdn, String hostGroup, String dataVolumes, String serialIds, String fstab, String uuids) {
+        this(privateIp, publicIp, fqdn, null, hostGroup);
+        this.dataVolumes = dataVolumes;
+        this.serialIds = serialIds;
+        this.fstab = fstab;
+        this.uuids = uuids;
     }
 
     public Node(String privateIp, String publicIp, String fqdn, String domain, String hostGroup) {
@@ -29,13 +41,6 @@ public class Node {
     public Node(String privateIp, String publicIp) {
         this.privateIp = privateIp;
         this.publicIp = publicIp;
-    }
-
-    public Node(String privateIp, String publicIp, String hostname, Set<String> dataVolumes) {
-        this.privateIp = privateIp;
-        this.publicIp = publicIp;
-        this.hostname = hostname;
-        this.dataVolumes = dataVolumes;
     }
 
     public String getPrivateIp() {
@@ -54,8 +59,12 @@ public class Node {
         this.hostname = hostname;
     }
 
-    public Set<String> getDataVolumes() {
+    public String getDataVolumes() {
         return dataVolumes;
+    }
+
+    public String getSerialIds() {
+        return serialIds;
     }
 
     public String getHostGroup() {
@@ -66,6 +75,14 @@ public class Node {
         return domain;
     }
 
+    public String getFstab() {
+        return fstab;
+    }
+
+    public String getUuids() {
+        return uuids;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("Node{");
@@ -74,7 +91,10 @@ public class Node {
         sb.append(", hostname='").append(hostname).append('\'');
         sb.append(", domain='").append(domain).append('\'');
         sb.append(", hostGroup='").append(hostGroup).append('\'');
-        sb.append(", dataVolumes=").append(dataVolumes);
+        sb.append(", dataVolumes='").append(dataVolumes).append('\'');
+        sb.append(", serialIds='").append(serialIds).append('\'');
+        sb.append(", fstab='").append(fstab).append('\'');
+        sb.append(", uuids='").append(uuids).append('\'');
         sb.append('}');
         return sb.toString();
     }

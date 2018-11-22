@@ -62,4 +62,7 @@ public interface HostOrchestrator extends HostRecipeExecutor {
             throws CloudbreakOrchestratorFailedException;
 
     byte[] getStateConfigZip() throws IOException;
+
+    Map<String, Map<String, String>> formatAndMountDisksOnNodes(List<GatewayConfig> allGateway, Set<Node> targets, ExitCriteriaModel exitModel,
+            String platformVariant) throws CloudbreakOrchestratorFailedException;
 }
