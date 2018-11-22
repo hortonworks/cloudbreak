@@ -82,6 +82,8 @@ func getNetworkMode(c *cli.Context) cloud.NetworkMode {
 		return cloud.EXISTING_NETWORK_EXISTING_SUBNET
 	case "legacy-network":
 		return cloud.LEGACY_NETWORK
+	case "shared-network":
+		return cloud.SHARED_NETWORK
 	default:
 		return cloud.NO_NETWORK
 	}
@@ -126,9 +128,10 @@ func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string)
 	template := model.StackV2Request{
 		Cluster: &model.ClusterV2Request{
 			Ambari: &model.AmbariV2Request{
-				BlueprintName: "____",
-				UserName:      &(&types.S{S: "____"}).S,
-				Password:      &(&types.S{S: ""}).S,
+				BlueprintName:     "____",
+				UserName:          &(&types.S{S: "____"}).S,
+				Password:          &(&types.S{S: ""}).S,
+				ValidateBlueprint: &(&types.B{B: false}).B,
 			},
 		},
 		General: &model.GeneralSettings{
@@ -335,6 +338,9 @@ func preExtendTemplateWithOptionalBlocks(template *model.StackV2Request, boolFin
 			Descriptor: "____",
 			Krb5Conf:   "____",
 		}
+	}
+	if withBlueprintValidation := boolFinder(fl.FlWithBlueprintValidation.Name); withBlueprintValidation {
+		template.Cluster.Ambari.ValidateBlueprint = &(&types.B{B: true}).B
 	}
 	extendTemplateWithStorageType(template, storageType)
 }
