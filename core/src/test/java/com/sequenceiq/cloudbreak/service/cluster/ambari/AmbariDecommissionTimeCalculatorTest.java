@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.service.cluster.ambari;
 
 import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -24,6 +26,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AmbariDecommissionTimeCalculatorTest {
@@ -32,6 +35,9 @@ public class AmbariDecommissionTimeCalculatorTest {
 
     @Mock
     private FlowMessageService flowMessageService;
+
+    @Mock
+    private DefaultRootVolumeSizeProvider defaultRootVolumeSizeProvider;
 
     @InjectMocks
     private AmbariDecommissionTimeCalculator underTest;
@@ -58,6 +64,20 @@ public class AmbariDecommissionTimeCalculatorTest {
         List<HostMetadata> hostMetadata = createHostMetadataList();
         Map<String, Map<Long, Long>> dfsSpace = createDfsSpaceMapsWithHalfUsage();
         long usedSpace = 5128 * BYTE_TO_GB;
+
+        underTest.calculateDecommissioningTime(stack, hostMetadata, dfsSpace, usedSpace);
+
+        verify(flowMessageService).fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_DECOMMISSIONING_TIME, AVAILABLE.name(), "5 hours");
+    }
+
+    @Test
+    public void testCalculateWithNullRootVolumeSize() {
+        Stack stack = TestUtil.stack();
+        List<HostMetadata> hostMetadata = createHostMetadataList();
+        hostMetadata.forEach(data -> data.getHostGroup().getConstraint().getInstanceGroup().getTemplate().setRootVolumeSize(null));
+        Map<String, Map<Long, Long>> dfsSpace = createDfsSpaceMapsWithHalfUsage();
+        long usedSpace = 5128 * BYTE_TO_GB;
+        when(defaultRootVolumeSizeProvider.getForPlatform(anyString())).thenReturn(50);
 
         underTest.calculateDecommissioningTime(stack, hostMetadata, dfsSpace, usedSpace);
 

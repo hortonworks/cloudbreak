@@ -11,6 +11,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -32,6 +33,9 @@ import com.sequenceiq.cloudbreak.util.PasswordUtil;
 public class ClusterRequestToClusterConverter extends AbstractConversionServiceAwareConverter<ClusterRequest, Cluster> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterRequestToClusterConverter.class);
+
+    @Value("${cb.ambari.username:cloudbreak}")
+    private String ambariUserName;
 
     @Inject
     private FileSystemConfigService fileSystemConfigService;
@@ -60,7 +64,7 @@ public class ClusterRequestToClusterConverter extends AbstractConversionServiceA
         cluster.setConfigStrategy(source.getConfigStrategy());
         cluster.setEmailTo(source.getEmailTo());
         cluster.setCloudbreakAmbariPassword(PasswordUtil.generatePassword());
-        cluster.setCloudbreakAmbariUser("cloudbreak");
+        cluster.setCloudbreakAmbariUser(ambariUserName);
         FileSystemBase fileSystem = source.getFileSystem();
         convertAttributes(source, cluster);
         if (fileSystem != null) {

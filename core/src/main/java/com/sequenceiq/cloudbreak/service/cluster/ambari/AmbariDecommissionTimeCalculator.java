@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
+import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
 
 @Component
 public class AmbariDecommissionTimeCalculator {
@@ -25,11 +26,17 @@ public class AmbariDecommissionTimeCalculator {
     @Inject
     private FlowMessageService flowMessageService;
 
+    @Inject
+    private DefaultRootVolumeSizeProvider defaultRootVolumeSizeProvider;
+
     public void calculateDecommissioningTime(Stack stack, Collection<HostMetadata> filteredHostList, Map<String, Map<Long, Long>> dfsSpace, long usedSpace) {
         Optional<HostMetadata> aHostMetadata = filteredHostList.stream().findFirst();
         if (aHostMetadata.isPresent()) {
             Template template = aHostMetadata.get().getHostGroup().getConstraint().getInstanceGroup().getTemplate();
-            long eachNodeCapacityInGB = template.getVolumeCount() * template.getVolumeSize() + template.getRootVolumeSize();
+            int rootVolumeSize = template.getRootVolumeSize() == null
+                    ? defaultRootVolumeSizeProvider.getForPlatform(stack.cloudPlatform())
+                    : template.getRootVolumeSize();
+            long eachNodeCapacityInGB = template.getVolumeCount() * template.getVolumeSize() + rootVolumeSize;
             long usedGlobalDfsSpace = dfsSpace.values().stream()
                     .mapToLong(dfsSpaceByUsed -> dfsSpaceByUsed.values().stream().mapToLong(Long::longValue).sum())
                     .sum();
