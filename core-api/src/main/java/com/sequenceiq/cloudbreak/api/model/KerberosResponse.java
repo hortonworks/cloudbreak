@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.api.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -13,22 +13,22 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonInclude(Include.NON_NULL)
 public class KerberosResponse extends KerberosBase {
 
-    @ApiModelProperty(ModelDescriptions.StackModelDescription.KERBEROS_MASTER_KEY)
+    @ApiModelProperty(StackModelDescription.KERBEROS_MASTER_KEY)
     private SecretResponse masterKey;
 
-    @ApiModelProperty(ModelDescriptions.StackModelDescription.KERBEROS_ADMIN)
+    @ApiModelProperty(StackModelDescription.KERBEROS_ADMIN)
     private SecretResponse admin;
 
-    @ApiModelProperty(ModelDescriptions.StackModelDescription.KERBEROS_PASSWORD)
+    @ApiModelProperty(StackModelDescription.KERBEROS_PASSWORD)
     private SecretResponse password;
 
-    @ApiModelProperty(ModelDescriptions.StackModelDescription.KERBEROS_PRINCIPAL)
+    @ApiModelProperty(StackModelDescription.KERBEROS_PRINCIPAL)
     private SecretResponse principal;
 
-    @ApiModelProperty(ModelDescriptions.StackModelDescription.DESCRIPTOR)
+    @ApiModelProperty(StackModelDescription.DESCRIPTOR)
     private SecretResponse descriptor;
 
-    @ApiModelProperty(ModelDescriptions.StackModelDescription.KRB_5_CONF)
+    @ApiModelProperty(StackModelDescription.KRB_5_CONF)
     private SecretResponse krb5Conf;
 
     public SecretResponse getMasterKey() {

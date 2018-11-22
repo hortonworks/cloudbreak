@@ -37,6 +37,9 @@ public class ClusterRequestToClusterConverter extends AbstractConversionServiceA
     @Value("${cb.ambari.username:cloudbreak}")
     private String ambariUserName;
 
+    @Value("${cb.ambari.dp.username:dpapps}")
+    private String dpUsername;
+
     @Inject
     private FileSystemConfigService fileSystemConfigService;
 
@@ -61,8 +64,10 @@ public class ClusterRequestToClusterConverter extends AbstractConversionServiceA
             cluster.setKerberosConfig(kerberosConfig);
         }
         cluster.setConfigStrategy(source.getConfigStrategy());
-        cluster.setCloudbreakAmbariPassword(PasswordUtil.generatePassword());
         cluster.setCloudbreakAmbariUser(ambariUserName);
+        cluster.setCloudbreakAmbariPassword(PasswordUtil.generatePassword());
+        cluster.setDpAmbariUser(dpUsername);
+        cluster.setDpAmbariPassword(PasswordUtil.generatePassword());
         FileSystemBase fileSystem = source.getFileSystem();
         convertAttributes(source, cluster);
         if (fileSystem != null) {
