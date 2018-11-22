@@ -1,14 +1,18 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.network;
 
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getCustomNetworkId;
+import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getSharedProjectId;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getSubnetId;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.isLegacyNetwork;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.isNewNetworkAndSubnet;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.isNewSubnetInExistingNetwork;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.noFirewallRules;
+import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import org.springframework.stereotype.Service;
 
@@ -67,13 +71,25 @@ public class GcpFirewallInternalResourceBuilder extends AbstractGcpNetworkBuilde
             firewall.setSourceRanges(Collections.singletonList(existingNetwork.getIPv4Range()));
         } else if (isNewNetworkAndSubnet(network) || isNewSubnetInExistingNetwork(network)) {
             firewall.setSourceRanges(Collections.singletonList(network.getSubnet().getCidr()));
-        } else {
+        } else if (isNoneEmpty(getSharedProjectId(network))) {
+            Get sn = context.getCompute().subnetworks().get(getSharedProjectId(network), context.getLocation().getRegion().value(), getSubnetId(network));
+            com.google.api.services.compute.model.Subnetwork existingSubnet = sn.execute();
+            List<String> strings = new ArrayList<>();
+            strings.add(existingSubnet.getIpCidrRange());
+            firewall.setSourceRanges(strings);
+        } else if (isNoneEmpty(getSubnetId(network))) {
             Get sn = context.getCompute().subnetworks().get(projectId, context.getLocation().getRegion().value(), getSubnetId(network));
             com.google.api.services.compute.model.Subnetwork existingSubnet = sn.execute();
             firewall.setSourceRanges(Collections.singletonList(existingSubnet.getIpCidrRange()));
         }
-        firewall.setNetwork(String.format("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s", projectId,
-                context.getParameter(GcpNetworkResourceBuilder.NETWORK_NAME, String.class)));
+        if (isNoneEmpty(getSharedProjectId(network))) {
+            firewall.setNetwork(String.format("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s",
+                    getSharedProjectId(network),
+                    context.getParameter(GcpNetworkResourceBuilder.NETWORK_NAME, String.class)));
+        } else {
+            firewall.setNetwork(String.format("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s", projectId,
+                    context.getParameter(GcpNetworkResourceBuilder.NETWORK_NAME, String.class)));
+        }
         Insert firewallInsert = context.getCompute().firewalls().insert(projectId, firewall);
         try {
             Operation operation = firewallInsert.execute();
