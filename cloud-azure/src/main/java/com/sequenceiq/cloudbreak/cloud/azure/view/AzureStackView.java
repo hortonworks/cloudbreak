@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 
 public class AzureStackView {
 
-    private static final int DEFAULT_FAULT_DOMAIN_COUNTER = 3;
+    private static final int DEFAULT_FAULT_DOMAIN_COUNTER = 2;
 
     private static final int DEFAULT_UPDATE_DOMAIN_COUNTER = 20;
 
