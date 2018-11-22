@@ -341,7 +341,7 @@ public class ClusterService {
     }
 
     public void delete(Long stackId, Boolean withStackDelete, Boolean deleteDependencies) {
-        Stack stack = stackService.getById(stackId);
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         if (stack.getCluster() == null || stack.getCluster() != null && Status.DELETE_COMPLETED.equals(stack.getCluster().getStatus())) {
             throw new BadRequestException("Clusters is already deleted.");
         }
