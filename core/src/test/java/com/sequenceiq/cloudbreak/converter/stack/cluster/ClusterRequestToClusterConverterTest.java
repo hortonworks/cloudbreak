@@ -13,6 +13,7 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.powermock.reflect.Whitebox;
 import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
@@ -42,6 +43,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
     @Before
     public void setUp() {
         underTest = new ClusterRequestToClusterConverter();
+        Whitebox.setInternalState(underTest, "ambariUserName", "cloudbreak");
         MockitoAnnotations.initMocks(this);
         when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(100L);
     }
