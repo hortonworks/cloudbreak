@@ -73,6 +73,12 @@ type ClusterResponse struct {
 	// description of the resource
 	Description string `json:"description,omitempty"`
 
+	// ambari password for Dataplane
+	DpAmbariPassword *SecretResponse `json:"dpAmbariPassword,omitempty"`
+
+	// ambari username for Dataplane
+	DpAmbariUser *SecretResponse `json:"dpAmbariUser,omitempty"`
+
 	// executor type of cluster
 	ExecutorType string `json:"executorType,omitempty"`
 
@@ -174,6 +180,10 @@ type ClusterResponse struct {
 
 /* polymorph ClusterResponse description false */
 
+/* polymorph ClusterResponse dpAmbariPassword false */
+
+/* polymorph ClusterResponse dpAmbariUser false */
+
 /* polymorph ClusterResponse executorType false */
 
 /* polymorph ClusterResponse extendedBlueprintText false */
@@ -256,6 +266,16 @@ func (m *ClusterResponse) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateCustomContainers(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateDpAmbariPassword(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateDpAmbariUser(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -497,6 +517,44 @@ func (m *ClusterResponse) validateCustomContainers(formats strfmt.Registry) erro
 		if err := m.CustomContainers.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("customContainers")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *ClusterResponse) validateDpAmbariPassword(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.DpAmbariPassword) { // not required
+		return nil
+	}
+
+	if m.DpAmbariPassword != nil {
+
+		if err := m.DpAmbariPassword.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("dpAmbariPassword")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *ClusterResponse) validateDpAmbariUser(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.DpAmbariUser) { // not required
+		return nil
+	}
+
+	if m.DpAmbariUser != nil {
+
+		if err := m.DpAmbariUser.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("dpAmbariUser")
 			}
 			return err
 		}
