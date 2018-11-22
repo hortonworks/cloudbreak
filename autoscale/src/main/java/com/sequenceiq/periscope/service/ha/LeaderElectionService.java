@@ -130,7 +130,9 @@ public class LeaderElectionService {
                             long limit = clock.getCurrentTime() - heartbeatThresholdRate;
                             List<PeriscopeNode> activeNodes = periscopeNodeRepository.findAllByLastUpdatedIsGreaterThan(limit);
                             reallocateOrphanClusters(activeNodes);
-                            cleanupInactiveNodesByActiveNodes(activeNodes);
+                            if (!activeNodes.isEmpty()) {
+                                cleanupInactiveNodesByActiveNodes(activeNodes);
+                            }
                         } catch (RuntimeException e) {
                             LOGGER.error("Error happend during fetching cluster allocating them to nodes", e);
                         }
