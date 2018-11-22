@@ -1,4 +1,5 @@
 {%- from 'ambari/settings.sls' import ambari with context %}
+{%- from 'nodes/settings.sls' import host with context %}
 
 /etc/unbound/conf.d/00-cluster.conf:
   file.managed:
@@ -19,6 +20,8 @@
     - makedirs: True
     - source: salt://unbound/config/60-domain-dns.conf
     - template: jinja
+    - context:
+      private_address: {{ host.private_address }}
 
 include_access_config:
   file.replace:
