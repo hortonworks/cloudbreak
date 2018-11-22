@@ -13,7 +13,9 @@ func (p *GcpProvider) GetNetworkParamatersTemplate(mode cloud.NetworkMode) map[s
 	case cloud.EXISTING_NETWORK_EXISTING_SUBNET:
 		return map[string]interface{}{"networkId": "____", "subnetId": "____", "noPublicIp": false, "noFirewallRules": false}
 	case cloud.LEGACY_NETWORK:
-		return map[string]interface{}{"networkId": ""}
+		return map[string]interface{}{"networkId": "____"}
+	case cloud.SHARED_NETWORK:
+		return map[string]interface{}{"sharedProjectId": "____", "networkId": "____", "subnetId": "____", "noFirewallRules": true}
 	default:
 		return nil
 	}
