@@ -164,11 +164,11 @@ public class AzurePlatformParameters implements PlatformParameters {
                 instanceGroupParameterResponse.setGroupName(groupParameterRequest.getGroupName());
                 instanceGroupParameterResponse.setParameters(groupParameterRequest.getParameters());
 
-            } else if (groupParameterRequest.getNodeCount() > 1) {
+            } else {
                 Map<String, Object> parameters = groupParameterRequest.getParameters();
 
                 Map<String, Object> availabilitySet = new HashMap<>();
-                availabilitySet.put("name", String.format("%s-%s-as", groupParameterRequest.getGroupName(), groupParameterRequest.getStackName()));
+                availabilitySet.put("name", String.format("%s-%s-as", groupParameterRequest.getStackName(), groupParameterRequest.getGroupName()));
                 availabilitySet.put("faultDomainCount", DEFAULT_FAULT_DOMAIN_COUNTER);
                 availabilitySet.put("updateDomainCount", DEFAULT_UPDATE_DOMAIN_COUNTER);
 
