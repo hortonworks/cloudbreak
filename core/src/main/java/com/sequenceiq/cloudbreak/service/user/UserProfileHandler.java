@@ -26,10 +26,12 @@ public class UserProfileHandler {
 
     public void createProfilePreparation(Credential credential, User user) {
         IdentityUser identityUser = restRequestThreadLocalService.getIdentityUser();
-        UserProfile userProfile = userProfileService.getOrCreate(identityUser.getAccount(), identityUser.getUserId(), user);
-        if (userProfile != null && userProfile.getDefaultCredentials().isEmpty()) {
-            userProfile.setDefaultCredentials(Sets.newHashSet(credential));
-            userProfileService.save(userProfile);
+        if (identityUser != null) {
+            UserProfile userProfile = userProfileService.getOrCreate(identityUser.getAccount(), identityUser.getUserId(), user);
+            if (userProfile != null && userProfile.getDefaultCredentials().isEmpty()) {
+                userProfile.setDefaultCredentials(Sets.newHashSet(credential));
+                userProfileService.save(userProfile);
+            }
         }
     }
 
