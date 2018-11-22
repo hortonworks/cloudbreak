@@ -34,7 +34,7 @@ public class AmbariClientProvider {
      */
     public AmbariClient getAmbariClient(HttpClientConfig clientConfig, Integer httpsPort, Cluster cluster) {
         return getAmbariClient(clientConfig, httpsPort,
-            ambariSecurityConfigProvider.getAmbariUserName(cluster), ambariSecurityConfigProvider.getAmbariPassword(cluster));
+            ambariSecurityConfigProvider.getCloudbreakAmbariUserName(cluster), ambariSecurityConfigProvider.getCloudbreakAmbariPassword(cluster));
     }
 
     /**

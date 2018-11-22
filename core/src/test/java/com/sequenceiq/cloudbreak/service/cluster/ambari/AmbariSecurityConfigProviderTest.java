@@ -16,36 +16,14 @@ public class AmbariSecurityConfigProviderTest {
     private final AmbariSecurityConfigProvider underTest = new AmbariSecurityConfigProvider();
 
     @Test
-    public void testGetAmbariUserNameWhenCloudbreakAmbariUserNameIsNullThenShouldReturnUserName() {
-        Cluster cluster = TestUtil.cluster();
-        cluster.setCloudbreakAmbariUser(null);
-        cluster.setUserName("admin");
-
-        String ambariUserName = underTest.getAmbariUserName(cluster);
-
-        Assert.assertEquals("admin", ambariUserName);
-    }
-
-    @Test
     public void testGetAmbariUserNameWhenCloudbreakAmbariUserNameIsExistThenShouldReturnAmbariUserName() {
         Cluster cluster = TestUtil.cluster();
         cluster.setCloudbreakAmbariUser("ambariUserName");
         cluster.setUserName("admin");
 
-        String ambariUserName = underTest.getAmbariUserName(cluster);
+        String ambariUserName = underTest.getCloudbreakAmbariUserName(cluster);
 
         Assert.assertEquals("ambariUserName", ambariUserName);
-    }
-
-    @Test
-    public void testGetAmbariPasswordNameWhenCloudbreakAmbariPasswordIsNullThenShouldReturnPassword() {
-        Cluster cluster = TestUtil.cluster();
-        cluster.setCloudbreakAmbariPassword(null);
-        cluster.setPassword("admin");
-
-        String ambariPassword = underTest.getAmbariPassword(cluster);
-
-        Assert.assertEquals("admin", ambariPassword);
     }
 
     @Test
@@ -54,7 +32,7 @@ public class AmbariSecurityConfigProviderTest {
         cluster.setCloudbreakAmbariPassword("ambariPassword");
         cluster.setPassword("admin");
 
-        String ambariPassword = underTest.getAmbariPassword(cluster);
+        String ambariPassword = underTest.getCloudbreakAmbariPassword(cluster);
 
         Assert.assertEquals("ambariPassword", ambariPassword);
     }

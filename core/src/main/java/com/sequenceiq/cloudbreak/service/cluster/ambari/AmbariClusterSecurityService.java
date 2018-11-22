@@ -66,7 +66,7 @@ public class AmbariClusterSecurityService implements ClusterSecurityService {
             AmbariClient ambariClient = clientFactory.getAmbariClient(stack, stack.getCluster());
             Map<String, Integer> operationRequests = new HashMap<>();
             Stream.of("ZOOKEEPER", "HDFS", "YARN", "MAPREDUCE2", "KERBEROS").forEach(s -> {
-                int opId = s.equals("ZOOKEEPER") ? ambariClient.startService(s) : stopServiceIfAvailable(ambariClient, s);
+                int opId = "ZOOKEEPER".equals(s) ? ambariClient.startService(s) : stopServiceIfAvailable(ambariClient, s);
                 if (opId != -1) {
                     operationRequests.put(s + "_SERVICE_STATE", opId);
                 }
@@ -141,9 +141,12 @@ public class AmbariClusterSecurityService implements ClusterSecurityService {
         Cluster cluster = stack.getCluster();
         LOGGER.info("Changing ambari credentials for cluster: {}, ambari ip: {}", cluster.getName(), cluster.getAmbariIp());
         AmbariClient client = clientFactory.getDefaultAmbariClient(stack);
-        String cloudbreakUserName = ambariSecurityConfigProvider.getAmbariUserName(cluster);
-        String cloudbreakPassword = ambariSecurityConfigProvider.getAmbariPassword(cluster);
+        String cloudbreakUserName = ambariSecurityConfigProvider.getCloudbreakAmbariUserName(cluster);
+        String cloudbreakPassword = ambariSecurityConfigProvider.getCloudbreakAmbariPassword(cluster);
         ambariUserHandler.createAmbariUser(cloudbreakUserName, cloudbreakPassword, stack, client);
+        String dpAmbariUserName = ambariSecurityConfigProvider.getDataplaneAmbariUserName(cluster);
+        String dpAmbariPassword = ambariSecurityConfigProvider.getDataplaneAmbariPassword(cluster);
+        ambariUserHandler.createAmbariUser(dpAmbariUserName, dpAmbariPassword, stack, client);
         String userName = cluster.getUserName();
         String password = cluster.getPassword();
         if (ADMIN.equals(userName)) {

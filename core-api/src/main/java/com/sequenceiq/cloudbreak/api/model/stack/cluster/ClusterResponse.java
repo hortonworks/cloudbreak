@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.FileSystemResponse;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 import com.sequenceiq.cloudbreak.api.model.KerberosResponse;
+import com.sequenceiq.cloudbreak.api.model.SecretResponse;
 import com.sequenceiq.cloudbreak.api.model.SharedServiceResponse;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.annotations.TransformSetterType;
@@ -79,6 +80,12 @@ public class ClusterResponse implements JsonEntity {
     @ApiModelProperty(StackModelDescription.AMBARI_URL)
     private String ambariServerUrl;
 
+    @ApiModelProperty(StackModelDescription.DP_AMBARI_USERNAME)
+    private SecretResponse dpAmbariUser;
+
+    @ApiModelProperty(StackModelDescription.DP_AMBARI_PASSWORD)
+    private SecretResponse dpAmbariPassword;
+
     @ApiModelProperty(ClusterModelDescription.SECURE)
     private boolean secure;
 
@@ -129,9 +136,8 @@ public class ClusterResponse implements JsonEntity {
     @ApiModelProperty(ClusterModelDescription.AMBARI_REPO_DETAILS)
     private AmbariRepoDetailsJson ambariRepoDetailsJson;
 
-    @Valid
     @ApiModelProperty(ClusterModelDescription.AMBARI_DATABASE_DETAILS)
-    private AmbariDatabaseDetailsJson ambariDatabaseDetails;
+    private @Valid AmbariDatabaseDetailsJson ambariDatabaseDetails;
 
     @ApiModelProperty(ClusterModelDescription.CUSTOM_QUEUE)
     private String customQueue;
@@ -261,6 +267,22 @@ public class ClusterResponse implements JsonEntity {
 
     public void setAmbariServerUrl(String ambariServerUrl) {
         this.ambariServerUrl = ambariServerUrl;
+    }
+
+    public SecretResponse getDpAmbariUser() {
+        return dpAmbariUser;
+    }
+
+    public void setDpAmbariUser(SecretResponse dpAmbariUser) {
+        this.dpAmbariUser = dpAmbariUser;
+    }
+
+    public SecretResponse getDpAmbariPassword() {
+        return dpAmbariPassword;
+    }
+
+    public void setDpAmbariPassword(SecretResponse dpAmbariPassword) {
+        this.dpAmbariPassword = dpAmbariPassword;
     }
 
     public Set<Long> getRdsConfigIds() {
