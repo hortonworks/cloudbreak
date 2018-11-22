@@ -10,10 +10,7 @@
 export TEST_CONTAINER_NAME=aruba-test-runner
 
 echo "Refresh the Test Runner Docker image"
-
-export container_version=":"$(git describe --tag --abbrev=0)
-
-docker pull hortonworks/cloud-cli-e2e$container_version
+docker pull hortonworks/cloud-cli-e2e
 
 echo "Checking stopped containers"
 if [[ -n "$(docker ps -a -f status=exited -f status=dead -q)" ]]; then
@@ -43,10 +40,11 @@ docker run -i \
        --privileged \
        --net=host \
        --name $TEST_CONTAINER_NAME \
-       -v $(pwd)/aruba:/aruba \
-       -v $(pwd)/responses:/responses \
+       -v $(pwd):/aruba \
+       -v $(pwd)/tmp/responses:/responses \
        -v $(pwd)/requests:/requests \
        -v $(pwd)/../build/Linux:/usr/local/bin \
+       -v $(pwd)/scripts/aruba-docker.sh:/entrypoint.sh \
        -e "BASE_URL=$BASE_URL" \
        -e "USERNAME_CLI=$USERNAME_CLI" \
        -e "PASSWORD_CLI=$PASSWORD_CLI" \
@@ -74,7 +72,7 @@ docker run -i \
        -e "INTEGRATIONTEST_PROXYCONFIG_PROXYUSER=$INTEGRATIONTEST_PROXYCONFIG_PROXYUSER" \
        -e "INTEGRATIONTEST_PROXYCONFIG_PROXYPASSWORD=$INTEGRATIONTEST_PROXYCONFIG_PROXYPASSWORD" \
        -e "CLI_TEST_FILES=$CLI_TEST_FILES" \
-       hortonworks/cloud-cli-e2e$container_version
+       hortonworks/cloud-cli-e2e
 RESULT=$?
 
 exit $RESULT

@@ -4,7 +4,9 @@
 : ${GIT_TAG:=latest}
 : ${BASE_URL:=https://127.0.0.1}
 
-set-mock-image-tag() {
+mock-image-tag() {
+    declare desc="Set Cloudbreak Mock Docker image tag"
+
     echo "GitHub First Parent Tag is: ${GIT_VERSION}"
     echo "GitHub Tag is: ${GIT_TAG}"
     echo "CircleCI Branch is: ${CIRCLE_BRANCH}"
@@ -15,8 +17,30 @@ set-mock-image-tag() {
     fi
 }
 
-set-mock-image-tag
+mock-start-logs() {
+    declare desc="Gather Cloudbreak Mock start logs"
 
-docker-compose -f docker-compose.yml -p cbreak up -d
+    mkdir -pv test_log
 
-sleep 30s
+    if [[ $(id -u jenkins 2>/dev/null || echo $?) -gt 1 ]]; then
+        sudo chown -R jenkins .
+        sudo docker logs cbreak_cloudbreak_1 > test_log/cloudbreak_start.log
+    else
+        docker logs cbreak_cloudbreak_1 > test_log/cloudbreak_start.log
+    fi
+}
+
+mock-start() {
+    declare desc="Start Cloudbreak Mock"
+
+    docker-compose -f tmp/docker-compose.yml -p cbreak up -d
+    sleep 30s
+}
+
+main() {
+    mock-image-tag
+    mock-start
+    mock-start-logs
+}
+
+main "$@"

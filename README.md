@@ -145,3 +145,9 @@ This project uses [Dep](https://github.com/golang/dep) for dependency management
 go get -u github.com/golang/dep/cmd/dep (or brew install dep)
 dep ensure
 ```
+
+## Functional Testing
+
+This repository contains also functional tests for CB-CLI (in End to End and Integration suites).
+* You can read more about these and how to run at [tests folder README](tests/README.md)
+* You can find the project at [tests folder](tests)

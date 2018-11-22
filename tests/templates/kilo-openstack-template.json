@@ -5,7 +5,7 @@
   },
   "general": {
     "name": "",
-    "credentialName": "openstackcluster"
+    "credentialName": "cli-os-cluster"
   },
   "tags": {
     "userDefinedTags": {
@@ -23,10 +23,6 @@
         "version": "2.6",
         "verify": false,
         "enableGplRepo": false
-      },
-      "gateway": {
-        "enableGateway": false,
-        "gatewayType": "INDIVIDUAL"
       },
       "validateBlueprint": false,
       "ambariSecurityMasterKey": ""
@@ -84,7 +80,7 @@
         "volumeCount": 0,
         "volumeSize": 100
       },
-      "nodeCount": 3,
+      "nodeCount": 1,
       "group": "worker",
       "type": "CORE",
       "recoveryMode": "MANUAL",
@@ -109,7 +105,7 @@
         "volumeCount": 0,
         "volumeSize": 100
       },
-      "nodeCount": 0,
+      "nodeCount": 1,
       "group": "compute",
       "type": "CORE",
       "recoveryMode": "MANUAL",

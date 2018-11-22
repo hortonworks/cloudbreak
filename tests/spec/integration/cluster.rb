@@ -45,7 +45,7 @@ RSpec.describe 'Cluster test cases', :type => :aruba do
     end
   end
 
-  it "Cluster - Create - Without password" do 
+  it "Cluster - Create - Without password BUG-94445" do
     skip("BUG-94445")
     with_environment 'DEBUG' => '1' do
       result = cb.cluster.create.name("asdfg").cli_input_json("../../templates/template-wo-pwd.json").build(false)
@@ -123,7 +123,7 @@ RSpec.describe 'Cluster test cases', :type => :aruba do
     end   
   end
 
-    xit "Cluster - Repair - Success" do 
+    xit "Cluster - Repair - Success BUG-???" do
     with_environment 'DEBUG' => '1' do
       result = cb.cluster.repair.name("asdfg").build(false)
       expect(result.exit_status).to eql 0
@@ -131,7 +131,7 @@ RSpec.describe 'Cluster test cases', :type => :aruba do
     end
   end
 
-   xit "Cluster - Repair - Failure" do 
+   xit "Cluster - Repair - Failure BUG-???" do
     with_environment 'DEBUG' => '1' do
       result = cb.cluster.repair.name("azstatus").build(false) 
       expect(result.exit_status).to eql 1

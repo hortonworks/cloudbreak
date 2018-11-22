@@ -5,3 +5,5 @@ swagger.json
 .cb
 allure
 ruby-uuid
+tmp
+test_log
