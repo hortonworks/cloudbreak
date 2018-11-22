@@ -4,12 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -43,12 +40,9 @@ import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
-import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptor;
-import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptors;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.converter.AbstractEntityConverterTest;
-import com.sequenceiq.cloudbreak.converter.mapper.ProxyConfigMapper;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
@@ -73,12 +67,6 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
 
     @InjectMocks
     private ClusterToClusterResponseConverter underTest;
-
-    @Mock
-    private BlueprintValidator blueprintValidator;
-
-    @Mock
-    private StackServiceComponentDescriptors stackServiceComponentDescs;
 
     @Mock
     private ConversionService conversionService;
@@ -126,12 +114,7 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
     private ClusterComponentConfigProvider componentConfigProvider;
 
     @Mock
-    private ProxyConfigMapper proxyConfigMapper;
-
-    @Mock
     private ServiceEndpointCollector serviceEndpointCollector;
-
-    private StackServiceComponentDescriptor stackServiceComponentDescriptor;
 
     @Before
     public void setUp() throws CloudbreakException {
@@ -142,7 +125,6 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
         given(stackService.findClustersConnectedToDatalake(anyLong())).willReturn(new HashSet<>());
         given(conversionService.convert(any(Workspace.class), eq(WorkspaceResourceResponse.class)))
                 .willReturn(new WorkspaceResourceResponse());
-        stackServiceComponentDescriptor = createStackServiceComponentDescriptor();
     }
 
     @Test
@@ -154,6 +136,8 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
         Cluster source = getSource();
         TestUtil.setSecretField(Cluster.class, "cloudbreakAmbariUser", source, "user", "secret/path");
         TestUtil.setSecretField(Cluster.class, "cloudbreakAmbariPassword", source, "pass", "secret/path");
+        TestUtil.setSecretField(Cluster.class, "dpAmbariUser", source, "user", "secret/path");
+        TestUtil.setSecretField(Cluster.class, "dpAmbariPassword", source, "pass", "secret/path");
         when(conversionService.convert(any(String.class), any())).thenAnswer(invocation -> new SecretResponse(null, invocation.getArgument(0)));
         // WHEN
         ClusterResponse result = underTest.convert(source);
@@ -179,22 +163,10 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
     public void testConvertWithoutMasterComponent() throws IOException {
         // GIVEN
         mockAll();
-        given(stackServiceComponentDescs.get(anyString())).willReturn(new StackServiceComponentDescriptor("dummy", "dummy", 1, 1));
         // WHEN
         ClusterResponse result = underTest.convert(getSource());
         // THEN
         assertEquals(1L, (long) result.getId());
-    }
-
-    @Test
-    public void testConvertWhenValidatorThrowException() throws IOException {
-        // GIVEN
-        given(blueprintValidator.getHostGroupNode(any(Blueprint.class))).willThrow(new IOException("error"));
-        // WHEN
-        underTest.convert(getSource());
-        // THEN
-        verify(blueprintValidator, times(0)).createHostGroupMap(anySet());
-
     }
 
     @Test
@@ -250,27 +222,21 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
             Object[] args = invocation.getArguments();
             return args[1];
         });
-        given(blueprintValidator.getHostGroupNode(any(Blueprint.class))).willReturn(jsonNode);
         given(jsonNode.iterator()).willReturn(mockIterator);
         given(mockIterator.hasNext()).willReturn(true).willReturn(false);
         given(mockIterator.next()).willReturn(jsonNode);
         given(conversionService.convert(any(RDSConfig.class), eq(RDSConfigJson.class))).willReturn(new RDSConfigRequest());
         given(conversionService.convert(any(Gateway.class), eq(GatewayJson.class))).willReturn(new GatewayJson());
-        given(blueprintValidator.getHostGroupName(jsonNode)).willReturn("slave_1");
-        given(blueprintValidator.createHostGroupMap(any(Set.class))).willReturn(hostGroupMap);
         given(hostGroupMap.get("slave_1")).willReturn(hostGroup);
         given(instanceGroup.getNotDeletedInstanceMetaDataSet()).willReturn(Sets.newHashSet(instanceMetaData));
-        given(blueprintValidator.getComponentsNode(jsonNode)).willReturn(nameJsonNode);
         given(nameJsonNode.iterator()).willReturn(mockComponentIterator);
         given(mockComponentIterator.hasNext()).willReturn(true).willReturn(false);
         given(mockComponentIterator.next()).willReturn(nameJsonNode);
         given(nameJsonNode.get(anyString())).willReturn(nameJsonNode);
         given(nameJsonNode.asText()).willReturn("dummyName");
         given(componentConfigProvider.getAmbariRepo(any(Set.class))).willReturn(null);
-        given(stackServiceComponentDescs.get(anyString())).willReturn(stackServiceComponentDescriptor);
         ProxyConfigResponse proxyConfigResponse = new ProxyConfigResponse();
         proxyConfigResponse.setId(1L);
-        given(proxyConfigMapper.mapEntityToResponse(any(ProxyConfig.class))).willReturn(proxyConfigResponse);
         given(serviceEndpointCollector.getAmbariServerUrl(any(), anyString())).willReturn("http://ambari.com");
         Map<String, Collection<ClusterExposedServiceResponse>> exposedServiceResponseMap = new HashMap<>();
         List<ClusterExposedServiceResponse> clusterExposedServiceResponseList = new ArrayList<>();

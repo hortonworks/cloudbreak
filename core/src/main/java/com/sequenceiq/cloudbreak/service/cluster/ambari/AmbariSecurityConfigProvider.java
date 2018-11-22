@@ -32,18 +32,20 @@ public class AmbariSecurityConfigProvider {
         return keystorePassword;
     }
 
-    public String getAmbariUserName(Cluster cluster) {
-        if (Strings.isNullOrEmpty(cluster.getCloudbreakAmbariUser())) {
-            return cluster.getUserName();
-        }
+    public String getCloudbreakAmbariUserName(Cluster cluster) {
         return cluster.getCloudbreakAmbariUser();
     }
 
-    public String getAmbariPassword(Cluster cluster) {
-        if (Strings.isNullOrEmpty(cluster.getCloudbreakAmbariPassword())) {
-            return cluster.getPassword();
-        }
+    public String getCloudbreakAmbariPassword(Cluster cluster) {
         return cluster.getCloudbreakAmbariPassword();
+    }
+
+    public String getDataplaneAmbariUserName(Cluster cluster) {
+        return cluster.getDpAmbariUser();
+    }
+
+    public String getDataplaneAmbariPassword(Cluster cluster) {
+        return cluster.getDpAmbariPassword();
     }
 
     public String getAmbariUserProvidedPassword(Cluster cluster) {

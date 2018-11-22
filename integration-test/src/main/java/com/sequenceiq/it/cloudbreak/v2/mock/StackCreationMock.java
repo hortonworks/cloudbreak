@@ -178,7 +178,7 @@ public class StackCreationMock extends MockServer {
         verify(AMBARI_API_ROOT + "/services/AMBARI/components/AMBARI_SERVER", "GET").exactTimes(1).verify();
         verify(AMBARI_API_ROOT + "/clusters", "GET").exactTimes(2).verify();
         verify(AMBARI_API_ROOT + "/check", "GET").atLeast(1).verify();
-        verify(AMBARI_API_ROOT + "/users", "POST").exactTimes(1).verify();
+        verify(AMBARI_API_ROOT + "/users", "POST").exactTimes(2).verify();
         verify(AMBARI_API_ROOT + "/blueprints/bp", "POST").exactTimes(1)
                 .bodyContains("blueprint_name").bodyContains("stack_name").bodyContains("stack_version").bodyContains("host_groups")
                 .exactTimes(1).verify();

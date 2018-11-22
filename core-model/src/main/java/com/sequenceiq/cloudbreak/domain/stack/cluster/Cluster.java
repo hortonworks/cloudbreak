@@ -119,6 +119,14 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
     @SecretValue
     private Secret cloudbreakAmbariPassword = Secret.EMPTY;
 
+    @Convert(converter = SecretToString.class)
+    @SecretValue
+    private Secret dpAmbariUser = Secret.EMPTY;
+
+    @Convert(converter = SecretToString.class)
+    @SecretValue
+    private Secret dpAmbariPassword = Secret.EMPTY;
+
     @Column(nullable = false)
     private Boolean secure;
 
@@ -455,6 +463,30 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setCloudbreakAmbariPassword(String cloudbreakAmbariPassword) {
         this.cloudbreakAmbariPassword = new Secret(cloudbreakAmbariPassword);
+    }
+
+    public String getDpAmbariUser() {
+        return dpAmbariUser.getRaw();
+    }
+
+    public String getDpAmbariUserSecret() {
+        return dpAmbariUser.getSecret();
+    }
+
+    public void setDpAmbariUser(String dpAmbariUser) {
+        this.dpAmbariUser = new Secret(dpAmbariUser);
+    }
+
+    public String getDpAmbariPassword() {
+        return dpAmbariPassword.getRaw();
+    }
+
+    public String getDpAmbariPasswordSecret() {
+        return dpAmbariPassword.getSecret();
+    }
+
+    public void setDpAmbariPassword(String dpAmbariPassword) {
+        this.dpAmbariPassword = new Secret(dpAmbariPassword);
     }
 
     public KerberosConfig getKerberosConfig() {

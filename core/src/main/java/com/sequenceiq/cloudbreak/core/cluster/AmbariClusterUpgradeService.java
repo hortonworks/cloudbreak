@@ -71,8 +71,8 @@ public class AmbariClusterUpgradeService {
                 AmbariRepo ambariRepo = componentConfigProvider.getAmbariRepo(cluster.getId());
                 Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
                 Map<String, Object> credentials = new HashMap<>();
-                credentials.put("username", ambariSecurityConfigProvider.getAmbariUserName(cluster));
-                credentials.put("password", ambariSecurityConfigProvider.getAmbariPassword(cluster));
+                credentials.put("username", ambariSecurityConfigProvider.getCloudbreakAmbariUserName(cluster));
+                credentials.put("password", ambariSecurityConfigProvider.getCloudbreakAmbariPassword(cluster));
                 servicePillar.put("ambari-credentials", new SaltPillarProperties("/ambari/credentials.sls", singletonMap("ambari", credentials)));
                 if (ambariRepo != null) {
                     servicePillar.put("ambari-repo", new SaltPillarProperties("/ambari/repo.sls", singletonMap("ambari", singletonMap("repo", ambariRepo))));

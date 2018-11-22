@@ -252,8 +252,8 @@ public class ClusterHostServiceRunner {
         saveHDPPillar(cluster.getId(), servicePillar);
         saveLdapsAdPillar(cluster, servicePillar);
         Map<String, Object> credentials = new HashMap<>();
-        credentials.put("username", ambariSecurityConfigProvider.getAmbariUserName(stack.getCluster()));
-        credentials.put("password", ambariSecurityConfigProvider.getAmbariPassword(stack.getCluster()));
+        credentials.put("username", ambariSecurityConfigProvider.getCloudbreakAmbariUserName(stack.getCluster()));
+        credentials.put("password", ambariSecurityConfigProvider.getCloudbreakAmbariPassword(stack.getCluster()));
         credentials.put("securityMasterKey", ambariSecurityConfigProvider.getAmbariSecurityMasterKey(cluster));
         servicePillar.put("ambari-credentials", new SaltPillarProperties("/ambari/credentials.sls", singletonMap("ambari", credentials)));
 

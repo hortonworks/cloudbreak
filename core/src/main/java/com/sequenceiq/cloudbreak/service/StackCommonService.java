@@ -45,7 +45,6 @@ import com.sequenceiq.cloudbreak.common.type.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.controller.StackCreatorService;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
-import com.sequenceiq.cloudbreak.controller.validation.stack.StackRequestValidator;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -54,7 +53,6 @@ import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.decorator.StackDecorator;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
@@ -79,22 +77,13 @@ public class StackCommonService implements StackEndpoint {
     private TlsSecurityService tlsSecurityService;
 
     @Inject
-    private StackDecorator stackDecorator;
-
-    @Inject
     private CloudParameterService parameterService;
 
     @Inject
     private FileSystemValidator fileSystemValidator;
 
     @Inject
-    private StackRequestValidator stackValidator;
-
-    @Inject
     private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
-
-    @Inject
-    private ClusterCreationSetupService clusterCreationService;
 
     @Inject
     private StackCreatorService stackCreatorService;
