@@ -1,11 +1,12 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.network;
 
+import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getSharedProjectId;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getSubnetId;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.isExistingSubnet;
-import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.isLegacyNetwork;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.isNewNetworkAndSubnet;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.isNewSubnetInExistingNetwork;
 import static com.sequenceiq.cloudbreak.common.type.ResourceType.GCP_SUBNET;
+import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
 
 import org.springframework.stereotype.Service;
 
@@ -21,7 +22,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
-import com.sequenceiq.cloudbreak.cloud.template.ResourceNotNeededException;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Service
@@ -31,9 +31,6 @@ public class GcpSubnetResourceBuilder extends AbstractGcpNetworkBuilder {
 
     @Override
     public CloudResource create(GcpContext context, AuthenticatedContext auth, Network network) {
-        if (isLegacyNetwork(network)) {
-            throw new ResourceNotNeededException("Legacy GCP networks doesn't support subnets. Subnet won't be created.");
-        }
         String resourceName = isExistingSubnet(network) ? getSubnetId(network) : getResourceNameService().resourceName(resourceType(), context.getName());
         return createNamedResource(resourceType(), resourceName);
     }
@@ -49,7 +46,12 @@ public class GcpSubnetResourceBuilder extends AbstractGcpNetworkBuilder {
             gcpSubnet.setIpCidrRange(network.getSubnet().getCidr());
 
             String networkName = context.getStringParameter(GcpNetworkResourceBuilder.NETWORK_NAME);
-            gcpSubnet.setNetwork(String.format("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s", projectId, networkName));
+            if (isNoneEmpty(getSharedProjectId(network))) {
+                gcpSubnet.setNetwork(String.format("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s",
+                        getSharedProjectId(network), networkName));
+            } else {
+                gcpSubnet.setNetwork(String.format("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s", projectId, networkName));
+            }
 
             Insert snInsert = compute.subnetworks().insert(projectId, auth.getCloudContext().getLocation().getRegion().value(), gcpSubnet);
             try {
