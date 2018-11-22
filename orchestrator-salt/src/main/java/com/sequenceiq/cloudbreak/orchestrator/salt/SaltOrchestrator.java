@@ -2,11 +2,13 @@ package com.sequenceiq.cloudbreak.orchestrator.salt;
 
 import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.SALT;
 import static com.sequenceiq.cloudbreak.common.type.RecipeExecutionPhase.convert;
+import static com.sequenceiq.cloudbreak.util.FileReaderUtils.readFileFromClasspath;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -34,6 +36,7 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.common.type.RecipeExecutionPhase;
@@ -52,6 +55,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Compound;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Compound.CompoundType;
+import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Glob;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionStatusSaltResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.BaseSaltJobRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.PillarSave;
@@ -67,6 +71,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.SyncGrainsRunn
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
+import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -74,6 +79,18 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 public class SaltOrchestrator implements HostOrchestrator {
 
     private static final int SLEEP_TIME = 10000;
+
+    private static final String DISK_INITIALIZE = "format-and-mount-initialize.sh";
+
+    private static final String DISK_COMMON = "format-and-mount-common.sh";
+
+    private static final String DISK_FORMAT = "find-device-and-format.sh";
+
+    private static final String DISK_MOUNT = "mount-disks.sh";
+
+    private static final String DISK_SCRIPT_PATH = "salt/bootstrapnodes/";
+
+    private static final String SRV_SALT_DISK = "/srv/salt/disk";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SaltOrchestrator.class);
 
@@ -110,7 +127,8 @@ public class SaltOrchestrator implements HostOrchestrator {
         Set<String> gatewayTargets = getGatewayPrivateIps(allGatewayConfigs);
         try (SaltConnector sc = new SaltConnector(primaryGateway, restDebug)) {
             uploadSaltConfig(sc, gatewayTargets, exitModel);
-            uploadSignKey(sc, primaryGateway, gatewayTargets, targets.stream().map(Node::getPrivateIp).collect(Collectors.toSet()), exitModel);
+            Set<String> allTargets = targets.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
+            uploadSignKey(sc, primaryGateway, gatewayTargets, allTargets, exitModel);
             OrchestratorBootstrap saltBootstrap = new SaltBootstrap(sc, allGatewayConfigs, targets, params);
             Callable<Boolean> saltBootstrapRunner = runner(saltBootstrap, exitCriteria, exitModel);
             Future<Boolean> saltBootstrapRunnerFuture = parallelOrchestratorComponentRunner.submit(saltBootstrapRunner);
@@ -120,6 +138,82 @@ public class SaltOrchestrator implements HostOrchestrator {
             throw new CloudbreakOrchestratorFailedException(e);
         }
         LOGGER.info("SaltBootstrap finished");
+    }
+
+    @Override
+    public Map<String, Map<String, String>> formatAndMountDisksOnNodes(List<GatewayConfig> allGateway, Set<Node> nodes, ExitCriteriaModel exitModel,
+            String platformVariant) throws CloudbreakOrchestratorFailedException {
+        GatewayConfig primaryGateway = getPrimaryGatewayConfig(allGateway);
+        Set<String> allTargets = nodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
+        Compound allHosts = new Compound(nodes.stream().map(Node::getHostname).collect(Collectors.toSet()), CompoundType.HOST);
+        try (SaltConnector sc = new SaltConnector(primaryGateway, restDebug)) {
+            uploadMountScriptsAndMakeThemExecutable(nodes, exitModel, allTargets, allHosts, sc);
+
+            SaltStates.runCommandOnHosts(sc, allHosts, "(cd " + SRV_SALT_DISK + ";./" + DISK_INITIALIZE + ')');
+            return nodes.stream()
+                    .map(node -> {
+                        Glob hostname = new Glob(node.getHostname());
+                        String uuidList = formatDisks(platformVariant, sc, node, hostname);
+                        Map<String, String> fstabResponse = mountDisks(platformVariant, sc, hostname, uuidList, node.getFstab());
+                        String fstab = fstabResponse.getOrDefault(node.getHostname(), "");
+                        return new SimpleImmutableEntry<>(node.getHostname(), Map.of("uuids", uuidList, "fstab", fstab));
+                    })
+                    .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+        } catch (Exception e) {
+            LOGGER.error("Error occurred during the salt bootstrap", e);
+            throw new CloudbreakOrchestratorFailedException(e);
+        }
+    }
+
+    private Map<String, String> mountDisks(String platformVariant, SaltConnector sc, Glob hostname, String uuidList, String fstab) {
+        String mountCommandParams = "CLOUD_PLATFORM='" + platformVariant + "' ATTACHED_VOLUME_UUID_LIST='" + uuidList + "' ";
+
+        if (!StringUtils.isEmpty(fstab)) {
+            mountCommandParams += "PREVIOUS_FSTAB='" + fstab + "' ";
+        }
+        SaltStates.runCommandOnHosts(sc, hostname, "(cd " + SRV_SALT_DISK + ';' + mountCommandParams + " ./" + DISK_MOUNT + ')');
+        return StringUtils.isEmpty(uuidList) ? Map.of() : SaltStates.runCommandOnHosts(sc, hostname, "cat /etc/fstab");
+    }
+
+    private String formatDisks(String platformVariant, SaltConnector sc, Node node, Glob hostname) {
+        if (!StringUtils.isEmpty(node.getFstab())) {
+            return node.getUuids();
+        }
+
+        String dataVolumes = String.join(" ", node.getDataVolumes());
+        String serialIds = String.join(" ", node.getSerialIds());
+        String formatCommandParams = "CLOUD_PLATFORM='" + platformVariant
+                + "' ATTACHED_VOLUME_NAME_LIST='" + dataVolumes
+                + "' ATTACHED_VOLUME_SERIAL_LIST='" + serialIds + "' ";
+        String command = "(cd " + SRV_SALT_DISK + ';' + formatCommandParams + "./" + DISK_FORMAT + ')';
+        Map<String, String> formatResponse = SaltStates.runCommandOnHosts(sc, hostname, command);
+        return formatResponse.get(node.getHostname());
+    }
+
+    private void uploadMountScriptsAndMakeThemExecutable(Set<Node> nodes, ExitCriteriaModel exitModel, Set<String> allTargets, Compound allHosts,
+            SaltConnector sc) throws IOException {
+        Map.of(
+                DISK_INITIALIZE, readFileFromClasspath(DISK_SCRIPT_PATH + DISK_INITIALIZE).getBytes(),
+                DISK_COMMON, readFileFromClasspath(DISK_SCRIPT_PATH + DISK_COMMON).getBytes(),
+                DISK_FORMAT, readFileFromClasspath(DISK_SCRIPT_PATH + DISK_FORMAT).getBytes(),
+                DISK_MOUNT, readFileFromClasspath(DISK_SCRIPT_PATH + DISK_MOUNT).getBytes())
+                .entrySet()
+                .stream()
+                .map(script -> {
+                    String scriptName = script.getKey();
+                    try {
+                        LOGGER.debug("Uploading script {} to targets {}", scriptName, nodes);
+                        uploadFileToTargets(sc, allTargets, exitModel, SRV_SALT_DISK, scriptName, script.getValue());
+                        return SRV_SALT_DISK + '/' + scriptName;
+                    } catch (CloudbreakOrchestratorFailedException e) {
+                        String message = String.format("Failed to upload file %s, to targets %s", scriptName, allTargets.toString());
+                        throw new CloudbreakServiceException(message, e);
+                    }
+                })
+                .forEach(path -> {
+                    LOGGER.debug("Making script {} executable on targets {}", path, nodes);
+                    SaltStates.runCommandOnHosts(sc, allHosts, "chmod 755 " + path);
+                });
     }
 
     @Override
@@ -652,7 +746,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         byte[] byteArray;
         byteArray = stateConfigZip == null || stateConfigZip.length == 0 ? getStateConfigZip() : stateConfigZip;
         LOGGER.info("Upload salt.zip to gateways");
-        uploadFileToGateways(saltConnector, targets, exitCriteriaModel, "/srv", "salt.zip", byteArray);
+        uploadFileToTargets(saltConnector, targets, exitCriteriaModel, "/srv", "salt.zip", byteArray);
     }
 
     private void uploadSignKey(SaltConnector saltConnector, GatewayConfig gateway, Set<String> gatewayTargets,
@@ -662,14 +756,14 @@ public class SaltOrchestrator implements HostOrchestrator {
             if (!gatewayTargets.isEmpty() && saltSignPrivateKey != null) {
                 LOGGER.info("Upload master_sign.pem to gateways");
                 byte[] privateKeyContent = saltSignPrivateKey.getBytes();
-                uploadFileToGateways(saltConnector, gatewayTargets, exitCriteriaModel, "/etc/salt/pki/master", "master_sign.pem", privateKeyContent);
+                uploadFileToTargets(saltConnector, gatewayTargets, exitCriteriaModel, "/etc/salt/pki/master", "master_sign.pem", privateKeyContent);
             }
 
             String saltSignPublicKey = gateway.getSaltSignPublicKey();
             if (!targets.isEmpty() && saltSignPublicKey != null) {
                 byte[] publicKeyContent = saltSignPublicKey.getBytes();
                 LOGGER.info("Upload master_sign.pub to nodes: " + targets);
-                uploadFileToGateways(saltConnector, targets, exitCriteriaModel, "/etc/salt/pki/minion", "master_sign.pub", publicKeyContent);
+                uploadFileToTargets(saltConnector, targets, exitCriteriaModel, "/etc/salt/pki/minion", "master_sign.pub", publicKeyContent);
             }
         } catch (SecurityException se) {
             throw new CloudbreakOrchestratorFailedException("Failed to read salt sign key: " + se.getMessage());
@@ -681,10 +775,10 @@ public class SaltOrchestrator implements HostOrchestrator {
         byte[] recipeBytes = recipe.getBytes(StandardCharsets.UTF_8);
         LOGGER.info("Upload '{}' recipe: {}", phase.value(), name);
         String folder = phase.isPreRecipe() ? "pre-recipes" : "post-recipes";
-        uploadFileToGateways(sc, targets, exitModel, "/srv/salt/" + folder + "/scripts", name, recipeBytes);
+        uploadFileToTargets(sc, targets, exitModel, "/srv/salt/" + folder + "/scripts", name, recipeBytes);
     }
 
-    private void uploadFileToGateways(SaltConnector saltConnector, Set<String> targets, ExitCriteriaModel exitCriteriaModel,
+    private void uploadFileToTargets(SaltConnector saltConnector, Set<String> targets, ExitCriteriaModel exitCriteriaModel,
             String path, String fileName, byte[] content) throws CloudbreakOrchestratorFailedException {
         try {
             OrchestratorBootstrap saltUpload = new SaltUpload(saltConnector, targets, path, fileName, content);

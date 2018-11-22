@@ -17,6 +17,7 @@ public enum StackUpscaleState implements FlowState {
     BOOTSTRAP_NEW_NODES_STATE,
     EXTEND_HOST_METADATA_STATE,
     EXTEND_HOST_METADATA_FINISHED_STATE,
+    MOUNT_DISKS_ON_NEW_HOSTS_STATE,
     FINAL_STATE;
 
     private Class<? extends RestartAction> restartAction = FillInMemoryStateStoreRestartAction.class;

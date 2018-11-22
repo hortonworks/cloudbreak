@@ -177,6 +177,12 @@ public class SaltStates {
         return CollectionUtils.isEmpty(result) ? new HashMap<>() : result.get(0);
     }
 
+    public static Map<String, String> runCommandOnHosts(SaltConnector sc, Target<String> target, String command) {
+        CommandExecutionResponse resp = sc.run(target, "cmd.run", LOCAL, CommandExecutionResponse.class, command);
+        List<Map<String, String>> result = resp.getResult();
+        return CollectionUtils.isEmpty(result) ? new HashMap<>() : result.get(0);
+    }
+
     public static Map<String, String> getGrains(SaltConnector sc, String grain) {
         CommandExecutionResponse resp = sc.run(Glob.ALL, "grains.get", LOCAL, CommandExecutionResponse.class, grain);
         List<Map<String, String>> result = resp.getResult();

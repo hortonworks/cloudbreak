@@ -159,11 +159,6 @@ public class StackUpscaleService {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.EXTENDING_HOST_METADATA);
     }
 
-    public void finishExtendHostMetadata(Stack stack) {
-        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.UPSCALE_COMPLETED, "Stack upscale has been finished successfully.");
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_UPSCALE_FINISHED, AVAILABLE.name());
-    }
-
     public void handleStackUpscaleFailure(long stackId, StackFailureEvent payload) {
         LOGGER.error("Exception during the upscale of stack", payload.getException());
         try {
@@ -234,5 +229,12 @@ public class StackUpscaleService {
         }
         LOGGER.info("highest privateId: {}", highest);
         return highest == 0 ? 0 : highest + 1;
+    }
+
+    public void mountDisksOnNewHosts(Stack stack) {
+        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.MOUNTING_DISKS_ON_NEW_HOSTS);
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_MOUNT_DISKS_ON_NEW_HOSTS, UPDATE_IN_PROGRESS.name());
+        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.UPSCALE_COMPLETED, "Stack upscale has been finished successfully.");
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_UPSCALE_FINISHED, AVAILABLE.name());
     }
 }

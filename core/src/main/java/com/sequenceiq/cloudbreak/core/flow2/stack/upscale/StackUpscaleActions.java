@@ -30,7 +30,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.transform.ResourceLists;
-import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
@@ -48,8 +47,11 @@ import com.sequenceiq.cloudbreak.reactor.api.event.resource.BootstrapNewNodesReq
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.BootstrapNewNodesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ExtendHostMetadataRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ExtendHostMetadataResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.resource.MountDisksOnNewHostsRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.resource.MountDisksOnNewHostsResult;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -256,7 +258,19 @@ public class StackUpscaleActions {
         return new AbstractStackUpscaleAction<>(ExtendHostMetadataResult.class) {
             @Override
             protected void doExecute(StackScalingFlowContext context, ExtendHostMetadataResult payload, Map<Object, Object> variables) {
-                stackUpscaleService.finishExtendHostMetadata(context.getStack());
+                Selectable request = new MountDisksOnNewHostsRequest(context.getStack().getId(),
+                        payload.getRequest().getUpscaleCandidateAddresses());
+                sendEvent(context.getFlowId(), request);
+            }
+        };
+    }
+
+    @Bean(name = "MOUNT_DISKS_ON_NEW_HOSTS_STATE")
+    public Action<?, ?> mountDisksOnNewHosts() {
+        return new AbstractStackUpscaleAction<>(MountDisksOnNewHostsResult.class) {
+            @Override
+            protected void doExecute(StackScalingFlowContext context, MountDisksOnNewHostsResult payload, Map<Object, Object> variables) {
+                stackUpscaleService.mountDisksOnNewHosts(context.getStack());
                 metricService.incrementMetricCounter(MetricType.STACK_UPSCALE_SUCCESSFUL, context.getStack());
                 sendEvent(context);
             }

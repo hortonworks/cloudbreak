@@ -19,15 +19,19 @@ import com.amazonaws.services.ec2.model.AttachVolumeRequest;
 import com.amazonaws.services.ec2.model.DescribeVolumesRequest;
 import com.amazonaws.services.ec2.model.DescribeVolumesResult;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.AwsPlatformParameters.AwsDiskType;
 import com.sequenceiq.cloudbreak.cloud.aws.context.AwsContext;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
@@ -46,7 +50,15 @@ public class AwsAttachmentResourceBuilder extends AbstractAwsComputeBuilder {
     @Override
     public List<CloudResource> create(AwsContext context, long privateId, AuthenticatedContext auth, Group group, Image image) {
         LOGGER.info("Prepare instance resource to attach to");
-        return context.getComputeResources(privateId);
+        String volumeType = getVolumeType(group);
+        return AwsDiskType.Ephemeral.value().equalsIgnoreCase(volumeType) ? List.of() : context.getComputeResources(privateId);
+    }
+
+    public String getVolumeType(Group group) {
+        CloudInstance instance = group.getReferenceInstanceConfiguration();
+        InstanceTemplate template = instance.getTemplate();
+        Volume volumeTemplate = template.getVolumes().iterator().next();
+        return volumeTemplate.getType();
     }
 
     @Override

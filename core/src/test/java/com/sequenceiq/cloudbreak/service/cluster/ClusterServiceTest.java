@@ -25,7 +25,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.model.RecoveryMode;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
-import com.sequenceiq.cloudbreak.common.model.VolumeSetResourceAttributes;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
@@ -83,6 +83,7 @@ public class ClusterServiceTest {
         cluster.setId(1L);
         stack = spy(new Stack());
         stack.setCluster(cluster);
+        stack.setPlatformVariant("AWS");
         when(stackService.get(any(Long.class))).thenReturn(stack);
 
         doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).required(any());
@@ -154,19 +155,19 @@ public class ClusterServiceTest {
 
 
         Resource volumeSet = new Resource();
-        VolumeSetResourceAttributes attributes = new VolumeSetResourceAttributes("eu-west-1", 100, "standard",
-                null, "", List.of());
+        VolumeSetAttributes attributes = new VolumeSetAttributes("eu-west-1", 100, "standard",
+                false, "", List.of());
         attributes.setDeleteOnTermination(null);
         volumeSet.setAttributes(new Json(attributes));
-        when(resourceRepository.findAllByStackIdAndInstanceIdAndType(eq(1L), eq("instanceId1"), eq(ResourceType.AWS_VOLUMESET))).thenReturn(List.of(volumeSet));
+        when(resourceRepository.findByStackIdAndInstanceIdAndType(eq(1L), eq("instanceId1"), eq(ResourceType.AWS_VOLUMESET))).thenReturn(volumeSet);
 
         clusterService.repairCluster(1L, List.of("instanceId1"), false, false);
         verify(stack).getInstanceMetaDataAsList();
-        verify(resourceRepository).findAllByStackIdAndInstanceIdAndType(eq(1L), eq("instanceId1"), eq(ResourceType.AWS_VOLUMESET));
+        verify(resourceRepository).findByStackIdAndInstanceIdAndType(eq(1L), eq("instanceId1"), eq(ResourceType.AWS_VOLUMESET));
         @SuppressWarnings("unchecked")
-        ArgumentCaptor<List<Resource>> saveCaptor = ArgumentCaptor.forClass(List.class);
-        verify(resourceRepository).saveAll(saveCaptor.capture());
-        assertFalse(saveCaptor.getValue().get(0).getAttributes().get(VolumeSetResourceAttributes.class).getDeleteOnTermination());
+        ArgumentCaptor<Resource> saveCaptor = ArgumentCaptor.forClass(Resource.class);
+        verify(resourceRepository).save(saveCaptor.capture());
+        assertFalse(saveCaptor.getValue().getAttributes().get(VolumeSetAttributes.class).getDeleteOnTermination());
         verify(flowManager).triggerClusterRepairFlow(eq(1L), eq(Map.of("hostGroup1", List.of("host1Name.healthy"))), eq(false));
     }
 }
