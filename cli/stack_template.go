@@ -78,6 +78,8 @@ func getNetworkMode(c *cli.Context) cloud.NetworkMode {
 		return cloud.EXISTING_NETWORK_EXISTING_SUBNET
 	case "legacy-network":
 		return cloud.LEGACY_NETWORK
+	case "shared-network":
+		return cloud.SHARED_NETWORK
 	default:
 		return cloud.NO_NETWORK
 	}

@@ -516,6 +516,18 @@ func main() {
 										}
 									},
 								},
+								{
+									Name:   "shared-network",
+									Usage:  "creates a gcp cluster JSON template with shared network",
+									Before: ConfigRead,
+									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional, cb.FlCloudStorageTypeOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
+									Action: cb.GenerateGcpStackTemplate,
+									BashComplete: func(c *cli.Context) {
+										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional, cb.FlCloudStorageTypeOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
+											printFlagCompletion(f)
+										}
+									},
+								},
 							},
 						},
 						{
