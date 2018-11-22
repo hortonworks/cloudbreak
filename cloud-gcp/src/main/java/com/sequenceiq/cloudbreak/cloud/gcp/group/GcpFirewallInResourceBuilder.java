@@ -1,8 +1,10 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.group;
 
+import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getSharedProjectId;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.isExistingNetwork;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.noFirewallRules;
 import static com.sequenceiq.cloudbreak.common.type.ResourceType.GCP_FIREWALL_IN;
+import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -60,7 +62,7 @@ public class GcpFirewallInResourceBuilder extends AbstractGcpGroupBuilder {
 
         firewallRequest = StringUtils.isNotBlank(security.getCloudSecurityId()) && isExistingNetwork(network)
                 ? updateExistingFirewallForNewTargets(context, auth, group, security)
-                : createNewFirewallRule(context, auth, group, security, buildableResource, projectId);
+                : createNewFirewallRule(context, auth, group, network, security, buildableResource, projectId);
         try {
             Operation operation = firewallRequest.execute();
             if (operation.getHttpErrorStatusCode() != null) {
@@ -82,7 +84,7 @@ public class GcpFirewallInResourceBuilder extends AbstractGcpGroupBuilder {
         return context.getCompute().firewalls().update(context.getProjectId(), firewall.getName(), firewall);
     }
 
-    private ComputeRequest<Operation> createNewFirewallRule(GcpContext context, AuthenticatedContext auth, Group group, Security security,
+    private ComputeRequest<Operation> createNewFirewallRule(GcpContext context, AuthenticatedContext auth, Group group, Network network, Security security,
             CloudResource buildableResource, String projectId) throws IOException {
         ComputeRequest<Operation> firewallRequest;
         List<String> sourceRanges = getSourceRanges(security);
@@ -98,8 +100,14 @@ public class GcpFirewallInResourceBuilder extends AbstractGcpGroupBuilder {
         firewall.setTargetTags(Collections.singletonList(GcpStackUtil.getGroupClusterTag(auth.getCloudContext(), group)));
         firewall.setAllowed(allowedRules);
         firewall.setName(buildableResource.getName());
-        firewall.setNetwork(String.format("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s",
-                projectId, context.getParameter(GcpNetworkResourceBuilder.NETWORK_NAME, String.class)));
+        if (isNoneEmpty(getSharedProjectId(network))) {
+            firewall.setNetwork(String.format("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s",
+                    getSharedProjectId(network),
+                    context.getParameter(GcpNetworkResourceBuilder.NETWORK_NAME, String.class)));
+        } else {
+            firewall.setNetwork(String.format("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s", projectId,
+                    context.getParameter(GcpNetworkResourceBuilder.NETWORK_NAME, String.class)));
+        }
 
         return context.getCompute().firewalls().insert(projectId, firewall);
     }
