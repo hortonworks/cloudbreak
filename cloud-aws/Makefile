@@ -7,4 +7,4 @@ generate-zone-vms:
 
 	cat ./build/pricing.json | jq '.terms | .OnDemand | .[] | .[] | {sku,priceDimensions}' | jq --slurp '{ "items": .}' > ./build/tmp-terms.json
 	cat ./build/pricing.json | jq '.products | .[] | select(.productFamily!=null and .productFamily=="Compute Instance") | {sku, attributes} | select(.attributes.location!=null and .attributes.instanceType !=null)' | jq --slurp '{ "items": .}' > ./build/tmp-vms.json
-	python scripts/vms.py ./build/tmp-terms.json ./build/tmp-vms.json ./src/main/resources/definitions/aws-vm.json
+	python scripts/vms.py ./build/tmp-terms.json ./build/tmp-vms.json ./src/main/resources/definitions/aws-encryption-support.json ./src/main/resources/definitions/aws-vm.json
