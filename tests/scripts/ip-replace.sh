@@ -16,7 +16,7 @@ tmp-create() {
     declare desc="Copy all the files that needs to be modified by local Docker IP"
 
     mkdir -p tmp
-    cp -r scripts/{docker-aruba-test.sh,cbm.sh} {docker-compose.yml,swagger.json,uaa.yml} {certs,responses} tmp
+    cp -r scripts/{docker-test.sh,cbm.sh} {docker-compose.yml,swagger.json,uaa.yml} {certs,responses} tmp
 }
 
 ip-replace() {

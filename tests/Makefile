@@ -47,11 +47,11 @@ download-s3:
 
 # Execute an entire test suite or just one scenario you can start this with: 'CLI_TEST_FILES:=spec/integration/credential.rb make docker-test'
 integration-test:
-	BLUEPRINT_URL=$(BLUEPRINT_URL) RECIPE_URL=$(RECIPE_URL) tmp/docker-aruba-test.sh
+	BLUEPRINT_URL=$(BLUEPRINT_URL) RECIPE_URL=$(RECIPE_URL) tmp/docker-test.sh
 
 # Execute an entire test suite or just one scenario you can start this with: 'CLI_TEST_FILES:=spec/e2e/credential.rb make docker-test'
 e2e-test:
-	BLUEPRINT_URL=$(BLUEPRINT_URL) RECIPE_URL=$(RECIPE_URL) scripts/docker-aruba-test.sh
+	BLUEPRINT_URL=$(BLUEPRINT_URL) RECIPE_URL=$(RECIPE_URL) scripts/docker-test.sh
 
 clean-after-tests:
 	rm -rf test_log/ tmp/ allure/ .cb test-result.html test-result.xml

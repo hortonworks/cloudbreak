@@ -3,18 +3,6 @@
 : ${GIT_VERSION:=latest}
 : ${BASE_URL:=https://127.0.0.1}
 
-mock-image-tag() {
-    declare desc="Set Cloudbreak Mock Docker image tag"
-
-    echo "GitHub First Parent Tag is: ${GIT_VERSION}"
-    echo "CircleCI Branch is: ${CIRCLE_BRANCH}"
-    echo "CircleCI Tag is: ${CIRCLE_TAG}"
-
-    if [[ "${GIT_VERSION}" != *"-rc."* ]]; then
-        export GIT_VERSION=latest
-    fi
-}
-
 mock-start-logs() {
     declare desc="Gather Cloudbreak Mock start logs"
 
@@ -31,12 +19,13 @@ mock-start-logs() {
 mock-start() {
     declare desc="Start Cloudbreak Mock"
 
+    echo "hortonworks/cloudbreak-mock-caas image version is: ${GIT_VERSION}"
+
     docker-compose -f tmp/docker-compose.yml -p cbreak up -d
     sleep 30s
 }
 
 main() {
-    mock-image-tag
     mock-start
     mock-start-logs
 }

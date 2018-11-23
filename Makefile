@@ -133,6 +133,9 @@ upload_s3:
 linux-test: build-linux
 	docker run --rm -it -v ${PWD}/build/Linux/:/usr/sbin/ --name "${BINARY}" alpine sh
 
+# Build local CB-CLI
+# Start a new Cloudbreak Mock with new Swagger JSON and renewed Mock IP
+# Custom CB-CLI Mock version apply like: 'GIT_FIRST_PARENT=2.10.0-dev.233 make integration-test'
 integration-test: build-docker
 	make -C tests all
 
