@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v1;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.model.SecurityRulesResponse;
@@ -25,5 +27,6 @@ public interface SecurityRuleEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = SecurityRuleOpDescription.GET_DEFAULT_SECURITY_RULES, produces = ContentType.JSON,
             notes = Notes.SECURITY_RULE_NOTES, nickname = "getDefaultSecurityRules")
-    SecurityRulesResponse getDefaultSecurityRules();
+    SecurityRulesResponse getDefaultSecurityRules(
+            @QueryParam("knoxEnabled") @DefaultValue("false") Boolean knoxEnabled);
 }

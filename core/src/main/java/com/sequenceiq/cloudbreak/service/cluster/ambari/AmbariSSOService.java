@@ -7,6 +7,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
@@ -23,6 +24,9 @@ public class AmbariSSOService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariSSOService.class);
 
+    @Value("${cb.knox.port}")
+    private String knoxPort;
+
     @Inject
     private AmbariClientFactory clientFactory;
 
@@ -37,7 +41,7 @@ public class AmbariSSOService {
             GatewayView gatewayView = new GatewayView(gateway, gateway.getSignKey());
             GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
             Map<String, Object> ssoConfigs = new HashMap<>();
-            ssoConfigs.put("ambari.sso.provider.url", "https://" + primaryGatewayConfig.getPublicAddress() + ":8443" + gatewayView.getSsoProvider());
+            ssoConfigs.put("ambari.sso.provider.url", "https://" + primaryGatewayConfig.getPublicAddress() + ":" + knoxPort + gatewayView.getSsoProvider());
             ssoConfigs.put("ambari.sso.provider.certificate", gatewayView.getSignCert());
             ssoConfigs.put("ambari.sso.authentication.enabled", true);
             ssoConfigs.put("ambari.sso.manage_services", true);

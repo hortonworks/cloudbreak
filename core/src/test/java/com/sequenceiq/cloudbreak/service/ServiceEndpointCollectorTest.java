@@ -28,6 +28,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.Sets;
@@ -92,6 +93,7 @@ public class ServiceEndpointCollectorTest {
     @Before
     public void setup() {
         when(exposedServiceListValidator.validate(any())).thenReturn(ValidationResult.builder().build());
+        ReflectionTestUtils.setField(underTest, "knoxPort", "8443");
     }
 
     @Test
