@@ -25,13 +25,13 @@ deps:
 # Start a new Cloudbreak Mock with new Swagger JSON and renewed Mock IP
 # For custom version apply as: 'GIT_FIRST_PARENT=2.8.0-dev.374 make start-mock'
 start-mock: download-s3
-	ORIGINAL_IP=127.0.0.1 NEW_IP=$(DOCKER_IP) scripts/ip-replace.sh
+	ORIGINAL_IP=127.0.0.1 NEW_IP=$(DOCKER_IP) CLEANUP=true scripts/ip-replace.sh
 	GIT_VERSION=$(GIT_FIRST_PARENT) GIT_TAG=$(GIT_LATEST_TAG) BASE_URL=https://$(DOCKER_IP) tmp/cbm.sh
 
 # Stop Cloudbreak Mock then set back the 127.0.0.1 as default Mock IP
 stop-mock:
 	GIT_VERSION=$(GIT_FIRST_PARENT) docker-compose -f tmp/docker-compose.yml -p cbreak down
-	ORIGINAL_IP=$(DOCKER_IP) NEW_IP=127.0.0.1 scripts/ip-replace.sh
+	ORIGINAL_IP=$(DOCKER_IP) NEW_IP=127.0.0.1 CLEANUP=false scripts/ip-replace.sh
 
 # Restart Cloudbreak Mock (only Containers are restarted) with same Swagger JSON and Mock IP as was set previously
 restart-mock:
@@ -42,11 +42,14 @@ restart-mock:
 download-s3:
 	curl -k https://s3-eu-central-1.amazonaws.com/cloudbreak-swagger/swagger-$(GIT_FIRST_PARENT).json -o swagger.json
 
-# Execute an entire test suite or just one scenario you can start this with: 'CLI_TEST_FILES:=spec/integration/credential.rb make docker-test'
+# Start a new Cloudbreak Mock with new Swagger JSON and renewed Mock IP
+#   For custom version apply like: 'GIT_FIRST_PARENT=2.8.0-dev.374 make start-mock'
+# Execute an entire test suite or just one scenario you can start this with: 'CLI_TEST_FILES=spec/integration/credential.rb make integration-test'
 integration-test:
 	tmp/docker-aruba-test.sh
 
-# Execute an entire test suite or just one scenario you can start this with: 'CLI_TEST_FILES:=spec/e2e/credential.rb make docker-test'
+# Create then source your local E2E testing environment variables like 'tests/localvars'
+# Execute an entire test suite or just one scenario you can start this with: 'CLI_TEST_FILES=spec/e2e/credential.rb make e2e-test'
 e2e-test:
 	scripts/docker-aruba-test.sh
 
