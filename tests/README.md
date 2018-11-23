@@ -23,7 +23,7 @@ tenant_password(ENV['OS_V2_PASSWORD']).tenant_name(ENV['OS_V2_TENANT_NAME']).end
 ### Run tests on your local machine
 **Run a specific test, for example:**
 ```
-rspec spec/integration/workspace.rb
+rspec spec/integration/credential.rb
 ```
 
 **Run all tests:**
@@ -48,10 +48,7 @@ You can find the related Make target at [CB-CLI Makefile](../Makefile)
 ```
 make e2e-test
 ```
-Or you can use the test project own Make target at [Tests Makefile](Makefile)
-```
-make docker-test
-```
+> Or you can use the test project own Make target at [Tests Makefile](Makefile)
 > You can check test results at `tests/out.html`
 
 ### Integration testing

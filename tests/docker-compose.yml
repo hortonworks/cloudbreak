@@ -8,7 +8,7 @@ traefik:
         - consul
     volumes:
         - /var/run/docker.sock:/var/run/docker.sock
-        - ./certs:/certs/traefik
+        - ${PWD}/tmp/certs:/certs/traefik
     log_opt:
         max-size: "10M"
         max-file: "5"
@@ -35,7 +35,7 @@ consul:
         - http_proxy=
         - https_proxy=
     volumes:
-        - "/var/run/docker.sock:/var/run/docker.sock"
+        - /var/run/docker.sock:/var/run/docker.sock
         - consul-data:/data
     ports:
         - "172.17.0.1:53:8600/udp"
@@ -54,7 +54,7 @@ registrator:
       - traefik.enable=false
     privileged: true
     volumes:
-        - "/var/run/docker.sock:/tmp/docker.sock"
+        - /var/run/docker.sock:/tmp/docker.sock
     log_opt:
         max-size: "10M"
         max-file: "5"
@@ -65,7 +65,7 @@ registrator:
     container_name: cbreak_registrator_1
 
 caas-api:
-    image: hortonworks/cloudbreak-mock-caas:$GIT_TAG
+    image: hortonworks/cloudbreak-mock-caas:$GIT_VERSION
     dns: 172.17.0.1
     restart: always
     environment:
@@ -89,7 +89,7 @@ cloudbreak:
         - 8080:8080
     dns: 172.17.0.1
     volumes:
-      - ./swagger.json:/cbm/api/swagger.json
-      - ./responses:/cbm/responses
+      - ${PWD}/tmp/swagger.json:/cbm/api/swagger.json
+      - ${PWD}/tmp/responses:/cbm/responses
     image: hortonworks/cloud-swagger-mock
     container_name: cbreak_cloudbreak_1

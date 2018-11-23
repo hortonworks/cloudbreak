@@ -5,28 +5,16 @@
 : ${BASE_URL:=https://127.0.0.1}
 : ${USERNAME_CLI:=admin@example.com}
 : ${PASSWORD_CLI:=cloudbreak}
-: ${DOCKER_TAG:=latest}
 : ${CLI_TEST_FILES:=spec/integration/*.rb}
 : ${BLUEPRINT_URL:? required}
 : ${RECIPE_URL:? required}
 
 readonly TEST_CONTAINER_NAME=cli-test-runner
 
-image-tag() {
-    declare desc="Set CLI Docker Image Tag based for CBD version [for Jenkins E2E]"
-
-    if [[ $TARGET_CBD_VERSION ]]; then
-	    export DOCKER_TAG=$TARGET_CBD_VERSION
-    fi
-    if [[ $(git rev-parse --abbrev-ref HEAD) == *"master"* ]]; then
-	    export DOCKER_TAG=latest
-    fi
-}
-
 image-update() {
     declare desc="Refresh the Test Runner Docker image"
 
-    docker pull hortonworks/cloud-cli-e2e:$DOCKER_TAG
+    docker pull hortonworks/cloud-cli-e2e
 }
 
 image-cleanup() {
@@ -78,11 +66,10 @@ test-regression() {
        --net=host \
        --name $TEST_CONTAINER_NAME \
        -v $(pwd):/aruba \
-       -v $(pwd)/scripts/aruba-docker.sh:/entrypoint.sh \
-       -v $(pwd)/responses:/responses \
+       -v $(pwd)/tmp/responses:/responses \
        -v $(pwd)/requests:/requests \
        -v $(pwd)/../build/Linux:/usr/local/bin \
-       -v /var/run/docker.sock:/var/run/docker.sock \
+       -v $(pwd)/scripts/aruba-docker.sh:/entrypoint.sh \
        -e "BASE_URL=$BASE_URL" \
        -e "USERNAME_CLI=$USERNAME_CLI" \
        -e "PASSWORD_CLI=$PASSWORD_CLI" \
@@ -112,12 +99,11 @@ test-regression() {
        -e "CLI_TEST_FILES=$CLI_TEST_FILES" \
        -e "BLUEPRINT_URL=$BLUEPRINT_URL" \
        -e "RECIPE_URL=$RECIPE_URL" \
-       hortonworks/cloud-cli-e2e:$DOCKER_TAG
+       hortonworks/cloud-cli-e2e
     RESULT=$?
 }
 
 main() {
-    image-tag
     image-cleanup
     image-update
     cbd-version
