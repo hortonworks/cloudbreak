@@ -42,7 +42,8 @@ public class AzureStackView {
                 instanceGroupView = new AzureInstanceGroupView(group.getName(), faultDomainCount, updateDomainCount,
                         asName);
             } else {
-                instanceGroupView = new AzureInstanceGroupView(group.getName());
+                String asName = String.format("%s-%s-as", stackName, group.getName());
+                instanceGroupView = new AzureInstanceGroupView(group.getName(), DEFAULT_FAULT_DOMAIN_COUNTER, DEFAULT_FAULT_DOMAIN_COUNTER, asName);
             }
             for (CloudInstance instance : group.getInstances()) {
                 InstanceTemplate template = instance.getTemplate();
