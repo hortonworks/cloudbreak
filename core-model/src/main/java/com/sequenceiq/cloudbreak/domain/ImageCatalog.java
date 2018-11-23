@@ -26,6 +26,9 @@ public class ImageCatalog implements ProvisionEntity, WorkspaceAwareResource {
     @Column(nullable = false)
     private String name;
 
+    @Column(length = 1000000, columnDefinition = "TEXT")
+    private String description;
+
     @Column(name = "url", nullable = false)
     private String imageCatalogUrl;
 
@@ -45,6 +48,14 @@ public class ImageCatalog implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public String getImageCatalogUrl() {

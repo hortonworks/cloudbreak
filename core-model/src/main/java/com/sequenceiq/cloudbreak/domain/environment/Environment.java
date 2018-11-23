@@ -23,6 +23,7 @@ import javax.persistence.UniqueConstraint;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.KubernetesConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -83,6 +84,10 @@ public class Environment implements WorkspaceAwareResource {
     @ManyToMany(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
     @JoinTable(name = "env_rds", joinColumns = @JoinColumn(name = "envid"), inverseJoinColumns = @JoinColumn(name = "rdsid"))
     private Set<RDSConfig> rdsConfigs = new HashSet<>();
+
+    @ManyToMany(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
+    @JoinTable(name = "env_kubernetes", joinColumns = @JoinColumn(name = "envid"), inverseJoinColumns = @JoinColumn(name = "kubernetesid"))
+    private Set<KubernetesConfig> kubernetesConfigs = new HashSet<>();
 
     @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "environment_id")
@@ -171,6 +176,14 @@ public class Environment implements WorkspaceAwareResource {
 
     public void setRdsConfigs(Set<RDSConfig> rdsConfigs) {
         this.rdsConfigs = rdsConfigs;
+    }
+
+    public Set<KubernetesConfig> getKubernetesConfigs() {
+        return kubernetesConfigs;
+    }
+
+    public void setKubernetesConfigs(Set<KubernetesConfig> kubernetesConfigs) {
+        this.kubernetesConfigs = kubernetesConfigs;
     }
 
     public Set<StackApiView> getStacks() {

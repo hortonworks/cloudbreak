@@ -406,6 +406,11 @@ public class ModelDescriptions {
         public static final String PREINSTALLED = "if true, the management pack is already installed on the instances";
     }
 
+    public static class KubernetesConfig {
+        public static final String NAME = "Name of the Kubernetes configuration resource";
+        public static final String CONFIG = "Kubernetes configuration";
+    }
+
     public static class HostGroupModelDescription {
         public static final String RECIPE_IDS = "referenced recipe ids";
         public static final String RECIPE_NAMES = "referenced recipe names";
@@ -619,6 +624,7 @@ public class ModelDescriptions {
         public static final String CREDENTIAL = "If credentialName is not specified, the credential is used to create the new credential for the environment.";
         public static final String PROXY_CONFIGS = "Name of the proxy configurations to be attached to the environment.";
         public static final String RDS_CONFIGS = "Name of the RDS configurations to be attached to the environment.";
+        public static final String KUBERNETES_CONFIGS = "Name of the Kubernetes configurations to be attached to the environment.";
         public static final String LDAP_CONFIGS = "Name of the LDAP configurations to be attached to the environment.";
         public static final String REGIONS = "Regions of the environment.";
         public static final String LOCATION = "Location of the environment.";
@@ -631,6 +637,7 @@ public class ModelDescriptions {
         public static final String CREDENTIAL = "Credential of the environment.";
         public static final String PROXY_CONFIGS = "Proxy configurations in the environment.";
         public static final String RDS_CONFIGS = "RDS configurations in the environment.";
+        public static final String KUBERNETES_CONFIGS = "Kubernetes configurations in the environment.";
         public static final String LDAP_CONFIGS = "LDAP configurations in the environment.";
         public static final String REGIONS = "Regions of the environment.";
         public static final String CLOUD_PLATFORM = "Cloud platform of the environment.";

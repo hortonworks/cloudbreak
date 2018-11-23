@@ -56,7 +56,7 @@ public class Notes {
             + "cluster members. It's applied for package manager and Ambari too";
     public static final String MANAGEMENT_PACK_NOTES = "An Apache Ambari Management Pack (Mpack) can bundle multiple service definitions, stack definitions, "
             + "stack add-on service definitions, view definitions services so that releasing these artifacts don’t enforce an Apache Ambari release.";
-
+    public static final String KUBERNETESCONFIG_NOTES = "An Kubernetes Configuration describe a configuration to communicate with a Kubernetes cluster.";
     public static final String LDAP_CONFIG_NOTES = "LDAP server integration enables the user to provide"
             + " a central place to store usernames and passwords for the users of his/her clusters.";
     public static final String CONNECTOR_NOTES = "Each cloud provider has it's own specific resources like instance types and disk types."

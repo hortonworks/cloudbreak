@@ -20,6 +20,10 @@ public class ImageCatalogBase {
     @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
     private String name;
 
+    @Size(max = 1000)
+    @ApiModelProperty(ModelDescriptions.DESCRIPTION)
+    private String description;
+
     @NotNull
     @Pattern(regexp = "^http[s]?://.*",
             message = "The URL should start with the protocol (http, https)")
@@ -32,6 +36,14 @@ public class ImageCatalogBase {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public String getUrl() {

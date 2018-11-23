@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.api.model.environment.response;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.api.model.KubernetesConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigResponse;
@@ -22,6 +23,9 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
 
     @ApiModelProperty(EnvironmentResponseModelDescription.RDS_CONFIGS)
     private Set<RDSConfigResponse> rdsConfigs = new HashSet<>();
+
+    @ApiModelProperty(EnvironmentResponseModelDescription.KUBERNETES_CONFIGS)
+    private Set<KubernetesConfigResponse> kubernetesConfigs = new HashSet<>();
 
     @ApiModelProperty(EnvironmentResponseModelDescription.WORKLOAD_CLUSTERS)
     private Set<StackViewResponse> workloadClusters = new HashSet<>();
@@ -51,6 +55,14 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
 
     public void setRdsConfigs(Set<RDSConfigResponse> rdsConfigs) {
         this.rdsConfigs = rdsConfigs;
+    }
+
+    public Set<KubernetesConfigResponse> getKubernetesConfigs() {
+        return kubernetesConfigs;
+    }
+
+    public void setKubernetesConfigs(Set<KubernetesConfigResponse> kubernetesConfigs) {
+        this.kubernetesConfigs = kubernetesConfigs;
     }
 
     public Set<StackViewResponse> getWorkloadClusters() {

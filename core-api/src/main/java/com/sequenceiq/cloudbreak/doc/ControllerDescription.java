@@ -48,6 +48,7 @@ public class ControllerDescription {
     public static final String STACK_V3_DESCRIPTION = "Operations on stack by workspace";
     public static final String IMAGE_CATALOG_V3_DESCRIPTION = "Operations on Image Catalog by O";
     public static final String RDSCONFIGS_V3_DESCRIPTION = "Operations on RDS configs by workspace";
+    public static final String KUBERNETESCONFIGS_V3_DESCRIPTION = "Operations on Kubernetes configs by workspace";
     public static final String AUDIT_V3_DESCRIPTION = "Operations on audit events by workspace";
     public static final String KNOX_SERVICES_V3_DESCRIPTION = "Operations on Knox services by workspace and blueprint";
     public static final String CONNECTOR_V3_DESCRIPTION = "Returns cloud provider specific resource types by workspace";

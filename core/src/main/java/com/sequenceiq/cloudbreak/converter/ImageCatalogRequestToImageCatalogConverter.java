@@ -11,8 +11,9 @@ public class ImageCatalogRequestToImageCatalogConverter extends AbstractConversi
     @Override
     public ImageCatalog convert(ImageCatalogRequest source) {
         ImageCatalog imageCatalog = new ImageCatalog();
-        imageCatalog.setImageCatalogUrl(source.getUrl());
         imageCatalog.setName(source.getName());
+        imageCatalog.setDescription(source.getDescription());
+        imageCatalog.setImageCatalogUrl(source.getUrl());
         return imageCatalog;
     }
 }

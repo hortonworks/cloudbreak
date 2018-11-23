@@ -297,8 +297,8 @@ public class OperationDescriptions {
         public static final String CREATE_IN_WORKSPACE = "create RDS config in workspace";
         public static final String DELETE_BY_NAME_IN_WORKSPACE = "delete RDS config by name in workspace";
         public static final String GET_REQUEST_IN_WORKSPACE = "get request in workspace";
-        public static final String ATTACH_TO_ENVIRONMENTS = "attach rds resource to environemnts";
-        public static final String DETACH_FROM_ENVIRONMENTS = "detach rds resource from environemnts";
+        public static final String ATTACH_TO_ENVIRONMENTS = "attach RDS resource to environemnts";
+        public static final String DETACH_FROM_ENVIRONMENTS = "detach RDS resource from environemnts";
     }
 
     public static class ProxyConfigOpDescription {
@@ -335,6 +335,16 @@ public class OperationDescriptions {
         public static final String GET_BY_NAME_IN_WORKSPACE = "get management pack by name in workspace";
         public static final String CREATE_IN_WORKSPACE = "create management pack in workspace";
         public static final String DELETE_BY_NAME_IN_WORKSPACE = "delete management pack by name in workspace";
+    }
+
+    public static class KubernetesConfigOpDescription {
+        public static final String LIST_BY_WORKSPACE = "list Kubernetes configs for the given workspace";
+        public static final String GET_BY_NAME_IN_WORKSPACE = "get Kubernetes config by name in workspace";
+        public static final String CREATE_IN_WORKSPACE = "create Kubernetes config in workspace";
+        public static final String PUT_IN_WORKSPACE = "modify Kubernetes config in workspace";
+        public static final String DELETE_BY_NAME_IN_WORKSPACE = "delete Kubernetes config by name in workspace";
+        public static final String ATTACH_TO_ENVIRONMENTS = "attach Kubernetes resource to environemnts";
+        public static final String DETACH_FROM_ENVIRONMENTS = "detach Kubernetes resource from environemnts";
     }
 
     public static class ConnectorOpDescription {

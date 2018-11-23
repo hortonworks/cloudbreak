@@ -30,6 +30,7 @@ public class RDSConfigToRDSConfigResponseConverter extends AbstractConversionSer
         RDSConfigResponse json = new RDSConfigResponse();
         json.setId(source.getId());
         json.setName(source.getName());
+        json.setDescription(source.getDescription());
         json.setConnectionURL(source.getConnectionURL());
         json.setDatabaseEngine(source.getDatabaseEngine().name());
         json.setConnectionDriver(source.getConnectionDriver());

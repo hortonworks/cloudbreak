@@ -11,9 +11,6 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 public class LdapConfigResponse extends LdapConfigBase {
 
-    @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
-    private String name;
-
     @ApiModelProperty(ModelDescriptions.ID)
     private Long id;
 
@@ -33,14 +30,6 @@ public class LdapConfigResponse extends LdapConfigBase {
 
     public void setPublicInAccount(boolean publicInAccount) {
         this.publicInAccount = publicInAccount;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     @JsonProperty("id")
