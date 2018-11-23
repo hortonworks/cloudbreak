@@ -2,9 +2,11 @@ package com.sequenceiq.cloudbreak.logger;
 
 public enum LoggerContextKey {
 
-    USER("user"),
+    USER_ID("userId"),
+    USER_NAME("userName"),
     TENANT("tenant"),
     WORKSPACE("workspace"),
+    WORKSPACE_ID("workspaceId"),
     RESOURCE_TYPE("resourceType"),
     RESOURCE_ID("resourceId"),
     RESOURCE_NAME("resourceName"),

@@ -147,7 +147,7 @@ public class ClusterCreationSetupService {
         } else if (request.getKerberos() != null) {
                 throw new BadRequestException("Invalid kerberos settings, attached cluster should inherit kerberos parameters");
         }
-        MDCBuilder.buildUserMdcContext(user.getUserId());
+        MDCBuilder.buildUserMdcContext(user.getUserId(), user.getUserName());
         CloudCredential credential = cloudCredential;
         if (credential == null) {
             credential = credentialToCloudCredentialConverter.convert(stack.getCredential());
