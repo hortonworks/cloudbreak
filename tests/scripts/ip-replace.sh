@@ -5,11 +5,14 @@
 
 : ${ORIGINAL_IP:=127.0.0.1}
 : ${NEW_IP:=192.168.99.100}
+: ${CLEANUP:=false}
 
 tmp-cleanup() {
     declare desc="Remove old temporary files and test results before new test run"
 
-    rm -rf {test_log,allure,.cb,tmp} {test-result.html,test-result.xml}
+    if [[ $CLEANUP == "true" ]]; then
+        rm -rf {test_log,allure,.cb,tmp} {test-result.html,test-result.xml}
+    fi
 }
 
 tmp-create() {
