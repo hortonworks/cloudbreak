@@ -53,7 +53,7 @@ class CommandBuilder
         end 
       end  
     end  
-    CommandBuilder.cmd = "cb "     
+    CommandBuilder.cmd = "dp "     
     return result  
  end
   

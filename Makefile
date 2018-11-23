@@ -1,4 +1,4 @@
-BINARY=cb
+BINARY=dp
 
 VERSION ?= $(shell git describe --tags --abbrev=0)-snapshot
 PLUGIN_ENABLED ?= false

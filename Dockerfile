@@ -10,6 +10,6 @@ RUN make build-linux
 
 FROM alpine
 
-COPY --from=0 /go/src/github.com/hortonworks/cb-cli/build/Linux/cb /usr/local/bin
+COPY --from=0 /go/src/github.com/hortonworks/cb-cli/build/Linux/dp /usr/local/bin
 
-ENTRYPOINT ["cb"]
+ENTRYPOINT ["dp"]

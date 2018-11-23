@@ -11,7 +11,7 @@ import (
 	"github.com/hortonworks/cb-cli/cloudbreak/common"
 	fl "github.com/hortonworks/cb-cli/cloudbreak/flags"
 	"github.com/hortonworks/cb-cli/cmd"
-	"github.com/hortonworks/cb-cli/dps-common/utils"
+	"github.com/hortonworks/cb-cli/dp-cli-common/utils"
 	"github.com/hortonworks/cb-cli/help"
 	"github.com/hortonworks/cb-cli/plugin"
 	"github.com/urfave/cli"
@@ -44,8 +44,8 @@ func main() {
 	}
 
 	app := cli.NewApp()
-	app.Name = "cb"
-	app.HelpName = "Hortonworks Data Cloud command line tool"
+	app.Name = "dp"
+	app.HelpName = "Hortonworks DataPlane command line tool"
 	app.Version = common.Version + "-" + common.BuildTime
 	app.Author = "Hortonworks"
 	app.EnableBashCompletion = true

@@ -11,7 +11,7 @@ import (
 	"github.com/go-openapi/strfmt"
 	apiclient "github.com/hortonworks/cb-cli/cloudbreak/api/client"
 	fl "github.com/hortonworks/cb-cli/cloudbreak/flags"
-	"github.com/hortonworks/cb-cli/dps-common/caasauth"
+	"github.com/hortonworks/cb-cli/dp-cli-common/caasauth"
 	"github.com/urfave/cli"
 )
 

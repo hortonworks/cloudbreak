@@ -8,7 +8,7 @@ import (
 	"github.com/hortonworks/cb-cli/cloudbreak/api/client/v3_workspace_id_blueprints"
 	"github.com/hortonworks/cb-cli/cloudbreak/api/model"
 	"github.com/hortonworks/cb-cli/cloudbreak/types"
-	"github.com/hortonworks/cb-cli/dps-common/utils"
+	"github.com/hortonworks/cb-cli/dp-cli-common/utils"
 )
 
 type mockBlueprintsClient struct {

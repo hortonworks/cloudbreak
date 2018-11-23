@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/hortonworks/cb-cli/cloudbreak/utils"
-	commonutils "github.com/hortonworks/cb-cli/dps-common/utils"
+	commonutils "github.com/hortonworks/cb-cli/dp-cli-common/utils"
 
 	"github.com/hortonworks/cb-cli/cloudbreak/common"
 	"github.com/hortonworks/cb-cli/cloudbreak/credential"

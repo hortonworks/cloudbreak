@@ -3,7 +3,7 @@ package aws
 import (
 	"github.com/hortonworks/cb-cli/cloudbreak/api/model"
 	"github.com/hortonworks/cb-cli/cloudbreak/cloud"
-	"github.com/hortonworks/cb-cli/dps-common/utils"
+	"github.com/hortonworks/cb-cli/dp-cli-common/utils"
 )
 
 func (p *AwsProvider) GetNetworkParamatersTemplate(mode cloud.NetworkMode) map[string]interface{} {

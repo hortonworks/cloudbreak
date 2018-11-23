@@ -14,7 +14,7 @@ import (
 	_ "github.com/hortonworks/cb-cli/cloudbreak/cloud/gcp"
 	_ "github.com/hortonworks/cb-cli/cloudbreak/cloud/openstack"
 	_ "github.com/hortonworks/cb-cli/cloudbreak/cloud/yarn"
-	"github.com/hortonworks/cb-cli/dps-common/utils"
+	"github.com/hortonworks/cb-cli/dp-cli-common/utils"
 )
 
 type mockConnectorsClient struct {

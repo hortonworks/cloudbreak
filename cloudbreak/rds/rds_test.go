@@ -8,7 +8,7 @@ import (
 	"github.com/hortonworks/cb-cli/cloudbreak/api/model"
 	_ "github.com/hortonworks/cb-cli/cloudbreak/cloud/aws"
 	"github.com/hortonworks/cb-cli/cloudbreak/types"
-	"github.com/hortonworks/cb-cli/dps-common/utils"
+	"github.com/hortonworks/cb-cli/dp-cli-common/utils"
 )
 
 type mockRdsClient struct {

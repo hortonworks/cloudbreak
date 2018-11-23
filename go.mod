@@ -18,7 +18,7 @@ require (
 	github.com/go-openapi/strfmt v0.0.0-20180910212104-776114108ccc
 	github.com/go-openapi/swag v0.0.0-20180908172849-dd0dad036e67
 	github.com/go-openapi/validate v0.0.0-20180825180342-e0648ff40507
-	github.com/hortonworks/cb-cli/dps-common v0.0.0
+	github.com/hortonworks/cb-cli/dp-cli-common v0.0.0
 	github.com/kisielk/errcheck v1.1.0 // indirect
 	github.com/mailru/easyjson v0.0.0-20180823135443-60711f1a8329 // indirect
 	github.com/mattn/go-runewidth v0.0.3 // indirect
@@ -43,4 +43,4 @@ require (
 	gopkg.in/yaml.v2 v2.2.1
 )
 
-replace github.com/hortonworks/cb-cli/dps-common => ./dps-common
+replace github.com/hortonworks/cb-cli/dp-cli-common => ./dp-cli-common

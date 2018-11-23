@@ -19,7 +19,7 @@ import (
 	"github.com/ernesto-jimenez/httplogger"
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/client"
-	"github.com/hortonworks/cb-cli/dps-common/utils"
+	"github.com/hortonworks/cb-cli/dp-cli-common/utils"
 )
 
 var PREFIX_TRIM = []string{"http://", "https://"}

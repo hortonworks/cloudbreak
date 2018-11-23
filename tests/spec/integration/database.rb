@@ -6,7 +6,7 @@ require_relative "spec_helper"
 
 define_method(:cb) do
   cb = CommandBuilder.new
-  CommandBuilder.cmd = "cb "
+  CommandBuilder.cmd = "dp "
   return cb
 end
 
