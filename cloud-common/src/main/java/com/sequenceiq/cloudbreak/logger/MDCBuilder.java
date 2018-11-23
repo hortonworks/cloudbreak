@@ -4,9 +4,9 @@ import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.MDC;
 import org.springframework.util.ReflectionUtils;
-import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
@@ -31,7 +31,7 @@ public class MDCBuilder {
 
     public static void buildMdcContext(Object object) {
         if (object == null) {
-            MDC.put(LoggerContextKey.USER.toString(), "undefined");
+            MDC.put(LoggerContextKey.USER_ID.toString(), "undefined");
             MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), "undefined");
             MDC.put(LoggerContextKey.RESOURCE_ID.toString(), "undefined");
             MDC.put(LoggerContextKey.RESOURCE_NAME.toString(), "undefined");
@@ -55,19 +55,33 @@ public class MDCBuilder {
 
     public static void buildUserMdcContext(CloudbreakUser user) {
         if (user != null) {
-            MDC.put(LoggerContextKey.USER.toString(), user.getUserId());
+            MDC.put(LoggerContextKey.USER_ID.toString(), user.getUserId());
+            MDC.put(LoggerContextKey.USER_NAME.toString(), user.getUsername());
             MDC.put(LoggerContextKey.TENANT.toString(), user.getTenant());
         }
     }
 
-    public static void buildUserMdcContext(String userName) {
-        if (userName != null && !userName.isEmpty()) {
-            MDC.put(LoggerContextKey.USER.toString(), userName);
+    public static void buildUserMdcContext(String userId, String userName) {
+        if (StringUtils.isNotEmpty(userId)) {
+            MDC.put(LoggerContextKey.USER_ID.toString(), userId);
         }
+        if (StringUtils.isNotEmpty(userName)) {
+            MDC.put(LoggerContextKey.USER_NAME.toString(), userName);
+        }
+    }
+
+    public static void buildWorkspaceMdcContext(Long workspaceId) {
+        MDC.put(LoggerContextKey.WORKSPACE_ID.toString(), workspaceId == null ? "undefined" : workspaceId.toString());
     }
 
     public static void buildMdcContextFromMap(Map<String, String> map) {
         cleanupMdc();
+        if (map != null) {
+            map.forEach(MDC::put);
+        }
+    }
+
+    public static void buildMdcContextFromMapForControllerCalls(Map<String, String> map) {
         if (map != null) {
             map.forEach(MDC::put);
         }

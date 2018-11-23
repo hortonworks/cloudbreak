@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceAwareResourceService;
@@ -47,6 +48,7 @@ public abstract class AbstractWorkspaceAwareResourceService<T extends WorkspaceA
     @Override
     public T create(T resource, Workspace workspace, User user) {
         try {
+            MDCBuilder.buildMdcContext(resource);
             prepareCreation(resource);
             setWorkspace(resource, user, workspace);
             return repository().save(resource);
@@ -63,6 +65,7 @@ public abstract class AbstractWorkspaceAwareResourceService<T extends WorkspaceA
         if (object == null) {
             throw new NotFoundException(String.format("No %s found with name '%s'", resource().getShortName(), name));
         }
+        MDCBuilder.buildMdcContext(object);
         return object;
     }
 
@@ -72,6 +75,7 @@ public abstract class AbstractWorkspaceAwareResourceService<T extends WorkspaceA
         if (object == null) {
             throw new NotFoundException(String.format("No %s found with name '%s'", resource().getShortName(), name));
         }
+        MDCBuilder.buildMdcContext(object);
         return object;
     }
 
@@ -87,6 +91,7 @@ public abstract class AbstractWorkspaceAwareResourceService<T extends WorkspaceA
 
     @Override
     public T delete(T resource) {
+        MDCBuilder.buildMdcContext(resource);
         LOGGER.info("Deleting {} with name: {}", resource().getReadableName(), resource.getName());
         prepareDeletion(resource);
         repository().delete(resource);

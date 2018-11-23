@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Maps;
-import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
@@ -42,7 +41,7 @@ public class ControllerLogContextAspects {
             String trackingIdLCKey = LoggerContextKey.TRACKING_ID.toString();
             Map<String, String> mdcParams = getMDCParams(joinPoint.getTarget(), paramNames, args);
             mdcParams.put(trackingIdLCKey, MDCBuilder.getMdcContextMap().get(trackingIdLCKey));
-            MDCBuilder.buildMdcContextFromMap(mdcParams);
+            MDCBuilder.buildMdcContextFromMapForControllerCalls(mdcParams);
             LOGGER.debug("A controller method has been intercepted: {} with params {}, {}, MDC logger context is built.", joinPoint.toShortString(),
                     sig.getParameterNames(), args);
         } catch (Exception any) {
@@ -67,9 +66,6 @@ public class ControllerLogContextAspects {
         String controllerClassName = target.getClass().getSimpleName();
         String resourceType = controllerClassName.substring(0, controllerClassName.indexOf("Controller"));
         result.put(LoggerContextKey.RESOURCE_TYPE.toString(), resourceType);
-        CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
-        String userName = cloudbreakUser != null ? userService.getOrCreate(cloudbreakUser).getUserName() : "undefined";
-        result.put(LoggerContextKey.USER.toString(), userName);
         return result;
     }
 }

@@ -30,8 +30,16 @@ public class MDCContextFilter extends OncePerRequestFilter {
 
     private final AuthenticatedUserService authenticatedUserService;
 
-    public MDCContextFilter(AuthenticatedUserService authenticatedUserService) {
+    private final Runnable mdcAppender;
+
+    public MDCContextFilter(AuthenticatedUserService authenticatedUserService, Runnable mdcAppender) {
         this.authenticatedUserService = authenticatedUserService;
+        this.mdcAppender = mdcAppender;
+    }
+
+    public MDCContextFilter(AuthenticatedUserService authenticatedUserService) {
+        this(authenticatedUserService, () -> {
+        });
     }
 
     @Override
@@ -43,6 +51,7 @@ public class MDCContextFilter extends OncePerRequestFilter {
                 request.getMethod().toUpperCase(),
                 request.getRequestURI());
         MDCBuilder.buildUserMdcContext(authenticatedUserService.getCbUser());
+        mdcAppender.run();
         filterChain.doFilter(wrapper, response);
     }
 
