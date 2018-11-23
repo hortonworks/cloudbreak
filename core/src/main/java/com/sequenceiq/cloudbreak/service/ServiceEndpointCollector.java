@@ -20,6 +20,7 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.ClusterExposedServiceResponse;
@@ -41,9 +42,10 @@ import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 @Service
 public class ServiceEndpointCollector {
 
-    private static final int KNOX_PORT = 8443;
-
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceEndpointCollector.class);
+
+    @Value("${cb.knox.port}")
+    private String knoxPort;
 
     @Inject
     private BlueprintService blueprintService;
@@ -163,7 +165,7 @@ public class ServiceEndpointCollector {
             } else {
                 String url = GatewayType.CENTRAL == gateway.getGatewayType()
                         ? String.format("/%s/%s%s", gateway.getPath(), topologyName, exposedService.getKnoxUrl())
-                        : String.format("https://%s:%s/%s/%s%s", ambariIp, KNOX_PORT, gateway.getPath(), topologyName, exposedService.getKnoxUrl());
+                        : String.format("https://%s:%s/%s/%s%s", ambariIp, knoxPort, gateway.getPath(), topologyName, exposedService.getKnoxUrl());
                 return Optional.of(url);
             }
         }
@@ -198,7 +200,7 @@ public class ServiceEndpointCollector {
     private String getAmbariUrlFromGatewayTopology(String ambariIp, Gateway gateway, GatewayTopology gt) {
         return GatewayType.CENTRAL == gateway.getGatewayType()
                 ? String.format("/%s/%s/ambari/", gateway.getPath(), gt.getTopologyName())
-                : String.format("https://%s:%s/%s/%s/ambari/", ambariIp, KNOX_PORT, gateway.getPath(), gt.getTopologyName());
+                : String.format("https://%s:%s/%s/%s/ambari/", ambariIp, knoxPort, gateway.getPath(), gt.getTopologyName());
     }
 
     private Optional<String> getHiveJdbcUrl(Gateway gateway, String ambariIp) {
@@ -209,6 +211,6 @@ public class ServiceEndpointCollector {
     private String getHiveJdbcUrlFromGatewayTopology(String ambariIp, GatewayTopology gt) {
         Gateway gateway = gt.getGateway();
         return String.format("jdbc:hive2://%s:%s/;ssl=true;sslTrustStore=/cert/gateway.jks;trustStorePassword=${GATEWAY_JKS_PASSWORD};"
-                + "transportMode=http;httpPath=%s/%s/hive", ambariIp, KNOX_PORT, gateway.getPath(), gt.getTopologyName());
+                + "transportMode=http;httpPath=%s/%s/hive", ambariIp, knoxPort, gateway.getPath(), gt.getTopologyName());
     }
 }

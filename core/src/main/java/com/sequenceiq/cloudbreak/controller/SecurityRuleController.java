@@ -18,7 +18,7 @@ public class SecurityRuleController implements SecurityRuleEndpoint {
     private SecurityRuleService securityRuleService;
 
     @Override
-    public SecurityRulesResponse getDefaultSecurityRules() {
-        return securityRuleService.getDefaultSecurityRules();
+    public SecurityRulesResponse getDefaultSecurityRules(Boolean knoxEnabled) {
+        return securityRuleService.getDefaultSecurityRules(knoxEnabled);
     }
 }

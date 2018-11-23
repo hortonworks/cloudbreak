@@ -183,7 +183,7 @@ public class StackService {
     @Inject
     private OpenSshPublicKeyValidator rsaPublicKeyValidator;
 
-    @Value("${cb.nginx.port:9443}")
+    @Value("${cb.nginx.port}")
     private Integer nginxPort;
 
     @Value("${info.app.version:}")

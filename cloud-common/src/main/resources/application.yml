@@ -186,6 +186,10 @@ cb:
 
   nginx:
     port: 9443
+  knox:
+    port: 8443
+  ssh:
+    port: 22
 
   hive.database:
     user: hive

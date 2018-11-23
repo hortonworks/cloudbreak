@@ -27,7 +27,7 @@ public class DefaultSecurityGroupCreator {
     @Inject
     private SecurityGroupService securityGroupService;
 
-    @Value("${cb.nginx.port:9443}")
+    @Value("${cb.nginx.port}")
     private int nginxPort;
 
     private void addSecurityGroup(User user, String platform, String name, Iterable<Port> securityGroupPorts,

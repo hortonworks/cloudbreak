@@ -1,9 +1,9 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
+import java.io.IOException;
+
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.log.Log;
-
-import java.io.IOException;
 
 public class SecurityRulesAction {
 
@@ -15,7 +15,7 @@ public class SecurityRulesAction {
         CloudbreakClient client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
 
         Log.log(" get Security Rules to");
-        securityRulesEntity.setResponse(client.getCloudbreakClient().securityRuleEndpoint().getDefaultSecurityRules());
+        securityRulesEntity.setResponse(client.getCloudbreakClient().securityRuleEndpoint().getDefaultSecurityRules(true));
         Log.logJSON(" get Security Rules response: ", securityRulesEntity.getResponse());
     }
 }

@@ -17,30 +17,36 @@ public class SecurityRuleService {
 
     private static final String TCP_PROTOCOL = "tcp";
 
-    @Value("${cb.nginx.port:9443}")
+    @Value("${cb.nginx.port}")
     private String gatewayPort;
 
-    @Value("${cb.ssh.port:22}")
+    @Value("${cb.knox.port}")
+    private String knoxPort;
+
+    @Value("${cb.ssh.port}")
     private String sshPort;
 
     @Value("#{'${cb.default.gateway.cidr:0.0.0.0/0}'.split(',')}")
     private Set<String> defaultGatewayCidr;
 
-    public SecurityRulesResponse getDefaultSecurityRules() {
-
+    public SecurityRulesResponse getDefaultSecurityRules(Boolean knoxEnabled) {
         SecurityRulesResponse ret = new SecurityRulesResponse();
-
-        Set<String> defaultGatewayCidrs = defaultGatewayCidr.stream().filter(StringUtils::isNotBlank).collect(Collectors.toSet());
-
+        Set<String> defaultGatewayCidrs = defaultGatewayCidr
+                .stream()
+                .filter(StringUtils::isNotBlank)
+                .collect(Collectors.toSet());
         if (!defaultGatewayCidrs.isEmpty()) {
-            defaultGatewayCidr.forEach(cidr -> addCidrAndPort(ret, cidr));
+            defaultGatewayCidr.forEach(cloudbreakCidr -> addCidrAndPort(ret, cloudbreakCidr, knoxEnabled));
         }
-
         return ret;
     }
 
-    private void addCidrAndPort(SecurityRulesResponse ret, String cidr) {
-        ret.getGateway().addAll(createSecurityRuleResponse(cidr, sshPort, gatewayPort));
+    private void addCidrAndPort(SecurityRulesResponse ret, String cloudbreakCidr, Boolean knoxEnabled) {
+        if (knoxEnabled) {
+            ret.getGateway().addAll(createSecurityRuleResponse(cloudbreakCidr, knoxPort));
+        }
+        ret.getGateway().addAll(createSecurityRuleResponse(cloudbreakCidr, sshPort, gatewayPort));
+        ret.getCore().addAll(createSecurityRuleResponse(cloudbreakCidr, sshPort));
     }
 
     private Collection<SecurityRuleResponse> createSecurityRuleResponse(String cidr, String... ports) {
