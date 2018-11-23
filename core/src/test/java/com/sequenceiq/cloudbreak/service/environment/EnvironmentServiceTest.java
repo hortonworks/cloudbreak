@@ -70,6 +70,7 @@ import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.environment.EnvironmentRepository;
+import com.sequenceiq.cloudbreak.service.KubernetesConfigService;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
@@ -107,6 +108,9 @@ public class EnvironmentServiceTest {
 
     @Mock
     private RdsConfigService rdsConfigService;
+
+    @Mock
+    private KubernetesConfigService kubernetesConfigService;
 
     @Mock
     private LdapConfigService ldapConfigService;

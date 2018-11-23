@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.controller.validation.environment.EnvironmentAt
 import com.sequenceiq.cloudbreak.controller.validation.environment.EnvironmentCreationValidator;
 import com.sequenceiq.cloudbreak.controller.validation.environment.EnvironmentDetachValidator;
 import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.KubernetesConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.PlatformResourceRequest;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
@@ -47,6 +48,7 @@ import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.repository.environment.EnvironmentRepository;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
+import com.sequenceiq.cloudbreak.service.KubernetesConfigService;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
@@ -63,6 +65,9 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
 
     @Inject
     private RdsConfigService rdsConfigService;
+
+    @Inject
+    private KubernetesConfigService kubernetesConfigService;
 
     @Inject
     private LdapConfigService ldapConfigService;
@@ -152,6 +157,7 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
         environment.setLdapConfigs(ldapConfigService.findByNamesInWorkspace(request.getLdapConfigs(), workspaceId));
         environment.setProxyConfigs(proxyConfigService.findByNamesInWorkspace(request.getProxyConfigs(), workspaceId));
         environment.setRdsConfigs(rdsConfigService.findByNamesInWorkspace(request.getRdsConfigs(), workspaceId));
+        environment.setKubernetesConfigs(kubernetesConfigService.findByNamesInWorkspace(request.getRdsConfigs(), workspaceId));
         Credential credential = environmentCredentialOperationService.getCredentialFromRequest(request, workspaceId);
         environment.setCredential(credential);
         environment.setCloudPlatform(credential.cloudPlatform());
@@ -215,22 +221,26 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
         Set<LdapConfig> ldapsToAttach = ldapConfigService.findByNamesInWorkspace(request.getLdapConfigs(), workspaceId);
         Set<ProxyConfig> proxiesToAttach = proxyConfigService.findByNamesInWorkspace(request.getProxyConfigs(), workspaceId);
         Set<RDSConfig> rdssToAttach = rdsConfigService.findByNamesInWorkspace(request.getRdsConfigs(), workspaceId);
+        Set<KubernetesConfig> kubesToAttach = kubernetesConfigService.findByNamesInWorkspace(request.getKubernetesConfigs(), workspaceId);
         ValidationResult validationResult = environmentAttachValidator.validate(request, ldapsToAttach, proxiesToAttach, rdssToAttach);
         if (validationResult.hasError()) {
             throw new BadRequestException(validationResult.getFormattedErrors());
         }
         Environment environment = getByNameForWorkspaceId(environmentName, workspaceId);
-        environment = doAttach(ldapsToAttach, proxiesToAttach, rdssToAttach, environment);
+        environment = doAttach(ldapsToAttach, proxiesToAttach, rdssToAttach, kubesToAttach, environment);
         return conversionService.convert(environment, DetailedEnvironmentResponse.class);
     }
 
-    private Environment doAttach(Set<LdapConfig> ldapsToAttach, Set<ProxyConfig> proxiesToAttach, Set<RDSConfig> rdssToAttach, Environment environment) {
+    private Environment doAttach(Set<LdapConfig> ldapsToAttach, Set<ProxyConfig> proxiesToAttach, Set<RDSConfig> rdssToAttach,
+            Set<KubernetesConfig> kubesToAttach, Environment environment) {
         ldapsToAttach.removeAll(environment.getLdapConfigs());
         environment.getLdapConfigs().addAll(ldapsToAttach);
         proxiesToAttach.removeAll(environment.getProxyConfigs());
         environment.getProxyConfigs().addAll(proxiesToAttach);
         rdssToAttach.removeAll(environment.getRdsConfigs());
         environment.getRdsConfigs().addAll(rdssToAttach);
+        kubesToAttach.removeAll(environment.getKubernetesConfigs());
+        environment.getKubernetesConfigs().addAll(kubesToAttach);
         environment = environmentRepository.save(environment);
         return environment;
     }
@@ -240,6 +250,7 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
         ValidationResult validationResult = validateAndDetachLdaps(request, environment);
         validationResult = validateAndDetachProxies(request, environment, validationResult);
         validationResult = validateAndDetachRdss(request, environment, validationResult);
+        detachKubes(request, environment);
         if (validationResult.hasError()) {
             throw new BadRequestException(validationResult.getFormattedErrors());
         }
@@ -275,6 +286,12 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
         validationResult = environmentDetachValidator.validate(environment, rdssToClusters).merge(validationResult);
         environment.getRdsConfigs().removeAll(rdssToDetach);
         return validationResult;
+    }
+
+    private void detachKubes(EnvironmentDetachRequest request, Environment environment) {
+        Set<KubernetesConfig> kubesToDetach = environment.getKubernetesConfigs().stream()
+                .filter(config -> request.getKubernetesConfigs().contains(config.getName())).collect(Collectors.toSet());
+        environment.getKubernetesConfigs().removeAll(kubesToDetach);
     }
 
     public DetailedEnvironmentResponse changeCredential(String environmentName, Long workspaceId, EnvironmentChangeCredentialRequest request) {

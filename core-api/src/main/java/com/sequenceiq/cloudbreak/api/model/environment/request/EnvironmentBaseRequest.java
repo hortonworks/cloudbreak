@@ -20,6 +20,9 @@ public abstract class EnvironmentBaseRequest {
     @ApiModelProperty(EnvironmentRequestModelDescription.RDS_CONFIGS)
     private Set<String> rdsConfigs = new HashSet<>();
 
+    @ApiModelProperty(EnvironmentRequestModelDescription.KUBERNETES_CONFIGS)
+    private Set<String> kubernetesConfigs = new HashSet<>();
+
     public Set<String> getProxyConfigs() {
         return proxyConfigs;
     }
@@ -42,5 +45,13 @@ public abstract class EnvironmentBaseRequest {
 
     public void setRdsConfigs(Set<String> rdsConfigs) {
         this.rdsConfigs = rdsConfigs == null ? new HashSet<>() : rdsConfigs;
+    }
+
+    public Set<String> getKubernetesConfigs() {
+        return kubernetesConfigs;
+    }
+
+    public void setKubernetesConfigs(Set<String> kubernetesConfigs) {
+        this.kubernetesConfigs = kubernetesConfigs;
     }
 }

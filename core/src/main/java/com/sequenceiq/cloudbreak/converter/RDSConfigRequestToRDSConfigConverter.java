@@ -33,6 +33,7 @@ public class RDSConfigRequestToRDSConfigConverter extends AbstractConversionServ
         } else {
             rdsConfig.setName(source.getName());
         }
+        rdsConfig.setDescription(source.getDescription());
         rdsConfig.setConnectionURL(source.getConnectionURL());
 
         DatabaseVendor databaseVendor = DatabaseVendor.getVendorByJdbcUrl(source).get();

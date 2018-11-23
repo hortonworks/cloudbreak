@@ -6,6 +6,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.model.KubernetesConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.environment.response.DetailedEnvironmentResponse;
 import com.sequenceiq.cloudbreak.api.model.environment.response.LocationResponse;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
@@ -47,6 +48,11 @@ public class EnvironmentToDetailedEnvironmentResponseConverter extends AbstractC
                 source.getRdsConfigs()
                         .stream()
                         .map(rdsConfig -> getConversionService().convert(rdsConfig, RDSConfigResponse.class))
+                        .collect(Collectors.toSet()));
+        response.setKubernetesConfigs(
+                source.getKubernetesConfigs()
+                        .stream()
+                        .map(kubeConfig -> getConversionService().convert(kubeConfig, KubernetesConfigResponse.class))
                         .collect(Collectors.toSet()));
         response.setWorkloadClusters(
                 source.getStacks()

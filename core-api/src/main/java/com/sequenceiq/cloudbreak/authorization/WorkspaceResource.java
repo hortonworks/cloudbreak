@@ -12,6 +12,7 @@ public enum WorkspaceResource {
     RDS("RDS config", "rds"),
     PROXY("Proxy config", "proxy"),
     MPACK("MPACK resource", "mpack"),
+    KUBERNETES("Kubernetes config", "kube"),
     STRUCTURED_EVENT("Structured event resource", "structuredevent"),
     FLEXSUBSCRIPTION("Flex subscription", "flexsubscription"),
     NETWORK("Network", "network"),
