@@ -1,11 +1,15 @@
 import json
 import sys
+import re
 
 with open(sys.argv[1]) as terms_data_file:
     terms = json.load(terms_data_file)
 
 with open(sys.argv[2]) as vms_data_file:
     vms = json.load(vms_data_file)
+
+with open(sys.argv[3]) as encFlags_data_file:
+    encryptionSupportedTypes = json.load(encFlags_data_file)
 
 vmResults = {}
 vmResults["items"] = []
@@ -42,6 +46,13 @@ for term in terms["items"]:
         continue
 
     item["meta"]["properties"]["Price"] = priceDimensions[priceDimension]["pricePerUnit"]["USD"]
+
+    encryptionSupported = False
+    for encryptionSupportedType in encryptionSupportedTypes["encryption_supported_types"]:
+        if encryptionSupportedType == vmAttributes["instanceType"] or re.match(encryptionSupportedType, vmAttributes["instanceType"]):
+            encryptionSupported = True
+
+    item["meta"]["properties"]["encryption_supported"] = encryptionSupported
 
     item["meta"]["configs"] = []
 
@@ -93,5 +104,5 @@ for term in terms["items"]:
 
     vmResults["items"].append(item)
 
-with open(sys.argv[3], 'w') as outfile:
+with open(sys.argv[4], 'w') as outfile:
     json.dump(vmResults, outfile, indent=2)
