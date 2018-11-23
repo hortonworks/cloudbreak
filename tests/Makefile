@@ -28,13 +28,13 @@ deps:
 # Start a new Cloudbreak Mock with new Swagger JSON and renewed Mock IP
 # For custom version apply as: 'GIT_FIRST_PARENT=2.8.0-dev.374 make start-mock'
 start-mock: download-s3
-	ORIGINAL_IP=127.0.0.1 NEW_IP=$(DOCKER_IP) scripts/ip-replace.sh
+	ORIGINAL_IP=127.0.0.1 NEW_IP=$(DOCKER_IP) CLEANUP=true scripts/ip-replace.sh
 	GIT_VERSION=$(GIT_FIRST_PARENT) BASE_URL=https://$(DOCKER_IP) tmp/cbm.sh
 
 # Stop Cloudbreak Mock then set back the 127.0.0.1 as default Mock IP
 stop-mock:
 	GIT_VERSION=$(GIT_FIRST_PARENT) docker-compose -f tmp/docker-compose.yml -p cbreak down
-	ORIGINAL_IP=$(DOCKER_IP) NEW_IP=127.0.0.1 scripts/ip-replace.sh
+	ORIGINAL_IP=$(DOCKER_IP) NEW_IP=127.0.0.1 CLEANUP=false scripts/ip-replace.sh
 
 # Restart Cloudbreak Mock (only Containers are restarted) with same Swagger JSON and Mock IP as was set previously
 restart-mock:
