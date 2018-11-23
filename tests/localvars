@@ -5,7 +5,7 @@ export AWS_ROLE_ARN=arn:aws:iam::test:role/test
 export OS_V2_USERNAME=test
 export OS_V2_PASSWORD=test
 export OS_V2_TENANT_NAME=test
-export OS_V2_ENDPOINT=http://test:5000/v2.0 
+export OS_V2_ENDPOINT=http://test:5000/v2.0
 
 export INTEGRATIONTEST_RDSCONFIG_RDSCONNECTIONURL=jdbc:postgresql://test:5432/test
 export INTEGRATIONTEST_RDSCONFIG_RDSUSER=test
