@@ -5,7 +5,6 @@
 : ${BASE_URL:=https://127.0.0.1}
 : ${USERNAME_CLI:=admin@example.com}
 : ${PASSWORD_CLI:=cloudbreak}
-: ${DOCKER_TAG:=latest}
 : ${CLI_TEST_FILES:=spec/integration/*.rb}
 : ${BLUEPRINT_URL:? required}
 : ${RECIPE_URL:? required}
@@ -15,7 +14,7 @@ readonly TEST_CONTAINER_NAME=aruba-test-runner
 image-update() {
     declare desc="Refresh the Test Runner Docker image"
 
-    docker pull hortonworks/cloud-cli-e2e:$DOCKER_TAG
+    docker pull hortonworks/cloud-cli-e2e
 }
 
 image-cleanup() {
@@ -66,10 +65,11 @@ test-regression() {
        --privileged \
        --net=host \
        --name $TEST_CONTAINER_NAME \
-       -v $(pwd)/aruba:/aruba \
-       -v $(pwd)/responses:/responses \
+       -v $(pwd):/aruba \
+       -v $(pwd)/tmp/responses:/responses \
        -v $(pwd)/requests:/requests \
        -v $(pwd)/../build/Linux:/usr/local/bin \
+       -v $(pwd)/scripts/aruba-docker.sh:/entrypoint.sh \
        -e "BASE_URL=$BASE_URL" \
        -e "USERNAME_CLI=$USERNAME_CLI" \
        -e "PASSWORD_CLI=$PASSWORD_CLI" \
@@ -99,7 +99,7 @@ test-regression() {
        -e "CLI_TEST_FILES=$CLI_TEST_FILES" \
        -e "BLUEPRINT_URL=$BLUEPRINT_URL" \
        -e "RECIPE_URL=$RECIPE_URL" \
-       hortonworks/cloud-cli-e2e:$DOCKER_TAG
+       hortonworks/cloud-cli-e2e
     RESULT=$?
 }
 

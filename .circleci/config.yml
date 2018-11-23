@@ -15,9 +15,9 @@ jobs:
       - store_test_results:
           path: tests/
       - store_artifacts:
-          path: tests/aruba/test-result.html
+          path: tests/test-result.html
       - store_artifacts:
-          path: tests/aruba/allure/
+          path: tests/allure/
 
 workflows:
   version: 2

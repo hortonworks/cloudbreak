@@ -9,13 +9,15 @@ traefik:
         - consul
     volumes:
         - /var/run/docker.sock:/var/run/docker.sock
-        - ./certs:/certs/traefik
+        - ${PWD}/tmp/certs:/certs/traefik
     log_opt:
         max-size: "10M"
         max-file: "5"
-    image: traefik:v1.3.8-alpine
+    image: traefik:v1.6.6-alpine
     restart: on-failure
     command: --debug --web --InsecureSkipVerify=true         --defaultEntryPoints=http,https         --entryPoints='Name:http Address::80 Redirect.EntryPoint:https'         --entryPoints='Name:https Address::443 TLS:/certs/traefik/client.pem,/certs/traefik/client-key.pem'         --maxidleconnsperhost=100         --traefikLogsFile=/opt/traefik/log/traefik.log         --accessLogsFile=/opt/traefik/log/access.log         --docker         --consul --consul.endpoint=consul:8500 
+    container_name: cbreak_traefik_1
+
 haveged:
     labels:
       - traefik.enable=false
@@ -24,6 +26,7 @@ haveged:
         max-size: "10M"
         max-file: "5"
     image: hortonworks/haveged:1.1.0
+    container_name: cbreak_haveged_1
 
 consul:
     labels:
@@ -33,7 +36,7 @@ consul:
         - http_proxy=
         - https_proxy=
     volumes:
-        - "/var/run/docker.sock:/var/run/docker.sock"
+        - /var/run/docker.sock:/var/run/docker.sock
         - consul-data:/data
     ports:
         - "172.17.0.1:53:8600/udp"
@@ -44,14 +47,15 @@ consul:
         max-size: "10M"
         max-file: "5"
     image: gliderlabs/consul-server:0.5
-    command: --bootstrap --advertise 172.17.0.1 -recursor 169.254.169.254 
+    command: --bootstrap --advertise 172.17.0.1 -recursor 169.254.169.254
+    container_name: cbreak_consul_1
 
 registrator:
     labels:
       - traefik.enable=false
     privileged: true
     volumes:
-        - "/var/run/docker.sock:/tmp/docker.sock"
+        - /var/run/docker.sock:/tmp/docker.sock
     log_opt:
         max-size: "10M"
         max-file: "5"
@@ -59,6 +63,7 @@ registrator:
     links:
         - consul
     command: consul://consul:8500
+    container_name: cbreak_registrator_1
 
 identity:
     labels:
@@ -74,11 +79,12 @@ identity:
         - SERVICE_NAME=identity
     dns: 172.17.0.1
     volumes:
-      - ./uaa.yml:/uaa/uaa.yml
+      - ${PWD}/tmp/uaa.yml:/uaa/uaa.yml
     log_opt:
         max-size: "10M"
         max-file: "5"
     image: hortonworks/cloudbreak-uaa:3.6.5
+    container_name: cbreak_identity_1
 
 cloudbreak:
     labels:
@@ -90,9 +96,10 @@ cloudbreak:
         - 8080:8080
     dns: 172.17.0.1
     volumes:
-      - ./swagger.json:/cbm/api/swagger.json
-      - ./responses:/cbm/responses
+      - ${PWD}/tmp/swagger.json:/cbm/api/swagger.json
+      - ${PWD}/tmp/responses:/cbm/responses
     image: hortonworks/cloud-swagger-mock
+    container_name: cbreak_cloudbreak_1
 
 sultans:
     environment:
@@ -127,13 +134,5 @@ sultans:
     log_opt:
         max-size: "10M"
         max-file: "5"
-    image: hortonworks/hdc-auth:2.1.0-dev.374
-
-#test:
-#    volumes:
-#     - .:/work
-#     - ../build/Linux:/usr/local/bin
-#    working_dir: /work
-#    net: host
-#    image: afarsang/docker-bats-jq
-#    command: ./scripts/integration-test.sh 
+    image: hortonworks/hdc-auth:2.7.3-rc.28
+    container_name: cbreak_sultans_1

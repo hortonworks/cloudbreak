@@ -19,16 +19,16 @@ RSpec.describe 'Image catalog test cases', :type => :aruba do
     end
   end
 
-  it "Imagecatalog - Create - Invalid Url" do 
-    skip("BUG-97072")
+  it "Imagecatalog - Create - Invalid Url BUG-97072" do
+  	skip("BUG-97072")
     with_environment 'DEBUG' => '1' do
       result = cb.imagecatalog.create.name(@image_catalog_name).url("http://www.google.com").build(false)
       expect(result.stderr).to include("create imagecatalog took")    
     end
   end 
 
-  it "Imagecatalog - Create - Invalid json" do 
-    skip("BUG-97072")
+  it "Imagecatalog - Create - Invalid json BUG-97072" do
+  	skip("BUG-97072")
     with_environment 'DEBUG' => '1' do
       result = cb.imagecatalog.create.name(@image_catalog_name).url(@imagecatalog_invalid_json ).build(false) 
       expect(result.stderr).to include("error")    
