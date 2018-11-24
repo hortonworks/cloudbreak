@@ -7,7 +7,7 @@ Aruba-RSpec Test Framework for Cloudbreak CLI. The aruba test project is located
     > * More info about RVM install at [https://rvm.io/rvm/install](https://rvm.io/rvm/install)
     > * "To start using RVM you need to source your `.rvm/scripts/rvm` in all your open shell windows, in rare cases you need to reopen all shell windows."
 
-### Develop new test cases
+### Create new test cases
 Test cases use [command_builder](spec/common/command_builder.rb) and [command_helper](spec/common/command_helpers.rb) to run the CB CLI commands. So you do not 
 need to add exact cli commands in test cases, for example:
 ```
@@ -35,14 +35,15 @@ rspec spec/integration/*.rb
 ```
 rspec -f RspecJunitFormatter -o test-result.xml -f h spec/integration/*.rb | tee test-result.html | ruby -n spec/common/integration_formatter.rb
 ```
+> You can create your own script for test execution like [scripts/test_run.sh](scripts/test_run.sh).
 
 ## Run tests in Docker container
 Your [Docker Machine](https://docs.docker.com/machine/reference/start/) has to be up and running before step forward.
 
 ### E2E testing
 #### Preconditions 
-1. Edit your [localvars](localvars) for End to End testing
-2. Source your set up E2E localvars (`. localvars` or `source localvars`)
+Create your own End to End testing local environment (for example: [localvars](localvars))
+> Source your E2E localvars (`. localvars` or `source localvars`)
 
 You can find the related Make target at [CB-CLI Makefile](../Makefile)
 ```
@@ -62,6 +63,11 @@ make all
 ```
 > You can check test results at `tests/test-result.html` or `tests/test-result.xml`
 
+#### Run a specific test scenario
+```
+CLI_TEST_FILES=spec/integration/credential.rb make integration-test'
+```
+
 ## CB-CLI Mock
 We created a [CBD Mock](https://github.com/hortonworks/cloud-swagger-mock) for CB-CLI Integration testing purposes. This is a JavaScript base Swagger mock
  for CBD.
@@ -69,7 +75,15 @@ We created a [CBD Mock](https://github.com/hortonworks/cloud-swagger-mock) for C
 You can use CBD mock with the help of Make targets at [Tests Makefile](Makefile).
 
 You can start, stop or restart the CBD Mock step-by-step if you would like with the help of the following make targets: 
-* **Download S3**: Download the versioned Swagger Json file from out AWS S3 bucket (`make download-s3`).
-* **Start mock**: Start CBD mock for CB-CLI based on the downloaded Swagger Json (`make start-mock`).
-* **Stop mock**: Kill all the CBD mock related containers (`make stop-mock`).
-* **Restart mock**: Kill all the CBD mock containers then start these again based on the existing [swagger.json](swagger.json) (`make restart-mock`).
+* **Download S3**: Download the versioned Swagger Json file from out AWS S3 bucket
+    
+    ```make download-s3```
+* **Start mock**: Start CBD mock for CB-CLI based on the downloaded Swagger Json
+    
+    ```make start-mock```
+* **Stop mock**: Kill all the CBD mock related containers
+    
+    ```make stop-mock```
+* **Restart mock**: Kill all the CBD mock containers then start these again based on the existing [swagger.json](swagger.json)
+    
+    ```make restart-mock```
