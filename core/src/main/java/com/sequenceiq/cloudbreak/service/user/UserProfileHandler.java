@@ -26,10 +26,12 @@ public class UserProfileHandler {
 
     public void createProfilePreparation(Credential credential, User user) {
         CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
-        UserProfile userProfile = userProfileService.getOrCreate(cloudbreakUser.getAccount(), cloudbreakUser.getUserId(), user);
-        if (userProfile != null && userProfile.getDefaultCredentials().isEmpty()) {
-            userProfile.setDefaultCredentials(Sets.newHashSet(credential));
-            userProfileService.save(userProfile);
+        if (cloudbreakUser != null) {
+            UserProfile userProfile = userProfileService.getOrCreate(cloudbreakUser.getAccount(), cloudbreakUser.getUserId(), user);
+            if (userProfile != null && userProfile.getDefaultCredentials().isEmpty()) {
+                userProfile.setDefaultCredentials(Sets.newHashSet(credential));
+                userProfileService.save(userProfile);
+            }
         }
     }
 
