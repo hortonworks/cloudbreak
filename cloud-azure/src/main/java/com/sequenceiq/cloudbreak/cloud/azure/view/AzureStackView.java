@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 
 public class AzureStackView {
 
-    private static final int DEFAULT_FAULT_DOMAIN_COUNTER = 3;
+    private static final int DEFAULT_FAULT_DOMAIN_COUNTER = 2;
 
     private static final int DEFAULT_UPDATE_DOMAIN_COUNTER = 20;
 
@@ -41,7 +41,9 @@ public class AzureStackView {
                 instanceGroupView = new AzureInstanceGroupView(group.getName(), faultDomainCount, updateDomainCount,
                         asName, group.getRootVolumeSize());
             } else {
-                instanceGroupView = new AzureInstanceGroupView(group.getName(), group.getRootVolumeSize());
+                String asName = String.format("%s-%s-as", stackName, group.getName());
+                instanceGroupView = new AzureInstanceGroupView(group.getName(), DEFAULT_FAULT_DOMAIN_COUNTER,
+                        DEFAULT_FAULT_DOMAIN_COUNTER, asName, group.getRootVolumeSize());
             }
             if (!group.getInstances().isEmpty()) {
                 List<AzureInstanceView> existingInstances = groups.computeIfAbsent(groupName, k -> new ArrayList<>());
