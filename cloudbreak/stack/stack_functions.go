@@ -9,7 +9,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/cb-cli/cloudbreak/api/client/v3_workspace_id_stacks"
 	"github.com/hortonworks/cb-cli/cloudbreak/api/model"
-	"github.com/hortonworks/cb-cli/dp-cli-common/utils"
+	"github.com/hortonworks/dp-cli-common/utils"
 )
 
 type status string

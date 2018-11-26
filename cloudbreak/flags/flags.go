@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/hortonworks/cb-cli/dp-cli-common/utils"
+	"github.com/hortonworks/dp-cli-common/utils"
 	"github.com/urfave/cli"
 )
 

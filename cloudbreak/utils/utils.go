@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/hortonworks/cb-cli/cloudbreak/api/client/v1util"
-	commonutils "github.com/hortonworks/cb-cli/dp-cli-common/utils"
+	commonutils "github.com/hortonworks/dp-cli-common/utils"
 )
 
 type utilClient interface {

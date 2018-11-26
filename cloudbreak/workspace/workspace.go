@@ -9,7 +9,7 @@ import (
 	"github.com/hortonworks/cb-cli/cloudbreak/api/model"
 	fl "github.com/hortonworks/cb-cli/cloudbreak/flags"
 	"github.com/hortonworks/cb-cli/cloudbreak/oauth"
-	"github.com/hortonworks/cb-cli/dp-cli-common/utils"
+	"github.com/hortonworks/dp-cli-common/utils"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 )

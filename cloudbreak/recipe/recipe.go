@@ -14,7 +14,7 @@ import (
 	"github.com/hortonworks/cb-cli/cloudbreak/api/client/v3_workspace_id_recipes"
 	"github.com/hortonworks/cb-cli/cloudbreak/api/model"
 	fl "github.com/hortonworks/cb-cli/cloudbreak/flags"
-	"github.com/hortonworks/cb-cli/dp-cli-common/utils"
+	"github.com/hortonworks/dp-cli-common/utils"
 	"github.com/urfave/cli"
 )
 
