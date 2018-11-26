@@ -1,9 +1,89 @@
 {
   "entries": [
     {
+      "propertyName": "zeppelin.notebook.dir",
+      "propertyFile": "zeppelin-site",
+      "description": "The root directory where Zeppelin notebook directories are saved",
+      "defaultPath": "{{{ defaultPath }}}/spark/zeppelin/notebook",
+      "propertyDisplayName": "Zeppelin Notebooks Root Directory",
+      "relatedService": "ZEPPELIN_MASTER",
+      "requiredForAttachedCluster": false,
+      "supportedStorages": ["ADLS", "WASB", "S3", "GCS", "ADLS_GEN_2"]
+    },
+    {
+      "propertyName": "tez.history.logging.proto-base-dir",
+      "propertyFile": "tez-site",
+      "description": "The directory into which Tez history data will be written when proto history logging service is used",
+      "defaultPath": "{{{ defaultPath }}}/apps/hive/ewarehouse/tablespace/external/hive/sys.db/query_data",
+      "propertyDisplayName": "Tez Proto History Logs",
+      "relatedService": "TEZ_CLIENT",
+      "requiredForAttachedCluster": false,
+      "supportedStorages": ["ADLS", "WASB", "S3", "GCS", "ADLS_GEN_2"]
+    },
+    {
+      "propertyName": "yarn.nodemanager.remote-app-log-dir",
+      "propertyFile": "yarn-site",
+      "description": "This is the directory where aggregated application logs should be stored by YARN NodeManager",
+      "defaultPath": "{{{ defaultPath }}}/yarn-app-logs",
+      "propertyDisplayName": "YARN Application Logs",
+      "relatedService": "NODEMANAGER",
+      "requiredForAttachedCluster": false,
+      "supportedStorages": ["ADLS", "WASB", "S3", "GCS", "ADLS_GEN_2"]
+    },
+    {
+      "propertyName": "hbase.rootdir",
+      "propertyFile": "yarn-hbase-site",
+      "description": "The directory shared by region servers and into which YARN App Timeline Server HBase persists",
+      "defaultPath": "{{{ defaultPath }}}/yarn-hbase/data",
+      "propertyDisplayName": "YARN HBase Root Directory",
+      "relatedService": "APP_TIMELINE_SERVER",
+      "requiredForAttachedCluster": false,
+      "supportedStorages": ["ADLS", "WASB", "S3", "GCS", "ADLS_GEN_2"]
+    },
+    {
+      "propertyName": "spark.eventLog.dir",
+      "propertyFile": "spark2-defaults",
+      "description": "The directory into which Spark events are logged",
+      "defaultPath": "{{{ defaultPath }}}/spark2-history",
+      "propertyDisplayName": "Spark Event Logs",
+      "relatedService": "SPARK2_CLIENT",
+      "requiredForAttachedCluster": false,
+      "supportedStorages": ["ADLS", "WASB", "S3", "GCS", "ADLS_GEN_2"]
+    },
+    {
+      "propertyName": "spark.history.fs.logDirectory",
+      "propertyFile": "spark2-defaults",
+      "description": "The directory containing application event logs to load into Spark History Server",
+      "defaultPath": "{{{ defaultPath }}}/spark2-history",
+      "propertyDisplayName": "Spark History Log Source",
+      "relatedService": "SPARK2_JOBHISTORYSERVER",
+      "requiredForAttachedCluster": false,
+      "supportedStorages": ["ADLS", "WASB", "S3", "GCS", "ADLS_GEN_2"]
+    },
+    {
+      "propertyName": "spark.sql.warehouse.dir",
+      "propertyFile": "spark2-defaults",
+      "description": "Spark SQL stores the table data for managed tables in the warehouse directory",
+      "defaultPath": "{{{ defaultPath }}}/apps/spark/warehouse",
+      "propertyDisplayName": "Spark SQL Warehouse Directory",
+      "relatedService": "SPARK2_CLIENT",
+      "requiredForAttachedCluster": false,
+      "supportedStorages": ["ADLS", "WASB", "S3", "GCS", "ADLS_GEN_2"]
+    },
+    {
+      "propertyName": "hbase.rootdir",
+      "propertyFile": "ams-hbase-site",
+      "description": "The directory shared by region servers and into which Ambari Metrics System HBase persists",
+      "defaultPath": "{{{ defaultPath }}}/ams-hbase/data",
+      "propertyDisplayName": "Ambari Metrics System HBase Root Directory",
+      "relatedService": "METRICS_COLLECTOR",
+      "requiredForAttachedCluster": false,
+      "supportedStorages": ["ADLS", "WASB", "S3", "GCS", "ADLS_GEN_2"]
+    },
+    {
       "propertyName": "hive.metastore.warehouse.dir",
       "propertyFile": "hive-site",
-      "description": "Hive stores the table data for managed tables in the Hive warehouse directory",
+      "description": "Hive stores the table data for managed tables in the warehouse directory",
       "defaultPath": "{{{ defaultPath }}}/apps/hive/warehouse",
       "propertyDisplayName": "Hive Warehouse Directory",
       "relatedService": "HIVE_METASTORE",
@@ -11,10 +91,20 @@
       "supportedStorages": ["ADLS", "WASB", "S3", "GCS", "ADLS_GEN_2"]
     },
     {
+      "propertyName": "hive.metastore.warehouse.external.dir",
+      "propertyFile": "hive-site",
+      "description": "Hive stores the table data for external managed tables in the warehouse directory",
+      "defaultPath": "{{{ defaultPath }}}/apps/hive/ewarehouse/tablespace/external/hive",
+      "propertyDisplayName": "Hive Warehouse Directory For External Tables",
+      "relatedService": "HIVE_METASTORE",
+      "requiredForAttachedCluster": false,
+      "supportedStorages": ["ADLS", "WASB", "S3", "GCS", "ADLS_GEN_2"]
+    },
+    {
       "propertyName": "xasecure.audit.destination.hdfs.dir",
       "propertyFile": "ranger-env",
-      "description": "This is the Directory where audit logs should be stored",
-      "defaultPath": "{{{ defaultPath }}}/apps/ranger/audit/{{{ clusterName }}}",
+      "description": "This is the directory where audit logs should be stored",
+      "defaultPath": "{{{ defaultPath }}}/apps/ranger/audit",
       "propertyDisplayName": "Ranger Audit Logs",
       "relatedService": "RANGER_ADMIN",
       "requiredForAttachedCluster": false,
@@ -23,8 +113,8 @@
     {
       "propertyName": "xasecure.audit.destination.hdfs.dir",
       "propertyFile": "ranger-hive-audit",
-      "description": "This is the Directory where audit logs should be stored",
-      "defaultPath": "{{{ defaultPath }}}/apps/ranger/audit/{{{ clusterName }}}",
+      "description": "This is the directory where audit logs should be stored",
+      "defaultPath": "{{{ defaultPath }}}/apps/ranger/audit",
       "propertyDisplayName": "Ranger Audit Logs For Hive",
       "relatedService": "HIVE_SERVER",
       "requiredForAttachedCluster": true,
@@ -33,7 +123,7 @@
     {
       "propertyName": "hbase.rootdir",
       "propertyFile": "hbase-site",
-      "description": "The directory shared by region servers and into which HBase persists.",
+      "description": "The directory shared by region servers and into which HBase persists",
       "defaultPath": "{{{ defaultPath }}}/apps/hbase/data",
       "propertyDisplayName": "HBase Root Directory",
       "relatedService": "HBASE_MASTER",
