@@ -39,6 +39,13 @@ public class Environment extends EnvironmentEntity {
         return entity;
     }
 
+    public static EnvironmentEntity delete(TestContext testContext, EnvironmentEntity entity, CloudbreakClient cloudbreakClient) {
+        entity.setResponseSimpleEnv(
+                cloudbreakClient.getCloudbreakClient().environmentV3Endpoint().delete(cloudbreakClient.getWorkspaceId(), entity.getName())
+        );
+        return entity;
+    }
+
     public static Action<Environment> post(String key) {
         return new Action<>(getTestContext(key), EnvironmentAction::post);
     }
@@ -56,7 +63,7 @@ public class Environment extends EnvironmentEntity {
     }
 
     public static EnvironmentEntity getAll(TestContext testContext, EnvironmentEntity entity, CloudbreakClient cloudbreakClient) {
-        entity.setResponseSimpleEnv(
+        entity.setResponseSimpleEnvSet(
                 cloudbreakClient.getCloudbreakClient().environmentV3Endpoint().list(cloudbreakClient.getWorkspaceId())
         );
         return entity;

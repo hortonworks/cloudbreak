@@ -43,7 +43,7 @@ public class EnvironmentAction {
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
-        environmentEntity.setResponseSimpleEnv(
+        environmentEntity.setResponseSimpleEnvSet(
                 client.getCloudbreakClient()
                         .environmentV3Endpoint()
                         .list(client.getWorkspaceId()));

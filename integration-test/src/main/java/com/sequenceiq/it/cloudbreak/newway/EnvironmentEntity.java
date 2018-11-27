@@ -2,6 +2,8 @@ package com.sequenceiq.it.cloudbreak.newway;
 
 import java.util.Set;
 
+import javax.ws.rs.WebApplicationException;
+
 import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.LocationRequest;
@@ -15,6 +17,8 @@ public class EnvironmentEntity extends AbstractCloudbreakEntity<EnvironmentReque
     public static final String ENVIRONMENT = "ENVIRONMENT";
 
     private Set<SimpleEnvironmentResponse> response;
+
+    private SimpleEnvironmentResponse simpleResponse;
 
     public EnvironmentEntity(TestContext testContext) {
         super(new EnvironmentRequest(), testContext);
@@ -83,11 +87,29 @@ public class EnvironmentEntity extends AbstractCloudbreakEntity<EnvironmentReque
         return this;
     }
 
-    public Set<SimpleEnvironmentResponse> getResponseSimpleEnv() {
+    @Override
+    public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
+        LOGGER.info("Cleaning up resource with name: {}", getName());
+        try {
+            cloudbreakClient.getCloudbreakClient().environmentV3Endpoint().delete(cloudbreakClient.getWorkspaceId(), getName());
+        } catch (WebApplicationException ignore) {
+            LOGGER.info("Something happend.");
+        }
+    }
+
+    public Set<SimpleEnvironmentResponse> getResponseSimpleEnvSet() {
         return response;
     }
 
-    public void setResponseSimpleEnv(Set<SimpleEnvironmentResponse> response) {
+    public void setResponseSimpleEnvSet(Set<SimpleEnvironmentResponse> response) {
         this.response = response;
+    }
+
+    public SimpleEnvironmentResponse getResponseSimpleEnv() {
+        return simpleResponse;
+    }
+
+    public void setResponseSimpleEnv(SimpleEnvironmentResponse response) {
+        this.simpleResponse = response;
     }
 }
