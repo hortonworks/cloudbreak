@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.BadRequestException;
+import javax.ws.rs.ForbiddenException;
 
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -39,12 +40,6 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
     private static final Set<String> INVALID_LDAP = new HashSet<>(Collections.singletonList("InvalidLdap"));
 
     private static final Set<String> INVALID_RDS = new HashSet<>(Collections.singletonList("InvalidRds"));
-
-    private Set<String> validProxy = new HashSet<>();
-
-    private Set<String> validLdap = new HashSet<>();
-
-    private Set<String> validRds = new HashSet<>();
 
     private Set<String> mixedProxy = new HashSet<>();
 
@@ -82,6 +77,7 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
     @Test(dataProvider = "testContext")
     public void testCreateEnvironmenWithProxy(TestContext testContext) {
         createDefaultProxyConfig(testContext);
+        Set<String> validProxy = new HashSet<>();
         validProxy.add(testContext.get(ProxyConfigEntity.class).getName());
         testContext
                 .given(EnvironmentEntity.class)
@@ -98,6 +94,7 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
     @Test(dataProvider = "testContext")
     public void testCreateEnvironmenWithLdap(TestContext testContext) {
         createDefaultLdapConfig(testContext);
+        Set<String> validLdap = new HashSet<>();
         validLdap.add(testContext.get(LdapConfigEntity.class).getName());
         testContext
                 .given(EnvironmentEntity.class)
@@ -114,6 +111,7 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
     @Test(dataProvider = "testContext")
     public void testCreateEnvironmenWithRds(TestContext testContext) {
         createDefaultRdsConfig(testContext);
+        Set<String> validRds = new HashSet<>();
         validRds.add(testContext.get(RdsConfigEntity.class).getName());
         testContext
                 .given(EnvironmentEntity.class)
@@ -241,6 +239,85 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
                 .validate();
     }
 
+    @Test(dataProvider = "testContext")
+    public void testDeleteEnvironment(TestContext testContext) {
+        testContext
+                .given(EnvironmentEntity.class)
+                .withRegions(VALID_REGION)
+                .withLocation(VALID_LOCATION)
+                .when(Environment::post)
+                .then(EnvironmentTest::checkCredentialAttachedToEnv)
+                .when(Environment::getAll)
+                .then(EnvironmentTest::checkEnvIsListed)
+                .when(Environment::delete)
+                .validate();
+    }
+
+    @Test(dataProvider = "testContext")
+    public void testDeleteEnvWithProxy(TestContext testContext) {
+        createDefaultProxyConfig(testContext);
+        Set<String> validProxy = new HashSet<>();
+        validProxy.add(testContext.get(ProxyConfigEntity.class).getName());
+        testContext
+                .given(EnvironmentEntity.class)
+                .withRegions(VALID_REGION)
+                .withLocation(VALID_LOCATION)
+                .withProxyConfigs(validProxy)
+                .when(Environment::post)
+                .then(EnvironmentTest::checkCredentialAttachedToEnv)
+                .when(Environment::getAll)
+                .then(EnvironmentTest::checkEnvIsListed)
+                .when(Environment::delete)
+                .validate();
+    }
+
+    @Test(dataProvider = "testContext")
+    public void testDeleteEnvWithLdap(TestContext testContext) {
+        createDefaultLdapConfig(testContext);
+        Set<String> validLdap = new HashSet<>();
+        validLdap.add(testContext.get(LdapConfigEntity.class).getName());
+        testContext
+                .given(EnvironmentEntity.class)
+                .withRegions(VALID_REGION)
+                .withLocation(VALID_LOCATION)
+                .withLdapConfigs(validLdap)
+                .when(Environment::post)
+                .then(EnvironmentTest::checkCredentialAttachedToEnv)
+                .when(Environment::getAll)
+                .then(EnvironmentTest::checkEnvIsListed)
+                .when(Environment::delete)
+                .validate();
+    }
+
+    @Test(dataProvider = "testContext")
+    public void testDeleteEnvWithRds(TestContext testContext) {
+        createDefaultRdsConfig(testContext);
+        Set<String> validRds = new HashSet<>();
+        validRds.add(testContext.get(RdsConfigEntity.class).getName());
+        testContext
+                .given(EnvironmentEntity.class)
+                .withRegions(VALID_REGION)
+                .withLocation(VALID_LOCATION)
+                .withRdsConfigs(validRds)
+                .when(Environment::post)
+                .then(EnvironmentTest::checkCredentialAttachedToEnv)
+                .when(Environment::getAll)
+                .then(EnvironmentTest::checkEnvIsListed)
+                .when(Environment::delete)
+                .validate();
+    }
+
+    @Test(dataProvider = "testContext")
+    public void testDeleteEnvironmentNotExist(TestContext testContext) {
+        testContext
+                .given(EnvironmentEntity.class)
+                .withRegions(VALID_REGION)
+                .withLocation(VALID_LOCATION)
+                .when(Environment::delete, key(FORBIDDEN_KEY))
+                .except(ForbiddenException.class, key(FORBIDDEN_KEY))
+                .validate();
+    }
+
     private static EnvironmentEntity checkCredentialAttachedToEnv(TestContext testContext, EnvironmentEntity environment, CloudbreakClient cloudbreakClient) {
         String credentialName = environment.getResponse().getCredentialName();
         if (!credentialName.equals(testContext.get(CredentialEntity.class).getName())) {
@@ -250,7 +327,7 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
     }
 
     private static EnvironmentEntity checkEnvIsListed(TestContext testContext, EnvironmentEntity environment, CloudbreakClient cloudbreakClient) {
-        Set<SimpleEnvironmentResponse> simpleEnvironmentResponses = testContext.get(EnvironmentEntity.class).getResponseSimpleEnv();
+        Set<SimpleEnvironmentResponse> simpleEnvironmentResponses = testContext.get(EnvironmentEntity.class).getResponseSimpleEnvSet();
         List<SimpleEnvironmentResponse> result = simpleEnvironmentResponses.stream()
                 .filter(env -> environment.getName().equals(env.getName()))
                 .collect(Collectors.toList());
