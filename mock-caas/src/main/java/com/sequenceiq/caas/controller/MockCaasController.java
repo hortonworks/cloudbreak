@@ -1,5 +1,6 @@
 package com.sequenceiq.caas.controller;
 
+import java.util.List;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -24,6 +25,11 @@ public class MockCaasController {
 
     @Inject
     private MockCaasService mockCaasService;
+
+    @GetMapping("/caas/api/users")
+    public List<CaasUser> getUsers(HttpServletRequest httpServletRequest) {
+        return mockCaasService.getUsers(httpServletRequest);
+    }
 
     @PostMapping("/oidc/token")
     public TokenResponse postToken(@RequestBody TokenRequest tokenRequest) {

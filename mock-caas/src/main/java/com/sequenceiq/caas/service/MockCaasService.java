@@ -8,6 +8,8 @@ import static org.springframework.security.jwt.JwtHelper.encode;
 
 import java.security.InvalidParameterException;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.Nonnull;
@@ -48,21 +50,40 @@ public class MockCaasService {
     @Inject
     private JsonUtil jsonUtil;
 
-    public CaasUser getUserInfo(@Nonnull HttpServletRequest request) {
+    public IntrospectResponse getIntrospectResponse(@Nonnull HttpServletRequest request) {
         for (Cookie cookie : request.getCookies()) {
             if (JWT_COOKIE_KEY.equals(cookie.getName())) {
                 String tokenClaims = decodeAndVerify(cookie.getValue(), SIGNATURE_VERIFIER).getClaims();
-                IntrospectResponse introspectResponse = jsonUtil.toObject(tokenClaims, IntrospectResponse.class);
-                CaasUser caasUser = new CaasUser();
-                caasUser.setName(introspectResponse.getSub());
-                caasUser.setPreferredUsername(introspectResponse.getSub());
-                caasUser.setTenantId(introspectResponse.getTenantName());
-                caasUser.setId(introspectResponse.getTenantName() + '#' + introspectResponse.getSub());
-                LOGGER.info(format("Generated caas user: %s", jsonUtil.toJsonString(caasUser)));
-                return caasUser;
+                return jsonUtil.toObject(tokenClaims, IntrospectResponse.class);
             }
         }
         throw new NotFoundException("Can not retrieve user from token");
+    }
+
+    public List<CaasUser> getUsers(HttpServletRequest request) {
+        IntrospectResponse introspectResponse = getIntrospectResponse(request);
+        List<CaasUser> caasUsers = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            CaasUser caasUser = new CaasUser();
+            String userName = "mockuser" + i;
+            caasUser.setName(userName);
+            caasUser.setPreferredUsername(userName);
+            caasUser.setTenantId(introspectResponse.getTenantName());
+            caasUser.setId(introspectResponse.getTenantName() + '#' + userName);
+            caasUsers.add(caasUser);
+        }
+        return caasUsers;
+    }
+
+    public CaasUser getUserInfo(@Nonnull HttpServletRequest request) {
+        IntrospectResponse introspectResponse = getIntrospectResponse(request);
+        CaasUser caasUser = new CaasUser();
+        caasUser.setName(introspectResponse.getSub());
+        caasUser.setPreferredUsername(introspectResponse.getSub());
+        caasUser.setTenantId(introspectResponse.getTenantName());
+        caasUser.setId(introspectResponse.getTenantName() + '#' + introspectResponse.getSub());
+        LOGGER.info(format("Generated caas user: %s", jsonUtil.toJsonString(caasUser)));
+        return caasUser;
     }
 
     public IntrospectResponse introSpect(@Nonnull IntrospectRequest encodedToken) {
