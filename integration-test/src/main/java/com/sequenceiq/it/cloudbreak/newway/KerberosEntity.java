@@ -2,15 +2,17 @@ package com.sequenceiq.it.cloudbreak.newway;
 
 import java.util.function.Function;
 
-import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
+import javax.ws.rs.WebApplicationException;
+
 import com.sequenceiq.cloudbreak.api.model.KerberosResponse;
-import com.sequenceiq.cloudbreak.type.KerberosType;
+import com.sequenceiq.cloudbreak.api.model.kerberos.FreeIPAKerberosDescriptor;
+import com.sequenceiq.cloudbreak.api.model.kerberos.KerberosRequest;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
-@Prototype
 public class KerberosEntity extends AbstractCloudbreakEntity<KerberosRequest, KerberosResponse, KerberosEntity>  {
-    public static final String KERBEROS_REQUEST = "KERBEROS_REQUEST";
+
+    public static final String KERBEROS = "KERBEROS";
 
     public static final String DEFAULT_MASTERKEY = "masterkey";
 
@@ -20,18 +22,34 @@ public class KerberosEntity extends AbstractCloudbreakEntity<KerberosRequest, Ke
 
     private KerberosRequest request;
 
+    KerberosEntity() {
+        this(KERBEROS);
+    }
+
     KerberosEntity(String newId) {
         super(newId);
         request = new KerberosRequest();
-        request.setType(KerberosType.CB_MANAGED);
-    }
-
-    KerberosEntity() {
-        this(KERBEROS_REQUEST);
+        FreeIPAKerberosDescriptor ipa = new FreeIPAKerberosDescriptor();
+        ipa.setPassword(DEFAULT_ADMIN_PASSWORD);
+        ipa.setAdminUrl("http://someurl.com");
+        ipa.setRealm("somerealm");
+        ipa.setUrl("someUrl");
+        request.setName("FreeIpaKdc");
+        request.setFreeIpa(ipa);
     }
 
     public KerberosEntity(TestContext testContext) {
         super(new KerberosRequest(), testContext);
+    }
+
+    @Override
+    public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
+        LOGGER.info("Cleaning up resource with name: {}", getName());
+        try {
+            cloudbreakClient.getCloudbreakClient().kerberosConfigV3Endpoint().deleteInWorkspace(cloudbreakClient.getWorkspaceId(), getName());
+        } catch (WebApplicationException ignore) {
+            LOGGER.info("Something happend during the kerberos resource delete operation.");
+        }
     }
 
     public KerberosRequest getRequest() {
@@ -42,18 +60,20 @@ public class KerberosEntity extends AbstractCloudbreakEntity<KerberosRequest, Ke
         this.request = request;
     }
 
-    public KerberosEntity withMasterKey(String masterKey) {
-        request.setMasterKey(masterKey);
+    @Override
+    public KerberosEntity valid() {
+        setRequest(request);
         return this;
     }
 
-    public KerberosEntity withAdmin(String admin) {
-        request.setAdmin(admin);
+    public KerberosEntity withRequest(KerberosRequest request) {
+        setRequest(request);
         return this;
     }
 
-    public KerberosEntity withPassword(String password) {
-        request.setPassword(password);
+    public KerberosEntity withName(String name) {
+        getRequest().setName(name);
+        setName(name);
         return this;
     }
 
@@ -70,6 +90,7 @@ public class KerberosEntity extends AbstractCloudbreakEntity<KerberosRequest, Ke
     }
 
     public static Function<IntegrationTestContext, KerberosEntity> getTestContextCluster() {
-        return getTestContextCluster(KERBEROS_REQUEST);
+        return getTestContextCluster(KERBEROS);
     }
+
 }

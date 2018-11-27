@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentReques
 import com.sequenceiq.cloudbreak.api.model.environment.request.LocationRequest;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -49,11 +50,16 @@ public class EnvironmentCreationValidatorTest {
         rdsConfig1.setId(1L);
         rdsConfig2.setName("rds2");
 
+        KerberosConfig kerberosConfig = new KerberosConfig();
+        kerberosConfig.setId(1L);
+        kerberosConfig.setName("kdc1");
+
         Environment environment = new Environment();
         environment.setCredential(credential);
         environment.setLdapConfigs(Set.of(ldapConfig));
         environment.setProxyConfigs(Set.of(proxyConfig));
         environment.setRdsConfigs(Set.of(rdsConfig1, rdsConfig2));
+        environment.setKerberosConfigs(Set.of(kerberosConfig));
 
         Region region1 = new Region();
         region1.setName("region1");
@@ -64,6 +70,7 @@ public class EnvironmentCreationValidatorTest {
         environmentRequest.setLdapConfigs(Set.of("ldap1", "ldap2"));
         environmentRequest.setProxyConfigs(Set.of("proxy1", "proxy2"));
         environmentRequest.setRdsConfigs(Set.of("rds1", "rds2", "rds3"));
+        environmentRequest.setKerberosConfigs(Set.of("kdc1", "kdc2"));
         environmentRequest.setRegions(Set.of("region1", "region2", "region3"));
         LocationRequest locationRequest = new LocationRequest();
         locationRequest.setLocationName("region1");
@@ -72,11 +79,12 @@ public class EnvironmentCreationValidatorTest {
         ValidationResult result = environmentCreationValidator.validate(environment, environmentRequest, true);
 
         assertEquals(ERROR, result.getState());
-        assertEquals(4L, result.getErrors().size());
+        assertEquals(5L, result.getErrors().size());
         assertTrue(result.getErrors().get(0).contains("[ldap2]"));
         assertTrue(result.getErrors().get(1).contains("[proxy2]"));
         assertTrue(result.getErrors().get(2).contains("[rds3]"));
         assertTrue(result.getErrors().get(3).contains("[region3]"));
+        assertTrue(result.getErrors().get(4).contains("[kdc2]"));
     }
 
     @Test

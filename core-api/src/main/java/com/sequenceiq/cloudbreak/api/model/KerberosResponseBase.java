@@ -1,18 +1,18 @@
 package com.sequenceiq.cloudbreak.api.model;
 
-import static com.sequenceiq.cloudbreak.type.KerberosType.EXISTING_AD;
-import static com.sequenceiq.cloudbreak.type.KerberosType.EXISTING_FREEIPA;
-import static com.sequenceiq.cloudbreak.type.KerberosType.EXISTING_MIT;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 import com.sequenceiq.cloudbreak.type.KerberosType;
-import com.sequenceiq.cloudbreak.validation.RequiredKerberosField;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -20,26 +20,24 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-public abstract class KerberosBase implements JsonEntity {
+public abstract class KerberosResponseBase implements JsonEntity {
 
-    @RequiredKerberosField(types = {EXISTING_AD, EXISTING_MIT, EXISTING_FREEIPA})
-    @ApiModelProperty(StackModelDescription.KERBEROS_KDC_URL)
+    private Long id;
+
+    private String name;
+
+    @ApiModelProperty(StackModelDescription.KERBEROS_URL)
     private String url;
 
-    @RequiredKerberosField(types = {EXISTING_AD, EXISTING_MIT, EXISTING_FREEIPA})
     @ApiModelProperty(StackModelDescription.KERBEROS_ADMIN_URL)
     private String adminUrl;
 
-    @RequiredKerberosField(types = {EXISTING_AD, EXISTING_MIT, EXISTING_FREEIPA})
     private String realm;
 
-    @RequiredKerberosField(types = EXISTING_AD)
     private String ldapUrl;
 
-    @RequiredKerberosField(types = EXISTING_AD)
     private String containerDn;
 
-    @RequiredKerberosField
     private Boolean tcpAllowed = false;
 
     @NotNull(message = "Kerberos type can not be null")
@@ -55,6 +53,13 @@ public abstract class KerberosBase implements JsonEntity {
             + "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))*$)")
     @ApiModelProperty(StackModelDescription.KERBEROS_NAMESERVERS)
     private String nameServers;
+
+    @Size(max = 1000)
+    @ApiModelProperty(ModelDescriptions.DESCRIPTION)
+    private String description;
+
+    @ApiModelProperty(ModelDescriptions.ENVIRONMENTS)
+    private Set<String> environments = new HashSet<>();
 
     public KerberosType getType() {
         return type;
@@ -135,4 +140,37 @@ public abstract class KerberosBase implements JsonEntity {
     public void setNameServers(String nameServers) {
         this.nameServers = nameServers;
     }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Set<String> getEnvironments() {
+        return environments;
+    }
+
+    public void setEnvironments(Set<String> environments) {
+        this.environments = environments;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
 }

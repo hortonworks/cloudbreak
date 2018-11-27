@@ -7,12 +7,7 @@
   "userName" : "user",
   "password" : "pass",
   "enableSecurity": true,
-  "kerberos" : {
-    "masterKey": "masterkey",
-    "admin" : "admin",
-    "password" : "passw",
-    "type" : "CB_MANAGED"
-  },
+  "kerberosConfigName" : "somename",
   "gateway" : {
     "enableKnoxGateway": "false"
   },

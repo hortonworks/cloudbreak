@@ -121,8 +121,10 @@ public class SecretAspects {
                         LOGGER.debug("Found SecretValue annotation on {}", field);
                         field.setAccessible(true);
                         Secret path = (Secret) field.get(entity);
-                        secretService.delete(path.getSecret());
-                        LOGGER.debug("Secret deleted at path: {}", path);
+                        if (path != null && path.getSecret() != null) {
+                            secretService.delete(path.getSecret());
+                            LOGGER.debug("Secret deleted at path: {}", path);
+                        }
                     }
                 }
             } catch (Exception e) {

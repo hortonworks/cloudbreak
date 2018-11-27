@@ -19,6 +19,7 @@
             "kerberos-env": {
                 "properties": {
                     "admin_server_host": "admin_server_host.bp",
+                    "case_insensitive_username_rules": "true",
                     "container_dn": "",
                     "encryption_types": "enc_types.bp",
                     "install_packages": false,

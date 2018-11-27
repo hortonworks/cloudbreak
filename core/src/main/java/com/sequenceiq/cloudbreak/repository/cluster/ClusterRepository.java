@@ -77,4 +77,12 @@ public interface ClusterRepository extends WorkspaceResourceRepository<Cluster, 
     @CheckPermissionsByReturnValue
     @Query("SELECT c FROM Cluster c INNER JOIN c.rdsConfigs rc WHERE c.environment.id = :environmentId AND rc.id= :id")
     Set<Cluster> findByRdsConfigAndEnvironment(@Param("id") Long rdsConfigId, @Param("environmentId") Long environmentId);
+
+    @CheckPermissionsByReturnValue
+    @Query("SELECT c FROM Cluster c INNER JOIN c.kerberosConfig kc WHERE kc.id= :id")
+    Set<Cluster> findByKerberosConfig(@Param("id") Long kerberosConfigId);
+
+    @CheckPermissionsByReturnValue
+    @Query("SELECT c FROM Cluster c INNER JOIN c.kerberosConfig kc WHERE c.environment.id = :environmentId AND kc.id= :id")
+    Set<Cluster> findByKerberosConfigAndEnvironment(@Param("id") Long id, @Param("environmentId") Long environmentId);
 }

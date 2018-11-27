@@ -23,6 +23,7 @@ import javax.persistence.UniqueConstraint;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.KubernetesConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
@@ -88,6 +89,10 @@ public class Environment implements WorkspaceAwareResource {
     @ManyToMany(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
     @JoinTable(name = "env_kubernetes", joinColumns = @JoinColumn(name = "envid"), inverseJoinColumns = @JoinColumn(name = "kubernetesid"))
     private Set<KubernetesConfig> kubernetesConfigs = new HashSet<>();
+
+    @ManyToMany(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
+    @JoinTable(name = "env_kdc", joinColumns = @JoinColumn(name = "envid"), inverseJoinColumns = @JoinColumn(name = "kdcid"))
+    private Set<KerberosConfig> kerberosConfigs = new HashSet<>();
 
     @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "environment_id")
@@ -237,5 +242,13 @@ public class Environment implements WorkspaceAwareResource {
 
     public void setLatitude(Double latitude) {
         this.latitude = latitude;
+    }
+
+    public Set<KerberosConfig> getKerberosConfigs() {
+        return kerberosConfigs;
+    }
+
+    public void setKerberosConfigs(Set<KerberosConfig> kerberosConfigs) {
+        this.kerberosConfigs = kerberosConfigs;
     }
 }

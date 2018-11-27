@@ -114,7 +114,7 @@ public class ModelDescriptions {
         public static final String WORKSPACE_ID = "id of the workspace";
         public static final String USER_ID = "id of the user";
         public static final String STACK_ID = "id of the stack";
-        public static final String CUSTOM = "Custom parameters as a json";
+        public static final String CUSTOM = "AmbariKerberosDescriptor parameters as a json";
         public static final String ENTRIES = "Entries parameters as a json";
         public static final String IMAGE = "image of the stack";
         public static final String STACK_NAME = "name of the stack";
@@ -129,9 +129,14 @@ public class ModelDescriptions {
         public static final String KERBEROS_MASTER_KEY = "kerberos master key";
         public static final String KERBEROS_ADMIN = "kerberos admin user";
         public static final String KERBEROS_PASSWORD = "kerberos admin password";
-        public static final String KERBEROS_KDC_URL = "kerberos KDC server URL";
+        public static final String KERBEROS_URL = "kerberos KDC server URL";
         public static final String KERBEROS_ADMIN_URL = "kerberos admin server URL";
         public static final String KERBEROS_PRINCIPAL = "kerberos principal";
+        public static final String KERBEROS_REALM = "kerberos realm";
+        public static final String KERBEROS_CONTAINER_DN = "kerberos containerDn";
+        public static final String KERBEROS_LDAP_URL = "URL of the connected ldap";
+        public static final String KERBEROS_CONFIG_NAME = "the name of the kerberos configuration";
+        public static final String KERBEROS_TCP_ALLOW = "kerberos configuration name";
         public static final String DESCRIPTOR = "Ambari kerberos descriptor";
         public static final String KRB_5_CONF = "Ambari kerberos krb5.conf template";
         public static final String KERBEROS_DOMAIN = "cluster instances will set this as the domain part of their hostname";
@@ -613,6 +618,7 @@ public class ModelDescriptions {
         public static final String LOCATION = "Location of the environment.";
         public static final String LONGITUDE = "Location longitude of the environment.";
         public static final String LATITUDE = "Location latitude of the environment.";
+        public static final String KERBEROS_CONFIGS = "Name of Kerberos configs to be attached to the environment.";
     }
 
     public static class EnvironmentResponseModelDescription {
@@ -629,6 +635,7 @@ public class ModelDescriptions {
         public static final String WORKLOAD_CLUSTER_NAMES = "Names of the workload clusters created in the environment.";
         public static final String DATALAKE_CLUSTERS = "Datalake clusters created in the environment.";
         public static final String DATALAKE_CLUSTER_NAMES = "Names of the datalake clusters created in the environment.";
+        public static final String KERBEROS_CONFIGS = "Kerberos configs in the environment.";
     }
 
     public static class SecretResponseModelDescription {

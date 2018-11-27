@@ -48,7 +48,7 @@ public class KerberosBlueprintExtendTest {
 
         BlueprintTextProcessor b = new BlueprintTextProcessor(json);
         String result = underTest.extendBlueprintWithKerberos(b, KERBEROS_ENV, "node.dc1.consul,node.consul", true, null,
-                KerberosType.EXISTING_MIT, false).asText();
+                KerberosType.MIT, false).asText();
 
         JsonNode expectedNode = JsonUtil.readTree(expected);
         JsonNode resultNode = JsonUtil.readTree(result);
@@ -62,7 +62,7 @@ public class KerberosBlueprintExtendTest {
 
         BlueprintTextProcessor b = new BlueprintTextProcessor(json);
         String result = underTest.extendBlueprintWithKerberos(b, KERBEROS_ENV, "node.dc1.consul,node.consul", true, null,
-                KerberosType.EXISTING_MIT, false).asText();
+                KerberosType.MIT, false).asText();
 
         JsonNode expectedNode = JsonUtil.readTree(expected);
         JsonNode resultNode = JsonUtil.readTree(result);
@@ -76,7 +76,7 @@ public class KerberosBlueprintExtendTest {
 
         BlueprintTextProcessor b = new BlueprintTextProcessor(json);
         String result = underTest.extendBlueprintWithKerberos(b, KERBEROS_ENV, "node.dc1.consul,node.consul", true, null,
-                KerberosType.EXISTING_MIT, true).asText();
+                KerberosType.MIT, true).asText();
 
         JsonNode expectedNode = JsonUtil.readTree(expected);
         JsonNode resultNode = JsonUtil.readTree(result);
@@ -90,7 +90,7 @@ public class KerberosBlueprintExtendTest {
 
         BlueprintTextProcessor b = new BlueprintTextProcessor(json);
         String result = underTest.extendBlueprintWithKerberos(b, KERBEROS_ENV, "node.dc1.consul,node.consul", false, null,
-                KerberosType.EXISTING_MIT, false).asText();
+                KerberosType.MIT, false).asText();
 
         JsonNode expectedNode = JsonUtil.readTree(expected);
         JsonNode resultNode = JsonUtil.readTree(result);
@@ -104,7 +104,7 @@ public class KerberosBlueprintExtendTest {
 
         BlueprintTextProcessor b = new BlueprintTextProcessor(json);
         String result = underTest.extendBlueprintWithKerberos(b, KERBEROS_ENV, "node.dc1.consul,node.consul", false, null,
-                KerberosType.EXISTING_MIT, true).asText();
+                KerberosType.MIT, true).asText();
 
         JsonNode expectedNode = JsonUtil.readTree(expected);
         JsonNode resultNode = JsonUtil.readTree(result);

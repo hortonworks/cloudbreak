@@ -114,13 +114,7 @@
       "enableSecurity": false,
       "userName": "string",
       "password": "string",
-      "kerberos": {
-        "admin": "string",
-        "tcpAllowed": false,
-        "masterKey": "string",
-        "password": "string",
-        "type": "CB_MANAGED"
-      },
+      "kerberosConfigName": "testFreeIpaKdc",
       "validateBlueprint": false,
       "ambariStackDetails": {
         "stack": "string",

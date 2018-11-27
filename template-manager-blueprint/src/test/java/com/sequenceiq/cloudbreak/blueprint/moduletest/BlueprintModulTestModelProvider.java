@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.blueprint.moduletest;
 import static com.sequenceiq.cloudbreak.TestUtil.adConfig;
 import static com.sequenceiq.cloudbreak.TestUtil.gatewayEnabled;
 import static com.sequenceiq.cloudbreak.TestUtil.hostGroup;
-import static com.sequenceiq.cloudbreak.TestUtil.kerberosConfig;
+import static com.sequenceiq.cloudbreak.TestUtil.kerberosConfigMit;
 import static com.sequenceiq.cloudbreak.TestUtil.ldapConfig;
 import static com.sequenceiq.cloudbreak.TestUtil.rdsConfig;
 import static com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType.CORE;
@@ -116,7 +116,7 @@ class BlueprintModulTestModelProvider {
                 .withGeneralClusterConfigs(configWithGateWay)
                 .withHostgroupViews(hostGroupsView)
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
-                .withKerberosConfig(kerberosConfig())
+                .withKerberosConfig(kerberosConfigMit())
                 .build();
     }
 

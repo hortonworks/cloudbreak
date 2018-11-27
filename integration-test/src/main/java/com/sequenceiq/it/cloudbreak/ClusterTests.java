@@ -1,5 +1,17 @@
 package com.sequenceiq.it.cloudbreak;
 
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
 import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImageResponse;
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImagesResponse;
@@ -13,7 +25,6 @@ import com.sequenceiq.it.cloudbreak.newway.ClusterGateway;
 import com.sequenceiq.it.cloudbreak.newway.GatewayTopology;
 import com.sequenceiq.it.cloudbreak.newway.HostGroups;
 import com.sequenceiq.it.cloudbreak.newway.ImageSettingsEntity;
-import com.sequenceiq.it.cloudbreak.newway.KerberosEntity;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackGetWithEntriesStrategy;
 import com.sequenceiq.it.cloudbreak.newway.StackImageChangeEntity;
@@ -22,17 +33,6 @@ import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
 import com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.newway.v3.StackV3Action;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
-
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class ClusterTests extends CloudbreakClusterTestConfiguration {
 
@@ -68,13 +68,6 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
             throws Exception {
         given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
-        if (enableKerberos) {
-            KerberosEntity kerberos = KerberosEntity.request()
-                    .withMasterKey(KerberosEntity.DEFAULT_MASTERKEY)
-                    .withAdmin(KerberosEntity.DEFAULT_ADMIN_USER)
-                    .withPassword(KerberosEntity.DEFAULT_ADMIN_PASSWORD);
-            given(kerberos);
-        }
         AmbariV2Request ambariV2Request = cloudProvider.ambariRequestWithBlueprintName(blueprintName);
         if (org.apache.commons.lang3.StringUtils.equals(imageDescription, "base")) {
             String basePropertyKey = "integrationtest.customAmbari." + cloudProvider.getPlatform().toLowerCase() + ".hdf.";
@@ -103,11 +96,10 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
     }
 
     @Test(dataProvider = "providernameblueprintimageos", priority = 10)
-    public void testCreateNewClusterWithOs(CloudProvider cloudProvider, String clusterName, String blueprintName, String os, KerberosEntity kerberos)
+    public void testCreateNewClusterWithOs(CloudProvider cloudProvider, String clusterName, String blueprintName, String os)
             throws Exception {
         given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
-        given(kerberos);
         given(Cluster.request()
                         .withAmbariRequest(cloudProvider.ambariRequestWithBlueprintName(blueprintName)),
                 "a cluster request");
@@ -288,12 +280,8 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
         String imageOs = getTestParameter().get("imageos");
         CloudProvider cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter());
         String clusterName = getTestParameter().get("clusterName");
-        KerberosEntity kerberos = KerberosEntity.request()
-                .withMasterKey(KerberosEntity.DEFAULT_MASTERKEY)
-                .withAdmin(KerberosEntity.DEFAULT_ADMIN_USER)
-                .withPassword(KerberosEntity.DEFAULT_ADMIN_PASSWORD);
         return new Object[][]{
-                {cloudProvider, clusterName, blueprint, imageOs, kerberos}
+                {cloudProvider, clusterName, blueprint, imageOs}
         };
     }
 

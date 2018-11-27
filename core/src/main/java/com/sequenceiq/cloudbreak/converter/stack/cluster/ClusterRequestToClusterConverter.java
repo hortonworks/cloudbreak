@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
+import com.sequenceiq.cloudbreak.service.kerberos.KerberosService;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 
 @Component
@@ -46,6 +47,9 @@ public class ClusterRequestToClusterConverter extends AbstractConversionServiceA
     @Inject
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
+    @Inject
+    private KerberosService kerberosService;
+
     @Override
     public Cluster convert(ClusterRequest source) {
         Cluster cluster = new Cluster();
@@ -59,8 +63,9 @@ public class ClusterRequestToClusterConverter extends AbstractConversionServiceA
         cluster.setSecure(enableSecurity == null ? Boolean.FALSE : enableSecurity);
         convertGateway(source, cluster);
 
-        if (source.getKerberos() != null) {
-            KerberosConfig kerberosConfig = getConversionService().convert(source.getKerberos(), KerberosConfig.class);
+        if (source.getKerberosConfigName() != null) {
+            KerberosConfig kerberosConfig = kerberosService.getByNameForWorkspaceId(source.getKerberosConfigName(),
+                    restRequestThreadLocalService.getRequestedWorkspaceId());
             cluster.setKerberosConfig(kerberosConfig);
         }
         cluster.setConfigStrategy(source.getConfigStrategy());

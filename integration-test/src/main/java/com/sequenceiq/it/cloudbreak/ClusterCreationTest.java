@@ -14,13 +14,11 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ClusterV1Endpoint;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.ConstraintJson;
 import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupRequest;
-import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
 import com.sequenceiq.cloudbreak.api.model.RecoveryMode;
-import com.sequenceiq.cloudbreak.type.KerberosType;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupRequest;
 import com.sequenceiq.it.IntegrationTestContext;
 
 public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
@@ -74,12 +72,8 @@ public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
         }
 
         if (enableSecurity) {
-            KerberosRequest kerberosRequest = new KerberosRequest();
-            kerberosRequest.setAdmin(kerberosAdmin);
-            kerberosRequest.setPassword(kerberosPassword);
-            kerberosRequest.setMasterKey(kerberosMasterKey);
-            kerberosRequest.setType(KerberosType.CB_MANAGED);
-            clusterRequest.setKerberos(kerberosRequest);
+            // FIXME
+            clusterRequest.setKerberosConfigName("");
         }
 
         ClusterV1Endpoint clusterV1Endpoint = getCloudbreakClient().clusterEndpoint();

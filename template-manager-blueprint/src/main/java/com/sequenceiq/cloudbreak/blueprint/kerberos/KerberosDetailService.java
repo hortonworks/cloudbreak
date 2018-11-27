@@ -25,9 +25,9 @@ public class KerberosDetailService {
 
     public String resolveTypeForKerberos(@Nonnull KerberosConfig kerberosConfig) {
         switch (kerberosConfig.getType()) {
-            case EXISTING_AD:
+            case ACTIVE_DIRECTORY:
                 return "active-directory";
-            case EXISTING_FREEIPA:
+            case FREEIPA:
                 return "ipa";
             default:
                 return "mit-kdc";

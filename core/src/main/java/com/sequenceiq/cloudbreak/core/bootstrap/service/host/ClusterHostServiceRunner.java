@@ -190,7 +190,6 @@ public class ClusterHostServiceRunner {
         if (cluster.isSecure() && kerberosDetailService.isAmbariManagedKerberosPackages(cluster.getKerberosConfig())) {
             Map<String, String> kerberosPillarConf = new HashMap<>();
             KerberosConfig kerberosConfig = cluster.getKerberosConfig();
-            putIfNotNull(kerberosPillarConf, kerberosConfig.getMasterKey(), "masterKey");
             putIfNotNull(kerberosPillarConf, kerberosConfig.getAdmin(), "user");
             putIfNotNull(kerberosPillarConf, kerberosConfig.getPassword(), "password");
             if (StringUtils.isEmpty(kerberosConfig.getDescriptor())) {
@@ -330,7 +329,7 @@ public class ClusterHostServiceRunner {
             servicePillar.put("forwarder-zones", new SaltPillarProperties("/unbound/forwarders.sls",
                     singletonMap("forwarder-zones", singletonMap(kerberosConfig.getDomain(), singletonMap("nameservers", ipList)))));
         } else if (!secure || kerberosConfig == null
-                || (kerberosConfig.getType() != KerberosType.EXISTING_FREEIPA && kerberosConfig.getType() != KerberosType.EXISTING_AD)) {
+                || (kerberosConfig.getType() != KerberosType.FREEIPA && kerberosConfig.getType() != KerberosType.ACTIVE_DIRECTORY)) {
             saveDatalakeNameservers(stack, servicePillar);
         }
     }

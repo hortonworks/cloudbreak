@@ -63,11 +63,8 @@ tests:
       subnetCidr: 10.0.0.0/16
       mockPort: 9443
       publicKeyId: seq-master
-      enableSecurity: true
+      enableSecurity: false
       enableGateway: false
-      kerberosMasterKey: masterkey
-      kerberosAdmin: admin
-      kerberosPassword: admin
     classes:
       - com.sequenceiq.it.cloudbreak.v2.mock.MockStackCreationV2Test
 

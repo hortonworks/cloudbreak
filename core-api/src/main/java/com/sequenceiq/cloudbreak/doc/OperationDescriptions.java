@@ -407,4 +407,14 @@ public class OperationDescriptions {
         public static final String DELETE = "Delete an environment. Only possible if no cluster is running in the environment.";
         public static final String CHANGE_CREDENTIAL = "Changes the credential of the environment and the clusters in the environment.";
     }
+
+    public static class KerberosOpDescription {
+        public static final String LIST_BY_WORKSPACE = "list kerberos configs for the given workspace";
+        public static final String GET_BY_NAME_IN_WORKSPACE = "get kerberos config by name in workspace";
+        public static final String CREATE_IN_WORKSPACE = "create kerberos config in workspace";
+        public static final String DELETE_BY_NAME_IN_WORKSPACE = "delete kerberos config by name in workspace";
+        public static final String ATTACH_TO_ENVIRONMENTS = "attach kerberos config to environemnts";
+        public static final String DETACH_FROM_ENVIRONMENTS = "detach kerberos config from environemnts";
+        public static final String GET_REQUEST = "get request by name";
+    }
 }

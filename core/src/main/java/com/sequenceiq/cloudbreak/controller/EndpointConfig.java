@@ -48,6 +48,7 @@ public class EndpointConfig extends ResourceConfig {
         FlexSubscriptionV3Controller.class,
         ImageCatalogV1Controller.class,
         ImageCatalogV3Controller.class,
+        KerberosConfigV3Controller.class,
         KnoxServicesV3Controller.class,
         LdapController.class,
         LdapV3Controller.class,

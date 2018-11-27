@@ -1,36 +1,43 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 
 import com.sequenceiq.cloudbreak.aspect.secret.SecretValue;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
+import com.sequenceiq.cloudbreak.domain.environment.EnvironmentAwareResource;
+import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
 import com.sequenceiq.cloudbreak.type.KerberosType;
 
 @Entity
-public class KerberosConfig implements ProvisionEntity, WorkspaceAwareResource {
+public class KerberosConfig implements ProvisionEntity, EnvironmentAwareResource {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "kerberosconfig_generator")
     @SequenceGenerator(name = "kerberosconfig_generator", sequenceName = "kerberosconfig_id_seq", allocationSize = 1)
     private Long id;
 
+    @Column(nullable = false)
+    private String name;
+
     @Enumerated(EnumType.STRING)
     private KerberosType type;
-
-    @Column(name = "kerberosmasterkey")
-    @Convert(converter = SecretToString.class)
-    @SecretValue
-    private Secret masterKey = Secret.EMPTY;
 
     @Column(name = "kerberosadmin")
     @Convert(converter = SecretToString.class)
@@ -87,6 +94,13 @@ public class KerberosConfig implements ProvisionEntity, WorkspaceAwareResource {
     @ManyToOne
     private Workspace workspace;
 
+    @ManyToMany(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
+    @JoinTable(name = "env_kdc", joinColumns = @JoinColumn(name = "kdcid"), inverseJoinColumns = @JoinColumn(name = "envid"))
+    private Set<EnvironmentView> environments = new HashSet<>();
+
+    @Column(length = 1000000, columnDefinition = "TEXT")
+    private String description;
+
     public Long getId() {
         return id;
     }
@@ -98,7 +112,7 @@ public class KerberosConfig implements ProvisionEntity, WorkspaceAwareResource {
 
     @Override
     public String getName() {
-        return getResource().getShortName() + "-" + id;
+        return name;
     }
 
     @Override
@@ -121,18 +135,6 @@ public class KerberosConfig implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setType(KerberosType type) {
         this.type = type;
-    }
-
-    public String getMasterKey() {
-        return masterKey.getRaw();
-    }
-
-    public String getMasterKeySecret() {
-        return masterKey.getSecret();
-    }
-
-    public void setMasterKey(String masterKey) {
-        this.masterKey = new Secret(masterKey);
     }
 
     public String getAdmin() {
@@ -265,5 +267,27 @@ public class KerberosConfig implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setNameServers(String nameServers) {
         this.nameServers = nameServers;
+    }
+
+    @Override
+    public Set<EnvironmentView> getEnvironments() {
+        return environments;
+    }
+
+    @Override
+    public void setEnvironments(Set<EnvironmentView> environments) {
+        this.environments = environments;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

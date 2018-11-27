@@ -22,7 +22,6 @@ import com.sequenceiq.cloudbreak.api.model.CustomContainerRequest;
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
-import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
 import com.sequenceiq.cloudbreak.api.model.annotations.TransformGetterType;
 import com.sequenceiq.cloudbreak.api.model.annotations.TransformSetterType;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigRequest;
@@ -82,7 +81,7 @@ public class ClusterRequest implements JsonEntity {
     private String password;
 
     @Valid
-    private KerberosRequest kerberos;
+    private String kerberosConfigName;
 
     @ApiModelProperty(ClusterModelDescription.LDAP_CONFIG_ID)
     private Long ldapConfigId;
@@ -332,12 +331,12 @@ public class ClusterRequest implements JsonEntity {
         this.blueprintCustomProperties = blueprintCustomProperties;
     }
 
-    public KerberosRequest getKerberos() {
-        return kerberos;
+    public String getKerberosConfigName() {
+        return kerberosConfigName;
     }
 
-    public void setKerberos(KerberosRequest kerberos) {
-        this.kerberos = kerberos;
+    public void setKerberosConfigName(String kerberosConfigName) {
+        this.kerberosConfigName = kerberosConfigName;
     }
 
     public LdapConfigRequest getLdapConfig() {

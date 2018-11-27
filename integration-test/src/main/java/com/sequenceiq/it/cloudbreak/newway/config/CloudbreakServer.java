@@ -25,8 +25,7 @@ public class CloudbreakServer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakServer.class);
 
-    private static final String WARNING_TEXT = "Following variables must be set whether as environment variables or (test) application.yaml: "
-            + "INTEGRATIONTEST_CLOUDBREAK_SERVER INTEGRATIONTEST_CAAS_TOKEN";
+    private static final String WARNING_TEXT_FORMAT = "Following variable must be set whether as environment variables or (test) application.yaml: %s";
 
     @Value("${integrationtest.cloudbreak.server}")
     private String server;
@@ -90,7 +89,7 @@ public class CloudbreakServer {
             LOGGER.info("Could not find cb profile file at location {}, falling back to application.yml", cbProfileLocation);
         }
 
-        checkNonEmpty(server);
+        checkNonEmpty("integrationtest.cloudbreak.server", server);
 
         String[] cloudbreakServerSplit = server.split("://");
         if (StringUtils.isEmpty(caasProtocol) && cloudbreakServerSplit.length > 0) {
@@ -100,10 +99,10 @@ public class CloudbreakServer {
             caasAddress = cloudbreakServerSplit[1];
         }
 
-        checkNonEmpty(cbRootContextPath);
-        checkNonEmpty(refreshToken);
-        checkNonEmpty(caasProtocol);
-        checkNonEmpty(caasAddress);
+        checkNonEmpty("server.contextPath", cbRootContextPath);
+        checkNonEmpty("integrationtest.caas.token", refreshToken);
+        checkNonEmpty("integrationtest.caas.protocol", caasProtocol);
+        checkNonEmpty("integrationtest.caas.address", caasAddress);
 
         testParameter.put(CloudbreakTest.CLOUDBREAK_SERVER_ROOT, server + cbRootContextPath);
         testParameter.put(CloudbreakTest.CAAS_PROTOCOL, caasProtocol);
@@ -111,9 +110,9 @@ public class CloudbreakServer {
         testParameter.put(CloudbreakTest.REFRESH_TOKEN, refreshToken);
     }
 
-    private void checkNonEmpty(String value) {
+    private void checkNonEmpty(String name, String value) {
         if (StringUtils.isEmpty(value)) {
-            throw new NullPointerException(WARNING_TEXT);
+            throw new NullPointerException(String.format(WARNING_TEXT_FORMAT, name.replaceAll("\\.", "_").toUpperCase()));
         }
     }
 }

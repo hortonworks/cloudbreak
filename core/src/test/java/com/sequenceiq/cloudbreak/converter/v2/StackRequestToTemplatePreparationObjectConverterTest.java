@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -27,7 +26,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.core.convert.ConversionService;
 
-import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
@@ -58,6 +56,7 @@ import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
 import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
+import com.sequenceiq.cloudbreak.service.kerberos.KerberosService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
@@ -168,6 +167,9 @@ public class StackRequestToTemplatePreparationObjectConverterTest {
     @Mock
     private WorkspaceService workspaceService;
 
+    @Mock
+    private KerberosService kerberosService;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -234,39 +236,38 @@ public class StackRequestToTemplatePreparationObjectConverterTest {
 
     @Test
     public void testConvertWhenKerberosRequestIsNullInAmbariV2RequestThenEmptyKerberosShouldBeStored() {
-        when(ambari.getKerberos()).thenReturn(null);
+        when(ambari.getKerberosConfigName()).thenReturn(null);
 
         TemplatePreparationObject result = underTest.convert(source);
 
+        assertNotNull(result);
         assertFalse(result.getKerberosConfig().isPresent());
-        verify(conversionService, times(0)).convert(any(KerberosRequest.class), eq(KerberosConfig.class));
     }
 
     @Test
     public void testConvertWhenKerberosRequestIsNotNullInAmbariV2RequestButSecurityFalseThenEmptyKerberosShouldBeStored() {
-        when(ambari.getKerberos()).thenReturn(new KerberosRequest());
+        when(ambari.getKerberosConfigName()).thenReturn("something");
         when(ambari.getEnableSecurity()).thenReturn(false);
 
         TemplatePreparationObject result = underTest.convert(source);
 
+        assertNotNull(result);
         assertFalse(result.getKerberosConfig().isPresent());
-        verify(conversionService, times(0)).convert(any(KerberosRequest.class), eq(KerberosConfig.class));
     }
 
     @Test
     public void testConvertWhenKerberosRequestIsNotNullInAmbariV2RequestAndSecurityTrueThenExpectedKerberosConfigShouldBeStored() {
         KerberosConfig expected = new KerberosConfig();
-        KerberosRequest kerberosRequest = new KerberosRequest();
-        when(ambari.getKerberos()).thenReturn(kerberosRequest);
+        when(ambari.getKerberosConfigName()).thenReturn("somename");
         when(ambari.getEnableSecurity()).thenReturn(true);
-        when(conversionService.convert(kerberosRequest, KerberosConfig.class)).thenReturn(expected);
+        when(kerberosService.getByNameForWorkspaceId(eq("somename"), anyLong())).thenReturn(expected);
 
         TemplatePreparationObject result = underTest.convert(source);
 
+        assertNotNull(result);
         assertTrue(result.getKerberosConfig().isPresent());
         assertEquals(expected, result.getKerberosConfig().get());
-        verify(conversionService, times(1)).convert(kerberosRequest, KerberosConfig.class);
-        verify(conversionService, times(1)).convert(any(KerberosRequest.class), eq(KerberosConfig.class));
+        verify(kerberosService, times(1)).getByNameForWorkspaceId(anyString(), anyLong());
     }
 
     @Test

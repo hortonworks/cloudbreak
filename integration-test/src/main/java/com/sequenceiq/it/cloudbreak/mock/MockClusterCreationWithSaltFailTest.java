@@ -26,13 +26,11 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ClusterV1Endpoint;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.ConstraintJson;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupRequest;
-import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
-import com.sequenceiq.cloudbreak.type.KerberosType;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.AbstractMockIntegrationTest;
 import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
@@ -86,12 +84,7 @@ public class MockClusterCreationWithSaltFailTest extends AbstractMockIntegration
         clusterRequest.setBlueprintId(Long.valueOf(blueprintId));
         clusterRequest.setHostGroups(hostGroupJsons1);
 
-        KerberosRequest kerberosRequest = new KerberosRequest();
-        kerberosRequest.setAdmin(kerberosAdmin);
-        kerberosRequest.setPassword(kerberosPassword);
-        kerberosRequest.setMasterKey(kerberosMasterKey);
-        kerberosRequest.setType(KerberosType.CB_MANAGED);
-        clusterRequest.setKerberos(kerberosRequest);
+        clusterRequest.setKerberosConfigName("somename");
 
         initSpark();
 

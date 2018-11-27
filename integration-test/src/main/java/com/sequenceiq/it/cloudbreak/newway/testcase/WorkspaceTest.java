@@ -17,6 +17,8 @@ import com.sequenceiq.it.cloudbreak.newway.Credential;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
 import com.sequenceiq.it.cloudbreak.newway.ImageCatalog;
 import com.sequenceiq.it.cloudbreak.newway.ImageCatalogEntity;
+import com.sequenceiq.it.cloudbreak.newway.Kerberos;
+import com.sequenceiq.it.cloudbreak.newway.KerberosEntity;
 import com.sequenceiq.it.cloudbreak.newway.LdapConfig;
 import com.sequenceiq.it.cloudbreak.newway.LdapConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.ProxyConfig;
@@ -132,6 +134,16 @@ public class WorkspaceTest extends AbstractIntegrationTest {
                 .given(ProxyConfigEntity.class)
                 .when(ProxyConfig.postV2())
                 .when(ProxyConfig::getByName, key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
+                .except(ForbiddenException.class, key(FORBIDDEN_KEY))
+                .validate();
+    }
+
+    @Test(dataProvider = DATA_PROVIDER, enabled = false)
+    public void testCreateKerberosConfigAndGetOtherUser(TestContext testContext) {
+        testContext
+                .given(KerberosEntity.class)
+                .when(Kerberos.postV2())
+                .when(Kerberos::getByName, key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
                 .except(ForbiddenException.class, key(FORBIDDEN_KEY))
                 .validate();
     }
