@@ -3,8 +3,8 @@ BINARY=dp
 VERSION ?= $(shell git describe --tags --abbrev=0)-snapshot
 PLUGIN_ENABLED ?= false
 BUILD_TIME=$(shell date +%FT%T)
-LDFLAGS=-ldflags "-X github.com/hortonworks/cb-cli/cloudbreak/common.Version=${VERSION} -X github.com/hortonworks/cb-cli/cloudbreak/common.BuildTime=${BUILD_TIME} -X github.com/hortonworks/cb-cli/plugin.Enabled=${PLUGIN_ENABLED}"
-LDFLAGS_NOVER=-ldflags "-X github.com/hortonworks/cb-cli/cloudbreak/common.Version=snapshot -X github.com/hortonworks/cb-cli/cloudbreak/common.BuildTime=${BUILD_TIME} -X github.com/hortonworks/cb-cli/plugin.Enabled=${PLUGIN_ENABLED}"
+LDFLAGS=-ldflags "-X github.com/hortonworks/cb-cli/dataplane/common.Version=${VERSION} -X github.com/hortonworks/cb-cli/dataplane/common.BuildTime=${BUILD_TIME} -X github.com/hortonworks/cb-cli/plugin.Enabled=${PLUGIN_ENABLED}"
+LDFLAGS_NOVER=-ldflags "-X github.com/hortonworks/cb-cli/dataplane/common.Version=snapshot -X github.com/hortonworks/cb-cli/dataplane/common.BuildTime=${BUILD_TIME} -X github.com/hortonworks/cb-cli/plugin.Enabled=${PLUGIN_ENABLED}"
 GOFILES_NOVENDOR = $(shell find . -type f -name '*.go' -not -path "./vendor/*" -not -path "./.git/*")
 CB_IP = $(shell echo \${IP})
 ifeq ($(CB_IP),)
@@ -77,14 +77,14 @@ build-windows-version:
 	GOOS=windows GO111MODULE=on CGO_ENABLED=0 go build -a ${LDFLAGS} -o build/Windows/${BINARY}.exe main.go
 
 generate-swagger: build-swagger-fix
-	rm -rf cloudbreak/api/client cloudbreak/api/model
-	swagger generate client -f http://$(CB_IP):$(CB_PORT)/cb/api/swagger.json -c client -m model -t cloudbreak/api
+	rm -rf dataplane/api/client dataplane/api/model
+	swagger generate client -f http://$(CB_IP):$(CB_PORT)/cb/api/swagger.json -c client -m model -t dataplane/api
 	make fix-swagger
 
 generate-swagger-docker: build-swagger-fix
-	rm -rf cloudbreak/api/client cloudbreak/api/model
+	rm -rf dataplane/api/client dataplane/api/model
 	@docker run --rm -it -v "${GOPATH}":"${GOPATH}" -w "${PWD}" -e GOPATH --net=host quay.io/goswagger/swagger:0.12.0 \
-	generate client -f http://$(CB_IP):$(CB_PORT)/cb/api/swagger.json -c client -m model -t cloudbreak/api
+	generate client -f http://$(CB_IP):$(CB_PORT)/cb/api/swagger.json -c client -m model -t dataplane/api
 	make fix-swagger
 
 build-swagger-fix:
@@ -92,13 +92,13 @@ build-swagger-fix:
 
 fix-swagger:
 	$(info fixed on master https://github.com/go-swagger/go-swagger/issues/1197#issuecomment-335610396)
-	build/swagger_fix --src cloudbreak/api/model/platform_gateways_response.go --operation remove-statement --exp validateGateways:range-0,for-0,if-1
-	build/swagger_fix --src cloudbreak/api/model/platform_ip_pools_response.go --operation remove-statement --exp validateIppools:range-0,for-0,if-1
-	build/swagger_fix --src cloudbreak/api/model/platform_networks_response.go --operation remove-statement --exp validateNetworks:range-0,for-0,if-1
-	build/swagger_fix --src cloudbreak/api/model/platform_ssh_keys_response.go --operation remove-statement --exp validateSSHKeys:range-0,for-0,if-1
-	build/swagger_fix --src cloudbreak/api/model/platform_security_groups_response.go --operation remove-statement --exp validateSecurityGroups:range-0,for-0,if-1
-	goimports -l -w cloudbreak/api/model
-	goimports -l -w cloudbreak/api/client
+	build/swagger_fix --src dataplane/api/model/platform_gateways_response.go --operation remove-statement --exp validateGateways:range-0,for-0,if-1
+	build/swagger_fix --src dataplane/api/model/platform_ip_pools_response.go --operation remove-statement --exp validateIppools:range-0,for-0,if-1
+	build/swagger_fix --src dataplane/api/model/platform_networks_response.go --operation remove-statement --exp validateNetworks:range-0,for-0,if-1
+	build/swagger_fix --src dataplane/api/model/platform_ssh_keys_response.go --operation remove-statement --exp validateSSHKeys:range-0,for-0,if-1
+	build/swagger_fix --src dataplane/api/model/platform_security_groups_response.go --operation remove-statement --exp validateSecurityGroups:range-0,for-0,if-1
+	goimports -l -w dataplane/api/model
+	goimports -l -w dataplane/api/client
 	@gofmt -w ${GOFILES_NOVENDOR}
 
 release: build

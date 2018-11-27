@@ -57,7 +57,7 @@ e2e-test:
 	BLUEPRINT_URL=$(BLUEPRINT_URL) RECIPE_URL=$(RECIPE_URL) scripts/docker-test.sh
 
 clean-after-tests:
-	rm -rf test_log/ tmp/ allure/ .cb test-result.html test-result.xml
+	rm -rf test_log/ tmp/ allure/ .dp test-result.html test-result.xml
 
 .PHONY:
 	all

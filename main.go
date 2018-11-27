@@ -7,10 +7,10 @@ import (
 	"sort"
 
 	log "github.com/Sirupsen/logrus"
-	cb "github.com/hortonworks/cb-cli/cloudbreak/cmd"
-	"github.com/hortonworks/cb-cli/cloudbreak/common"
-	fl "github.com/hortonworks/cb-cli/cloudbreak/flags"
 	"github.com/hortonworks/cb-cli/cmd"
+	cb "github.com/hortonworks/cb-cli/dataplane/cmd"
+	"github.com/hortonworks/cb-cli/dataplane/common"
+	fl "github.com/hortonworks/cb-cli/dataplane/flags"
 	"github.com/hortonworks/cb-cli/help"
 	"github.com/hortonworks/cb-cli/plugin"
 	"github.com/hortonworks/dp-cli-common/utils"

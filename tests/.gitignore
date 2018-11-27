@@ -3,6 +3,7 @@ swagger.json
 *.html
 *.xml
 .cb
+.dp
 allure
 ruby-uuid
 tmp

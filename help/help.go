@@ -8,7 +8,7 @@ import (
 	"text/tabwriter"
 	"text/template"
 
-	fl "github.com/hortonworks/cb-cli/cloudbreak/flags"
+	fl "github.com/hortonworks/cb-cli/dataplane/flags"
 	"github.com/hortonworks/dp-cli-common/utils"
 
 	"github.com/urfave/cli"

@@ -60,7 +60,7 @@ USAGE:
    Hortonworks Data Cloud command line tool configure [command options]
 
 DESCRIPTION:
-   it will save the provided server address and credential to ~/.cb/config
+   it will save the provided server address and credential to ~/.dp/config
 
 REQUIRED OPTIONS:
    --server value  server address [$CB_SERVER_ADDRESS]
@@ -80,7 +80,7 @@ If the profile switch is omitted, the `default` profile is saved and used.
 ```
 cb configure --server https://ec2-52-29-224-64...compute.amazonaws.com --workspace your@email --profile cloudbreak-staging
 ```
-This will save the configuration into the user's home directory. To see its content: `cat ~/.cb/config`. If this config file is present you don't need to specify the connection flags anymore,
+This will save the configuration into the user's home directory. To see its content: `cat ~/.dp/config`. If this config file is present you don't need to specify the connection flags anymore,
 otherwise you need to specify these flags to every command.
 ```
 cb cluster list --server https://ec2-52-29-224-64...compute.amazonaws.com --workspace your@email
@@ -165,7 +165,7 @@ func init() {
 The `init()` function is automatically invoked for each file in the `cmd` folder, because it is referenced from the `main.go` file:
 ```$xslt
 import (
-	"github.com/hortonworks/cb-cli/cloudbreak/cmd"
+	"github.com/hortonworks/cb-cli/dataplane/cmd"
 )
 ```
 and then added to the main app:
