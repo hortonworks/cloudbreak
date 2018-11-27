@@ -11,10 +11,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-public class KerberosResponse extends KerberosBase {
-
-    @ApiModelProperty(StackModelDescription.KERBEROS_MASTER_KEY)
-    private SecretResponse masterKey;
+public class KerberosResponse extends KerberosResponseBase {
 
     @ApiModelProperty(StackModelDescription.KERBEROS_ADMIN)
     private SecretResponse admin;
@@ -30,14 +27,6 @@ public class KerberosResponse extends KerberosBase {
 
     @ApiModelProperty(StackModelDescription.KRB_5_CONF)
     private SecretResponse krb5Conf;
-
-    public SecretResponse getMasterKey() {
-        return masterKey;
-    }
-
-    public void setMasterKey(SecretResponse masterKey) {
-        this.masterKey = masterKey;
-    }
 
     public SecretResponse getAdmin() {
         return admin;

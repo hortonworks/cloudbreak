@@ -432,10 +432,19 @@ public class TestUtil {
         return cluster;
     }
 
-    public static KerberosConfig kerberosConfig() {
+    public static KerberosConfig kerberosConfigFreeipa() {
         KerberosConfig kerberosConfig = new KerberosConfig();
-        kerberosConfig.setType(KerberosType.CB_MANAGED);
-        kerberosConfig.setMasterKey("mk");
+        kerberosConfig.setType(KerberosType.FREEIPA);
+        kerberosConfig.setAdmin("admin");
+        kerberosConfig.setPassword("passwd");
+        kerberosConfig.setVerifyKdcTrust(true);
+        kerberosConfig.setTcpAllowed(true);
+        return kerberosConfig;
+    }
+
+    public static KerberosConfig kerberosConfigMit() {
+        KerberosConfig kerberosConfig = new KerberosConfig();
+        kerberosConfig.setType(KerberosType.MIT);
         kerberosConfig.setAdmin("admin");
         kerberosConfig.setPassword("passwd");
         kerberosConfig.setVerifyKdcTrust(true);

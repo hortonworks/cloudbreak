@@ -10,14 +10,15 @@ import javax.validation.Constraint;
 import javax.validation.Payload;
 
 @Documented
-@Constraint(validatedBy = KerberosValidator.class)
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ValidKerberos {
+@Constraint(validatedBy = KerberosRequestValidator.class)
+public @interface ValidKerberosRequest {
 
-    String message() default "Kerberos configuration contains inconsistent parameters or there are missing values";
+    String message() default "KerberosRequest contains one or more invalid data.";
 
-    Class<?>[] groups() default { };
+    Class<?>[] groups() default {};
 
-    Class<? extends Payload>[] payload() default { };
+    Class<? extends Payload>[] payload() default {};
+
 }

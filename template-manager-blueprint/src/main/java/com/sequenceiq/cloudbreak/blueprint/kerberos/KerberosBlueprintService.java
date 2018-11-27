@@ -74,7 +74,7 @@ public class KerberosBlueprintService implements BlueprintComponentConfigProvide
                 .put("encryption_types", "aes des3-cbc-sha1 rc4 des-cbc-md5")
                 .put("ldap_url", ldapUrl == null ? "" : ldapUrl)
                 .put("container_dn", containerDn == null ? "" : containerDn);
-        if (kerberosConfig.getType() == KerberosType.EXISTING_FREEIPA) {
+        if (kerberosConfig.getType() == KerberosType.FREEIPA) {
             builder.put("case_insensitive_username_rules", "true");
         }
         Map<String, String> kerberosEnv = builder.build();
@@ -98,7 +98,7 @@ public class KerberosBlueprintService implements BlueprintComponentConfigProvide
             SiteConfigurations configs = SiteConfigurations.getEmptyConfiguration();
             Map<String, String> krb5Conf = new HashMap<>();
             krb5Conf.put("domains", domains);
-            if (kerberosType != KerberosType.EXISTING_AD && kerberosType != KerberosType.EXISTING_FREEIPA) {
+            if (kerberosType != KerberosType.ACTIVE_DIRECTORY && kerberosType != KerberosType.FREEIPA) {
                 krb5Conf.put("manage_krb5_conf", "true");
             } else {
                 krb5Conf.put("manage_krb5_conf", "false");

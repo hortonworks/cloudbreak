@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import java.util.stream.Collectors;
+
 import javax.inject.Inject;
 
 import org.springframework.core.convert.ConversionService;
@@ -8,6 +10,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.model.KerberosResponse;
 import com.sequenceiq.cloudbreak.api.model.SecretResponse;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
+import com.sequenceiq.cloudbreak.domain.view.CompactView;
 
 @Component
 public class KerberosConfigToKerberosResponseConverter extends AbstractConversionServiceAwareConverter<KerberosConfig, KerberosResponse> {
@@ -25,7 +28,6 @@ public class KerberosConfigToKerberosResponseConverter extends AbstractConversio
         kerberosResponse.setLdapUrl(source.getLdapUrl());
         kerberosResponse.setContainerDn(source.getContainerDn());
         kerberosResponse.setTcpAllowed(source.isTcpAllowed());
-        kerberosResponse.setMasterKey(conversionService.convert(source.getMasterKeySecret(), SecretResponse.class));
         kerberosResponse.setAdmin(conversionService.convert(source.getAdminSecret(), SecretResponse.class));
         kerberosResponse.setPassword(conversionService.convert(source.getPasswordSecret(), SecretResponse.class));
         kerberosResponse.setPrincipal(conversionService.convert(source.getPrincipalSecret(), SecretResponse.class));
@@ -33,6 +35,10 @@ public class KerberosConfigToKerberosResponseConverter extends AbstractConversio
         kerberosResponse.setKrb5Conf(conversionService.convert(source.getKrb5ConfSecret(), SecretResponse.class));
         kerberosResponse.setDomain(source.getDomain());
         kerberosResponse.setNameServers(source.getNameServers());
+        kerberosResponse.setName(source.getName());
+        kerberosResponse.setDescription(source.getDescription());
+        kerberosResponse.setId(source.getId());
+        kerberosResponse.setEnvironments(source.getEnvironments().stream().map(CompactView::getName).collect(Collectors.toSet()));
         return kerberosResponse;
     }
 }

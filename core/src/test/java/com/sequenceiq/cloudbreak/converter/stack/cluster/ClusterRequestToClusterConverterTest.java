@@ -16,7 +16,6 @@ import org.mockito.MockitoAnnotations;
 import org.powermock.reflect.Whitebox;
 import org.springframework.core.convert.ConversionService;
 
-import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.converter.AbstractJsonConverterTest;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
@@ -25,6 +24,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
+import com.sequenceiq.cloudbreak.service.kerberos.KerberosService;
 
 public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterTest<ClusterRequest> {
 
@@ -39,6 +39,9 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
 
     @Mock
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
+
+    @Mock
+    private KerberosService kerberosService;
 
     @Before
     public void setUp() {
@@ -65,7 +68,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         // GIVEN
         Gateway gateway = new Gateway();
         given(conversionService.convert(any(ClusterRequest.class), eq(Gateway.class))).willReturn(gateway);
-        given(conversionService.convert(any(KerberosRequest.class), eq(KerberosConfig.class))).willReturn(new KerberosConfig());
+        given(kerberosService.getByNameForWorkspaceId("somename", 100L)).willReturn(new KerberosConfig());
         given(fileSystemConfigService.getByNameForWorkspaceId("teszt", 100L)).willReturn(new FileSystem());
         // WHEN
         Cluster result = underTest.convert(getRequest("cluster-with-file-system.json"));

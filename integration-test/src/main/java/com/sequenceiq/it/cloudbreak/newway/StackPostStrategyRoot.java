@@ -67,11 +67,11 @@ public abstract class StackPostStrategyRoot implements Strategy {
     protected void setKerberosIfNeeded(StackEntity stackEntity, IntegrationTestContext integrationTestContext) {
         var kerberos = KerberosEntity.getTestContextCluster().apply(integrationTestContext);
         boolean updateKerberos = stackEntity.getRequest().getCluster() != null && stackEntity.getRequest().getCluster().getAmbari() != null
-                && stackEntity.getRequest().getCluster().getAmbari().getKerberos() == null;
+                && stackEntity.getRequest().getCluster().getAmbari().getKerberosConfigName() == null;
         if (kerberos != null && updateKerberos) {
             AmbariV2Request ambariReq = stackEntity.getRequest().getCluster().getAmbari();
             ambariReq.setEnableSecurity(true);
-            ambariReq.setKerberos(kerberos.getRequest());
+            ambariReq.setKerberosConfigName(kerberos.getRequest().getName());
         }
     }
 

@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.api.model.environment.response;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.api.model.KerberosResponse;
 import com.sequenceiq.cloudbreak.api.model.KubernetesConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigResponse;
@@ -26,6 +27,9 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
 
     @ApiModelProperty(EnvironmentResponseModelDescription.KUBERNETES_CONFIGS)
     private Set<KubernetesConfigResponse> kubernetesConfigs = new HashSet<>();
+
+    @ApiModelProperty(EnvironmentResponseModelDescription.KERBEROS_CONFIGS)
+    private Set<KerberosResponse> kerberosConfigs = new HashSet<>();
 
     @ApiModelProperty(EnvironmentResponseModelDescription.WORKLOAD_CLUSTERS)
     private Set<StackViewResponse> workloadClusters = new HashSet<>();
@@ -79,5 +83,13 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
 
     public void setDatalakeClusters(Set<StackViewResponse> datalakeClusters) {
         this.datalakeClusters = datalakeClusters;
+    }
+
+    public Set<KerberosResponse> getKerberosConfigs() {
+        return kerberosConfigs;
+    }
+
+    public void setKerberosConfigs(Set<KerberosResponse> kerberosConfigs) {
+        this.kerberosConfigs = kerberosConfigs;
     }
 }

@@ -101,13 +101,13 @@ public class KerberosDetailServiceTest {
 
     @Test
     public void testResolveTypeForKerberos() {
-        config.setType(KerberosType.EXISTING_FREEIPA);
+        config.setType(KerberosType.FREEIPA);
         assertEquals("ipa", underTest.resolveTypeForKerberos(config));
-        config.setType(KerberosType.EXISTING_AD);
+        config.setType(KerberosType.ACTIVE_DIRECTORY);
         assertEquals("active-directory", underTest.resolveTypeForKerberos(config));
-        config.setType(KerberosType.EXISTING_MIT);
+        config.setType(KerberosType.MIT);
         assertEquals("mit-kdc", underTest.resolveTypeForKerberos(config));
-        config.setType(KerberosType.CUSTOM);
+        config.setType(KerberosType.AMBARI_DESCRIPTOR);
         assertEquals("mit-kdc", underTest.resolveTypeForKerberos(config));
     }
 }

@@ -13,9 +13,8 @@ import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.model.ConnectedClusterRequest;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
-import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 
@@ -51,7 +50,7 @@ public class AmbariV2Request implements JsonEntity {
     private String password;
 
     @Valid
-    private KerberosRequest kerberos;
+    private String kerberosConfigName;
 
     @ApiModelProperty(ClusterModelDescription.VALIDATE_BLUEPRINT)
     private Boolean validateBlueprint = Boolean.TRUE;
@@ -133,12 +132,12 @@ public class AmbariV2Request implements JsonEntity {
         this.password = password;
     }
 
-    public KerberosRequest getKerberos() {
-        return kerberos;
+    public String getKerberosConfigName() {
+        return kerberosConfigName;
     }
 
-    public void setKerberos(KerberosRequest kerberos) {
-        this.kerberos = kerberos;
+    public void setKerberosConfigName(String kerberosConfigName) {
+        this.kerberosConfigName = kerberosConfigName;
     }
 
     public Boolean getValidateBlueprint() {

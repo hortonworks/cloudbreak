@@ -577,11 +577,11 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
     }
 
     public boolean isAdJoinable() {
-        return isSecure() && kerberosConfig != null && kerberosConfig.getType() == KerberosType.EXISTING_AD;
+        return isSecure() && kerberosConfig != null && kerberosConfig.getType() == KerberosType.ACTIVE_DIRECTORY;
     }
 
     public boolean isIpaJoinable() {
-        return isSecure() && kerberosConfig != null && kerberosConfig.getType() == KerberosType.EXISTING_FREEIPA;
+        return isSecure() && kerberosConfig != null && kerberosConfig.getType() == KerberosType.FREEIPA;
     }
 
     @Override

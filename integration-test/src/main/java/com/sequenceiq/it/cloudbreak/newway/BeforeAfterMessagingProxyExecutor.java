@@ -1,12 +1,13 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
-import com.sequenceiq.it.cloudbreak.exception.ProxyMethodInvocationException;
+import static com.sequenceiq.it.cloudbreak.newway.log.Log.log;
 
-import javax.ws.rs.WebApplicationException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.Callable;
 
-import static com.sequenceiq.it.cloudbreak.newway.log.Log.log;
+import javax.ws.rs.WebApplicationException;
+
+import com.sequenceiq.it.cloudbreak.exception.ProxyMethodInvocationException;
 
 public final class BeforeAfterMessagingProxyExecutor extends GenericProxyExecutor {
 
@@ -18,7 +19,7 @@ public final class BeforeAfterMessagingProxyExecutor extends GenericProxyExecuto
             if (ite.getCause() instanceof WebApplicationException) {
                 String content = ((WebApplicationException) ite.getCause()).getResponse().readEntity(String.class);
                 log(content);
-                throw WebApplicationException.class.cast(ite.getCause());
+                throw (WebApplicationException) ite.getCause();
             } else {
                 throw new ProxyMethodInvocationException(getGenericExceptionMessage(), ite);
             }

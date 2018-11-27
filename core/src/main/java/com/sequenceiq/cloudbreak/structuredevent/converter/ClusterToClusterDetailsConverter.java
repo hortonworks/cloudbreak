@@ -66,7 +66,7 @@ public class ClusterToClusterDetailsConverter extends AbstractConversionServiceA
             String kerberosType = "New MIT Kerberos";
             if (kerberosConfig != null) {
                 if (StringUtils.isNoneEmpty(kerberosConfig.getUrl())) {
-                    kerberosType = StringUtils.isNoneEmpty(kerberosConfig.getLdapUrl()) ? "Existing Active Directory" : "Existing MIT Kerberos";
+                    kerberosType = StringUtils.isNoneEmpty(kerberosConfig.getLdapUrl()) ? "Active Directory" : "MIT Kerberos";
                 }
             }
             clusterDetails.setKerberosType(kerberosType);

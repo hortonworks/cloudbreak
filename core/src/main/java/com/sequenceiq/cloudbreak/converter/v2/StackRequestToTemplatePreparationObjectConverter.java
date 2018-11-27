@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentViewService;
 import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
+import com.sequenceiq.cloudbreak.service.kerberos.KerberosService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
@@ -108,6 +109,9 @@ public class StackRequestToTemplatePreparationObjectConverter extends AbstractCo
 
     @Inject
     private EnvironmentViewService environmentViewService;
+
+    @Inject
+    private KerberosService kerberosService;
 
     @Override
     public TemplatePreparationObject convert(StackV2Request source) {
@@ -242,8 +246,9 @@ public class StackRequestToTemplatePreparationObjectConverter extends AbstractCo
 
     private KerberosConfig getKerberosConfig(StackV2Request source) {
         KerberosConfig kerberosConfig = null;
-        if (source.getCluster().getAmbari().getKerberos() != null && source.getCluster().getAmbari().getEnableSecurity()) {
-            kerberosConfig = getConversionService().convert(source.getCluster().getAmbari().getKerberos(), KerberosConfig.class);
+        if (source.getCluster().getAmbari().getKerberosConfigName() != null && source.getCluster().getAmbari().getEnableSecurity()) {
+            kerberosConfig = kerberosService.getByNameForWorkspaceId(source.getCluster().getAmbari().getKerberosConfigName(),
+                    restRequestThreadLocalService.getRequestedWorkspaceId());
         }
         return kerberosConfig;
     }

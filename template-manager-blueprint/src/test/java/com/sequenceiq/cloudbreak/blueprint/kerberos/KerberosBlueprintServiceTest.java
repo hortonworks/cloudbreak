@@ -48,7 +48,7 @@ public class KerberosBlueprintServiceTest {
 
         Blueprint blueprint = TestUtil.blueprint("name", expectedBlueprint);
         Stack stack = TestUtil.stack();
-        Cluster cluster = TestUtil.cluster(blueprint, stack, 1L, TestUtil.kerberosConfig());
+        Cluster cluster = TestUtil.cluster(blueprint, stack, 1L, TestUtil.kerberosConfigFreeipa());
         TemplatePreparationObject object = Builder.builder()
                 .withKerberosConfig(cluster.getKerberosConfig())
                 .withGeneralClusterConfigs(BlueprintTestUtil.generalClusterConfigs())
@@ -56,32 +56,6 @@ public class KerberosBlueprintServiceTest {
 
         BlueprintTextProcessor b = new BlueprintTextProcessor(blueprint.getBlueprintText());
         String actualBlueprint = underTest.customTextManipulation(object, b).asText();
-
-        JsonNode expectedNode = JsonUtil.readTree(expectedBlueprint);
-        JsonNode resultNode = JsonUtil.readTree(actualBlueprint);
-        Assert.assertEquals(expectedNode, resultNode);
-    }
-
-    @Test
-    public void testExtendBlueprintWithKerberosManagedKerberos() throws IOException {
-        String blueprintText = FileReaderUtils.readFileFromClasspath("blueprints-jackson/bp-not-kerberized.bp");
-
-        Blueprint blueprint = TestUtil.blueprint("name", blueprintText);
-        Stack stack = TestUtil.stack();
-        Cluster cluster = TestUtil.cluster(blueprint, stack, 1L, TestUtil.kerberosConfig());
-        GeneralClusterConfigs generalClusterConfigs = BlueprintTestUtil.generalClusterConfigs();
-        generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.of("test-1-1"));
-        generalClusterConfigs.setGatewayInstanceMetadataPresented(false);
-
-        TemplatePreparationObject object = Builder.builder()
-                .withKerberosConfig(cluster.getKerberosConfig())
-                .withGeneralClusterConfigs(generalClusterConfigs)
-                .build();
-
-        BlueprintTextProcessor b = new BlueprintTextProcessor(blueprint.getBlueprintText());
-        String actualBlueprint = underTest.customTextManipulation(object, b).asText();
-
-        String expectedBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/bp-not-kerberized-cloudbreak-managed-expected.bp");
 
         JsonNode expectedNode = JsonUtil.readTree(expectedBlueprint);
         JsonNode resultNode = JsonUtil.readTree(actualBlueprint);
@@ -102,7 +76,7 @@ public class KerberosBlueprintServiceTest {
         kerberosConfig.setKrb5Conf("{\"krb5-conf\":{\"properties\":{\"domains\":\".domains.bp\","
                 + "\"manage_krb5_conf\":\"true\",\"content\":\"content.bp\"}}}");
         kerberosConfig.setTcpAllowed(true);
-        kerberosConfig.setType(KerberosType.EXISTING_MIT);
+        kerberosConfig.setType(KerberosType.MIT);
         Cluster cluster = TestUtil.cluster(blueprint, stack, 1L, kerberosConfig);
         TemplatePreparationObject object = Builder.builder()
                 .withKerberosConfig(cluster.getKerberosConfig())
@@ -133,7 +107,7 @@ public class KerberosBlueprintServiceTest {
         kerberosConfig.setLdapUrl("ldapUrl.conf");
         kerberosConfig.setContainerDn("containerDn.conf");
         kerberosConfig.setTcpAllowed(true);
-        kerberosConfig.setType(KerberosType.EXISTING_AD);
+        kerberosConfig.setType(KerberosType.ACTIVE_DIRECTORY);
         Stack stack = TestUtil.stack();
 
         GeneralClusterConfigs generalClusterConfigs = BlueprintTestUtil.generalClusterConfigs();

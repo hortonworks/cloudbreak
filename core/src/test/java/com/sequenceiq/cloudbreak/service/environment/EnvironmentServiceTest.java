@@ -41,6 +41,7 @@ import org.springframework.core.convert.ConversionService;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
 import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
+import com.sequenceiq.cloudbreak.api.model.KerberosResponse;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentChangeCredentialRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentDetachRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentRequest;
@@ -55,12 +56,14 @@ import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.environment.EnvironmentCreationValidator;
 import com.sequenceiq.cloudbreak.controller.validation.environment.EnvironmentDetachValidator;
+import com.sequenceiq.cloudbreak.converter.KerberosConfigToKerberosResponseConverter;
 import com.sequenceiq.cloudbreak.converter.LdapConfigToLdapConfigResponseConverter;
 import com.sequenceiq.cloudbreak.converter.ProxyConfigToProxyConfigResponseConverter;
 import com.sequenceiq.cloudbreak.converter.RDSConfigToRDSConfigResponseConverter;
 import com.sequenceiq.cloudbreak.converter.environment.EnvironmentToDetailedEnvironmentResponseConverter;
 import com.sequenceiq.cloudbreak.converter.environment.RegionConverter;
 import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -74,6 +77,7 @@ import com.sequenceiq.cloudbreak.service.KubernetesConfigService;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.service.kerberos.KerberosService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.platform.PlatformParameterService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigService;
@@ -117,6 +121,9 @@ public class EnvironmentServiceTest {
 
     @Mock
     private ProxyConfigService proxyConfigService;
+
+    @Mock
+    private KerberosService kerberosService;
 
     @Mock
     private EnvironmentCredentialOperationService environmentCredentialOperationService;
@@ -167,6 +174,9 @@ public class EnvironmentServiceTest {
     @InjectMocks
     private RDSConfigToRDSConfigResponseConverter rdsConfigResponseConverter;
 
+    @InjectMocks
+    private KerberosConfigToKerberosResponseConverter kerberosConfigResponseConverter;
+
     @Before
     public void setup() throws TransactionExecutionException {
         doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).required(any());
@@ -175,6 +185,7 @@ public class EnvironmentServiceTest {
         when(ldapConfigService.findByNamesInWorkspace(anySet(), anyLong())).thenReturn(Collections.emptySet());
         when(rdsConfigService.findByNamesInWorkspace(anySet(), anyLong())).thenReturn(Collections.emptySet());
         when(proxyConfigService.findByNamesInWorkspace(anySet(), anyLong())).thenReturn(Collections.emptySet());
+        when(kerberosService.findByNamesInWorkspace(anySet(), anyLong())).thenReturn(Collections.emptySet());
         when(environmentCreationValidator.validate(any(), any(), anyBoolean())).thenReturn(ValidationResult.builder().build());
         when(workspaceService.get(anyLong(), any())).thenReturn(workspace);
         when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(new CloudbreakUser("", "", "", ""));
@@ -294,6 +305,8 @@ public class EnvironmentServiceTest {
         String ldapName2 = "ldap2";
         String proxyName2 = "proxy2";
         String rdsName2 = "rds2";
+        String kdcName1 = "kdc1";
+        String kdcName2 = "kdc2";
 
         Environment environment = new Environment();
         LdapConfig ldap1 = new LdapConfig();
@@ -319,6 +332,13 @@ public class EnvironmentServiceTest {
         rds2.setName(rdsName2);
         rds2.setDatabaseEngine(DatabaseVendor.POSTGRES);
         environment.setRdsConfigs(Sets.newHashSet(rds1, rds2));
+        KerberosConfig kdc1 = new KerberosConfig();
+        kdc1.setId(1L);
+        kdc1.setName(kdcName1);
+        KerberosConfig kdc2 = new KerberosConfig();
+        kdc2.setId(2L);
+        kdc2.setName(kdcName2);
+        environment.setKerberosConfigs(Sets.newHashSet(kdc1, kdc2));
 
         setCredential(environment);
 
@@ -332,6 +352,7 @@ public class EnvironmentServiceTest {
         detachRequest.getLdapConfigs().add(notAttachedLdap);
         detachRequest.getProxyConfigs().add(proxyName1);
         detachRequest.getRdsConfigs().add(rdsName1);
+        detachRequest.getKerberosConfigs().add(kdcName1);
 
         DetailedEnvironmentResponse detachResponse = environmentService.detachResources(ENVIRONMENT_NAME, detachRequest, WORKSPACE_ID);
 
@@ -339,9 +360,11 @@ public class EnvironmentServiceTest {
         assertFalse(detachResponse.getLdapConfigs().stream().map(o -> o.getName()).collect(Collectors.toSet()).contains(ldapName1));
         assertFalse(detachResponse.getProxyConfigs().stream().map(o -> o.getName()).collect(Collectors.toSet()).contains(proxyName1));
         assertFalse(detachResponse.getRdsConfigs().stream().map(o -> o.getName()).collect(Collectors.toSet()).contains(rdsName1));
+        assertFalse(detachResponse.getKerberosConfigs().stream().map(o -> o.getName()).collect(Collectors.toSet()).contains(kdcName1));
         assertTrue(detachResponse.getLdapConfigs().stream().map(o -> o.getName()).collect(Collectors.toSet()).contains(ldapName2));
         assertTrue(detachResponse.getProxyConfigs().stream().map(o -> o.getName()).collect(Collectors.toSet()).contains(proxyName2));
         assertTrue(detachResponse.getRdsConfigs().stream().map(o -> o.getName()).collect(Collectors.toSet()).contains(rdsName2));
+        assertTrue(detachResponse.getKerberosConfigs().stream().map(o -> o.getName()).collect(Collectors.toSet()).contains(kdcName2));
     }
 
     @Test
@@ -478,14 +501,26 @@ public class EnvironmentServiceTest {
         rds2.setName(rdsName2);
         rds2.setDatabaseEngine(DatabaseVendor.POSTGRES);
 
+        KerberosConfig kdc1 = new KerberosConfig();
+        kdc1.setId(1L);
+        String kdcName1 = "kdc1";
+        kdc1.setName(kdcName1);
+
+        KerberosConfig kdc2 = new KerberosConfig();
+        kdc2.setId(2L);
+        String kdcName2 = "kdc2";
+        kdc2.setName(kdcName2);
+
         environment.setLdapConfigs(Sets.newHashSet(ldap1, ldap2, ldap3));
         environment.setProxyConfigs(Sets.newHashSet(proxy1, proxy2));
         environment.setRdsConfigs(Sets.newHashSet(rds1, rds2));
+        environment.setKerberosConfigs(Sets.newHashSet(kdc1, kdc2));
 
         EnvironmentDetachRequest request = new EnvironmentDetachRequest();
         request.setLdapConfigs(Sets.newHashSet(ldapName1, ldapName2));
         request.setProxyConfigs(Sets.newHashSet(proxyName1));
         request.setRdsConfigs(Sets.newHashSet(rdsName1));
+        request.setKerberosConfigs(Sets.newHashSet(kdcName1));
 
         when(environmentRepository.findByNameAndWorkspaceId(ENVIRONMENT_NAME, WORKSPACE_ID)).thenReturn(environment);
         when(environmentRepository.save(any(Environment.class)))
@@ -497,9 +532,11 @@ public class EnvironmentServiceTest {
         assertEquals(1, result.getLdapConfigs().size());
         assertEquals(1, result.getProxyConfigs().size());
         assertEquals(1, result.getRdsConfigs().size());
+        assertEquals(1, result.getKerberosConfigs().size());
         assertEquals(ldapName3, result.getLdapConfigs().iterator().next().getName());
         assertEquals(proxyName2, result.getProxyConfigs().iterator().next().getName());
         assertEquals(rdsName2, result.getRdsConfigs().iterator().next().getName());
+        assertEquals(kdcName2, result.getKerberosConfigs().iterator().next().getName());
     }
 
     @Test
@@ -546,6 +583,16 @@ public class EnvironmentServiceTest {
         rds2.setName(rdsName2);
         rds2.setDatabaseEngine(DatabaseVendor.POSTGRES);
 
+        KerberosConfig kdc1 = new KerberosConfig();
+        kdc1.setId(1L);
+        String kdcName1 = "kdc1";
+        kdc1.setName(kdcName1);
+
+        KerberosConfig kdc2 = new KerberosConfig();
+        kdc2.setId(2L);
+        String kdcName2 = "kdc2";
+        kdc2.setName(kdcName2);
+
         Cluster cluster1 = new Cluster();
         cluster1.setId(1L);
         String clusterName1 = "cluster1";
@@ -559,17 +606,20 @@ public class EnvironmentServiceTest {
         environment.setLdapConfigs(Sets.newHashSet(ldap1, ldap2, ldap3));
         environment.setProxyConfigs(Sets.newHashSet(proxy1, proxy2));
         environment.setRdsConfigs(Sets.newHashSet(rds1, rds2));
+        environment.setKerberosConfigs(Sets.newHashSet(kdc1, kdc2));
 
         EnvironmentDetachRequest request = new EnvironmentDetachRequest();
         request.setLdapConfigs(Sets.newHashSet(ldapName1, ldapName2));
         request.setProxyConfigs(Sets.newHashSet(proxyName1));
         request.setRdsConfigs(Sets.newHashSet(rdsName1));
+        request.setKerberosConfigs(Sets.newHashSet(kdcName1));
 
         when(environmentRepository.findByNameAndWorkspaceId(ENVIRONMENT_NAME, WORKSPACE_ID)).thenReturn(environment);
         when(ldapConfigService.getClustersUsingResourceInEnvironment(ldap1, ENVIRONMENT_ID)).thenReturn(Sets.newHashSet(cluster1));
         when(ldapConfigService.getClustersUsingResourceInEnvironment(ldap2, ENVIRONMENT_ID)).thenReturn(Sets.newHashSet(cluster1, cluster2));
         when(proxyConfigService.getClustersUsingResourceInEnvironment(proxy1, ENVIRONMENT_ID)).thenReturn(Sets.newHashSet(cluster1));
         when(rdsConfigService.getClustersUsingResourceInEnvironment(rds1, ENVIRONMENT_ID)).thenReturn(Sets.newHashSet(cluster1));
+        when(kerberosService.getClustersUsingResourceInEnvironment(kdc1, ENVIRONMENT_ID)).thenReturn(Sets.newHashSet(cluster1));
 
         exceptionRule.expect(BadRequestException.class);
         exceptionRule.expectMessage(String.format("RDS config '%s' cannot be detached from environment 'EnvName' "
@@ -580,6 +630,8 @@ public class EnvironmentServiceTest {
                 + "because it is used by the following cluster(s): [%s]", ldapName1, clusterName1));
         exceptionRule.expectMessage(String.format("LDAP config '%s' cannot be detached from environment 'EnvName' "
                 + "because it is used by the following cluster(s): [%s, %s]", ldapName2, clusterName1, clusterName2));
+        exceptionRule.expectMessage(String.format("Kerberos Config '%s' cannot be detached from environment 'EnvName' "
+                + "because it is used by the following cluster(s): [%s]", kdcName1, clusterName1));
 
         environmentService.detachResources(ENVIRONMENT_NAME, request, WORKSPACE_ID);
     }
@@ -600,5 +652,7 @@ public class EnvironmentServiceTest {
                 .thenAnswer((Answer<ProxyConfigResponse>) invocation -> proxyConfigResponseConverter.convert((ProxyConfig) invocation.getArgument(0)));
         when(conversionService.convert(any(RDSConfig.class), eq(RDSConfigResponse.class)))
                 .thenAnswer((Answer<RDSConfigResponse>) invocation -> rdsConfigResponseConverter.convert((RDSConfig) invocation.getArgument(0)));
+        when(conversionService.convert(any(KerberosConfig.class), eq(KerberosResponse.class)))
+                .thenAnswer((Answer<KerberosResponse>) invocation -> kerberosConfigResponseConverter.convert((KerberosConfig) invocation.getArgument(0)));
     }
 }

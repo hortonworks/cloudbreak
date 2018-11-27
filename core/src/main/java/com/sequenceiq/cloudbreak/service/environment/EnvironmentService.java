@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.controller.validation.environment.EnvironmentAt
 import com.sequenceiq.cloudbreak.controller.validation.environment.EnvironmentCreationValidator;
 import com.sequenceiq.cloudbreak.controller.validation.environment.EnvironmentDetachValidator;
 import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.KubernetesConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.PlatformResourceRequest;
@@ -52,6 +53,7 @@ import com.sequenceiq.cloudbreak.service.KubernetesConfigService;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
+import com.sequenceiq.cloudbreak.service.kerberos.KerberosService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.platform.PlatformParameterService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigService;
@@ -74,6 +76,9 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
 
     @Inject
     private ProxyConfigService proxyConfigService;
+
+    @Inject
+    private KerberosService kerberosService;
 
     @Inject
     private EnvironmentCredentialOperationService environmentCredentialOperationService;
@@ -158,6 +163,7 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
         environment.setProxyConfigs(proxyConfigService.findByNamesInWorkspace(request.getProxyConfigs(), workspaceId));
         environment.setRdsConfigs(rdsConfigService.findByNamesInWorkspace(request.getRdsConfigs(), workspaceId));
         environment.setKubernetesConfigs(kubernetesConfigService.findByNamesInWorkspace(request.getRdsConfigs(), workspaceId));
+        environment.setKerberosConfigs(kerberosService.findByNamesInWorkspace(request.getKerberosConfigs(), workspaceId));
         Credential credential = environmentCredentialOperationService.getCredentialFromRequest(request, workspaceId);
         environment.setCredential(credential);
         environment.setCloudPlatform(credential.cloudPlatform());
@@ -225,11 +231,12 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
                 Set<RDSConfig> rdssToAttach = rdsConfigService.findByNamesInWorkspace(request.getRdsConfigs(), workspaceId);
                 Set<KubernetesConfig> kubesToAttach = kubernetesConfigService.findByNamesInWorkspace(request.getKubernetesConfigs(), workspaceId);
                 ValidationResult validationResult = environmentAttachValidator.validate(request, ldapsToAttach, proxiesToAttach, rdssToAttach);
+                Set<KerberosConfig> kerberosConfigsToAttach = kerberosService.findByNamesInWorkspace(request.getKerberosConfigs(), workspaceId);
                 if (validationResult.hasError()) {
                     throw new BadRequestException(validationResult.getFormattedErrors());
                 }
                 Environment environment = getByNameForWorkspaceId(environmentName, workspaceId);
-                environment = doAttach(ldapsToAttach, proxiesToAttach, rdssToAttach, kubesToAttach, environment);
+                environment = doAttach(ldapsToAttach, proxiesToAttach, rdssToAttach, kubesToAttach, kerberosConfigsToAttach, environment);
                 return conversionService.convert(environment, DetailedEnvironmentResponse.class);
             });
         } catch (TransactionExecutionException e) {
@@ -238,7 +245,7 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
     }
 
     private Environment doAttach(Set<LdapConfig> ldapsToAttach, Set<ProxyConfig> proxiesToAttach, Set<RDSConfig> rdssToAttach,
-            Set<KubernetesConfig> kubesToAttach, Environment environment) {
+            Set<KubernetesConfig> kubesToAttach, Set<KerberosConfig> kerberosConfigs, Environment environment) {
         ldapsToAttach.removeAll(environment.getLdapConfigs());
         environment.getLdapConfigs().addAll(ldapsToAttach);
         proxiesToAttach.removeAll(environment.getProxyConfigs());
@@ -247,6 +254,8 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
         environment.getRdsConfigs().addAll(rdssToAttach);
         kubesToAttach.removeAll(environment.getKubernetesConfigs());
         environment.getKubernetesConfigs().addAll(kubesToAttach);
+        kerberosConfigs.removeAll(environment.getKerberosConfigs());
+        environment.getKerberosConfigs().addAll(kerberosConfigs);
         environment = environmentRepository.save(environment);
         return environment;
     }
@@ -258,6 +267,7 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
                 ValidationResult validationResult = validateAndDetachLdaps(request, environment);
                 validationResult = validateAndDetachProxies(request, environment, validationResult);
                 validationResult = validateAndDetachRdss(request, environment, validationResult);
+                validationResult = validateAndDetachKerberosConfigs(request, environment, validationResult);
                 detachKubes(request, environment);
                 if (validationResult.hasError()) {
                     throw new BadRequestException(validationResult.getFormattedErrors());
@@ -304,6 +314,17 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
         Set<KubernetesConfig> kubesToDetach = environment.getKubernetesConfigs().stream()
                 .filter(config -> request.getKubernetesConfigs().contains(config.getName())).collect(Collectors.toSet());
         environment.getKubernetesConfigs().removeAll(kubesToDetach);
+    }
+
+    private ValidationResult validateAndDetachKerberosConfigs(EnvironmentDetachRequest request, Environment environment, ValidationResult validationResult) {
+        Set<KerberosConfig> kerberosConfigsToDetach = environment.getKerberosConfigs().stream()
+                .filter(kerberosConfig -> request.getKerberosConfigs().contains(kerberosConfig.getName())).collect(Collectors.toSet());
+        Map<KerberosConfig, Set<Cluster>> kerberosConfigsToClusters = kerberosConfigsToDetach.stream()
+                .collect(Collectors.toMap(kerberosConfig -> kerberosConfig, kerberosConfig ->
+                        kerberosService.getClustersUsingResourceInEnvironment(kerberosConfig, environment.getId())));
+        validationResult = environmentDetachValidator.validate(environment, kerberosConfigsToClusters).merge(validationResult);
+        environment.getKerberosConfigs().removeAll(kerberosConfigsToDetach);
+        return validationResult;
     }
 
     public DetailedEnvironmentResponse changeCredential(String environmentName, Long workspaceId, EnvironmentChangeCredentialRequest request) {

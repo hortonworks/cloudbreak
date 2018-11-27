@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -37,6 +38,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
+import com.sequenceiq.cloudbreak.service.kerberos.KerberosService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 
 @Component
@@ -70,6 +72,9 @@ public class StackRequestValidator implements Validator<StackRequest> {
     @Inject
     private RdsConfigService rdsConfigService;
 
+    @Inject
+    private KerberosService kerberosService;
+
     @Override
     public ValidationResult validate(StackRequest subject) {
         ValidationResultBuilder validationBuilder = ValidationResult.builder();
@@ -80,6 +85,7 @@ public class StackRequestValidator implements Validator<StackRequest> {
         validateTemplates(subject, validationBuilder);
         validateSharedService(subject, validationBuilder);
         validateEncryptionKey(subject, validationBuilder);
+        validateKerberos(subject.getClusterRequest().getKerberosConfigName(), validationBuilder);
         return validationBuilder.build();
     }
 
@@ -214,6 +220,14 @@ public class StackRequestValidator implements Validator<StackRequest> {
         types.addAll(clusterRequest.getRdsConfigNames().stream().map(s -> RdsType.valueOf(
                 rdsConfigService.getByNameForWorkspaceId(s, restRequestThreadLocalService.getRequestedWorkspaceId()).getType())).collect(Collectors.toSet()));
         return types;
+    }
+
+    private void validateKerberos(String kerberosConfigName, ValidationResultBuilder validationBuilder) {
+        if (kerberosConfigName != null && kerberosConfigName.length() == 0) {
+            validationBuilder.error("kerberosConfigNameParameter should not be empty. Should be neither filled or null!");
+        } else if (StringUtils.isNotEmpty(kerberosConfigName)) {
+            kerberosService.getByNameForWorkspaceId(kerberosConfigName, restRequestThreadLocalService.getRequestedWorkspaceId());
+        }
     }
 
 }

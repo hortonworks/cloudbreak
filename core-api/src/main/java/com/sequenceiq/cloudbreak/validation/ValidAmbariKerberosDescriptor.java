@@ -10,15 +10,15 @@ import javax.validation.Constraint;
 import javax.validation.Payload;
 
 @Documented
-@Constraint(validatedBy = KerberosDescriptorValidator.class)
-@Target(ElementType.FIELD)
+@Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ValidKerberosDescriptor {
+@Constraint(validatedBy = AmbariKerberosDescriptorValidator.class)
+public @interface ValidAmbariKerberosDescriptor {
 
-    String message() default "The descriptor must be a valid JSON with the required fields";
+    String message() default "AmbariKerberosDescriptor contains one or more invalid data.";
 
-    Class<?>[] groups() default { };
+    Class<?>[] groups() default {};
 
-    Class<? extends Payload>[] payload() default { };
+    Class<? extends Payload>[] payload() default {};
 
 }

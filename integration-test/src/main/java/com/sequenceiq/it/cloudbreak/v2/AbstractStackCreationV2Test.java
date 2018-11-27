@@ -14,7 +14,6 @@ import org.testng.annotations.Test;
 
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.model.ExposedService;
-import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.StackAuthenticationRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayTopologyJson;
@@ -26,7 +25,6 @@ import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.PlacementSettings;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
-import com.sequenceiq.cloudbreak.type.KerberosType;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.AbstractCloudbreakIntegrationTest;
 import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
@@ -88,9 +86,8 @@ public class AbstractStackCreationV2Test extends AbstractCloudbreakIntegrationTe
     }
 
     @BeforeMethod(dependsOnGroups = "V2StackCreationInit")
-    @Parameters({"blueprintName", "enableSecurity", "kerberosMasterKey", "kerberosAdmin", "kerberosPassword", "enableGateway"})
-    public void ambariParameters(@Optional("") String blueprintName, @Optional("false") boolean enableSecurity,
-            @Optional String kerberosMasterKey, @Optional String kerberosAdmin, @Optional String kerberosPassword, @Optional("true") boolean enableGateway) {
+    @Parameters({"blueprintName", "enableSecurity", "enableGateway"})
+    public void ambariParameters(@Optional("") String blueprintName, @Optional("false") boolean enableSecurity, @Optional("true") boolean enableGateway) {
         IntegrationTestContext itContext = getItContext();
         blueprintName = StringUtils.hasText(blueprintName) ? blueprintName : itContext.getContextParam(CloudbreakV2Constants.BLUEPRINT_NAME);
 
@@ -112,12 +109,6 @@ public class AbstractStackCreationV2Test extends AbstractCloudbreakIntegrationTe
         }
         if (enableSecurity) {
             ambariV2Request.setEnableSecurity(enableSecurity);
-            KerberosRequest kerberosRequest = new KerberosRequest();
-            kerberosRequest.setMasterKey(kerberosMasterKey);
-            kerberosRequest.setAdmin(kerberosAdmin);
-            kerberosRequest.setPassword(kerberosPassword);
-            kerberosRequest.setType(KerberosType.CB_MANAGED);
-            ambariV2Request.setKerberos(kerberosRequest);
         }
     }
 

@@ -2,13 +2,10 @@ package com.sequenceiq.cloudbreak.converter.v2.cli;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
-import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
@@ -19,8 +16,6 @@ import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 
 @Component
 public class ClusterToAmbariV2RequestRequestConverter extends AbstractConversionServiceAwareConverter<Cluster, AmbariV2Request> {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterToAmbariV2RequestRequestConverter.class);
 
     @Inject
     private ClusterComponentConfigProvider componentConfigProvider;
@@ -39,7 +34,7 @@ public class ClusterToAmbariV2RequestRequestConverter extends AbstractConversion
         ambariV2Request.setUserName("");
         ambariV2Request.setValidateBlueprint(null);
         if (source.isSecure() && source.getKerberosConfig() != null) {
-            ambariV2Request.setKerberos(getConversionService().convert(source.getKerberosConfig(), KerberosRequest.class));
+            ambariV2Request.setKerberosConfigName(source.getKerberosConfig().getName());
         }
         if (source.getGateway() != null) {
             ambariV2Request.setGateway(getConversionService().convert(source.getGateway(), GatewayJson.class));

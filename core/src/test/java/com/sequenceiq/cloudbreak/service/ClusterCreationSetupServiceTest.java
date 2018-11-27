@@ -174,7 +174,7 @@ public class ClusterCreationSetupServiceTest {
 
     @Test
     public void testIncorrectKerberosSettingForDatalakeCluster() {
-        clusterRequest.setKerberos(null);
+        clusterRequest.setKerberosConfigName(null);
         clusterRequest.setEnableSecurity(true);
 
         assertThrows(BadRequestException.class, () -> underTest.validate(clusterRequest, stack, user, workspace));
@@ -183,7 +183,7 @@ public class ClusterCreationSetupServiceTest {
     @Test
     public void testIncorrectKerberosSettingForWorkloadCluster() {
         stack.setDatalakeId(null);
-        clusterRequest.setKerberos(null);
+        clusterRequest.setKerberosConfigName(null);
         clusterRequest.setEnableSecurity(true);
 
         assertThrows(BadRequestException.class, () -> underTest.validate(clusterRequest, stack, user, workspace));

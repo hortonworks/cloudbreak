@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.KubernetesConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
@@ -30,7 +31,19 @@ public class EnvironmentCreationValidator {
         validateKubernetesConfigs(environment, request, resultBuilder);
         validateRegions(request.getRegions(), environment, regionsSupported, resultBuilder);
         validateLocation(request.getLocation(), request.getRegions(), environment, resultBuilder);
+        validateKerberosConfigs(environment, request, resultBuilder);
         return resultBuilder.build();
+    }
+
+    private void validateKerberosConfigs(Environment environment, EnvironmentRequest request, ValidationResultBuilder resultBuilder) {
+        if (environment.getKerberosConfigs().size() < request.getKerberosConfigs().size()) {
+            Set<String> foundKerberosConfigs = environment.getKerberosConfigs().stream()
+                    .map(KerberosConfig::getName).collect(Collectors.toSet());
+            Set<String> requestedKerberosConfigs = new HashSet<>(request.getKerberosConfigs());
+            requestedKerberosConfigs.removeAll(foundKerberosConfigs);
+            resultBuilder.error(String.format("The following Kerberos config(s) could not be found in the workspace: [%s]",
+                    requestedKerberosConfigs.stream().collect(Collectors.joining(", "))));
+        }
     }
 
     private void validateLdapConfigs(Environment subject, EnvironmentRequest request, ValidationResultBuilder resultBuilder) {

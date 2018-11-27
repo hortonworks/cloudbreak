@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.client;
 
+import static java.lang.String.format;
+
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -61,6 +63,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v3.EnvironmentV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.FileSystemV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.FlexSubscriptionV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.ImageCatalogV3Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v3.KerberosConfigV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.KnoxServicesV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.KubernetesConfigV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.LdapConfigV3Endpoint;
@@ -124,7 +127,8 @@ public class CloudbreakClient {
             SubscriptionEndpoint.class,
             UserEndpoint.class,
             UserV3Endpoint.class,
-            UtilEndpoint.class
+            UtilEndpoint.class,
+            KerberosConfigV3Endpoint.class
     );
 
     private static final Form EMPTY_FORM = new Form();
@@ -345,6 +349,10 @@ public class CloudbreakClient {
         return getEndpoint(ClusterTemplateV3EndPoint.class);
     }
 
+    public KerberosConfigV3Endpoint kerberosConfigV3Endpoint() {
+        return getEndpoint(KerberosConfigV3Endpoint.class);
+    }
+
     protected <E> E getEndpoint(Class<E> clazz) {
         return refreshIfNeededAndGet(clazz);
     }
@@ -372,7 +380,8 @@ public class CloudbreakClient {
                 tokenCache.put(TOKEN_KEY, accessToken, ExpirationPolicy.CREATED, 1, TimeUnit.MINUTES);
                 refreshEndpointWrapperHolder(accessToken);
             }
-            return (T) getRequiredEndpoint(clazz).orElse(null);
+            return (T) getRequiredEndpoint(clazz)
+                    .orElseThrow(() -> new EndpointConfigurationException(format("Endpoint [%s] has not added to the endpoint list!", clazz)));
         }
         throw new TokenUnavailableException("No Refresh token provided for CloudbreakClient!");
     }

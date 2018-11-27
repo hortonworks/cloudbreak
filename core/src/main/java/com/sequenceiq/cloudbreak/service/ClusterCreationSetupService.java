@@ -141,10 +141,10 @@ public class ClusterCreationSetupService {
 
     public void validate(ClusterRequest request, CloudCredential cloudCredential, Stack stack, User user, Workspace workspace) {
         if (stack.getDatalakeId() == null) {
-            if (request.getEnableSecurity() && request.getKerberos() == null) {
+            if (request.getEnableSecurity() && request.getKerberosConfigName() == null) {
                 throw new BadRequestException("If the security is enabled then kerberos parameters cannot be empty");
             }
-        } else if (request.getKerberos() != null) {
+        } else if (request.getKerberosConfigName() != null) {
                 throw new BadRequestException("Invalid kerberos settings, attached cluster should inherit kerberos parameters");
         }
         MDCBuilder.buildUserMdcContext(user.getUserId(), user.getUserName());

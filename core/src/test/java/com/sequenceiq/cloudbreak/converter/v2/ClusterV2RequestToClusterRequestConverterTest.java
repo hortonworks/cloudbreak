@@ -17,11 +17,9 @@ import org.springframework.core.convert.ConversionService;
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
-import com.sequenceiq.cloudbreak.api.model.BlueprintInputJson;
 import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.model.ConnectedClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
-import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
 import com.sequenceiq.cloudbreak.api.model.SharedServiceRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
@@ -88,8 +86,7 @@ public class ClusterV2RequestToClusterRequestConverterTest {
 
     @Test
     public void testConvertWhenHasAmbariRequestButSharedServiceIsNotConfiguredThenSharedServiceRelatedFieldsShouldntBeConfigured() {
-        int blueprintInputQuantity = 2;
-        AmbariV2Request ambariV2Request = createAmbariV2Request(blueprintInputQuantity);
+        AmbariV2Request ambariV2Request = createAmbariV2Request();
         ClusterV2Request source = createClusterV2Request(Collections.emptySet(), ambariV2Request);
         when(sharedServiceConfigProvider.isConfigured(source)).thenReturn(false);
 
@@ -104,8 +101,7 @@ public class ClusterV2RequestToClusterRequestConverterTest {
 
     @Test
     public void testConvertWhenRdsConfigNamesIsEmptyAndHasAmbariRequestAndSharedServiceIsConfiguredThenSharedServiceRelatedFieldsShouldtBeConfiguredCorrectly() {
-        int blueprintInputQuantity = 2;
-        AmbariV2Request ambariV2Request = createAmbariV2Request(blueprintInputQuantity);
+        AmbariV2Request ambariV2Request = createAmbariV2Request();
         ClusterV2Request source = createClusterV2Request(Collections.emptySet(), ambariV2Request);
         when(sharedServiceConfigProvider.isConfigured(source)).thenReturn(true);
 
@@ -134,6 +130,21 @@ public class ClusterV2RequestToClusterRequestConverterTest {
         Assert.assertTrue(result.getHostGroups().isEmpty());
     }
 
+    @Test
+    public void testConvertWhenKerberosConfigNameHasGivenThenThisValueShouldBePassedToTheResultClusterRequest() {
+        String kerberosConfigName = "someKerberosConfig";
+        AmbariV2Request ambariV2Request = createAmbariV2Request();
+        ambariV2Request.setKerberosConfigName(kerberosConfigName);
+        ClusterV2Request source = createClusterV2Request(Collections.emptySet(), ambariV2Request);
+
+        ClusterRequest result = underTest.convert(source);
+
+        Assert.assertNotNull(result);
+        Assert.assertNotNull(result.getKerberosConfigName());
+        Assert.assertEquals(kerberosConfigName, result.getKerberosConfigName());
+
+    }
+
     private ClusterV2Request createClusterV2Request(Set<String> rdsConfigNames, AmbariV2Request ambariV2Request) {
         ClusterV2Request request = new ClusterV2Request();
         request.setExecutorType(ExecutorType.CONTAINER);
@@ -158,7 +169,7 @@ public class ClusterV2RequestToClusterRequestConverterTest {
         return rdsConfigNames;
     }
 
-    private AmbariV2Request createAmbariV2Request(int blueprintInputsQuantity) {
+    private AmbariV2Request createAmbariV2Request() {
         AmbariV2Request request = new AmbariV2Request();
         request.setAmbariDatabaseDetails(new AmbariDatabaseDetailsJson());
         request.setAmbariRepoDetailsJson(new AmbariRepoDetailsJson());
@@ -169,24 +180,12 @@ public class ClusterV2RequestToClusterRequestConverterTest {
         request.setConnectedCluster(new ConnectedClusterRequest());
         request.setEnableSecurity(true);
         request.setGateway(new GatewayJson());
-        request.setKerberos(new KerberosRequest());
+        request.setKerberosConfigName(null);
         request.setPassword("somePwd");
         request.setUserName("someUserName");
         request.setValidateBlueprint(true);
         request.setAmbariSecurityMasterKey("masterKey");
         return request;
-    }
-
-    private Set<BlueprintInputJson> blueprintInputJsons(int quantity) {
-        if (quantity > 0) {
-            Set<BlueprintInputJson> jsons = new LinkedHashSet<>(quantity);
-            for (int i = 0; i < quantity; i++) {
-                jsons.add(new BlueprintInputJson());
-            }
-            return jsons;
-        } else {
-            return Collections.emptySet();
-        }
     }
 
 }
