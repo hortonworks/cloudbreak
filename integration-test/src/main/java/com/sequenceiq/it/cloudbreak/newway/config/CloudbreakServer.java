@@ -43,7 +43,7 @@ public class CloudbreakServer {
     @Value("${integrationtest.caas.address:}")
     private String caasAddress;
 
-    @Value("${integrationtest.caas.profile:}")
+    @Value("${integrationtest.dp.profile:}")
     private String profile;
 
     @Inject
@@ -53,10 +53,10 @@ public class CloudbreakServer {
     private void init() throws IOException {
 
         String userHome = System.getProperty("user.home");
-        Path cbProfileLocation = Paths.get(userHome, ".cb", "config");
+        Path cbProfileLocation = Paths.get(userHome, ".dp", "config");
 
         if (Files.exists(cbProfileLocation)) {
-            byte[] encoded = Files.readAllBytes(Paths.get(userHome, ".cb", "config"));
+            byte[] encoded = Files.readAllBytes(Paths.get(userHome, ".dp", "config"));
             String profileString = new String(encoded, Charset.defaultCharset());
 
             Yaml yaml = new Yaml();
@@ -71,9 +71,9 @@ public class CloudbreakServer {
             Map<String, String> prof = (Map<String, String>) profiles.get(usedProfile);
 
             if (prof == null) {
-                LOGGER.warn("localhost in ~/.cb/config or "
-                        + "integrationtest.cb.profile in application.yml or "
-                        + "-Dintegrationtest.cb.profile should be added with exited profile");
+                LOGGER.warn("localhost in ~/.dp/config or "
+                        + "integrationtest.dp.profile in application.yml or "
+                        + "-Dintegrationtest.dp.profile should be added with exited profile");
             } else {
                 if (StringUtils.isEmpty(server)) {
                     if (prof.get("server").contains("http")) {
