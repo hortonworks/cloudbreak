@@ -172,7 +172,7 @@ public class ImageCatalogTests extends CloudbreakTest {
     // TODO: if this test and the test of cluster creation are run parallel, wrong image id is found by image finder.
     // Find a UUID from this catalog and run with the original catalog (cloudbreak-default)
     @Test(enabled = false)
-    public void testSetImageCatalogBackAsNotDefault() throws  Exception {
+    public void testSetImageCatalogBackAsNotDefault() throws Exception {
         given(CloudbreakClient.created());
 
         given(ImageCatalog.isCreatedAsDefault()
@@ -287,11 +287,17 @@ public class ImageCatalogTests extends CloudbreakTest {
     @AfterSuite
     public void cleanAll() throws Exception {
         for (String name : IMAGECATALOG_NAMES) {
-            given(CloudbreakClient.created());
-            given(ImageCatalog.request()
-                    .withName(name)
-            );
-            when(ImageCatalog.delete());
+            try {
+                given(CloudbreakClient.created());
+                given(ImageCatalog.request()
+                        .withName(name)
+                );
+                when(ImageCatalog.delete());
+            } catch (ForbiddenException e) {
+                String exceptionMessage = e.getResponse().readEntity(String.class);
+                String errorMessage = exceptionMessage.substring(exceptionMessage.lastIndexOf(':') + 1);
+                LOGGER.info("ForbiddenException message ::: " + errorMessage);
+            }
         }
     }
 
