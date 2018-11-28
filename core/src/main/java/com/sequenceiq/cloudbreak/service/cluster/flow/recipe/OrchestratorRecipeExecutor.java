@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow.recipe;
 
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
-import static com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine.DEFAULT_RECIPES;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -21,6 +20,7 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
 import com.google.api.client.util.Joiner;
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
@@ -50,6 +50,9 @@ import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Component
 class OrchestratorRecipeExecutor {
+
+    private static final Set<String> DEFAULT_RECIPES = Collections.unmodifiableSet(
+            Sets.newHashSet());
 
     @Inject
     private HostOrchestratorResolver hostOrchestratorResolver;
