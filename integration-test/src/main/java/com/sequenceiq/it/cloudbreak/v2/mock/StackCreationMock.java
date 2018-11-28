@@ -199,7 +199,7 @@ public class StackCreationMock extends MockServer {
         verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=jobs.active").atLeast(2).verify();
 
         verify(SALT_BOOT_ROOT + "/file", "POST").exactTimes(0).verify();
-        verify(SALT_BOOT_ROOT + "/file/distribute", "POST").exactTimes(4).verify();
+        verify(SALT_BOOT_ROOT + "/file/distribute", "POST").exactTimes(3).verify();
     }
 
     public void verifyGatewayCalls() {

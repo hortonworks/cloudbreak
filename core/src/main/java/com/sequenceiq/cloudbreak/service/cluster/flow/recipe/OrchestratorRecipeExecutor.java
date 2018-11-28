@@ -53,7 +53,7 @@ import com.sequenceiq.cloudbreak.util.StackUtil;
 class OrchestratorRecipeExecutor {
 
     private static final Set<String> DEFAULT_RECIPES = Collections.unmodifiableSet(
-            Sets.newHashSet("prepare-s3-symlinks"));
+            Sets.newHashSet());
 
     @Inject
     private HostOrchestratorResolver hostOrchestratorResolver;
