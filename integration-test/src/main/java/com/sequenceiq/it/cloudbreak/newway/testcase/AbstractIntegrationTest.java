@@ -133,4 +133,11 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
                 .given(BlueprintEntity.class)
                 .when(new BlueprintGetListAction());
     }
+
+    protected void minimalSetupForClusterCreation(TestContext testContext) {
+        createDefaultUser(testContext);
+        createDefaultCredential(testContext);
+        createDefaultImageCatalog(testContext);
+        initializeDefaultBlueprints(testContext);
+    }
 }
