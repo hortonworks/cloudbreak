@@ -26,7 +26,7 @@ var stackTemplateDescription = `Template parameters to fill in the generated tem
 `
 
 func init() {
-	CloudbreakCommands = append(CloudbreakCommands, cli.Command{
+	DataPlaneCommands = append(DataPlaneCommands, cli.Command{
 		Name:  "cluster",
 		Usage: "cluster related operations",
 		Subcommands: []cli.Command{

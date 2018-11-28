@@ -15,7 +15,7 @@ import (
 )
 
 var AppHelpTemplate = `NAME:
-   Cloudbreak command line tool
+   DataPlane command line tool
 USAGE:
    {{if .UsageText}}{{.UsageText}}{{else}}{{.Name}} {{if .VisibleFlags}}[global options]{{end}}{{if .Commands}} command [command options]{{end}} {{if .ArgsUsage}}{{.ArgsUsage}}{{end}}{{end}}
    {{if .Version}}{{if not .HideVersion}}
@@ -38,7 +38,7 @@ COPYRIGHT:
 `
 
 var CommandHelpTemplate = `NAME:
-   Cloudbreak command line tool
+   DataPlane command line tool
 
 USAGE:
    {{.HelpName}}{{if .VisibleFlags}} [command options]{{end}} {{if .ArgsUsage}}{{.ArgsUsage}}{{end}}{{if .Category}}
@@ -58,7 +58,7 @@ OPTIONS:
 `
 
 var SubCommandHelpTemplate = `NAME:
-   Cloudbreak command line tool
+   DataPlane command line tool
 
 USAGE:
    {{.HelpName}} command{{if .VisibleFlags}} [command options]{{end}} {{if .ArgsUsage}}{{.ArgsUsage}}{{end}} {{if .Description}}
@@ -79,7 +79,7 @@ OPTIONS:
 `
 
 var HiddenAppHelpTemplate = `NAME:
-   Cloudbreak command line tool
+   DataPlane command line tool
 
 USAGE:
    {{if .UsageText}}{{.UsageText}}{{else}}{{.HelpName}} {{if .VisibleFlags}}[global options]{{end}}{{if .Commands}} command [command options]{{end}} {{if .ArgsUsage}}{{.ArgsUsage}}{{end}}{{end}}

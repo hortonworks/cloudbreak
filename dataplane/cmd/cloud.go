@@ -13,7 +13,7 @@ import (
 )
 
 func init() {
-	CloudbreakCommands = append(CloudbreakCommands, cli.Command{
+	DataPlaneCommands = append(DataPlaneCommands, cli.Command{
 		Name:  "cloud",
 		Usage: "information about cloud provider resources",
 		Subcommands: []cli.Command{

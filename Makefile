@@ -40,10 +40,10 @@ errcheck:
 #	errcheck -ignoretests -exclude errcheck_excludes.txt ./...
 
 coverage:
-	go test github.com/hortonworks/cb-cli/cloudbreak -cover
+	go test github.com/hortonworks/cb-cli/dataplane/... -cover
 
 coverage-html:
-	go test github.com/hortonworks/cb-cli/cloudbreak -coverprofile fmt
+	go test github.com/hortonworks/cb-cli/dataplane/... -coverprofile fmt
 	@go tool cover -html=fmt
 	@rm -f fmt
 
@@ -134,7 +134,7 @@ linux-test: build-linux
 	docker run --rm -it -v ${PWD}/build/Linux/:/usr/sbin/ --name "${BINARY}" alpine sh
 
 # Build CB-CLI locally
-# Start a new Cloudbreak Mock with new Swagger JSON and renewed Mock IP
+# Start a new DataPlane Mock with new Swagger JSON and renewed Mock IP
 #   For custom version apply like: 'GIT_FIRST_PARENT=2.8.0-dev.374 make integration-test'
 # Execute just one scenario you can start this with: 'CLI_TEST_FILES=spec/integration/credential.rb make integration-test'
 integration-test: build-docker

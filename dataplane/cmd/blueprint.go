@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	CloudbreakCommands = append(CloudbreakCommands, cli.Command{
+	DataPlaneCommands = append(DataPlaneCommands, cli.Command{
 		Name:  "blueprint",
 		Usage: "blueprint related operations",
 		Subcommands: []cli.Command{

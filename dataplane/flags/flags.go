@@ -511,14 +511,14 @@ var (
 		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{
 			Name:  "ldap-user-to-create-groups",
-			Usage: "semicolon separated list of group DNs that the user will be added to (e.g: OU=cloudbreak,CN=Users,DC=ad,DC=cb,DC=com;)",
+			Usage: "semicolon separated list of group DNs that the user will be added to (e.g: OU=dataplane,CN=Users,DC=ad,DC=cb,DC=com;)",
 		},
 	}
 	FlLdapGroupToCreate = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
 			Name:  "ldap-group-to-create",
-			Usage: "name of the ldap group (e.g cloudbreak will create CN=cloudbreak)",
+			Usage: "name of the ldap group (e.g dataplane will create CN=dataplane)",
 		},
 	}
 	FlLdapGroupToCreateBase = StringFlag{
@@ -778,7 +778,7 @@ var (
 		RequiredFlag: OPTIONAL,
 		BoolFlag: cli.BoolFlag{
 			Name:  "with-kerberos-managed",
-			Usage: "adds Cloudbreak managed Kerberos configuration to the template",
+			Usage: "adds DataPlane managed Kerberos configuration to the template",
 		},
 	}
 	FlWithKerberosExistingMITOptional = BoolFlag{

@@ -1,5 +1,5 @@
-# Testing project for Cloudbreak CLI
-Aruba-RSpec Test Framework for Cloudbreak CLI. The aruba test project is located at [/tests](/tests) folder.
+# Testing project for DataPlane CLI
+Aruba-RSpec Test Framework for DataPlane CLI. The aruba test project is located at [/tests](/tests) folder.
 
 ## Local development setup
 1. `make deps`
@@ -8,7 +8,7 @@ Aruba-RSpec Test Framework for Cloudbreak CLI. The aruba test project is located
     > * "To start using RVM you need to source your `.rvm/scripts/rvm` in all your open shell windows, in rare cases you need to reopen all shell windows."
 
 ### Create new test cases
-Test cases use [command_builder](spec/common/command_builder.rb) and [command_helper](spec/common/command_helpers.rb) to run the CB CLI commands. So you do not 
+Test cases use [command_builder](spec/common/command_builder.rb) and [command_helper](spec/common/command_helpers.rb) to run the CB CLI commands. So you do not
 need to add exact cli commands in test cases, for example:
 ```
 cb.credential.describe.name(“test”).build
@@ -41,7 +41,7 @@ rspec -f RspecJunitFormatter -o test-result.xml -f h spec/integration/*.rb | tee
 Your [Docker Machine](https://docs.docker.com/machine/reference/start/) has to be up and running before step forward.
 
 ### E2E testing
-#### Preconditions 
+#### Preconditions
 Create your own End to End testing local environment (for example: [localvars](localvars))
 > Source your E2E localvars (`. localvars` or `source localvars`)
 
@@ -74,16 +74,16 @@ We created a [CBD Mock](https://github.com/hortonworks/cloud-swagger-mock) for C
 
 You can use CBD mock with the help of Make targets at [Tests Makefile](Makefile).
 
-You can start, stop or restart the CBD Mock step-by-step if you would like with the help of the following make targets: 
+You can start, stop or restart the CBD Mock step-by-step if you would like with the help of the following make targets:
 * **Download S3**: Download the versioned Swagger Json file from out AWS S3 bucket
-    
+
     ```make download-s3```
 * **Start mock**: Start CBD mock for CB-CLI based on the downloaded Swagger Json
-    
+
     ```make start-mock```
 * **Stop mock**: Kill all the CBD mock related containers
-    
+
     ```make stop-mock```
 * **Restart mock**: Kill all the CBD mock containers then start these again based on the existing [swagger.json](swagger.json)
-    
+
     ```make restart-mock```

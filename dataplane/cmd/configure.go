@@ -11,7 +11,7 @@ import (
 )
 
 func init() {
-	CloudbreakCommands = append(CloudbreakCommands, cli.Command{
+	DataPlaneCommands = append(DataPlaneCommands, cli.Command{
 		Name:   "configure",
 		Before: fl.CheckRequiredFlagsAndArguments,
 		Description: fmt.Sprintf("it will save the provided server address and credential "+

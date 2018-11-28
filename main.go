@@ -62,7 +62,7 @@ func main() {
 		fmt.Fprintf(c.App.Writer, "Command not found: %q\n", command)
 	}
 
-	app.Commands = append(app.Commands, cb.CloudbreakCommands...)
+	app.Commands = append(app.Commands, cb.DataPlaneCommands...)
 	app.Commands = append(app.Commands, cmd.AppCommands...)
 	sortByName(app.Commands)
 

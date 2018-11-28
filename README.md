@@ -1,6 +1,6 @@
 [![CircleCI](https://circleci.com/gh/hortonworks/cb-cli.svg?style=shield)](https://circleci.com/gh/hortonworks/cb-cli) [![Go Report Card](https://goreportcard.com/badge/github.com/hortonworks/cb-cli)](https://goreportcard.com/report/github.com/hortonworks/cb-cli)
 
-# Cloudbreak - Command Line Interface
+# DataPlane - Command Line Interface
 
 ## Install
 
@@ -17,7 +17,7 @@ curl -LO "https://s3-eu-west-1.amazonaws.com/cb-cli/cb-cli_${VERSION}_Windows_x8
 To see the available commands `cb -h`.
 ```
 NAME:
-   Cloudbreak command line tool
+   DataPlane command line tool
 USAGE:
    cb [global options] command [command options]
 
@@ -54,10 +54,10 @@ GLOBAL OPTIONS:
 Each command provides a help flag with a description and the accepted flags and subcommands, e.g: `cb configure -h`.
 ```
 NAME:
-   Cloudbreak command line tool
+   DataPlane command line tool
 
 USAGE:
-   Hortonworks Data Cloud command line tool configure [command options]
+   Hortonworks DataPlane command line tool configure [command options]
 
 DESCRIPTION:
    it will save the provided server address and credential to ~/.dp/config
@@ -73,12 +73,12 @@ OPTIONS:
 ```
 
 ### Configure
-Although there is an option to provide some global flags to every command to which Cloudbreak to connect to, it is recommended to save the configuration.
-A configuration entry contains the Cloudbreak server's address, the username and optionally the password and the output format.
+Although there is an option to provide some global flags to every command to which DataPlane to connect to, it is recommended to save the configuration.
+A configuration entry contains the DataPlane server's address, the username and optionally the password and the output format.
 Multiple configuration profiles can be saved by specifying the `--profile` switch. The same switch can be used as a global flag to the other commands to use a specific profile.
 If the profile switch is omitted, the `default` profile is saved and used.
 ```
-cb configure --server https://ec2-52-29-224-64...compute.amazonaws.com --workspace your@email --profile cloudbreak-staging
+cb configure --server https://ec2-52-29-224-64...compute.amazonaws.com --workspace your@email --profile dataplane-staging
 ```
 This will save the configuration into the user's home directory. To see its content: `cat ~/.dp/config`. If this config file is present you don't need to specify the connection flags anymore,
 otherwise you need to specify these flags to every command.
@@ -92,7 +92,7 @@ To create a cluster with the CLI, a cluster descriptor file needs to be put toge
 cb cluster create --cli-input-json create_cluster.json
 ```
 
-The cluster descriptor is basically the JSON request that's being sent to the Cloudbreak API.
+The cluster descriptor is basically the JSON request that's being sent to the DataPlane API.
 The full reference of this descriptor file can be found in the API docs.
 The CLI can help with creating the skeleton of the cluster descriptor JSON.
 The following command outputs a descriptor file with empty values:
@@ -156,10 +156,10 @@ export GO111MODULE=on
 ```
 
 ## Implementing new commands
-Top level commands like `cluster` are separated into a cmd package. You can see an example for these commands in the `cloudbreak/cmd` folder. Each of these resource separated files contain an `init` function that adds the resource specific commands to an internal array:
+Top level commands like `cluster` are separated into a cmd package. You can see an example for these commands in the `dataplane/cmd` folder. Each of these resource separated files contain an `init` function that adds the resource specific commands to an internal array:
 ```$xslt
 func init() {
-    CloudbreakCommands = append(CloudbreakCommands, cli.Command{})
+    DataPlaneCommands = append(DataPlaneCommands, cli.Command{})
 }
 ```
 The `init()` function is automatically invoked for each file in the `cmd` folder, because it is referenced from the `main.go` file:
@@ -170,7 +170,7 @@ import (
 ```
 and then added to the main app:
 ```$xslt
-app.Commands = append(app.Commands, cmd.CloudbreakCommands...)
+app.Commands = append(app.Commands, cmd.DataPlaneCommands...)
 ```
 To implement new top level commands you can create your own folder structure and reproduce the above specified:
 ```$xslt
@@ -179,8 +179,8 @@ To implement new top level commands you can create your own folder structure and
 - Reference these files from the main.go file
 - Add your commands to the app.Commands
 ```
-If you'd like to introduce `sub-commands` for already existing top level commands that are not Cloudbreak specific you can move the `cluster.go` file (for example) from
-the `cloudbreak/cmd` folder to a top level `cmd` folder and reference it from the `main.go` file as describe above.
+If you'd like to introduce `sub-commands` for already existing top level commands that are not DataPlane specific you can move the `cluster.go` file (for example) from
+the `dataplane/cmd` folder to a top level `cmd` folder and reference it from the `main.go` file as describe above.
 
 ### Plugins
 The CLI also supports a `plugin` model. This means that you can create similar CLI tools like this one and build them independently/separately, but get them invoked by the main CLI tool. Let's assume you'd like to create a `dlm` CLI, but develop it outside from this repository, but with the same framework.
