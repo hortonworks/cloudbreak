@@ -322,10 +322,10 @@ public class KerberosTest extends AbstractIntegrationTest {
 
         private static List<AssertionV2<StackEntity>> verifyCloudbreakUserHasSentToCreate() {
             return List.of(
-                    MockVerification.verify(HttpMethod.POST, AMBARI_API_ROOT + "/users").bodyContains("\"Users/active\": true"),
-                    MockVerification.verify(HttpMethod.POST, AMBARI_API_ROOT + "/users").bodyContains("\"Users/admin\": true"),
-                    MockVerification.verify(HttpMethod.POST, AMBARI_API_ROOT + "/users").bodyContains("\"Users/user_name\": \"cloudbreak\""),
-                    MockVerification.verify(HttpMethod.POST, AMBARI_API_ROOT + "/users").bodyContains("Users/password"));
+                    MockVerification.verify(HttpMethod.POST, AMBARI_API_ROOT + "/users").atLeast(1).bodyContains("\"Users/active\": true"),
+                    MockVerification.verify(HttpMethod.POST, AMBARI_API_ROOT + "/users").atLeast(1).bodyContains("\"Users/admin\": true"),
+                    MockVerification.verify(HttpMethod.POST, AMBARI_API_ROOT + "/users").atLeast(1).bodyContains("\"Users/user_name\": \"cloudbreak\""),
+                    MockVerification.verify(HttpMethod.POST, AMBARI_API_ROOT + "/users").atLeast(1).bodyContains("Users/password"));
         }
 
     }

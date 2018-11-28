@@ -93,7 +93,8 @@ public class MockVerification implements AssertionV2<StackEntity> {
     private void checkExactTimes(int times) {
         if (exactTimes != null) {
             if (exactTimes != times) {
-                throw new RuntimeException(path + " request should have been invoked exactly " + exactTimes + " times, but it was invoked " + times + " times");
+                throw new RuntimeException(path + "with body" + generateBodyTimesLog(bodyContainsList) + " "
+                        + "request should have been invoked exactly " + exactTimes + " times, but it was invoked " + times + " times");
             }
         }
     }
@@ -101,7 +102,8 @@ public class MockVerification implements AssertionV2<StackEntity> {
     private void checkAtLeast(int times) {
         if (atLeast != null) {
             if (times < atLeast) {
-                throw new RuntimeException(path + " request should have been invoked at least " + atLeast + " times, but it was invoked " + times + " times");
+                throw new RuntimeException(path + "with body" + generateBodyTimesLog(bodyContainsList)
+                        + " request should have been invoked at least " + atLeast + " times, but it was invoked " + times + " times");
             }
         }
     }
@@ -163,5 +165,13 @@ public class MockVerification implements AssertionV2<StackEntity> {
         checkExactTimes(matchesCount);
         checkAtLeast(matchesCount);
         return entity;
+    }
+
+    private String generateBodyTimesLog(Map<String, Integer> bodyContainsList) {
+        StringBuilder sb = new StringBuilder();
+        for (Entry<String, Integer> entry : bodyContainsList.entrySet()) {
+            sb.append("Body: " + entry.getKey() + " Times: " + entry.getValue());
+        }
+        return sb.toString();
     }
 }
