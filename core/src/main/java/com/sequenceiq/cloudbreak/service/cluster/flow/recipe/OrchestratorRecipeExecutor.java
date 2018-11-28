@@ -20,7 +20,6 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
 import com.google.api.client.util.Joiner;
-import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
@@ -50,9 +49,6 @@ import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Component
 class OrchestratorRecipeExecutor {
-
-    private static final Set<String> DEFAULT_RECIPES = Collections.unmodifiableSet(
-            Sets.newHashSet());
 
     @Inject
     private HostOrchestratorResolver hostOrchestratorResolver;
@@ -193,8 +189,6 @@ class OrchestratorRecipeExecutor {
             for (RecipeModel recipeModel : hostGroupListEntry.getValue()) {
                 GeneratedRecipe generatedRecipe = new GeneratedRecipe();
                 generatedRecipe.setHostGroup(hostGroupListEntry.getKey());
-                generatedRecipe.setExtendedRecipe(recipeModel.getGeneratedScript());
-                generatedRecipe.setOriginalRecipe(recipeModel.getScript());
                 generatedRecipeService.save(generatedRecipe);
             }
         }
@@ -229,10 +223,7 @@ class OrchestratorRecipeExecutor {
         for (Entry<String, List<RecipeModel>> entry : recipeMap.entrySet()) {
             Collection<String> recipeNamesPerHostgroup = new ArrayList<>(entry.getValue().size());
             for (RecipeModel rm : entry.getValue()) {
-                //filter out default recipes
-                if (!DEFAULT_RECIPES.contains(rm.getName())) {
                     recipeNamesPerHostgroup.add(rm.getName());
-                }
             }
             if (!recipeNamesPerHostgroup.isEmpty()) {
                 String recipeNamesStr = Joiner.on(',').join(recipeNamesPerHostgroup);
