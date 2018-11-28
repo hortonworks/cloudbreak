@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow.recipe;
 
 import static com.sequenceiq.cloudbreak.api.model.RecipeType.POST_AMBARI_START;
-import static com.sequenceiq.cloudbreak.api.model.RecipeType.POST_CLUSTER_INSTALL;
 import static com.sequenceiq.cloudbreak.api.model.RecipeType.PRE_AMBARI_START;
 import static com.sequenceiq.cloudbreak.api.model.RecipeType.PRE_TERMINATION;
 
@@ -16,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.RecipeType;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
@@ -36,9 +34,6 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @Component
 public class RecipeEngine {
-
-    public static final Set<String> DEFAULT_RECIPES = Collections.unmodifiableSet(
-            Sets.newHashSet("hdfs-home", "smartsense-capture-schedule", "prepare-s3-symlinks"));
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RecipeEngine.class);
 
@@ -64,10 +59,7 @@ public class RecipeEngine {
         Orchestrator orchestrator = stack.getOrchestrator();
         if (recipesSupportedOnOrchestrator(orchestrator)) {
             String blueprintText = stack.getCluster().getBlueprint().getBlueprintText();
-            addHDFSRecipe(stack, blueprintText, hostGroups);
-            addSmartSenseRecipe(stack, blueprintText, hostGroups);
             addS3SymlinkRecipe(stack, blueprintText, hostGroups);
-            addContainerExecutorScripts(stack, hostGroups);
             boolean recipesFound = recipesFound(hostGroups);
             if (recipesFound) {
                 orchestratorRecipeExecutor.uploadRecipes(stack, hostGroups);
@@ -129,22 +121,6 @@ public class RecipeEngine {
         return (recipesFound(hostGroups, recipeType)) && recipesSupportedOnOrchestrator(orchestrator);
     }
 
-    private void addContainerExecutorScripts(Stack stack, Set<HostGroup> hostGroups) {
-        try {
-            Cluster cluster = stack.getCluster();
-            if (cluster != null && ExecutorType.CONTAINER.equals(cluster.getExecutorType())) {
-                for (HostGroup hostGroup : hostGroups) {
-                    String script = FileReaderUtils.readFileFromClasspath("scripts/configure-container-executor.sh");
-                    RecipeScript recipeScript = new RecipeScript(script, POST_CLUSTER_INSTALL);
-                    Recipe recipe = recipeBuilder.buildRecipes("getConfigurationEntries-container-executor",
-                            Collections.singletonList(recipeScript)).get(0);
-                    hostGroup.addRecipe(recipe);
-                }
-            }
-        } catch (IOException e) {
-            LOGGER.warn("Cannot getConfigurationEntries container executor", e);
-        }
-    }
 
     private boolean recipesFound(Iterable<HostGroup> hostGroups) {
         for (HostGroup hostGroup : hostGroups) {
@@ -164,24 +140,6 @@ public class RecipeEngine {
             }
         }
         return false;
-    }
-
-    private void addHDFSRecipe(Stack stack, String blueprintText, Set<HostGroup> hostGroups) {
-        try {
-            Cluster cluster = stack.getCluster();
-            for (HostGroup hostGroup : hostGroups) {
-                if (isComponentPresent(blueprintText, "NAMENODE", hostGroup)) {
-                    String userName = cluster.getUserName();
-                    String script = FileReaderUtils.readFileFromClasspath("scripts/hdfs-home.sh").replaceAll("\\$USER", userName);
-                    RecipeScript recipeScript = new RecipeScript(script, POST_CLUSTER_INSTALL);
-                    Recipe recipe = recipeBuilder.buildRecipes("hdfs-home", Collections.singletonList(recipeScript)).get(0);
-                    hostGroup.addRecipe(recipe);
-                    break;
-                }
-            }
-        } catch (IOException e) {
-            LOGGER.warn("Cannot create HDFS home dir recipe", e);
-        }
     }
 
     private void addS3SymlinkRecipe(Stack stack, String blueprintText, Set<HostGroup> hostGroups) {
@@ -214,26 +172,6 @@ public class RecipeEngine {
             }
         }
         return result;
-    }
-
-    private void addSmartSenseRecipe(Stack stack, String blueprintText, Set<HostGroup> hostGroups) {
-        try {
-            Cluster cluster = stack.getCluster();
-            if (smartsenseConfigurationLocator.smartsenseConfigurable(smartSenseSubscriptionService.getDefault())) {
-                for (HostGroup hostGroup : hostGroups) {
-                    if (isComponentPresent(blueprintText, "HST_AGENT", hostGroup)) {
-                        String script = FileReaderUtils.readFileFromClasspath("scripts/smartsense-capture-schedule.sh");
-                        RecipeScript recipeScript = new RecipeScript(script, POST_CLUSTER_INSTALL);
-                        Recipe recipe = recipeBuilder.buildRecipes("smartsense-capture-schedule",
-                                Collections.singletonList(recipeScript)).get(0);
-                        hostGroup.addRecipe(recipe);
-                        break;
-                    }
-                }
-            }
-        } catch (IOException e) {
-            LOGGER.warn("Cannot create SmartSense caputre schedule setter recipe", e);
-        }
     }
 
     private boolean isComponentPresent(String blueprint, String component, HostGroup hostGroup) {
