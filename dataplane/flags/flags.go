@@ -711,6 +711,13 @@ var (
 			Usage: "[DEPRECATED] has no effect, use 'cb database test ...' command instead",
 		},
 	}
+	FlKubernetesConfigFile = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "kubernetes-config",
+			Usage: "Kubernetes config file location",
+		},
+	}
 	FLMpackURL = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{

@@ -64,6 +64,9 @@ type LdapConfigResponse struct {
 
 	// name of the resource
 	// Required: true
+	// Max Length: 100
+	// Min Length: 1
+	// Pattern: (^[a-z][-a-z0-9]*[a-z0-9]$)
 	Name *string `json:"name"`
 
 	// determines the protocol (LDAP or LDAP over SSL)
@@ -313,6 +316,18 @@ func (m *LdapConfigResponse) validateEnvironments(formats strfmt.Registry) error
 func (m *LdapConfigResponse) validateName(formats strfmt.Registry) error {
 
 	if err := validate.Required("name", "body", m.Name); err != nil {
+		return err
+	}
+
+	if err := validate.MinLength("name", "body", string(*m.Name), 1); err != nil {
+		return err
+	}
+
+	if err := validate.MaxLength("name", "body", string(*m.Name), 100); err != nil {
+		return err
+	}
+
+	if err := validate.Pattern("name", "body", string(*m.Name), `(^[a-z][-a-z0-9]*[a-z0-9]$)`); err != nil {
 		return err
 	}
 

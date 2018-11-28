@@ -25,7 +25,7 @@ type Client struct {
 }
 
 /*
-AttachRdsResourceToEnvironments attaches rds resource to environemnts
+AttachRdsResourceToEnvironments attaches r d s resource to environemnts
 
 An RDS Configuration describe a connection to an external Relational Database Service that can be used as the Hive Metastore.
 */
@@ -115,7 +115,7 @@ func (a *Client) DeleteRdsConfigInWorkspace(params *DeleteRdsConfigInWorkspacePa
 }
 
 /*
-DetachRdsResourceFromEnvironments detaches rds resource from environemnts
+DetachRdsResourceFromEnvironments detaches r d s resource from environemnts
 
 An RDS Configuration describe a connection to an external Relational Database Service that can be used as the Hive Metastore.
 */

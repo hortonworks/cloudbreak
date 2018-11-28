@@ -50,6 +50,11 @@ type RDSConfigResponse struct {
 	// Required: true
 	DatabaseEngineDisplayName *string `json:"databaseEngineDisplayName"`
 
+	// description of the resource
+	// Max Length: 1000
+	// Min Length: 0
+	Description *string `json:"description,omitempty"`
+
 	// Environments of the resource
 	// Unique: true
 	Environments []string `json:"environments"`
@@ -59,6 +64,9 @@ type RDSConfigResponse struct {
 
 	// Name of the RDS configuration resource
 	// Required: true
+	// Max Length: 100
+	// Min Length: 5
+	// Pattern: (^[a-z][-a-z0-9]*[a-z0-9]$)
 	Name *string `json:"name"`
 
 	// resource is visible in account
@@ -92,6 +100,8 @@ type RDSConfigResponse struct {
 /* polymorph RDSConfigResponse databaseEngine false */
 
 /* polymorph RDSConfigResponse databaseEngineDisplayName false */
+
+/* polymorph RDSConfigResponse description false */
 
 /* polymorph RDSConfigResponse environments false */
 
@@ -142,6 +152,11 @@ func (m *RDSConfigResponse) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateDatabaseEngineDisplayName(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateDescription(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -259,6 +274,23 @@ func (m *RDSConfigResponse) validateDatabaseEngineDisplayName(formats strfmt.Reg
 	return nil
 }
 
+func (m *RDSConfigResponse) validateDescription(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Description) { // not required
+		return nil
+	}
+
+	if err := validate.MinLength("description", "body", string(*m.Description), 0); err != nil {
+		return err
+	}
+
+	if err := validate.MaxLength("description", "body", string(*m.Description), 1000); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (m *RDSConfigResponse) validateEnvironments(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Environments) { // not required
@@ -275,6 +307,18 @@ func (m *RDSConfigResponse) validateEnvironments(formats strfmt.Registry) error 
 func (m *RDSConfigResponse) validateName(formats strfmt.Registry) error {
 
 	if err := validate.Required("name", "body", m.Name); err != nil {
+		return err
+	}
+
+	if err := validate.MinLength("name", "body", string(*m.Name), 5); err != nil {
+		return err
+	}
+
+	if err := validate.MaxLength("name", "body", string(*m.Name), 100); err != nil {
+		return err
+	}
+
+	if err := validate.Pattern("name", "body", string(*m.Name), `(^[a-z][-a-z0-9]*[a-z0-9]$)`); err != nil {
 		return err
 	}
 

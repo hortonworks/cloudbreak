@@ -47,6 +47,7 @@ import (
 	"github.com/hortonworks/cb-cli/dataplane/api/client/v3_workspace_id_flexsubscriptions"
 	"github.com/hortonworks/cb-cli/dataplane/api/client/v3_workspace_id_imagecatalogs"
 	"github.com/hortonworks/cb-cli/dataplane/api/client/v3_workspace_id_knoxservices"
+	"github.com/hortonworks/cb-cli/dataplane/api/client/v3_workspace_id_kubernetesconfigs"
 	"github.com/hortonworks/cb-cli/dataplane/api/client/v3_workspace_id_ldapconfigs"
 	"github.com/hortonworks/cb-cli/dataplane/api/client/v3_workspace_id_mpacks"
 	"github.com/hortonworks/cb-cli/dataplane/api/client/v3_workspace_id_proxyconfigs"
@@ -76,12 +77,12 @@ var DefaultSchemes = []string{"http", "https"}
 
 // NewHTTPClient creates a new cloudbreak HTTP client.
 func NewHTTPClient(formats strfmt.Registry) *Cloudbreak {
-	return NewHTTPClientWithConfigC(formats, nil)
+	return NewHTTPClientWithConfig(formats, nil)
 }
 
 // NewHTTPClientWithConfig creates a new cloudbreak HTTP client,
 // using a customizable transport config.
-func NewHTTPClientWithConfigC(formats strfmt.Registry, cfg *TransportConfig) *Cloudbreak {
+func NewHTTPClientWithConfig(formats strfmt.Registry, cfg *TransportConfig) *Cloudbreak {
 	// ensure nullable parameters have default
 	if formats == nil {
 		formats = strfmt.Default
@@ -171,6 +172,8 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *Cloudbreak
 	cli.V3WorkspaceIDImagecatalogs = v3_workspace_id_imagecatalogs.New(transport, formats)
 
 	cli.V3WorkspaceIDKnoxservices = v3_workspace_id_knoxservices.New(transport, formats)
+
+	cli.V3WorkspaceIDKubernetesconfigs = v3_workspace_id_kubernetesconfigs.New(transport, formats)
 
 	cli.V3WorkspaceIDLdapconfigs = v3_workspace_id_ldapconfigs.New(transport, formats)
 
@@ -308,6 +311,8 @@ type Cloudbreak struct {
 
 	V3WorkspaceIDKnoxservices *v3_workspace_id_knoxservices.Client
 
+	V3WorkspaceIDKubernetesconfigs *v3_workspace_id_kubernetesconfigs.Client
+
 	V3WorkspaceIDLdapconfigs *v3_workspace_id_ldapconfigs.Client
 
 	V3WorkspaceIDMpacks *v3_workspace_id_mpacks.Client
@@ -406,6 +411,8 @@ func (c *Cloudbreak) SetTransport(transport runtime.ClientTransport) {
 	c.V3WorkspaceIDImagecatalogs.SetTransport(transport)
 
 	c.V3WorkspaceIDKnoxservices.SetTransport(transport)
+
+	c.V3WorkspaceIDKubernetesconfigs.SetTransport(transport)
 
 	c.V3WorkspaceIDLdapconfigs.SetTransport(transport)
 

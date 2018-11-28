@@ -18,6 +18,11 @@ import (
 
 type ImageCatalogShortResponse struct {
 
+	// description of the resource
+	// Max Length: 1000
+	// Min Length: 0
+	Description *string `json:"description,omitempty"`
+
 	// id of the resource
 	// Required: true
 	ID *int64 `json:"id"`
@@ -43,6 +48,8 @@ type ImageCatalogShortResponse struct {
 	UsedAsDefault bool `json:"usedAsDefault"`
 }
 
+/* polymorph ImageCatalogShortResponse description false */
+
 /* polymorph ImageCatalogShortResponse id false */
 
 /* polymorph ImageCatalogShortResponse name false */
@@ -56,6 +63,11 @@ type ImageCatalogShortResponse struct {
 // Validate validates this image catalog short response
 func (m *ImageCatalogShortResponse) Validate(formats strfmt.Registry) error {
 	var res []error
+
+	if err := m.validateDescription(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
 
 	if err := m.validateID(formats); err != nil {
 		// prop
@@ -85,6 +97,23 @@ func (m *ImageCatalogShortResponse) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *ImageCatalogShortResponse) validateDescription(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Description) { // not required
+		return nil
+	}
+
+	if err := validate.MinLength("description", "body", string(*m.Description), 0); err != nil {
+		return err
+	}
+
+	if err := validate.MaxLength("description", "body", string(*m.Description), 1000); err != nil {
+		return err
+	}
+
 	return nil
 }
 

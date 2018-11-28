@@ -36,6 +36,10 @@ type DetailedEnvironmentResponse struct {
 	// id of the resource
 	ID int64 `json:"id,omitempty"`
 
+	// Kubernetes configurations in the environment.
+	// Unique: true
+	KubernetesConfigs []*KubernetesConfigResponse `json:"kubernetesConfigs"`
+
 	// LDAP configurations in the environment.
 	// Unique: true
 	LdapConfigs []*LdapConfigResponse `json:"ldapConfigs"`
@@ -75,6 +79,8 @@ type DetailedEnvironmentResponse struct {
 
 /* polymorph DetailedEnvironmentResponse id false */
 
+/* polymorph DetailedEnvironmentResponse kubernetesConfigs false */
+
 /* polymorph DetailedEnvironmentResponse ldapConfigs false */
 
 /* polymorph DetailedEnvironmentResponse location false */
@@ -96,6 +102,11 @@ func (m *DetailedEnvironmentResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateDatalakeClusters(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateKubernetesConfigs(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -162,6 +173,37 @@ func (m *DetailedEnvironmentResponse) validateDatalakeClusters(formats strfmt.Re
 			if err := m.DatalakeClusters[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("datalakeClusters" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+func (m *DetailedEnvironmentResponse) validateKubernetesConfigs(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.KubernetesConfigs) { // not required
+		return nil
+	}
+
+	if err := validate.UniqueItems("kubernetesConfigs", "body", m.KubernetesConfigs); err != nil {
+		return err
+	}
+
+	for i := 0; i < len(m.KubernetesConfigs); i++ {
+
+		if swag.IsZero(m.KubernetesConfigs[i]) { // not required
+			continue
+		}
+
+		if m.KubernetesConfigs[i] != nil {
+
+			if err := m.KubernetesConfigs[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("kubernetesConfigs" + "." + strconv.Itoa(i))
 				}
 				return err
 			}

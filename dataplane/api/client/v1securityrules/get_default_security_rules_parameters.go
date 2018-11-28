@@ -14,6 +14,7 @@ import (
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	cr "github.com/go-openapi/runtime/client"
+	"github.com/go-openapi/swag"
 
 	strfmt "github.com/go-openapi/strfmt"
 )
@@ -21,8 +22,11 @@ import (
 // NewGetDefaultSecurityRulesParams creates a new GetDefaultSecurityRulesParams object
 // with the default values initialized.
 func NewGetDefaultSecurityRulesParams() *GetDefaultSecurityRulesParams {
-
+	var (
+		knoxEnabledDefault = bool(false)
+	)
 	return &GetDefaultSecurityRulesParams{
+		KnoxEnabled: &knoxEnabledDefault,
 
 		timeout: cr.DefaultTimeout,
 	}
@@ -31,8 +35,11 @@ func NewGetDefaultSecurityRulesParams() *GetDefaultSecurityRulesParams {
 // NewGetDefaultSecurityRulesParamsWithTimeout creates a new GetDefaultSecurityRulesParams object
 // with the default values initialized, and the ability to set a timeout on a request
 func NewGetDefaultSecurityRulesParamsWithTimeout(timeout time.Duration) *GetDefaultSecurityRulesParams {
-
+	var (
+		knoxEnabledDefault = bool(false)
+	)
 	return &GetDefaultSecurityRulesParams{
+		KnoxEnabled: &knoxEnabledDefault,
 
 		timeout: timeout,
 	}
@@ -41,8 +48,11 @@ func NewGetDefaultSecurityRulesParamsWithTimeout(timeout time.Duration) *GetDefa
 // NewGetDefaultSecurityRulesParamsWithContext creates a new GetDefaultSecurityRulesParams object
 // with the default values initialized, and the ability to set a context for a request
 func NewGetDefaultSecurityRulesParamsWithContext(ctx context.Context) *GetDefaultSecurityRulesParams {
-
+	var (
+		knoxEnabledDefault = bool(false)
+	)
 	return &GetDefaultSecurityRulesParams{
+		KnoxEnabled: &knoxEnabledDefault,
 
 		Context: ctx,
 	}
@@ -51,9 +61,12 @@ func NewGetDefaultSecurityRulesParamsWithContext(ctx context.Context) *GetDefaul
 // NewGetDefaultSecurityRulesParamsWithHTTPClient creates a new GetDefaultSecurityRulesParams object
 // with the default values initialized, and the ability to set a custom HTTPClient for a request
 func NewGetDefaultSecurityRulesParamsWithHTTPClient(client *http.Client) *GetDefaultSecurityRulesParams {
-
+	var (
+		knoxEnabledDefault = bool(false)
+	)
 	return &GetDefaultSecurityRulesParams{
-		HTTPClient: client,
+		KnoxEnabled: &knoxEnabledDefault,
+		HTTPClient:  client,
 	}
 }
 
@@ -61,6 +74,10 @@ func NewGetDefaultSecurityRulesParamsWithHTTPClient(client *http.Client) *GetDef
 for the get default security rules operation typically these are written to a http.Request
 */
 type GetDefaultSecurityRulesParams struct {
+
+	/*KnoxEnabled*/
+	KnoxEnabled *bool
+
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
@@ -99,6 +116,17 @@ func (o *GetDefaultSecurityRulesParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithKnoxEnabled adds the knoxEnabled to the get default security rules params
+func (o *GetDefaultSecurityRulesParams) WithKnoxEnabled(knoxEnabled *bool) *GetDefaultSecurityRulesParams {
+	o.SetKnoxEnabled(knoxEnabled)
+	return o
+}
+
+// SetKnoxEnabled adds the knoxEnabled to the get default security rules params
+func (o *GetDefaultSecurityRulesParams) SetKnoxEnabled(knoxEnabled *bool) {
+	o.KnoxEnabled = knoxEnabled
+}
+
 // WriteToRequest writes these params to a swagger request
 func (o *GetDefaultSecurityRulesParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
@@ -106,6 +134,22 @@ func (o *GetDefaultSecurityRulesParams) WriteToRequest(r runtime.ClientRequest, 
 		return err
 	}
 	var res []error
+
+	if o.KnoxEnabled != nil {
+
+		// query param knoxEnabled
+		var qrKnoxEnabled bool
+		if o.KnoxEnabled != nil {
+			qrKnoxEnabled = *o.KnoxEnabled
+		}
+		qKnoxEnabled := swag.FormatBool(qrKnoxEnabled)
+		if qKnoxEnabled != "" {
+			if err := r.SetQueryParam("knoxEnabled", qKnoxEnabled); err != nil {
+				return err
+			}
+		}
+
+	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)

@@ -19,6 +19,7 @@ func (*mockListImageCatalogsByWorkspaceClient) ListImageCatalogsByWorkspace(para
 	resp := []*model.ImageCatalogResponse{
 		{
 			Name:          &(&types.S{S: "test"}).S,
+			Description:   &(&types.S{S: "description"}).S,
 			UsedAsDefault: (&types.B{B: true}).B,
 			URL:           &(&types.S{S: "testurl"}).S,
 		},
@@ -35,7 +36,7 @@ func TestListImagecatalogsImpl(t *testing.T) {
 		t.Fatalf("row number doesn't match 1 == %d", len(rows))
 	}
 	for _, r := range rows {
-		expected := "test true testurl"
+		expected := "test description true testurl"
 		if strings.Join(r.DataAsStringArray(), " ") != expected {
 			t.Errorf("row data not match %s == %s", expected, strings.Join(r.DataAsStringArray(), " "))
 		}

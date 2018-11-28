@@ -33,12 +33,20 @@ type RdsConfig struct {
 	// URL that points to the jar of the connection driver(connector)
 	ConnectorJarURL string `json:"connectorJarUrl,omitempty"`
 
+	// description of the resource
+	// Max Length: 1000
+	// Min Length: 0
+	Description *string `json:"description,omitempty"`
+
 	// Environments of the resource
 	// Unique: true
 	Environments []string `json:"environments"`
 
 	// Name of the RDS configuration resource
 	// Required: true
+	// Max Length: 100
+	// Min Length: 5
+	// Pattern: (^[a-z][-a-z0-9]*[a-z0-9]$)
 	Name *string `json:"name"`
 
 	// Oracle specific properties
@@ -56,6 +64,8 @@ type RdsConfig struct {
 /* polymorph RdsConfig connectionUserName false */
 
 /* polymorph RdsConfig connectorJarUrl false */
+
+/* polymorph RdsConfig description false */
 
 /* polymorph RdsConfig environments false */
 
@@ -80,6 +90,11 @@ func (m *RdsConfig) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateConnectionUserName(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateDescription(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -137,6 +152,23 @@ func (m *RdsConfig) validateConnectionUserName(formats strfmt.Registry) error {
 	return nil
 }
 
+func (m *RdsConfig) validateDescription(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Description) { // not required
+		return nil
+	}
+
+	if err := validate.MinLength("description", "body", string(*m.Description), 0); err != nil {
+		return err
+	}
+
+	if err := validate.MaxLength("description", "body", string(*m.Description), 1000); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (m *RdsConfig) validateEnvironments(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Environments) { // not required
@@ -153,6 +185,18 @@ func (m *RdsConfig) validateEnvironments(formats strfmt.Registry) error {
 func (m *RdsConfig) validateName(formats strfmt.Registry) error {
 
 	if err := validate.Required("name", "body", m.Name); err != nil {
+		return err
+	}
+
+	if err := validate.MinLength("name", "body", string(*m.Name), 5); err != nil {
+		return err
+	}
+
+	if err := validate.MaxLength("name", "body", string(*m.Name), 100); err != nil {
+		return err
+	}
+
+	if err := validate.Pattern("name", "body", string(*m.Name), `(^[a-z][-a-z0-9]*[a-z0-9]$)`); err != nil {
 		return err
 	}
 

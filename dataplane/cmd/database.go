@@ -25,7 +25,7 @@ func init() {
 						Action: rds.CreateRds,
 						BashComplete: func(c *cli.Context) {
 							for _, f := range fl.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(fl.FlRdsUserName, fl.FlRdsPassword, fl.FlRdsURL, fl.FlRdsDriverOptional, fl.FlRdsDatabaseEngineOptional,
-								fl.FlEnvironmentsOptional, fl.FlRdsType, fl.FlRdsValidatedOptional, fl.FlRdsConnectorJarURLOptional).AddAuthenticationFlags().Build() {
+								fl.FlEnvironmentsOptional, fl.FlRdsType, fl.FlRdsValidatedOptional, fl.FlRdsConnectorJarURLOptional, fl.FlEnvironmentsOptional).AddAuthenticationFlags().Build() {
 								fl.PrintFlagCompletion(f)
 							}
 						},

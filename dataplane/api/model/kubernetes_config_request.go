@@ -13,61 +13,60 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// UpdateImageCatalogRequest update image catalog request
-// swagger:model UpdateImageCatalogRequest
+// KubernetesConfigRequest kubernetes config request
+// swagger:model KubernetesConfigRequest
 
-type UpdateImageCatalogRequest struct {
+type KubernetesConfigRequest struct {
+
+	// Kubernetes configuration
+	// Required: true
+	Config *string `json:"config"`
 
 	// description of the resource
 	// Max Length: 1000
 	// Min Length: 0
 	Description *string `json:"description,omitempty"`
 
-	// id of the resource
-	// Required: true
-	ID *int64 `json:"id"`
+	// Environments of the resource
+	// Unique: true
+	Environments []string `json:"environments"`
 
-	// name of the resource
+	// Name of the Kubernetes configuration resource
 	// Required: true
 	// Max Length: 100
 	// Min Length: 5
 	// Pattern: (^[a-z][-a-z0-9]*[a-z0-9]$)
 	Name *string `json:"name"`
-
-	// custom image catalog's URL
-	// Required: true
-	// Pattern: ^http[s]?://.*
-	URL *string `json:"url"`
 }
 
-/* polymorph UpdateImageCatalogRequest description false */
+/* polymorph KubernetesConfigRequest config false */
 
-/* polymorph UpdateImageCatalogRequest id false */
+/* polymorph KubernetesConfigRequest description false */
 
-/* polymorph UpdateImageCatalogRequest name false */
+/* polymorph KubernetesConfigRequest environments false */
 
-/* polymorph UpdateImageCatalogRequest url false */
+/* polymorph KubernetesConfigRequest name false */
 
-// Validate validates this update image catalog request
-func (m *UpdateImageCatalogRequest) Validate(formats strfmt.Registry) error {
+// Validate validates this kubernetes config request
+func (m *KubernetesConfigRequest) Validate(formats strfmt.Registry) error {
 	var res []error
+
+	if err := m.validateConfig(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
 
 	if err := m.validateDescription(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
 
-	if err := m.validateID(formats); err != nil {
+	if err := m.validateEnvironments(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateURL(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -78,7 +77,16 @@ func (m *UpdateImageCatalogRequest) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *UpdateImageCatalogRequest) validateDescription(formats strfmt.Registry) error {
+func (m *KubernetesConfigRequest) validateConfig(formats strfmt.Registry) error {
+
+	if err := validate.Required("config", "body", m.Config); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *KubernetesConfigRequest) validateDescription(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Description) { // not required
 		return nil
@@ -95,16 +103,20 @@ func (m *UpdateImageCatalogRequest) validateDescription(formats strfmt.Registry)
 	return nil
 }
 
-func (m *UpdateImageCatalogRequest) validateID(formats strfmt.Registry) error {
+func (m *KubernetesConfigRequest) validateEnvironments(formats strfmt.Registry) error {
 
-	if err := validate.Required("id", "body", m.ID); err != nil {
+	if swag.IsZero(m.Environments) { // not required
+		return nil
+	}
+
+	if err := validate.UniqueItems("environments", "body", m.Environments); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (m *UpdateImageCatalogRequest) validateName(formats strfmt.Registry) error {
+func (m *KubernetesConfigRequest) validateName(formats strfmt.Registry) error {
 
 	if err := validate.Required("name", "body", m.Name); err != nil {
 		return err
@@ -125,21 +137,8 @@ func (m *UpdateImageCatalogRequest) validateName(formats strfmt.Registry) error 
 	return nil
 }
 
-func (m *UpdateImageCatalogRequest) validateURL(formats strfmt.Registry) error {
-
-	if err := validate.Required("url", "body", m.URL); err != nil {
-		return err
-	}
-
-	if err := validate.Pattern("url", "body", string(*m.URL), `^http[s]?://.*`); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 // MarshalBinary interface implementation
-func (m *UpdateImageCatalogRequest) MarshalBinary() ([]byte, error) {
+func (m *KubernetesConfigRequest) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -147,8 +146,8 @@ func (m *UpdateImageCatalogRequest) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *UpdateImageCatalogRequest) UnmarshalBinary(b []byte) error {
-	var res UpdateImageCatalogRequest
+func (m *KubernetesConfigRequest) UnmarshalBinary(b []byte) error {
+	var res KubernetesConfigRequest
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

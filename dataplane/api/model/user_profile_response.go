@@ -23,8 +23,14 @@ type UserProfileResponse struct {
 	// image catalog
 	ImageCatalog *ImageCatalogShortResponse `json:"imageCatalog,omitempty"`
 
+	// tenant
+	Tenant string `json:"tenant,omitempty"`
+
 	// ui properties
 	UIProperties map[string]interface{} `json:"uiProperties,omitempty"`
+
+	// user Id
+	UserID string `json:"userId,omitempty"`
 
 	// username
 	Username string `json:"username,omitempty"`
@@ -34,7 +40,11 @@ type UserProfileResponse struct {
 
 /* polymorph UserProfileResponse imageCatalog false */
 
+/* polymorph UserProfileResponse tenant false */
+
 /* polymorph UserProfileResponse uiProperties false */
+
+/* polymorph UserProfileResponse userId false */
 
 /* polymorph UserProfileResponse username false */
 

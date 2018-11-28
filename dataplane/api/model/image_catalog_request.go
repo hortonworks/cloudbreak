@@ -18,6 +18,11 @@ import (
 
 type ImageCatalogRequest struct {
 
+	// description of the resource
+	// Max Length: 1000
+	// Min Length: 0
+	Description *string `json:"description,omitempty"`
+
 	// name of the resource
 	// Required: true
 	// Max Length: 100
@@ -31,6 +36,8 @@ type ImageCatalogRequest struct {
 	URL *string `json:"url"`
 }
 
+/* polymorph ImageCatalogRequest description false */
+
 /* polymorph ImageCatalogRequest name false */
 
 /* polymorph ImageCatalogRequest url false */
@@ -38,6 +45,11 @@ type ImageCatalogRequest struct {
 // Validate validates this image catalog request
 func (m *ImageCatalogRequest) Validate(formats strfmt.Registry) error {
 	var res []error
+
+	if err := m.validateDescription(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
 
 	if err := m.validateName(formats); err != nil {
 		// prop
@@ -52,6 +64,23 @@ func (m *ImageCatalogRequest) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *ImageCatalogRequest) validateDescription(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Description) { // not required
+		return nil
+	}
+
+	if err := validate.MinLength("description", "body", string(*m.Description), 0); err != nil {
+		return err
+	}
+
+	if err := validate.MaxLength("description", "body", string(*m.Description), 1000); err != nil {
+		return err
+	}
+
 	return nil
 }
 

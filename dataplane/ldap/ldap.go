@@ -23,12 +23,13 @@ import (
 	ldaputils "gopkg.in/ldap.v2"
 )
 
-var LdapHeader = []string{"Name", "Server", "Domain", "DirectoryType",
+var LdapHeader = []string{"Name", "Description", "Server", "Domain", "DirectoryType",
 	"UserSearchBase", "UserDnPattern", "UserNameAttribute", "UserObjectClass",
 	"GroupMemberAttribute", "GroupNameAttribute", "GroupObjectClass", "GroupSearchBase", "Certificate", "Environments"}
 
 type ldap struct {
 	Name                 string `json:"Name" yaml:"Name"`
+	Description          string `json:"Description" yaml:"Description"`
 	Server               string `json:"Server" yaml:"Server"`
 	Domain               string `json:"Domain,omitempty" yaml:"Domain,omitempty"`
 	DirectoryType        string `json:"DirectoryType" yaml:"DirectoryType"`
@@ -51,7 +52,7 @@ type ldapOutDescribe struct {
 }
 
 func (l *ldap) DataAsStringArray() []string {
-	return []string{l.Name, l.Server, l.Domain, l.DirectoryType, l.UserSearchBase, l.UserDnPattern, l.UserNameAttribute,
+	return []string{l.Name, l.Description, l.Server, l.Domain, l.DirectoryType, l.UserSearchBase, l.UserDnPattern, l.UserNameAttribute,
 		l.UserObjectClass, l.GroupMemberAttribute, l.GroupNameAttribute, l.GroupObjectClass, l.GroupSearchBase, strings.Join(l.Environments, ",")}
 }
 
@@ -89,6 +90,7 @@ type ldapClient interface {
 func CreateLDAP(c *cli.Context) error {
 
 	name := c.String(fl.FlName.Name)
+	description := c.String(fl.FlDescriptionOptional.Name)
 	domain := c.String(fl.FlLdapDomain.Name)
 	bindDn := c.String(fl.FlLdapBindDN.Name)
 	bindPassword := c.String(fl.FlLdapBindPassword.Name)
@@ -125,11 +127,11 @@ func CreateLDAP(c *cli.Context) error {
 
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
 
-	return createLDAPImpl(cbClient.Cloudbreak.V3WorkspaceIDLdapconfigs, int32(serverPort), workspaceID, name, server, protocol, domain, bindDn, bindPassword, directoryType,
+	return createLDAPImpl(cbClient.Cloudbreak.V3WorkspaceIDLdapconfigs, int32(serverPort), workspaceID, name, description, server, protocol, domain, bindDn, bindPassword, directoryType,
 		userSearchBase, userDnPattern, userNameAttribute, userObjectClass, groupSearchBase, groupMemberAttribute, groupNameAttribute, groupObjectClass, adminGroup, certificate, environments)
 }
 
-func createLDAPImpl(ldapClient ldapClient, port int32, workspaceID int64, name, server, protocol, domain, bindDn, bindPassword, directoryType,
+func createLDAPImpl(ldapClient ldapClient, port int32, workspaceID int64, name, description, server, protocol, domain, bindDn, bindPassword, directoryType,
 	userSearchBase, userDnPattern, userNameAttribute, userObjectClass, groupSearchBase, groupMemberAttribute, groupNameAttribute,
 	groupObjectClass, adminGroup, certificate string, environments []string) error {
 	defer utils.TimeTrack(time.Now(), "create ldap")
@@ -137,6 +139,7 @@ func createLDAPImpl(ldapClient ldapClient, port int32, workspaceID int64, name, 
 	host := server[strings.LastIndex(server, "/")+1 : strings.LastIndex(server, ":")]
 	ldapConfigRequest := &model.LdapConfigRequest{
 		Name:                 &name,
+		Description:          &description,
 		ServerHost:           &host,
 		ServerPort:           &port,
 		Protocol:             protocol,
@@ -190,6 +193,7 @@ func listLdapsImpl(ldapClient ldapClient, writer func([]string, []utils.Row), wo
 		server := fmt.Sprintf("%s://%s:%d", l.Protocol, utils.SafeStringConvert(l.ServerHost), utils.SafeInt32Convert(l.ServerPort))
 		row := &ldap{
 			Name:                 *l.Name,
+			Description:          utils.SafeStringConvert(l.Description),
 			Server:               server,
 			Domain:               l.Domain,
 			DirectoryType:        l.DirectoryType,
@@ -245,6 +249,7 @@ func DescribeLdap(c *cli.Context) {
 	output.Write(append(LdapHeader, "ID"), &ldapOutDescribe{
 		&ldap{
 			Name:                 *l.Name,
+			Description:          utils.SafeStringConvert(l.Description),
 			Server:               server,
 			Domain:               l.Domain,
 			DirectoryType:        l.DirectoryType,

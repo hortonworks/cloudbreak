@@ -15,12 +15,13 @@ import (
 	"github.com/urfave/cli"
 )
 
-var imagecatalogHeader = []string{"Name", "Default", "URL"}
+var imagecatalogHeader = []string{"Name", "Description", "Default", "URL"}
 
 type imagecatalogOut struct {
-	Name    string `json:"Name" yaml:"Name"`
-	Default bool   `json:"Default" yaml:"Default"`
-	URL     string `json:"URL" yaml:"URL"`
+	Name        string `json:"Name" yaml:"Name"`
+	Description string `json:"Description" yaml:"Description"`
+	Default     bool   `json:"Default" yaml:"Default"`
+	URL         string `json:"URL" yaml:"URL"`
 }
 
 type imagecatalogOutDescribe struct {
@@ -29,7 +30,7 @@ type imagecatalogOutDescribe struct {
 }
 
 func (r *imagecatalogOut) DataAsStringArray() []string {
-	return []string{r.Name, strconv.FormatBool(r.Default), r.URL}
+	return []string{r.Name, r.Description, strconv.FormatBool(r.Default), r.URL}
 }
 
 func (b *imagecatalogOutDescribe) DataAsStringArray() []string {
@@ -87,6 +88,7 @@ func CreateImagecatalogFromUrl(c *cli.Context) {
 		cbClient.Cloudbreak.V3WorkspaceIDImagecatalogs,
 		c.Int64(fl.FlWorkspaceOptional.Name),
 		c.String(fl.FlName.Name),
+		c.String(fl.FlDescriptionOptional.Name),
 		c.String(fl.FlURL.Name))
 }
 
@@ -94,11 +96,12 @@ type imagecatalogClient interface {
 	CreateImageCatalogInWorkspace(params *v3_workspace_id_imagecatalogs.CreateImageCatalogInWorkspaceParams) (*v3_workspace_id_imagecatalogs.CreateImageCatalogInWorkspaceOK, error)
 }
 
-func createImagecatalogImpl(client imagecatalogClient, workspaceID int64, name string, imagecatalogURL string) {
+func createImagecatalogImpl(client imagecatalogClient, workspaceID int64, name string, description string, imagecatalogURL string) {
 	defer utils.TimeTrack(time.Now(), "create imagecatalog")
 	imagecatalogRequest := &model.ImageCatalogRequest{
-		Name: &name,
-		URL:  &imagecatalogURL,
+		Name:        &name,
+		Description: &description,
+		URL:         &imagecatalogURL,
 	}
 	var ic *model.ImageCatalogResponse
 	log.Infof("[createImagecatalogImpl] sending create imagecatalog request")
@@ -132,7 +135,7 @@ func listImagecatalogsImpl(client listImageCatalogsByWorkspaceClient, workspaceI
 
 	tableRows := []utils.Row{}
 	for _, ic := range imagecatalogResp.Payload {
-		tableRows = append(tableRows, &imagecatalogOut{*ic.Name, ic.UsedAsDefault, *ic.URL})
+		tableRows = append(tableRows, &imagecatalogOut{*ic.Name, utils.SafeStringConvert(ic.Description), ic.UsedAsDefault, *ic.URL})
 	}
 
 	writer(imagecatalogHeader, tableRows)
@@ -179,9 +182,9 @@ func DescribeImagecatalog(c *cli.Context) {
 
 	imgc := resp.Payload
 	if imgc.ID == nil {
-		output.Write(imagecatalogHeader, &imagecatalogOut{*imgc.Name, imgc.UsedAsDefault, *imgc.URL})
+		output.Write(imagecatalogHeader, &imagecatalogOut{*imgc.Name, utils.SafeStringConvert(imgc.Description), imgc.UsedAsDefault, *imgc.URL})
 	} else {
-		output.Write(append(imagecatalogHeader, "ID"), &imagecatalogOutDescribe{&imagecatalogOut{*imgc.Name, imgc.UsedAsDefault, *imgc.URL}, strconv.FormatInt(*imgc.ID, 10)})
+		output.Write(append(imagecatalogHeader, "ID"), &imagecatalogOutDescribe{&imagecatalogOut{*imgc.Name, utils.SafeStringConvert(imgc.Description), imgc.UsedAsDefault, *imgc.URL}, strconv.FormatInt(*imgc.ID, 10)})
 	}
 }
 

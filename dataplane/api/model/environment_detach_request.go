@@ -18,6 +18,10 @@ import (
 
 type EnvironmentDetachRequest struct {
 
+	// Name of the Kubernetes configurations to be attached to the environment.
+	// Unique: true
+	KubernetesConfigs []string `json:"kubernetesConfigs"`
+
 	// Name of the LDAP configurations to be attached to the environment.
 	// Unique: true
 	LdapConfigs []string `json:"ldapConfigs"`
@@ -31,6 +35,8 @@ type EnvironmentDetachRequest struct {
 	RdsConfigs []string `json:"rdsConfigs"`
 }
 
+/* polymorph EnvironmentDetachRequest kubernetesConfigs false */
+
 /* polymorph EnvironmentDetachRequest ldapConfigs false */
 
 /* polymorph EnvironmentDetachRequest proxyConfigs false */
@@ -40,6 +46,11 @@ type EnvironmentDetachRequest struct {
 // Validate validates this environment detach request
 func (m *EnvironmentDetachRequest) Validate(formats strfmt.Registry) error {
 	var res []error
+
+	if err := m.validateKubernetesConfigs(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
 
 	if err := m.validateLdapConfigs(formats); err != nil {
 		// prop
@@ -59,6 +70,19 @@ func (m *EnvironmentDetachRequest) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *EnvironmentDetachRequest) validateKubernetesConfigs(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.KubernetesConfigs) { // not required
+		return nil
+	}
+
+	if err := validate.UniqueItems("kubernetesConfigs", "body", m.KubernetesConfigs); err != nil {
+		return err
+	}
+
 	return nil
 }
 

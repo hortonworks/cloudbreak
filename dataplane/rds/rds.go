@@ -16,10 +16,11 @@ import (
 	"strings"
 )
 
-var rdsHeader = []string{"Name", "ConnectionURL", "DatabaseEngine", "Type", "Driver", "Environments"}
+var rdsHeader = []string{"Name", "Description", "ConnectionURL", "DatabaseEngine", "Type", "Driver", "Environments"}
 
 type rds struct {
 	Name           string `json:"Name" yaml:"Name"`
+	Description    string `json:"Description" yaml:"Description"`
 	URL            string `json:"ConnectionURL" yaml:"ConnectionURL"`
 	DatabaseEngine string `json:"DatabaseEngine" yaml:"DatabaseEngine"`
 	Type           string `json:"Type" yaml:"Type"`
@@ -33,7 +34,7 @@ type rdsOutDescribe struct {
 }
 
 func (r *rds) DataAsStringArray() []string {
-	return []string{r.Name, r.URL, r.DatabaseEngine, r.Type, r.Driver, strings.Join(r.Environments, ",")}
+	return []string{r.Name, r.Description, r.URL, r.DatabaseEngine, r.Type, r.Driver, strings.Join(r.Environments, ",")}
 }
 
 func (r *rdsOutDescribe) DataAsStringArray() []string {
@@ -110,6 +111,7 @@ func CreateRdsOracle11(c *cli.Context) {
 		cbClient.Cloudbreak.V3WorkspaceIDRdsconfigs,
 		c.Int64(fl.FlWorkspaceOptional.Name),
 		c.String(fl.FlName.Name),
+		c.String(fl.FlDescriptionOptional.Name),
 		c.String(fl.FlRdsUserName.Name),
 		c.String(fl.FlRdsPassword.Name),
 		c.String(fl.FlRdsURL.Name),
@@ -128,6 +130,7 @@ func CreateRdsOracle12(c *cli.Context) {
 		cbClient.Cloudbreak.V3WorkspaceIDRdsconfigs,
 		c.Int64(fl.FlWorkspaceOptional.Name),
 		c.String(fl.FlName.Name),
+		c.String(fl.FlDescriptionOptional.Name),
 		c.String(fl.FlRdsUserName.Name),
 		c.String(fl.FlRdsPassword.Name),
 		c.String(fl.FlRdsURL.Name),
@@ -146,6 +149,7 @@ func CreateRds(c *cli.Context) {
 		cbClient.Cloudbreak.V3WorkspaceIDRdsconfigs,
 		c.Int64(fl.FlWorkspaceOptional.Name),
 		c.String(fl.FlName.Name),
+		c.String(fl.FlDescriptionOptional.Name),
 		c.String(fl.FlRdsUserName.Name),
 		c.String(fl.FlRdsPassword.Name),
 		c.String(fl.FlRdsURL.Name),
@@ -155,10 +159,11 @@ func CreateRds(c *cli.Context) {
 		nil)
 }
 
-func createRdsImpl(client rdsClient, workspaceID int64, name string, username string, password string, URL string, rdsType string, jarURL string, environments []string, oracle *model.Oracle) {
+func createRdsImpl(client rdsClient, workspaceID int64, name string, description string, username string, password string, URL string, rdsType string, jarURL string, environments []string, oracle *model.Oracle) {
 	defer utils.TimeTrack(time.Now(), "create database")
 	rdsRequest := &model.RdsConfig{
 		Name:               &name,
+		Description:        &description,
 		ConnectionUserName: &username,
 		ConnectionPassword: &password,
 		ConnectionURL:      &URL,
@@ -213,6 +218,7 @@ func DescribeRds(c *cli.Context) {
 	output.Write(append(rdsHeader, "ID"), &rdsOutDescribe{
 		&rds{
 			Name:           *r.Name,
+			Description:    utils.SafeStringConvert(r.Description),
 			URL:            *r.ConnectionURL,
 			DatabaseEngine: *r.DatabaseEngine,
 			Type:           getEmptyIfNil(r.Type),
@@ -278,6 +284,7 @@ func listAllRdsImpl(rdsClient rdsClient, writer func([]string, []utils.Row), wor
 	for _, r := range resp.Payload {
 		row := &rds{
 			Name:           *r.Name,
+			Description:    utils.SafeStringConvert(r.Description),
 			URL:            *r.ConnectionURL,
 			DatabaseEngine: *r.DatabaseEngine,
 			Type:           getEmptyIfNil(r.Type),

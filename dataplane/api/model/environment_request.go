@@ -29,6 +29,10 @@ type EnvironmentRequest struct {
 	// Min Length: 0
 	Description *string `json:"description,omitempty"`
 
+	// Name of the Kubernetes configurations to be attached to the environment.
+	// Unique: true
+	KubernetesConfigs []string `json:"kubernetesConfigs"`
+
 	// Name of the LDAP configurations to be attached to the environment.
 	// Unique: true
 	LdapConfigs []string `json:"ldapConfigs"`
@@ -63,6 +67,8 @@ type EnvironmentRequest struct {
 
 /* polymorph EnvironmentRequest description false */
 
+/* polymorph EnvironmentRequest kubernetesConfigs false */
+
 /* polymorph EnvironmentRequest ldapConfigs false */
 
 /* polymorph EnvironmentRequest location false */
@@ -85,6 +91,11 @@ func (m *EnvironmentRequest) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateDescription(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateKubernetesConfigs(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -155,6 +166,19 @@ func (m *EnvironmentRequest) validateDescription(formats strfmt.Registry) error 
 	}
 
 	if err := validate.MaxLength("description", "body", string(*m.Description), 1000); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *EnvironmentRequest) validateKubernetesConfigs(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.KubernetesConfigs) { // not required
+		return nil
+	}
+
+	if err := validate.UniqueItems("kubernetesConfigs", "body", m.KubernetesConfigs); err != nil {
 		return err
 	}
 

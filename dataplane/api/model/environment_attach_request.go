@@ -18,6 +18,10 @@ import (
 
 type EnvironmentAttachRequest struct {
 
+	// Name of the Kubernetes configurations to be attached to the environment.
+	// Unique: true
+	KubernetesConfigs []string `json:"kubernetesConfigs"`
+
 	// Name of the LDAP configurations to be attached to the environment.
 	// Unique: true
 	LdapConfigs []string `json:"ldapConfigs"`
@@ -31,6 +35,8 @@ type EnvironmentAttachRequest struct {
 	RdsConfigs []string `json:"rdsConfigs"`
 }
 
+/* polymorph EnvironmentAttachRequest kubernetesConfigs false */
+
 /* polymorph EnvironmentAttachRequest ldapConfigs false */
 
 /* polymorph EnvironmentAttachRequest proxyConfigs false */
@@ -40,6 +46,11 @@ type EnvironmentAttachRequest struct {
 // Validate validates this environment attach request
 func (m *EnvironmentAttachRequest) Validate(formats strfmt.Registry) error {
 	var res []error
+
+	if err := m.validateKubernetesConfigs(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
 
 	if err := m.validateLdapConfigs(formats); err != nil {
 		// prop
@@ -59,6 +70,19 @@ func (m *EnvironmentAttachRequest) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *EnvironmentAttachRequest) validateKubernetesConfigs(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.KubernetesConfigs) { // not required
+		return nil
+	}
+
+	if err := validate.UniqueItems("kubernetesConfigs", "body", m.KubernetesConfigs); err != nil {
+		return err
+	}
+
 	return nil
 }
 

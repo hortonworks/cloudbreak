@@ -18,6 +18,7 @@ func (*mockRdsClient) ListRdsConfigsByWorkspace(params *v3_workspace_id_rdsconfi
 	resp := []*model.RDSConfigResponse{
 		{
 			Name:             &(&types.S{S: "test"}).S,
+			Description:      &(&types.S{S: "description"}).S,
 			ConnectionURL:    &(&types.S{S: "connectionURL"}).S,
 			DatabaseEngine:   &(&types.S{S: "databaseEngine"}).S,
 			Type:             &(&types.S{S: "type"}).S,
@@ -42,7 +43,7 @@ func TestListRdsImpl(t *testing.T) {
 		t.Fatalf("row number doesn't match 1 == %d", len(rows))
 	}
 	for _, r := range rows {
-		expected := "test connectionURL databaseEngine type  "
+		expected := "test description connectionURL databaseEngine type  "
 		if strings.Join(r.DataAsStringArray(), " ") != expected {
 			t.Errorf("row data not match %s == %s", expected, strings.Join(r.DataAsStringArray(), " "))
 		}
