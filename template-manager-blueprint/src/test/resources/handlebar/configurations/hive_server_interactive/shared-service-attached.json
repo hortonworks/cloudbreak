@@ -25,7 +25,7 @@
   },
   "ranger-hive-security":{
     "properties": {
-      "ranger.plugin.hive.policy.rest.url": "http://localhost:6080",
+      "ranger.plugin.hive.policy.rest.url": "http://1.1.1.1:6080",
       "ranger.plugin.hive.service.name":"datalake-1_hive"
     }
   },

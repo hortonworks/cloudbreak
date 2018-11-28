@@ -16,7 +16,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -46,7 +45,6 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
@@ -75,7 +73,6 @@ import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
-import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.template.views.LdapView;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 import com.sequenceiq.cloudbreak.util.StackUtil;
@@ -196,7 +193,6 @@ public class ClusterHostServiceRunner {
             throws IOException, CloudbreakOrchestratorException {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
         saveCustomNameservers(cluster.isSecure(), cluster.getKerberosConfig(), servicePillar);
-        saveSharedRangerService(stack, servicePillar);
         if (cluster.isSecure() && kerberosDetailService.isAmbariManagedKerberosPackages(cluster.getKerberosConfig())) {
             Map<String, String> kerberosPillarConf = new HashMap<>();
             KerberosConfig kerberosConfig = cluster.getKerberosConfig();
@@ -339,31 +335,6 @@ public class ClusterHostServiceRunner {
             List<String> ipList = Lists.newArrayList(kerberosConfig.getNameServers().split(","));
             servicePillar.put("forwarder-zones", new SaltPillarProperties("/unbound/forwarders.sls",
                     singletonMap("forwarder-zones", singletonMap(kerberosConfig.getDomain(), singletonMap("nameservers", ipList)))));
-        }
-    }
-
-    private void saveSharedRangerService(Stack stack, Map<String, SaltPillarProperties> servicePillar) {
-        Long datalakeId = stack.getDatalakeId();
-        if (datalakeId != null) {
-            StackView dataLakeStack = getStackView(datalakeId);
-            Cluster dataLakeCluster = clusterService.findOneWithLists(dataLakeStack.getClusterView().getId());
-            String blueprintText = dataLakeCluster.getBlueprint().getBlueprintText();
-            BlueprintTextProcessor blueprintTextProcessor = blueprintProcessorFactory.get(blueprintText);
-
-            Set<String> groupNames = blueprintTextProcessor.getHostGroupsWithComponent("RANGER_ADMIN");
-            List<HostGroup> groups = dataLakeCluster.getHostGroups().stream().filter(hg -> groupNames.contains(hg.getName())).collect(Collectors.toList());
-            Set<String> hostNames = new HashSet<>();
-            groups.forEach(hg -> hostNames.addAll(hostGroupService.getByClusterIdAndName(dataLakeCluster.getId(), hg.getName())
-                    .getHostMetadata().stream().map(HostMetadata::getHostName).collect(Collectors.toList())));
-
-            Map<String, String> rangerAdminConfigs = blueprintTextProcessor.getConfigurationEntries().getOrDefault("ranger-admin-site", new HashMap<>());
-            String rangerPort = rangerAdminConfigs.getOrDefault("ranger.service.http.port", "6080");
-
-            Map<String, Object> rangerMap = new HashMap<>();
-            rangerMap.put("servers", hostNames);
-            rangerMap.put("port", rangerPort);
-            servicePillar.put("datalake-services", new SaltPillarProperties("/datalake/init.sls",
-                    singletonMap("datalake-services", singletonMap("ranger", rangerMap))));
         }
     }
 
