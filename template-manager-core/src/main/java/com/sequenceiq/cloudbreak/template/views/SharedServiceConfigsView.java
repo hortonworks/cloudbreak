@@ -13,6 +13,8 @@ public class SharedServiceConfigsView {
 
     private String rangerAdminPort;
 
+    private String rangerAdminHost;
+
     private String datalakeAmbariIp;
 
     private String datalakeAmbariFqdn;
@@ -73,5 +75,13 @@ public class SharedServiceConfigsView {
 
     public void setDatalakeComponents(Set<String> datalakeComponents) {
         this.datalakeComponents = datalakeComponents;
+    }
+
+    public String getRangerAdminHost() {
+        return rangerAdminHost;
+    }
+
+    public void setRangerAdminHost(String rangerAdminHost) {
+        this.rangerAdminHost = rangerAdminHost;
     }
 }

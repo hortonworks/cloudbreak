@@ -20,7 +20,7 @@
   },
   "ranger-hive-security":{
     "properties": {
-      "ranger.plugin.hive.policy.rest.url": "http://localhost:{{{ sharedService.rangerAdminPort }}}",
+      "ranger.plugin.hive.policy.rest.url": "http://{{{ sharedService.rangerAdminHost }}}:{{{ sharedService.rangerAdminPort }}}",
       "ranger.plugin.hive.service.name":"{{{ remoteClusterName }}}_hive"
     }
   },

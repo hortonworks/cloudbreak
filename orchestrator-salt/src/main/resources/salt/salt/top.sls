@@ -5,9 +5,6 @@ base:
     - unbound
     - java
     - metadata
-{% if not salt['file.directory_exists']('/yarn-private') %}  # FIXME (BUG-92637): must be disabled for YCloud
-    - nginx.datalake
-{% endif %}
     - docker
     - recipes.runner
 
