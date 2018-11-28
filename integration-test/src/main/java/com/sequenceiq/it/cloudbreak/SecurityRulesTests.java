@@ -1,19 +1,20 @@
 package com.sequenceiq.it.cloudbreak;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sequenceiq.cloudbreak.api.model.SecurityRuleResponse;
-import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
-import com.sequenceiq.it.cloudbreak.newway.SecurityRules;
-import com.sequenceiq.it.cloudbreak.newway.TestParameter;
+import java.io.IOException;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StreamUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import java.io.IOException;
-import java.util.List;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sequenceiq.cloudbreak.api.model.SecurityRuleResponse;
+import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
+import com.sequenceiq.it.cloudbreak.newway.SecurityRules;
+import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 
 public class SecurityRulesTests extends CloudbreakTest {
 
@@ -76,7 +77,9 @@ public class SecurityRulesTests extends CloudbreakTest {
                     List<SecurityRuleResponse> coresList = securityrules.getResponse().getCore();
 
                     coresList.forEach(core -> LOGGER.debug(" Security Rule core is ::: {}", core.getId()));
-                    Assert.assertTrue(coresList.isEmpty(), "Security Rule Cores should be present in response!");
+                    Assert.assertFalse(coresList.isEmpty(), "Security Rule Cores should be present in response!");
+                    Assert.assertTrue(coresList.stream().filter(rule -> rule.getPorts().contains("22")).findFirst().isPresent(),
+                            "Core security rules should contain sshOpen port");
                 }), " Security Rule Cores should be part of the response."
         );
     }
