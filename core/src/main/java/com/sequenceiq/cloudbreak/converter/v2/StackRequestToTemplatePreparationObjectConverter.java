@@ -7,11 +7,13 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.ConfigsResponse;
 import com.sequenceiq.cloudbreak.api.model.SharedServiceRequest;
+import com.sequenceiq.cloudbreak.api.model.v2.GeneralSettings;
 import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.blueprint.GeneralClusterConfigsProvider;
@@ -30,12 +32,14 @@ import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
+import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentViewService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
 import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
@@ -110,13 +114,16 @@ public class StackRequestToTemplatePreparationObjectConverter extends AbstractCo
     @Inject
     private WorkspaceService workspaceService;
 
+    @Inject
+    private EnvironmentViewService environmentViewService;
+
     @Override
     public TemplatePreparationObject convert(StackV2Request source) {
         try {
             CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
             User user = userService.getOrCreate(cloudbreakUser);
             Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
-            Credential credential = credentialService.getByNameForWorkspace(source.getGeneral().getCredentialName(), workspace);
+            Credential credential = getCredential(source, workspace);
             Optional<FlexSubscription> flexSubscription = getFlexSubscription(source);
             SmartSenseSubscription smartsenseSubscription = flexSubscription.isPresent() ? flexSubscription.get().getSmartSenseSubscription() : null;
             KerberosConfig kerberosConfig = getKerberosConfig(source);
@@ -168,6 +175,18 @@ public class StackRequestToTemplatePreparationObjectConverter extends AbstractCo
         } catch (BlueprintProcessingException | IOException e) {
             throw new CloudbreakServiceException(e.getMessage(), e);
         }
+    }
+
+    private Credential getCredential(StackV2Request source, Workspace workspace) {
+        GeneralSettings generalSettings = source.getGeneral();
+        Credential credential;
+        if (!StringUtils.isEmpty(generalSettings.getEnvironmentName())) {
+            EnvironmentView environmentView = environmentViewService.getByNameForWorkspace(generalSettings.getEnvironmentName(), workspace);
+            credential = environmentView.getCredential();
+        } else {
+            credential = credentialService.getByNameForWorkspace(source.getGeneral().getCredentialName(), workspace);
+        }
+        return credential;
     }
 
     private Blueprint getBlueprint(StackV2Request source, Workspace workspace) {
