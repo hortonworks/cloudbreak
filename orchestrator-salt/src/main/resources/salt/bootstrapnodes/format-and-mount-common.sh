@@ -37,7 +37,7 @@ semaphore_file_exists() {
     local log_file=$1
     if [ ! -f "$SEMAPHORE_FILE" ]; then
         log $log_file "semaphore file $SEMAPHORE_FILE missing, cannot proceed. Exiting"
-        exit
+        exit 1
     fi
 }
 
@@ -68,4 +68,26 @@ can_start() {
     is_cloud_platform_supported $log_file
     semaphore_file_exists $log_file
     was_script_executed $script_name $log_file
+}
+
+get_disk_uuid() {
+    local device=$1
+    uuid=$(blkid -o value $device | head -1)
+    echo $uuid
+}
+
+get_root_disk() {
+    root_partition=$(lsblk | grep /$ | cut -f1 -d' ' )
+    if [[ $root_partition =~ "nvme" ]]; then
+        echo "/dev/$(lsblk | grep /$ | cut -f1 -d' ' | sed 's/p\w//g' | cut -c 3-)"
+    else
+        echo "/dev/$(lsblk | grep /$ | cut -f1 -d' ' | sed 's/[0-9]//g' | cut -c 3-)"
+    fi
+}
+
+not_elastic_block_store() {
+    local device_name=$1 # input is evpected without '/dev/'
+    local log_file=$2
+    nvme list | grep $device_name | sed 's/ \+/ /g' | tr '[:upper:]' '[:lower:]' | grep "amazon elastic block store" >> $log_file 2>&1
+    [[ $? -eq 0 ]] && return 1 || return 0
 }

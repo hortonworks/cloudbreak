@@ -16,28 +16,65 @@ VERSION="V1.0"
 #       exit code: not 0
 #       stderr: a one line info. Details are in the log
 
+mount_remaining() {
+      local hadoop_fs_dir_counter=$1
+      local return_value=0
+      not_mounted_volume_names=$(lsblk | grep -v / | grep ^[a-z] | cut -f1 -d' ')
+      log $LOG_FILE remaining not mounted volumes: $not_mounted_volume_names
+      root_disk=$(get_root_disk)
+      for volume in $not_mounted_volume_names; do
+          uuid=$(get_disk_uuid "/dev/$volume")
+          if [[ $root_disk != "/dev/$volume" && "$uuid" != ""  ]] && not_elastic_block_store "/dev/$volume" $LOG_FILE; then
+                mount_one "UUID=$uuid /hadoopfs/fs${hadoop_fs_dir_counter} $FS_TYPE defaults,noatime,nofail 0 2"
+                return_value=$(($? || return_value ))
+                log $LOG_FILE result of all mounting: $return_value
+                ((hadoop_fs_dir_counter++))
+           elif [[ "$root_disk" == "/dev/$volume" ]]; then
+                log $LOG_FILE volume $volume is the root volume, skipping it
+           elif ! not_elastic_block_store "/dev/$volume" $LOG_FILE ; then
+                log $LOG_FILE volume $volume is a free-rider volume, skipping it
+           else
+                log $LOG_FILE volume $volume has still no uuid, skipping it
+                return_value=1
+           fi
+      done
+
+    return $((return_value))
+}
+
 mount_all_from_fstab() {
       local return_value=0
+      local hadoop_fs_dir_counter=1
       log $LOG_FILE mounting via fstab, value: "$PREVIOUS_FSTAB"
       for uuid in $ATTACHED_VOLUME_UUID_LIST; do
           local fstab_line=$(echo "$PREVIOUS_FSTAB" | grep $uuid)
           mount_one "$fstab_line"
+          mount_result=$?
+          [[ $mount_result -eq 0 ]] && ((hadoop_fs_dir_counter++))
           return_value=$(($? || return_value ))
       done
+
+      mount_remaining $hadoop_fs_dir_counter
+      return_value=$(($? || return_value ))
+
       return $((return_value))
 }
 
 mount_all_sequential() {
       local return_value=0
       log $LOG_FILE mounting for first time, no previous fstab information present
-      local counter=1
+      local hadoop_fs_dir_counter=1
       for uuid in $ATTACHED_VOLUME_UUID_LIST; do
-          mount_one "UUID=$uuid /hadoopfs/fs${counter} $FS_TYPE defaults,noatime,nofail 0 2"
+          mount_one "UUID=$uuid /hadoopfs/fs${hadoop_fs_dir_counter} $FS_TYPE defaults,noatime,nofail 0 2"
           return_value=$(($? || return_value ))
-          ((counter++))
+          log $LOG_FILE result of all mounting: $return_value
+          ((hadoop_fs_dir_counter++))
       done
 
-      return $return_value
+      mount_remaining $hadoop_fs_dir_counter
+      return_value=$(($? || return_value ))
+
+      return $((return_value))
 }
 
 mount_one() {
@@ -70,9 +107,17 @@ mount_common() {
         mount_all_from_fstab
         return_value=$?
     fi
-    cd /hadoopfs/fs1 && mkdir logs logs/ambari-server logs/ambari-agent logs/consul-watch logs/kerberos >> $LOG_FILE 2>&1
-    return_value=$(($? || return_value ))
     return $((return_value))
+}
+
+create_directories() {
+    cd /hadoopfs/fs1 && mkdir logs logs/ambari-server logs/ambari-agent logs/consul-watch logs/kerberos >> $LOG_FILE 2>&1
+
+    fs1_logs_dir=/hadoopfs/fs1/logs
+    [[ -d $fs1_logs_dir  && -d $fs1_logs_dir/ambari-server  && -d $fs1_logs_dir/ambari-agent  && -d $fs1_logs_dir/consul-watch  && -d $fs1_logs_dir/kerberos ]] && return 0
+
+    log $LOG_FILE there was an error creating log directories in /hadoopfs/fs1
+    return 1
 }
 
 save_env_vars_to_log_file() {
@@ -87,9 +132,15 @@ main() {
     save_env_vars_to_log_file
     local script_name="mount-disk"
     can_start $script_name $LOG_FILE
+
     mount_common
     return_code=$?
     [[ ! $return_code -eq 0 ]] && exit_with_code $LOG_FILE $return_code "Not all devices were mounted"
+
+    create_directories
+    return_code=$?
+    [[ ! $return_code -eq 0 ]] && exit_with_code $LOG_FILE $return_code "Error creating directories on /hadoopfs/fs1"
+
     exit_with_code $LOG_FILE 0 "Script $script_name ended"
 }
 
