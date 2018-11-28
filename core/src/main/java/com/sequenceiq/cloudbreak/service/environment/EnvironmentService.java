@@ -218,17 +218,23 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
     }
 
     public DetailedEnvironmentResponse attachResources(String environmentName, EnvironmentAttachRequest request, Long workspaceId) {
-        Set<LdapConfig> ldapsToAttach = ldapConfigService.findByNamesInWorkspace(request.getLdapConfigs(), workspaceId);
-        Set<ProxyConfig> proxiesToAttach = proxyConfigService.findByNamesInWorkspace(request.getProxyConfigs(), workspaceId);
-        Set<RDSConfig> rdssToAttach = rdsConfigService.findByNamesInWorkspace(request.getRdsConfigs(), workspaceId);
-        Set<KubernetesConfig> kubesToAttach = kubernetesConfigService.findByNamesInWorkspace(request.getKubernetesConfigs(), workspaceId);
-        ValidationResult validationResult = environmentAttachValidator.validate(request, ldapsToAttach, proxiesToAttach, rdssToAttach);
-        if (validationResult.hasError()) {
-            throw new BadRequestException(validationResult.getFormattedErrors());
+        try {
+            return transactionService.required(() -> {
+                Set<LdapConfig> ldapsToAttach = ldapConfigService.findByNamesInWorkspace(request.getLdapConfigs(), workspaceId);
+                Set<ProxyConfig> proxiesToAttach = proxyConfigService.findByNamesInWorkspace(request.getProxyConfigs(), workspaceId);
+                Set<RDSConfig> rdssToAttach = rdsConfigService.findByNamesInWorkspace(request.getRdsConfigs(), workspaceId);
+                Set<KubernetesConfig> kubesToAttach = kubernetesConfigService.findByNamesInWorkspace(request.getKubernetesConfigs(), workspaceId);
+                ValidationResult validationResult = environmentAttachValidator.validate(request, ldapsToAttach, proxiesToAttach, rdssToAttach);
+                if (validationResult.hasError()) {
+                    throw new BadRequestException(validationResult.getFormattedErrors());
+                }
+                Environment environment = getByNameForWorkspaceId(environmentName, workspaceId);
+                environment = doAttach(ldapsToAttach, proxiesToAttach, rdssToAttach, kubesToAttach, environment);
+                return conversionService.convert(environment, DetailedEnvironmentResponse.class);
+            });
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
         }
-        Environment environment = getByNameForWorkspaceId(environmentName, workspaceId);
-        environment = doAttach(ldapsToAttach, proxiesToAttach, rdssToAttach, kubesToAttach, environment);
-        return conversionService.convert(environment, DetailedEnvironmentResponse.class);
     }
 
     private Environment doAttach(Set<LdapConfig> ldapsToAttach, Set<ProxyConfig> proxiesToAttach, Set<RDSConfig> rdssToAttach,
@@ -246,16 +252,22 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
     }
 
     public DetailedEnvironmentResponse detachResources(String environmentName, EnvironmentDetachRequest request, Long workspaceId) {
-        Environment environment = getByNameForWorkspaceId(environmentName, workspaceId);
-        ValidationResult validationResult = validateAndDetachLdaps(request, environment);
-        validationResult = validateAndDetachProxies(request, environment, validationResult);
-        validationResult = validateAndDetachRdss(request, environment, validationResult);
-        detachKubes(request, environment);
-        if (validationResult.hasError()) {
-            throw new BadRequestException(validationResult.getFormattedErrors());
+        try {
+            return transactionService.required(() -> {
+                Environment environment = getByNameForWorkspaceId(environmentName, workspaceId);
+                ValidationResult validationResult = validateAndDetachLdaps(request, environment);
+                validationResult = validateAndDetachProxies(request, environment, validationResult);
+                validationResult = validateAndDetachRdss(request, environment, validationResult);
+                detachKubes(request, environment);
+                if (validationResult.hasError()) {
+                    throw new BadRequestException(validationResult.getFormattedErrors());
+                }
+                Environment saved = environmentRepository.save(environment);
+                return conversionService.convert(saved, DetailedEnvironmentResponse.class);
+            });
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
         }
-        Environment saved = environmentRepository.save(environment);
-        return conversionService.convert(saved, DetailedEnvironmentResponse.class);
     }
 
     private ValidationResult validateAndDetachLdaps(EnvironmentDetachRequest request, Environment environment) {
