@@ -60,11 +60,43 @@ format_disks_if_unformatted() {
   return $((return_value))
 }
 
+not_in_list() {
+    local element_to_find=$1
+    local list=$2
+
+    for element in $list; do
+        [[ "$element" == "$element_to_find" ]] && return 1
+    done
+
+    return 0
+}
+
+get_ephemeral_device_names() {
+    attached_volumes=$1
+
+    lsblk_out=$(lsblk | cut -f1 -d' ')
+
+    root_disk=$(get_root_disk)
+    used_disks="$attached_volumes $root_disk"
+    all_disk_names=$(lsblk | cut -f1 -d' ' | grep ^[a-z])
+    log $LOG_FILE root disk: $root_disk
+    log $LOG_FILE used disks: $used_disks
+    log $LOG_FILE all disks: $all_disk_names
+
+    local ephemeral_volumes=""
+    for disk in $all_disk_names; do
+        $(not_in_list "/dev/$disk" "$used_disks") && $(not_elastic_block_store $disk $LOG_FILE) && ephemeral_volumes+=" /dev/$disk"
+    done
+
+    log $LOG_FILE found ephemeral volumes: \"$ephemeral_volumes\"
+    echo "$ephemeral_volumes"
+}
+
 get_uuid_list() {
   local device_name_list=$1
   local uuid_list=""
   for device in $device_name_list; do
-      uuid=$(blkid -o value $device | head -1)
+      uuid=$(get_disk_uuid $device)
       if [ -z "$(blkid $device)" ]; then
           log $LOG_FILE "uuid still does not exists for device $device => error"
       else
@@ -92,19 +124,34 @@ are_all_attached_volume_names_present() {
     return $([[ $existing_device_count -eq ${#device_name_array[@]} ]])
 }
 
+strip_serial_id() {
+    local serial_id=$1
+    serial_id_stripped=$(echo $serial_id | sed 's/\-//g')
+    echo $serial_id_stripped
+}
+
 get_nvme_device_names() {
     local return_value=0
 
     declare -A serial_id_to_device_path_map
+    declare -A serial_id_stripped_to_device_path_map
+
     for nvme_device in $(nvme list -o json | jq -r '.Devices[] | "\(.SerialNumber)=\(.DevicePath)"'); do
         IFS='=' read -r -a split_array <<< "$nvme_device"
         serial_id_to_device_path_map[${split_array[0]}]=${split_array[1]}
+        serial_id_stripped=$(strip_serial_id ${split_array[0]})
+        serial_id_stripped_to_device_path_map[$serial_id_stripped]=${split_array[1]}
     done
 
     nvme_device_list=()
     for volume_serial_id in $ATTACHED_VOLUME_SERIAL_LIST; do
         found_device=${serial_id_to_device_path_map[$volume_serial_id]}
-        log $LOG_FILE searched $volume_serial_id, found $found_device
+        log $LOG_FILE searched $volume_serial_id, found \"$found_device\"
+        if [ -z "$found_device" ]; then
+            serial_id_stripped=$(strip_serial_id $volume_serial_id)
+            found_device=${serial_id_stripped_to_device_path_map[$serial_id_stripped])}
+            log $LOG_FILE searched $serial_id_stripped, found \"$found_device\"
+        fi
         if [ -z "$found_device" ]; then
             log $LOG_FILE not found device for volume id: $volume_serial_id
             return_value=1
@@ -145,19 +192,20 @@ main() {
     if [ ! $? -eq 0 ]; then
         exit_with_code $LOG_FILE $EXIT_CODE_ERROR "some volumes are missing"
     fi
-    log $LOG_FILE found devices: $device_name_list
+    ephemeral_device_name_list=$(get_ephemeral_device_names "$device_name_list")
+    log $LOG_FILE found devices: $device_name_list $ephemeral_device_name_list
 
-    format_disks_if_unformatted "$device_name_list"
+    format_disks_if_unformatted "$device_name_list $ephemeral_device_name_list"
     if [ ! $? -eq 0 ]; then
         exit_with_code $LOG_FILE $EXIT_CODE_ERROR "could not format all devices"
     fi
 
-    unmount_device_if_mounted "$device_name_list"
+    unmount_device_if_mounted "$device_name_list $ephemeral_device_name_list"
     if [ ! $? -eq 0 ]; then
         exit_with_code $LOG_FILE $EXIT_CODE_ERROR "could not unmount devices that were mounted by device name"
     fi
 
-    local uuid_list=$(get_uuid_list "$device_name_list")
+    local uuid_list=$(get_uuid_list "$device_name_list") # ephemeral devices' uuid should not be returned
     log $LOG_FILE exit code of get_uuid_list: $?, uuids: $uuid_list
     output $uuid_list
     exit_with_code $LOG_FILE $EXIT_CODE_OK "script ran ok"
