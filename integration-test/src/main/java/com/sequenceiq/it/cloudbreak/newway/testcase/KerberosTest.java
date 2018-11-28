@@ -3,14 +3,12 @@ package com.sequenceiq.it.cloudbreak.newway.testcase;
 import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.MASTER;
 import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.key;
 import static com.sequenceiq.it.cloudbreak.newway.mock.model.SaltMock.SALT_RUN;
-import static com.sequenceiq.it.spark.ITResponse.AMBARI_API_ROOT;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static javax.ws.rs.core.Response.Status.OK;
 
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
 import org.springframework.http.HttpMethod;
@@ -23,7 +21,6 @@ import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
 import com.sequenceiq.cloudbreak.type.KerberosType;
 import com.sequenceiq.it.cloudbreak.newway.Blueprint;
 import com.sequenceiq.it.cloudbreak.newway.BlueprintEntity;
-import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.assertion.AssertionV2;
@@ -48,16 +45,9 @@ public class KerberosTest extends AbstractIntegrationTest {
             + "\"configurations\":[],\"components\":[{\"name\":\"METRICS_MONITOR\"},{\"name\":\"METRICS_COLLECTOR\"},{\"name\":\"ZOOKEEPER_CLIENT\"}],"
             + "\"cardinality\":\"1\"}]}";
 
-    @Inject
-    private RandomNameCreator creator;
-
     @BeforeMethod
     public void beforeMethod(Object[] data) {
-        TestContext testContext = (TestContext) data[0];
-        createDefaultUser(testContext);
-        createDefaultCredential(testContext);
-        createDefaultImageCatalog(testContext);
-        initializeDefaultBlueprints(testContext);
+        minimalSetupForClusterCreation((TestContext) data[0]);
     }
 
     @AfterMethod(alwaysRun = true)
@@ -90,7 +80,7 @@ public class KerberosTest extends AbstractIntegrationTest {
     @Test(dataProvider = TEST_CONTEXT)
     public void testClusterCreationAttemptWithKerberosWhenDescriptorIsAnInvalidJson(TestContext testContext) {
         mockAmbariBlueprintPassLdapSync(testContext);
-        String blueprintName = creator.getRandomNameForMock();
+        String blueprintName = getNameGenerator().getRandomNameForMock();
         KerberosRequest request = KerberosTestData.CUSTOM.getRequest();
         request.setDescriptor("{\"kerberos-env\":{\"properties\":{\"kdc_type\":\"mit-kdc\",\"kdc_hosts\":\"kdc-host-value\",\"admin_server_host\""
                 + ":\"admin-server-host-value\",\"realm\":\"realm-value\"}}");
@@ -115,7 +105,7 @@ public class KerberosTest extends AbstractIntegrationTest {
     @Test(dataProvider = TEST_CONTEXT)
     public void testClusterCreationAttemptWithKerberosWhenDescriptorDoesNotContainsAllTheRequiredFields(TestContext testContext) {
         mockAmbariBlueprintPassLdapSync(testContext);
-        String blueprintName = creator.getRandomNameForMock();
+        String blueprintName = getNameGenerator().getRandomNameForMock();
         KerberosRequest request = KerberosTestData.CUSTOM.getRequest();
         request.setDescriptor("{\"kerberos-env\":{\"properties\":{\"kdc_type\":\"mit-kdc\",\"kdc_hosts\":\"kdc-host-value\"}}}");
         testContext
@@ -139,7 +129,7 @@ public class KerberosTest extends AbstractIntegrationTest {
     @Test(dataProvider = TEST_CONTEXT)
     public void testClusterCreationAttemptWithKerberosWhenKrb5ConfIsNotAValidJson(TestContext testContext) {
         mockAmbariBlueprintPassLdapSync(testContext);
-        String blueprintName = creator.getRandomNameForMock();
+        String blueprintName = getNameGenerator().getRandomNameForMock();
         KerberosRequest request = KerberosTestData.CUSTOM.getRequest();
         request.setKrb5Conf("{");
         testContext
@@ -163,10 +153,10 @@ public class KerberosTest extends AbstractIntegrationTest {
     @DataProvider(name = "dataProviderForTest")
     public Object[][] provide() {
         return new Object[][]{
-                {applicationContext.getBean(TestContext.class), creator.getRandomNameForMock(), KerberosTestData.CB_MANAGED},
-                {applicationContext.getBean(TestContext.class), creator.getRandomNameForMock(), KerberosTestData.EXISTING_AD},
-                {applicationContext.getBean(TestContext.class), creator.getRandomNameForMock(), KerberosTestData.EXISTING_MIT},
-                {applicationContext.getBean(TestContext.class), creator.getRandomNameForMock(), KerberosTestData.CUSTOM}
+                {applicationContext.getBean(TestContext.class), getNameGenerator().getRandomNameForMock(), KerberosTestData.CB_MANAGED},
+                {applicationContext.getBean(TestContext.class), getNameGenerator().getRandomNameForMock(), KerberosTestData.EXISTING_AD},
+                {applicationContext.getBean(TestContext.class), getNameGenerator().getRandomNameForMock(), KerberosTestData.EXISTING_MIT},
+                {applicationContext.getBean(TestContext.class), getNameGenerator().getRandomNameForMock(), KerberosTestData.CUSTOM}
         };
     }
 
@@ -193,7 +183,6 @@ public class KerberosTest extends AbstractIntegrationTest {
                 verifications.add(blueprintPostToAmbariContains(getRequest().getAdmin()).exactTimes(0));
                 verifications.add(blueprintPostToAmbariContains("KERBEROS_CLIENT").exactTimes(1));
                 verifications.add(MockVerification.verify(HttpMethod.POST, SALT_RUN).bodyContains(SALT_HIGHSTATE).exactTimes(2));
-                verifications.addAll(verifyCloudbreakUserHasSentToCreate());
                 return verifications;
             }
 
@@ -230,7 +219,6 @@ public class KerberosTest extends AbstractIntegrationTest {
                 verifications.add(blueprintPostToAmbariContains("container_dn").exactTimes(1));
                 verifications.add(blueprintPostToAmbariContains("KERBEROS_CLIENT").exactTimes(1));
                 verifications.add(MockVerification.verify(HttpMethod.POST, SALT_RUN).bodyContains(SALT_HIGHSTATE).exactTimes(2));
-                verifications.addAll(verifyCloudbreakUserHasSentToCreate());
                 return verifications;
             }
 
@@ -262,7 +250,6 @@ public class KerberosTest extends AbstractIntegrationTest {
                 verifications.add(blueprintPostToAmbariContains("realm").exactTimes(1));
                 verifications.add(blueprintPostToAmbariContains("KERBEROS_CLIENT").exactTimes(1));
                 verifications.add(MockVerification.verify(HttpMethod.POST, SALT_RUN).bodyContains(SALT_HIGHSTATE).exactTimes(2));
-                verifications.addAll(verifyCloudbreakUserHasSentToCreate());
                 return verifications;
             }
 
@@ -294,7 +281,6 @@ public class KerberosTest extends AbstractIntegrationTest {
                 verifications.add(blueprintPostToAmbariContains("realm-value").exactTimes(1));
                 verifications.add(blueprintPostToAmbariContains("KERBEROS_CLIENT").exactTimes(1));
                 verifications.add(MockVerification.verify(HttpMethod.POST, SALT_RUN).bodyContains(SALT_HIGHSTATE).exactTimes(2));
-                verifications.addAll(verifyCloudbreakUserHasSentToCreate());
                 return verifications;
             }
 
@@ -318,14 +304,6 @@ public class KerberosTest extends AbstractIntegrationTest {
 
         private static MockVerification blueprintPostToAmbariContains(String content) {
             return MockVerification.verify(HttpMethod.POST, "/api/v1/blueprints/").bodyContains(content);
-        }
-
-        private static List<AssertionV2<StackEntity>> verifyCloudbreakUserHasSentToCreate() {
-            return List.of(
-                    MockVerification.verify(HttpMethod.POST, AMBARI_API_ROOT + "/users").atLeast(1).bodyContains("\"Users/active\": true"),
-                    MockVerification.verify(HttpMethod.POST, AMBARI_API_ROOT + "/users").atLeast(1).bodyContains("\"Users/admin\": true"),
-                    MockVerification.verify(HttpMethod.POST, AMBARI_API_ROOT + "/users").atLeast(1).bodyContains("\"Users/user_name\": \"cloudbreak\""),
-                    MockVerification.verify(HttpMethod.POST, AMBARI_API_ROOT + "/users").atLeast(1).bodyContains("Users/password"));
         }
 
     }
