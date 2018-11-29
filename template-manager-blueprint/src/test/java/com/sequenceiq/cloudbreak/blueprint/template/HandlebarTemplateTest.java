@@ -224,6 +224,14 @@ public class HandlebarTemplateTest {
                 {"blueprints/configurations/dp_profiler/global.handlebars", "configurations/dp_profiler/profiler.json",
                         objectWithoutEverything()},
 
+                // METRICS_MONITOR
+                {"blueprints/configurations/metrics_monitor/shared_service.handlebars", "configurations/metrics_monitor/metrics-monitor.json",
+                        sSConfigWhenMetricsMonitorInWLThenShouldReturnWithMetricsCollectorConfig()},
+
+                // YARN_CLIENT
+                {"blueprints/configurations/yarn_client/shared_service.handlebars", "configurations/yarn_client/yarn-client.json",
+                        sSConfigWhenMetricsMonitorInWLThenShouldReturnWithMetricsCollectorConfig()},
+
                 // RANGER_ADMIN
                 {"blueprints/configurations/ranger/gateway.handlebars", "configurations/ranger/enable-gateway.json",
                         enabledGateway()},
@@ -665,6 +673,16 @@ public class HandlebarTemplateTest {
         return new TemplateModelContextBuilder()
                 .withSharedServiceConfigs(attachedClusterSharedServiceConfig().get())
                 .withFixInputs(fixInputs)
+                .build();
+    }
+
+    private static Object sSConfigWhenMetricsMonitorInWLThenShouldReturnWithMetricsCollectorConfig() {
+
+        SharedServiceConfigsView sharedServiceConfigsView = attachedClusterSharedServiceConfig().get();
+        sharedServiceConfigsView.setDatalakeAmbariFqdn("ambarifqdn");
+
+        return new TemplateModelContextBuilder()
+                .withSharedServiceConfigs(sharedServiceConfigsView)
                 .build();
     }
 
