@@ -66,7 +66,7 @@ public class MockCaasController {
     }
 
     @GetMapping("/auth/out")
-    public void out(HttpServletResponse httpServletResponse) {
-        mockCaasService.out(httpServletResponse);
+    public void out(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
+        mockCaasService.out(httpServletRequest, httpServletResponse);
     }
 }

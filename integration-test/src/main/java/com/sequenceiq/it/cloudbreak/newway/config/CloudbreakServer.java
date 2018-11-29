@@ -85,19 +85,21 @@ public class CloudbreakServer {
                 if (StringUtils.isEmpty(refreshToken)) {
                     refreshToken = prof.get("refreshtoken");
                 }
-                String[] cloudbreakServerSplit = server.split("://");
-                if (StringUtils.isEmpty(caasProtocol)) {
-                    caasProtocol = cloudbreakServerSplit[0];
-                }
-                if (StringUtils.isEmpty(caasAddress)) {
-                    caasAddress = cloudbreakServerSplit[1];
-                }
             }
         } else {
             LOGGER.info("Could not find cb profile file at location {}, falling back to application.yml", cbProfileLocation);
         }
 
         checkNonEmpty(server);
+
+        String[] cloudbreakServerSplit = server.split("://");
+        if (StringUtils.isEmpty(caasProtocol) && cloudbreakServerSplit.length > 0) {
+            caasProtocol = cloudbreakServerSplit[0];
+        }
+        if (StringUtils.isEmpty(caasAddress) && cloudbreakServerSplit.length > 1) {
+            caasAddress = cloudbreakServerSplit[1];
+        }
+
         checkNonEmpty(cbRootContextPath);
         checkNonEmpty(refreshToken);
         checkNonEmpty(caasProtocol);
