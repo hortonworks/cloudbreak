@@ -2,6 +2,8 @@ package com.sequenceiq.it.cloudbreak.newway;
 
 import java.util.function.Function;
 
+import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentAttachRequest;
+import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentDetachRequest;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
@@ -77,7 +79,31 @@ public class Environment extends EnvironmentEntity {
         return new Action<>(getTestContext(key), EnvironmentAction::putAttachResources);
     }
 
+    public static EnvironmentEntity putAttachResources(TestContext testContext, EnvironmentEntity entity, CloudbreakClient cloudbreakClient) {
+        EnvironmentAttachRequest environmentAttachRequest = new EnvironmentAttachRequest();
+        environmentAttachRequest.setLdapConfigs(entity.getRequest().getLdapConfigs());
+        environmentAttachRequest.setProxyConfigs(entity.getRequest().getProxyConfigs());
+        environmentAttachRequest.setRdsConfigs(entity.getRequest().getRdsConfigs());
+        entity.setResponse(
+                cloudbreakClient.getCloudbreakClient().environmentV3Endpoint().attachResources(cloudbreakClient.getWorkspaceId(), entity.getName(),
+                        environmentAttachRequest)
+        );
+        return entity;
+    }
+
     public static Action<Environment> putDetachResources(String key) {
         return new Action<>(getTestContext(key), EnvironmentAction::putDetachResources);
+    }
+
+    public static EnvironmentEntity putDetachResources(TestContext testContext, EnvironmentEntity entity, CloudbreakClient cloudbreakClient) {
+        EnvironmentDetachRequest environmentDetachRequest = new EnvironmentDetachRequest();
+        environmentDetachRequest.setLdapConfigs(entity.getRequest().getLdapConfigs());
+        environmentDetachRequest.setProxyConfigs(entity.getRequest().getProxyConfigs());
+        environmentDetachRequest.setRdsConfigs(entity.getRequest().getRdsConfigs());
+        entity.setResponse(
+                cloudbreakClient.getCloudbreakClient().environmentV3Endpoint().detachResources(cloudbreakClient.getWorkspaceId(), entity.getName(),
+                        environmentDetachRequest)
+        );
+        return entity;
     }
 }
