@@ -188,6 +188,8 @@ cb:
     port: 9443
   knox:
     port: 8443
+  https:
+    port: 443
   ssh:
     port: 22
 

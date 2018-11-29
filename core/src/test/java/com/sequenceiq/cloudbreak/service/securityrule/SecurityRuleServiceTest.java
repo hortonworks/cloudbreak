@@ -49,6 +49,7 @@ public class SecurityRuleServiceTest {
         Assert.assertEquals(1, defaultSecurityRules.getCore().size());
 
         Assert.assertTrue(containsServicePort(defaultSecurityRules.getGateway(), "9443"));
+        Assert.assertTrue(containsServicePort(defaultSecurityRules.getGateway(), "443"));
         Assert.assertTrue(containsServicePort(defaultSecurityRules.getGateway(), "22"));
         Assert.assertTrue(containsServicePort(defaultSecurityRules.getCore(), "22"));
     }
