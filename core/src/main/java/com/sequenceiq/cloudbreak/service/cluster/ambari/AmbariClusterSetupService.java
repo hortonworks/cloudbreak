@@ -47,7 +47,6 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.util.AmbariClientExceptionUtil;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
@@ -64,16 +63,10 @@ public class AmbariClusterSetupService implements ClusterSetupService {
     private ConversionService conversionService;
 
     @Inject
-    private StackService stackService;
-
-    @Inject
     private ClusterService clusterService;
 
     @Inject
     private AmbariClientFactory clientFactory;
-
-    @Inject
-    private AmbariUserHandler ambariUserHandler;
 
     @Inject
     private AmbariClusterConnectorPollingResultChecker ambariClusterConnectorPollingResultChecker;

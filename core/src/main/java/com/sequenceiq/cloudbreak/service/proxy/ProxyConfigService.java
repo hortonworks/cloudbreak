@@ -15,7 +15,6 @@ import com.sequenceiq.cloudbreak.repository.ProxyConfigRepository;
 import com.sequenceiq.cloudbreak.repository.environment.EnvironmentResourceRepository;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.environment.AbstractEnvironmentAwareService;
-import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
 
 @Service
 public class ProxyConfigService extends AbstractEnvironmentAwareService<ProxyConfig> {
@@ -25,9 +24,6 @@ public class ProxyConfigService extends AbstractEnvironmentAwareService<ProxyCon
 
     @Inject
     private ClusterService clusterService;
-
-    @Inject
-    private StackApiViewService stackApiViewService;
 
     public ProxyConfig get(Long id) {
         return proxyConfigRepository.findById(id).orElseThrow(notFound("Proxy configuration", id));

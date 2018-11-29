@@ -66,9 +66,6 @@ public class ClusterCommonService {
     private StackService stackService;
 
     @Inject
-    private ClusterCreationSetupService clusterCreationSetupService;
-
-    @Inject
     private CloudbreakEventService cloudbreakEventService;
 
     @Inject

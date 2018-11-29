@@ -27,8 +27,8 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.OnFailureAction;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
@@ -47,15 +47,13 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
-import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
-import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.service.GatewayConfigService;
+import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.notification.Notification;
 import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
@@ -96,9 +94,6 @@ public class StackCreationService {
     private ServiceProviderConnectorAdapter connector;
 
     @Inject
-    private InstanceGroupRepository instanceGroupRepository;
-
-    @Inject
     private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
@@ -112,9 +107,6 @@ public class StackCreationService {
 
     @Inject
     private FlowMessageService flowMessageService;
-
-    @Inject
-    private GatewayConfigService gatewayConfigService;
 
     @Inject
     private UsageService usageService;
@@ -158,7 +150,7 @@ public class StackCreationService {
             Stack stack = context.getStack();
             Image image = imageService.getImage(stack.getId());
             CheckImageRequest<CheckImageResult> checkImageRequest = new CheckImageRequest<>(context.getCloudContext(), context.getCloudCredential(),
-                cloudStackConverter.convert(stack), image);
+                    cloudStackConverter.convert(stack), image);
             LOGGER.info("Triggering event: {}", checkImageRequest);
             eventBus.notify(checkImageRequest.selector(), eventFactory.createEvent(checkImageRequest));
             CheckImageResult result = checkImageRequest.await();

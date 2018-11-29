@@ -41,9 +41,6 @@ import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackUtils;
 import com.sequenceiq.cloudbreak.cloud.openstack.heat.HeatTemplateBuilder.ModelContext;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.KeystoneCredentialView;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.NeutronNetworkView;
-import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
-import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
-import com.sequenceiq.cloudbreak.cloud.task.ResourcesStatePollerResult;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.cloudbreak.service.Retry.ActionWentFailException;
@@ -65,14 +62,8 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
     private OpenStackUtils utils;
 
     @Inject
-    private SyncPollingScheduler<ResourcesStatePollerResult> syncPollingScheduler;
-
-    @Inject
     @Qualifier("DefaultRetryService")
     private Retry retryService;
-
-    @Inject
-    private PollTaskFactory pollTaskFactory;
 
     @Inject
     private PersistenceNotifier persistenceNotifier;

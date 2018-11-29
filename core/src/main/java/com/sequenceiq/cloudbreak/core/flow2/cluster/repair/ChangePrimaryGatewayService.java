@@ -26,7 +26,6 @@ import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariClusterConnector;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
@@ -40,9 +39,6 @@ public class ChangePrimaryGatewayService {
 
     @Inject
     private StackService stackService;
-
-    @Inject
-    private AmbariClusterConnector ambariClusterConnector;
 
     @Inject
     private ClusterService clusterService;

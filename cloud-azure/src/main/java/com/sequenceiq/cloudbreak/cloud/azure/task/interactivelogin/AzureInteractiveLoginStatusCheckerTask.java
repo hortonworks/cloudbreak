@@ -30,8 +30,6 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.task.PollBooleanStateTask;
 
-import reactor.bus.EventBus;
-
 /**
  * Created by perdos on 9/22/16.
  */
@@ -70,9 +68,6 @@ public class AzureInteractiveLoginStatusCheckerTask extends PollBooleanStateTask
     @Inject
     private PrincipalCreator principalCreator;
 
-    @Inject
-    private EventBus eventBus;
-
     public AzureInteractiveLoginStatusCheckerTask(CloudContext cloudContext,
             AzureInteractiveLoginStatusCheckerContext armInteractiveLoginStatusCheckerContext) {
         super(new AuthenticatedContext(cloudContext, armInteractiveLoginStatusCheckerContext.getExtendedCloudCredential()), false);
@@ -106,7 +101,7 @@ public class AzureInteractiveLoginStatusCheckerTask extends PollBooleanStateTask
                     String appId = applicationCreator.createApplication(graphApiAccessToken, armCredentialView.getTenantId(), secretKey);
                     sendStatusMessage(extendedCloudCredential, "Cloudbreak application created");
                     ServicePrincipalInner sp = principalCreator.createServicePrincipal(graphApiAccessToken, appId, armCredentialView.getTenantId());
-                    String principalObjectId =  sp.objectId();
+                    String principalObjectId = sp.objectId();
                     String notification = new StringBuilder("Principal created for application!")
                             .append(" Name: ")
                             .append(sp.displayName())

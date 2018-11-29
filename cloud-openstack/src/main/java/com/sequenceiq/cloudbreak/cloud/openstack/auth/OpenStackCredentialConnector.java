@@ -22,9 +22,6 @@ public class OpenStackCredentialConnector implements CredentialConnector {
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackCredentialConnector.class);
 
     @Inject
-    private OpenStackClient openStackClient;
-
-    @Inject
     private OpenStackSmartSenseIdGenerator smartSenseIdGenerator;
 
     @Override

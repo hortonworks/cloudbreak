@@ -118,9 +118,6 @@ public class StackSyncActions {
         @Inject
         private CredentialToCloudCredentialConverter credentialConverter;
 
-        @Inject
-        private InstanceMetaDataToCloudInstanceConverter cloudInstanceConverter;
-
         protected AbstractStackSyncAction(Class<P> payloadClass) {
             super(payloadClass);
         }

@@ -100,7 +100,6 @@ import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
-import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
 @Service
@@ -113,9 +112,6 @@ public class StackService {
     private static final String STACK_NOT_FOUND_EXCEPTION_TXT = "Stack not found by name '%s'";
 
     private static final String STACK_NOT_FOUND_EXCEPTION_ID_TXT = "Stack not found by id '%d'";
-
-    @Inject
-    private UserService userService;
 
     @Inject
     private StackRepository stackRepository;

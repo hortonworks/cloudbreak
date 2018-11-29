@@ -20,7 +20,6 @@ import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
@@ -54,9 +53,6 @@ public class AwsPlatformParameters implements PlatformParameters {
 
     @Inject
     private CloudbreakResourceReaderService cloudbreakResourceReaderService;
-
-    @Inject
-    private Environment environment;
 
     @Inject
     @Qualifier("AwsTagSpecification")

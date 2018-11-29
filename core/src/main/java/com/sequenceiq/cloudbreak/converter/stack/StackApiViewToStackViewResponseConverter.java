@@ -20,15 +20,11 @@ import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConvert
 import com.sequenceiq.cloudbreak.domain.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
-import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 
 @Component
 public class StackApiViewToStackViewResponseConverter extends AbstractConversionServiceAwareConverter<StackApiView, StackViewResponse> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackApiViewToStackViewResponseConverter.class);
-
-    @Inject
-    private ComponentConfigProvider componentConfigProvider;
 
     @Inject
     private ClusterComponentConfigProvider clusterComponentConfigProvider;

@@ -31,7 +31,6 @@ import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.json.JsonHelper;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
-import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.util.AmbariClientExceptionUtil;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
@@ -55,9 +54,6 @@ public class AmbariRepositoryVersionService {
 
     @Inject
     private OrchestratorTypeResolver orchestratorTypeResolver;
-
-    @Inject
-    private ComponentConfigProvider componentConfigProvider;
 
     @Inject
     private JsonHelper jsonHelper;
@@ -106,7 +102,7 @@ public class AmbariRepositoryVersionService {
     public String getOsTypeForStackRepoDetails(StackRepoDetails stackRepoDetails) {
         Map<String, String> stackRepo = stackRepoDetails.getStack();
         stackRepo = removeVDFRelatedRepoDetails(stackRepo);
-        String [] unwantedKeys = {StackRepoDetails.REPO_ID_TAG, StackRepoDetails.MPACK_TAG};
+        String[] unwantedKeys = {StackRepoDetails.REPO_ID_TAG, StackRepoDetails.MPACK_TAG};
         Set<String> keys = stackRepo.keySet();
         keys.removeAll(List.of(unwantedKeys));
         return keys.isEmpty() ? "" : keys.iterator().next();

@@ -12,13 +12,11 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
-import com.sequenceiq.cloudbreak.cloud.aws.AwsContextService;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -29,7 +27,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
-import com.sequenceiq.cloudbreak.service.Retry;
 
 import freemarker.template.Configuration;
 
@@ -59,20 +56,10 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
     private String awsCloudformationTemplatePath;
 
     @Inject
-    @Qualifier("DefaultRetryService")
-    private Retry retryService;
-
-    @Inject
     private AwsLaunchService awsLaunchService;
 
     @Inject
     private AwsTerminateService awsTerminateService;
-
-    @Inject
-    private AwsContextService awsContextService;
-
-    @Inject
-    private AwsAutoScalingService awsAutoScalingService;
 
     @Inject
     private AwsUpscaleService awsUpscaleService;

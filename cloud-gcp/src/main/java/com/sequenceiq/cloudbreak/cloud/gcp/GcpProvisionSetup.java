@@ -10,8 +10,6 @@ import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getTarName;
 import java.io.IOException;
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +35,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
-import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.common.type.ImageStatus;
 import com.sequenceiq.cloudbreak.common.type.ImageStatusResult;
 
@@ -47,9 +44,6 @@ public class GcpProvisionSetup implements Setup {
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpProvisionSetup.class);
 
     private static final String READY = "READY";
-
-    @Inject
-    private SyncPollingScheduler<Boolean> syncPollingScheduler;
 
     @Override
     public void prepareImage(AuthenticatedContext authenticatedContext, CloudStack stack, com.sequenceiq.cloudbreak.cloud.model.Image image) {

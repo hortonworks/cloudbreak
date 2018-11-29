@@ -17,8 +17,8 @@ import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import javax.annotation.PostConstruct;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
@@ -83,9 +83,6 @@ public class GcpPlatformResources implements PlatformResources {
 
     @Value("${cb.gcp.zone.parameter.default:europe-west1}")
     private String gcpZoneParameterDefault;
-
-    @Inject
-    private GcpPlatformParameters gcpPlatformParameters;
 
     @Inject
     private CloudbreakResourceReaderService cloudbreakResourceReaderService;
@@ -178,7 +175,7 @@ public class GcpPlatformResources implements PlatformResources {
     }
 
     private String getNetworkName(Firewall firewall) {
-        String [] splittedNetworkName = firewall.getNetwork().split("/");
+        String[] splittedNetworkName = firewall.getNetwork().split("/");
         return splittedNetworkName[splittedNetworkName.length - 1];
     }
 
@@ -326,9 +323,9 @@ public class GcpPlatformResources implements PlatformResources {
         String keyRingPath = String.format("projects/%s/locations/%s", projectId, regionName);
         try {
             ListKeyRingsResponse response = cloudKMS.projects().locations()
-                .keyRings()
-                .list(keyRingPath)
-                .execute();
+                    .keyRings()
+                    .list(keyRingPath)
+                    .execute();
             return Optional.ofNullable(response.getKeyRings()).orElse(List.of());
         } catch (IOException e) {
             LOGGER.error("Failed to get list of keyrings on keyring path: [{}].", keyRingPath, e);

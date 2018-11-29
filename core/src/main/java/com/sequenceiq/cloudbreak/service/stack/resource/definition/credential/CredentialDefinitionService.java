@@ -8,8 +8,6 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.jasypt.encryption.pbe.PBEStringCleanablePasswordEncryptor;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
@@ -26,14 +24,6 @@ public class CredentialDefinitionService {
 
     @Inject
     private ResourceDefinitionService definitionService;
-
-    @Inject
-    @Qualifier("PBEStringCleanablePasswordEncryptor")
-    private PBEStringCleanablePasswordEncryptor encryptor;
-
-    @Inject
-    @Qualifier("LegacyPBEStringCleanablePasswordEncryptor")
-    private PBEStringCleanablePasswordEncryptor legacyEncryptor;
 
     public Map<String, Object> removeSensitives(Platform cloudPlatform, Map<String, Object> properties) {
         return processValues(getDefinition(cloudPlatform), properties);

@@ -24,14 +24,10 @@ import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterTerminat
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
 
 @Service
 public class ClusterTerminationFlowService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterTerminationFlowService.class);
-
-    @Inject
-    private ClusterTerminationService terminationService;
 
     @Inject
     private ClusterService clusterService;

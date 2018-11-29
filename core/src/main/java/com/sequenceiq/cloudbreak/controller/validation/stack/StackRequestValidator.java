@@ -38,8 +38,6 @@ import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
-import com.sequenceiq.cloudbreak.service.user.UserService;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
 @Component
 public class StackRequestValidator implements Validator<StackRequest> {
@@ -61,13 +59,7 @@ public class StackRequestValidator implements Validator<StackRequest> {
     private CredentialService credentialService;
 
     @Inject
-    private WorkspaceService workspaceService;
-
-    @Inject
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
-
-    @Inject
-    private UserService userService;
 
     @Inject
     private TemplateRequestValidator templateRequestValidator;

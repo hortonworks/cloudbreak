@@ -11,7 +11,6 @@ import com.sequenceiq.cloudbreak.converter.scheduler.StatusToPollGroupConverter;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
-import com.sequenceiq.cloudbreak.repository.ResourceRepository;
 import com.sequenceiq.cloudbreak.repository.SecurityConfigRepository;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -20,9 +19,6 @@ public class StackUpdater {
 
     @Inject
     private StackService stackService;
-
-    @Inject
-    private ResourceRepository resourceRepository;
 
     @Inject
     private StatusToPollGroupConverter statusToPollGroupConverter;

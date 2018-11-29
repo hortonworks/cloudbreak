@@ -44,9 +44,6 @@ public class UserProfileService {
     private ImageCatalogService imageCatalogService;
 
     @Inject
-    private UserService userService;
-
-    @Inject
     private SecretService secretService;
 
     public UserProfile getOrCreate(User user) {

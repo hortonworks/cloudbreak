@@ -29,7 +29,6 @@ import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Component
 public class ClusterUpscaleFlowService {
@@ -52,9 +51,6 @@ public class ClusterUpscaleFlowService {
 
     @Inject
     private HostMetadataRepository hostMetadataRepository;
-
-    @Inject
-    private StackUtil stackUtil;
 
     public void upscalingAmbari(long stackId) {
         clusterService.updateClusterStatusByStackId(stackId, UPDATE_IN_PROGRESS, "Upscaling the cluster.");

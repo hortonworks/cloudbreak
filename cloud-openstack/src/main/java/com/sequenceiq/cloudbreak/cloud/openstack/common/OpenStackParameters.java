@@ -19,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
@@ -33,8 +32,8 @@ import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
-import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
+import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 
 @Service
 public class OpenStackParameters implements PlatformParameters {
@@ -50,9 +49,6 @@ public class OpenStackParameters implements PlatformParameters {
 
     @Inject
     private CloudbreakResourceReaderService cloudbreakResourceReaderService;
-
-    @Inject
-    private Environment environment;
 
     @Inject
     @Qualifier("OpenStackTagSpecification")

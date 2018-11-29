@@ -12,26 +12,14 @@ import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.AbstractClusterAction;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterViewContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
-import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ClusterUpgradeRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ClusterUpgradeResult;
-import com.sequenceiq.cloudbreak.service.StackUpdater;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 
 @Configuration
 public class ClusterUpgradeActions {
-
-    @Inject
-    private FlowMessageService flowMessageService;
-
-    @Inject
-    private ClusterService clusterService;
-
-    @Inject
-    private StackUpdater stackUpdater;
 
     @Inject
     private ClusterUpgradeService clusterUpgradeService;

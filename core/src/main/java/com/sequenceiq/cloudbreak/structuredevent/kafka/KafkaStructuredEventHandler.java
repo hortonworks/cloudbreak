@@ -14,7 +14,6 @@ import org.springframework.util.concurrent.ListenableFuture;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sequenceiq.cloudbreak.conf.StructuredEventSenderConfig;
 import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
 
@@ -24,9 +23,6 @@ import reactor.bus.Event;
 public class KafkaStructuredEventHandler<T extends StructuredEvent> implements ReactorEventHandler<T> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaStructuredEventHandler.class);
-
-    @Inject
-    private StructuredEventSenderConfig structuredEventSenderConfig;
 
     private ObjectMapper objectMapper = new ObjectMapper();
 

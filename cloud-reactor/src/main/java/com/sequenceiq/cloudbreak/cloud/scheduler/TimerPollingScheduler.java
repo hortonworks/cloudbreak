@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import reactor.bus.EventBus;
 import reactor.fn.Consumer;
 import reactor.fn.Pausable;
 import reactor.fn.timer.Timer;
@@ -23,9 +22,6 @@ public class TimerPollingScheduler implements Consumer<Long> {
 
     @Inject
     private Timer timer;
-
-    @Inject
-    private EventBus eventBus;
 
     private CountDownLatch latch;
 

@@ -20,7 +20,6 @@ import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
-import com.sequenceiq.cloudbreak.cloud.aws.context.AwsContextBuilder;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -53,9 +52,6 @@ public class AwsUpscaleService {
 
     @Inject
     private AwsAutoScalingService awsAutoScalingService;
-
-    @Inject
-    private AwsContextBuilder contextBuilder;
 
     @Inject
     private AwsComputeResourceService awsComputeResourceService;

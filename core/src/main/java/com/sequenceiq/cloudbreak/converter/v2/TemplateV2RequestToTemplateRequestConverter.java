@@ -13,12 +13,9 @@ import com.sequenceiq.cloudbreak.api.model.v2.template.GcpParameters;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.service.MissingResourceNameGenerator;
-import com.sequenceiq.cloudbreak.service.topology.TopologyService;
 
 @Component
 public class TemplateV2RequestToTemplateRequestConverter extends AbstractConversionServiceAwareConverter<TemplateV2Request, TemplateRequest> {
-    @Inject
-    private TopologyService topologyService;
 
     @Inject
     private MissingResourceNameGenerator missingResourceNameGenerator;

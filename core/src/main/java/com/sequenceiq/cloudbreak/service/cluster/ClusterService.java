@@ -121,7 +121,6 @@ import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
-import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.AmbariClientExceptionUtil;
@@ -228,9 +227,6 @@ public class ClusterService {
 
     @Inject
     private ResourceRepository resourceRepository;
-
-    @Inject
-    private SecretService secretService;
 
     @Inject
     private KerberosConfigProvider kerberosConfigProvider;
@@ -643,10 +639,10 @@ public class ClusterService {
     private void checkDiskTypeSupported(Stack inTransactionStack, boolean repairWithReattach, HostGroup hg) {
         if (repairWithReattach
                 && inTransactionStack.getInstanceGroupsAsList().stream()
-                    .filter(instanceGroup -> hg.getName().equalsIgnoreCase(instanceGroup.getGroupName()))
-                    .map(InstanceGroup::getTemplate)
-                    .map(Template::getVolumeType)
-                    .anyMatch(REATTACH_NOT_SUPPORTED_VOLUME_TYPES::contains)) {
+                .filter(instanceGroup -> hg.getName().equalsIgnoreCase(instanceGroup.getGroupName()))
+                .map(InstanceGroup::getTemplate)
+                .map(Template::getVolumeType)
+                .anyMatch(REATTACH_NOT_SUPPORTED_VOLUME_TYPES::contains)) {
             throw new BadRequestException("Reattach not supported for this disk type.");
         }
     }

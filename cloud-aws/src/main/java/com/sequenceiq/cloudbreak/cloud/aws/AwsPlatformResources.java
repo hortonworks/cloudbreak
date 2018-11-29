@@ -115,9 +115,6 @@ public class AwsPlatformResources implements PlatformResources {
     private CloudbreakResourceReaderService cloudbreakResourceReaderService;
 
     @Inject
-    private AwsPlatformParameters awsPlatformParameters;
-
-    @Inject
     private AwsDefaultZoneProvider awsDefaultZoneProvider;
 
     @Value("${cb.aws.vm.parameter.definition.path:}")
@@ -508,31 +505,31 @@ public class AwsPlatformResources implements PlatformResources {
             for (AliasListEntry keyListEntry : listAliasesResult.getAliases()) {
                 try {
                     listKeysResult.getKeys().stream()
-                        .filter(item -> item.getKeyId().equals(keyListEntry.getTargetKeyId())).findFirst()
-                        .ifPresent(item -> {
-                            DescribeKeyRequest describeKeyRequest = new DescribeKeyRequest().withKeyId(item.getKeyId());
-                            DescribeKeyResult describeKeyResult = client.describeKey(describeKeyRequest);
-                            Map<String, Object> meta = new HashMap<>();
-                            meta.put("aWSAccountId", describeKeyResult.getKeyMetadata().getAWSAccountId());
-                            meta.put("creationDate", describeKeyResult.getKeyMetadata().getCreationDate());
-                            meta.put("enabled", describeKeyResult.getKeyMetadata().getEnabled());
-                            meta.put("expirationModel", describeKeyResult.getKeyMetadata().getExpirationModel());
-                            meta.put("keyManager", describeKeyResult.getKeyMetadata().getKeyManager());
-                            meta.put("keyState", describeKeyResult.getKeyMetadata().getKeyState());
-                            meta.put("keyUsage", describeKeyResult.getKeyMetadata().getKeyUsage());
-                            meta.put("origin", describeKeyResult.getKeyMetadata().getOrigin());
-                            meta.put("validTo", describeKeyResult.getKeyMetadata().getValidTo());
+                            .filter(item -> item.getKeyId().equals(keyListEntry.getTargetKeyId())).findFirst()
+                            .ifPresent(item -> {
+                                DescribeKeyRequest describeKeyRequest = new DescribeKeyRequest().withKeyId(item.getKeyId());
+                                DescribeKeyResult describeKeyResult = client.describeKey(describeKeyRequest);
+                                Map<String, Object> meta = new HashMap<>();
+                                meta.put("aWSAccountId", describeKeyResult.getKeyMetadata().getAWSAccountId());
+                                meta.put("creationDate", describeKeyResult.getKeyMetadata().getCreationDate());
+                                meta.put("enabled", describeKeyResult.getKeyMetadata().getEnabled());
+                                meta.put("expirationModel", describeKeyResult.getKeyMetadata().getExpirationModel());
+                                meta.put("keyManager", describeKeyResult.getKeyMetadata().getKeyManager());
+                                meta.put("keyState", describeKeyResult.getKeyMetadata().getKeyState());
+                                meta.put("keyUsage", describeKeyResult.getKeyMetadata().getKeyUsage());
+                                meta.put("origin", describeKeyResult.getKeyMetadata().getOrigin());
+                                meta.put("validTo", describeKeyResult.getKeyMetadata().getValidTo());
 
-                            if (!CloudConstants.AWS.equalsIgnoreCase(describeKeyResult.getKeyMetadata().getKeyManager())) {
-                                CloudEncryptionKey key = new CloudEncryptionKey(
-                                        item.getKeyArn(),
-                                        describeKeyResult.getKeyMetadata().getKeyId(),
-                                        describeKeyResult.getKeyMetadata().getDescription(),
-                                        keyListEntry.getAliasName().replace("alias/", ""),
-                                        meta);
-                                cloudEncryptionKeys.getCloudEncryptionKeys().add(key);
-                            }
-                    });
+                                if (!CloudConstants.AWS.equalsIgnoreCase(describeKeyResult.getKeyMetadata().getKeyManager())) {
+                                    CloudEncryptionKey key = new CloudEncryptionKey(
+                                            item.getKeyArn(),
+                                            describeKeyResult.getKeyMetadata().getKeyId(),
+                                            describeKeyResult.getKeyMetadata().getDescription(),
+                                            keyListEntry.getAliasName().replace("alias/", ""),
+                                            meta);
+                                    cloudEncryptionKeys.getCloudEncryptionKeys().add(key);
+                                }
+                            });
                 } catch (AmazonServiceException e) {
                     if (e.getStatusCode() == UNAUTHORIZED) {
                         String policyMessage = "Could not get encryption keys because the user does not have enough permission.";
