@@ -24,9 +24,6 @@ public class KerberosConfigProvider {
             Cluster datalakeCluster = datalake.getCluster();
             if (Objects.nonNull(datalake) && Objects.nonNull(datalakeCluster)) {
                 if (datalakeCluster.getKerberosConfig() != null) {
-                    if (!cluster.isSecure()) {
-                        throw new BadRequestException(String.format("Security should be enabled for attached cluster %s as the datalake cluster", stackName));
-                    }
                     cluster.setSecure(Boolean.TRUE);
                     cluster.setKerberosConfig(datalakeCluster.getKerberosConfig());
                     LOGGER.info("Inherit Kerberos config from Data Lake cluster took {} ms for stack {}, datalake stack {}",

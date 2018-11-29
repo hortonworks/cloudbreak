@@ -49,7 +49,6 @@ public class KerberosConfigProviderTest {
         KerberosConfig datalakeKerberosConfig = new KerberosConfig();
         when(datalakeStack.getCluster()).thenReturn(datalakeCluster);
         when(datalakeCluster.getKerberosConfig()).thenReturn(datalakeKerberosConfig);
-        when(workLoadCluster.isSecure()).thenReturn(true);
         underTest.setKerberosConfigForWorkloadCluster(workLoadCluster, datalakeStack);
         assertEquals(workLoadCluster.getKerberosConfig(), datalakeKerberosConfig);
     }
@@ -60,14 +59,6 @@ public class KerberosConfigProviderTest {
         when(datalakeCluster.getKerberosConfig()).thenReturn(null);
         underTest.setKerberosConfigForWorkloadCluster(workLoadCluster, datalakeStack);
         assertEquals(workLoadCluster.isSecure(), false);
-    }
-
-    @Test
-    public void testSetKerberosConfigForWorkloadClusterInvalidConfig() {
-        workLoadCluster.setSecure(false);
-        when(datalakeCluster.getKerberosConfig()).thenReturn(new KerberosConfig());
-        Throwable exception = assertThrows(BadRequestException.class, () -> underTest.setKerberosConfigForWorkloadCluster(workLoadCluster, datalakeStack));
-        assertEquals(exception.getMessage(), String.format("Security should be enabled for attached cluster %s as the datalake cluster", STACK_NAME));
     }
 
     @Test
