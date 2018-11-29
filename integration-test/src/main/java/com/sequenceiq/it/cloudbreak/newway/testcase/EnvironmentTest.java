@@ -16,6 +16,9 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.model.environment.response.SimpleEnvironmentResponse;
+import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
+import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigResponse;
+import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigResponse;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
@@ -136,7 +139,6 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
                 .validate();
     }
 
-    // new
     @Test(dataProvider = "testContext")
     public void testCreateEnvironmentNoRegion(TestContext testContext) {
         testContext
@@ -318,10 +320,272 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
                 .validate();
     }
 
+    @Test(dataProvider = "testContext")
+    public void testCreateEnvAttachRds(TestContext testContext) {
+        createDefaultRdsConfig(testContext);
+        Set<String> validRds = new HashSet<>();
+        validRds.add(testContext.get(RdsConfigEntity.class).getName());
+        testContext
+                .given(EnvironmentEntity.class)
+                .withName("int-rds-attach")
+                .withRegions(VALID_REGION)
+                .withLocation(VALID_LOCATION)
+                .when(Environment::post)
+                .when(Environment::getAll)
+                .given(EnvironmentEntity.class)
+                .withRdsConfigs(validRds)
+                .when(Environment::putAttachResources)
+                .then(EnvironmentTest::checkRdsAttachedToEnv)
+                .validate();
+    }
+
+    @Test(dataProvider = "testContext")
+    public void testCreateEnvAttachLdap(TestContext testContext) {
+        createDefaultLdapConfig(testContext);
+        Set<String> validLdap = new HashSet<>();
+        validLdap.add(testContext.get(LdapConfigEntity.class).getName());
+        testContext
+                .given(EnvironmentEntity.class)
+                .withName("int-ldap-attach")
+                .withRegions(VALID_REGION)
+                .withLocation(VALID_LOCATION)
+                .when(Environment::post)
+                .given(EnvironmentEntity.class)
+                .withLdapConfigs(validLdap)
+                .when(Environment::putAttachResources)
+                .then(EnvironmentTest::checkLdapAttachedToEnv)
+                .validate();
+    }
+
+    @Test(dataProvider = "testContext")
+    public void testCreateEnvAttachProxy(TestContext testContext) {
+        createDefaultProxyConfig(testContext);
+        Set<String> validProxy = new HashSet<>();
+        validProxy.add(testContext.get(ProxyConfigEntity.class).getName());
+        testContext
+                .given(EnvironmentEntity.class)
+                .withName("int-proxy-attach")
+                .withRegions(VALID_REGION)
+                .withLocation(VALID_LOCATION)
+                .when(Environment::post)
+                .given(EnvironmentEntity.class)
+                .withProxyConfigs(validProxy)
+                .when(Environment::putAttachResources)
+                .then(EnvironmentTest::checkProxyAttachedToEnv)
+                .validate();
+    }
+
+    @Test(dataProvider = "testContext")
+    public void testCreateEnvDetachRds(TestContext testContext) {
+        createDefaultRdsConfig(testContext);
+        Set<String> validRds = new HashSet<>();
+        validRds.add(testContext.get(RdsConfigEntity.class).getName());
+        testContext
+                .given(EnvironmentEntity.class)
+                .withName("int-rds-detach")
+                .withRegions(VALID_REGION)
+                .withLocation(VALID_LOCATION)
+                .when(Environment::post)
+                .when(Environment::getAll)
+                .given(EnvironmentEntity.class)
+                .withRdsConfigs(validRds)
+                .when(Environment::putAttachResources)
+                .then(EnvironmentTest::checkRdsAttachedToEnv)
+                .when(Environment::putDetachResources)
+                .validate();
+    }
+
+    @Test(dataProvider = "testContext")
+    public void testCreateEnvDetachLdap(TestContext testContext) {
+        createDefaultLdapConfig(testContext);
+        Set<String> validLdap = new HashSet<>();
+        validLdap.add(testContext.get(LdapConfigEntity.class).getName());
+        testContext
+                .given(EnvironmentEntity.class)
+                .withName("int-ldap-detach")
+                .withRegions(VALID_REGION)
+                .withLocation(VALID_LOCATION)
+                .when(Environment::post)
+                .when(Environment::getAll)
+                .given(EnvironmentEntity.class)
+                .withLdapConfigs(validLdap)
+                .when(Environment::putAttachResources)
+                .then(EnvironmentTest::checkLdapAttachedToEnv)
+                .when(Environment::putDetachResources)
+                .validate();
+    }
+
+    @Test(dataProvider = "testContext")
+    public void testCreateEnvDetachProxy(TestContext testContext) {
+        createDefaultProxyConfig(testContext);
+        Set<String> validProxy = new HashSet<>();
+        validProxy.add(testContext.get(ProxyConfigEntity.class).getName());
+        testContext
+                .given(EnvironmentEntity.class)
+                .withName("int-proxy-detach")
+                .withRegions(VALID_REGION)
+                .withLocation(VALID_LOCATION)
+                .when(Environment::post)
+                .when(Environment::getAll)
+                .given(EnvironmentEntity.class)
+                .withProxyConfigs(validProxy)
+                .when(Environment::putAttachResources)
+                .then(EnvironmentTest::checkProxyAttachedToEnv)
+                .when(Environment::putDetachResources)
+                .validate();
+    }
+
+    @Test(dataProvider = "testContext")
+    public void testAttachRdsToMoreEnvs(TestContext testContext) {
+        createDefaultRdsConfig(testContext);
+        Set<String> validRds = new HashSet<>();
+        validRds.add(testContext.get(RdsConfigEntity.class).getName());
+        attachRdsToEnv(testContext, "int-rds-attach-envs", validRds);
+        attachRdsToEnv(testContext, "int-rds-attach-envs2", validRds);
+    }
+
+    @Test(dataProvider = "testContext")
+    public void testAttachLdapToMoreEnvs(TestContext testContext) {
+        createDefaultLdapConfig(testContext);
+        Set<String> validLdap = new HashSet<>();
+        validLdap.add(testContext.get(LdapConfigEntity.class).getName());
+        attachLdapToEnv(testContext, "int-ldap-attach-envs", validLdap);
+        attachLdapToEnv(testContext, "int-ldap-attach-envs2", validLdap);
+    }
+
+    @Test(dataProvider = "testContext")
+    public void testAttachProxyToMoreEnvs(TestContext testContext) {
+        createDefaultProxyConfig(testContext);
+        Set<String> validProxy = new HashSet<>();
+        validProxy.add(testContext.get(ProxyConfigEntity.class).getName());
+        attachProxyToEnv(testContext, "int-proxy-attach-envs", validProxy);
+        attachProxyToEnv(testContext, "int-proxy-attach-envs2", validProxy);
+    }
+
+    @Test(dataProvider = "testContext")
+    public void testAttachRdsToNotExistEnv(TestContext testContext) {
+        createDefaultRdsConfig(testContext);
+        Set<String> validRds = new HashSet<>();
+        validRds.add(testContext.get(RdsConfigEntity.class).getName());
+        testContext
+                .given(EnvironmentEntity.class)
+                .withName("int-no-env")
+                .withRdsConfigs(validRds)
+                .when(Environment::putAttachResources, key(FORBIDDEN_KEY))
+                .except(ForbiddenException.class, key(FORBIDDEN_KEY))
+                .validate();
+    }
+
+    @Test(dataProvider = "testContext")
+    public void testRdsAttachDetachOther(TestContext testContext) {
+        createDefaultRdsConfig(testContext);
+        Set<String> validRds = new HashSet<>();
+        Set<String> notValidRds = new HashSet<>();
+        validRds.add(testContext.get(RdsConfigEntity.class).getName());
+        notValidRds.add("not-existing-rds");
+        testContext
+                .given(EnvironmentEntity.class)
+                .withName("int-rds-attach-1")
+                .withRegions(VALID_REGION)
+                .withLocation(VALID_LOCATION)
+                .when(Environment::post)
+                .when(Environment::getAll)
+                .given(EnvironmentEntity.class)
+                .withRdsConfigs(validRds)
+                .when(Environment::putAttachResources)
+                .then(EnvironmentTest::checkRdsAttachedToEnv)
+                .given(EnvironmentEntity.class)
+                .withName("int-rds-attach-1")
+                .withRdsConfigs(notValidRds)
+                .when(Environment::putDetachResources)
+                .validate();
+    }
+
+    private static void attachRdsToEnv(TestContext testContext, String name, Set<String> validRds) {
+        testContext
+                .given(EnvironmentEntity.class)
+                .withName(name)
+                .withRegions(VALID_REGION)
+                .withLocation(VALID_LOCATION)
+                .when(Environment::post)
+
+                .given(EnvironmentEntity.class)
+                .withRdsConfigs(validRds)
+                .when(Environment::putAttachResources)
+                .then(EnvironmentTest::checkRdsAttachedToEnv)
+                .validate();
+    }
+
+    private static void attachLdapToEnv(TestContext testContext, String name, Set<String> validLdap) {
+        testContext
+                .given(EnvironmentEntity.class)
+                .withName(name)
+                .withRegions(VALID_REGION)
+                .withLocation(VALID_LOCATION)
+                .when(Environment::post)
+
+                .given(EnvironmentEntity.class)
+                .withLdapConfigs(validLdap)
+                .when(Environment::putAttachResources)
+                .then(EnvironmentTest::checkLdapAttachedToEnv)
+                .validate();
+    }
+
+    private static void attachProxyToEnv(TestContext testContext, String name, Set<String> validLdap) {
+        testContext
+                .given(EnvironmentEntity.class)
+                .withName(name)
+                .withRegions(VALID_REGION)
+                .withLocation(VALID_LOCATION)
+                .when(Environment::post)
+
+                .given(EnvironmentEntity.class)
+                .withProxyConfigs(validLdap)
+                .when(Environment::putAttachResources)
+                .then(EnvironmentTest::checkProxyAttachedToEnv)
+                .validate();
+    }
+
     private static EnvironmentEntity checkCredentialAttachedToEnv(TestContext testContext, EnvironmentEntity environment, CloudbreakClient cloudbreakClient) {
         String credentialName = environment.getResponse().getCredentialName();
         if (!credentialName.equals(testContext.get(CredentialEntity.class).getName())) {
             throw new TestFailException("Credential is not attached to environment");
+        }
+        return environment;
+    }
+
+    private static EnvironmentEntity checkRdsAttachedToEnv(TestContext testContext, EnvironmentEntity environment, CloudbreakClient cloudbreakClient) {
+        Set<String> rdsConfigs = new HashSet<>();
+        Set<RDSConfigResponse> rdsConfigResponseSet = environment.getResponse().getRdsConfigs();
+        for (RDSConfigResponse rdsConfigResponse : rdsConfigResponseSet) {
+            rdsConfigs.add(rdsConfigResponse.getName());
+        }
+        if (!rdsConfigs.contains(testContext.get(RdsConfigEntity.class).getName())) {
+            throw new TestFailException("Rds is not attached to environment");
+        }
+        return environment;
+    }
+
+    private static EnvironmentEntity checkLdapAttachedToEnv(TestContext testContext, EnvironmentEntity environment, CloudbreakClient cloudbreakClient) {
+        Set<String> ldapConfigs = new HashSet<>();
+        Set<LdapConfigResponse> ldapConfigResponseSet = environment.getResponse().getLdapConfigs();
+        for (LdapConfigResponse ldapConfigResponse : ldapConfigResponseSet) {
+            ldapConfigs.add(ldapConfigResponse.getName());
+        }
+        if (!ldapConfigs.contains(testContext.get(LdapConfigEntity.class).getName())) {
+            throw new TestFailException("Ldap is not attached to environment");
+        }
+        return environment;
+    }
+
+    private static EnvironmentEntity checkProxyAttachedToEnv(TestContext testContext, EnvironmentEntity environment, CloudbreakClient cloudbreakClient) {
+        Set<String> proxyConfigs = new HashSet<>();
+        Set<ProxyConfigResponse> proxyConfigResponseSet = environment.getResponse().getProxyConfigs();
+        for (ProxyConfigResponse proxyConfigResponse : proxyConfigResponseSet) {
+            proxyConfigs.add(proxyConfigResponse.getName());
+        }
+        if (!proxyConfigs.contains(testContext.get(ProxyConfigEntity.class).getName())) {
+            throw new TestFailException("Proxy is not attached to environment");
         }
         return environment;
     }
