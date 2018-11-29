@@ -39,7 +39,7 @@ public class BlueprintSegmentReaderTest {
         Map<ServiceName, TemplateFiles> kerberosDescriptorFiles = underTest.collectAllKerberosDescriptorFile();
 
         Assert.assertEquals(3L, configFiles.size());
-        Assert.assertEquals(24L, serviceFiles.size());
+        Assert.assertEquals(26L, serviceFiles.size());
         Assert.assertEquals(1L, settingsFiles.size());
         Assert.assertEquals(1L, kerberosDescriptorFiles.size());
     }
