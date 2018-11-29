@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.cluster.KerberosConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariClientFactory;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -54,15 +55,19 @@ public class SharedServiceConfigProvider {
     @Inject
     private CentralBlueprintParameterQueryService centralBlueprintParameterQueryService;
 
+    @Inject
+    private KerberosConfigProvider kerberosConfigProvider;
+
     public Cluster configureCluster(@Nonnull Cluster requestedCluster, ConnectedClusterRequest connectedClusterRequest, User user, Workspace workspace) {
         Objects.requireNonNull(requestedCluster);
         if (connectedClusterRequest != null) {
-            Stack publicStack = queryStack(connectedClusterRequest.getSourceClusterId(),
+            Stack datalake = queryStack(connectedClusterRequest.getSourceClusterId(),
                     Optional.ofNullable(connectedClusterRequest.getSourceClusterName()), user, workspace);
-            Cluster sourceCluster = queryCluster(publicStack);
+            Cluster sourceCluster = queryCluster(datalake);
             if (sourceCluster != null) {
-                setupLdap(requestedCluster, publicStack);
+                setupLdap(requestedCluster, sourceCluster);
                 setupRds(requestedCluster, sourceCluster);
+                kerberosConfigProvider.setKerberosConfigForWorkloadCluster(requestedCluster, datalake);
             }
         }
         return requestedCluster;
@@ -139,7 +144,7 @@ public class SharedServiceConfigProvider {
             requestedCluster.getRdsConfigs().addAll(
                     sourceCluster.getRdsConfigs()
                             .stream()
-                            .filter(rdsConfig -> !ResourceStatus.DEFAULT.equals(rdsConfig.getStatus()))
+                            .filter(rdsConfig -> ResourceStatus.DEFAULT != rdsConfig.getStatus())
                             .collect(toSet()));
         }
     }
@@ -154,7 +159,7 @@ public class SharedServiceConfigProvider {
                 : stackService.getById(sourceClusterId);
     }
 
-    private void setupLdap(Cluster requestedCluster, Stack publicStack) {
-        requestedCluster.setLdapConfig(publicStack.getCluster().getLdapConfig());
+    private void setupLdap(Cluster requestedCluster, Cluster datalake) {
+        requestedCluster.setLdapConfig(datalake.getLdapConfig());
     }
 }

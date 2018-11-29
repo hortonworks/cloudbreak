@@ -13,9 +13,9 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 @Service
 public class KerberosConfigProvider {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(KerberosConfigProvider.class);
 
-    void setKerberosConfigForWorkloadCluster(Cluster cluster, Stack datalake) {
+    public void setKerberosConfigForWorkloadCluster(Cluster cluster, Stack datalake) {
         Stack stack = cluster.getStack();
         String stackName = stack.getName();
         if (stack.getDatalakeId() != null) {
