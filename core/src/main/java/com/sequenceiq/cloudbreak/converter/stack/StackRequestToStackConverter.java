@@ -48,9 +48,7 @@ import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.account.PreferencesService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Component
 public class StackRequestToStackConverter extends AbstractConversionServiceAwareConverter<StackRequest, Stack> {
@@ -66,12 +64,6 @@ public class StackRequestToStackConverter extends AbstractConversionServiceAware
 
     @Inject
     private OrchestratorTypeResolver orchestratorTypeResolver;
-
-    @Inject
-    private PreferencesService preferencesService;
-
-    @Inject
-    private StackService stackService;
 
     @Inject
     private DefaultCostTaggingService defaultCostTaggingService;

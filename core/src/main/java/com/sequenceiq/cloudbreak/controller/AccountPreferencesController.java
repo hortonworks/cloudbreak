@@ -4,7 +4,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
@@ -17,7 +16,6 @@ import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.AccountPreferencesEndpoint;
 import com.sequenceiq.cloudbreak.api.model.AccountPreferencesResponse;
 import com.sequenceiq.cloudbreak.api.model.SupportedExternalDatabaseServiceEntryResponse;
-import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.account.PreferencesService;
 import com.sequenceiq.cloudbreak.validation.externaldatabase.SupportedDatabaseProvider;
 
@@ -31,9 +29,6 @@ public class AccountPreferencesController implements AccountPreferencesEndpoint 
     @Autowired
     @Qualifier("conversionService")
     private ConversionService conversionService;
-
-    @Inject
-    private RestRequestThreadLocalService restRequestThreadLocalService;
 
     @Override
     public AccountPreferencesResponse get() {

@@ -14,12 +14,10 @@ import com.sequenceiq.cloudbreak.cloud.event.setup.CheckImageResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
-import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
 import com.sequenceiq.cloudbreak.common.type.ImageStatus;
 import com.sequenceiq.cloudbreak.common.type.ImageStatusResult;
 
 import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @Component
 public class CheckImageHandler implements CloudPlatformEventHandler<CheckImageRequest> {
@@ -28,12 +26,6 @@ public class CheckImageHandler implements CloudPlatformEventHandler<CheckImageRe
 
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
-
-    @Inject
-    private PollTaskFactory statusCheckFactory;
-
-    @Inject
-    private EventBus eventBus;
 
     @Override
     public Class<CheckImageRequest> type() {

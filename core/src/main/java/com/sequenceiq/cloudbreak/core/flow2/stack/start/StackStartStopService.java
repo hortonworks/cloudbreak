@@ -33,7 +33,6 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
 import com.sequenceiq.cloudbreak.service.usages.UsageService;
-import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Service
 public class StackStartStopService {
@@ -53,9 +52,6 @@ public class StackStartStopService {
 
     @Inject
     private UsageService usageService;
-
-    @Inject
-    private StackUtil stackUtil;
 
     public void startStackStart(StackStartStopContext context) {
         Stack stack = context.getStack();

@@ -28,9 +28,6 @@ public class GcpCredentialConnector implements CredentialConnector {
     private GcpContextBuilder gcpContextBuilder;
 
     @Inject
-    private GcpPlatformParameters gcpPlatformParameters;
-
-    @Inject
     private GcpCredentialVerifier gcpCredentialVerifier;
 
     @Override
@@ -74,7 +71,6 @@ public class GcpCredentialConnector implements CredentialConnector {
      *                    If the passed Optional is empty, then a default
      *                    message is going to be passed to the status
      *                    instance.
-     *
      * @return The combined CloudCredentialStatus instance which stores all
      * the necessary/required data for a proper object with a FAILED status.
      */
@@ -92,7 +88,6 @@ public class GcpCredentialConnector implements CredentialConnector {
      *
      * @param e The TokenResponseException which content should have a
      *          "error_description" parameter with a string value.
-     *
      * @return A String Optional with the content of the "error_description"
      * from the exception, or an empty one.
      */

@@ -4,8 +4,6 @@ import static com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstant
 
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.openstack4j.api.Builders;
 import org.openstack4j.api.OSClient;
 import org.openstack4j.api.exceptions.OS4JException;
@@ -21,7 +19,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants;
-import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackUtils;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.OpenStackResourceException;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.context.OpenStackContext;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.NeutronNetworkView;
@@ -30,9 +27,6 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
 @Service
 public class OpenStackNetworkResourceBuilder extends AbstractOpenStackNetworkResourceBuilder {
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackNetworkResourceBuilder.class);
-
-    @Inject
-    private OpenStackUtils utils;
 
     @Override
     public CloudResource build(OpenStackContext context, AuthenticatedContext auth, Network network, Security security, CloudResource buildableResource) {

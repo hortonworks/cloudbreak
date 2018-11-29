@@ -30,7 +30,6 @@ import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecution
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.environment.AbstractEnvironmentAwareService;
-import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
 import com.sequenceiq.cloudbreak.util.NameUtil;
 
 @Service
@@ -43,9 +42,6 @@ public class RdsConfigService extends AbstractEnvironmentAwareService<RDSConfig>
 
     @Inject
     private ClusterService clusterService;
-
-    @Inject
-    private StackApiViewService stackApiViewService;
 
     @Inject
     private RdsConnectionValidator rdsConnectionValidator;

@@ -36,7 +36,6 @@ import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -59,9 +58,6 @@ public class StackV2Controller extends NotificationController implements StackV2
     @Inject
     @Named("conversionService")
     private ConversionService conversionService;
-
-    @Inject
-    private CloudParameterCache cloudParameterCache;
 
     @Inject
     private ClusterService clusterService;

@@ -31,7 +31,6 @@ import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
-import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.ResourceRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
@@ -52,9 +51,6 @@ public class MountDisks {
 
     @Inject
     private ResourceRepository resourceRepository;
-
-    @Inject
-    private InstanceMetaDataRepository instanceMetaDataRepository;
 
     @Inject
     private GatewayConfigService gatewayConfigService;

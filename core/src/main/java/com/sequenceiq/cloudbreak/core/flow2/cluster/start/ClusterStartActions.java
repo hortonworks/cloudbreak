@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
-import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.AbstractClusterAction;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterViewContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
@@ -22,14 +21,11 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartPollingRe
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartPollingResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartResult;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 
 @Configuration
 public class ClusterStartActions {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterStartActions.class);
-
-    @Inject
-    private ClusterService clusterService;
 
     @Inject
     private ClusterStartService clusterStartService;

@@ -10,7 +10,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
-import com.sequenceiq.cloudbreak.cloud.openstack.auth.OpenStackClient;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.AbstractOpenStackResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.context.OpenStackContext;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.service.OpenStackResourceNameService;
@@ -20,9 +19,6 @@ public abstract class AbstractOpenStackGroupResourceBuilder extends AbstractOpen
 
     @Inject
     private OpenStackResourceNameService resourceNameService;
-
-    @Inject
-    private OpenStackClient openStackClient;
 
     @Override
     public List<CloudResourceStatus> checkResources(OpenStackContext context, AuthenticatedContext auth, List<CloudResource> resources) {

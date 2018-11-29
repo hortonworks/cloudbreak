@@ -17,7 +17,6 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
-import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
@@ -41,9 +40,6 @@ public class UpscaleStackHandler implements CloudPlatformEventHandler<UpscaleSta
 
     @Inject
     private PollTaskFactory statusCheckFactory;
-
-    @Inject
-    private PersistenceNotifier persistenceNotifier;
 
     @Inject
     private EventBus eventBus;

@@ -56,8 +56,6 @@ import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.user.UserService;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredEventClient;
 import com.sequenceiq.cloudbreak.structuredevent.event.OperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredRestCallEvent;
@@ -99,12 +97,6 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
 
     @Value("${info.app.version:}")
     private String cbVersion;
-
-    @Inject
-    private WorkspaceService workspaceService;
-
-    @Inject
-    private UserService userService;
 
     @Inject
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;

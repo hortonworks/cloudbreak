@@ -24,7 +24,6 @@ import com.sequenceiq.cloudbreak.api.model.v2.ImageSettings;
 import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
@@ -56,9 +55,6 @@ public class StackV2RequestToStackRequestConverter extends AbstractConversionSer
 
     @Inject
     private SharedServiceConfigProvider sharedServiceConfigProvider;
-
-    @Inject
-    private TemplateValidator templateValidator;
 
     @Inject
     private UserService userService;

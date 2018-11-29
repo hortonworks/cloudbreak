@@ -23,7 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
@@ -69,9 +68,6 @@ public class AzurePlatformParameters implements PlatformParameters {
 
     @Value("${cb.arm.zone.parameter.default:North Europe}")
     private String armZoneParameterDefault;
-
-    @Inject
-    private Environment environment;
 
     @Inject
     @Qualifier("AzureTagSpecification")

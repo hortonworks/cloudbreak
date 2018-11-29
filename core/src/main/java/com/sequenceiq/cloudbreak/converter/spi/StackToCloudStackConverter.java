@@ -55,7 +55,6 @@ import com.sequenceiq.cloudbreak.repository.SecurityRuleRepository;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
-import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationsViewProvider;
 
 @Component
 public class StackToCloudStackConverter {
@@ -73,9 +72,6 @@ public class StackToCloudStackConverter {
 
     @Inject
     private DefaultRootVolumeSizeProvider defaultRootVolumeSizeProvider;
-
-    @Inject
-    private FileSystemConfigurationsViewProvider fileSystemConfigurationsViewProvider;
 
     @Inject
     private InstanceMetadataToImageIdConverter instanceMetadataToImageIdConverter;

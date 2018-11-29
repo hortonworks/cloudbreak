@@ -11,7 +11,6 @@ import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterTerminat
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterTerminationResult;
 import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -19,9 +18,6 @@ import reactor.bus.EventBus;
 @Component
 public class ClusterTerminationHandler implements ReactorEventHandler<ClusterTerminationRequest> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterTerminationHandler.class);
-
-    @Inject
-    private StackService stackService;
 
     @Inject
     private EventBus eventBus;

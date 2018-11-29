@@ -11,16 +11,12 @@ import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.repository.FileSystemRepository;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
-import com.sequenceiq.cloudbreak.service.AuthorizationService;
 
 @Service
 public class FileSystemConfigService extends AbstractWorkspaceAwareResourceService<FileSystem> {
 
     @Inject
     private FileSystemRepository fileSystemRepository;
-
-    @Inject
-    private AuthorizationService authService;
 
     @Override
     public WorkspaceResourceRepository<FileSystem, Long> repository() {

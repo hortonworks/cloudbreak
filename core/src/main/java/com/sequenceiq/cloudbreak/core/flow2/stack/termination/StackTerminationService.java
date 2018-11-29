@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackResult;
 import com.sequenceiq.cloudbreak.common.type.BillingStatus;
-import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -20,10 +19,9 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.service.stack.flow.TerminationService;
 import com.sequenceiq.cloudbreak.service.usages.UsageService;
-import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Service
 public class StackTerminationService {
@@ -39,9 +37,6 @@ public class StackTerminationService {
     private FlowMessageService flowMessageService;
 
     @Inject
-    private StackService stackService;
-
-    @Inject
     private StackUpdater stackUpdater;
 
     @Inject
@@ -49,9 +44,6 @@ public class StackTerminationService {
 
     @Inject
     private DependecyDeletionService dependecyDeletionService;
-
-    @Inject
-    private StackUtil stackUtil;
 
     @Inject
     private CloudbreakMetricService metricService;

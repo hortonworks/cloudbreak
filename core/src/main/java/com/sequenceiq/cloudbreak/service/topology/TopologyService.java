@@ -14,14 +14,11 @@ import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Topology;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.TopologyRepository;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
-import com.sequenceiq.cloudbreak.service.credential.CredentialService;
-import com.sequenceiq.cloudbreak.service.network.NetworkService;
-import com.sequenceiq.cloudbreak.service.template.TemplateService;
 
 @Service
 public class TopologyService extends AbstractWorkspaceAwareResourceService<Topology> {
@@ -34,15 +31,6 @@ public class TopologyService extends AbstractWorkspaceAwareResourceService<Topol
 
     @Inject
     private TopologyRepository topologyRepository;
-
-    @Inject
-    private CredentialService credentialService;
-
-    @Inject
-    private TemplateService templateService;
-
-    @Inject
-    private NetworkService networkService;
 
     public Topology get(Long id) {
         return topologyRepository.findById(id).orElseThrow(notFound("Topology", id));

@@ -19,14 +19,11 @@ import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
 import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.StackValidationRequest;
-import com.sequenceiq.cloudbreak.authorization.PermissionCheckerService;
-import com.sequenceiq.cloudbreak.authorization.PermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
@@ -43,9 +40,6 @@ public class StackV1Controller extends NotificationController implements StackV1
     private StackCommonService stackCommonService;
 
     @Inject
-    private StackService stackService;
-
-    @Inject
     private UserService userService;
 
     @Inject
@@ -53,12 +47,6 @@ public class StackV1Controller extends NotificationController implements StackV1
 
     @Inject
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
-
-    @Inject
-    private PermissionCheckerService permissionCheckerService;
-
-    @Inject
-    private PermissionCheckingUtils permissionCheckingUtils;
 
     @Override
     public StackResponse postPrivate(StackRequest stackRequest) {

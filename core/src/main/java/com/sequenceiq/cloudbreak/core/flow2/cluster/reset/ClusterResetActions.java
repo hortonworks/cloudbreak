@@ -13,7 +13,6 @@ import org.springframework.statemachine.action.Action;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterViewContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
-import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
@@ -21,21 +20,10 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartAmbariRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartAmbariSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ClusterResetRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ClusterResetResult;
-import com.sequenceiq.cloudbreak.service.StackUpdater;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 
 @Configuration
 public class ClusterResetActions {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterResetActions.class);
-
-    @Inject
-    private FlowMessageService flowMessageService;
-
-    @Inject
-    private ClusterService clusterService;
-
-    @Inject
-    private StackUpdater stackUpdater;
 
     @Inject
     private ClusterResetService clusterResetService;

@@ -20,16 +20,12 @@ import com.sequenceiq.cloudbreak.controller.validation.credential.CredentialVali
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.service.stack.resource.definition.credential.CredentialDefinitionService;
-import com.sequenceiq.cloudbreak.service.topology.TopologyService;
 
 @Component
 public class CredentialToCredentialResponseConverter extends AbstractConversionServiceAwareConverter<Credential, CredentialResponse> {
     private static final List<String> FIELDS_TO_COVER = Arrays.asList("password", "secretKey", "serviceAccountPrivateKey");
 
     private static final String PLACEHOLDER = "********";
-
-    @Inject
-    private TopologyService topologyService;
 
     @Inject
     private CredentialValidator credentialValidator;

@@ -21,13 +21,12 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintComponentConfigProvider;
-import com.sequenceiq.cloudbreak.template.processor.configuration.BlueprintConfigurationEntry;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
-import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.blueprint.SmartsenseConfigurationLocator;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
+import com.sequenceiq.cloudbreak.template.processor.configuration.BlueprintConfigurationEntry;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 
 @Component
@@ -58,9 +57,6 @@ public class SmartSenseConfigProvider implements BlueprintComponentConfigProvide
 
     @Inject
     private CloudbreakNodeConfig cloudbreakNodeConfig;
-
-    @Inject
-    private BlueprintProcessorFactory blueprintProcessorFactory;
 
     @Inject
     private SmartsenseConfigurationLocator smartsenseConfigurationLocator;

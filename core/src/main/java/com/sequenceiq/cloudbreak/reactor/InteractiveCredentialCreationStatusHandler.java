@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
 import com.sequenceiq.cloudbreak.cloud.event.credential.InteractiveCredentialCreationStatus;
-import com.sequenceiq.cloudbreak.converter.spi.ExtendedCloudCredentialToCredentialConverter;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
 import com.sequenceiq.cloudbreak.service.notification.Notification;
@@ -24,9 +23,6 @@ public class InteractiveCredentialCreationStatusHandler implements ReactorEventH
 
     @Inject
     private NotificationSender notificationSender;
-
-    @Inject
-    private ExtendedCloudCredentialToCredentialConverter extendedCloudCredentialToCredentialConverter;
 
     @Override
     public String selector() {

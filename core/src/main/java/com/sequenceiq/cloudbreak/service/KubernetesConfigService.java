@@ -22,7 +22,6 @@ import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecution
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.environment.AbstractEnvironmentAwareService;
 import com.sequenceiq.cloudbreak.service.secret.SecretService;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
 @Service
 public class KubernetesConfigService extends AbstractEnvironmentAwareService<KubernetesConfig> {
@@ -34,9 +33,6 @@ public class KubernetesConfigService extends AbstractEnvironmentAwareService<Kub
 
     @Inject
     private TransactionService transactionService;
-
-    @Inject
-    private WorkspaceService workspaceService;
 
     @Inject
     private SecretService secretService;

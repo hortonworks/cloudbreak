@@ -88,7 +88,6 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.DNDecommissionStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.cluster.flow.RSDecommissionStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
 import com.sequenceiq.cloudbreak.util.AmbariClientExceptionUtil;
 
@@ -108,9 +107,6 @@ public class AmbariDecommissioner {
     private static final int NO_REPLICATION = 0;
 
     private static final Map<String, String> COMPONENTS_NEED_TO_DECOMMISSION = new HashMap<>();
-
-    @Inject
-    private StackService stackService;
 
     @Inject
     private HostGroupService hostGroupService;

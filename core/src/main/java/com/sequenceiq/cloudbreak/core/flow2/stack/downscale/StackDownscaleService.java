@@ -29,7 +29,6 @@ import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecution
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
 import com.sequenceiq.cloudbreak.service.usages.UsageService;
-import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Service
 public class StackDownscaleService {
@@ -49,9 +48,6 @@ public class StackDownscaleService {
 
     @Inject
     private StackService stackService;
-
-    @Inject
-    private StackUtil stackUtil;
 
     public void startStackDownscale(StackScalingFlowContext context, StackDownscaleTriggerEvent stackDownscaleTriggerEvent) {
         LOGGER.debug("Downscaling of stack {}", context.getStack().getId());

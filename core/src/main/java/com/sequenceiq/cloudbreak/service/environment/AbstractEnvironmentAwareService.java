@@ -28,9 +28,6 @@ public abstract class AbstractEnvironmentAwareService<T extends EnvironmentAware
     private EnvironmentViewService environmentViewService;
 
     @Inject
-    private EnvironmentService environmentService;
-
-    @Inject
     private ResourceDetachValidator resourceDetachValidator;
 
     @Inject

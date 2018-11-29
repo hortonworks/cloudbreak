@@ -11,7 +11,6 @@ import org.springframework.util.StringUtils;
 
 import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintComponentConfigProvider;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
@@ -28,9 +27,6 @@ public class KerberosBlueprintService implements BlueprintComponentConfigProvide
     private static final String DOMAIN = "node.dc1.consul";
 
     private static final Integer KERBEROS_DB_PROPAGATION_PORT = 6318;
-
-    @Inject
-    private BlueprintProcessorFactory blueprintProcessorFactory;
 
     @Inject
     private KerberosDetailService kerberosDetailService;

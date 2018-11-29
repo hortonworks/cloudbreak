@@ -13,7 +13,6 @@ import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.notification.Notification;
 import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
 import com.sequenceiq.cloudbreak.service.user.UserService;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
 public abstract class NotificationController {
 
@@ -25,9 +24,6 @@ public abstract class NotificationController {
 
     @Inject
     private UserService userService;
-
-    @Inject
-    private WorkspaceService workspaceService;
 
     @Inject
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;

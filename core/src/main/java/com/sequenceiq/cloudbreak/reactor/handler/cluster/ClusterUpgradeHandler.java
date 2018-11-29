@@ -9,7 +9,6 @@ import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ClusterUpgradeRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ClusterUpgradeResult;
 import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -18,9 +17,6 @@ import reactor.bus.EventBus;
 public class ClusterUpgradeHandler implements ReactorEventHandler<ClusterUpgradeRequest> {
     @Inject
     private AmbariClusterUpgradeService ambariClusterUpgradeService;
-
-    @Inject
-    private StackService stackService;
 
     @Inject
     private EventBus eventBus;
