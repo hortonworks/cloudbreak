@@ -17,21 +17,18 @@ import (
 
 // MaintenanceModeJSON maintenance mode Json
 // swagger:model MaintenanceModeJson
-
 type MaintenanceModeJSON struct {
 
 	// maintenance mode status
+	// Enum: [ENABLED VALIDATION_REQUESTED DISABLED]
 	Status string `json:"status,omitempty"`
 }
-
-/* polymorph MaintenanceModeJson status false */
 
 // Validate validates this maintenance mode Json
 func (m *MaintenanceModeJSON) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateStatus(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -54,10 +51,13 @@ func init() {
 }
 
 const (
+
 	// MaintenanceModeJSONStatusENABLED captures enum value "ENABLED"
 	MaintenanceModeJSONStatusENABLED string = "ENABLED"
+
 	// MaintenanceModeJSONStatusVALIDATIONREQUESTED captures enum value "VALIDATION_REQUESTED"
 	MaintenanceModeJSONStatusVALIDATIONREQUESTED string = "VALIDATION_REQUESTED"
+
 	// MaintenanceModeJSONStatusDISABLED captures enum value "DISABLED"
 	MaintenanceModeJSONStatusDISABLED string = "DISABLED"
 )

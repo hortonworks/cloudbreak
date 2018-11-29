@@ -18,7 +18,6 @@ import (
 
 // AccountPreferencesResponse account preferences response
 // swagger:model AccountPreferencesResponse
-
 type AccountPreferencesResponse struct {
 
 	// feature switches
@@ -30,21 +29,15 @@ type AccountPreferencesResponse struct {
 	SupportedExternalDatabases []*SupportedExternalDatabaseServiceEntryResponse `json:"supportedExternalDatabases"`
 }
 
-/* polymorph AccountPreferencesResponse featureSwitches false */
-
-/* polymorph AccountPreferencesResponse supportedExternalDatabases false */
-
 // Validate validates this account preferences response
 func (m *AccountPreferencesResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateFeatureSwitches(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateSupportedExternalDatabases(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -106,13 +99,11 @@ func (m *AccountPreferencesResponse) validateSupportedExternalDatabases(formats 
 	}
 
 	for i := 0; i < len(m.SupportedExternalDatabases); i++ {
-
 		if swag.IsZero(m.SupportedExternalDatabases[i]) { // not required
 			continue
 		}
 
 		if m.SupportedExternalDatabases[i] != nil {
-
 			if err := m.SupportedExternalDatabases[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("supportedExternalDatabases" + "." + strconv.Itoa(i))

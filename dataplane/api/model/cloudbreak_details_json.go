@@ -8,28 +8,19 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
 // CloudbreakDetailsJSON cloudbreak details Json
 // swagger:model CloudbreakDetailsJson
-
 type CloudbreakDetailsJSON struct {
 
 	// version of the Cloudbreak that provisioned the stack
 	Version string `json:"version,omitempty"`
 }
 
-/* polymorph CloudbreakDetailsJson version false */
-
 // Validate validates this cloudbreak details Json
 func (m *CloudbreakDetailsJSON) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }
 

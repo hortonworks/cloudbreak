@@ -17,7 +17,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/hortonworks/cb-cli/dataplane/api/model"
+	model "github.com/hortonworks/cb-cli/dataplane/api/model"
 )
 
 // NewPostPublicStackV2ForBlueprintParams creates a new PostPublicStackV2ForBlueprintParams object
@@ -124,12 +124,10 @@ func (o *PostPublicStackV2ForBlueprintParams) WriteToRequest(r runtime.ClientReq
 	}
 	var res []error
 
-	if o.Body == nil {
-		o.Body = new(model.StackV2Request)
-	}
-
-	if err := r.SetBodyParam(o.Body); err != nil {
-		return err
+	if o.Body != nil {
+		if err := r.SetBodyParam(o.Body); err != nil {
+			return err
+		}
 	}
 
 	if len(res) > 0 {

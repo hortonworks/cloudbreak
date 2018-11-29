@@ -15,7 +15,6 @@ import (
 
 // CredentialResponse credential response
 // swagger:model CredentialResponse
-
 type CredentialResponse struct {
 
 	// provider specific attributes of the credential
@@ -53,50 +52,27 @@ type CredentialResponse struct {
 	Workspace *WorkspaceResourceResponse `json:"workspace,omitempty"`
 }
 
-/* polymorph CredentialResponse attributes false */
-
-/* polymorph CredentialResponse cloudPlatform false */
-
-/* polymorph CredentialResponse description false */
-
-/* polymorph CredentialResponse id false */
-
-/* polymorph CredentialResponse name false */
-
-/* polymorph CredentialResponse parameters false */
-
-/* polymorph CredentialResponse public false */
-
-/* polymorph CredentialResponse topologyId false */
-
-/* polymorph CredentialResponse workspace false */
-
 // Validate validates this credential response
 func (m *CredentialResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAttributes(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateCloudPlatform(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateDescription(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateWorkspace(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -113,7 +89,6 @@ func (m *CredentialResponse) validateAttributes(formats strfmt.Registry) error {
 	}
 
 	if m.Attributes != nil {
-
 		if err := m.Attributes.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("attributes")
@@ -179,7 +154,6 @@ func (m *CredentialResponse) validateWorkspace(formats strfmt.Registry) error {
 	}
 
 	if m.Workspace != nil {
-
 		if err := m.Workspace.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("workspace")

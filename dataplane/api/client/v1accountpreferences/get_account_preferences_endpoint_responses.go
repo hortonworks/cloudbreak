@@ -13,7 +13,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/hortonworks/cb-cli/dataplane/api/model"
+	model "github.com/hortonworks/cb-cli/dataplane/api/model"
 )
 
 // GetAccountPreferencesEndpointReader is a Reader for the GetAccountPreferencesEndpoint structure.

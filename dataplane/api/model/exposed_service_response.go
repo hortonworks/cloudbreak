@@ -8,13 +8,11 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
 // ExposedServiceResponse exposed service response
 // swagger:model ExposedServiceResponse
-
 type ExposedServiceResponse struct {
 
 	// display name
@@ -30,21 +28,8 @@ type ExposedServiceResponse struct {
 	ServiceName string `json:"serviceName,omitempty"`
 }
 
-/* polymorph ExposedServiceResponse displayName false */
-
-/* polymorph ExposedServiceResponse knoxService false */
-
-/* polymorph ExposedServiceResponse knoxUrl false */
-
-/* polymorph ExposedServiceResponse serviceName false */
-
 // Validate validates this exposed service response
 func (m *ExposedServiceResponse) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }
 

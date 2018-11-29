@@ -15,7 +15,6 @@ import (
 
 // StackImageChangeRequest stack image change request
 // swagger:model StackImageChangeRequest
-
 type StackImageChangeRequest struct {
 
 	// custom image catalog URL
@@ -28,16 +27,11 @@ type StackImageChangeRequest struct {
 	ImageID *string `json:"imageId"`
 }
 
-/* polymorph StackImageChangeRequest imageCatalogName false */
-
-/* polymorph StackImageChangeRequest imageId false */
-
 // Validate validates this stack image change request
 func (m *StackImageChangeRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateImageID(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

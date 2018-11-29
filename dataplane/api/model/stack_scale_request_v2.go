@@ -15,7 +15,6 @@ import (
 
 // StackScaleRequestV2 stack scale request v2
 // swagger:model StackScaleRequestV2
-
 type StackScaleRequestV2 struct {
 
 	// scaling adjustment of the instance groups
@@ -27,21 +26,15 @@ type StackScaleRequestV2 struct {
 	Group *string `json:"group"`
 }
 
-/* polymorph StackScaleRequestV2 desiredCount false */
-
-/* polymorph StackScaleRequestV2 group false */
-
 // Validate validates this stack scale request v2
 func (m *StackScaleRequestV2) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateDesiredCount(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateGroup(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

@@ -17,7 +17,6 @@ import (
 
 // CloudbreakEvent cloudbreak event
 // swagger:model CloudbreakEvent
-
 type CloudbreakEvent struct {
 
 	// availability zone of the stack
@@ -39,6 +38,7 @@ type CloudbreakEvent struct {
 	ClusterName string `json:"clusterName,omitempty"`
 
 	// status of the cluster
+	// Enum: [REQUESTED CREATE_IN_PROGRESS AVAILABLE UPDATE_IN_PROGRESS UPDATE_REQUESTED UPDATE_FAILED CREATE_FAILED ENABLE_SECURITY_FAILED PRE_DELETE_IN_PROGRESS DELETE_IN_PROGRESS DELETE_FAILED DELETE_COMPLETED STOPPED STOP_REQUESTED START_REQUESTED STOP_IN_PROGRESS START_IN_PROGRESS START_FAILED STOP_FAILED WAIT_FOR_SYNC MAINTENANCE_MODE_ENABLED]
 	ClusterStatus string `json:"clusterStatus,omitempty"`
 
 	// message of the event
@@ -66,6 +66,7 @@ type CloudbreakEvent struct {
 	StackName string `json:"stackName,omitempty"`
 
 	// status of the stack
+	// Enum: [REQUESTED CREATE_IN_PROGRESS AVAILABLE UPDATE_IN_PROGRESS UPDATE_REQUESTED UPDATE_FAILED CREATE_FAILED ENABLE_SECURITY_FAILED PRE_DELETE_IN_PROGRESS DELETE_IN_PROGRESS DELETE_FAILED DELETE_COMPLETED STOPPED STOP_REQUESTED START_REQUESTED STOP_IN_PROGRESS START_IN_PROGRESS START_FAILED STOP_FAILED WAIT_FOR_SYNC MAINTENANCE_MODE_ENABLED]
 	StackStatus string `json:"stackStatus,omitempty"`
 
 	// User ID in the new authorization model
@@ -75,53 +76,15 @@ type CloudbreakEvent struct {
 	WorkspaceID int64 `json:"workspaceId,omitempty"`
 }
 
-/* polymorph CloudbreakEvent availabilityZone false */
-
-/* polymorph CloudbreakEvent blueprintId false */
-
-/* polymorph CloudbreakEvent blueprintName false */
-
-/* polymorph CloudbreakEvent cloud false */
-
-/* polymorph CloudbreakEvent clusterId false */
-
-/* polymorph CloudbreakEvent clusterName false */
-
-/* polymorph CloudbreakEvent clusterStatus false */
-
-/* polymorph CloudbreakEvent eventMessage false */
-
-/* polymorph CloudbreakEvent eventTimestamp false */
-
-/* polymorph CloudbreakEvent eventType false */
-
-/* polymorph CloudbreakEvent instanceGroup false */
-
-/* polymorph CloudbreakEvent nodeCount false */
-
-/* polymorph CloudbreakEvent region false */
-
-/* polymorph CloudbreakEvent stackId false */
-
-/* polymorph CloudbreakEvent stackName false */
-
-/* polymorph CloudbreakEvent stackStatus false */
-
-/* polymorph CloudbreakEvent userId false */
-
-/* polymorph CloudbreakEvent workspaceId false */
-
 // Validate validates this cloudbreak event
 func (m *CloudbreakEvent) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateClusterStatus(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateStackStatus(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -144,46 +107,67 @@ func init() {
 }
 
 const (
+
 	// CloudbreakEventClusterStatusREQUESTED captures enum value "REQUESTED"
 	CloudbreakEventClusterStatusREQUESTED string = "REQUESTED"
+
 	// CloudbreakEventClusterStatusCREATEINPROGRESS captures enum value "CREATE_IN_PROGRESS"
 	CloudbreakEventClusterStatusCREATEINPROGRESS string = "CREATE_IN_PROGRESS"
+
 	// CloudbreakEventClusterStatusAVAILABLE captures enum value "AVAILABLE"
 	CloudbreakEventClusterStatusAVAILABLE string = "AVAILABLE"
+
 	// CloudbreakEventClusterStatusUPDATEINPROGRESS captures enum value "UPDATE_IN_PROGRESS"
 	CloudbreakEventClusterStatusUPDATEINPROGRESS string = "UPDATE_IN_PROGRESS"
+
 	// CloudbreakEventClusterStatusUPDATEREQUESTED captures enum value "UPDATE_REQUESTED"
 	CloudbreakEventClusterStatusUPDATEREQUESTED string = "UPDATE_REQUESTED"
+
 	// CloudbreakEventClusterStatusUPDATEFAILED captures enum value "UPDATE_FAILED"
 	CloudbreakEventClusterStatusUPDATEFAILED string = "UPDATE_FAILED"
+
 	// CloudbreakEventClusterStatusCREATEFAILED captures enum value "CREATE_FAILED"
 	CloudbreakEventClusterStatusCREATEFAILED string = "CREATE_FAILED"
+
 	// CloudbreakEventClusterStatusENABLESECURITYFAILED captures enum value "ENABLE_SECURITY_FAILED"
 	CloudbreakEventClusterStatusENABLESECURITYFAILED string = "ENABLE_SECURITY_FAILED"
+
 	// CloudbreakEventClusterStatusPREDELETEINPROGRESS captures enum value "PRE_DELETE_IN_PROGRESS"
 	CloudbreakEventClusterStatusPREDELETEINPROGRESS string = "PRE_DELETE_IN_PROGRESS"
+
 	// CloudbreakEventClusterStatusDELETEINPROGRESS captures enum value "DELETE_IN_PROGRESS"
 	CloudbreakEventClusterStatusDELETEINPROGRESS string = "DELETE_IN_PROGRESS"
+
 	// CloudbreakEventClusterStatusDELETEFAILED captures enum value "DELETE_FAILED"
 	CloudbreakEventClusterStatusDELETEFAILED string = "DELETE_FAILED"
+
 	// CloudbreakEventClusterStatusDELETECOMPLETED captures enum value "DELETE_COMPLETED"
 	CloudbreakEventClusterStatusDELETECOMPLETED string = "DELETE_COMPLETED"
+
 	// CloudbreakEventClusterStatusSTOPPED captures enum value "STOPPED"
 	CloudbreakEventClusterStatusSTOPPED string = "STOPPED"
+
 	// CloudbreakEventClusterStatusSTOPREQUESTED captures enum value "STOP_REQUESTED"
 	CloudbreakEventClusterStatusSTOPREQUESTED string = "STOP_REQUESTED"
+
 	// CloudbreakEventClusterStatusSTARTREQUESTED captures enum value "START_REQUESTED"
 	CloudbreakEventClusterStatusSTARTREQUESTED string = "START_REQUESTED"
+
 	// CloudbreakEventClusterStatusSTOPINPROGRESS captures enum value "STOP_IN_PROGRESS"
 	CloudbreakEventClusterStatusSTOPINPROGRESS string = "STOP_IN_PROGRESS"
+
 	// CloudbreakEventClusterStatusSTARTINPROGRESS captures enum value "START_IN_PROGRESS"
 	CloudbreakEventClusterStatusSTARTINPROGRESS string = "START_IN_PROGRESS"
+
 	// CloudbreakEventClusterStatusSTARTFAILED captures enum value "START_FAILED"
 	CloudbreakEventClusterStatusSTARTFAILED string = "START_FAILED"
+
 	// CloudbreakEventClusterStatusSTOPFAILED captures enum value "STOP_FAILED"
 	CloudbreakEventClusterStatusSTOPFAILED string = "STOP_FAILED"
+
 	// CloudbreakEventClusterStatusWAITFORSYNC captures enum value "WAIT_FOR_SYNC"
 	CloudbreakEventClusterStatusWAITFORSYNC string = "WAIT_FOR_SYNC"
+
 	// CloudbreakEventClusterStatusMAINTENANCEMODEENABLED captures enum value "MAINTENANCE_MODE_ENABLED"
 	CloudbreakEventClusterStatusMAINTENANCEMODEENABLED string = "MAINTENANCE_MODE_ENABLED"
 )
@@ -223,46 +207,67 @@ func init() {
 }
 
 const (
+
 	// CloudbreakEventStackStatusREQUESTED captures enum value "REQUESTED"
 	CloudbreakEventStackStatusREQUESTED string = "REQUESTED"
+
 	// CloudbreakEventStackStatusCREATEINPROGRESS captures enum value "CREATE_IN_PROGRESS"
 	CloudbreakEventStackStatusCREATEINPROGRESS string = "CREATE_IN_PROGRESS"
+
 	// CloudbreakEventStackStatusAVAILABLE captures enum value "AVAILABLE"
 	CloudbreakEventStackStatusAVAILABLE string = "AVAILABLE"
+
 	// CloudbreakEventStackStatusUPDATEINPROGRESS captures enum value "UPDATE_IN_PROGRESS"
 	CloudbreakEventStackStatusUPDATEINPROGRESS string = "UPDATE_IN_PROGRESS"
+
 	// CloudbreakEventStackStatusUPDATEREQUESTED captures enum value "UPDATE_REQUESTED"
 	CloudbreakEventStackStatusUPDATEREQUESTED string = "UPDATE_REQUESTED"
+
 	// CloudbreakEventStackStatusUPDATEFAILED captures enum value "UPDATE_FAILED"
 	CloudbreakEventStackStatusUPDATEFAILED string = "UPDATE_FAILED"
+
 	// CloudbreakEventStackStatusCREATEFAILED captures enum value "CREATE_FAILED"
 	CloudbreakEventStackStatusCREATEFAILED string = "CREATE_FAILED"
+
 	// CloudbreakEventStackStatusENABLESECURITYFAILED captures enum value "ENABLE_SECURITY_FAILED"
 	CloudbreakEventStackStatusENABLESECURITYFAILED string = "ENABLE_SECURITY_FAILED"
+
 	// CloudbreakEventStackStatusPREDELETEINPROGRESS captures enum value "PRE_DELETE_IN_PROGRESS"
 	CloudbreakEventStackStatusPREDELETEINPROGRESS string = "PRE_DELETE_IN_PROGRESS"
+
 	// CloudbreakEventStackStatusDELETEINPROGRESS captures enum value "DELETE_IN_PROGRESS"
 	CloudbreakEventStackStatusDELETEINPROGRESS string = "DELETE_IN_PROGRESS"
+
 	// CloudbreakEventStackStatusDELETEFAILED captures enum value "DELETE_FAILED"
 	CloudbreakEventStackStatusDELETEFAILED string = "DELETE_FAILED"
+
 	// CloudbreakEventStackStatusDELETECOMPLETED captures enum value "DELETE_COMPLETED"
 	CloudbreakEventStackStatusDELETECOMPLETED string = "DELETE_COMPLETED"
+
 	// CloudbreakEventStackStatusSTOPPED captures enum value "STOPPED"
 	CloudbreakEventStackStatusSTOPPED string = "STOPPED"
+
 	// CloudbreakEventStackStatusSTOPREQUESTED captures enum value "STOP_REQUESTED"
 	CloudbreakEventStackStatusSTOPREQUESTED string = "STOP_REQUESTED"
+
 	// CloudbreakEventStackStatusSTARTREQUESTED captures enum value "START_REQUESTED"
 	CloudbreakEventStackStatusSTARTREQUESTED string = "START_REQUESTED"
+
 	// CloudbreakEventStackStatusSTOPINPROGRESS captures enum value "STOP_IN_PROGRESS"
 	CloudbreakEventStackStatusSTOPINPROGRESS string = "STOP_IN_PROGRESS"
+
 	// CloudbreakEventStackStatusSTARTINPROGRESS captures enum value "START_IN_PROGRESS"
 	CloudbreakEventStackStatusSTARTINPROGRESS string = "START_IN_PROGRESS"
+
 	// CloudbreakEventStackStatusSTARTFAILED captures enum value "START_FAILED"
 	CloudbreakEventStackStatusSTARTFAILED string = "START_FAILED"
+
 	// CloudbreakEventStackStatusSTOPFAILED captures enum value "STOP_FAILED"
 	CloudbreakEventStackStatusSTOPFAILED string = "STOP_FAILED"
+
 	// CloudbreakEventStackStatusWAITFORSYNC captures enum value "WAIT_FOR_SYNC"
 	CloudbreakEventStackStatusWAITFORSYNC string = "WAIT_FOR_SYNC"
+
 	// CloudbreakEventStackStatusMAINTENANCEMODEENABLED captures enum value "MAINTENANCE_MODE_ENABLED"
 	CloudbreakEventStackStatusMAINTENANCEMODEENABLED string = "MAINTENANCE_MODE_ENABLED"
 )

@@ -17,7 +17,6 @@ import (
 
 // PlatformEncryptionKeysResponse platform encryption keys response
 // swagger:model PlatformEncryptionKeysResponse
-
 type PlatformEncryptionKeysResponse struct {
 
 	// encryption key configs
@@ -25,14 +24,11 @@ type PlatformEncryptionKeysResponse struct {
 	EncryptionKeyConfigs []*EncryptionKeyConfigJSON `json:"encryptionKeyConfigs"`
 }
 
-/* polymorph PlatformEncryptionKeysResponse encryptionKeyConfigs false */
-
 // Validate validates this platform encryption keys response
 func (m *PlatformEncryptionKeysResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateEncryptionKeyConfigs(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -53,13 +49,11 @@ func (m *PlatformEncryptionKeysResponse) validateEncryptionKeyConfigs(formats st
 	}
 
 	for i := 0; i < len(m.EncryptionKeyConfigs); i++ {
-
 		if swag.IsZero(m.EncryptionKeyConfigs[i]) { // not required
 			continue
 		}
 
 		if m.EncryptionKeyConfigs[i] != nil {
-
 			if err := m.EncryptionKeyConfigs[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("encryptionKeyConfigs" + "." + strconv.Itoa(i))

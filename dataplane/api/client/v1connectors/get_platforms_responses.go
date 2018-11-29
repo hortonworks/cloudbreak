@@ -9,9 +9,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
-	"github.com/go-openapi/validate"
 
 	strfmt "github.com/go-openapi/strfmt"
 )
@@ -47,7 +45,7 @@ func NewGetPlatformsOK() *GetPlatformsOK {
 successful operation
 */
 type GetPlatformsOK struct {
-	Payload GetPlatformsOKBody
+	Payload map[string]interface{}
 }
 
 func (o *GetPlatformsOK) Error() string {
@@ -61,25 +59,5 @@ func (o *GetPlatformsOK) readResponse(response runtime.ClientResponse, consumer 
 		return err
 	}
 
-	return nil
-}
-
-/*GetPlatformsOKBody get platforms o k body
-swagger:model GetPlatformsOKBody
-*/
-
-type GetPlatformsOKBody map[string]interface{}
-
-// Validate validates this get platforms o k body
-func (o GetPlatformsOKBody) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if err := validate.Required("getPlatformsOK", "body", o); err != nil {
-		return err
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }

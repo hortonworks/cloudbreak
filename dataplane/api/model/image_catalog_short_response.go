@@ -15,7 +15,6 @@ import (
 
 // ImageCatalogShortResponse image catalog short response
 // swagger:model ImageCatalogShortResponse
-
 type ImageCatalogShortResponse struct {
 
 	// description of the resource
@@ -48,49 +47,31 @@ type ImageCatalogShortResponse struct {
 	UsedAsDefault bool `json:"usedAsDefault"`
 }
 
-/* polymorph ImageCatalogShortResponse description false */
-
-/* polymorph ImageCatalogShortResponse id false */
-
-/* polymorph ImageCatalogShortResponse name false */
-
-/* polymorph ImageCatalogShortResponse publicInAccount false */
-
-/* polymorph ImageCatalogShortResponse url false */
-
-/* polymorph ImageCatalogShortResponse usedAsDefault false */
-
 // Validate validates this image catalog short response
 func (m *ImageCatalogShortResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateDescription(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateID(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validatePublicInAccount(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateURL(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateUsedAsDefault(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

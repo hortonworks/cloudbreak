@@ -18,7 +18,6 @@ import (
 
 // StackResponse stack response
 // swagger:model StackResponse
-
 type StackResponse struct {
 
 	// specific version of ambari
@@ -118,6 +117,7 @@ type StackResponse struct {
 	NodeCount int32 `json:"nodeCount,omitempty"`
 
 	// action on failure
+	// Enum: [ROLLBACK DO_NOTHING]
 	OnFailureAction string `json:"onFailureAction,omitempty"`
 
 	// the details of the container orchestrator api to use
@@ -139,6 +139,7 @@ type StackResponse struct {
 	StackAuthentication *StackAuthenticationResponse `json:"stackAuthentication,omitempty"`
 
 	// status of the stack
+	// Enum: [REQUESTED CREATE_IN_PROGRESS AVAILABLE UPDATE_IN_PROGRESS UPDATE_REQUESTED UPDATE_FAILED CREATE_FAILED ENABLE_SECURITY_FAILED PRE_DELETE_IN_PROGRESS DELETE_IN_PROGRESS DELETE_FAILED DELETE_COMPLETED STOPPED STOP_REQUESTED START_REQUESTED STOP_IN_PROGRESS START_IN_PROGRESS START_FAILED STOP_FAILED WAIT_FOR_SYNC MAINTENANCE_MODE_ENABLED]
 	Status string `json:"status,omitempty"`
 
 	// status message of the stack
@@ -151,174 +152,75 @@ type StackResponse struct {
 	Workspace *WorkspaceResourceResponse `json:"workspace,omitempty"`
 }
 
-/* polymorph StackResponse ambariVersion false */
-
-/* polymorph StackResponse applicationTags false */
-
-/* polymorph StackResponse availabilityZone false */
-
-/* polymorph StackResponse cloudPlatform false */
-
-/* polymorph StackResponse cloudbreakDetails false */
-
-/* polymorph StackResponse cloudbreakEvents false */
-
-/* polymorph StackResponse cloudbreakUsages false */
-
-/* polymorph StackResponse cluster false */
-
-/* polymorph StackResponse clusterNameAsSubdomain false */
-
-/* polymorph StackResponse created false */
-
-/* polymorph StackResponse credential false */
-
-/* polymorph StackResponse credentialId false */
-
-/* polymorph StackResponse customDomain false */
-
-/* polymorph StackResponse customHostname false */
-
-/* polymorph StackResponse customInputs false */
-
-/* polymorph StackResponse defaultTags false */
-
-/* polymorph StackResponse environment false */
-
-/* polymorph StackResponse failurePolicy false */
-
-/* polymorph StackResponse flexSubscription false */
-
-/* polymorph StackResponse gatewayPort false */
-
-/* polymorph StackResponse hardwareInfoGroups false */
-
-/* polymorph StackResponse hdpVersion false */
-
-/* polymorph StackResponse hostgroupNameAsHostname false */
-
-/* polymorph StackResponse id false */
-
-/* polymorph StackResponse image false */
-
-/* polymorph StackResponse instanceGroups false */
-
-/* polymorph StackResponse name false */
-
-/* polymorph StackResponse network false */
-
-/* polymorph StackResponse networkId false */
-
-/* polymorph StackResponse nodeCount false */
-
-/* polymorph StackResponse onFailureAction false */
-
-/* polymorph StackResponse orchestrator false */
-
-/* polymorph StackResponse parameters false */
-
-/* polymorph StackResponse platformVariant false */
-
-/* polymorph StackResponse public false */
-
-/* polymorph StackResponse region false */
-
-/* polymorph StackResponse stackAuthentication false */
-
-/* polymorph StackResponse status false */
-
-/* polymorph StackResponse statusReason false */
-
-/* polymorph StackResponse userDefinedTags false */
-
-/* polymorph StackResponse workspace false */
-
 // Validate validates this stack response
 func (m *StackResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateCloudbreakDetails(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateCloudbreakEvents(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateCloudbreakUsages(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateCluster(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateCredential(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateFailurePolicy(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateFlexSubscription(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateHardwareInfoGroups(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateImage(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateInstanceGroups(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateNetwork(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateOnFailureAction(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateOrchestrator(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateStackAuthentication(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateStatus(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateWorkspace(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -335,7 +237,6 @@ func (m *StackResponse) validateCloudbreakDetails(formats strfmt.Registry) error
 	}
 
 	if m.CloudbreakDetails != nil {
-
 		if err := m.CloudbreakDetails.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("cloudbreakDetails")
@@ -354,13 +255,11 @@ func (m *StackResponse) validateCloudbreakEvents(formats strfmt.Registry) error 
 	}
 
 	for i := 0; i < len(m.CloudbreakEvents); i++ {
-
 		if swag.IsZero(m.CloudbreakEvents[i]) { // not required
 			continue
 		}
 
 		if m.CloudbreakEvents[i] != nil {
-
 			if err := m.CloudbreakEvents[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("cloudbreakEvents" + "." + strconv.Itoa(i))
@@ -381,13 +280,11 @@ func (m *StackResponse) validateCloudbreakUsages(formats strfmt.Registry) error 
 	}
 
 	for i := 0; i < len(m.CloudbreakUsages); i++ {
-
 		if swag.IsZero(m.CloudbreakUsages[i]) { // not required
 			continue
 		}
 
 		if m.CloudbreakUsages[i] != nil {
-
 			if err := m.CloudbreakUsages[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("cloudbreakUsages" + "." + strconv.Itoa(i))
@@ -408,7 +305,6 @@ func (m *StackResponse) validateCluster(formats strfmt.Registry) error {
 	}
 
 	if m.Cluster != nil {
-
 		if err := m.Cluster.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("cluster")
@@ -427,7 +323,6 @@ func (m *StackResponse) validateCredential(formats strfmt.Registry) error {
 	}
 
 	if m.Credential != nil {
-
 		if err := m.Credential.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("credential")
@@ -446,7 +341,6 @@ func (m *StackResponse) validateFailurePolicy(formats strfmt.Registry) error {
 	}
 
 	if m.FailurePolicy != nil {
-
 		if err := m.FailurePolicy.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("failurePolicy")
@@ -465,7 +359,6 @@ func (m *StackResponse) validateFlexSubscription(formats strfmt.Registry) error 
 	}
 
 	if m.FlexSubscription != nil {
-
 		if err := m.FlexSubscription.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("flexSubscription")
@@ -488,13 +381,11 @@ func (m *StackResponse) validateHardwareInfoGroups(formats strfmt.Registry) erro
 	}
 
 	for i := 0; i < len(m.HardwareInfoGroups); i++ {
-
 		if swag.IsZero(m.HardwareInfoGroups[i]) { // not required
 			continue
 		}
 
 		if m.HardwareInfoGroups[i] != nil {
-
 			if err := m.HardwareInfoGroups[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("hardwareInfoGroups" + "." + strconv.Itoa(i))
@@ -515,7 +406,6 @@ func (m *StackResponse) validateImage(formats strfmt.Registry) error {
 	}
 
 	if m.Image != nil {
-
 		if err := m.Image.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("image")
@@ -534,13 +424,11 @@ func (m *StackResponse) validateInstanceGroups(formats strfmt.Registry) error {
 	}
 
 	for i := 0; i < len(m.InstanceGroups); i++ {
-
 		if swag.IsZero(m.InstanceGroups[i]) { // not required
 			continue
 		}
 
 		if m.InstanceGroups[i] != nil {
-
 			if err := m.InstanceGroups[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("instanceGroups" + "." + strconv.Itoa(i))
@@ -582,7 +470,6 @@ func (m *StackResponse) validateNetwork(formats strfmt.Registry) error {
 	}
 
 	if m.Network != nil {
-
 		if err := m.Network.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("network")
@@ -607,8 +494,10 @@ func init() {
 }
 
 const (
+
 	// StackResponseOnFailureActionROLLBACK captures enum value "ROLLBACK"
 	StackResponseOnFailureActionROLLBACK string = "ROLLBACK"
+
 	// StackResponseOnFailureActionDONOTHING captures enum value "DO_NOTHING"
 	StackResponseOnFailureActionDONOTHING string = "DO_NOTHING"
 )
@@ -642,7 +531,6 @@ func (m *StackResponse) validateOrchestrator(formats strfmt.Registry) error {
 	}
 
 	if m.Orchestrator != nil {
-
 		if err := m.Orchestrator.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("orchestrator")
@@ -661,7 +549,6 @@ func (m *StackResponse) validateStackAuthentication(formats strfmt.Registry) err
 	}
 
 	if m.StackAuthentication != nil {
-
 		if err := m.StackAuthentication.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("stackAuthentication")
@@ -686,46 +573,67 @@ func init() {
 }
 
 const (
+
 	// StackResponseStatusREQUESTED captures enum value "REQUESTED"
 	StackResponseStatusREQUESTED string = "REQUESTED"
+
 	// StackResponseStatusCREATEINPROGRESS captures enum value "CREATE_IN_PROGRESS"
 	StackResponseStatusCREATEINPROGRESS string = "CREATE_IN_PROGRESS"
+
 	// StackResponseStatusAVAILABLE captures enum value "AVAILABLE"
 	StackResponseStatusAVAILABLE string = "AVAILABLE"
+
 	// StackResponseStatusUPDATEINPROGRESS captures enum value "UPDATE_IN_PROGRESS"
 	StackResponseStatusUPDATEINPROGRESS string = "UPDATE_IN_PROGRESS"
+
 	// StackResponseStatusUPDATEREQUESTED captures enum value "UPDATE_REQUESTED"
 	StackResponseStatusUPDATEREQUESTED string = "UPDATE_REQUESTED"
+
 	// StackResponseStatusUPDATEFAILED captures enum value "UPDATE_FAILED"
 	StackResponseStatusUPDATEFAILED string = "UPDATE_FAILED"
+
 	// StackResponseStatusCREATEFAILED captures enum value "CREATE_FAILED"
 	StackResponseStatusCREATEFAILED string = "CREATE_FAILED"
+
 	// StackResponseStatusENABLESECURITYFAILED captures enum value "ENABLE_SECURITY_FAILED"
 	StackResponseStatusENABLESECURITYFAILED string = "ENABLE_SECURITY_FAILED"
+
 	// StackResponseStatusPREDELETEINPROGRESS captures enum value "PRE_DELETE_IN_PROGRESS"
 	StackResponseStatusPREDELETEINPROGRESS string = "PRE_DELETE_IN_PROGRESS"
+
 	// StackResponseStatusDELETEINPROGRESS captures enum value "DELETE_IN_PROGRESS"
 	StackResponseStatusDELETEINPROGRESS string = "DELETE_IN_PROGRESS"
+
 	// StackResponseStatusDELETEFAILED captures enum value "DELETE_FAILED"
 	StackResponseStatusDELETEFAILED string = "DELETE_FAILED"
+
 	// StackResponseStatusDELETECOMPLETED captures enum value "DELETE_COMPLETED"
 	StackResponseStatusDELETECOMPLETED string = "DELETE_COMPLETED"
+
 	// StackResponseStatusSTOPPED captures enum value "STOPPED"
 	StackResponseStatusSTOPPED string = "STOPPED"
+
 	// StackResponseStatusSTOPREQUESTED captures enum value "STOP_REQUESTED"
 	StackResponseStatusSTOPREQUESTED string = "STOP_REQUESTED"
+
 	// StackResponseStatusSTARTREQUESTED captures enum value "START_REQUESTED"
 	StackResponseStatusSTARTREQUESTED string = "START_REQUESTED"
+
 	// StackResponseStatusSTOPINPROGRESS captures enum value "STOP_IN_PROGRESS"
 	StackResponseStatusSTOPINPROGRESS string = "STOP_IN_PROGRESS"
+
 	// StackResponseStatusSTARTINPROGRESS captures enum value "START_IN_PROGRESS"
 	StackResponseStatusSTARTINPROGRESS string = "START_IN_PROGRESS"
+
 	// StackResponseStatusSTARTFAILED captures enum value "START_FAILED"
 	StackResponseStatusSTARTFAILED string = "START_FAILED"
+
 	// StackResponseStatusSTOPFAILED captures enum value "STOP_FAILED"
 	StackResponseStatusSTOPFAILED string = "STOP_FAILED"
+
 	// StackResponseStatusWAITFORSYNC captures enum value "WAIT_FOR_SYNC"
 	StackResponseStatusWAITFORSYNC string = "WAIT_FOR_SYNC"
+
 	// StackResponseStatusMAINTENANCEMODEENABLED captures enum value "MAINTENANCE_MODE_ENABLED"
 	StackResponseStatusMAINTENANCEMODEENABLED string = "MAINTENANCE_MODE_ENABLED"
 )
@@ -759,7 +667,6 @@ func (m *StackResponse) validateWorkspace(formats strfmt.Registry) error {
 	}
 
 	if m.Workspace != nil {
-
 		if err := m.Workspace.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("workspace")

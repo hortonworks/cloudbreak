@@ -15,7 +15,6 @@ import (
 
 // LocationRequest location request
 // swagger:model LocationRequest
-
 type LocationRequest struct {
 
 	// Location latitude of the environment.
@@ -29,18 +28,11 @@ type LocationRequest struct {
 	Longitude float64 `json:"longitude,omitempty"`
 }
 
-/* polymorph LocationRequest latitude false */
-
-/* polymorph LocationRequest locationName false */
-
-/* polymorph LocationRequest longitude false */
-
 // Validate validates this location request
 func (m *LocationRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateLocationName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

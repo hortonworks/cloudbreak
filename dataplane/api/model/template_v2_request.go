@@ -14,7 +14,6 @@ import (
 
 // TemplateV2Request template v2 request
 // swagger:model TemplateV2Request
-
 type TemplateV2Request struct {
 
 	// aws specific parameters for template
@@ -54,51 +53,23 @@ type TemplateV2Request struct {
 	YarnParameters YarnParameters `json:"yarnParameters,omitempty"`
 }
 
-/* polymorph TemplateV2Request awsParameters false */
-
-/* polymorph TemplateV2Request azureParameters false */
-
-/* polymorph TemplateV2Request customInstanceType false */
-
-/* polymorph TemplateV2Request gcpParameters false */
-
-/* polymorph TemplateV2Request instanceType false */
-
-/* polymorph TemplateV2Request openStackParameters false */
-
-/* polymorph TemplateV2Request parameters false */
-
-/* polymorph TemplateV2Request rootVolumeSize false */
-
-/* polymorph TemplateV2Request volumeCount false */
-
-/* polymorph TemplateV2Request volumeSize false */
-
-/* polymorph TemplateV2Request volumeType false */
-
-/* polymorph TemplateV2Request yarnParameters false */
-
 // Validate validates this template v2 request
 func (m *TemplateV2Request) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAwsParameters(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateAzureParameters(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateCustomInstanceType(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateGcpParameters(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -115,7 +86,6 @@ func (m *TemplateV2Request) validateAwsParameters(formats strfmt.Registry) error
 	}
 
 	if m.AwsParameters != nil {
-
 		if err := m.AwsParameters.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("awsParameters")
@@ -134,7 +104,6 @@ func (m *TemplateV2Request) validateAzureParameters(formats strfmt.Registry) err
 	}
 
 	if m.AzureParameters != nil {
-
 		if err := m.AzureParameters.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("azureParameters")
@@ -153,7 +122,6 @@ func (m *TemplateV2Request) validateCustomInstanceType(formats strfmt.Registry) 
 	}
 
 	if m.CustomInstanceType != nil {
-
 		if err := m.CustomInstanceType.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("customInstanceType")
@@ -172,7 +140,6 @@ func (m *TemplateV2Request) validateGcpParameters(formats strfmt.Registry) error
 	}
 
 	if m.GcpParameters != nil {
-
 		if err := m.GcpParameters.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("gcpParameters")

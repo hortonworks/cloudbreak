@@ -17,7 +17,6 @@ import (
 
 // SecurityGroupRequest security group request
 // swagger:model SecurityGroupRequest
-
 type SecurityGroupRequest struct {
 
 	// type of cloud provider
@@ -45,44 +44,27 @@ type SecurityGroupRequest struct {
 	SecurityRules []*SecurityRuleRequest `json:"securityRules"`
 }
 
-/* polymorph SecurityGroupRequest cloudPlatform false */
-
-/* polymorph SecurityGroupRequest description false */
-
-/* polymorph SecurityGroupRequest name false */
-
-/* polymorph SecurityGroupRequest securityGroupId false */
-
-/* polymorph SecurityGroupRequest securityGroupIds false */
-
-/* polymorph SecurityGroupRequest securityRules false */
-
 // Validate validates this security group request
 func (m *SecurityGroupRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateCloudPlatform(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateDescription(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateSecurityGroupIds(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateSecurityRules(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -151,13 +133,11 @@ func (m *SecurityGroupRequest) validateSecurityRules(formats strfmt.Registry) er
 	}
 
 	for i := 0; i < len(m.SecurityRules); i++ {
-
 		if swag.IsZero(m.SecurityRules[i]) { // not required
 			continue
 		}
 
 		if m.SecurityRules[i] != nil {
-
 			if err := m.SecurityRules[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("securityRules" + "." + strconv.Itoa(i))

@@ -17,7 +17,6 @@ import (
 
 // HostGroupViewResponse host group view response
 // swagger:model HostGroupViewResponse
-
 type HostGroupViewResponse struct {
 
 	// id of the resource
@@ -32,23 +31,15 @@ type HostGroupViewResponse struct {
 	Name *string `json:"name"`
 }
 
-/* polymorph HostGroupViewResponse id false */
-
-/* polymorph HostGroupViewResponse metadata false */
-
-/* polymorph HostGroupViewResponse name false */
-
 // Validate validates this host group view response
 func (m *HostGroupViewResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateMetadata(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -69,13 +60,11 @@ func (m *HostGroupViewResponse) validateMetadata(formats strfmt.Registry) error 
 	}
 
 	for i := 0; i < len(m.Metadata); i++ {
-
 		if swag.IsZero(m.Metadata[i]) { // not required
 			continue
 		}
 
 		if m.Metadata[i] != nil {
-
 			if err := m.Metadata[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("metadata" + "." + strconv.Itoa(i))

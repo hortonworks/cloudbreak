@@ -15,7 +15,6 @@ import (
 
 // Oracle oracle
 // swagger:model oracle
-
 type Oracle struct {
 
 	// Version of the Database
@@ -23,14 +22,11 @@ type Oracle struct {
 	Version *string `json:"version"`
 }
 
-/* polymorph oracle version false */
-
 // Validate validates this oracle
 func (m *Oracle) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateVersion(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

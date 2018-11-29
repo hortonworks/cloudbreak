@@ -16,7 +16,6 @@ import (
 
 // SecurityRulesResponse security rules response
 // swagger:model SecurityRulesResponse
-
 type SecurityRulesResponse struct {
 
 	// security rules for core type
@@ -26,21 +25,15 @@ type SecurityRulesResponse struct {
 	Gateway []*SecurityRuleResponse `json:"gateway"`
 }
 
-/* polymorph SecurityRulesResponse core false */
-
-/* polymorph SecurityRulesResponse gateway false */
-
 // Validate validates this security rules response
 func (m *SecurityRulesResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateCore(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateGateway(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -57,13 +50,11 @@ func (m *SecurityRulesResponse) validateCore(formats strfmt.Registry) error {
 	}
 
 	for i := 0; i < len(m.Core); i++ {
-
 		if swag.IsZero(m.Core[i]) { // not required
 			continue
 		}
 
 		if m.Core[i] != nil {
-
 			if err := m.Core[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("core" + "." + strconv.Itoa(i))
@@ -84,13 +75,11 @@ func (m *SecurityRulesResponse) validateGateway(formats strfmt.Registry) error {
 	}
 
 	for i := 0; i < len(m.Gateway); i++ {
-
 		if swag.IsZero(m.Gateway[i]) { // not required
 			continue
 		}
 
 		if m.Gateway[i] != nil {
-
 			if err := m.Gateway[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("gateway" + "." + strconv.Itoa(i))

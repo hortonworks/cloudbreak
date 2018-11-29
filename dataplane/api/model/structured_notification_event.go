@@ -14,7 +14,6 @@ import (
 
 // StructuredNotificationEvent structured notification event
 // swagger:model StructuredNotificationEvent
-
 type StructuredNotificationEvent struct {
 
 	// duration
@@ -33,27 +32,15 @@ type StructuredNotificationEvent struct {
 	Type string `json:"type,omitempty"`
 }
 
-/* polymorph StructuredNotificationEvent duration false */
-
-/* polymorph StructuredNotificationEvent notificationDetails false */
-
-/* polymorph StructuredNotificationEvent operation false */
-
-/* polymorph StructuredNotificationEvent status false */
-
-/* polymorph StructuredNotificationEvent type false */
-
 // Validate validates this structured notification event
 func (m *StructuredNotificationEvent) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateNotificationDetails(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateOperation(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -70,7 +57,6 @@ func (m *StructuredNotificationEvent) validateNotificationDetails(formats strfmt
 	}
 
 	if m.NotificationDetails != nil {
-
 		if err := m.NotificationDetails.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("notificationDetails")
@@ -89,7 +75,6 @@ func (m *StructuredNotificationEvent) validateOperation(formats strfmt.Registry)
 	}
 
 	if m.Operation != nil {
-
 		if err := m.Operation.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("operation")

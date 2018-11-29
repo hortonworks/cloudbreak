@@ -18,7 +18,6 @@ import (
 
 // InstanceGroupResponse instance group response
 // swagger:model InstanceGroupResponse
-
 type InstanceGroupResponse struct {
 
 	// name of the instance group
@@ -56,60 +55,35 @@ type InstanceGroupResponse struct {
 	TemplateID int64 `json:"templateId,omitempty"`
 
 	// type of the instance group
+	// Enum: [GATEWAY CORE]
 	Type string `json:"type,omitempty"`
 }
-
-/* polymorph InstanceGroupResponse group false */
-
-/* polymorph InstanceGroupResponse id false */
-
-/* polymorph InstanceGroupResponse metadata false */
-
-/* polymorph InstanceGroupResponse nodeCount false */
-
-/* polymorph InstanceGroupResponse parameters false */
-
-/* polymorph InstanceGroupResponse securityGroup false */
-
-/* polymorph InstanceGroupResponse securityGroupId false */
-
-/* polymorph InstanceGroupResponse template false */
-
-/* polymorph InstanceGroupResponse templateId false */
-
-/* polymorph InstanceGroupResponse type false */
 
 // Validate validates this instance group response
 func (m *InstanceGroupResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateGroup(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateMetadata(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateNodeCount(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateSecurityGroup(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateTemplate(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateType(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -139,13 +113,11 @@ func (m *InstanceGroupResponse) validateMetadata(formats strfmt.Registry) error 
 	}
 
 	for i := 0; i < len(m.Metadata); i++ {
-
 		if swag.IsZero(m.Metadata[i]) { // not required
 			continue
 		}
 
 		if m.Metadata[i] != nil {
-
 			if err := m.Metadata[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("metadata" + "." + strconv.Itoa(i))
@@ -183,7 +155,6 @@ func (m *InstanceGroupResponse) validateSecurityGroup(formats strfmt.Registry) e
 	}
 
 	if m.SecurityGroup != nil {
-
 		if err := m.SecurityGroup.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("securityGroup")
@@ -202,7 +173,6 @@ func (m *InstanceGroupResponse) validateTemplate(formats strfmt.Registry) error 
 	}
 
 	if m.Template != nil {
-
 		if err := m.Template.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("template")
@@ -227,8 +197,10 @@ func init() {
 }
 
 const (
+
 	// InstanceGroupResponseTypeGATEWAY captures enum value "GATEWAY"
 	InstanceGroupResponseTypeGATEWAY string = "GATEWAY"
+
 	// InstanceGroupResponseTypeCORE captures enum value "CORE"
 	InstanceGroupResponseTypeCORE string = "CORE"
 )

@@ -16,7 +16,6 @@ import (
 
 // AmbariStackDetailsResponse ambari stack details response
 // swagger:model AmbariStackDetailsResponse
-
 type AmbariStackDetailsResponse struct {
 
 	// enable gpl repo
@@ -38,24 +37,11 @@ type AmbariStackDetailsResponse struct {
 	Verify *bool `json:"verify,omitempty"`
 }
 
-/* polymorph AmbariStackDetailsResponse enableGplRepo false */
-
-/* polymorph AmbariStackDetailsResponse hdpVersion false */
-
-/* polymorph AmbariStackDetailsResponse mpacks false */
-
-/* polymorph AmbariStackDetailsResponse stack false */
-
-/* polymorph AmbariStackDetailsResponse util false */
-
-/* polymorph AmbariStackDetailsResponse verify false */
-
 // Validate validates this ambari stack details response
 func (m *AmbariStackDetailsResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateMpacks(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -72,13 +58,11 @@ func (m *AmbariStackDetailsResponse) validateMpacks(formats strfmt.Registry) err
 	}
 
 	for i := 0; i < len(m.Mpacks); i++ {
-
 		if swag.IsZero(m.Mpacks[i]) { // not required
 			continue
 		}
 
 		if m.Mpacks[i] != nil {
-
 			if err := m.Mpacks[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("mpacks" + "." + strconv.Itoa(i))

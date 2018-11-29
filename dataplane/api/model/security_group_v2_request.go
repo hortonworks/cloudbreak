@@ -17,7 +17,6 @@ import (
 
 // SecurityGroupV2Request security group v2 request
 // swagger:model SecurityGroupV2Request
-
 type SecurityGroupV2Request struct {
 
 	// Exisiting security group id
@@ -31,23 +30,15 @@ type SecurityGroupV2Request struct {
 	SecurityRules []*SecurityRuleRequest `json:"securityRules"`
 }
 
-/* polymorph SecurityGroupV2Request securityGroupId false */
-
-/* polymorph SecurityGroupV2Request securityGroupIds false */
-
-/* polymorph SecurityGroupV2Request securityRules false */
-
 // Validate validates this security group v2 request
 func (m *SecurityGroupV2Request) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateSecurityGroupIds(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateSecurityRules(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -77,13 +68,11 @@ func (m *SecurityGroupV2Request) validateSecurityRules(formats strfmt.Registry) 
 	}
 
 	for i := 0; i < len(m.SecurityRules); i++ {
-
 		if swag.IsZero(m.SecurityRules[i]) { // not required
 			continue
 		}
 
 		if m.SecurityRules[i] != nil {
-
 			if err := m.SecurityRules[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("securityRules" + "." + strconv.Itoa(i))

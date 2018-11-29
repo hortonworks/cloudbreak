@@ -15,7 +15,6 @@ import (
 
 // EnvironmentDetachRequest environment detach request
 // swagger:model EnvironmentDetachRequest
-
 type EnvironmentDetachRequest struct {
 
 	// Name of the Kubernetes configurations to be attached to the environment.
@@ -35,35 +34,23 @@ type EnvironmentDetachRequest struct {
 	RdsConfigs []string `json:"rdsConfigs"`
 }
 
-/* polymorph EnvironmentDetachRequest kubernetesConfigs false */
-
-/* polymorph EnvironmentDetachRequest ldapConfigs false */
-
-/* polymorph EnvironmentDetachRequest proxyConfigs false */
-
-/* polymorph EnvironmentDetachRequest rdsConfigs false */
-
 // Validate validates this environment detach request
 func (m *EnvironmentDetachRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateKubernetesConfigs(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateLdapConfigs(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateProxyConfigs(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateRdsConfigs(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

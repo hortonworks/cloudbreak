@@ -16,7 +16,6 @@ import (
 
 // FlexUsageProductJSON flex usage product Json
 // swagger:model FlexUsageProductJson
-
 type FlexUsageProductJSON struct {
 
 	// components
@@ -26,16 +25,11 @@ type FlexUsageProductJSON struct {
 	ProductID string `json:"productId,omitempty"`
 }
 
-/* polymorph FlexUsageProductJson components false */
-
-/* polymorph FlexUsageProductJson productId false */
-
 // Validate validates this flex usage product Json
 func (m *FlexUsageProductJSON) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateComponents(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -52,13 +46,11 @@ func (m *FlexUsageProductJSON) validateComponents(formats strfmt.Registry) error
 	}
 
 	for i := 0; i < len(m.Components); i++ {
-
 		if swag.IsZero(m.Components[i]) { // not required
 			continue
 		}
 
 		if m.Components[i] != nil {
-
 			if err := m.Components[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("components" + "." + strconv.Itoa(i))

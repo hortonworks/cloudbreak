@@ -149,8 +149,10 @@ func (o *AttachProxyResourceToEnvironmentsParams) WriteToRequest(r runtime.Clien
 	}
 	var res []error
 
-	if err := r.SetBodyParam(o.Body); err != nil {
-		return err
+	if o.Body != nil {
+		if err := r.SetBodyParam(o.Body); err != nil {
+			return err
+		}
 	}
 
 	// path param name

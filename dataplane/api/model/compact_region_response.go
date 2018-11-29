@@ -15,7 +15,6 @@ import (
 
 // CompactRegionResponse compact region response
 // swagger:model CompactRegionResponse
-
 type CompactRegionResponse struct {
 
 	// regions with displayNames
@@ -26,16 +25,11 @@ type CompactRegionResponse struct {
 	Values []string `json:"values"`
 }
 
-/* polymorph CompactRegionResponse displayNames false */
-
-/* polymorph CompactRegionResponse values false */
-
 // Validate validates this compact region response
 func (m *CompactRegionResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateValues(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

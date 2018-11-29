@@ -15,7 +15,6 @@ import (
 
 // PlacementSettings placement settings
 // swagger:model PlacementSettings
-
 type PlacementSettings struct {
 
 	// availability zone of the stack
@@ -26,16 +25,11 @@ type PlacementSettings struct {
 	Region *string `json:"region"`
 }
 
-/* polymorph PlacementSettings availabilityZone false */
-
-/* polymorph PlacementSettings region false */
-
 // Validate validates this placement settings
 func (m *PlacementSettings) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateRegion(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

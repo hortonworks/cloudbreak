@@ -17,7 +17,6 @@ import (
 
 // RecipeResponse recipe response
 // swagger:model RecipeResponse
-
 type RecipeResponse struct {
 
 	// content of recipe
@@ -39,6 +38,7 @@ type RecipeResponse struct {
 
 	// type of recipe
 	// Required: true
+	// Enum: [PRE_AMBARI_START PRE_TERMINATION POST_AMBARI_START POST_CLUSTER_INSTALL]
 	RecipeType *string `json:"recipeType"`
 
 	// recipe uri
@@ -48,41 +48,23 @@ type RecipeResponse struct {
 	Workspace *WorkspaceResourceResponse `json:"workspace,omitempty"`
 }
 
-/* polymorph RecipeResponse content false */
-
-/* polymorph RecipeResponse description false */
-
-/* polymorph RecipeResponse id false */
-
-/* polymorph RecipeResponse name false */
-
-/* polymorph RecipeResponse recipeType false */
-
-/* polymorph RecipeResponse uri false */
-
-/* polymorph RecipeResponse workspace false */
-
 // Validate validates this recipe response
 func (m *RecipeResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateDescription(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateRecipeType(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateWorkspace(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -143,12 +125,16 @@ func init() {
 }
 
 const (
+
 	// RecipeResponseRecipeTypePREAMBARISTART captures enum value "PRE_AMBARI_START"
 	RecipeResponseRecipeTypePREAMBARISTART string = "PRE_AMBARI_START"
+
 	// RecipeResponseRecipeTypePRETERMINATION captures enum value "PRE_TERMINATION"
 	RecipeResponseRecipeTypePRETERMINATION string = "PRE_TERMINATION"
+
 	// RecipeResponseRecipeTypePOSTAMBARISTART captures enum value "POST_AMBARI_START"
 	RecipeResponseRecipeTypePOSTAMBARISTART string = "POST_AMBARI_START"
+
 	// RecipeResponseRecipeTypePOSTCLUSTERINSTALL captures enum value "POST_CLUSTER_INSTALL"
 	RecipeResponseRecipeTypePOSTCLUSTERINSTALL string = "POST_CLUSTER_INSTALL"
 )
@@ -182,7 +168,6 @@ func (m *RecipeResponse) validateWorkspace(formats strfmt.Registry) error {
 	}
 
 	if m.Workspace != nil {
-
 		if err := m.Workspace.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("workspace")

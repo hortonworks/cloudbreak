@@ -14,7 +14,6 @@ import (
 
 // RdsBuildResult rds build result
 // swagger:model RdsBuildResult
-
 type RdsBuildResult struct {
 
 	// name of the created dbs
@@ -22,14 +21,11 @@ type RdsBuildResult struct {
 	Results map[string]string `json:"results"`
 }
 
-/* polymorph RdsBuildResult results false */
-
 // Validate validates this rds build result
 func (m *RdsBuildResult) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateResults(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -40,10 +36,6 @@ func (m *RdsBuildResult) Validate(formats strfmt.Registry) error {
 }
 
 func (m *RdsBuildResult) validateResults(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Results) { // not required
-		return nil
-	}
 
 	return nil
 }

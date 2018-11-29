@@ -8,13 +8,11 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
 // GatewayTopologyJSON gateway topology Json
 // swagger:model GatewayTopologyJson
-
 type GatewayTopologyJSON struct {
 
 	// exposed Knox services - those services that should be accessible through Knox gateway.
@@ -24,31 +22,8 @@ type GatewayTopologyJSON struct {
 	TopologyName string `json:"topologyName,omitempty"`
 }
 
-/* polymorph GatewayTopologyJson exposedServices false */
-
-/* polymorph GatewayTopologyJson topologyName false */
-
 // Validate validates this gateway topology Json
 func (m *GatewayTopologyJSON) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if err := m.validateExposedServices(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-func (m *GatewayTopologyJSON) validateExposedServices(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.ExposedServices) { // not required
-		return nil
-	}
-
 	return nil
 }
 

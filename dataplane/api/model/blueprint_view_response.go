@@ -17,7 +17,6 @@ import (
 
 // BlueprintViewResponse blueprint view response
 // swagger:model BlueprintViewResponse
-
 type BlueprintViewResponse struct {
 
 	// description of the resource
@@ -45,44 +44,26 @@ type BlueprintViewResponse struct {
 	StackVersion string `json:"stackVersion,omitempty"`
 
 	// status of the blueprint
+	// Enum: [DEFAULT DEFAULT_DELETED USER_MANAGED]
 	Status string `json:"status,omitempty"`
 
 	// user defined tags for blueprint
 	Tags map[string]interface{} `json:"tags,omitempty"`
 }
 
-/* polymorph BlueprintViewResponse description false */
-
-/* polymorph BlueprintViewResponse hostGroupCount false */
-
-/* polymorph BlueprintViewResponse id false */
-
-/* polymorph BlueprintViewResponse name false */
-
-/* polymorph BlueprintViewResponse stackType false */
-
-/* polymorph BlueprintViewResponse stackVersion false */
-
-/* polymorph BlueprintViewResponse status false */
-
-/* polymorph BlueprintViewResponse tags false */
-
 // Validate validates this blueprint view response
 func (m *BlueprintViewResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateDescription(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateStatus(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -143,10 +124,13 @@ func init() {
 }
 
 const (
+
 	// BlueprintViewResponseStatusDEFAULT captures enum value "DEFAULT"
 	BlueprintViewResponseStatusDEFAULT string = "DEFAULT"
+
 	// BlueprintViewResponseStatusDEFAULTDELETED captures enum value "DEFAULT_DELETED"
 	BlueprintViewResponseStatusDEFAULTDELETED string = "DEFAULT_DELETED"
+
 	// BlueprintViewResponseStatusUSERMANAGED captures enum value "USER_MANAGED"
 	BlueprintViewResponseStatusUSERMANAGED string = "USER_MANAGED"
 )

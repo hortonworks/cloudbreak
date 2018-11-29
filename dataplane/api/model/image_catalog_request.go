@@ -15,7 +15,6 @@ import (
 
 // ImageCatalogRequest image catalog request
 // swagger:model ImageCatalogRequest
-
 type ImageCatalogRequest struct {
 
 	// description of the resource
@@ -36,28 +35,19 @@ type ImageCatalogRequest struct {
 	URL *string `json:"url"`
 }
 
-/* polymorph ImageCatalogRequest description false */
-
-/* polymorph ImageCatalogRequest name false */
-
-/* polymorph ImageCatalogRequest url false */
-
 // Validate validates this image catalog request
 func (m *ImageCatalogRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateDescription(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateURL(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

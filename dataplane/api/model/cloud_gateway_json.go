@@ -8,13 +8,11 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
 // CloudGatewayJSON cloud gateway Json
 // swagger:model CloudGatewayJson
-
 type CloudGatewayJSON struct {
 
 	// id
@@ -27,19 +25,8 @@ type CloudGatewayJSON struct {
 	Properties map[string]interface{} `json:"properties,omitempty"`
 }
 
-/* polymorph CloudGatewayJson id false */
-
-/* polymorph CloudGatewayJson name false */
-
-/* polymorph CloudGatewayJson properties false */
-
 // Validate validates this cloud gateway Json
 func (m *CloudGatewayJSON) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }
 

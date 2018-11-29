@@ -15,21 +15,17 @@ import (
 
 // PlatformVmtypesResponse platform vmtypes response
 // swagger:model PlatformVmtypesResponse
-
 type PlatformVmtypesResponse struct {
 
 	// vm types
 	VMTypes map[string]VirtualMachinesResponse `json:"vmTypes,omitempty"`
 }
 
-/* polymorph PlatformVmtypesResponse vmTypes false */
-
 // Validate validates this platform vmtypes response
 func (m *PlatformVmtypesResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateVMTypes(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -45,8 +41,17 @@ func (m *PlatformVmtypesResponse) validateVMTypes(formats strfmt.Registry) error
 		return nil
 	}
 
-	if err := validate.Required("vmTypes", "body", m.VMTypes); err != nil {
-		return err
+	for k := range m.VMTypes {
+
+		if err := validate.Required("vmTypes"+"."+k, "body", m.VMTypes[k]); err != nil {
+			return err
+		}
+		if val, ok := m.VMTypes[k]; ok {
+			if err := val.Validate(formats); err != nil {
+				return err
+			}
+		}
+
 	}
 
 	return nil

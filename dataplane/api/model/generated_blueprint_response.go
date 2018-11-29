@@ -8,28 +8,19 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
 // GeneratedBlueprintResponse generated blueprint response
 // swagger:model GeneratedBlueprintResponse
-
 type GeneratedBlueprintResponse struct {
 
 	// ambari blueprint JSON, set this or the url field
 	AmbariBlueprint string `json:"ambariBlueprint,omitempty"`
 }
 
-/* polymorph GeneratedBlueprintResponse ambariBlueprint false */
-
 // Validate validates this generated blueprint response
 func (m *GeneratedBlueprintResponse) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }
 

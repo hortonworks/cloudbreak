@@ -17,36 +17,28 @@ import (
 
 // UpdateStack update stack
 // swagger:model UpdateStack
-
 type UpdateStack struct {
 
 	// instance group adjustment
 	InstanceGroupAdjustment *InstanceGroupAdjustment `json:"instanceGroupAdjustment,omitempty"`
 
 	// status of the scale request
+	// Enum: [SYNC FULL_SYNC REPAIR_FAILED_NODES STOPPED STARTED]
 	Status string `json:"status,omitempty"`
 
 	// on stack update, update cluster too
 	WithClusterEvent *bool `json:"withClusterEvent,omitempty"`
 }
 
-/* polymorph UpdateStack instanceGroupAdjustment false */
-
-/* polymorph UpdateStack status false */
-
-/* polymorph UpdateStack withClusterEvent false */
-
 // Validate validates this update stack
 func (m *UpdateStack) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateInstanceGroupAdjustment(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateStatus(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -63,7 +55,6 @@ func (m *UpdateStack) validateInstanceGroupAdjustment(formats strfmt.Registry) e
 	}
 
 	if m.InstanceGroupAdjustment != nil {
-
 		if err := m.InstanceGroupAdjustment.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("instanceGroupAdjustment")
@@ -88,14 +79,19 @@ func init() {
 }
 
 const (
+
 	// UpdateStackStatusSYNC captures enum value "SYNC"
 	UpdateStackStatusSYNC string = "SYNC"
+
 	// UpdateStackStatusFULLSYNC captures enum value "FULL_SYNC"
 	UpdateStackStatusFULLSYNC string = "FULL_SYNC"
+
 	// UpdateStackStatusREPAIRFAILEDNODES captures enum value "REPAIR_FAILED_NODES"
 	UpdateStackStatusREPAIRFAILEDNODES string = "REPAIR_FAILED_NODES"
+
 	// UpdateStackStatusSTOPPED captures enum value "STOPPED"
 	UpdateStackStatusSTOPPED string = "STOPPED"
+
 	// UpdateStackStatusSTARTED captures enum value "STARTED"
 	UpdateStackStatusSTARTED string = "STARTED"
 )

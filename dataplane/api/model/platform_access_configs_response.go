@@ -17,7 +17,6 @@ import (
 
 // PlatformAccessConfigsResponse platform access configs response
 // swagger:model PlatformAccessConfigsResponse
-
 type PlatformAccessConfigsResponse struct {
 
 	// access configs
@@ -25,14 +24,11 @@ type PlatformAccessConfigsResponse struct {
 	AccessConfigs []*AccessConfigJSON `json:"accessConfigs"`
 }
 
-/* polymorph PlatformAccessConfigsResponse accessConfigs false */
-
 // Validate validates this platform access configs response
 func (m *PlatformAccessConfigsResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAccessConfigs(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -53,13 +49,11 @@ func (m *PlatformAccessConfigsResponse) validateAccessConfigs(formats strfmt.Reg
 	}
 
 	for i := 0; i < len(m.AccessConfigs); i++ {
-
 		if swag.IsZero(m.AccessConfigs[i]) { // not required
 			continue
 		}
 
 		if m.AccessConfigs[i] != nil {
-
 			if err := m.AccessConfigs[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("accessConfigs" + "." + strconv.Itoa(i))

@@ -15,7 +15,6 @@ import (
 
 // CredentialSourceRequest credential source request
 // swagger:model CredentialSourceRequest
-
 type CredentialSourceRequest struct {
 
 	// cloud specific parameters for credential
@@ -30,23 +29,15 @@ type CredentialSourceRequest struct {
 	SourceName *string `json:"sourceName"`
 }
 
-/* polymorph CredentialSourceRequest parameters false */
-
-/* polymorph CredentialSourceRequest sourceId false */
-
-/* polymorph CredentialSourceRequest sourceName false */
-
 // Validate validates this credential source request
 func (m *CredentialSourceRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateSourceID(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateSourceName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

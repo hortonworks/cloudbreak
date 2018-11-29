@@ -149,8 +149,10 @@ func (o *DetachLdapResourceFromEnvironmentsParams) WriteToRequest(r runtime.Clie
 	}
 	var res []error
 
-	if err := r.SetBodyParam(o.Body); err != nil {
-		return err
+	if o.Body != nil {
+		if err := r.SetBodyParam(o.Body); err != nil {
+			return err
+		}
 	}
 
 	// path param name

@@ -8,13 +8,11 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
 // PlatformSecurityGroupResponse platform security group response
 // swagger:model PlatformSecurityGroupResponse
-
 type PlatformSecurityGroupResponse struct {
 
 	// group Id
@@ -27,19 +25,8 @@ type PlatformSecurityGroupResponse struct {
 	Properties map[string]interface{} `json:"properties,omitempty"`
 }
 
-/* polymorph PlatformSecurityGroupResponse groupId false */
-
-/* polymorph PlatformSecurityGroupResponse groupName false */
-
-/* polymorph PlatformSecurityGroupResponse properties false */
-
 // Validate validates this platform security group response
 func (m *PlatformSecurityGroupResponse) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }
 

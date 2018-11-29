@@ -8,13 +8,11 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
 // StackRepoDetailsJSON stack repo details Json
 // swagger:model StackRepoDetailsJson
-
 type StackRepoDetailsJSON struct {
 
 	// stack
@@ -24,17 +22,8 @@ type StackRepoDetailsJSON struct {
 	Util map[string]string `json:"util,omitempty"`
 }
 
-/* polymorph StackRepoDetailsJson stack false */
-
-/* polymorph StackRepoDetailsJson util false */
-
 // Validate validates this stack repo details Json
 func (m *StackRepoDetailsJSON) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }
 

@@ -17,7 +17,6 @@ import (
 
 // LdapConfigResponse ldap config response
 // swagger:model LdapConfigResponse
-
 type LdapConfigResponse struct {
 
 	// LDAP group for administrators
@@ -38,6 +37,7 @@ type LdapConfigResponse struct {
 	Description *string `json:"description,omitempty"`
 
 	// directory type of server LDAP or AD
+	// Enum: [LDAP ACTIVE_DIRECTORY]
 	DirectoryType string `json:"directoryType,omitempty"`
 
 	// domain in LDAP server (e.g. ad.seq.com).
@@ -100,101 +100,47 @@ type LdapConfigResponse struct {
 	UserSearchBase *string `json:"userSearchBase"`
 }
 
-/* polymorph LdapConfigResponse adminGroup false */
-
-/* polymorph LdapConfigResponse bindDn false */
-
-/* polymorph LdapConfigResponse bindPassword false */
-
-/* polymorph LdapConfigResponse certificate false */
-
-/* polymorph LdapConfigResponse description false */
-
-/* polymorph LdapConfigResponse directoryType false */
-
-/* polymorph LdapConfigResponse domain false */
-
-/* polymorph LdapConfigResponse environments false */
-
-/* polymorph LdapConfigResponse groupMemberAttribute false */
-
-/* polymorph LdapConfigResponse groupNameAttribute false */
-
-/* polymorph LdapConfigResponse groupObjectClass false */
-
-/* polymorph LdapConfigResponse groupSearchBase false */
-
-/* polymorph LdapConfigResponse id false */
-
-/* polymorph LdapConfigResponse name false */
-
-/* polymorph LdapConfigResponse protocol false */
-
-/* polymorph LdapConfigResponse public false */
-
-/* polymorph LdapConfigResponse serverHost false */
-
-/* polymorph LdapConfigResponse serverPort false */
-
-/* polymorph LdapConfigResponse userDnPattern false */
-
-/* polymorph LdapConfigResponse userNameAttribute false */
-
-/* polymorph LdapConfigResponse userObjectClass false */
-
-/* polymorph LdapConfigResponse userSearchBase false */
-
 // Validate validates this ldap config response
 func (m *LdapConfigResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateBindDn(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateBindPassword(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateDescription(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateDirectoryType(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateEnvironments(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateServerHost(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateServerPort(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateUserDnPattern(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateUserSearchBase(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -211,7 +157,6 @@ func (m *LdapConfigResponse) validateBindDn(formats strfmt.Registry) error {
 	}
 
 	if m.BindDn != nil {
-
 		if err := m.BindDn.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("bindDn")
@@ -230,7 +175,6 @@ func (m *LdapConfigResponse) validateBindPassword(formats strfmt.Registry) error
 	}
 
 	if m.BindPassword != nil {
-
 		if err := m.BindPassword.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("bindPassword")
@@ -272,8 +216,10 @@ func init() {
 }
 
 const (
+
 	// LdapConfigResponseDirectoryTypeLDAP captures enum value "LDAP"
 	LdapConfigResponseDirectoryTypeLDAP string = "LDAP"
+
 	// LdapConfigResponseDirectoryTypeACTIVEDIRECTORY captures enum value "ACTIVE_DIRECTORY"
 	LdapConfigResponseDirectoryTypeACTIVEDIRECTORY string = "ACTIVE_DIRECTORY"
 )

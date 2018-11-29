@@ -15,7 +15,6 @@ import (
 
 // LdapTestResult ldap test result
 // swagger:model LdapTestResult
-
 type LdapTestResult struct {
 
 	// result of Ldap connection test
@@ -23,14 +22,11 @@ type LdapTestResult struct {
 	ConnectionResult *string `json:"connectionResult"`
 }
 
-/* polymorph LdapTestResult connectionResult false */
-
 // Validate validates this ldap test result
 func (m *LdapTestResult) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateConnectionResult(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

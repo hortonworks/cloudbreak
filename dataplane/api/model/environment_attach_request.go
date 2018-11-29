@@ -15,7 +15,6 @@ import (
 
 // EnvironmentAttachRequest environment attach request
 // swagger:model EnvironmentAttachRequest
-
 type EnvironmentAttachRequest struct {
 
 	// Name of the Kubernetes configurations to be attached to the environment.
@@ -35,35 +34,23 @@ type EnvironmentAttachRequest struct {
 	RdsConfigs []string `json:"rdsConfigs"`
 }
 
-/* polymorph EnvironmentAttachRequest kubernetesConfigs false */
-
-/* polymorph EnvironmentAttachRequest ldapConfigs false */
-
-/* polymorph EnvironmentAttachRequest proxyConfigs false */
-
-/* polymorph EnvironmentAttachRequest rdsConfigs false */
-
 // Validate validates this environment attach request
 func (m *EnvironmentAttachRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateKubernetesConfigs(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateLdapConfigs(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateProxyConfigs(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateRdsConfigs(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

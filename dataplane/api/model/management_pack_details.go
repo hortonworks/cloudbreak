@@ -15,7 +15,6 @@ import (
 
 // ManagementPackDetails management pack details
 // swagger:model ManagementPackDetails
-
 type ManagementPackDetails struct {
 
 	// name of the resource
@@ -29,16 +28,11 @@ type ManagementPackDetails struct {
 	PreInstalled *bool `json:"preInstalled,omitempty"`
 }
 
-/* polymorph ManagementPackDetails name false */
-
-/* polymorph ManagementPackDetails preInstalled false */
-
 // Validate validates this management pack details
 func (m *ManagementPackDetails) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

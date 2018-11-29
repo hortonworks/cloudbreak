@@ -15,7 +15,6 @@ import (
 
 // NetworkRequest network request
 // swagger:model NetworkRequest
-
 type NetworkRequest struct {
 
 	// type of cloud provider
@@ -42,34 +41,19 @@ type NetworkRequest struct {
 	TopologyID int64 `json:"topologyId,omitempty"`
 }
 
-/* polymorph NetworkRequest cloudPlatform false */
-
-/* polymorph NetworkRequest description false */
-
-/* polymorph NetworkRequest name false */
-
-/* polymorph NetworkRequest parameters false */
-
-/* polymorph NetworkRequest subnetCIDR false */
-
-/* polymorph NetworkRequest topologyId false */
-
 // Validate validates this network request
 func (m *NetworkRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateCloudPlatform(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateDescription(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

@@ -15,7 +15,6 @@ import (
 
 // EnvironmentRequest environment request
 // swagger:model EnvironmentRequest
-
 type EnvironmentRequest struct {
 
 	// If credentialName is not specified, the credential is used to create the new credential for the environment.
@@ -61,72 +60,43 @@ type EnvironmentRequest struct {
 	Regions []string `json:"regions"`
 }
 
-/* polymorph EnvironmentRequest credential false */
-
-/* polymorph EnvironmentRequest credentialName false */
-
-/* polymorph EnvironmentRequest description false */
-
-/* polymorph EnvironmentRequest kubernetesConfigs false */
-
-/* polymorph EnvironmentRequest ldapConfigs false */
-
-/* polymorph EnvironmentRequest location false */
-
-/* polymorph EnvironmentRequest name false */
-
-/* polymorph EnvironmentRequest proxyConfigs false */
-
-/* polymorph EnvironmentRequest rdsConfigs false */
-
-/* polymorph EnvironmentRequest regions false */
-
 // Validate validates this environment request
 func (m *EnvironmentRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateCredential(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateDescription(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateKubernetesConfigs(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateLdapConfigs(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateLocation(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateProxyConfigs(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateRdsConfigs(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateRegions(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -143,7 +113,6 @@ func (m *EnvironmentRequest) validateCredential(formats strfmt.Registry) error {
 	}
 
 	if m.Credential != nil {
-
 		if err := m.Credential.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("credential")
@@ -205,7 +174,6 @@ func (m *EnvironmentRequest) validateLocation(formats strfmt.Registry) error {
 	}
 
 	if m.Location != nil {
-
 		if err := m.Location.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("location")

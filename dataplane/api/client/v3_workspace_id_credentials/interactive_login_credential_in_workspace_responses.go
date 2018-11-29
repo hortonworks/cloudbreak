@@ -9,9 +9,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
-	"github.com/go-openapi/swag"
 
 	strfmt "github.com/go-openapi/strfmt"
 )
@@ -47,7 +45,7 @@ func NewInteractiveLoginCredentialInWorkspaceOK() *InteractiveLoginCredentialInW
 successful operation
 */
 type InteractiveLoginCredentialInWorkspaceOK struct {
-	Payload InteractiveLoginCredentialInWorkspaceOKBody
+	Payload map[string]string
 }
 
 func (o *InteractiveLoginCredentialInWorkspaceOK) Error() string {
@@ -61,25 +59,5 @@ func (o *InteractiveLoginCredentialInWorkspaceOK) readResponse(response runtime.
 		return err
 	}
 
-	return nil
-}
-
-/*InteractiveLoginCredentialInWorkspaceOKBody interactive login credential in workspace o k body
-swagger:model InteractiveLoginCredentialInWorkspaceOKBody
-*/
-
-type InteractiveLoginCredentialInWorkspaceOKBody map[string]string
-
-// Validate validates this interactive login credential in workspace o k body
-func (o InteractiveLoginCredentialInWorkspaceOKBody) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if swag.IsZero(o) { // not required
-		return nil
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }

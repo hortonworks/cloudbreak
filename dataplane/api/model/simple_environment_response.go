@@ -15,7 +15,6 @@ import (
 
 // SimpleEnvironmentResponse simple environment response
 // swagger:model SimpleEnvironmentResponse
-
 type SimpleEnvironmentResponse struct {
 
 	// Cloud platform of the environment.
@@ -51,52 +50,27 @@ type SimpleEnvironmentResponse struct {
 	Workspace *WorkspaceResourceResponse `json:"workspace,omitempty"`
 }
 
-/* polymorph SimpleEnvironmentResponse cloudPlatform false */
-
-/* polymorph SimpleEnvironmentResponse credentialName false */
-
-/* polymorph SimpleEnvironmentResponse datalakeClusterNames false */
-
-/* polymorph SimpleEnvironmentResponse description false */
-
-/* polymorph SimpleEnvironmentResponse id false */
-
-/* polymorph SimpleEnvironmentResponse location false */
-
-/* polymorph SimpleEnvironmentResponse name false */
-
-/* polymorph SimpleEnvironmentResponse regions false */
-
-/* polymorph SimpleEnvironmentResponse workloadClusterNames false */
-
-/* polymorph SimpleEnvironmentResponse workspace false */
-
 // Validate validates this simple environment response
 func (m *SimpleEnvironmentResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateDatalakeClusterNames(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateLocation(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateRegions(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateWorkloadClusterNames(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateWorkspace(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -126,7 +100,6 @@ func (m *SimpleEnvironmentResponse) validateLocation(formats strfmt.Registry) er
 	}
 
 	if m.Location != nil {
-
 		if err := m.Location.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("location")
@@ -145,7 +118,6 @@ func (m *SimpleEnvironmentResponse) validateRegions(formats strfmt.Registry) err
 	}
 
 	if m.Regions != nil {
-
 		if err := m.Regions.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("regions")
@@ -177,7 +149,6 @@ func (m *SimpleEnvironmentResponse) validateWorkspace(formats strfmt.Registry) e
 	}
 
 	if m.Workspace != nil {
-
 		if err := m.Workspace.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("workspace")

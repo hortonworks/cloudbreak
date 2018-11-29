@@ -8,13 +8,11 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
 // FlowDetails flow details
 // swagger:model FlowDetails
-
 type FlowDetails struct {
 
 	// duration
@@ -42,29 +40,8 @@ type FlowDetails struct {
 	NextFlowState string `json:"nextFlowState,omitempty"`
 }
 
-/* polymorph FlowDetails duration false */
-
-/* polymorph FlowDetails flowChainId false */
-
-/* polymorph FlowDetails flowChainType false */
-
-/* polymorph FlowDetails flowEvent false */
-
-/* polymorph FlowDetails flowId false */
-
-/* polymorph FlowDetails flowState false */
-
-/* polymorph FlowDetails flowType false */
-
-/* polymorph FlowDetails nextFlowState false */
-
 // Validate validates this flow details
 func (m *FlowDetails) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }
 

@@ -15,7 +15,6 @@ import (
 
 // AwsCredentialPrerequisites aws credential prerequisites
 // swagger:model AwsCredentialPrerequisites
-
 type AwsCredentialPrerequisites struct {
 
 	// AWS specific identifier for role based credential creation - External id for 'Another AWS account' typed roles.
@@ -27,21 +26,15 @@ type AwsCredentialPrerequisites struct {
 	PolicyJSON *string `json:"policyJson"`
 }
 
-/* polymorph AwsCredentialPrerequisites externalId false */
-
-/* polymorph AwsCredentialPrerequisites policyJson false */
-
 // Validate validates this aws credential prerequisites
 func (m *AwsCredentialPrerequisites) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateExternalID(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validatePolicyJSON(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

@@ -17,7 +17,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/hortonworks/cb-cli/dataplane/api/model"
+	model "github.com/hortonworks/cb-cli/dataplane/api/model"
 )
 
 // NewAddWorkspaceUsersParams creates a new AddWorkspaceUsersParams object
@@ -137,8 +137,10 @@ func (o *AddWorkspaceUsersParams) WriteToRequest(r runtime.ClientRequest, reg st
 	}
 	var res []error
 
-	if err := r.SetBodyParam(o.Body); err != nil {
-		return err
+	if o.Body != nil {
+		if err := r.SetBodyParam(o.Body); err != nil {
+			return err
+		}
 	}
 
 	// path param name

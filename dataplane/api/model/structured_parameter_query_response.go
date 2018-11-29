@@ -8,13 +8,11 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
 // StructuredParameterQueryResponse structured parameter query response
 // swagger:model StructuredParameterQueryResponse
-
 type StructuredParameterQueryResponse struct {
 
 	// default path
@@ -39,27 +37,8 @@ type StructuredParameterQueryResponse struct {
 	RelatedService string `json:"relatedService,omitempty"`
 }
 
-/* polymorph StructuredParameterQueryResponse defaultPath false */
-
-/* polymorph StructuredParameterQueryResponse description false */
-
-/* polymorph StructuredParameterQueryResponse propertyDisplayName false */
-
-/* polymorph StructuredParameterQueryResponse propertyFile false */
-
-/* polymorph StructuredParameterQueryResponse propertyName false */
-
-/* polymorph StructuredParameterQueryResponse protocol false */
-
-/* polymorph StructuredParameterQueryResponse relatedService false */
-
 // Validate validates this structured parameter query response
 func (m *StructuredParameterQueryResponse) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }
 

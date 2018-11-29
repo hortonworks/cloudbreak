@@ -15,7 +15,6 @@ import (
 
 // AdlsGen2CloudStorageParameters adls gen2 cloud storage parameters
 // swagger:model AdlsGen2CloudStorageParameters
-
 type AdlsGen2CloudStorageParameters struct {
 
 	// account key
@@ -27,21 +26,15 @@ type AdlsGen2CloudStorageParameters struct {
 	AccountName *string `json:"accountName"`
 }
 
-/* polymorph AdlsGen2CloudStorageParameters accountKey false */
-
-/* polymorph AdlsGen2CloudStorageParameters accountName false */
-
 // Validate validates this adls gen2 cloud storage parameters
 func (m *AdlsGen2CloudStorageParameters) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAccountKey(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateAccountName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

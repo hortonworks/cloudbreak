@@ -18,7 +18,6 @@ import (
 
 // ClusterRequest cluster request
 // swagger:model ClusterRequest
-
 type ClusterRequest struct {
 
 	// [DEPRECATED] use RdsConfig instead! details of the external Ambari database
@@ -52,6 +51,7 @@ type ClusterRequest struct {
 	BlueprintName string `json:"blueprintName,omitempty"`
 
 	// config recommendation strategy
+	// Enum: [NEVER_APPLY ONLY_STACK_DEFAULTS_APPLY ALWAYS_APPLY ALWAYS_APPLY_DONT_OVERRIDE_CUSTOM_VALUES]
 	ConfigStrategy string `json:"configStrategy,omitempty"`
 
 	// cluster can connect to a datalake you can define the parameters here
@@ -72,6 +72,7 @@ type ClusterRequest struct {
 	EnableSecurity *bool `json:"enableSecurity,omitempty"`
 
 	// executor type of cluster
+	// Enum: [CONTAINER DEFAULT]
 	ExecutorType string `json:"executorType,omitempty"`
 
 	// external file system configuration
@@ -139,181 +140,95 @@ type ClusterRequest struct {
 	ValidateRepositories *bool `json:"validateRepositories,omitempty"`
 }
 
-/* polymorph ClusterRequest ambariDatabaseDetails false */
-
-/* polymorph ClusterRequest ambariRepoDetailsJson false */
-
-/* polymorph ClusterRequest ambariSecurityMasterKey false */
-
-/* polymorph ClusterRequest ambariStackDetails false */
-
-/* polymorph ClusterRequest blueprint false */
-
-/* polymorph ClusterRequest blueprintCustomProperties false */
-
-/* polymorph ClusterRequest blueprintId false */
-
-/* polymorph ClusterRequest blueprintInputs false */
-
-/* polymorph ClusterRequest blueprintName false */
-
-/* polymorph ClusterRequest configStrategy false */
-
-/* polymorph ClusterRequest connectedCluster false */
-
-/* polymorph ClusterRequest customContainer false */
-
-/* polymorph ClusterRequest customQueue false */
-
-/* polymorph ClusterRequest description false */
-
-/* polymorph ClusterRequest enableSecurity false */
-
-/* polymorph ClusterRequest executorType false */
-
-/* polymorph ClusterRequest fileSystem false */
-
-/* polymorph ClusterRequest gateway false */
-
-/* polymorph ClusterRequest hostGroups false */
-
-/* polymorph ClusterRequest kerberos false */
-
-/* polymorph ClusterRequest ldapConfig false */
-
-/* polymorph ClusterRequest ldapConfigId false */
-
-/* polymorph ClusterRequest ldapConfigName false */
-
-/* polymorph ClusterRequest name false */
-
-/* polymorph ClusterRequest password false */
-
-/* polymorph ClusterRequest proxyName false */
-
-/* polymorph ClusterRequest rdsConfigIds false */
-
-/* polymorph ClusterRequest rdsConfigJsons false */
-
-/* polymorph ClusterRequest rdsConfigNames false */
-
-/* polymorph ClusterRequest userName false */
-
-/* polymorph ClusterRequest validateBlueprint false */
-
-/* polymorph ClusterRequest validateRepositories false */
-
 // Validate validates this cluster request
 func (m *ClusterRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAmbariDatabaseDetails(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateAmbariRepoDetailsJSON(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateAmbariSecurityMasterKey(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateAmbariStackDetails(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateBlueprint(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateBlueprintInputs(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateConfigStrategy(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateConnectedCluster(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateCustomContainer(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateDescription(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateExecutorType(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateFileSystem(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateGateway(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateHostGroups(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateKerberos(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateLdapConfig(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validatePassword(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateRdsConfigIds(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateRdsConfigJsons(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateRdsConfigNames(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateUserName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -330,7 +245,6 @@ func (m *ClusterRequest) validateAmbariDatabaseDetails(formats strfmt.Registry) 
 	}
 
 	if m.AmbariDatabaseDetails != nil {
-
 		if err := m.AmbariDatabaseDetails.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("ambariDatabaseDetails")
@@ -349,7 +263,6 @@ func (m *ClusterRequest) validateAmbariRepoDetailsJSON(formats strfmt.Registry) 
 	}
 
 	if m.AmbariRepoDetailsJSON != nil {
-
 		if err := m.AmbariRepoDetailsJSON.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("ambariRepoDetailsJson")
@@ -385,7 +298,6 @@ func (m *ClusterRequest) validateAmbariStackDetails(formats strfmt.Registry) err
 	}
 
 	if m.AmbariStackDetails != nil {
-
 		if err := m.AmbariStackDetails.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("ambariStackDetails")
@@ -404,7 +316,6 @@ func (m *ClusterRequest) validateBlueprint(formats strfmt.Registry) error {
 	}
 
 	if m.Blueprint != nil {
-
 		if err := m.Blueprint.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("blueprint")
@@ -427,13 +338,11 @@ func (m *ClusterRequest) validateBlueprintInputs(formats strfmt.Registry) error 
 	}
 
 	for i := 0; i < len(m.BlueprintInputs); i++ {
-
 		if swag.IsZero(m.BlueprintInputs[i]) { // not required
 			continue
 		}
 
 		if m.BlueprintInputs[i] != nil {
-
 			if err := m.BlueprintInputs[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("blueprintInputs" + "." + strconv.Itoa(i))
@@ -460,12 +369,16 @@ func init() {
 }
 
 const (
+
 	// ClusterRequestConfigStrategyNEVERAPPLY captures enum value "NEVER_APPLY"
 	ClusterRequestConfigStrategyNEVERAPPLY string = "NEVER_APPLY"
+
 	// ClusterRequestConfigStrategyONLYSTACKDEFAULTSAPPLY captures enum value "ONLY_STACK_DEFAULTS_APPLY"
 	ClusterRequestConfigStrategyONLYSTACKDEFAULTSAPPLY string = "ONLY_STACK_DEFAULTS_APPLY"
+
 	// ClusterRequestConfigStrategyALWAYSAPPLY captures enum value "ALWAYS_APPLY"
 	ClusterRequestConfigStrategyALWAYSAPPLY string = "ALWAYS_APPLY"
+
 	// ClusterRequestConfigStrategyALWAYSAPPLYDONTOVERRIDECUSTOMVALUES captures enum value "ALWAYS_APPLY_DONT_OVERRIDE_CUSTOM_VALUES"
 	ClusterRequestConfigStrategyALWAYSAPPLYDONTOVERRIDECUSTOMVALUES string = "ALWAYS_APPLY_DONT_OVERRIDE_CUSTOM_VALUES"
 )
@@ -499,7 +412,6 @@ func (m *ClusterRequest) validateConnectedCluster(formats strfmt.Registry) error
 	}
 
 	if m.ConnectedCluster != nil {
-
 		if err := m.ConnectedCluster.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("connectedCluster")
@@ -518,7 +430,6 @@ func (m *ClusterRequest) validateCustomContainer(formats strfmt.Registry) error 
 	}
 
 	if m.CustomContainer != nil {
-
 		if err := m.CustomContainer.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("customContainer")
@@ -560,8 +471,10 @@ func init() {
 }
 
 const (
+
 	// ClusterRequestExecutorTypeCONTAINER captures enum value "CONTAINER"
 	ClusterRequestExecutorTypeCONTAINER string = "CONTAINER"
+
 	// ClusterRequestExecutorTypeDEFAULT captures enum value "DEFAULT"
 	ClusterRequestExecutorTypeDEFAULT string = "DEFAULT"
 )
@@ -595,7 +508,6 @@ func (m *ClusterRequest) validateFileSystem(formats strfmt.Registry) error {
 	}
 
 	if m.FileSystem != nil {
-
 		if err := m.FileSystem.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("fileSystem")
@@ -614,7 +526,6 @@ func (m *ClusterRequest) validateGateway(formats strfmt.Registry) error {
 	}
 
 	if m.Gateway != nil {
-
 		if err := m.Gateway.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("gateway")
@@ -637,13 +548,11 @@ func (m *ClusterRequest) validateHostGroups(formats strfmt.Registry) error {
 	}
 
 	for i := 0; i < len(m.HostGroups); i++ {
-
 		if swag.IsZero(m.HostGroups[i]) { // not required
 			continue
 		}
 
 		if m.HostGroups[i] != nil {
-
 			if err := m.HostGroups[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("hostGroups" + "." + strconv.Itoa(i))
@@ -664,7 +573,6 @@ func (m *ClusterRequest) validateKerberos(formats strfmt.Registry) error {
 	}
 
 	if m.Kerberos != nil {
-
 		if err := m.Kerberos.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("kerberos")
@@ -683,7 +591,6 @@ func (m *ClusterRequest) validateLdapConfig(formats strfmt.Registry) error {
 	}
 
 	if m.LdapConfig != nil {
-
 		if err := m.LdapConfig.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("ldapConfig")
@@ -761,13 +668,11 @@ func (m *ClusterRequest) validateRdsConfigJsons(formats strfmt.Registry) error {
 	}
 
 	for i := 0; i < len(m.RdsConfigJsons); i++ {
-
 		if swag.IsZero(m.RdsConfigJsons[i]) { // not required
 			continue
 		}
 
 		if m.RdsConfigJsons[i] != nil {
-
 			if err := m.RdsConfigJsons[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("rdsConfigJsons" + "." + strconv.Itoa(i))

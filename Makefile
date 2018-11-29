@@ -17,7 +17,7 @@ endif
 
 deps: deps-errcheck
 	go get -u golang.org/x/tools/cmd/goimports
-	curl -o $(GOPATH)/bin/swagger -L'#' https://github.com/go-swagger/go-swagger/releases/download/0.12.0/swagger_$(shell echo `uname`|tr '[:upper:]' '[:lower:]')_amd64
+	curl -o $(GOPATH)/bin/swagger -L'#' https://github.com/go-swagger/go-swagger/releases/download/v0.17.2/swagger_$(shell echo `uname`|tr '[:upper:]' '[:lower:]')_amd64
 	chmod +x $(GOPATH)/bin/swagger
 
 deps-errcheck:
@@ -76,30 +76,17 @@ build-linux-version:
 build-windows-version:
 	GOOS=windows GO111MODULE=on CGO_ENABLED=0 go build -a ${LDFLAGS} -o build/Windows/${BINARY}.exe main.go
 
-generate-swagger: build-swagger-fix
+_init-swagger-generation:
 	rm -rf dataplane/api/client dataplane/api/model
-	swagger generate client -f http://$(CB_IP):$(CB_PORT)/cb/api/swagger.json -c client -m model -t dataplane/api
-	make fix-swagger
+	rm -f build/swagger.json
+	curl -sL http://$(CB_IP):$(CB_PORT)/cb/api/swagger.json -o build/swagger.json
 
-generate-swagger-docker: build-swagger-fix
-	rm -rf dataplane/api/client dataplane/api/model
-	@docker run --rm -it -v "${GOPATH}":"${GOPATH}" -w "${PWD}" -e GOPATH --net=host quay.io/goswagger/swagger:0.12.0 \
-	generate client -f http://$(CB_IP):$(CB_PORT)/cb/api/swagger.json -c client -m model -t dataplane/api
-	make fix-swagger
+generate-swagger: _init-swagger-generation
+	swagger generate client -f build/swagger.json -c client -m model -t dataplane/api
 
-build-swagger-fix:
-	go build -o build/swagger_fix swagger_fix/main.go
-
-fix-swagger:
-	$(info fixed on master https://github.com/go-swagger/go-swagger/issues/1197#issuecomment-335610396)
-	build/swagger_fix --src dataplane/api/model/platform_gateways_response.go --operation remove-statement --exp validateGateways:range-0,for-0,if-1
-	build/swagger_fix --src dataplane/api/model/platform_ip_pools_response.go --operation remove-statement --exp validateIppools:range-0,for-0,if-1
-	build/swagger_fix --src dataplane/api/model/platform_networks_response.go --operation remove-statement --exp validateNetworks:range-0,for-0,if-1
-	build/swagger_fix --src dataplane/api/model/platform_ssh_keys_response.go --operation remove-statement --exp validateSSHKeys:range-0,for-0,if-1
-	build/swagger_fix --src dataplane/api/model/platform_security_groups_response.go --operation remove-statement --exp validateSecurityGroups:range-0,for-0,if-1
-	goimports -l -w dataplane/api/model
-	goimports -l -w dataplane/api/client
-	@gofmt -w ${GOFILES_NOVENDOR}
+generate-swagger-docker: _init-swagger-generation
+	@docker run --rm -it -v "${GOPATH}":"${GOPATH}" -v ${PWD}/build/swagger.json:${PWD}/build/swagger.json  -w "${PWD}" -e GOPATH --net=host quay.io/goswagger/swagger:v0.17.2 \
+	generate client -f ${PWD}/build/swagger.json -c client -m model -t dataplane/api
 
 release: build
 	rm -rf release

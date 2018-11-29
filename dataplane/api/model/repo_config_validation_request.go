@@ -8,13 +8,11 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
 // RepoConfigValidationRequest repo config validation request
 // swagger:model RepoConfigValidationRequest
-
 type RepoConfigValidationRequest struct {
 
 	// url of the Ambari repository
@@ -36,25 +34,8 @@ type RepoConfigValidationRequest struct {
 	VersionDefinitionFileURL string `json:"versionDefinitionFileUrl,omitempty"`
 }
 
-/* polymorph RepoConfigValidationRequest ambariBaseUrl false */
-
-/* polymorph RepoConfigValidationRequest ambariGpgKeyUrl false */
-
-/* polymorph RepoConfigValidationRequest mpackUrl false */
-
-/* polymorph RepoConfigValidationRequest stackBaseURL false */
-
-/* polymorph RepoConfigValidationRequest utilsBaseURL false */
-
-/* polymorph RepoConfigValidationRequest versionDefinitionFileUrl false */
-
 // Validate validates this repo config validation request
 func (m *RepoConfigValidationRequest) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }
 

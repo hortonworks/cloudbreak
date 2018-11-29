@@ -15,7 +15,6 @@ import (
 
 // RegionResponse region response
 // swagger:model RegionResponse
-
 type RegionResponse struct {
 
 	// availability zones
@@ -36,51 +35,21 @@ type RegionResponse struct {
 	Regions []string `json:"regions"`
 }
 
-/* polymorph RegionResponse availabilityZones false */
-
-/* polymorph RegionResponse defaultRegion false */
-
-/* polymorph RegionResponse displayNames false */
-
-/* polymorph RegionResponse locations false */
-
-/* polymorph RegionResponse regions false */
-
 // Validate validates this region response
 func (m *RegionResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateAvailabilityZones(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
 	if err := m.validateLocations(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateRegions(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-func (m *RegionResponse) validateAvailabilityZones(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.AvailabilityZones) { // not required
-		return nil
-	}
-
-	if swag.IsZero(m.AvailabilityZones) { // not required
-		return nil
-	}
-
 	return nil
 }
 

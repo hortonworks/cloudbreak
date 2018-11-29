@@ -15,7 +15,6 @@ import (
 
 // AmbariDatabaseTestResult ambari database test result
 // swagger:model AmbariDatabaseTestResult
-
 type AmbariDatabaseTestResult struct {
 
 	// result of Ambari database test
@@ -23,14 +22,11 @@ type AmbariDatabaseTestResult struct {
 	Error *string `json:"error"`
 }
 
-/* polymorph AmbariDatabaseTestResult error false */
-
 // Validate validates this ambari database test result
 func (m *AmbariDatabaseTestResult) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateError(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

@@ -14,7 +14,6 @@ import (
 
 // StructuredFlowEvent structured flow event
 // swagger:model StructuredFlowEvent
-
 type StructuredFlowEvent struct {
 
 	// blueprint
@@ -45,50 +44,27 @@ type StructuredFlowEvent struct {
 	Type string `json:"type,omitempty"`
 }
 
-/* polymorph StructuredFlowEvent blueprint false */
-
-/* polymorph StructuredFlowEvent cluster false */
-
-/* polymorph StructuredFlowEvent duration false */
-
-/* polymorph StructuredFlowEvent exception false */
-
-/* polymorph StructuredFlowEvent flow false */
-
-/* polymorph StructuredFlowEvent operation false */
-
-/* polymorph StructuredFlowEvent stack false */
-
-/* polymorph StructuredFlowEvent status false */
-
-/* polymorph StructuredFlowEvent type false */
-
 // Validate validates this structured flow event
 func (m *StructuredFlowEvent) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateBlueprint(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateCluster(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateFlow(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateOperation(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateStack(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -105,7 +81,6 @@ func (m *StructuredFlowEvent) validateBlueprint(formats strfmt.Registry) error {
 	}
 
 	if m.Blueprint != nil {
-
 		if err := m.Blueprint.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("blueprint")
@@ -124,7 +99,6 @@ func (m *StructuredFlowEvent) validateCluster(formats strfmt.Registry) error {
 	}
 
 	if m.Cluster != nil {
-
 		if err := m.Cluster.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("cluster")
@@ -143,7 +117,6 @@ func (m *StructuredFlowEvent) validateFlow(formats strfmt.Registry) error {
 	}
 
 	if m.Flow != nil {
-
 		if err := m.Flow.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("flow")
@@ -162,7 +135,6 @@ func (m *StructuredFlowEvent) validateOperation(formats strfmt.Registry) error {
 	}
 
 	if m.Operation != nil {
-
 		if err := m.Operation.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("operation")
@@ -181,7 +153,6 @@ func (m *StructuredFlowEvent) validateStack(formats strfmt.Registry) error {
 	}
 
 	if m.Stack != nil {
-
 		if err := m.Stack.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("stack")

@@ -8,13 +8,11 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
 // PlatformDisksJSON platform disks Json
 // swagger:model PlatformDisksJson
-
 type PlatformDisksJSON struct {
 
 	// default disks
@@ -30,39 +28,8 @@ type PlatformDisksJSON struct {
 	DisplayNames map[string]map[string]string `json:"displayNames,omitempty"`
 }
 
-/* polymorph PlatformDisksJson defaultDisks false */
-
-/* polymorph PlatformDisksJson diskMappings false */
-
-/* polymorph PlatformDisksJson diskTypes false */
-
-/* polymorph PlatformDisksJson displayNames false */
-
 // Validate validates this platform disks Json
 func (m *PlatformDisksJSON) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if err := m.validateDiskTypes(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-func (m *PlatformDisksJSON) validateDiskTypes(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.DiskTypes) { // not required
-		return nil
-	}
-
-	if swag.IsZero(m.DiskTypes) { // not required
-		return nil
-	}
-
 	return nil
 }
 

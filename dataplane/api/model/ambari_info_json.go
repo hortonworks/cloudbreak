@@ -15,7 +15,6 @@ import (
 
 // AmbariInfoJSON ambari info Json
 // swagger:model AmbariInfoJson
-
 type AmbariInfoJSON struct {
 
 	// repo
@@ -25,16 +24,11 @@ type AmbariInfoJSON struct {
 	Version string `json:"version,omitempty"`
 }
 
-/* polymorph AmbariInfoJson repo false */
-
-/* polymorph AmbariInfoJson version false */
-
 // Validate validates this ambari info Json
 func (m *AmbariInfoJSON) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateRepo(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -50,8 +44,17 @@ func (m *AmbariInfoJSON) validateRepo(formats strfmt.Registry) error {
 		return nil
 	}
 
-	if err := validate.Required("repo", "body", m.Repo); err != nil {
-		return err
+	for k := range m.Repo {
+
+		if err := validate.Required("repo"+"."+k, "body", m.Repo[k]); err != nil {
+			return err
+		}
+		if val, ok := m.Repo[k]; ok {
+			if err := val.Validate(formats); err != nil {
+				return err
+			}
+		}
+
 	}
 
 	return nil

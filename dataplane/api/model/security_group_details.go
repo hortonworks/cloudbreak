@@ -17,7 +17,6 @@ import (
 
 // SecurityGroupDetails security group details
 // swagger:model SecurityGroupDetails
-
 type SecurityGroupDetails struct {
 
 	// description
@@ -40,29 +39,15 @@ type SecurityGroupDetails struct {
 	SecurityRules []*SecurityRuleDetails `json:"securityRules"`
 }
 
-/* polymorph SecurityGroupDetails description false */
-
-/* polymorph SecurityGroupDetails id false */
-
-/* polymorph SecurityGroupDetails name false */
-
-/* polymorph SecurityGroupDetails securityGroupId false */
-
-/* polymorph SecurityGroupDetails securityGroupIds false */
-
-/* polymorph SecurityGroupDetails securityRules false */
-
 // Validate validates this security group details
 func (m *SecurityGroupDetails) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateSecurityGroupIds(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateSecurityRules(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -92,13 +77,11 @@ func (m *SecurityGroupDetails) validateSecurityRules(formats strfmt.Registry) er
 	}
 
 	for i := 0; i < len(m.SecurityRules); i++ {
-
 		if swag.IsZero(m.SecurityRules[i]) { // not required
 			continue
 		}
 
 		if m.SecurityRules[i] != nil {
-
 			if err := m.SecurityRules[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("securityRules" + "." + strconv.Itoa(i))

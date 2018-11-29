@@ -8,13 +8,11 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
 // NetworkV2Request network v2 request
 // swagger:model NetworkV2Request
-
 type NetworkV2Request struct {
 
 	// provider specific parameters of the specified network
@@ -24,17 +22,8 @@ type NetworkV2Request struct {
 	SubnetCIDR string `json:"subnetCIDR,omitempty"`
 }
 
-/* polymorph NetworkV2Request parameters false */
-
-/* polymorph NetworkV2Request subnetCIDR false */
-
 // Validate validates this network v2 request
 func (m *NetworkV2Request) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }
 

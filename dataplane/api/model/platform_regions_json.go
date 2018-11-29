@@ -8,13 +8,11 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
 // PlatformRegionsJSON platform regions Json
 // swagger:model PlatformRegionsJson
-
 type PlatformRegionsJSON struct {
 
 	// availability zones
@@ -30,57 +28,8 @@ type PlatformRegionsJSON struct {
 	Regions map[string][]string `json:"regions,omitempty"`
 }
 
-/* polymorph PlatformRegionsJson availabilityZones false */
-
-/* polymorph PlatformRegionsJson defaultRegions false */
-
-/* polymorph PlatformRegionsJson displayNames false */
-
-/* polymorph PlatformRegionsJson regions false */
-
 // Validate validates this platform regions Json
 func (m *PlatformRegionsJSON) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if err := m.validateAvailabilityZones(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateRegions(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-func (m *PlatformRegionsJSON) validateAvailabilityZones(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.AvailabilityZones) { // not required
-		return nil
-	}
-
-	if swag.IsZero(m.AvailabilityZones) { // not required
-		return nil
-	}
-
-	return nil
-}
-
-func (m *PlatformRegionsJSON) validateRegions(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Regions) { // not required
-		return nil
-	}
-
-	if swag.IsZero(m.Regions) { // not required
-		return nil
-	}
-
 	return nil
 }
 

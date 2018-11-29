@@ -17,7 +17,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/hortonworks/cb-cli/dataplane/api/model"
+	model "github.com/hortonworks/cb-cli/dataplane/api/model"
 )
 
 // NewPostRepositoryConfigsValidationParams creates a new PostRepositoryConfigsValidationParams object
@@ -124,12 +124,10 @@ func (o *PostRepositoryConfigsValidationParams) WriteToRequest(r runtime.ClientR
 	}
 	var res []error
 
-	if o.Body == nil {
-		o.Body = new(model.RepoConfigValidationRequest)
-	}
-
-	if err := r.SetBodyParam(o.Body); err != nil {
-		return err
+	if o.Body != nil {
+		if err := r.SetBodyParam(o.Body); err != nil {
+			return err
+		}
 	}
 
 	if len(res) > 0 {

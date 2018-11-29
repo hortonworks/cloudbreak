@@ -17,7 +17,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/hortonworks/cb-cli/dataplane/api/model"
+	model "github.com/hortonworks/cb-cli/dataplane/api/model"
 )
 
 // NewPostPrivateCredentialParams creates a new PostPrivateCredentialParams object
@@ -124,12 +124,10 @@ func (o *PostPrivateCredentialParams) WriteToRequest(r runtime.ClientRequest, re
 	}
 	var res []error
 
-	if o.Body == nil {
-		o.Body = new(model.CredentialRequest)
-	}
-
-	if err := r.SetBodyParam(o.Body); err != nil {
-		return err
+	if o.Body != nil {
+		if err := r.SetBodyParam(o.Body); err != nil {
+			return err
+		}
 	}
 
 	if len(res) > 0 {

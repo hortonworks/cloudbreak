@@ -8,28 +8,19 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
 // TagSpecificationsJSON tag specifications Json
 // swagger:model TagSpecificationsJson
-
 type TagSpecificationsJSON struct {
 
 	// tag specifications
 	Specifications map[string]map[string]interface{} `json:"specifications,omitempty"`
 }
 
-/* polymorph TagSpecificationsJson specifications false */
-
 // Validate validates this tag specifications Json
 func (m *TagSpecificationsJSON) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }
 

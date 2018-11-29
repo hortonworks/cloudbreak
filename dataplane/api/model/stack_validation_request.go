@@ -17,7 +17,6 @@ import (
 
 // StackValidationRequest stack validation request
 // swagger:model StackValidationRequest
-
 type StackValidationRequest struct {
 
 	// blueprint for the cluster
@@ -65,68 +64,35 @@ type StackValidationRequest struct {
 	Platform *string `json:"platform"`
 }
 
-/* polymorph StackValidationRequest blueprint false */
-
-/* polymorph StackValidationRequest blueprintId false */
-
-/* polymorph StackValidationRequest blueprintName false */
-
-/* polymorph StackValidationRequest credential false */
-
-/* polymorph StackValidationRequest credentialId false */
-
-/* polymorph StackValidationRequest credentialName false */
-
-/* polymorph StackValidationRequest environment false */
-
-/* polymorph StackValidationRequest fileSystem false */
-
-/* polymorph StackValidationRequest hostGroups false */
-
-/* polymorph StackValidationRequest instanceGroups false */
-
-/* polymorph StackValidationRequest network false */
-
-/* polymorph StackValidationRequest networkId false */
-
-/* polymorph StackValidationRequest platform false */
-
 // Validate validates this stack validation request
 func (m *StackValidationRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateBlueprint(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateCredential(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateFileSystem(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateHostGroups(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateInstanceGroups(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateNetwork(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validatePlatform(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -143,7 +109,6 @@ func (m *StackValidationRequest) validateBlueprint(formats strfmt.Registry) erro
 	}
 
 	if m.Blueprint != nil {
-
 		if err := m.Blueprint.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("blueprint")
@@ -162,7 +127,6 @@ func (m *StackValidationRequest) validateCredential(formats strfmt.Registry) err
 	}
 
 	if m.Credential != nil {
-
 		if err := m.Credential.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("credential")
@@ -181,7 +145,6 @@ func (m *StackValidationRequest) validateFileSystem(formats strfmt.Registry) err
 	}
 
 	if m.FileSystem != nil {
-
 		if err := m.FileSystem.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("fileSystem")
@@ -204,13 +167,11 @@ func (m *StackValidationRequest) validateHostGroups(formats strfmt.Registry) err
 	}
 
 	for i := 0; i < len(m.HostGroups); i++ {
-
 		if swag.IsZero(m.HostGroups[i]) { // not required
 			continue
 		}
 
 		if m.HostGroups[i] != nil {
-
 			if err := m.HostGroups[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("hostGroups" + "." + strconv.Itoa(i))
@@ -235,13 +196,11 @@ func (m *StackValidationRequest) validateInstanceGroups(formats strfmt.Registry)
 	}
 
 	for i := 0; i < len(m.InstanceGroups); i++ {
-
 		if swag.IsZero(m.InstanceGroups[i]) { // not required
 			continue
 		}
 
 		if m.InstanceGroups[i] != nil {
-
 			if err := m.InstanceGroups[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("instanceGroups" + "." + strconv.Itoa(i))
@@ -262,7 +221,6 @@ func (m *StackValidationRequest) validateNetwork(formats strfmt.Registry) error 
 	}
 
 	if m.Network != nil {
-
 		if err := m.Network.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("network")

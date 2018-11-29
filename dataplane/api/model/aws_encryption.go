@@ -8,13 +8,11 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
 // AwsEncryption aws encryption
 // swagger:model AwsEncryption
-
 type AwsEncryption struct {
 
 	// encryption key for vm
@@ -24,17 +22,8 @@ type AwsEncryption struct {
 	Type string `json:"type,omitempty"`
 }
 
-/* polymorph AwsEncryption key false */
-
-/* polymorph AwsEncryption type false */
-
 // Validate validates this aws encryption
 func (m *AwsEncryption) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }
 

@@ -15,7 +15,6 @@ import (
 
 // ImageCatalogResponse image catalog response
 // swagger:model ImageCatalogResponse
-
 type ImageCatalogResponse struct {
 
 	// description of the resource
@@ -54,63 +53,39 @@ type ImageCatalogResponse struct {
 	Workspace *WorkspaceResourceResponse `json:"workspace,omitempty"`
 }
 
-/* polymorph ImageCatalogResponse description false */
-
-/* polymorph ImageCatalogResponse id false */
-
-/* polymorph ImageCatalogResponse imagesResponse false */
-
-/* polymorph ImageCatalogResponse name false */
-
-/* polymorph ImageCatalogResponse publicInAccount false */
-
-/* polymorph ImageCatalogResponse url false */
-
-/* polymorph ImageCatalogResponse usedAsDefault false */
-
-/* polymorph ImageCatalogResponse workspace false */
-
 // Validate validates this image catalog response
 func (m *ImageCatalogResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateDescription(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateID(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateImagesResponse(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validatePublicInAccount(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateURL(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateUsedAsDefault(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateWorkspace(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -153,7 +128,6 @@ func (m *ImageCatalogResponse) validateImagesResponse(formats strfmt.Registry) e
 	}
 
 	if m.ImagesResponse != nil {
-
 		if err := m.ImagesResponse.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("imagesResponse")
@@ -224,7 +198,6 @@ func (m *ImageCatalogResponse) validateWorkspace(formats strfmt.Registry) error 
 	}
 
 	if m.Workspace != nil {
-
 		if err := m.Workspace.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("workspace")

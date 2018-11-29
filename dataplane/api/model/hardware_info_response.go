@@ -17,7 +17,6 @@ import (
 
 // HardwareInfoResponse hardware info response
 // swagger:model HardwareInfoResponse
-
 type HardwareInfoResponse struct {
 
 	// ambari server address
@@ -49,9 +48,11 @@ type HardwareInfoResponse struct {
 	InstanceID string `json:"instanceId,omitempty"`
 
 	// type of the instance
+	// Enum: [GATEWAY GATEWAY_PRIMARY CORE]
 	InstanceMetadataType string `json:"instanceMetadataType,omitempty"`
 
 	// status of the instance
+	// Enum: [REQUESTED CREATED UNREGISTERED REGISTERED DECOMMISSIONED TERMINATED DELETED_ON_PROVIDER_SIDE FAILED STOPPED]
 	InstanceStatus string `json:"instanceStatus,omitempty"`
 
 	// name of the resource
@@ -83,72 +84,27 @@ type HardwareInfoResponse struct {
 	Template *TemplateResponse `json:"template,omitempty"`
 }
 
-/* polymorph HardwareInfoResponse ambariServer false */
-
-/* polymorph HardwareInfoResponse discoveryFQDN false */
-
-/* polymorph HardwareInfoResponse groupName false */
-
-/* polymorph HardwareInfoResponse imageCatalogName false */
-
-/* polymorph HardwareInfoResponse imageCatalogUrl false */
-
-/* polymorph HardwareInfoResponse imageId false */
-
-/* polymorph HardwareInfoResponse imageName false */
-
-/* polymorph HardwareInfoResponse instanceGroup false */
-
-/* polymorph HardwareInfoResponse instanceId false */
-
-/* polymorph HardwareInfoResponse instanceMetadataType false */
-
-/* polymorph HardwareInfoResponse instanceStatus false */
-
-/* polymorph HardwareInfoResponse name false */
-
-/* polymorph HardwareInfoResponse os false */
-
-/* polymorph HardwareInfoResponse osType false */
-
-/* polymorph HardwareInfoResponse packageVersions false */
-
-/* polymorph HardwareInfoResponse privateIp false */
-
-/* polymorph HardwareInfoResponse publicIp false */
-
-/* polymorph HardwareInfoResponse sshPort false */
-
-/* polymorph HardwareInfoResponse state false */
-
-/* polymorph HardwareInfoResponse template false */
-
 // Validate validates this hardware info response
 func (m *HardwareInfoResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateGroupName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateInstanceMetadataType(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateInstanceStatus(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateTemplate(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -180,10 +136,13 @@ func init() {
 }
 
 const (
+
 	// HardwareInfoResponseInstanceMetadataTypeGATEWAY captures enum value "GATEWAY"
 	HardwareInfoResponseInstanceMetadataTypeGATEWAY string = "GATEWAY"
+
 	// HardwareInfoResponseInstanceMetadataTypeGATEWAYPRIMARY captures enum value "GATEWAY_PRIMARY"
 	HardwareInfoResponseInstanceMetadataTypeGATEWAYPRIMARY string = "GATEWAY_PRIMARY"
+
 	// HardwareInfoResponseInstanceMetadataTypeCORE captures enum value "CORE"
 	HardwareInfoResponseInstanceMetadataTypeCORE string = "CORE"
 )
@@ -223,22 +182,31 @@ func init() {
 }
 
 const (
+
 	// HardwareInfoResponseInstanceStatusREQUESTED captures enum value "REQUESTED"
 	HardwareInfoResponseInstanceStatusREQUESTED string = "REQUESTED"
+
 	// HardwareInfoResponseInstanceStatusCREATED captures enum value "CREATED"
 	HardwareInfoResponseInstanceStatusCREATED string = "CREATED"
+
 	// HardwareInfoResponseInstanceStatusUNREGISTERED captures enum value "UNREGISTERED"
 	HardwareInfoResponseInstanceStatusUNREGISTERED string = "UNREGISTERED"
+
 	// HardwareInfoResponseInstanceStatusREGISTERED captures enum value "REGISTERED"
 	HardwareInfoResponseInstanceStatusREGISTERED string = "REGISTERED"
+
 	// HardwareInfoResponseInstanceStatusDECOMMISSIONED captures enum value "DECOMMISSIONED"
 	HardwareInfoResponseInstanceStatusDECOMMISSIONED string = "DECOMMISSIONED"
+
 	// HardwareInfoResponseInstanceStatusTERMINATED captures enum value "TERMINATED"
 	HardwareInfoResponseInstanceStatusTERMINATED string = "TERMINATED"
+
 	// HardwareInfoResponseInstanceStatusDELETEDONPROVIDERSIDE captures enum value "DELETED_ON_PROVIDER_SIDE"
 	HardwareInfoResponseInstanceStatusDELETEDONPROVIDERSIDE string = "DELETED_ON_PROVIDER_SIDE"
+
 	// HardwareInfoResponseInstanceStatusFAILED captures enum value "FAILED"
 	HardwareInfoResponseInstanceStatusFAILED string = "FAILED"
+
 	// HardwareInfoResponseInstanceStatusSTOPPED captures enum value "STOPPED"
 	HardwareInfoResponseInstanceStatusSTOPPED string = "STOPPED"
 )
@@ -281,7 +249,6 @@ func (m *HardwareInfoResponse) validateTemplate(formats strfmt.Registry) error {
 	}
 
 	if m.Template != nil {
-
 		if err := m.Template.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("template")

@@ -15,7 +15,6 @@ import (
 
 // CloudStorageSupportedResponse cloud storage supported response
 // swagger:model CloudStorageSupportedResponse
-
 type CloudStorageSupportedResponse struct {
 
 	// file system type
@@ -26,16 +25,11 @@ type CloudStorageSupportedResponse struct {
 	Provider string `json:"provider,omitempty"`
 }
 
-/* polymorph CloudStorageSupportedResponse fileSystemType false */
-
-/* polymorph CloudStorageSupportedResponse provider false */
-
 // Validate validates this cloud storage supported response
 func (m *CloudStorageSupportedResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateFileSystemType(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

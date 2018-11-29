@@ -17,7 +17,6 @@ import (
 
 // LdapConfigRequest ldap config request
 // swagger:model LdapConfigRequest
-
 type LdapConfigRequest struct {
 
 	// LDAP group for administrators
@@ -40,6 +39,7 @@ type LdapConfigRequest struct {
 	Description *string `json:"description,omitempty"`
 
 	// directory type of server LDAP or AD
+	// Enum: [LDAP ACTIVE_DIRECTORY]
 	DirectoryType string `json:"directoryType,omitempty"`
 
 	// domain in LDAP server (e.g. ad.seq.com).
@@ -96,97 +96,47 @@ type LdapConfigRequest struct {
 	UserSearchBase *string `json:"userSearchBase"`
 }
 
-/* polymorph LdapConfigRequest adminGroup false */
-
-/* polymorph LdapConfigRequest bindDn false */
-
-/* polymorph LdapConfigRequest bindPassword false */
-
-/* polymorph LdapConfigRequest certificate false */
-
-/* polymorph LdapConfigRequest description false */
-
-/* polymorph LdapConfigRequest directoryType false */
-
-/* polymorph LdapConfigRequest domain false */
-
-/* polymorph LdapConfigRequest environments false */
-
-/* polymorph LdapConfigRequest groupMemberAttribute false */
-
-/* polymorph LdapConfigRequest groupNameAttribute false */
-
-/* polymorph LdapConfigRequest groupObjectClass false */
-
-/* polymorph LdapConfigRequest groupSearchBase false */
-
-/* polymorph LdapConfigRequest name false */
-
-/* polymorph LdapConfigRequest protocol false */
-
-/* polymorph LdapConfigRequest serverHost false */
-
-/* polymorph LdapConfigRequest serverPort false */
-
-/* polymorph LdapConfigRequest userDnPattern false */
-
-/* polymorph LdapConfigRequest userNameAttribute false */
-
-/* polymorph LdapConfigRequest userObjectClass false */
-
-/* polymorph LdapConfigRequest userSearchBase false */
-
 // Validate validates this ldap config request
 func (m *LdapConfigRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateBindDn(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateBindPassword(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateDescription(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateDirectoryType(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateEnvironments(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateServerHost(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateServerPort(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateUserDnPattern(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateUserSearchBase(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -244,8 +194,10 @@ func init() {
 }
 
 const (
+
 	// LdapConfigRequestDirectoryTypeLDAP captures enum value "LDAP"
 	LdapConfigRequestDirectoryTypeLDAP string = "LDAP"
+
 	// LdapConfigRequestDirectoryTypeACTIVEDIRECTORY captures enum value "ACTIVE_DIRECTORY"
 	LdapConfigRequestDirectoryTypeACTIVEDIRECTORY string = "ACTIVE_DIRECTORY"
 )

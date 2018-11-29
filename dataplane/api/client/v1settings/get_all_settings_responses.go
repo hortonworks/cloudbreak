@@ -9,9 +9,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
-	"github.com/go-openapi/validate"
 
 	strfmt "github.com/go-openapi/strfmt"
 )
@@ -47,7 +45,7 @@ func NewGetAllSettingsOK() *GetAllSettingsOK {
 successful operation
 */
 type GetAllSettingsOK struct {
-	Payload GetAllSettingsOKBody
+	Payload map[string]map[string]interface{}
 }
 
 func (o *GetAllSettingsOK) Error() string {
@@ -61,25 +59,5 @@ func (o *GetAllSettingsOK) readResponse(response runtime.ClientResponse, consume
 		return err
 	}
 
-	return nil
-}
-
-/*GetAllSettingsOKBody get all settings o k body
-swagger:model GetAllSettingsOKBody
-*/
-
-type GetAllSettingsOKBody map[string]map[string]interface{}
-
-// Validate validates this get all settings o k body
-func (o GetAllSettingsOKBody) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if err := validate.Required("getAllSettingsOK", "body", o); err != nil {
-		return err
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }

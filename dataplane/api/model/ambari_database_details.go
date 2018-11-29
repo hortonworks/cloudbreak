@@ -17,7 +17,6 @@ import (
 
 // AmbariDatabaseDetails ambari database details
 // swagger:model AmbariDatabaseDetails
-
 type AmbariDatabaseDetails struct {
 
 	// host of the Ambari database
@@ -46,52 +45,35 @@ type AmbariDatabaseDetails struct {
 
 	// vendor of the Ambari database
 	// Required: true
+	// Enum: [POSTGRES MYSQL MARIADB MSSQL ORACLE11 ORACLE12 SQLANYWHERE EMBEDDED]
 	Vendor *string `json:"vendor"`
 }
-
-/* polymorph AmbariDatabaseDetails host false */
-
-/* polymorph AmbariDatabaseDetails name false */
-
-/* polymorph AmbariDatabaseDetails password false */
-
-/* polymorph AmbariDatabaseDetails port false */
-
-/* polymorph AmbariDatabaseDetails userName false */
-
-/* polymorph AmbariDatabaseDetails vendor false */
 
 // Validate validates this ambari database details
 func (m *AmbariDatabaseDetails) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateHost(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validatePassword(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validatePort(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateUserName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateVendor(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -175,20 +157,28 @@ func init() {
 }
 
 const (
+
 	// AmbariDatabaseDetailsVendorPOSTGRES captures enum value "POSTGRES"
 	AmbariDatabaseDetailsVendorPOSTGRES string = "POSTGRES"
+
 	// AmbariDatabaseDetailsVendorMYSQL captures enum value "MYSQL"
 	AmbariDatabaseDetailsVendorMYSQL string = "MYSQL"
+
 	// AmbariDatabaseDetailsVendorMARIADB captures enum value "MARIADB"
 	AmbariDatabaseDetailsVendorMARIADB string = "MARIADB"
+
 	// AmbariDatabaseDetailsVendorMSSQL captures enum value "MSSQL"
 	AmbariDatabaseDetailsVendorMSSQL string = "MSSQL"
+
 	// AmbariDatabaseDetailsVendorORACLE11 captures enum value "ORACLE11"
 	AmbariDatabaseDetailsVendorORACLE11 string = "ORACLE11"
+
 	// AmbariDatabaseDetailsVendorORACLE12 captures enum value "ORACLE12"
 	AmbariDatabaseDetailsVendorORACLE12 string = "ORACLE12"
+
 	// AmbariDatabaseDetailsVendorSQLANYWHERE captures enum value "SQLANYWHERE"
 	AmbariDatabaseDetailsVendorSQLANYWHERE string = "SQLANYWHERE"
+
 	// AmbariDatabaseDetailsVendorEMBEDDED captures enum value "EMBEDDED"
 	AmbariDatabaseDetailsVendorEMBEDDED string = "EMBEDDED"
 )

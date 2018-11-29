@@ -14,7 +14,6 @@ import (
 
 // UserProfileResponse user profile response
 // swagger:model UserProfileResponse
-
 type UserProfileResponse struct {
 
 	// credential
@@ -36,29 +35,15 @@ type UserProfileResponse struct {
 	Username string `json:"username,omitempty"`
 }
 
-/* polymorph UserProfileResponse credential false */
-
-/* polymorph UserProfileResponse imageCatalog false */
-
-/* polymorph UserProfileResponse tenant false */
-
-/* polymorph UserProfileResponse uiProperties false */
-
-/* polymorph UserProfileResponse userId false */
-
-/* polymorph UserProfileResponse username false */
-
 // Validate validates this user profile response
 func (m *UserProfileResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateCredential(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateImageCatalog(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -75,7 +60,6 @@ func (m *UserProfileResponse) validateCredential(formats strfmt.Registry) error 
 	}
 
 	if m.Credential != nil {
-
 		if err := m.Credential.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("credential")
@@ -94,7 +78,6 @@ func (m *UserProfileResponse) validateImageCatalog(formats strfmt.Registry) erro
 	}
 
 	if m.ImageCatalog != nil {
-
 		if err := m.ImageCatalog.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("imageCatalog")

@@ -14,7 +14,6 @@ import (
 
 // EnvironmentChangeCredentialRequest environment change credential request
 // swagger:model EnvironmentChangeCredentialRequest
-
 type EnvironmentChangeCredentialRequest struct {
 
 	// If credentialName is not specified, the credential is used to create the new credential for the environment.
@@ -24,16 +23,11 @@ type EnvironmentChangeCredentialRequest struct {
 	CredentialName string `json:"credentialName,omitempty"`
 }
 
-/* polymorph EnvironmentChangeCredentialRequest credential false */
-
-/* polymorph EnvironmentChangeCredentialRequest credentialName false */
-
 // Validate validates this environment change credential request
 func (m *EnvironmentChangeCredentialRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateCredential(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -50,7 +44,6 @@ func (m *EnvironmentChangeCredentialRequest) validateCredential(formats strfmt.R
 	}
 
 	if m.Credential != nil {
-
 		if err := m.Credential.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("credential")

@@ -17,7 +17,6 @@ import (
 
 // RecipeRequest recipe request
 // swagger:model RecipeRequest
-
 type RecipeRequest struct {
 
 	// content of recipe
@@ -36,38 +35,26 @@ type RecipeRequest struct {
 
 	// type of recipe
 	// Required: true
+	// Enum: [PRE_AMBARI_START PRE_TERMINATION POST_AMBARI_START POST_CLUSTER_INSTALL]
 	RecipeType *string `json:"recipeType"`
 
 	// recipe uri
 	URI string `json:"uri,omitempty"`
 }
 
-/* polymorph RecipeRequest content false */
-
-/* polymorph RecipeRequest description false */
-
-/* polymorph RecipeRequest name false */
-
-/* polymorph RecipeRequest recipeType false */
-
-/* polymorph RecipeRequest uri false */
-
 // Validate validates this recipe request
 func (m *RecipeRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateDescription(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateRecipeType(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -128,12 +115,16 @@ func init() {
 }
 
 const (
+
 	// RecipeRequestRecipeTypePREAMBARISTART captures enum value "PRE_AMBARI_START"
 	RecipeRequestRecipeTypePREAMBARISTART string = "PRE_AMBARI_START"
+
 	// RecipeRequestRecipeTypePRETERMINATION captures enum value "PRE_TERMINATION"
 	RecipeRequestRecipeTypePRETERMINATION string = "PRE_TERMINATION"
+
 	// RecipeRequestRecipeTypePOSTAMBARISTART captures enum value "POST_AMBARI_START"
 	RecipeRequestRecipeTypePOSTAMBARISTART string = "POST_AMBARI_START"
+
 	// RecipeRequestRecipeTypePOSTCLUSTERINSTALL captures enum value "POST_CLUSTER_INSTALL"
 	RecipeRequestRecipeTypePOSTCLUSTERINSTALL string = "POST_CLUSTER_INSTALL"
 )

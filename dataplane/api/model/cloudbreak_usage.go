@@ -8,13 +8,11 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
 // CloudbreakUsage cloudbreak usage
 // swagger:model CloudbreakUsage
-
 type CloudbreakUsage struct {
 
 	// availability zone of the stack
@@ -72,49 +70,8 @@ type CloudbreakUsage struct {
 	Username string `json:"username,omitempty"`
 }
 
-/* polymorph CloudbreakUsage availabilityZone false */
-
-/* polymorph CloudbreakUsage blueprintId false */
-
-/* polymorph CloudbreakUsage blueprintName false */
-
-/* polymorph CloudbreakUsage costs false */
-
-/* polymorph CloudbreakUsage day false */
-
-/* polymorph CloudbreakUsage duration false */
-
-/* polymorph CloudbreakUsage flexId false */
-
-/* polymorph CloudbreakUsage instanceGroup false */
-
-/* polymorph CloudbreakUsage instanceHours false */
-
-/* polymorph CloudbreakUsage instanceNum false */
-
-/* polymorph CloudbreakUsage instanceType false */
-
-/* polymorph CloudbreakUsage peak false */
-
-/* polymorph CloudbreakUsage provider false */
-
-/* polymorph CloudbreakUsage region false */
-
-/* polymorph CloudbreakUsage stackId false */
-
-/* polymorph CloudbreakUsage stackName false */
-
-/* polymorph CloudbreakUsage stackUuid false */
-
-/* polymorph CloudbreakUsage username false */
-
 // Validate validates this cloudbreak usage
 func (m *CloudbreakUsage) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }
 

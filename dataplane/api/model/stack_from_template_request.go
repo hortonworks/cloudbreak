@@ -15,7 +15,6 @@ import (
 
 // StackFromTemplateRequest stack from template request
 // swagger:model StackFromTemplateRequest
-
 type StackFromTemplateRequest struct {
 
 	// ambari password
@@ -40,35 +39,23 @@ type StackFromTemplateRequest struct {
 	StackAuthentication *StackAuthentication `json:"stackAuthentication"`
 }
 
-/* polymorph StackFromTemplateRequest ambariPassword false */
-
-/* polymorph StackFromTemplateRequest ambariUserName false */
-
-/* polymorph StackFromTemplateRequest general false */
-
-/* polymorph StackFromTemplateRequest stackAuthentication false */
-
 // Validate validates this stack from template request
 func (m *StackFromTemplateRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAmbariPassword(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateAmbariUserName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateGeneral(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateStackAuthentication(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -123,7 +110,6 @@ func (m *StackFromTemplateRequest) validateGeneral(formats strfmt.Registry) erro
 	}
 
 	if m.General != nil {
-
 		if err := m.General.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("general")
@@ -142,7 +128,6 @@ func (m *StackFromTemplateRequest) validateStackAuthentication(formats strfmt.Re
 	}
 
 	if m.StackAuthentication != nil {
-
 		if err := m.StackAuthentication.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("stackAuthentication")

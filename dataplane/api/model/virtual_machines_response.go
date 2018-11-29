@@ -17,7 +17,6 @@ import (
 
 // VirtualMachinesResponse virtual machines response
 // swagger:model VirtualMachinesResponse
-
 type VirtualMachinesResponse struct {
 
 	// default virtual machines
@@ -28,21 +27,15 @@ type VirtualMachinesResponse struct {
 	VirtualMachines []*VMTypeJSON `json:"virtualMachines"`
 }
 
-/* polymorph VirtualMachinesResponse defaultVirtualMachine false */
-
-/* polymorph VirtualMachinesResponse virtualMachines false */
-
 // Validate validates this virtual machines response
 func (m *VirtualMachinesResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateDefaultVirtualMachine(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateVirtualMachines(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -59,7 +52,6 @@ func (m *VirtualMachinesResponse) validateDefaultVirtualMachine(formats strfmt.R
 	}
 
 	if m.DefaultVirtualMachine != nil {
-
 		if err := m.DefaultVirtualMachine.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("defaultVirtualMachine")
@@ -82,13 +74,11 @@ func (m *VirtualMachinesResponse) validateVirtualMachines(formats strfmt.Registr
 	}
 
 	for i := 0; i < len(m.VirtualMachines); i++ {
-
 		if swag.IsZero(m.VirtualMachines[i]) { // not required
 			continue
 		}
 
 		if m.VirtualMachines[i] != nil {
-
 			if err := m.VirtualMachines[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("virtualMachines" + "." + strconv.Itoa(i))

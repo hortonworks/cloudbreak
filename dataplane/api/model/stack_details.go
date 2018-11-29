@@ -16,7 +16,6 @@ import (
 
 // StackDetails stack details
 // swagger:model StackDetails
-
 type StackDetails struct {
 
 	// ambari version
@@ -77,50 +76,11 @@ type StackDetails struct {
 	StatusReason string `json:"statusReason,omitempty"`
 }
 
-/* polymorph StackDetails ambariVersion false */
-
-/* polymorph StackDetails availabilityZone false */
-
-/* polymorph StackDetails cloudPlatform false */
-
-/* polymorph StackDetails cloudbreakVersion false */
-
-/* polymorph StackDetails clusterType false */
-
-/* polymorph StackDetails clusterVersion false */
-
-/* polymorph StackDetails description false */
-
-/* polymorph StackDetails detailedStatus false */
-
-/* polymorph StackDetails existingNetwork false */
-
-/* polymorph StackDetails existingSubnet false */
-
-/* polymorph StackDetails id false */
-
-/* polymorph StackDetails imageIdentifier false */
-
-/* polymorph StackDetails instanceGroups false */
-
-/* polymorph StackDetails name false */
-
-/* polymorph StackDetails platformVariant false */
-
-/* polymorph StackDetails prewarmedImage false */
-
-/* polymorph StackDetails region false */
-
-/* polymorph StackDetails status false */
-
-/* polymorph StackDetails statusReason false */
-
 // Validate validates this stack details
 func (m *StackDetails) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateInstanceGroups(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -137,13 +97,11 @@ func (m *StackDetails) validateInstanceGroups(formats strfmt.Registry) error {
 	}
 
 	for i := 0; i < len(m.InstanceGroups); i++ {
-
 		if swag.IsZero(m.InstanceGroups[i]) { // not required
 			continue
 		}
 
 		if m.InstanceGroups[i] != nil {
-
 			if err := m.InstanceGroups[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("instanceGroups" + "." + strconv.Itoa(i))

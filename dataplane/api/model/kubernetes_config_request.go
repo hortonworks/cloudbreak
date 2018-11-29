@@ -15,7 +15,6 @@ import (
 
 // KubernetesConfigRequest kubernetes config request
 // swagger:model KubernetesConfigRequest
-
 type KubernetesConfigRequest struct {
 
 	// Kubernetes configuration
@@ -39,35 +38,23 @@ type KubernetesConfigRequest struct {
 	Name *string `json:"name"`
 }
 
-/* polymorph KubernetesConfigRequest config false */
-
-/* polymorph KubernetesConfigRequest description false */
-
-/* polymorph KubernetesConfigRequest environments false */
-
-/* polymorph KubernetesConfigRequest name false */
-
 // Validate validates this kubernetes config request
 func (m *KubernetesConfigRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateConfig(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateDescription(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateEnvironments(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

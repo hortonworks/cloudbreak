@@ -15,7 +15,6 @@ import (
 
 // UpdateImageCatalogRequest update image catalog request
 // swagger:model UpdateImageCatalogRequest
-
 type UpdateImageCatalogRequest struct {
 
 	// description of the resource
@@ -40,35 +39,23 @@ type UpdateImageCatalogRequest struct {
 	URL *string `json:"url"`
 }
 
-/* polymorph UpdateImageCatalogRequest description false */
-
-/* polymorph UpdateImageCatalogRequest id false */
-
-/* polymorph UpdateImageCatalogRequest name false */
-
-/* polymorph UpdateImageCatalogRequest url false */
-
 // Validate validates this update image catalog request
 func (m *UpdateImageCatalogRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateDescription(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateID(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateURL(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

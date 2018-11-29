@@ -8,13 +8,11 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
 // StackAuthentication stack authentication
 // swagger:model StackAuthentication
-
 type StackAuthentication struct {
 
 	// authentication name for machines
@@ -27,19 +25,8 @@ type StackAuthentication struct {
 	PublicKeyID string `json:"publicKeyId,omitempty"`
 }
 
-/* polymorph StackAuthentication loginUserName false */
-
-/* polymorph StackAuthentication publicKey false */
-
-/* polymorph StackAuthentication publicKeyId false */
-
 // Validate validates this stack authentication
 func (m *StackAuthentication) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }
 

@@ -15,7 +15,6 @@ import (
 
 // ID Id
 // swagger:model Id
-
 type ID struct {
 
 	// id of the resource
@@ -23,14 +22,11 @@ type ID struct {
 	ID *int64 `json:"id"`
 }
 
-/* polymorph Id id false */
-
 // Validate validates this Id
 func (m *ID) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateID(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

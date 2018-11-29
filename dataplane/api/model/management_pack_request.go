@@ -15,7 +15,6 @@ import (
 
 // ManagementPackRequest management pack request
 // swagger:model ManagementPackRequest
-
 type ManagementPackRequest struct {
 
 	// description of the resource
@@ -45,39 +44,19 @@ type ManagementPackRequest struct {
 	PurgeList []string `json:"purgeList"`
 }
 
-/* polymorph ManagementPackRequest description false */
-
-/* polymorph ManagementPackRequest force false */
-
-/* polymorph ManagementPackRequest mpackUrl false */
-
-/* polymorph ManagementPackRequest name false */
-
-/* polymorph ManagementPackRequest purge false */
-
-/* polymorph ManagementPackRequest purgeList false */
-
 // Validate validates this management pack request
 func (m *ManagementPackRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateDescription(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateMpackURL(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validatePurgeList(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -133,15 +112,6 @@ func (m *ManagementPackRequest) validateName(formats strfmt.Registry) error {
 
 	if err := validate.Pattern("name", "body", string(*m.Name), `(^[a-z][-a-z0-9]*[a-z0-9]$)`); err != nil {
 		return err
-	}
-
-	return nil
-}
-
-func (m *ManagementPackRequest) validatePurgeList(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.PurgeList) { // not required
-		return nil
 	}
 
 	return nil

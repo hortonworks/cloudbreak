@@ -17,7 +17,6 @@ import (
 
 // ClusterV2Request cluster v2 request
 // swagger:model ClusterV2Request
-
 type ClusterV2Request struct {
 
 	// ambari specific requests
@@ -27,6 +26,7 @@ type ClusterV2Request struct {
 	CloudStorage *CloudStorageRequest `json:"cloudStorage,omitempty"`
 
 	// executor type of cluster
+	// Enum: [CONTAINER DEFAULT]
 	ExecutorType string `json:"executorType,omitempty"`
 
 	// LDAP config name for the cluster
@@ -43,46 +43,27 @@ type ClusterV2Request struct {
 	SharedService *SharedService `json:"sharedService,omitempty"`
 }
 
-/* polymorph ClusterV2Request ambari false */
-
-/* polymorph ClusterV2Request cloudStorage false */
-
-/* polymorph ClusterV2Request executorType false */
-
-/* polymorph ClusterV2Request ldapConfigName false */
-
-/* polymorph ClusterV2Request proxyName false */
-
-/* polymorph ClusterV2Request rdsConfigNames false */
-
-/* polymorph ClusterV2Request sharedService false */
-
 // Validate validates this cluster v2 request
 func (m *ClusterV2Request) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAmbari(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateCloudStorage(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateExecutorType(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateRdsConfigNames(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateSharedService(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -99,7 +80,6 @@ func (m *ClusterV2Request) validateAmbari(formats strfmt.Registry) error {
 	}
 
 	if m.Ambari != nil {
-
 		if err := m.Ambari.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("ambari")
@@ -118,7 +98,6 @@ func (m *ClusterV2Request) validateCloudStorage(formats strfmt.Registry) error {
 	}
 
 	if m.CloudStorage != nil {
-
 		if err := m.CloudStorage.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("cloudStorage")
@@ -143,8 +122,10 @@ func init() {
 }
 
 const (
+
 	// ClusterV2RequestExecutorTypeCONTAINER captures enum value "CONTAINER"
 	ClusterV2RequestExecutorTypeCONTAINER string = "CONTAINER"
+
 	// ClusterV2RequestExecutorTypeDEFAULT captures enum value "DEFAULT"
 	ClusterV2RequestExecutorTypeDEFAULT string = "DEFAULT"
 )
@@ -191,7 +172,6 @@ func (m *ClusterV2Request) validateSharedService(formats strfmt.Registry) error 
 	}
 
 	if m.SharedService != nil {
-
 		if err := m.SharedService.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("sharedService")

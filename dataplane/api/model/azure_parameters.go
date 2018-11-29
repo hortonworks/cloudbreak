@@ -8,28 +8,19 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
 // AzureParameters azure parameters
 // swagger:model AzureParameters
-
 type AzureParameters struct {
 
 	// private id for azure
 	PrivateID string `json:"privateId,omitempty"`
 }
 
-/* polymorph AzureParameters privateId false */
-
 // Validate validates this azure parameters
 func (m *AzureParameters) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }
 

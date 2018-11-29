@@ -8,13 +8,11 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
 // DiskResponse disk response
 // swagger:model DiskResponse
-
 type DiskResponse struct {
 
 	// display name
@@ -27,19 +25,8 @@ type DiskResponse struct {
 	Type string `json:"type,omitempty"`
 }
 
-/* polymorph DiskResponse displayName false */
-
-/* polymorph DiskResponse name false */
-
-/* polymorph DiskResponse type false */
-
 // Validate validates this disk response
 func (m *DiskResponse) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }
 

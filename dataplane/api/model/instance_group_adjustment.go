@@ -15,7 +15,6 @@ import (
 
 // InstanceGroupAdjustment instance group adjustment
 // swagger:model InstanceGroupAdjustment
-
 type InstanceGroupAdjustment struct {
 
 	// name of the instance group
@@ -27,21 +26,15 @@ type InstanceGroupAdjustment struct {
 	ScalingAdjustment *int32 `json:"scalingAdjustment"`
 }
 
-/* polymorph InstanceGroupAdjustment instanceGroup false */
-
-/* polymorph InstanceGroupAdjustment scalingAdjustment false */
-
 // Validate validates this instance group adjustment
 func (m *InstanceGroupAdjustment) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateInstanceGroup(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateScalingAdjustment(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

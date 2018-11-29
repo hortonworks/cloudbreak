@@ -17,7 +17,6 @@ import (
 
 // OperationDetails operation details
 // swagger:model OperationDetails
-
 type OperationDetails struct {
 
 	// cloudbreak Id
@@ -27,6 +26,7 @@ type OperationDetails struct {
 	CloudbreakVersion string `json:"cloudbreakVersion,omitempty"`
 
 	// event type
+	// Enum: [REST FLOW NOTIFICATION]
 	EventType string `json:"eventType,omitempty"`
 
 	// resource Id
@@ -51,37 +51,19 @@ type OperationDetails struct {
 	WorkspaceID int64 `json:"workspaceId,omitempty"`
 
 	// zoned date time
+	// Format: date-time
 	ZonedDateTime strfmt.DateTime `json:"zonedDateTime,omitempty"`
 }
-
-/* polymorph OperationDetails cloudbreakId false */
-
-/* polymorph OperationDetails cloudbreakVersion false */
-
-/* polymorph OperationDetails eventType false */
-
-/* polymorph OperationDetails resourceId false */
-
-/* polymorph OperationDetails resourceName false */
-
-/* polymorph OperationDetails resourceType false */
-
-/* polymorph OperationDetails timestamp false */
-
-/* polymorph OperationDetails userId false */
-
-/* polymorph OperationDetails userName false */
-
-/* polymorph OperationDetails workspaceId false */
-
-/* polymorph OperationDetails zonedDateTime false */
 
 // Validate validates this operation details
 func (m *OperationDetails) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateEventType(formats); err != nil {
-		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateZonedDateTime(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -104,10 +86,13 @@ func init() {
 }
 
 const (
+
 	// OperationDetailsEventTypeREST captures enum value "REST"
 	OperationDetailsEventTypeREST string = "REST"
+
 	// OperationDetailsEventTypeFLOW captures enum value "FLOW"
 	OperationDetailsEventTypeFLOW string = "FLOW"
+
 	// OperationDetailsEventTypeNOTIFICATION captures enum value "NOTIFICATION"
 	OperationDetailsEventTypeNOTIFICATION string = "NOTIFICATION"
 )
@@ -128,6 +113,19 @@ func (m *OperationDetails) validateEventType(formats strfmt.Registry) error {
 
 	// value enum
 	if err := m.validateEventTypeEnum("eventType", "body", m.EventType); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *OperationDetails) validateZonedDateTime(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ZonedDateTime) { // not required
+		return nil
+	}
+
+	if err := validate.FormatOf("zonedDateTime", "body", "date-time", m.ZonedDateTime.String(), formats); err != nil {
 		return err
 	}
 

@@ -15,7 +15,6 @@ import (
 
 // AdlsCloudStorageParameters adls cloud storage parameters
 // swagger:model AdlsCloudStorageParameters
-
 type AdlsCloudStorageParameters struct {
 
 	// account name
@@ -34,30 +33,19 @@ type AdlsCloudStorageParameters struct {
 	TenantID string `json:"tenantId,omitempty"`
 }
 
-/* polymorph AdlsCloudStorageParameters accountName false */
-
-/* polymorph AdlsCloudStorageParameters clientId false */
-
-/* polymorph AdlsCloudStorageParameters credential false */
-
-/* polymorph AdlsCloudStorageParameters tenantId false */
-
 // Validate validates this adls cloud storage parameters
 func (m *AdlsCloudStorageParameters) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAccountName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateClientID(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateCredential(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

@@ -17,7 +17,6 @@ import (
 
 // FileSystem file system
 // swagger:model FileSystem
-
 type FileSystem struct {
 
 	// adls
@@ -51,65 +50,39 @@ type FileSystem struct {
 	Wasb *WasbCloudStorageParameters `json:"wasb,omitempty"`
 }
 
-/* polymorph FileSystem adls false */
-
-/* polymorph FileSystem adlsGen2 false */
-
-/* polymorph FileSystem defaultFs false */
-
-/* polymorph FileSystem gcs false */
-
-/* polymorph FileSystem locations false */
-
-/* polymorph FileSystem name false */
-
-/* polymorph FileSystem s3 false */
-
-/* polymorph FileSystem type false */
-
-/* polymorph FileSystem wasb false */
-
 // Validate validates this file system
 func (m *FileSystem) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAdls(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateAdlsGen2(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateGcs(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateLocations(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateS3(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateType(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateWasb(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -126,7 +99,6 @@ func (m *FileSystem) validateAdls(formats strfmt.Registry) error {
 	}
 
 	if m.Adls != nil {
-
 		if err := m.Adls.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("adls")
@@ -145,7 +117,6 @@ func (m *FileSystem) validateAdlsGen2(formats strfmt.Registry) error {
 	}
 
 	if m.AdlsGen2 != nil {
-
 		if err := m.AdlsGen2.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("adlsGen2")
@@ -164,7 +135,6 @@ func (m *FileSystem) validateGcs(formats strfmt.Registry) error {
 	}
 
 	if m.Gcs != nil {
-
 		if err := m.Gcs.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("gcs")
@@ -187,13 +157,11 @@ func (m *FileSystem) validateLocations(formats strfmt.Registry) error {
 	}
 
 	for i := 0; i < len(m.Locations); i++ {
-
 		if swag.IsZero(m.Locations[i]) { // not required
 			continue
 		}
 
 		if m.Locations[i] != nil {
-
 			if err := m.Locations[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("locations" + "." + strconv.Itoa(i))
@@ -223,7 +191,6 @@ func (m *FileSystem) validateS3(formats strfmt.Registry) error {
 	}
 
 	if m.S3 != nil {
-
 		if err := m.S3.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("s3")
@@ -251,7 +218,6 @@ func (m *FileSystem) validateWasb(formats strfmt.Registry) error {
 	}
 
 	if m.Wasb != nil {
-
 		if err := m.Wasb.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("wasb")

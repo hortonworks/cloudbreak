@@ -18,7 +18,6 @@ import (
 
 // HostGroupRequest host group request
 // swagger:model HostGroupRequest
-
 type HostGroupRequest struct {
 
 	// instance group or resource constraint for a hostgroup
@@ -42,52 +41,35 @@ type HostGroupRequest struct {
 	Recipes []*RecipeRequest `json:"recipes"`
 
 	// recovery mode of the hostgroup's nodes
+	// Enum: [MANUAL AUTO]
 	RecoveryMode string `json:"recoveryMode,omitempty"`
 }
-
-/* polymorph HostGroupRequest constraint false */
-
-/* polymorph HostGroupRequest name false */
-
-/* polymorph HostGroupRequest recipeIds false */
-
-/* polymorph HostGroupRequest recipeNames false */
-
-/* polymorph HostGroupRequest recipes false */
-
-/* polymorph HostGroupRequest recoveryMode false */
 
 // Validate validates this host group request
 func (m *HostGroupRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateConstraint(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateRecipeIds(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateRecipeNames(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateRecipes(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateRecoveryMode(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -104,7 +86,6 @@ func (m *HostGroupRequest) validateConstraint(formats strfmt.Registry) error {
 	}
 
 	if m.Constraint != nil {
-
 		if err := m.Constraint.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("constraint")
@@ -162,13 +143,11 @@ func (m *HostGroupRequest) validateRecipes(formats strfmt.Registry) error {
 	}
 
 	for i := 0; i < len(m.Recipes); i++ {
-
 		if swag.IsZero(m.Recipes[i]) { // not required
 			continue
 		}
 
 		if m.Recipes[i] != nil {
-
 			if err := m.Recipes[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("recipes" + "." + strconv.Itoa(i))
@@ -195,8 +174,10 @@ func init() {
 }
 
 const (
+
 	// HostGroupRequestRecoveryModeMANUAL captures enum value "MANUAL"
 	HostGroupRequestRecoveryModeMANUAL string = "MANUAL"
+
 	// HostGroupRequestRecoveryModeAUTO captures enum value "AUTO"
 	HostGroupRequestRecoveryModeAUTO string = "AUTO"
 )

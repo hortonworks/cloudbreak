@@ -8,13 +8,11 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
 // IPPoolJSON Ip pool Json
 // swagger:model IpPoolJson
-
 type IPPoolJSON struct {
 
 	// id
@@ -27,19 +25,8 @@ type IPPoolJSON struct {
 	Properties map[string]interface{} `json:"properties,omitempty"`
 }
 
-/* polymorph IpPoolJson id false */
-
-/* polymorph IpPoolJson name false */
-
-/* polymorph IpPoolJson properties false */
-
 // Validate validates this Ip pool Json
 func (m *IPPoolJSON) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }
 

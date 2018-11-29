@@ -15,7 +15,6 @@ import (
 
 // WorkspaceRequest workspace request
 // swagger:model WorkspaceRequest
-
 type WorkspaceRequest struct {
 
 	// description of the resource
@@ -30,21 +29,15 @@ type WorkspaceRequest struct {
 	Name string `json:"name,omitempty"`
 }
 
-/* polymorph WorkspaceRequest description false */
-
-/* polymorph WorkspaceRequest name false */
-
 // Validate validates this workspace request
 func (m *WorkspaceRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateDescription(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

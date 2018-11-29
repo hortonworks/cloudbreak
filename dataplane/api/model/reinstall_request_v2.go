@@ -17,7 +17,6 @@ import (
 
 // ReinstallRequestV2 reinstall request v2
 // swagger:model ReinstallRequestV2
-
 type ReinstallRequestV2 struct {
 
 	// details of the Ambari stack
@@ -40,37 +39,23 @@ type ReinstallRequestV2 struct {
 	KerberosPrincipal string `json:"kerberosPrincipal,omitempty"`
 }
 
-/* polymorph ReinstallRequestV2 ambariStackDetails false */
-
-/* polymorph ReinstallRequestV2 blueprintName false */
-
-/* polymorph ReinstallRequestV2 instanceGroups false */
-
-/* polymorph ReinstallRequestV2 kerberosPassword false */
-
-/* polymorph ReinstallRequestV2 kerberosPrincipal false */
-
 // Validate validates this reinstall request v2
 func (m *ReinstallRequestV2) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAmbariStackDetails(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateBlueprintName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateInstanceGroups(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateKerberosPassword(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -87,7 +72,6 @@ func (m *ReinstallRequestV2) validateAmbariStackDetails(formats strfmt.Registry)
 	}
 
 	if m.AmbariStackDetails != nil {
-
 		if err := m.AmbariStackDetails.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("ambariStackDetails")
@@ -119,13 +103,11 @@ func (m *ReinstallRequestV2) validateInstanceGroups(formats strfmt.Registry) err
 	}
 
 	for i := 0; i < len(m.InstanceGroups); i++ {
-
 		if swag.IsZero(m.InstanceGroups[i]) { // not required
 			continue
 		}
 
 		if m.InstanceGroups[i] != nil {
-
 			if err := m.InstanceGroups[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("instanceGroups" + "." + strconv.Itoa(i))

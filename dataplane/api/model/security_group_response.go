@@ -17,7 +17,6 @@ import (
 
 // SecurityGroupResponse security group response
 // swagger:model SecurityGroupResponse
-
 type SecurityGroupResponse struct {
 
 	// type of cloud provider
@@ -49,48 +48,27 @@ type SecurityGroupResponse struct {
 	Workspace *WorkspaceResourceResponse `json:"workspace,omitempty"`
 }
 
-/* polymorph SecurityGroupResponse cloudPlatform false */
-
-/* polymorph SecurityGroupResponse description false */
-
-/* polymorph SecurityGroupResponse id false */
-
-/* polymorph SecurityGroupResponse name false */
-
-/* polymorph SecurityGroupResponse securityGroupId false */
-
-/* polymorph SecurityGroupResponse securityGroupIds false */
-
-/* polymorph SecurityGroupResponse securityRules false */
-
-/* polymorph SecurityGroupResponse workspace false */
-
 // Validate validates this security group response
 func (m *SecurityGroupResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateCloudPlatform(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateDescription(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateSecurityGroupIds(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateSecurityRules(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateWorkspace(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -146,13 +124,11 @@ func (m *SecurityGroupResponse) validateSecurityRules(formats strfmt.Registry) e
 	}
 
 	for i := 0; i < len(m.SecurityRules); i++ {
-
 		if swag.IsZero(m.SecurityRules[i]) { // not required
 			continue
 		}
 
 		if m.SecurityRules[i] != nil {
-
 			if err := m.SecurityRules[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("securityRules" + "." + strconv.Itoa(i))
@@ -173,7 +149,6 @@ func (m *SecurityGroupResponse) validateWorkspace(formats strfmt.Registry) error
 	}
 
 	if m.Workspace != nil {
-
 		if err := m.Workspace.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("workspace")

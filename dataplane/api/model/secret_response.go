@@ -8,13 +8,11 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
 // SecretResponse secret response
 // swagger:model SecretResponse
-
 type SecretResponse struct {
 
 	// Engine path of the secret.
@@ -24,17 +22,8 @@ type SecretResponse struct {
 	SecretPath string `json:"secretPath,omitempty"`
 }
 
-/* polymorph SecretResponse enginePath false */
-
-/* polymorph SecretResponse secretPath false */
-
 // Validate validates this secret response
 func (m *SecretResponse) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }
 

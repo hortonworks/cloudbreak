@@ -15,7 +15,6 @@ import (
 
 // ManagementPackResponse management pack response
 // swagger:model ManagementPackResponse
-
 type ManagementPackResponse struct {
 
 	// description of the resource
@@ -54,50 +53,23 @@ type ManagementPackResponse struct {
 	Workspace *WorkspaceResourceResponse `json:"workspace,omitempty"`
 }
 
-/* polymorph ManagementPackResponse description false */
-
-/* polymorph ManagementPackResponse force false */
-
-/* polymorph ManagementPackResponse id false */
-
-/* polymorph ManagementPackResponse mpackUrl false */
-
-/* polymorph ManagementPackResponse name false */
-
-/* polymorph ManagementPackResponse public false */
-
-/* polymorph ManagementPackResponse purge false */
-
-/* polymorph ManagementPackResponse purgeList false */
-
-/* polymorph ManagementPackResponse workspace false */
-
 // Validate validates this management pack response
 func (m *ManagementPackResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateDescription(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateMpackURL(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validatePurgeList(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateWorkspace(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -158,15 +130,6 @@ func (m *ManagementPackResponse) validateName(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *ManagementPackResponse) validatePurgeList(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.PurgeList) { // not required
-		return nil
-	}
-
-	return nil
-}
-
 func (m *ManagementPackResponse) validateWorkspace(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Workspace) { // not required
@@ -174,7 +137,6 @@ func (m *ManagementPackResponse) validateWorkspace(formats strfmt.Registry) erro
 	}
 
 	if m.Workspace != nil {
-
 		if err := m.Workspace.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("workspace")

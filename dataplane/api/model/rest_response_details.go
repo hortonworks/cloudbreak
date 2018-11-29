@@ -8,13 +8,11 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
 // RestResponseDetails rest response details
 // swagger:model RestResponseDetails
-
 type RestResponseDetails struct {
 
 	// body
@@ -36,25 +34,8 @@ type RestResponseDetails struct {
 	StatusText string `json:"statusText,omitempty"`
 }
 
-/* polymorph RestResponseDetails body false */
-
-/* polymorph RestResponseDetails cookies false */
-
-/* polymorph RestResponseDetails headers false */
-
-/* polymorph RestResponseDetails mediaType false */
-
-/* polymorph RestResponseDetails statusCode false */
-
-/* polymorph RestResponseDetails statusText false */
-
 // Validate validates this rest response details
 func (m *RestResponseDetails) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }
 

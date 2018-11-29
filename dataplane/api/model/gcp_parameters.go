@@ -14,21 +14,17 @@ import (
 
 // GcpParameters gcp parameters
 // swagger:model GcpParameters
-
 type GcpParameters struct {
 
 	// encryption for vm
 	Encryption *GcpEncryption `json:"encryption,omitempty"`
 }
 
-/* polymorph GcpParameters encryption false */
-
 // Validate validates this gcp parameters
 func (m *GcpParameters) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateEncryption(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -45,7 +41,6 @@ func (m *GcpParameters) validateEncryption(formats strfmt.Registry) error {
 	}
 
 	if m.Encryption != nil {
-
 		if err := m.Encryption.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("encryption")

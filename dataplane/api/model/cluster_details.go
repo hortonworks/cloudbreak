@@ -8,13 +8,11 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
 // ClusterDetails cluster details
 // swagger:model ClusterDetails
-
 type ClusterDetails struct {
 
 	// ambari version
@@ -72,63 +70,8 @@ type ClusterDetails struct {
 	StatusReason string `json:"statusReason,omitempty"`
 }
 
-/* polymorph ClusterDetails ambariVersion false */
-
-/* polymorph ClusterDetails clusterType false */
-
-/* polymorph ClusterDetails clusterVersion false */
-
-/* polymorph ClusterDetails databaseType false */
-
-/* polymorph ClusterDetails defaultFileSystem false */
-
-/* polymorph ClusterDetails description false */
-
-/* polymorph ClusterDetails externalDatabase false */
-
-/* polymorph ClusterDetails fileSystemType false */
-
-/* polymorph ClusterDetails gatewayEnabled false */
-
-/* polymorph ClusterDetails gatewayType false */
-
-/* polymorph ClusterDetails hostGroups false */
-
-/* polymorph ClusterDetails id false */
-
-/* polymorph ClusterDetails kerberosType false */
-
-/* polymorph ClusterDetails name false */
-
-/* polymorph ClusterDetails secure false */
-
-/* polymorph ClusterDetails ssoType false */
-
-/* polymorph ClusterDetails status false */
-
-/* polymorph ClusterDetails statusReason false */
-
 // Validate validates this cluster details
 func (m *ClusterDetails) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if err := m.validateHostGroups(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-func (m *ClusterDetails) validateHostGroups(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.HostGroups) { // not required
-		return nil
-	}
-
 	return nil
 }
 

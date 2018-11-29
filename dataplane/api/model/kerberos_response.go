@@ -17,7 +17,6 @@ import (
 
 // KerberosResponse kerberos response
 // swagger:model KerberosResponse
-
 type KerberosResponse struct {
 
 	// kerberos admin user
@@ -62,6 +61,7 @@ type KerberosResponse struct {
 
 	// type
 	// Required: true
+	// Enum: [CB_MANAGED EXISTING_AD EXISTING_MIT EXISTING_FREEIPA CUSTOM]
 	Type *string `json:"type"`
 
 	// kerberos KDC server URL
@@ -71,79 +71,39 @@ type KerberosResponse struct {
 	VerifyKdcTrust *bool `json:"verifyKdcTrust,omitempty"`
 }
 
-/* polymorph KerberosResponse admin false */
-
-/* polymorph KerberosResponse adminUrl false */
-
-/* polymorph KerberosResponse containerDn false */
-
-/* polymorph KerberosResponse descriptor false */
-
-/* polymorph KerberosResponse domain false */
-
-/* polymorph KerberosResponse krb5Conf false */
-
-/* polymorph KerberosResponse ldapUrl false */
-
-/* polymorph KerberosResponse masterKey false */
-
-/* polymorph KerberosResponse nameServers false */
-
-/* polymorph KerberosResponse password false */
-
-/* polymorph KerberosResponse principal false */
-
-/* polymorph KerberosResponse realm false */
-
-/* polymorph KerberosResponse tcpAllowed false */
-
-/* polymorph KerberosResponse type false */
-
-/* polymorph KerberosResponse url false */
-
-/* polymorph KerberosResponse verifyKdcTrust false */
-
 // Validate validates this kerberos response
 func (m *KerberosResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAdmin(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateDescriptor(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateKrb5Conf(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateMasterKey(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateNameServers(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validatePassword(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validatePrincipal(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateType(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -160,7 +120,6 @@ func (m *KerberosResponse) validateAdmin(formats strfmt.Registry) error {
 	}
 
 	if m.Admin != nil {
-
 		if err := m.Admin.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("admin")
@@ -179,7 +138,6 @@ func (m *KerberosResponse) validateDescriptor(formats strfmt.Registry) error {
 	}
 
 	if m.Descriptor != nil {
-
 		if err := m.Descriptor.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("descriptor")
@@ -198,7 +156,6 @@ func (m *KerberosResponse) validateKrb5Conf(formats strfmt.Registry) error {
 	}
 
 	if m.Krb5Conf != nil {
-
 		if err := m.Krb5Conf.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("krb5Conf")
@@ -217,7 +174,6 @@ func (m *KerberosResponse) validateMasterKey(formats strfmt.Registry) error {
 	}
 
 	if m.MasterKey != nil {
-
 		if err := m.MasterKey.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("masterKey")
@@ -249,7 +205,6 @@ func (m *KerberosResponse) validatePassword(formats strfmt.Registry) error {
 	}
 
 	if m.Password != nil {
-
 		if err := m.Password.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("password")
@@ -268,7 +223,6 @@ func (m *KerberosResponse) validatePrincipal(formats strfmt.Registry) error {
 	}
 
 	if m.Principal != nil {
-
 		if err := m.Principal.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("principal")
@@ -293,14 +247,19 @@ func init() {
 }
 
 const (
+
 	// KerberosResponseTypeCBMANAGED captures enum value "CB_MANAGED"
 	KerberosResponseTypeCBMANAGED string = "CB_MANAGED"
+
 	// KerberosResponseTypeEXISTINGAD captures enum value "EXISTING_AD"
 	KerberosResponseTypeEXISTINGAD string = "EXISTING_AD"
+
 	// KerberosResponseTypeEXISTINGMIT captures enum value "EXISTING_MIT"
 	KerberosResponseTypeEXISTINGMIT string = "EXISTING_MIT"
+
 	// KerberosResponseTypeEXISTINGFREEIPA captures enum value "EXISTING_FREEIPA"
 	KerberosResponseTypeEXISTINGFREEIPA string = "EXISTING_FREEIPA"
+
 	// KerberosResponseTypeCUSTOM captures enum value "CUSTOM"
 	KerberosResponseTypeCUSTOM string = "CUSTOM"
 )

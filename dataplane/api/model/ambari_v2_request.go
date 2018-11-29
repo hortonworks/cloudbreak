@@ -17,7 +17,6 @@ import (
 
 // AmbariV2Request ambari v2 request
 // swagger:model AmbariV2Request
-
 type AmbariV2Request struct {
 
 	// [DEPRECATED] use RdsConfig instead! details of the external Ambari database
@@ -41,6 +40,7 @@ type AmbariV2Request struct {
 	BlueprintName string `json:"blueprintName,omitempty"`
 
 	// config recommendation strategy
+	// Enum: [NEVER_APPLY ONLY_STACK_DEFAULTS_APPLY ALWAYS_APPLY ALWAYS_APPLY_DONT_OVERRIDE_CUSTOM_VALUES]
 	ConfigStrategy string `json:"configStrategy,omitempty"`
 
 	// cluster can connect to a datalake you can define the parameters here
@@ -75,87 +75,47 @@ type AmbariV2Request struct {
 	ValidateRepositories *bool `json:"validateRepositories,omitempty"`
 }
 
-/* polymorph AmbariV2Request ambariDatabaseDetails false */
-
-/* polymorph AmbariV2Request ambariRepoDetailsJson false */
-
-/* polymorph AmbariV2Request ambariSecurityMasterKey false */
-
-/* polymorph AmbariV2Request ambariStackDetails false */
-
-/* polymorph AmbariV2Request blueprintId false */
-
-/* polymorph AmbariV2Request blueprintName false */
-
-/* polymorph AmbariV2Request configStrategy false */
-
-/* polymorph AmbariV2Request connectedCluster false */
-
-/* polymorph AmbariV2Request enableSecurity false */
-
-/* polymorph AmbariV2Request gateway false */
-
-/* polymorph AmbariV2Request kerberos false */
-
-/* polymorph AmbariV2Request password false */
-
-/* polymorph AmbariV2Request userName false */
-
-/* polymorph AmbariV2Request validateBlueprint false */
-
-/* polymorph AmbariV2Request validateRepositories false */
-
 // Validate validates this ambari v2 request
 func (m *AmbariV2Request) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAmbariDatabaseDetails(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateAmbariRepoDetailsJSON(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateAmbariSecurityMasterKey(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateAmbariStackDetails(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateConfigStrategy(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateConnectedCluster(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateGateway(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateKerberos(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validatePassword(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateUserName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -172,7 +132,6 @@ func (m *AmbariV2Request) validateAmbariDatabaseDetails(formats strfmt.Registry)
 	}
 
 	if m.AmbariDatabaseDetails != nil {
-
 		if err := m.AmbariDatabaseDetails.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("ambariDatabaseDetails")
@@ -191,7 +150,6 @@ func (m *AmbariV2Request) validateAmbariRepoDetailsJSON(formats strfmt.Registry)
 	}
 
 	if m.AmbariRepoDetailsJSON != nil {
-
 		if err := m.AmbariRepoDetailsJSON.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("ambariRepoDetailsJson")
@@ -227,7 +185,6 @@ func (m *AmbariV2Request) validateAmbariStackDetails(formats strfmt.Registry) er
 	}
 
 	if m.AmbariStackDetails != nil {
-
 		if err := m.AmbariStackDetails.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("ambariStackDetails")
@@ -252,12 +209,16 @@ func init() {
 }
 
 const (
+
 	// AmbariV2RequestConfigStrategyNEVERAPPLY captures enum value "NEVER_APPLY"
 	AmbariV2RequestConfigStrategyNEVERAPPLY string = "NEVER_APPLY"
+
 	// AmbariV2RequestConfigStrategyONLYSTACKDEFAULTSAPPLY captures enum value "ONLY_STACK_DEFAULTS_APPLY"
 	AmbariV2RequestConfigStrategyONLYSTACKDEFAULTSAPPLY string = "ONLY_STACK_DEFAULTS_APPLY"
+
 	// AmbariV2RequestConfigStrategyALWAYSAPPLY captures enum value "ALWAYS_APPLY"
 	AmbariV2RequestConfigStrategyALWAYSAPPLY string = "ALWAYS_APPLY"
+
 	// AmbariV2RequestConfigStrategyALWAYSAPPLYDONTOVERRIDECUSTOMVALUES captures enum value "ALWAYS_APPLY_DONT_OVERRIDE_CUSTOM_VALUES"
 	AmbariV2RequestConfigStrategyALWAYSAPPLYDONTOVERRIDECUSTOMVALUES string = "ALWAYS_APPLY_DONT_OVERRIDE_CUSTOM_VALUES"
 )
@@ -291,7 +252,6 @@ func (m *AmbariV2Request) validateConnectedCluster(formats strfmt.Registry) erro
 	}
 
 	if m.ConnectedCluster != nil {
-
 		if err := m.ConnectedCluster.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("connectedCluster")
@@ -310,7 +270,6 @@ func (m *AmbariV2Request) validateGateway(formats strfmt.Registry) error {
 	}
 
 	if m.Gateway != nil {
-
 		if err := m.Gateway.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("gateway")
@@ -329,7 +288,6 @@ func (m *AmbariV2Request) validateKerberos(formats strfmt.Registry) error {
 	}
 
 	if m.Kerberos != nil {
-
 		if err := m.Kerberos.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("kerberos")

@@ -15,7 +15,6 @@ import (
 
 // StructuredParametersQueryRequest structured parameters query request
 // swagger:model StructuredParametersQueryRequest
-
 type StructuredParametersQueryRequest struct {
 
 	// Account name of the path
@@ -42,44 +41,27 @@ type StructuredParametersQueryRequest struct {
 	StorageName *string `json:"storageName"`
 }
 
-/* polymorph StructuredParametersQueryRequest accountName false */
-
-/* polymorph StructuredParametersQueryRequest attachedCluster false */
-
-/* polymorph StructuredParametersQueryRequest blueprintName false */
-
-/* polymorph StructuredParametersQueryRequest clusterName false */
-
-/* polymorph StructuredParametersQueryRequest fileSystemType false */
-
-/* polymorph StructuredParametersQueryRequest storageName false */
-
 // Validate validates this structured parameters query request
 func (m *StructuredParametersQueryRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAttachedCluster(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateBlueprintName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateClusterName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateFileSystemType(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateStorageName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

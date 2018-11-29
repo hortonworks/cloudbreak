@@ -17,7 +17,6 @@ import (
 
 // StackV2Request stack v2 request
 // swagger:model StackV2Request
-
 type StackV2Request struct {
 
 	// specific version of ambari
@@ -76,96 +75,51 @@ type StackV2Request struct {
 	Tags *Tags `json:"tags,omitempty"`
 }
 
-/* polymorph StackV2Request ambariVersion false */
-
-/* polymorph StackV2Request cluster false */
-
-/* polymorph StackV2Request customDomain false */
-
-/* polymorph StackV2Request failurePolicy false */
-
-/* polymorph StackV2Request flexId false */
-
-/* polymorph StackV2Request gatewayPort false */
-
-/* polymorph StackV2Request general false */
-
-/* polymorph StackV2Request hdpVersion false */
-
-/* polymorph StackV2Request imageSettings false */
-
-/* polymorph StackV2Request inputs false */
-
-/* polymorph StackV2Request instanceGroups false */
-
-/* polymorph StackV2Request network false */
-
-/* polymorph StackV2Request parameters false */
-
-/* polymorph StackV2Request placement false */
-
-/* polymorph StackV2Request platformVariant false */
-
-/* polymorph StackV2Request stackAuthentication false */
-
-/* polymorph StackV2Request tags false */
-
 // Validate validates this stack v2 request
 func (m *StackV2Request) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateCluster(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateCustomDomain(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateFailurePolicy(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateGatewayPort(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateGeneral(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateImageSettings(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateInstanceGroups(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateNetwork(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validatePlacement(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateStackAuthentication(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateTags(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -182,7 +136,6 @@ func (m *StackV2Request) validateCluster(formats strfmt.Registry) error {
 	}
 
 	if m.Cluster != nil {
-
 		if err := m.Cluster.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("cluster")
@@ -201,7 +154,6 @@ func (m *StackV2Request) validateCustomDomain(formats strfmt.Registry) error {
 	}
 
 	if m.CustomDomain != nil {
-
 		if err := m.CustomDomain.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("customDomain")
@@ -220,7 +172,6 @@ func (m *StackV2Request) validateFailurePolicy(formats strfmt.Registry) error {
 	}
 
 	if m.FailurePolicy != nil {
-
 		if err := m.FailurePolicy.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("failurePolicy")
@@ -256,7 +207,6 @@ func (m *StackV2Request) validateGeneral(formats strfmt.Registry) error {
 	}
 
 	if m.General != nil {
-
 		if err := m.General.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("general")
@@ -275,7 +225,6 @@ func (m *StackV2Request) validateImageSettings(formats strfmt.Registry) error {
 	}
 
 	if m.ImageSettings != nil {
-
 		if err := m.ImageSettings.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("imageSettings")
@@ -294,13 +243,11 @@ func (m *StackV2Request) validateInstanceGroups(formats strfmt.Registry) error {
 	}
 
 	for i := 0; i < len(m.InstanceGroups); i++ {
-
 		if swag.IsZero(m.InstanceGroups[i]) { // not required
 			continue
 		}
 
 		if m.InstanceGroups[i] != nil {
-
 			if err := m.InstanceGroups[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("instanceGroups" + "." + strconv.Itoa(i))
@@ -321,7 +268,6 @@ func (m *StackV2Request) validateNetwork(formats strfmt.Registry) error {
 	}
 
 	if m.Network != nil {
-
 		if err := m.Network.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("network")
@@ -340,7 +286,6 @@ func (m *StackV2Request) validatePlacement(formats strfmt.Registry) error {
 	}
 
 	if m.Placement != nil {
-
 		if err := m.Placement.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("placement")
@@ -359,7 +304,6 @@ func (m *StackV2Request) validateStackAuthentication(formats strfmt.Registry) er
 	}
 
 	if m.StackAuthentication != nil {
-
 		if err := m.StackAuthentication.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("stackAuthentication")
@@ -378,7 +322,6 @@ func (m *StackV2Request) validateTags(formats strfmt.Registry) error {
 	}
 
 	if m.Tags != nil {
-
 		if err := m.Tags.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("tags")

@@ -14,7 +14,6 @@ import (
 
 // ImageResponse image response
 // swagger:model ImageResponse
-
 type ImageResponse struct {
 
 	// date
@@ -51,34 +50,11 @@ type ImageResponse struct {
 	Version string `json:"version,omitempty"`
 }
 
-/* polymorph ImageResponse date false */
-
-/* polymorph ImageResponse defaultImage false */
-
-/* polymorph ImageResponse description false */
-
-/* polymorph ImageResponse images false */
-
-/* polymorph ImageResponse os false */
-
-/* polymorph ImageResponse osType false */
-
-/* polymorph ImageResponse packageVersions false */
-
-/* polymorph ImageResponse repo false */
-
-/* polymorph ImageResponse stackDetails false */
-
-/* polymorph ImageResponse uuid false */
-
-/* polymorph ImageResponse version false */
-
 // Validate validates this image response
 func (m *ImageResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateStackDetails(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -95,7 +71,6 @@ func (m *ImageResponse) validateStackDetails(formats strfmt.Registry) error {
 	}
 
 	if m.StackDetails != nil {
-
 		if err := m.StackDetails.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("stackDetails")

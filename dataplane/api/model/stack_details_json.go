@@ -6,6 +6,8 @@ package model
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"strconv"
+
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
@@ -15,7 +17,6 @@ import (
 
 // StackDetailsJSON stack details Json
 // swagger:model StackDetailsJson
-
 type StackDetailsJSON struct {
 
 	// mpacks
@@ -28,23 +29,15 @@ type StackDetailsJSON struct {
 	Version string `json:"version,omitempty"`
 }
 
-/* polymorph StackDetailsJson mpacks false */
-
-/* polymorph StackDetailsJson repo false */
-
-/* polymorph StackDetailsJson version false */
-
 // Validate validates this stack details Json
 func (m *StackDetailsJSON) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateMpacks(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateRepo(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -60,8 +53,23 @@ func (m *StackDetailsJSON) validateMpacks(formats strfmt.Registry) error {
 		return nil
 	}
 
-	if err := validate.Required("mpacks", "body", m.Mpacks); err != nil {
-		return err
+	for k := range m.Mpacks {
+
+		if err := validate.Required("mpacks"+"."+k, "body", m.Mpacks[k]); err != nil {
+			return err
+		}
+
+		for i := 0; i < len(m.Mpacks[k]); i++ {
+
+			if err := m.Mpacks[k][i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("mpacks" + "." + k + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+
+		}
+
 	}
 
 	return nil
@@ -74,7 +82,6 @@ func (m *StackDetailsJSON) validateRepo(formats strfmt.Registry) error {
 	}
 
 	if m.Repo != nil {
-
 		if err := m.Repo.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("repo")

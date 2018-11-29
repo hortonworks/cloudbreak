@@ -18,7 +18,6 @@ import (
 
 // WorkspaceResponse workspace response
 // swagger:model WorkspaceResponse
-
 type WorkspaceResponse struct {
 
 	// description of the resource
@@ -36,6 +35,7 @@ type WorkspaceResponse struct {
 	Name string `json:"name,omitempty"`
 
 	// status
+	// Enum: [ACTIVE DELETED]
 	Status string `json:"status,omitempty"`
 
 	// users
@@ -43,37 +43,23 @@ type WorkspaceResponse struct {
 	Users []*UserWorkspacePermissionsJSON `json:"users"`
 }
 
-/* polymorph WorkspaceResponse description false */
-
-/* polymorph WorkspaceResponse id false */
-
-/* polymorph WorkspaceResponse name false */
-
-/* polymorph WorkspaceResponse status false */
-
-/* polymorph WorkspaceResponse users false */
-
 // Validate validates this workspace response
 func (m *WorkspaceResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateDescription(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateStatus(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateUsers(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -134,8 +120,10 @@ func init() {
 }
 
 const (
+
 	// WorkspaceResponseStatusACTIVE captures enum value "ACTIVE"
 	WorkspaceResponseStatusACTIVE string = "ACTIVE"
+
 	// WorkspaceResponseStatusDELETED captures enum value "DELETED"
 	WorkspaceResponseStatusDELETED string = "DELETED"
 )
@@ -173,13 +161,11 @@ func (m *WorkspaceResponse) validateUsers(formats strfmt.Registry) error {
 	}
 
 	for i := 0; i < len(m.Users); i++ {
-
 		if swag.IsZero(m.Users[i]) { // not required
 			continue
 		}
 
 		if m.Users[i] != nil {
-
 			if err := m.Users[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("users" + "." + strconv.Itoa(i))

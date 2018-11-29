@@ -15,7 +15,6 @@ import (
 
 // FailureReport failure report
 // swagger:model FailureReport
-
 type FailureReport struct {
 
 	// List of failed nodes
@@ -23,14 +22,11 @@ type FailureReport struct {
 	FailedNodes []string `json:"failedNodes"`
 }
 
-/* polymorph FailureReport failedNodes false */
-
 // Validate validates this failure report
 func (m *FailureReport) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateFailedNodes(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

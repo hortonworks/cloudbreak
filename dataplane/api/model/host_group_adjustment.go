@@ -15,7 +15,6 @@ import (
 
 // HostGroupAdjustment host group adjustment
 // swagger:model HostGroupAdjustment
-
 type HostGroupAdjustment struct {
 
 	// name of the host group
@@ -33,25 +32,15 @@ type HostGroupAdjustment struct {
 	WithStackUpdate *bool `json:"withStackUpdate,omitempty"`
 }
 
-/* polymorph HostGroupAdjustment hostGroup false */
-
-/* polymorph HostGroupAdjustment scalingAdjustment false */
-
-/* polymorph HostGroupAdjustment validateNodeCount false */
-
-/* polymorph HostGroupAdjustment withStackUpdate false */
-
 // Validate validates this host group adjustment
 func (m *HostGroupAdjustment) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateHostGroup(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateScalingAdjustment(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

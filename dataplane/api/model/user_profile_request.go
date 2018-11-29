@@ -8,13 +8,11 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
 // UserProfileRequest user profile request
 // swagger:model UserProfileRequest
-
 type UserProfileRequest struct {
 
 	// credential Id
@@ -30,21 +28,8 @@ type UserProfileRequest struct {
 	UIProperties map[string]interface{} `json:"uiProperties,omitempty"`
 }
 
-/* polymorph UserProfileRequest credentialId false */
-
-/* polymorph UserProfileRequest credentialName false */
-
-/* polymorph UserProfileRequest imageCatalogName false */
-
-/* polymorph UserProfileRequest uiProperties false */
-
 // Validate validates this user profile request
 func (m *UserProfileRequest) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }
 

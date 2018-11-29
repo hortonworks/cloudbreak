@@ -84,9 +84,6 @@ func NewHTTPClient(formats strfmt.Registry) *Cloudbreak {
 // using a customizable transport config.
 func NewHTTPClientWithConfig(formats strfmt.Registry, cfg *TransportConfig) *Cloudbreak {
 	// ensure nullable parameters have default
-	if formats == nil {
-		formats = strfmt.Default
-	}
 	if cfg == nil {
 		cfg = DefaultTransportConfig()
 	}
@@ -98,6 +95,11 @@ func NewHTTPClientWithConfig(formats strfmt.Registry, cfg *TransportConfig) *Clo
 
 // New creates a new cloudbreak client
 func New(transport runtime.ClientTransport, formats strfmt.Registry) *Cloudbreak {
+	// ensure nullable parameters have default
+	if formats == nil {
+		formats = strfmt.Default
+	}
+
 	cli := new(Cloudbreak)
 	cli.Transport = transport
 

@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/hortonworks/cb-cli/dataplane/api/model"
+	model "github.com/hortonworks/cb-cli/dataplane/api/model"
 )
 
 // NewCreateRDSDatabaseUtilV3Params creates a new CreateRDSDatabaseUtilV3Params object
@@ -138,12 +138,10 @@ func (o *CreateRDSDatabaseUtilV3Params) WriteToRequest(r runtime.ClientRequest, 
 	}
 	var res []error
 
-	if o.Body == nil {
-		o.Body = new(model.RDSBuildRequest)
-	}
-
-	if err := r.SetBodyParam(o.Body); err != nil {
-		return err
+	if o.Body != nil {
+		if err := r.SetBodyParam(o.Body); err != nil {
+			return err
+		}
 	}
 
 	valuesTarget := o.Target

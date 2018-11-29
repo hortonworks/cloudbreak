@@ -17,7 +17,6 @@ import (
 
 // SharedServiceResponse shared service response
 // swagger:model SharedServiceResponse
-
 type SharedServiceResponse struct {
 
 	// attached clusters
@@ -31,18 +30,11 @@ type SharedServiceResponse struct {
 	SharedClusterName string `json:"sharedClusterName,omitempty"`
 }
 
-/* polymorph SharedServiceResponse attachedClusters false */
-
-/* polymorph SharedServiceResponse sharedClusterId false */
-
-/* polymorph SharedServiceResponse sharedClusterName false */
-
 // Validate validates this shared service response
 func (m *SharedServiceResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAttachedClusters(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -63,13 +55,11 @@ func (m *SharedServiceResponse) validateAttachedClusters(formats strfmt.Registry
 	}
 
 	for i := 0; i < len(m.AttachedClusters); i++ {
-
 		if swag.IsZero(m.AttachedClusters[i]) { // not required
 			continue
 		}
 
 		if m.AttachedClusters[i] != nil {
-
 			if err := m.AttachedClusters[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("attachedClusters" + "." + strconv.Itoa(i))

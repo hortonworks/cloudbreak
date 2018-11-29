@@ -18,7 +18,6 @@ import (
 
 // StackRequest stack request
 // swagger:model StackRequest
-
 type StackRequest struct {
 
 	// specific version of ambari
@@ -109,6 +108,7 @@ type StackRequest struct {
 	NetworkID int64 `json:"networkId,omitempty"`
 
 	// action on failure
+	// Enum: [ROLLBACK DO_NOTHING]
 	OnFailureAction string `json:"onFailureAction,omitempty"`
 
 	// the details of the container orchestrator api to use
@@ -133,127 +133,47 @@ type StackRequest struct {
 	UserDefinedTags map[string]string `json:"userDefinedTags,omitempty"`
 }
 
-/* polymorph StackRequest ambariVersion false */
-
-/* polymorph StackRequest applicationTags false */
-
-/* polymorph StackRequest availabilityZone false */
-
-/* polymorph StackRequest cloudPlatform false */
-
-/* polymorph StackRequest clusterNameAsSubdomain false */
-
-/* polymorph StackRequest clusterRequest false */
-
-/* polymorph StackRequest clusterToAttach false */
-
-/* polymorph StackRequest credential false */
-
-/* polymorph StackRequest credentialId false */
-
-/* polymorph StackRequest credentialName false */
-
-/* polymorph StackRequest credentialSource false */
-
-/* polymorph StackRequest customDomain false */
-
-/* polymorph StackRequest customHostname false */
-
-/* polymorph StackRequest customInputs false */
-
-/* polymorph StackRequest defaultTags false */
-
-/* polymorph StackRequest environment false */
-
-/* polymorph StackRequest failurePolicy false */
-
-/* polymorph StackRequest flexId false */
-
-/* polymorph StackRequest gatewayPort false */
-
-/* polymorph StackRequest hdpVersion false */
-
-/* polymorph StackRequest hostgroupNameAsHostname false */
-
-/* polymorph StackRequest imageCatalog false */
-
-/* polymorph StackRequest imageId false */
-
-/* polymorph StackRequest instanceGroups false */
-
-/* polymorph StackRequest name false */
-
-/* polymorph StackRequest network false */
-
-/* polymorph StackRequest networkId false */
-
-/* polymorph StackRequest onFailureAction false */
-
-/* polymorph StackRequest orchestrator false */
-
-/* polymorph StackRequest os false */
-
-/* polymorph StackRequest parameters false */
-
-/* polymorph StackRequest platformVariant false */
-
-/* polymorph StackRequest region false */
-
-/* polymorph StackRequest stackAuthentication false */
-
-/* polymorph StackRequest userDefinedTags false */
-
 // Validate validates this stack request
 func (m *StackRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateClusterRequest(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateCredential(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateCredentialSource(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateFailurePolicy(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateInstanceGroups(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateNetwork(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateOnFailureAction(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateOrchestrator(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateStackAuthentication(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -270,7 +190,6 @@ func (m *StackRequest) validateClusterRequest(formats strfmt.Registry) error {
 	}
 
 	if m.ClusterRequest != nil {
-
 		if err := m.ClusterRequest.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("clusterRequest")
@@ -289,7 +208,6 @@ func (m *StackRequest) validateCredential(formats strfmt.Registry) error {
 	}
 
 	if m.Credential != nil {
-
 		if err := m.Credential.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("credential")
@@ -308,7 +226,6 @@ func (m *StackRequest) validateCredentialSource(formats strfmt.Registry) error {
 	}
 
 	if m.CredentialSource != nil {
-
 		if err := m.CredentialSource.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("credentialSource")
@@ -327,7 +244,6 @@ func (m *StackRequest) validateFailurePolicy(formats strfmt.Registry) error {
 	}
 
 	if m.FailurePolicy != nil {
-
 		if err := m.FailurePolicy.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("failurePolicy")
@@ -346,13 +262,11 @@ func (m *StackRequest) validateInstanceGroups(formats strfmt.Registry) error {
 	}
 
 	for i := 0; i < len(m.InstanceGroups); i++ {
-
 		if swag.IsZero(m.InstanceGroups[i]) { // not required
 			continue
 		}
 
 		if m.InstanceGroups[i] != nil {
-
 			if err := m.InstanceGroups[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("instanceGroups" + "." + strconv.Itoa(i))
@@ -394,7 +308,6 @@ func (m *StackRequest) validateNetwork(formats strfmt.Registry) error {
 	}
 
 	if m.Network != nil {
-
 		if err := m.Network.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("network")
@@ -419,8 +332,10 @@ func init() {
 }
 
 const (
+
 	// StackRequestOnFailureActionROLLBACK captures enum value "ROLLBACK"
 	StackRequestOnFailureActionROLLBACK string = "ROLLBACK"
+
 	// StackRequestOnFailureActionDONOTHING captures enum value "DO_NOTHING"
 	StackRequestOnFailureActionDONOTHING string = "DO_NOTHING"
 )
@@ -454,7 +369,6 @@ func (m *StackRequest) validateOrchestrator(formats strfmt.Registry) error {
 	}
 
 	if m.Orchestrator != nil {
-
 		if err := m.Orchestrator.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("orchestrator")
@@ -473,7 +387,6 @@ func (m *StackRequest) validateStackAuthentication(formats strfmt.Registry) erro
 	}
 
 	if m.StackAuthentication != nil {
-
 		if err := m.StackAuthentication.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("stackAuthentication")

@@ -15,7 +15,6 @@ import (
 
 // RdsConfig rds config
 // swagger:model RdsConfig
-
 type RdsConfig struct {
 
 	// Password to use for the jdbc connection
@@ -57,65 +56,39 @@ type RdsConfig struct {
 	Type *string `json:"type"`
 }
 
-/* polymorph RdsConfig connectionPassword false */
-
-/* polymorph RdsConfig connectionURL false */
-
-/* polymorph RdsConfig connectionUserName false */
-
-/* polymorph RdsConfig connectorJarUrl false */
-
-/* polymorph RdsConfig description false */
-
-/* polymorph RdsConfig environments false */
-
-/* polymorph RdsConfig name false */
-
-/* polymorph RdsConfig oracle false */
-
-/* polymorph RdsConfig type false */
-
 // Validate validates this rds config
 func (m *RdsConfig) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateConnectionPassword(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateConnectionURL(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateConnectionUserName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateDescription(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateEnvironments(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateOracle(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateType(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -210,7 +183,6 @@ func (m *RdsConfig) validateOracle(formats strfmt.Registry) error {
 	}
 
 	if m.Oracle != nil {
-
 		if err := m.Oracle.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("oracle")

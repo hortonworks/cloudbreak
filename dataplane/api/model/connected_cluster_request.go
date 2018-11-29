@@ -8,13 +8,11 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
 // ConnectedClusterRequest connected cluster request
 // swagger:model ConnectedClusterRequest
-
 type ConnectedClusterRequest struct {
 
 	// source cluster Id
@@ -24,17 +22,8 @@ type ConnectedClusterRequest struct {
 	SourceClusterName string `json:"sourceClusterName,omitempty"`
 }
 
-/* polymorph ConnectedClusterRequest sourceClusterId false */
-
-/* polymorph ConnectedClusterRequest sourceClusterName false */
-
 // Validate validates this connected cluster request
 func (m *ConnectedClusterRequest) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }
 

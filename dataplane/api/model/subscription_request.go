@@ -15,7 +15,6 @@ import (
 
 // SubscriptionRequest subscription request
 // swagger:model SubscriptionRequest
-
 type SubscriptionRequest struct {
 
 	// url of the endpoint
@@ -24,14 +23,11 @@ type SubscriptionRequest struct {
 	EndpointURL *string `json:"endpointUrl"`
 }
 
-/* polymorph SubscriptionRequest endpointUrl false */
-
 // Validate validates this subscription request
 func (m *SubscriptionRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateEndpointURL(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

@@ -17,7 +17,6 @@ import (
 
 // SupportedExternalDatabaseServiceEntryResponse supported external database service entry response
 // swagger:model SupportedExternalDatabaseServiceEntryResponse
-
 type SupportedExternalDatabaseServiceEntryResponse struct {
 
 	// Supported database list
@@ -31,18 +30,11 @@ type SupportedExternalDatabaseServiceEntryResponse struct {
 	Name string `json:"name,omitempty"`
 }
 
-/* polymorph SupportedExternalDatabaseServiceEntryResponse databases false */
-
-/* polymorph SupportedExternalDatabaseServiceEntryResponse displayName false */
-
-/* polymorph SupportedExternalDatabaseServiceEntryResponse name false */
-
 // Validate validates this supported external database service entry response
 func (m *SupportedExternalDatabaseServiceEntryResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateDatabases(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -63,13 +55,11 @@ func (m *SupportedExternalDatabaseServiceEntryResponse) validateDatabases(format
 	}
 
 	for i := 0; i < len(m.Databases); i++ {
-
 		if swag.IsZero(m.Databases[i]) { // not required
 			continue
 		}
 
 		if m.Databases[i] != nil {
-
 			if err := m.Databases[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("databases" + "." + strconv.Itoa(i))

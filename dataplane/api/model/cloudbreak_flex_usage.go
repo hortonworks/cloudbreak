@@ -16,7 +16,6 @@ import (
 
 // CloudbreakFlexUsage cloudbreak flex usage
 // swagger:model CloudbreakFlexUsage
-
 type CloudbreakFlexUsage struct {
 
 	// controller
@@ -26,21 +25,15 @@ type CloudbreakFlexUsage struct {
 	Products []*FlexUsageProductJSON `json:"products"`
 }
 
-/* polymorph CloudbreakFlexUsage controller false */
-
-/* polymorph CloudbreakFlexUsage products false */
-
 // Validate validates this cloudbreak flex usage
 func (m *CloudbreakFlexUsage) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateController(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateProducts(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -57,7 +50,6 @@ func (m *CloudbreakFlexUsage) validateController(formats strfmt.Registry) error 
 	}
 
 	if m.Controller != nil {
-
 		if err := m.Controller.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("controller")
@@ -76,13 +68,11 @@ func (m *CloudbreakFlexUsage) validateProducts(formats strfmt.Registry) error {
 	}
 
 	for i := 0; i < len(m.Products); i++ {
-
 		if swag.IsZero(m.Products[i]) { // not required
 			continue
 		}
 
 		if m.Products[i] != nil {
-
 			if err := m.Products[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("products" + "." + strconv.Itoa(i))

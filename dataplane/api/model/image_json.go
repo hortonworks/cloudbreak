@@ -8,13 +8,11 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
 // ImageJSON image Json
 // swagger:model ImageJson
-
 type ImageJSON struct {
 
 	// name of the image catalog
@@ -30,21 +28,8 @@ type ImageJSON struct {
 	ImageName string `json:"imageName,omitempty"`
 }
 
-/* polymorph ImageJson imageCatalogName false */
-
-/* polymorph ImageJson imageCatalogUrl false */
-
-/* polymorph ImageJson imageId false */
-
-/* polymorph ImageJson imageName false */
-
 // Validate validates this image Json
 func (m *ImageJSON) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }
 

@@ -14,7 +14,6 @@ import (
 
 // LDAPTestRequest l d a p test request
 // swagger:model LDAPTestRequest
-
 type LDAPTestRequest struct {
 
 	// name of the resource
@@ -24,16 +23,11 @@ type LDAPTestRequest struct {
 	ValidationRequest *LdapValidationRequest `json:"validationRequest,omitempty"`
 }
 
-/* polymorph LDAPTestRequest name false */
-
-/* polymorph LDAPTestRequest validationRequest false */
-
 // Validate validates this l d a p test request
 func (m *LDAPTestRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateValidationRequest(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -50,7 +44,6 @@ func (m *LDAPTestRequest) validateValidationRequest(formats strfmt.Registry) err
 	}
 
 	if m.ValidationRequest != nil {
-
 		if err := m.ValidationRequest.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("validationRequest")

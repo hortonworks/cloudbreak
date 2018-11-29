@@ -8,13 +8,11 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
 // EncryptionKeyConfigJSON encryption key config Json
 // swagger:model EncryptionKeyConfigJson
-
 type EncryptionKeyConfigJSON struct {
 
 	// description
@@ -33,23 +31,8 @@ type EncryptionKeyConfigJSON struct {
 	Properties map[string]interface{} `json:"properties,omitempty"`
 }
 
-/* polymorph EncryptionKeyConfigJson description false */
-
-/* polymorph EncryptionKeyConfigJson displayName false */
-
-/* polymorph EncryptionKeyConfigJson id false */
-
-/* polymorph EncryptionKeyConfigJson name false */
-
-/* polymorph EncryptionKeyConfigJson properties false */
-
 // Validate validates this encryption key config Json
 func (m *EncryptionKeyConfigJSON) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }
 

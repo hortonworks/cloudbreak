@@ -17,7 +17,6 @@ import (
 
 // StructuredParameterQueriesResponse structured parameter queries response
 // swagger:model StructuredParameterQueriesResponse
-
 type StructuredParameterQueriesResponse struct {
 
 	// Entries parameters as a json
@@ -25,14 +24,11 @@ type StructuredParameterQueriesResponse struct {
 	Entries []*StructuredParameterQueryResponse `json:"entries"`
 }
 
-/* polymorph StructuredParameterQueriesResponse entries false */
-
 // Validate validates this structured parameter queries response
 func (m *StructuredParameterQueriesResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateEntries(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -49,13 +45,11 @@ func (m *StructuredParameterQueriesResponse) validateEntries(formats strfmt.Regi
 	}
 
 	for i := 0; i < len(m.Entries); i++ {
-
 		if swag.IsZero(m.Entries[i]) { // not required
 			continue
 		}
 
 		if m.Entries[i] != nil {
-
 			if err := m.Entries[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("entries" + "." + strconv.Itoa(i))

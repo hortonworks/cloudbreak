@@ -15,7 +15,6 @@ import (
 
 // HostMetadataViewResponse host metadata view response
 // swagger:model HostMetadataViewResponse
-
 type HostMetadataViewResponse struct {
 
 	// id of the resource
@@ -29,18 +28,11 @@ type HostMetadataViewResponse struct {
 	State string `json:"state,omitempty"`
 }
 
-/* polymorph HostMetadataViewResponse id false */
-
-/* polymorph HostMetadataViewResponse name false */
-
-/* polymorph HostMetadataViewResponse state false */
-
 // Validate validates this host metadata view response
 func (m *HostMetadataViewResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

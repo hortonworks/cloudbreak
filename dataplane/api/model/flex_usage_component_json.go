@@ -16,7 +16,6 @@ import (
 
 // FlexUsageComponentJSON flex usage component Json
 // swagger:model FlexUsageComponentJson
-
 type FlexUsageComponentJSON struct {
 
 	// component Id
@@ -26,16 +25,11 @@ type FlexUsageComponentJSON struct {
 	Instances []*FlexUsageComponentInstanceJSON `json:"instances"`
 }
 
-/* polymorph FlexUsageComponentJson componentId false */
-
-/* polymorph FlexUsageComponentJson instances false */
-
 // Validate validates this flex usage component Json
 func (m *FlexUsageComponentJSON) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateInstances(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -52,13 +46,11 @@ func (m *FlexUsageComponentJSON) validateInstances(formats strfmt.Registry) erro
 	}
 
 	for i := 0; i < len(m.Instances); i++ {
-
 		if swag.IsZero(m.Instances[i]) { // not required
 			continue
 		}
 
 		if m.Instances[i] != nil {
-
 			if err := m.Instances[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("instances" + "." + strconv.Itoa(i))

@@ -135,8 +135,10 @@ func (o *RemoveWorkspaceUsersParams) WriteToRequest(r runtime.ClientRequest, reg
 	}
 	var res []error
 
-	if err := r.SetBodyParam(o.Body); err != nil {
-		return err
+	if o.Body != nil {
+		if err := r.SetBodyParam(o.Body); err != nil {
+			return err
+		}
 	}
 
 	// path param name

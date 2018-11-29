@@ -15,7 +15,6 @@ import (
 
 // WasbCloudStorageParameters wasb cloud storage parameters
 // swagger:model WasbCloudStorageParameters
-
 type WasbCloudStorageParameters struct {
 
 	// account key
@@ -30,23 +29,15 @@ type WasbCloudStorageParameters struct {
 	Secure *bool `json:"secure,omitempty"`
 }
 
-/* polymorph WasbCloudStorageParameters accountKey false */
-
-/* polymorph WasbCloudStorageParameters accountName false */
-
-/* polymorph WasbCloudStorageParameters secure false */
-
 // Validate validates this wasb cloud storage parameters
 func (m *WasbCloudStorageParameters) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAccountKey(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateAccountName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

@@ -15,7 +15,6 @@ import (
 
 // RDSBuildRequest r d s build request
 // swagger:model RDSBuildRequest
-
 type RDSBuildRequest struct {
 
 	// requested cluster name
@@ -27,21 +26,15 @@ type RDSBuildRequest struct {
 	RdsConfigRequest *RdsConfig `json:"rdsConfigRequest"`
 }
 
-/* polymorph RDSBuildRequest clusterName false */
-
-/* polymorph RDSBuildRequest rdsConfigRequest false */
-
 // Validate validates this r d s build request
 func (m *RDSBuildRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateClusterName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateRdsConfigRequest(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -67,7 +60,6 @@ func (m *RDSBuildRequest) validateRdsConfigRequest(formats strfmt.Registry) erro
 	}
 
 	if m.RdsConfigRequest != nil {
-
 		if err := m.RdsConfigRequest.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("rdsConfigRequest")

@@ -8,13 +8,11 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
 // CustomDomainSettings custom domain settings
 // swagger:model CustomDomainSettings
-
 type CustomDomainSettings struct {
 
 	// using the cluster name to create subdomain
@@ -30,21 +28,8 @@ type CustomDomainSettings struct {
 	HostgroupNameAsHostname *bool `json:"hostgroupNameAsHostname,omitempty"`
 }
 
-/* polymorph CustomDomainSettings clusterNameAsSubdomain false */
-
-/* polymorph CustomDomainSettings customDomain false */
-
-/* polymorph CustomDomainSettings customHostname false */
-
-/* polymorph CustomDomainSettings hostgroupNameAsHostname false */
-
 // Validate validates this custom domain settings
 func (m *CustomDomainSettings) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }
 

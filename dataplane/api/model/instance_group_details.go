@@ -14,7 +14,6 @@ import (
 
 // InstanceGroupDetails instance group details
 // swagger:model InstanceGroupDetails
-
 type InstanceGroupDetails struct {
 
 	// group name
@@ -42,28 +41,11 @@ type InstanceGroupDetails struct {
 	VolumeType string `json:"volumeType,omitempty"`
 }
 
-/* polymorph InstanceGroupDetails groupName false */
-
-/* polymorph InstanceGroupDetails groupType false */
-
-/* polymorph InstanceGroupDetails instanceType false */
-
-/* polymorph InstanceGroupDetails nodeCount false */
-
-/* polymorph InstanceGroupDetails securityGroup false */
-
-/* polymorph InstanceGroupDetails volumeCount false */
-
-/* polymorph InstanceGroupDetails volumeSize false */
-
-/* polymorph InstanceGroupDetails volumeType false */
-
 // Validate validates this instance group details
 func (m *InstanceGroupDetails) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateSecurityGroup(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -80,7 +62,6 @@ func (m *InstanceGroupDetails) validateSecurityGroup(formats strfmt.Registry) er
 	}
 
 	if m.SecurityGroup != nil {
-
 		if err := m.SecurityGroup.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("securityGroup")

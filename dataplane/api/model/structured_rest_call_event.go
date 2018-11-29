@@ -14,7 +14,6 @@ import (
 
 // StructuredRestCallEvent structured rest call event
 // swagger:model StructuredRestCallEvent
-
 type StructuredRestCallEvent struct {
 
 	// duration
@@ -33,27 +32,15 @@ type StructuredRestCallEvent struct {
 	Type string `json:"type,omitempty"`
 }
 
-/* polymorph StructuredRestCallEvent duration false */
-
-/* polymorph StructuredRestCallEvent operation false */
-
-/* polymorph StructuredRestCallEvent restCall false */
-
-/* polymorph StructuredRestCallEvent status false */
-
-/* polymorph StructuredRestCallEvent type false */
-
 // Validate validates this structured rest call event
 func (m *StructuredRestCallEvent) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateOperation(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateRestCall(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -70,7 +57,6 @@ func (m *StructuredRestCallEvent) validateOperation(formats strfmt.Registry) err
 	}
 
 	if m.Operation != nil {
-
 		if err := m.Operation.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("operation")
@@ -89,7 +75,6 @@ func (m *StructuredRestCallEvent) validateRestCall(formats strfmt.Registry) erro
 	}
 
 	if m.RestCall != nil {
-
 		if err := m.RestCall.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("restCall")

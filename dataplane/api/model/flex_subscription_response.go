@@ -15,7 +15,6 @@ import (
 
 // FlexSubscriptionResponse flex subscription response
 // swagger:model FlexSubscriptionResponse
-
 type FlexSubscriptionResponse struct {
 
 	// id of the resource
@@ -50,38 +49,19 @@ type FlexSubscriptionResponse struct {
 	UsedForController *bool `json:"usedForController,omitempty"`
 }
 
-/* polymorph FlexSubscriptionResponse id false */
-
-/* polymorph FlexSubscriptionResponse name false */
-
-/* polymorph FlexSubscriptionResponse publicInAccount false */
-
-/* polymorph FlexSubscriptionResponse smartSenseSubscription false */
-
-/* polymorph FlexSubscriptionResponse smartSenseSubscriptionId false */
-
-/* polymorph FlexSubscriptionResponse subscriptionId false */
-
-/* polymorph FlexSubscriptionResponse usedAsDefault false */
-
-/* polymorph FlexSubscriptionResponse usedForController false */
-
 // Validate validates this flex subscription response
 func (m *FlexSubscriptionResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateSmartSenseSubscription(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateSubscriptionID(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -107,7 +87,6 @@ func (m *FlexSubscriptionResponse) validateSmartSenseSubscription(formats strfmt
 	}
 
 	if m.SmartSenseSubscription != nil {
-
 		if err := m.SmartSenseSubscription.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("smartSenseSubscription")

@@ -14,7 +14,6 @@ import (
 
 // AuditEvent audit event
 // swagger:model AuditEvent
-
 type AuditEvent struct {
 
 	// audit Id
@@ -39,41 +38,23 @@ type AuditEvent struct {
 	Status string `json:"status,omitempty"`
 }
 
-/* polymorph AuditEvent auditId false */
-
-/* polymorph AuditEvent duration false */
-
-/* polymorph AuditEvent operation false */
-
-/* polymorph AuditEvent rawFlowEvent false */
-
-/* polymorph AuditEvent rawNotification false */
-
-/* polymorph AuditEvent rawRestEvent false */
-
-/* polymorph AuditEvent status false */
-
 // Validate validates this audit event
 func (m *AuditEvent) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateOperation(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateRawFlowEvent(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateRawNotification(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateRawRestEvent(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -90,7 +71,6 @@ func (m *AuditEvent) validateOperation(formats strfmt.Registry) error {
 	}
 
 	if m.Operation != nil {
-
 		if err := m.Operation.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("operation")
@@ -109,7 +89,6 @@ func (m *AuditEvent) validateRawFlowEvent(formats strfmt.Registry) error {
 	}
 
 	if m.RawFlowEvent != nil {
-
 		if err := m.RawFlowEvent.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("rawFlowEvent")
@@ -128,7 +107,6 @@ func (m *AuditEvent) validateRawNotification(formats strfmt.Registry) error {
 	}
 
 	if m.RawNotification != nil {
-
 		if err := m.RawNotification.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("rawNotification")
@@ -147,7 +125,6 @@ func (m *AuditEvent) validateRawRestEvent(formats strfmt.Registry) error {
 	}
 
 	if m.RawRestEvent != nil {
-
 		if err := m.RawRestEvent.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("rawRestEvent")

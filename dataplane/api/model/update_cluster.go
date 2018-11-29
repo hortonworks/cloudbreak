@@ -18,7 +18,6 @@ import (
 
 // UpdateCluster update cluster
 // swagger:model UpdateCluster
-
 type UpdateCluster struct {
 
 	// details of the Ambari stack
@@ -43,6 +42,7 @@ type UpdateCluster struct {
 	KerberosPrincipal string `json:"kerberosPrincipal,omitempty"`
 
 	// request status
+	// Enum: [SYNC FULL_SYNC REPAIR_FAILED_NODES STOPPED STARTED]
 	Status string `json:"status,omitempty"`
 
 	// user details
@@ -52,55 +52,31 @@ type UpdateCluster struct {
 	ValidateBlueprint *bool `json:"validateBlueprint,omitempty"`
 }
 
-/* polymorph UpdateCluster ambariStackDetails false */
-
-/* polymorph UpdateCluster blueprintId false */
-
-/* polymorph UpdateCluster hostGroupAdjustment false */
-
-/* polymorph UpdateCluster hostgroups false */
-
-/* polymorph UpdateCluster kerberosPassword false */
-
-/* polymorph UpdateCluster kerberosPrincipal false */
-
-/* polymorph UpdateCluster status false */
-
-/* polymorph UpdateCluster userNamePasswordJson false */
-
-/* polymorph UpdateCluster validateBlueprint false */
-
 // Validate validates this update cluster
 func (m *UpdateCluster) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAmbariStackDetails(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateHostGroupAdjustment(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateHostgroups(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateKerberosPassword(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateStatus(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateUserNamePasswordJSON(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -117,7 +93,6 @@ func (m *UpdateCluster) validateAmbariStackDetails(formats strfmt.Registry) erro
 	}
 
 	if m.AmbariStackDetails != nil {
-
 		if err := m.AmbariStackDetails.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("ambariStackDetails")
@@ -136,7 +111,6 @@ func (m *UpdateCluster) validateHostGroupAdjustment(formats strfmt.Registry) err
 	}
 
 	if m.HostGroupAdjustment != nil {
-
 		if err := m.HostGroupAdjustment.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("hostGroupAdjustment")
@@ -159,13 +133,11 @@ func (m *UpdateCluster) validateHostgroups(formats strfmt.Registry) error {
 	}
 
 	for i := 0; i < len(m.Hostgroups); i++ {
-
 		if swag.IsZero(m.Hostgroups[i]) { // not required
 			continue
 		}
 
 		if m.Hostgroups[i] != nil {
-
 			if err := m.Hostgroups[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("hostgroups" + "." + strconv.Itoa(i))
@@ -209,14 +181,19 @@ func init() {
 }
 
 const (
+
 	// UpdateClusterStatusSYNC captures enum value "SYNC"
 	UpdateClusterStatusSYNC string = "SYNC"
+
 	// UpdateClusterStatusFULLSYNC captures enum value "FULL_SYNC"
 	UpdateClusterStatusFULLSYNC string = "FULL_SYNC"
+
 	// UpdateClusterStatusREPAIRFAILEDNODES captures enum value "REPAIR_FAILED_NODES"
 	UpdateClusterStatusREPAIRFAILEDNODES string = "REPAIR_FAILED_NODES"
+
 	// UpdateClusterStatusSTOPPED captures enum value "STOPPED"
 	UpdateClusterStatusSTOPPED string = "STOPPED"
+
 	// UpdateClusterStatusSTARTED captures enum value "STARTED"
 	UpdateClusterStatusSTARTED string = "STARTED"
 )
@@ -250,7 +227,6 @@ func (m *UpdateCluster) validateUserNamePasswordJSON(formats strfmt.Registry) er
 	}
 
 	if m.UserNamePasswordJSON != nil {
-
 		if err := m.UserNamePasswordJSON.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("userNamePasswordJson")

@@ -7,5 +7,4 @@ package model
 
 // YarnParameters yarn parameters
 // swagger:model YarnParameters
-
 type YarnParameters interface{}

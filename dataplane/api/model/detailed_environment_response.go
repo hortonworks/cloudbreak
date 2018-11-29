@@ -17,7 +17,6 @@ import (
 
 // DetailedEnvironmentResponse detailed environment response
 // swagger:model DetailedEnvironmentResponse
-
 type DetailedEnvironmentResponse struct {
 
 	// Cloud platform of the environment.
@@ -69,80 +68,43 @@ type DetailedEnvironmentResponse struct {
 	Workspace *WorkspaceResourceResponse `json:"workspace,omitempty"`
 }
 
-/* polymorph DetailedEnvironmentResponse cloudPlatform false */
-
-/* polymorph DetailedEnvironmentResponse credentialName false */
-
-/* polymorph DetailedEnvironmentResponse datalakeClusters false */
-
-/* polymorph DetailedEnvironmentResponse description false */
-
-/* polymorph DetailedEnvironmentResponse id false */
-
-/* polymorph DetailedEnvironmentResponse kubernetesConfigs false */
-
-/* polymorph DetailedEnvironmentResponse ldapConfigs false */
-
-/* polymorph DetailedEnvironmentResponse location false */
-
-/* polymorph DetailedEnvironmentResponse name false */
-
-/* polymorph DetailedEnvironmentResponse proxyConfigs false */
-
-/* polymorph DetailedEnvironmentResponse rdsConfigs false */
-
-/* polymorph DetailedEnvironmentResponse regions false */
-
-/* polymorph DetailedEnvironmentResponse workloadClusters false */
-
-/* polymorph DetailedEnvironmentResponse workspace false */
-
 // Validate validates this detailed environment response
 func (m *DetailedEnvironmentResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateDatalakeClusters(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateKubernetesConfigs(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateLdapConfigs(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateLocation(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateProxyConfigs(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateRdsConfigs(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateRegions(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateWorkloadClusters(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateWorkspace(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -163,13 +125,11 @@ func (m *DetailedEnvironmentResponse) validateDatalakeClusters(formats strfmt.Re
 	}
 
 	for i := 0; i < len(m.DatalakeClusters); i++ {
-
 		if swag.IsZero(m.DatalakeClusters[i]) { // not required
 			continue
 		}
 
 		if m.DatalakeClusters[i] != nil {
-
 			if err := m.DatalakeClusters[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("datalakeClusters" + "." + strconv.Itoa(i))
@@ -194,13 +154,11 @@ func (m *DetailedEnvironmentResponse) validateKubernetesConfigs(formats strfmt.R
 	}
 
 	for i := 0; i < len(m.KubernetesConfigs); i++ {
-
 		if swag.IsZero(m.KubernetesConfigs[i]) { // not required
 			continue
 		}
 
 		if m.KubernetesConfigs[i] != nil {
-
 			if err := m.KubernetesConfigs[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("kubernetesConfigs" + "." + strconv.Itoa(i))
@@ -225,13 +183,11 @@ func (m *DetailedEnvironmentResponse) validateLdapConfigs(formats strfmt.Registr
 	}
 
 	for i := 0; i < len(m.LdapConfigs); i++ {
-
 		if swag.IsZero(m.LdapConfigs[i]) { // not required
 			continue
 		}
 
 		if m.LdapConfigs[i] != nil {
-
 			if err := m.LdapConfigs[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("ldapConfigs" + "." + strconv.Itoa(i))
@@ -252,7 +208,6 @@ func (m *DetailedEnvironmentResponse) validateLocation(formats strfmt.Registry) 
 	}
 
 	if m.Location != nil {
-
 		if err := m.Location.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("location")
@@ -275,13 +230,11 @@ func (m *DetailedEnvironmentResponse) validateProxyConfigs(formats strfmt.Regist
 	}
 
 	for i := 0; i < len(m.ProxyConfigs); i++ {
-
 		if swag.IsZero(m.ProxyConfigs[i]) { // not required
 			continue
 		}
 
 		if m.ProxyConfigs[i] != nil {
-
 			if err := m.ProxyConfigs[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("proxyConfigs" + "." + strconv.Itoa(i))
@@ -306,13 +259,11 @@ func (m *DetailedEnvironmentResponse) validateRdsConfigs(formats strfmt.Registry
 	}
 
 	for i := 0; i < len(m.RdsConfigs); i++ {
-
 		if swag.IsZero(m.RdsConfigs[i]) { // not required
 			continue
 		}
 
 		if m.RdsConfigs[i] != nil {
-
 			if err := m.RdsConfigs[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("rdsConfigs" + "." + strconv.Itoa(i))
@@ -333,7 +284,6 @@ func (m *DetailedEnvironmentResponse) validateRegions(formats strfmt.Registry) e
 	}
 
 	if m.Regions != nil {
-
 		if err := m.Regions.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("regions")
@@ -356,13 +306,11 @@ func (m *DetailedEnvironmentResponse) validateWorkloadClusters(formats strfmt.Re
 	}
 
 	for i := 0; i < len(m.WorkloadClusters); i++ {
-
 		if swag.IsZero(m.WorkloadClusters[i]) { // not required
 			continue
 		}
 
 		if m.WorkloadClusters[i] != nil {
-
 			if err := m.WorkloadClusters[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("workloadClusters" + "." + strconv.Itoa(i))
@@ -383,7 +331,6 @@ func (m *DetailedEnvironmentResponse) validateWorkspace(formats strfmt.Registry)
 	}
 
 	if m.Workspace != nil {
-
 		if err := m.Workspace.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("workspace")

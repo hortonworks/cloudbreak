@@ -8,13 +8,11 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
 // VersionCheckResult version check result
 // swagger:model VersionCheckResult
-
 type VersionCheckResult struct {
 
 	// message
@@ -24,17 +22,8 @@ type VersionCheckResult struct {
 	VersionCheckOk *bool `json:"versionCheckOk,omitempty"`
 }
 
-/* polymorph VersionCheckResult message false */
-
-/* polymorph VersionCheckResult versionCheckOk false */
-
 // Validate validates this version check result
 func (m *VersionCheckResult) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }
 

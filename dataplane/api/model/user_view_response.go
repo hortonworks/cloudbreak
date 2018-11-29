@@ -8,13 +8,11 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
 // UserViewResponse user view response
 // swagger:model UserViewResponse
-
 type UserViewResponse struct {
 
 	// user Id
@@ -24,17 +22,8 @@ type UserViewResponse struct {
 	UserName string `json:"userName,omitempty"`
 }
 
-/* polymorph UserViewResponse userId false */
-
-/* polymorph UserViewResponse userName false */
-
 // Validate validates this user view response
 func (m *UserViewResponse) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }
 

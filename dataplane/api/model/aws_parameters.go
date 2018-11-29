@@ -14,7 +14,6 @@ import (
 
 // AwsParameters aws parameters
 // swagger:model AwsParameters
-
 type AwsParameters struct {
 
 	// should encrypt the vm
@@ -27,18 +26,11 @@ type AwsParameters struct {
 	SpotPrice float64 `json:"spotPrice,omitempty"`
 }
 
-/* polymorph AwsParameters encrypted false */
-
-/* polymorph AwsParameters encryption false */
-
-/* polymorph AwsParameters spotPrice false */
-
 // Validate validates this aws parameters
 func (m *AwsParameters) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateEncryption(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -55,7 +47,6 @@ func (m *AwsParameters) validateEncryption(formats strfmt.Registry) error {
 	}
 
 	if m.Encryption != nil {
-
 		if err := m.Encryption.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("encryption")

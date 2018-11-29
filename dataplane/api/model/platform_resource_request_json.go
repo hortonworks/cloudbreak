@@ -8,13 +8,11 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
 // PlatformResourceRequestJSON platform resource request Json
 // swagger:model PlatformResourceRequestJson
-
 type PlatformResourceRequestJSON struct {
 
 	// related availability zone
@@ -36,25 +34,8 @@ type PlatformResourceRequestJSON struct {
 	Region string `json:"region,omitempty"`
 }
 
-/* polymorph PlatformResourceRequestJson availabilityZone false */
-
-/* polymorph PlatformResourceRequestJson credentialId false */
-
-/* polymorph PlatformResourceRequestJson credentialName false */
-
-/* polymorph PlatformResourceRequestJson filters false */
-
-/* polymorph PlatformResourceRequestJson platformVariant false */
-
-/* polymorph PlatformResourceRequestJson region false */
-
 // Validate validates this platform resource request Json
 func (m *PlatformResourceRequestJSON) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }
 

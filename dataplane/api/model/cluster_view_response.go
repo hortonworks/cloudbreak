@@ -18,7 +18,6 @@ import (
 
 // ClusterViewResponse cluster view response
 // swagger:model ClusterViewResponse
-
 type ClusterViewResponse struct {
 
 	// public ambari ip of the stack
@@ -53,58 +52,35 @@ type ClusterViewResponse struct {
 	SharedServiceResponse *SharedServiceResponse `json:"sharedServiceResponse,omitempty"`
 
 	// status of the cluster
+	// Enum: [REQUESTED CREATE_IN_PROGRESS AVAILABLE UPDATE_IN_PROGRESS UPDATE_REQUESTED UPDATE_FAILED CREATE_FAILED ENABLE_SECURITY_FAILED PRE_DELETE_IN_PROGRESS DELETE_IN_PROGRESS DELETE_FAILED DELETE_COMPLETED STOPPED STOP_REQUESTED START_REQUESTED STOP_IN_PROGRESS START_IN_PROGRESS START_FAILED STOP_FAILED WAIT_FOR_SYNC MAINTENANCE_MODE_ENABLED]
 	Status string `json:"status,omitempty"`
 }
-
-/* polymorph ClusterViewResponse ambariServerIp false */
-
-/* polymorph ClusterViewResponse blueprint false */
-
-/* polymorph ClusterViewResponse description false */
-
-/* polymorph ClusterViewResponse hostGroups false */
-
-/* polymorph ClusterViewResponse id false */
-
-/* polymorph ClusterViewResponse name false */
-
-/* polymorph ClusterViewResponse secure false */
-
-/* polymorph ClusterViewResponse sharedServiceResponse false */
-
-/* polymorph ClusterViewResponse status false */
 
 // Validate validates this cluster view response
 func (m *ClusterViewResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateBlueprint(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateDescription(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateHostGroups(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateSharedServiceResponse(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateStatus(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -121,7 +97,6 @@ func (m *ClusterViewResponse) validateBlueprint(formats strfmt.Registry) error {
 	}
 
 	if m.Blueprint != nil {
-
 		if err := m.Blueprint.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("blueprint")
@@ -161,13 +136,11 @@ func (m *ClusterViewResponse) validateHostGroups(formats strfmt.Registry) error 
 	}
 
 	for i := 0; i < len(m.HostGroups); i++ {
-
 		if swag.IsZero(m.HostGroups[i]) { // not required
 			continue
 		}
 
 		if m.HostGroups[i] != nil {
-
 			if err := m.HostGroups[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("hostGroups" + "." + strconv.Itoa(i))
@@ -209,7 +182,6 @@ func (m *ClusterViewResponse) validateSharedServiceResponse(formats strfmt.Regis
 	}
 
 	if m.SharedServiceResponse != nil {
-
 		if err := m.SharedServiceResponse.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("sharedServiceResponse")
@@ -234,46 +206,67 @@ func init() {
 }
 
 const (
+
 	// ClusterViewResponseStatusREQUESTED captures enum value "REQUESTED"
 	ClusterViewResponseStatusREQUESTED string = "REQUESTED"
+
 	// ClusterViewResponseStatusCREATEINPROGRESS captures enum value "CREATE_IN_PROGRESS"
 	ClusterViewResponseStatusCREATEINPROGRESS string = "CREATE_IN_PROGRESS"
+
 	// ClusterViewResponseStatusAVAILABLE captures enum value "AVAILABLE"
 	ClusterViewResponseStatusAVAILABLE string = "AVAILABLE"
+
 	// ClusterViewResponseStatusUPDATEINPROGRESS captures enum value "UPDATE_IN_PROGRESS"
 	ClusterViewResponseStatusUPDATEINPROGRESS string = "UPDATE_IN_PROGRESS"
+
 	// ClusterViewResponseStatusUPDATEREQUESTED captures enum value "UPDATE_REQUESTED"
 	ClusterViewResponseStatusUPDATEREQUESTED string = "UPDATE_REQUESTED"
+
 	// ClusterViewResponseStatusUPDATEFAILED captures enum value "UPDATE_FAILED"
 	ClusterViewResponseStatusUPDATEFAILED string = "UPDATE_FAILED"
+
 	// ClusterViewResponseStatusCREATEFAILED captures enum value "CREATE_FAILED"
 	ClusterViewResponseStatusCREATEFAILED string = "CREATE_FAILED"
+
 	// ClusterViewResponseStatusENABLESECURITYFAILED captures enum value "ENABLE_SECURITY_FAILED"
 	ClusterViewResponseStatusENABLESECURITYFAILED string = "ENABLE_SECURITY_FAILED"
+
 	// ClusterViewResponseStatusPREDELETEINPROGRESS captures enum value "PRE_DELETE_IN_PROGRESS"
 	ClusterViewResponseStatusPREDELETEINPROGRESS string = "PRE_DELETE_IN_PROGRESS"
+
 	// ClusterViewResponseStatusDELETEINPROGRESS captures enum value "DELETE_IN_PROGRESS"
 	ClusterViewResponseStatusDELETEINPROGRESS string = "DELETE_IN_PROGRESS"
+
 	// ClusterViewResponseStatusDELETEFAILED captures enum value "DELETE_FAILED"
 	ClusterViewResponseStatusDELETEFAILED string = "DELETE_FAILED"
+
 	// ClusterViewResponseStatusDELETECOMPLETED captures enum value "DELETE_COMPLETED"
 	ClusterViewResponseStatusDELETECOMPLETED string = "DELETE_COMPLETED"
+
 	// ClusterViewResponseStatusSTOPPED captures enum value "STOPPED"
 	ClusterViewResponseStatusSTOPPED string = "STOPPED"
+
 	// ClusterViewResponseStatusSTOPREQUESTED captures enum value "STOP_REQUESTED"
 	ClusterViewResponseStatusSTOPREQUESTED string = "STOP_REQUESTED"
+
 	// ClusterViewResponseStatusSTARTREQUESTED captures enum value "START_REQUESTED"
 	ClusterViewResponseStatusSTARTREQUESTED string = "START_REQUESTED"
+
 	// ClusterViewResponseStatusSTOPINPROGRESS captures enum value "STOP_IN_PROGRESS"
 	ClusterViewResponseStatusSTOPINPROGRESS string = "STOP_IN_PROGRESS"
+
 	// ClusterViewResponseStatusSTARTINPROGRESS captures enum value "START_IN_PROGRESS"
 	ClusterViewResponseStatusSTARTINPROGRESS string = "START_IN_PROGRESS"
+
 	// ClusterViewResponseStatusSTARTFAILED captures enum value "START_FAILED"
 	ClusterViewResponseStatusSTARTFAILED string = "START_FAILED"
+
 	// ClusterViewResponseStatusSTOPFAILED captures enum value "STOP_FAILED"
 	ClusterViewResponseStatusSTOPFAILED string = "STOP_FAILED"
+
 	// ClusterViewResponseStatusWAITFORSYNC captures enum value "WAIT_FOR_SYNC"
 	ClusterViewResponseStatusWAITFORSYNC string = "WAIT_FOR_SYNC"
+
 	// ClusterViewResponseStatusMAINTENANCEMODEENABLED captures enum value "MAINTENANCE_MODE_ENABLED"
 	ClusterViewResponseStatusMAINTENANCEMODEENABLED string = "MAINTENANCE_MODE_ENABLED"
 )

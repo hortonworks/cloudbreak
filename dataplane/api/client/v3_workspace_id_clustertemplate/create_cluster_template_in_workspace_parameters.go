@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/hortonworks/cb-cli/dataplane/api/model"
+	model "github.com/hortonworks/cb-cli/dataplane/api/model"
 )
 
 // NewCreateClusterTemplateInWorkspaceParams creates a new CreateClusterTemplateInWorkspaceParams object
@@ -138,12 +138,10 @@ func (o *CreateClusterTemplateInWorkspaceParams) WriteToRequest(r runtime.Client
 	}
 	var res []error
 
-	if o.Body == nil {
-		o.Body = new(model.ClusterTemplateRequest)
-	}
-
-	if err := r.SetBodyParam(o.Body); err != nil {
-		return err
+	if o.Body != nil {
+		if err := r.SetBodyParam(o.Body); err != nil {
+			return err
+		}
 	}
 
 	// path param workspaceId

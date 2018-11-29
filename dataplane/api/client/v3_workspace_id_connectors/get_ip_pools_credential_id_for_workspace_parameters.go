@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/hortonworks/cb-cli/dataplane/api/model"
+	model "github.com/hortonworks/cb-cli/dataplane/api/model"
 )
 
 // NewGetIPPoolsCredentialIDForWorkspaceParams creates a new GetIPPoolsCredentialIDForWorkspaceParams object
@@ -138,12 +138,10 @@ func (o *GetIPPoolsCredentialIDForWorkspaceParams) WriteToRequest(r runtime.Clie
 	}
 	var res []error
 
-	if o.Body == nil {
-		o.Body = new(model.PlatformResourceRequestJSON)
-	}
-
-	if err := r.SetBodyParam(o.Body); err != nil {
-		return err
+	if o.Body != nil {
+		if err := r.SetBodyParam(o.Body); err != nil {
+			return err
+		}
 	}
 
 	// path param workspaceId

@@ -9,9 +9,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
-	"github.com/go-openapi/swag"
 
 	strfmt "github.com/go-openapi/strfmt"
 )
@@ -47,7 +45,7 @@ func NewGetRegionAvByTypeOK() *GetRegionAvByTypeOK {
 successful operation
 */
 type GetRegionAvByTypeOK struct {
-	Payload GetRegionAvByTypeOKBody
+	Payload map[string][]string
 }
 
 func (o *GetRegionAvByTypeOK) Error() string {
@@ -61,25 +59,5 @@ func (o *GetRegionAvByTypeOK) readResponse(response runtime.ClientResponse, cons
 		return err
 	}
 
-	return nil
-}
-
-/*GetRegionAvByTypeOKBody get region av by type o k body
-swagger:model GetRegionAvByTypeOKBody
-*/
-
-type GetRegionAvByTypeOKBody map[string][]string
-
-// Validate validates this get region av by type o k body
-func (o GetRegionAvByTypeOKBody) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if swag.IsZero(o) { // not required
-		return nil
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }

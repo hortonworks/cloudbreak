@@ -8,13 +8,11 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
 // ClusterRepairNodesRequest cluster repair nodes request
 // swagger:model ClusterRepairNodesRequest
-
 type ClusterRepairNodesRequest struct {
 
 	// If true, delete volumes, otherwise reattaches them to a newly created node instance.
@@ -24,31 +22,8 @@ type ClusterRepairNodesRequest struct {
 	Ids []string `json:"ids"`
 }
 
-/* polymorph ClusterRepairNodesRequest deleteVolumes false */
-
-/* polymorph ClusterRepairNodesRequest ids false */
-
 // Validate validates this cluster repair nodes request
 func (m *ClusterRepairNodesRequest) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if err := m.validateIds(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-func (m *ClusterRepairNodesRequest) validateIds(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Ids) { // not required
-		return nil
-	}
-
 	return nil
 }
 

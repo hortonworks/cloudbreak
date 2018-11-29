@@ -15,7 +15,6 @@ import (
 
 // KubernetesConfigResponse kubernetes config response
 // swagger:model KubernetesConfigResponse
-
 type KubernetesConfigResponse struct {
 
 	// Kubernetes configuration
@@ -44,44 +43,27 @@ type KubernetesConfigResponse struct {
 	Workspace *WorkspaceResourceResponse `json:"workspace,omitempty"`
 }
 
-/* polymorph KubernetesConfigResponse config false */
-
-/* polymorph KubernetesConfigResponse description false */
-
-/* polymorph KubernetesConfigResponse environments false */
-
-/* polymorph KubernetesConfigResponse id false */
-
-/* polymorph KubernetesConfigResponse name false */
-
-/* polymorph KubernetesConfigResponse workspace false */
-
 // Validate validates this kubernetes config response
 func (m *KubernetesConfigResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateConfig(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateDescription(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateEnvironments(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateWorkspace(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -98,7 +80,6 @@ func (m *KubernetesConfigResponse) validateConfig(formats strfmt.Registry) error
 	}
 
 	if m.Config != nil {
-
 		if err := m.Config.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("config")
@@ -168,7 +149,6 @@ func (m *KubernetesConfigResponse) validateWorkspace(formats strfmt.Registry) er
 	}
 
 	if m.Workspace != nil {
-
 		if err := m.Workspace.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("workspace")

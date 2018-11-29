@@ -15,7 +15,6 @@ import (
 
 // AmbariRepoDetails ambari repo details
 // swagger:model AmbariRepoDetails
-
 type AmbariRepoDetails struct {
 
 	// url of the Ambari repository
@@ -30,23 +29,15 @@ type AmbariRepoDetails struct {
 	Version *string `json:"version"`
 }
 
-/* polymorph AmbariRepoDetails baseUrl false */
-
-/* polymorph AmbariRepoDetails gpgKeyUrl false */
-
-/* polymorph AmbariRepoDetails version false */
-
 // Validate validates this ambari repo details
 func (m *AmbariRepoDetails) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateBaseURL(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateVersion(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

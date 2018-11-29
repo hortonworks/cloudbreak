@@ -8,13 +8,11 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
 // LocationResponse location response
 // swagger:model LocationResponse
-
 type LocationResponse struct {
 
 	// Location latitude of the environment.
@@ -27,19 +25,8 @@ type LocationResponse struct {
 	Longitude float64 `json:"longitude,omitempty"`
 }
 
-/* polymorph LocationResponse latitude false */
-
-/* polymorph LocationResponse locationName false */
-
-/* polymorph LocationResponse longitude false */
-
 // Validate validates this location response
 func (m *LocationResponse) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }
 

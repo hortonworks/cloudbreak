@@ -15,7 +15,6 @@ import (
 
 // CredentialPrerequisites credential prerequisites
 // swagger:model CredentialPrerequisites
-
 type CredentialPrerequisites struct {
 
 	// provider specific identifier of the account/subscription/project that is used by Cloudbreak
@@ -31,28 +30,19 @@ type CredentialPrerequisites struct {
 	CloudPlatform *string `json:"cloudPlatform"`
 }
 
-/* polymorph CredentialPrerequisites accountId false */
-
-/* polymorph CredentialPrerequisites aws false */
-
-/* polymorph CredentialPrerequisites cloudPlatform false */
-
 // Validate validates this credential prerequisites
 func (m *CredentialPrerequisites) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAccountID(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateAws(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateCloudPlatform(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -78,7 +68,6 @@ func (m *CredentialPrerequisites) validateAws(formats strfmt.Registry) error {
 	}
 
 	if m.Aws != nil {
-
 		if err := m.Aws.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("aws")

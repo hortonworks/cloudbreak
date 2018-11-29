@@ -8,13 +8,11 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
 // WorkspaceResourceResponse workspace resource response
 // swagger:model WorkspaceResourceResponse
-
 type WorkspaceResourceResponse struct {
 
 	// id of the workspace
@@ -24,17 +22,8 @@ type WorkspaceResourceResponse struct {
 	Name string `json:"name,omitempty"`
 }
 
-/* polymorph WorkspaceResourceResponse id false */
-
-/* polymorph WorkspaceResourceResponse name false */
-
 // Validate validates this workspace resource response
 func (m *WorkspaceResourceResponse) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }
 

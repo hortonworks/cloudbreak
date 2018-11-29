@@ -8,28 +8,19 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
 // CustomContainerRequest custom container request
 // swagger:model CustomContainerRequest
-
 type CustomContainerRequest struct {
 
 	// definitions
 	Definitions map[string]string `json:"definitions,omitempty"`
 }
 
-/* polymorph CustomContainerRequest definitions false */
-
 // Validate validates this custom container request
 func (m *CustomContainerRequest) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }
 

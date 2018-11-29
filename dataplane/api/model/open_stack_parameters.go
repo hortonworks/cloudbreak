@@ -7,5 +7,4 @@ package model
 
 // OpenStackParameters open stack parameters
 // swagger:model OpenStackParameters
-
 type OpenStackParameters interface{}

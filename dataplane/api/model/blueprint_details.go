@@ -8,13 +8,11 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
 // BlueprintDetails blueprint details
 // swagger:model BlueprintDetails
-
 type BlueprintDetails struct {
 
 	// blueprint Json
@@ -33,23 +31,8 @@ type BlueprintDetails struct {
 	Name string `json:"name,omitempty"`
 }
 
-/* polymorph BlueprintDetails blueprintJson false */
-
-/* polymorph BlueprintDetails blueprintName false */
-
-/* polymorph BlueprintDetails description false */
-
-/* polymorph BlueprintDetails id false */
-
-/* polymorph BlueprintDetails name false */
-
 // Validate validates this blueprint details
 func (m *BlueprintDetails) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }
 

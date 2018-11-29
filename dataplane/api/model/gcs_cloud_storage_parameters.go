@@ -15,7 +15,6 @@ import (
 
 // GcsCloudStorageParameters gcs cloud storage parameters
 // swagger:model GcsCloudStorageParameters
-
 type GcsCloudStorageParameters struct {
 
 	// service account email
@@ -23,14 +22,11 @@ type GcsCloudStorageParameters struct {
 	ServiceAccountEmail *string `json:"serviceAccountEmail"`
 }
 
-/* polymorph GcsCloudStorageParameters serviceAccountEmail false */
-
 // Validate validates this gcs cloud storage parameters
 func (m *GcsCloudStorageParameters) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateServiceAccountEmail(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

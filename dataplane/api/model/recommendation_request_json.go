@@ -8,13 +8,11 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
 // RecommendationRequestJSON recommendation request Json
 // swagger:model RecommendationRequestJson
-
 type RecommendationRequestJSON struct {
 
 	// related availability zone
@@ -42,29 +40,8 @@ type RecommendationRequestJSON struct {
 	Region string `json:"region,omitempty"`
 }
 
-/* polymorph RecommendationRequestJson availabilityZone false */
-
-/* polymorph RecommendationRequestJson blueprintId false */
-
-/* polymorph RecommendationRequestJson blueprintName false */
-
-/* polymorph RecommendationRequestJson credentialId false */
-
-/* polymorph RecommendationRequestJson credentialName false */
-
-/* polymorph RecommendationRequestJson filters false */
-
-/* polymorph RecommendationRequestJson platformVariant false */
-
-/* polymorph RecommendationRequestJson region false */
-
 // Validate validates this recommendation request Json
 func (m *RecommendationRequestJSON) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }
 

@@ -17,7 +17,6 @@ import (
 
 // ImagesResponse images response
 // swagger:model ImagesResponse
-
 type ImagesResponse struct {
 
 	// base images
@@ -34,35 +33,23 @@ type ImagesResponse struct {
 	SupportedVersions []string `json:"supportedVersions"`
 }
 
-/* polymorph ImagesResponse baseImages false */
-
-/* polymorph ImagesResponse hdfImages false */
-
-/* polymorph ImagesResponse hdpImages false */
-
-/* polymorph ImagesResponse supportedVersions false */
-
 // Validate validates this images response
 func (m *ImagesResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateBaseImages(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateHdfImages(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateHdpImages(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateSupportedVersions(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -79,13 +66,11 @@ func (m *ImagesResponse) validateBaseImages(formats strfmt.Registry) error {
 	}
 
 	for i := 0; i < len(m.BaseImages); i++ {
-
 		if swag.IsZero(m.BaseImages[i]) { // not required
 			continue
 		}
 
 		if m.BaseImages[i] != nil {
-
 			if err := m.BaseImages[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("baseImages" + "." + strconv.Itoa(i))
@@ -106,13 +91,11 @@ func (m *ImagesResponse) validateHdfImages(formats strfmt.Registry) error {
 	}
 
 	for i := 0; i < len(m.HdfImages); i++ {
-
 		if swag.IsZero(m.HdfImages[i]) { // not required
 			continue
 		}
 
 		if m.HdfImages[i] != nil {
-
 			if err := m.HdfImages[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("hdfImages" + "." + strconv.Itoa(i))
@@ -133,13 +116,11 @@ func (m *ImagesResponse) validateHdpImages(formats strfmt.Registry) error {
 	}
 
 	for i := 0; i < len(m.HdpImages); i++ {
-
 		if swag.IsZero(m.HdpImages[i]) { // not required
 			continue
 		}
 
 		if m.HdpImages[i] != nil {
-
 			if err := m.HdpImages[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("hdpImages" + "." + strconv.Itoa(i))

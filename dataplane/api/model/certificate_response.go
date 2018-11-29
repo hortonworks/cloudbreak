@@ -8,13 +8,11 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
 // CertificateResponse certificate response
 // swagger:model CertificateResponse
-
 type CertificateResponse struct {
 
 	// client certificate used by the gateway
@@ -27,19 +25,8 @@ type CertificateResponse struct {
 	ServerCert string `json:"serverCert,omitempty"`
 }
 
-/* polymorph CertificateResponse clientCertPath false */
-
-/* polymorph CertificateResponse clientKeyPath false */
-
-/* polymorph CertificateResponse serverCert false */
-
 // Validate validates this certificate response
 func (m *CertificateResponse) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }
 

@@ -18,7 +18,6 @@ import (
 
 // HardwareInfoGroupResponse hardware info group response
 // swagger:model HardwareInfoGroupResponse
-
 type HardwareInfoGroupResponse struct {
 
 	// Metadata of instances.
@@ -29,26 +28,19 @@ type HardwareInfoGroupResponse struct {
 	Name string `json:"name,omitempty"`
 
 	// recovery mode of the hostgroup's nodes
+	// Enum: [MANUAL AUTO]
 	RecoveryMode string `json:"recoveryMode,omitempty"`
 }
-
-/* polymorph HardwareInfoGroupResponse hardwareInfos false */
-
-/* polymorph HardwareInfoGroupResponse name false */
-
-/* polymorph HardwareInfoGroupResponse recoveryMode false */
 
 // Validate validates this hardware info group response
 func (m *HardwareInfoGroupResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateHardwareInfos(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateRecoveryMode(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -69,13 +61,11 @@ func (m *HardwareInfoGroupResponse) validateHardwareInfos(formats strfmt.Registr
 	}
 
 	for i := 0; i < len(m.HardwareInfos); i++ {
-
 		if swag.IsZero(m.HardwareInfos[i]) { // not required
 			continue
 		}
 
 		if m.HardwareInfos[i] != nil {
-
 			if err := m.HardwareInfos[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("hardwareInfos" + "." + strconv.Itoa(i))
@@ -102,8 +92,10 @@ func init() {
 }
 
 const (
+
 	// HardwareInfoGroupResponseRecoveryModeMANUAL captures enum value "MANUAL"
 	HardwareInfoGroupResponseRecoveryModeMANUAL string = "MANUAL"
+
 	// HardwareInfoGroupResponseRecoveryModeAUTO captures enum value "AUTO"
 	HardwareInfoGroupResponseRecoveryModeAUTO string = "AUTO"
 )

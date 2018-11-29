@@ -8,13 +8,11 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
 // PlatformNetworkResponse platform network response
 // swagger:model PlatformNetworkResponse
-
 type PlatformNetworkResponse struct {
 
 	// id
@@ -30,21 +28,8 @@ type PlatformNetworkResponse struct {
 	Subnets map[string]string `json:"subnets,omitempty"`
 }
 
-/* polymorph PlatformNetworkResponse id false */
-
-/* polymorph PlatformNetworkResponse name false */
-
-/* polymorph PlatformNetworkResponse properties false */
-
-/* polymorph PlatformNetworkResponse subnets false */
-
 // Validate validates this platform network response
 func (m *PlatformNetworkResponse) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }
 

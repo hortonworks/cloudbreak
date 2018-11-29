@@ -17,7 +17,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/hortonworks/cb-cli/dataplane/api/model"
+	model "github.com/hortonworks/cb-cli/dataplane/api/model"
 )
 
 // NewPrivateInteractiveLoginCredentialParams creates a new PrivateInteractiveLoginCredentialParams object
@@ -124,12 +124,10 @@ func (o *PrivateInteractiveLoginCredentialParams) WriteToRequest(r runtime.Clien
 	}
 	var res []error
 
-	if o.Body == nil {
-		o.Body = new(model.CredentialRequest)
-	}
-
-	if err := r.SetBodyParam(o.Body); err != nil {
-		return err
+	if o.Body != nil {
+		if err := r.SetBodyParam(o.Body); err != nil {
+			return err
+		}
 	}
 
 	if len(res) > 0 {

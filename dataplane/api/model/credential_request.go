@@ -15,7 +15,6 @@ import (
 
 // CredentialRequest credential request
 // swagger:model CredentialRequest
-
 type CredentialRequest struct {
 
 	// type of cloud provider
@@ -41,32 +40,19 @@ type CredentialRequest struct {
 	TopologyID int64 `json:"topologyId,omitempty"`
 }
 
-/* polymorph CredentialRequest cloudPlatform false */
-
-/* polymorph CredentialRequest description false */
-
-/* polymorph CredentialRequest name false */
-
-/* polymorph CredentialRequest parameters false */
-
-/* polymorph CredentialRequest topologyId false */
-
 // Validate validates this credential request
 func (m *CredentialRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateCloudPlatform(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateDescription(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

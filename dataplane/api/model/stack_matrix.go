@@ -15,7 +15,6 @@ import (
 
 // StackMatrix stack matrix
 // swagger:model StackMatrix
-
 type StackMatrix struct {
 
 	// hdf
@@ -25,21 +24,15 @@ type StackMatrix struct {
 	Hdp map[string]StackDescriptor `json:"hdp,omitempty"`
 }
 
-/* polymorph StackMatrix hdf false */
-
-/* polymorph StackMatrix hdp false */
-
 // Validate validates this stack matrix
 func (m *StackMatrix) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateHdf(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateHdp(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -55,8 +48,17 @@ func (m *StackMatrix) validateHdf(formats strfmt.Registry) error {
 		return nil
 	}
 
-	if err := validate.Required("hdf", "body", m.Hdf); err != nil {
-		return err
+	for k := range m.Hdf {
+
+		if err := validate.Required("hdf"+"."+k, "body", m.Hdf[k]); err != nil {
+			return err
+		}
+		if val, ok := m.Hdf[k]; ok {
+			if err := val.Validate(formats); err != nil {
+				return err
+			}
+		}
+
 	}
 
 	return nil
@@ -68,8 +70,17 @@ func (m *StackMatrix) validateHdp(formats strfmt.Registry) error {
 		return nil
 	}
 
-	if err := validate.Required("hdp", "body", m.Hdp); err != nil {
-		return err
+	for k := range m.Hdp {
+
+		if err := validate.Required("hdp"+"."+k, "body", m.Hdp[k]); err != nil {
+			return err
+		}
+		if val, ok := m.Hdp[k]; ok {
+			if err := val.Validate(formats); err != nil {
+				return err
+			}
+		}
+
 	}
 
 	return nil

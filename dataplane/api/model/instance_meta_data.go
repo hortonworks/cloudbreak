@@ -17,7 +17,6 @@ import (
 
 // InstanceMetaData instance meta data
 // swagger:model InstanceMetaData
-
 type InstanceMetaData struct {
 
 	// ambari server address
@@ -33,9 +32,11 @@ type InstanceMetaData struct {
 	InstanceID string `json:"instanceId,omitempty"`
 
 	// status of the instance
+	// Enum: [REQUESTED CREATED UNREGISTERED REGISTERED DECOMMISSIONED TERMINATED DELETED_ON_PROVIDER_SIDE FAILED STOPPED]
 	InstanceStatus string `json:"instanceStatus,omitempty"`
 
 	// type of the instance
+	// Enum: [GATEWAY GATEWAY_PRIMARY CORE]
 	InstanceType string `json:"instanceType,omitempty"`
 
 	// private ip of the insctance
@@ -48,35 +49,15 @@ type InstanceMetaData struct {
 	SSHPort int32 `json:"sshPort,omitempty"`
 }
 
-/* polymorph InstanceMetaData ambariServer false */
-
-/* polymorph InstanceMetaData discoveryFQDN false */
-
-/* polymorph InstanceMetaData instanceGroup false */
-
-/* polymorph InstanceMetaData instanceId false */
-
-/* polymorph InstanceMetaData instanceStatus false */
-
-/* polymorph InstanceMetaData instanceType false */
-
-/* polymorph InstanceMetaData privateIp false */
-
-/* polymorph InstanceMetaData publicIp false */
-
-/* polymorph InstanceMetaData sshPort false */
-
 // Validate validates this instance meta data
 func (m *InstanceMetaData) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateInstanceStatus(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateInstanceType(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -99,22 +80,31 @@ func init() {
 }
 
 const (
+
 	// InstanceMetaDataInstanceStatusREQUESTED captures enum value "REQUESTED"
 	InstanceMetaDataInstanceStatusREQUESTED string = "REQUESTED"
+
 	// InstanceMetaDataInstanceStatusCREATED captures enum value "CREATED"
 	InstanceMetaDataInstanceStatusCREATED string = "CREATED"
+
 	// InstanceMetaDataInstanceStatusUNREGISTERED captures enum value "UNREGISTERED"
 	InstanceMetaDataInstanceStatusUNREGISTERED string = "UNREGISTERED"
+
 	// InstanceMetaDataInstanceStatusREGISTERED captures enum value "REGISTERED"
 	InstanceMetaDataInstanceStatusREGISTERED string = "REGISTERED"
+
 	// InstanceMetaDataInstanceStatusDECOMMISSIONED captures enum value "DECOMMISSIONED"
 	InstanceMetaDataInstanceStatusDECOMMISSIONED string = "DECOMMISSIONED"
+
 	// InstanceMetaDataInstanceStatusTERMINATED captures enum value "TERMINATED"
 	InstanceMetaDataInstanceStatusTERMINATED string = "TERMINATED"
+
 	// InstanceMetaDataInstanceStatusDELETEDONPROVIDERSIDE captures enum value "DELETED_ON_PROVIDER_SIDE"
 	InstanceMetaDataInstanceStatusDELETEDONPROVIDERSIDE string = "DELETED_ON_PROVIDER_SIDE"
+
 	// InstanceMetaDataInstanceStatusFAILED captures enum value "FAILED"
 	InstanceMetaDataInstanceStatusFAILED string = "FAILED"
+
 	// InstanceMetaDataInstanceStatusSTOPPED captures enum value "STOPPED"
 	InstanceMetaDataInstanceStatusSTOPPED string = "STOPPED"
 )
@@ -154,10 +144,13 @@ func init() {
 }
 
 const (
+
 	// InstanceMetaDataInstanceTypeGATEWAY captures enum value "GATEWAY"
 	InstanceMetaDataInstanceTypeGATEWAY string = "GATEWAY"
+
 	// InstanceMetaDataInstanceTypeGATEWAYPRIMARY captures enum value "GATEWAY_PRIMARY"
 	InstanceMetaDataInstanceTypeGATEWAYPRIMARY string = "GATEWAY_PRIMARY"
+
 	// InstanceMetaDataInstanceTypeCORE captures enum value "CORE"
 	InstanceMetaDataInstanceTypeCORE string = "CORE"
 )

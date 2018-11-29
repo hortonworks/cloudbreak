@@ -8,13 +8,11 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
 // ImageSettings image settings
 // swagger:model ImageSettings
-
 type ImageSettings struct {
 
 	// custom image catalog URL
@@ -27,19 +25,8 @@ type ImageSettings struct {
 	Os string `json:"os,omitempty"`
 }
 
-/* polymorph ImageSettings imageCatalog false */
-
-/* polymorph ImageSettings imageId false */
-
-/* polymorph ImageSettings os false */
-
 // Validate validates this image settings
 func (m *ImageSettings) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }
 

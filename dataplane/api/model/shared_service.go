@@ -8,28 +8,19 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
 // SharedService shared service
 // swagger:model SharedService
-
 type SharedService struct {
 
 	// shared cluster
 	SharedCluster string `json:"sharedCluster,omitempty"`
 }
 
-/* polymorph SharedService sharedCluster false */
-
 // Validate validates this shared service
 func (m *SharedService) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }
 

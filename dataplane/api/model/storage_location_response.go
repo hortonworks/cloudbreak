@@ -15,7 +15,6 @@ import (
 
 // StorageLocationResponse storage location response
 // swagger:model StorageLocationResponse
-
 type StorageLocationResponse struct {
 
 	// property file
@@ -31,28 +30,19 @@ type StorageLocationResponse struct {
 	Value *string `json:"value"`
 }
 
-/* polymorph StorageLocationResponse propertyFile false */
-
-/* polymorph StorageLocationResponse propertyName false */
-
-/* polymorph StorageLocationResponse value false */
-
 // Validate validates this storage location response
 func (m *StorageLocationResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validatePropertyFile(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validatePropertyName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateValue(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

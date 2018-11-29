@@ -17,7 +17,6 @@ import (
 
 // InstanceGroups instance groups
 // swagger:model instanceGroups
-
 type InstanceGroups struct {
 
 	// name of the instance group
@@ -46,51 +45,31 @@ type InstanceGroups struct {
 	TemplateID int64 `json:"templateId,omitempty"`
 
 	// type of the instance group
+	// Enum: [GATEWAY CORE]
 	Type string `json:"type,omitempty"`
 }
-
-/* polymorph instanceGroups group false */
-
-/* polymorph instanceGroups nodeCount false */
-
-/* polymorph instanceGroups parameters false */
-
-/* polymorph instanceGroups securityGroup false */
-
-/* polymorph instanceGroups securityGroupId false */
-
-/* polymorph instanceGroups template false */
-
-/* polymorph instanceGroups templateId false */
-
-/* polymorph instanceGroups type false */
 
 // Validate validates this instance groups
 func (m *InstanceGroups) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateGroup(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateNodeCount(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateSecurityGroup(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateTemplate(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateType(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -133,7 +112,6 @@ func (m *InstanceGroups) validateSecurityGroup(formats strfmt.Registry) error {
 	}
 
 	if m.SecurityGroup != nil {
-
 		if err := m.SecurityGroup.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("securityGroup")
@@ -152,7 +130,6 @@ func (m *InstanceGroups) validateTemplate(formats strfmt.Registry) error {
 	}
 
 	if m.Template != nil {
-
 		if err := m.Template.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("template")
@@ -177,8 +154,10 @@ func init() {
 }
 
 const (
+
 	// InstanceGroupsTypeGATEWAY captures enum value "GATEWAY"
 	InstanceGroupsTypeGATEWAY string = "GATEWAY"
+
 	// InstanceGroupsTypeCORE captures enum value "CORE"
 	InstanceGroupsTypeCORE string = "CORE"
 )

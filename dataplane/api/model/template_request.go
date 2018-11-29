@@ -15,7 +15,6 @@ import (
 
 // TemplateRequest template request
 // swagger:model TemplateRequest
-
 type TemplateRequest struct {
 
 	// type of cloud provider
@@ -60,51 +59,23 @@ type TemplateRequest struct {
 	VolumeType string `json:"volumeType,omitempty"`
 }
 
-/* polymorph TemplateRequest cloudPlatform false */
-
-/* polymorph TemplateRequest customInstanceType false */
-
-/* polymorph TemplateRequest description false */
-
-/* polymorph TemplateRequest instanceType false */
-
-/* polymorph TemplateRequest name false */
-
-/* polymorph TemplateRequest parameters false */
-
-/* polymorph TemplateRequest rootVolumeSize false */
-
-/* polymorph TemplateRequest secretParameters false */
-
-/* polymorph TemplateRequest topologyId false */
-
-/* polymorph TemplateRequest volumeCount false */
-
-/* polymorph TemplateRequest volumeSize false */
-
-/* polymorph TemplateRequest volumeType false */
-
 // Validate validates this template request
 func (m *TemplateRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateCloudPlatform(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateCustomInstanceType(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateDescription(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -130,7 +101,6 @@ func (m *TemplateRequest) validateCustomInstanceType(formats strfmt.Registry) er
 	}
 
 	if m.CustomInstanceType != nil {
-
 		if err := m.CustomInstanceType.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("customInstanceType")

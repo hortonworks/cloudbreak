@@ -17,7 +17,6 @@ import (
 
 // KerberosRequest kerberos request
 // swagger:model KerberosRequest
-
 type KerberosRequest struct {
 
 	// kerberos admin user
@@ -68,6 +67,7 @@ type KerberosRequest struct {
 
 	// type
 	// Required: true
+	// Enum: [CB_MANAGED EXISTING_AD EXISTING_MIT EXISTING_FREEIPA CUSTOM]
 	Type *string `json:"type"`
 
 	// kerberos KDC server URL
@@ -77,64 +77,27 @@ type KerberosRequest struct {
 	VerifyKdcTrust *bool `json:"verifyKdcTrust,omitempty"`
 }
 
-/* polymorph KerberosRequest admin false */
-
-/* polymorph KerberosRequest adminUrl false */
-
-/* polymorph KerberosRequest containerDn false */
-
-/* polymorph KerberosRequest descriptor false */
-
-/* polymorph KerberosRequest domain false */
-
-/* polymorph KerberosRequest krb5Conf false */
-
-/* polymorph KerberosRequest ldapUrl false */
-
-/* polymorph KerberosRequest masterKey false */
-
-/* polymorph KerberosRequest nameServers false */
-
-/* polymorph KerberosRequest password false */
-
-/* polymorph KerberosRequest principal false */
-
-/* polymorph KerberosRequest realm false */
-
-/* polymorph KerberosRequest tcpAllowed false */
-
-/* polymorph KerberosRequest type false */
-
-/* polymorph KerberosRequest url false */
-
-/* polymorph KerberosRequest verifyKdcTrust false */
-
 // Validate validates this kerberos request
 func (m *KerberosRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAdmin(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateMasterKey(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateNameServers(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validatePassword(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateType(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -221,14 +184,19 @@ func init() {
 }
 
 const (
+
 	// KerberosRequestTypeCBMANAGED captures enum value "CB_MANAGED"
 	KerberosRequestTypeCBMANAGED string = "CB_MANAGED"
+
 	// KerberosRequestTypeEXISTINGAD captures enum value "EXISTING_AD"
 	KerberosRequestTypeEXISTINGAD string = "EXISTING_AD"
+
 	// KerberosRequestTypeEXISTINGMIT captures enum value "EXISTING_MIT"
 	KerberosRequestTypeEXISTINGMIT string = "EXISTING_MIT"
+
 	// KerberosRequestTypeEXISTINGFREEIPA captures enum value "EXISTING_FREEIPA"
 	KerberosRequestTypeEXISTINGFREEIPA string = "EXISTING_FREEIPA"
+
 	// KerberosRequestTypeCUSTOM captures enum value "CUSTOM"
 	KerberosRequestTypeCUSTOM string = "CUSTOM"
 )

@@ -9,9 +9,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
-	"github.com/go-openapi/validate"
 
 	strfmt "github.com/go-openapi/strfmt"
 )
@@ -47,7 +45,7 @@ func NewStatusStackV3OK() *StatusStackV3OK {
 successful operation
 */
 type StatusStackV3OK struct {
-	Payload StatusStackV3OKBody
+	Payload map[string]interface{}
 }
 
 func (o *StatusStackV3OK) Error() string {
@@ -61,25 +59,5 @@ func (o *StatusStackV3OK) readResponse(response runtime.ClientResponse, consumer
 		return err
 	}
 
-	return nil
-}
-
-/*StatusStackV3OKBody status stack v3 o k body
-swagger:model StatusStackV3OKBody
-*/
-
-type StatusStackV3OKBody map[string]interface{}
-
-// Validate validates this status stack v3 o k body
-func (o StatusStackV3OKBody) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if err := validate.Required("statusStackV3OK", "body", o); err != nil {
-		return err
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }

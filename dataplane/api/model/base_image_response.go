@@ -16,7 +16,6 @@ import (
 
 // BaseImageResponse base image response
 // swagger:model BaseImageResponse
-
 type BaseImageResponse struct {
 
 	// date
@@ -59,48 +58,19 @@ type BaseImageResponse struct {
 	Version string `json:"version,omitempty"`
 }
 
-/* polymorph BaseImageResponse date false */
-
-/* polymorph BaseImageResponse defaultImage false */
-
-/* polymorph BaseImageResponse description false */
-
-/* polymorph BaseImageResponse hdfStacks false */
-
-/* polymorph BaseImageResponse hdpStacks false */
-
-/* polymorph BaseImageResponse images false */
-
-/* polymorph BaseImageResponse os false */
-
-/* polymorph BaseImageResponse osType false */
-
-/* polymorph BaseImageResponse packageVersions false */
-
-/* polymorph BaseImageResponse repo false */
-
-/* polymorph BaseImageResponse stackDetails false */
-
-/* polymorph BaseImageResponse uuid false */
-
-/* polymorph BaseImageResponse version false */
-
 // Validate validates this base image response
 func (m *BaseImageResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateHdfStacks(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateHdpStacks(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateStackDetails(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -117,13 +87,11 @@ func (m *BaseImageResponse) validateHdfStacks(formats strfmt.Registry) error {
 	}
 
 	for i := 0; i < len(m.HdfStacks); i++ {
-
 		if swag.IsZero(m.HdfStacks[i]) { // not required
 			continue
 		}
 
 		if m.HdfStacks[i] != nil {
-
 			if err := m.HdfStacks[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("hdfStacks" + "." + strconv.Itoa(i))
@@ -144,13 +112,11 @@ func (m *BaseImageResponse) validateHdpStacks(formats strfmt.Registry) error {
 	}
 
 	for i := 0; i < len(m.HdpStacks); i++ {
-
 		if swag.IsZero(m.HdpStacks[i]) { // not required
 			continue
 		}
 
 		if m.HdpStacks[i] != nil {
-
 			if err := m.HdpStacks[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("hdpStacks" + "." + strconv.Itoa(i))
@@ -171,7 +137,6 @@ func (m *BaseImageResponse) validateStackDetails(formats strfmt.Registry) error 
 	}
 
 	if m.StackDetails != nil {
-
 		if err := m.StackDetails.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("stackDetails")

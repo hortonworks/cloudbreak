@@ -15,7 +15,6 @@ import (
 
 // NetworkResponse network response
 // swagger:model NetworkResponse
-
 type NetworkResponse struct {
 
 	// type of cloud provider
@@ -48,43 +47,23 @@ type NetworkResponse struct {
 	Workspace *WorkspaceResourceResponse `json:"workspace,omitempty"`
 }
 
-/* polymorph NetworkResponse cloudPlatform false */
-
-/* polymorph NetworkResponse description false */
-
-/* polymorph NetworkResponse id false */
-
-/* polymorph NetworkResponse name false */
-
-/* polymorph NetworkResponse parameters false */
-
-/* polymorph NetworkResponse subnetCIDR false */
-
-/* polymorph NetworkResponse topologyId false */
-
-/* polymorph NetworkResponse workspace false */
-
 // Validate validates this network response
 func (m *NetworkResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateCloudPlatform(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateDescription(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateWorkspace(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -136,7 +115,6 @@ func (m *NetworkResponse) validateWorkspace(formats strfmt.Registry) error {
 	}
 
 	if m.Workspace != nil {
-
 		if err := m.Workspace.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("workspace")

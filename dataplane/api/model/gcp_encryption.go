@@ -8,13 +8,11 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
 // GcpEncryption gcp encryption
 // swagger:model GcpEncryption
-
 type GcpEncryption struct {
 
 	// encryption key for vm
@@ -27,19 +25,8 @@ type GcpEncryption struct {
 	Type string `json:"type,omitempty"`
 }
 
-/* polymorph GcpEncryption key false */
-
-/* polymorph GcpEncryption keyEncryptionMethod false */
-
-/* polymorph GcpEncryption type false */
-
 // Validate validates this gcp encryption
 func (m *GcpEncryption) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }
 

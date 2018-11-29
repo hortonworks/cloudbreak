@@ -18,7 +18,6 @@ import (
 
 // GatewayJSON gateway Json
 // swagger:model GatewayJson
-
 type GatewayJSON struct {
 
 	// [DEPRECATED] 'enableGateway' is no longer needed to determine if gateway needs to be launched or not.
@@ -32,9 +31,11 @@ type GatewayJSON struct {
 	ExposedServices []string `json:"exposedServices"`
 
 	// Knox gateway type
+	// Enum: [CENTRAL INDIVIDUAL]
 	GatewayType string `json:"gatewayType,omitempty"`
 
 	// Knox SSO type
+	// Enum: [SSO_PROVIDER NONE]
 	SsoType string `json:"ssoType,omitempty"`
 
 	// SSO Provider certificate
@@ -48,56 +49,25 @@ type GatewayJSON struct {
 	TopologyName string `json:"topologyName,omitempty"`
 }
 
-/* polymorph GatewayJson enableGateway false */
-
-/* polymorph GatewayJson exposedServices false */
-
-/* polymorph GatewayJson gatewayType false */
-
-/* polymorph GatewayJson ssoType false */
-
-/* polymorph GatewayJson tokenCert false */
-
-/* polymorph GatewayJson topologies false */
-
-/* polymorph GatewayJson topologyName false */
-
 // Validate validates this gateway Json
 func (m *GatewayJSON) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateExposedServices(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
 	if err := m.validateGatewayType(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateSsoType(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateTopologies(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-func (m *GatewayJSON) validateExposedServices(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.ExposedServices) { // not required
-		return nil
-	}
-
 	return nil
 }
 
@@ -114,8 +84,10 @@ func init() {
 }
 
 const (
+
 	// GatewayJSONGatewayTypeCENTRAL captures enum value "CENTRAL"
 	GatewayJSONGatewayTypeCENTRAL string = "CENTRAL"
+
 	// GatewayJSONGatewayTypeINDIVIDUAL captures enum value "INDIVIDUAL"
 	GatewayJSONGatewayTypeINDIVIDUAL string = "INDIVIDUAL"
 )
@@ -155,8 +127,10 @@ func init() {
 }
 
 const (
+
 	// GatewayJSONSsoTypeSSOPROVIDER captures enum value "SSO_PROVIDER"
 	GatewayJSONSsoTypeSSOPROVIDER string = "SSO_PROVIDER"
+
 	// GatewayJSONSsoTypeNONE captures enum value "NONE"
 	GatewayJSONSsoTypeNONE string = "NONE"
 )
@@ -190,13 +164,11 @@ func (m *GatewayJSON) validateTopologies(formats strfmt.Registry) error {
 	}
 
 	for i := 0; i < len(m.Topologies); i++ {
-
 		if swag.IsZero(m.Topologies[i]) { // not required
 			continue
 		}
 
 		if m.Topologies[i] != nil {
-
 			if err := m.Topologies[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("topologies" + "." + strconv.Itoa(i))

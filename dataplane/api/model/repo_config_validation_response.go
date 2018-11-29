@@ -8,13 +8,11 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
 // RepoConfigValidationResponse repo config validation response
 // swagger:model RepoConfigValidationResponse
-
 type RepoConfigValidationResponse struct {
 
 	// Indicates the request's value with the same key is valid and reachable by Cloudbreak or not
@@ -36,25 +34,8 @@ type RepoConfigValidationResponse struct {
 	VersionDefinitionFileURL *bool `json:"versionDefinitionFileUrl,omitempty"`
 }
 
-/* polymorph RepoConfigValidationResponse ambariBaseUrl false */
-
-/* polymorph RepoConfigValidationResponse ambariGpgKeyUrl false */
-
-/* polymorph RepoConfigValidationResponse mpackUrl false */
-
-/* polymorph RepoConfigValidationResponse stackBaseURL false */
-
-/* polymorph RepoConfigValidationResponse utilsBaseURL false */
-
-/* polymorph RepoConfigValidationResponse versionDefinitionFileUrl false */
-
 // Validate validates this repo config validation response
 func (m *RepoConfigValidationResponse) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }
 

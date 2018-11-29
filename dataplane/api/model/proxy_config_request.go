@@ -15,7 +15,6 @@ import (
 
 // ProxyConfigRequest proxy config request
 // swagger:model ProxyConfigRequest
-
 type ProxyConfigRequest struct {
 
 	// description of the resource
@@ -59,53 +58,31 @@ type ProxyConfigRequest struct {
 	UserName string `json:"userName,omitempty"`
 }
 
-/* polymorph ProxyConfigRequest description false */
-
-/* polymorph ProxyConfigRequest environments false */
-
-/* polymorph ProxyConfigRequest name false */
-
-/* polymorph ProxyConfigRequest password false */
-
-/* polymorph ProxyConfigRequest protocol false */
-
-/* polymorph ProxyConfigRequest serverHost false */
-
-/* polymorph ProxyConfigRequest serverPort false */
-
-/* polymorph ProxyConfigRequest userName false */
-
 // Validate validates this proxy config request
 func (m *ProxyConfigRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateDescription(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateEnvironments(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateProtocol(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateServerHost(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateServerPort(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

@@ -15,7 +15,6 @@ import (
 
 // S3CloudStorageParameters s3 cloud storage parameters
 // swagger:model S3CloudStorageParameters
-
 type S3CloudStorageParameters struct {
 
 	// instance profile
@@ -23,14 +22,11 @@ type S3CloudStorageParameters struct {
 	InstanceProfile *string `json:"instanceProfile"`
 }
 
-/* polymorph S3CloudStorageParameters instanceProfile false */
-
 // Validate validates this s3 cloud storage parameters
 func (m *S3CloudStorageParameters) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateInstanceProfile(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

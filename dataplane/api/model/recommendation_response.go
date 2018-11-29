@@ -17,7 +17,6 @@ import (
 
 // RecommendationResponse recommendation response
 // swagger:model RecommendationResponse
-
 type RecommendationResponse struct {
 
 	// disk responses
@@ -32,28 +31,19 @@ type RecommendationResponse struct {
 	VirtualMachines []*VMTypeJSON `json:"virtualMachines"`
 }
 
-/* polymorph RecommendationResponse diskResponses false */
-
-/* polymorph RecommendationResponse recommendations false */
-
-/* polymorph RecommendationResponse virtualMachines false */
-
 // Validate validates this recommendation response
 func (m *RecommendationResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateDiskResponses(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateRecommendations(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateVirtualMachines(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -74,13 +64,11 @@ func (m *RecommendationResponse) validateDiskResponses(formats strfmt.Registry) 
 	}
 
 	for i := 0; i < len(m.DiskResponses); i++ {
-
 		if swag.IsZero(m.DiskResponses[i]) { // not required
 			continue
 		}
 
 		if m.DiskResponses[i] != nil {
-
 			if err := m.DiskResponses[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("diskResponses" + "." + strconv.Itoa(i))
@@ -100,8 +88,17 @@ func (m *RecommendationResponse) validateRecommendations(formats strfmt.Registry
 		return nil
 	}
 
-	if err := validate.Required("recommendations", "body", m.Recommendations); err != nil {
-		return err
+	for k := range m.Recommendations {
+
+		if err := validate.Required("recommendations"+"."+k, "body", m.Recommendations[k]); err != nil {
+			return err
+		}
+		if val, ok := m.Recommendations[k]; ok {
+			if err := val.Validate(formats); err != nil {
+				return err
+			}
+		}
+
 	}
 
 	return nil
@@ -118,13 +115,11 @@ func (m *RecommendationResponse) validateVirtualMachines(formats strfmt.Registry
 	}
 
 	for i := 0; i < len(m.VirtualMachines); i++ {
-
 		if swag.IsZero(m.VirtualMachines[i]) { // not required
 			continue
 		}
 
 		if m.VirtualMachines[i] != nil {
-
 			if err := m.VirtualMachines[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("virtualMachines" + "." + strconv.Itoa(i))

@@ -14,7 +14,6 @@ import (
 
 // RestCallDetails rest call details
 // swagger:model RestCallDetails
-
 type RestCallDetails struct {
 
 	// duration
@@ -27,23 +26,15 @@ type RestCallDetails struct {
 	RestResponse *RestResponseDetails `json:"restResponse,omitempty"`
 }
 
-/* polymorph RestCallDetails duration false */
-
-/* polymorph RestCallDetails restRequest false */
-
-/* polymorph RestCallDetails restResponse false */
-
 // Validate validates this rest call details
 func (m *RestCallDetails) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateRestRequest(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateRestResponse(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -60,7 +51,6 @@ func (m *RestCallDetails) validateRestRequest(formats strfmt.Registry) error {
 	}
 
 	if m.RestRequest != nil {
-
 		if err := m.RestRequest.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("restRequest")
@@ -79,7 +69,6 @@ func (m *RestCallDetails) validateRestResponse(formats strfmt.Registry) error {
 	}
 
 	if m.RestResponse != nil {
-
 		if err := m.RestResponse.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("restResponse")

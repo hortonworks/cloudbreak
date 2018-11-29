@@ -18,7 +18,6 @@ import (
 
 // HostGroupResponse host group response
 // swagger:model HostGroupResponse
-
 type HostGroupResponse struct {
 
 	// instance group or resource constraint for a hostgroup
@@ -49,61 +48,39 @@ type HostGroupResponse struct {
 	Recipes []*RecipeResponse `json:"recipes"`
 
 	// recovery mode of the hostgroup's nodes
+	// Enum: [MANUAL AUTO]
 	RecoveryMode string `json:"recoveryMode,omitempty"`
 }
-
-/* polymorph HostGroupResponse constraint false */
-
-/* polymorph HostGroupResponse extendedRecipes false */
-
-/* polymorph HostGroupResponse id false */
-
-/* polymorph HostGroupResponse metadata false */
-
-/* polymorph HostGroupResponse name false */
-
-/* polymorph HostGroupResponse recipeIds false */
-
-/* polymorph HostGroupResponse recipes false */
-
-/* polymorph HostGroupResponse recoveryMode false */
 
 // Validate validates this host group response
 func (m *HostGroupResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateConstraint(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateExtendedRecipes(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateMetadata(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateRecipeIds(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateRecipes(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateRecoveryMode(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -120,7 +97,6 @@ func (m *HostGroupResponse) validateConstraint(formats strfmt.Registry) error {
 	}
 
 	if m.Constraint != nil {
-
 		if err := m.Constraint.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("constraint")
@@ -156,13 +132,11 @@ func (m *HostGroupResponse) validateMetadata(formats strfmt.Registry) error {
 	}
 
 	for i := 0; i < len(m.Metadata); i++ {
-
 		if swag.IsZero(m.Metadata[i]) { // not required
 			continue
 		}
 
 		if m.Metadata[i] != nil {
-
 			if err := m.Metadata[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("metadata" + "." + strconv.Itoa(i))
@@ -209,13 +183,11 @@ func (m *HostGroupResponse) validateRecipes(formats strfmt.Registry) error {
 	}
 
 	for i := 0; i < len(m.Recipes); i++ {
-
 		if swag.IsZero(m.Recipes[i]) { // not required
 			continue
 		}
 
 		if m.Recipes[i] != nil {
-
 			if err := m.Recipes[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("recipes" + "." + strconv.Itoa(i))
@@ -242,8 +214,10 @@ func init() {
 }
 
 const (
+
 	// HostGroupResponseRecoveryModeMANUAL captures enum value "MANUAL"
 	HostGroupResponseRecoveryModeMANUAL string = "MANUAL"
+
 	// HostGroupResponseRecoveryModeAUTO captures enum value "AUTO"
 	HostGroupResponseRecoveryModeAUTO string = "AUTO"
 )

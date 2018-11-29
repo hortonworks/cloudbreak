@@ -14,7 +14,6 @@ import (
 
 // RdsTestRequest rds test request
 // swagger:model RdsTestRequest
-
 type RdsTestRequest struct {
 
 	// Name of the RDS configuration resource
@@ -24,16 +23,11 @@ type RdsTestRequest struct {
 	RdsConfig *RdsConfig `json:"rdsConfig,omitempty"`
 }
 
-/* polymorph RdsTestRequest name false */
-
-/* polymorph RdsTestRequest rdsConfig false */
-
 // Validate validates this rds test request
 func (m *RdsTestRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateRdsConfig(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -50,7 +44,6 @@ func (m *RdsTestRequest) validateRdsConfig(formats strfmt.Registry) error {
 	}
 
 	if m.RdsConfig != nil {
-
 		if err := m.RdsConfig.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("rdsConfig")

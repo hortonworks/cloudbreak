@@ -15,7 +15,6 @@ import (
 
 // GeneralSettings general settings
 // swagger:model GeneralSettings
-
 type GeneralSettings struct {
 
 	// credential resource name for the stack
@@ -32,18 +31,11 @@ type GeneralSettings struct {
 	Name *string `json:"name"`
 }
 
-/* polymorph GeneralSettings credentialName false */
-
-/* polymorph GeneralSettings environmentName false */
-
-/* polymorph GeneralSettings name false */
-
 // Validate validates this general settings
 func (m *GeneralSettings) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

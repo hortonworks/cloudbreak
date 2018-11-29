@@ -16,7 +16,6 @@ import (
 
 // VMTypeMetaJSON Vm type meta Json
 // swagger:model VmTypeMetaJson
-
 type VMTypeMetaJSON struct {
 
 	// configs
@@ -26,16 +25,11 @@ type VMTypeMetaJSON struct {
 	Properties map[string]interface{} `json:"properties,omitempty"`
 }
 
-/* polymorph VmTypeMetaJson configs false */
-
-/* polymorph VmTypeMetaJson properties false */
-
 // Validate validates this Vm type meta Json
 func (m *VMTypeMetaJSON) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateConfigs(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -52,13 +46,11 @@ func (m *VMTypeMetaJSON) validateConfigs(formats strfmt.Registry) error {
 	}
 
 	for i := 0; i < len(m.Configs); i++ {
-
 		if swag.IsZero(m.Configs[i]) { // not required
 			continue
 		}
 
 		if m.Configs[i] != nil {
-
 			if err := m.Configs[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("configs" + "." + strconv.Itoa(i))

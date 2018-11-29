@@ -17,7 +17,6 @@ import (
 
 // AmbariStackDetails ambari stack details
 // swagger:model AmbariStackDetails
-
 type AmbariStackDetails struct {
 
 	// enable gpl repository
@@ -67,47 +66,15 @@ type AmbariStackDetails struct {
 	VersionDefinitionFileURL string `json:"versionDefinitionFileUrl,omitempty"`
 }
 
-/* polymorph AmbariStackDetails enableGplRepo false */
-
-/* polymorph AmbariStackDetails gpgKeyUrl false */
-
-/* polymorph AmbariStackDetails mpackUrl false */
-
-/* polymorph AmbariStackDetails mpacks false */
-
-/* polymorph AmbariStackDetails os false */
-
-/* polymorph AmbariStackDetails osType false */
-
-/* polymorph AmbariStackDetails repositoryVersion false */
-
-/* polymorph AmbariStackDetails stack false */
-
-/* polymorph AmbariStackDetails stackBaseURL false */
-
-/* polymorph AmbariStackDetails stackRepoId false */
-
-/* polymorph AmbariStackDetails utilsBaseURL false */
-
-/* polymorph AmbariStackDetails utilsRepoId false */
-
-/* polymorph AmbariStackDetails verify false */
-
-/* polymorph AmbariStackDetails version false */
-
-/* polymorph AmbariStackDetails versionDefinitionFileUrl false */
-
 // Validate validates this ambari stack details
 func (m *AmbariStackDetails) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateMpacks(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateVersion(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -124,13 +91,11 @@ func (m *AmbariStackDetails) validateMpacks(formats strfmt.Registry) error {
 	}
 
 	for i := 0; i < len(m.Mpacks); i++ {
-
 		if swag.IsZero(m.Mpacks[i]) { // not required
 			continue
 		}
 
 		if m.Mpacks[i] != nil {
-
 			if err := m.Mpacks[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("mpacks" + "." + strconv.Itoa(i))

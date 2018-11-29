@@ -15,7 +15,6 @@ import (
 
 // LdapValidationRequest ldap validation request
 // swagger:model LdapValidationRequest
-
 type LdapValidationRequest struct {
 
 	// bind distinguished name for connection test and group search (e.g. cn=admin,dc=example,dc=org)
@@ -40,37 +39,23 @@ type LdapValidationRequest struct {
 	ServerPort *int32 `json:"serverPort"`
 }
 
-/* polymorph LdapValidationRequest bindDn false */
-
-/* polymorph LdapValidationRequest bindPassword false */
-
-/* polymorph LdapValidationRequest protocol false */
-
-/* polymorph LdapValidationRequest serverHost false */
-
-/* polymorph LdapValidationRequest serverPort false */
-
 // Validate validates this ldap validation request
 func (m *LdapValidationRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateBindDn(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateBindPassword(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateServerHost(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateServerPort(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

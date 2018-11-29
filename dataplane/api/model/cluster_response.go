@@ -18,7 +18,6 @@ import (
 
 // ClusterResponse cluster response
 // swagger:model ClusterResponse
-
 type ClusterResponse struct {
 
 	// [DEPRECATED] use RdsConfig instead! details of the external Ambari database
@@ -59,6 +58,7 @@ type ClusterResponse struct {
 	ClusterExposedServicesForTopologies map[string][]ClusterExposedServiceResponse `json:"clusterExposedServicesForTopologies,omitempty"`
 
 	// config recommendation strategy
+	// Enum: [NEVER_APPLY ONLY_STACK_DEFAULTS_APPLY ALWAYS_APPLY ALWAYS_APPLY_DONT_OVERRIDE_CUSTOM_VALUES]
 	ConfigStrategy string `json:"configStrategy,omitempty"`
 
 	// Epoch time of cluster creation finish
@@ -80,6 +80,7 @@ type ClusterResponse struct {
 	DpAmbariUser *SecretResponse `json:"dpAmbariUser,omitempty"`
 
 	// executor type of cluster
+	// Enum: [CONTAINER DEFAULT]
 	ExecutorType string `json:"executorType,omitempty"`
 
 	// ambari blueprint JSON, set this or the url field
@@ -134,6 +135,7 @@ type ClusterResponse struct {
 	SharedServiceResponse *SharedServiceResponse `json:"sharedServiceResponse,omitempty"`
 
 	// status of the cluster
+	// Enum: [REQUESTED CREATE_IN_PROGRESS AVAILABLE UPDATE_IN_PROGRESS UPDATE_REQUESTED UPDATE_FAILED CREATE_FAILED ENABLE_SECURITY_FAILED PRE_DELETE_IN_PROGRESS DELETE_IN_PROGRESS DELETE_FAILED DELETE_COMPLETED STOPPED STOP_REQUESTED START_REQUESTED STOP_IN_PROGRESS START_IN_PROGRESS START_FAILED STOP_FAILED WAIT_FOR_SYNC MAINTENANCE_MODE_ENABLED]
 	Status string `json:"status,omitempty"`
 
 	// status message of the cluster
@@ -146,192 +148,91 @@ type ClusterResponse struct {
 	Workspace *WorkspaceResourceResponse `json:"workspace,omitempty"`
 }
 
-/* polymorph ClusterResponse ambariDatabaseDetails false */
-
-/* polymorph ClusterResponse ambariRepoDetailsJson false */
-
-/* polymorph ClusterResponse ambariServerIp false */
-
-/* polymorph ClusterResponse ambariServerUrl false */
-
-/* polymorph ClusterResponse ambariStackDetails false */
-
-/* polymorph ClusterResponse attributes false */
-
-/* polymorph ClusterResponse blueprint false */
-
-/* polymorph ClusterResponse blueprintCustomProperties false */
-
-/* polymorph ClusterResponse blueprintId false */
-
-/* polymorph ClusterResponse blueprintInputs false */
-
-/* polymorph ClusterResponse cluster false */
-
-/* polymorph ClusterResponse clusterExposedServicesForTopologies false */
-
-/* polymorph ClusterResponse configStrategy false */
-
-/* polymorph ClusterResponse creationFinished false */
-
-/* polymorph ClusterResponse customContainers false */
-
-/* polymorph ClusterResponse customQueue false */
-
-/* polymorph ClusterResponse description false */
-
-/* polymorph ClusterResponse dpAmbariPassword false */
-
-/* polymorph ClusterResponse dpAmbariUser false */
-
-/* polymorph ClusterResponse executorType false */
-
-/* polymorph ClusterResponse extendedBlueprintText false */
-
-/* polymorph ClusterResponse fileSystemResponse false */
-
-/* polymorph ClusterResponse gateway false */
-
-/* polymorph ClusterResponse hostGroups false */
-
-/* polymorph ClusterResponse hoursUp false */
-
-/* polymorph ClusterResponse id false */
-
-/* polymorph ClusterResponse kerberosResponse false */
-
-/* polymorph ClusterResponse ldapConfig false */
-
-/* polymorph ClusterResponse ldapConfigId false */
-
-/* polymorph ClusterResponse minutesUp false */
-
-/* polymorph ClusterResponse name false */
-
-/* polymorph ClusterResponse proxyName false */
-
-/* polymorph ClusterResponse rdsConfigIds false */
-
-/* polymorph ClusterResponse rdsConfigs false */
-
-/* polymorph ClusterResponse secure false */
-
-/* polymorph ClusterResponse sharedServiceResponse false */
-
-/* polymorph ClusterResponse status false */
-
-/* polymorph ClusterResponse statusReason false */
-
-/* polymorph ClusterResponse uptime false */
-
-/* polymorph ClusterResponse workspace false */
-
 // Validate validates this cluster response
 func (m *ClusterResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAmbariDatabaseDetails(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateAmbariRepoDetailsJSON(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateAmbariStackDetails(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateBlueprint(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateBlueprintInputs(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateClusterExposedServicesForTopologies(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateConfigStrategy(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateCustomContainers(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateDpAmbariPassword(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateDpAmbariUser(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateExecutorType(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateFileSystemResponse(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateGateway(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateHostGroups(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateKerberosResponse(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateLdapConfig(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateRdsConfigIds(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateRdsConfigs(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateSharedServiceResponse(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateStatus(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateWorkspace(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -348,7 +249,6 @@ func (m *ClusterResponse) validateAmbariDatabaseDetails(formats strfmt.Registry)
 	}
 
 	if m.AmbariDatabaseDetails != nil {
-
 		if err := m.AmbariDatabaseDetails.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("ambariDatabaseDetails")
@@ -367,7 +267,6 @@ func (m *ClusterResponse) validateAmbariRepoDetailsJSON(formats strfmt.Registry)
 	}
 
 	if m.AmbariRepoDetailsJSON != nil {
-
 		if err := m.AmbariRepoDetailsJSON.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("ambariRepoDetailsJson")
@@ -386,7 +285,6 @@ func (m *ClusterResponse) validateAmbariStackDetails(formats strfmt.Registry) er
 	}
 
 	if m.AmbariStackDetails != nil {
-
 		if err := m.AmbariStackDetails.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("ambariStackDetails")
@@ -405,7 +303,6 @@ func (m *ClusterResponse) validateBlueprint(formats strfmt.Registry) error {
 	}
 
 	if m.Blueprint != nil {
-
 		if err := m.Blueprint.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("blueprint")
@@ -428,13 +325,11 @@ func (m *ClusterResponse) validateBlueprintInputs(formats strfmt.Registry) error
 	}
 
 	for i := 0; i < len(m.BlueprintInputs); i++ {
-
 		if swag.IsZero(m.BlueprintInputs[i]) { // not required
 			continue
 		}
 
 		if m.BlueprintInputs[i] != nil {
-
 			if err := m.BlueprintInputs[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("blueprintInputs" + "." + strconv.Itoa(i))
@@ -454,8 +349,23 @@ func (m *ClusterResponse) validateClusterExposedServicesForTopologies(formats st
 		return nil
 	}
 
-	if err := validate.Required("clusterExposedServicesForTopologies", "body", m.ClusterExposedServicesForTopologies); err != nil {
-		return err
+	for k := range m.ClusterExposedServicesForTopologies {
+
+		if err := validate.Required("clusterExposedServicesForTopologies"+"."+k, "body", m.ClusterExposedServicesForTopologies[k]); err != nil {
+			return err
+		}
+
+		for i := 0; i < len(m.ClusterExposedServicesForTopologies[k]); i++ {
+
+			if err := m.ClusterExposedServicesForTopologies[k][i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("clusterExposedServicesForTopologies" + "." + k + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+
+		}
+
 	}
 
 	return nil
@@ -474,12 +384,16 @@ func init() {
 }
 
 const (
+
 	// ClusterResponseConfigStrategyNEVERAPPLY captures enum value "NEVER_APPLY"
 	ClusterResponseConfigStrategyNEVERAPPLY string = "NEVER_APPLY"
+
 	// ClusterResponseConfigStrategyONLYSTACKDEFAULTSAPPLY captures enum value "ONLY_STACK_DEFAULTS_APPLY"
 	ClusterResponseConfigStrategyONLYSTACKDEFAULTSAPPLY string = "ONLY_STACK_DEFAULTS_APPLY"
+
 	// ClusterResponseConfigStrategyALWAYSAPPLY captures enum value "ALWAYS_APPLY"
 	ClusterResponseConfigStrategyALWAYSAPPLY string = "ALWAYS_APPLY"
+
 	// ClusterResponseConfigStrategyALWAYSAPPLYDONTOVERRIDECUSTOMVALUES captures enum value "ALWAYS_APPLY_DONT_OVERRIDE_CUSTOM_VALUES"
 	ClusterResponseConfigStrategyALWAYSAPPLYDONTOVERRIDECUSTOMVALUES string = "ALWAYS_APPLY_DONT_OVERRIDE_CUSTOM_VALUES"
 )
@@ -513,7 +427,6 @@ func (m *ClusterResponse) validateCustomContainers(formats strfmt.Registry) erro
 	}
 
 	if m.CustomContainers != nil {
-
 		if err := m.CustomContainers.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("customContainers")
@@ -532,7 +445,6 @@ func (m *ClusterResponse) validateDpAmbariPassword(formats strfmt.Registry) erro
 	}
 
 	if m.DpAmbariPassword != nil {
-
 		if err := m.DpAmbariPassword.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("dpAmbariPassword")
@@ -551,7 +463,6 @@ func (m *ClusterResponse) validateDpAmbariUser(formats strfmt.Registry) error {
 	}
 
 	if m.DpAmbariUser != nil {
-
 		if err := m.DpAmbariUser.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("dpAmbariUser")
@@ -576,8 +487,10 @@ func init() {
 }
 
 const (
+
 	// ClusterResponseExecutorTypeCONTAINER captures enum value "CONTAINER"
 	ClusterResponseExecutorTypeCONTAINER string = "CONTAINER"
+
 	// ClusterResponseExecutorTypeDEFAULT captures enum value "DEFAULT"
 	ClusterResponseExecutorTypeDEFAULT string = "DEFAULT"
 )
@@ -611,7 +524,6 @@ func (m *ClusterResponse) validateFileSystemResponse(formats strfmt.Registry) er
 	}
 
 	if m.FileSystemResponse != nil {
-
 		if err := m.FileSystemResponse.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("fileSystemResponse")
@@ -630,7 +542,6 @@ func (m *ClusterResponse) validateGateway(formats strfmt.Registry) error {
 	}
 
 	if m.Gateway != nil {
-
 		if err := m.Gateway.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("gateway")
@@ -653,13 +564,11 @@ func (m *ClusterResponse) validateHostGroups(formats strfmt.Registry) error {
 	}
 
 	for i := 0; i < len(m.HostGroups); i++ {
-
 		if swag.IsZero(m.HostGroups[i]) { // not required
 			continue
 		}
 
 		if m.HostGroups[i] != nil {
-
 			if err := m.HostGroups[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("hostGroups" + "." + strconv.Itoa(i))
@@ -680,7 +589,6 @@ func (m *ClusterResponse) validateKerberosResponse(formats strfmt.Registry) erro
 	}
 
 	if m.KerberosResponse != nil {
-
 		if err := m.KerberosResponse.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("kerberosResponse")
@@ -699,7 +607,6 @@ func (m *ClusterResponse) validateLdapConfig(formats strfmt.Registry) error {
 	}
 
 	if m.LdapConfig != nil {
-
 		if err := m.LdapConfig.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("ldapConfig")
@@ -735,13 +642,11 @@ func (m *ClusterResponse) validateRdsConfigs(formats strfmt.Registry) error {
 	}
 
 	for i := 0; i < len(m.RdsConfigs); i++ {
-
 		if swag.IsZero(m.RdsConfigs[i]) { // not required
 			continue
 		}
 
 		if m.RdsConfigs[i] != nil {
-
 			if err := m.RdsConfigs[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("rdsConfigs" + "." + strconv.Itoa(i))
@@ -762,7 +667,6 @@ func (m *ClusterResponse) validateSharedServiceResponse(formats strfmt.Registry)
 	}
 
 	if m.SharedServiceResponse != nil {
-
 		if err := m.SharedServiceResponse.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("sharedServiceResponse")
@@ -787,46 +691,67 @@ func init() {
 }
 
 const (
+
 	// ClusterResponseStatusREQUESTED captures enum value "REQUESTED"
 	ClusterResponseStatusREQUESTED string = "REQUESTED"
+
 	// ClusterResponseStatusCREATEINPROGRESS captures enum value "CREATE_IN_PROGRESS"
 	ClusterResponseStatusCREATEINPROGRESS string = "CREATE_IN_PROGRESS"
+
 	// ClusterResponseStatusAVAILABLE captures enum value "AVAILABLE"
 	ClusterResponseStatusAVAILABLE string = "AVAILABLE"
+
 	// ClusterResponseStatusUPDATEINPROGRESS captures enum value "UPDATE_IN_PROGRESS"
 	ClusterResponseStatusUPDATEINPROGRESS string = "UPDATE_IN_PROGRESS"
+
 	// ClusterResponseStatusUPDATEREQUESTED captures enum value "UPDATE_REQUESTED"
 	ClusterResponseStatusUPDATEREQUESTED string = "UPDATE_REQUESTED"
+
 	// ClusterResponseStatusUPDATEFAILED captures enum value "UPDATE_FAILED"
 	ClusterResponseStatusUPDATEFAILED string = "UPDATE_FAILED"
+
 	// ClusterResponseStatusCREATEFAILED captures enum value "CREATE_FAILED"
 	ClusterResponseStatusCREATEFAILED string = "CREATE_FAILED"
+
 	// ClusterResponseStatusENABLESECURITYFAILED captures enum value "ENABLE_SECURITY_FAILED"
 	ClusterResponseStatusENABLESECURITYFAILED string = "ENABLE_SECURITY_FAILED"
+
 	// ClusterResponseStatusPREDELETEINPROGRESS captures enum value "PRE_DELETE_IN_PROGRESS"
 	ClusterResponseStatusPREDELETEINPROGRESS string = "PRE_DELETE_IN_PROGRESS"
+
 	// ClusterResponseStatusDELETEINPROGRESS captures enum value "DELETE_IN_PROGRESS"
 	ClusterResponseStatusDELETEINPROGRESS string = "DELETE_IN_PROGRESS"
+
 	// ClusterResponseStatusDELETEFAILED captures enum value "DELETE_FAILED"
 	ClusterResponseStatusDELETEFAILED string = "DELETE_FAILED"
+
 	// ClusterResponseStatusDELETECOMPLETED captures enum value "DELETE_COMPLETED"
 	ClusterResponseStatusDELETECOMPLETED string = "DELETE_COMPLETED"
+
 	// ClusterResponseStatusSTOPPED captures enum value "STOPPED"
 	ClusterResponseStatusSTOPPED string = "STOPPED"
+
 	// ClusterResponseStatusSTOPREQUESTED captures enum value "STOP_REQUESTED"
 	ClusterResponseStatusSTOPREQUESTED string = "STOP_REQUESTED"
+
 	// ClusterResponseStatusSTARTREQUESTED captures enum value "START_REQUESTED"
 	ClusterResponseStatusSTARTREQUESTED string = "START_REQUESTED"
+
 	// ClusterResponseStatusSTOPINPROGRESS captures enum value "STOP_IN_PROGRESS"
 	ClusterResponseStatusSTOPINPROGRESS string = "STOP_IN_PROGRESS"
+
 	// ClusterResponseStatusSTARTINPROGRESS captures enum value "START_IN_PROGRESS"
 	ClusterResponseStatusSTARTINPROGRESS string = "START_IN_PROGRESS"
+
 	// ClusterResponseStatusSTARTFAILED captures enum value "START_FAILED"
 	ClusterResponseStatusSTARTFAILED string = "START_FAILED"
+
 	// ClusterResponseStatusSTOPFAILED captures enum value "STOP_FAILED"
 	ClusterResponseStatusSTOPFAILED string = "STOP_FAILED"
+
 	// ClusterResponseStatusWAITFORSYNC captures enum value "WAIT_FOR_SYNC"
 	ClusterResponseStatusWAITFORSYNC string = "WAIT_FOR_SYNC"
+
 	// ClusterResponseStatusMAINTENANCEMODEENABLED captures enum value "MAINTENANCE_MODE_ENABLED"
 	ClusterResponseStatusMAINTENANCEMODEENABLED string = "MAINTENANCE_MODE_ENABLED"
 )
@@ -860,7 +785,6 @@ func (m *ClusterResponse) validateWorkspace(formats strfmt.Registry) error {
 	}
 
 	if m.Workspace != nil {
-
 		if err := m.Workspace.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("workspace")

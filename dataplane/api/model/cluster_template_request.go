@@ -15,7 +15,6 @@ import (
 
 // ClusterTemplateRequest cluster template request
 // swagger:model ClusterTemplateRequest
-
 type ClusterTemplateRequest struct {
 
 	// cloudplatform which this template is compatible with
@@ -39,35 +38,23 @@ type ClusterTemplateRequest struct {
 	Template *StackV2Request `json:"template"`
 }
 
-/* polymorph ClusterTemplateRequest cloudPlatform false */
-
-/* polymorph ClusterTemplateRequest description false */
-
-/* polymorph ClusterTemplateRequest name false */
-
-/* polymorph ClusterTemplateRequest template false */
-
 // Validate validates this cluster template request
 func (m *ClusterTemplateRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateCloudPlatform(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateDescription(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateTemplate(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -131,7 +118,6 @@ func (m *ClusterTemplateRequest) validateTemplate(formats strfmt.Registry) error
 	}
 
 	if m.Template != nil {
-
 		if err := m.Template.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("template")

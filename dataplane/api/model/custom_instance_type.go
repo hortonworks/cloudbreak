@@ -8,13 +8,11 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
 // CustomInstanceType custom instance type
 // swagger:model CustomInstanceType
-
 type CustomInstanceType struct {
 
 	// cpus
@@ -24,17 +22,8 @@ type CustomInstanceType struct {
 	Memory int32 `json:"memory,omitempty"`
 }
 
-/* polymorph CustomInstanceType cpus false */
-
-/* polymorph CustomInstanceType memory false */
-
 // Validate validates this custom instance type
 func (m *CustomInstanceType) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }
 

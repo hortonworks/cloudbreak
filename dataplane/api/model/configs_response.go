@@ -17,7 +17,6 @@ import (
 
 // ConfigsResponse configs response
 // swagger:model ConfigsResponse
-
 type ConfigsResponse struct {
 
 	// datalakeinputs object
@@ -34,28 +33,19 @@ type ConfigsResponse struct {
 	Inputs []*BlueprintInput `json:"inputs"`
 }
 
-/* polymorph ConfigsResponse datalakeInputs false */
-
-/* polymorph ConfigsResponse fixInputs false */
-
-/* polymorph ConfigsResponse inputs false */
-
 // Validate validates this configs response
 func (m *ConfigsResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateDatalakeInputs(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateFixInputs(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateInputs(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -67,8 +57,16 @@ func (m *ConfigsResponse) Validate(formats strfmt.Registry) error {
 
 func (m *ConfigsResponse) validateDatalakeInputs(formats strfmt.Registry) error {
 
-	if err := validate.Required("datalakeInputs", "body", m.DatalakeInputs); err != nil {
-		return err
+	for k := range m.DatalakeInputs {
+
+		if err := validate.Required("datalakeInputs"+"."+k, "body", m.DatalakeInputs[k]); err != nil {
+			return err
+		}
+
+		if err := validate.Required("datalakeInputs"+"."+k, "body", m.DatalakeInputs[k]); err != nil {
+			return err
+		}
+
 	}
 
 	return nil
@@ -76,8 +74,16 @@ func (m *ConfigsResponse) validateDatalakeInputs(formats strfmt.Registry) error 
 
 func (m *ConfigsResponse) validateFixInputs(formats strfmt.Registry) error {
 
-	if err := validate.Required("fixInputs", "body", m.FixInputs); err != nil {
-		return err
+	for k := range m.FixInputs {
+
+		if err := validate.Required("fixInputs"+"."+k, "body", m.FixInputs[k]); err != nil {
+			return err
+		}
+
+		if err := validate.Required("fixInputs"+"."+k, "body", m.FixInputs[k]); err != nil {
+			return err
+		}
+
 	}
 
 	return nil
@@ -94,13 +100,11 @@ func (m *ConfigsResponse) validateInputs(formats strfmt.Registry) error {
 	}
 
 	for i := 0; i < len(m.Inputs); i++ {
-
 		if swag.IsZero(m.Inputs[i]) { // not required
 			continue
 		}
 
 		if m.Inputs[i] != nil {
-
 			if err := m.Inputs[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("inputs" + "." + strconv.Itoa(i))

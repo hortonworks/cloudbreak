@@ -15,7 +15,6 @@ import (
 
 // OrchestratorResponse orchestrator response
 // swagger:model OrchestratorResponse
-
 type OrchestratorResponse struct {
 
 	// endpoint for the container orchestration api
@@ -29,18 +28,11 @@ type OrchestratorResponse struct {
 	Type *string `json:"type"`
 }
 
-/* polymorph OrchestratorResponse apiEndpoint false */
-
-/* polymorph OrchestratorResponse parameters false */
-
-/* polymorph OrchestratorResponse type false */
-
 // Validate validates this orchestrator response
 func (m *OrchestratorResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateType(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

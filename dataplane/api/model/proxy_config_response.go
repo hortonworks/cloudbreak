@@ -15,7 +15,6 @@ import (
 
 // ProxyConfigResponse proxy config response
 // swagger:model ProxyConfigResponse
-
 type ProxyConfigResponse struct {
 
 	// description of the resource
@@ -65,72 +64,43 @@ type ProxyConfigResponse struct {
 	Workspace *WorkspaceResourceResponse `json:"workspace,omitempty"`
 }
 
-/* polymorph ProxyConfigResponse description false */
-
-/* polymorph ProxyConfigResponse environments false */
-
-/* polymorph ProxyConfigResponse id false */
-
-/* polymorph ProxyConfigResponse name false */
-
-/* polymorph ProxyConfigResponse password false */
-
-/* polymorph ProxyConfigResponse protocol false */
-
-/* polymorph ProxyConfigResponse serverHost false */
-
-/* polymorph ProxyConfigResponse serverPort false */
-
-/* polymorph ProxyConfigResponse userName false */
-
-/* polymorph ProxyConfigResponse workspace false */
-
 // Validate validates this proxy config response
 func (m *ProxyConfigResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateDescription(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateEnvironments(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validatePassword(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateProtocol(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateServerHost(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateServerPort(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateUserName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateWorkspace(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -198,7 +168,6 @@ func (m *ProxyConfigResponse) validatePassword(formats strfmt.Registry) error {
 	}
 
 	if m.Password != nil {
-
 		if err := m.Password.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("password")
@@ -268,7 +237,6 @@ func (m *ProxyConfigResponse) validateUserName(formats strfmt.Registry) error {
 	}
 
 	if m.UserName != nil {
-
 		if err := m.UserName.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("userName")
@@ -287,7 +255,6 @@ func (m *ProxyConfigResponse) validateWorkspace(formats strfmt.Registry) error {
 	}
 
 	if m.Workspace != nil {
-
 		if err := m.Workspace.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("workspace")

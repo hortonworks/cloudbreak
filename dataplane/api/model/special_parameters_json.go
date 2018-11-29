@@ -8,13 +8,11 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
 // SpecialParametersJSON special parameters Json
 // swagger:model SpecialParametersJson
-
 type SpecialParametersJSON struct {
 
 	// platform specific custom parameters
@@ -24,17 +22,8 @@ type SpecialParametersJSON struct {
 	SpecialParameters map[string]bool `json:"specialParameters,omitempty"`
 }
 
-/* polymorph SpecialParametersJson platformSpecificSpecialParameters false */
-
-/* polymorph SpecialParametersJson specialParameters false */
-
 // Validate validates this special parameters Json
 func (m *SpecialParametersJSON) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }
 

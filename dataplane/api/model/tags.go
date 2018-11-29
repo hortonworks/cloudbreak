@@ -8,13 +8,11 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
 // Tags tags
 // swagger:model Tags
-
 type Tags struct {
 
 	// stack related application tags
@@ -27,19 +25,8 @@ type Tags struct {
 	UserDefinedTags map[string]string `json:"userDefinedTags,omitempty"`
 }
 
-/* polymorph Tags applicationTags false */
-
-/* polymorph Tags defaultTags false */
-
-/* polymorph Tags userDefinedTags false */
-
 // Validate validates this tags
 func (m *Tags) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }
 

@@ -8,13 +8,11 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
 // BlueprintInput blueprint input
 // swagger:model BlueprintInput
-
 type BlueprintInput struct {
 
 	// name
@@ -24,17 +22,8 @@ type BlueprintInput struct {
 	PropertyValue string `json:"propertyValue,omitempty"`
 }
 
-/* polymorph BlueprintInput name false */
-
-/* polymorph BlueprintInput propertyValue false */
-
 // Validate validates this blueprint input
 func (m *BlueprintInput) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }
 

@@ -8,13 +8,11 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
 // SecurityRuleDetails security rule details
 // swagger:model SecurityRuleDetails
-
 type SecurityRuleDetails struct {
 
 	// cidr
@@ -27,19 +25,8 @@ type SecurityRuleDetails struct {
 	Protocol string `json:"protocol,omitempty"`
 }
 
-/* polymorph SecurityRuleDetails cidr false */
-
-/* polymorph SecurityRuleDetails ports false */
-
-/* polymorph SecurityRuleDetails protocol false */
-
 // Validate validates this security rule details
 func (m *SecurityRuleDetails) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }
 

@@ -15,7 +15,6 @@ import (
 
 // SupportedDatabaseEntryResponse supported database entry response
 // swagger:model SupportedDatabaseEntryResponse
-
 type SupportedDatabaseEntryResponse struct {
 
 	// Name of the database
@@ -32,20 +31,11 @@ type SupportedDatabaseEntryResponse struct {
 	Versions []string `json:"versions"`
 }
 
-/* polymorph SupportedDatabaseEntryResponse databaseName false */
-
-/* polymorph SupportedDatabaseEntryResponse displayName false */
-
-/* polymorph SupportedDatabaseEntryResponse jdbcPrefix false */
-
-/* polymorph SupportedDatabaseEntryResponse versions false */
-
 // Validate validates this supported database entry response
 func (m *SupportedDatabaseEntryResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateVersions(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

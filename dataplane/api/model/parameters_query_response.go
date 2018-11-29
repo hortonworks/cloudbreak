@@ -14,7 +14,6 @@ import (
 
 // ParametersQueryResponse parameters query response
 // swagger:model ParametersQueryResponse
-
 type ParametersQueryResponse struct {
 
 	// Custom parameters as a json
@@ -22,14 +21,11 @@ type ParametersQueryResponse struct {
 	Custom map[string]string `json:"custom"`
 }
 
-/* polymorph ParametersQueryResponse custom false */
-
 // Validate validates this parameters query response
 func (m *ParametersQueryResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateCustom(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -40,10 +36,6 @@ func (m *ParametersQueryResponse) Validate(formats strfmt.Registry) error {
 }
 
 func (m *ParametersQueryResponse) validateCustom(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Custom) { // not required
-		return nil
-	}
 
 	return nil
 }

@@ -17,7 +17,6 @@ import (
 
 // ClusterExposedServiceResponse cluster exposed service response
 // swagger:model ClusterExposedServiceResponse
-
 type ClusterExposedServiceResponse struct {
 
 	// display name
@@ -27,6 +26,7 @@ type ClusterExposedServiceResponse struct {
 	KnoxService string `json:"knoxService,omitempty"`
 
 	// mode
+	// Enum: [SSO_PROVIDER NONE]
 	Mode string `json:"mode,omitempty"`
 
 	// open
@@ -39,24 +39,11 @@ type ClusterExposedServiceResponse struct {
 	ServiceURL string `json:"serviceUrl,omitempty"`
 }
 
-/* polymorph ClusterExposedServiceResponse displayName false */
-
-/* polymorph ClusterExposedServiceResponse knoxService false */
-
-/* polymorph ClusterExposedServiceResponse mode false */
-
-/* polymorph ClusterExposedServiceResponse open false */
-
-/* polymorph ClusterExposedServiceResponse serviceName false */
-
-/* polymorph ClusterExposedServiceResponse serviceUrl false */
-
 // Validate validates this cluster exposed service response
 func (m *ClusterExposedServiceResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateMode(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -79,8 +66,10 @@ func init() {
 }
 
 const (
+
 	// ClusterExposedServiceResponseModeSSOPROVIDER captures enum value "SSO_PROVIDER"
 	ClusterExposedServiceResponseModeSSOPROVIDER string = "SSO_PROVIDER"
+
 	// ClusterExposedServiceResponseModeNONE captures enum value "NONE"
 	ClusterExposedServiceResponseModeNONE string = "NONE"
 )

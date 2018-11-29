@@ -17,27 +17,22 @@ import (
 
 // FailurePolicyRequest failure policy request
 // swagger:model FailurePolicyRequest
-
 type FailurePolicyRequest struct {
 
 	// type of  adjustment
 	// Required: true
+	// Enum: [EXACT PERCENTAGE BEST_EFFORT]
 	AdjustmentType *string `json:"adjustmentType"`
 
 	// threshold of failure policy
 	Threshold int64 `json:"threshold,omitempty"`
 }
 
-/* polymorph FailurePolicyRequest adjustmentType false */
-
-/* polymorph FailurePolicyRequest threshold false */
-
 // Validate validates this failure policy request
 func (m *FailurePolicyRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAdjustmentType(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -60,10 +55,13 @@ func init() {
 }
 
 const (
+
 	// FailurePolicyRequestAdjustmentTypeEXACT captures enum value "EXACT"
 	FailurePolicyRequestAdjustmentTypeEXACT string = "EXACT"
+
 	// FailurePolicyRequestAdjustmentTypePERCENTAGE captures enum value "PERCENTAGE"
 	FailurePolicyRequestAdjustmentTypePERCENTAGE string = "PERCENTAGE"
+
 	// FailurePolicyRequestAdjustmentTypeBESTEFFORT captures enum value "BEST_EFFORT"
 	FailurePolicyRequestAdjustmentTypeBESTEFFORT string = "BEST_EFFORT"
 )

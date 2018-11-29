@@ -16,7 +16,6 @@ import (
 
 // StructuredEventContainer structured event container
 // swagger:model StructuredEventContainer
-
 type StructuredEventContainer struct {
 
 	// flow
@@ -29,28 +28,19 @@ type StructuredEventContainer struct {
 	Rest []*StructuredRestCallEvent `json:"rest"`
 }
 
-/* polymorph StructuredEventContainer flow false */
-
-/* polymorph StructuredEventContainer notification false */
-
-/* polymorph StructuredEventContainer rest false */
-
 // Validate validates this structured event container
 func (m *StructuredEventContainer) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateFlow(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateNotification(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateRest(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -67,13 +57,11 @@ func (m *StructuredEventContainer) validateFlow(formats strfmt.Registry) error {
 	}
 
 	for i := 0; i < len(m.Flow); i++ {
-
 		if swag.IsZero(m.Flow[i]) { // not required
 			continue
 		}
 
 		if m.Flow[i] != nil {
-
 			if err := m.Flow[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("flow" + "." + strconv.Itoa(i))
@@ -94,13 +82,11 @@ func (m *StructuredEventContainer) validateNotification(formats strfmt.Registry)
 	}
 
 	for i := 0; i < len(m.Notification); i++ {
-
 		if swag.IsZero(m.Notification[i]) { // not required
 			continue
 		}
 
 		if m.Notification[i] != nil {
-
 			if err := m.Notification[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("notification" + "." + strconv.Itoa(i))
@@ -121,13 +107,11 @@ func (m *StructuredEventContainer) validateRest(formats strfmt.Registry) error {
 	}
 
 	for i := 0; i < len(m.Rest); i++ {
-
 		if swag.IsZero(m.Rest[i]) { // not required
 			continue
 		}
 
 		if m.Rest[i] != nil {
-
 			if err := m.Rest[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("rest" + "." + strconv.Itoa(i))

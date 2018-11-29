@@ -8,13 +8,11 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
 // FlexUsageComponentInstanceJSON flex usage component instance Json
 // swagger:model FlexUsageComponentInstanceJson
-
 type FlexUsageComponentInstanceJSON struct {
 
 	// creation time
@@ -39,27 +37,8 @@ type FlexUsageComponentInstanceJSON struct {
 	UsageDate string `json:"usageDate,omitempty"`
 }
 
-/* polymorph FlexUsageComponentInstanceJson creationTime false */
-
-/* polymorph FlexUsageComponentInstanceJson flexSubscriptionId false */
-
-/* polymorph FlexUsageComponentInstanceJson guid false */
-
-/* polymorph FlexUsageComponentInstanceJson peakUsage false */
-
-/* polymorph FlexUsageComponentInstanceJson provider false */
-
-/* polymorph FlexUsageComponentInstanceJson region false */
-
-/* polymorph FlexUsageComponentInstanceJson usageDate false */
-
 // Validate validates this flex usage component instance Json
 func (m *FlexUsageComponentInstanceJSON) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }
 

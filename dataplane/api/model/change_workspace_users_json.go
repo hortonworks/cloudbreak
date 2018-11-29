@@ -15,7 +15,6 @@ import (
 
 // ChangeWorkspaceUsersJSON change workspace users Json
 // swagger:model ChangeWorkspaceUsersJson
-
 type ChangeWorkspaceUsersJSON struct {
 
 	// permissions
@@ -26,16 +25,11 @@ type ChangeWorkspaceUsersJSON struct {
 	UserID string `json:"userId,omitempty"`
 }
 
-/* polymorph ChangeWorkspaceUsersJson permissions false */
-
-/* polymorph ChangeWorkspaceUsersJson userId false */
-
 // Validate validates this change workspace users Json
 func (m *ChangeWorkspaceUsersJSON) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validatePermissions(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

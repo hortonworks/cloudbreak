@@ -17,7 +17,6 @@ import (
 
 // CloudStorageRequest cloud storage request
 // swagger:model CloudStorageRequest
-
 type CloudStorageRequest struct {
 
 	// adls
@@ -40,49 +39,31 @@ type CloudStorageRequest struct {
 	Wasb *WasbCloudStorageParameters `json:"wasb,omitempty"`
 }
 
-/* polymorph CloudStorageRequest adls false */
-
-/* polymorph CloudStorageRequest adlsGen2 false */
-
-/* polymorph CloudStorageRequest gcs false */
-
-/* polymorph CloudStorageRequest locations false */
-
-/* polymorph CloudStorageRequest s3 false */
-
-/* polymorph CloudStorageRequest wasb false */
-
 // Validate validates this cloud storage request
 func (m *CloudStorageRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAdls(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateAdlsGen2(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateGcs(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateLocations(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateS3(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateWasb(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -99,7 +80,6 @@ func (m *CloudStorageRequest) validateAdls(formats strfmt.Registry) error {
 	}
 
 	if m.Adls != nil {
-
 		if err := m.Adls.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("adls")
@@ -118,7 +98,6 @@ func (m *CloudStorageRequest) validateAdlsGen2(formats strfmt.Registry) error {
 	}
 
 	if m.AdlsGen2 != nil {
-
 		if err := m.AdlsGen2.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("adlsGen2")
@@ -137,7 +116,6 @@ func (m *CloudStorageRequest) validateGcs(formats strfmt.Registry) error {
 	}
 
 	if m.Gcs != nil {
-
 		if err := m.Gcs.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("gcs")
@@ -160,13 +138,11 @@ func (m *CloudStorageRequest) validateLocations(formats strfmt.Registry) error {
 	}
 
 	for i := 0; i < len(m.Locations); i++ {
-
 		if swag.IsZero(m.Locations[i]) { // not required
 			continue
 		}
 
 		if m.Locations[i] != nil {
-
 			if err := m.Locations[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("locations" + "." + strconv.Itoa(i))
@@ -187,7 +163,6 @@ func (m *CloudStorageRequest) validateS3(formats strfmt.Registry) error {
 	}
 
 	if m.S3 != nil {
-
 		if err := m.S3.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("s3")
@@ -206,7 +181,6 @@ func (m *CloudStorageRequest) validateWasb(formats strfmt.Registry) error {
 	}
 
 	if m.Wasb != nil {
-
 		if err := m.Wasb.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("wasb")

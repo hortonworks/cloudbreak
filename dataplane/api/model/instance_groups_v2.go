@@ -17,7 +17,6 @@ import (
 
 // InstanceGroupsV2 instance groups v2
 // swagger:model instanceGroupsV2
-
 type InstanceGroupsV2 struct {
 
 	// name of the instance group
@@ -38,6 +37,7 @@ type InstanceGroupsV2 struct {
 	RecipeNames []string `json:"recipeNames"`
 
 	// recovery mode of the hostgroup's nodes
+	// Enum: [MANUAL AUTO]
 	RecoveryMode string `json:"recoveryMode,omitempty"`
 
 	// instancegroup related securitygroup
@@ -48,61 +48,39 @@ type InstanceGroupsV2 struct {
 	Template *TemplateV2Request `json:"template"`
 
 	// type of the instance group
+	// Enum: [GATEWAY CORE]
 	Type string `json:"type,omitempty"`
 }
-
-/* polymorph instanceGroupsV2 group false */
-
-/* polymorph instanceGroupsV2 nodeCount false */
-
-/* polymorph instanceGroupsV2 parameters false */
-
-/* polymorph instanceGroupsV2 recipeNames false */
-
-/* polymorph instanceGroupsV2 recoveryMode false */
-
-/* polymorph instanceGroupsV2 securityGroup false */
-
-/* polymorph instanceGroupsV2 template false */
-
-/* polymorph instanceGroupsV2 type false */
 
 // Validate validates this instance groups v2
 func (m *InstanceGroupsV2) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateGroup(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateNodeCount(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateRecipeNames(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateRecoveryMode(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateSecurityGroup(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateTemplate(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateType(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -164,8 +142,10 @@ func init() {
 }
 
 const (
+
 	// InstanceGroupsV2RecoveryModeMANUAL captures enum value "MANUAL"
 	InstanceGroupsV2RecoveryModeMANUAL string = "MANUAL"
+
 	// InstanceGroupsV2RecoveryModeAUTO captures enum value "AUTO"
 	InstanceGroupsV2RecoveryModeAUTO string = "AUTO"
 )
@@ -199,7 +179,6 @@ func (m *InstanceGroupsV2) validateSecurityGroup(formats strfmt.Registry) error 
 	}
 
 	if m.SecurityGroup != nil {
-
 		if err := m.SecurityGroup.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("securityGroup")
@@ -218,7 +197,6 @@ func (m *InstanceGroupsV2) validateTemplate(formats strfmt.Registry) error {
 	}
 
 	if m.Template != nil {
-
 		if err := m.Template.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("template")
@@ -243,8 +221,10 @@ func init() {
 }
 
 const (
+
 	// InstanceGroupsV2TypeGATEWAY captures enum value "GATEWAY"
 	InstanceGroupsV2TypeGATEWAY string = "GATEWAY"
+
 	// InstanceGroupsV2TypeCORE captures enum value "CORE"
 	InstanceGroupsV2TypeCORE string = "CORE"
 )

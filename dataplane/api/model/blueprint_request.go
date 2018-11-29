@@ -15,7 +15,6 @@ import (
 
 // BlueprintRequest blueprint request
 // swagger:model BlueprintRequest
-
 type BlueprintRequest struct {
 
 	// ambari blueprint JSON, set this or the url field
@@ -43,34 +42,15 @@ type BlueprintRequest struct {
 	URL string `json:"url,omitempty"`
 }
 
-/* polymorph BlueprintRequest ambariBlueprint false */
-
-/* polymorph BlueprintRequest description false */
-
-/* polymorph BlueprintRequest name false */
-
-/* polymorph BlueprintRequest properties false */
-
-/* polymorph BlueprintRequest tags false */
-
-/* polymorph BlueprintRequest url false */
-
 // Validate validates this blueprint request
 func (m *BlueprintRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateDescription(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateProperties(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -113,15 +93,6 @@ func (m *BlueprintRequest) validateName(formats strfmt.Registry) error {
 
 	if err := validate.Pattern("name", "body", string(*m.Name), `^[^;\/%]*$`); err != nil {
 		return err
-	}
-
-	return nil
-}
-
-func (m *BlueprintRequest) validateProperties(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Properties) { // not required
-		return nil
 	}
 
 	return nil

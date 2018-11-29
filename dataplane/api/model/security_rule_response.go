@@ -15,7 +15,6 @@ import (
 
 // SecurityRuleResponse security rule response
 // swagger:model SecurityRuleResponse
-
 type SecurityRuleResponse struct {
 
 	// id of the resource
@@ -39,32 +38,19 @@ type SecurityRuleResponse struct {
 	Subnet *string `json:"subnet"`
 }
 
-/* polymorph SecurityRuleResponse id false */
-
-/* polymorph SecurityRuleResponse modifiable false */
-
-/* polymorph SecurityRuleResponse ports false */
-
-/* polymorph SecurityRuleResponse protocol false */
-
-/* polymorph SecurityRuleResponse subnet false */
-
 // Validate validates this security rule response
 func (m *SecurityRuleResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validatePorts(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateProtocol(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateSubnet(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

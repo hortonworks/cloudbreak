@@ -15,7 +15,6 @@ import (
 
 // TemplateResponse template response
 // swagger:model TemplateResponse
-
 type TemplateResponse struct {
 
 	// aws specific parameters for template
@@ -79,88 +78,43 @@ type TemplateResponse struct {
 	YarnParameters YarnParameters `json:"yarnParameters,omitempty"`
 }
 
-/* polymorph TemplateResponse awsParameters false */
-
-/* polymorph TemplateResponse azureParameters false */
-
-/* polymorph TemplateResponse cloudPlatform false */
-
-/* polymorph TemplateResponse customInstanceType false */
-
-/* polymorph TemplateResponse description false */
-
-/* polymorph TemplateResponse gcpParameters false */
-
-/* polymorph TemplateResponse id false */
-
-/* polymorph TemplateResponse instanceType false */
-
-/* polymorph TemplateResponse name false */
-
-/* polymorph TemplateResponse openStackParameters false */
-
-/* polymorph TemplateResponse parameters false */
-
-/* polymorph TemplateResponse public false */
-
-/* polymorph TemplateResponse rootVolumeSize false */
-
-/* polymorph TemplateResponse topologyId false */
-
-/* polymorph TemplateResponse volumeCount false */
-
-/* polymorph TemplateResponse volumeSize false */
-
-/* polymorph TemplateResponse volumeType false */
-
-/* polymorph TemplateResponse yarnParameters false */
-
 // Validate validates this template response
 func (m *TemplateResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAwsParameters(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateAzureParameters(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateCloudPlatform(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateCustomInstanceType(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateDescription(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateGcpParameters(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateVolumeCount(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateVolumeSize(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -177,7 +131,6 @@ func (m *TemplateResponse) validateAwsParameters(formats strfmt.Registry) error 
 	}
 
 	if m.AwsParameters != nil {
-
 		if err := m.AwsParameters.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("awsParameters")
@@ -196,7 +149,6 @@ func (m *TemplateResponse) validateAzureParameters(formats strfmt.Registry) erro
 	}
 
 	if m.AzureParameters != nil {
-
 		if err := m.AzureParameters.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("azureParameters")
@@ -224,7 +176,6 @@ func (m *TemplateResponse) validateCustomInstanceType(formats strfmt.Registry) e
 	}
 
 	if m.CustomInstanceType != nil {
-
 		if err := m.CustomInstanceType.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("customInstanceType")
@@ -260,7 +211,6 @@ func (m *TemplateResponse) validateGcpParameters(formats strfmt.Registry) error 
 	}
 
 	if m.GcpParameters != nil {
-
 		if err := m.GcpParameters.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("gcpParameters")

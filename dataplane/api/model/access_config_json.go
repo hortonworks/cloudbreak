@@ -8,13 +8,11 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
 // AccessConfigJSON access config Json
 // swagger:model AccessConfigJson
-
 type AccessConfigJSON struct {
 
 	// id
@@ -27,19 +25,8 @@ type AccessConfigJSON struct {
 	Properties map[string]interface{} `json:"properties,omitempty"`
 }
 
-/* polymorph AccessConfigJson id false */
-
-/* polymorph AccessConfigJson name false */
-
-/* polymorph AccessConfigJson properties false */
-
 // Validate validates this access config Json
 func (m *AccessConfigJSON) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }
 

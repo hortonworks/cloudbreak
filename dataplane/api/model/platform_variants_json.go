@@ -8,13 +8,11 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
 // PlatformVariantsJSON platform variants Json
 // swagger:model PlatformVariantsJson
-
 type PlatformVariantsJSON struct {
 
 	// default variants
@@ -24,35 +22,8 @@ type PlatformVariantsJSON struct {
 	PlatformToVariants map[string][]string `json:"platformToVariants,omitempty"`
 }
 
-/* polymorph PlatformVariantsJson defaultVariants false */
-
-/* polymorph PlatformVariantsJson platformToVariants false */
-
 // Validate validates this platform variants Json
 func (m *PlatformVariantsJSON) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if err := m.validatePlatformToVariants(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-func (m *PlatformVariantsJSON) validatePlatformToVariants(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.PlatformToVariants) { // not required
-		return nil
-	}
-
-	if swag.IsZero(m.PlatformToVariants) { // not required
-		return nil
-	}
-
 	return nil
 }
 

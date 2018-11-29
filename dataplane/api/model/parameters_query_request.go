@@ -15,7 +15,6 @@ import (
 
 // ParametersQueryRequest parameters query request
 // swagger:model ParametersQueryRequest
-
 type ParametersQueryRequest struct {
 
 	// gathered from blueprintName field from the blueprint JSON
@@ -23,14 +22,11 @@ type ParametersQueryRequest struct {
 	BlueprintName *string `json:"blueprintName"`
 }
 
-/* polymorph ParametersQueryRequest blueprintName false */
-
 // Validate validates this parameters query request
 func (m *ParametersQueryRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateBlueprintName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

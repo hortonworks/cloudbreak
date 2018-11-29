@@ -14,7 +14,6 @@ import (
 
 // VMTypeJSON Vm type Json
 // swagger:model VmTypeJson
-
 type VMTypeJSON struct {
 
 	// value
@@ -24,16 +23,11 @@ type VMTypeJSON struct {
 	VMTypeMetaJSON *VMTypeMetaJSON `json:"vmTypeMetaJson,omitempty"`
 }
 
-/* polymorph VmTypeJson value false */
-
-/* polymorph VmTypeJson vmTypeMetaJson false */
-
 // Validate validates this Vm type Json
 func (m *VMTypeJSON) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateVMTypeMetaJSON(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -50,7 +44,6 @@ func (m *VMTypeJSON) validateVMTypeMetaJSON(formats strfmt.Registry) error {
 	}
 
 	if m.VMTypeMetaJSON != nil {
-
 		if err := m.VMTypeMetaJSON.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("vmTypeMetaJson")

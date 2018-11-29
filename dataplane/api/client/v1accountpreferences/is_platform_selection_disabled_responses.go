@@ -9,9 +9,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
-	"github.com/go-openapi/swag"
 
 	strfmt "github.com/go-openapi/strfmt"
 )
@@ -47,7 +45,7 @@ func NewIsPlatformSelectionDisabledOK() *IsPlatformSelectionDisabledOK {
 successful operation
 */
 type IsPlatformSelectionDisabledOK struct {
-	Payload IsPlatformSelectionDisabledOKBody
+	Payload map[string]bool
 }
 
 func (o *IsPlatformSelectionDisabledOK) Error() string {
@@ -61,25 +59,5 @@ func (o *IsPlatformSelectionDisabledOK) readResponse(response runtime.ClientResp
 		return err
 	}
 
-	return nil
-}
-
-/*IsPlatformSelectionDisabledOKBody is platform selection disabled o k body
-swagger:model IsPlatformSelectionDisabledOKBody
-*/
-
-type IsPlatformSelectionDisabledOKBody map[string]bool
-
-// Validate validates this is platform selection disabled o k body
-func (o IsPlatformSelectionDisabledOKBody) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if swag.IsZero(o) { // not required
-		return nil
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }

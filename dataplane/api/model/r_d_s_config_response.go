@@ -15,7 +15,6 @@ import (
 
 // RDSConfigResponse r d s config response
 // swagger:model RDSConfigResponse
-
 type RDSConfigResponse struct {
 
 	// list of clusters which use config
@@ -83,101 +82,55 @@ type RDSConfigResponse struct {
 	Workspace *WorkspaceResourceResponse `json:"workspace,omitempty"`
 }
 
-/* polymorph RDSConfigResponse clusterNames false */
-
-/* polymorph RDSConfigResponse connectionDriver false */
-
-/* polymorph RDSConfigResponse connectionPassword false */
-
-/* polymorph RDSConfigResponse connectionURL false */
-
-/* polymorph RDSConfigResponse connectionUserName false */
-
-/* polymorph RDSConfigResponse connectorJarUrl false */
-
-/* polymorph RDSConfigResponse creationDate false */
-
-/* polymorph RDSConfigResponse databaseEngine false */
-
-/* polymorph RDSConfigResponse databaseEngineDisplayName false */
-
-/* polymorph RDSConfigResponse description false */
-
-/* polymorph RDSConfigResponse environments false */
-
-/* polymorph RDSConfigResponse id false */
-
-/* polymorph RDSConfigResponse name false */
-
-/* polymorph RDSConfigResponse publicInAccount false */
-
-/* polymorph RDSConfigResponse stackVersion false */
-
-/* polymorph RDSConfigResponse type false */
-
-/* polymorph RDSConfigResponse workspace false */
-
 // Validate validates this r d s config response
 func (m *RDSConfigResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateClusterNames(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateConnectionDriver(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateConnectionPassword(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateConnectionURL(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateConnectionUserName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateDatabaseEngine(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateDatabaseEngineDisplayName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateDescription(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateEnvironments(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateType(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateWorkspace(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -216,7 +169,6 @@ func (m *RDSConfigResponse) validateConnectionPassword(formats strfmt.Registry) 
 	}
 
 	if m.ConnectionPassword != nil {
-
 		if err := m.ConnectionPassword.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("connectionPassword")
@@ -244,7 +196,6 @@ func (m *RDSConfigResponse) validateConnectionUserName(formats strfmt.Registry) 
 	}
 
 	if m.ConnectionUserName != nil {
-
 		if err := m.ConnectionUserName.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("connectionUserName")
@@ -341,7 +292,6 @@ func (m *RDSConfigResponse) validateWorkspace(formats strfmt.Registry) error {
 	}
 
 	if m.Workspace != nil {
-
 		if err := m.Workspace.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("workspace")

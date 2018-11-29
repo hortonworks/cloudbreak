@@ -9,9 +9,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
-	"github.com/go-openapi/swag"
 
 	strfmt "github.com/go-openapi/strfmt"
 )
@@ -47,7 +45,7 @@ func NewPlatformEnablementOK() *PlatformEnablementOK {
 successful operation
 */
 type PlatformEnablementOK struct {
-	Payload PlatformEnablementOKBody
+	Payload map[string]bool
 }
 
 func (o *PlatformEnablementOK) Error() string {
@@ -61,25 +59,5 @@ func (o *PlatformEnablementOK) readResponse(response runtime.ClientResponse, con
 		return err
 	}
 
-	return nil
-}
-
-/*PlatformEnablementOKBody platform enablement o k body
-swagger:model PlatformEnablementOKBody
-*/
-
-type PlatformEnablementOKBody map[string]bool
-
-// Validate validates this platform enablement o k body
-func (o PlatformEnablementOKBody) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if swag.IsZero(o) { // not required
-		return nil
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }

@@ -17,7 +17,6 @@ import (
 
 // ClusterTemplateResponse cluster template response
 // swagger:model ClusterTemplateResponse
-
 type ClusterTemplateResponse struct {
 
 	// cloudplatform which this template is compatible with
@@ -40,6 +39,7 @@ type ClusterTemplateResponse struct {
 	Name *string `json:"name"`
 
 	// status
+	// Enum: [DEFAULT DEFAULT_DELETED USER_MANAGED]
 	Status string `json:"status,omitempty"`
 
 	// stringified template JSON
@@ -47,44 +47,27 @@ type ClusterTemplateResponse struct {
 	Template *StackV2Request `json:"template"`
 }
 
-/* polymorph ClusterTemplateResponse cloudPlatform false */
-
-/* polymorph ClusterTemplateResponse description false */
-
-/* polymorph ClusterTemplateResponse id false */
-
-/* polymorph ClusterTemplateResponse name false */
-
-/* polymorph ClusterTemplateResponse status false */
-
-/* polymorph ClusterTemplateResponse template false */
-
 // Validate validates this cluster template response
 func (m *ClusterTemplateResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateCloudPlatform(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateDescription(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateStatus(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateTemplate(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -154,10 +137,13 @@ func init() {
 }
 
 const (
+
 	// ClusterTemplateResponseStatusDEFAULT captures enum value "DEFAULT"
 	ClusterTemplateResponseStatusDEFAULT string = "DEFAULT"
+
 	// ClusterTemplateResponseStatusDEFAULTDELETED captures enum value "DEFAULT_DELETED"
 	ClusterTemplateResponseStatusDEFAULTDELETED string = "DEFAULT_DELETED"
+
 	// ClusterTemplateResponseStatusUSERMANAGED captures enum value "USER_MANAGED"
 	ClusterTemplateResponseStatusUSERMANAGED string = "USER_MANAGED"
 )
@@ -191,7 +177,6 @@ func (m *ClusterTemplateResponse) validateTemplate(formats strfmt.Registry) erro
 	}
 
 	if m.Template != nil {
-
 		if err := m.Template.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("template")

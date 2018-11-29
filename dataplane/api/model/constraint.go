@@ -15,7 +15,6 @@ import (
 
 // Constraint constraint
 // swagger:model Constraint
-
 type Constraint struct {
 
 	// name of a constraint template that defines the resource constraints for the hostgroup
@@ -29,18 +28,11 @@ type Constraint struct {
 	InstanceGroupName string `json:"instanceGroupName,omitempty"`
 }
 
-/* polymorph Constraint constraintTemplateName false */
-
-/* polymorph Constraint hostCount false */
-
-/* polymorph Constraint instanceGroupName false */
-
 // Validate validates this constraint
 func (m *Constraint) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateHostCount(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

@@ -8,13 +8,11 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
 // PlatformOrchestratorsJSON platform orchestrators Json
 // swagger:model PlatformOrchestratorsJson
-
 type PlatformOrchestratorsJSON struct {
 
 	// default orchestrators
@@ -24,35 +22,8 @@ type PlatformOrchestratorsJSON struct {
 	Orchestrators map[string][]string `json:"orchestrators,omitempty"`
 }
 
-/* polymorph PlatformOrchestratorsJson defaults false */
-
-/* polymorph PlatformOrchestratorsJson orchestrators false */
-
 // Validate validates this platform orchestrators Json
 func (m *PlatformOrchestratorsJSON) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if err := m.validateOrchestrators(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-func (m *PlatformOrchestratorsJSON) validateOrchestrators(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Orchestrators) { // not required
-		return nil
-	}
-
-	if swag.IsZero(m.Orchestrators) { // not required
-		return nil
-	}
-
 	return nil
 }
 
