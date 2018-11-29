@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -75,6 +76,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
 import com.sequenceiq.cloudbreak.template.views.LdapView;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
+import com.sequenceiq.cloudbreak.type.KerberosType;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Component
@@ -192,7 +194,7 @@ public class ClusterHostServiceRunner {
     private SaltConfig createSaltConfig(Stack stack, Cluster cluster, GatewayConfig primaryGatewayConfig, Iterable<GatewayConfig> gatewayConfigs)
             throws IOException, CloudbreakOrchestratorException {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
-        saveCustomNameservers(cluster.isSecure(), cluster.getKerberosConfig(), servicePillar);
+        saveCustomNameservers(stack, cluster.isSecure(), cluster.getKerberosConfig(), servicePillar);
         if (cluster.isSecure() && kerberosDetailService.isAmbariManagedKerberosPackages(cluster.getKerberosConfig())) {
             Map<String, String> kerberosPillarConf = new HashMap<>();
             KerberosConfig kerberosConfig = cluster.getKerberosConfig();
@@ -330,11 +332,25 @@ public class ClusterHostServiceRunner {
         return grainProperties;
     }
 
-    private void saveCustomNameservers(boolean secure, KerberosConfig kerberosConfig, Map<String, SaltPillarProperties> servicePillar) {
+    private void saveCustomNameservers(Stack stack, boolean secure, KerberosConfig kerberosConfig, Map<String, SaltPillarProperties> servicePillar) {
         if (secure && kerberosConfig != null && StringUtils.isNotBlank(kerberosConfig.getDomain()) && StringUtils.isNotBlank(kerberosConfig.getNameServers())) {
             List<String> ipList = Lists.newArrayList(kerberosConfig.getNameServers().split(","));
             servicePillar.put("forwarder-zones", new SaltPillarProperties("/unbound/forwarders.sls",
                     singletonMap("forwarder-zones", singletonMap(kerberosConfig.getDomain(), singletonMap("nameservers", ipList)))));
+        } else if (!secure || kerberosConfig == null
+                || (kerberosConfig.getType() != KerberosType.EXISTING_FREEIPA && kerberosConfig.getType() != KerberosType.EXISTING_AD)) {
+            saveDatalakeNameservers(stack, servicePillar);
+        }
+    }
+
+    private void saveDatalakeNameservers(Stack stack, Map<String, SaltPillarProperties> servicePillar) {
+        Long datalakeId = stack.getDatalakeId();
+        if (datalakeId != null) {
+            Stack dataLakeStack = stackService.getByIdWithListsInTransaction(datalakeId);
+            String datalakeDomain = dataLakeStack.getGatewayInstanceMetadata().get(0).getDomain();
+            List<String> ipList = dataLakeStack.getGatewayInstanceMetadata().stream().map(InstanceMetaData::getPrivateIp).collect(Collectors.toList());
+            servicePillar.put("forwarder-zones", new SaltPillarProperties("/unbound/forwarders.sls",
+                    singletonMap("forwarder-zones", singletonMap(datalakeDomain, singletonMap("nameservers", ipList)))));
         }
     }
 
