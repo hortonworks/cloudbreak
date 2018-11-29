@@ -114,7 +114,7 @@ func configRead(c *cli.Context) error {
 	server = c.String(fl.FlServerOptional.Name)
 	workspace = c.String(fl.FlWorkspaceOptional.Name)
 	if len(server) == 0 || len(workspace) == 0 {
-		log.Error(fmt.Sprintf("configuration is not set, see: cb configure --help or provide the following flags: %v",
+		log.Error(fmt.Sprintf("configuration is not set, see: dp configure --help or provide the following flags: %v",
 			[]string{"--" + fl.FlServerOptional.Name, "--" + fl.FlWorkspaceOptional.Name}))
 		os.Exit(1)
 	}

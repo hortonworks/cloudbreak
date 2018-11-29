@@ -8,15 +8,15 @@ echo "CLI Tests: "$CLI_TEST_FILES
 echo "HOME path: "$HOME
 
 if [[ "${TARGET_CBD_VERSION}" != "MOCK" ]]; then
-    echo "Get CB CLI for "$TARGET_CBD_VERSION
+    echo "Get DP CLI for "$TARGET_CBD_VERSION
     wget --continue --no-check-certificate https://s3-us-west-2.amazonaws.com/cb-cli/cb-cli_"${TARGET_CBD_VERSION}"_$(uname)_x86_64.tgz -O - | tar -xvz --directory /usr/local/bin
-    echo "CB CLI version is: "$(dp -v)
+    echo "DP CLI version is: "$(dp -v)
 fi
 
-echo "Get CB Token for CLI"
+echo "Get DP Token for CLI"
 token=$(wget --continue --no-check-certificate $BASE_URL/oidc/authorize?username=$USERNAME_CLI\&tenant=hortonworks -O -)
 
-echo "Configure CB CLI to Server: $BASE_URL User: $USERNAME_CLI"
+echo "Configure DP CLI to Server: $BASE_URL User: $USERNAME_CLI"
 echo $token | dp configure --server $BASE_URL --workspace $USERNAME_CLI
 
 echo "Running RSpec with "$CLI_TEST_FILES
