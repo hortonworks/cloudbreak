@@ -38,6 +38,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.cluster.KerberosConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 public class SharedServiceConfigProviderTest {
@@ -82,6 +83,9 @@ public class SharedServiceConfigProviderTest {
 
     @Mock
     private ConfigsResponse configsResponse;
+
+    @Mock
+    private KerberosConfigProvider kerberosConfigProvider;
 
     @Before
     public void setUp() {
@@ -147,7 +151,7 @@ public class SharedServiceConfigProviderTest {
         when(connectedClusterRequest.getSourceClusterId()).thenReturn(TEST_LONG_VALUE);
         when(stackService.getById(TEST_LONG_VALUE)).thenReturn(publicStack);
         when(publicStack.getId()).thenReturn(TEST_LONG_VALUE);
-        when(clusterService.getById(TEST_LONG_VALUE)).thenReturn(sourceCluster);
+        when(clusterService.getById(TEST_LONG_VALUE)).thenReturn(publicStackCluster);
         when(publicStackCluster.getId()).thenReturn(TEST_LONG_VALUE);
         when(publicStack.getCluster()).thenReturn(publicStackCluster);
         when(publicStackCluster.getLdapConfig()).thenReturn(ldapConfig);
@@ -174,7 +178,7 @@ public class SharedServiceConfigProviderTest {
         when(publicStack.getId()).thenReturn(TEST_LONG_VALUE);
         when(publicStackCluster.getId()).thenReturn(TEST_LONG_VALUE);
         when(publicStack.getCluster()).thenReturn(publicStackCluster);
-        when(clusterService.getById(TEST_LONG_VALUE)).thenReturn(sourceCluster);
+        when(clusterService.getById(TEST_LONG_VALUE)).thenReturn(publicStackCluster);
         when(publicStackCluster.getLdapConfig()).thenReturn(ldapConfig);
         when(clusterService.retrieveOutputs(anyLong())).thenReturn(configsResponse);
         when(configsResponse.getInputs()).thenReturn(Collections.emptySet());
