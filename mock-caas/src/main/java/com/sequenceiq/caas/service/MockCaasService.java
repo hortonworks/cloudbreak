@@ -98,8 +98,11 @@ public class MockCaasService {
         }
     }
 
-    public void out(@Nonnull HttpServletResponse httpServletResponse) {
+    public void out(@Nonnull HttpServletRequest httpServletRequest, @Nonnull HttpServletResponse httpServletResponse) {
+        String host = httpServletRequest.getHeader("Host");
         Cookie cookie = new Cookie(JWT_COOKIE_KEY, "");
+        cookie.setDomain(host.split(":")[0]);
+        cookie.setPath("/");
         cookie.setMaxAge(0);
         httpServletResponse.addCookie(cookie);
         httpServletResponse.setHeader(LOCATION_HEADER_KEY, "/");
@@ -108,7 +111,7 @@ public class MockCaasService {
 
     public void auth(@Nonnull HttpServletRequest httpServletRequest, @Nonnull HttpServletResponse httpServletResponse, @Nonnull Optional<String> tenant,
             @Nonnull Optional<String> userName, String redirectUri, Boolean active) {
-        var host = httpServletRequest.getHeader("Host");
+        String host = httpServletRequest.getHeader("Host");
         if (!tenant.isPresent() || !userName.isPresent()) {
             LOGGER.info("redirect to index.html");
             httpServletResponse.setHeader(LOCATION_HEADER_KEY, "login.html?redirect_uri=" + redirectUri);
