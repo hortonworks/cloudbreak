@@ -26,6 +26,9 @@ public class SecurityRuleService {
     @Value("${cb.ssh.port}")
     private String sshPort;
 
+    @Value("${cb.https.port}")
+    private String httpsPort;
+
     @Value("#{'${cb.default.gateway.cidr:0.0.0.0/0}'.split(',')}")
     private Set<String> defaultGatewayCidr;
 
@@ -43,9 +46,11 @@ public class SecurityRuleService {
 
     private void addCidrAndPort(SecurityRulesResponse ret, String cloudbreakCidr, Boolean knoxEnabled) {
         if (knoxEnabled) {
-            ret.getGateway().addAll(createSecurityRuleResponse(cloudbreakCidr, knoxPort));
+            ret.getGateway().addAll(createSecurityRuleResponse(cloudbreakCidr, gatewayPort, knoxPort));
+        } else {
+            ret.getGateway().addAll(createSecurityRuleResponse(cloudbreakCidr, gatewayPort, httpsPort));
         }
-        ret.getGateway().addAll(createSecurityRuleResponse(cloudbreakCidr, sshPort, gatewayPort));
+        ret.getGateway().addAll(createSecurityRuleResponse(cloudbreakCidr, sshPort));
         ret.getCore().addAll(createSecurityRuleResponse(cloudbreakCidr, sshPort));
     }
 
