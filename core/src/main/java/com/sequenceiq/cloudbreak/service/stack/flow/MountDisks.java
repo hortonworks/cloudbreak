@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
@@ -92,6 +93,7 @@ public class MountDisks {
             mountInfo.forEach((hostname, value) -> {
                 String instanceId = stack.getInstanceMetaDataAsList().stream()
                         .filter(instanceMetaData -> hostname.equals(instanceMetaData.getDiscoveryFQDN()))
+                        .filter(instanceMetaData -> InstanceStatus.CREATED.equals(instanceMetaData.getInstanceStatus()))
                         .map(InstanceMetaData::getInstanceId)
                         .findFirst().get();
 
