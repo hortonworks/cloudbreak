@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.gcp.compute;
 
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getCustomNetworkId;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getSharedProjectId;
+import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getSubnetId;
 import static java.util.Collections.singletonList;
 import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
 
@@ -285,7 +286,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
             List<CloudResource> subnet, String networkName) {
         if (isNoneEmpty(getSharedProjectId(network))) {
             networkInterface.setNetwork(getNetworkUrl(getSharedProjectId(network), getCustomNetworkId(network)));
-            networkInterface.setSubnetwork(getSubnetUrl(getSharedProjectId(network), region.value(), getCustomNetworkId(network)));
+            networkInterface.setSubnetwork(getSubnetUrl(getSharedProjectId(network), region.value(), getSubnetId(network)));
         } else {
             if (subnet.isEmpty()) {
                 networkInterface.setNetwork(getNetworkUrl(projectId, networkName));
@@ -295,8 +296,8 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         }
     }
 
-    private String getSubnetUrl(String sharedProjectId, String value, String customNetworkId) {
-        return String.format("https://www.googleapis.com/compute/v1/projects/%s/regions/%s/subnetworks/%s", sharedProjectId, value, customNetworkId);
+    private String getSubnetUrl(String sharedProjectId, String value, String customSubnetworkId) {
+        return String.format("https://www.googleapis.com/compute/v1/projects/%s/regions/%s/subnetworks/%s", sharedProjectId, value, customSubnetworkId);
     }
 
     private String getNetworkUrl(String sharedProjectId, String customNetworkId) {
