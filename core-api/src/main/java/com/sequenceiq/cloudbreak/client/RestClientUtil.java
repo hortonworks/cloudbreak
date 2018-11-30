@@ -53,12 +53,9 @@ public class RestClientUtil {
         ClientBuilder builder = ClientBuilder.newBuilder().withConfig(config);
         builder.sslContext(sslContext);
         builder.hostnameVerifier(CertificateTrustManager.hostnameVerifier());
-
         if (debug) {
-            builder = builder.property(LoggingFeature.LOGGING_FEATURE_VERBOSITY_CLIENT, LoggingFeature.Verbosity.PAYLOAD_ANY)
-                    .property(LoggingFeature.LOGGING_FEATURE_LOGGER_LEVEL_CLIENT, "FINE");
+            builder = enableRestDebug(builder);
         }
-
         Client client = builder.build();
         LOGGER.debug("Jax rs client has been constructed: {}, sslContext: {}", client, sslContext);
         return client;
@@ -74,8 +71,7 @@ public class RestClientUtil {
         ClientBuilder builder = ClientBuilder.newBuilder().withConfig(config);
 
         if (configKey.isDebug()) {
-            builder = builder.property(LoggingFeature.LOGGING_FEATURE_VERBOSITY_CLIENT, LoggingFeature.Verbosity.PAYLOAD_ANY)
-                    .property(LoggingFeature.LOGGING_FEATURE_LOGGER_LEVEL_CLIENT, "FINE");
+            builder = enableRestDebug(builder);
         }
 
         if (!configKey.isSecure()) {
@@ -89,5 +85,10 @@ public class RestClientUtil {
         SSLContext sslContext = client.getSslContext();
         LOGGER.warn("RestClient has been constructed: {}, client: {}, sslContext: {}", configKey, client, sslContext);
         return client;
+    }
+
+    private static ClientBuilder enableRestDebug(ClientBuilder builder) {
+        return builder.property(LoggingFeature.LOGGING_FEATURE_VERBOSITY_CLIENT, LoggingFeature.Verbosity.PAYLOAD_ANY)
+                .property(LoggingFeature.LOGGING_FEATURE_LOGGER_LEVEL_CLIENT, "INFO");
     }
 }
