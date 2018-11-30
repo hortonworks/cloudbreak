@@ -81,7 +81,8 @@ public class StackV3Controller extends NotificationController implements StackV3
         CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
         User user = userService.getOrCreate(cloudbreakUser);
         Workspace workspace = workspaceService.get(workspaceId, user);
-        return stackCommonService.createInWorkspace(conversionService.convert(request, StackRequest.class), cloudbreakUser, user, workspace);
+        StackRequest stackRequest = conversionService.convert(request, StackRequest.class);
+        return stackCommonService.createInWorkspace(stackRequest, cloudbreakUser, user, workspace);
     }
 
     @Override
