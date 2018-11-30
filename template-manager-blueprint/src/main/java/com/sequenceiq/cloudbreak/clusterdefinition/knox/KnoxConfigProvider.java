@@ -16,6 +16,7 @@ public class KnoxConfigProvider implements ClusterDefinitionComponentConfigProvi
 
     private static final String KNOX_GATEWAY = "KNOX_GATEWAY";
 
+    // TODO-MASTER-REPAIR knox should be enabled
     @Override
     public AmbariBlueprintTextProcessor customTextManipulation(TemplatePreparationObject source, AmbariBlueprintTextProcessor blueprintProcessor) {
         Set<String> hostGroupNames = source.getHostgroupViews()

@@ -1,11 +1,12 @@
 package com.sequenceiq.cloudbreak.service.cluster.api;
 
 import java.util.Collection;
+import java.util.Map;
 
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 
 public interface ClusterApi {
@@ -56,6 +57,38 @@ public interface ClusterApi {
 
     default int startCluster(Stack stack) throws CloudbreakException {
         return clusterModificationService().startCluster(stack);
+    }
+
+    default Map<String, String> gatherInstalledComponents(Stack stack, String hostname) {
+        return clusterModificationService().gatherInstalledComponents(stack, hostname);
+    }
+
+    default void ensureComponentsAreStopped(Stack stack, Map<String, String> components, String hostname) throws CloudbreakException {
+        clusterModificationService().ensureComponentsAreStopped(stack, components, hostname);
+    }
+
+    default void initComponents(Stack stack, Map<String, String> components, String hostname) throws CloudbreakException {
+        clusterModificationService().initComponents(stack, components, hostname);
+    }
+
+    default void stopComponents(Stack stack, Map<String, String> components, String hostname) throws CloudbreakException {
+        clusterModificationService().stopComponents(stack, components, hostname);
+    }
+
+    default void installComponents(Stack stack, Map<String, String> components, String hostname) throws CloudbreakException {
+        clusterModificationService().installComponents(stack, components, hostname);
+    }
+
+    default void regenerateKerberosKeytabs(Stack stack, String hostname) throws CloudbreakException {
+        clusterModificationService().regenerateKerberosKeytabs(stack, hostname);
+    }
+
+    default void startComponents(Stack stack, Map<String, String> components, String hostname) throws CloudbreakException {
+        clusterModificationService().startComponents(stack, components, hostname);
+    }
+
+    default void restartAll(Stack stack) throws CloudbreakException {
+        clusterModificationService().restartAll(stack);
     }
 
     ClusterSetupService clusterSetupService();

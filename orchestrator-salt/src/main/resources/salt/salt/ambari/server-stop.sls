@@ -2,10 +2,6 @@
 
 {% if ambari.is_systemd %}
 
-/etc/systemd/system/ambari-server.service:
-  file.managed:
-    - source: salt://ambari/systemd/ambari-server.service
-
 stop-ambari-server:
   module.wait:
     - name: service.systemctl_reload

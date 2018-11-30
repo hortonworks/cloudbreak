@@ -1,18 +1,18 @@
-package com.sequenceiq.cloudbreak.core.flow2.cluster.repair;
+package com.sequenceiq.cloudbreak.core.flow2.cluster.repair.master.ha;
 
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.repair.ChangePrimaryGatewayEvent.AMBARI_SERVER_STARTED;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.repair.ChangePrimaryGatewayEvent.AMBARI_SERVER_START_FAILED;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.repair.ChangePrimaryGatewayEvent.CHANGE_PRIMARY_GATEWAY_FAILED;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.repair.ChangePrimaryGatewayEvent.CHANGE_PRIMARY_GATEWAY_FAILURE_HANDLED;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.repair.ChangePrimaryGatewayEvent.CHANGE_PRIMARY_GATEWAY_FINISHED;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.repair.ChangePrimaryGatewayEvent.CHANGE_PRIMARY_GATEWAY_FLOW_FINISHED;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.repair.ChangePrimaryGatewayEvent.CHANGE_PRIMARY_GATEWAY_TRIGGER_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.repair.ChangePrimaryGatewayState.CHANGE_PRIMARY_GATEWAY_FAILED_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.repair.ChangePrimaryGatewayState.CHANGE_PRIMARY_GATEWAY_FINISHED_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.repair.ChangePrimaryGatewayState.CHANGE_PRIMARY_GATEWAY_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.repair.ChangePrimaryGatewayState.FINAL_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.repair.ChangePrimaryGatewayState.INIT_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.repair.ChangePrimaryGatewayState.WAITING_FOR_AMBARI_SERVER_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.repair.master.ha.ChangePrimaryGatewayEvent.AMBARI_SERVER_STARTED;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.repair.master.ha.ChangePrimaryGatewayEvent.AMBARI_SERVER_START_FAILED;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.repair.master.ha.ChangePrimaryGatewayEvent.CHANGE_PRIMARY_GATEWAY_FAILED;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.repair.master.ha.ChangePrimaryGatewayEvent.CHANGE_PRIMARY_GATEWAY_FAILURE_HANDLED;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.repair.master.ha.ChangePrimaryGatewayEvent.CHANGE_PRIMARY_GATEWAY_FINISHED;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.repair.master.ha.ChangePrimaryGatewayEvent.CHANGE_PRIMARY_GATEWAY_FLOW_FINISHED;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.repair.master.ha.ChangePrimaryGatewayEvent.CHANGE_PRIMARY_GATEWAY_TRIGGER_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.repair.master.ha.ChangePrimaryGatewayState.CHANGE_PRIMARY_GATEWAY_FAILED_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.repair.master.ha.ChangePrimaryGatewayState.CHANGE_PRIMARY_GATEWAY_FINISHED_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.repair.master.ha.ChangePrimaryGatewayState.CHANGE_PRIMARY_GATEWAY_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.repair.master.ha.ChangePrimaryGatewayState.FINAL_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.repair.master.ha.ChangePrimaryGatewayState.INIT_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.repair.master.ha.ChangePrimaryGatewayState.WAITING_FOR_AMBARI_SERVER_STATE;
 
 import java.util.List;
 

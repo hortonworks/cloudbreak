@@ -69,6 +69,7 @@ public class ReactorFlowManagerTest {
         Stack stack = TestUtil.stack();
         stack.setCluster(TestUtil.cluster());
         when(stackService.getByIdWithTransaction(anyLong())).thenReturn(stack);
+        when(stackService.getByIdWithListsInTransaction(anyLong())).thenReturn(stack);
         when(eventFactory.createEventWithErrHandler(anyObject())).thenReturn(new Event<>(acceptable));
     }
 

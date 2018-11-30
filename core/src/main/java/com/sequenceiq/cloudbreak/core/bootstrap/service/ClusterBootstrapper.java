@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -186,16 +187,16 @@ public class ClusterBootstrapper {
         boolean recoveredNodes = Integer.valueOf(recoveryHostNames.size()).equals(upscaleCandidateAddresses.size());
         Set<InstanceMetaData> metaDataSet = stack.getNotDeletedInstanceMetaDataSet().stream()
                 .filter(im -> im.getPrivateIp() != null && im.getPublicIpWrapper() != null).collect(Collectors.toSet());
-        String clusterDomain = metaDataSet.stream().filter(im -> isNoneBlank(im.getDiscoveryFQDN())).findAny().get().getDomain();
+        String clusterDomain = getClusterDomain(metaDataSet, stack.getCustomDomain());
+
+        Iterator<String> iterator = recoveryHostNames.iterator();
         for (InstanceMetaData im : metaDataSet) {
             Node node = createNode(stack.getCustomHostname(), im, clusterDomain, stack.isHostgroupNameAsHostname());
             if (upscaleCandidateAddresses.contains(im.getPrivateIp())) {
                 // use the hostname of the node we're recovering instead of generating a new one
                 // but only when we would have generated a hostname, otherwise use the cloud provider's default mechanism
                 if (recoveredNodes && isNoneBlank(node.getHostname())) {
-                    Iterator<String> iterator = recoveryHostNames.iterator();
                     node.setHostname(iterator.next().split("\\.")[0]);
-                    iterator.remove();
                     LOGGER.debug("Set the hostname to {} for address: {}", node.getHostname(), im.getPrivateIp());
                 }
                 nodes.add(node);
@@ -219,6 +220,17 @@ public class ClusterBootstrapper {
         } catch (CloudbreakOrchestratorException e) {
             throw new CloudbreakException(e);
         }
+    }
+
+    private String getClusterDomain(Set<InstanceMetaData> metaDataSet, String customDomain) {
+        if (customDomain != null && !customDomain.isEmpty()) {
+            return customDomain;
+        }
+        Optional<InstanceMetaData> metadataWithFqdn = metaDataSet.stream().filter(im -> isNoneBlank(im.getDiscoveryFQDN())).findAny();
+        if (metadataWithFqdn.isPresent()) {
+            return metadataWithFqdn.get().getDomain();
+        }
+        throw new RuntimeException("Could not determine domain of cluster");
     }
 
     private void bootstrapNewNodesOnHost(Stack stack, List<GatewayConfig> allGatewayConfigs, Set<Node> nodes, Set<Node> allNodes)

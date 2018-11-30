@@ -60,9 +60,16 @@ public interface InstanceMetaDataRepository extends DisabledBaseRepository<Insta
 
     List<InstanceMetaData> findAllByInstanceGroup(InstanceGroup instanceGroup);
 
-    @Query("SELECT i.serverCert FROM InstanceMetaData i WHERE i.instanceGroup.stack.id= :stackId AND i.instanceMetadataType = 'GATEWAY_PRIMARY'")
+    @Query("SELECT i.serverCert FROM InstanceMetaData i WHERE i.instanceGroup.stack.id= :stackId AND i.instanceMetadataType = 'GATEWAY_PRIMARY' "
+            + "AND i.instanceStatus <> 'TERMINATED'")
     String getServerCertByStackId(@Param("stackId") Long stackId);
 
-    @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceMetadataType = 'GATEWAY_PRIMARY' AND i.instanceGroup.stack.id= :stackId")
+    @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceMetadataType = 'GATEWAY_PRIMARY' AND i.instanceStatus <> 'TERMINATED' "
+            + "AND i.instanceGroup.stack.id= :stackId")
     InstanceMetaData getPrimaryGatewayInstanceMetadata(@Param("stackId") Long stackId);
+
+    @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceGroup.id = :instanceGroupId AND i.instanceMetadataType = 'GATEWAY_PRIMARY' AND"
+            + " i.instanceStatus <> 'TERMINATED' AND i.instanceGroup.stack.id= :stackId")
+    List<InstanceMetaData> getPrimaryGatewayByInstanceGroup(@Param("stackId") Long stackId, @Param("instanceGroupId") Long instanceGroupId);
+
 }

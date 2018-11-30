@@ -33,7 +33,7 @@ public class UpscaleClusterManagerHandler implements ReactorEventHandler<Upscale
         UpscaleClusterManagerResult result;
         try {
             clusterUpscaleService.upscaleClusterManager(request.getStackId(), request.getHostGroupName(),
-                    request.getScalingAdjustment());
+                    request.getScalingAdjustment(), request.isPrimaryGatewayChanged());
             result = new UpscaleClusterManagerResult(request);
         } catch (Exception e) {
             result = new UpscaleClusterManagerResult(e.getMessage(), e, request);

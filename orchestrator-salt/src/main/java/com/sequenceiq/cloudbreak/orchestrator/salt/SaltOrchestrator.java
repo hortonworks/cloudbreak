@@ -440,6 +440,32 @@ public class SaltOrchestrator implements HostOrchestrator {
         }
     }
 
+    @Override
+    public void stopAmbariOnMaster(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorException {
+        try (SaltConnector saltConnector = new SaltConnector(gatewayConfig, restDebug)) {
+            Set<String> master = Set.of(gatewayConfig.getPrivateAddress());
+            runSaltCommand(saltConnector, new GrainAddRunner(master, allNodes, "ambari_single_master_repair_stop"), exitCriteriaModel);
+            runNewService(saltConnector, new HighStateRunner(master, allNodes), exitCriteriaModel);
+        } catch (Exception e) {
+            LOGGER.info("Error occurred during stopping ambari agent and server", e);
+            throw new CloudbreakOrchestratorFailedException(e);
+        }
+    }
+
+    @Override
+    public void startAmbariOnMaster(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorException {
+        try (SaltConnector saltConnector = new SaltConnector(gatewayConfig, restDebug)) {
+            Set<String> master = Set.of(gatewayConfig.getPrivateAddress());
+            runSaltCommand(saltConnector, new GrainRemoveRunner(master, allNodes, "ambari_single_master_repair_stop"), exitCriteriaModel);
+            runNewService(saltConnector, new HighStateRunner(master, allNodes), exitCriteriaModel);
+        } catch (Exception e) {
+            LOGGER.info("Error occurred during starting ambari agent and server", e);
+            throw new CloudbreakOrchestratorFailedException(e);
+        }
+    }
+
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     @Override
     public void upgradeAmbari(GatewayConfig gatewayConfig, Set<String> target, Set<Node> allNodes, SaltConfig pillarConfig,

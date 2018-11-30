@@ -101,6 +101,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
         LOGGER.debug("Create volume resources");
         String volumeType = getVolumeType(group);
         if (AwsDiskType.Ephemeral.value().equalsIgnoreCase(volumeType)) {
+            LOGGER.debug("Volume type is ephemeral, resource not needed.");
             return List.of();
         }
         List<CloudResource> computeResources = context.getComputeResources(privateId);
@@ -250,6 +251,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
 
         boolean anyDeleted = cloudResourceStatuses.stream().map(CloudResourceStatus::getStatus).anyMatch(ResourceStatus.DELETED::equals);
         if (!volumeSetAttributes.getDeleteOnTermination() && !anyDeleted) {
+            LOGGER.debug("Volumes will be preserved.");
             resource.setInstanceId(null);
             volumeSetAttributes.setDeleteOnTermination(Boolean.TRUE);
             resource.putParameter(CloudResource.ATTRIBUTES, volumeSetAttributes);
@@ -277,9 +279,8 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
                 .withInstanceId(resource.getInstanceId())
                 .withBlockDeviceMappings(deviceMappingSpecifications);
 
-        LOGGER.debug("Volume delete request {}", modifyInstanceAttributeRequest);
         ModifyInstanceAttributeResult modifyIdentityIdFormatResult = client.modifyInstanceAttribute(modifyInstanceAttributeRequest);
-        LOGGER.debug("Volume delete result {}", modifyIdentityIdFormatResult);
+        LOGGER.debug("Delete on termination set to ture. {}", modifyIdentityIdFormatResult);
     }
 
     private void deleteOrphanedVolumes(List<CloudResourceStatus> cloudResourceStatuses, AmazonEC2Client client) {
@@ -315,6 +316,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
         DescribeVolumesRequest describeVolumesRequest = new DescribeVolumesRequest(volumeIds);
         DescribeVolumesResult result = client.describeVolumes(describeVolumesRequest);
         ResourceStatus volumeSetStatus = getResourceStatus(result);
+        LOGGER.debug("Reduced resource status for volume set is {}", volumeSetStatus);
         return volumeResources.stream()
                 .map(resource -> new CloudResourceStatus(resource, volumeSetStatus))
                 .collect(Collectors.toList());
@@ -323,6 +325,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
     private ResourceStatus getResourceStatus(DescribeVolumesResult result) {
         try {
             return result.getVolumes().stream()
+                    .peek(volume -> LOGGER.debug("State of volume {} is {}", volume.getVolumeId(), volume.getState()))
                     .map(com.amazonaws.services.ec2.model.Volume::getState)
                     .map(toResourceStatus())
                     .reduce(ResourceStatus.ATTACHED, resourceStatusReducer());

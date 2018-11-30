@@ -27,4 +27,9 @@ public interface HostMetadataRepository extends DisabledBaseRepository<HostMetad
     @Query("SELECT h FROM HostMetadata h "
             + "WHERE h.hostGroup.cluster.id= :clusterId AND h.hostName = :hostName")
     HostMetadata findHostInClusterByName(@Param("clusterId") Long clusterId, @Param("hostName") String hostName);
+
+    @Query("SELECT h FROM HostMetadata h "
+            + "WHERE h.hostGroup.cluster.id= :clusterId AND h.hostName = :hostName")
+    Set<HostMetadata> findHostsInClusterByName(@Param("clusterId") Long clusterId, @Param("hostName") String hostName);
+
 }

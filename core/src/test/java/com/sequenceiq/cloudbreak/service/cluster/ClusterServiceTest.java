@@ -86,6 +86,7 @@ public class ClusterServiceTest {
     public void setUp() throws TransactionExecutionException {
         cluster = new Cluster();
         cluster.setId(1L);
+        cluster.setRdsConfigs(Set.of());
         stack = spy(new Stack());
         stack.setCluster(cluster);
         stack.setPlatformVariant("AWS");
