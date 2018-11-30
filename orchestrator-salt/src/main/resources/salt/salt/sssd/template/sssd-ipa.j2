@@ -1,7 +1,6 @@
 [sssd]
 services = nss, pam, sudo, ssh
 domains = {{ pillar['sssd-ipa']['realm'] }}
-default_domain_suffix = {{ pillar['sssd-ipa']['realm'] }}
 
 [nss]
 homedir_substring = /home
@@ -16,6 +15,6 @@ id_provider = ipa
 auth_provider = ipa
 access_provider = ipa
 chpass_provider = ipa
-ipa_server = {{ pillar['sssd-ipa']['server'] }}
+ipa_server = _srv_, {{ pillar['sssd-ipa']['server'] }}
 ldap_tls_cacert = /etc/ipa/ca.crt
 ipa_hostname={{ salt['grains.get']('fqdn') }}
