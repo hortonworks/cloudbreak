@@ -52,6 +52,6 @@ public abstract class EnvironmentBaseRequest {
     }
 
     public void setKubernetesConfigs(Set<String> kubernetesConfigs) {
-        this.kubernetesConfigs = kubernetesConfigs;
+        this.kubernetesConfigs = kubernetesConfigs == null ? new HashSet<>() : kubernetesConfigs;
     }
 }
