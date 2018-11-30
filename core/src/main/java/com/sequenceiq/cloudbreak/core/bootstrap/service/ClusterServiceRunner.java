@@ -85,9 +85,7 @@ public class ClusterServiceRunner {
             clusterService.updateHostMetadata(cluster.getId(), hostsPerHostGroup, HostMetadataState.CONTAINER_RUNNING);
         } else if (orchestratorType.hostOrchestrator()) {
             hostRunner.runClusterServices(stack, cluster);
-            String gatewayIp = gatewayConfigService.getPrimaryGatewayIp(stack);
-            HttpClientConfig ambariClientConfig = buildAmbariClientConfig(stack, gatewayIp);
-            clusterService.updateAmbariClientConfig(cluster.getId(), ambariClientConfig);
+            updateAmbariClientConfig(stack, cluster);
             Map<String, List<String>> hostsPerHostGroup = new HashMap<>();
             for (InstanceMetaData instanceMetaData : stack.getNotDeletedInstanceMetaDataSet()) {
                 String groupName = instanceMetaData.getInstanceGroup().getGroupName();
@@ -101,6 +99,12 @@ public class ClusterServiceRunner {
             LOGGER.info("Please implement {} orchestrator because it is not on classpath.", orchestrator.getType());
             throw new CloudbreakException(String.format("Please implement %s orchestrator because it is not on classpath.", orchestrator.getType()));
         }
+    }
+
+    public void updateAmbariClientConfig(Stack stack, Cluster cluster) {
+        String gatewayIp = gatewayConfigService.getPrimaryGatewayIp(stack);
+        HttpClientConfig ambariClientConfig = buildAmbariClientConfig(stack, gatewayIp);
+        clusterService.updateAmbariClientConfig(cluster.getId(), ambariClientConfig);
     }
 
     public void updateSaltState(Long stackId) throws CloudbreakException {

@@ -31,8 +31,10 @@ import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Component
-public class ClusterUpscaleFlowService {
+class ClusterUpscaleFlowService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterUpscaleFlowService.class);
+
+    private static final String STATUS_REASON_REPAIR_SINGLE_MASTER = "Repairing single master of cluster.";
 
     @Inject
     private StackService stackService;
@@ -52,12 +54,55 @@ public class ClusterUpscaleFlowService {
     @Inject
     private HostMetadataRepository hostMetadataRepository;
 
-    public void upscalingClusterManager(long stackId) {
+    void ambariRepairSingleMasterStarted(long stackId) {
+        clusterService.updateClusterStatusByStackId(stackId, UPDATE_IN_PROGRESS, "Repairing single master of cluster finished.");
+        flowMessageService.fireEventAndLog(stackId, Msg.CLUSTER_SINGLE_MASTER_REPAIR_STARTED, UPDATE_IN_PROGRESS.name());
+    }
+
+    void ambariRepairSingleMasterFinished(long stackId) {
+        clusterService.updateClusterStatusByStackId(stackId, UPDATE_IN_PROGRESS, "Repairing single master of cluster finished.");
+        flowMessageService.fireEventAndLog(stackId, Msg.CLUSTER_SINGLE_MASTER_REPAIR_FINISHED, UPDATE_IN_PROGRESS.name());
+    }
+
+    void upscalingClusterManager(long stackId) {
         clusterService.updateClusterStatusByStackId(stackId, UPDATE_IN_PROGRESS, "Upscaling the cluster.");
         flowMessageService.fireEventAndLog(stackId, Msg.AMBARI_CLUSTER_SCALING_UP, UPDATE_IN_PROGRESS.name());
     }
 
-    public void clusterUpscaleFinished(StackView stackView, String hostgroupName) {
+    void stopAmbariServer(long stackId) {
+        sendMessage(stackId, Msg.AMBARI_STOP_AMBARI_SERVER_STARTED, "Stopping ambari server.");
+    }
+
+    void ambariStopComponents(long stackId) {
+        sendMessage(stackId, Msg.AMBARI_STOP_COMPONENTS_STARTED, "Stopping components.");
+    }
+
+    void startAmbariServer(long stackId) {
+        sendMessage(stackId, Msg.AMBARI_START_AMBARI_SERVER_STARTED, "Starting ambari server.");
+    }
+
+    void ambariRegenerateKeytabs(long stackId) {
+        sendMessage(stackId, Msg.AMBARI_REGENERATE_KEYTABS_STARTED, "Regenerating ambari keytabs.");
+    }
+
+    void ambariReinstallComponents(long stackId) {
+        sendMessage(stackId, Msg.AMBARI_REINSTALL_COMPONENTS_STARTED, "Reinstalling ambari components.");
+    }
+
+    void ambariComponentsStart(long stackId) {
+        sendMessage(stackId, Msg.AMBARI_START_COMPONENTS_STARTED, "Start components on new hosts.");
+    }
+
+    void ambariRestartAll(long stackId) {
+        sendMessage(stackId, Msg.AMBARI_RESTART_ALL_STARTED, "Restarting all components on all nodes.");
+    }
+
+    private void sendMessage(long stackId, Msg ambariMessage, String statusReason) {
+        clusterService.updateClusterStatusByStackId(stackId, UPDATE_IN_PROGRESS, statusReason);
+        flowMessageService.fireEventAndLog(stackId, ambariMessage, UPDATE_IN_PROGRESS.name());
+    }
+
+    void clusterUpscaleFinished(StackView stackView, String hostgroupName) {
         int numOfFailedHosts = updateMetadata(stackView, hostgroupName);
         boolean success = numOfFailedHosts == 0;
         if (success) {
@@ -72,7 +117,7 @@ public class ClusterUpscaleFlowService {
         }
     }
 
-    public void clusterUpscaleFailed(long stackId, Exception errorDetails) {
+    void clusterUpscaleFailed(long stackId, Exception errorDetails) {
         LOGGER.info("Error during Cluster upscale flow: " + errorDetails.getMessage(), errorDetails);
         clusterService.updateClusterStatusByStackId(stackId, UPDATE_FAILED, errorDetails.getMessage());
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.PROVISIONED,

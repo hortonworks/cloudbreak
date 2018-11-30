@@ -9,6 +9,7 @@ import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariMessages.AM
 import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariMessages.AMBARI_CLUSTER_SERVICES_STOPPING;
 
 import java.util.Collection;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -130,5 +131,45 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         } else if (isTimeout(healthCheckResult)) {
             throw new CloudbreakException("Cloudera Manager server was not restarted properly.");
         }
+    }
+
+    @Override
+    public Map<String, String> gatherInstalledComponents(Stack stack, String hostname) {
+        return Map.of();
+    }
+
+    @Override
+    public void stopComponents(Stack stack, Map<String, String> components, String hostname) throws CloudbreakException {
+
+    }
+
+    @Override
+    public void ensureComponentsAreStopped(Stack stack, Map<String, String> components, String hostname) throws CloudbreakException {
+
+    }
+
+    @Override
+    public void initComponents(Stack stack, Map<String, String> components, String hostname) throws CloudbreakException {
+
+    }
+
+    @Override
+    public void installComponents(Stack stack, Map<String, String> components, String hostname) throws CloudbreakException {
+
+    }
+
+    @Override
+    public void regenerateKerberosKeytabs(Stack stack, String hostname) throws CloudbreakException {
+
+    }
+
+    @Override
+    public void startComponents(Stack stack, Map<String, String> components, String hostname) throws CloudbreakException {
+
+    }
+
+    @Override
+    public void restartAll(Stack stack) throws CloudbreakException {
+
     }
 }

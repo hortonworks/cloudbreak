@@ -14,6 +14,8 @@ import java.util.Map;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -48,7 +50,10 @@ import spark.Service;
 @Component(StackCreationMock.NAME)
 @Scope("prototype")
 public class StackCreationMock extends MockServer {
+
     public static final String NAME = "StackCreationMock";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(StackCreationMock.class);
 
     private static final String DEFAULT_KERBEROS_PRINCIPAL = "/admin";
 
@@ -82,6 +87,7 @@ public class StackCreationMock extends MockServer {
         Service sparkService = getSparkService();
         sparkService.get(AMBARI_API_ROOT + "/clusters/:cluster/requests/:request", new AmbariStatusResponse());
         sparkService.post(AMBARI_API_ROOT + "/views/:view/versions/1.0.0/instances/*", new EmptyAmbariResponse());
+        sparkService.get(AMBARI_API_ROOT + "/views/", (request, response) -> List.of(clusterName));
         sparkService.get(AMBARI_API_ROOT + "/clusters", (req, resp) -> {
             ITResponse itResp = clusterCreated ? new AmbariClusterResponse(instanceMap, clusterName) : new EmptyAmbariClusterResponse();
             return itResp.handle(req, resp);
@@ -199,7 +205,7 @@ public class StackCreationMock extends MockServer {
         verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=jobs.active").atLeast(2).verify();
 
         verify(SALT_BOOT_ROOT + "/file", "POST").exactTimes(0).verify();
-        verify(SALT_BOOT_ROOT + "/file/distribute", "POST").exactTimes(3).verify();
+        verify(SALT_BOOT_ROOT + "/file/distribute", "POST").exactTimes(7).verify();
     }
 
     public void verifyGatewayCalls() {

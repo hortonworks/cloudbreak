@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.core.flow2.cluster.repair;
+package com.sequenceiq.cloudbreak.core.flow2.cluster.repair.master.ha;
 
 import com.sequenceiq.cloudbreak.core.flow2.FlowState;
 import com.sequenceiq.cloudbreak.core.flow2.RestartAction;

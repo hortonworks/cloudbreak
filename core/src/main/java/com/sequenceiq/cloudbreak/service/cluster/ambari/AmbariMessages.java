@@ -17,9 +17,13 @@ public enum AmbariMessages {
     AMBARI_CLUSTER_PREPARE_DEKERBERIZING_ERROR("ambari.cluster.prepare.dekerberizing.error"),
     AMBARI_CLUSTER_DISABLE_KERBEROS_FAILED("ambari.cluster.disable.kerberos.failed"),
     AMBARI_CLUSTER_MR_SMOKE_FAILED("ambari.cluster.mr.smoke.failed"),
+    AMBARI_CLUSTER_SERVICES_INIT_FAILED("ambari.cluster.services.init.failed"),
+    AMBARI_REGENERATE_KERBEROS_KEYTABS_FAILED("ambari.regenerate.kerberos.keytabs.failed"),
     AMBARI_CLUSTER_SERVICES_STARTING("ambari.cluster.services.starting"),
+    AMBARI_CLUSTER_SERVICES_START_FAILED("ambari.cluster.services.start.failed"),
     AMBARI_CLUSTER_SERVICES_STARTED("ambari.cluster.services.started"),
     AMBARI_CLUSTER_SERVICES_STOPPING("ambari.cluster.services.stopping"),
+    AMBARI_CLUSTER_SERVICES_STOP_FAILED("ambari.cluster.services.stop.failed"),
     AMBARI_CLUSTER_SERVICES_STOPPED("ambari.cluster.services.stopped");
 
     private final String code;

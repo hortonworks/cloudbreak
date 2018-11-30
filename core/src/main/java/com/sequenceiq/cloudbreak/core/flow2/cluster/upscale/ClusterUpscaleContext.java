@@ -8,10 +8,16 @@ public class ClusterUpscaleContext extends ClusterViewContext {
 
     private final Integer adjustment;
 
-    public ClusterUpscaleContext(String flowId, StackView stack, String hostGroupName, Integer adjustment) {
+    private final Boolean singlePrimaryGateway;
+
+    private final String primaryGatewayHostName;
+
+    public ClusterUpscaleContext(String flowId, StackView stack, String hostGroupName, Integer adjustment, Boolean singlePrimaryGateway, String hostName) {
         super(flowId, stack);
         this.hostGroupName = hostGroupName;
         this.adjustment = adjustment;
+        this.singlePrimaryGateway = singlePrimaryGateway;
+        this.primaryGatewayHostName = hostName;
     }
 
     public String getHostGroupName() {
@@ -20,5 +26,13 @@ public class ClusterUpscaleContext extends ClusterViewContext {
 
     public Integer getAdjustment() {
         return adjustment;
+    }
+
+    public Boolean isSinglePrimaryGateway() {
+        return singlePrimaryGateway;
+    }
+
+    public String getPrimaryGatewayHostName() {
+        return primaryGatewayHostName;
     }
 }

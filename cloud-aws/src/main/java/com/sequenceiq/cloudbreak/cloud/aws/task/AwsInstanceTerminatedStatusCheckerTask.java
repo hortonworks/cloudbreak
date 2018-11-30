@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.task;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
@@ -7,8 +9,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.amazonaws.services.ec2.AmazonEC2Client;
-import com.amazonaws.services.ec2.model.DescribeInstanceStatusRequest;
-import com.amazonaws.services.ec2.model.DescribeInstanceStatusResult;
+import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
+import com.amazonaws.services.ec2.model.DescribeInstancesResult;
+import com.amazonaws.services.ec2.model.Instance;
+import com.amazonaws.services.ec2.model.Reservation;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.task.PollBooleanStateTask;
 
@@ -32,7 +36,16 @@ public class AwsInstanceTerminatedStatusCheckerTask extends PollBooleanStateTask
     @Override
     protected Boolean doCall() {
         LOGGER.debug("Checking if AWS instance '{}' is terminated.", instanceId);
-        DescribeInstanceStatusResult result = ec2Client.describeInstanceStatus(new DescribeInstanceStatusRequest().withInstanceIds(instanceId));
-        return CollectionUtils.isEmpty(result.getInstanceStatuses()) || "terminated".equals(result.getInstanceStatuses().get(0).getInstanceState().getName());
+        DescribeInstancesResult result = ec2Client.describeInstances(new DescribeInstancesRequest().withInstanceIds(instanceId));
+        List<Reservation> reservations = result.getReservations();
+        List<Instance> instances = reservations.get(0).getInstances();
+        if (CollectionUtils.isEmpty(reservations) || CollectionUtils.isEmpty(instances)) {
+            LOGGER.debug("Instance '{}' no longer on provider", instanceId);
+            return Boolean.TRUE;
+        } else {
+            String state = instances.get(0).getState().getName();
+            LOGGER.debug("Instance state of '{}' is {}.", instanceId, state);
+            return "terminated".equals(state);
+        }
     }
 }

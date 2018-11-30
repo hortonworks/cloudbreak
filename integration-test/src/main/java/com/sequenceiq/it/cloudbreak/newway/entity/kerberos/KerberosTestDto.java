@@ -33,6 +33,11 @@ public class KerberosTestDto extends AbstractCloudbreakEntity<KerberosV4Request,
     }
 
     @Override
+    public int order() {
+        return 500;
+    }
+
+    @Override
     public KerberosTestDto valid() {
         return withName(getNameCreator().getRandomNameForResource());
     }

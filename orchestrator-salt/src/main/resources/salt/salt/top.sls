@@ -117,3 +117,8 @@ base:
   'G@roles:ipa_leave and G@os_family:RedHat':
     - match: compound
     - sssd.ipa-leave
+
+  'roles:ambari_single_master_repair_stop':
+    - match: grain
+    - ambari.server-stop
+    - ambari.agent-stop

@@ -17,7 +17,7 @@ public class ClusterConnectorPollingResultChecker {
         if (isExited(pollingResult)) {
             throw new CancellationException("Stack or cluster in delete in progress phase.");
         } else if (isTimeout(pollingResult) || isFailure(pollingResult)) {
-            throw new ClusterException(message);
+            throw new ClusterException(message, pollingResult);
         }
     }
 }

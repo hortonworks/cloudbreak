@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterServiceRunner;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ClusterContainerRunner;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
@@ -66,7 +67,10 @@ public class ClusterUpscaleService {
     @Inject
     private RecipeEngine recipeEngine;
 
-    public void upscaleClusterManager(Long stackId, String hostGroupName, Integer scalingAdjustment) throws CloudbreakException {
+    @Inject
+    private ClusterServiceRunner clusterServiceRunner;
+
+    public void upscaleClusterManager(Long stackId, String hostGroupName, Integer scalingAdjustment, boolean primaryGatewayChanged) throws CloudbreakException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         LOGGER.debug("Start adding cluster containers");
         Orchestrator orchestrator = stack.getOrchestrator();
@@ -81,6 +85,9 @@ public class ClusterUpscaleService {
             clusterService.updateHostMetadata(stack.getCluster().getId(), hostsPerHostGroup, HostMetadataState.CONTAINER_RUNNING);
         } else if (orchestratorType.hostOrchestrator()) {
             Map<String, String> hosts = hostRunner.addClusterServices(stackId, hostGroupName, scalingAdjustment);
+            if (primaryGatewayChanged) {
+                clusterServiceRunner.updateAmbariClientConfig(stack, stack.getCluster());
+            }
             for (String hostName : hosts.keySet()) {
                 if (!hostsPerHostGroup.keySet().contains(hostGroupName)) {
                     hostsPerHostGroup.put(hostGroupName, new ArrayList<>());
@@ -97,8 +104,7 @@ public class ClusterUpscaleService {
             allHosts.addAll(hostsPerHostGroupEntry.getValue());
         }
         instanceMetaDataService.updateInstanceStatus(stack.getInstanceGroups(), InstanceStatus.UNREGISTERED, allHosts);
-        ClusterApi connector = clusterApiConnectors.getConnector(stack.getCluster().getVariant());
-        connector.waitForHosts(stackService.getByIdWithListsInTransaction(stackId));
+        getClusterConnector(stack).waitForHosts(stackService.getByIdWithListsInTransaction(stackId));
     }
 
     public void uploadRecipesOnNewHosts(Long stackId, String hostGroupName) throws CloudbreakException {
@@ -114,13 +120,64 @@ public class ClusterUpscaleService {
         LOGGER.debug("Start installing Ambari services");
         HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), hostGroupName);
         Set<HostMetadata> hostMetadata = hostGroupService.findEmptyHostMetadataInHostGroup(hostGroup.getId());
-        ClusterApi connector = clusterApiConnectors.getConnector(stack.getCluster().getVariant());
-        connector.upscaleCluster(stack, hostGroup, hostMetadata);
+        getClusterConnector(stack).upscaleCluster(stack, hostGroup, hostMetadata);
     }
 
     public void executePostRecipesOnNewHosts(Long stackId) throws CloudbreakException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         LOGGER.debug("Start executing post recipes");
         recipeEngine.executePostInstallRecipes(stack, hostGroupService.getByCluster(stack.getCluster().getId()));
+    }
+
+    public Map<String, String> gatherInstalledComponents(Long stackId, String hostname) {
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        LOGGER.info("Start gathering installed components from ambari on host {}", hostname);
+        return getClusterConnector(stack).gatherInstalledComponents(stack, hostname);
+    }
+
+    public void ensureComponentsAreStopped(Long stackId, Map<String, String> components, String hostname) throws CloudbreakException {
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        LOGGER.info("Ensuring components are in stopped state in ambari on host {}", hostname);
+        getClusterConnector(stack).ensureComponentsAreStopped(stack, components, hostname);
+    }
+
+    public void initComponents(Long stackId, Map<String, String> components, String hostname) throws CloudbreakException {
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        LOGGER.info("Start init components in ambari on host {}", hostname);
+        getClusterConnector(stack).initComponents(stack, components, hostname);
+    }
+
+    public void stopComponents(Long stackId, Map<String, String> components, String hostname) throws CloudbreakException {
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        LOGGER.info("Start stop components in ambari on host {}", hostname);
+        getClusterConnector(stack).stopComponents(stack, components, hostname);
+    }
+
+    public void installComponents(Long stackId, Map<String, String> components, String hostname) throws CloudbreakException {
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        LOGGER.info("Start installing components in ambari on host {}", hostname);
+        getClusterConnector(stack).installComponents(stack, components, hostname);
+    }
+
+    public void regenerateKerberosKeytabs(Long stackId, String hostname) throws CloudbreakException {
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        LOGGER.info("Start regenerate kerberos keytabs in ambari on host {}", hostname);
+        getClusterConnector(stack).regenerateKerberosKeytabs(stack, hostname);
+    }
+
+    public void startComponents(Long stackId, Map<String, String> components, String hostname) throws CloudbreakException {
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        LOGGER.info("Start components in ambari on host {}", hostname);
+        getClusterConnector(stack).startComponents(stack, components, hostname);
+    }
+
+    public void restartAll(Long stackId) throws CloudbreakException {
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        LOGGER.info("Restart all in ambari");
+        getClusterConnector(stack).restartAll(stack);
+    }
+
+    private ClusterApi getClusterConnector(Stack stack) {
+        return clusterApiConnectors.getConnector(stack.getCluster().getVariant());
     }
 }

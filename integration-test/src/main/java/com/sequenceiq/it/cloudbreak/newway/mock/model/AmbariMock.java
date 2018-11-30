@@ -313,4 +313,8 @@ public class AmbariMock extends AbstractModelMock {
     public void putConfigureLdap() {
         dynamicRouteStack.put(LDAP_CONFIGURATION, new AmbariRequestIdRespone(12));
     }
+
+    private void getInstalledComponents() {
+
+    }
 }
