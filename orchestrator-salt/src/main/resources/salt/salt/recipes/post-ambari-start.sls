@@ -1,3 +1,4 @@
+{% set timeout = salt['pillar.get']('recipes:timeout') %}
 create_recipe_log_dir_post_start:
   file.directory:
     - name: /var/log/recipes/post-ambari-start
@@ -21,7 +22,7 @@ run_post_ambari_start_script_{{ script_name }}:
     - onlyif:
       - test -f /opt/scripts/post-ambari-start/{{ script_name }}
       - test ! -f /var/log/recipes/post-ambari-start/{{ script_name }}.success
-    - timeout: 600
+    - timeout: {{ timeout }}
 {% endfor %}
 {% endif %}
 
