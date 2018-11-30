@@ -51,7 +51,7 @@ public class PillarSave implements OrchestratorBootstrap {
         originalTargets = targets;
     }
 
-    public PillarSave(SaltConnector sc, Set<String> targets, Map<String, List<RecipeModel>> recipes) {
+    public PillarSave(SaltConnector sc, Set<String> targets, Map<String, List<RecipeModel>> recipes, Long recipeExecutionTimeout) {
         this.sc = sc;
         Map<String, Map<String, List<String>>> scripts = new HashMap<>(recipes.size());
         for (Entry<String, List<RecipeModel>> entry : recipes.entrySet()) {
@@ -70,7 +70,9 @@ public class PillarSave implements OrchestratorBootstrap {
             prePostScripts.put(RecipeExecutionPhase.POST_CLUSTER_INSTALL.value(), postClusterInstall);
             scripts.put(entry.getKey(), prePostScripts);
         }
-        pillar = new Pillar("/recipes/init.sls", singletonMap("recipes", scripts), targets);
+        Map<String, Object> pillarConfig = new HashMap<>(scripts);
+        pillarConfig.put("timeout", recipeExecutionTimeout);
+        pillar = new Pillar("/recipes/init.sls", singletonMap("recipes", pillarConfig), targets);
         this.targets = targets;
         originalTargets = targets;
     }

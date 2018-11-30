@@ -73,6 +73,20 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     private static final int SLEEP_TIME = 10000;
 
+    private static final int SLEEP_TIME_IN_SEC = SLEEP_TIME / 1000;
+
+    private static final String DISK_INITIALIZE = "format-and-mount-initialize.sh";
+
+    private static final String DISK_COMMON = "format-and-mount-common.sh";
+
+    private static final String DISK_FORMAT = "find-device-and-format.sh";
+
+    private static final String DISK_MOUNT = "mount-disks.sh";
+
+    private static final String DISK_SCRIPT_PATH = "salt/bootstrapnodes/";
+
+    private static final String SRV_SALT_DISK = "/srv/salt/disk";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(SaltOrchestrator.class);
 
     @Value("${cb.max.salt.new.service.retry:90}")
@@ -329,7 +343,7 @@ public class SaltOrchestrator implements HostOrchestrator {
 
             Set<String> all = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
             runSaltCommand(sc, new SyncGrainsRunner(all, allNodes), exitCriteriaModel);
-            runNewService(sc, new HighStateRunner(all, allNodes), exitCriteriaModel, maxRetryRecipe, true);
+            runNewService(sc, new HighStateRunner(all, allNodes), exitCriteriaModel, maxRetry, true);
 
             // remove 'ambari_upgrade' role from all nodes
             targets = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
@@ -380,10 +394,13 @@ public class SaltOrchestrator implements HostOrchestrator {
     @Override
     public void uploadRecipes(List<GatewayConfig> allGatewayConfigs, Map<String, List<RecipeModel>> recipes, ExitCriteriaModel exitModel)
             throws CloudbreakOrchestratorFailedException {
-        GatewayConfig primaryGateway = allGatewayConfigs.stream().filter(GatewayConfig::isPrimary).findFirst().get();
+        GatewayConfig primaryGateway = allGatewayConfigs.stream()
+                .filter(GatewayConfig::isPrimary)
+                .findFirst()
+                .orElseThrow(() -> new CloudbreakOrchestratorFailedException("Primary gateway not found"));
         Set<String> gatewayTargets = getGatewayPrivateIps(allGatewayConfigs);
         try (SaltConnector sc = new SaltConnector(primaryGateway, restDebug)) {
-            OrchestratorBootstrap scriptPillarSave = new PillarSave(sc, gatewayTargets, recipes);
+            OrchestratorBootstrap scriptPillarSave = new PillarSave(sc, gatewayTargets, recipes, calculateRecipeExecutionTimeout());
             Callable<Boolean> saltPillarRunner = runner(scriptPillarSave, exitCriteria, exitModel);
             Future<Boolean> saltPillarRunnerFuture = parallelOrchestratorComponentRunner.submit(saltPillarRunner);
             saltPillarRunnerFuture.get();
@@ -397,6 +414,10 @@ public class SaltOrchestrator implements HostOrchestrator {
             LOGGER.error("Error occurred during recipe upload", e);
             throw new CloudbreakOrchestratorFailedException(e);
         }
+    }
+
+    private Long calculateRecipeExecutionTimeout() {
+        return SLEEP_TIME_IN_SEC * (maxRetryRecipe - 2L);
     }
 
     @Override
