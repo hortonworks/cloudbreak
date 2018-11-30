@@ -23,6 +23,7 @@ RSpec.describe 'Users test cases', :type => :aruba, :feature => "Users", :severi
   end
 
   it "User - List", :story => "List Users", :severity => :critical, :testId => 5 do |test|
+    skip("BUG-115272") 
     with_environment 'DEBUG' => '1' do
       test.step "step1" do
         @responseHash = MockHelper.getResponseHash("../../../responses/users/users.json")

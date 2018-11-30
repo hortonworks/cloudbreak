@@ -866,6 +866,13 @@ var (
 			Usage: "id of the user",
 		},
 	}
+	FlRolesIDs = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "role-ids",
+			Usage: "comma seperated values of roles ids",
+		},
+	}
 	FlVersion = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{

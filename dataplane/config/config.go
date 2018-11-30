@@ -46,9 +46,59 @@ func (c ConfigList) Yaml() string {
 func CheckConfigAndCommandFlags(c *cli.Context) error {
 	err := fl.CheckRequiredFlagsAndArguments(c)
 	if err == nil {
-		return configRead(c)
+		resp := configRead(c)
+		setWorkspaceInContext(c)
+		validateContext(c, []fl.StringFlag{fl.FlServerOptional, fl.FlWorkspaceOptional})
+		return resp
 	}
 	return err
+}
+
+func CheckConfigAndCommandFlagsDP(c *cli.Context) error {
+	err := fl.CheckRequiredFlagsAndArguments(c)
+	if err == nil {
+		resp := configRead(c)
+		validateContext(c, []fl.StringFlag{fl.FlServerOptional})
+		return resp
+	}
+	return err
+}
+
+func validateContext(c *cli.Context, flagsTocheck []fl.StringFlag) {
+	for _, f := range flagsTocheck {
+		if len(c.String(f.Name)) == 0 {
+			log.Error(fmt.Sprintf("configuration is not set, see: cb configure --help or provide the following flags: %v",
+				[]string{"--" + f.Name}))
+			os.Exit(1)
+		}
+	}
+}
+
+func setWorkspaceInContext(c *cli.Context) {
+	profile := c.String(fl.FlProfileOptional.Name)
+	workspace := c.String(fl.FlWorkspaceOptional.Name)
+	if len(profile) == 0 {
+		profile = "default"
+	}
+	config, err := ReadConfig(GetHomeDirectory(), profile)
+	if err != nil {
+		utils.LogErrorAndExit(err)
+	}
+
+	set := func(name, value string) {
+		if err = c.Set(name, value); err != nil {
+			log.Debug(err)
+		}
+	}
+	if len(workspace) == 0 {
+		if len(config.Workspace) != 0 {
+			workspaceID := ws.GetWorkspaceIdByName(c, config.Workspace)
+			set(fl.FlWorkspaceOptional.Name, strconv.FormatInt(workspaceID, 10))
+		}
+	} else {
+		workspaceID := ws.GetWorkspaceIdByName(c, workspace)
+		set(fl.FlWorkspaceOptional.Name, strconv.FormatInt(workspaceID, 10))
+	}
 }
 
 func configRead(c *cli.Context) error {
@@ -64,7 +114,6 @@ func configRead(c *cli.Context) error {
 	server := c.String(fl.FlServerOptional.Name)
 	output := c.String(fl.FlOutputOptional.Name)
 	profile := c.String(fl.FlProfileOptional.Name)
-	workspace := c.String(fl.FlWorkspaceOptional.Name)
 	refreshToken := c.String(fl.FlRefreshTokenOptional.Name)
 
 	if len(profile) == 0 {
@@ -100,23 +149,6 @@ func configRead(c *cli.Context) error {
 		} else {
 			set(fl.FlRefreshTokenOptional.Name, config.RefreshToken)
 		}
-	}
-	if len(workspace) == 0 {
-		if len(config.Workspace) != 0 {
-			workspaceID := ws.GetWorkspaceIdByName(c, config.Workspace)
-			set(fl.FlWorkspaceOptional.Name, strconv.FormatInt(workspaceID, 10))
-		}
-	} else {
-		workspaceID := ws.GetWorkspaceIdByName(c, workspace)
-		set(fl.FlWorkspaceOptional.Name, strconv.FormatInt(workspaceID, 10))
-	}
-
-	server = c.String(fl.FlServerOptional.Name)
-	workspace = c.String(fl.FlWorkspaceOptional.Name)
-	if len(server) == 0 || len(workspace) == 0 {
-		log.Error(fmt.Sprintf("configuration is not set, see: cb configure --help or provide the following flags: %v",
-			[]string{"--" + fl.FlServerOptional.Name, "--" + fl.FlWorkspaceOptional.Name}))
-		os.Exit(1)
 	}
 	return nil
 }
@@ -184,9 +216,15 @@ func WriteConfigToFile(baseDir, server, output, profile, workspace, token string
 	}
 
 	configList[profile] = Config{Server: server,
-		Workspace:    workspace,
 		Output:       output,
 		RefreshToken: token,
+	}
+
+	// in the case the token is empty and command is of type caas we don't want to overide workspace value
+	if len(workspace) != 0 {
+		var p = configList[profile]
+		p.Workspace = workspace
+		configList[profile] = p
 	}
 
 	err := ioutil.WriteFile(configFile, []byte(configList.Yaml()), 0600)

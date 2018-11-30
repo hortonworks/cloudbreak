@@ -84,6 +84,10 @@ _init-swagger-generation:
 generate-swagger: _init-swagger-generation
 	swagger generate client -f build/swagger.json -c client -m model -t dataplane/api
 
+generate-swagger-dp: 
+	rm -rf dataplane/oauthapi/client dataplane/oauthapi/model
+	swagger generate client -f http://$(DP_IP):$(DP_PORT)/spec/api-docs/swagger.json -c client -m model -t dataplane/oauthapi
+
 generate-swagger-docker: _init-swagger-generation
 	@docker run --rm -it -v "${GOPATH}":"${GOPATH}" -v ${PWD}/build/swagger.json:${PWD}/build/swagger.json  -w "${PWD}" -e GOPATH --net=host quay.io/goswagger/swagger:v0.17.2 \
 	generate client -f ${PWD}/build/swagger.json -c client -m model -t dataplane/api
