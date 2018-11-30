@@ -218,14 +218,8 @@ public class StackService {
         }
     }
 
-    public StackResponse findStackByNameAndWorkspaceId(String name, Long workspaceId) {
-        try {
-            return transactionService.required(() ->
-                    conversionService.convert(stackRepository
-                            .findByNameAndWorkspaceIdWithLists(name, workspaceId), StackResponse.class));
-        } catch (TransactionExecutionException e) {
-            throw new TransactionRuntimeExecutionException(e);
-        }
+    public Stack findStackByNameAndWorkspaceId(String name, Long workspaceId) {
+        return stackRepository.findByNameAndWorkspaceIdWithLists(name, workspaceId);
     }
 
     public StackResponse getJsonById(Long id, Collection<String> entry) {

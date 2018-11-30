@@ -118,6 +118,8 @@ public class StackCreatorService {
         try {
             savedStack = transactionService.required(() -> {
                 long start = System.currentTimeMillis();
+                ensureStackDoesNotExists(stackRequest.getName(), workspace);
+
                 Stack stack = conversionService.convert(stackRequest, Stack.class);
 
                 stack.setWorkspace(workspace);
@@ -260,6 +262,13 @@ public class StackCreatorService {
             Cluster cluster = clusterCreationService.prepare(stackRequest.getClusterRequest(), stack, blueprint, user, workspace);
             LOGGER.info("Cluster object and its dependencies has been created in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
             stack.setCluster(cluster);
+        }
+    }
+
+    private void ensureStackDoesNotExists(String stackName, Workspace workspace) {
+        Stack stack = stackService.findStackByNameAndWorkspaceId(stackName, workspace.getId());
+        if (stack != null) {
+            throw new BadRequestException("Cluster already exists: " + stackName);
         }
     }
 }

@@ -5,20 +5,21 @@ import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
+import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataIntegrityViolationException;
 
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.util.ThrowableUtil;
 
 public abstract class AbstractWorkspaceAwareResourceService<T extends WorkspaceAwareResource> implements WorkspaceAwareResourceService<T> {
 
@@ -45,7 +46,8 @@ public abstract class AbstractWorkspaceAwareResourceService<T extends WorkspaceA
                 return repository().save(resource);
             });
         } catch (TransactionExecutionException e) {
-            if (e.getCause() instanceof DataIntegrityViolationException) {
+            ConstraintViolationException cve = ThrowableUtil.getSpecificCauseRecursively(e, ConstraintViolationException.class);
+            if (cve != null) {
                 String message = String.format("%s already exists with name '%s' in workspace %s",
                         resource().getShortName(), resource.getName(), resource.getWorkspace().getName());
                 throw new BadRequestException(message, e);
@@ -99,7 +101,7 @@ public abstract class AbstractWorkspaceAwareResourceService<T extends WorkspaceA
     protected void setWorkspace(T resource, User user, Workspace workspace) {
         Set<Workspace> usersWorkspaces = workspaceService.retrieveForUser(user);
         if (!usersWorkspaces.contains(workspace)) {
-            throw new NotFoundException("Workspace not found for user.");
+            throw new NotFoundException("Workspace not found for user: " + workspace.getName());
         }
         resource.setWorkspace(workspace);
     }
