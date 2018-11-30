@@ -10,6 +10,7 @@
  forwardable = true
  rdns = false
  default_realm = {{ salt['pillar.get']('kerberos:realm')|upper }}
+ default_ccache_name = /tmp/krb5cc_%{uid}
 
 [realms]
  {{ salt['pillar.get']('kerberos:realm')|upper }} = {
