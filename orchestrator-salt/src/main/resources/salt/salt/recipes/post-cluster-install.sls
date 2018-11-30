@@ -1,3 +1,4 @@
+{% set timeout = salt['pillar.get']('recipes:timeout') %}
 create_recipe_log_dir_post_cluster:
   file.directory:
     - name: /var/log/recipes/post-cluster-install
@@ -21,7 +22,7 @@ run_post_cluster_install_script_{{ script_name }}:
     - onlyif:
       - test -f /opt/scripts/post-cluster-install/{{ script_name }}
       - test ! -f /var/log/recipes/post-cluster-install/{{ script_name }}.success
-    - timeout: 600
+    - timeout: {{ timeout }}
 {% endfor %}
 {% endif %}
 
