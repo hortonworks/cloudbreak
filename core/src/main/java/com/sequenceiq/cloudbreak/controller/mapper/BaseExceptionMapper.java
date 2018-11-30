@@ -47,7 +47,9 @@ abstract class BaseExceptionMapper<E extends Throwable> implements ExceptionMapp
     }
 
     protected String getErrorMessage(E exception) {
-        return exception.getMessage();
+        String message = exception.getMessage();
+        LOGGER.debug("Exception text has been mapped: {}", message);
+        return message;
     }
 
     protected String getErrorMessageFromThrowable(Throwable e) {
