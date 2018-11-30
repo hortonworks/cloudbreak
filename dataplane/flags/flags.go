@@ -325,6 +325,13 @@ var (
 			Usage: "type of execution [pre-ambari-start, pre-termination, post-ambari-start, post-cluster-install]",
 		},
 	}
+	FlAmbariUserOptional = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name:  "input-json-param-user",
+			Usage: "user of the cluster and ambari",
+		},
+	}
 	FlAmbariPasswordOptional = StringFlag{
 		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{

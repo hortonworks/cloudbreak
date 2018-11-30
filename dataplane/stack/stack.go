@@ -115,15 +115,20 @@ func assembleStackRequest(c *cli.Context) *model.StackV2Request {
 		commonutils.LogErrorMessageAndExit("Name of the cluster must be set either in the template or with the --name command line option.")
 	}
 
+	ambariUser := c.String(fl.FlAmbariUserOptional.Name)
 	ambariPassword := c.String(fl.FlAmbariPasswordOptional.Name)
-	if len(ambariPassword) != 0 {
+	if len(ambariUser) != 0 || len(ambariPassword) != 0 {
 		if req.Cluster != nil && req.Cluster.Ambari != nil {
-			req.Cluster.Ambari.Password = &ambariPassword
+			if len(ambariUser) != 0 {
+				req.Cluster.Ambari.UserName = &ambariUser
+			}
+			if len(ambariPassword) != 0 {
+				req.Cluster.Ambari.Password = &ambariPassword
+			}
 		} else {
 			commonutils.LogErrorMessageAndExit("Missing clusterRequest.ambariRequest node in JSON")
 		}
 	}
-
 	return &req
 }
 

@@ -58,11 +58,11 @@ func init() {
 				Name:        "create",
 				Usage:       "creates a new cluster",
 				Description: `use 'cb cluster generate-template' for cluster request JSON generation`,
-				Flags:       fl.NewFlagBuilder().AddResourceFlagsWithOptionalName().AddFlags(fl.FlInputJson, fl.FlAmbariPasswordOptional, fl.FlWaitOptional).AddAuthenticationFlags().Build(),
+				Flags:       fl.NewFlagBuilder().AddResourceFlagsWithOptionalName().AddFlags(fl.FlInputJson, fl.FlAmbariUserOptional, fl.FlAmbariPasswordOptional, fl.FlWaitOptional).AddAuthenticationFlags().Build(),
 				Before:      cf.CheckConfigAndCommandFlags,
 				Action:      stack.CreateStack,
 				BashComplete: func(c *cli.Context) {
-					for _, f := range fl.NewFlagBuilder().AddResourceFlagsWithOptionalName().AddFlags(fl.FlInputJson, fl.FlAmbariPasswordOptional, fl.FlWaitOptional).AddAuthenticationFlags().Build() {
+					for _, f := range fl.NewFlagBuilder().AddResourceFlagsWithOptionalName().AddFlags(fl.FlInputJson, fl.FlAmbariUserOptional, fl.FlAmbariPasswordOptional, fl.FlWaitOptional).AddAuthenticationFlags().Build() {
 						fl.PrintFlagCompletion(f)
 					}
 				},
