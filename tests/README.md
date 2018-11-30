@@ -8,7 +8,7 @@ Aruba-RSpec Test Framework for DataPlane CLI. The aruba test project is located 
     > * "To start using RVM you need to source your `.rvm/scripts/rvm` in all your open shell windows, in rare cases you need to reopen all shell windows."
 
 ### Create new test cases
-Test cases use [command_builder](spec/common/command_builder.rb) and [command_helper](spec/common/command_helpers.rb) to run the DP CLI commands. So you do not
+Test cases use [command_builder](spec/common/command_builder.rb) and [command_helper](spec/common/command_helpers.rb) to run the CB CLI commands. So you do not
 need to add exact cli commands in test cases, for example:
 ```
 cb.credential.describe.name(“test”).build
@@ -45,7 +45,7 @@ Your [Docker Machine](https://docs.docker.com/machine/reference/start/) has to b
 Create your own End to End testing local environment (for example: [localvars](localvars))
 > Source your E2E localvars (`. localvars` or `source localvars`)
 
-You can find the related Make target at [DP-CLI Makefile](../Makefile)
+You can find the related Make target at [CB-CLI Makefile](../Makefile)
 ```
 make e2e-test
 ```
@@ -53,7 +53,7 @@ make e2e-test
 > You can check test results at `tests/out.html`
 
 ### Integration testing
-You can find the related Make target at [DP-CLI Makefile](../Makefile)
+You can find the related Make target at [CB-CLI Makefile](../Makefile)
 ```
 make integration-test
 ```
@@ -68,8 +68,8 @@ make all
 CLI_TEST_FILES=spec/integration/credential.rb make integration-test'
 ```
 
-## DP-CLI Mock
-We created a [CBD Mock](https://github.com/hortonworks/cloud-swagger-mock) for DP-CLI Integration testing purposes. This is a JavaScript base Swagger mock
+## CB-CLI Mock
+We created a [CBD Mock](https://github.com/hortonworks/cloud-swagger-mock) for CB-CLI Integration testing purposes. This is a JavaScript base Swagger mock
  for CBD.
 
 You can use CBD mock with the help of Make targets at [Tests Makefile](Makefile).
@@ -78,7 +78,7 @@ You can start, stop or restart the CBD Mock step-by-step if you would like with 
 * **Download S3**: Download the versioned Swagger Json file from out AWS S3 bucket
 
     ```make download-s3```
-* **Start mock**: Start CBD mock for DP-CLI based on the downloaded Swagger Json
+* **Start mock**: Start CBD mock for CB-CLI based on the downloaded Swagger Json
 
     ```make start-mock```
 * **Stop mock**: Kill all the CBD mock related containers

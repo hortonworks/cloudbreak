@@ -1,4 +1,4 @@
-[![CircleCI](https://circleci.com/gh/hortonworks/dp-cli.svg?style=shield)](https://circleci.com/gh/hortonworks/cb-cli) [![Go Report Card](https://goreportcard.com/badge/github.com/hortonworks/cb-cli)](https://goreportcard.com/report/github.com/hortonworks/cb-cli)
+[![CircleCI](https://circleci.com/gh/hortonworks/cb-cli.svg?style=shield)](https://circleci.com/gh/hortonworks/cb-cli) [![Go Report Card](https://goreportcard.com/badge/github.com/hortonworks/cb-cli)](https://goreportcard.com/report/github.com/hortonworks/cb-cli)
 
 # DataPlane - Command Line Interface
 
@@ -8,18 +8,18 @@ Each Git TAG (without the leading 'v') is built and uploaded to S3 where you can
 ```
 export VERSION=2.1.0-dev.X
 
-curl -LO "https://s3-eu-west-1.amazonaws.com/dp-cli/dp-cli_${VERSION}_Darwin_x86_64.tgz"
-curl -LO "https://s3-eu-west-1.amazonaws.com/dp-cli/dp-cli_${VERSION}_Linux_x86_64.tgz"
-curl -LO "https://s3-eu-west-1.amazonaws.com/dp-cli/dp-cli_${VERSION}_Windows_x86_64.tgz"
+curl -LO "https://s3-eu-west-1.amazonaws.com/cb-cli/cb-cli_${VERSION}_Darwin_x86_64.tgz"
+curl -LO "https://s3-eu-west-1.amazonaws.com/cb-cli/cb-cli_${VERSION}_Linux_x86_64.tgz"
+curl -LO "https://s3-eu-west-1.amazonaws.com/cb-cli/cb-cli_${VERSION}_Windows_x86_64.tgz"
 ```
 
 ## Usage
-To see the available commands `dp -h`.
+To see the available commands `cb -h`.
 ```
 NAME:
    DataPlane command line tool
 USAGE:
-   dp [global options] command [command options]
+   cb [global options] command [command options]
 
 VERSION:
    snapshot-2018-11-19T19:59:11
@@ -51,7 +51,7 @@ GLOBAL OPTIONS:
    --help, -h     show help
    --version, -v  print the version
 ```
-Each command provides a help flag with a description and the accepted flags and subcommands, e.g: `dp configure -h`.
+Each command provides a help flag with a description and the accepted flags and subcommands, e.g: `cb configure -h`.
 ```
 NAME:
    DataPlane command line tool
@@ -78,18 +78,18 @@ A configuration entry contains the DataPlane server's address, the username and 
 Multiple configuration profiles can be saved by specifying the `--profile` switch. The same switch can be used as a global flag to the other commands to use a specific profile.
 If the profile switch is omitted, the `default` profile is saved and used.
 ```
-dp configure --server https://ec2-52-29-224-64...compute.amazonaws.com --workspace your@email --profile dataplane-staging
+cb configure --server https://ec2-52-29-224-64...compute.amazonaws.com --workspace your@email --profile dataplane-staging
 ```
 This will save the configuration into the user's home directory. To see its content: `cat ~/.dp/config`. If this config file is present you don't need to specify the connection flags anymore,
 otherwise you need to specify these flags to every command.
 ```
-dp cluster list --server https://ec2-52-29-224-64...compute.amazonaws.com --workspace your@email
+cb cluster list --server https://ec2-52-29-224-64...compute.amazonaws.com --workspace your@email
 ```
 
 ### Create cluster
 To create a cluster with the CLI, a cluster descriptor file needs to be put together and specified as an input to the `cluster create` command:
 ```
-dp cluster create --cli-input-json create_cluster.json
+cb cluster create --cli-input-json create_cluster.json
 ```
 
 The cluster descriptor is basically the JSON request that's being sent to the DataPlane API.
@@ -97,49 +97,49 @@ The full reference of this descriptor file can be found in the API docs.
 The CLI can help with creating the skeleton of the cluster descriptor JSON.
 The following command outputs a descriptor file with empty values:
 ```
-dp cluster generate-template aws existing-subnet --blueprint-name "my-custom-blueprint"
+cb cluster generate-template aws existing-subnet --blueprint-name "my-custom-blueprint"
 ```
 The `aws` and `existing-subnet` keywords are subcommands to the `cluster generate-template` command and help with creating a skeleton with proper entries for the selected cloud provider and network configuration.
 Use the `-h` option to see the available subcommands, e.g.:
 ```
-dp cluster generate-template -h
+cb cluster generate-template -h
 ```
 Direct the output to a file to save the skeleton locally.
 ```
-dp cluster generate-template aws existing-subnet > create_cluster.json
+cb cluster generate-template aws existing-subnet > create_cluster.json
 ```
 To create a cluster, fill the empty values or change the existing ones and use the `create-cluster` command above.
 
 ### Terminate cluster
 To terminate the previously created cluster use the `delete-cluster` command.
 ```
-dp cluster delete --cluster-name my-cluster
+cb cluster delete --cluster-name my-cluster
 ```
 
 ### Describe cluster
 If you want to check out the properties of a running cluster the `describe-cluster` command can be useful.
 ```
-dp cluster describe --cluster-name my-cluster
+cb cluster describe --cluster-name my-cluster
 ```
 
 ## Bash completion
 To enable bash completion run the following command and follow the instructions:
 ```
-dp completion
+cb completion
 ```
 
 ## Debug
 To enable the debug logging use the `--debug` global switch
 ```
-dp --debug cluster list
+cb --debug cluster list
 ```
 or provide it as an environment variable `export DEBUG=1` or inline
 ```
-DEBUG=1 dp clusters list
+DEBUG=1 cb clusters list
 ```
 
 ## Proxy settings
-To use the dp cli behind a proxy you must use the following environment variable:
+To use the cb cli behind a proxy you must use the following environment variable:
 ```
  export HTTP_PROXY=10.0.0.133:3128
 ```
@@ -186,7 +186,7 @@ the `dataplane/cmd` folder to a top level `cmd` folder and reference it from the
 The CLI also supports a `plugin` model. This means that you can create similar CLI tools like this one and build them independently/separately, but get them invoked by the main CLI tool. Let's assume you'd like to create a `dlm` CLI, but develop it outside from this repository, but with the same framework.
 If you create the `dlm` binary and put it in your `$PATH` you can invoke with the main CLI tool like:
 ```$xslt
-dp dlm my-command
+cb dlm my-command
 ```
 In order to do this the main CLI needs to be built with plugin mode enabled:
 ```$xslt
