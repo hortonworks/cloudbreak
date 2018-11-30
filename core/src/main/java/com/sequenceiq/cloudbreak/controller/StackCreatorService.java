@@ -132,6 +132,8 @@ public class StackCreatorService {
         try {
             savedStack = transactionService.required(() -> {
                 long start = System.currentTimeMillis();
+                ensureStackDoesNotExists(stackRequest.getName(), workspace);
+
                 Stack stack = conversionService.convert(stackRequest, Stack.class);
 
                 stack.setWorkspace(workspace);
@@ -314,6 +316,13 @@ public class StackCreatorService {
         if (!credential.cloudPlatform().equalsIgnoreCase(clusterTemplate.getCloudPlatform())) {
             throw new BadRequestException(String.format("Credential cloudplatform [%s] and template cloudplatform [%s] is different",
                     credential.cloudPlatform(), clusterTemplate.getCloudPlatform()));
+        }
+    }
+
+    private void ensureStackDoesNotExists(String stackName, Workspace workspace) {
+        Stack stack = stackService.findStackByNameAndWorkspaceId(stackName, workspace.getId());
+        if (stack != null) {
+            throw new BadRequestException("Cluster already exists: " + stackName);
         }
     }
 }
