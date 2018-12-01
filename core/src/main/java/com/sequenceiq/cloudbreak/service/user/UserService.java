@@ -16,6 +16,7 @@ import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.retry.RetryException;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
@@ -56,10 +57,14 @@ public class UserService {
 
     @Retryable(maxAttempts = 5, backoff = @Backoff(delay = 500))
     public User getOrCreate(CloudbreakUser cloudbreakUser) {
-        try {
-            return getCached(cloudbreakUser, this::createUser);
-        } catch (Exception e) {
-            throw new RetryException(e.getMessage());
+        if (cloudbreakUser != null) {
+            try {
+                return getCached(cloudbreakUser, this::createUser);
+            } catch (Exception e) {
+                throw new RetryException(e.getMessage());
+            }
+        } else {
+            throw new AccessDeniedException("cloudbreakUser is empty");
         }
     }
 
